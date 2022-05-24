@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { APMPlugin, APMRouteHandlerResources } from '../..';
 import {
   PostPackagePolicyCreateCallback,
   PutPackagePolicyUpdateCallback,
-} from '../../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 import {
   NewPackagePolicy,
   UpdatePackagePolicy,
-} from '../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
+import { APMPlugin, APMRouteHandlerResources } from '../..';
 import { AgentConfiguration } from '../../../common/agent_configuration/configuration_types';
 import { AGENT_NAME } from '../../../common/elasticsearch_fieldnames';
 import { APMPluginStartDependencies } from '../../types';

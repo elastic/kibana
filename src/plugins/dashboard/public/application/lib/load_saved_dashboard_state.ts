@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
-
 import { getDashboard60Warning, dashboardLoadingErrorStrings } from '../../dashboard_strings';
 import { savedObjectToDashboardState } from './convert_dashboard_state';
 import { DashboardState, DashboardBuildContext } from '../../types';

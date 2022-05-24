@@ -60,6 +60,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ConfigDeprecationDetails](./kibana-plugin-core-server.configdeprecationdetails.md) |  |
 |  [ContextSetup](./kibana-plugin-core-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CorePreboot](./kibana-plugin-core-server.corepreboot.md) | Context passed to the <code>setup</code> method of <code>preboot</code> plugins. |
+|  [CoreRequestHandlerContext](./kibana-plugin-core-server.corerequesthandlercontext.md) | The <code>core</code> context provided to route handler.<!-- -->Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.client](./kibana-plugin-core-server.iscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
 |  [CoreSetup](./kibana-plugin-core-server.coresetup.md) | Context passed to the <code>setup</code> method of <code>standard</code> plugins. |
 |  [CoreStart](./kibana-plugin-core-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
 |  [CoreStatus](./kibana-plugin-core-server.corestatus.md) | Status of core services. |
@@ -133,7 +134,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [PrebootPlugin](./kibana-plugin-core-server.prebootplugin.md) | The interface that should be returned by a <code>PluginInitializer</code> for a <code>preboot</code> plugin. |
 |  [PrebootServicePreboot](./kibana-plugin-core-server.prebootservicepreboot.md) | Kibana Preboot Service allows to control the boot flow of Kibana. Preboot plugins can use it to hold the boot until certain condition is met. |
 |  [RegisterDeprecationsConfig](./kibana-plugin-core-server.registerdeprecationsconfig.md) |  |
-|  [RequestHandlerContext](./kibana-plugin-core-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.client](./kibana-plugin-core-server.iscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
+|  [RequestHandlerContext](./kibana-plugin-core-server.requesthandlercontext.md) | Base context passed to a route handler. |
+|  [RequestHandlerContextBase](./kibana-plugin-core-server.requesthandlercontextbase.md) | \* |
 |  [ResolveCapabilitiesOptions](./kibana-plugin-core-server.resolvecapabilitiesoptions.md) | Defines a set of additional options for the <code>resolveCapabilities</code> method of [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md)<!-- -->. |
 |  [RouteConfig](./kibana-plugin-core-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-core-server.routeconfigoptions.md) | Additional route options. |
@@ -253,18 +255,23 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AnalyticsServicePreboot](./kibana-plugin-core-server.analyticsservicepreboot.md) | Exposes the public APIs of the AnalyticsClient during the preboot phase  |
+|  [AnalyticsServiceSetup](./kibana-plugin-core-server.analyticsservicesetup.md) | Exposes the public APIs of the AnalyticsClient during the setup phase.  |
+|  [AnalyticsServiceStart](./kibana-plugin-core-server.analyticsservicestart.md) | Exposes the public APIs of the AnalyticsClient during the start phase  |
 |  [AppenderConfigType](./kibana-plugin-core-server.appenderconfigtype.md) |  |
 |  [AuthenticationHandler](./kibana-plugin-core-server.authenticationhandler.md) | See [AuthToolkit](./kibana-plugin-core-server.authtoolkit.md)<!-- -->. |
 |  [AuthHeaders](./kibana-plugin-core-server.authheaders.md) | Auth Headers map |
 |  [AuthResult](./kibana-plugin-core-server.authresult.md) |  |
 |  [CapabilitiesProvider](./kibana-plugin-core-server.capabilitiesprovider.md) | See [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
 |  [CapabilitiesSwitcher](./kibana-plugin-core-server.capabilitiesswitcher.md) | See [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
+|  [CustomRequestHandlerContext](./kibana-plugin-core-server.customrequesthandlercontext.md) |  |
 |  [DeprecationsDetails](./kibana-plugin-core-server.deprecationsdetails.md) |  |
 |  [DestructiveRouteMethod](./kibana-plugin-core-server.destructiveroutemethod.md) | Set of HTTP methods changing the state of the server. |
 |  [DocLinksServiceStart](./kibana-plugin-core-server.doclinksservicestart.md) |  |
 |  [ElasticsearchClient](./kibana-plugin-core-server.elasticsearchclient.md) | Client used to query the elasticsearch cluster. |
 |  [ElasticsearchClientConfig](./kibana-plugin-core-server.elasticsearchclientconfig.md) | Configuration options to be used to create a [cluster client](./kibana-plugin-core-server.iclusterclient.md) using the [createClient API](./kibana-plugin-core-server.elasticsearchservicestart.createclient.md) |
 |  [ExecutionContextStart](./kibana-plugin-core-server.executioncontextstart.md) |  |
+|  [ExposedToBrowserDescriptor](./kibana-plugin-core-server.exposedtobrowserdescriptor.md) | Type defining the list of configuration properties that will be exposed on the client-side Object properties can either be fully exposed |
 |  [GetAuthHeaders](./kibana-plugin-core-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-core-server.getauthstate.md) | Gets authentication state for a request. Returned by <code>auth</code> interceptor. |
 |  [HandlerContextType](./kibana-plugin-core-server.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md) to represent the type of the context. |

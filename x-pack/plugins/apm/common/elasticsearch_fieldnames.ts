@@ -41,7 +41,6 @@ export const USER_AGENT_NAME = 'user_agent.name';
 export const DESTINATION_ADDRESS = 'destination.address';
 
 export const OBSERVER_HOSTNAME = 'observer.hostname';
-export const OBSERVER_VERSION_MAJOR = 'observer.version_major';
 export const OBSERVER_LISTENING = 'observer.listening';
 export const PROCESSOR_EVENT = 'processor.event';
 
@@ -74,6 +73,10 @@ export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT =
 
 export const SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM =
   'span.destination.service.response_time.sum.us';
+
+export const SPAN_LINKS = 'span.links';
+export const SPAN_LINKS_TRACE_ID = 'span.links.trace.id';
+export const SPAN_LINKS_SPAN_ID = 'span.links.span.id';
 
 // Parent ID for a transaction or span
 export const PARENT_ID = 'parent.id';

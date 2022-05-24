@@ -12,10 +12,13 @@ import { indexOf } from 'lodash';
 import { connect, ConnectedProps } from 'react-redux';
 import { ExceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { get } from 'lodash/fp';
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
+import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
+import { OsqueryFlyout } from '../../osquery/osquery_flyout';
 import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../common/components/exceptions/helpers';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../timelines/public';
 import { Ecs } from '../../../../../common/ecs';
 import {
   AddExceptionFlyout,
@@ -27,13 +30,12 @@ import { TimelineId } from '../../../../../common/types';
 import { AlertData, EcsHit } from '../../../../common/components/exceptions/types';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { useSignalIndex } from '../../../containers/detection_engine/alerts/use_signal_index';
-import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/flyout';
+import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { useAlertsActions } from './use_alerts_actions';
-import { useExceptionModal } from './use_add_exception_modal';
+import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
 import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { useKibana } from '../../../../common/lib/kibana';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
@@ -63,25 +65,39 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   timelineQuery,
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
+  const [isOsqueryFlyoutOpen, setOsqueryFlyoutOpen] = useState(false);
   const [routeProps] = useRouteSpy();
 
-  const afterItemSelection = useCallback(() => {
+  const onMenuItemClick = useCallback(() => {
     setPopover(false);
   }, []);
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
-  const { timelines: timelinesUi } = useKibana().services;
 
-  const { addToCaseActionProps, addToCaseActionItems } = useAddToCaseActions({
+  const { addToCaseActionItems } = useAddToCaseActions({
     ecsData: ecsRowData,
-    afterCaseSelection: afterItemSelection,
+    onMenuItemClick,
     timelineId,
     ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
   });
 
+  const { loading: canAccessEndpointManagementLoading, canAccessEndpointManagement } =
+    useUserPrivileges().endpointPrivileges;
+  const canCreateEndpointEventFilters = useMemo(
+    () => !canAccessEndpointManagementLoading && canAccessEndpointManagement,
+    [canAccessEndpointManagement, canAccessEndpointManagementLoading]
+  );
+
   const alertStatus = get(0, ecsRowData?.kibana?.alert?.workflow_status) as Status | undefined;
 
   const isEvent = useMemo(() => indexOf(ecsRowData.event?.kind, 'event') !== -1, [ecsRowData]);
+  const isAgentEndpoint = useMemo(() => ecsRowData.agent?.type?.includes('endpoint'), [ecsRowData]);
+
+  const isEndpointEvent = useMemo(() => isEvent && isAgentEndpoint, [isEvent, isAgentEndpoint]);
+  const timelineIdAllowsAddEndpointEventFilter = useMemo(
+    () => timelineId === TimelineId.hostsPageEvents || timelineId === TimelineId.usersPageEvents,
+    [timelineId]
+  );
 
   const onButtonClick = useCallback(() => {
     setPopover(!isPopoverOpen);
@@ -125,12 +141,12 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
     ecsRowData['kibana.alert.rule.parameters']?.index ?? ecsRowData?.signal?.rule?.index;
 
   const {
-    exceptionModalType,
+    exceptionFlyoutType,
     onAddExceptionCancel,
     onAddExceptionConfirm,
     onAddExceptionTypeClick,
     ruleIndices,
-  } = useExceptionModal({
+  } = useExceptionFlyout({
     ruleIndex,
     refetch: refetchAll,
     timelineId,
@@ -167,26 +183,49 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   });
   const { eventFilterActionItems } = useEventFilterAction({
     onAddEventFilterClick: handleOnAddEventFilterClick,
-    disabled: !isEvent,
+    disabled:
+      !isEndpointEvent || !canCreateEndpointEventFilters || !timelineIdAllowsAddEndpointEventFilter,
+    tooltipMessage: !timelineIdAllowsAddEndpointEventFilter
+      ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
+      : undefined,
   });
+  const agentId = useMemo(() => get(0, ecsRowData?.agent?.id), [ecsRowData]);
+
+  const handleOnOsqueryClick = useCallback(() => {
+    setOsqueryFlyoutOpen((prevValue) => !prevValue);
+    setPopover(false);
+  }, []);
+
+  const { osqueryActionItems } = useOsqueryContextActionItem({ handleClick: handleOnOsqueryClick });
+
   const items: React.ReactElement[] = useMemo(
     () =>
       !isEvent && ruleId
-        ? [...addToCaseActionItems, ...statusActionItems, ...exceptionActionItems]
-        : [...addToCaseActionItems, ...eventFilterActionItems],
+        ? [
+            ...addToCaseActionItems,
+            ...statusActionItems,
+            ...exceptionActionItems,
+            ...(agentId ? osqueryActionItems : []),
+          ]
+        : [
+            ...addToCaseActionItems,
+            ...eventFilterActionItems,
+            ...(agentId ? osqueryActionItems : []),
+          ],
     [
-      statusActionItems,
-      addToCaseActionItems,
-      eventFilterActionItems,
-      exceptionActionItems,
       isEvent,
       ruleId,
+      addToCaseActionItems,
+      statusActionItems,
+      exceptionActionItems,
+      agentId,
+      osqueryActionItems,
+      eventFilterActionItems,
     ]
   );
 
   return (
     <>
-      {addToCaseActionProps && timelinesUi.getAddToCaseAction(addToCaseActionProps)}
       {items.length > 0 && (
         <div key="actions-context-menu">
           <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
@@ -204,7 +243,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
           </EventsTdContent>
         </div>
       )}
-      {exceptionModalType != null &&
+      {exceptionFlyoutType != null &&
         ruleId != null &&
         ruleName != null &&
         ecsRowData?._id != null && (
@@ -212,7 +251,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
             ruleName={ruleName}
             ruleId={ruleId}
             ruleIndices={ruleIndices}
-            exceptionListType={exceptionModalType}
+            exceptionListType={exceptionFlyoutType}
             eventId={ecsRowData?._id}
             onCancel={onAddExceptionCancel}
             onConfirm={onAddExceptionConfirm}
@@ -222,6 +261,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
         )}
       {isAddEventFilterModalOpen && ecsRowData != null && (
         <EventFiltersFlyout data={ecsRowData} onCancel={closeAddEventFilterModal} />
+      )}
+      {isOsqueryFlyoutOpen && agentId && ecsRowData != null && (
+        <OsqueryFlyout agentId={agentId} onClose={handleOnOsqueryClick} />
       )}
     </>
   );

@@ -28,9 +28,10 @@ import {
   SumIndexPatternColumn,
   TermsIndexPatternColumn,
   CardinalityIndexPatternColumn,
-} from '../../../../../../lens/public';
+} from '@kbn/lens-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { PersistableFilter } from '@kbn/lens-plugin/common';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
-import { IndexPattern } from '../../../../../../../../src/plugins/data/common';
 import {
   FILTER_RECORDS,
   USE_BREAK_DOWN_COLUMN,
@@ -43,7 +44,6 @@ import {
   ReportTypes,
 } from './constants';
 import { ColumnFilter, SeriesConfig, UrlFilter, URLReportDefinition } from '../types';
-import { PersistableFilter } from '../../../../../../lens/common';
 import { parseRelativeDate } from '../components/date_range_picker';
 import { getDistributionInPercentageColumn } from './lens_columns/overall_column';
 
@@ -91,7 +91,7 @@ export interface LayerConfig {
   operationType?: OperationType;
   reportDefinitions: URLReportDefinition;
   time: { to: string; from: string };
-  indexPattern: IndexPattern;
+  indexPattern: DataView; // TODO: Figure out if this can be renamed or if it's a Lens requirement
   selectedMetricField: string;
   color: string;
   name: string;
@@ -146,13 +146,19 @@ export class LensAttributes {
     layerId,
     labels,
     indexPattern,
+    layerConfig,
   }: {
     sourceField: string;
     layerId: string;
     labels: Record<string, string>;
-    indexPattern: IndexPattern;
+    indexPattern: DataView;
+    layerConfig: LayerConfig;
   }): TermsIndexPatternColumn {
     const fieldMeta = indexPattern.getFieldByName(sourceField);
+
+    const { sourceField: yAxisSourceField } = layerConfig.seriesConfig.yAxisColumns[0];
+
+    const isFormulaColumn = yAxisSourceField === RECORDS_PERCENTAGE_FIELD;
 
     return {
       sourceField,
@@ -162,7 +168,9 @@ export class LensAttributes {
       scale: 'ordinal',
       isBucketed: true,
       params: {
-        orderBy: { type: 'column', columnId: `y-axis-column-${layerId}` },
+        orderBy: isFormulaColumn
+          ? { type: 'alphabetical' }
+          : { type: 'column', columnId: `y-axis-column-${layerId}` },
         size: 10,
         orderDirection: 'desc',
         otherBucket: true,
@@ -280,6 +288,7 @@ export class LensAttributes {
       filter: columnFilter,
       params: {
         sortField: '@timestamp',
+        showArrayValues: false,
       },
     };
   }
@@ -392,6 +401,7 @@ export class LensAttributes {
     if (xAxisColumn?.sourceField === USE_BREAK_DOWN_COLUMN) {
       return this.getBreakdownColumn({
         layerId,
+        layerConfig,
         indexPattern: layerConfig.indexPattern,
         sourceField: layerConfig.breakdown || layerConfig.seriesConfig.breakdownFields[0],
         labels: layerConfig.seriesConfig.labels,
@@ -500,14 +510,15 @@ export class LensAttributes {
 
   getMainYAxis(layerConfig: LayerConfig, layerId: string, columnFilter: string) {
     const { breakdown } = layerConfig;
-    const { sourceField, operationType, label } = layerConfig.seriesConfig.yAxisColumns[0];
+    const { sourceField, operationType, label, timeScale } =
+      layerConfig.seriesConfig.yAxisColumns[0];
 
     if (sourceField === RECORDS_PERCENTAGE_FIELD) {
       return getDistributionInPercentageColumn({ label, layerId, columnFilter }).main;
     }
 
     if (sourceField === RECORDS_FIELD || !sourceField) {
-      return this.getRecordsColumn(label);
+      return this.getRecordsColumn(label, undefined, timeScale);
     }
 
     return this.getColumnBasedOnType({
@@ -627,6 +638,7 @@ export class LensAttributes {
     });
 
     const urlFilters = urlFiltersToKueryString(filters ?? []);
+
     if (!baseFilters) {
       return urlFilters;
     }
@@ -681,7 +693,6 @@ export class LensAttributes {
       const columnFilter = this.getLayerFilters(layerConfig, layerConfigs.length);
       const timeShift = this.getTimeShift(this.layerConfigs[0], layerConfig, index);
       const mainYAxis = this.getMainYAxis(layerConfig, layerId, columnFilter);
-
       const { sourceField } = seriesConfig.xAxisColumn;
 
       const label = timeShift ? `${mainYAxis.label}(${timeShift})` : mainYAxis.label;
@@ -720,6 +731,7 @@ export class LensAttributes {
                   sourceField: breakdown,
                   indexPattern: layerConfig.indexPattern,
                   labels: layerConfig.seriesConfig.labels,
+                  layerConfig,
                 }),
               }
             : {}),
@@ -783,7 +795,7 @@ export class LensAttributes {
     };
   }
 
-  getJSON(): TypedLensByValueInput['attributes'] {
+  getJSON(lastRefresh?: number): TypedLensByValueInput['attributes'] {
     const uniqueIndexPatternsIds = Array.from(
       new Set([...this.layerConfigs.map(({ indexPattern }) => indexPattern.id)])
     );
@@ -792,7 +804,7 @@ export class LensAttributes {
 
     return {
       title: 'Prefilled from exploratory view app',
-      description: '',
+      description: lastRefresh ? `Last refreshed at ${new Date(lastRefresh).toISOString()}` : '',
       visualizationType: 'lnsXY',
       references: [
         ...uniqueIndexPatternsIds.map((patternId) => ({

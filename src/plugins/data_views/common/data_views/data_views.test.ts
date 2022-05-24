@@ -8,11 +8,11 @@
 
 import { defaults } from 'lodash';
 import { DataViewsService, DataView } from '.';
-import { fieldFormatsMock } from '../../../field_formats/common/mocks';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import { UiSettingsCommon, SavedObjectsClientCommon, SavedObject } from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
-import { FLEET_ASSETS_TO_IGNORE } from '../constants';
+import { DEFAULT_ASSETS_TO_IGNORE } from '../constants';
 
 const createFieldsFetcher = jest.fn().mockImplementation(() => ({
   getFieldsForWildcard: jest.fn().mockImplementation(() => {
@@ -382,12 +382,12 @@ describe('IndexPatterns', () => {
         {
           id: 'id1',
           version: 'a',
-          attributes: { title: FLEET_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN },
+          attributes: { title: DEFAULT_ASSETS_TO_IGNORE.LOGS_INDEX_PATTERN },
         },
         {
           id: 'id2',
           version: 'a',
-          attributes: { title: FLEET_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN },
+          attributes: { title: DEFAULT_ASSETS_TO_IGNORE.METRICS_INDEX_PATTERN },
         },
         {
           id: 'id3',

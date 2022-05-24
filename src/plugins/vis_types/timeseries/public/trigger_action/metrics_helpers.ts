@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Query } from '../../../../data/common';
+import { Query } from '@kbn/data-plugin/common';
 import type { Metric, MetricType } from '../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
 
@@ -91,7 +91,7 @@ export const getParentPipelineSeries = (
   //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
   const [fieldId, meta] = currentMetric?.field?.split('[') ?? [];
   const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
-  if (!subFunctionMetric) {
+  if (!subFunctionMetric || subFunctionMetric.type === 'static') {
     return null;
   }
   const pipelineAgg = getPipelineAgg(subFunctionMetric);
@@ -184,7 +184,7 @@ export const getSiblingPipelineSeriesFormula = (
   metrics: Metric[]
 ) => {
   const subFunctionMetric = metrics.find((metric) => metric.id === currentMetric.field);
-  if (!subFunctionMetric) {
+  if (!subFunctionMetric || subFunctionMetric.type === 'static') {
     return null;
   }
   const pipelineAggMap = SUPPORTED_METRICS[subFunctionMetric.type];
@@ -192,20 +192,31 @@ export const getSiblingPipelineSeriesFormula = (
     return null;
   }
   const aggregationMap = SUPPORTED_METRICS[aggregation];
-  const subMetricField = subFunctionMetric.field;
+  const subMetricField = subFunctionMetric.type !== 'count' ? subFunctionMetric.field : '';
   // support nested aggs with formula
   const additionalSubFunction = metrics.find((metric) => metric.id === subMetricField);
   let formula = `${aggregationMap.name}(`;
+  let minMax = '';
   if (additionalSubFunction) {
     const additionalPipelineAggMap = SUPPORTED_METRICS[additionalSubFunction.type];
     if (!additionalPipelineAggMap) {
       return null;
     }
+    const additionalSubFunctionField =
+      additionalSubFunction.type !== 'count' ? additionalSubFunction.field : '';
+    if (currentMetric.type === 'positive_only') {
+      minMax = `, 0, ${pipelineAggMap.name}(${additionalPipelineAggMap.name}(${
+        additionalSubFunctionField ?? ''
+      }))`;
+    }
     formula += `${pipelineAggMap.name}(${additionalPipelineAggMap.name}(${
-      additionalSubFunction.field ?? ''
-    })))`;
+      additionalSubFunctionField ?? ''
+    }))${minMax})`;
   } else {
-    formula += `${pipelineAggMap.name}(${subFunctionMetric.field ?? ''}))`;
+    if (currentMetric.type === 'positive_only') {
+      minMax = `, 0, ${pipelineAggMap.name}(${subMetricField ?? ''})`;
+    }
+    formula += `${pipelineAggMap.name}(${subMetricField ?? ''})${minMax})`;
   }
   return formula;
 };
@@ -262,7 +273,8 @@ export const getFormulaEquivalent = (
     case 'avg_bucket':
     case 'max_bucket':
     case 'min_bucket':
-    case 'sum_bucket': {
+    case 'sum_bucket':
+    case 'positive_only': {
       return getSiblingPipelineSeriesFormula(currentMetric.type, currentMetric, metrics);
     }
     case 'count': {
@@ -298,6 +310,9 @@ export const getFormulaEquivalent = (
     }
     case 'filter_ratio': {
       return getFilterRatioFormula(currentMetric);
+    }
+    case 'static': {
+      return `${currentMetric.value}`;
     }
     default: {
       return `${aggregation}(${currentMetric.field})`;

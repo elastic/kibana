@@ -24,7 +24,6 @@ const hasCellActions = (columnId?: string) => {
 };
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
-  browserFields,
   data,
   ecsData,
   eventId,
@@ -60,7 +59,6 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
       <StyledContent className={styledContentClassName} $isDetails={isDetails}>
         {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
           asPlainText, // we want to render value with links as plain text but keep other formatters like badge.
-          browserFields,
           columnName: header.id,
           ecsData,
           eventId,
@@ -74,10 +72,9 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           values,
         })}
       </StyledContent>
-      {isDetails && browserFields && hasCellActions(header.id) && (
+      {isDetails && hasCellActions(header.id) && (
         <ExpandedCellValueActions
-          browserFields={browserFields}
-          field={header.id}
+          field={header}
           globalFilters={globalFilters}
           timelineId={timelineId}
           value={values}

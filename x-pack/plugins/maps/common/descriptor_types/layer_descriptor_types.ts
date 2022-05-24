@@ -7,7 +7,8 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import { Query } from 'src/plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { Query } from '@kbn/data-plugin/public';
 import { Feature } from 'geojson';
 import {
   HeatmapStyleDescriptor,
@@ -34,11 +35,17 @@ export type TileMetaFeature = Feature & {
     'hits.total.value': number;
 
     // For _mvt requests with "aggs" property in request: aggregation statistics returned in the pattern outined below
+    // aggregations._count.avg
+    // aggregations._count.count
     // aggregations._count.min
     // aggregations._count.max
+    // aggregations._count.sum
+    // aggregations.<agg_name>.avg
+    // aggregations.<agg_name>.count
     // aggregations.<agg_name>.min
     // aggregations.<agg_name>.max
-    [key: string]: number | string;
+    // aggregations.<agg_name>.sum
+    [key: string]: number | string | boolean;
   };
 };
 
@@ -54,6 +61,7 @@ export type LayerDescriptor = {
   attribution?: Attribution;
   id: string;
   label?: string | null;
+  locale?: string | null;
   areLabelsOnTop?: boolean;
   minZoom?: number;
   maxZoom?: number;

@@ -6,10 +6,9 @@
  */
 
 import { CreateRulesOptions } from './types';
-import { rulesClientMock } from '../../../../../alerting/server/mocks';
+import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 
-export const getCreateRulesOptionsMock = (isRuleRegistryEnabled: boolean): CreateRulesOptions => ({
-  isRuleRegistryEnabled,
+export const getCreateRulesOptionsMock = (): CreateRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
@@ -33,11 +32,14 @@ export const getCreateRulesOptionsMock = (isRuleRegistryEnabled: boolean): Creat
   index: ['index-123'],
   interval: '5m',
   maxSignals: 100,
+  relatedIntegrations: undefined,
+  requiredFields: undefined,
   riskScore: 80,
   riskScoreMapping: [],
   ruleNameOverride: undefined,
   outputIndex: 'output-1',
   name: 'Query with a rule id',
+  setup: undefined,
   severity: 'high',
   severityMapping: [],
   tags: [],
@@ -62,10 +64,7 @@ export const getCreateRulesOptionsMock = (isRuleRegistryEnabled: boolean): Creat
   actions: [],
 });
 
-export const getCreateMlRulesOptionsMock = (
-  isRuleRegistryEnabled: boolean
-): CreateRulesOptions => ({
-  isRuleRegistryEnabled,
+export const getCreateMlRulesOptionsMock = (): CreateRulesOptions => ({
   author: ['Elastic'],
   buildingBlockType: undefined,
   rulesClient: rulesClientMock.create(),
@@ -89,11 +88,14 @@ export const getCreateMlRulesOptionsMock = (
   index: ['index-123'],
   interval: '5m',
   maxSignals: 100,
+  relatedIntegrations: undefined,
+  requiredFields: undefined,
   riskScore: 80,
   riskScoreMapping: [],
   ruleNameOverride: undefined,
   outputIndex: 'output-1',
   name: 'Machine Learning Job',
+  setup: undefined,
   severity: 'high',
   severityMapping: [],
   tags: [],
@@ -118,9 +120,7 @@ export const getCreateMlRulesOptionsMock = (
   actions: [],
 });
 
-export const getCreateThreatMatchRulesOptionsMock = (
-  isRuleRegistryEnabled: boolean
-): CreateRulesOptions => ({
+export const getCreateThreatMatchRulesOptionsMock = (): CreateRulesOptions => ({
   actions: [],
   anomalyThreshold: undefined,
   author: ['Elastic'],
@@ -136,7 +136,6 @@ export const getCreateThreatMatchRulesOptionsMock = (
   immutable: false,
   index: ['*'],
   interval: '5m',
-  isRuleRegistryEnabled,
   itemsPerSearch: undefined,
   language: 'kuery',
   license: 'Elastic License',
@@ -148,12 +147,15 @@ export const getCreateThreatMatchRulesOptionsMock = (
   outputIndex: 'output-1',
   query: 'user.name: root or user.name: admin',
   references: ['http://www.example.com'],
+  relatedIntegrations: undefined,
+  requiredFields: undefined,
   riskScore: 80,
   riskScoreMapping: [],
   ruleId: 'rule-1',
   ruleNameOverride: undefined,
   rulesClient: rulesClientMock.create(),
   savedId: 'savedId-123',
+  setup: undefined,
   severity: 'high',
   severityMapping: [],
   tags: [],

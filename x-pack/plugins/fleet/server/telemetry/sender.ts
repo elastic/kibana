@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CoreStart, ElasticsearchClient, Logger } from 'src/core/server';
-import type { TelemetryPluginStart, TelemetryPluginSetup } from 'src/plugins/telemetry/server';
+import type { CoreStart, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 
 import { cloneDeep } from 'lodash';
 
@@ -168,7 +168,7 @@ export class TelemetryEventsSender {
       const resp = await axios.post(telemetryUrl, ndjson, {
         headers: {
           'Content-Type': 'application/x-ndjson',
-          'X-Elastic-Cluster-ID': clusterUuid,
+          ...(clusterUuid ? { 'X-Elastic-Cluster-ID': clusterUuid } : undefined),
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '7.16.0',
         },
       });

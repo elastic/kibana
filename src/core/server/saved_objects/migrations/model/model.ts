@@ -21,7 +21,11 @@ import {
   setProgressTotal,
 } from './progress';
 import { delayRetryState, resetRetryState } from './retry_state';
-import { extractTransformFailuresReason, extractUnknownDocFailureReason } from './extract_errors';
+import {
+  extractTransformFailuresReason,
+  extractUnknownDocFailureReason,
+  fatalReasonDocumentExceedsMaxBatchSizeBytes,
+} from './extract_errors';
 import type { ExcludeRetryableEsError } from './types';
 import {
   getAliases,
@@ -33,17 +37,8 @@ import {
 } from './helpers';
 import { createBatches } from './create_batches';
 
-const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
-const fatalReasonDocumentExceedsMaxBatchSizeBytes = ({
-  _id,
-  docSizeBytes,
-  maxBatchSizeBytes,
-}: {
-  _id: string;
-  docSizeBytes: number;
-  maxBatchSizeBytes: number;
-}) =>
-  `The document with _id "${_id}" is ${docSizeBytes} bytes which exceeds the configured maximum batch size of ${maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`;
+export const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
+const CLUSTER_SHARD_LIMIT_EXCEEDED_REASON = `[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources.`;
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
@@ -57,22 +52,29 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
   // Handle retryable_es_client_errors. Other left values need to be handled
   // by the control state specific code below.
-  if (
-    Either.isLeft<unknown, unknown>(resW) &&
-    isLeftTypeof(resW.left, 'retryable_es_client_error')
-  ) {
-    // Retry the same step after an exponentially increasing delay.
-    return delayRetryState(stateP, resW.left.message, stateP.retryAttempts);
+  if (Either.isLeft<unknown, unknown>(resW)) {
+    if (isLeftTypeof(resW.left, 'retryable_es_client_error')) {
+      // Retry the same step after an exponentially increasing delay.
+      return delayRetryState(stateP, resW.left.message, stateP.retryAttempts);
+    }
   } else {
-    // If the action didn't fail with a retryable_es_client_error, reset the
-    // retry counter and retryDelay state
+    // If any action returns a right response, reset the retryCount and retryDelay state
     stateP = resetRetryState(stateP);
   }
 
   if (stateP.controlState === 'INIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
 
-    if (Either.isRight(res)) {
+    if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'incompatible_cluster_routing_allocation')) {
+        const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else {
+        return throwBadResponse(stateP, left);
+      }
+    } else if (Either.isRight(res)) {
+      // cluster routing allocation is enabled and we can continue with the migration as normal
       const indices = res.right;
       const aliases = getAliases(indices);
 
@@ -218,7 +220,27 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'LEGACY_CREATE_REINDEX_TARGET') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
+    if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        // `index_not_yellow_timeout` for the LEGACY_CREATE_REINDEX_TARGET source index:
+        // A yellow status timeout could theoretically be temporary for a busy cluster
+        // that takes a long time to allocate the primary and we retry the action to see if
+        // we get a response.
+        // If the cluster hit the low watermark for disk usage the LEGACY_CREATE_REINDEX_TARGET action will
+        // continue to timeout and eventually lead to a failed migration.
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
+      } else {
+        return throwBadResponse(stateP, left);
+      }
+    } else if (Either.isRight(res)) {
       return {
         ...stateP,
         controlState: 'LEGACY_REINDEX',
@@ -268,7 +290,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // After waiting for the specified timeout, the task has not yet
         // completed. Retry this step to see if the task has completed after an
         // exponential delay. We will basically keep polling forever until the
-        // Elasticeasrch task succeeds or fails.
+        // Elasticsearch task succeeds or fails.
         return delayRetryState(stateP, left.message, Number.MAX_SAFE_INTEGER);
       } else if (
         isLeftTypeof(left, 'index_not_found_exception') ||
@@ -327,6 +349,19 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'CHECK_UNKNOWN_DOCUMENTS',
       };
+    } else if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        // A yellow status timeout could theoretically be temporary for a busy cluster
+        // that takes a long time to allocate the primary and we retry the action to see if
+        // we get a response.
+        // In the event of retries running out, we link to the docs to help with diagnosing
+        // the problem.
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else {
+        return throwBadResponse(stateP, left);
+      }
     } else {
       return throwBadResponse(stateP, res);
     }
@@ -408,6 +443,26 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT' };
+    } else if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        // `index_not_yellow_timeout` for the CREATE_REINDEX_TEMP target temp index:
+        // The index status did not go yellow within the specified timeout period.
+        // A yellow status timeout could theoretically be temporary for a busy cluster.
+        //
+        // If there is a problem CREATE_REINDEX_TEMP action will
+        // continue to timeout and eventually lead to a failed migration.
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
+      } else {
+        return throwBadResponse(stateP, left);
+      }
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
       // it will wait until the index status turns green so we don't have any
@@ -627,6 +682,24 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: 'REFRESH_TARGET',
+        };
+      } else if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        // `index_not_yellow_timeout` for the CLONE_TEMP_TO_TARGET source -> target index:
+        // The target index status did not go yellow within the specified timeout period.
+        // The cluster could just be busy and we retry the action.
+
+        // Once we run out of retries, the migration fails.
+        // Identifying the cause requires inspecting the ouput of the
+        // `_cluster/allocation/explain?index=${targetIndex}` API.
+        // Unless the root cause is identified and addressed, the request will
+        // continue to timeout and eventually lead to a failed migration.
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
         };
       } else {
         throwBadResponse(stateP, left);
@@ -859,7 +932,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (isLeftTypeof(left, 'wait_for_task_completion_timeout')) {
         // After waiting for the specified timeout, the task has not yet
         // completed. Retry this step to see if the task has completed after an
-        // exponential delay. We will basically keep polling forever until the
+        // exponential delay.  We will basically keep polling forever until the
         // Elasticsearch task succeeds or fails.
         return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
       } else {
@@ -873,6 +946,25 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ...stateP,
         controlState: 'MARK_VERSION_INDEX_READY',
       };
+    } else if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isLeftTypeof(left, 'index_not_yellow_timeout')) {
+        // `index_not_yellow_timeout` for the CREATE_NEW_TARGET target index:
+        // The cluster might just be busy and we retry the action for a set number of times.
+        // If the cluster hit the low watermark for disk usage the action will continue to timeout.
+        // Unless the disk space is addressed, the LEGACY_CREATE_REINDEX_TARGET action will
+        // continue to timeout and eventually lead to a failed migration.
+        const retryErrorMessage = `${left.message} Refer to ${stateP.migrationDocLinks.repeatedTimeoutRequests} for information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
+      } else if (isLeftTypeof(left, 'cluster_shard_limit_exceeded')) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `${CLUSTER_SHARD_LIMIT_EXCEEDED_REASON} See ${stateP.migrationDocLinks.clusterShardLimitExceeded}`,
+        };
+      } else {
+        return throwBadResponse(stateP, left);
+      }
     } else {
       // If the createIndex action receives an 'resource_already_exists_exception'
       // it will wait until the index status turns green so we don't have any

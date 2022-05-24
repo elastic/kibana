@@ -18,17 +18,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
 import { Case, DeleteCase } from '../../../common/ui/types';
-import {
-  CaseStatuses,
-  CommentType,
-  CommentRequestAlertType,
-  ActionConnector,
-} from '../../../common/api';
+import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -39,12 +36,13 @@ import { getActions } from './actions';
 import { UpdateCase } from '../../containers/use_get_cases';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
-import { useKibana } from '../../common/lib/kibana';
+import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
 import { StatusContextMenu } from '../case_action_bar/status_context_menu';
 import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
-import { PostComment } from '../../containers/use_post_comment';
-import type { CasesOwners } from '../../methods/can_use_cases';
+import type { CasesOwners } from '../../client/helpers/can_use_cases';
+import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { severities } from '../severity/config';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -53,14 +51,6 @@ export type CasesColumns =
 
 const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
-`;
-
-const Spacer = styled.span`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
-`;
-
-const TagWrapper = styled(EuiBadgeGroup)`
-  width: 100%;
 `;
 
 const renderStringField = (field: string, dataTestSubj: string) =>
@@ -76,9 +66,7 @@ export interface GetCasesColumn {
   userCanCrud: boolean;
   connectors?: ActionConnector[];
   onRowClick?: (theCase: Case) => void;
-  alertData?: Omit<CommentRequestAlertType, 'type'>;
-  postComment?: (args: PostComment) => Promise<void>;
-  updateCase?: (newCase: Case) => void;
+
   showSolutionColumn?: boolean;
 }
 export const useCasesColumns = ({
@@ -91,9 +79,6 @@ export const useCasesColumns = ({
   userCanCrud,
   connectors = [],
   onRowClick,
-  alertData,
-  postComment,
-  updateCase,
   showSolutionColumn,
 }: GetCasesColumn): CasesColumns[] => {
   // Delete case
@@ -105,6 +90,8 @@ export const useCasesColumns = ({
     isDisplayConfirmDeleteModal,
     isLoading: isDeleting,
   } = useDeleteCases();
+
+  const { isAlertsEnabled } = useCasesFeatures();
 
   const [deleteThisCase, setDeleteThisCase] = useState<DeleteCase>({
     id: '',
@@ -141,21 +128,11 @@ export const useCasesColumns = ({
 
   const assignCaseAction = useCallback(
     async (theCase: Case) => {
-      if (alertData != null) {
-        await postComment?.({
-          caseId: theCase.id,
-          data: {
-            type: CommentType.alert,
-            ...alertData,
-          },
-          updateCase,
-        });
-      }
       if (onRowClick) {
         onRowClick(theCase);
       }
     },
-    [alertData, onRowClick, postComment, updateCase]
+    [onRowClick]
   );
 
   useEffect(() => {
@@ -201,16 +178,18 @@ export const useCasesColumns = ({
       render: (createdBy: Case['createdBy']) => {
         if (createdBy != null) {
           return (
-            <>
+            <EuiToolTip
+              position="top"
+              content={createdBy.username ?? i18n.UNKNOWN}
+              data-test-subj="case-table-column-createdBy-tooltip"
+            >
               <EuiAvatar
                 className="userAction__circle"
                 name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
                 size="s"
+                data-test-subj="case-table-column-createdBy"
               />
-              <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.username ?? i18n.UNKNOWN}
-              </Spacer>
-            </>
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();
@@ -221,33 +200,47 @@ export const useCasesColumns = ({
       name: i18n.TAGS,
       render: (tags: Case['tags']) => {
         if (tags != null && tags.length > 0) {
-          return (
-            <TagWrapper>
+          const badges = (
+            <EuiBadgeGroup data-test-subj="case-table-column-tags">
               {tags.map((tag: string, i: number) => (
                 <EuiBadge
                   color="hollow"
                   key={`${tag}-${i}`}
-                  data-test-subj={`case-table-column-tags-${i}`}
+                  data-test-subj={`case-table-column-tags-${tag}`}
                 >
                   {tag}
                 </EuiBadge>
               ))}
-            </TagWrapper>
+            </EuiBadgeGroup>
+          );
+
+          return (
+            <EuiToolTip
+              data-test-subj="case-table-column-tags-tooltip"
+              position="left"
+              content={badges}
+            >
+              {badges}
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();
       },
       truncateText: true,
     },
-    {
-      align: RIGHT_ALIGNMENT,
-      field: 'totalAlerts',
-      name: ALERTS,
-      render: (totalAlerts: Case['totalAlerts']) =>
-        totalAlerts != null
-          ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-          : getEmptyTagValue(),
-    },
+    ...(isAlertsEnabled
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            field: 'totalAlerts',
+            name: ALERTS,
+            render: (totalAlerts: Case['totalAlerts']) =>
+              totalAlerts != null
+                ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
+                : getEmptyTagValue(),
+          },
+        ]
+      : []),
     ...(showSolutionColumn
       ? [
           {
@@ -314,30 +307,6 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    ...(isSelectorView
-      ? [
-          {
-            align: RIGHT_ALIGNMENT,
-            render: (theCase: Case) => {
-              if (theCase.id != null) {
-                return (
-                  <EuiButton
-                    data-test-subj={`cases-table-row-select-${theCase.id}`}
-                    onClick={() => {
-                      assignCaseAction(theCase);
-                    }}
-                    size="s"
-                    fill={true}
-                  >
-                    {i18n.SELECT}
-                  </EuiButton>
-                );
-              }
-              return getEmptyTagValue();
-            },
-          },
-        ]
-      : []),
     ...(!isSelectorView
       ? [
           {
@@ -361,6 +330,45 @@ export const useCasesColumns = ({
                   }
                 />
               );
+            },
+          },
+        ]
+      : []),
+    {
+      name: i18n.SEVERITY,
+      render: (theCase: Case) => {
+        if (theCase.severity != null) {
+          const severityData = severities[theCase.severity ?? CaseSeverity.LOW];
+          return (
+            <EuiHealth data-test-subj="case-table-column-severity" color={severityData.color}>
+              {severityData.label}
+            </EuiHealth>
+          );
+        }
+        return getEmptyTagValue();
+      },
+    },
+
+    ...(isSelectorView
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            render: (theCase: Case) => {
+              if (theCase.id != null) {
+                return (
+                  <EuiButton
+                    data-test-subj={`cases-table-row-select-${theCase.id}`}
+                    onClick={() => {
+                      assignCaseAction(theCase);
+                    }}
+                    size="s"
+                    fill={true}
+                  >
+                    {i18n.SELECT}
+                  </EuiButton>
+                );
+              }
+              return getEmptyTagValue();
             },
           },
         ]
@@ -402,6 +410,7 @@ const IconWrapper = styled.span`
 
 export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) => {
   const { triggersActionsUi } = useKibana().services;
+  const { actions } = useApplicationCapabilities();
 
   if (theCase.externalService == null) {
     return renderStringField(i18n.NOT_PUSHED, `case-table-column-external-notPushed`);
@@ -419,13 +428,16 @@ export const ExternalServiceColumn: React.FC<Props> = ({ theCase, connectors }) 
 
   return (
     <p>
-      <IconWrapper>
-        <EuiIcon
-          size="original"
-          title={theCase.externalService?.connectorName}
-          type={getConnectorIcon(triggersActionsUi, lastPushedConnector?.actionTypeId)}
-        />
-      </IconWrapper>
+      {actions.read && (
+        <IconWrapper>
+          <EuiIcon
+            size="original"
+            title={theCase.externalService?.connectorName}
+            type={getConnectorIcon(triggersActionsUi, lastPushedConnector?.actionTypeId)}
+            data-test-subj="cases-table-connector-icon"
+          />
+        </IconWrapper>
+      )}
       <EuiLink
         data-test-subj={`case-table-column-external`}
         title={theCase.externalService?.connectorName}

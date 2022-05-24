@@ -12,6 +12,7 @@
   "language": "eql",
   "license": "Elastic License v2",
   "name": "Unusual Executable File Creation by a System Critical Process",
+  "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
   "query": "file where event.type != \"deletion\" and\n  file.extension : (\"exe\", \"dll\") and\n  process.name : (\"smss.exe\",\n                  \"autochk.exe\",\n                  \"csrss.exe\",\n                  \"wininit.exe\",\n                  \"services.exe\",\n                  \"lsass.exe\",\n                  \"winlogon.exe\",\n                  \"userinit.exe\",\n                  \"LogonUI.exe\")\n",
   "risk_score": 73,
   "rule_id": "e94262f2-c1e9-4d3f-a907-aeab16712e1a",
@@ -42,5 +43,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 4
+  "version": 5
 }

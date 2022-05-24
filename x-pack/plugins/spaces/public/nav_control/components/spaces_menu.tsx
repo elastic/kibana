@@ -18,9 +18,9 @@ import {
 import type { ReactElement } from 'react';
 import React, { Component, lazy, Suspense } from 'react';
 
+import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
-import type { ApplicationStart, Capabilities } from 'src/core/public';
 
 import type { Space } from '../../../common';
 import { addSpaceIdToPath, ENTER_SPACE_PATH, SPACE_SEARCH_COUNT_THRESHOLD } from '../../../common';
@@ -69,7 +69,6 @@ class SpacesMenuUI extends Component<Props, State> {
         id: 'xpack.spaces.navControl.spacesMenu.changeCurrentSpaceTitle',
         defaultMessage: 'Change current space',
       }),
-      watchedItemProps: ['data-search-term'],
     };
 
     if (this.props.spaces.length >= SPACE_SEARCH_COUNT_THRESHOLD) {
@@ -121,7 +120,6 @@ class SpacesMenuUI extends Component<Props, State> {
         key={`spcMenuList`}
         data-search-term={searchTerm}
         className="spcMenu__spacesList"
-        hasFocus={this.state.allowSpacesListFocus}
         initialFocusedItemIndex={this.state.allowSpacesListFocus ? 0 : undefined}
         items={items}
       />

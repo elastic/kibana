@@ -14,14 +14,15 @@ import { useDispatch } from 'react-redux';
 
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataViewBase, Filter, Query } from '@kbn/es-query';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { Direction, EntityType } from '../../../../common/search_strategy';
 import type { DocValueFields } from '../../../../common/search_strategy';
-import type { CoreStart } from '../../../../../../../src/core/public';
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import {
   BulkActionsProp,
-  CreateFieldComponentType,
   TGridCellAction,
   TimelineId,
   TimelineTabs,
@@ -36,13 +37,12 @@ import type {
   AlertStatus,
 } from '../../../../common/types/timeline';
 
-import type { DataPublicPluginStart } from '../../../../../../../src/plugins/data/public';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { buildCombinedQuery, getCombinedFilterQuery, resolverIsShowing } from '../helpers';
 import { tGridActions, tGridSelectors } from '../../../store/t_grid';
 import { useTimelineEvents, InspectResponse, Refetch } from '../../../container';
+import { FieldBrowserOptions } from '../../fields_browser';
 import { StatefulBody } from '../body';
 import { SELECTOR_TIMELINE_GLOBAL_CONTAINER, UpdatedFlexGroup, UpdatedFlexItem } from '../styles';
 import { Sort } from '../body/sort';
@@ -58,6 +58,7 @@ const StyledEuiPanel = styled(EuiPanel)<{ $isFullScreen: boolean }>`
   display: flex;
   flex-direction: column;
   position: relative;
+  width: 100%;
 
   ${({ $isFullScreen }) =>
     $isFullScreen &&
@@ -98,7 +99,6 @@ export interface TGridIntegratedProps {
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   columns: ColumnHeaderOptions[];
-  createFieldComponent?: CreateFieldComponentType;
   data?: DataPublicPluginStart;
   dataProviders: DataProvider[];
   dataViewId?: string | null;
@@ -108,11 +108,12 @@ export interface TGridIntegratedProps {
   docValueFields: DocValueFields[];
   end: string;
   entityType: EntityType;
+  fieldBrowserOptions?: FieldBrowserOptions;
   filters: Filter[];
   filterStatus?: AlertStatus;
   globalFullScreen: boolean;
   // If truthy, the graph viewer (Resolver) is showing
-  graphEventId: string | undefined;
+  graphEventId?: string;
   graphOverlay?: React.ReactNode;
   hasAlertsCrud: boolean;
   height?: number;
@@ -153,12 +154,12 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
   docValueFields,
   end,
   entityType,
+  fieldBrowserOptions,
   filters,
   filterStatus,
   globalFullScreen,
   graphEventId,
   graphOverlay = null,
-  createFieldComponent,
   hasAlertsCrud,
   id,
   indexNames,
@@ -225,10 +226,11 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const sortField = useMemo(
     () =>
-      sort.map(({ columnId, columnType, sortDirection }) => ({
+      sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
+        esTypes: esTypes ?? [],
       })),
     [sort]
   );
@@ -350,50 +352,48 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                     </UpdatedFlexItem>
                   )}
               </UpdatedFlexGroup>
-              {!graphEventId && graphOverlay == null && (
-                <>
-                  {!hasAlerts && !loading && <TGridEmpty height="short" />}
-                  {hasAlerts && (
-                    <FullWidthFlexGroup
-                      $visible={!graphEventId && graphOverlay == null}
-                      gutterSize="none"
-                    >
-                      <ScrollableFlexItem grow={1}>
-                        <StatefulBody
-                          activePage={pageInfo.activePage}
-                          appId={appId}
-                          browserFields={browserFields}
-                          bulkActions={bulkActions}
-                          createFieldComponent={createFieldComponent}
-                          data={nonDeletedEvents}
-                          defaultCellActions={defaultCellActions}
-                          disabledCellActions={disabledCellActions}
-                          filterQuery={filterQuery}
-                          filters={filters}
-                          filterStatus={filterStatus}
-                          hasAlertsCrud={hasAlertsCrud}
-                          id={id}
-                          indexNames={indexNames}
-                          isEventViewer={true}
-                          itemsPerPageOptions={itemsPerPageOptions}
-                          leadingControlColumns={leadingControlColumns}
-                          loadPage={loadPage}
-                          onRuleChange={onRuleChange}
-                          pageSize={itemsPerPage}
-                          refetch={refetch}
-                          renderCellValue={renderCellValue}
-                          rowRenderers={rowRenderers}
-                          tableView={tableView}
-                          tabType={TimelineTabs.query}
-                          totalItems={totalCountMinusDeleted}
-                          trailingControlColumns={trailingControlColumns}
-                          unit={unit}
-                        />
-                      </ScrollableFlexItem>
-                    </FullWidthFlexGroup>
-                  )}
-                </>
-              )}
+              <>
+                {!hasAlerts && !loading && <TGridEmpty height="short" />}
+                {hasAlerts && (
+                  <FullWidthFlexGroup
+                    $visible={!graphEventId && graphOverlay == null}
+                    gutterSize="none"
+                  >
+                    <ScrollableFlexItem grow={1}>
+                      <StatefulBody
+                        activePage={pageInfo.activePage}
+                        appId={appId}
+                        browserFields={browserFields}
+                        bulkActions={bulkActions}
+                        data={nonDeletedEvents}
+                        defaultCellActions={defaultCellActions}
+                        disabledCellActions={disabledCellActions}
+                        fieldBrowserOptions={fieldBrowserOptions}
+                        filterQuery={filterQuery}
+                        filters={filters}
+                        filterStatus={filterStatus}
+                        hasAlertsCrud={hasAlertsCrud}
+                        id={id}
+                        indexNames={indexNames}
+                        isEventViewer={true}
+                        itemsPerPageOptions={itemsPerPageOptions}
+                        leadingControlColumns={leadingControlColumns}
+                        loadPage={loadPage}
+                        onRuleChange={onRuleChange}
+                        pageSize={itemsPerPage}
+                        refetch={refetch}
+                        renderCellValue={renderCellValue}
+                        rowRenderers={rowRenderers}
+                        tableView={tableView}
+                        tabType={TimelineTabs.query}
+                        totalItems={totalCountMinusDeleted}
+                        trailingControlColumns={trailingControlColumns}
+                        unit={unit}
+                      />
+                    </ScrollableFlexItem>
+                  </FullWidthFlexGroup>
+                )}
+              </>
             </EventsContainerLoading>
           </TimelineContext.Provider>
         )}

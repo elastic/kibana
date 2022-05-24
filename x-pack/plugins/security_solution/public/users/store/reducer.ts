@@ -6,17 +6,20 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { get } from 'lodash/fp';
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../common/store/constants';
 
 import {
   setUsersTablesActivePageToZero,
-  updateUsersTable,
   updateTableActivePage,
   updateTableLimit,
+  updateTableSorting,
+  updateUserRiskScoreSeverityFilter,
 } from './actions';
 import { setUsersPageQueriesActivePageToZero } from './helpers';
 import { UsersTableType, UsersModel } from './model';
+import { Direction } from '../../../common/search_strategy/common';
+import { RiskScoreFields } from '../../../common/search_strategy';
+import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 
 export const initialUsersState: UsersModel = {
   page: {
@@ -24,43 +27,51 @@ export const initialUsersState: UsersModel = {
       [UsersTableType.allUsers]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
-        // TODO Fix me
-        // sort: {
-        //   field: AllUsersFields.allUsers,
-        //   direction: Direction.desc,
-        // },
+        sort: {
+          field: UsersFields.lastSeen,
+          direction: Direction.desc,
+        },
+      },
+      [UsersTableType.authentications]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
+      [UsersTableType.risk]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+        sort: {
+          field: RiskScoreFields.riskScore,
+          direction: Direction.desc,
+        },
+        severitySelection: [],
+      },
+      [UsersTableType.anomalies]: null,
+      [UsersTableType.events]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
+      },
+      [UsersTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
       },
     },
   },
   details: {
     queries: {
-      [UsersTableType.allUsers]: {
+      [UsersTableType.anomalies]: null,
+      [UsersTableType.events]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         limit: DEFAULT_TABLE_LIMIT,
-        // TODO Fix me
-        // sort: {
-        //   field: HostRulesFields.riskScore,
-        //   direction: Direction.desc,
-        // },
+      },
+      [UsersTableType.alerts]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
       },
     },
   },
 };
 
 export const usersReducer = reducerWithInitialState(initialUsersState)
-  .case(updateUsersTable, (state, { usersType, tableType, updates }) => ({
-    ...state,
-    [usersType]: {
-      ...state[usersType],
-      queries: {
-        ...state[usersType].queries,
-        [tableType]: {
-          ...get([usersType, 'queries', tableType], state),
-          ...updates,
-        },
-      },
-    },
-  }))
   .case(setUsersTablesActivePageToZero, (state) => ({
     ...state,
     page: {
@@ -68,30 +79,55 @@ export const usersReducer = reducerWithInitialState(initialUsersState)
       queries: setUsersPageQueriesActivePageToZero(state),
     },
   }))
-  .case(updateTableActivePage, (state, { activePage, usersType, tableType }) => ({
+  .case(updateTableActivePage, (state, { activePage, tableType }) => ({
     ...state,
-    [usersType]: {
-      ...state[usersType],
+    page: {
+      ...state.page,
       queries: {
-        ...state[usersType].queries,
+        ...state.page.queries,
         [tableType]: {
-          // TODO: Steph/users fix active page/limit on users tables. is broken because multiple UsersTableType.userRules tables
-          ...state[usersType].queries[tableType],
+          ...state.page.queries[tableType],
           activePage,
         },
       },
     },
   }))
-  .case(updateTableLimit, (state, { limit, usersType, tableType }) => ({
+  .case(updateTableLimit, (state, { limit, tableType }) => ({
     ...state,
-    [usersType]: {
-      ...state[usersType],
+    page: {
+      ...state.page,
       queries: {
-        ...state[usersType].queries,
+        ...state.page.queries,
         [tableType]: {
-          // TODO: Steph/users fix active page/limit on users tables. is broken because multiple UsersTableType.userRules tables
-          ...state[usersType].queries[tableType],
+          ...state.page.queries[tableType],
           limit,
+        },
+      },
+    },
+  }))
+  .case(updateTableSorting, (state, { sort, tableType }) => ({
+    ...state,
+    page: {
+      ...state.page,
+      queries: {
+        ...state.page.queries,
+        [tableType]: {
+          ...state.page.queries[tableType],
+          sort,
+        },
+      },
+    },
+  }))
+  .case(updateUserRiskScoreSeverityFilter, (state, { severitySelection }) => ({
+    ...state,
+    page: {
+      ...state.page,
+      queries: {
+        ...state.page.queries,
+        [UsersTableType.risk]: {
+          ...state.page.queries[UsersTableType.risk],
+          severitySelection,
+          activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         },
       },
     },

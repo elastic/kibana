@@ -1,0 +1,314 @@
+{
+  "id": "@kbn/analytics-shippers-fullstory",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/analytics-shippers-fullstory",
+        "id": "def-server.FullStoryShipper",
+        "type": "Class",
+        "tags": [],
+        "label": "FullStoryShipper",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/analytics-shippers-fullstory",
+            "scope": "server",
+            "docId": "kibKbnAnalyticsShippersFullstoryPluginApi",
+            "section": "def-server.FullStoryShipper",
+            "text": "FullStoryShipper"
+          },
+          " implements ",
+          "IShipper"
+        ],
+        "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics-shippers-fullstory",
+            "id": "def-server.FullStoryShipper.shipperName",
+            "type": "string",
+            "tags": [],
+            "label": "shipperName",
+            "description": [],
+            "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-fullstory",
+            "id": "def-server.FullStoryShipper.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-fullstory",
+                "id": "def-server.FullStoryShipper.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "config",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/analytics-shippers-fullstory",
+                    "scope": "server",
+                    "docId": "kibKbnAnalyticsShippersFullstoryPluginApi",
+                    "section": "def-server.FullStorySnippetConfig",
+                    "text": "FullStorySnippetConfig"
+                  }
+                ],
+                "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+                "deprecated": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/analytics-shippers-fullstory",
+                "id": "def-server.FullStoryShipper.Unnamed.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "initContext",
+                "description": [],
+                "signature": [
+                  "AnalyticsClientInitContext"
+                ],
+                "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-fullstory",
+            "id": "def-server.FullStoryShipper.extendContext",
+            "type": "Function",
+            "tags": [],
+            "label": "extendContext",
+            "description": [],
+            "signature": [
+              "(newContext: ",
+              "EventContext",
+              ") => void"
+            ],
+            "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-fullstory",
+                "id": "def-server.FullStoryShipper.extendContext.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "newContext",
+                "description": [],
+                "signature": [
+                  "EventContext"
+                ],
+                "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-fullstory",
+            "id": "def-server.FullStoryShipper.optIn",
+            "type": "Function",
+            "tags": [],
+            "label": "optIn",
+            "description": [],
+            "signature": [
+              "(isOptedIn: boolean) => void"
+            ],
+            "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-fullstory",
+                "id": "def-server.FullStoryShipper.optIn.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isOptedIn",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-fullstory",
+            "id": "def-server.FullStoryShipper.reportEvents",
+            "type": "Function",
+            "tags": [],
+            "label": "reportEvents",
+            "description": [],
+            "signature": [
+              "(events: ",
+              "Event",
+              "[]) => void"
+            ],
+            "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/analytics-shippers-fullstory",
+                "id": "def-server.FullStoryShipper.reportEvents.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "events",
+                "description": [],
+                "signature": [
+                  "Event",
+                  "[]"
+                ],
+                "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/analytics-shippers-fullstory",
+        "id": "def-server.FullStorySnippetConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "FullStorySnippetConfig",
+        "description": [],
+        "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/analytics-shippers-fullstory",
+            "id": "def-server.FullStorySnippetConfig.fullStoryOrgId",
+            "type": "string",
+            "tags": [],
+            "label": "fullStoryOrgId",
+            "description": [
+              "\nThe FullStory account id."
+            ],
+            "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-fullstory",
+            "id": "def-server.FullStorySnippetConfig.host",
+            "type": "string",
+            "tags": [],
+            "label": "host",
+            "description": [
+              "\nThe host to send the data to. Used to overcome AdBlockers by using custom DNSs.\nIf not specified, it defaults to `fullstory.com`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-fullstory",
+            "id": "def-server.FullStorySnippetConfig.scriptUrl",
+            "type": "string",
+            "tags": [],
+            "label": "scriptUrl",
+            "description": [
+              "\nThe URL to load the FullStory client from. Falls back to `edge.fullstory.com/s/fs.js` if not specified."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-fullstory",
+            "id": "def-server.FullStorySnippetConfig.debug",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "debug",
+            "description": [
+              "\nWhether the debug logs should be printed to the console."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-shippers-fullstory",
+            "id": "def-server.FullStorySnippetConfig.namespace",
+            "type": "string",
+            "tags": [],
+            "label": "namespace",
+            "description": [
+              "\nThe name of the variable where the API is stored: `window[namespace]`. Defaults to `FS`."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/analytics/shippers/fullstory/src/load_snippet.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/analytics-shippers-fullstory",
+        "id": "def-server.FullStoryShipperConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "FullStoryShipperConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/analytics-shippers-fullstory",
+            "scope": "server",
+            "docId": "kibKbnAnalyticsShippersFullstoryPluginApi",
+            "section": "def-server.FullStorySnippetConfig",
+            "text": "FullStorySnippetConfig"
+          }
+        ],
+        "path": "packages/analytics/shippers/fullstory/src/fullstory_shipper.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

@@ -25,6 +25,7 @@ export type {
   Output,
   DataStream,
   Settings,
+  CurrentUpgrade,
   GetFleetStatusResponse,
   GetAgentPoliciesRequest,
   GetAgentPoliciesResponse,
@@ -61,6 +62,9 @@ export type {
   PostBulkAgentUpgradeResponse,
   GetAgentStatusRequest,
   GetAgentStatusResponse,
+  GetAgentIncomingDataRequest,
+  IncomingDataList,
+  GetAgentIncomingDataResponse,
   PutAgentReassignRequest,
   PutAgentReassignResponse,
   PostBulkAgentReassignRequest,
@@ -72,7 +76,9 @@ export type {
   GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyRequest,
   PostEnrollmentAPIKeyResponse,
+  PostLogstashApiKeyResponse,
   GetOutputsResponse,
+  GetCurrentUpgradesResponse,
   PutOutputRequest,
   PutOutputResponse,
   PostOutputRequest,
@@ -121,4 +127,3 @@ export { entries, ElasticsearchAssetType, KibanaAssetType, InstallStatus } from 
 export * from './intra_app_route_state';
 export * from './ui_extensions';
 export * from './in_memory_package_policy';
-export * from './start_plugins';

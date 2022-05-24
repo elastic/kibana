@@ -7,14 +7,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { KibanaExecutionContext } from 'kibana/public';
-import { DataView } from 'src/plugins/data/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { DataView } from '@kbn/data-plugin/common';
 import { Filter, buildEsQuery } from '@kbn/es-query';
-import { KibanaContext, TimeRange, Query, getEsQueryConfig } from '../../../../data/public';
+import { KibanaContext, TimeRange, Query, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { TimelionVisDependencies } from '../plugin';
 import { getTimezone } from './get_timezone';
 import { TimelionVisParams } from '../timelion_vis_fn';
-import { getDataSearch, getIndexPatterns } from '../helpers/plugin_services';
+import { getDataSearch, getIndexPatterns } from './plugin_services';
 import { VisSeries } from '../../common/vis_data';
 
 interface Stats {
@@ -54,7 +54,10 @@ export function getTimelionRequestHandler({
   uiSettings,
   http,
   timefilter,
-}: TimelionVisDependencies) {
+  expressionAbortSignal,
+}: TimelionVisDependencies & {
+  expressionAbortSignal: AbortSignal;
+}) {
   const timezone = getTimezone(uiSettings);
 
   return async function ({
@@ -74,6 +77,12 @@ export function getTimelionRequestHandler({
   }): Promise<TimelionSuccessResponse> {
     const dataSearch = getDataSearch();
     const expression = visParams.expression;
+    const abortController = new AbortController();
+    const expressionAbortHandler = function () {
+      abortController.abort();
+    };
+
+    expressionAbortSignal.addEventListener('abort', expressionAbortHandler);
 
     if (!expression) {
       throw new Error(
@@ -98,9 +107,7 @@ export function getTimelionRequestHandler({
     const untrackSearch =
       dataSearch.session.isCurrentSession(searchSessionId) &&
       dataSearch.session.trackSearch({
-        abort: () => {
-          // TODO: support search cancellations
-        },
+        abort: () => abortController.abort(),
       });
 
     try {
@@ -124,6 +131,7 @@ export function getTimelionRequestHandler({
           }),
         }),
         context: executionContext,
+        signal: abortController.signal,
       });
     } catch (e) {
       if (e && e.body) {
@@ -142,6 +150,7 @@ export function getTimelionRequestHandler({
         // call `untrack` if this search still belongs to current session
         untrackSearch();
       }
+      expressionAbortSignal.removeEventListener('abort', expressionAbortHandler);
     }
   };
 }

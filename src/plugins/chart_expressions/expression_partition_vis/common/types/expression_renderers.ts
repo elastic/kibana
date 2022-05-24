@@ -7,10 +7,11 @@
  */
 
 import { Position } from '@elastic/charts';
-import { Datatable, DatatableColumn } from '../../../../expressions/common';
-import { SerializedFieldFormat } from '../../../../field_formats/common';
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
-import { PaletteOutput } from '../../../../charts/common';
+import type { PaletteOutput } from '@kbn/coloring';
+import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { ChartTypes, ExpressionValuePartitionLabels } from './expression_functions';
 
 export enum EmptySizeRatios {
@@ -28,10 +29,10 @@ export interface Dimension {
 }
 
 export interface Dimensions {
-  metric?: ExpressionValueVisDimension;
-  buckets?: ExpressionValueVisDimension[];
-  splitRow?: ExpressionValueVisDimension[];
-  splitColumn?: ExpressionValueVisDimension[];
+  metric?: ExpressionValueVisDimension | string;
+  buckets?: Array<ExpressionValueVisDimension | string>;
+  splitRow?: Array<ExpressionValueVisDimension | string>;
+  splitColumn?: Array<ExpressionValueVisDimension | string>;
 }
 
 export interface LabelsParams {
@@ -52,13 +53,14 @@ interface VisCommonParams {
   legendPosition: Position;
   truncateLegend: boolean;
   maxLegendLines: number;
+  legendSize?: LegendSize;
   ariaLabel?: string;
 }
 
 interface VisCommonConfig extends VisCommonParams {
-  metric: ExpressionValueVisDimension;
-  splitColumn?: ExpressionValueVisDimension[];
-  splitRow?: ExpressionValueVisDimension[];
+  metric: ExpressionValueVisDimension | string;
+  splitColumn?: Array<ExpressionValueVisDimension | string>;
+  splitRow?: Array<ExpressionValueVisDimension | string>;
   labels: ExpressionValuePartitionLabels;
   palette: PaletteOutput;
 }
@@ -77,7 +79,7 @@ export interface PartitionVisParams extends VisCommonParams {
 }
 
 export interface PieVisConfig extends VisCommonConfig {
-  buckets?: ExpressionValueVisDimension[];
+  buckets?: Array<ExpressionValueVisDimension | string>;
   isDonut: boolean;
   emptySizeRatio?: EmptySizeRatios;
   respectSourceOrder?: boolean;
@@ -87,17 +89,17 @@ export interface PieVisConfig extends VisCommonConfig {
 }
 
 export interface TreemapVisConfig extends VisCommonConfig {
-  buckets?: ExpressionValueVisDimension[];
+  buckets?: Array<ExpressionValueVisDimension | string>;
   nestedLegend: boolean;
 }
 
 export interface MosaicVisConfig extends VisCommonConfig {
-  buckets?: ExpressionValueVisDimension[];
+  buckets?: Array<ExpressionValueVisDimension | string>;
   nestedLegend: boolean;
 }
 
 export interface WaffleVisConfig extends VisCommonConfig {
-  bucket?: ExpressionValueVisDimension;
+  bucket?: ExpressionValueVisDimension | string;
   showValuesInLegend: boolean;
 }
 

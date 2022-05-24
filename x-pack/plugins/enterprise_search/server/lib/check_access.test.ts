@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { spacesMock } from '../../../spaces/server/mocks';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
 import { checkAccess } from './check_access';
 
@@ -191,6 +191,17 @@ describe('checkAccess', () => {
 
         it('falls back to no access if no http response', async () => {
           (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({}));
+          expect(await checkAccess(mockDependencies)).toEqual({
+            hasAppSearchAccess: false,
+            hasWorkplaceSearchAccess: false,
+          });
+        });
+
+        it('falls back to no access if response error', async () => {
+          (callEnterpriseSearchConfigAPI as jest.Mock).mockImplementationOnce(() => ({
+            responseStatus: 500,
+            responseStatusText: 'failed',
+          }));
           expect(await checkAccess(mockDependencies)).toEqual({
             hasAppSearchAccess: false,
             hasWorkplaceSearchAccess: false,

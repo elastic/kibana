@@ -7,16 +7,26 @@
  */
 
 export default async function ({ readConfigFile }) {
-  const defaultConfig = await readConfigFile(require.resolve('./config'));
+  const baseConfig = await readConfigFile(require.resolve('./config.base.js'));
 
   return {
-    ...defaultConfig.getAll(),
+    ...baseConfig.getAll(),
+
+    testFiles: [
+      require.resolve('./apps/console'),
+      require.resolve('./apps/dashboard/group4/dashboard_save'),
+      require.resolve('./apps/dashboard_elements'),
+      require.resolve('./apps/discover'),
+      require.resolve('./apps/home'),
+      require.resolve('./apps/visualize/group5'),
+    ],
 
     browser: {
       type: 'firefox',
     },
 
     suiteTags: {
+      include: ['includeFirefox'],
       exclude: ['skipFirefox'],
     },
 

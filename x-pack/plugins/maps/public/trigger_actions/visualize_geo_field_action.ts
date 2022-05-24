@@ -12,7 +12,10 @@ import {
   createAction,
   ACTION_VISUALIZE_GEO_FIELD,
   VisualizeFieldContext,
-} from '../../../../../src/plugins/ui_actions/public';
+} from '@kbn/ui-actions-plugin/public';
+import { getUsageCollection } from '../kibana_services';
+import { APP_ID } from '../../common/constants';
+
 import {
   getVisualizeCapabilities,
   getIndexPatternService,
@@ -42,6 +45,13 @@ export const visualizeGeoFieldAction = createAction<VisualizeFieldContext>({
   },
   execute: async (context) => {
     const { app, path, state } = await getMapsLink(context);
+
+    const usageCollection = getUsageCollection();
+    usageCollection?.reportUiCounter(
+      APP_ID,
+      'visualize_geo_field',
+      context.originatingApp ? context.originatingApp : 'unknownOriginatingApp'
+    );
 
     getCore().application.navigateToApp(app, {
       path,

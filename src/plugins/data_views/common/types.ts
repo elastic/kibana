@@ -7,26 +7,62 @@
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataViewFieldBase, IFieldSubType, DataViewBase } from '@kbn/es-query';
-import { ToastInputFields, ErrorToastOptions } from 'src/core/public/notifications';
+import { ToastInputFields, ErrorToastOptions } from '@kbn/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { FieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { DataViewField } from './fields';
-import { FieldFormat, SerializedFieldFormat } from '../../field_formats/common';
 
 export type { QueryDslQueryContainer };
 
 export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
-export interface RuntimeField {
+
+export type RuntimeTypeExceptComposite = Exclude<RuntimeType, 'composite'>;
+
+export interface RuntimeFieldBase {
   type: RuntimeType;
   script?: {
     source: string;
   };
+}
+
+/**
+ * The RuntimeField that will be sent in the ES Query "runtime_mappings" object
+ */
+export interface RuntimeFieldSpec extends RuntimeFieldBase {
+  fields?: Record<
+    string,
+    {
+      // It is not recursive, we can't create a composite inside a composite.
+      type: RuntimeTypeExceptComposite;
+    }
+  >;
+}
+
+export interface FieldConfiguration {
+  format?: SerializedFieldFormat | null;
+  customLabel?: string;
+  popularity?: number;
+}
+
+/**
+ * This is the RuntimeField interface enhanced with Data view field
+ * configuration: field format definition, customLabel or popularity.
+ *
+ * @see {@link RuntimeField}
+ */
+export interface RuntimeField extends RuntimeFieldBase, FieldConfiguration {
+  fields?: Record<string, RuntimeFieldSubField>;
+}
+
+export interface RuntimeFieldSubField extends FieldConfiguration {
+  type: RuntimeTypeExceptComposite;
 }
 
 /**
@@ -87,8 +123,8 @@ export interface FieldAttrSet {
   count?: number;
 }
 
-export type OnNotification = (toastInputFields: ToastInputFields) => void;
-export type OnError = (error: Error, toastInputFields: ErrorToastOptions) => void;
+export type OnNotification = (toastInputFields: ToastInputFields, key: string) => void;
+export type OnError = (error: Error, toastInputFields: ErrorToastOptions, key: string) => void;
 
 export interface UiSettingsCommon {
   get: <T = any>(key: string) => Promise<T>;
@@ -216,7 +252,7 @@ export interface FieldSpec extends DataViewFieldBase {
   readFromDocValues?: boolean;
   indexed?: boolean;
   customLabel?: string;
-  runtimeField?: RuntimeField;
+  runtimeField?: RuntimeFieldSpec;
   // not persisted
   shortDotsEnable?: boolean;
   isMapped?: boolean;
@@ -244,11 +280,18 @@ export interface DataViewSpec {
   typeMeta?: TypeMeta;
   type?: string;
   fieldFormats?: Record<string, SerializedFieldFormat>;
-  runtimeFieldMap?: Record<string, RuntimeField>;
+  runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
   fieldAttrs?: FieldAttrs;
   allowNoIndex?: boolean;
+  namespaces?: string[];
 }
 
 export interface SourceFilter {
   value: string;
+}
+
+export interface HasDataService {
+  hasESData: () => Promise<boolean>;
+  hasUserDataView: () => Promise<boolean>;
+  hasDataView: () => Promise<boolean>;
 }

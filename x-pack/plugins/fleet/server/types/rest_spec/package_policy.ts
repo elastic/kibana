@@ -12,7 +12,7 @@ import {
   UpdatePackagePolicyRequestBodySchema,
 } from '../models';
 
-import { ListWithKuerySchema } from './index';
+import { ListWithKuerySchema } from '.';
 
 export const GetPackagePoliciesRequestSchema = {
   query: ListWithKuerySchema,

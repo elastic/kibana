@@ -6,7 +6,7 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { CaseMetricsFeature } from '../../common/ui';
+import { SingleCaseMetricsFeature } from '../../common/ui';
 import { useGetCaseMetrics, UseGetCaseMetrics } from './use_get_case_metrics';
 import { basicCase, basicCaseMetrics } from './mock';
 import * as api from './api';
@@ -16,7 +16,7 @@ jest.mock('../common/lib/kibana');
 
 describe('useGetCaseMetrics', () => {
   const abortCtrl = new AbortController();
-  const features: CaseMetricsFeature[] = ['alerts.count'];
+  const features: SingleCaseMetricsFeature[] = ['alerts.count'];
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -38,8 +38,8 @@ describe('useGetCaseMetrics', () => {
     });
   });
 
-  it('calls getCaseMetrics with correct arguments', async () => {
-    const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
+  it('calls getSingleCaseMetrics with correct arguments', async () => {
+    const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
     await act(async () => {
       const { waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
         useGetCaseMetrics(basicCase.id, features)
@@ -50,8 +50,8 @@ describe('useGetCaseMetrics', () => {
     });
   });
 
-  it('does not call getCaseMetrics if empty feature parameter passed', async () => {
-    const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
+  it('does not call getSingleCaseMetrics if empty feature parameter passed', async () => {
+    const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
     await act(async () => {
       const { waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
         useGetCaseMetrics(basicCase.id, [])
@@ -78,7 +78,7 @@ describe('useGetCaseMetrics', () => {
   });
 
   it('refetch case metrics', async () => {
-    const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
+    const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCaseMetrics>(() =>
         useGetCaseMetrics(basicCase.id, features)
@@ -116,8 +116,8 @@ describe('useGetCaseMetrics', () => {
     });
   });
 
-  it('returns an error when getCaseMetrics throws', async () => {
-    const spyOnGetCaseMetrics = jest.spyOn(api, 'getCaseMetrics');
+  it('returns an error when getSingleCaseMetrics throws', async () => {
+    const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
     spyOnGetCaseMetrics.mockImplementation(() => {
       throw new Error('Something went wrong');
     });

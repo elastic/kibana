@@ -15,7 +15,9 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiButtonEmpty } from '@elastic/eui';
+
+import { DataPanel } from '../../../../../data_panel';
 
 import { IgnoredQueriesPanel } from './ignored_queries_panel';
 
@@ -90,5 +92,14 @@ describe('IgnoredQueriesPanel', () => {
     wrapper.find(EuiBasicTable).simulate('change', { page: { index: 0 } });
 
     expect(mockActions.onPaginate).toHaveBeenCalledWith(1);
+  });
+
+  it('fetches data on refresh button press', () => {
+    const wrapper = shallow(<IgnoredQueriesPanel />);
+    expect(mockActions.loadIgnoredQueries).toHaveBeenCalledTimes(1);
+
+    shallow(wrapper.find(DataPanel).prop('title')).find(EuiButtonEmpty).simulate('click');
+
+    expect(mockActions.loadIgnoredQueries).toHaveBeenCalledTimes(2);
   });
 });

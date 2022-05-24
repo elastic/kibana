@@ -56,7 +56,15 @@ export const EntityDraggableComponent: React.FC<Props> = ({
     [entityName, entityValue]
   );
 
-  return <DraggableWrapper key={id} dataProvider={dataProviderProp} render={render} />;
+  return (
+    <DraggableWrapper
+      key={id}
+      dataProvider={dataProviderProp}
+      render={render}
+      isAggregatable={true}
+      fieldType={'keyword'}
+    />
+  );
 };
 
 EntityDraggableComponent.displayName = 'EntityDraggableComponent';

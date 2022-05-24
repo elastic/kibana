@@ -8,7 +8,20 @@
 import uuid from 'uuid';
 import expect from '@kbn/expect';
 import { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
-import { FtrProviderContext } from '../ftr_provider_context';
+import {
+  METADATA_DATASTREAM,
+  HOST_METADATA_LIST_ROUTE,
+  METADATA_UNITED_INDEX,
+  METADATA_UNITED_TRANSFORM,
+  METADATA_TRANSFORMS_STATUS_ROUTE,
+  metadataTransformPrefix,
+} from '@kbn/security-solution-plugin/common/endpoint/constants';
+import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
+import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import { TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
+import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+
+import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
 import {
   deleteAllDocsFromMetadataCurrentIndex,
   deleteAllDocsFromMetadataDatastream,
@@ -20,55 +33,53 @@ import {
   deleteAllDocsFromIndex,
   bulkIndex,
 } from './data_stream_helper';
-import {
-  METADATA_DATASTREAM,
-  HOST_METADATA_LIST_ROUTE,
-  METADATA_UNITED_INDEX,
-  METADATA_UNITED_TRANSFORM,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
-  metadataTransformPrefix,
-} from '../../../plugins/security_solution/common/endpoint/constants';
-import { AGENTS_INDEX } from '../../../plugins/fleet/common';
-import { generateAgentDocs, generateMetadataDocs } from './metadata.fixtures';
-import { indexFleetEndpointPolicy } from '../../../plugins/security_solution/common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { TRANSFORM_STATES } from '../../../plugins/security_solution/common/constants';
+import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const endpointTestResources = getService('endpointTestResources');
 
   describe('test metadata apis', () => {
+    before(async () => {
+      await endpointTestResources.setMetadataTransformFrequency('1s');
+    });
+
     describe('list endpoints GET route', () => {
       describe('with .metrics-endpoint.metadata_united_default index', () => {
         const numberOfHostsInFixture = 2;
 
         before(async () => {
-          await stopTransform(getService, `${METADATA_UNITED_TRANSFORM}*`);
           await deleteAllDocsFromFleetAgents(getService);
           await deleteAllDocsFromMetadataDatastream(getService);
           await deleteAllDocsFromMetadataCurrentIndex(getService);
           await deleteAllDocsFromIndex(getService, METADATA_UNITED_INDEX);
 
-          // generate an endpoint policy and attach id to agents since
-          // metadata list api filters down to endpoint policies only
-          const policy = await indexFleetEndpointPolicy(
-            getService('kibanaServer'),
-            `Default ${uuid.v4()}`,
-            '1.1.1'
-          );
-          const policyId = policy.integrationPolicies[0].policy_id;
-          const currentTime = new Date().getTime();
+          const customIndexFn = async (): Promise<IndexedHostsAndAlertsResponse> => {
+            // generate an endpoint policy and attach id to agents since
+            // metadata list api filters down to endpoint policies only
+            const policy = await indexFleetEndpointPolicy(
+              getService('kibanaServer'),
+              `Default ${uuid.v4()}`,
+              '1.1.1'
+            );
+            const policyId = policy.integrationPolicies[0].policy_id;
+            const currentTime = new Date().getTime();
 
-          await Promise.all([
-            bulkIndex(getService, AGENTS_INDEX, generateAgentDocs(currentTime, policyId)),
-            bulkIndex(getService, METADATA_DATASTREAM, generateMetadataDocs(currentTime)),
-          ]);
+            const agentDocs = generateAgentDocs(currentTime, policyId);
+            const metadataDocs = generateMetadataDocs(currentTime);
 
-          // wait for latest metadata transform to run
-          await new Promise((r) => setTimeout(r, 60000));
-          await startTransform(getService, METADATA_UNITED_TRANSFORM);
+            await Promise.all([
+              bulkIndex(getService, AGENTS_INDEX, agentDocs),
+              bulkIndex(getService, METADATA_DATASTREAM, metadataDocs),
+            ]);
 
-          // wait for united metadata transform to run
-          await new Promise((r) => setTimeout(r, 30000));
+            return {
+              agents: agentDocs,
+              hosts: metadataDocs,
+            } as unknown as IndexedHostsAndAlertsResponse;
+          };
+
+          await endpointTestResources.loadEndpointData({ customIndexFn });
         });
 
         after(async () => {
@@ -295,9 +306,14 @@ export default function ({ getService }: FtrProviderContext) {
             // otherwise it won't hit metrics-endpoint.metadata_current_default index
             await stopTransform(getService, `${METADATA_UNITED_TRANSFORM}*`);
             await deleteIndex(getService, METADATA_UNITED_INDEX);
-            await bulkIndex(getService, METADATA_DATASTREAM, generateMetadataDocs(timestamp));
-            // wait for transform
-            await new Promise((r) => setTimeout(r, 60000));
+
+            const metadataDocs = generateMetadataDocs(timestamp);
+            await bulkIndex(getService, METADATA_DATASTREAM, metadataDocs);
+
+            await endpointTestResources.waitForEndpoints(
+              Array.from(new Set(metadataDocs.map((doc) => doc.agent.id))),
+              60000
+            );
           });
           // the endpoint uses data streams and es archiver does not support deleting them at the moment so we need
           // to do it manually

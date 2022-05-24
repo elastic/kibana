@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
+import { IntegrationsPopover } from '../../../../../common/components/integrations_popover';
 import {
   APP_UI_ID,
   DEFAULT_RELATIVE_DATE_THRESHOLD,
@@ -27,7 +28,6 @@ import { LinkAnchor } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { getRuleDetailsUrl } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { PopoverItems } from '../../../../../common/components/popover_items';
-import { useStateToaster } from '../../../../../common/components/toasters';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { canEditRuleWithActions, getToolTipContent } from '../../../../../common/utils/privileges';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
@@ -45,6 +45,7 @@ import {
   DurationMetric,
   RuleExecutionSummary,
 } from '../../../../../../common/detection_engine/schemas/common';
+import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -157,16 +158,31 @@ const TAGS_COLUMN: TableColumn = {
   truncateText: true,
 };
 
+const INTEGRATIONS_COLUMN: TableColumn = {
+  field: 'related_integrations',
+  name: null,
+  align: 'center',
+  render: (integrations: Rule['related_integrations']) => {
+    if (integrations?.length === 0) {
+      return null;
+    }
+
+    return <IntegrationsPopover integrations={integrations} />;
+  },
+  width: '143px',
+  truncateText: true,
+};
+
 const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
   const { navigateToApp } = useKibana().services.application;
   const hasActionsPrivileges = useHasActionsPrivileges();
-  const [, dispatchToaster] = useStateToaster();
+  const toasts = useAppToasts();
   const { reFetchRules, setLoadingRules } = useRulesTableContext().actions;
 
   return useMemo(
     () => ({
       actions: getRulesTableActions(
-        dispatchToaster,
+        toasts,
         navigateToApp,
         reFetchRules,
         hasActionsPrivileges,
@@ -174,7 +190,7 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
       ),
       width: '40px',
     }),
-    [dispatchToaster, hasActionsPrivileges, navigateToApp, reFetchRules, setLoadingRules]
+    [hasActionsPrivileges, navigateToApp, reFetchRules, setLoadingRules, toasts]
   );
 };
 
@@ -187,6 +203,7 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
   return useMemo(
     () => [
       ruleNameColumn,
+      INTEGRATIONS_COLUMN,
       TAGS_COLUMN,
       {
         field: 'risk_score',
@@ -196,7 +213,7 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
             {value}
           </EuiText>
         ),
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '85px',
       },
@@ -204,7 +221,7 @@ export const useRulesColumns = ({ hasPermissions }: ColumnsProps): TableColumn[]
         field: 'severity',
         name: i18n.COLUMN_SEVERITY,
         render: (value: Rule['severity']) => <SeverityBadge value={value} />,
-        sortable: !!isInMemorySorting,
+        sortable: true,
         truncateText: true,
         width: '12%',
       },
@@ -292,6 +309,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
         ...ruleNameColumn,
         width: '28%',
       },
+      INTEGRATIONS_COLUMN,
       TAGS_COLUMN,
       {
         field: 'execution_summary.last_execution.metrics.total_indexing_duration_ms',
@@ -346,7 +364,7 @@ export const useMonitoringColumns = ({ hasPermissions }: ColumnsProps): TableCol
                               href={`${docLinks.links.siem.troubleshootGaps}`}
                               target="_blank"
                             >
-                              {'see documentation'}
+                              {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
                             </EuiLink>
                           ),
                         }}

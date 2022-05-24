@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Embeddable, EmbeddableInput } from '../../../../../../../src/plugins/embeddable/public';
-import { EnhancedEmbeddable } from '../../../../../embeddable_enhanced/public';
+import { Embeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { EnhancedEmbeddable } from '@kbn/embeddable-enhanced-plugin/public';
 import {
   UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
   AdvancedUiActionsStart,
-} from '../../../../../ui_actions_enhanced/public';
-import { uiActionsEnhancedPluginMock } from '../../../../../ui_actions_enhanced/public/mocks';
+} from '@kbn/ui-actions-enhanced-plugin/public';
+import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 
 export class MockEmbeddable extends Embeddable {
   public rootType = 'dashboard';

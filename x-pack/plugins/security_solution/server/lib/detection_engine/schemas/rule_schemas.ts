@@ -37,6 +37,7 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 
+import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
 import {
   author,
   buildingBlockTypeOrUndefined,
@@ -71,9 +72,11 @@ import {
   updatedByOrNull,
   created_at,
   updated_at,
-} from '../../../../common/detection_engine/schemas/common/schemas';
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
+} from '../../../../common/detection_engine/schemas/common';
 import { SERVER_APP_ID } from '../../../../common/constants';
-import { SanitizedRuleConfig } from '../../../../../alerting/common';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 export const baseRuleParams = t.exact(
@@ -105,6 +108,9 @@ export const baseRuleParams = t.exact(
     references,
     version,
     exceptionsList: listArray,
+    relatedIntegrations: t.union([RelatedIntegrationArray, t.undefined]),
+    requiredFields: t.union([RequiredFieldArray, t.undefined]),
+    setup: t.union([SetupGuide, t.undefined]),
   })
 );
 export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;

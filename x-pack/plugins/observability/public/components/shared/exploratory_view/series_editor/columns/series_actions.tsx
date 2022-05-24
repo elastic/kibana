@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../../types';
 import { useDiscoverLink } from '../../hooks/use_discover_link';
-import { useAppIndexPatternContext } from '../../hooks/use_app_index_pattern';
+import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 
 interface Props {
   seriesId: number;
@@ -34,9 +34,9 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
 
   const { href: discoverHref } = useDiscoverLink({ series, seriesConfig });
 
-  const { indexPatterns } = useAppIndexPatternContext();
+  const { dataViews } = useAppDataViewContext();
 
-  const indexPattern = indexPatterns?.[series.dataType];
+  const dataView = dataViews?.[series.dataType];
   const deleteDisabled = seriesId === 0 && allSeries.length > 1;
 
   const copySeries = () => {
@@ -109,7 +109,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
                 icon="discoverApp"
                 href={discoverHref}
                 aria-label={VIEW_SAMPLE_DOCUMENTS_LABEL}
-                disabled={!series.dataType || !series.selectedMetricField || !indexPattern}
+                disabled={!series.dataType || !series.selectedMetricField || !dataView}
                 target="_blank"
               >
                 {VIEW_SAMPLE_DOCUMENTS_LABEL}
@@ -182,7 +182,7 @@ const DELETE_SERIES_TOOLTIP_LABEL = i18n.translate(
 const VIEW_SAMPLE_DOCUMENTS_LABEL = i18n.translate(
   'xpack.observability.seriesEditor.sampleDocuments',
   {
-    defaultMessage: 'View sample documents',
+    defaultMessage: 'View transaction in Discover',
   }
 );
 

@@ -78,9 +78,12 @@ describe('useRuleWithFallback', () => {
             "name": "Test rule",
             "query": "user.email: 'root@elastic.co'",
             "references": Array [],
+            "related_integrations": Array [],
+            "required_fields": Array [],
             "risk_score": 75,
             "risk_score_mapping": Array [],
             "rule_id": "bbd3106e-b4b5-4d7c-a1a2-47531d6a2baf",
+            "setup": "",
             "severity": "high",
             "severity_mapping": Array [],
             "tags": Array [
@@ -154,8 +157,6 @@ describe('useRuleWithFallback', () => {
             "tags": Array [
               "host.name exists",
               "for testing",
-              "__internal_rule_id:82b2b065-a2ee-49fc-9d6d-781a75c3d280",
-              "__internal_immutable:false",
             ],
             "threat": Array [
               Object {

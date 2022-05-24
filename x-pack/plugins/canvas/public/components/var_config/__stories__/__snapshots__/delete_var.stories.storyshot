@@ -20,7 +20,9 @@ Array [
               "verticalAlign": "top",
             }
           }
-        />
+        >
+          
+        </span>
       </span>
       <span>
         <span
@@ -54,7 +56,7 @@ Array [
         </div>
       </div>
       <div
-        className="euiSpacer euiSpacer--m"
+        className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
       />
       <div
         className="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -81,7 +83,9 @@ Array [
                 color="inherit"
                 data-euiicon-type="trash"
                 size="m"
-              />
+              >
+                
+              </span>
               <span
                 className="euiButton__text"
               >

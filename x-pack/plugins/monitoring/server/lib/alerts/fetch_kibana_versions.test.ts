@@ -6,7 +6,7 @@
  */
 
 import { fetchKibanaVersions } from './fetch_kibana_versions';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../static_globals', () => ({
   Globals: {
@@ -102,6 +102,7 @@ describe('fetchKibanaVersions', () => {
                 bool: {
                   should: [
                     { term: { type: 'kibana_stats' } },
+                    { term: { 'metricset.name': 'stats' } },
                     { term: { 'data_stream.dataset': 'kibana.stats' } },
                   ],
                   minimum_should_match: 1,

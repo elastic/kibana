@@ -9,6 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
+import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { EnvironmentMode, PackageInfo } from '../config';
 import { ICspConfig } from '../csp';
 import { InternalHttpServicePreboot, InternalHttpServiceSetup, KibanaRequest } from '../http';
@@ -38,6 +39,11 @@ export interface InjectedMetadata {
   basePath: string;
   serverBasePath: string;
   publicBaseUrl?: string;
+  clusterInfo: {
+    cluster_uuid?: string;
+    cluster_name?: string;
+    cluster_version?: string;
+  };
   env: {
     mode: EnvironmentMode;
     packageInfo: PackageInfo;
@@ -74,6 +80,7 @@ export interface RenderingPrebootDeps {
 
 /** @internal */
 export interface RenderingSetupDeps {
+  elasticsearch: InternalElasticsearchServiceSetup;
   http: InternalHttpServiceSetup;
   status: InternalStatusServiceSetup;
   uiPlugins: UiPlugins;
@@ -82,17 +89,23 @@ export interface RenderingSetupDeps {
 /** @public */
 export interface IRenderOptions {
   /**
-   * Set whether to output user settings in the page metadata.
-   * `true` by default.
+   * Set whether the page is anonymous, which determines what plugins are enabled and whether to output user settings in the page metadata.
+   * `false` by default.
    */
-  includeUserSettings?: boolean;
+  isAnonymousPage?: boolean;
 
   /**
    * Inject custom vars into the page metadata.
-   * @deprecated for legacy use only, remove with ui_render_mixin
+   * @deprecated for legacy use only. Can be removed when https://github.com/elastic/kibana/issues/127733 is done.
    * @internal
    */
   vars?: Record<string, any>;
+
+  /**
+   * @internal
+   * This is only used for integration tests that allow us to verify which config keys are exposed to the browser.
+   */
+  includeExposedConfigKeys?: boolean;
 }
 
 /** @internal */

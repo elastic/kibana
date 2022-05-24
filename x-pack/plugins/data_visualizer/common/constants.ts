@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES } from '../../../../src/plugins/data/common';
+import { KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 
+export const APP_ID = 'data_visualizer';
 export const UI_SETTING_MAX_FILE_SIZE = 'fileUpload:maxFileSize';
 
 export const MB = Math.pow(2, 20);

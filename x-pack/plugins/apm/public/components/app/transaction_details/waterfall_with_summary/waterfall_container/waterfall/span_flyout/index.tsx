@@ -7,7 +7,6 @@
 
 import {
   EuiBadge,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,23 +20,27 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { isEmpty } from 'lodash';
 import React, { Fragment } from 'react';
-import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
-import { euiStyled } from '../../../../../../../../../../../src/plugins/kibana_react/common';
 import { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
+import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
 import { Stacktrace } from '../../../../../../shared/stacktrace';
 import { Summary } from '../../../../../../shared/summary';
+import { CompositeSpanDurationSummaryItem } from '../../../../../../shared/summary/composite_span_duration_summary_item';
 import { DurationSummaryItem } from '../../../../../../shared/summary/duration_summary_item';
 import { HttpInfoSummaryItem } from '../../../../../../shared/summary/http_info_summary_item';
 import { TimestampTooltip } from '../../../../../../shared/timestamp_tooltip';
-import { ResponsiveFlyout } from '../responsive_flyout';
 import { SyncBadge } from '../badge/sync_badge';
+import { FailureBadge } from '../failure_badge';
+import { ResponsiveFlyout } from '../responsive_flyout';
+import { SpanLinksCount } from '../waterfall_helpers/waterfall_helpers';
 import { SpanDatabase } from './span_db';
 import { StickySpanProperties } from './sticky_span_properties';
-import { FailureBadge } from '../failure_badge';
+import { ProcessorEvent } from '../../../../../../../../common/processor_event';
 
 function formatType(type: string) {
   switch (type) {
@@ -86,6 +89,7 @@ interface Props {
   parentTransaction?: Transaction;
   totalDuration?: number;
   onClose: () => void;
+  spanLinksCount: SpanLinksCount;
 }
 
 export function SpanFlyout({
@@ -93,6 +97,7 @@ export function SpanFlyout({
   parentTransaction,
   totalDuration,
   onClose,
+  spanLinksCount,
 }: Props) {
   if (!span) {
     return null;
@@ -106,6 +111,13 @@ export function SpanFlyout({
     span.http?.response?.status_code || span.span?.http?.response?.status_code;
   const spanHttpUrl = span.url?.original || span.span?.http?.url?.original;
   const spanHttpMethod = span.http?.request?.method || span.span?.http?.method;
+
+  const spanLinksTabContent = getSpanLinksTabContent({
+    spanLinksCount,
+    traceId: span.trace.id,
+    spanId: span.span.id,
+    processorEvent: ProcessorEvent.span,
+  });
 
   return (
     <EuiPortal>
@@ -126,14 +138,12 @@ export function SpanFlyout({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <DiscoverSpanLink span={span}>
-                <EuiButtonEmpty iconType="discoverApp">
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                    {
-                      defaultMessage: 'View span in Discover',
-                    }
-                  )}
-                </EuiButtonEmpty>
+                {i18n.translate(
+                  'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
+                  {
+                    defaultMessage: 'View span in Discover',
+                  }
+                )}
               </DiscoverSpanLink>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -220,24 +230,6 @@ export function SpanFlyout({
           <EuiTabbedContent
             tabs={[
               {
-                id: 'stack-trace',
-                name: i18n.translate(
-                  'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
-                  {
-                    defaultMessage: 'Stack Trace',
-                  }
-                ),
-                content: (
-                  <Fragment>
-                    <EuiSpacer size="l" />
-                    <Stacktrace
-                      stackframes={stackframes}
-                      codeLanguage={codeLanguage}
-                    />
-                  </Fragment>
-                ),
-              },
-              {
                 id: 'metadata',
                 name: i18n.translate(
                   'xpack.apm.propertiesTable.tabs.metadataLabel',
@@ -252,6 +244,29 @@ export function SpanFlyout({
                   </Fragment>
                 ),
               },
+              ...(!isEmpty(stackframes)
+                ? [
+                    {
+                      id: 'stack-trace',
+                      name: i18n.translate(
+                        'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
+                        {
+                          defaultMessage: 'Stack Trace',
+                        }
+                      ),
+                      content: (
+                        <Fragment>
+                          <EuiSpacer size="l" />
+                          <Stacktrace
+                            stackframes={stackframes}
+                            codeLanguage={codeLanguage}
+                          />
+                        </Fragment>
+                      ),
+                    },
+                  ]
+                : []),
+              ...(spanLinksTabContent ? [spanLinksTabContent] : []),
             ]}
           />
         </EuiFlyoutBody>

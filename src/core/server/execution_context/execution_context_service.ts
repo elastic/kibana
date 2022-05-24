@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import { AsyncLocalStorage } from 'async_hooks';
+import apm from 'elastic-apm-node';
+import { isUndefined, omitBy } from 'lodash';
 import type { Subscription } from 'rxjs';
 
 import type { CoreService, KibanaExecutionContext } from '../../types';
@@ -39,6 +41,10 @@ export interface IExecutionContext {
    * returns serialized representation to send as a header
    **/
   getAsHeader(): string | undefined;
+  /**
+   * returns apm labels
+   **/
+  getAsLabels(): apm.Labels;
 }
 
 /**
@@ -61,6 +67,7 @@ export interface ExecutionContextSetup {
    * The nested calls stack the registered context on top of each other.
    **/
   withContext<R>(context: KibanaExecutionContext | undefined, fn: (...args: any[]) => R): R;
+  getAsLabels(): apm.Labels;
 }
 
 /**
@@ -97,6 +104,7 @@ export class ExecutionContextService
       setRequestId: this.setRequestId.bind(this),
       get: this.get.bind(this),
       getAsHeader: this.getAsHeader.bind(this),
+      getAsLabels: this.getAsLabels.bind(this),
     };
   }
 
@@ -108,6 +116,7 @@ export class ExecutionContextService
       withContext: this.withContext.bind(this),
       get: this.get.bind(this),
       getAsHeader: this.getAsHeader.bind(this),
+      getAsLabels: this.getAsLabels.bind(this),
     };
   }
 
@@ -160,5 +169,19 @@ export class ExecutionContextService
     const executionContextStr = executionContext ? `;kibana:${executionContext}` : '';
 
     return `${requestId}${executionContextStr}`;
+  }
+
+  private getAsLabels() {
+    if (!this.enabled) return {};
+    const executionContext = this.contextStore.getStore()?.toJSON();
+
+    return omitBy(
+      {
+        name: executionContext?.name,
+        id: executionContext?.id,
+        page: executionContext?.page,
+      },
+      isUndefined
+    );
   }
 }

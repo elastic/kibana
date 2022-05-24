@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import { fetchMissingMonitoringData } from './fetch_missing_monitoring_data';
 
 jest.mock('../../static_globals', () => ({
@@ -189,6 +189,7 @@ describe('fetchMissingMonitoringData', () => {
                 bool: {
                   should: [
                     { term: { type: 'node_stats' } },
+                    { term: { 'metricset.name': 'node_stats' } },
                     { term: { 'data_stream.dataset': 'elasticsearch.node_stats' } },
                   ],
                   minimum_should_match: 1,
@@ -210,7 +211,9 @@ describe('fetchMissingMonitoringData', () => {
                     top_hits: {
                       size: 1,
                       sort: [{ timestamp: { order: 'desc', unmapped_type: 'long' } }],
-                      _source: { includes: ['_index', 'source_node.name'] },
+                      _source: {
+                        includes: ['source_node.name', 'elasticsearch.node.name'],
+                      },
                     },
                   },
                 },
@@ -221,7 +224,7 @@ describe('fetchMissingMonitoringData', () => {
       },
     });
   });
-  it('should call ES with correct query  when ccs disabled', async () => {
+  it('should call ES with correct query when ccs disabled', async () => {
     const now = 10;
     const clusters = [
       {

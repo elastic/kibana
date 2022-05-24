@@ -13,6 +13,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer, EuiText, EuiTitle } from
 
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { docLinks } from '../../../shared/doc_links';
 import { WEB_CRAWLER_DOCS_URL, WEB_CRAWLER_LOG_DOCS_URL } from '../../routes';
 import { getEngineBreadcrumbs } from '../engine';
 import { AppSearchPageTemplate } from '../layout';
@@ -22,6 +25,7 @@ import { AddDomainForm } from './components/add_domain/add_domain_form';
 import { AddDomainFormErrors } from './components/add_domain/add_domain_form_errors';
 import { AddDomainFormSubmitButton } from './components/add_domain/add_domain_form_submit_button';
 import { AddDomainLogic } from './components/add_domain/add_domain_logic';
+import { CrawlCustomSettingsFlyout } from './components/crawl_custom_settings_flyout/crawl_custom_settings_flyout';
 import { CrawlDetailsFlyout } from './components/crawl_details_flyout';
 import { CrawlRequestsTable } from './components/crawl_requests_table';
 import { CrawlSelectDomainsModal } from './components/crawl_select_domains_modal/crawl_select_domains_modal';
@@ -42,6 +46,34 @@ export const CrawlerOverview: React.FC = () => {
       pageHeader={{
         pageTitle: CRAWLER_TITLE,
         rightSideItems: [<ManageCrawlsPopover />, <CrawlerStatusIndicator />],
+        description: (
+          <FormattedMessage
+            id="xpack.enterpriseSearch.appSearch.crawler.pdfExtractionMessage"
+            defaultMessage="Interested in extracting additional content types? Install the {ingestPluginDocumentationLink} and {deploymentSettingsDocumentationLink}."
+            values={{
+              ingestPluginDocumentationLink: (
+                <EuiLink href={docLinks.pluginsIngestAttachment} target="_blank" external>
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.crawler.ingestionPluginDocumentationLink',
+                    { defaultMessage: 'Elasticsearch ingest attachment plugin' }
+                  )}
+                </EuiLink>
+              ),
+              deploymentSettingsDocumentationLink: (
+                <EuiLink
+                  href={`${docLinks.appSearchWebCrawlerReference}#web-crawler-reference-binary-content-extraction`}
+                  target="_blank"
+                  external
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.appSearch.crawler.deploymentSettingsDocumentationLink',
+                    { defaultMessage: 'review your deployment settings' }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        ),
       }}
       isLoading={dataLoading}
     >
@@ -140,6 +172,7 @@ export const CrawlerOverview: React.FC = () => {
       )}
       <CrawlDetailsFlyout />
       <CrawlSelectDomainsModal />
+      <CrawlCustomSettingsFlyout />
     </AppSearchPageTemplate>
   );
 };

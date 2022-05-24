@@ -23,6 +23,7 @@ import { observabilityOverviewRouteRepository } from '../observability_overview/
 import { rumRouteRepository } from '../rum_client/route';
 import { fallbackToTransactionsRouteRepository } from '../fallback_to_transactions/route';
 import { serviceRouteRepository } from '../services/route';
+import { serviceGroupRouteRepository } from '../service_groups/route';
 import { serviceMapRouteRepository } from '../service_map/route';
 import { serviceNodeRouteRepository } from '../service_nodes/route';
 import { agentConfigurationRouteRepository } from '../settings/agent_configuration/route';
@@ -36,8 +37,9 @@ import { historicalDataRouteRepository } from '../historical_data/route';
 import { eventMetadataRouteRepository } from '../event_metadata/route';
 import { suggestionsRouteRepository } from '../suggestions/route';
 import { agentKeysRouteRepository } from '../agent_keys/route';
-
-const getTypedGlobalApmServerRouteRepository = () => {
+import { spanLinksRouteRepository } from '../span_links/route';
+import { debugTelemetryRoute } from '../debug_telemetry/route';
+function getTypedGlobalApmServerRouteRepository() {
   const repository = {
     ...dataViewRouteRepository,
     ...environmentsRouteRepository,
@@ -49,6 +51,7 @@ const getTypedGlobalApmServerRouteRepository = () => {
     ...serviceMapRouteRepository,
     ...serviceNodeRouteRepository,
     ...serviceRouteRepository,
+    ...serviceGroupRouteRepository,
     ...suggestionsRouteRepository,
     ...traceRouteRepository,
     ...transactionRouteRepository,
@@ -65,10 +68,12 @@ const getTypedGlobalApmServerRouteRepository = () => {
     ...historicalDataRouteRepository,
     ...eventMetadataRouteRepository,
     ...agentKeysRouteRepository,
+    ...spanLinksRouteRepository,
+    ...debugTelemetryRoute,
   };
 
   return repository;
-};
+}
 
 const getGlobalApmServerRouteRepository = (): ServerRouteRepository => {
   return getTypedGlobalApmServerRouteRepository();

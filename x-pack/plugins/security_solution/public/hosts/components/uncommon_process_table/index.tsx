@@ -30,6 +30,7 @@ interface UncommonProcessTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   showMorePagesIndicator: boolean;
   totalCount: number;
   type: hostsModel.HostsType;
@@ -72,6 +73,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
     loading,
     loadPage,
     totalCount,
+    setQuerySkip,
     showMorePagesIndicator,
     type,
   }) => {
@@ -125,6 +127,7 @@ const UncommonProcessTableComponent = React.memo<UncommonProcessTableProps>(
         loading={loading}
         loadPage={loadPage}
         pageOfItems={data}
+        setQuerySkip={setQuerySkip}
         showMorePagesIndicator={showMorePagesIndicator}
         totalCount={fakeTotalCount}
         updateLimitPagination={updateLimitPagination}
@@ -150,6 +153,8 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         rowItems: node.process.name,
         attrName: 'process.name',
         idPrefix: `uncommon-process-table-${node._id}-processName`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
     width: '20%',
   },
@@ -179,6 +184,8 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         attrName: 'host.name',
         idPrefix: `uncommon-process-table-${node._id}-processHost`,
         render: (item) => <HostDetailsLink hostName={item} />,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
     width: '25%',
   },
@@ -192,6 +199,8 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         attrName: 'process.args',
         idPrefix: `uncommon-process-table-${node._id}-processArgs`,
         displayCount: 1, // TODO: Change this back once we have improved the UI
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
     width: '25%',
   },
@@ -204,6 +213,8 @@ const getUncommonColumns = (): UncommonProcessTableColumns => [
         rowItems: node.user != null ? node.user.name : null,
         attrName: 'user.name',
         idPrefix: `uncommon-process-table-${node._id}-processUser`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
 ];

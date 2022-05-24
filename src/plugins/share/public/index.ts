@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { PluginInitializerContext } from 'src/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 
 export { CSV_QUOTE_VALUES_SETTING, CSV_SEPARATOR_SETTING } from '../common/constants';
 
 export type { LocatorDefinition, LocatorPublic, KibanaLocation } from '../common/url_service';
-
-export type { UrlGeneratorStateMapping } from './url_generators/url_generator_definition';
 
 export type { SharePluginSetup, SharePluginStart } from './plugin';
 
@@ -24,14 +22,6 @@ export type {
   ShareContextMenuPanelItem,
   BrowserUrlService,
 } from './types';
-
-export type {
-  UrlGeneratorId,
-  UrlGeneratorState,
-  UrlGeneratorsDefinition,
-  UrlGeneratorContract,
-} from './url_generators';
-export { UrlGeneratorsService } from './url_generators';
 
 export type { RedirectOptions } from '../common/url_service';
 export { useLocatorUrl } from '../common/url_service/locators/use_locator_url';

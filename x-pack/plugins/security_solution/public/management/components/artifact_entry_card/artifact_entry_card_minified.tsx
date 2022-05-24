@@ -27,7 +27,7 @@ import { DescriptionField } from './components/description_field';
 
 const CardContainerPanel = styled(EuiSplitPanel.Outer)`
   &.artifactEntryCardMinified + &.artifactEntryCardMinified {
-    margin-top: ${({ theme }) => theme.eui.spacerSizes.l};
+    margin-top: ${({ theme }) => theme.eui.euiSizeL};
   }
 `;
 

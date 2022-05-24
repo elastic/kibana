@@ -91,16 +91,40 @@ describe('KibanaExecutionContext', () => {
       expect(value).toBe('type:name:41;child-test-type:child-test-name:42');
     });
 
-    it('returns an escaped string representation of provided execution contextStringified', () => {
+    it('returns an escaped string representation of provided execution context', () => {
       const context: KibanaExecutionContext = {
         id: 'Visualization☺漢字',
+        type: 'test☺type',
+        name: 'test漢name',
+        description: 'test字description',
+      };
+
+      const value = new ExecutionContextContainer(context).toString();
+      expect(value).toBe(
+        'test%E2%98%BAtype:test%E6%BC%A2name:Visualization%E2%98%BA%E6%BC%A2%E5%AD%97'
+      );
+    });
+
+    it('returns an escaped string representation of provided execution context parent', () => {
+      const parentContext: KibanaExecutionContext = {
+        id: 'Dashboard☺漢字',
+        type: 'test☺type',
+        name: 'test漢name',
+        description: 'parent-descripton',
+      };
+      const parentContainer = new ExecutionContextContainer(parentContext);
+
+      const context: KibanaExecutionContext = {
+        id: 'Visualization',
         type: 'test-type',
         name: 'test-name',
         description: 'test-description',
       };
 
-      const value = new ExecutionContextContainer(context).toString();
-      expect(value).toBe('test-type:test-name:Visualization%E2%98%BA%E6%BC%A2%E5%AD%97');
+      const value = new ExecutionContextContainer(context, parentContainer).toString();
+      expect(value).toBe(
+        'test%E2%98%BAtype:test%E6%BC%A2name:Dashboard%E2%98%BA%E6%BC%A2%E5%AD%97;test-type:test-name:Visualization'
+      );
     });
 
     it('trims a string representation of provided execution context if it is bigger max allowed size', () => {

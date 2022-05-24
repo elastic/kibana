@@ -90,9 +90,28 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
 
     // Update package policy's package and agent policy info
     useEffect(() => {
-      if (isUpdate || isLoadingPackagePolicies) {
+      if (isLoadingPackagePolicies) {
         return;
       }
+
+      if (isUpdate) {
+        // If we're upgrading, we need to make sure we catch an addition of package-level
+        // vars when they were previously no package-level vars defined
+        if (!packagePolicy.vars && packageInfo.vars) {
+          updatePackagePolicy(
+            packageToPackagePolicy(
+              packageInfo,
+              agentPolicy?.id || '',
+              packagePolicy.output_id,
+              packagePolicy.namespace,
+              packagePolicy.name,
+              packagePolicy.description,
+              integrationToEnable
+            )
+          );
+        }
+      }
+
       const pkg = packagePolicy.package;
       const currentPkgKey = pkg ? pkgKeyFromPackageInfo(pkg) : '';
       const pkgKey = pkgKeyFromPackageInfo(packageInfo);
@@ -211,6 +230,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
             const { name: varName, type: varType } = varDef;
             if (!packagePolicy.vars || !packagePolicy.vars[varName]) return null;
             const value = packagePolicy.vars[varName].value;
+
             return (
               <EuiFlexItem key={varName}>
                 <PackagePolicyInputVarField
@@ -316,6 +336,34 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                         });
                       }}
                     />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLabel"
+                        defaultMessage="Data retention settings"
+                      />
+                    }
+                    helpText={
+                      <FormattedMessage
+                        id="xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionText"
+                        defaultMessage="By default all logs and metrics data are stored on the hot tier. {learnMore} about changing the data retention policy for this integration."
+                        values={{
+                          learnMore: (
+                            <EuiLink href={docLinks.links.fleet.datastreamsILM} target="_blank">
+                              {i18n.translate(
+                                'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink',
+                                { defaultMessage: 'Learn more' }
+                              )}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    }
+                  >
+                    <div />
                   </EuiFormRow>
                 </EuiFlexItem>
                 {/* Advanced vars */}

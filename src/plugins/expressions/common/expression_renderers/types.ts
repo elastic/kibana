@@ -15,6 +15,7 @@ export interface ExpressionRenderDefinition<Config = unknown> {
    * function that is used to create the `type: render` object.
    */
   name: string;
+  namespace?: string;
 
   /**
    * A user friendly name of the renderer as will be displayed to user in UI.
@@ -90,6 +91,8 @@ export interface IInterpreterRenderHandlers {
   isInteractive(): boolean;
 
   isSyncColorsEnabled(): boolean;
+
+  isSyncTooltipsEnabled(): boolean;
   /**
    * This uiState interface is actually `PersistedState` from the visualizations plugin,
    * but expressions cannot know about vis or it creates a mess of circular dependencies.

@@ -18,13 +18,15 @@ export const CreateNoticeFile: Task = {
 
   async run(config, log, build) {
     log.info('Generating notice from source');
-    log.indent(4);
-    const noticeFromSource = await generateNoticeFromSource({
-      productName: 'Kibana',
-      directory: build.resolvePath(),
-      log,
-    });
-    log.indent(-4);
+    const noticeFromSource = await log.indent(
+      4,
+      async () =>
+        await generateNoticeFromSource({
+          productName: 'Kibana',
+          directory: build.resolvePath(),
+          log,
+        })
+    );
 
     log.info('Discovering installed packages');
     const packages = await getInstalledPackages({

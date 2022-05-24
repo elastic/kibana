@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
-import { DeepPartial } from '../../../../../plugins/ml/common/types/common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -90,12 +90,12 @@ export default ({ getService }: FtrProviderContext) => {
         it(`should validate ${testConfig.jobType} job for given config`, async () => {
           const requestBody = testConfig.config;
 
-          const { body } = await supertest
+          const { body, status } = await supertest
             .post('/api/ml/data_frame/analytics/validate')
             .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
             .set(COMMON_REQUEST_HEADERS)
-            .send(requestBody)
-            .expect(200);
+            .send(requestBody);
+          ml.api.assertResponseStatusCode(200, status, body);
 
           expect(body).not.to.be(undefined);
           expect(body.length).to.eql(testConfig.jobType === 'outlier_detection' ? 1 : 3);
@@ -106,12 +106,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not allow analytics job validation for unauthorized user', async () => {
         const requestBody = testJobConfigs[0].config;
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post('/api/ml/data_frame/analytics/validate')
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(403);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');
@@ -120,12 +120,12 @@ export default ({ getService }: FtrProviderContext) => {
       it('should not allow analytics job validation for the user with only view permission', async () => {
         const requestBody = testJobConfigs[0].config;
 
-        const { body } = await supertest
+        const { body, status } = await supertest
           .post('/api/ml/data_frame/analytics/validate')
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
           .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody)
-          .expect(403);
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
         expect(body.message).to.eql('Forbidden');

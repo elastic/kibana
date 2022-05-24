@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { truncate } from 'lodash';
 import moment from 'moment';
-import { transformError } from '@kbn/securitysolution-es-utils';
-import { Logger } from 'src/core/server';
+import { BadRequestError, transformError } from '@kbn/securitysolution-es-utils';
+import { KibanaResponseFactory, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { RuleAlertType as Rule } from '../../rules/types';
-
-import type { RulesClient } from '../../../../../../alerting/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
+import { AbortError } from '@kbn/kibana-utils-plugin/common';
+import { RuleAlertType } from '../../rules/types';
 
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -24,38 +26,28 @@ import { SetupPlugins } from '../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { routeLimitedConcurrencyTag } from '../../../../utils/route_limited_concurrency_tag';
-import { initPromisePool } from '../../../../utils/promise_pool';
+import {
+  initPromisePool,
+  PromisePoolError,
+  PromisePoolOutcome,
+} from '../../../../utils/promise_pool';
 import { buildMlAuthz } from '../../../machine_learning/authz';
-import { throwHttpError } from '../../../machine_learning/validation';
+import { throwAuthzError } from '../../../machine_learning/validation';
 import { deleteRules } from '../../rules/delete_rules';
 import { duplicateRule } from '../../rules/duplicate_rule';
 import { findRules } from '../../rules/find_rules';
 import { readRules } from '../../rules/read_rules';
-import { patchRules } from '../../rules/patch_rules';
+import { editRule } from '../../rules/edit_rule';
 import { applyBulkActionEditToRule } from '../../rules/bulk_action_edit';
 import { getExportByObjectIds } from '../../rules/get_export_by_object_ids';
 import { buildSiemResponse } from '../utils';
+import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
+import { legacyMigrate } from '../../rules/utils';
+import { RuleParams } from '../../schemas/rule_schemas';
 
 const MAX_RULES_TO_PROCESS_TOTAL = 10000;
 const MAX_ERROR_MESSAGE_LENGTH = 1000;
 const MAX_ROUTE_CONCURRENCY = 5;
-
-type RuleActionFn = (rule: Rule) => Promise<void>;
-
-type RuleActionSuccess = undefined;
-
-type RuleActionResult = RuleActionSuccess | RuleActionError;
-
-interface RuleActionError {
-  error: {
-    message: string;
-    statusCode: number;
-  };
-  rule: {
-    id: string;
-    name: string;
-  };
-}
 
 interface NormalizedRuleError {
   message: string;
@@ -66,18 +58,25 @@ interface NormalizedRuleError {
   }>;
 }
 
-const normalizeErrorResponse = (errors: RuleActionError[]): NormalizedRuleError[] => {
+const normalizeErrorResponse = (
+  errors: Array<PromisePoolError<string> | PromisePoolError<RuleAlertType>>
+): NormalizedRuleError[] => {
   const errorsMap = new Map();
 
-  errors.forEach((ruleError) => {
-    const { message } = ruleError.error;
+  errors.forEach(({ error, item }) => {
+    const { message, statusCode } =
+      error instanceof Error ? transformError(error) : { message: String(error), statusCode: 500 };
+    // The promise pool item is either a rule ID string or a rule object. We have
+    // string IDs when we fail to fetch rules. Rule objects come from other
+    // situations when we found a rule but failed somewhere else.
+    const rule = typeof item === 'string' ? { id: item } : { id: item.id, name: item.name };
+
     if (errorsMap.has(message)) {
-      errorsMap.get(message).rules.push(ruleError.rule);
+      errorsMap.get(message).rules.push(rule);
     } else {
-      const { error, rule } = ruleError;
       errorsMap.set(message, {
-        message: error.message,
-        status_code: error.statusCode,
+        message: truncate(message, { length: MAX_ERROR_MESSAGE_LENGTH }),
+        status_code: statusCode,
         rules: [rule],
       });
     }
@@ -86,116 +85,90 @@ const normalizeErrorResponse = (errors: RuleActionError[]): NormalizedRuleError[
   return Array.from(errorsMap, ([_, normalizedError]) => normalizedError);
 };
 
-const getErrorResponseBody = (errors: RuleActionError[], rulesCount: number) => {
-  const errorsCount = errors.length;
-  return {
-    message: errorsCount === rulesCount ? 'Bulk edit failed' : 'Bulk edit partially failed',
-    status_code: 500,
-    attributes: {
-      errors: normalizeErrorResponse(errors).map(({ message, ...error }) => ({
-        ...error,
-        message:
-          message.length > MAX_ERROR_MESSAGE_LENGTH
-            ? `${message.slice(0, MAX_ERROR_MESSAGE_LENGTH - 3)}...`
-            : message,
-      })),
-      rules: {
-        total: rulesCount,
-        failed: errorsCount,
-        succeeded: rulesCount - errorsCount,
-      },
-    },
+const buildBulkResponse = (
+  response: KibanaResponseFactory,
+  fetchRulesOutcome: PromisePoolOutcome<string, RuleAlertType>,
+  bulkActionOutcome: PromisePoolOutcome<RuleAlertType, RuleAlertType | null>
+) => {
+  const errors = [...fetchRulesOutcome.errors, ...bulkActionOutcome.errors];
+  const summary = {
+    failed: errors.length,
+    succeeded: bulkActionOutcome.results.length,
+    total: bulkActionOutcome.results.length + errors.length,
   };
-};
 
-const executeActionAndHandleErrors = async (
-  rule: Rule,
-  action: RuleActionFn
-): Promise<RuleActionResult> => {
-  try {
-    await action(rule);
-  } catch (err) {
-    const { message, statusCode } = transformError(err);
-    return {
-      error: { message, statusCode },
-      rule: { id: rule.id, name: rule.name },
-    };
+  // Whether rules will be updated, created or deleted depends on the bulk
+  // action type being processed. However, in order to avoid doing a switch-case
+  // by the action type, we can figure it out indirectly.
+  const results = {
+    // We had a rule, now there's a rule with the same id - the existing rule was modified
+    updated: bulkActionOutcome.results
+      .filter(({ item, result }) => item.id === result?.id)
+      .map(({ result }) => result && internalRuleToAPIResponse(result)),
+    // We had a rule, now there's a rule with a different id - a new rule was created
+    created: bulkActionOutcome.results
+      .filter(({ item, result }) => result != null && result.id !== item.id)
+      .map(({ result }) => result && internalRuleToAPIResponse(result)),
+    // We had a rule, now it's null - the rule was deleted
+    deleted: bulkActionOutcome.results
+      .filter(({ result }) => result == null)
+      .map(({ item }) => internalRuleToAPIResponse(item)),
+  };
+
+  if (errors.length > 0) {
+    return response.custom({
+      headers: { 'content-type': 'application/json' },
+      body: Buffer.from(
+        JSON.stringify({
+          message: summary.succeeded > 0 ? 'Bulk edit partially failed' : 'Bulk edit failed',
+          status_code: 500,
+          attributes: {
+            errors: normalizeErrorResponse(errors),
+            results,
+            summary,
+          },
+        })
+      ),
+      statusCode: 500,
+    });
   }
+
+  return response.ok({
+    body: {
+      success: true,
+      rules_count: summary.total,
+      attributes: { results, summary },
+    },
+  });
 };
 
-const executeBulkAction = async (rules: Rule[], action: RuleActionFn, abortSignal: AbortSignal) =>
-  initPromisePool({
-    concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-    items: rules,
-    executor: async (rule) => executeActionAndHandleErrors(rule, action),
-    abortSignal,
-  });
-
-const getRulesByIds = async ({
-  ids,
-  rulesClient,
-  isRuleRegistryEnabled,
-  abortSignal,
-}: {
-  ids: string[];
-  rulesClient: RulesClient;
-  isRuleRegistryEnabled: boolean;
-  abortSignal: AbortSignal;
-}) => {
-  const readRulesExecutor = async (id: string) => {
-    try {
-      const rule = await readRules({ id, rulesClient, isRuleRegistryEnabled, ruleId: undefined });
-      if (rule == null) {
-        throw Error('Can`t fetch a rule');
-      }
-      return { rule };
-    } catch (err) {
-      const { message, statusCode } = transformError(err);
-      return {
-        error: { message, statusCode },
-        rule: { id },
-      };
-    }
-  };
-
-  const { results } = await initPromisePool({
-    concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-    items: ids,
-    executor: readRulesExecutor,
-    abortSignal,
-  });
-
-  return {
-    total: ids.length,
-    rules: results.filter((rule) => rule.error === undefined).map(({ rule }) => rule) as Rule[],
-    fetchErrors: results.filter((rule): rule is RuleActionError => rule.error !== undefined),
-  };
-};
-
-const fetchRules = async ({
+const fetchRulesByQueryOrIds = async ({
   query,
   ids,
   rulesClient,
-  isRuleRegistryEnabled,
   abortSignal,
 }: {
   query: string | undefined;
   ids: string[] | undefined;
   rulesClient: RulesClient;
-  isRuleRegistryEnabled: boolean;
   abortSignal: AbortSignal;
-}) => {
+}): Promise<PromisePoolOutcome<string, RuleAlertType>> => {
   if (ids) {
-    return getRulesByIds({
-      ids,
-      rulesClient,
-      isRuleRegistryEnabled,
+    return initPromisePool({
+      concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
+      items: ids,
+      executor: async (id: string) => {
+        const rule = await readRules({ id, rulesClient, ruleId: undefined });
+        if (rule == null) {
+          throw Error('Rule not found');
+        }
+        return rule;
+      },
       abortSignal,
     });
   }
 
   const { data, total } = await findRules({
-    isRuleRegistryEnabled,
     rulesClient,
     perPage: MAX_RULES_TO_PROCESS_TOTAL,
     filter: query !== '' ? query : undefined,
@@ -205,18 +178,55 @@ const fetchRules = async ({
     fields: undefined,
   });
 
+  if (total > MAX_RULES_TO_PROCESS_TOTAL) {
+    throw new BadRequestError(
+      `More than ${MAX_RULES_TO_PROCESS_TOTAL} rules matched the filter query. Try to narrow it down.`
+    );
+  }
+
   return {
-    rules: data,
-    total,
-    fetchErrors: [] as RuleActionError[],
+    results: data.map((rule) => ({ item: rule.id, result: rule })),
+    errors: [],
   };
+};
+
+/**
+ * Helper method to migrate any legacy actions a rule may have. If no actions or no legacy actions
+ * no migration is performed.
+ * @params rulesClient
+ * @params savedObjectsClient
+ * @params rule - rule to be migrated
+ * @returns The migrated rule
+ */
+export const migrateRuleActions = async ({
+  rulesClient,
+  savedObjectsClient,
+  rule,
+}: {
+  rulesClient: RulesClient;
+  savedObjectsClient: SavedObjectsClientContract;
+  rule: RuleAlertType;
+}): Promise<SanitizedRule<RuleParams>> => {
+  const migratedRule = await legacyMigrate({
+    rulesClient,
+    savedObjectsClient,
+    rule,
+  });
+
+  // This should only be hit if `rule` passed into `legacyMigrate`
+  // is `null` or `rule.id` is null which right now, as typed, should not occur
+  // but catching if does, in which case something upstream would be breaking down
+  if (migratedRule == null) {
+    throw new Error(`An error occurred processing rule with id:${rule.id}`);
+  }
+
+  return migratedRule;
 };
 
 export const performBulkActionRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ) => {
   router.post(
     {
@@ -256,88 +266,128 @@ export const performBulkActionRoute = (
       request.events.completed$.subscribe(() => abortController.abort());
 
       try {
-        const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-        const exceptionsClient = context.lists?.getExceptionListClient();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const ctx = await context.resolve([
+          'core',
+          'securitySolution',
+          'alerting',
+          'licensing',
+          'lists',
+        ]);
+
+        const rulesClient = ctx.alerting.getRulesClient();
+        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+        const exceptionsClient = ctx.lists?.getExceptionListClient();
+        const savedObjectsClient = ctx.core.savedObjects.client;
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: ctx.licensing.license,
           ml,
           request,
           savedObjectsClient,
         });
 
-        const { rules, total, fetchErrors } = await fetchRules({
-          isRuleRegistryEnabled,
+        const fetchRulesOutcome = await fetchRulesByQueryOrIds({
           rulesClient,
           query: body.query,
           ids: body.ids,
           abortSignal: abortController.signal,
         });
 
-        if (total > MAX_RULES_TO_PROCESS_TOTAL) {
-          return siemResponse.error({
-            body: `More than ${MAX_RULES_TO_PROCESS_TOTAL} rules matched the filter query. Try to narrow it down.`,
-            statusCode: 400,
-          });
-        }
+        const rules = fetchRulesOutcome.results.map(({ result }) => result);
+        let bulkActionOutcome: PromisePoolOutcome<RuleAlertType, RuleAlertType | null>;
 
-        let processingResponse: {
-          results: RuleActionResult[];
-        } = {
-          results: [],
-        };
         switch (body.action) {
           case BulkAction.enable:
-            processingResponse = await executeBulkAction(
-              rules,
-              async (rule) => {
-                if (!rule.enabled) {
-                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                  await rulesClient.enable({ id: rule.id });
+            bulkActionOutcome = await initPromisePool({
+              concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
+              items: rules,
+              executor: async (rule) => {
+                const migratedRule = await migrateRuleActions({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
+                });
+
+                if (!migratedRule.enabled) {
+                  throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
+                  await rulesClient.enable({ id: migratedRule.id });
                 }
+
+                return {
+                  ...migratedRule,
+                  enabled: true,
+                };
               },
-              abortController.signal
-            );
+              abortSignal: abortController.signal,
+            });
             break;
           case BulkAction.disable:
-            processingResponse = await executeBulkAction(
-              rules,
-              async (rule) => {
-                if (rule.enabled) {
-                  throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-                  await rulesClient.disable({ id: rule.id });
+            bulkActionOutcome = await initPromisePool({
+              concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
+              items: rules,
+              executor: async (rule) => {
+                const migratedRule = await migrateRuleActions({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
+                });
+
+                if (migratedRule.enabled) {
+                  throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
+                  await rulesClient.disable({ id: migratedRule.id });
                 }
+
+                return {
+                  ...migratedRule,
+                  enabled: false,
+                };
               },
-              abortController.signal
-            );
+              abortSignal: abortController.signal,
+            });
             break;
           case BulkAction.delete:
-            processingResponse = await executeBulkAction(
-              rules,
-              async (rule) => {
+            bulkActionOutcome = await initPromisePool({
+              concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
+              items: rules,
+              executor: async (rule) => {
+                const migratedRule = await migrateRuleActions({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
+                });
+
                 await deleteRules({
-                  ruleId: rule.id,
+                  ruleId: migratedRule.id,
                   rulesClient,
                   ruleExecutionLog,
                 });
+
+                return null;
               },
-              abortController.signal
-            );
+              abortSignal: abortController.signal,
+            });
             break;
           case BulkAction.duplicate:
-            processingResponse = await executeBulkAction(
-              rules,
-              async (rule) => {
-                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
-
-                await rulesClient.create({
-                  data: duplicateRule(rule, isRuleRegistryEnabled),
+            bulkActionOutcome = await initPromisePool({
+              concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
+              items: rules,
+              executor: async (rule) => {
+                const migratedRule = await migrateRuleActions({
+                  rulesClient,
+                  savedObjectsClient,
+                  rule,
                 });
+
+                throwAuthzError(await mlAuthz.validateRuleType(migratedRule.params.type));
+
+                const createdRule = await rulesClient.create({
+                  data: duplicateRule(migratedRule),
+                });
+
+                return createdRule;
               },
-              abortController.signal
-            );
+              abortSignal: abortController.signal,
+            });
             break;
           case BulkAction.export:
             const exported = await getExportByObjectIds(
@@ -345,8 +395,7 @@ export const performBulkActionRoute = (
               exceptionsClient,
               savedObjectsClient,
               rules.map(({ params }) => ({ rule_id: params.ruleId })),
-              logger,
-              isRuleRegistryEnabled
+              logger
             );
 
             const responseBody = `${exported.rulesNdjson}${exported.exceptionLists}${exported.exportDetails}`;
@@ -359,66 +408,45 @@ export const performBulkActionRoute = (
               body: responseBody,
             });
           case BulkAction.edit:
-            processingResponse = await executeBulkAction(
-              rules,
-              async (rule) => {
-                throwHttpError({
-                  valid: !rule.params.immutable,
-                  message: 'Elastic rule can`t be edited',
-                });
+            bulkActionOutcome = await initPromisePool({
+              concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
+              items: rules,
+              executor: async (rule) => {
+                if (rule.params.immutable) {
+                  throw new BadRequestError('Elastic rule can`t be edited');
+                }
 
-                throwHttpError(await mlAuthz.validateRuleType(rule.params.type));
+                throwAuthzError(await mlAuthz.validateRuleType(rule.params.type));
 
-                const editedRule = body[BulkAction.edit].reduce(
-                  (acc, action) => applyBulkActionEditToRule(acc, action),
-                  rule
-                );
-
-                const { tags, params: { timelineTitle, timelineId } = {} } = editedRule;
-                const index = 'index' in editedRule.params ? editedRule.params.index : undefined;
-
-                await patchRules({
+                const migratedRule = await migrateRuleActions({
                   rulesClient,
+                  savedObjectsClient,
                   rule,
-                  tags,
-                  index,
-                  timelineTitle,
-                  timelineId,
                 });
+
+                const updatedRule = await editRule({
+                  rulesClient,
+                  rule: migratedRule,
+                  edit: (ruleToEdit) => {
+                    return body[BulkAction.edit].reduce(
+                      (acc, action) => applyBulkActionEditToRule(acc, action),
+                      ruleToEdit
+                    );
+                  },
+                });
+
+                return updatedRule;
               },
-              abortController.signal
-            );
+              abortSignal: abortController.signal,
+            });
+            break;
         }
 
         if (abortController.signal.aborted === true) {
-          throw Error('Bulk action was aborted');
+          throw new AbortError('Bulk action was aborted');
         }
 
-        const errors = [
-          ...fetchErrors,
-          ...processingResponse.results.filter(
-            (resp): resp is RuleActionError => resp?.error !== undefined
-          ),
-        ];
-
-        if (errors.length > 0) {
-          const responseBody = getErrorResponseBody(errors, total);
-
-          return response.custom({
-            headers: {
-              'content-type': 'application/json',
-            },
-            body: Buffer.from(JSON.stringify(responseBody)),
-            statusCode: 500,
-          });
-        }
-
-        return response.ok({
-          body: {
-            success: true,
-            rules_count: total,
-          },
-        });
+        return buildBulkResponse(response, fetchRulesOutcome, bulkActionOutcome);
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({

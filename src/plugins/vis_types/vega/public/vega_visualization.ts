@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IInterpreterRenderHandlers, RenderMode } from 'src/plugins/expressions';
+import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin';
 import { VegaParser } from './data_model/vega_parser';
 import { VegaVisualizationDependencies } from './plugin';
 import { getNotifications, getData } from './services';
@@ -16,6 +16,7 @@ import { createVegaStateRestorer } from './lib/vega_state_restorer';
 
 type VegaVisType = new (el: HTMLDivElement, fireEvent: IInterpreterRenderHandlers['event']) => {
   render(visData: VegaParser): Promise<void>;
+  resize(dimensions?: { height: number; width: number }): Promise<void>;
   destroy(): void;
 };
 
@@ -95,6 +96,10 @@ export const createVegaVisualization = (
         }
         await this.vegaView?.init();
       }
+    }
+
+    async resize(dimensions?: { height: number; width: number }) {
+      return this.vegaView?.resize(dimensions);
     }
 
     destroy() {

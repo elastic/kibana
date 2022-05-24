@@ -11,12 +11,14 @@ import { useLocation } from 'react-router-dom';
 import {
   useKibana,
   KibanaPageTemplateProps,
-} from '../../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
+import { enableServiceGroups } from '@kbn/observability-plugin/public';
 import { EnvironmentsContextProvider } from '../../../context/environments_context/environments_context';
-import { useFetcher } from '../../../hooks/use_fetcher';
+import { useFetcher, FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { ApmPluginStartDeps } from '../../../plugin';
 import { ApmEnvironmentFilter } from '../../shared/environment_filter';
 import { getNoDataConfig } from './no_data_config';
+import { ServiceGroupSaveButton } from '../../app/service_groups';
 
 // Paths that must skip the no data screen
 const bypassNoDataScreenPaths = ['/settings'];
@@ -29,18 +31,21 @@ const bypassNoDataScreenPaths = ['/settings'];
  *
  *  Optionally:
  *   - EnvironmentFilter
+ *   - ServiceGroupSaveButton
  */
 export function ApmMainTemplate({
   pageTitle,
   pageHeader,
   children,
   environmentFilter = true,
+  showServiceGroupSaveButton = false,
   ...pageTemplateProps
 }: {
   pageTitle?: React.ReactNode;
   pageHeader?: EuiPageHeaderProps;
   children: React.ReactNode;
   environmentFilter?: boolean;
+  showServiceGroupSaveButton?: boolean;
 } & KibanaPageTemplateProps) {
   const location = useLocation();
 
@@ -50,21 +55,45 @@ export function ApmMainTemplate({
 
   const ObservabilityPageTemplate = observability.navigation.PageTemplate;
 
-  const { data } = useFetcher((callApmApi) => {
+  const { data, status } = useFetcher((callApmApi) => {
     return callApmApi('GET /internal/apm/has_data');
   }, []);
-
-  const noDataConfig = getNoDataConfig({
-    basePath,
-    docsLink: docLinks!.links.observability.guide,
-    hasData: data?.hasData,
-  });
 
   const shouldBypassNoDataScreen = bypassNoDataScreenPaths.some((path) =>
     location.pathname.includes(path)
   );
 
-  const rightSideItems = environmentFilter ? [<ApmEnvironmentFilter />] : [];
+  const { data: fleetApmPoliciesData, status: fleetApmPoliciesStatus } =
+    useFetcher(
+      (callApmApi) => {
+        if (!data?.hasData && !shouldBypassNoDataScreen) {
+          return callApmApi('GET /internal/apm/fleet/has_apm_policies');
+        }
+      },
+      [shouldBypassNoDataScreen, data?.hasData]
+    );
+
+  const noDataConfig = getNoDataConfig({
+    basePath,
+    docsLink: docLinks!.links.observability.guide,
+    hasApmData: data?.hasData,
+    hasApmIntegrations: fleetApmPoliciesData?.hasApmPolicies,
+    shouldBypassNoDataScreen,
+    loading:
+      status === FETCH_STATUS.LOADING ||
+      fleetApmPoliciesStatus === FETCH_STATUS.LOADING,
+  });
+
+  const {
+    services: { uiSettings },
+  } = useKibana<ApmPluginStartDeps>();
+  const isServiceGroupsEnabled = uiSettings?.get<boolean>(enableServiceGroups);
+  const renderServiceGroupSaveButton =
+    showServiceGroupSaveButton && isServiceGroupsEnabled;
+  const rightSideItems = [
+    ...(renderServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),
+    ...(environmentFilter ? [<ApmEnvironmentFilter />] : []),
+  ];
 
   const pageTemplate = (
     <ObservabilityPageTemplate

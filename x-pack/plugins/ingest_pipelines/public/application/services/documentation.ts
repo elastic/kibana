@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { DocLinksStart } from 'src/core/public';
+import { DocLinksStart } from '@kbn/core/public';
 
 export class DocumentationService {
   private esDocBasePath: string = '';
   private ingestNodeUrl: string = '';
   private processorsUrl: string = '';
   private handlingFailureUrl: string = '';
-  private putPipelineApiUrl: string = '';
+  private createPipelineUrl: string = '';
+  private createPipelineCSVUrl: string = '';
   private simulatePipelineApiUrl: string = '';
   private enrichDataUrl: string = '';
   private geoMatchUrl: string = '';
@@ -29,7 +30,8 @@ export class DocumentationService {
     this.ingestNodeUrl = links.ingest.pipelines;
     this.processorsUrl = links.ingest.processors;
     this.handlingFailureUrl = links.ingest.pipelineFailure;
-    this.putPipelineApiUrl = links.apis.createPipeline;
+    this.createPipelineUrl = links.ingest.pipelines;
+    this.createPipelineCSVUrl = links.ingest.csvPipelines;
     this.simulatePipelineApiUrl = links.apis.simulatePipeline;
     this.enrichDataUrl = links.ingest.enrich;
     this.geoMatchUrl = links.ingest.geoMatch;
@@ -55,8 +57,12 @@ export class DocumentationService {
     return this.handlingFailureUrl;
   }
 
-  public getPutPipelineApiUrl() {
-    return this.putPipelineApiUrl;
+  public getCreatePipelineUrl() {
+    return this.createPipelineUrl;
+  }
+
+  public getCreatePipelineCSVUrl() {
+    return this.createPipelineCSVUrl;
   }
 
   public getSimulatePipelineApiUrl() {

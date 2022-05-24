@@ -7,14 +7,15 @@
  */
 
 import React from 'react';
-import type { DataView } from 'src/plugins/data/common';
-import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import { ElasticSearchHit } from '../../types';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
+import type { ElasticSearchHit } from '../../types';
 
 export interface GridContext {
   expanded?: ElasticSearchHit;
   setExpanded: (hit?: ElasticSearchHit) => void;
   rows: ElasticSearchHit[];
+  rowsFlattened: Array<Record<string, unknown>>;
   onFilter: DocViewFilterFn;
   indexPattern: DataView;
   isDarkMode: boolean;

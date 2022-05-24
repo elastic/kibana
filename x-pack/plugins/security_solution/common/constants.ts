@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { TransformConfigSchema } from './transforms/types';
-
 /**
  * as const
  *
@@ -54,7 +52,6 @@ export const DEFAULT_INTERVAL_PAUSE = true as const;
 export const DEFAULT_INTERVAL_TYPE = 'manual' as const;
 export const DEFAULT_INTERVAL_VALUE = 300000 as const; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges' as const;
-export const DEFAULT_TRANSFORMS = 'securitySolution:transforms' as const;
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled' as const;
 export const GLOBAL_HEADER_HEIGHT = 96 as const; // px
 export const FILTERS_GLOBAL_HEIGHT = 109 as const; // px
@@ -79,49 +76,65 @@ export const DEFAULT_THREAT_MATCH_QUERY = '@timestamp >= "now-30d/d"' as const;
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
-  authentications = 'authentications',
+  blocklist = 'blocklist',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
-   * The 3 following Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation.ts
+   * All Cases page names must match `CasesDeepLinkId` in x-pack/plugins/cases/public/common/navigation/deep_links.ts
    */
-  blocklist = 'blocklist',
-  case = 'cases',
-  caseConfigure = 'cases_configure',
-  caseCreate = 'cases_create',
+  case = 'cases', // must match `CasesDeepLinkId.cases`
+  caseConfigure = 'cases_configure', // must match `CasesDeepLinkId.casesConfigure`
+  caseCreate = 'cases_create', // must match `CasesDeepLinkId.casesCreate`
   detections = 'detections',
+  detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
   eventFilters = 'event_filters',
-  hostIsolationExceptions = 'host_isolation_exceptions',
-  events = 'events',
   exceptions = 'exceptions',
-  explore = 'explore',
+  hostIsolationExceptions = 'host_isolation_exceptions',
   hosts = 'hosts',
   hostsAnomalies = 'hosts-anomalies',
   hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
-  users = 'users',
+  hostsEvents = 'hosts-events',
+  hostsAuthentications = 'hosts-authentications',
   investigate = 'investigate',
+  landing = 'get_started',
   network = 'network',
   networkAnomalies = 'network-anomalies',
   networkDns = 'network-dns',
   networkExternalAlerts = 'network-external_alerts',
   networkHttp = 'network-http',
   networkTls = 'network-tls',
+  overview = 'overview',
+  policies = 'policy',
+  rules = 'rules',
+  rulesCreate = 'rules-create',
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
-  overview = 'overview',
-  policies = 'policies',
-  rules = 'rules',
   trustedApps = 'trusted_apps',
   uncommonProcesses = 'uncommon_processes',
+  users = 'users',
+  usersAuthentications = 'users-authentications',
+  usersAnomalies = 'users-anomalies',
+  usersRisk = 'users-risk',
+  sessions = 'sessions',
+  usersEvents = 'users-events',
+  usersExternalAlerts = 'users-external_alerts',
+  exploreLanding = 'explore',
+  dashboardsLanding = 'dashboards',
 }
 
+export const EXPLORE_PATH = '/explore' as const;
+export const DASHBOARDS_PATH = '/dashboards' as const;
+export const MANAGE_PATH = '/manage' as const;
 export const TIMELINES_PATH = '/timelines' as const;
 export const CASES_PATH = '/cases' as const;
 export const OVERVIEW_PATH = '/overview' as const;
+export const LANDING_PATH = '/get_started' as const;
+export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
 export const ALERTS_PATH = '/alerts' as const;
 export const RULES_PATH = '/rules' as const;
+export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const HOSTS_PATH = '/hosts' as const;
 export const USERS_PATH = '/users' as const;
@@ -136,7 +149,11 @@ export const HOST_ISOLATION_EXCEPTIONS_PATH =
 export const BLOCKLIST_PATH = `${MANAGEMENT_PATH}/blocklist` as const;
 
 export const APP_OVERVIEW_PATH = `${APP_PATH}${OVERVIEW_PATH}` as const;
+export const APP_LANDING_PATH = `${APP_PATH}${LANDING_PATH}` as const;
+export const APP_DETECTION_RESPONSE_PATH = `${APP_PATH}${DETECTION_RESPONSE_PATH}` as const;
 export const APP_MANAGEMENT_PATH = `${APP_PATH}${MANAGEMENT_PATH}` as const;
+export const APP_EXPLORE_PATH = `${APP_PATH}${EXPLORE_PATH}` as const;
+export const APP_DASHBOARDS_PATH = `${APP_PATH}${DASHBOARDS_PATH}` as const;
 
 export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_RULES_PATH = `${APP_PATH}${RULES_PATH}` as const;
@@ -155,20 +172,31 @@ export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
 export const APP_BLOCKLIST_PATH = `${APP_PATH}${BLOCKLIST_PATH}` as const;
 
+// cloud logs to exclude from default index pattern
+export const EXCLUDE_ELASTIC_CLOUD_INDICES = ['-*elastic-cloud-logs-*'];
+
 /** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events */
-export const DEFAULT_INDEX_PATTERN = [
+export const INCLUDE_INDEX_PATTERN = [
   'apm-*-transaction*',
-  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
   'logs-*',
   'packetbeat-*',
+  'traces-apm*',
   'winlogbeat-*',
 ];
+/** The comma-delimited list of Elasticsearch indices from which the SIEM app collects events, and the exclude index pattern */
+export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELASTIC_CLOUD_INDICES];
+
+/** This Kibana Advanced Setting enables the grouped navigation in Security Solution */
+export const ENABLE_GROUPED_NAVIGATION = 'securitySolution:enableGroupedNav' as const;
 
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
+
+/** This Kibana Advanced Setting enables the warnings for CCS read permissions */
+export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
 
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
@@ -188,52 +216,11 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
   { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
 ]`;
 
-/** The default settings for the transforms */
-export const defaultTransformsSetting: TransformConfigSchema = {
-  enabled: false,
-  auto_start: true,
-  auto_create: true,
-  query: {
-    range: {
-      '@timestamp': {
-        gte: 'now-1d/d',
-        format: 'strict_date_optional_time',
-      },
-    },
-  },
-  retention_policy: {
-    time: {
-      field: '@timestamp',
-      max_age: '1w',
-    },
-  },
-  max_page_search_size: 5000,
-  settings: [
-    {
-      prefix: 'all',
-      indices: ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-      data_sources: [
-        ['auditbeat-*', 'endgame-*', 'filebeat-*', 'logs-*', 'packetbeat-*', 'winlogbeat-*'],
-      ],
-    },
-  ],
-};
-export const DEFAULT_TRANSFORMS_SETTING = JSON.stringify(defaultTransformsSetting, null, 2);
-
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  */
 export const LEGACY_NOTIFICATIONS_ID = `siem.notifications` as const;
-
-/**
- * Special internal structure for tags for signals. This is used
- * to filter out tags that have internal structures within them.
- */
-export const INTERNAL_IDENTIFIER = '__internal' as const;
-export const INTERNAL_RULE_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_id` as const;
-export const INTERNAL_RULE_ALERT_ID_KEY = `${INTERNAL_IDENTIFIER}_rule_alert_id` as const;
-export const INTERNAL_IMMUTABLE_KEY = `${INTERNAL_IDENTIFIER}_immutable` as const;
 
 /**
  * Internal actions route
@@ -255,6 +242,12 @@ export const DETECTION_ENGINE_PREPACKAGED_RULES_STATUS_URL =
 export const DETECTION_ENGINE_RULES_BULK_ACTION =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_action` as const;
 export const DETECTION_ENGINE_RULES_PREVIEW = `${DETECTION_ENGINE_RULES_URL}/preview` as const;
+export const DETECTION_ENGINE_RULES_BULK_DELETE =
+  `${DETECTION_ENGINE_RULES_URL}/_bulk_delete` as const;
+export const DETECTION_ENGINE_RULES_BULK_CREATE =
+  `${DETECTION_ENGINE_RULES_URL}/_bulk_create` as const;
+export const DETECTION_ENGINE_RULES_BULK_UPDATE =
+  `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
 /**
  * Internal detection engine routes
@@ -264,6 +257,8 @@ export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/execution/events` as const;
 export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
+export const DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/fleet/integrations/installed` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
@@ -285,6 +280,7 @@ export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
+export const DETECTION_RESPONSE_METRICS_API_URL = '/api/detection_response_metrics' as const;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -355,14 +351,9 @@ export const showAllOthersBucket: string[] = [
   'user.name',
 ];
 
-/**
- * Used for transforms for metrics_entities. If the security_solutions pulls in
- * the metrics_entities plugin, then it should pull this constant from there rather
- * than use it from here.
- */
-export const ELASTIC_NAME = 'estc' as const;
-
 export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
+
+export const RISKY_USERS_INDEX_PREFIX = 'ml_user_risk_score_' as const;
 
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',
@@ -418,5 +409,14 @@ export const LIMITED_CONCURRENCY_ROUTE_TAG_PREFIX = `${APP_ID}:limitedConcurrenc
 export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const RULES_TABLE_PAGE_SIZE_OPTIONS = [5, 10, 20, 50, RULES_TABLE_MAX_PAGE_SIZE];
 
+/**
+ * A local storage key we use to store the state of the feature tour UI for the Rule Management page.
+ *
+ * NOTE: As soon as we want to show a new tour for features in the current Kibana version,
+ * we will need to update this constant with the corresponding version.
+ */
 export const RULES_MANAGEMENT_FEATURE_TOUR_STORAGE_KEY =
-  'securitySolution.rulesManagementPage.newFeaturesTour.v8.1';
+  'securitySolution.rulesManagementPage.newFeaturesTour.v8.2';
+
+export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
+  'securitySolution.ruleDetails.ruleExecutionLog.showMetrics.v8.2';

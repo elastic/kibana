@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import puppeteer from 'puppeteer';
 import * as Rx from 'rxjs';
 import { mergeMap, take } from 'rxjs/operators';
-import type { Logger } from 'src/core/server';
-import type { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/server';
+import { DEFAULT_VIEWPORT, HeadlessChromiumDriverFactory } from '.';
 import { ConfigType } from '../../../config';
-import { HeadlessChromiumDriverFactory, DEFAULT_VIEWPORT } from '.';
 
 jest.mock('puppeteer');
 
@@ -61,7 +61,7 @@ describe('HeadlessChromiumDriverFactory', () => {
 
     (puppeteer as jest.Mocked<typeof puppeteer>).launch.mockResolvedValue(mockBrowser);
 
-    factory = new HeadlessChromiumDriverFactory(screenshotMode, config, logger, path);
+    factory = new HeadlessChromiumDriverFactory(screenshotMode, config, logger, path, '');
     jest.spyOn(factory, 'getBrowserLogger').mockReturnValue(Rx.EMPTY);
     jest.spyOn(factory, 'getProcessLogger').mockReturnValue(Rx.EMPTY);
     jest.spyOn(factory, 'getPageExit').mockReturnValue(Rx.EMPTY);

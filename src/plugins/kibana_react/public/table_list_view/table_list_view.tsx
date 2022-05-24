@@ -13,16 +13,21 @@ import {
   EuiConfirmModal,
   EuiEmptyPrompt,
   EuiInMemoryTable,
+  Criteria,
+  PropertySort,
+  Direction,
   EuiLink,
   EuiSpacer,
   EuiTableActionsColumnType,
   SearchFilterConfig,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { ThemeServiceStart, HttpFetchError, ToastsStart } from 'kibana/public';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
+import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
 import { debounce, keyBy, sortBy, uniq, get } from 'lodash';
 import React from 'react';
+import moment from 'moment';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
 
@@ -58,11 +63,13 @@ export interface TableListViewProps<V> {
   tableCaption: string;
   searchFilters?: SearchFilterConfig[];
   theme: ThemeServiceStart;
+  application: ApplicationStart;
 }
 
 export interface TableListViewState<V> {
   items: V[];
   hasInitialFetchReturned: boolean;
+  hasUpdatedAtMetadata: boolean | null;
   isFetchingItems: boolean;
   isDeletingItems: boolean;
   showDeleteModal: boolean;
@@ -71,6 +78,10 @@ export interface TableListViewState<V> {
   filter: string;
   selectedIds: string[];
   totalItems: number;
+  tableSort?: {
+    field: keyof V;
+    direction: Direction;
+  };
 }
 
 // saved object client does not support sorting by title because title is only mapped as analyzed
@@ -93,10 +104,12 @@ class TableListView<V extends {}> extends React.Component<
       initialPageSize: props.initialPageSize,
       pageSizeOptions: uniq([10, 20, 50, props.initialPageSize]).sort(),
     };
+
     this.state = {
       items: [],
       totalItems: 0,
       hasInitialFetchReturned: false,
+      hasUpdatedAtMetadata: null,
       isFetchingItems: false,
       isDeletingItems: false,
       showDeleteModal: false,
@@ -117,6 +130,28 @@ class TableListView<V extends {}> extends React.Component<
 
   componentDidMount() {
     this.fetchItems();
+  }
+
+  componentDidUpdate(prevProps: TableListViewProps<V>, prevState: TableListViewState<V>) {
+    if (this.state.hasUpdatedAtMetadata === null && prevState.items !== this.state.items) {
+      // We check if the saved object have the "updatedAt" metadata
+      // to render or not that column in the table
+      const hasUpdatedAtMetadata = Boolean(
+        this.state.items.find((item: { updatedAt?: string }) => Boolean(item.updatedAt))
+      );
+
+      this.setState((prev) => {
+        return {
+          hasUpdatedAtMetadata,
+          tableSort: hasUpdatedAtMetadata
+            ? {
+                field: 'updatedAt' as keyof V,
+                direction: 'desc' as const,
+              }
+            : prev.tableSort,
+        };
+      });
+    }
   }
 
   debouncedFetch = debounce(async (filter: string) => {
@@ -275,6 +310,11 @@ class TableListView<V extends {}> extends React.Component<
 
   renderListingLimitWarning() {
     if (this.state.showLimitError) {
+      const canEditAdvancedSettings = this.props.application.capabilities.advancedSettings.save;
+      const setting = 'savedObjects:listingLimit';
+      const advancedSettingsLink = this.props.application.getUrlForApp('management', {
+        path: `/kibana/settings?query=${setting}`,
+      });
       return (
         <React.Fragment>
           <EuiCallOut
@@ -288,25 +328,39 @@ class TableListView<V extends {}> extends React.Component<
             iconType="help"
           >
             <p>
-              <FormattedMessage
-                id="kibana-react.tableListView.listing.listingLimitExceededDescription"
-                defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
+              {canEditAdvancedSettings ? (
+                <FormattedMessage
+                  id="kibana-react.tableListView.listing.listingLimitExceededDescription"
+                  defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
                 the table below from displaying more than {listingLimitValue}. You can change this setting under {advancedSettingsLink}."
-                values={{
-                  entityNamePlural: this.props.entityNamePlural,
-                  totalItems: this.state.totalItems,
-                  listingLimitValue: this.props.listingLimit,
-                  listingLimitText: <strong>listingLimit</strong>,
-                  advancedSettingsLink: (
-                    <EuiLink href="#/management/kibana/settings">
-                      <FormattedMessage
-                        id="kibana-react.tableListView.listing.listingLimitExceeded.advancedSettingsLinkText"
-                        defaultMessage="Advanced Settings"
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
+                  values={{
+                    entityNamePlural: this.props.entityNamePlural,
+                    totalItems: this.state.totalItems,
+                    listingLimitValue: this.props.listingLimit,
+                    listingLimitText: <strong>listingLimit</strong>,
+                    advancedSettingsLink: (
+                      <EuiLink href={advancedSettingsLink}>
+                        <FormattedMessage
+                          id="kibana-react.tableListView.listing.listingLimitExceeded.advancedSettingsLinkText"
+                          defaultMessage="Advanced Settings"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="kibana-react.tableListView.listing.listingLimitExceededDescriptionNoPermissions"
+                  defaultMessage="You have {totalItems} {entityNamePlural}, but your {listingLimitText} setting prevents
+                  the table below from displaying more than {listingLimitValue}. Contact your system administrator to change this setting."
+                  values={{
+                    entityNamePlural: this.props.entityNamePlural,
+                    totalItems: this.state.totalItems,
+                    listingLimitValue: this.props.listingLimit,
+                    listingLimitText: <strong>listingLimit</strong>,
+                  }}
+                />
+              )}
             </p>
           </EuiCallOut>
           <EuiSpacer size="m" />
@@ -400,6 +454,12 @@ class TableListView<V extends {}> extends React.Component<
     );
   }
 
+  onTableChange(criteria: Criteria<V>) {
+    if (criteria.sort) {
+      this.setState({ tableSort: criteria.sort });
+    }
+  }
+
   renderTable() {
     const { searchFilters } = this.props;
 
@@ -415,28 +475,6 @@ class TableListView<V extends {}> extends React.Component<
         }
       : undefined;
 
-    const actions: EuiTableActionsColumnType<V>['actions'] = [
-      {
-        name: (item) =>
-          i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
-            defaultMessage: 'Edit {itemDescription}',
-            values: {
-              itemDescription: get(item, this.props.rowHeader),
-            },
-          }),
-        description: i18n.translate(
-          'kibana-react.tableListView.listing.table.editActionDescription',
-          {
-            defaultMessage: 'Edit',
-          }
-        ),
-        icon: 'pencil',
-        type: 'icon',
-        enabled: (v) => !(v as unknown as { error: string })?.error,
-        onClick: this.props.editItem,
-      },
-    ];
-
     const search = {
       onChange: this.setFilter.bind(this),
       toolsLeft: this.renderToolsLeft(),
@@ -448,8 +486,106 @@ class TableListView<V extends {}> extends React.Component<
       filters: searchFilters ?? [],
     };
 
+    const noItemsMessage = (
+      <FormattedMessage
+        id="kibana-react.tableListView.listing.noMatchedItemsMessage"
+        defaultMessage="No {entityNamePlural} matched your search."
+        values={{ entityNamePlural: this.props.entityNamePlural }}
+      />
+    );
+
+    return (
+      <EuiInMemoryTable
+        itemId="id"
+        items={this.state.items}
+        columns={this.getTableColumns()}
+        pagination={this.pagination}
+        loading={this.state.isFetchingItems}
+        message={noItemsMessage}
+        selection={selection}
+        search={search}
+        sorting={{ sort: this.state.tableSort as PropertySort }}
+        onChange={this.onTableChange.bind(this)}
+        data-test-subj="itemsInMemTable"
+        rowHeader={this.props.rowHeader}
+        tableCaption={this.props.tableCaption}
+      />
+    );
+  }
+
+  getTableColumns() {
     const columns = this.props.tableColumns.slice();
+
+    // Add "Last update" column
+    if (this.state.hasUpdatedAtMetadata) {
+      const renderUpdatedAt = (dateTime?: string) => {
+        if (!dateTime) {
+          return (
+            <EuiToolTip
+              content={i18n.translate('kibana-react.tableListView.updatedDateUnknownLabel', {
+                defaultMessage: 'Last updated unknown',
+              })}
+            >
+              <span>-</span>
+            </EuiToolTip>
+          );
+        }
+        const updatedAt = moment(dateTime);
+
+        if (updatedAt.diff(moment(), 'days') > -7) {
+          return (
+            <FormattedRelative value={new Date(dateTime).getTime()}>
+              {(formattedDate: string) => (
+                <EuiToolTip content={updatedAt.format('LL LT')}>
+                  <span>{formattedDate}</span>
+                </EuiToolTip>
+              )}
+            </FormattedRelative>
+          );
+        }
+        return (
+          <EuiToolTip content={updatedAt.format('LL LT')}>
+            <span>{updatedAt.format('LL')}</span>
+          </EuiToolTip>
+        );
+      };
+
+      columns.push({
+        field: 'updatedAt',
+        name: i18n.translate('kibana-react.tableListView.lastUpdatedColumnTitle', {
+          defaultMessage: 'Last updated',
+        }),
+        render: (field: string, record: { updatedAt?: string }) =>
+          renderUpdatedAt(record.updatedAt),
+        sortable: true,
+        width: '150px',
+      });
+    }
+
+    // Add "Actions" column
     if (this.props.editItem) {
+      const actions: EuiTableActionsColumnType<V>['actions'] = [
+        {
+          name: (item) =>
+            i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
+              defaultMessage: 'Edit {itemDescription}',
+              values: {
+                itemDescription: get(item, this.props.rowHeader),
+              },
+            }),
+          description: i18n.translate(
+            'kibana-react.tableListView.listing.table.editActionDescription',
+            {
+              defaultMessage: 'Edit',
+            }
+          ),
+          icon: 'pencil',
+          type: 'icon',
+          enabled: (v) => !(v as unknown as { error: string })?.error,
+          onClick: this.props.editItem,
+        },
+      ];
+
       columns.push({
         name: i18n.translate('kibana-react.tableListView.listing.table.actionTitle', {
           defaultMessage: 'Actions',
@@ -459,29 +595,7 @@ class TableListView<V extends {}> extends React.Component<
       });
     }
 
-    const noItemsMessage = (
-      <FormattedMessage
-        id="kibana-react.tableListView.listing.noMatchedItemsMessage"
-        defaultMessage="No {entityNamePlural} matched your search."
-        values={{ entityNamePlural: this.props.entityNamePlural }}
-      />
-    );
-    return (
-      <EuiInMemoryTable
-        itemId="id"
-        items={this.state.items}
-        columns={columns}
-        pagination={this.pagination}
-        loading={this.state.isFetchingItems}
-        message={noItemsMessage}
-        selection={selection}
-        search={search}
-        sorting={true}
-        data-test-subj="itemsInMemTable"
-        rowHeader={this.props.rowHeader}
-        tableCaption={this.props.tableCaption}
-      />
-    );
+    return columns;
   }
 
   renderCreateButton() {

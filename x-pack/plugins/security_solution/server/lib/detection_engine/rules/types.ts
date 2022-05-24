@@ -7,7 +7,7 @@
 
 import { Readable } from 'stream';
 
-import { SavedObjectAttributes, SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectAttributes, SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   MachineLearningJobIdOrUndefined,
   From,
@@ -39,9 +39,11 @@ import type {
   ThrottleOrNull,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-types';
-import { SIGNALS_ID, ruleTypeMappings } from '@kbn/securitysolution-rules';
+import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
+import { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
+import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
 import {
@@ -91,15 +93,16 @@ import {
   RuleNameOverrideOrUndefined,
   EventCategoryOverrideOrUndefined,
   NamespaceOrUndefined,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../../../../common/detection_engine/schemas/common';
 
-import { RulesClient, PartialAlert } from '../../../../../alerting/server';
-import { SanitizedAlert } from '../../../../../alerting/common';
 import { PartialFilter } from '../types';
 import { RuleParams } from '../schemas/rule_schemas';
 import { IRuleExecutionLogForRoutes } from '../rule_execution_log';
 
-export type RuleAlertType = SanitizedAlert<RuleParams>;
+export type RuleAlertType = SanitizedRule<RuleParams>;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export interface IRuleAssetSOAttributes extends Record<string, any> {
@@ -125,20 +128,16 @@ export interface Clients {
 }
 
 export const isAlertTypes = (
-  isRuleRegistryEnabled: boolean,
-  partialAlert: Array<PartialAlert<RuleParams>>
+  partialAlert: Array<PartialRule<RuleParams>>
 ): partialAlert is RuleAlertType[] => {
-  return partialAlert.every((rule) => isAlertType(isRuleRegistryEnabled, rule));
+  return partialAlert.every((rule) => isAlertType(rule));
 };
 
 export const isAlertType = (
-  isRuleRegistryEnabled: boolean,
-  partialAlert: PartialAlert<RuleParams>
+  partialAlert: PartialRule<RuleParams>
 ): partialAlert is RuleAlertType => {
   const ruleTypeValues = Object.values(ruleTypeMappings) as unknown as string[];
-  return isRuleRegistryEnabled
-    ? ruleTypeValues.includes(partialAlert.alertTypeId as string)
-    : partialAlert.alertTypeId === SIGNALS_ID;
+  return ruleTypeValues.includes(partialAlert.alertTypeId as string);
 };
 
 export interface CreateRulesOptions {
@@ -165,11 +164,14 @@ export interface CreateRulesOptions {
   interval: Interval;
   license: LicenseOrUndefined;
   maxSignals: MaxSignals;
+  relatedIntegrations: RelatedIntegrationArray | undefined;
+  requiredFields: RequiredFieldArray | undefined;
   riskScore: RiskScore;
   riskScoreMapping: RiskScoreMapping;
   ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndex;
   name: Name;
+  setup: SetupGuide | undefined;
   severity: Severity;
   severityMapping: SeverityMapping;
   tags: Tags;
@@ -192,20 +194,20 @@ export interface CreateRulesOptions {
   version: Version;
   exceptionsList: ListArray;
   actions: RuleAlertAction[];
-  isRuleRegistryEnabled: boolean;
   namespace?: NamespaceOrUndefined;
+  id?: string;
 }
 
 export interface UpdateRulesOptions {
   rulesClient: RulesClient;
   defaultOutputIndex: string;
-  existingRule: SanitizedAlert<RuleParams> | null | undefined;
+  existingRule: RuleAlertType | null | undefined;
   ruleUpdate: UpdateRulesSchema;
 }
 
 export interface PatchRulesOptions extends Partial<PatchRulesFieldsOptions> {
   rulesClient: RulesClient;
-  rule: SanitizedAlert<RuleParams> | null | undefined;
+  rule: RuleAlertType | null | undefined;
 }
 
 interface PatchRulesFieldsOptions {
@@ -229,11 +231,14 @@ interface PatchRulesFieldsOptions {
   interval: IntervalOrUndefined;
   license: LicenseOrUndefined;
   maxSignals: MaxSignalsOrUndefined;
+  relatedIntegrations: RelatedIntegrationArray | undefined;
+  requiredFields: RequiredFieldArray | undefined;
   riskScore: RiskScoreOrUndefined;
   riskScoreMapping: RiskScoreMappingOrUndefined;
   ruleNameOverride: RuleNameOverrideOrUndefined;
   outputIndex: OutputIndexOrUndefined;
   name: NameOrUndefined;
+  setup: SetupGuide | undefined;
   severity: SeverityOrUndefined;
   severityMapping: SeverityMappingOrUndefined;
   tags: TagsOrUndefined;
@@ -260,7 +265,6 @@ interface PatchRulesFieldsOptions {
 }
 
 export interface ReadRuleOptions {
-  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   id: IdOrUndefined;
   ruleId: RuleIdOrUndefined;
@@ -273,7 +277,6 @@ export interface DeleteRuleOptions {
 }
 
 export interface FindRuleOptions {
-  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   perPage: PerPageOrUndefined;
   page: PageOrUndefined;
@@ -286,5 +289,5 @@ export interface FindRuleOptions {
 export interface LegacyMigrateParams {
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
-  rule: SanitizedAlert<RuleParams> | null | undefined;
+  rule: SanitizedRule<RuleParams> | null | undefined;
 }

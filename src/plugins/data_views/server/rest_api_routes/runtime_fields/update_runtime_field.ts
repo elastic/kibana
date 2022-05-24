@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
-import { DataViewsService, RuntimeField } from 'src/plugins/data_views/common';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { DataViewsService, RuntimeField } from '../../../common';
 import { ErrorIndexPatternFieldNotFound } from '../../error';
 import { handleErrors } from '../util/handle_errors';
-import { runtimeFieldSpec, runtimeFieldSpecTypeSchema } from '../util/schemas';
-import { IRouter, StartServicesAccessor } from '../../../../../core/server';
+import { runtimeFieldSchema } from '../util/schemas';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
@@ -52,16 +52,14 @@ export const updateRuntimeField = async ({
   }
 
   dataView.removeRuntimeField(name);
-  dataView.addRuntimeField(name, {
+  const fields = dataView.addRuntimeField(name, {
     ...existingRuntimeField,
     ...runtimeField,
   });
 
   await dataViewsService.updateSavedObject(dataView);
 
-  const field = dataView.fields.getByName(name);
-  if (!field) throw new Error(`Could not create a field [name = ${name}].`);
-  return { dataView, field };
+  return { dataView, fields };
 };
 
 const updateRuntimeFieldRouteFactory =
@@ -90,18 +88,14 @@ const updateRuntimeFieldRouteFactory =
           }),
           body: schema.object({
             name: schema.never(),
-            runtimeField: schema.object({
-              ...runtimeFieldSpec,
-              // We need to overwrite the below fields on top of `runtimeFieldSpec`,
-              // because some fields would be optional
-              type: schema.maybe(runtimeFieldSpecTypeSchema),
-            }),
+            runtimeField: runtimeFieldSchema,
           }),
         },
       },
       handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const core = await ctx.core;
+        const savedObjectsClient = core.savedObjects.client;
+        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
         const [, , { dataViewsServiceFactory }] = await getStartServices();
         const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,
@@ -112,7 +106,7 @@ const updateRuntimeFieldRouteFactory =
         const name = req.params.name;
         const runtimeField = req.body.runtimeField as Partial<RuntimeField>;
 
-        const { dataView, field } = await updateRuntimeField({
+        const { dataView, fields } = await updateRuntimeField({
           dataViewsService,
           usageCollection,
           counterName: `${req.route.method} ${path}`,
@@ -121,7 +115,7 @@ const updateRuntimeFieldRouteFactory =
           runtimeField,
         });
 
-        return res.ok(responseFormatter({ serviceKey, dataView, field }));
+        return res.ok(responseFormatter({ serviceKey, dataView, fields }));
       })
     );
   };

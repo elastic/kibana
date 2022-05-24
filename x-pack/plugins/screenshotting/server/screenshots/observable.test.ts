@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { interval, throwError, of } from 'rxjs';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { interval, of, throwError } from 'rxjs';
 import { map } from 'rxjs/operators';
-import type { Logger } from 'src/core/server';
-import type { ConditionalHeaders } from '../browsers';
 import { createMockBrowserDriver } from '../browsers/mock';
+import type { ConfigType } from '../config';
 import { createMockLayout } from '../layouts/mock';
+import { EventLogger } from './event_logger';
 import { ScreenshotObservableHandler, ScreenshotObservableOptions } from './observable';
 
 describe('ScreenshotObservableHandler', () => {
   let browser: ReturnType<typeof createMockBrowserDriver>;
+  let config: ConfigType;
   let layout: ReturnType<typeof createMockLayout>;
-  let logger: jest.Mocked<Logger>;
+  let eventLogger: EventLogger;
   let options: ScreenshotObservableOptions;
 
   beforeEach(async () => {
     browser = createMockBrowserDriver();
-    layout = createMockLayout();
-    logger = { error: jest.fn() } as unknown as jest.Mocked<Logger>;
-    options = {
-      conditionalHeaders: {
-        headers: { testHeader: 'testHeadValue' },
-        conditions: {} as unknown as ConditionalHeaders['conditions'],
-      },
-      timeouts: {
+    config = {
+      capture: {
+        timeouts: { openUrl: 30000, waitForElements: 30000, renderComplete: 30000 },
         loadDelay: 5000,
-        openUrl: 30000,
-        waitForElements: 30000,
-        renderComplete: 30000,
+        zoom: 13,
       },
+    } as ConfigType;
+    layout = createMockLayout();
+    eventLogger = new EventLogger(loggingSystemMock.createLogger(), config);
+    options = {
+      headers: { testHeader: 'testHeadValue' },
       urls: [],
     };
 
@@ -41,8 +41,12 @@ describe('ScreenshotObservableHandler', () => {
   });
 
   describe('waitUntil', () => {
+    let screenshots: ScreenshotObservableHandler;
+    beforeEach(() => {
+      screenshots = new ScreenshotObservableHandler(browser, config, eventLogger, layout, options);
+    });
+
     it('catches TimeoutError and references the timeout config in a custom message', async () => {
-      const screenshots = new ScreenshotObservableHandler(browser, logger, layout, options);
       const test$ = interval(1000).pipe(screenshots.waitUntil(200, 'Test Config'));
 
       const testPipeline = () => test$.toPromise();
@@ -52,7 +56,6 @@ describe('ScreenshotObservableHandler', () => {
     });
 
     it('catches other Errors and explains where they were thrown', async () => {
-      const screenshots = new ScreenshotObservableHandler(browser, logger, layout, options);
       const test$ = throwError(new Error(`Test Error to Throw`)).pipe(
         screenshots.waitUntil(200, 'Test Config')
       );
@@ -64,7 +67,6 @@ describe('ScreenshotObservableHandler', () => {
     });
 
     it('is a pass-through if there is no Error', async () => {
-      const screenshots = new ScreenshotObservableHandler(browser, logger, layout, options);
       const test$ = of('nice to see you').pipe(screenshots.waitUntil(20, 'xxxxxxxxxxx'));
 
       await expect(test$.toPromise()).resolves.toBe(`nice to see you`);
@@ -72,9 +74,13 @@ describe('ScreenshotObservableHandler', () => {
   });
 
   describe('checkPageIsOpen', () => {
+    let screenshots: ScreenshotObservableHandler;
+    beforeEach(() => {
+      screenshots = new ScreenshotObservableHandler(browser, config, eventLogger, layout, options);
+    });
+
     it('throws a decorated Error when page is not open', async () => {
       browser.isPageOpen.mockReturnValue(false);
-      const screenshots = new ScreenshotObservableHandler(browser, logger, layout, options);
       const test$ = of(234455).pipe(
         map((input) => {
           screenshots.checkPageIsOpen();
@@ -88,7 +94,6 @@ describe('ScreenshotObservableHandler', () => {
     });
 
     it('is a pass-through when the page is open', async () => {
-      const screenshots = new ScreenshotObservableHandler(browser, logger, layout, options);
       const test$ = of(234455).pipe(
         map((input) => {
           screenshots.checkPageIsOpen();

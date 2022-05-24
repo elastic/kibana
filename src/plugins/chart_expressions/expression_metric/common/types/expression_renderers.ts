@@ -6,30 +6,37 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionValueVisDimension } from '../../../../visualizations/common';
+import { $Values } from '@kbn/utility-types';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import {
   ColorMode,
   Labels,
   CustomPaletteState,
   Style as ChartStyle,
-} from '../../../../charts/common';
-import { Style } from '../../../../expressions/common';
+} from '@kbn/charts-plugin/common';
+import { Style } from '@kbn/expressions-plugin/common';
+import { LabelPosition } from '../constants';
 
 export const visType = 'metric';
 
 export interface DimensionsVisParam {
-  metrics: ExpressionValueVisDimension[];
-  bucket?: ExpressionValueVisDimension;
+  metrics: Array<ExpressionValueVisDimension | string>;
+  bucket?: ExpressionValueVisDimension | string;
 }
 
+export type LabelPositionType = $Values<typeof LabelPosition>;
+
 export type MetricStyle = Style & Pick<ChartStyle, 'bgColor' | 'labelColor'>;
+
+export type LabelsConfig = Labels & { style: Style; position: LabelPositionType };
 export interface MetricVisParam {
   percentageMode: boolean;
   percentageFormatPattern?: string;
   metricColorMode: ColorMode;
   palette?: CustomPaletteState;
-  labels: Labels;
+  labels: LabelsConfig;
   style: MetricStyle;
+  colorFullBackground: boolean;
   autoScale?: boolean;
 }
 
@@ -47,4 +54,6 @@ export interface MetricOptions {
   color?: string;
   bgColor?: string;
   lightText: boolean;
+  colIndex: number;
+  rowIndex: number;
 }

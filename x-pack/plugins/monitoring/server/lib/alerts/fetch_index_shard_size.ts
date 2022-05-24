@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { AlertCluster, IndexShardSizeStats } from '../../../common/types/alerts';
 import { ElasticsearchIndexStats, ElasticsearchResponseHit } from '../../../common/types/es';
 import { ESGlobPatterns, RegExPatterns } from '../../../common/es_glob_patterns';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 type TopHitType = ElasticsearchResponseHit & {
@@ -40,7 +40,7 @@ export async function fetchIndexShardSize(
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'index',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: CCS_REMOTE_PATTERN,
   });
   const params = {
     index: indexPatterns,
@@ -50,7 +50,7 @@ export async function fetchIndexShardSize(
       query: {
         bool: {
           filter: [
-            createDatasetFilter('index_stats', 'elasticsearch.index'),
+            createDatasetFilter('index_stats', 'index', 'elasticsearch.index'),
             {
               range: {
                 timestamp: {
@@ -90,6 +90,8 @@ export async function fetchIndexShardSize(
                         '_index',
                         'index_stats.shards.primaries',
                         'index_stats.primaries.store.size_in_bytes',
+                        'elasticsearch.index.shards.primaries',
+                        'elasticsearch.index.primaries.store.size_in_bytes',
                       ],
                     },
                     size: 1,
@@ -113,9 +115,14 @@ export async function fetchIndexShardSize(
   }
 
   const response = await esClient.search(params);
-  // @ts-expect-error declare aggegations type explicitly
-  const { buckets: clusterBuckets } = response.aggregations?.clusters;
   const stats: IndexShardSizeStats[] = [];
+
+  if (!response.aggregations) {
+    return stats;
+  }
+
+  // @ts-expect-error declare aggegations type explicitly
+  const { buckets: clusterBuckets } = response.aggregations.clusters;
   if (!clusterBuckets?.length) {
     return stats;
   }
@@ -131,10 +138,8 @@ export async function fetchIndexShardSize(
       if (!topHit || !ESGlobPatterns.isValid(shardIndex, validIndexPatterns)) {
         continue;
       }
-      const {
-        _index: monitoringIndexName,
-        _source: { index_stats: indexStats },
-      } = topHit;
+      const { _index: monitoringIndexName, _source } = topHit;
+      const indexStats = _source.index_stats || _source.elasticsearch?.index;
 
       if (!indexStats || !indexStats.primaries) {
         continue;

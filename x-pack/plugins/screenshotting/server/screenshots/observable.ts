@@ -5,45 +5,36 @@
  * 2.0.
  */
 
-import type { Transaction } from 'elastic-apm-node';
-import { defer, forkJoin, throwError, Observable } from 'rxjs';
+import type { Headers } from '@kbn/core/server';
+import { defer, forkJoin, Observable, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
-import type { Logger } from 'src/core/server';
-import type { ConditionalHeaders, Context, HeadlessChromiumDriver } from '../browsers';
-import { getChromiumDisconnectedError, DEFAULT_VIEWPORT } from '../browsers';
-import type { Layout } from '../layouts';
+import { errors, LayoutTypes } from '../../common';
+import {
+  Context,
+  DEFAULT_VIEWPORT,
+  getChromiumDisconnectedError,
+  HeadlessChromiumDriver,
+} from '../browsers';
+import { ConfigType, durationToNumber as toNumber } from '../config';
+import type { PdfScreenshotOptions } from '../formats';
+import { Layout } from '../layouts';
+import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
 import { getElementPositionAndAttributes } from './get_element_position_data';
 import { getNumberOfItems } from './get_number_of_items';
+import { getPdf } from './get_pdf';
 import { getRenderErrors } from './get_render_errors';
 import { getScreenshots } from './get_screenshots';
-import type { Screenshot } from './get_screenshots';
 import { getTimeRange } from './get_time_range';
 import { injectCustomCss } from './inject_css';
 import { openUrl } from './open_url';
+import type { Screenshot } from './types';
 import { waitForRenderComplete } from './wait_for_render';
 import { waitForVisualizations } from './wait_for_visualizations';
 
-export interface PhaseTimeouts {
-  /**
-   * Open URL phase timeout.
-   */
-  openUrl: number;
-
-  /**
-   * Timeout of the page readiness phase.
-   */
-  waitForElements: number;
-
-  /**
-   * Timeout of the page render phase.
-   */
-  renderComplete: number;
-
-  /**
-   * An additional delay to wait until the visualizations are ready.
-   */
-  loadDelay: number;
+type CaptureTimeouts = ConfigType['capture']['timeouts'];
+export interface PhaseTimeouts extends CaptureTimeouts {
+  loadDelay: ConfigType['capture']['loadDelay'];
 }
 
 type Url = string;
@@ -60,12 +51,7 @@ export interface ScreenshotObservableOptions {
   /**
    * Custom headers to be sent with each request.
    */
-  conditionalHeaders: ConditionalHeaders;
-
-  /**
-   * Timeouts for each phase of the screenshot.
-   */
-  timeouts: PhaseTimeouts;
+  headers?: Headers;
 
   /**
    * The list or URL to take screenshots of.
@@ -107,9 +93,12 @@ interface PageSetupResults {
   elementsPositionAndAttributes: ElementsPositionAndAttribute[] | null;
   timeRange: string | null;
   error?: Error;
+  renderErrors?: string[];
 }
 
-const getDefaultElementPosition = (dimensions: { height?: number; width?: number } | null) => {
+const getDefaultElementPosition = (
+  dimensions: { height?: number; width?: number } | null
+): ElementsPositionAndAttribute[] => {
   const height = dimensions?.height || DEFAULT_VIEWPORT.height;
   const width = dimensions?.width || DEFAULT_VIEWPORT.width;
 
@@ -124,19 +113,11 @@ const getDefaultElementPosition = (dimensions: { height?: number; width?: number
   ];
 };
 
-/*
- * If Kibana is showing a non-HTML error message, the viewport might not be
- * provided by the browser.
- */
-const getDefaultViewPort = () => ({
-  ...DEFAULT_VIEWPORT,
-  zoom: 1,
-});
-
 export class ScreenshotObservableHandler {
   constructor(
     private readonly driver: HeadlessChromiumDriver,
-    private readonly logger: Logger,
+    private readonly config: ConfigType,
+    private readonly eventLogger: EventLogger,
     private readonly layout: Layout,
     private options: ScreenshotObservableOptions
   ) {}
@@ -172,66 +153,98 @@ export class ScreenshotObservableHandler {
 
       return openUrl(
         this.driver,
-        this.logger,
-        this.options.timeouts.openUrl,
+        this.eventLogger,
+        toNumber(this.config.capture.timeouts.openUrl),
         index,
         url,
         { ...(context ?? {}), layout: this.layout.id },
-        this.options.conditionalHeaders
+        this.options.headers ?? {}
       );
-    }).pipe(this.waitUntil(this.options.timeouts.openUrl, 'open URL'));
+    }).pipe(this.waitUntil(toNumber(this.config.capture.timeouts.openUrl), 'open URL'));
   }
 
   private waitForElements() {
     const driver = this.driver;
-    const waitTimeout = this.options.timeouts.waitForElements;
+    const waitTimeout = toNumber(this.config.capture.timeouts.waitForElements);
 
-    return defer(() => getNumberOfItems(driver, this.logger, waitTimeout, this.layout)).pipe(
-      mergeMap(async (itemsCount) => {
-        // set the viewport to the dimensions from the job, to allow elements to flow into the expected layout
-        const viewport = this.layout.getViewport(itemsCount) || getDefaultViewPort();
-
-        // Set the viewport allowing time for the browser to handle reflow and redraw
-        // before checking for readiness of visualizations.
-        await driver.setViewport(viewport, this.logger);
-        await waitForVisualizations(driver, this.logger, waitTimeout, itemsCount, this.layout);
-      }),
+    return defer(() => getNumberOfItems(driver, this.eventLogger, waitTimeout, this.layout)).pipe(
+      mergeMap((itemsCount) =>
+        waitForVisualizations(driver, this.eventLogger, waitTimeout, itemsCount, this.layout)
+      ),
       this.waitUntil(waitTimeout, 'wait for elements')
     );
   }
 
-  private completeRender(apmTrans: Transaction | null) {
+  private completeRender() {
     const driver = this.driver;
     const layout = this.layout;
-    const logger = this.logger;
+    const eventLogger = this.eventLogger;
 
     return defer(async () => {
       // Waiting till _after_ elements have rendered before injecting our CSS
       // allows for them to be displayed properly in many cases
-      await injectCustomCss(driver, logger, layout);
+      await injectCustomCss(driver, eventLogger, layout);
 
-      const apmPositionElements = apmTrans?.startSpan('position-elements', 'correction');
-      // position panel elements for print layout
-      await layout.positionElements?.(driver, logger);
-      apmPositionElements?.end();
+      const spanEnd = this.eventLogger.logScreenshottingEvent(
+        'get positions of visualization elements',
+        Actions.GET_ELEMENT_POSITION_DATA,
+        'read'
+      );
+      try {
+        // position panel elements for print layout
+        await layout.positionElements?.(driver, eventLogger.kbnLogger);
+        spanEnd();
+      } catch (error) {
+        eventLogger.error(error, Actions.GET_ELEMENT_POSITION_DATA);
+        throw error;
+      }
 
-      await waitForRenderComplete(driver, logger, this.options.timeouts.loadDelay, layout);
+      await waitForRenderComplete(
+        driver,
+        eventLogger,
+        toNumber(this.config.capture.loadDelay),
+        layout
+      );
     }).pipe(
       mergeMap(() =>
         forkJoin({
-          timeRange: getTimeRange(driver, logger, layout),
-          elementsPositionAndAttributes: getElementPositionAndAttributes(driver, logger, layout),
-          renderErrors: getRenderErrors(driver, logger, layout),
+          timeRange: getTimeRange(driver, eventLogger, layout),
+          elementsPositionAndAttributes: getElementPositionAndAttributes(
+            driver,
+            eventLogger,
+            layout
+          ),
+          renderErrors: getRenderErrors(driver, eventLogger, layout),
         })
       ),
-      this.waitUntil(this.options.timeouts.renderComplete, 'render complete')
+      this.waitUntil(toNumber(this.config.capture.timeouts.renderComplete), 'render complete')
     );
   }
 
-  public setupPage(index: number, url: UrlOrUrlWithContext, apmTrans: Transaction | null) {
+  public setupPage(index: number, url: UrlOrUrlWithContext) {
     return this.openUrl(index, url).pipe(
       switchMapTo(this.waitForElements()),
-      switchMapTo(this.completeRender(apmTrans))
+      switchMapTo(this.completeRender())
+    );
+  }
+
+  /**
+   * Given a title and time range value look like:
+   *
+   * "[Logs] Web Traffic - Apr 14, 2022 @ 120742.318 to Apr 21, 2022 @ 120742.318"
+   *
+   * Otherwise closest thing to that or a blank string.
+   */
+  private getTitle(timeRange: null | string): string {
+    return `${(this.options as PdfScreenshotOptions).title ?? ''} ${
+      timeRange ? `- ${timeRange}` : ''
+    }`.trim();
+  }
+
+  private shouldCapturePdf(): boolean {
+    return (
+      this.layout.id === LayoutTypes.PRINT &&
+      (this.options as PdfScreenshotOptions).format === 'pdf'
     );
   }
 
@@ -240,17 +253,29 @@ export class ScreenshotObservableHandler {
       withRenderComplete.pipe(
         mergeMap(async (data: PageSetupResults): Promise<ScreenshotObservableResult> => {
           this.checkPageIsOpen(); // fail the report job if the browser has closed
-
           const elements =
             data.elementsPositionAndAttributes ??
-            getDefaultElementPosition(this.layout.getViewport(1));
-          const screenshots = await getScreenshots(this.driver, this.logger, elements);
-          const { timeRange, error: setupError } = data;
+            getDefaultElementPosition(this.layout.getViewport());
+          let screenshots: Screenshot[] = [];
+          try {
+            screenshots = this.shouldCapturePdf()
+              ? await getPdf(
+                  this.driver,
+                  this.eventLogger,
+                  this.getTitle(data.timeRange),
+                  (this.options as PdfScreenshotOptions).logo
+                )
+              : await getScreenshots(this.driver, this.eventLogger, elements, this.layout);
+          } catch (e) {
+            throw new errors.FailedToCaptureScreenshot(e.message);
+          }
+          const { timeRange, error: setupError, renderErrors } = data;
 
           return {
             timeRange,
             screenshots,
             error: setupError,
+            renderErrors,
             elementsPositionAndAttributes: elements,
           };
         })

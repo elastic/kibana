@@ -67,6 +67,7 @@ export const powerUserRole: RoleType = {
         savedObjectsManagement: ['all'],
         stackAlerts: ['all'],
         fleet: ['all'],
+        fleetv2: ['all'],
         actions: ['all'],
       },
       spaces: ['*'],

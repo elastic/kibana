@@ -53,6 +53,7 @@ export const mapping = {
   output: {
     type: 'object',
     properties: {
+      error_code: { type: 'keyword' },
       chunk: { type: 'long' },
       content_type: { type: 'keyword' },
       size: { type: 'long' },

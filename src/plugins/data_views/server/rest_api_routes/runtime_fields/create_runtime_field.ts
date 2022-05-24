@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { UsageCounter } from 'src/plugins/usage_collection/server';
-import { DataViewsService, RuntimeField } from 'src/plugins/data_views/common';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { DataViewsService, RuntimeField } from '../../../common';
 import { handleErrors } from '../util/handle_errors';
-import { runtimeFieldSpecSchema } from '../util/schemas';
-import { IRouter, StartServicesAccessor } from '../../../../../core/server';
+import { runtimeFieldSchema } from '../util/schemas';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
@@ -45,18 +45,21 @@ export const createRuntimeField = async ({
   usageCollection?.incrementCounter({ counterName });
   const dataView = await dataViewsService.get(id);
 
-  if (dataView.fields.getByName(name)) {
+  if (dataView.fields.getByName(name) || dataView.getRuntimeField(name)) {
     throw new Error(`Field [name = ${name}] already exists.`);
   }
 
-  dataView.addRuntimeField(name, runtimeField);
+  const firstNameSegment = name.split('.')[0];
 
-  const field = dataView.fields.getByName(name);
-  if (!field) throw new Error(`Could not create a field [name = ${name}].`);
+  if (dataView.fields.getByName(firstNameSegment) || dataView.getRuntimeField(firstNameSegment)) {
+    throw new Error(`Field [name = ${firstNameSegment}] already exists.`);
+  }
+
+  const createdRuntimeFields = dataView.addRuntimeField(name, runtimeField);
 
   await dataViewsService.updateSavedObject(dataView);
 
-  return { dataView, field };
+  return { dataView, fields: createdRuntimeFields };
 };
 
 const runtimeCreateFieldRouteFactory =
@@ -84,13 +87,14 @@ const runtimeCreateFieldRouteFactory =
               minLength: 1,
               maxLength: 1_000,
             }),
-            runtimeField: runtimeFieldSpecSchema,
+            runtimeField: runtimeFieldSchema,
           }),
         },
       },
       handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const core = await ctx.core;
+        const savedObjectsClient = core.savedObjects.client;
+        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
         const [, , { dataViewsServiceFactory }] = await getStartServices();
         const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,
@@ -100,16 +104,16 @@ const runtimeCreateFieldRouteFactory =
         const id = req.params.id;
         const { name, runtimeField } = req.body;
 
-        const { dataView, field } = await createRuntimeField({
+        const { dataView, fields } = await createRuntimeField({
           dataViewsService,
           usageCollection,
           counterName: `${req.route.method} ${path}`,
           id,
           name,
-          runtimeField,
+          runtimeField: runtimeField as RuntimeField,
         });
 
-        return res.ok(responseFormatter({ serviceKey, dataView, field }));
+        return res.ok(responseFormatter({ serviceKey, dataView, fields }));
       })
     );
   };

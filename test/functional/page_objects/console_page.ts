@@ -83,29 +83,30 @@ export class ConsolePageObject extends FtrService {
     }
   }
 
-  public async promptAutocomplete() {
+  // Prompt autocomplete window and provide a initial letter of properties to narrow down the results. E.g. 'b' = 'bool'
+  public async promptAutocomplete(letter = 'b') {
     const textArea = await this.testSubjects.find('console-textarea');
-    // There should be autocomplete for this on all license levels
-    await textArea.pressKeys([Key.CONTROL, Key.SPACE]);
+    await textArea.clickMouseButton();
+    await textArea.type(letter);
+    await this.retry.waitFor('autocomplete to be visible', () => this.isAutocompleteVisible());
   }
 
-  public async hasAutocompleter(): Promise<boolean> {
-    try {
-      return Boolean(await this.find.byCssSelector('.ace_autocomplete'));
-    } catch (e) {
-      return false;
-    }
+  public async isAutocompleteVisible() {
+    const element = await this.find.byCssSelector('.ace_autocomplete');
+    if (!element) return false;
+
+    const attribute = await element.getAttribute('style');
+    return !attribute.includes('display: none;');
   }
 
   public async enterRequest(request: string = '\nGET _search') {
     const textArea = await this.getEditorTextArea();
     await textArea.pressKeys(request);
-    await textArea.pressKeys(Key.ENTER);
   }
 
   public async enterText(text: string) {
-    const textArea = await this.getEditorTextArea();
-    await textArea.pressKeys(text);
+    const textArea = await this.testSubjects.find('console-textarea');
+    await textArea.type(text);
   }
 
   private async getEditorTextArea() {
@@ -118,10 +119,22 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.find('console-textarea');
   }
 
-  public async getVisibleTextAt(lineIndex: number) {
+  public async getAllTextLines() {
     const editor = await this.getEditor();
-    const lines = await editor.findAllByClassName('ace_line_group');
+    return await editor.findAllByClassName('ace_line_group');
+  }
 
+  public async getAllVisibleText() {
+    let textString = '';
+    const textLineElements = await this.getAllTextLines();
+    for (let i = 0; i < textLineElements.length; i++) {
+      textString = textString.concat(await textLineElements[i].getVisibleText());
+    }
+    return textString;
+  }
+
+  public async getVisibleTextAt(lineIndex: number) {
+    const lines = await this.getAllTextLines();
     if (lines.length < lineIndex) {
       throw new Error(`No line with index: ${lineIndex}`);
     }
@@ -138,9 +151,16 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clearTextArea() {
-    const textArea = await this.getEditorTextArea();
-    await this.retry.try(async () => {
+    await this.retry.waitForWithTimeout('text area is cleared', 20000, async () => {
+      const textArea = await this.testSubjects.find('console-textarea');
+      await textArea.clickMouseButton();
       await textArea.clearValueWithKeyboard();
+
+      const editor = await this.getEditor();
+      const lines = await editor.findAllByClassName('ace_line_group');
+      // there should be only one empty line after clearing the textarea
+      const text = await lines[lines.length - 1].getVisibleText();
+      return lines.length === 1 && text.trim() === '';
     });
   }
 }

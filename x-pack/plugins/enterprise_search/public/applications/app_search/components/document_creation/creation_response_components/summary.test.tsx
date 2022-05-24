@@ -20,7 +20,7 @@ import {
   SchemaFieldsSummary,
 } from './summary_sections';
 
-import { Summary } from './';
+import { Summary } from '.';
 
 describe('Summary', () => {
   const values = {

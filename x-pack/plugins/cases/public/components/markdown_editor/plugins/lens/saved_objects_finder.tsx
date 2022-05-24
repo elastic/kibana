@@ -35,9 +35,9 @@ import {
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
-import { SimpleSavedObject, CoreStart } from 'src/core/public';
+import { SimpleSavedObject, CoreStart } from '@kbn/core/public';
 
-import { LISTING_LIMIT_SETTING } from '../../../../../../../../src/plugins/saved_objects/public';
+import { LISTING_LIMIT_SETTING } from '@kbn/saved-objects-plugin/public';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
@@ -394,10 +394,7 @@ export class SavedObjectFinderUi extends React.Component<
                   </EuiFilterButton>
                 }
               >
-                <EuiContextMenuPanel
-                  watchedItemProps={['icon', 'disabled']}
-                  items={this.getSortOptions()}
-                />
+                <EuiContextMenuPanel items={this.getSortOptions()} />
               </EuiPopover>
               {this.props.showFilter && (
                 <EuiPopover
@@ -430,7 +427,6 @@ export class SavedObjectFinderUi extends React.Component<
                   }
                 >
                   <EuiContextMenuPanel
-                    watchedItemProps={['icon', 'disabled']}
                     items={this.props.savedObjectMetaData.map((metaData) => (
                       <EuiContextMenuItem
                         key={metaData.type}

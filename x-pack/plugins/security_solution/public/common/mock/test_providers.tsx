@@ -14,7 +14,7 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
-import { Capabilities } from 'src/core/public';
+import { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
 import { createStore, State } from '../store';

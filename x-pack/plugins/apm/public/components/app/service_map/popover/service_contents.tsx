@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { NodeDataDefinition } from 'cytoscape';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import type { ContentsProps } from '.';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -22,7 +23,6 @@ import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { AnomalyDetection } from './anomaly_detection';
 import { StatsList } from './stats_list';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 
 type ServiceNodeReturn =
@@ -35,10 +35,11 @@ const INITIAL_STATE: ServiceNodeReturn = {
 
 export function ServiceContents({
   onFocusClick,
-  nodeData,
+  elementData,
   environment,
   kuery,
 }: ContentsProps) {
+  const nodeData = elementData as NodeDataDefinition;
   const apmRouter = useApmRouter();
 
   const { query } = useApmParams('/*');
@@ -51,18 +52,12 @@ export function ServiceContents({
     throw new Error('Expected rangeFrom and rangeTo to be set');
   }
 
-  const { rangeFrom, rangeTo, comparisonEnabled, comparisonType } = query;
+  const { rangeFrom, rangeTo, comparisonEnabled, offset } = query;
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-  });
-
   const serviceName = nodeData.id!;
+  const serviceGroup = ('serviceGroup' in query && query.serviceGroup) || '';
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -72,25 +67,44 @@ export function ServiceContents({
           {
             params: {
               path: { serviceName },
-              query: { environment, start, end, offset },
+              query: {
+                environment,
+                start,
+                end,
+                offset: comparisonEnabled ? offset : undefined,
+              },
             },
           }
         );
       }
     },
-    [environment, serviceName, start, end, offset]
+    [environment, serviceName, start, end, offset, comparisonEnabled]
   );
 
   const isLoading = status === FETCH_STATUS.LOADING;
 
   const detailsUrl = apmRouter.link('/services/{serviceName}', {
     path: { serviceName },
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      comparisonEnabled,
+      serviceGroup,
+    },
   });
 
   const focusUrl = apmRouter.link('/services/{serviceName}/service-map', {
     path: { serviceName },
-    query: { rangeFrom, rangeTo, environment, kuery },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      serviceGroup,
+      comparisonEnabled,
+    },
   });
 
   const { serviceAnomalyStats } = nodeData;

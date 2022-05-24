@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { getStats, TimeseriesUsage } from './get_usage_collector';
-import type { UsageCollectionSetup } from '../../../../usage_collection/server';
-import type { HomeServerPluginSetup } from '../../../../home/server';
 
 export function registerTimeseriesUsageCollector(
   collectorSet: UsageCollectionSetup,

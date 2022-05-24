@@ -8,8 +8,6 @@
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
-// @ts-ignore
-import fetch from 'node-fetch';
 import { getUrl } from '@kbn/test';
 import moment from 'moment';
 import { FtrService } from '../ftr_provider_context';
@@ -281,6 +279,7 @@ export class CommonPageObject extends FtrService {
         }
         if (appName === 'discover') {
           await this.browser.setLocalStorageItem('data.autocompleteFtuePopover', 'true');
+          await this.browser.setLocalStorageItem('data.newDataViewMenu', 'true');
         }
         return currentUrl;
       });
@@ -517,7 +516,7 @@ export class CommonPageObject extends FtrService {
    */
   formatTime(time: TimeStrings, fmt: string = 'MMM D, YYYY @ HH:mm:ss.SSS') {
     return Object.keys(time)
-      .map((x) => moment(time[x], [fmt]).format())
+      .map((x) => moment.utc(time[x], [fmt]).format())
       .reduce(
         (acc, curr, idx) => {
           if (idx === 0) acc.from = curr;

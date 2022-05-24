@@ -7,16 +7,10 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { TransportRequestParams } from '@elastic/elasticsearch';
-import { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import {
-  CoreSetup,
-  IRouter,
-  KibanaRequest,
-  RequestHandler,
-  RouteMethod,
-} from '../../../../../../../src/core/server';
-import { UI_SETTINGS } from '../../../../../../../src/plugins/data/server';
-import { TimeseriesVisData } from '../../../../../../../src/plugins/vis_types/timeseries/server';
+import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { CoreSetup, IRouter, KibanaRequest, RequestHandler, RouteMethod } from '@kbn/core/server';
+import { UI_SETTINGS } from '@kbn/data-plugin/server';
+import { TimeseriesVisData } from '@kbn/vis-type-timeseries-plugin/server';
 import { TSVBMetricModel } from '../../../../common/inventory_models/types';
 import { InfraConfig } from '../../../plugin';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
@@ -130,7 +124,7 @@ export class KibanaFramework {
     endpoint: string,
     params: CallWithRequestParams
   ) {
-    const { elasticsearch, uiSettings } = requestContext.core;
+    const { elasticsearch, uiSettings } = await requestContext.core;
 
     const includeFrozen = await uiSettings.client.get<boolean>(UI_SETTINGS.SEARCH_INCLUDE_FROZEN);
     if (endpoint === 'msearch') {
@@ -169,6 +163,7 @@ export class KibanaFramework {
         } as estypes.MsearchRequest);
         break;
       case 'fieldCaps':
+        // @ts-expect-error FieldCapsRequest.fields is not optional, CallWithRequestParams.fields is
         apiResult = elasticsearch.client.asCurrentUser.fieldCaps({
           ...params,
         });
@@ -205,9 +200,10 @@ export class KibanaFramework {
   public async getIndexPatternsServiceWithRequestContext(
     requestContext: InfraPluginRequestHandlerContext
   ) {
+    const { savedObjects, elasticsearch } = await requestContext.core;
     return await this.createIndexPatternsService(
-      requestContext.core.savedObjects.client,
-      requestContext.core.elasticsearch.client.asCurrentUser
+      savedObjects.client,
+      elasticsearch.client.asCurrentUser
     );
   }
 

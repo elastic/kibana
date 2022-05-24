@@ -21,6 +21,7 @@ const baseContextMock = {
   expanded: undefined,
   setExpanded: jest.fn(),
   rows: esHits,
+  rowsFlattened: esHits,
   onFilter: jest.fn(),
   indexPattern: indexPatternMock,
   isDarkMode: false,
@@ -57,6 +58,7 @@ describe('document selection', () => {
         <DiscoverGridContext.Provider value={contextMock}>
           <SelectButton
             rowIndex={0}
+            colIndex={0}
             setCellProps={jest.fn()}
             columnId="test"
             isExpanded={false}
@@ -80,6 +82,7 @@ describe('document selection', () => {
         <DiscoverGridContext.Provider value={contextMock}>
           <SelectButton
             rowIndex={0}
+            colIndex={0}
             setCellProps={jest.fn()}
             columnId="test"
             isExpanded={false}
@@ -102,6 +105,7 @@ describe('document selection', () => {
         <DiscoverGridContext.Provider value={contextMock}>
           <SelectButton
             rowIndex={0}
+            colIndex={0}
             setCellProps={jest.fn()}
             columnId="test"
             isExpanded={false}
@@ -125,6 +129,7 @@ describe('document selection', () => {
         <DiscoverGridContext.Provider value={contextMock}>
           <SelectButton
             rowIndex={0}
+            colIndex={0}
             setCellProps={jest.fn()}
             columnId="test"
             isExpanded={false}

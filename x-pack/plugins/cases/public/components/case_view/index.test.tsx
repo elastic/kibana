@@ -18,16 +18,16 @@ import {
   alertComment,
   getAlertUserAction,
   basicCaseMetrics,
+  connectorsMock,
 } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
-import { SpacesApi } from '../../../../spaces/public';
+import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { UseGetCase, useGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { connectorsMock } from '../../containers/configure/mock';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { ConnectorTypes } from '../../../common/api';
 import { Case } from '../../../common/ui';
@@ -217,7 +217,8 @@ describe('CaseView', () => {
 
   it('should redirect case view when resolves to alias match', async () => {
     const resolveAliasId = `${defaultGetCase.data.id}_2`;
-    mockGetCase({ resolveOutcome: 'aliasMatch', resolveAliasId });
+    const resolveAliasPurpose = 'savedObjectConversion' as const;
+    mockGetCase({ resolveOutcome: 'aliasMatch', resolveAliasId, resolveAliasPurpose });
     const wrapper = mount(
       <TestProviders>
         <CaseView {...caseViewProps} />
@@ -226,10 +227,11 @@ describe('CaseView', () => {
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
       expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
-      expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith(
-        `/cases/${resolveAliasId}`,
-        'case'
-      );
+      expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith({
+        path: `/cases/${resolveAliasId}`,
+        aliasPurpose: resolveAliasPurpose,
+        objectNoun: 'case',
+      });
     });
   });
 

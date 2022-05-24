@@ -3,10 +3,10 @@
   "version": "kibana",
   "server": true,
   "ui": true,
-  "requiredPlugins": ["fieldFormats","expressions"],
+  "requiredPlugins": ["fieldFormats", "expressions"],
   "optionalPlugins": ["usageCollection"],
   "extraPublicDirs": ["common"],
-  "requiredBundles": ["kibanaUtils","kibanaReact"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact"],
   "owner": {
     "name": "App Services",
     "githubTeam": "kibana-app-services"

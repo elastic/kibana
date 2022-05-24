@@ -12,7 +12,11 @@ import type {
   PluginStats,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { DEFAULT_REPOSITORY_TYPES, REPOSITORY_PLUGINS_MAP } from '../../../common';
+import {
+  ON_PREM_REPOSITORY_TYPES,
+  REPOSITORY_PLUGINS_MAP,
+  MODULE_REPOSITORY_TYPES,
+} from '../../../common';
 import { Repository, RepositoryType } from '../../../common/types';
 import { RouteDependencies } from '../../types';
 import { addBasePath } from '../helpers';
@@ -39,7 +43,7 @@ export function registerRepositoriesRoutes({
   router.get(
     { path: addBasePath('repositories'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const managedRepositoryName = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
       let repositoryNames: string[] | undefined;
@@ -98,7 +102,7 @@ export function registerRepositoriesRoutes({
   router.get(
     { path: addBasePath('repositories/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
@@ -153,9 +157,12 @@ export function registerRepositoriesRoutes({
   router.get(
     { path: addBasePath('repository_types'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
-      // In ECE/ESS, do not enable the default types
-      const types: RepositoryType[] = isCloudEnabled ? [] : [...DEFAULT_REPOSITORY_TYPES];
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
+      // module repo types are available everywhere out of the box
+      // on-prem repo types are not available on Cloud
+      const types: RepositoryType[] = isCloudEnabled
+        ? [...MODULE_REPOSITORY_TYPES]
+        : [...MODULE_REPOSITORY_TYPES, ...ON_PREM_REPOSITORY_TYPES];
 
       try {
         const { nodes } = await clusterClient.asCurrentUser.nodes.info({
@@ -191,7 +198,7 @@ export function registerRepositoriesRoutes({
       validate: { params: nameParameterSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       try {
@@ -225,7 +232,7 @@ export function registerRepositoriesRoutes({
       validate: { params: nameParameterSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
 
       try {
@@ -267,7 +274,7 @@ export function registerRepositoriesRoutes({
   router.put(
     { path: addBasePath('repositories'), validate: { body: repositorySchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name = '', type = '', settings = {} } = req.body as TypeOf<typeof repositorySchema>;
 
       // Check that repository with the same name doesn't already exist
@@ -306,7 +313,7 @@ export function registerRepositoriesRoutes({
       validate: { body: repositorySchema, params: nameParameterSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
       const { type = '', settings = {} } = req.body as TypeOf<typeof repositorySchema>;
 
@@ -338,7 +345,7 @@ export function registerRepositoriesRoutes({
   router.delete(
     { path: addBasePath('repositories/{name}'), validate: { params: nameParameterSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { name } = req.params as TypeOf<typeof nameParameterSchema>;
       const repositoryNames = name.split(',');
 

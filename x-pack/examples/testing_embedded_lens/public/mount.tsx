@@ -9,28 +9,32 @@ import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { EuiCallOut } from '@elastic/eui';
 
-import type { CoreSetup, AppMountParameters } from 'kibana/public';
+import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { StartDependencies } from './plugin';
 
 export const mount =
   (coreSetup: CoreSetup<StartDependencies>) =>
-  async ({ element }: AppMountParameters) => {
+  async ({ element, history }: AppMountParameters) => {
     const [core, plugins] = await coreSetup.getStartServices();
     const { App } = await import('./app');
+    const preloadedVisualizationAttributes = history.location
+      ?.state as TypedLensByValueInput['attributes'];
 
-    const defaultDataView = await plugins.data.indexPatterns.getDefault();
+    const dataView = await plugins.data.indexPatterns.getDefault();
     const stateHelpers = await plugins.lens.stateHelperApi();
 
     const i18nCore = core.i18n;
 
     const reactElement = (
       <i18nCore.Context>
-        {defaultDataView ? (
+        {dataView ? (
           <App
             core={core}
             plugins={plugins}
-            defaultDataView={defaultDataView}
+            defaultDataView={dataView}
             stateHelpers={stateHelpers}
+            preloadedVisualization={preloadedVisualizationAttributes}
           />
         ) : (
           <EuiCallOut

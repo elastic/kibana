@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchListItemArraySchema, Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import {
@@ -30,6 +30,9 @@ export const searchListItemByValues = async ({
   type,
   value,
 }: SearchListItemByValuesOptions): Promise<SearchListItemArraySchema> => {
+  // TODO: Will need to address this when we switch over to
+  // using PIT, don't want it to get lost
+  // https://github.com/elastic/kibana/issues/103944
   const response = await esClient.search<SearchEsListItemSchema>({
     body: {
       query: {

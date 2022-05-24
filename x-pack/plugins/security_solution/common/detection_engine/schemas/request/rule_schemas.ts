@@ -60,12 +60,16 @@ import {
   enabled,
   outcome,
   alias_target_id,
+  alias_purpose,
   updated_at,
   updated_by,
   created_at,
   created_by,
   namespace,
   ruleExecutionSummary,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../common';
 
 export const createSchema = <
@@ -149,6 +153,7 @@ const baseParams = {
     license,
     outcome,
     alias_target_id,
+    alias_purpose,
     output_index,
     timeline_id,
     timeline_title,
@@ -217,7 +222,7 @@ const {
   patch: eqlPatchParams,
   response: eqlResponseParams,
 } = buildAPISchemas(eqlRuleParams);
-export { eqlCreateParams };
+export { eqlCreateParams, eqlResponseParams };
 
 const threatMatchRuleParams = {
   required: {
@@ -410,6 +415,14 @@ const responseRequiredFields = {
   updated_by,
   created_at,
   created_by,
+
+  // NOTE: For now, Related Integrations, Required Fields and Setup Guide are supported for prebuilt
+  // rules only. We don't want to allow users to edit these 3 fields via the API. If we added them
+  // to baseParams.defaultable, they would become a part of the request schema as optional fields.
+  // This is why we add them here, in order to add them only to the response schema.
+  related_integrations: RelatedIntegrationArray,
+  required_fields: RequiredFieldArray,
+  setup: SetupGuide,
 };
 
 const responseOptionalFields = {
@@ -428,9 +441,11 @@ export interface RulePreviewLogs {
   errors: string[];
   warnings: string[];
   startedAt?: string;
+  duration: number;
 }
 
 export interface PreviewResponse {
   previewId: string | undefined;
   logs: RulePreviewLogs[] | undefined;
+  isAborted: boolean | undefined;
 }

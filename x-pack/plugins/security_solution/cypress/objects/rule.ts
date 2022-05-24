@@ -7,7 +7,7 @@
 
 import type { RulesSchema } from '../../common/detection_engine/schemas/response';
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
+import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import { getTimeline, CompleteTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 
@@ -59,6 +59,7 @@ export interface CustomRule {
   timeline: CompleteTimeline;
   maxSignals: number;
   buildingBlockType?: string;
+  exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -104,13 +105,14 @@ export interface MachineLearningRule {
 
 export const getIndexPatterns = (): string[] => [
   'apm-*-transaction*',
-  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
   'logs-*',
   'packetbeat-*',
+  'traces-apm*',
   'winlogbeat-*',
+  '-*elastic-cloud-logs-*',
 ];
 
 export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
@@ -163,6 +165,8 @@ const getSeverityOverride4 = (): SeverityOverride => ({
   sourceValue: 'auditbeat',
 });
 
+// Default interval is 1m, our tests config overwrite this to 1s
+// See https://github.com/elastic/kibana/pull/125396 for details
 const getRunsEvery = (): Interval => ({
   interval: '1',
   timeType: 'Seconds',
@@ -309,7 +313,7 @@ export const getNewThresholdRule = (): ThresholdRule => ({
   mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
   thresholdField: 'host.name',
-  threshold: '10',
+  threshold: '1',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
   timeline: getTimeline(),
@@ -333,7 +337,7 @@ export const getMachineLearningRule = (): MachineLearningRule => ({
 });
 
 export const getEqlRule = (): CustomRule => ({
-  customQuery: 'any where process.name == "which"',
+  customQuery: 'any where process.name == "zsh"',
   name: 'New EQL Rule',
   index: getIndexPatterns(),
   description: 'New EQL rule description.',
@@ -371,8 +375,8 @@ export const getCCSEqlRule = (): CustomRule => ({
 export const getEqlSequenceRule = (): CustomRule => ({
   customQuery:
     'sequence with maxspan=30s\
-     [any where process.name == "which"]\
-     [any where process.name == "xargs"]',
+     [any where agent.name == "test.local"]\
+     [any where host.name == "test.local"]',
   name: 'New EQL Sequence Rule',
   index: getIndexPatterns(),
   description: 'New EQL rule description.',
@@ -438,7 +442,9 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     severity,
     query,
   } = ruleResponse.body;
-  const rule = {
+
+  // NOTE: Order of the properties in this object matters for the tests to work.
+  const rule: RulesSchema = {
     id,
     updated_at: updatedAt,
     updated_by: updatedBy,
@@ -465,6 +471,9 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     version: 1,
     exceptions_list: [],
     immutable: false,
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
     type: 'query',
     language: 'kuery',
     index: getIndexPatterns(),
@@ -472,6 +481,8 @@ export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>
     throttle: 'no_actions',
     actions: [],
   };
+
+  // NOTE: Order of the properties in this object matters for the tests to work.
   const details = {
     exported_count: 1,
     exported_rules_count: 1,

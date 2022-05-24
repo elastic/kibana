@@ -4,13 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { AlertCluster, AlertClusterHealth } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 
 export async function fetchClusterHealth(
   esClient: ElasticsearchClient,
@@ -21,13 +21,15 @@ export async function fetchClusterHealth(
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'cluster_stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: CCS_REMOTE_PATTERN,
   });
   const params = {
     index: indexPatterns,
     filter_path: [
       'hits.hits._source.cluster_state.status',
+      'hits.hits._source.elasticsearch.cluster.stats.status',
       'hits.hits._source.cluster_uuid',
+      'hits.hits._source.elasticsearch.cluster.id',
       'hits.hits._index',
     ],
     body: {
@@ -48,7 +50,7 @@ export async function fetchClusterHealth(
                 cluster_uuid: clusters.map((cluster) => cluster.clusterUuid),
               },
             },
-            createDatasetFilter('cluster_stats', 'elasticsearch.cluster_stats'),
+            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: {
                 timestamp: {
@@ -77,8 +79,9 @@ export async function fetchClusterHealth(
   const response = await esClient.search<ElasticsearchSource>(params);
   return (response.hits?.hits ?? []).map((hit) => {
     return {
-      health: hit._source!.cluster_state?.status,
-      clusterUuid: hit._source!.cluster_uuid,
+      health:
+        hit._source!.cluster_state?.status || hit._source!.elasticsearch?.cluster?.stats?.status,
+      clusterUuid: hit._source!.cluster_uuid || hit._source!.elasticsearch?.cluster?.id,
       ccs: hit._index.includes(':') ? hit._index.split(':')[0] : undefined,
     } as AlertClusterHealth;
   });

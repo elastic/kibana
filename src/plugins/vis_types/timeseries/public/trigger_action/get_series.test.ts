@@ -17,7 +17,7 @@ describe('getSeries', () => {
         field: 'day_of_week_i',
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'average',
@@ -44,7 +44,7 @@ describe('getSeries', () => {
         },
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -71,7 +71,7 @@ describe('getSeries', () => {
         field: '123456',
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -79,6 +79,32 @@ describe('getSeries', () => {
         isFullReference: true,
         params: {
           formula: 'overall_max(max(day_of_week_i))',
+        },
+      },
+    ]);
+  });
+
+  test('should return the correct formula config for a positive only function', () => {
+    const metric = [
+      {
+        field: 'day_of_week_i',
+        id: '123456',
+        type: 'max',
+      },
+      {
+        id: '891011',
+        type: 'positive_only',
+        field: '123456',
+      },
+    ] as Metric[];
+    const config = getSeries(metric, 1);
+    expect(config).toStrictEqual([
+      {
+        agg: 'formula',
+        fieldName: 'document',
+        isFullReference: true,
+        params: {
+          formula: 'clamp(max(day_of_week_i), 0, max(day_of_week_i))',
         },
       },
     ]);
@@ -96,7 +122,7 @@ describe('getSeries', () => {
         field: '123456',
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'cumulative_sum',
@@ -121,7 +147,7 @@ describe('getSeries', () => {
         field: '123456',
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -148,7 +174,7 @@ describe('getSeries', () => {
         unit: '1m',
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'differences',
@@ -176,7 +202,7 @@ describe('getSeries', () => {
         window: 6,
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'moving_average',
@@ -220,7 +246,7 @@ describe('getSeries', () => {
         window: 6,
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'formula',
@@ -267,7 +293,7 @@ describe('getSeries', () => {
         ],
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'percentile',
@@ -294,6 +320,75 @@ describe('getSeries', () => {
         isFullReference: false,
         params: {
           percentile: '70',
+        },
+      },
+    ]);
+  });
+
+  test('should return the correct formula config for a top_hit size 1 aggregation', () => {
+    const metric = [
+      {
+        id: '12345',
+        type: 'top_hit',
+        field: 'day_of_week_i',
+        size: 1,
+        order_by: 'timestamp',
+      },
+    ] as Metric[];
+    const config = getSeries(metric, 1);
+    expect(config).toStrictEqual([
+      {
+        agg: 'last_value',
+        fieldName: 'day_of_week_i',
+        isFullReference: false,
+        params: {
+          sortField: 'timestamp',
+        },
+      },
+    ]);
+  });
+
+  test('should return null for a top_hit size >1 aggregation', () => {
+    const metric = [
+      {
+        id: '12345',
+        type: 'top_hit',
+        field: 'day_of_week_i',
+        size: 2,
+      },
+    ] as Metric[];
+    const config = getSeries(metric, 1);
+    expect(config).toBeNull();
+  });
+
+  test('should return null for a static aggregation with 1 layer', () => {
+    const metric = [
+      {
+        id: '12345',
+        type: 'static',
+        value: '10',
+      },
+    ] as Metric[];
+    const config = getSeries(metric, 1);
+    expect(config).toBeNull();
+  });
+
+  test('should return the correct config for a static aggregation with 2 layers', () => {
+    const metric = [
+      {
+        id: '12345',
+        type: 'static',
+        value: '10',
+      },
+    ] as Metric[];
+    const config = getSeries(metric, 2);
+    expect(config).toStrictEqual([
+      {
+        agg: 'static_value',
+        fieldName: 'document',
+        isFullReference: true,
+        params: {
+          value: '10',
         },
       },
     ]);
@@ -353,7 +448,7 @@ describe('getSeries', () => {
         ],
       },
     ] as Metric[];
-    const config = getSeries(metric);
+    const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
         agg: 'formula',

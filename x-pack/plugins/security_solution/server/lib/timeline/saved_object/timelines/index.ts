@@ -7,10 +7,8 @@
 
 import { getOr } from 'lodash/fp';
 
-import {
-  SavedObjectsClientContract,
-  SavedObjectsFindOptions,
-} from '../../../../../../../../src/core/server';
+import { SavedObjectsClientContract, SavedObjectsFindOptions } from '@kbn/core/server';
+import { AuthenticatedUser } from '@kbn/security-plugin/server';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import { NoteSavedObject } from '../../../../../common/types/timeline/note';
 import { PinnedEventSavedObject } from '../../../../../common/types/timeline/pinned_event';
@@ -37,9 +35,8 @@ import * as note from '../notes/saved_object';
 import * as pinnedEvent from '../pinned_events';
 import { convertSavedObjectToSavedTimeline } from './convert_saved_object_to_savedtimeline';
 import { pickSavedTimeline } from './pick_saved_timeline';
-import { timelineSavedObjectType } from '../../saved_object_mappings/';
+import { timelineSavedObjectType } from '../../saved_object_mappings';
 import { draftTimelineDefaults } from '../../utils/default_timeline';
-import { AuthenticatedUser } from '../../../../../../security/server';
 import { Maybe } from '../../../../../common/search_strategy';
 import { timelineFieldsMigrator } from './field_migrator';
 export { pickSavedTimeline } from './pick_saved_timeline';
@@ -383,7 +380,7 @@ export const persistTimeline = async (
   timeline: SavedTimeline,
   isImmutable?: boolean
 ): Promise<ResponseTimeline> => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const userInfo = isImmutable ? ({ username: 'Elastic' } as AuthenticatedUser) : request.user;
   try {
     if (timelineId == null) {
@@ -501,7 +498,7 @@ const updatePartialSavedTimeline = async (
   timelineId: string,
   timeline: SavedTimeline
 ) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const currentSavedTimeline = await savedObjectsClient.get<SavedTimeline>(
     timelineSavedObjectType,
     timelineId
@@ -566,7 +563,7 @@ export const resetTimeline = async (
 };
 
 export const deleteTimeline = async (request: FrameworkRequest, timelineIds: string[]) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   await Promise.all(
     timelineIds.map((timelineId) =>
@@ -580,7 +577,7 @@ export const deleteTimeline = async (request: FrameworkRequest, timelineIds: str
 };
 
 const resolveBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const { saved_object: savedObject, ...resolveAttributes } =
     await savedObjectsClient.resolve<TimelineWithoutExternalRefs>(
       timelineSavedObjectType,
@@ -618,7 +615,7 @@ const resolveSavedTimeline = async (request: FrameworkRequest, timelineId: strin
 };
 
 const getBasicSavedTimeline = async (request: FrameworkRequest, timelineId: string) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   const savedObject = await savedObjectsClient.get<TimelineWithoutExternalRefs>(
     timelineSavedObjectType,
     timelineId
@@ -647,7 +644,7 @@ const getSavedTimeline = async (request: FrameworkRequest, timelineId: string) =
 
 const getAllSavedTimeline = async (request: FrameworkRequest, options: SavedObjectsFindOptions) => {
   const userName = request.user?.username ?? UNAUTHENTICATED_USER;
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
 
   const savedObjects = await savedObjectsClient.find<TimelineWithoutExternalRefs>(options);
 
@@ -696,7 +693,7 @@ export const getSelectedTimelines = async (
   request: FrameworkRequest,
   timelineIds?: string[] | null
 ) => {
-  const savedObjectsClient = request.context.core.savedObjects.client;
+  const savedObjectsClient = (await request.context.core).savedObjects.client;
   let exportedIds = timelineIds;
   if (timelineIds == null || timelineIds.length === 0) {
     const { timeline: savedAllTimelines } = await getAllTimeline(

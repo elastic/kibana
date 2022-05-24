@@ -6,13 +6,14 @@
  */
 
 import { lazy } from 'react';
-import { PackagePolicyEditExtensionComponent } from '../../../fleet/public';
+import { PackagePolicyEditExtensionComponent } from '@kbn/fleet-plugin/public';
 
 export const LazyOsqueryManagedPolicyEditExtension = lazy<PackagePolicyEditExtensionComponent>(
   async () => {
     const { OsqueryManagedPolicyCreateImportExtension } = await import(
       './osquery_managed_policy_create_import_extension'
     );
+
     return {
       default: OsqueryManagedPolicyCreateImportExtension,
     };

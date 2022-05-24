@@ -13,45 +13,53 @@ import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart } from '@elastic/eui';
 import { Filter, onlyDisabledFiltersChanged } from '@kbn/es-query';
-import type { SavedObjectAttributes, KibanaExecutionContext } from 'kibana/public';
-import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { Query, TimefilterContract, TimeRange } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
-  IndexPattern,
-  TimeRange,
-  Query,
-  TimefilterContract,
-} from '../../../../plugins/data/public';
-import {
+  Adapters,
+  AttributeService,
+  Embeddable,
   EmbeddableInput,
   EmbeddableOutput,
-  Embeddable,
   IContainer,
-  Adapters,
-  SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
-  AttributeService,
-} from '../../../../plugins/embeddable/public';
+  SavedObjectEmbeddableInput,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
 import {
-  IExpressionLoaderParams,
+  ExpressionAstExpression,
   ExpressionLoader,
   ExpressionRenderError,
-  ExpressionAstExpression,
-} from '../../../../plugins/expressions/public';
-import { Vis, SerializedVis } from '../vis';
-import { getExpressions, getTheme, getUiActions } from '../services';
+  IExpressionLoaderParams,
+} from '@kbn/expressions-plugin/public';
+import type { RenderMode } from '@kbn/expressions-plugin';
+import { VisualizationMissedDataViewError } from '../components/visualization_missed_data_view_error';
+import VisualizationError from '../components/visualization_error';
+import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
+import { SerializedVis, Vis } from '../vis';
+import {
+  getApplication,
+  getExecutionContext,
+  getExpressions,
+  getTheme,
+  getUiActions,
+} from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import { getSavedVisualization } from '../utils/saved_visualize_utils';
+import {
+  getSavedVisualization,
+  shouldShowMissedDataViewError,
+} from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
-import type { RenderMode } from '../../../expressions';
 
 const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
 
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
-  indexPatterns?: IndexPattern[];
+  indexPatterns?: DataView[];
   editPath: string;
   editUrl: string;
   capabilities: { visualizeSave: boolean; dashboardSave: boolean };
@@ -74,7 +82,7 @@ export interface VisualizeOutput extends EmbeddableOutput {
   editPath: string;
   editApp: string;
   editUrl: string;
-  indexPatterns?: IndexPattern[];
+  indexPatterns?: DataView[];
   visTypeName: string;
 }
 
@@ -97,6 +105,7 @@ export class VisualizeEmbeddable
   private filters?: Filter[];
   private searchSessionId?: string;
   private syncColors?: boolean;
+  private syncTooltips?: boolean;
   private embeddableTitle?: string;
   private visCustomizations?: Pick<VisualizeInput, 'vis' | 'table'>;
   private subscriptions: Subscription[] = [];
@@ -139,6 +148,7 @@ export class VisualizeEmbeddable
     this.deps = deps;
     this.timefilter = timefilter;
     this.syncColors = this.input.syncColors;
+    this.syncTooltips = this.input.syncTooltips;
     this.searchSessionId = this.input.searchSessionId;
     this.query = this.input.query;
     this.embeddableTitle = this.getTitle();
@@ -261,6 +271,11 @@ export class VisualizeEmbeddable
       dirty = true;
     }
 
+    if (this.syncTooltips !== this.input.syncTooltips) {
+      this.syncTooltips = this.input.syncTooltips;
+      dirty = true;
+    }
+
     if (this.embeddableTitle !== this.getTitle()) {
       this.embeddableTitle = this.getTitle();
       dirty = true;
@@ -378,6 +393,26 @@ export class VisualizeEmbeddable
     this.subscriptions.push(this.handler.loading$.subscribe(this.onContainerLoading));
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
+    this.subscriptions.push(
+      this.getOutput$().subscribe(({ error }) => {
+        if (error) {
+          if (error.original && shouldShowMissedDataViewError(error.original)) {
+            render(
+              <VisualizationMissedDataViewError
+                viewMode={this.input.viewMode ?? ViewMode.VIEW}
+                renderMode={this.input.renderMode ?? 'view'}
+                error={error.original}
+                application={getApplication()}
+              />,
+              this.domNode
+            );
+          } else {
+            render(<VisualizationError error={error} />, this.domNode);
+          }
+        }
+      })
+    );
+
     await this.updateHandler();
   }
 
@@ -398,20 +433,18 @@ export class VisualizeEmbeddable
   };
 
   private async updateHandler() {
-    const parentContext = this.parent?.getInput().executionContext;
+    const parentContext = this.parent?.getInput().executionContext || getExecutionContext().get();
     const child: KibanaExecutionContext = {
       type: 'visualization',
-      name: this.vis.type.title,
-      id: this.vis.id ?? 'an_unsaved_vis',
+      name: this.vis.type.name,
+      id: this.vis.id ?? 'new',
       description: this.vis.title || this.input.title || this.vis.type.name,
       url: this.output.editUrl,
     };
-    const context = parentContext
-      ? {
-          ...parentContext,
-          child,
-        }
-      : child;
+    const context = {
+      ...parentContext,
+      child,
+    };
 
     const expressionParams: IExpressionLoaderParams = {
       searchContext: {
@@ -424,6 +457,7 @@ export class VisualizeEmbeddable
       },
       searchSessionId: this.input.searchSessionId,
       syncColors: this.input.syncColors,
+      syncTooltips: this.input.syncTooltips,
       uiState: this.vis.uiState,
       interactive: !this.input.disableTriggers,
       inspectorAdapters: this.inspectorAdapters,
@@ -434,11 +468,16 @@ export class VisualizeEmbeddable
     }
     this.abortController = new AbortController();
     const abortController = this.abortController;
-    this.expression = await toExpressionAst(this.vis, {
-      timefilter: this.timefilter,
-      timeRange: this.timeRange,
-      abortSignal: this.abortController!.signal,
-    });
+
+    try {
+      this.expression = await toExpressionAst(this.vis, {
+        timefilter: this.timefilter,
+        timeRange: this.timeRange,
+        abortSignal: this.abortController!.signal,
+      });
+    } catch (e) {
+      this.onContainerError(e);
+    }
 
     if (this.handler && !abortController.signal.aborted) {
       await this.handler.update(this.expression, expressionParams);

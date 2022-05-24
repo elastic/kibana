@@ -52,34 +52,26 @@ export default function (providerContext: FtrProviderContext) {
       // the index template composed_of has the correct component templates in the correct order
       const indexTemplate = indexTemplateResponse.index_templates[0].index_template;
       expect(indexTemplate.composed_of).to.eql([
-        `${templateName}@mappings`,
-        `${templateName}@settings`,
+        `${templateName}@package`,
         `${templateName}@custom`,
-        '.fleet_component_template-1',
+        '.fleet_globals-1',
+        '.fleet_agent_id_verification-1',
       ]);
 
       ({ body } = await es.transport.request(
         {
           method: 'GET',
-          path: `/_component_template/${templateName}@mappings`,
+          path: `/_component_template/${templateName}@package`,
         },
         {
           meta: true,
         }
       ));
 
-      // The mappings override provided in the package is set in the mappings component template
+      // The mappings override provided in the package is set in the package component template
       expect(body.component_templates[0].component_template.template.mappings.dynamic).to.be(false);
 
-      ({ body } = await es.transport.request(
-        {
-          method: 'GET',
-          path: `/_component_template/${templateName}@settings`,
-        },
-        { meta: true }
-      ));
-
-      // The settings override provided in the package is set in the settings component template
+      // The settings override provided in the package is set in the package component template
       expect(
         body.component_templates[0].component_template.template.settings.index.lifecycle.name
       ).to.be('reference');
@@ -121,11 +113,7 @@ export default function (providerContext: FtrProviderContext) {
           // body: indexTemplate, // I *think* this should work, but it doesn't
           body: {
             index_patterns: [`${templateName}-*`],
-            composed_of: [
-              `${templateName}@mappings`,
-              `${templateName}@settings`,
-              `${templateName}@custom`,
-            ],
+            composed_of: [`${templateName}@package`, `${templateName}@custom`],
           },
         },
         { meta: true }
@@ -151,6 +139,24 @@ export default function (providerContext: FtrProviderContext) {
           },
           mappings: {
             dynamic: 'false',
+            properties: {
+              '@timestamp': {
+                type: 'date',
+              },
+              data_stream: {
+                properties: {
+                  dataset: {
+                    type: 'constant_keyword',
+                  },
+                  namespace: {
+                    type: 'constant_keyword',
+                  },
+                  type: {
+                    type: 'constant_keyword',
+                  },
+                },
+              },
+            },
           },
           aliases: {},
         },

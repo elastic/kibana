@@ -7,7 +7,7 @@
  */
 
 import { RetryableEsClientError } from './catch_retryable_es_client_errors';
-import { DocumentsTransformFailed } from '../../migrations/core/migrate_raw_docs';
+import { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 
 export {
   BATCH_SIZE,
@@ -20,6 +20,9 @@ export {
 export type { RetryableEsClientError };
 
 // actions/* imports
+export type { InitActionParams, IncompatibleClusterRoutingAllocation } from './initialize_action';
+export { initAction } from './initialize_action';
+
 export type { FetchIndexResponse, FetchIndicesParams } from './fetch_indices';
 export { fetchIndices } from './fetch_indices';
 
@@ -32,8 +35,11 @@ export { removeWriteBlock } from './remove_write_block';
 export type { CloneIndexResponse, CloneIndexParams } from './clone_index';
 export { cloneIndex } from './clone_index';
 
-export type { WaitForIndexStatusYellowParams } from './wait_for_index_status_yellow';
-import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
+export type {
+  WaitForIndexStatusYellowParams,
+  IndexNotYellowTimeout,
+} from './wait_for_index_status_yellow';
+import { IndexNotYellowTimeout, waitForIndexStatusYellow } from './wait_for_index_status_yellow';
 
 export type { WaitForTaskResponse, WaitForTaskCompletionTimeout } from './wait_for_task';
 import { waitForTask, WaitForTaskCompletionTimeout } from './wait_for_task';
@@ -81,6 +87,9 @@ export type {
 export { updateAndPickupMappings } from './update_and_pickup_mappings';
 
 import type { UnknownDocsFound } from './check_for_unknown_docs';
+import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
+import { ClusterShardLimitExceeded } from './create_index';
+
 export type {
   CheckForUnknownDocsParams,
   UnknownDocsFound,
@@ -143,6 +152,9 @@ export interface ActionErrorTypeMap {
   documents_transform_failed: DocumentsTransformFailed;
   request_entity_too_large_exception: RequestEntityTooLargeException;
   unknown_docs_found: UnknownDocsFound;
+  incompatible_cluster_routing_allocation: IncompatibleClusterRoutingAllocation;
+  index_not_yellow_timeout: IndexNotYellowTimeout;
+  cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
 }
 
 /**

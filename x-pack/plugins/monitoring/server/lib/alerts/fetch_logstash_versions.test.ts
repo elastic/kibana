@@ -6,7 +6,7 @@
  */
 
 import { fetchLogstashVersions } from './fetch_logstash_versions';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../static_globals', () => ({
   Globals: {
@@ -107,6 +107,7 @@ describe('fetchLogstashVersions', () => {
                 bool: {
                   should: [
                     { term: { type: 'logstash_stats' } },
+                    { term: { 'metricset.name': 'node_stats' } },
                     { term: { 'data_stream.dataset': 'logstash.node_stats' } },
                   ],
                   minimum_should_match: 1,

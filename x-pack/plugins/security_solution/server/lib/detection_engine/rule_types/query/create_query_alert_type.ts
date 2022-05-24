@@ -20,7 +20,6 @@ export const createQueryAlertType = (
   return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
-    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown) => {

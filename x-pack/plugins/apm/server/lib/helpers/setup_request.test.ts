@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '../../../../../../src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { setupRequest } from './setup_request';
 import { APMConfig } from '../..';
 import { APMRouteHandlerResources } from '../../routes/typings';
 import { ProcessorEvent } from '../../../common/processor_event';
-import { PROCESSOR_EVENT } from '../../../common/elasticsearch_fieldnames';
 import { getApmIndices } from '../../routes/settings/apm_indices/get_apm_indices';
 
 jest.mock('../../routes/settings/apm_indices/get_apm_indices', () => ({
@@ -109,7 +108,7 @@ describe('setupRequest', () => {
       const { apmEventClient } = await setupRequest(mockResources);
       await apmEventClient.search('foo', {
         apm: { events: [ProcessorEvent.transaction] },
-        body: { foo: 'bar' },
+        body: { size: 10 },
       });
 
       expect(
@@ -118,13 +117,10 @@ describe('setupRequest', () => {
         {
           index: ['apm-*'],
           body: {
-            foo: 'bar',
+            size: 10,
             query: {
               bool: {
-                filter: [
-                  { terms: { 'processor.event': ['transaction'] } },
-                  { range: { 'observer.version_major': { gte: 7 } } },
-                ],
+                filter: [{ terms: { 'processor.event': ['transaction'] } }],
               },
             },
           },
@@ -161,94 +157,6 @@ describe('setupRequest', () => {
       );
     });
   });
-
-  describe('with a bool filter', () => {
-    it('adds a range filter for `observer.version_major` to the existing filter', async () => {
-      const mockResources = getMockResources();
-      const { apmEventClient } = await setupRequest(mockResources);
-      await apmEventClient.search('foo', {
-        apm: {
-          events: [ProcessorEvent.transaction],
-        },
-        body: {
-          query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
-        },
-      });
-      const params =
-        mockResources.context.core.elasticsearch.client.asCurrentUser.search
-          .mock.calls[0][0];
-      // @ts-expect-error missing body definition
-      expect(params.body).toEqual({
-        query: {
-          bool: {
-            filter: [
-              { term: { field: 'someTerm' } },
-              { terms: { [PROCESSOR_EVENT]: ['transaction'] } },
-              { range: { 'observer.version_major': { gte: 7 } } },
-            ],
-          },
-        },
-      });
-    });
-
-    it('does not add a range filter for `observer.version_major` if includeLegacyData=true', async () => {
-      const mockResources = getMockResources();
-      const { apmEventClient } = await setupRequest(mockResources);
-      await apmEventClient.search('foo', {
-        apm: {
-          events: [ProcessorEvent.error],
-          includeLegacyData: true,
-        },
-        body: {
-          query: { bool: { filter: [{ term: { field: 'someTerm' } }] } },
-        },
-      });
-      const params =
-        mockResources.context.core.elasticsearch.client.asCurrentUser.search
-          .mock.calls[0][0];
-      // @ts-expect-error missing body definition
-      expect(params.body).toEqual({
-        query: {
-          bool: {
-            filter: [
-              { term: { field: 'someTerm' } },
-              {
-                terms: {
-                  [PROCESSOR_EVENT]: ['error'],
-                },
-              },
-            ],
-          },
-        },
-      });
-    });
-  });
-});
-
-describe('without a bool filter', () => {
-  it('adds a range filter for `observer.version_major`', async () => {
-    const mockResources = getMockResources();
-    const { apmEventClient } = await setupRequest(mockResources);
-    await apmEventClient.search('foo', {
-      apm: {
-        events: [ProcessorEvent.error],
-      },
-    });
-    const params =
-      mockResources.context.core.elasticsearch.client.asCurrentUser.search.mock
-        .calls[0][0];
-    // @ts-expect-error missing body definition
-    expect(params.body).toEqual({
-      query: {
-        bool: {
-          filter: [
-            { terms: { [PROCESSOR_EVENT]: ['error'] } },
-            { range: { 'observer.version_major': { gte: 7 } } },
-          ],
-        },
-      },
-    });
-  });
 });
 
 describe('with includeFrozen=false', () => {
@@ -264,6 +172,7 @@ describe('with includeFrozen=false', () => {
       apm: {
         events: [],
       },
+      body: { size: 10 },
     });
 
     const params =
@@ -285,6 +194,7 @@ describe('with includeFrozen=true', () => {
 
     await apmEventClient.search('foo', {
       apm: { events: [] },
+      body: { size: 10 },
     });
 
     const params =

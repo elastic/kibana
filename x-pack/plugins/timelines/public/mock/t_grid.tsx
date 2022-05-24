@@ -123,6 +123,7 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
     {
       columnId: '@timestamp',
       columnType: 'date',
+      esTypes: ['date'],
       sortDirection: 'desc',
     },
   ],
@@ -134,7 +135,6 @@ export const tGridIntegratedProps: TGridIntegratedProps = {
 export const eventRenderedProps: EventRenderedViewProps = {
   alertToolbar: <></>,
   appId: '',
-  browserFields: mockBrowserFields,
   events: mockTimelineData,
   leadingControlColumns: [],
   onChangePage: () => null,

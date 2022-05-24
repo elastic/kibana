@@ -32,7 +32,7 @@ import {
 import type { MockedFleetStartServices, TestRenderer } from '../../../../../../mock';
 import { createIntegrationsTestRendererMock } from '../../../../../../mock';
 
-import { Detail } from './index';
+import { Detail } from '.';
 
 describe('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
@@ -509,7 +509,6 @@ const mockApiCalls = (
       ],
       owner: { github: 'elastic/integrations-services' },
       latestVersion: '0.3.7',
-      removable: true,
       status: 'installed',
     },
   } as GetInfoResponse;
@@ -527,7 +526,11 @@ The logs were tested with version 1.10.
 On Windows, the module was tested with Nginx installed from the Chocolatey repository.
 `;
 
-  const agentsSetupResponse: GetFleetStatusResponse = { isReady: true, missing_requirements: [] };
+  const agentsSetupResponse: GetFleetStatusResponse = {
+    isReady: true,
+    missing_requirements: [],
+    missing_optional_features: [],
+  };
 
   const packagePoliciesResponse: GetPackagePoliciesResponse = {
     items: [

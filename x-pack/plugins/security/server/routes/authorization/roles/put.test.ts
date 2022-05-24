@@ -6,11 +6,11 @@
  */
 
 import type { Type } from '@kbn/config-schema';
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/server';
+import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
-import { KibanaFeature } from '../../../../../features/server';
-import type { LicenseCheck } from '../../../../../licensing/server';
 import { GLOBAL_RESOURCE } from '../../../../common/constants';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
 import { routeDefinitionParamsMock } from '../../index.mock';
@@ -75,19 +75,23 @@ const putRoleTest = (
     mockRouteDefinitionParams.authz.applicationName = application;
     mockRouteDefinitionParams.authz.privileges.get.mockReturnValue(privilegeMap);
 
-    const mockContext = {
-      core: coreMock.createRequestHandlerContext(),
-      licensing: { license: { check: jest.fn().mockReturnValue(licenseCheckResult) } } as any,
-    };
+    const mockCoreContext = coreMock.createRequestHandlerContext();
+    const mockLicensingContext = {
+      license: { check: jest.fn().mockReturnValue(licenseCheckResult) },
+    } as any;
+    const mockContext = coreMock.createCustomRequestHandlerContext({
+      core: mockCoreContext,
+      licensing: mockLicensingContext,
+    });
 
     if (apiResponses?.get) {
-      mockContext.core.elasticsearch.client.asCurrentUser.security.getRole.mockResponseImplementationOnce(
+      mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole.mockResponseImplementationOnce(
         (() => ({ body: apiResponses?.get() })) as any
       );
     }
 
     if (apiResponses?.put) {
-      mockContext.core.elasticsearch.client.asCurrentUser.security.putRole.mockResponseImplementationOnce(
+      mockCoreContext.elasticsearch.client.asCurrentUser.security.putRole.mockResponseImplementationOnce(
         (() => ({ body: apiResponses?.put() })) as any
       );
     }
@@ -154,15 +158,15 @@ const putRoleTest = (
 
     if (asserts.apiArguments?.get) {
       expect(
-        mockContext.core.elasticsearch.client.asCurrentUser.security.getRole
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.getRole
       ).toHaveBeenCalledWith(...asserts.apiArguments?.get);
     }
     if (asserts.apiArguments?.put) {
       expect(
-        mockContext.core.elasticsearch.client.asCurrentUser.security.putRole
+        mockCoreContext.elasticsearch.client.asCurrentUser.security.putRole
       ).toHaveBeenCalledWith(...asserts.apiArguments?.put);
     }
-    expect(mockContext.licensing.license.check).toHaveBeenCalledWith('security', 'basic');
+    expect(mockLicensingContext.license.check).toHaveBeenCalledWith('security', 'basic');
 
     if (asserts.recordSubFeaturePrivilegeUsage) {
       expect(

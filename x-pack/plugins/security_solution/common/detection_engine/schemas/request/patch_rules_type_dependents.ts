@@ -6,7 +6,6 @@
  */
 
 import { isMlRule } from '../../../machine_learning/helpers';
-import { isThresholdRule } from '../../utils';
 import { PatchRulesSchema } from './patch_rules_schema';
 
 export const validateQuery = (rule: PatchRulesSchema): string[] => {
@@ -70,25 +69,35 @@ export const validateId = (rule: PatchRulesSchema): string[] => {
 };
 
 export const validateThreshold = (rule: PatchRulesSchema): string[] => {
-  if (isThresholdRule(rule.type)) {
+  const errors: string[] = [];
+  if (rule.type === 'threshold') {
     if (!rule.threshold) {
-      return ['when "type" is "threshold", "threshold" is required'];
-    } else if (rule.threshold.value <= 0) {
-      return ['"threshold.value" has to be bigger than 0'];
+      errors.push('when "type" is "threshold", "threshold" is required');
     } else {
-      return [];
+      if (
+        rule.threshold.cardinality?.length &&
+        rule.threshold.field.includes(rule.threshold.cardinality[0].field)
+      ) {
+        errors.push('Cardinality of a field that is being aggregated on is always 1');
+      }
+      if (rule.threshold.value <= 0) {
+        errors.push('"threshold.value" has to be bigger than 0');
+      }
+      if (Array.isArray(rule.threshold.field) && rule.threshold.field.length > 3) {
+        errors.push('Number of fields must be 3 or less');
+      }
     }
   }
-  return [];
+  return errors;
 };
 
-export const patchRuleValidateTypeDependents = (schema: PatchRulesSchema): string[] => {
+export const patchRuleValidateTypeDependents = (rule: PatchRulesSchema): string[] => {
   return [
-    ...validateId(schema),
-    ...validateQuery(schema),
-    ...validateLanguage(schema),
-    ...validateTimelineId(schema),
-    ...validateTimelineTitle(schema),
-    ...validateThreshold(schema),
+    ...validateId(rule),
+    ...validateQuery(rule),
+    ...validateLanguage(rule),
+    ...validateTimelineId(rule),
+    ...validateTimelineTitle(rule),
+    ...validateThreshold(rule),
   ];
 };

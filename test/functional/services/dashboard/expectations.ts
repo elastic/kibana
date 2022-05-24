@@ -19,6 +19,7 @@ export class DashboardExpectService extends FtrService {
 
   private readonly dashboard = this.ctx.getPageObject('dashboard');
   private readonly visChart = this.ctx.getPageObject('visChart');
+  private readonly pieChart = this.ctx.getService('pieChart');
   private readonly tagCloud = this.ctx.getPageObject('tagCloud');
   private readonly findTimeout = 2500;
 
@@ -39,11 +40,11 @@ export class DashboardExpectService extends FtrService {
   async selectedLegendColorCount(color: string, expectedCount: number) {
     this.log.debug(`DashboardExpect.selectedLegendColorCount(${color}, ${expectedCount})`);
     await this.retry.try(async () => {
-      const selectedLegendColor = await this.testSubjects.findAll(
-        `legendSelectedColor-${color}`,
-        this.findTimeout
-      );
-      expect(selectedLegendColor.length).to.be(expectedCount);
+      const slicesColors = await this.pieChart.getAllPieSlicesColors();
+      const selectedColors = slicesColors.filter((sliceColor) => {
+        return sliceColor === color;
+      });
+      expect(selectedColors.length).to.be(expectedCount);
     });
   }
 
@@ -226,11 +227,20 @@ export class DashboardExpectService extends FtrService {
   async savedSearchRowCount(expectedMinCount: number) {
     this.log.debug(`DashboardExpect.savedSearchRowCount(${expectedMinCount})`);
     await this.retry.try(async () => {
-      const savedSearchRows = await this.testSubjects.findAll(
-        'docTableExpandToggleColumn',
-        this.findTimeout
-      );
-      expect(savedSearchRows.length).to.be.above(expectedMinCount);
+      const gridExists = await this.find.existsByCssSelector('[data-document-number]');
+      if (gridExists) {
+        const grid = await this.find.byCssSelector('[data-document-number]');
+        // in this case it's the document explorer
+        const docNr = Number(await grid.getAttribute('data-document-number'));
+        expect(docNr).to.be.above(expectedMinCount);
+      } else {
+        // in this case it's the classic table
+        const savedSearchRows = await this.testSubjects.findAll(
+          'docTableExpandToggleColumn',
+          this.findTimeout
+        );
+        expect(savedSearchRows.length).to.be.above(expectedMinCount);
+      }
     });
   }
 

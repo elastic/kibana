@@ -7,8 +7,9 @@
  */
 
 import { uniq } from 'lodash';
-import type { Panel, IndexPatternValue, FetchedIndexPattern } from '../common/types';
-import { IndexPatternsService } from '../../../data/common';
+import { DataViewsService } from '@kbn/data-views-plugin/common';
+import { DataViewNotFoundError } from './errors';
+import type { Panel, IndexPatternValue, FetchedIndexPattern } from './types';
 
 export const isStringTypeIndexPattern = (
   indexPatternValue: IndexPatternValue
@@ -45,7 +46,7 @@ export const extractIndexPatternValues = (panel: Panel, defaultIndexId?: string)
 
 export const fetchIndexPattern = async (
   indexPatternValue: IndexPatternValue | undefined,
-  indexPatternsService: Pick<IndexPatternsService, 'getDefault' | 'get' | 'find'>,
+  indexPatternsService: Pick<DataViewsService, 'getDefault' | 'get' | 'find'>,
   options: {
     fetchKibanaIndexForStringIndexes: boolean;
   } = {
@@ -70,7 +71,11 @@ export const fetchIndexPattern = async (
 
       indexPatternString = indexPatternValue;
     } else if (indexPatternValue.id) {
-      indexPattern = await indexPatternsService.get(indexPatternValue.id);
+      try {
+        indexPattern = await indexPatternsService.get(indexPatternValue.id);
+      } catch (e) {
+        throw new DataViewNotFoundError(indexPatternValue.id);
+      }
     }
   }
 

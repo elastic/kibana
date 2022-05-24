@@ -11,7 +11,7 @@ import {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectTypes } from '@kbn/securitysolution-list-utils';
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { findExceptionList } from '../../find_exception_list';
 import { CHUNK_PARSED_OBJECT_SIZE } from '../../import_exception_list_and_items';
@@ -72,7 +72,9 @@ export const findAllListTypes = async (
       namespaceType: ['agnostic'],
       page: undefined,
       perPage: CHUNK_PARSED_OBJECT_SIZE,
+      pit: undefined,
       savedObjectsClient,
+      searchAfter: undefined,
       sortField: undefined,
       sortOrder: undefined,
     });
@@ -82,7 +84,9 @@ export const findAllListTypes = async (
       namespaceType: ['single'],
       page: undefined,
       perPage: CHUNK_PARSED_OBJECT_SIZE,
+      pit: undefined,
       savedObjectsClient,
+      searchAfter: undefined,
       sortField: undefined,
       sortOrder: undefined,
     });
@@ -92,7 +96,9 @@ export const findAllListTypes = async (
       namespaceType: ['single', 'agnostic'],
       page: undefined,
       perPage: CHUNK_PARSED_OBJECT_SIZE,
+      pit: undefined,
       savedObjectsClient,
+      searchAfter: undefined,
       sortField: undefined,
       sortOrder: undefined,
     });

@@ -57,8 +57,8 @@ const Popover = React.memo<UtilityBarActionProps>(
             iconSide={iconSide}
             iconSize={iconSize}
             iconType={iconType}
-            onClick={handleLinkIconClick}
             disabled={disabled}
+            onClick={handleLinkIconClick}
           >
             {children}
           </LinkIcon>
@@ -119,7 +119,6 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
       <BarAction data-test-subj={dataTestSubj}>
         {popoverContent ? (
           <Popover
-            onClick={onClick}
             dataTestSubj={`${dataTestSubj}-popover`}
             disabled={disabled}
             color={color}
@@ -129,6 +128,7 @@ export const UtilityBarAction = React.memo<UtilityBarActionProps>(
             ownFocus={ownFocus}
             popoverPanelPaddingSize={popoverPanelPaddingSize}
             popoverContent={popoverContent}
+            onClick={onClick}
           >
             {children}
           </Popover>

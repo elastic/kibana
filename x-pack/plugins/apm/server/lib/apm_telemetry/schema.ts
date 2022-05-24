@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MakeSchemaFrom } from 'src/plugins/usage_collection/server';
+import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import {
   AggregatedTransactionsCounts,
   APMUsage,

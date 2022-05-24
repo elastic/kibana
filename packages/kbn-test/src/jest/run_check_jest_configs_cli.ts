@@ -10,20 +10,22 @@ import { writeFileSync } from 'fs';
 import path from 'path';
 import Mustache from 'mustache';
 
-import { run } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFailError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/utils';
+import { getAllRepoRelativeBazelPackageDirs } from '@kbn/bazel-packages';
 
 import { JestConfigs, CONFIG_NAMES } from './configs';
 
 const unitTestingTemplate: string = `module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test/jest_node',
   rootDir: '{{{relToRoot}}}',
   roots: ['<rootDir>/{{{modulePath}}}'],
 };
 `;
 
 const integrationTestingTemplate: string = `module.exports = {
-  preset: '@kbn/test/jest_integration',
+  preset: '@kbn/test/jest_integration_node',
   rootDir: '{{{relToRoot}}}',
   roots: ['<rootDir>/{{{modulePath}}}'],
 };
@@ -34,10 +36,10 @@ const roots: string[] = [
   'x-pack/plugins/security_solution/server',
   'x-pack/plugins/security_solution',
   'x-pack/plugins',
-  'packages',
   'src/plugins',
   'test',
   'src',
+  ...getAllRepoRelativeBazelPackageDirs(),
 ];
 
 export async function runCheckJestConfigsCli() {
@@ -72,7 +74,7 @@ export async function runCheckJestConfigsCli() {
             log.info('created %s', file);
           });
         } else {
-          log.info(
+          throw createFailError(
             `Run 'node scripts/check_jest_configs --fix' to create the missing config files`
           );
         }

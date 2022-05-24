@@ -18,6 +18,7 @@ const baseContextMock = {
   expanded: undefined,
   setExpanded: jest.fn(),
   rows: esHits,
+  rowsFlattened: esHits,
   onFilter: jest.fn(),
   indexPattern: indexPatternMock,
   isDarkMode: false,
@@ -35,6 +36,7 @@ describe('Discover grid view button ', function () {
       <DiscoverGridContext.Provider value={contextMock}>
         <ExpandButton
           rowIndex={0}
+          colIndex={0}
           setCellProps={jest.fn()}
           columnId="test"
           isExpanded={false}
@@ -57,6 +59,7 @@ describe('Discover grid view button ', function () {
       <DiscoverGridContext.Provider value={contextMock}>
         <ExpandButton
           rowIndex={0}
+          colIndex={0}
           setCellProps={jest.fn()}
           columnId="test"
           isExpanded={false}
@@ -79,6 +82,7 @@ describe('Discover grid view button ', function () {
       <DiscoverGridContext.Provider value={contextMock}>
         <ExpandButton
           rowIndex={1}
+          colIndex={0}
           setCellProps={jest.fn()}
           columnId="test"
           isExpanded={false}

@@ -22,8 +22,8 @@ import { Option, map, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
-import { ActionTypeExecutorResult } from '../../../../../actions/common';
 
 export interface ConnectorAddFlyoutProps {
   connector: ActionConnector;

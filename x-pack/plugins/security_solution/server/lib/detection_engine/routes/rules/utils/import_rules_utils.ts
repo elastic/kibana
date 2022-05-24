@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ImportExceptionsListSchema,
   ImportExceptionListItemSchema,
   ExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
+import { RulesClient } from '@kbn/alerting-plugin/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { legacyMigrate } from '../../../rules/utils';
 import { PartialFilter } from '../../../types';
 import { createBulkErrorObject, ImportRuleResponse } from '../../utils';
@@ -21,9 +23,7 @@ import { readRules } from '../../../rules/read_rules';
 import { patchRules } from '../../../rules/patch_rules';
 import { ImportRulesSchemaDecoded } from '../../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { MlAuthz } from '../../../../machine_learning/authz';
-import { throwHttpError } from '../../../../machine_learning/validation';
-import { RulesClient } from '../../../../../../../../plugins/alerting/server';
-import { ExceptionListClient } from '../../../../../../../../plugins/lists/server';
+import { throwAuthzError } from '../../../../machine_learning/validation';
 import { checkRuleExceptionReferences } from './check_rule_exception_references';
 
 export type PromiseFromStreams = ImportRulesSchemaDecoded | Error;
@@ -41,13 +41,10 @@ export interface RuleExceptionsPromiseFromStreams {
  * @param mlAuthz {object}
  * @param overwriteRules {boolean} - whether to overwrite existing rules
  * with imported rules if their rule_id matches
- * @param isRuleRegistryEnabled {boolean} - feature flag that should be
- * removed as this is now on and no going back
  * @param rulesClient {object}
  * @param savedObjectsClient {object}
  * @param exceptionsClient {object}
  * @param spaceId {string} - space being used during import
- * @param signalsIndex {string} - the signals index name
  * @param existingLists {object} - all exception lists referenced by
  * rules that were found to exist
  * @returns {Promise} an array of error and success messages from import
@@ -57,24 +54,20 @@ export const importRules = async ({
   rulesResponseAcc,
   mlAuthz,
   overwriteRules,
-  isRuleRegistryEnabled,
   rulesClient,
   savedObjectsClient,
   exceptionsClient,
   spaceId,
-  signalsIndex,
   existingLists,
 }: {
   ruleChunks: PromiseFromStreams[][];
   rulesResponseAcc: ImportRuleResponse[];
   mlAuthz: MlAuthz;
   overwriteRules: boolean;
-  isRuleRegistryEnabled: boolean;
   rulesClient: RulesClient;
   savedObjectsClient: SavedObjectsClientContract;
   exceptionsClient: ExceptionListClient | undefined;
   spaceId: string;
-  signalsIndex: string;
   existingLists: Record<string, ExceptionListSchema>;
 }) => {
   let importRuleResponse: ImportRuleResponse[] = [...rulesResponseAcc];
@@ -124,10 +117,13 @@ export const importRules = async ({
                 index,
                 interval,
                 max_signals: maxSignals,
+                related_integrations: relatedIntegrations,
+                required_fields: requiredFields,
                 risk_score: riskScore,
                 risk_score_mapping: riskScoreMapping,
                 rule_name_override: ruleNameOverride,
                 name,
+                setup,
                 severity,
                 severity_mapping: severityMapping,
                 tags,
@@ -165,9 +161,8 @@ export const importRules = async ({
                 const language =
                   !isMlRule(type) && languageOrUndefined == null ? 'kuery' : languageOrUndefined; // TODO: Fix these either with an is conversion or by better typing them within io-ts
                 const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
-                throwHttpError(await mlAuthz.validateRuleType(type));
+                throwAuthzError(await mlAuthz.validateRuleType(type));
                 const rule = await readRules({
-                  isRuleRegistryEnabled,
                   rulesClient,
                   ruleId,
                   id: undefined,
@@ -175,7 +170,6 @@ export const importRules = async ({
 
                 if (rule == null) {
                   await createRules({
-                    isRuleRegistryEnabled,
                     rulesClient,
                     anomalyThreshold,
                     author,
@@ -190,7 +184,7 @@ export const importRules = async ({
                     language,
                     license,
                     machineLearningJobId,
-                    outputIndex: signalsIndex,
+                    outputIndex: '',
                     savedId,
                     timelineId,
                     timelineTitle,
@@ -201,9 +195,12 @@ export const importRules = async ({
                     interval,
                     maxSignals,
                     name,
+                    relatedIntegrations,
+                    requiredFields,
                     riskScore,
                     riskScoreMapping,
                     ruleNameOverride,
+                    setup,
                     severity,
                     severityMapping,
                     tags,
@@ -259,10 +256,13 @@ export const importRules = async ({
                     index,
                     interval,
                     maxSignals,
+                    relatedIntegrations,
+                    requiredFields,
                     riskScore,
                     riskScoreMapping,
                     ruleNameOverride,
                     name,
+                    setup,
                     severity,
                     severityMapping,
                     tags,

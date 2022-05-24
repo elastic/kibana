@@ -174,7 +174,8 @@ export class DataGridService extends FtrService {
 
     const textArr = [];
     for (const cell of result) {
-      textArr.push(await cell.getVisibleText());
+      const textContent = await cell.getAttribute('textContent');
+      textArr.push(textContent.trim());
     }
     return Promise.resolve(textArr);
   }

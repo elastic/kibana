@@ -7,10 +7,11 @@
 
 import { History } from 'history';
 import React, { FC, memo, useEffect } from 'react';
-import { Route, Router, Switch } from 'react-router-dom';
+import { Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 import { useDispatch } from 'react-redux';
 
-import { AppLeaveHandler, AppMountParameters } from '../../../../../src/core/public';
+import { AppLeaveHandler, AppMountParameters } from '@kbn/core/public';
 import { ManageRoutesSpy } from '../common/utils/route/manage_spy_routes';
 import { RouteCapture } from '../common/components/endpoint/route_capture';
 import { AppAction } from '../common/store/actions';

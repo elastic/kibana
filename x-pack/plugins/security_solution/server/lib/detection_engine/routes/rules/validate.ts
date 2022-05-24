@@ -7,6 +7,7 @@
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
 
+import { PartialRule } from '@kbn/alerting-plugin/server';
 import { RuleExecutionSummary } from '../../../../../common/detection_engine/schemas/common';
 import {
   FullResponseSchema,
@@ -16,26 +17,20 @@ import {
   RulesSchema,
   rulesSchema,
 } from '../../../../../common/detection_engine/schemas/response/rules_schema';
-import { PartialAlert } from '../../../../../../alerting/server';
 import { isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError } from '../utils';
-import { transform, transformAlertToRule } from './utils';
+import { transform } from './utils';
 import { RuleParams } from '../../schemas/rule_schemas';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesActionsSavedObject } from '../../rule_actions/legacy_get_rule_actions_saved_object';
+import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
 
 export const transformValidate = (
-  rule: PartialAlert<RuleParams>,
+  rule: PartialRule<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null,
-  isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [RulesSchema | null, string | null] => {
-  const transformed = transform(
-    rule,
-    ruleExecutionSummary,
-    isRuleRegistryEnabled,
-    legacyRuleActions
-  );
+  const transformed = transform(rule, ruleExecutionSummary, legacyRuleActions);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -44,17 +39,11 @@ export const transformValidate = (
 };
 
 export const newTransformValidate = (
-  rule: PartialAlert<RuleParams>,
+  rule: PartialRule<RuleParams>,
   ruleExecutionSummary: RuleExecutionSummary | null,
-  isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): [FullResponseSchema | null, string | null] => {
-  const transformed = transform(
-    rule,
-    ruleExecutionSummary,
-    isRuleRegistryEnabled,
-    legacyRuleActions
-  );
+  const transformed = transform(rule, ruleExecutionSummary, legacyRuleActions);
   if (transformed == null) {
     return [null, 'Internal error transforming'];
   } else {
@@ -64,12 +53,11 @@ export const newTransformValidate = (
 
 export const transformValidateBulkError = (
   ruleId: string,
-  rule: PartialAlert<RuleParams>,
-  ruleExecutionSummary: RuleExecutionSummary | null,
-  isRuleRegistryEnabled?: boolean
+  rule: PartialRule<RuleParams>,
+  ruleExecutionSummary: RuleExecutionSummary | null
 ): RulesSchema | BulkError => {
-  if (isAlertType(isRuleRegistryEnabled ?? false, rule)) {
-    const transformed = transformAlertToRule(rule, ruleExecutionSummary);
+  if (isAlertType(rule)) {
+    const transformed = internalRuleToAPIResponse(rule, ruleExecutionSummary);
     const [validated, errors] = validateNonExact(transformed, rulesSchema);
     if (errors != null || validated == null) {
       return createBulkErrorObject({

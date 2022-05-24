@@ -45,8 +45,9 @@ export type HttpServiceSetupMock = jest.Mocked<
   createRouter: jest.MockedFunction<() => RouterMock>;
 };
 export type InternalHttpServiceSetupMock = jest.Mocked<
-  Omit<InternalHttpServiceSetup, 'basePath' | 'createRouter' | 'authRequestHeaders'>
+  Omit<InternalHttpServiceSetup, 'basePath' | 'createRouter' | 'authRequestHeaders' | 'auth'>
 > & {
+  auth: AuthMocked;
   basePath: BasePathMocked;
   createRouter: jest.MockedFunction<(path: string) => RouterMock>;
   authRequestHeaders: jest.Mocked<IAuthHeadersStorage>;
@@ -179,10 +180,6 @@ const createSetupContractMock = () => {
     csp: CspConfig.DEFAULT,
     createRouter: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
-    auth: {
-      get: internalMock.auth.get,
-      isAuthenticated: internalMock.auth.isAuthenticated,
-    },
     getServerInfo: internalMock.getServerInfo,
   };
 

@@ -7,14 +7,12 @@
 
 import { includes } from 'lodash';
 // @ts-ignore
-import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../metrics';
 import { ML_SUPPORTED_LICENSES } from '../../../common/constants';
-import { ElasticsearchResponse, ElasticsearchSource } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
+import { ElasticsearchResponse } from '../../../common/types/es';
+import { LegacyRequest, Cluster } from '../../types';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 import { Globals } from '../../static_globals';
 
@@ -40,8 +38,8 @@ export function handleResponse(response: ElasticsearchResponse) {
 export type MLJobs = ReturnType<typeof handleResponse>;
 
 export function getMlJobs(req: LegacyRequest) {
-  const config = req.server.config();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const config = req.server.config;
+  const maxBucketSize = config.ui.max_bucket_size;
   const start = req.payload.timeRange.min; // no wrapping in moment :)
   const end = req.payload.timeRange.max;
   const clusterUuid = req.params.clusterUuid;
@@ -100,7 +98,7 @@ export function getMlJobs(req: LegacyRequest) {
  * cardinality isn't guaranteed to be accurate is the issue
  * but it will be as long as the precision threshold is >= the actual value
  */
-export function getMlJobsForCluster(req: LegacyRequest, cluster: ElasticsearchSource, ccs: string) {
+export function getMlJobsForCluster(req: LegacyRequest, cluster: Cluster, ccs: string) {
   const license = cluster.license ?? cluster.elasticsearch?.cluster?.stats?.license ?? {};
 
   if (license.status === 'active' && includes(ML_SUPPORTED_LICENSES, license.type)) {

@@ -23,21 +23,19 @@ import { Tags } from './tags';
 import { Connector } from './connector';
 import * as i18n from './translations';
 import { SyncAlertsToggle } from './sync_alerts_toggle';
-import {
-  ActionConnector,
-  CommentRequestUserType,
-  CommentRequestAlertType,
-} from '../../../common/api';
+import { ActionConnector } from '../../../common/api';
 import { Case } from '../../containers/types';
 import { CasesTimelineIntegration, CasesTimelineIntegrationProvider } from '../timeline_context';
 import { InsertTimeline } from '../insert_timeline';
-import { UsePostComment } from '../../containers/use_post_comment';
+import { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { SubmitCaseButton } from './submit_button';
 import { FormContext } from './form_context';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { CaseAttachments } from '../../types';
+import { Severity } from './severity';
 
 interface ContainerProps {
   big?: boolean;
@@ -55,8 +53,6 @@ const MySpinner = styled(EuiLoadingSpinner)`
   left: 50%;
   z-index: 99;
 `;
-export type SupportedCreateCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
-export type CreateCaseAttachment = SupportedCreateCaseAttachment[];
 
 export interface CreateCaseFormFieldsProps {
   connectors: ActionConnector[];
@@ -66,9 +62,12 @@ export interface CreateCaseFormFieldsProps {
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
   onSuccess: (theCase: Case) => Promise<void>;
-  afterCaseCreated?: (theCase: Case, postComment: UsePostComment['postComment']) => Promise<void>;
+  afterCaseCreated?: (
+    theCase: Case,
+    createAttachments: UseCreateAttachments['createAttachments']
+  ) => Promise<void>;
   timelineIntegration?: CasesTimelineIntegration;
-  attachments?: CreateCaseAttachment;
+  attachments?: CaseAttachments;
 }
 
 const empty: ActionConnector[] = [];
@@ -90,6 +89,9 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             <Container>
               <Tags isLoading={isSubmitting} />
             </Container>
+            <Container>
+              <Severity isLoading={isSubmitting} />
+            </Container>
             {canShowCaseSolutionSelection && (
               <Container big>
                 <CreateCaseOwnerSelector
@@ -101,6 +103,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
             <Container big>
               <Description isLoading={isSubmitting} />
             </Container>
+            <Container />
           </>
         ),
       }),

@@ -6,8 +6,6 @@
  */
 
 // @ts-ignore
-import { StringOptions } from '@kbn/config-schema/target_types/types';
-// @ts-ignore
 import { createQuery } from '../../create_query';
 // @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
@@ -97,7 +95,7 @@ export function getShardAllocation(
     });
   }
 
-  const config = req.server.config();
+  const config = req.server.config;
   const clusterUuid = req.params.clusterUuid;
   const metric = ElasticsearchMetric.getMetricFields();
 
@@ -113,7 +111,7 @@ export function getShardAllocation(
 
   const params = {
     index: indexPatterns,
-    size: config.get('monitoring.ui.max_bucket_size'),
+    size: config.ui.max_bucket_size,
     ignore_unavailable: true,
     body: {
       query: createQuery({

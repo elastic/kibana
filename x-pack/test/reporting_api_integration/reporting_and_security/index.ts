@@ -10,8 +10,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   describe('Reporting APIs', function () {
-    this.tags('ciGroup2');
-
     before(async () => {
       const reportingAPI = getService('reportingAPI');
       await reportingAPI.logTaskManagerHealth();
@@ -29,5 +27,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./spaces'));
     loadTestFile(require.resolve('./usage'));
     loadTestFile(require.resolve('./ilm_migration_apis'));
+    loadTestFile(require.resolve('./error_codes'));
   });
 }

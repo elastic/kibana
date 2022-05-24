@@ -10,7 +10,7 @@ import { BehaviorSubject, Observable, Subject, Subscription, asyncScheduler, ide
 import { filter, map, delay, shareReplay, throttleTime } from 'rxjs/operators';
 import { defaults } from 'lodash';
 import { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
-import { Adapters } from '../../inspector/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
 import { ExecutionContract } from '../common/execution/execution_contract';
@@ -58,6 +58,7 @@ export class ExpressionLoader {
       onRenderError: params && params.onRenderError,
       renderMode: params?.renderMode,
       syncColors: params?.syncColors,
+      syncTooltips: params?.syncTooltips,
       hasCompatibleActions: params?.hasCompatibleActions,
     });
     this.render$ = this.renderHandler.render$;
@@ -142,6 +143,7 @@ export class ExpressionLoader {
       searchSessionId: params.searchSessionId,
       debug: params.debug,
       syncColors: params.syncColors,
+      syncTooltips: params.syncTooltips,
       executionContext: params.executionContext,
     });
     this.subscription = this.execution
@@ -182,6 +184,7 @@ export class ExpressionLoader {
       this.params.searchSessionId = params.searchSessionId;
     }
     this.params.syncColors = params.syncColors;
+    this.params.syncTooltips = params.syncTooltips;
     this.params.debug = Boolean(params.debug);
     this.params.partial = Boolean(params.partial);
     this.params.throttle = Number(params.throttle ?? 1000);

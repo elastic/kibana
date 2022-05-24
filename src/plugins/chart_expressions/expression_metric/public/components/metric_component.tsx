@@ -7,15 +7,19 @@
  */
 
 import React, { Component } from 'react';
-import { MetricVisValue } from './metric_value';
+import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import {
+  getColumnByAccessor,
+  getAccessor,
+  getFormatByAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { CustomPaletteState } from '@kbn/charts-plugin/public';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import { getFormatService, getPaletteService } from '../services';
 import { VisParams, MetricOptions } from '../../common/types';
-import type { IFieldFormat } from '../../../../field_formats/common';
-import { Datatable } from '../../../../expressions/public';
-import { CustomPaletteState } from '../../../../charts/public';
-import { getFormatService, getPaletteService } from '../../../expression_metric/public/services';
-import { ExpressionValueVisDimension } from '../../../../visualizations/public';
+import { MetricVisValue } from './metric_value';
 import { formatValue, shouldApplyColor } from '../utils';
-import { getColumnByAccessor } from '../utils/accessor';
 import { needsLightText } from '../utils/palette';
 import { withAutoScale } from './with_auto_scale';
 
@@ -24,6 +28,7 @@ import './metric.scss';
 export interface MetricVisComponentProps {
   visParams: Pick<VisParams, 'metric' | 'dimensions'>;
   visData: Datatable;
+  filterable: boolean[];
   fireEvent: (event: any) => void;
   renderComplete: () => void;
 }
@@ -49,17 +54,23 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     let bucketFormatter: IFieldFormat;
 
     if (dimensions.bucket) {
-      bucketColumnId = getColumnByAccessor(dimensions.bucket.accessor, table.columns).id;
-      bucketFormatter = getFormatService().deserialize(dimensions.bucket.format);
+      const bucketColumn = getColumnByAccessor(dimensions.bucket!, table.columns);
+      bucketColumnId = bucketColumn?.id!;
+      bucketFormatter = getFormatService().deserialize(
+        getFormatByAccessor(dimensions.bucket, table.columns)
+      );
     }
 
     return dimensions.metrics.reduce(
-      (acc: MetricOptions[], metric: ExpressionValueVisDimension) => {
-        const column = getColumnByAccessor(metric.accessor, table?.columns);
-        const formatter = getFormatService().deserialize(metric.format);
+      (acc: MetricOptions[], metric: string | ExpressionValueVisDimension) => {
+        const column = getColumnByAccessor(metric, table?.columns);
+        const colIndex = table?.columns.indexOf(column!);
+        const formatter = getFormatService().deserialize(
+          getFormatByAccessor(metric, table.columns)
+        );
         const metrics = table.rows.map((row, rowIndex) => {
-          let title = column.name;
-          let value: number = row[column.id];
+          let title = column!.name;
+          let value: number = row[column!.id];
           const color = palette ? this.getColor(value, palette) : undefined;
 
           if (isPercentageMode && stops.length) {
@@ -72,7 +83,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
             title = `${bucketValue} - ${title}`;
           }
 
-          const shouldBrush = stops.length > 1 && shouldApplyColor(color ?? '');
+          const shouldBrush = shouldApplyColor(color ?? '');
           return {
             label: title,
             value: formattedValue,
@@ -80,6 +91,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
             bgColor: shouldBrush && (style.bgColor ?? false) ? color : undefined,
             lightText: shouldBrush && (style.bgColor ?? false) && needsLightText(color),
             rowIndex,
+            colIndex,
           };
         });
 
@@ -89,20 +101,21 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     );
   }
 
-  private filterBucket = (row: number) => {
+  private filterColumn = (row: number, metricColIndex: number) => {
     const { dimensions } = this.props.visParams;
-    if (!dimensions.bucket) {
-      return;
-    }
 
     const table = this.props.visData;
+    let column = dimensions.bucket ? getAccessor(dimensions.bucket) : metricColIndex;
+    if (typeof column === 'object' && 'id' in column) {
+      column = table.columns.indexOf(column);
+    }
     this.props.fireEvent({
-      name: 'filterBucket',
+      name: 'filter',
       data: {
         data: [
           {
             table,
-            column: dimensions.bucket.accessor,
+            column,
             row,
           },
         ],
@@ -110,20 +123,40 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
     });
   };
 
+  private isAutoScaleWithColorizingContainer = () => {
+    return this.props.visParams.metric.autoScale && this.props.visParams.metric.colorFullBackground;
+  };
+
   private renderMetric = (metric: MetricOptions, index: number) => {
+    const hasBuckets = this.props.visParams.dimensions.bucket !== undefined;
     const MetricComponent = this.props.visParams.metric.autoScale
       ? AutoScaleMetricVisValue
       : MetricVisValue;
 
     return (
       <MetricComponent
+        autoScaleParams={
+          this.isAutoScaleWithColorizingContainer()
+            ? {
+                containerStyles: {
+                  backgroundColor: metric.bgColor,
+                  minHeight: '100%',
+                  minWidth: '100%',
+                },
+              }
+            : undefined
+        }
         key={index}
         metric={metric}
         style={this.props.visParams.metric.style}
         onFilter={
-          this.props.visParams.dimensions.bucket ? () => this.filterBucket(index) : undefined
+          hasBuckets || this.props.filterable[index]
+            ? () => this.filterColumn(metric.rowIndex, metric.colIndex)
+            : undefined
         }
-        showLabel={this.props.visParams.metric.labels.show}
+        autoScale={this.props.visParams.metric.autoScale}
+        colorFullBackground={this.props.visParams.metric.colorFullBackground}
+        labelConfig={this.props.visParams.metric.labels}
       />
     );
   };

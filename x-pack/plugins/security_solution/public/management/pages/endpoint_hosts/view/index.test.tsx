@@ -8,10 +8,10 @@
 import React from 'react';
 import * as reactTestingLibrary from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { EndpointList } from './index';
+import { EndpointList } from '.';
 import '../../../../common/mock/match_media';
 
-import { createUseUiSetting$Mock } from '../../../../../public/common/lib/kibana/kibana_react.mock';
+import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 import {
   mockEndpointDetailsApiResult,
@@ -69,8 +69,8 @@ jest.mock('@kbn/i18n-react', () => {
   };
 });
 jest.mock('../../../../common/components/link_to');
-jest.mock('../../policy/store/services/ingest', () => {
-  const originalModule = jest.requireActual('../../policy/store/services/ingest');
+jest.mock('../../../services/policies/ingest', () => {
+  const originalModule = jest.requireActual('../../../services/policies/ingest');
   return {
     ...originalModule,
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
@@ -133,8 +133,7 @@ const timepickerRanges = [
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../../common/hooks/use_license');
 
-// FLAKY: https://github.com/elastic/kibana/issues/115489
-describe.skip('when on the endpoint list page', () => {
+describe('when on the endpoint list page', () => {
   const docGenerator = new EndpointDocGenerator();
   const { act, screen, fireEvent, waitFor } = reactTestingLibrary;
 
@@ -296,17 +295,6 @@ describe.skip('when on the endpoint list page', () => {
   });
 
   describe('when there is no selected host in the url', () => {
-    it('should not show the flyout', () => {
-      setEndpointListApiMockImplementation(coreStart.http, {
-        endpointsResults: [],
-      });
-
-      const renderResult = render();
-      expect.assertions(1);
-      return renderResult.findByTestId('endpointDetailsFlyout').catch((e) => {
-        expect(e).not.toBeNull();
-      });
-    });
     describe('when list data loads', () => {
       const generatedPolicyStatuses: Array<
         HostInfo['metadata']['Endpoint']['policy']['applied']['status']

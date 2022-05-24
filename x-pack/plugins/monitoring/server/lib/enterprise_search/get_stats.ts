@@ -6,22 +6,26 @@
  */
 
 import moment from 'moment';
+import { TimeRange } from '../../../common/http_api/shared';
 import { ElasticsearchResponse } from '../../../common/types/es';
+import { Globals } from '../../static_globals';
 import { LegacyRequest } from '../../types';
+import { getLegacyIndexPattern } from '../cluster/get_index_patterns';
 import { createEnterpriseSearchQuery } from './create_enterprise_search_query';
 import {
   entSearchAggFilterPath,
-  entSearchUuidsAgg,
   entSearchAggResponseHandler,
+  entSearchUuidsAgg,
 } from './_enterprise_search_stats';
-import { getLegacyIndexPattern } from '../cluster/get_index_patterns';
-import { Globals } from '../../static_globals';
 
-export async function getStats(req: LegacyRequest, clusterUuid: string) {
-  const config = req.server.config();
+export async function getStats(
+  req: LegacyRequest<unknown, unknown, { ccs?: string; timeRange: TimeRange }>,
+  clusterUuid: string
+) {
+  const config = req.server.config;
   const start = moment.utc(req.payload.timeRange.min).valueOf();
   const end = moment.utc(req.payload.timeRange.max).valueOf();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const maxBucketSize = config.ui.max_bucket_size;
 
   // just get the legacy pattern since no integration exists yet
   const indexPattern = getLegacyIndexPattern({
@@ -41,7 +45,7 @@ export async function getStats(req: LegacyRequest, clusterUuid: string) {
         end,
         uuid: clusterUuid,
       }),
-      aggs: entSearchUuidsAgg(maxBucketSize!),
+      aggs: entSearchUuidsAgg(maxBucketSize),
     },
   };
 

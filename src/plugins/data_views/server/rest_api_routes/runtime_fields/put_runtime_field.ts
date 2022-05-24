@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { UsageCounter } from 'src/plugins/usage_collection/server';
-import { DataViewsService, RuntimeField } from 'src/plugins/data_views/common';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { schema } from '@kbn/config-schema';
+import { IRouter, StartServicesAccessor } from '@kbn/core/server';
+import { DataViewsService, RuntimeField } from '../../../common';
 import { handleErrors } from '../util/handle_errors';
-import { runtimeFieldSpecSchema } from '../util/schemas';
-import { IRouter, StartServicesAccessor } from '../../../../../core/server';
+import { runtimeFieldSchema } from '../util/schemas';
 import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
@@ -55,14 +55,11 @@ export const putRuntimeField = async ({
     dataView.removeRuntimeField(name);
   }
 
-  dataView.addRuntimeField(name, runtimeField);
+  const fields = dataView.addRuntimeField(name, runtimeField);
 
   await dataViewsService.updateSavedObject(dataView);
 
-  const field = dataView.fields.getByName(name);
-  if (!field) throw new Error(`Could not create a field [name = ${name}].`);
-
-  return { dataView, field };
+  return { dataView, fields };
 };
 
 const putRuntimeFieldRouteFactory =
@@ -90,13 +87,14 @@ const putRuntimeFieldRouteFactory =
               minLength: 1,
               maxLength: 1_000,
             }),
-            runtimeField: runtimeFieldSpecSchema,
+            runtimeField: runtimeFieldSchema,
           }),
         },
       },
       handleErrors(async (ctx, req, res) => {
-        const savedObjectsClient = ctx.core.savedObjects.client;
-        const elasticsearchClient = ctx.core.elasticsearch.client.asCurrentUser;
+        const core = await ctx.core;
+        const savedObjectsClient = core.savedObjects.client;
+        const elasticsearchClient = core.elasticsearch.client.asCurrentUser;
         const [, , { dataViewsServiceFactory }] = await getStartServices();
         const dataViewsService = await dataViewsServiceFactory(
           savedObjectsClient,
@@ -104,9 +102,12 @@ const putRuntimeFieldRouteFactory =
           req
         );
         const id = req.params.id;
-        const { name, runtimeField } = req.body;
+        const { name, runtimeField } = req.body as {
+          name: string;
+          runtimeField: RuntimeField;
+        };
 
-        const { dataView, field } = await putRuntimeField({
+        const { dataView, fields } = await putRuntimeField({
           dataViewsService,
           id,
           name,
@@ -115,7 +116,7 @@ const putRuntimeFieldRouteFactory =
           counterName: `${req.route.method} ${path}`,
         });
 
-        return res.ok(responseFormatter({ serviceKey, dataView, field }));
+        return res.ok(responseFormatter({ serviceKey, dataView, fields }));
       })
     );
   };

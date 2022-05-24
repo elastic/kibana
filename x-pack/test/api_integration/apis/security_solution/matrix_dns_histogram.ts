@@ -11,7 +11,7 @@ import {
   MatrixHistogramQuery,
   MatrixHistogramType,
   NetworkDnsStrategyResponse,
-} from '../../../../plugins/security_solution/common/search_strategy';
+} from '@kbn/security-solution-plugin/common/search_strategy';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -20,7 +20,8 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const bsearch = getService('bsearch');
 
-  describe('Matrix DNS Histogram', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/130692
+  describe.skip('Matrix DNS Histogram', () => {
     describe('Large data set', () => {
       before(
         async () =>

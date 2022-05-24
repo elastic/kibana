@@ -5,35 +5,35 @@
  * 2.0.
  */
 
+import type { SavedObjectsResolveResponse } from '@kbn/core/public';
 import {
-  CaseAttributes,
-  CaseConnector,
   CasePatchRequest,
   CaseStatuses,
   User,
   ActionConnector,
   CaseExternalServiceBasic,
   CaseUserActionResponse,
-  CaseMetricsResponse,
+  SingleCaseMetricsResponse,
   CommentResponse,
+  CaseResponse,
+  CommentResponseAlertsType,
+  CasesFindResponse,
+  CasesStatusResponse,
+  CasesMetricsResponse,
+  CaseSeverity,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
+type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
+
 export interface CasesContextFeatures {
-  alerts: { sync: boolean };
-  metrics: CaseMetricsFeature[];
+  alerts: { sync?: boolean; enabled?: boolean };
+  metrics: SingleCaseMetricsFeature[];
 }
+
+export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
 
 export type CasesFeatures = Partial<CasesContextFeatures>;
-
-export interface CasesContextValue {
-  owner: string[];
-  appId: string;
-  appTitle: string;
-  userCanCrud: boolean;
-  basePath: string;
-  features: CasesContextFeatures;
-}
 
 export interface CasesUiConfigType {
   markdownPlugins: {
@@ -45,6 +45,9 @@ export const StatusAll = 'all' as const;
 export type StatusAllType = typeof StatusAll;
 
 export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
+
+export const SeverityAll = 'all' as const;
+export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
 
 /**
  * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.
@@ -61,38 +64,19 @@ export type CaseViewRefreshPropInterface = null | {
 };
 
 export type Comment = SnakeToCamelCase<CommentResponse>;
+export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
-
-interface BasicCase {
-  id: string;
-  owner: string;
-  closedAt: string | null;
-  closedBy: ElasticUser | null;
-  comments: Comment[];
-  createdAt: string;
-  createdBy: ElasticUser;
-  status: CaseStatuses;
-  title: string;
-  totalAlerts: number;
-  totalComment: number;
-  updatedAt: string | null;
-  updatedBy: ElasticUser | null;
-  version: string;
-}
-
-export interface Case extends BasicCase {
-  connector: CaseConnector;
-  description: string;
-  externalService: CaseExternalService | null;
-  settings: CaseAttributes['settings'];
-  tags: string[];
-}
+export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
+export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
+export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
+export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 
 export interface ResolvedCase {
   case: Case;
-  outcome: 'exactMatch' | 'aliasMatch' | 'conflict';
-  aliasTargetId?: string;
+  outcome: SavedObjectsResolveResponse['outcome'];
+  aliasTargetId?: SavedObjectsResolveResponse['alias_target_id'];
+  aliasPurpose?: SavedObjectsResolveResponse['alias_purpose'];
 }
 
 export interface QueryParams {
@@ -104,27 +88,15 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
+  severity: CaseSeverityWithAll;
   status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
   owner: string[];
 }
 
-export interface CasesStatus {
-  countClosedCases: number | null;
-  countOpenCases: number | null;
-  countInProgressCases: number | null;
-}
-
-export interface AllCases extends CasesStatus {
-  cases: Case[];
-  page: number;
-  perPage: number;
-  total: number;
-}
-
-export type CaseMetrics = CaseMetricsResponse;
-export type CaseMetricsFeature =
+export type SingleCaseMetrics = SingleCaseMetricsResponse;
+export type SingleCaseMetricsFeature =
   | 'alerts.count'
   | 'alerts.users'
   | 'alerts.hosts'
@@ -177,7 +149,7 @@ export interface FieldMappings {
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings'
+  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity'
 >;
 
 export interface UpdateByKey {
@@ -194,7 +166,7 @@ export interface RuleEcs {
   id?: string[];
   rule_id?: string[];
   name?: string[];
-  false_positives: string[];
+  false_positives?: string[];
   saved_id?: string[];
   timeline_id?: string[];
   timeline_title?: string[];

@@ -39,7 +39,7 @@
     "id": "space2alert",
     "source": {
       "event.kind" : "signal",
-      "@timestamp": "2020-12-16T15:16:18.570Z",
+      "@timestamp": "2020-12-16T15:16:19.570Z",
       "kibana.alert.rule.rule_type_id": "apm.error_rate",
       "message": "hello world 1",
       "kibana.alert.rule.consumer": "apm",
@@ -56,8 +56,8 @@
     "id": "020202",
     "source": {
       "event.kind" : "signal",
-      "@timestamp": "2020-12-16T15:16:18.570Z",
-      "kibana.alert.rule.rule_type_id": "siem.signals",
+      "@timestamp": "2020-12-16T15:16:20.570Z",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
       "message": "hello world security",
       "kibana.alert.rule.consumer": "siem",
       "kibana.alert.workflow_status": "open",
@@ -73,8 +73,8 @@
     "id": "020204",
     "source": {
       "event.kind" : "signal",
-      "@timestamp": "2020-12-16T15:16:18.570Z",
-      "kibana.alert.rule.rule_type_id": "siem.customRule",
+      "@timestamp": "2020-12-16T15:16:21.570Z",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
       "message": "hello world security",
       "kibana.alert.rule.consumer": "siem",
       "kibana.alert.workflow_status": "open",
@@ -89,8 +89,8 @@
     "index": ".alerts-security.alerts",
     "id": "space1securityalert",
     "source": {
-      "@timestamp": "2020-12-16T15:16:18.570Z",
-      "kibana.alert.rule.rule_type_id": "siem.signals",
+      "@timestamp": "2020-12-16T15:16:22.570Z",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
       "message": "hello world security",
       "kibana.alert.rule.consumer": "siem",
       "kibana.alert.workflow_status": "open",
@@ -105,8 +105,8 @@
     "index": ".alerts-security.alerts",
     "id": "space2securityalert",
     "source": {
-      "@timestamp": "2020-12-16T15:16:18.570Z",
-      "kibana.alert.rule.rule_type_id": "siem.signals",
+      "@timestamp": "2020-12-16T15:16:23.570Z",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
       "message": "hello world security",
       "kibana.alert.rule.consumer": "siem",
       "kibana.alert.workflow_status": "open",

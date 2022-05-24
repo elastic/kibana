@@ -6,7 +6,7 @@
  */
 
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
-import type { CellValueElementProps } from '../../../../../../timelines/common';
+import type { CellValueElementProps } from '@kbn/timelines-plugin/common';
 import { createObservabilityRuleTypeRegistryMock } from '../../../../rules/observability_rule_type_registry_mock';
 import * as PluginHook from '../../../../hooks/use_plugin_context';
 import { render } from '../../../../utils/test_helper';
@@ -67,6 +67,7 @@ function makeAlertsTableRow({ alertStatus }: AlertsTableRow) {
 
 const requiredProperties: CellValueElementProps = {
   rowIndex: 0,
+  colIndex: 0,
   columnId: '',
   setCellProps: jest.fn(),
   isExpandable: false,

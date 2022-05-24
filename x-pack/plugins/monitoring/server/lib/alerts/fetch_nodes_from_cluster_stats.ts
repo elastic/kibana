@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { AlertCluster, AlertClusterStatsNodes } from '../../../common/types/alerts';
 import { ElasticsearchSource } from '../../../common/types/es';
 import { createDatasetFilter } from './create_dataset_query_filter';
 import { Globals } from '../../static_globals';
-import { getConfigCcs } from '../../../common/ccs_utils';
+import { CCS_REMOTE_PATTERN } from '../../../common/constants';
 import { getNewIndexPatterns } from '../cluster/get_index_patterns';
 
 function formatNode(
@@ -36,7 +36,7 @@ export async function fetchNodesFromClusterStats(
     config: Globals.app.config,
     moduleType: 'elasticsearch',
     dataset: 'cluster_stats',
-    ccs: getConfigCcs(Globals.app.config) ? '*' : undefined,
+    ccs: CCS_REMOTE_PATTERN,
   });
   const params = {
     index: indexPatterns,
@@ -54,7 +54,7 @@ export async function fetchNodesFromClusterStats(
       query: {
         bool: {
           filter: [
-            createDatasetFilter('cluster_stats', 'elasticsearch.cluster_stats'),
+            createDatasetFilter('cluster_stats', 'cluster_stats', 'elasticsearch.cluster_stats'),
             {
               range: {
                 timestamp: {
@@ -83,7 +83,7 @@ export async function fetchNodesFromClusterStats(
                   },
                 ],
                 _source: {
-                  includes: ['cluster_state.nodes_hash', 'cluster_state.nodes'],
+                  includes: ['cluster_state.nodes', 'elasticsearch.cluster.stats.nodes'],
                 },
                 size: 2,
               },
@@ -116,8 +116,12 @@ export async function fetchNodesFromClusterStats(
     const indexName = hits[0]._index;
     nodes.push({
       clusterUuid,
-      recentNodes: formatNode(hits[0]._source.cluster_state?.nodes),
-      priorNodes: formatNode(hits[1]._source.cluster_state?.nodes),
+      recentNodes: formatNode(
+        hits[0]._source.cluster_state?.nodes || hits[0]._source.elasticsearch.cluster.stats.nodes
+      ),
+      priorNodes: formatNode(
+        hits[1]._source.cluster_state?.nodes || hits[1]._source.elasticsearch.cluster.stats.nodes
+      ),
       ccs: indexName.includes(':') ? indexName.split(':')[0] : undefined,
     });
   }

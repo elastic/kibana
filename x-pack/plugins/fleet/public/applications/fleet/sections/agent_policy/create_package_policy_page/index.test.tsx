@@ -20,9 +20,10 @@ import {
   sendGetAgentStatus,
   useIntraAppState,
   useStartServices,
+  useGetPackageInfoByKey,
 } from '../../../hooks';
 
-import { CreatePackagePolicyPage } from './index';
+import { CreatePackagePolicyPage } from '.';
 
 jest.mock('../../../hooks', () => {
   return {
@@ -43,68 +44,7 @@ jest.mock('../../../hooks', () => {
     sendGetOneAgentPolicy: jest.fn().mockResolvedValue({
       data: { item: { id: 'agent-policy-1', name: 'Agent policy 1', namespace: 'default' } },
     }),
-    useGetPackageInfoByKey: jest.fn().mockReturnValue({
-      data: {
-        item: {
-          name: 'nginx',
-          title: 'Nginx',
-          version: '1.3.0',
-          release: 'ga',
-          description: 'Collect logs and metrics from Nginx HTTP servers with Elastic Agent.',
-          policy_templates: [
-            {
-              name: 'nginx',
-              title: 'Nginx logs and metrics',
-              description: 'Collect logs and metrics from Nginx instances',
-              inputs: [
-                {
-                  type: 'logfile',
-                  title: 'Collect logs from Nginx instances',
-                  description: 'Collecting Nginx access and error logs',
-                },
-              ],
-              multiple: true,
-            },
-          ],
-          data_streams: [
-            {
-              type: 'logs',
-              dataset: 'nginx.access',
-              title: 'Nginx access logs',
-              release: 'experimental',
-              ingest_pipeline: 'default',
-              streams: [
-                {
-                  input: 'logfile',
-                  vars: [
-                    {
-                      name: 'paths',
-                      type: 'text',
-                      title: 'Paths',
-                      multi: true,
-                      required: true,
-                      show_user: true,
-                      default: ['/var/log/nginx/access.log*'],
-                    },
-                  ],
-                  template_path: 'stream.yml.hbs',
-                  title: 'Nginx access logs',
-                  description: 'Collect Nginx access logs',
-                  enabled: true,
-                },
-              ],
-              package: 'nginx',
-              path: 'access',
-            },
-          ],
-          latestVersion: '1.3.0',
-          removable: true,
-          keepPoliciesUpToDate: false,
-          status: 'not_installed',
-        },
-      },
-      isLoading: false,
-    }),
+    useGetPackageInfoByKey: jest.fn(),
     sendCreatePackagePolicy: jest
       .fn()
       .mockResolvedValue({ data: { item: { id: 'policy-1', inputs: [] } } }),
@@ -160,11 +100,78 @@ describe('when on the package policy create page', () => {
         <CreatePackagePolicyPage />
       </Route>
     ));
+  let mockPackageInfo: any;
 
   beforeEach(() => {
     testRenderer = createFleetTestRendererMock();
     mockApiCalls(testRenderer.startServices.http);
     testRenderer.mountHistory.push(createPageUrlPath);
+
+    // (useGetPackageInfoByKey as jest.Mock).mockClear();
+
+    mockPackageInfo = {
+      data: {
+        item: {
+          name: 'nginx',
+          title: 'Nginx',
+          version: '1.3.0',
+          release: 'ga',
+          description: 'Collect logs and metrics from Nginx HTTP servers with Elastic Agent.',
+          policy_templates: [
+            {
+              name: 'nginx',
+              title: 'Nginx logs and metrics',
+              description: 'Collect logs and metrics from Nginx instances',
+              inputs: [
+                {
+                  type: 'logfile',
+                  title: 'Collect logs from Nginx instances',
+                  description: 'Collecting Nginx access and error logs',
+                },
+              ],
+              multiple: true,
+            },
+          ],
+          data_streams: [
+            {
+              type: 'logs',
+              dataset: 'nginx.access',
+              title: 'Nginx access logs',
+              release: 'experimental',
+              ingest_pipeline: 'default',
+              streams: [
+                {
+                  input: 'logfile',
+                  vars: [
+                    {
+                      name: 'paths',
+                      type: 'text',
+                      title: 'Paths',
+                      multi: true,
+                      required: true,
+                      show_user: true,
+                      default: ['/var/log/nginx/access.log*'],
+                    },
+                  ],
+                  template_path: 'stream.yml.hbs',
+                  title: 'Nginx access logs',
+                  description: 'Collect Nginx access logs',
+                  enabled: true,
+                },
+              ],
+              package: 'nginx',
+              path: 'access',
+            },
+          ],
+          latestVersion: '1.3.0',
+          keepPoliciesUpToDate: false,
+          status: 'not_installed',
+        },
+      },
+      isLoading: false,
+    };
+
+    (useGetPackageInfoByKey as jest.Mock).mockReturnValue(mockPackageInfo);
   });
 
   describe('and Route state is provided via Fleet HashRouter', () => {
@@ -343,6 +350,38 @@ describe('when on the package policy create page', () => {
 
         expect(useHistory().push).toHaveBeenCalledWith('/policies/agent-policy-1');
       });
+    });
+
+    test('should create agent policy without sys monitoring when new hosts is selected for system integration', async () => {
+      (useGetPackageInfoByKey as jest.Mock).mockReturnValue({
+        ...mockPackageInfo,
+        data: {
+          item: {
+            ...mockPackageInfo.data!.item,
+            name: 'system',
+          },
+        },
+      });
+
+      render();
+
+      await waitFor(() => {
+        renderResult.getByDisplayValue('Agent policy 2');
+      });
+
+      await act(async () => {
+        fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+      });
+
+      expect(sendCreateAgentPolicy as jest.MockedFunction<any>).toHaveBeenCalledWith(
+        {
+          description: '',
+          monitoring_enabled: ['logs', 'metrics'],
+          name: 'Agent policy 2',
+          namespace: 'default',
+        },
+        { withSysMonitoring: false }
+      );
     });
 
     describe('without query param', () => {

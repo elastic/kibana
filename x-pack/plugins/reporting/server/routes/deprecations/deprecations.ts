@@ -5,16 +5,16 @@
  * 2.0.
  */
 import { errors } from '@elastic/elasticsearch';
-import { SecurityHasPrivilegesIndexPrivilegesCheck } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { RequestHandler } from 'src/core/server';
+import type { SecurityHasPrivilegesIndexPrivilegesCheck } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Logger, RequestHandler } from '@kbn/core/server';
 import {
   API_GET_ILM_POLICY_STATUS,
   API_MIGRATE_ILM_POLICY_URL,
   ILM_POLICY_NAME,
 } from '../../../common/constants';
-import { IlmPolicyStatusResponse } from '../../../common/types';
-import { ReportingCore } from '../../core';
-import { IlmPolicyManager, LevelLogger as Logger } from '../../lib';
+import type { IlmPolicyStatusResponse } from '../../../common/types';
+import type { ReportingCore } from '../../core';
+import { IlmPolicyManager } from '../../lib';
 import { deprecations } from '../../lib/deprecations';
 
 export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Logger) => {
@@ -27,9 +27,7 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         return handler(ctx, req, res);
       }
 
-      const {
-        core: { elasticsearch },
-      } = ctx;
+      const { elasticsearch } = await ctx.core;
 
       const store = await reporting.getStore();
 
@@ -63,47 +61,40 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
       path: API_GET_ILM_POLICY_STATUS,
       validate: false,
     },
-    authzWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client: scopedClient },
-          },
-        },
-        _req,
-        res
-      ) => {
-        const checkIlmMigrationStatus = () => {
-          return deprecations.checkIlmMigrationStatus({
-            reportingCore: reporting,
-            // We want to make the current status visible to all reporting users
-            elasticsearchClient: scopedClient.asInternalUser,
-          });
-        };
+    authzWrapper(async ({ core }, _req, res) => {
+      const {
+        elasticsearch: { client: scopedClient },
+      } = await core;
+      const checkIlmMigrationStatus = () => {
+        return deprecations.checkIlmMigrationStatus({
+          reportingCore: reporting,
+          // We want to make the current status visible to all reporting users
+          elasticsearchClient: scopedClient.asInternalUser,
+        });
+      };
 
-        try {
-          const response: IlmPolicyStatusResponse = {
-            status: await checkIlmMigrationStatus(),
-          };
-          return res.ok({ body: response });
-        } catch (e) {
-          logger.error(e);
-          return res.customError({
-            statusCode: e?.statusCode ?? 500,
-            body: { message: e.message },
-          });
-        }
+      try {
+        const response: IlmPolicyStatusResponse = {
+          status: await checkIlmMigrationStatus(),
+        };
+        return res.ok({ body: response });
+      } catch (e) {
+        logger.error(e);
+        return res.customError({
+          statusCode: e?.statusCode ?? 500,
+          body: { message: e.message },
+        });
       }
-    )
+    })
   );
 
   router.put(
     { path: API_MIGRATE_ILM_POLICY_URL, validate: false },
-    authzWrapper(async ({ core: { elasticsearch } }, _req, res) => {
+    authzWrapper(async ({ core }, _req, res) => {
       const store = await reporting.getStore();
       const {
         client: { asCurrentUser: client },
-      } = elasticsearch;
+      } = (await core).elasticsearch;
 
       const scopedIlmPolicyManager = IlmPolicyManager.create({
         client,
@@ -126,8 +117,10 @@ export const registerDeprecationsRoutes = (reporting: ReportingCore, logger: Log
         await client.indices.putSettings({
           index: indexPattern,
           body: {
-            'index.lifecycle': {
-              name: ILM_POLICY_NAME,
+            index: {
+              lifecycle: {
+                name: ILM_POLICY_NAME,
+              },
             },
           },
         });

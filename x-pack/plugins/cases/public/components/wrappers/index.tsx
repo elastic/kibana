@@ -13,6 +13,10 @@ export const WhitePageWrapper = styled.div`
   flex: 1 1 auto;
 `;
 
+export const WhitePageWrapperNoBorder = styled.div`
+  background-color: ${({ theme }) => theme.eui.euiColorEmptyShade};
+  flex: 1 1 auto;
+`;
 export const SectionWrapper = styled.div`
   box-sizing: content-box;
   margin: 0 auto;
@@ -26,4 +30,9 @@ export const ContentWrapper = styled.div`
     `
       padding: ${theme.eui.paddingSizes.l} 0 ${gutterTimeline} 0;
     `};
+`;
+
+export const Wrapper = styled.div`
+  display: flex;
+  flex-direction: column;
 `;

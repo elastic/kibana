@@ -7,27 +7,62 @@
 
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
+import { validateTimeWindowUnits } from '@kbn/triggers-actions-ui-plugin/server';
+import { RuleTypeState } from '@kbn/alerting-plugin/server';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { Comparator } from '../../../common/comparator_types';
 import { ComparatorFnNames } from '../lib';
-import { validateTimeWindowUnits } from '../../../../triggers_actions_ui/server';
-import { AlertTypeState } from '../../../../alerting/server';
+import { getComparatorSchemaType } from '../lib/comparator';
 
 export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 
 // alert type parameters
 export type EsQueryAlertParams = TypeOf<typeof EsQueryAlertParamsSchema>;
-export interface EsQueryAlertState extends AlertTypeState {
+export interface EsQueryAlertState extends RuleTypeState {
   latestTimestamp: string | undefined;
 }
 
-export const EsQueryAlertParamsSchemaProperties = {
-  index: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
-  timeField: schema.string({ minLength: 1 }),
-  esQuery: schema.string({ minLength: 1 }),
+export type EsQueryAlertParamsExtractedParams = Omit<EsQueryAlertParams, 'searchConfiguration'> & {
+  searchConfiguration: SerializedSearchSourceFields & {
+    indexRefName: string;
+  };
+};
+
+const EsQueryAlertParamsSchemaProperties = {
   size: schema.number({ min: 0, max: ES_QUERY_MAX_HITS_PER_EXECUTION }),
   timeWindowSize: schema.number({ min: 1 }),
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
   threshold: schema.arrayOf(schema.number(), { minSize: 1, maxSize: 2 }),
-  thresholdComparator: schema.string({ validate: validateComparator }),
+  thresholdComparator: getComparatorSchemaType(validateComparator),
+  searchType: schema.oneOf([schema.literal('searchSource'), schema.literal('esQuery')], {
+    defaultValue: 'esQuery',
+  }),
+  // searchSource alert param only
+  searchConfiguration: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('searchSource'),
+    schema.object({}, { unknowns: 'allow' }),
+    schema.never()
+  ),
+  // esQuery alert params only
+  esQuery: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('esQuery'),
+    schema.string({ minLength: 1 }),
+    schema.never()
+  ),
+  index: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('esQuery'),
+    schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
+    schema.never()
+  ),
+  timeField: schema.conditional(
+    schema.siblingRef('searchType'),
+    schema.literal('esQuery'),
+    schema.string({ minLength: 1 }),
+    schema.never()
+  ),
 };
 
 export const EsQueryAlertParamsSchema = schema.object(EsQueryAlertParamsSchemaProperties, {
@@ -38,8 +73,7 @@ const betweenComparators = new Set(['between', 'notBetween']);
 
 // using direct type not allowed, circular reference, so body is typed to any
 function validateParams(anyParams: unknown): string | undefined {
-  const { esQuery, thresholdComparator, threshold }: EsQueryAlertParams =
-    anyParams as EsQueryAlertParams;
+  const { esQuery, thresholdComparator, threshold, searchType } = anyParams as EsQueryAlertParams;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
     return i18n.translate('xpack.stackAlerts.esQuery.invalidThreshold2ErrorMessage', {
@@ -49,6 +83,10 @@ function validateParams(anyParams: unknown): string | undefined {
         thresholdComparator,
       },
     });
+  }
+
+  if (searchType === 'searchSource') {
+    return;
   }
 
   try {
@@ -66,7 +104,7 @@ function validateParams(anyParams: unknown): string | undefined {
   }
 }
 
-export function validateComparator(comparator: string): string | undefined {
+function validateComparator(comparator: Comparator): string | undefined {
   if (ComparatorFnNames.has(comparator)) return;
 
   return i18n.translate('xpack.stackAlerts.esQuery.invalidComparatorErrorMessage', {

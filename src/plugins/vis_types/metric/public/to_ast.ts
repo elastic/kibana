@@ -7,14 +7,14 @@
  */
 
 import { get } from 'lodash';
-import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '../../../visualizations/public';
-import { buildExpression, buildExpressionFunction } from '../../../expressions/public';
-import { inter } from '../../../expressions/common';
+import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizations-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { inter } from '@kbn/expressions-plugin/common';
 
 import {
   EsaggsExpressionFunctionDefinition,
   IndexPatternLoadExpressionFunctionDefinition,
-} from '../../../data/public';
+} from '@kbn/data-plugin/public';
 import { VisParams } from './types';
 import { getStopsWithColorsFromRanges } from './utils';
 
@@ -83,7 +83,9 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     )
   );
 
-  if (colorsRange && colorsRange.length) {
+  metricVis.addArgument('labelFont', buildExpression(`font size="14" align="center"`));
+
+  if (colorsRange && colorsRange.length > 1) {
     const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
     const palette = buildExpressionFunction('palette', {
       ...stopsWithColors,

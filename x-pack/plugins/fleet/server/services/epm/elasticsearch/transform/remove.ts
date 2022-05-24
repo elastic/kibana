@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { ElasticsearchAssetType } from '../../../../types';
 import type { EsAssetReference } from '../../../../types';
@@ -46,7 +46,6 @@ export const deleteTransforms = async (esClient: ElasticsearchClient, transformI
           await esClient.transport.request(
             {
               method: 'DELETE',
-              // @ts-expect-error @elastic/elasticsearch Transform is empty interface
               path: `/${transform?.dest?.index}`,
             },
             {

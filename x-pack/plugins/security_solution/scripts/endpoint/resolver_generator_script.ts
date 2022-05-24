@@ -10,20 +10,21 @@ import yargs from 'yargs';
 import fs from 'fs';
 import { Client, errors } from '@elastic/elasticsearch';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
-import { ToolingLog, CA_CERT_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient, KbnClientOptions } from '@kbn/test';
 import { indexHostsAndAlerts } from '../../common/endpoint/index_data';
 import { ANCESTRY_LIMIT, EndpointDocGenerator } from '../../common/endpoint/generate_data';
 
 main();
 
-const handleErr = (err: unknown) => {
+function handleErr(err: unknown) {
   if (err instanceof errors.ResponseError && err.statusCode !== 404) {
     console.log(JSON.stringify(err, null, 2));
     // eslint-disable-next-line no-process-exit
     process.exit(1);
   }
-};
+}
 
 async function deleteIndices(indices: string[], client: Client) {
   for (const index of indices) {
@@ -84,7 +85,7 @@ async function deleteUser(esClient: Client, username: string): Promise<{ found: 
   });
 }
 
-const updateURL = ({
+function updateURL({
   url,
   user,
   protocol,
@@ -92,7 +93,7 @@ const updateURL = ({
   url: string;
   user?: { username: string; password: string };
   protocol?: string;
-}): string => {
+}): string {
   const urlObject = new URL(url);
   if (user) {
     urlObject.username = user.username;
@@ -102,7 +103,7 @@ const updateURL = ({
     urlObject.protocol = protocol;
   }
   return urlObject.href;
-};
+}
 
 async function main() {
   const argv = yargs.help().options({
@@ -232,14 +233,6 @@ async function main() {
       type: 'boolean',
       default: false,
     },
-    logsEndpoint: {
-      alias: 'le',
-      describe:
-        'By default .logs-endpoint.action and .logs-endpoint.action.responses are not indexed. \
-        Add endpoint actions and responses using this option. Starting with v7.16.0.',
-      type: 'boolean',
-      default: false,
-    },
     ssl: {
       alias: 'ssl',
       describe: 'Use https for elasticsearch and kbn clients',
@@ -247,7 +240,7 @@ async function main() {
       default: false,
     },
     withNewUser: {
-      alias: 'nu',
+      alias: 'wnu',
       describe:
         'If the --fleet flag is enabled, using `--withNewUser=username:password` would add a new user with \
          the given username, password and `superuser`, `kibana_system` roles. Adding a new user would also write \
@@ -354,7 +347,6 @@ async function main() {
     argv.alertIndex,
     argv.alertsPerHost,
     argv.fleet,
-    argv.logsEndpoint,
     {
       ancestors: argv.ancestors,
       generations: argv.generations,

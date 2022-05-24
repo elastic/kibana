@@ -17,7 +17,7 @@ import { TestProviders } from '../../common/mock';
 import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -29,16 +29,24 @@ import { useConnectors } from '../../containers/configure/use_connectors';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
 import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
-import { triggersActionsUiMock } from '../../../../triggers_actions_ui/public/mocks';
+import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { registerConnectorsToMockActionRegistry } from '../../common/mock/register_connectors';
 import { createStartServicesMock } from '../../common/lib/kibana/kibana_react.mock';
 import { waitForComponentToUpdate } from '../../common/test_utils';
+import { useCreateAttachments } from '../../containers/use_create_attachments';
+import { useGetTags } from '../../containers/use_get_tags';
+import { useGetReporters } from '../../containers/use_get_reporters';
+import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 
+jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
+jest.mock('../../containers/use_get_cases_metrics');
 jest.mock('../../containers/use_get_action_license');
+jest.mock('../../containers/use_get_tags');
+jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
@@ -49,10 +57,14 @@ jest.mock('../app/use_available_owners', () => ({
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
+const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
+const useGetTagsMock = useGetTags as jest.Mock;
+const useGetReportersMock = useGetReporters as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
+const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -79,6 +91,10 @@ describe('AllCasesListGeneric', () => {
   const fetchCasesStatus = jest.fn();
   const onRowClick = jest.fn();
   const emptyTag = getEmptyTagValue().props.children;
+  useCreateAttachmentsMock.mockReturnValue({
+    status: { isLoading: false },
+    createAttachments: jest.fn(),
+  });
 
   const defaultGetCases = {
     ...useGetCasesMockState,
@@ -103,6 +119,12 @@ describe('AllCasesListGeneric', () => {
     fetchCasesStatus,
     isError: false,
     isLoading: false,
+  };
+
+  const defaultCasesMetrics = {
+    mttr: 5,
+    isLoading: false,
+    fetchCasesMetrics: jest.fn(),
   };
 
   const defaultUpdateCases = {
@@ -144,7 +166,16 @@ describe('AllCasesListGeneric', () => {
     useGetCasesMock.mockReturnValue(defaultGetCases);
     useDeleteCasesMock.mockReturnValue(defaultDeleteCases);
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
+    useGetCasesMetricsMock.mockReturnValue(defaultCasesMetrics);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
+    useGetTagsMock.mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
+    useGetReportersMock.mockReturnValue({
+      reporters: ['casetester'],
+      respReporters: [{ username: 'casetester' }],
+      isLoading: true,
+      isError: false,
+      fetchReporters: jest.fn(),
+    });
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     mockKibana();
@@ -171,10 +202,10 @@ describe('AllCasesListGeneric', () => {
         useGetCasesMockState.data.cases[0].title
       );
       expect(
-        wrapper.find(`span[data-test-subj="case-table-column-tags-0"]`).first().prop('title')
+        wrapper.find(`span[data-test-subj="case-table-column-tags-coke"]`).first().prop('title')
       ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
       expect(wrapper.find(`[data-test-subj="case-table-column-createdBy"]`).first().text()).toEqual(
-        useGetCasesMockState.data.cases[0].createdBy.username
+        'LK'
       );
       expect(
         wrapper
@@ -183,9 +214,53 @@ describe('AllCasesListGeneric', () => {
           .childAt(0)
           .prop('value')
       ).toBe(useGetCasesMockState.data.cases[0].createdAt);
+
+      expect(
+        wrapper.find(`[data-test-subj="case-table-column-severity"]`).first().text().toLowerCase()
+      ).toBe(useGetCasesMockState.data.cases[0].severity);
+
       expect(wrapper.find(`[data-test-subj="case-table-case-count"]`).first().text()).toEqual(
         'Showing 10 cases'
       );
+    });
+  });
+
+  it('should show a tooltip with the reporter username when hover over the reporter avatar', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
+    });
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    userEvent.hover(result.queryAllByTestId('case-table-column-createdBy')[0]);
+
+    await waitFor(() => {
+      expect(result.getByTestId('case-table-column-createdBy-tooltip')).toBeTruthy();
+      expect(result.getByTestId('case-table-column-createdBy-tooltip').textContent).toEqual(
+        'lknope'
+      );
+    });
+  });
+
+  it('should show a tooltip with all tags when hovered', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
+    });
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    userEvent.hover(result.queryAllByTestId('case-table-column-tags')[0]);
+
+    await waitFor(() => {
+      expect(result.getByTestId('case-table-column-tags-tooltip')).toBeTruthy();
     });
   });
 
@@ -202,6 +277,7 @@ describe('AllCasesListGeneric', () => {
             createdAt: null,
             createdBy: null,
             status: null,
+            severity: null,
             tags: null,
             title: null,
             totalComment: null,
@@ -210,19 +286,24 @@ describe('AllCasesListGeneric', () => {
         ],
       },
     });
+
     const wrapper = mount(
       <TestProviders>
         <AllCasesList />
       </TestProviders>
     );
+
     const checkIt = (columnName: string, key: number) => {
       const column = wrapper.find('[data-test-subj="cases-table"] tbody .euiTableRowCell').at(key);
       expect(column.find('.euiTableRowCell--hideForDesktop').text()).toEqual(columnName);
       expect(column.find('span').text()).toEqual(emptyTag);
     };
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
-      useCasesColumns(defaultColumnArgs)
+    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+      () => useCasesColumns(defaultColumnArgs),
+      {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      }
     );
 
     await waitFor(() => {
@@ -290,6 +371,15 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+  });
+
+  it('should render the case stats', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="cases-count-stats"]')).toBeTruthy();
   });
 
   it.skip('Bulk delete', async () => {
@@ -534,6 +624,8 @@ describe('AllCasesListGeneric', () => {
           username: 'lknope',
         },
         description: 'Security banana Issue',
+        severity: CaseSeverity.LOW,
+        duration: null,
         externalService: {
           connectorId: '123',
           connectorName: 'connector name',
@@ -652,11 +744,15 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(() =>
-      useCasesColumns({
-        ...defaultColumnArgs,
-        isSelectorView: true,
-      })
+    const { result } = renderHook<GetCasesColumn, CasesColumns[]>(
+      () =>
+        useCasesColumns({
+          ...defaultColumnArgs,
+          isSelectorView: true,
+        }),
+      {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      }
     );
 
     expect(result.current.find((i) => i.name === 'Status')).toBeFalsy();
@@ -736,7 +832,8 @@ describe('AllCasesListGeneric', () => {
       </TestProviders>
     );
 
-    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    const allCheckbox = await screen.findByTestId('checkboxSelectAll');
+    userEvent.click(allCheckbox);
     const checkboxes = await screen.findAllByRole('checkbox');
 
     for (const checkbox of checkboxes) {
@@ -748,7 +845,7 @@ describe('AllCasesListGeneric', () => {
       expect(checkbox).not.toBeChecked();
     }
 
-    waitForComponentToUpdate();
+    await waitForComponentToUpdate();
   });
 
   it('should deselect cases when changing filters', async () => {
@@ -757,26 +854,15 @@ describe('AllCasesListGeneric', () => {
       selectedCases: [],
     });
 
-    const { rerender } = render(
+    render(
       <TestProviders>
         <AllCasesList />
       </TestProviders>
     );
 
-    /** Something really weird is going on and we have to rerender
-     * to get the correct html output. Not sure why.
-     *
-     * If you run the test alone the rerender is not needed.
-     * If you run the test along with the above test
-     * then you need the rerender
-     */
-    rerender(
-      <TestProviders>
-        <AllCasesList />
-      </TestProviders>
-    );
+    const allCheckbox = await screen.findByTestId('checkboxSelectAll');
 
-    userEvent.click(screen.getByTestId('checkboxSelectAll'));
+    userEvent.click(allCheckbox);
     const checkboxes = await screen.findAllByRole('checkbox');
 
     for (const checkbox of checkboxes) {
@@ -790,6 +876,43 @@ describe('AllCasesListGeneric', () => {
       expect(checkbox).not.toBeChecked();
     }
 
-    waitForComponentToUpdate();
+    await waitForComponentToUpdate();
+  });
+
+  it('should hide the alerts column if the alert feature is disabled', async () => {
+    const result = render(
+      <TestProviders features={{ alerts: { enabled: false } }}>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(result.getByTestId('cases-table')).toBeTruthy();
+      expect(result.queryAllByTestId('case-table-column-alertsCount').length).toBe(0);
+    });
+  });
+
+  it('should show the alerts column if the alert feature is enabled', async () => {
+    const { findAllByTestId } = render(
+      <TestProviders features={{ alerts: { enabled: true } }}>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    const alertCounts = await findAllByTestId('case-table-column-alertsCount');
+
+    expect(alertCounts.length).toBeGreaterThan(0);
+  });
+
+  it('should show the alerts column if the alert object is empty', async () => {
+    const { findAllByTestId } = render(
+      <TestProviders features={{ alerts: {} }}>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    const alertCounts = await findAllByTestId('case-table-column-alertsCount');
+
+    expect(alertCounts.length).toBeGreaterThan(0);
   });
 });

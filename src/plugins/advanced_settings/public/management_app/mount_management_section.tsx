@@ -14,11 +14,11 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import { LocationDescriptor } from 'history';
-import { KibanaThemeProvider } from '../../../kibana_react/public';
-import { url } from '../../../kibana_utils/public';
-import { ManagementAppMountParams } from '../../../management/public';
-import { UsageCollectionSetup } from '../../../usage_collection/public';
-import { StartServicesAccessor } from '../../../../core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { url } from '@kbn/kibana-utils-plugin/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { StartServicesAccessor } from '@kbn/core/public';
 
 import { AdvancedSettings, QUERY } from './advanced_settings';
 import { ComponentRegistry } from '../types';
@@ -82,7 +82,7 @@ export async function mountManagementSection(
                 history={params.history}
                 enableSaving={canSave}
                 toasts={notifications.toasts}
-                dockLinks={docLinks.links}
+                docLinks={docLinks.links}
                 uiSettings={uiSettings}
                 theme={params.theme$}
                 componentRegistry={componentRegistry}

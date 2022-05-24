@@ -7,13 +7,21 @@
  */
 
 import * as path from 'path';
-import { StorybookConfig } from '@storybook/core-common';
+import type { StorybookConfig } from '@storybook/core-common';
 import { Configuration } from 'webpack';
 import webpackMerge from 'webpack-merge';
 import { REPO_ROOT } from './constants';
 import { default as WebpackConfig } from '../webpack.config';
 
+export type { StorybookConfig };
+
 const toPath = (_path: string) => path.join(REPO_ROOT, _path);
+
+// This ignore pattern excludes all of node_modules EXCEPT for `@kbn`.  This allows for
+// changes to packages to cause a refresh in Storybook.
+const IGNORE_PATTERN =
+  /[/\\]node_modules[/\\](?!@kbn[/\\][^/\\]+[/\\](?!node_modules)([^/\\]+))([^/\\]+[/\\][^/\\]+)/;
+
 export const defaultConfig: StorybookConfig = {
   addons: ['@kbn/storybook/preset', '@storybook/addon-a11y', '@storybook/addon-essentials'],
   stories: ['../**/*.stories.tsx', '../**/*.stories.mdx'],
@@ -26,7 +34,16 @@ export const defaultConfig: StorybookConfig = {
   // @ts-expect-error StorybookConfig type is incomplete
   // https://storybook.js.org/docs/react/configure/babel#custom-configuration
   babel: async (options) => {
-    options.presets.push('@emotion/babel-preset-css-prop');
+    options.presets.push([
+      require.resolve('@emotion/babel-preset-css-prop'),
+      {
+        // There's an issue where emotion classnames may be duplicated,
+        // (e.g. `[hash]-[filename]--[local]_[filename]--[local]`)
+        // https://github.com/emotion-js/emotion/issues/2417
+        autoLabel: 'always',
+        labelFormat: '[filename]--[local]',
+      },
+    ]);
     return options;
   },
   webpackFinal: (config, options) => {
@@ -36,6 +53,11 @@ export const defaultConfig: StorybookConfig = {
     }
 
     config.node = { fs: 'empty' };
+    config.watch = true;
+    config.watchOptions = {
+      ...config.watchOptions,
+      ignored: [IGNORE_PATTERN],
+    };
 
     // Remove when @storybook has moved to @emotion v11
     // https://github.com/storybookjs/storybook/issues/13145
@@ -61,7 +83,7 @@ export const defaultConfig: StorybookConfig = {
 // an issue with storybook typescript setup see this issue for more details
 // https://github.com/storybookjs/storybook/issues/9610
 
-export const defaultConfigWebFinal = {
+export const defaultConfigWebFinal: StorybookConfig = {
   ...defaultConfig,
   webpackFinal: (config: Configuration) => {
     return WebpackConfig({ config });

@@ -12,10 +12,11 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText, EuiPageContent, EuiPage, EuiSpacer } from '@elastic/eui';
 import { cloneDeep } from 'lodash';
-import { esFilters } from '../../../../data/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { generateFilters } from '@kbn/data-plugin/public';
 import { DOC_TABLE_LEGACY, SEARCH_FIELDS_FROM_SOURCE } from '../../../common';
 import { ContextErrorMessage } from './components/context_error_message';
-import { DataView, DataViewField } from '../../../../data/common';
 import { LoadingStatus } from './services/context_query_state';
 import { AppState, isEqualFilters } from './services/context_state';
 import { useColumns } from '../../utils/use_data_grid_columns';
@@ -36,10 +37,16 @@ export interface ContextAppProps {
 
 export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
   const services = useDiscoverServices();
-  const { uiSettings, capabilities, indexPatterns, navigation, filterManager } = services;
+  const { uiSettings, capabilities, indexPatterns, navigation, filterManager, core } = services;
 
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const useNewFieldsApi = useMemo(() => !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE), [uiSettings]);
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'context',
+    id: indexPattern.id || '',
+  });
 
   /**
    * Context app state
@@ -111,13 +118,7 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
 
   const addFilter = useCallback(
     async (field: DataViewField | string, values: unknown, operation: string) => {
-      const newFilters = esFilters.generateFilters(
-        filterManager,
-        field,
-        values,
-        operation,
-        indexPattern.id!
-      );
+      const newFilters = generateFilters(filterManager, field, values, operation, indexPattern.id!);
       filterManager.addFilters(newFilters);
       if (indexPatterns) {
         const fieldName = typeof field === 'string' ? field : field.name;
@@ -132,7 +133,8 @@ export const ContextApp = ({ indexPattern, anchorId }: ContextAppProps) => {
     return {
       appName: 'context',
       showSearchBar: true,
-      showQueryBar: false,
+      showQueryBar: true,
+      showQueryInput: false,
       showFilterBar: true,
       showSaveQuery: false,
       showDatePicker: false,

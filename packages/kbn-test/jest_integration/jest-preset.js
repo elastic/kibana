@@ -16,7 +16,8 @@ module.exports = {
   ),
   setupFilesAfterEnv: [
     '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/after_env.integration.js',
-    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.moment_timezone.js',
+    '<rootDir>/node_modules/@kbn/test/target_node/jest/setup/mocks.eui.js',
   ],
   reporters: [
     'default',
@@ -27,12 +28,16 @@ module.exports = {
         reportName: 'Jest Integration Tests',
       },
     ],
-    [
-      '@kbn/test/target_node/jest/ci_stats_jest_reporter',
-      {
-        testGroupType: 'Jest Integration Tests',
-      },
-    ],
+    ...(process.env.TEST_GROUP_TYPE_INTEGRATION
+      ? [
+          [
+            '@kbn/test/target_node/jest/ci_stats_jest_reporter',
+            {
+              testGroupType: process.env.TEST_GROUP_TYPE_INTEGRATION,
+            },
+          ],
+        ]
+      : []),
   ],
   coverageReporters: !!process.env.CI
     ? [['json', { file: 'jest-integration.json' }]]

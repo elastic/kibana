@@ -22,6 +22,7 @@ import { Rules } from './rules';
 
 import { Timelines } from './timelines';
 import { Management } from './management';
+import { LandingPages } from './landing_pages';
 
 /**
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
@@ -38,5 +39,6 @@ const subPluginClasses = {
   Rules,
   Timelines,
   Management,
+  LandingPages,
 };
 export { subPluginClasses };
