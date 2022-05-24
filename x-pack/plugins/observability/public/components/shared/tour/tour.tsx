@@ -4,35 +4,41 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+
+import React, { ReactNode, useState, useCallback } from 'react';
+
 import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiStatelessTourStep,
-  EuiText,
   EuiTourStep,
-  useEuiTour,
+  EuiTourStepProps,
+  EuiText,
+  ElementTarget,
 } from '@elastic/eui';
+import { useLocation } from 'react-router-dom';
+import { ApplicationStart } from '@kbn/core/public';
+import { observabilityAppId } from '../../../../common';
+import { useHasData } from '../../../hooks/use_has_data';
 
-const TOUR_POPOVER_MAX_WIDTH = 360;
+interface TourStep {
+  content: EuiTourStepProps['content'];
+  anchor: ElementTarget;
+  anchorPosition: EuiTourStepProps['anchorPosition'];
+  title: EuiTourStepProps['title'];
+}
 
-const observabilityTourConfig = {
-  currentTourStep: 1,
-  isTourActive: true,
-  tourPopoverWidth: 360,
-  tourSubtitle: i18n.translate('xpack.observability.tour.tourSubTitle', {
-    defaultMessage: 'Elastic Observability tour',
-  }),
-};
+const minWidth: EuiTourStepProps['minWidth'] = 360;
+const maxWidth: EuiTourStepProps['maxWidth'] = 360;
+const offset: EuiTourStepProps['offset'] = 30;
+const repositionOnScroll: EuiTourStepProps['repositionOnScroll'] = false;
 
-const observabilityTourSteps = [
+const overviewPath = '/overview';
+
+const tourStepsConfig: TourStep[] = [
   {
-    anchor: '.euiSideNav__heading', // TODO better anchor here?
-    maxWidth: TOUR_POPOVER_MAX_WIDTH,
-    step: 1,
     title: i18n.translate('xpack.observability.tour.observabilityOverviewStep.tourTitle', {
       defaultMessage: 'Welcome to Elastic Observability',
     }),
@@ -44,12 +50,10 @@ const observabilityTourSteps = [
         })}
       </EuiText>
     ),
-    anchorPosition: 'rightCenter',
-  } as EuiStatelessTourStep,
+    anchor: `[id^="KibanaPageTemplateSolutionNav"]`,
+    anchorPosition: 'rightUp',
+  },
   {
-    anchor: '[data-nav-id="stream"]',
-    maxWidth: TOUR_POPOVER_MAX_WIDTH,
-    step: 2,
     title: i18n.translate('xpack.observability.tour.streamStep.tourTitle', {
       defaultMessage: 'View all your infrastructure logs in real time',
     }),
@@ -61,12 +65,10 @@ const observabilityTourSteps = [
         })}
       </EuiText>
     ),
-    anchorPosition: 'rightCenter',
-  } as EuiStatelessTourStep,
+    anchor: `[data-nav-id="stream"]`,
+    anchorPosition: 'rightUp',
+  },
   {
-    anchor: '[data-nav-id="metrics_explorer"]',
-    maxWidth: TOUR_POPOVER_MAX_WIDTH,
-    step: 3,
     title: i18n.translate('xpack.observability.tour.metricsExplorerStep.tourTitle', {
       defaultMessage: 'Inspect your overall infrastructure performance',
     }),
@@ -78,12 +80,10 @@ const observabilityTourSteps = [
         })}
       </EuiText>
     ),
-    anchorPosition: 'rightCenter',
-  } as EuiStatelessTourStep,
+    anchor: `[data-nav-id="metrics_explorer"]`,
+    anchorPosition: 'rightUp',
+  },
   {
-    anchor: '[data-nav-id="traces"]',
-    maxWidth: TOUR_POPOVER_MAX_WIDTH,
-    step: 4,
     title: i18n.translate('xpack.observability.tour.tracesStep.tourTitle', {
       defaultMessage: 'Understand the entire lifecycle of a request/action',
     }),
@@ -95,12 +95,10 @@ const observabilityTourSteps = [
         })}
       </EuiText>
     ),
-    anchorPosition: 'rightCenter',
-  } as EuiStatelessTourStep,
+    anchor: `[data-nav-id="traces"]`,
+    anchorPosition: 'rightUp',
+  },
   {
-    anchor: '[data-nav-id="alerts"]',
-    maxWidth: TOUR_POPOVER_MAX_WIDTH,
-    step: 5,
     title: i18n.translate('xpack.observability.tour.alertsStep.tourTitle', {
       defaultMessage: 'Get notified when something goes wrong',
     }),
@@ -112,25 +110,45 @@ const observabilityTourSteps = [
         })}
       </EuiText>
     ),
-    anchorPosition: 'rightCenter',
-  } as EuiStatelessTourStep,
-  // TODO add last step - "Guided setup"
+    anchor: `[data-nav-id="alerts"]`,
+    anchorPosition: 'rightUp',
+  },
+  {
+    title: i18n.translate('xpack.observability.tour.guidedSetupStep.tourTitle', {
+      defaultMessage: `You're ready!`,
+    }),
+    content: (
+      <EuiText>
+        {i18n.translate('xpack.observability.tour.guidedSetupStep.tourContent', {
+          defaultMessage: 'View the guided setup to learn about next steps.',
+        })}
+      </EuiText>
+    ),
+    anchor: '#guidedSetupButton',
+    anchorPosition: 'rightUp',
+  },
 ];
 
-export function ObservabilityTour() {
-  const [tourStepProps, actions] = useEuiTour(observabilityTourSteps, observabilityTourConfig);
-
+const getSteps = ({
+  activeStep,
+  incrementStep,
+  endTour,
+}: {
+  activeStep: number;
+  incrementStep: () => void;
+  endTour: () => void;
+}) => {
   const footerAction = (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="s" alignItems="baseline">
       <EuiFlexItem>
-        <EuiButtonEmpty onClick={() => actions.finishTour()} size="s">
+        <EuiButtonEmpty onClick={() => endTour()} size="xs" color="text">
           {i18n.translate('xpack.observability.tour.skipButtonLabel', {
             defaultMessage: 'Skip',
           })}
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton onClick={() => actions.incrementStep()} size="s" fill>
+        <EuiButton onClick={() => incrementStep()} size="s" color="success">
           {i18n.translate('xpack.observability.tour.nextButtonLabel', {
             defaultMessage: 'Next',
           })}
@@ -139,12 +157,73 @@ export function ObservabilityTour() {
     </EuiFlexGroup>
   );
 
+  return tourStepsConfig.map((stepConfig, index) => {
+    const step = index + 1;
+    return (
+      <EuiTourStep
+        {...stepConfig}
+        key={step}
+        subtitle={i18n.translate('xpack.observability.tour.subtitleLabel', {
+          defaultMessage: 'Step {stepNumber}',
+          values: {
+            stepNumber: step,
+          },
+        })}
+        step={step}
+        minWidth={minWidth}
+        maxWidth={maxWidth}
+        offset={offset}
+        repositionOnScroll={repositionOnScroll}
+        stepsTotal={tourStepsConfig.length}
+        isStepOpen={step === activeStep}
+        footerAction={activeStep === tourStepsConfig.length ? undefined : footerAction}
+        onFinish={() => endTour()}
+      />
+    );
+  });
+};
+
+export function ObservabilityOverviewTour({
+  children,
+  navigateToApp,
+}: {
+  children: ReactNode;
+  navigateToApp: ApplicationStart['navigateToApp'];
+}) {
+  const [isTourActive, setIsTourActive] = useState(true);
+  const [activeStep, setActiveStep] = useState(1);
+
+  const { hasAnyData, isAllRequestsComplete } = useHasData();
+  const { pathname: currentPath } = useLocation();
+
+  const isOverviewPage = currentPath === overviewPath;
+
+  const incrementStep = useCallback(() => {
+    // The user must be on the overview page to view the last step in the tour
+    // TODO this logic feels brittle if we ever change the steps/step order
+    if (isOverviewPage === false && activeStep === tourStepsConfig.length - 1) {
+      return navigateToApp(observabilityAppId, {
+        path: overviewPath,
+      });
+    }
+
+    setActiveStep((prevState) => prevState + 1);
+  }, [activeStep, isOverviewPage, navigateToApp]);
+
+  const endTour = useCallback(() => setIsTourActive(false), []);
+
+  const shouldShowTour = useCallback(() => {
+    if (isOverviewPage) {
+      // We must wait for data to load on the overview page in order for the last step in the tour to render correctly
+      return Boolean(isTourActive && isAllRequestsComplete && hasAnyData);
+    }
+    return isTourActive;
+  }, [hasAnyData, isAllRequestsComplete, isOverviewPage, isTourActive]);
+
   return (
     <>
-      {tourStepProps.map((stepProps, index) => {
-        const isLastStep = index === tourStepProps.length - 1;
-        return <EuiTourStep {...stepProps} footerAction={isLastStep ? undefined : footerAction} />;
-      })}
+      {children}
+      {shouldShowTour() && getSteps({ activeStep, incrementStep, endTour })}
     </>
   );
 }

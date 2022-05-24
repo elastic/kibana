@@ -313,6 +313,7 @@ function PageHeader({
           color="text"
           iconType="wrench"
           onClick={handleGuidedSetupClick}
+          id="guidedSetupButton"
         >
           <FormattedMessage
             id="xpack.observability.overview.guidedSetupButton"
