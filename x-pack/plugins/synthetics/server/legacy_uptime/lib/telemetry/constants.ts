@@ -7,3 +7,5 @@
 
 export const MONITOR_UPDATE_CHANNEL = 'synthetics-monitor-update';
 export const MONITOR_CURRENT_CHANNEL = 'synthetics-monitor-current';
+export const MONITOR_SYNC_STATE_CHANNEL = 'synthetics-monitor-sync-state';
+export const MONITOR_SYNC_EVENTS_CHANNEL = 'synthetics-monitor-sync-events';
