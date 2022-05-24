@@ -34,18 +34,24 @@ export const ApiKeyBtn = ({
           >
             {loading ? GET_API_KEY_LOADING_LABEL : GET_API_KEY_LABEL}
           </EuiButton>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="s" />
         </>
       )}
       {apiKey && (
         <>
-          <EuiCallOut title={API_KEY_WARNING_LABEL} iconType="iInCircle" />
+          <EuiCallOut title={API_KEY_WARNING_LABEL} iconType="iInCircle" size="s" />
           <EuiSpacer size="s" />
-          <EuiText size="xs">
-            <h3>{API_KEY_LABEL}</h3>
+          <EuiText size="s">
+            <strong>{API_KEY_LABEL}</strong>
           </EuiText>
           <EuiSpacer size="s" />
-          <EuiCodeBlock language="javascript" isCopyable>
+          <EuiCodeBlock
+            language="javascript"
+            isCopyable
+            fontSize="s"
+            paddingSize="m"
+            whiteSpace="pre"
+          >
             {apiKey}
           </EuiCodeBlock>
         </>

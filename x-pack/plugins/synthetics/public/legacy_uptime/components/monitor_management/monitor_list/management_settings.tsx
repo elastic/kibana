@@ -57,18 +57,27 @@ export const ManagementSettings = () => {
       }}
       style={{ margin: 'auto' }}
     >
-      <div style={{ width: 550 }}>
+      <div style={{ maxWidth: 350 }}>
         {canSave && canManageApiKeys ? (
           <>
             <EuiPopoverTitle>{GET_API_KEY_GENERATE}</EuiPopoverTitle>
-            <EuiText>{GET_API_KEY_LABEL_DESCRIPTION}</EuiText>
-            <EuiLink href="#">{LEARN_MORE_LABEL}</EuiLink>
+            <EuiText size="s">
+              {GET_API_KEY_LABEL_DESCRIPTION}{' '}
+              <EuiLink href="#" external target="_blank">
+                {LEARN_MORE_LABEL}
+              </EuiLink>
+            </EuiText>
             <ApiKeyBtn loading={loading} setLoadAPIKey={setLoadAPIKey} apiKey={apiKey} />
           </>
         ) : (
           <>
-            <EuiText>{GET_API_KEY_LABEL_DESCRIPTION}</EuiText>
-            <EuiText>{GET_API_KEY_REDUCED_PERMISSIONS_LABEL}</EuiText>
+            <EuiPopoverTitle>{GET_API_KEY_GENERATE}</EuiPopoverTitle>
+            <EuiText size="s">
+              {GET_API_KEY_REDUCED_PERMISSIONS_LABEL}{' '}
+              <EuiLink href="#" external target="_blank">
+                {LEARN_MORE_LABEL}
+              </EuiLink>
+            </EuiText>
           </>
         )}
       </div>
@@ -81,7 +90,7 @@ const API_KEYS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.getAPI
 });
 
 const LEARN_MORE_LABEL = i18n.translate('xpack.synthetics.monitorManagement.learnMore.label', {
-  defaultMessage: 'Learn more.',
+  defaultMessage: 'Learn more',
 });
 
 const GET_API_KEY_GENERATE = i18n.translate(
@@ -102,6 +111,6 @@ const GET_API_KEY_REDUCED_PERMISSIONS_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.getAPIKeyLabel.description',
   {
     defaultMessage:
-      'To generate an API key, you must have permissions to manage API keys and Uptime write access. Please contact your administrator.',
+      'Use an API key to push monitors remotely from a CLI or CD pipeline. To generate an API key, you must have permissions to manage API keys and Uptime write access. Please contact your administrator.',
   }
 );
