@@ -7,6 +7,8 @@ properties:
     type: string
   rollout_duration_seconds:
     type: number
+  start_time:
+    type: string
   agents:
     oneOf:
       - type: array
