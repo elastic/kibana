@@ -471,6 +471,8 @@ const bulkActionEditPayloadTimeline = t.type({
   }),
 });
 
+export type BulkActionEditPayloadTimeline = t.TypeOf<typeof bulkActionEditPayloadTimeline>;
+
 export const bulkActionEditPayload = t.union([
   bulkActionEditPayloadTags,
   bulkActionEditPayloadIndexPatterns,
@@ -478,3 +480,9 @@ export const bulkActionEditPayload = t.union([
 ]);
 
 export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
+
+export type BulkActionEditForRuleAttributes = BulkActionEditPayloadTags;
+
+export type BulkActionEditForRuleParams =
+  | BulkActionEditPayloadIndexPatterns
+  | BulkActionEditPayloadTimeline;
