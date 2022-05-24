@@ -82,11 +82,11 @@ export default ({ getService, getPageObjects }) => {
         it(beat + ' should be in the list of beats in the header', async () => {
           //Checking the total number of Beats reporting against how many beats we have configured in the integration test
           await testSubjects.click('beatsOverview');
-          const beatsList = await testSubjects.getVisibleTextAll('typeCount');
-          const processedList = beatsList.map((element) => {
-            return element.toLowerCase();
-          });
-          expect(processedList.contains(beat + ' 1')).to.be(true);
+          await testSubjects.click('beatsListingPage');
+          await testSubjects.click('beatLink-' + beat);
+          const eventsTotalText = await testSubjects.getVisibleText('eventsTotal');
+          const eventsTotal = parseInt(eventsTotalText.slice(13), 10);
+          expect(eventsTotal).to.be.greaterThan(0);
         });
       });
   });
