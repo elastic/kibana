@@ -63,3 +63,11 @@ export const ERROR_HEADING_LABEL = i18n.translate(
     defaultMessage: 'Error loading Monitor Management',
   }
 );
+
+export const BETA_TOOLTIP_MESSAGE = i18n.translate(
+  'xpack.synthetics.monitors.management.betaLabel',
+  {
+    defaultMessage:
+      'This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features.',
+  }
+);

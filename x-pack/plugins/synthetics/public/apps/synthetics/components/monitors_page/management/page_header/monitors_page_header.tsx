@@ -7,22 +7,29 @@
 
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBetaBadge, EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { MONITOR_ADD_ROUTE } from '../../../../../../../common/constants';
 
 import { SyntheticsSettingsContext } from '../../../../contexts/synthetics_settings_context';
 
+import { BETA_TOOLTIP_MESSAGE } from '../labels';
+
 export const MonitorsPageHeader = () => {
   const { basePath } = useContext(SyntheticsSettingsContext);
 
   return (
-    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="xs">
+    <EuiFlexGroup alignItems="center" gutterSize="xs">
       <EuiFlexItem grow={false}>
         <FormattedMessage
           id="xpack.synthetics.monitors.pageHeader.title"
           defaultMessage="Monitors"
         />
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <div>
+          <EuiBetaBadge label="Beta" tooltipContent={BETA_TOOLTIP_MESSAGE} />
+        </div>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
