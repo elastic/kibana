@@ -49,7 +49,7 @@ export const CaseViewActivity = ({
   const {
     data,
     refetch: fetchCaseUserActions,
-    isLoading: isLoadingUserActions,
+    isFetching: isLoadingUserActions,
   } = useFetchCaseUserActions(caseData.id, caseData.connector.id);
 
   const onShowAlertDetails = useCallback(

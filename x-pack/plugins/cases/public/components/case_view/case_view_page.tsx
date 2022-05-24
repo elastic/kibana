@@ -63,7 +63,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const {
       data,
       refetch: fetchCaseUserActions,
-      isLoading: isLoadingUserActions,
+      isFetching: isLoadingUserActions,
     } = useFetchCaseUserActions(caseData.id, caseData.connector.id);
 
     const {
