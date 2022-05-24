@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { unflattenObject } from '../../../../helpers/format_response_object_values';
 import { getOr } from 'lodash/fp';
+import { unflattenObject } from '../../../../helpers/format_response_object_values';
 import { GeoEcs } from '../../../../../../common/ecs/geo';
 import {
   AutonomousSystem,
