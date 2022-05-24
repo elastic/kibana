@@ -26,7 +26,12 @@ import { MONITOR_MANAGEMENT_ROUTE } from '../../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
 import { setMonitor } from '../../../state/api';
 
-import { ConfigKey, SyntheticsMonitor, SourceType, ServiceLocationErrors } from '../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  SyntheticsMonitor,
+  SourceType,
+  ServiceLocationErrors,
+} from '../../../../../common/runtime_types';
 import { TestRun } from '../test_now_mode/test_now_mode';
 
 import { monitorManagementListSelector } from '../../../state/selectors';
