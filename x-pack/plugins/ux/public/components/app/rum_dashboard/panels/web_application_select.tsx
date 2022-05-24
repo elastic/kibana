@@ -6,42 +6,42 @@
  */
 
 import React from 'react';
+import datemath from '@kbn/datemath';
+import { useEsSearch } from '@kbn/observability-plugin/public';
+import { serviceNameQuery } from '../../../../services/data/service_name_query';
 import { ServiceNameFilter } from '../url_filter/service_name_filter';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { RUM_AGENT_NAMES } from '../../../../../common/agent_name';
+import { useDataView } from '../local_uifilters/use_data_view';
+
+function callDateMath(value: unknown): number {
+  const DEFAULT_RETURN_VALUE = 0;
+  if (typeof value === 'string') {
+    return datemath.parse(value)?.valueOf() ?? DEFAULT_RETURN_VALUE;
+  }
+  return DEFAULT_RETURN_VALUE;
+}
 
 export function WebApplicationSelect() {
   const {
     rangeId,
     urlParams: { start, end },
   } = useLegacyUrlParams();
+  const { dataViewTitle } = useDataView();
 
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (start && end) {
-        return callApmApi('GET /internal/apm/ux/services', {
-          params: {
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify({ agentName: RUM_AGENT_NAMES }),
-            },
-          },
-        });
-      }
+  const { data, loading } = useEsSearch(
+    {
+      index: dataViewTitle,
+      ...serviceNameQuery(callDateMath(start), callDateMath(end)),
     },
     // `rangeId` works as a cache buster for ranges that never change, like `Today`
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [start, end, rangeId]
+    [start, end, rangeId, dataViewTitle],
+    { name: 'UxApplicationServices' }
   );
 
-  const rumServiceNames = data?.rumServices ?? [];
+  const rumServiceNames =
+    data?.aggregations?.services?.buckets.map(({ key }) => key as string) ?? [];
 
   return (
-    <ServiceNameFilter
-      loading={status !== 'success'}
-      serviceNames={rumServiceNames}
-    />
+    <ServiceNameFilter loading={!!loading} serviceNames={rumServiceNames} />
   );
 }
