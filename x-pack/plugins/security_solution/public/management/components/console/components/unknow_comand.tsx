@@ -6,8 +6,9 @@
  */
 
 import React, { memo, useEffect, useMemo } from 'react';
-import { EuiCode, EuiIcon, EuiText, EuiTextColor } from '@elastic/eui';
+import { EuiCode, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { UnsupportedMessageCallout } from './unsupported_message_callout';
 import { CommandExecutionComponentProps } from '../types';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -34,19 +35,17 @@ export const UnknownCommand = memo<CommandExecutionComponentProps>(({ command, s
   }, [setStatus]);
 
   return (
-    <div data-test-subj={getTestId('unknownCommandError')}>
-      <EuiText size="s">
-        <EuiTextColor color="danger">
-          <FormattedMessage
-            id="xpack.securitySolution.console.unknownCommand.title"
-            defaultMessage="Unsupported text/command!"
-          />
-        </EuiTextColor>
-      </EuiText>
-      <EuiText size="s">
-        <EuiTextColor color="subdued">{message}</EuiTextColor>
-      </EuiText>
-    </div>
+    <UnsupportedMessageCallout
+      header={
+        <FormattedMessage
+          id="xpack.securitySolution.console.unknownCommand.title"
+          defaultMessage="Unsupported text/command!"
+        />
+      }
+      data-test-subj={getTestId('unknownCommandError')}
+    >
+      {message}
+    </UnsupportedMessageCallout>
   );
 });
 UnknownCommand.displayName = 'UnknownCommand';
