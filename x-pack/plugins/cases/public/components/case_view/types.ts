@@ -29,7 +29,6 @@ export interface CaseViewProps extends CaseViewBaseProps {
 
 export interface CaseViewPageProps extends CaseViewBaseProps {
   caseId: string;
-  // fetchCase: UseGetCase['fetchCase'];
   fetchCase: () => void;
   caseData: Case;
   updateCase: (newCase: Case) => void;
