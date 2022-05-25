@@ -11,6 +11,7 @@ import React from 'react';
 import uuid from 'uuid';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -110,7 +111,10 @@ function useServicesFetcher() {
                   // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
                   .sort()
               ),
-              offset: comparisonEnabled ? offset : undefined,
+              offset:
+                comparisonEnabled && isTimeComparison(offset)
+                  ? offset
+                  : undefined,
             },
           },
         });

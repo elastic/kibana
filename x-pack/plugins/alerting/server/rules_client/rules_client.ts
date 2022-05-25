@@ -54,6 +54,7 @@ import {
   RuleWithLegacyId,
   SanitizedRuleWithLegacyId,
   PartialRuleWithLegacyId,
+  RuleSnooze,
   RawAlertInstance as RawAlert,
 } from '../types';
 import {
@@ -62,6 +63,7 @@ import {
   getRuleNotifyWhenType,
   validateMutatedRuleTypeParams,
   convertRuleIdsToKueryNode,
+  getRuleSnoozeEndTime,
 } from '../lib';
 import { taskInstanceToAlertTaskInstance } from '../task_runner/alert_task_instance';
 import { RegistryRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
@@ -310,7 +312,8 @@ export interface CreateOptions<Params extends RuleTypeParams> {
     | 'mutedInstanceIds'
     | 'actions'
     | 'executionStatus'
-    | 'snoozeEndTime'
+    | 'snoozeSchedule'
+    | 'isSnoozedUntil'
   > & { actions: NormalizedAlertAction[] };
   options?: {
     id?: string;
@@ -391,7 +394,7 @@ export class RulesClient {
   private readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
     'monitoring',
     'mapped_params',
-    'snoozeEndTime',
+    'snoozeSchedule',
   ];
 
   constructor({
@@ -504,7 +507,8 @@ export class RulesClient {
       updatedBy: username,
       createdAt: new Date(createTime).toISOString(),
       updatedAt: new Date(createTime).toISOString(),
-      snoozeEndTime: null,
+      isSnoozedUntil: null,
+      snoozeSchedule: [],
       params: updatedParams as RawRule['params'],
       muteAll: false,
       mutedInstanceIds: [],
@@ -1018,7 +1022,7 @@ export class RulesClient {
         },
         snoozed: {
           date_range: {
-            field: 'alert.attributes.snoozeEndTime',
+            field: 'alert.attributes.snoozeSchedule.rRule.dtstart',
             format: 'strict_date_time',
             ranges: [{ from: 'now' }],
           },
@@ -2120,8 +2124,21 @@ export class RulesClient {
     // If snoozeEndTime is -1, instead mute all
     const newAttrs =
       snoozeEndTime === -1
-        ? { muteAll: true, snoozeEndTime: null }
-        : { snoozeEndTime: new Date(snoozeEndTime).toISOString(), muteAll: false };
+        ? {
+            muteAll: true,
+            snoozeSchedule: clearUnscheduledSnooze(attributes),
+          }
+        : {
+            snoozeSchedule: clearUnscheduledSnooze(attributes).concat({
+              duration: Date.parse(snoozeEndTime) - Date.now(),
+              rRule: {
+                dtstart: new Date().toISOString(),
+                tzid: 'UTC',
+                count: 1,
+              },
+            }),
+            muteAll: false,
+          };
 
     const updateAttributes = this.updateMeta({
       ...newAttrs,
@@ -2135,7 +2152,7 @@ export class RulesClient {
       id,
       updateAttributes,
       updateOptions
-    );
+    ).then(() => this.updateSnoozedUntilTime({ id }));
   }
 
   public async unsnooze({ id }: { id: string }): Promise<void> {
@@ -2185,8 +2202,32 @@ export class RulesClient {
     this.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
     const updateAttributes = this.updateMeta({
-      snoozeEndTime: null,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
       muteAll: false,
+      updatedBy: await this.getUserName(),
+      updatedAt: new Date().toISOString(),
+    });
+    const updateOptions = { version };
+
+    await partiallyUpdateAlert(
+      this.unsecuredSavedObjectsClient,
+      id,
+      updateAttributes,
+      updateOptions
+    ).then(() => this.updateSnoozedUntilTime({ id }));
+  }
+
+  public async updateSnoozedUntilTime({ id }: { id: string }): Promise<void> {
+    const { attributes, version } = await this.unsecuredSavedObjectsClient.get<RawRule>(
+      'alert',
+      id
+    );
+
+    const isSnoozedUntil = getRuleSnoozeEndTime(attributes);
+    if (!isSnoozedUntil && !attributes.isSnoozedUntil) return;
+
+    const updateAttributes = this.updateMeta({
+      isSnoozedUntil: isSnoozedUntil ? isSnoozedUntil.toISOString() : null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2249,7 +2290,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: true,
       mutedInstanceIds: [],
-      snoozeEndTime: null,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2312,7 +2353,7 @@ export class RulesClient {
     const updateAttributes = this.updateMeta({
       muteAll: false,
       mutedInstanceIds: [],
-      snoozeEndTime: null,
+      snoozeSchedule: clearUnscheduledSnooze(attributes),
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });
@@ -2560,15 +2601,23 @@ export class RulesClient {
       executionStatus,
       schedule,
       actions,
-      snoozeEndTime,
+      snoozeSchedule,
+      isSnoozedUntil,
       ...partialRawRule
     }: Partial<RawRule>,
     references: SavedObjectReference[] | undefined,
     includeLegacyId: boolean = false,
     excludeFromPublicApi: boolean = false
   ): PartialRule<Params> | PartialRuleWithLegacyId<Params> {
-    const snoozeEndTimeDate = snoozeEndTime != null ? new Date(snoozeEndTime) : snoozeEndTime;
-    const includeSnoozeEndTime = snoozeEndTimeDate !== undefined && !excludeFromPublicApi;
+    const snoozeScheduleDates = snoozeSchedule?.map((s) => ({
+      ...s,
+      rRule: {
+        ...s.rRule,
+        dtstart: new Date(s.rRule.dtstart),
+        ...(s.rRule.until ? { until: new Date(s.rRule.until) } : {}),
+      },
+    }));
+    const includeSnoozeSchedule = snoozeSchedule !== undefined;
     const rule = {
       id,
       notifyWhen,
@@ -2578,9 +2627,10 @@ export class RulesClient {
       schedule: schedule as IntervalSchedule,
       actions: actions ? this.injectReferencesIntoActions(id, actions, references || []) : [],
       params: this.injectReferencesIntoParams(id, ruleType, params, references || []) as Params,
-      ...(includeSnoozeEndTime ? { snoozeEndTime: snoozeEndTimeDate } : {}),
+      ...(includeSnoozeSchedule ? { snoozeSchedule: snoozeScheduleDates } : {}),
       ...(updatedAt ? { updatedAt: new Date(updatedAt) } : {}),
       ...(createdAt ? { createdAt: new Date(createdAt) } : {}),
+      ...(isSnoozedUntil ? { isSnoozedUntil: new Date(isSnoozedUntil) } : {}),
       ...(scheduledTaskId ? { scheduledTaskId } : {}),
       ...(executionStatus
         ? { executionStatus: ruleExecutionStatusFromRaw(this.logger, id, executionStatus) }
@@ -2794,4 +2844,10 @@ function parseDate(dateString: string | undefined, propertyName: string, default
   }
 
   return parsedDate;
+}
+
+function clearUnscheduledSnooze(attributes: { snoozeSchedule?: RuleSnooze }) {
+  return attributes.snoozeSchedule
+    ? attributes.snoozeSchedule.filter((s) => typeof s.id !== 'undefined')
+    : [];
 }
