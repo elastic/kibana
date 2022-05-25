@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { CreateAPIKeyResult } from '@kbn/security-plugin/server';
 import { API_URLS } from '../../../../common/constants';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import {
@@ -123,7 +122,7 @@ export const fetchServiceAllowed = async (): Promise<SyntheticsServiceAllowed> =
 };
 
 export const fetchServiceAPIKey = async (): Promise<{
-  apiKey: CreateAPIKeyResult & { encoded: string };
+  apiKey: { encoded: string };
 }> => {
   return await apiService.get(API_URLS.SYNTHETICS_APIKEY);
 };
