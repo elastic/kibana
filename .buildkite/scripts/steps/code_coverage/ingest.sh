@@ -40,7 +40,7 @@ echo "--- collect VCS Info"
 .buildkite/scripts/steps/code_coverage/reporting/collectVcsInfo.sh
 
 echo "--- Jest: Reset file paths prefix, merge coverage files, and generate the final combined report"
-echo "### Reset file paths prefix to Kibana Dir of final worker"
+echo "### Jest: Reset file paths prefix to Kibana Dir of final worker"
 #sed -ie "s|CC_REPLACEMENT_ANCHOR|${KIBANA_DIR}|g" target/kibana-coverage/jest/*.json
 replacePaths "$KIBANA_DIR/target/kibana-coverage/jest" "CC_REPLACEMENT_ANCHOR" "$KIBANA_DIR"
 fileHeads "target/file-heads-jest-after-final-paths-reset-before-merge.txt" target/kibana-coverage/jest
@@ -50,6 +50,7 @@ collectAndUpload target/jest-combined-after-final-replace.tar.gz target/kibana-c
 
 
 echo "--- Functional: Reset file paths prefix, merge coverage files, and generate the final combined report"
+echo "### Functional: Reset file paths prefix to Kibana Dir of final worker"
 set +e
 sed -ie "s|CC_REPLACEMENT_ANCHOR|${KIBANA_DIR}|g" target/kibana-coverage/functional/*.json
 echo "--- Begin Split and Merge for Functional"
