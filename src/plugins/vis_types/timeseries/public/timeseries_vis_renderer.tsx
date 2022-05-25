@@ -7,11 +7,12 @@
  */
 
 import React, { lazy } from 'react';
+import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import { I18nProvider } from '@kbn/i18n-react';
-import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
+import type { IUiSettingsClient, ThemeServiceSetup, NotificationsSetup } from '@kbn/core/public';
 
 import { VisualizationContainer, PersistedState } from '@kbn/visualizations-plugin/public';
 
@@ -38,8 +39,13 @@ const checkIfDataExists = (visData: TimeseriesVisData | {}, model: TimeseriesVis
 
 export const getTimeseriesVisRenderer: (deps: {
   uiSettings: IUiSettingsClient;
-  theme: ThemeServiceStart;
-}) => ExpressionRenderDefinition<TimeseriesRenderValue> = ({ uiSettings, theme }) => ({
+  theme: ThemeServiceSetup;
+  notifications: NotificationsSetup;
+}) => ExpressionRenderDefinition<TimeseriesRenderValue> = ({
+  uiSettings,
+  theme,
+  notifications,
+}) => ({
   name: 'timeseries_vis',
   reuseDomNode: true,
   render: async (domNode, config, handlers) => {
@@ -54,6 +60,17 @@ export const getTimeseriesVisRenderer: (deps: {
 
     const showNoResult = !checkIfDataExists(visData, model);
 
+    const error = get(visData, [model.id, 'error']);
+
+    if (error) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('visTypeTimeseries.visRenderer.visDataErrorMessage', {
+          defaultMessage: 'Cannot retrieve search results',
+        }),
+        text: error,
+      });
+    }
+
     render(
       <I18nProvider>
         <KibanaThemeProvider theme$={theme.theme$}>
@@ -61,7 +78,7 @@ export const getTimeseriesVisRenderer: (deps: {
             data-test-subj="timeseriesVis"
             handlers={handlers}
             showNoResult={showNoResult}
-            error={get(visData, [model.id, 'error'])}
+            error={error}
           >
             <TimeseriesVisualization
               // it is mandatory to bind uiSettings because of "this" usage inside "get" method

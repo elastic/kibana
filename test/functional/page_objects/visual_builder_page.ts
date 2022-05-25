@@ -264,6 +264,10 @@ export class VisualBuilderPageObject extends FtrService {
     await this.find.clickByCssSelector('#tsvbAutoApplyInput');
   }
 
+  public async setAutoApplyChanges(isChecked: boolean) {
+    await this.testSubjects.setEuiSwitch('tsvbAutoApplyInput', isChecked ? 'check' : 'uncheck');
+  }
+
   public async applyChanges() {
     await this.testSubjects.clickWhenNotDisabled('applyBtn');
   }

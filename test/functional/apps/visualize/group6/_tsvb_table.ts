@@ -20,15 +20,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const findService = getService('find');
   const retry = getService('retry');
 
-  describe('visual builder', function describeIndexTests() {
+  const applyChanges = async () => {
+    await visualBuilder.applyChanges();
+    await visChart.waitForVisualizationRenderingStabilized();
+  };
+
+  describe('visual builder 124', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
     });
     describe('table', () => {
       beforeEach(async () => {
         await visualBuilder.resetPage('Sep 22, 2015 @ 06:00:00.000', 'Sep 22, 2015 @ 11:00:00.000');
+        await visualBuilder.setAutoApplyChanges(false);
         await visualBuilder.clickTable();
-
         await visualBuilder.checkTableTabIsPresent();
         await visualBuilder.clickPanelOptions('table');
         await visualBuilder.setMetricsDataTimerangeMode('Last value');
@@ -36,12 +41,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickDataTab('table');
         await visualBuilder.selectGroupByField('machine.os.raw');
         await visualBuilder.setColumnLabelValue('OS');
-        await visChart.waitForVisualizationRenderingStabilized();
       });
 
       it('should display correct values on changing group by field and column name', async () => {
         const EXPECTED = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
 
+        await applyChanges();
         const tableData = await visualBuilder.getViewTable();
         expect(tableData).to.be(EXPECTED);
       });
@@ -51,6 +56,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await visualBuilder.clickPanelOptions('table');
         await visualBuilder.setDrilldownUrl(`${baseURL}{{key}}`);
+
+        await applyChanges();
 
         await retry.try(async () => {
           const links = await findService.allByCssSelector(`a[href="${baseURL}ios"]`);
@@ -65,14 +72,20 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.setLabel('Cardinality');
         await visualBuilder.selectAggType('Cardinality');
         await visualBuilder.setFieldForAggregation('machine.ram');
+
+        await applyChanges();
+
         const isFieldForAggregationValid = await visualBuilder.checkFieldForAggregationValidity();
         const tableData = await visualBuilder.getViewTable();
+
         expect(isFieldForAggregationValid).to.be(true);
         expect(tableData).to.be(EXPECTED);
       });
 
-      it('should render correctly after saving', async () => {
+      it('should render correctly after saving 1', async () => {
         const EXPECTED = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
+
+        await applyChanges();
 
         await visualize.saveVisualizationExpectSuccessAndBreadcrumb('TSVB table saving test');
 
@@ -88,6 +101,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickSeriesOption();
         await visualBuilder.changeDataFormatter('number');
 
+        await applyChanges();
+
         const tableData = await visualBuilder.getViewTable();
         expect(tableData).to.be(EXPECTED);
       });
@@ -97,7 +112,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.selectAggType('Filter Ratio');
         await visualBuilder.setFilterRatioOption('Numerator', 'extension.raw : "css"');
         await visualBuilder.setFilterRatioOption('Denominator', 'bytes <= 3000');
-        await visChart.waitForVisualizationRenderingStabilized();
+
+        await applyChanges();
 
         const tableData = await visualBuilder.getViewTable();
         expect(tableData).to.be(EXPECTED);
@@ -108,6 +124,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'OS Average of machine.ram\nwin 8 13,958,643,712\nwin xp 14,602,888,806.4\nwin 7 14,048,122,197.333\nios 11,166,914,969.6\nosx 20,401,094,656';
         await visualBuilder.selectAggType('Average');
         await visualBuilder.setFieldForAggregation('machine.ram');
+
+        await applyChanges();
 
         const tableData = await visualBuilder.getViewTable();
         expect(tableData).to.be(EXPECTED);
@@ -121,6 +139,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.clickPanelOptions('table');
         await visualBuilder.setMetricsDataTimerangeMode('Entire time range');
 
+        await applyChanges();
+
         const tableData = await visualBuilder.getViewTable();
         expect(tableData).to.be(EXPECTED);
       });
@@ -133,6 +153,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await visualBuilder.selectAggType('math', 1);
         await visualBuilder.fillInVariable('test', 'Min');
         await visualBuilder.fillInExpression('params.test + 1');
+
+        await applyChanges();
 
         const tableData = await visualBuilder.getViewTable();
         expect(tableData).to.be(EXPECTED);
@@ -163,6 +185,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           const expected =
             'OS Average of bytes\nWIN 8 6.786KB\nWIN XP 3.804KB\nWIN 7 6.596KB\nIOS 4.844KB\nOSX 3.06KB';
 
+          await applyChanges();
+
           const tableData = await visualBuilder.getViewTable();
           expect(tableData).to.be(expected);
         });
@@ -174,6 +198,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await visualBuilder.clickSeriesOption();
           await visualBuilder.changeDataFormatter('number');
 
+          await applyChanges();
+
           const tableData = await visualBuilder.getViewTable();
           expect(tableData).to.be(expected);
         });
@@ -184,6 +210,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
           await visualBuilder.clickSeriesOption();
           await visualBuilder.changeDataFormatter('percent');
+
+          await applyChanges();
 
           const tableData = await visualBuilder.getViewTable();
           expect(tableData).to.be(expected);
@@ -200,6 +228,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await visualBuilder.clickPanelOptions('table');
         await visualBuilder.setDrilldownUrl(`${baseURL}{{key}}`);
+
+        await applyChanges();
 
         await retry.try(async () => {
           const links = await findService.allByCssSelector(`a[href="${baseURL}ios"]`);

@@ -144,6 +144,7 @@ class VisEditorVisualizationUI extends Component {
                 defaultMessage="Auto apply"
               />
             }
+            data-test-subj="tsvbAutoApplyInput"
             checked={autoApply}
             onChange={onToggleAutoApply}
           />
