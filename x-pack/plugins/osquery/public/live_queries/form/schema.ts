@@ -28,6 +28,7 @@ export const liveQueryFormSchema = {
     validations: [],
   },
   query: {
+    defaultValue: '',
     type: FIELD_TYPES.TEXT,
     validations: [
       {
