@@ -239,6 +239,13 @@ export class CsvGenerator {
   }
 
   public async generateData(): Promise<TaskRunResult> {
+    const searchSourceFields = {
+      ...(this.job.searchSource ?? {}),
+      fields: this.job.searchSource?.fields?.map((field) => ({
+        include_unmapped: true,
+        ...(typeof field === 'string' ? { field } : field),
+      })),
+    } as typeof this.job.searchSource;
     const [settings, searchSource] = await Promise.all([
       getExportSettings(
         this.clients.uiSettings,
@@ -246,7 +253,7 @@ export class CsvGenerator {
         this.job.browserTimezone,
         this.logger
       ),
-      this.dependencies.searchSourceStart.create(this.job.searchSource),
+      this.dependencies.searchSourceStart.create(searchSourceFields),
     ]);
     let reportingError: undefined | ReportingError;
 
