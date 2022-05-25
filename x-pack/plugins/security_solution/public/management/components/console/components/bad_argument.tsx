@@ -13,7 +13,7 @@ import { ParsedCommandInput } from '../service/parsed_command_input';
 import { CommandDefinition, CommandExecutionComponentProps } from '../types';
 import { CommandInputUsage } from './command_usage';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export type BadArgumentProps = PropsWithChildren<{
   parsedInput: ParsedCommandInput;

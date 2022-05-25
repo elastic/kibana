@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { UnsupportedMessageCallout } from './unsupported_message_callout';
 import { CommandExecutionComponentProps } from '../types';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const UnknownCommand = memo<CommandExecutionComponentProps>(({ command, setStatus }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());

@@ -22055,7 +22055,7 @@
     "xpack.osquery.pack.queryFlyoutForm.idFieldLabel": "ID",
     "xpack.osquery.pack.queryFlyoutForm.intervalFieldLabel": "間隔",
     "xpack.osquery.pack.queryFlyoutForm.invalidIdError": "文字は英数字、_、または-でなければなりません",
-    "xpack.osquery.pack.queryFlyoutForm.invalidIntervalField": "正の間隔値が必要です",
+    "xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError": "正の間隔値が必要です",
     "xpack.osquery.pack.queryFlyoutForm.mappingEcsFieldLabel": "ECSフィールド",
     "xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel": "値",
     "xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage": "値が必要です。",

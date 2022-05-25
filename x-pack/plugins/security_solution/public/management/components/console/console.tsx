@@ -12,7 +12,7 @@ import { ConsoleHeader } from './components/console_header';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { ConsoleProps } from './types';
 import { ConsoleStateProvider } from './components/console_state';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useWithManagedConsole } from './components/console_manager/console_manager';
 import { HistoryOutput } from './components/history_output';
 import { SidePanelFlexItem } from './components/side_panel/side_panel_flex_item';

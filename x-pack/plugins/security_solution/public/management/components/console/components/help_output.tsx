@@ -9,7 +9,7 @@ import React, { memo, PropsWithChildren, ReactNode } from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { MaybeImmutable } from '../../../../../common/endpoint/types';
 import { Command } from '..';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
 type HelpOutputProps = PropsWithChildren<{
