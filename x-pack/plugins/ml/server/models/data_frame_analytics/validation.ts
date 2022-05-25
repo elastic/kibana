@@ -261,16 +261,19 @@ async function getValidationCheckMessages(
   }
 
   try {
-    const body = await asCurrentUser.search<ValidationSearchResult>({
-      index,
-      size: 0,
-      track_total_hits: true,
-      body: {
-        ...(source.runtime_mappings ? { runtime_mappings: source.runtime_mappings } : {}),
-        query,
-        aggs,
+    const body = await asCurrentUser.search<ValidationSearchResult>(
+      {
+        index,
+        size: 0,
+        track_total_hits: true,
+        body: {
+          ...(source.runtime_mappings ? { runtime_mappings: source.runtime_mappings } : {}),
+          query,
+          aggs,
+        },
       },
-    });
+      { maxRetries: 0 }
+    );
 
     // @ts-expect-error incorrect search response type
     const totalDocs = body.hits.total.value;
