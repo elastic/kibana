@@ -44,10 +44,15 @@ while read -r config; do
   lastCode=$?
   set -e
 
-  fileHeads "target/file-heads-jest-in-loop-before-rename.txt" target/kibana-coverage/jest
-  dirListing "target/dir-listing-jest-in-loop-before-rename.txt" target/kibana-coverage/jest
 
-exit 11
+    dasherize() {
+      local withoutExtension=${1%.*}
+      dasherized=$(echo "$withoutExtension" | tr '\/' '\-')
+    }
+    dasherize "$config"
+
+  fileHeads "target/file-heads-jest-in-loop-before-rename-$dasherized.txt" target/kibana-coverage/jest
+  dirListing "target/dir-listing-jest-in-loop-before-rename-$dasherized.txt" target/kibana-coverage/jest
 
   if [[ -f target/kibana-coverage/jest/coverage-final.json ]]; then
     echo "--- Rename target/kibana-coverage/jest/coverage-final.json to avoid overwrite"
