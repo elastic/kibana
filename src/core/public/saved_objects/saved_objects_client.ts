@@ -145,9 +145,7 @@ const BATCH_INTERVAL = 100;
 const API_BASE_URL = '/api/saved_objects/';
 
 /**
- * Saved Objects is Kibana's data persistence mechanism allowing plugins to
- * use Elasticsearch for storing plugin state. The client-side
- * SavedObjectsClient is a thin convenience library around the SavedObjects
+ * The client-side SavedObjectsClient is a thin convenience library around the SavedObjects
  * HTTP API for interacting with Saved Objects.
  *
  * @public

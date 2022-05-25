@@ -4,7 +4,7 @@
 
 ## SavedObjectsClientContract interface
 
-Saved Objects is Kibana's data persistence mechanism allowing plugins to use Elasticsearch for storing plugin state. The client-side SavedObjectsClient is a thin convenience library around the SavedObjects HTTP API for interacting with Saved Objects.
+The client-side SavedObjectsClient is a thin convenience library around the SavedObjects HTTP API for interacting with Saved Objects.
 
 <b>Signature:</b>
 
