@@ -89,6 +89,7 @@ export async function registerMetricThresholdRuleType(
     minimumLicenseRequired: 'basic',
     isExportable: true,
     executor: createMetricThresholdExecutor(libs),
+    doesSetRecoveryContext: true,
     actionVariables: {
       context: [
         { name: 'group', description: groupActionVariableDescription },
