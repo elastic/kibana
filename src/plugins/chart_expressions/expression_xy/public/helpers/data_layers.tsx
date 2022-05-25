@@ -8,6 +8,7 @@
 
 import {
   AreaSeriesProps,
+  AreaSeriesStyle,
   BarSeriesProps,
   ColorVariant,
   LineSeriesProps,
@@ -79,6 +80,19 @@ type GetColorFn = (
     syncColors?: boolean;
   }
 ) => string | null;
+
+type GetPointConfigFn = (config: {
+  xAccessor: string | undefined;
+  markSizeAccessor: string | undefined;
+  emphasizeFitting?: boolean;
+  showPoints?: boolean;
+  pointsRadius?: number;
+}) => Partial<AreaSeriesStyle['point']>;
+
+type GetLineConfigFn = (config: {
+  showLines?: boolean;
+  lineWidth?: number;
+}) => Partial<AreaSeriesStyle['line']>;
 
 export interface DatatableWithFormatInfo {
   table: Datatable;
@@ -227,17 +241,29 @@ const getSeriesName: GetSeriesNameFn = (
   return splitColumnId ? data.seriesKeys[0] : columnToLabelMap[data.seriesKeys[0]] ?? null;
 };
 
-const getPointConfig = (
-  xAccessor: string | undefined,
-  markSizeAccessor: string | undefined,
-  emphasizeFitting?: boolean
-) => ({
-  visible: !xAccessor || markSizeAccessor !== undefined,
-  radius: xAccessor && !emphasizeFitting ? 5 : 0,
+const getPointConfig: GetPointConfigFn = ({
+  xAccessor,
+  markSizeAccessor,
+  emphasizeFitting,
+  showPoints,
+  pointsRadius,
+}) => ({
+  visible: showPoints !== undefined ? showPoints : !xAccessor || markSizeAccessor !== undefined,
+  radius: pointsRadius !== undefined ? pointsRadius : xAccessor && !emphasizeFitting ? 5 : 0,
   fill: markSizeAccessor ? ColorVariant.Series : undefined,
 });
 
-const getLineConfig = () => ({ visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] });
+const getFitLineConfig = () => ({
+  visible: true,
+  stroke: ColorVariant.Series,
+  opacity: 1,
+  dash: [],
+});
+
+const getLineConfig: GetLineConfigFn = ({ showLines, lineWidth }) => ({
+  strokeWidth: lineWidth,
+  visible: showLines,
+});
 
 const getColor: GetColorFn = (
   { yAccessor, seriesKeys },
@@ -363,15 +389,32 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     stackMode: isPercentage ? StackMode.Percentage : undefined,
     timeZone,
     areaSeriesStyle: {
-      point: getPointConfig(xColumnId, markSizeColumnId, emphasizeFitting),
+      point: getPointConfig({
+        xAccessor: xColumnId,
+        markSizeAccessor: markSizeColumnId,
+        emphasizeFitting,
+        showPoints: layer.showPoints,
+        pointsRadius: layer.pointsRadius,
+      }),
       ...(fillOpacity && { area: { opacity: fillOpacity } }),
       ...(emphasizeFitting && {
-        fit: { area: { opacity: fillOpacity || 0.5 }, line: getLineConfig() },
+        fit: { area: { opacity: fillOpacity || 0.5 }, line: getFitLineConfig() },
+      }),
+      line: getLineConfig({
+        showLines: layer.showLines,
+        lineWidth: layer.lineWidth,
       }),
     },
     lineSeriesStyle: {
-      point: getPointConfig(xColumnId, markSizeColumnId, emphasizeFitting),
-      ...(emphasizeFitting && { fit: { line: getLineConfig() } }),
+      point: getPointConfig({
+        xAccessor: xColumnId,
+        markSizeAccessor: markSizeColumnId,
+        emphasizeFitting,
+        showPoints: layer.showPoints,
+        pointsRadius: layer.pointsRadius,
+      }),
+      ...(emphasizeFitting && { fit: { line: getFitLineConfig() } }),
+      line: getLineConfig({ lineWidth: layer.lineWidth, showLines: layer.showLines }),
     },
     name(d) {
       return getSeriesName(d, {

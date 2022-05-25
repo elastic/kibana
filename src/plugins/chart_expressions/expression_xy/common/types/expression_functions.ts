@@ -102,6 +102,10 @@ export interface DataLayerArgs {
   hide?: boolean;
   splitAccessor?: string | ExpressionValueVisDimension;
   markSizeAccessor?: string | ExpressionValueVisDimension;
+  lineWidth?: number;
+  showPoints?: boolean;
+  showLines?: boolean;
+  pointsRadius?: number;
   columnToLabel?: string; // Actually a JSON key-value pair
   xScaleType: XScaleType;
   isHistogram: boolean;
@@ -121,6 +125,10 @@ export interface ExtendedDataLayerArgs {
   hide?: boolean;
   splitAccessor?: string;
   markSizeAccessor?: string;
+  lineWidth?: number;
+  showPoints?: boolean;
+  showLines?: boolean;
+  pointsRadius?: number;
   columnToLabel?: string; // Actually a JSON key-value pair
   xScaleType: XScaleType;
   isHistogram: boolean;
@@ -291,9 +299,10 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
   layerType: typeof LayerTypes.ANNOTATIONS;
 };
 
-export interface ReferenceLineArgs extends Omit<ExtendedYConfig, 'forAccessor'> {
+export interface ReferenceLineArgs extends Omit<ExtendedYConfig, 'forAccessor' | 'fill'> {
   name?: string;
   value: number;
+  fill: FillStyle;
 }
 
 export interface ReferenceLineLayerArgs {
@@ -416,7 +425,7 @@ export type ReferenceLineLayerFn = ExpressionFunctionDefinition<
   typeof REFERENCE_LINE_LAYER,
   Datatable,
   ReferenceLineLayerArgs,
-  ReferenceLineLayerConfigResult
+  Promise<ReferenceLineLayerConfigResult>
 >;
 
 export type YConfigFn = ExpressionFunctionDefinition<typeof Y_CONFIG, null, YConfig, YConfigResult>;
