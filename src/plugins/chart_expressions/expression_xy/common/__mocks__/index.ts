@@ -50,6 +50,7 @@ export const sampleLayer: DataLayerConfig = {
   layerId: 'first',
   type: 'dataLayer',
   layerType: LayerTypes.DATA,
+  showLines: true,
   seriesType: 'line',
   xAccessor: 'c',
   accessors: ['a', 'b'],

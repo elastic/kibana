@@ -28,7 +28,15 @@ describe('xyVis', () => {
       value: {
         args: {
           ...rest,
-          layers: [{ layerType, table: data, layerId: 'dataLayers-0', type, ...restLayerArgs }],
+          layers: [
+            {
+              layerType,
+              table: data,
+              layerId: 'dataLayers-0',
+              type,
+              ...restLayerArgs,
+            },
+          ],
         },
       },
     });
@@ -179,6 +187,29 @@ describe('xyVis', () => {
           referenceLines: [],
           annotationLayers: [],
           markSizeRatio: 5,
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws the error if showLines is provided to the not line/area chart', async () => {
+    const {
+      data,
+      args: { layers, ...rest },
+    } = sampleArgs();
+    const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
+
+    expect(
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
+          annotationLayers: [],
+          seriesType: 'bar',
+          showLines: true,
         },
         createMockExecutionContext()
       )

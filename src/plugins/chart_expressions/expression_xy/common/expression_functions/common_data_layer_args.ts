@@ -55,6 +55,10 @@ export const commonDataLayerArgs: Omit<
     types: ['number'],
     help: strings.getPointsRadiusHelp(),
   },
+  showLines: {
+    types: ['boolean'],
+    help: strings.getShowLinesHelp(),
+  },
   yConfig: {
     types: [Y_CONFIG],
     help: strings.getYConfigHelp(),

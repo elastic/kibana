@@ -14,7 +14,7 @@ import {
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER, REFERENCE_LINE } from '../constants';
-import { appendLayerIds, getAccessors, normalizeTable } from '../helpers';
+import { appendLayerIds, getAccessors, getShowLines, normalizeTable } from '../helpers';
 import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
 import { getLayerDimensions } from '../utils';
 import {
@@ -32,6 +32,7 @@ import {
   validateShowPointsForChartType,
   validateLineWidthForChartType,
   validatePointsRadiusForChartType,
+  validateLinesVisibilityForChartType,
 } from './validate';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
@@ -51,6 +52,7 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
     lineWidth: args.lineWidth,
     layerType: LayerTypes.DATA,
     table: normalizedTable,
+    showLines: args.showLines,
     ...accessors,
   };
 };
@@ -77,10 +79,14 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     showPoints,
     pointsRadius,
     lineWidth,
+    showLines: realShowLines,
     ...restArgs
   } = args;
 
-  const dataLayers: DataLayerConfigResult[] = [createDataLayer(args, data)];
+  validateLinesVisibilityForChartType(args.showLines, args.seriesType);
+  const showLines = getShowLines(args);
+
+  const dataLayers: DataLayerConfigResult[] = [createDataLayer({ ...args, showLines }, data)];
 
   validateAccessor(dataLayers[0].xAccessor, data.columns);
   validateAccessor(dataLayers[0].splitAccessor, data.columns);
