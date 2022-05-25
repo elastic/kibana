@@ -142,7 +142,6 @@ describe('use show timeline', () => {
   });
 
   describe('sourcererDataView', () => {
-
     it('should show timeline when indices exist', () => {
       mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: true, dataViewId: 'test' });
       const { result } = renderHook(() => useShowTimeline());
