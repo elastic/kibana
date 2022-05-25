@@ -10,7 +10,7 @@ import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
 // @ts-expect-error
-import { setMaxListeners } from 'node:events';
+import { setMaxListeners } from 'events';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';
