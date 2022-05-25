@@ -27,9 +27,10 @@ fileHeads "target/file-heads-jest-after-parallel-and-after-replacement.txt" targ
 yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.jest.config.js --reporter json
 
 fileHeads "target/file-heads-jest-after-parallel-and-after-replacement-and-after-merge.txt" target/kibana-coverage/jest
-dirListing "target/dir-listing-jest-after-thread-merge-before-jest-dir-delete.txt" target/kibana-coverage/jest
 rm -rf target/kibana-coverage/jest/*
 mv target/kibana-coverage/jest-combined/coverage-final.json "target/kibana-coverage/jest/jest-merged-coverage-$(date +%s%3N).json"
+dirListing "target/dir-listing-jest-combined.txt" target/kibana-coverage/jest-combined
+fileHeads "target/file-heads-jest-combined.txt" target/kibana-coverage/jest-combined
 
 # So the last step "knows" this config ran
 uploadRanFile "jest"
