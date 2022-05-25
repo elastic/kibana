@@ -8,7 +8,7 @@
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { SingleCaseMetricsFeature } from '../../common/ui';
-import { useFetchCaseMetrics } from './use_get_case_metrics';
+import { useGetCaseMetrics } from './use_get_case_metrics';
 import { basicCase } from './mock';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
@@ -31,7 +31,7 @@ describe('useGetCaseMetrics', () => {
   it('calls getSingleCaseMetrics with correct arguments', async () => {
     const spyOnGetCaseMetrics = jest.spyOn(api, 'getSingleCaseMetrics');
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useFetchCaseMetrics(basicCase.id, features), {
+      const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
         wrapper,
       });
       await waitForNextUpdate();
@@ -49,7 +49,7 @@ describe('useGetCaseMetrics', () => {
     });
 
     await act(async () => {
-      const { waitForNextUpdate } = renderHook(() => useFetchCaseMetrics(basicCase.id, features), {
+      const { waitForNextUpdate } = renderHook(() => useGetCaseMetrics(basicCase.id, features), {
         wrapper,
       });
       await waitForNextUpdate();

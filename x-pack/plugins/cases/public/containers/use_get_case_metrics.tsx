@@ -13,7 +13,7 @@ import { ServerError } from '../types';
 import { ERROR_TITLE } from './translations';
 import { CASE_VIEW_CACHE_KEY } from './constants';
 
-export const useFetchCaseMetrics = (caseId: string, features: SingleCaseMetricsFeature[]) => {
+export const useGetCaseMetrics = (caseId: string, features: SingleCaseMetricsFeature[]) => {
   const toasts = useToasts();
   const abortCtrlRef = new AbortController();
   return useQuery(
@@ -40,5 +40,3 @@ export const useFetchCaseMetrics = (caseId: string, features: SingleCaseMetricsF
     }
   );
 };
-
-export type UseFetchCasesMetrics = ReturnType<typeof useFetchCaseMetrics>;

@@ -24,7 +24,7 @@ import { TestProviders } from '../../common/mock';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { UseGetCase, useGetCase } from '../../containers/use_get_case';
-import { useFetchCaseMetrics } from '../../containers/use_get_case_metrics';
+import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
@@ -47,7 +47,7 @@ jest.mock('../../common/navigation/hooks');
 jest.mock('../../containers/api');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
-const useGetCaseMetricsMock = useFetchCaseMetrics as jest.Mock;
+const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;

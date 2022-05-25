@@ -15,13 +15,13 @@ import {
 import { CaseViewMetrics } from '.';
 import { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import { TestProviders } from '../../../common/mock';
-import { useFetchCaseMetrics } from '../../../containers/use_get_case_metrics';
+import { useGetCaseMetrics } from '../../../containers/use_get_case_metrics';
 import { useCasesFeatures } from '../../cases_context/use_cases_features';
 
 jest.mock('../../../containers/use_get_case_metrics');
 jest.mock('../../cases_context/use_cases_features');
 
-const useFetchCaseMetricsMock = useFetchCaseMetrics as jest.Mock;
+const useFetchCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 
 const renderCaseMetrics = ({

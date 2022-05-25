@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
-import { useFetchCaseMetrics } from '../../../containers/use_get_case_metrics';
+import { useGetCaseMetrics } from '../../../containers/use_get_case_metrics';
 import { CaseViewMetricItems } from './totals';
 import { CaseStatusMetrics } from './status';
 import { useCasesFeatures } from '../../cases_context/use_cases_features';
 
 export const CaseViewMetrics = React.memo(({ caseId }: { caseId: string }) => {
   const { metricsFeatures } = useCasesFeatures();
-  const { data, isLoading } = useFetchCaseMetrics(caseId, metricsFeatures);
+  const { data, isLoading } = useGetCaseMetrics(caseId, metricsFeatures);
   return (
     <EuiPanel data-test-subj="case-view-metrics-panel" hasShadow={false} hasBorder={true}>
       <EuiFlexGroup gutterSize="xl" wrap={true} responsive={false} alignItems="center">

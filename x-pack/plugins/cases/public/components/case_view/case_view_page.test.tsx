@@ -21,7 +21,7 @@ import {
   connectorsMock,
   getAlertUserAction,
 } from '../../containers/mock';
-import { useFetchCaseMetrics } from '../../containers/use_get_case_metrics';
+import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useUpdateCase } from '../../containers/use_update_case';
@@ -45,7 +45,7 @@ const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
-const useGetCaseMetricsMock = useFetchCaseMetrics as jest.Mock;
+const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 
 export const caseProps: CaseViewPageProps = {
   ...caseViewProps,
