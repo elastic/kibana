@@ -23,7 +23,11 @@ import {
 import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
-import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
+import type {
+  DateHistogramIndexPatternColumn,
+  RangeIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from './operations/definitions';
 import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 
@@ -265,7 +269,9 @@ function getExpressionForLayer(
       };
     }
 
-    const allDateHistogramFields = Object.values(columns)
+    const configColumns = Object.values(columns);
+
+    const allDateHistogramFields = configColumns
       .map((column) =>
         isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
         !column.params.ignoreTimeRange
@@ -273,6 +279,17 @@ function getExpressionForLayer(
           : null
       )
       .filter((field): field is string => Boolean(field));
+
+    // the combination of Interval with extended bounds + Top values (any combination)
+    // requires partial rows to be enabled
+    const shouldEnablePartialRows =
+      configColumns.some((column) => isColumnOfType<TermsIndexPatternColumn>('terms', column)) &&
+      configColumns.some(
+        (column) =>
+          isColumnOfType<RangeIndexPatternColumn>('range', column) &&
+          column.params.includeEmptyRows &&
+          column.params.customBounds
+      );
 
     return {
       type: 'expression',
@@ -287,7 +304,7 @@ function getExpressionForLayer(
           ]),
           aggs,
           metricsAtAllLevels: false,
-          partialRows: false,
+          partialRows: shouldEnablePartialRows,
           timeFields: allDateHistogramFields,
         }).toAst(),
         {

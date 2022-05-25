@@ -105,18 +105,23 @@ export const getFormattedRow = (
   columns: Datatable['columns'],
   columnsFormatters: Record<string, IFieldFormat>,
   xAccessor: string | undefined,
+  splitAccessor: string | undefined,
   xScaleType: XScaleType
 ): { row: Datatable['rows'][number]; formattedColumns: Record<string, true> } =>
   columns.reduce(
     (formattedInfo, { id }) => {
       const record = formattedInfo.row[id];
       if (
-        record != null &&
         // pre-format values for ordinal x axes because there can only be a single x axis formatter on chart level
-        (!isPrimitive(record) || (id === xAccessor && xScaleType === 'ordinal'))
+        !isPrimitive(record) ||
+        (id === xAccessor && xScaleType === 'ordinal')
       ) {
+        const overrideEmptyValue = record == null && splitAccessor;
         return {
-          row: { ...formattedInfo.row, [id]: columnsFormatters[id]!.convert(record) },
+          row: {
+            ...formattedInfo.row,
+            [id]: columnsFormatters[id]!.convert(overrideEmptyValue ? '' : record),
+          },
           formattedColumns: { ...formattedInfo.formattedColumns, [id]: true },
         };
       }
@@ -129,6 +134,7 @@ export const getFormattedTable = (
   table: Datatable,
   formatFactory: FormatFactory,
   xAccessor: string | ExpressionValueVisDimension | undefined,
+  splitAccessor: string | ExpressionValueVisDimension | undefined,
   accessors: Array<string | ExpressionValueVisDimension>,
   xScaleType: XScaleType
 ): { table: Datatable; formattedColumns: Record<string, true> } => {
@@ -146,28 +152,28 @@ export const getFormattedTable = (
     {}
   );
 
-  const formattedTableInfo = table.rows.reduce<{
+  const formattedTableInfo: {
     rows: Datatable['rows'];
     formattedColumns: Record<string, true>;
-  }>(
-    ({ rows: formattedRows, formattedColumns }, row) => {
-      const formattedRowInfo = getFormattedRow(
-        row,
-        table.columns,
-        columnsFormatters,
-        xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
-        xScaleType
-      );
-      return {
-        rows: [...formattedRows, formattedRowInfo.row],
-        formattedColumns: { ...formattedColumns, ...formattedRowInfo.formattedColumns },
-      };
-    },
-    {
-      rows: [],
-      formattedColumns: {},
-    }
-  );
+  } = {
+    rows: [],
+    formattedColumns: {},
+  };
+  for (const row of table.rows) {
+    const formattedRowInfo = getFormattedRow(
+      row,
+      table.columns,
+      columnsFormatters,
+      xAccessor ? getAccessorByDimension(xAccessor, table.columns) : undefined,
+      splitAccessor ? getAccessorByDimension(splitAccessor, table.columns) : undefined,
+      xScaleType
+    );
+    formattedTableInfo.rows.push(formattedRowInfo.row);
+    formattedTableInfo.formattedColumns = {
+      ...formattedTableInfo.formattedColumns,
+      ...formattedRowInfo.formattedColumns,
+    };
+  }
 
   return {
     table: { ...table, rows: formattedTableInfo.rows },
@@ -186,6 +192,7 @@ export const getFormattedTablesByLayers = (
         table,
         formatFactory,
         xAccessor,
+        splitAccessor,
         [xAccessor, splitAccessor, ...accessors].filter<string | ExpressionValueVisDimension>(
           (a): a is string | ExpressionValueVisDimension => a !== undefined
         ),

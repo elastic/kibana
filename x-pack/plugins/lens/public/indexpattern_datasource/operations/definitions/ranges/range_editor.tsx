@@ -82,6 +82,12 @@ const GranularityHelpPopover = () => {
   );
 };
 
+function isValidBound(
+  bounds?: { min?: number; max?: number } | undefined
+): bounds is Required<ExtendedBounds> {
+  return boundsValidation(bounds);
+}
+
 function boundsValidation(bounds?: { min?: number; max?: number }) {
   return bounds?.min != null && bounds?.max != null && bounds?.min < bounds?.max;
 }
@@ -122,15 +128,8 @@ const BaseRangeEditor = ({
     });
   const onChangeCustomBoundsWithValidation = useCallback(
     (newBounds: { min?: number; max?: number } | undefined) => {
-      if (
-        newBounds &&
-        newBounds.min != null &&
-        newBounds.max != null &&
-        boundsValidation(newBounds)
-      ) {
-        const bounds = { min: newBounds.min, max: newBounds.max };
-
-        onChangeCustomBounds(bounds);
+      if (!newBounds || isValidBound(newBounds)) {
+        onChangeCustomBounds(newBounds);
       }
     },
     [onChangeCustomBounds]

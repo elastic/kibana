@@ -174,7 +174,9 @@ export const rangeOperation: OperationDefinition<RangeIndexPatternColumn, 'field
       has_extended_bounds: Boolean(params.includeEmptyRows && params.customBounds),
       min_doc_count: Boolean(params.includeEmptyRows),
       autoExtendBounds: Boolean(params.includeEmptyRows && !params.customBounds),
-      extended_bounds: extendedBoundsToAst(params.customBounds ?? {}),
+      extended_bounds: extendedBoundsToAst(
+        params.includeEmptyRows ? params.customBounds ?? {} : {}
+      ),
     }).toAst();
   },
   paramEditor: ({
