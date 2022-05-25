@@ -55,8 +55,8 @@ export class FullStoryShipper implements IShipper {
   }
 
   /**
-   * {@inheritDoc IShipper.extendContext}
-   * @param newContext {@inheritDoc IShipper.extendContext.newContext}
+   * Calls `fs.identify`, `fs.setUserVars` and `fs.setVars` depending on the fields provided in the newContext.
+   * @param newContext The full new context to set {@link EventContext}
    */
   public extendContext(newContext: EventContext): void {
     this.initContext.logger.debug(`Received context ${JSON.stringify(newContext)}`);
@@ -97,8 +97,8 @@ export class FullStoryShipper implements IShipper {
   }
 
   /**
-   * {@inheritDoc IShipper.optIn}
-   * @param isOptedIn {@inheritDoc IShipper.optIn.isOptedIn}
+   * Stops/restarts the shipping mechanism based on the value of isOptedIn
+   * @param isOptedIn `true` for resume sending events. `false` to stop.
    */
   public optIn(isOptedIn: boolean): void {
     this.initContext.logger.debug(`Setting FS to optIn ${isOptedIn}`);
@@ -116,8 +116,9 @@ export class FullStoryShipper implements IShipper {
   }
 
   /**
-   * {@inheritDoc IShipper.reportEvents}
-   * @param events {@inheritDoc IShipper.reportEvents.events}
+   * Filters the events by the eventTypesAllowlist from the config.
+   * Then it transforms the event into a FS valid format and calls `fs.event`.
+   * @param events batched events {@link Event}
    */
   public reportEvents(events: Event[]): void {
     this.initContext.logger.debug(`Reporting ${events.length} events to FS`);
@@ -129,6 +130,10 @@ export class FullStoryShipper implements IShipper {
       });
   }
 
+  /**
+   * Shuts down the shipper.
+   * It doesn't really do anything inside because this shipper doesn't hold any internal queues.
+   */
   public shutdown() {
     // No need to do anything here for now.
   }
