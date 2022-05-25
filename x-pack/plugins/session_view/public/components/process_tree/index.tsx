@@ -97,7 +97,6 @@ export const ProcessTree = ({
     updatedAlertsStatus,
     verboseMode,
     jumpToEntityId,
-    refreshClicked,
   });
 
   const eventsRemaining = useMemo(() => {
