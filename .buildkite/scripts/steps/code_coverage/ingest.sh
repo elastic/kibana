@@ -29,9 +29,7 @@ echo "--- Download coverage artifacts"
 buildkite-agent artifact download target/kibana-coverage/jest/* .
 buildkite-agent artifact download target/kibana-coverage/functional/* .
 buildkite-agent artifact download target/ran_files/* .
-fileHeads "target/file-heads-ran-files.txt" target/ran_files '*.txt'
-dirListing target/dir-listing-jest.txt target/kibana-coverage/jest
-dirListing target/dir-listing-functional.txt target/kibana-coverage/functional
+ls -l target/ran_files/* || echo "### No ran-files found"
 
 echo "--- process HTML Links"
 .buildkite/scripts/steps/code_coverage/reporting/prokLinks.sh
@@ -43,11 +41,7 @@ echo "--- Jest: Reset file paths prefix, merge coverage files, and generate the 
 echo "### Jest: Reset file paths prefix to Kibana Dir of final worker"
 #sed -ie "s|CC_REPLACEMENT_ANCHOR|${KIBANA_DIR}|g" target/kibana-coverage/jest/*.json
 replacePaths "$KIBANA_DIR/target/kibana-coverage/jest" "CC_REPLACEMENT_ANCHOR" "$KIBANA_DIR"
-fileHeads "target/file-heads-jest-after-final-paths-reset-before-merge.txt" target/kibana-coverage/jest
-
 yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.jest.config.js
-collectAndUpload target/jest-combined-after-final-replace.tar.gz target/kibana-coverage/jest-combined
-
 
 echo "--- Functional: Reset file paths prefix, merge coverage files, and generate the final combined report"
 echo "### Functional: Reset file paths prefix to Kibana Dir of final worker"

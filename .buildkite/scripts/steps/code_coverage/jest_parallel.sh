@@ -44,15 +44,6 @@ while read -r config; do
   lastCode=$?
   set -e
 
-
-#    dasherize() {
-#      local withoutExtension=${1%.*}
-#      dasherized=$(echo "$withoutExtension" | tr '\/' '\-')
-#    }
-#    dasherize "$config"
-#  fileHeads "target/file-heads-jest-in-loop-before-rename-$dasherized.txt" target/kibana-coverage/jest
-#  dirListing "target/dir-listing-jest-in-loop-before-rename-$dasherized.txt" target/kibana-coverage/jest
-
   if [[ -f target/kibana-coverage/jest/coverage-final.json ]]; then
     echo "--- Rename target/kibana-coverage/jest/coverage-final.json to avoid overwrite"
     mv target/kibana-coverage/jest/coverage-final.json "target/kibana-coverage/jest/coverage-$(date +%s%3N).json"
@@ -85,17 +76,15 @@ echo "--- Normalize file paths prefix before final stage"
 # The prefix will be changed to the kibana dir, in the final stage,
 # so nyc doesnt error.
 replacePaths "$KIBANA_DIR/target/kibana-coverage/jest" "$KIBANA_DIR" "CC_REPLACEMENT_ANCHOR"
-fileHeads "target/file-heads-jest-$TEST_TYPE-after-replace.txt" target/kibana-coverage/jest
 
 echo "--- Merging code coverage for a thread"
 yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.jest.config.js --reporter json
 rm -rf target/kibana-coverage/jest/*
 mv target/kibana-coverage/jest-combined/coverage-final.json \
   "target/kibana-coverage/jest/jest-$TEST_TYPE-merged-coverage-$(date +%s%3N).json"
-fileHeads "target/file-heads-jest-combined-$TEST_TYPE.txt" target/kibana-coverage/jest-combined
 
 echo "--- Jest [$TEST_TYPE] configs complete"
-printf "%s\n" "${results[@]}\n"
+printf "%s\n" "${results[@]}"
 
 # Force exit 0 to ensure the next build step starts.
 exit 0
