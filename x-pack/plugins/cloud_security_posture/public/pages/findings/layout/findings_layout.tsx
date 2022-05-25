@@ -87,14 +87,19 @@ export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => 
     ),
   },
   {
-    field: 'rule.name',
-    name: TEXT.RULE,
+    field: 'resource.sub_type',
+    name: TEXT.RESOURCE_TYPE,
+    sortable: true,
+    width: '150px',
+  },
+  {
+    field: 'resource.name',
+    name: TEXT.RESOURCE_NAME,
     sortable: true,
   },
   {
-    field: 'cluster_id',
-    name: TEXT.CLUSTER_ID,
-    truncateText: true,
+    field: 'rule.name',
+    name: TEXT.RULE,
     sortable: true,
   },
   {
@@ -104,7 +109,14 @@ export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => 
     truncateText: true,
   },
   {
+    field: 'cluster_id',
+    name: TEXT.CLUSTER_ID,
+    truncateText: true,
+    sortable: true,
+  },
+  {
     field: '@timestamp',
+    width: '150px',
     name: TEXT.LAST_CHECKED,
     truncateText: true,
     sortable: true,

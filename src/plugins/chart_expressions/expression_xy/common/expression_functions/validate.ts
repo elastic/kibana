@@ -55,6 +55,13 @@ export const errors = {
         defaultMessage: '`pointsRadius` can be applied only for line or area charts',
       }
     ),
+  linesVisibilityForNonLineChartError: () =>
+    i18n.translate(
+      'expressionXY.reusable.function.xyVis.errors.linesVisibilityForNonLineChartError',
+      {
+        defaultMessage: 'Lines visibility can be controlled only at line charts',
+      }
+    ),
   markSizeRatioWithoutAccessor: () =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.markSizeRatioWithoutAccessor', {
       defaultMessage: 'Mark size ratio can be applied only with `markSizeAccessor`',
@@ -212,6 +219,15 @@ export const validatePointsRadiusForChartType = (
 ) => {
   if (pointsRadius !== undefined && !isAreaOrLineChart(seriesType)) {
     throw new Error(errors.pointsRadiusForNonLineOrAreaChartError());
+  }
+};
+
+export const validateLinesVisibilityForChartType = (
+  showLines: boolean | undefined,
+  seriesType: SeriesType
+) => {
+  if (showLines && !(seriesType.includes('line') || seriesType.includes('area'))) {
+    throw new Error(errors.linesVisibilityForNonLineChartError());
   }
 };
 
