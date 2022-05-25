@@ -5,12 +5,13 @@
  * 2.0.
  */
 import React from 'react';
+
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 
 import { AlertsTable } from './alerts_table';
-import { AlertsField } from '../../../types';
+import { AlertsField, AlertsTableFlyoutState } from '../../../types';
 
 jest.mock('@kbn/data-plugin/public');
 
@@ -55,7 +56,28 @@ describe('AlertsTable', () => {
     return fetchAlertsData;
   };
 
+  const alertsTableConfiguration = {
+    id: '',
+    columns,
+    sort: [],
+    externalFlyout: {
+      header: jest.fn(),
+      body: jest.fn(),
+      footer: jest.fn(),
+    },
+    internalFlyout: {
+      header: jest.fn(),
+      body: jest.fn(),
+      footer: jest.fn(),
+    },
+    getRenderCellValue: () =>
+      jest.fn().mockImplementation((props) => {
+        return `${props.colIndex}:${props.rowIndex}`;
+      }),
+  };
+
   const tableProps = {
+    alertsTableConfiguration,
     columns,
     bulkActions: [],
     deletedEventIds: [],
@@ -63,13 +85,13 @@ describe('AlertsTable', () => {
     pageSize: 1,
     pageSizeOptions: [1, 10, 20, 50, 100],
     leadingControlColumns: [],
-    renderCellValue: jest.fn().mockImplementation((props) => {
-      return `${props.colIndex}:${props.rowIndex}`;
-    }),
     showCheckboxes: false,
+    showExpandToDetails: true,
     trailingControlColumns: [],
     alerts,
+    flyoutState: AlertsTableFlyoutState.internal,
     useFetchAlertsData,
+    visibleColumns: columns.map((c) => c.id),
     'data-test-subj': 'testTable',
   };
 
@@ -88,49 +110,6 @@ describe('AlertsTable', () => {
       const renderResult = render(<AlertsTable {...tableProps} />);
       userEvent.click(renderResult.getByTestId('pagination-button-1'));
       expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
-    });
-
-    describe('flyout', () => {
-      it('should show a flyout when selecting an alert', async () => {
-        const wrapper = render(
-          <AlertsTable
-            {...{
-              ...tableProps,
-              pageSize: 10,
-            }}
-          />
-        );
-        userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
-
-        const result = await wrapper.findAllByTestId('alertsFlyout');
-        expect(result.length).toBe(1);
-
-        expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
-        expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
-
-        // Should paginate too
-        userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
-        expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('three');
-        expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
-
-        userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
-        expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
-        expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
-      });
-
-      it('should refetch data if flyout pagination exceeds the current page', async () => {
-        const wrapper = render(<AlertsTable {...tableProps} />);
-
-        userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
-        const result = await wrapper.findAllByTestId('alertsFlyout');
-        expect(result.length).toBe(1);
-
-        userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
-        expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
-
-        userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
-        expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 0, pageSize: 1 });
-      });
     });
 
     describe('leading control columns', () => {

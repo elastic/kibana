@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
@@ -21,6 +22,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+    });
+
+    afterEach(async () => {
+      await browser.clearLocalStorage();
     });
 
     it('should load the table', async () => {

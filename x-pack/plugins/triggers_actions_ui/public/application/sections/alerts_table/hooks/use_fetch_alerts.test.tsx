@@ -152,7 +152,7 @@ describe('useFetchAlerts', () => {
     expect(dataSearchMock).toHaveBeenCalledWith(
       {
         featureIds: args.featureIds,
-        fields: args.fields,
+        fields: undefined,
         pagination: args.pagination,
         query: {
           ids: {
@@ -315,7 +315,7 @@ describe('useFetchAlerts', () => {
     expect(dataSearchMock).toHaveBeenCalledWith(
       {
         featureIds: args.featureIds,
-        fields: args.fields,
+        fields: undefined,
         pagination: {
           pageIndex: 5,
           pageSize: 10,
@@ -337,7 +337,7 @@ describe('useFetchAlerts', () => {
     expect(dataSearchMock).toHaveBeenCalledWith(
       {
         featureIds: args.featureIds,
-        fields: args.fields,
+        fields: undefined,
         pagination: {
           pageIndex: 0,
           pageSize: 10,

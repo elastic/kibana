@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { ALERT_UUID } from '@kbn/rule-data-utils';
 import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect } from 'react';
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
-  EuiDataGridCellValueProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
@@ -25,13 +25,11 @@ import {
 import './alerts_table.scss';
 
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
-
+const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const GridStyles: EuiDataGridStyle = {
   border: 'horizontal',
   header: 'underline',
 };
-
-const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const [rowClasses, setRowClasses] = useState<EuiDataGridStyle['rowClasses']>({});
@@ -40,6 +38,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alerts,
     alertsCount,
     isLoading,
+    onColumnsChange,
     onPageChange,
     onSortChange,
     sort: sortingFields,
@@ -59,47 +58,62 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     alertsCount,
   });
 
-  const [visibleColumns, setVisibleColumns] = useState(props.columns.map(({ id }) => id));
+  const [visibleColumns, setVisibleColumns] = useState(props.visibleColumns);
+
+  const onChangeVisibleColumns = useCallback(
+    (newColumns: string[]) => {
+      setVisibleColumns(newColumns);
+      onColumnsChange(
+        props.columns.sort((a, b) => newColumns.indexOf(a.id) - newColumns.indexOf(b.id)),
+        newColumns
+      );
+    },
+    [onColumnsChange, props.columns]
+  );
 
   const leadingControlColumns = useMemo(() => {
     return [
-      {
-        id: 'expandColumn',
-        width: 50,
-        headerCellRender: () => {
-          return (
-            <span data-test-subj="expandColumnHeaderLabel">
-              {ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL}
-            </span>
-          );
-        },
-        rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
-          const { visibleRowIndex } = cveProps as EuiDataGridCellValueElementProps & {
-            visibleRowIndex: number;
-          };
-          return (
-            <EuiFlexGroup gutterSize="none" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiToolTip content={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}>
-                  <EuiButtonIcon
-                    size="s"
-                    iconType="expand"
-                    color="text"
-                    onClick={() => {
-                      setFlyoutAlertIndex(visibleRowIndex);
-                    }}
-                    data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
-                    aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
-                  />
-                </EuiToolTip>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          );
-        },
-      },
+      ...(props.showExpandToDetails
+        ? [
+            {
+              id: 'expandColumn',
+              width: 75,
+              headerCellRender: () => {
+                return (
+                  <span data-test-subj="expandColumnHeaderLabel">
+                    {ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL}
+                  </span>
+                );
+              },
+              rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
+                const { visibleRowIndex } = cveProps as EuiDataGridCellValueElementProps & {
+                  visibleRowIndex: number;
+                };
+                return (
+                  <EuiFlexGroup gutterSize="none" responsive={false}>
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip content={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}>
+                        <EuiButtonIcon
+                          size="s"
+                          iconType="expand"
+                          color="text"
+                          onClick={() => {
+                            setFlyoutAlertIndex(visibleRowIndex);
+                          }}
+                          data-test-subj={`expandColumnCellOpenFlyoutButton-${visibleRowIndex}`}
+                          aria-label={ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                );
+              },
+            },
+          ]
+        : []),
       ...props.leadingControlColumns,
     ];
-  }, [props.leadingControlColumns, setFlyoutAlertIndex]);
+  }, [props.leadingControlColumns, props.showExpandToDetails, setFlyoutAlertIndex]);
 
   useEffect(() => {
     // Row classes do not deal with visible row indices so we need to handle page offset
@@ -111,17 +125,54 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
+  // TODO when every solution is using this table, we will be bale to simplify it by just passing the alert index
+  const handleFlyoutAlert = useCallback(
+    (alert) => {
+      const idx = alerts.findIndex((a) =>
+        (a as any)[ALERT_UUID].includes(alert.fields[ALERT_UUID])
+      );
+      setFlyoutAlertIndex(idx);
+    },
+    [alerts, setFlyoutAlertIndex]
+  );
+
+  const basicRenderCellValue = ({
+    data,
+    columnId,
+  }: {
+    data: Array<{ field: string; value: string[] }>;
+    columnId: string;
+  }) => {
+    const value = data.find((d) => d.field === columnId)?.value ?? [];
+    // console.log({ data, columnId })
+    return <>{value.length ? value.join() : '--'}</>;
+  };
+
   const handleRenderCellValue = useCallback(
-    (improper: EuiDataGridCellValueElementProps) => {
-      const rcvProps = improper as EuiDataGridCellValueElementProps & EuiDataGridCellValueProps;
-      const alert = alerts[rcvProps.visibleRowIndex];
-      return props.renderCellValue({
-        ...rcvProps,
-        alert,
-        field: rcvProps.columnId,
+    (_props: EuiDataGridCellValueElementProps) => {
+      // https://github.com/elastic/eui/issues/5811
+      const alert = alerts[_props.rowIndex - pagination.pageSize * pagination.pageIndex];
+      const renderCellValue = props.alertsTableConfiguration?.getRenderCellValue
+        ? props.alertsTableConfiguration?.getRenderCellValue({
+            setFlyoutAlert: handleFlyoutAlert,
+          })
+        : basicRenderCellValue;
+      const data: Array<{ field: string; value: string[] }> = [];
+      Object.entries(alert ?? {}).forEach(([key, value]) => {
+        data.push({ field: key, value });
+      });
+      return renderCellValue({
+        ..._props,
+        data,
       });
     },
-    [alerts, props]
+    [
+      alerts,
+      handleFlyoutAlert,
+      pagination.pageIndex,
+      pagination.pageSize,
+      props.alertsTableConfiguration,
+    ]
   );
 
   return (
@@ -131,7 +182,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           <AlertsFlyout
             alert={alerts[flyoutAlertIndex]}
             alertsCount={alertsCount}
+            state={props.flyoutState}
             onClose={handleFlyoutClose}
+            alertsTableConfiguration={props.alertsTableConfiguration}
             flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
             onPaginate={onPaginateFlyout}
             isLoading={isLoading}
@@ -142,7 +195,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
         aria-label="Alerts table"
         data-test-subj="alertsTable"
         columns={props.columns}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
+        columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
         trailingControlColumns={props.trailingControlColumns}
         leadingControlColumns={leadingControlColumns}
         rowCount={alertsCount}

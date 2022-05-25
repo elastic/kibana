@@ -5,12 +5,19 @@
  * 2.0.
  */
 import React from 'react';
+import userEvent from '@testing-library/user-event';
+import { get } from 'lodash';
 import { render } from '@testing-library/react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
-import { AlertsField, AlertsTableConfigurationRegistry } from '../../../types';
+import {
+  AlertsField,
+  AlertsTableConfigurationRegistry,
+  AlertsTableFlyoutBaseProps,
+  AlertsTableFlyoutState,
+} from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import { TypeRegistry } from '../../type_registry';
 import AlertsTableState from './alerts_table_state';
@@ -42,12 +49,31 @@ const alerts = [
   },
 ] as unknown as EcsFieldsResponse[];
 
+const FlyoutBody = ({ alert }: AlertsTableFlyoutBaseProps) => (
+  <ul>
+    {columns.map((column) => (
+      <li data-test-subj={`alertsFlyout${column.displayAsText}`} key={column.id}>
+        {get(alert as any, column.id, [])[0]}
+      </li>
+    ))}
+  </ul>
+);
+
 const hasMock = jest.fn().mockImplementation((plugin: string) => {
   return plugin === PLUGIN_ID;
 });
 const getMock = jest.fn().mockImplementation((plugin: string) => {
   if (plugin === PLUGIN_ID) {
-    return { columns, sort: DefaultSort };
+    return {
+      columns,
+      sort: DefaultSort,
+      externalFlyout: { body: FlyoutBody },
+      internalFlyout: { body: FlyoutBody },
+      getRenderCellValue: () =>
+        jest.fn().mockImplementation((props) => {
+          return `${props.colIndex}:${props.rowIndex}`;
+        }),
+    };
   }
   return {};
 });
@@ -80,7 +106,9 @@ describe('AlertsTableState', () => {
     configurationId: PLUGIN_ID,
     id: `test-alerts`,
     featureIds: [AlertConsumers.LOGS],
+    flyoutState: AlertsTableFlyoutState.internal,
     query: {},
+    showExpandToDetails: true,
   };
 
   beforeEach(() => {
@@ -99,6 +127,68 @@ describe('AlertsTableState', () => {
       const props = { ...tableProps, configurationId: 'none' };
       const result = render(<AlertsTableState {...props} />);
       expect(result.getByTestId('alertsTableNoConfiguration')).toBeTruthy();
+    });
+  });
+
+  describe('flyout', () => {
+    beforeEach(() => {
+      hookUseFetchAlerts.mockClear();
+    });
+    it('should show a flyout when selecting an alert', async () => {
+      const wrapper = render(<AlertsTableState {...tableProps} />);
+      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+
+      const result = await wrapper.findAllByTestId('alertsFlyout');
+      expect(result.length).toBe(1);
+
+      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
+      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
+
+      // Should paginate too
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
+      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('three');
+      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
+
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
+      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
+    });
+
+    it('should refetch data if flyout pagination exceeds the current page', async () => {
+      const wrapper = render(
+        <AlertsTableState
+          {...{
+            ...tableProps,
+            pageSize: 1,
+          }}
+        />
+      );
+
+      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+      const result = await wrapper.findAllByTestId('alertsFlyout');
+      expect(result.length).toBe(1);
+
+      hookUseFetchAlerts.mockClear();
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
+      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: {
+            pageIndex: 1,
+            pageSize: 1,
+          },
+        })
+      );
+
+      hookUseFetchAlerts.mockClear();
+      userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
+      expect(hookUseFetchAlerts).toHaveBeenCalledWith(
+        expect.objectContaining({
+          pagination: {
+            pageIndex: 0,
+            pageSize: 1,
+          },
+        })
+      );
     });
   });
 });
