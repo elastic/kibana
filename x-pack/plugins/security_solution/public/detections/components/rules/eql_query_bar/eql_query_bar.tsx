@@ -94,7 +94,6 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           query: newQuery,
           language: 'eql',
         },
-        saved_id: null,
       });
     },
     [setValue, onValiditingChange]
