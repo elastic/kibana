@@ -27,6 +27,11 @@ Pull requests are made into the main branch and only backported when it is safe 
 - Bug fixes can be backported to a `<major>.<minor>` branch if the changes are safe and appropriate. Safety is a judgment call you make based on factors like the bug’s severity, test coverage, confidence in the changes, etc. Your reasoning should be included in the pull request description.
 - Documentation changes can be backported to any branch at any time.
 
+### Managing updates to `yarn.lock` across branches
+
+We want to keep updates to dependencies (both transitive dependencies and direct dependencies) in sync across both `main` and `<previous major>.<last minor>` (ex: `7.17`) as much as possible.
+A good rule of thumb is that most package upgrades should be backported to the `<previous major>.<last minor>` branch, though as always, exceptions may apply – if an upgrade requires significant code changes, then it might make sense to skip a backport for it.
+
 ## Commits and Merging
 
 - Feel free to make as many commits as you want, while working on a branch.
