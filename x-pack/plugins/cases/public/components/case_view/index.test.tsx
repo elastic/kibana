@@ -33,6 +33,7 @@ import { Case } from '../../../common/ui';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
 
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
@@ -331,7 +332,7 @@ describe('CaseView', () => {
     it('should refresh actions and comments', async () => {
       refreshRef!.current!.refreshCase();
       await waitFor(() => {
-        expect(queryClientSpy).toHaveBeenCalledWith('case');
+        expect(queryClientSpy).toHaveBeenCalledWith(CASE_VIEW_CACHE_KEY);
       });
     });
   });

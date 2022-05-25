@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useQueryClient } from 'react-query';
+import { CASE_VIEW_CACHE_KEY } from '../../../containers/constants';
 import { CaseSeverity } from '../../../../common/api';
 import { useConnectors } from '../../../containers/configure/use_connectors';
 import { useCaseViewNavigation } from '../../../common/navigation';
@@ -63,7 +64,7 @@ export const CaseViewActivity = ({
 
   const handleUpdateField = useCallback(
     (_newCase: Case, _updateKey: UpdateKey) => {
-      queryClient.invalidateQueries('case');
+      queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
     },
     [queryClient]
   );

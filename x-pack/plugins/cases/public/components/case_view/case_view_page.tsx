@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useQueryClient } from 'react-query';
 import styled from 'styled-components';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
+import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseActionBar } from '../case_action_bar';
@@ -66,7 +67,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     } = useGetCaseUserActions(caseData.id, caseData.connector.id);
 
     const handleRefresh = useCallback(() => {
-      queryClient.invalidateQueries('case');
+      queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
     }, [queryClient]);
 
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({

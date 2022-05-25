@@ -14,6 +14,7 @@ import { useToasts } from '../common/lib/kibana';
 import { getSingleCaseMetrics } from './api';
 import { ServerError } from '../types';
 import { ERROR_TITLE } from './translations';
+import { CASE_VIEW_CACHE_KEY } from './constants';
 
 interface CaseMeticsState {
   metrics: SingleCaseMetrics | null;
@@ -64,7 +65,7 @@ export const useFetchCaseMetrics = (caseId: string, features: SingleCaseMetricsF
   const toasts = useToasts();
   const abortCtrlRef = new AbortController();
   return useQuery(
-    ['case', 'metrics', caseId, features],
+    [CASE_VIEW_CACHE_KEY, 'metrics', caseId, features],
     async () => {
       const response: SingleCaseMetrics = await getSingleCaseMetrics(
         caseId,
