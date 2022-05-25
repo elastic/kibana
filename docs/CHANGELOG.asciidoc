@@ -53,11 +53,9 @@ To review the breaking changes in previous versions, refer to the following:
 
 [float]
 [[fixes-v8.2.2]]
-=== Bug fixes
+=== Bug fix
 Machine Learning::
-* Fixes trained model testing so it is available for users with ML read permissions {kibana-pull}132698[#132698]
-Management::
-* Fixes width of icon column in Messages table {kibana-pull}132444[#132444]
+Fixes width of icon column in Messages table {kibana-pull}132444[#132444]
 
 [[release-notes-8.2.1]]
 == {kib} 8.2.1
