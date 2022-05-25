@@ -24,7 +24,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { GetHostPolicyResponse, HostPolicyResponse } from '../../../../common/endpoint/types';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
+import {
+  createMockConfig,
+  requestContextMock,
+} from '../../../lib/detection_engine/routes/__mocks__';
 import { Agent } from '@kbn/fleet-plugin/common/types/models';
 import { AgentClient, AgentService } from '@kbn/fleet-plugin/server/services';
 import { get } from 'lodash';
@@ -59,7 +62,9 @@ describe('test policy response handler', () => {
       });
 
       await hostPolicyResponseHandler(
-        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
+        ),
         mockRequest,
         mockResponse
       );
@@ -81,7 +86,9 @@ describe('test policy response handler', () => {
       });
 
       await hostPolicyResponseHandler(
-        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
+        ),
         mockRequest,
         mockResponse
       );
@@ -185,7 +192,9 @@ describe('test policy response handler', () => {
       });
 
       await policySummarysHandler(
-        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
+        ),
         mockRequest,
         mockResponse
       );
@@ -216,7 +225,9 @@ describe('test policy response handler', () => {
       });
 
       await agentPolicySummaryHandler(
-        createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
+        requestContextMock.convertContext(
+          createRouteHandlerContext(mockScopedClient, mockSavedObjectClient)
+        ),
         mockRequest,
         mockResponse
       );

@@ -6,10 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { Observable, combineLatest, Subscription, Subject, firstValueFrom } from 'rxjs';
-import { map, distinctUntilChanged, shareReplay, debounceTime } from 'rxjs/operators';
+import {
+  Observable,
+  combineLatest,
+  Subscription,
+  Subject,
+  firstValueFrom,
+  tap,
+  BehaviorSubject,
+} from 'rxjs';
+import { map, distinctUntilChanged, shareReplay, debounceTime, takeUntil } from 'rxjs/operators';
 import { isDeepStrictEqual } from 'util';
 
+import type { RootSchema } from '@kbn/analytics-client';
+
+import { AnalyticsServiceSetup } from '../analytics';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
 import { Logger, LogMeta } from '../logging';
@@ -32,7 +43,13 @@ interface StatusLogMeta extends LogMeta {
   kibana: { status: ServiceStatus };
 }
 
+interface StatusAnalyticsPayload {
+  overall_status_level: string;
+  overall_status_summary: string;
+}
+
 export interface SetupDeps {
+  analytics: AnalyticsServiceSetup;
   elasticsearch: Pick<InternalElasticsearchServiceSetup, 'status$'>;
   environment: InternalEnvironmentServiceSetup;
   pluginDependencies: ReadonlyMap<PluginName, PluginName[]>;
@@ -57,6 +74,7 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
   }
 
   public async setup({
+    analytics,
     elasticsearch,
     pluginDependencies,
     http,
@@ -87,6 +105,8 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       distinctUntilChanged<ServiceStatus<unknown>>(isDeepStrictEqual),
       shareReplay(1)
     );
+
+    this.setupAnalyticsContextAndEvents(analytics);
 
     const coreOverall$ = core$.pipe(
       // Prevent many emissions at once from dependency status resolution from making this too noisy
@@ -191,5 +211,41 @@ export class StatusService implements CoreService<InternalStatusServiceSetup> {
       distinctUntilChanged<CoreStatus>(isDeepStrictEqual),
       shareReplay(1)
     );
+  }
+
+  private setupAnalyticsContextAndEvents(analytics: AnalyticsServiceSetup) {
+    // Set an initial "initializing" status, so we can attach it to early events.
+    const context$ = new BehaviorSubject<StatusAnalyticsPayload>({
+      overall_status_level: 'initializing',
+      overall_status_summary: 'Kibana is starting up',
+    });
+
+    // The schema is the same for the context and the events.
+    const schema: RootSchema<StatusAnalyticsPayload> = {
+      overall_status_level: {
+        type: 'keyword',
+        _meta: { description: 'The current availability level of the service.' },
+      },
+      overall_status_summary: {
+        type: 'text',
+        _meta: { description: 'A high-level summary of the service status.' },
+      },
+    };
+
+    const overallStatusChangedEventName = 'core-overall_status_changed';
+
+    analytics.registerEventType({ eventType: overallStatusChangedEventName, schema });
+    analytics.registerContextProvider({ name: 'status info', context$, schema });
+
+    this.overall$!.pipe(
+      takeUntil(this.stop$),
+      map(({ level, summary }) => ({
+        overall_status_level: level.toString(),
+        overall_status_summary: summary,
+      })),
+      // Emit the event before spreading the status to the context.
+      // This way we see from the context the previous status and the current one.
+      tap((statusPayload) => analytics.reportEvent(overallStatusChangedEventName, statusPayload))
+    ).subscribe(context$);
   }
 }

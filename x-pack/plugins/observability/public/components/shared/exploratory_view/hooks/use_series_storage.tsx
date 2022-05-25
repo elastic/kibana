@@ -8,6 +8,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { IKbnUrlStateStorage, ISessionStorageStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { OperationType, SeriesType } from '@kbn/lens-plugin/public';
+import { ChartTimeRange } from '../header/last_updated';
 import { useUiTracker } from '../../../../hooks/use_track_metric';
 import type {
   AppDataType,
@@ -32,6 +33,8 @@ export interface SeriesContextValue {
   setReportType: (reportType: ReportViewType) => void;
   storage: IKbnUrlStateStorage | ISessionStorageStateStorage;
   reportType: ReportViewType;
+  chartTimeRangeContext?: ChartTimeRange;
+  setChartTimeRangeContext: React.Dispatch<React.SetStateAction<ChartTimeRange | undefined>>;
 }
 export const UrlStorageContext = createContext<SeriesContextValue>({} as SeriesContextValue);
 
@@ -55,6 +58,8 @@ export function UrlStorageContextProvider({
   );
 
   const [lastRefresh, setLastRefresh] = useState<number>(() => Date.now());
+
+  const [chartTimeRangeContext, setChartTimeRangeContext] = useState<ChartTimeRange | undefined>();
 
   const [reportType, setReportType] = useState<ReportViewType>(
     () => ((storage as IKbnUrlStateStorage).get(reportTypeKey) ?? '') as ReportViewType
@@ -135,6 +140,8 @@ export function UrlStorageContextProvider({
     setLastRefresh,
     setReportType,
     reportType,
+    chartTimeRangeContext,
+    setChartTimeRangeContext,
     firstSeries: firstSeries!,
   };
   return <UrlStorageContext.Provider value={value}>{children}</UrlStorageContext.Provider>;

@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { extractUnknownDocFailureReason } from './extract_errors';
+import {
+  extractUnknownDocFailureReason,
+  fatalReasonDocumentExceedsMaxBatchSizeBytes,
+} from './extract_errors';
 
 describe('extractUnknownDocFailureReason', () => {
   it('generates the correct error message', () => {
@@ -35,5 +38,19 @@ describe('extractUnknownDocFailureReason', () => {
       { \\"delete\\" : { \\"_id\\" : \\"anotherUnknownType:42\\" } }
       '"
     `);
+  });
+});
+
+describe('fatalReasonDocumentExceedsMaxBatchSizeBytes', () => {
+  it('generate the correct error message', () => {
+    expect(
+      fatalReasonDocumentExceedsMaxBatchSizeBytes({
+        _id: 'abc',
+        docSizeBytes: 106954752,
+        maxBatchSizeBytes: 104857600,
+      })
+    ).toMatchInlineSnapshot(
+      `"The document with _id \\"abc\\" is 106954752 bytes which exceeds the configured maximum batch size of 104857600 bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value."`
+    );
   });
 });

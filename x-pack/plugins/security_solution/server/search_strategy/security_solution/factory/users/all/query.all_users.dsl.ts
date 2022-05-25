@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash/fp';
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { Direction } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
@@ -18,7 +17,6 @@ import { assertUnreachable } from '../../../../../../common/utility_types';
 
 export const buildUsersQuery = ({
   defaultIndex,
-  docValueFields,
   filterQuery,
   pagination: { querySize },
   sort,
@@ -43,7 +41,6 @@ export const buildUsersQuery = ({
     ignore_unavailable: true,
     track_total_hits: false,
     body: {
-      ...(!isEmpty(docValueFields) ? { docvalue_fields: docValueFields } : {}),
       aggregations: {
         user_count: { cardinality: { field: 'user.name' } },
         user_data: {
@@ -60,15 +57,22 @@ export const buildUsersQuery = ({
                     },
                   },
                 ],
-                _source: {
-                  includes: ['user.domain'],
-                },
+                _source: false,
               },
             },
           },
         },
       },
       query: { bool: { filter } },
+      _source: false,
+      fields: [
+        'user.name',
+        'user.domain',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
   };

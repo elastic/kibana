@@ -12,7 +12,7 @@ import type {
   SavedObjectsClientContract,
   Capabilities,
   IRouter,
-  RequestHandlerContext,
+  CustomRequestHandlerContext,
 } from '@kbn/core/server';
 import {
   GlobalSearchBatchedResults,
@@ -29,9 +29,9 @@ export type GlobalSearchPluginStart = Pick<SearchServiceStart, 'find' | 'getSear
 /**
  * @internal
  */
-export interface GlobalSearchRequestHandlerContext extends RequestHandlerContext {
+export type GlobalSearchRequestHandlerContext = CustomRequestHandlerContext<{
   globalSearch: RouteHandlerGlobalSearchContext;
-}
+}>;
 
 /**
  * @internal

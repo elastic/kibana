@@ -36,10 +36,6 @@ describe('ExternalConnectorLogic', () => {
     formDisabled: true,
     externalConnectorUrl: '',
     externalConnectorApiKey: '',
-    sourceConfigData: {
-      name: '',
-      categories: [],
-    },
     urlValid: true,
     showInsecureUrlCallout: false,
     insecureUrl: true,
@@ -52,7 +48,6 @@ describe('ExternalConnectorLogic', () => {
     formDisabled: false,
     insecureUrl: false,
     dataLoading: false,
-    sourceConfigData,
   };
 
   beforeEach(() => {
@@ -80,14 +75,13 @@ describe('ExternalConnectorLogic', () => {
       it('saves the external url', () => {
         expect(ExternalConnectorLogic.values).toEqual({
           ...DEFAULT_VALUES_SUCCESS,
-          externalConnectorUrl: sourceConfigData.configuredFields.externalConnectorUrl,
+          externalConnectorUrl: sourceConfigData.configuredFields.external_connector_url,
         });
       });
 
       it('saves the source config', () => {
         expect(ExternalConnectorLogic.values).toEqual({
           ...DEFAULT_VALUES_SUCCESS,
-          sourceConfigData,
         });
       });
 
@@ -96,30 +90,31 @@ describe('ExternalConnectorLogic', () => {
           ...sourceConfigData,
           configuredFields: {
             ...sourceConfigData.configuredFields,
-            externalConnectorUrl: undefined,
           },
         };
+        delete newSourceConfigData.configuredFields.external_connector_url;
+
         ExternalConnectorLogic.actions.fetchExternalSourceSuccess(newSourceConfigData);
         expect(ExternalConnectorLogic.values).toEqual({
           ...DEFAULT_VALUES_SUCCESS,
           externalConnectorUrl: '',
           insecureUrl: true,
-          sourceConfigData: newSourceConfigData,
         });
       });
+
       it('sets undefined api key to empty string', () => {
         const newSourceConfigData = {
           ...sourceConfigData,
           configuredFields: {
             ...sourceConfigData.configuredFields,
-            externalConnectorApiKey: undefined,
           },
         };
+        delete newSourceConfigData.configuredFields.external_connector_api_key;
+
         ExternalConnectorLogic.actions.fetchExternalSourceSuccess(newSourceConfigData);
         expect(ExternalConnectorLogic.values).toEqual({
           ...DEFAULT_VALUES_SUCCESS,
           externalConnectorApiKey: '',
-          sourceConfigData: newSourceConfigData,
         });
       });
     });
@@ -206,6 +201,7 @@ describe('ExternalConnectorLogic', () => {
         ExternalConnectorLogic.actions.fetchExternalSource();
       });
     });
+
     describe('fetchExternalSourceSuccess', () => {
       it('should show insecure URL callout if url is insecure', () => {
         const setSpy = jest.spyOn(ExternalConnectorLogic.actions, 'setShowInsecureUrlCallout');
@@ -255,18 +251,16 @@ describe('ExternalConnectorLogic', () => {
 
     describe('saveExternalConnectorConfig', () => {
       it('saves the external connector config', async () => {
+        mount({ externalConnectorUrl: 'http://url', externalConnectorApiKey: 'apiKey' });
         const validSpy = jest.spyOn(ExternalConnectorLogic.actions, 'setUrlValidation');
-        const promise = Promise.resolve();
-        http.post.mockReturnValue(promise);
+        http.post.mockReturnValue(Promise.resolve());
         const saveExternalConnectorConfigSuccess = jest.spyOn(
           ExternalConnectorLogic.actions,
           'saveExternalConnectorConfigSuccess'
         );
         const { flashSuccessToast } = mockFlashMessageHelpers;
-        ExternalConnectorLogic.actions.saveExternalConnectorConfig({
-          url: 'http://url',
-          apiKey: 'apiKey',
-        });
+        ExternalConnectorLogic.actions.saveExternalConnectorConfig();
+
         const params = {
           external_connector_url: 'http://url',
           external_connector_api_key: 'apiKey',
@@ -284,31 +278,29 @@ describe('ExternalConnectorLogic', () => {
         expect(saveExternalConnectorConfigSuccess).toHaveBeenCalled();
         expect(navigateToUrl).toHaveBeenCalledWith('/sources/add/external');
       });
+
       it('does not save the external connector config if url is invalid', async () => {
+        mount({ externalConnectorUrl: 'bad_url', externalConnectorApiKey: 'apiKey' });
         const validSpy = jest.spyOn(ExternalConnectorLogic.actions, 'setUrlValidation');
         const saveExternalConnectorConfigSuccess = jest.spyOn(
           ExternalConnectorLogic.actions,
           'saveExternalConnectorConfigSuccess'
         );
         const { flashSuccessToast } = mockFlashMessageHelpers;
-        ExternalConnectorLogic.actions.saveExternalConnectorConfig({
-          url: 'url',
-          apiKey: 'apiKey',
-        });
+        ExternalConnectorLogic.actions.saveExternalConnectorConfig();
         expect(http.post).not.toHaveBeenCalled();
         expect(flashSuccessToast).not.toHaveBeenCalled();
         expect(validSpy).toHaveBeenCalledWith(false);
         expect(saveExternalConnectorConfigSuccess).not.toHaveBeenCalled();
         expect(navigateToUrl).not.toHaveBeenCalled();
       });
+
       itShowsServerErrorAsFlashMessage(http.post, () => {
-        mount();
-        ExternalConnectorLogic.actions.saveExternalConnectorConfig({
-          url: 'http://url',
-          apiKey: 'apiKey',
-        });
+        mount({ externalConnectorUrl: 'http://url', externalConnectorApiKey: 'apiKey' });
+        ExternalConnectorLogic.actions.saveExternalConnectorConfig();
       });
     });
+
     describe('validateUrl', () => {
       it('should correctly validate a valid URL', () => {
         ExternalConnectorLogic.actions.setExternalConnectorUrl('https://validUrl');
@@ -318,6 +310,7 @@ describe('ExternalConnectorLogic', () => {
         expect(validSpy).toHaveBeenCalledWith(true);
         expect(insecureSpy).toHaveBeenCalledWith(false);
       });
+
       it('should correctly validate an invalid URL', () => {
         ExternalConnectorLogic.actions.setExternalConnectorUrl('invalidUrl');
         const validSpy = jest.spyOn(ExternalConnectorLogic.actions, 'setUrlValidation');

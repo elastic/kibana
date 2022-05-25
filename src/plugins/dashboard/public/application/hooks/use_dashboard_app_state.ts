@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import _ from 'lodash';
 import { History } from 'history';
 import { debounceTime, switchMap } from 'rxjs/operators';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -40,17 +39,22 @@ import {
   areTimeRangesEqual,
   areRefreshIntervalsEqual,
 } from '../lib';
+import { isDashboardAppInNoDataState } from '../dashboard_app_no_data';
 
 export interface UseDashboardStateProps {
   history: History;
+  showNoDataPage: boolean;
   savedDashboardId?: string;
   isEmbeddedExternally: boolean;
+  setShowNoDataPage: (showNoData: boolean) => void;
   kbnUrlStateStorage: IKbnUrlStateStorage;
 }
 
 export const useDashboardAppState = ({
   history,
   savedDashboardId,
+  showNoDataPage,
+  setShowNoDataPage,
   kbnUrlStateStorage,
   isEmbeddedExternally,
 }: UseDashboardStateProps) => {
@@ -140,6 +144,21 @@ export const useDashboardAppState = ({
 
     (async () => {
       /**
+       * Ensure default data view exists and there is data in elasticsearch
+       */
+      const isEmpty = await isDashboardAppInNoDataState(dataViews);
+      if (showNoDataPage || isEmpty) {
+        setShowNoDataPage(true);
+        return;
+      }
+
+      const defaultDataView = await dataViews.getDefaultDataView();
+
+      if (!defaultDataView) {
+        return;
+      }
+
+      /**
        * Load and unpack state from dashboard saved object.
        */
       const loadSavedDashboardResult = await loadSavedDashboardState({
@@ -183,8 +202,7 @@ export const useDashboardAppState = ({
         savedDashboard,
       });
 
-      // Backwards compatible way of detecting that we are taking a screenshot
-      const legacyPrintLayoutDetected =
+      const printLayoutDetected =
         screenshotModeService?.isScreenshotMode() &&
         screenshotModeService.getScreenshotContext('layout') === 'print';
 
@@ -194,8 +212,7 @@ export const useDashboardAppState = ({
         ...initialDashboardStateFromUrl,
         ...forwardedAppState,
 
-        // if we are in legacy print mode, dashboard needs to be in print viewMode
-        ...(legacyPrintLayoutDetected ? { viewMode: ViewMode.PRINT } : {}),
+        ...(printLayoutDetected ? { viewMode: ViewMode.PRINT } : {}),
 
         // if there is an incoming embeddable, dashboard always needs to be in edit mode to receive it.
         ...(incomingEmbeddable ? { viewMode: ViewMode.EDIT } : {}),
@@ -378,6 +395,8 @@ export const useDashboardAppState = ({
     search,
     query,
     data,
+    showNoDataPage,
+    setShowNoDataPage,
     spacesService?.ui,
     screenshotModeService,
   ]);

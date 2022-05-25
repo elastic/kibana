@@ -9,6 +9,7 @@
 import { AddConfigDeprecation } from '@kbn/config';
 import { AnalyticsClient } from '@kbn/analytics-client';
 import apm from 'elastic-apm-node';
+import { AwaitedProperties } from '@kbn/utility-types';
 import Boom from '@hapi/boom';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { CliArgs } from '@kbn/config';
@@ -52,7 +53,6 @@ import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { Readable } from 'stream';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
@@ -76,12 +76,12 @@ export { AnalyticsClient }
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
 //
 // @public
-export type AnalyticsServicePreboot = AnalyticsClient;
+export type AnalyticsServicePreboot = Omit<AnalyticsClient, 'shutdown'>;
 
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
 //
 // @public
-export type AnalyticsServiceSetup = AnalyticsClient;
+export type AnalyticsServiceSetup = Omit<AnalyticsClient, 'shutdown'>;
 
 // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
 //
@@ -444,6 +444,30 @@ export interface CorePreboot {
     http: HttpServicePreboot;
     // (undocumented)
     preboot: PrebootServicePreboot;
+}
+
+// @public
+export interface CoreRequestHandlerContext {
+    // (undocumented)
+    deprecations: {
+        client: DeprecationsClient;
+    };
+    // (undocumented)
+    elasticsearch: {
+        client: IScopedClusterClient;
+    };
+    // (undocumented)
+    savedObjects: {
+        client: SavedObjectsClientContract;
+        typeRegistry: ISavedObjectTypeRegistry;
+        getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
+        getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
+        getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
+    };
+    // (undocumented)
+    uiSettings: {
+        client: IUiSettingsClient;
+    };
 }
 
 // @internal
@@ -840,6 +864,11 @@ export interface CustomHttpResponseOptions<T extends HttpResponsePayload | Respo
     statusCode: number;
 }
 
+// @public (undocumented)
+export type CustomRequestHandlerContext<T> = RequestHandlerContext & {
+    [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
+};
+
 // @internal (undocumented)
 export const DEFAULT_APP_CATEGORIES: Record<string, AppCategory>;
 
@@ -1189,7 +1218,7 @@ export interface HttpServiceSetup {
     registerOnPreAuth: (handler: OnPreAuthHandler) => void;
     registerOnPreResponse: (handler: OnPreResponseHandler) => void;
     registerOnPreRouting: (handler: OnPreRoutingHandler) => void;
-    registerRouteHandlerContext: <Context extends RequestHandlerContext, ContextName extends keyof Context>(contextName: ContextName, provider: RequestHandlerContextProvider<Context, ContextName>) => RequestHandlerContextContainer;
+    registerRouteHandlerContext: <Context extends RequestHandlerContext, ContextName extends keyof Omit<Context, 'resolve'>>(contextName: ContextName, provider: RequestHandlerContextProvider<Context, ContextName>) => RequestHandlerContextContainer;
 }
 
 // @public (undocumented)
@@ -1221,7 +1250,7 @@ export interface IContextContainer {
 }
 
 // @public
-export type IContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => Promise<Context[ContextName]> | Context[ContextName];
+export type IContextProvider<Context extends RequestHandlerContext, ContextName extends keyof Context> = (context: Omit<Context, ContextName>, ...rest: HandlerParameters<RequestHandler>) => MaybePromise<Awaited<Context[ContextName]>>;
 
 // @public
 export interface ICspConfig {
@@ -1334,11 +1363,17 @@ export interface IRouter<Context extends RequestHandlerContext = RequestHandlerC
 // @public
 export type IsAuthenticated = (request: KibanaRequest) => boolean;
 
-// @public (undocumented)
-export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
+// @public
+export interface ISavedObjectsExporter {
+    exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
+    exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
+}
 
-// @public (undocumented)
-export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
+// @public
+export interface ISavedObjectsImporter {
+    import(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+}
 
 // @public (undocumented)
 export interface ISavedObjectsPointInTimeFinder<T, A> {
@@ -1840,26 +1875,14 @@ export interface RegisterDeprecationsConfig {
 export type RequestHandler<P = unknown, Q = unknown, B = unknown, Context extends RequestHandlerContext = RequestHandlerContext, Method extends RouteMethod = any, ResponseFactory extends KibanaResponseFactory = KibanaResponseFactory> = (context: Context, request: KibanaRequest<P, Q, B, Method>, response: ResponseFactory) => IKibanaResponse<any> | Promise<IKibanaResponse<any>>;
 
 // @public
-export interface RequestHandlerContext {
+export interface RequestHandlerContext extends RequestHandlerContextBase {
     // (undocumented)
-    core: {
-        savedObjects: {
-            client: SavedObjectsClientContract;
-            typeRegistry: ISavedObjectTypeRegistry;
-            getClient: (options?: SavedObjectsClientProviderOptions) => SavedObjectsClientContract;
-            getExporter: (client: SavedObjectsClientContract) => ISavedObjectsExporter;
-            getImporter: (client: SavedObjectsClientContract) => ISavedObjectsImporter;
-        };
-        elasticsearch: {
-            client: IScopedClusterClient;
-        };
-        uiSettings: {
-            client: IUiSettingsClient;
-        };
-        deprecations: {
-            client: DeprecationsClient;
-        };
-    };
+    core: Promise<CoreRequestHandlerContext>;
+}
+
+// @public (undocumented)
+export interface RequestHandlerContextBase {
+    resolve: <T extends keyof Omit<this, 'resolve'>>(parts: T[]) => Promise<AwaitedProperties<Pick<this, T>>>;
 }
 
 // @public
@@ -2364,15 +2387,17 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
     types: string[];
 }
 
-// @public (undocumented)
-export class SavedObjectsExporter {
+// @internal (undocumented)
+export class SavedObjectsExporter implements ISavedObjectsExporter {
     constructor({ savedObjectsClient, typeRegistry, exportSizeLimit, logger, }: {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
         exportSizeLimit: number;
         logger: Logger;
     });
+    // (undocumented)
     exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
+    // (undocumented)
     exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
 }
 
@@ -2516,14 +2541,16 @@ export interface SavedObjectsImportConflictError {
     type: 'conflict';
 }
 
-// @public (undocumented)
-export class SavedObjectsImporter {
+// @internal (undocumented)
+export class SavedObjectsImporter implements ISavedObjectsImporter {
     constructor({ savedObjectsClient, typeRegistry, importSizeLimit, }: {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
         importSizeLimit: number;
     });
-    import({ readStream, createNewCopies, namespace, overwrite, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    // (undocumented)
+    import({ readStream, createNewCopies, namespace, overwrite, refresh, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    // (undocumented)
     resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 }
 
@@ -2586,6 +2613,7 @@ export interface SavedObjectsImportOptions {
     namespace?: string;
     overwrite: boolean;
     readStream: Readable;
+    refresh?: boolean | 'wait_for';
 }
 
 // @public
@@ -2920,6 +2948,7 @@ export interface SavedObjectsUpdateObjectsSpacesResponseObject {
 export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
     refresh?: MutatingOperationRefreshSetting;
+    retryOnConflict?: number;
     upsert?: Attributes;
     version?: string;
 }

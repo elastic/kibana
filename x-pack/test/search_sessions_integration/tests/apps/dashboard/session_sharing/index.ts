@@ -13,8 +13,6 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const PageObjects = getPageObjects(['common']);
 
   describe('Search session sharing', function () {
-    this.tags('ciGroup5');
-
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });

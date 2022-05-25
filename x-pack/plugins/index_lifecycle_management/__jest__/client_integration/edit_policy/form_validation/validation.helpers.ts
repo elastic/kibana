@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HttpSetup } from '@kbn/core/public';
 import { TestBedConfig } from '@kbn/test-jest-helpers';
 import {
   createColdPhaseActions,
@@ -25,8 +26,11 @@ type SetupReturn = ReturnType<typeof setupValidationTestBed>;
 
 export type ValidationTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setupValidationTestBed = async (arg?: { testBedConfig?: Partial<TestBedConfig> }) => {
-  const testBed = await initTestBed(arg);
+export const setupValidationTestBed = async (
+  httpSetup: HttpSetup,
+  arg?: { testBedConfig?: Partial<TestBedConfig> }
+) => {
+  const testBed = await initTestBed(httpSetup, arg);
 
   return {
     ...testBed,

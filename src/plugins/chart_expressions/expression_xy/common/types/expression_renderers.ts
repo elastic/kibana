@@ -7,7 +7,10 @@
  */
 
 import { AnnotationTooltipFormatter } from '@elastic/charts';
-import { AvailableAnnotationIcon, EventAnnotationArgs } from '@kbn/event-annotation-plugin/common';
+import {
+  AvailableAnnotationIcon,
+  ManualPointEventAnnotationArgs,
+} from '@kbn/event-annotation-plugin/common';
 import { XY_VIS_RENDERER } from '../constants';
 import { XYProps } from './expression_functions';
 
@@ -21,7 +24,7 @@ export interface XYRender {
   value: XYChartProps;
 }
 
-export interface CollectiveConfig extends Omit<EventAnnotationArgs, 'icon'> {
+export interface CollectiveConfig extends Omit<ManualPointEventAnnotationArgs, 'icon'> {
   roundedTimestamp: number;
   axisMode: 'bottom';
   icon?: AvailableAnnotationIcon | string;

@@ -17,7 +17,6 @@ import { RuleExecutionSummary } from '../../../../../common/detection_engine/sch
 import { RulesSchema } from '../../../../../common/detection_engine/schemas/response/rules_schema';
 import { ImportRulesSchemaDecoded } from '../../../../../common/detection_engine/schemas/request/import_rules_schema';
 import { CreateRulesBulkSchema } from '../../../../../common/detection_engine/schemas/request/create_rules_bulk_schema';
-import { INTERNAL_IDENTIFIER } from '../../../../../common/constants';
 import { RuleAlertType, isAlertType } from '../../rules/types';
 import { createBulkErrorObject, BulkError, OutputError } from '../utils';
 import { internalRuleToAPIResponse } from '../../schemas/rule_converters';
@@ -88,10 +87,6 @@ export const getIdBulkError = ({
   }
 };
 
-export const transformTags = (tags: string[]): string[] => {
-  return tags.filter((tag) => !tag.startsWith(INTERNAL_IDENTIFIER));
-};
-
 export const transformAlertsToRules = (
   rules: RuleAlertType[],
   legacyRuleActions: Record<string, LegacyRulesActionsSavedObject>
@@ -123,10 +118,9 @@ export const transformFindAlerts = (
 export const transform = (
   rule: PartialRule<RuleParams>,
   ruleExecutionSummary?: RuleExecutionSummary | null,
-  isRuleRegistryEnabled?: boolean,
   legacyRuleActions?: LegacyRulesActionsSavedObject | null
 ): Partial<RulesSchema> | null => {
-  if (isAlertType(isRuleRegistryEnabled ?? false, rule)) {
+  if (isAlertType(rule)) {
     return internalRuleToAPIResponse(rule, ruleExecutionSummary, legacyRuleActions);
   }
 

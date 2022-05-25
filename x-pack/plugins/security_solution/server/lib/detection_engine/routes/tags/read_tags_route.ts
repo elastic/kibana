@@ -12,10 +12,7 @@ import { buildSiemResponse } from '../utils';
 
 import { readTags } from '../../tags/read_tags';
 
-export const readTagsRoute = (
-  router: SecuritySolutionPluginRouter,
-  isRuleRegistryEnabled: boolean
-) => {
+export const readTagsRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
       path: DETECTION_ENGINE_TAGS_URL,
@@ -26,7 +23,7 @@ export const readTagsRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const rulesClient = context.alerting?.getRulesClient();
+      const rulesClient = (await context.alerting)?.getRulesClient();
 
       if (!rulesClient) {
         return siemResponse.error({ statusCode: 404 });
@@ -34,7 +31,6 @@ export const readTagsRoute = (
 
       try {
         const tags = await readTags({
-          isRuleRegistryEnabled,
           rulesClient,
         });
         return response.ok({ body: tags });

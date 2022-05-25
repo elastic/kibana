@@ -25,6 +25,7 @@ import {
   DEFAULT_THREAT_INDEX_KEY,
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
+  ENABLE_GROUPED_NAVIGATION,
   ENABLE_NEWS_FEED_SETTING,
   IP_REPUTATION_LINKS_SETTING,
   IP_REPUTATION_LINKS_SETTING_DEFAULT,
@@ -144,6 +145,26 @@ export const initUiSettings = (
       requiresPageReload: true,
       schema: schema.number(),
     },
+    ...(experimentalFeatures.groupedNavigation
+      ? {
+          [ENABLE_GROUPED_NAVIGATION]: {
+            name: i18n.translate('xpack.securitySolution.uiSettings.enableGroupedNavigation', {
+              defaultMessage: 'Enable grouped navigation',
+            }),
+            value: false,
+            type: 'boolean',
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.enableGroupedNavigationDescription',
+              {
+                defaultMessage: '<p>Enables the grouped side navigation for Security Solution</p>',
+              }
+            ),
+            category: [APP_ID],
+            requiresPageReload: true,
+            schema: schema.boolean(),
+          },
+        }
+      : {}),
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {
         defaultMessage: 'News feed',

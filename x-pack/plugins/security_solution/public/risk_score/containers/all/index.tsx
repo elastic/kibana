@@ -103,7 +103,7 @@ export const useUserRiskScore = ({
   const spaceId = useSpaceId();
   const defaultIndex = spaceId ? getUserRiskIndex(spaceId, onlyLatest) : undefined;
 
-  const usersFeatureEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
+  const riskyUsersFeatureEnabled = useIsExperimentalFeatureEnabled('riskyUsersEnabled');
   return useRiskScore<UsersRiskScore[]>({
     timerange,
     onlyLatest,
@@ -111,7 +111,7 @@ export const useUserRiskScore = ({
     sort,
     skip,
     pagination,
-    featureEnabled: usersFeatureEnabled,
+    featureEnabled: riskyUsersFeatureEnabled,
     defaultIndex,
   });
 };

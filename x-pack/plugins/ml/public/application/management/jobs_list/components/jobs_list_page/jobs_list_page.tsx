@@ -37,7 +37,6 @@ import { PLUGIN_ID } from '../../../../../../common/constants/app';
 
 import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
 
-import { getDocLinks } from '../../../../util/dependency_cache';
 // @ts-ignore undeclared module
 import { JobsListView } from '../../../../jobs/jobs_list/components/jobs_list_view';
 import { DataFrameAnalyticsList } from '../../../../data_frame_analytics/pages/analytics_management/components/analytics_list';
@@ -54,6 +53,7 @@ import { ListingPageUrlState } from '../../../../../../common/types/common';
 import { getDefaultDFAListState } from '../../../../data_frame_analytics/pages/analytics_management/page';
 import { ExportJobsFlyout, ImportJobsFlyout } from '../../../../components/import_export_jobs';
 import type { JobType, MlSavedObjectType } from '../../../../../../common/types/saved_objects';
+import { useMlKibana } from '../../../../contexts/kibana';
 
 interface Tab extends EuiTabbedContentTab {
   'data-test-subj': string;
@@ -201,30 +201,6 @@ export const JobsListPage: FC<{
     return null;
   }
 
-  const anomalyDetectionJobsUrl = getDocLinks().links.ml.anomalyDetectionJobs;
-  const dataFrameAnalyticsUrl = getDocLinks().links.ml.dataFrameAnalytics;
-
-  const anomalyDetectionDocsLabel = i18n.translate(
-    'xpack.ml.management.jobsList.anomalyDetectionDocsLabel',
-    {
-      defaultMessage: 'Anomaly detection jobs docs',
-    }
-  );
-  const analyticsDocsLabel = i18n.translate('xpack.ml.management.jobsList.analyticsDocsLabel', {
-    defaultMessage: 'Analytics jobs docs',
-  });
-
-  const docsLink = (
-    <EuiButtonEmpty
-      href={currentTabId === 'anomaly-detector' ? anomalyDetectionJobsUrl : dataFrameAnalyticsUrl}
-      target="_blank"
-      iconType="help"
-      data-test-subj="documentationLink"
-    >
-      {currentTabId === 'anomaly-detector' ? anomalyDetectionDocsLabel : analyticsDocsLabel}
-    </EuiButtonEmpty>
-  );
-
   function renderTabs() {
     return (
       <EuiTabbedContent
@@ -280,7 +256,7 @@ export const JobsListPage: FC<{
                       defaultMessage="View, export, and import machine learning analytics and anomaly detection items."
                     />
                   }
-                  rightSideItems={[docsLink]}
+                  rightSideItems={[<DocsLink currentTabId={currentTabId} />]}
                   bottomBorder
                 />
 
@@ -327,5 +303,37 @@ export const JobsListPage: FC<{
         </KibanaThemeProvider>
       </I18nContext>
     </RedirectAppLinks>
+  );
+};
+
+const DocsLink: FC<{ currentTabId: MlSavedObjectType }> = ({ currentTabId }) => {
+  const {
+    services: {
+      docLinks: {
+        links: { ml },
+      },
+    },
+  } = useMlKibana();
+
+  let href = ml.anomalyDetectionJobs;
+  let linkLabel = i18n.translate('xpack.ml.management.jobsList.anomalyDetectionDocsLabel', {
+    defaultMessage: 'Anomaly detection jobs docs',
+  });
+
+  if (currentTabId === 'data-frame-analytics') {
+    href = ml.dataFrameAnalytics;
+    linkLabel = i18n.translate('xpack.ml.management.jobsList.analyticsDocsLabel', {
+      defaultMessage: 'Analytics jobs docs',
+    });
+  } else if (currentTabId === 'trained-model') {
+    href = ml.trainedModels;
+    linkLabel = i18n.translate('xpack.ml.management.jobsList.trainedModelsDocsLabel', {
+      defaultMessage: 'Trained models docs',
+    });
+  }
+  return (
+    <EuiButtonEmpty href={href} target="_blank" iconType="help" data-test-subj="documentationLink">
+      {linkLabel}
+    </EuiButtonEmpty>
   );
 };

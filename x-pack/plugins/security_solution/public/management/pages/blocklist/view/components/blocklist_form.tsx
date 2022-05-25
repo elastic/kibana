@@ -61,7 +61,7 @@ import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
 } from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useLicense } from '../../../../../common/hooks/use_license';
-import { isValidHash } from '../../../../../../common/endpoint/service/trusted_apps/validations';
+import { isValidHash } from '../../../../../../common/endpoint/service/artifacts/validations';
 import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
@@ -167,8 +167,11 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
     }, [item?.os_types]);
 
     const selectedValues = useMemo(() => {
-      return blocklistEntry.value.map((label) => ({ label }));
-    }, [blocklistEntry.value]);
+      return blocklistEntry.value.map((label) => ({
+        label,
+        'data-test-subj': getTestId(`values-input-${label}`),
+      }));
+    }, [blocklistEntry.value, getTestId]);
 
     const osOptions: Array<EuiSuperSelectOption<OperatingSystem>> = useMemo(
       () =>
@@ -186,17 +189,19 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
         value: field,
         inputDisplay: CONDITION_FIELD_TITLE[field],
         dropdownDisplay: getDropdownDisplay(field),
+        'data-test-subj': getTestId(field),
       }));
       if (selectedOs === OperatingSystem.WINDOWS) {
         selectableFields.push({
           value: 'file.Ext.code_signature',
           inputDisplay: CONDITION_FIELD_TITLE['file.Ext.code_signature'],
           dropdownDisplay: getDropdownDisplay('file.Ext.code_signature'),
+          'data-test-subj': getTestId('file.Ext.code_signature'),
         });
       }
 
       return selectableFields;
-    }, [selectedOs]);
+    }, [selectedOs, getTestId]);
 
     const valueLabel = useMemo(() => {
       return (

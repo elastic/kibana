@@ -37,20 +37,29 @@ export function IconSelect<Icon extends string = AvailableReferenceLineIcon>({
   value,
   onChange,
   customIconSet,
+  defaultIcon = 'empty',
 }: {
   value?: Icon;
   onChange: (newIcon: Icon) => void;
   customIconSet: IconSet<Icon>;
+  defaultIcon?: string;
 }) {
   const selectedIcon =
     customIconSet.find((option) => value === option.value) ||
-    customIconSet.find((option) => option.value === 'empty')!;
+    customIconSet.find((option) => option.value === defaultIcon)!;
 
   return (
     <EuiComboBox
+      fullWidth
+      data-test-subj="lns-icon-select"
       isClearable={false}
       options={customIconSet}
-      selectedOptions={[selectedIcon]}
+      selectedOptions={[
+        {
+          label: selectedIcon.label,
+          value: selectedIcon.value,
+        },
+      ]}
       onChange={(selection) => {
         onChange(selection[0].value!);
       }}

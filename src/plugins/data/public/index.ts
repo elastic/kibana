@@ -21,6 +21,7 @@ export * from './deprecated';
 export { getEsQueryConfig, FilterStateStore } from '../common';
 export {
   getDisplayValueFromFilter,
+  getFieldDisplayValueFromFilter,
   generateFilters,
   extractTimeRange,
   getIndexPatternFromFilter,
@@ -95,20 +96,6 @@ export {
   DuplicateDataViewError,
 } from '../common';
 
-/*
- * Autocomplete query suggestions:
- */
-
-export type {
-  QuerySuggestion,
-  QuerySuggestionGetFn,
-  QuerySuggestionGetFnArgs,
-  QuerySuggestionBasic,
-  QuerySuggestionField,
-  AutocompleteStart,
-} from './autocomplete';
-
-export { QuerySuggestionTypes } from './autocomplete';
 /*
  * Search:
  */
@@ -268,15 +255,21 @@ export {
   createSavedQueryService,
   connectToQueryState,
   syncQueryStateWithUrl,
+  syncGlobalQueryStateWithUrl,
   getDefaultQuery,
   FilterManager,
   TimeHistory,
   getQueryLog,
   mapAndFlattenFilters,
+  QueryService,
 } from './query';
+
+export { NowProvider } from './now_provider';
+export type { NowProviderInternalContract } from './now_provider';
 
 export type {
   QueryState,
+  QueryState$,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
@@ -288,6 +281,8 @@ export type {
   PersistedLog,
   QueryStringContract,
   QuerySetup,
+  TimefilterSetup,
+  GlobalQueryStateFromUrl,
 } from './query';
 
 export type { AggsStart } from './search/aggs';

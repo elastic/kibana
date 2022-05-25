@@ -52,3 +52,10 @@ export const CLIENT_ALERT_TYPES = {
   TLS: 'xpack.uptime.alerts.tlsCertificate',
   DURATION_ANOMALY: 'xpack.uptime.alerts.durationAnomaly',
 };
+
+export const UPTIME_RULE_TYPES = [
+  'xpack.uptime.alerts.tls',
+  'xpack.uptime.alerts.tlsCertificate',
+  'xpack.uptime.alerts.monitorStatus',
+  'xpack.uptime.alerts.durationAnomaly',
+];

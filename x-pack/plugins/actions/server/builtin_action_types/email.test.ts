@@ -24,6 +24,7 @@ import {
   EmailActionType,
   EmailActionTypeExecutorOptions,
 } from './email';
+import { ValidateEmailAddressesOptions } from '../../common';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -269,6 +270,26 @@ describe('config validation', () => {
       `"error validating action type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
     );
   });
+
+  test('config validation for emails calls validateEmailAddresses', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const basicActionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities,
+    });
+
+    expect(() => {
+      validateConfig(basicActionType, {
+        from: 'badmail',
+        service: 'gmail',
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [from]: stub for actual message"`
+    );
+    expect(configurationUtilities.validateEmailAddresses).toHaveBeenNthCalledWith(1, ['badmail']);
+  });
 });
 
 describe('secrets validation', () => {
@@ -404,6 +425,33 @@ describe('params validation', () => {
       `"error validating action params: [subject]: expected value of type [string] but got [undefined]"`
     );
   });
+
+  test('params validation for emails calls validateEmailAddresses', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const basicActionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities,
+    });
+
+    expect(() => {
+      validateParams(basicActionType, {
+        to: ['to@example.com'],
+        cc: ['cc@example.com'],
+        bcc: ['bcc@example.com'],
+        subject: 'this is a test',
+        message: 'this is the message',
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: [to/cc/bcc]: stub for actual message"`
+    );
+
+    const allEmails = ['to@example.com', 'cc@example.com', 'bcc@example.com'];
+    expect(configurationUtilities.validateEmailAddresses).toHaveBeenNthCalledWith(1, allEmails, {
+      treatMustacheTemplatesAsValid: true,
+    });
+  });
 });
 
 describe('execute()', () => {
@@ -454,21 +502,9 @@ describe('execute()', () => {
         "status": "ok",
       }
     `);
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
-        "configurationUtilities": Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction],
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
         "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
@@ -517,21 +553,9 @@ describe('execute()', () => {
 
     sendEmailMock.mockReset();
     await actionType.executor(customExecutorOptions);
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
-        "configurationUtilities": Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction],
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
         "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
@@ -580,21 +604,9 @@ describe('execute()', () => {
 
     sendEmailMock.mockReset();
     await actionType.executor(customExecutorOptions);
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
-        "configurationUtilities": Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction],
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
         "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
@@ -745,4 +757,48 @@ describe('execute()', () => {
       This message was sent by Kibana. [View this in Kibana](https://localhost:1234/foo/bar/my/app)."
     `);
   });
+
+  test('ensure execution runs validator with allowMustache false', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const testActionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities,
+    });
+
+    const customExecutorOptions: EmailActionTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...params,
+      },
+    };
+
+    const result = await testActionType.executor(customExecutorOptions);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "[to/cc/bcc]: stub for actual message",
+        "status": "error",
+      }
+    `);
+    expect(configurationUtilities.validateEmailAddresses.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Array [
+            "jim@example.com",
+            "james@example.com",
+            "jimmy@example.com",
+          ],
+        ],
+      ]
+    `);
+  });
 });
+
+function validateEmailAddressesImpl(
+  addresses: string[],
+  options?: ValidateEmailAddressesOptions
+): string | undefined {
+  return 'stub for actual message';
+}

@@ -28,8 +28,9 @@ export const deletePackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const esClient = coreContext.elasticsearch.client.asCurrentUser;
+      const savedObjectsClient = coreContext.savedObjects.client;
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
 
       const currentPackSO = await savedObjectsClient.get<{ name: string }>(

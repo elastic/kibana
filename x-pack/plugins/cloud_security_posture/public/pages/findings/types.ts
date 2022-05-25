@@ -7,10 +7,9 @@
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import { UseQueryResult } from 'react-query';
 
-export type FindingsGroupByKind = 'none' | 'resource';
+export type FindingsGroupByKind = 'default' | 'resource';
 
 export interface FindingsBaseURLQuery {
-  groupBy: FindingsGroupByKind;
   query: Query;
   filters: Filter[];
 }
@@ -20,10 +19,6 @@ export interface FindingsBaseEsQuery {
   query?: {
     bool: BoolQuery;
   };
-}
-
-export interface FindingsQueryStatus {
-  enabled: boolean;
 }
 
 export interface FindingsQueryResult<TData = unknown, TError = unknown> {
@@ -48,8 +43,14 @@ export interface CspFinding {
 
 interface CspRule {
   benchmark: { name: string; version: string };
+  section: string;
+  audit: string;
+  references: string;
+  profile_applicability: string;
   description: string;
   impact: string;
+  default_value: string;
+  rationale: string;
   name: string;
   remediation: string;
   tags: string[];
@@ -57,18 +58,17 @@ interface CspRule {
 
 interface CspFindingResult {
   evaluation: 'passed' | 'failed';
-  evidence: {
-    filemode: string;
-  };
+  expected?: Record<string, unknown>;
+  evidence: Record<string, unknown>;
 }
 
 interface CspFindingResource {
-  uid: string;
-  filename: string;
-  // gid: string;
-  mode: string;
-  path: string;
+  name: string;
+  sub_type: string;
+  raw: object;
+  id: string;
   type: string;
+  [other_keys: string]: unknown;
 }
 
 interface CspFindingHost {
@@ -88,6 +88,7 @@ interface CspFindingHost {
     family: string;
     name: string;
   };
+  [other_keys: string]: unknown;
 }
 
 interface CspFindingAgent {

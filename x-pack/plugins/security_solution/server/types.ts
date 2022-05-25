@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type {
+  IRouter,
+  CustomRequestHandlerContext,
+  CoreRequestHandlerContext,
+  KibanaRequest,
+} from '@kbn/core/server';
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
@@ -18,10 +23,15 @@ import { ConfigType } from './config';
 import { IRuleExecutionLogForRoutes } from './lib/detection_engine/rule_execution_log';
 import { FrameworkRequest } from './lib/framework';
 import { EndpointAuthz } from '../common/endpoint/types/authz';
+import {
+  EndpointInternalFleetServicesInterface,
+  EndpointScopedFleetServicesInterface,
+} from './endpoint/services/fleet';
 
 export { AppClient };
 
-export interface SecuritySolutionApiRequestHandlerContext extends RequestHandlerContext {
+export interface SecuritySolutionApiRequestHandlerContext {
+  core: CoreRequestHandlerContext;
   endpointAuthz: EndpointAuthz;
   getConfig: () => ConfigType;
   getFrameworkRequest: () => FrameworkRequest;
@@ -30,15 +40,17 @@ export interface SecuritySolutionApiRequestHandlerContext extends RequestHandler
   getRuleDataService: () => IRuleDataService;
   getRuleExecutionLog: () => IRuleExecutionLogForRoutes;
   getExceptionListClient: () => ExceptionListClient | null;
+  getInternalFleetServices: () => EndpointInternalFleetServicesInterface;
+  getScopedFleetServices: (req: KibanaRequest) => EndpointScopedFleetServicesInterface;
 }
 
-export interface SecuritySolutionRequestHandlerContext extends RequestHandlerContext {
+export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{
   securitySolution: SecuritySolutionApiRequestHandlerContext;
   actions: ActionsApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
   licensing: LicensingApiRequestHandlerContext;
   lists?: ListsApiRequestHandlerContext;
   fleet?: FleetRequestHandlerContext['fleet'];
-}
+}>;
 
 export type SecuritySolutionPluginRouter = IRouter<SecuritySolutionRequestHandlerContext>;

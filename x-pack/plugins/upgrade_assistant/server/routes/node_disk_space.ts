@@ -49,91 +49,84 @@ export function registerNodeDiskSpaceRoute({ router, lib: { handleEsError } }: R
       path: `${API_BASE_PATH}/node_disk_space`,
       validate: false,
     },
-    versionCheckHandlerWrapper(
-      async (
-        {
-          core: {
-            elasticsearch: { client },
-          },
-        },
-        request,
-        response
-      ) => {
-        try {
-          const clusterSettings = await client.asCurrentUser.cluster.getSettings({
-            flat_settings: true,
-            include_defaults: true,
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      try {
+        const {
+          elasticsearch: { client },
+        } = await core;
+        const clusterSettings = await client.asCurrentUser.cluster.getSettings({
+          flat_settings: true,
+          include_defaults: true,
+        });
+
+        const lowDiskWatermarkSetting = getLowDiskWatermarkSetting(clusterSettings);
+
+        if (lowDiskWatermarkSetting) {
+          const nodeStats = await client.asCurrentUser.nodes.stats({
+            metric: 'fs',
           });
 
-          const lowDiskWatermarkSetting = getLowDiskWatermarkSetting(clusterSettings);
+          const nodeIds = Object.keys(nodeStats.nodes);
 
-          if (lowDiskWatermarkSetting) {
-            const nodeStats = await client.asCurrentUser.nodes.stats({
-              metric: 'fs',
-            });
+          const nodesWithLowDiskSpace: NodeWithLowDiskSpace[] = [];
 
-            const nodeIds = Object.keys(nodeStats.nodes);
+          nodeIds.forEach((nodeId) => {
+            const node = nodeStats.nodes[nodeId];
+            const byteStats = node?.fs?.total;
+            // @ts-expect-error @elastic/elasticsearch not supported
+            const { total_in_bytes: totalInBytes, available_in_bytes: availableInBytes } =
+              byteStats;
 
-            const nodesWithLowDiskSpace: NodeWithLowDiskSpace[] = [];
+            // Regex to determine if the low disk watermark setting is configured as a percentage value
+            // Elasticsearch accepts a percentage or bytes value
+            const isLowDiskWatermarkPercentage = /^(\d+|(\.\d+))(\.\d+)?%$/.test(
+              lowDiskWatermarkSetting!
+            );
 
-            nodeIds.forEach((nodeId) => {
-              const node = nodeStats.nodes[nodeId];
-              const byteStats = node?.fs?.total;
-              // @ts-expect-error @elastic/elasticsearch not supported
-              const { total_in_bytes: totalInBytes, available_in_bytes: availableInBytes } =
-                byteStats;
-
-              // Regex to determine if the low disk watermark setting is configured as a percentage value
-              // Elasticsearch accepts a percentage or bytes value
-              const isLowDiskWatermarkPercentage = /^(\d+|(\.\d+))(\.\d+)?%$/.test(
-                lowDiskWatermarkSetting!
+            if (isLowDiskWatermarkPercentage) {
+              const percentageAvailable = (availableInBytes / totalInBytes) * 100;
+              const rawLowDiskWatermarkPercentageValue = Number(
+                lowDiskWatermarkSetting!.replace('%', '')
               );
 
-              if (isLowDiskWatermarkPercentage) {
-                const percentageAvailable = (availableInBytes / totalInBytes) * 100;
-                const rawLowDiskWatermarkPercentageValue = Number(
-                  lowDiskWatermarkSetting!.replace('%', '')
-                );
-
-                // If the percentage available is < the low disk watermark setting, mark node as having low disk space
-                if (percentageAvailable < rawLowDiskWatermarkPercentageValue) {
-                  nodesWithLowDiskSpace.push({
-                    nodeId,
-                    nodeName: node.name || nodeId,
-                    available: `${Math.round(percentageAvailable)}%`,
-                    lowDiskWatermarkSetting: lowDiskWatermarkSetting!,
-                  });
-                }
-              } else {
-                // If not a percentage value, assume user configured low disk watermark setting in bytes
-                const rawLowDiskWatermarkBytesValue = ByteSizeValue.parse(
-                  lowDiskWatermarkSetting!
-                ).getValueInBytes();
-
-                const percentageAvailable = (availableInBytes / totalInBytes) * 100;
-
-                // If bytes available < the low disk watermarket setting, mark node as having low disk space
-                if (availableInBytes < rawLowDiskWatermarkBytesValue) {
-                  nodesWithLowDiskSpace.push({
-                    nodeId,
-                    nodeName: node.name || nodeId,
-                    available: `${Math.round(percentageAvailable)}%`,
-                    lowDiskWatermarkSetting: lowDiskWatermarkSetting!,
-                  });
-                }
+              // If the percentage available is < the low disk watermark setting, mark node as having low disk space
+              if (percentageAvailable < rawLowDiskWatermarkPercentageValue) {
+                nodesWithLowDiskSpace.push({
+                  nodeId,
+                  nodeName: node.name || nodeId,
+                  available: `${Math.round(percentageAvailable)}%`,
+                  lowDiskWatermarkSetting: lowDiskWatermarkSetting!,
+                });
               }
-            });
+            } else {
+              // If not a percentage value, assume user configured low disk watermark setting in bytes
+              const rawLowDiskWatermarkBytesValue = ByteSizeValue.parse(
+                lowDiskWatermarkSetting!
+              ).getValueInBytes();
 
-            return response.ok({ body: nodesWithLowDiskSpace });
-          }
+              const percentageAvailable = (availableInBytes / totalInBytes) * 100;
 
-          // If the low disk watermark setting is undefined, send empty array
-          // This could occur if the setting is configured in elasticsearch.yml
-          return response.ok({ body: [] });
-        } catch (error) {
-          return handleEsError({ error, response });
+              // If bytes available < the low disk watermarket setting, mark node as having low disk space
+              if (availableInBytes < rawLowDiskWatermarkBytesValue) {
+                nodesWithLowDiskSpace.push({
+                  nodeId,
+                  nodeName: node.name || nodeId,
+                  available: `${Math.round(percentageAvailable)}%`,
+                  lowDiskWatermarkSetting: lowDiskWatermarkSetting!,
+                });
+              }
+            }
+          });
+
+          return response.ok({ body: nodesWithLowDiskSpace });
         }
+
+        // If the low disk watermark setting is undefined, send empty array
+        // This could occur if the setting is configured in elasticsearch.yml
+        return response.ok({ body: [] });
+      } catch (error) {
+        return handleEsError({ error, response });
       }
-    )
+    })
   );
 }

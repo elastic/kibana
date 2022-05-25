@@ -10,26 +10,29 @@ import { CoreSetup, Plugin } from '@kbn/core/server';
 
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
+import { PluginSetup as UnifiedSearchSetup } from '@kbn/unified-search-plugin/server';
 import { setupOptionsListSuggestionsRoute } from './control_types/options_list/options_list_suggestions_route';
 import { controlGroupContainerPersistableStateServiceFactory } from './control_group/control_group_container_factory';
 import { optionsListPersistableStateServiceFactory } from './control_types/options_list/options_list_embeddable_factory';
-import { timeSliderPersistableStateServiceFactory } from './control_types/time_slider/time_slider_embeddable_factory';
+// import { timeSliderPersistableStateServiceFactory } from './control_types/time_slider/time_slider_embeddable_factory';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
   data: DataSetup;
+  unifiedSearch: UnifiedSearchSetup;
 }
 
 export class ControlsPlugin implements Plugin<object, object, SetupDeps> {
-  public setup(core: CoreSetup, { embeddable, data }: SetupDeps) {
+  public setup(core: CoreSetup, { embeddable, unifiedSearch }: SetupDeps) {
     embeddable.registerEmbeddableFactory(optionsListPersistableStateServiceFactory());
-    embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
+    // Temporary disabling Time Slider
+    // embeddable.registerEmbeddableFactory(timeSliderPersistableStateServiceFactory());
 
     embeddable.registerEmbeddableFactory(
       controlGroupContainerPersistableStateServiceFactory(embeddable)
     );
 
-    setupOptionsListSuggestionsRoute(core, data.autocomplete.getAutocompleteSettings);
+    setupOptionsListSuggestionsRoute(core, unifiedSearch.autocomplete.getAutocompleteSettings);
     return {};
   }
 

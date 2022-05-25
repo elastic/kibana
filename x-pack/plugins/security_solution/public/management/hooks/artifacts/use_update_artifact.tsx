@@ -9,14 +9,19 @@ import {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { HttpFetchError } from '@kbn/core/public';
-import { useMutation, UseMutationResult, UseQueryOptions } from 'react-query';
+import { useMutation, UseMutationOptions, UseMutationResult } from 'react-query';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 
 const DEFAULT_OPTIONS = Object.freeze({});
 
 export function useUpdateArtifact(
   exceptionListApiClient: ExceptionsListApiClient,
-  customQueryOptions: UseQueryOptions<ExceptionListItemSchema, HttpFetchError> = DEFAULT_OPTIONS
+  customQueryOptions: UseMutationOptions<
+    ExceptionListItemSchema,
+    HttpFetchError,
+    UpdateExceptionListItemSchema,
+    () => void
+  > = DEFAULT_OPTIONS
 ): UseMutationResult<
   ExceptionListItemSchema,
   HttpFetchError,

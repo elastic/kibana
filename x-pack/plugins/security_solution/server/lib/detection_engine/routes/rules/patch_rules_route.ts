@@ -27,11 +27,7 @@ import { readRules } from '../../rules/read_rules';
 import { legacyMigrate } from '../../rules/utils';
 import { PartialFilter } from '../../types';
 
-export const patchRulesRoute = (
-  router: SecuritySolutionPluginRouter,
-  ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean
-) => {
+export const patchRulesRoute = (router: SecuritySolutionPluginRouter, ml: SetupPlugins['ml']) => {
   router.patch(
     {
       path: DETECTION_ENGINE_RULES_URL,
@@ -56,7 +52,9 @@ export const patchRulesRoute = (
         building_block_type: buildingBlockType,
         description,
         enabled,
+        timestamp_field: timestampField,
         event_category_override: eventCategoryOverride,
+        tiebreaker_field: tiebreakerField,
         false_positives: falsePositives,
         from,
         query,
@@ -106,12 +104,12 @@ export const patchRulesRoute = (
         const actions: RuleAlertAction[] = actionsRest as RuleAlertAction[];
         const filters: PartialFilter[] | undefined = filtersRest as PartialFilter[];
 
-        const rulesClient = context.alerting.getRulesClient();
-        const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-        const savedObjectsClient = context.core.savedObjects.client;
+        const rulesClient = (await context.alerting).getRulesClient();
+        const ruleExecutionLog = (await context.securitySolution).getRuleExecutionLog();
+        const savedObjectsClient = (await context.core).savedObjects.client;
 
         const mlAuthz = buildMlAuthz({
-          license: context.licensing.license,
+          license: (await context.licensing).license,
           ml,
           request,
           savedObjectsClient,
@@ -122,7 +120,6 @@ export const patchRulesRoute = (
         }
 
         const existingRule = await readRules({
-          isRuleRegistryEnabled,
           rulesClient,
           ruleId,
           id,
@@ -144,7 +141,9 @@ export const patchRulesRoute = (
           buildingBlockType,
           description,
           enabled,
+          timestampField,
           eventCategoryOverride,
+          tiebreakerField,
           falsePositives,
           from,
           query,
@@ -192,11 +191,7 @@ export const patchRulesRoute = (
         if (rule != null && rule.enabled != null && rule.name != null) {
           const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
 
-          const [validated, errors] = transformValidate(
-            rule,
-            ruleExecutionSummary,
-            isRuleRegistryEnabled
-          );
+          const [validated, errors] = transformValidate(rule, ruleExecutionSummary);
           if (errors != null) {
             return siemResponse.error({ statusCode: 500, body: errors });
           } else {

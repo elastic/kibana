@@ -10,5 +10,6 @@
   "configPath": ["xpack", "actions"],
   "requiredPlugins": ["licensing", "taskManager", "encryptedSavedObjects", "eventLog", "features"],
   "optionalPlugins": ["usageCollection", "spaces", "security", "monitoringCollection"],
-  "ui": false
+  "extraPublicDirs": ["common"],
+  "ui": true
 }

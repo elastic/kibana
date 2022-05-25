@@ -89,7 +89,7 @@ describe('context predecessors', function () {
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
         (hits: EsHitRecordList) => {
-          expect(mockSearchSource.fetch.calledOnce).toBe(true);
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
         }
       );
@@ -234,7 +234,7 @@ describe('context predecessors', function () {
         (hits: EsHitRecordList) => {
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
-          expect(mockSearchSource.fetch.calledOnce).toBe(true);
+          expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(removeFieldsSpy.calledOnce).toBe(true);
           expect(setFieldsSpy.calledOnce).toBe(true);
           expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));

@@ -6,9 +6,7 @@
  */
 
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
-import { Filter } from '@kbn/es-query';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Query } from '@kbn/data-plugin/public';
+import type { Query, Filter } from '@kbn/es-query';
 import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import type { LayerType, PersistableFilter, ValueLabelConfig } from '../../common';
 

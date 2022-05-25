@@ -12,7 +12,9 @@ import fs from 'fs';
 import { KIBANA_ROOT } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(require.resolve('../functional/config'));
+  const xpackFunctionalConfig = await readConfigFile(
+    require.resolve('../functional/config.base.js')
+  );
 
   // Find all folders in /examples and /x-pack/examples since we treat all them as plugin folder
   const examplesFiles = fs.readdirSync(resolve(KIBANA_ROOT, 'examples'));

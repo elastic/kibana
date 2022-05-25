@@ -9,10 +9,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { showErrorToast } from './use_findings';
-import type { FindingsBaseEsQuery, FindingsQueryStatus } from './types';
-
-interface UseFindingsCountOptions extends FindingsBaseEsQuery, FindingsQueryStatus {}
+import { showErrorToast } from './latest_findings/use_latest_findings';
+import type { FindingsBaseEsQuery } from './types';
 
 type FindingsAggRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type FindingsAggResponse = IKibanaSearchResponse<estypes.SearchResponse<{}, FindingsAggs>>;
@@ -35,7 +33,7 @@ export const getFindingsCountAggQuery = ({ index, query }: FindingsBaseEsQuery) 
   },
 });
 
-export const useFindingsCounter = ({ enabled, index, query }: UseFindingsCountOptions) => {
+export const useFindingsCounter = ({ index, query }: FindingsBaseEsQuery) => {
   const {
     data,
     notifications: { toasts },
@@ -50,7 +48,7 @@ export const useFindingsCounter = ({ enabled, index, query }: UseFindingsCountOp
         })
       ),
     {
-      enabled,
+      keepPreviousData: true,
       onError: (err) => showErrorToast(toasts, err),
       select: (response) =>
         Object.fromEntries(

@@ -8,57 +8,81 @@
 import { i18n } from '@kbn/i18n';
 
 export const VALUE_MUST_BE_GREATER_THAN_ZERO = i18n.translate(
-  'xpack.uptime.settings.invalid.error',
+  'xpack.synthetics.settings.invalid.error',
   {
     defaultMessage: 'Value must be greater than 0.',
   }
 );
 
-export const VALUE_MUST_BE_AN_INTEGER = i18n.translate('xpack.uptime.settings.invalid.nanError', {
-  defaultMessage: 'Value must be an integer.',
-});
+export const VALUE_MUST_BE_AN_INTEGER = i18n.translate(
+  'xpack.synthetics.settings.invalid.nanError',
+  {
+    defaultMessage: 'Value must be an integer.',
+  }
+);
 
 export const MonitorStatusTranslations = {
-  defaultActionMessage: i18n.translate('xpack.uptime.alerts.monitorStatus.defaultActionMessage', {
-    defaultMessage:
-      'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}',
-    values: {
-      monitorName: '{{state.monitorName}}',
-      monitorUrl: '{{{state.monitorUrl}}}',
-      statusMessage: '{{{state.statusMessage}}}',
-      latestErrorMessage: '{{{state.latestErrorMessage}}}',
-      observerLocation: '{{state.observerLocation}}',
-    },
-  }),
-  name: i18n.translate('xpack.uptime.alerts.monitorStatus.clientName', {
+  defaultActionMessage: i18n.translate(
+    'xpack.synthetics.alerts.monitorStatus.defaultActionMessage',
+    {
+      defaultMessage:
+        'Monitor {monitorName} with url {monitorUrl} from {observerLocation} {statusMessage} The latest error message is {latestErrorMessage}',
+      values: {
+        monitorName: '{{context.monitorName}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        statusMessage: '{{{context.statusMessage}}}',
+        latestErrorMessage: '{{{context.latestErrorMessage}}}',
+        observerLocation: '{{context.observerLocation}}',
+      },
+    }
+  ),
+  defaultRecoveryMessage: i18n.translate(
+    'xpack.synthetics.alerts.monitorStatus.defaultRecoveryMessage',
+    {
+      defaultMessage:
+        'Alert for monitor {monitorName} with url {monitorUrl} from {observerLocation} has recovered',
+      values: {
+        monitorName: '{{context.monitorName}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        observerLocation: '{{context.observerLocation}}',
+      },
+    }
+  ),
+  name: i18n.translate('xpack.synthetics.alerts.monitorStatus.clientName', {
     defaultMessage: 'Uptime monitor status',
   }),
-  description: i18n.translate('xpack.uptime.alerts.monitorStatus.description', {
+  description: i18n.translate('xpack.synthetics.alerts.monitorStatus.description', {
     defaultMessage: 'Alert when a monitor is down or an availability threshold is breached.',
   }),
 };
 
 export const TlsTranslations = {
-  defaultActionMessage: i18n.translate('xpack.uptime.alerts.tls.defaultActionMessage', {
-    defaultMessage: `Detected TLS certificate {commonName} from issuer {issuer} is {status}. Certificate {summary}
-`,
+  defaultActionMessage: i18n.translate('xpack.synthetics.alerts.tls.defaultActionMessage', {
+    defaultMessage: `Detected TLS certificate {commonName} from issuer {issuer} is {status}. Certificate {summary}`,
     values: {
-      commonName: '{{state.commonName}}',
-      issuer: '{{state.issuer}}',
-      summary: '{{state.summary}}',
-      status: '{{state.status}}',
+      commonName: '{{context.commonName}}',
+      issuer: '{{context.issuer}}',
+      summary: '{{context.summary}}',
+      status: '{{context.status}}',
     },
   }),
-  name: i18n.translate('xpack.uptime.alerts.tls.clientName', {
+  defaultRecoveryMessage: i18n.translate('xpack.synthetics.alerts.tls.defaultRecoveryMessage', {
+    defaultMessage: `Alert for TLS certificate {commonName} from issuer {issuer} has recovered`,
+    values: {
+      commonName: '{{context.commonName}}',
+      issuer: '{{context.issuer}}',
+    },
+  }),
+  name: i18n.translate('xpack.synthetics.alerts.tls.clientName', {
     defaultMessage: 'Uptime TLS',
   }),
-  description: i18n.translate('xpack.uptime.alerts.tls.description', {
+  description: i18n.translate('xpack.synthetics.alerts.tls.description', {
     defaultMessage: 'Alert when the TLS certificate of an Uptime monitor is about to expire.',
   }),
 };
 
 export const TlsTranslationsLegacy = {
-  defaultActionMessage: i18n.translate('xpack.uptime.alerts.tls.legacy.defaultActionMessage', {
+  defaultActionMessage: i18n.translate('xpack.synthetics.alerts.tls.legacy.defaultActionMessage', {
     defaultMessage: `Detected {count} TLS certificates expiring or becoming too old.
 {expiringConditionalOpen}
 Expiring cert count: {expiringCount}
@@ -81,34 +105,50 @@ Aging Certificates: {agingCommonNameAndDate}
       agingConditionalClose: '{{/state.hasAging}}',
     },
   }),
-  name: i18n.translate('xpack.uptime.alerts.tls.legacy.clientName', {
+  name: i18n.translate('xpack.synthetics.alerts.tls.legacy.clientName', {
     defaultMessage: 'Uptime TLS (Legacy)',
   }),
-  description: i18n.translate('xpack.uptime.alerts.tls.legacy.description', {
+  description: i18n.translate('xpack.synthetics.alerts.tls.legacy.description', {
     defaultMessage:
       'Alert when the TLS certificate of an Uptime monitor is about to expire. This alert will be deprecated in a future version.',
   }),
 };
 
 export const DurationAnomalyTranslations = {
-  defaultActionMessage: i18n.translate('xpack.uptime.alerts.durationAnomaly.defaultActionMessage', {
-    defaultMessage: `Abnormal ({severity} level) response time detected on {monitor} with url {monitorUrl} at {anomalyStartTimestamp}. Anomaly severity score is {severityScore}.
+  defaultActionMessage: i18n.translate(
+    'xpack.synthetics.alerts.durationAnomaly.defaultActionMessage',
+    {
+      defaultMessage: `Abnormal ({severity} level) response time detected on {monitor} with url {monitorUrl} at {anomalyStartTimestamp}. Anomaly severity score is {severityScore}.
 Response times as high as {slowestAnomalyResponse} have been detected from location {observerLocation}. Expected response time is {expectedResponseTime}.`,
-    values: {
-      severity: '{{state.severity}}',
-      anomalyStartTimestamp: '{{state.anomalyStartTimestamp}}',
-      monitor: '{{state.monitor}}',
-      monitorUrl: '{{{state.monitorUrl}}}',
-      slowestAnomalyResponse: '{{state.slowestAnomalyResponse}}',
-      expectedResponseTime: '{{state.expectedResponseTime}}',
-      severityScore: '{{state.severityScore}}',
-      observerLocation: '{{state.observerLocation}}',
-    },
-  }),
-  name: i18n.translate('xpack.uptime.alerts.durationAnomaly.clientName', {
+      values: {
+        severity: '{{context.severity}}',
+        anomalyStartTimestamp: '{{context.anomalyStartTimestamp}}',
+        monitor: '{{context.monitor}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        slowestAnomalyResponse: '{{context.slowestAnomalyResponse}}',
+        expectedResponseTime: '{{context.expectedResponseTime}}',
+        severityScore: '{{context.severityScore}}',
+        observerLocation: '{{context.observerLocation}}',
+      },
+    }
+  ),
+  defaultRecoveryMessage: i18n.translate(
+    'xpack.synthetics.alerts.durationAnomaly.defaultRecoveryMessage',
+    {
+      defaultMessage: `Alert for abnormal ({severity} level) response time detected on monitor {monitor} with url {monitorUrl} from location {observerLocation} at {anomalyStartTimestamp} has recovered`,
+      values: {
+        severity: '{{context.severity}}',
+        anomalyStartTimestamp: '{{context.anomalyStartTimestamp}}',
+        monitor: '{{context.monitor}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        observerLocation: '{{context.observerLocation}}',
+      },
+    }
+  ),
+  name: i18n.translate('xpack.synthetics.alerts.durationAnomaly.clientName', {
     defaultMessage: 'Uptime Duration Anomaly',
   }),
-  description: i18n.translate('xpack.uptime.alerts.durationAnomaly.description', {
+  description: i18n.translate('xpack.synthetics.alerts.durationAnomaly.description', {
     defaultMessage: 'Alert when the Uptime monitor duration is anomalous.',
   }),
 };

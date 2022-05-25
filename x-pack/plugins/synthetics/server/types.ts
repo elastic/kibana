@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type { IRouter, CustomRequestHandlerContext } from '@kbn/core/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
+
 /**
  * @internal
  */
-export interface UptimeRequestHandlerContext extends RequestHandlerContext {
+export type UptimeRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal

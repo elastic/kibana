@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useMemo } from 'react';
 
-import { i18n } from '@kbn/i18n';
+import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiTextArea, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
-
-import { LangIdentInference } from './lang_ident/lang_ident_inference';
-import { NerInference } from './ner/ner_inference';
-import type { FormattedLangIdentResp } from './lang_ident/lang_ident_inference';
-import type { FormattedNerResp } from './ner/ner_inference';
-
-import { MLJobEditor } from '../../../../jobs/jobs_list/components/ml_job_editor';
+import { EuiSpacer, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { ErrorMessage } from '../inference_error';
 import { OutputLoadingContent } from '../output_loading';
+import { RUNNING_STATE } from './inference_base';
+import { RawOutput } from './raw_output';
+import type { InferrerType } from '.';
 
 interface Props {
-  inferrer: LangIdentInference | NerInference;
-  getOutputComponent(output: any): JSX.Element;
+  inferrer: InferrerType;
 }
 
 enum TAB {
@@ -31,61 +26,41 @@ enum TAB {
   RAW,
 }
 
-export const InferenceInputForm: FC<Props> = ({ inferrer, getOutputComponent }) => {
-  const [inputText, setInputText] = useState('');
-  const [isRunning, setIsRunning] = useState(false);
-  const [output, setOutput] = useState<FormattedLangIdentResp | FormattedNerResp | null>(null);
-  const [rawOutput, setRawOutput] = useState<string | null>(null);
+export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
-  const [showOutput, setShowOutput] = useState(false);
   const [errorText, setErrorText] = useState<string | null>(null);
 
+  const runningState = useObservable(inferrer.runningState$);
+  const inputText = useObservable(inferrer.inputText$);
+  const inputComponent = useMemo(() => inferrer.getInputComponent(), []);
+  const outputComponent = useMemo(() => inferrer.getOutputComponent(), []);
+
   async function run() {
-    setShowOutput(true);
-    setOutput(null);
-    setRawOutput(null);
-    setIsRunning(true);
     setErrorText(null);
     try {
-      const { response, rawResponse } = await inferrer.infer(inputText);
-      setOutput(response);
-      setRawOutput(JSON.stringify(rawResponse, null, 2));
+      await inferrer.infer();
     } catch (e) {
-      setIsRunning(false);
-      setOutput(null);
       setErrorText(extractErrorMessage(e));
-      setRawOutput(JSON.stringify(e.body ?? e, null, 2));
     }
-    setIsRunning(false);
   }
 
   return (
     <>
-      <EuiTextArea
-        placeholder={i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.inputText', {
-          defaultMessage: 'Input text',
-        })}
-        value={inputText}
-        disabled={isRunning === true}
-        fullWidth
-        onChange={(e) => {
-          setInputText(e.target.value);
-        }}
-      />
+      <>{inputComponent}</>
       <EuiSpacer size="m" />
       <div>
         <EuiButton
           onClick={run}
-          disabled={isRunning === true || inputText === ''}
+          disabled={runningState === RUNNING_STATE.RUNNING || inputText === ''}
           fullWidth={false}
         >
           <FormattedMessage
-            id="xpack.ml.trainedModels.testModelsFlyout.langIdent.runButton"
+            id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.runButton"
             defaultMessage="Test"
           />
         </EuiButton>
       </div>
-      {showOutput === true ? (
+      {runningState !== RUNNING_STATE.STOPPED ? (
         <>
           <EuiSpacer size="m" />
           <EuiTabs size={'s'}>
@@ -94,7 +69,7 @@ export const InferenceInputForm: FC<Props> = ({ inferrer, getOutputComponent }) 
               onClick={setSelectedTab.bind(null, TAB.TEXT)}
             >
               <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.langIdent.markupTab"
+                id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.markupTab"
                 defaultMessage="Output"
               />
             </EuiTab>
@@ -103,7 +78,7 @@ export const InferenceInputForm: FC<Props> = ({ inferrer, getOutputComponent }) 
               onClick={setSelectedTab.bind(null, TAB.RAW)}
             >
               <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.langIdent.rawOutput"
+                id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.rawOutput"
                 defaultMessage="Raw output"
               />
             </EuiTab>
@@ -113,16 +88,16 @@ export const InferenceInputForm: FC<Props> = ({ inferrer, getOutputComponent }) 
 
           {selectedTab === TAB.TEXT ? (
             <>
-              {errorText !== null ? (
+              {runningState === RUNNING_STATE.RUNNING ? <OutputLoadingContent text={''} /> : null}
+
+              {errorText !== null || runningState === RUNNING_STATE.FINISHED_WITH_ERRORS ? (
                 <ErrorMessage errorText={errorText} />
-              ) : output === null ? (
-                <OutputLoadingContent text={inputText} />
-              ) : (
-                <>{getOutputComponent(output)}</>
-              )}
+              ) : null}
+
+              {runningState === RUNNING_STATE.FINISHED ? <>{outputComponent}</> : null}
             </>
           ) : (
-            <MLJobEditor value={rawOutput ?? ''} readOnly={true} />
+            <RawOutput inferrer={inferrer} />
           )}
         </>
       ) : null}

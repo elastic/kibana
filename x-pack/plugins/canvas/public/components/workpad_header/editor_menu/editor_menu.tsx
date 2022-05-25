@@ -29,7 +29,7 @@ interface Props {
 
 export const EditorMenu: FC<Props> = ({ addElement }) => {
   const embeddablesService = useEmbeddablesService();
-  const { pathname, search } = useLocation();
+  const { pathname, search, hash } = useLocation();
   const platformService = usePlatformService();
   const stateTransferService = embeddablesService.getStateTransfer();
   const visualizationsService = useVisualizationsService();
@@ -61,11 +61,11 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
         path,
         state: {
           originatingApp: CANVAS_APP,
-          originatingPath: `#/${pathname}${search}`,
+          originatingPath: `${pathname}${search}${hash}`,
         },
       });
     },
-    [stateTransferService, pathname, search]
+    [stateTransferService, pathname, search, hash]
   );
 
   const createNewEmbeddable = useCallback(

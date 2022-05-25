@@ -29,6 +29,7 @@ import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsType } from '../types';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
+import { DocLinksServiceStart } from '../../doc_links';
 
 export interface KibanaMigratorOptions {
   client: ElasticsearchClient;
@@ -37,6 +38,7 @@ export interface KibanaMigratorOptions {
   kibanaIndex: string;
   kibanaVersion: string;
   logger: Logger;
+  docLinks: DocLinksServiceStart;
 }
 
 export type IKibanaMigrator = Pick<KibanaMigrator, keyof KibanaMigrator>;
@@ -65,6 +67,7 @@ export class KibanaMigrator {
   private readonly activeMappings: IndexMapping;
   private readonly soMigrationsConfig: SavedObjectsMigrationConfigType;
   public readonly kibanaVersion: string;
+  private readonly docLinks: DocLinksServiceStart;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -76,6 +79,7 @@ export class KibanaMigrator {
     soMigrationsConfig,
     kibanaVersion,
     logger,
+    docLinks,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;
@@ -93,6 +97,7 @@ export class KibanaMigrator {
     // Building the active mappings (and associated md5sums) is an expensive
     // operation so we cache the result
     this.activeMappings = buildActiveMappings(this.mappingProperties);
+    this.docLinks = docLinks;
   }
 
   /**
@@ -177,6 +182,7 @@ export class KibanaMigrator {
             indexPrefix: index,
             migrationsConfig: this.soMigrationsConfig,
             typeRegistry: this.typeRegistry,
+            docLinks: this.docLinks,
           });
         },
       };

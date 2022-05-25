@@ -99,15 +99,23 @@ describe('When on the policy list page', () => {
       expect(policyNameCells).toBeTruthy();
       expect(policyNameCells.length).toBe(5);
     });
-    it('should show a avatar for the Created by column', () => {
+    it('should show an avatar and name for the Created by column', () => {
+      const expectedAvatarName = policies.items[0].created_by;
       const createdByCells = renderResult.getAllByTestId('created-by-avatar');
+      const firstCreatedByName = renderResult.getAllByTestId('created-by-name')[0];
       expect(createdByCells).toBeTruthy();
       expect(createdByCells.length).toBe(5);
+      expect(createdByCells[0].textContent).toEqual(expectedAvatarName.charAt(0));
+      expect(firstCreatedByName.textContent).toEqual(expectedAvatarName);
     });
-    it('should show a avatar for the Updated by column', () => {
+    it('should show an avatar and name for the Updated by column', () => {
+      const expectedAvatarName = policies.items[0].updated_by;
       const updatedByCells = renderResult.getAllByTestId('updated-by-avatar');
+      const firstUpdatedByName = renderResult.getAllByTestId('updated-by-name')[0];
       expect(updatedByCells).toBeTruthy();
       expect(updatedByCells.length).toBe(5);
+      expect(updatedByCells[0].textContent).toEqual(expectedAvatarName.charAt(0));
+      expect(firstUpdatedByName.textContent).toEqual(expectedAvatarName);
     });
     it('should show the correct endpoint count', () => {
       const endpointCount = renderResult.getAllByTestId('policyEndpointCountLink');

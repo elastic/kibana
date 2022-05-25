@@ -10,6 +10,7 @@ root:
   - ciGroup9
   - ciGroup10
   - ciGroup11
+  - ciGroup12
 
 xpack:
   - ciGroup1
