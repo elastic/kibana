@@ -21,7 +21,6 @@ export default ({ getService, getPageObjects }) => {
     });
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('monitoring', { insertTimestamp: false });
-      //await clusterOverview.acceptAlertsModal();
       await find.clickByLinkText('elasticsearch');
       // this is a workaround for https://github.com/elastic/kibana/issues/130029
     });
