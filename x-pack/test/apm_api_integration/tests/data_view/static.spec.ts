@@ -7,7 +7,7 @@
 
 import { apm, ApmSynthtraceEsClient, timerange } from '@elastic/apm-synthtrace';
 import expect from '@kbn/expect';
-import { APM_STATIC_INDEX_PATTERN_ID } from '@kbn/apm-plugin/common/index_pattern_constants';
+import { APM_STATIC_DATA_VIEW_ID } from '@kbn/apm-plugin/common/data_view_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { SupertestReturnType } from '../../common/apm_api_supertest';
 
@@ -26,13 +26,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   function deleteDataView() {
     // return supertest.delete('/api/saved_objects/<type>/<id>').set('kbn-xsrf', 'foo').expect(200)
     return supertest
-      .delete(`/api/saved_objects/index-pattern/${APM_STATIC_INDEX_PATTERN_ID}`)
+      .delete(`/api/saved_objects/index-pattern/${APM_STATIC_DATA_VIEW_ID}`)
       .set('kbn-xsrf', 'foo')
       .expect(200);
   }
 
   function getDataView() {
-    return supertest.get(`/api/saved_objects/index-pattern/${APM_STATIC_INDEX_PATTERN_ID}`);
+    return supertest.get(`/api/saved_objects/index-pattern/${APM_STATIC_DATA_VIEW_ID}`);
   }
 
   function getDataViewSuggestions(field: string) {

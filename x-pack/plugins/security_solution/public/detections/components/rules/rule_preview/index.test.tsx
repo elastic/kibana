@@ -55,6 +55,7 @@ const defaultProps: RulePreviewProps = {
   },
   anomalyThreshold: 50,
   machineLearningJobId: ['test-ml-job-id'],
+  eqlOptions: {},
 };
 
 describe('PreviewQuery', () => {
