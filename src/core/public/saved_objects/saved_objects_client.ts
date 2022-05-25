@@ -7,12 +7,11 @@
  */
 
 import { pick, throttle, cloneDeep } from 'lodash';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import {
   SavedObject,
   SavedObjectReference,
-  SavedObjectsBulkResolveResponse,
+  SavedObjectsBulkResolveResponse as SavedObjectsBulkResolveResponseServer,
   SavedObjectsClientContract as SavedObjectsApi,
   SavedObjectsFindOptions as SavedObjectFindOptionsServer,
   SavedObjectsMigrationVersion,
@@ -96,6 +95,11 @@ export interface SavedObjectsDeleteOptions {
   force?: boolean;
 }
 
+/** @public */
+export interface SavedObjectsBulkResolveResponse<T = unknown> {
+  resolved_objects: Array<ResolvedSimpleSavedObject<T>>;
+}
+
 /**
  * Return type of the Saved Objects `find()` method.
  *
@@ -118,6 +122,7 @@ interface BatchGetQueueEntry {
   resolve: <T = unknown>(value: SimpleSavedObject<T> | SavedObject<T>) => void;
   reject: (reason?: any) => void;
 }
+
 interface BatchResolveQueueEntry {
   type: string;
   id: string;
@@ -140,11 +145,140 @@ const BATCH_INTERVAL = 100;
 const API_BASE_URL = '/api/saved_objects/';
 
 /**
- * SavedObjectsClientContract as implemented by the {@link SavedObjectsClient}
+ * The client-side SavedObjectsClient is a thin convenience library around the SavedObjects
+ * HTTP API for interacting with Saved Objects.
  *
  * @public
  */
-export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
+export interface SavedObjectsClientContract {
+  /**
+   * Persists an object
+   */
+  create<T = unknown>(
+    type: string,
+    attributes: T,
+    options?: SavedObjectsCreateOptions
+  ): Promise<SimpleSavedObject<T>>;
+
+  /**
+   * Creates multiple documents at once
+   * @returns The result of the create operation containing created saved objects.
+   */
+  bulkCreate(
+    objects: SavedObjectsBulkCreateObject[],
+    options?: SavedObjectsBulkCreateOptions
+  ): Promise<SavedObjectsBatchResponse<unknown>>;
+
+  /**
+   * Deletes an object
+   */
+  delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
+
+  /**
+   * Search for objects
+   *
+   * @param {object} [options={}]
+   * @property {string} options.type
+   * @property {string} options.search
+   * @property {string} options.searchFields - see Elasticsearch Simple Query String
+   *                                        Query field argument for more information
+   * @property {integer} [options.page=1]
+   * @property {integer} [options.perPage=20]
+   * @property {array} options.fields
+   * @property {object} [options.hasReference] - { type, id }
+   * @returns A find result with objects matching the specified search.
+   */
+  find<T = unknown, A = unknown>(
+    options: SavedObjectsFindOptions
+  ): Promise<SavedObjectsFindResponsePublic<T>>;
+
+  /**
+   * Fetches a single object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns The saved object for the given type and id.
+   */
+  get<T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>>;
+
+  /**
+   * Returns an array of objects by id
+   *
+   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
+   * @returns The saved objects with the given type and ids requested
+   * @example
+   *
+   * bulkGet([
+   *   { id: 'one', type: 'config' },
+   *   { id: 'foo', type: 'index-pattern' }
+   * ])
+   */
+  bulkGet(
+    objects: Array<{ id: string; type: string }>
+  ): Promise<SavedObjectsBatchResponse<unknown>>;
+
+  /**
+   * Resolves a single object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @returns The resolve result for the saved object for the given type and id.
+   *
+   * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
+   * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. This behavior for the `resolve`
+   * API is unique to the public client, which batches individual calls with `bulkResolve` under the hood. We don't throw an error in that
+   * case for legacy compatibility reasons.
+   */
+  resolve<T = unknown>(type: string, id: string): Promise<ResolvedSimpleSavedObject<T>>;
+
+  /**
+   * Resolves an array of objects by id, using any legacy URL aliases if they exist
+   *
+   * @param objects - an array of objects containing id, type
+   * @returns The bulk resolve result for the saved objects for the given types and ids.
+   * @example
+   *
+   * bulkResolve([
+   *   { id: 'one', type: 'config' },
+   *   { id: 'foo', type: 'index-pattern' }
+   * ])
+   *
+   * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
+   * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. The `resolve` method in the
+   * public client uses `bulkResolve` under the hood, so it behaves the same way.
+   */
+  bulkResolve<T = unknown>(
+    objects: Array<{ id: string; type: string }>
+  ): Promise<SavedObjectsBulkResolveResponse<T>>;
+
+  /**
+   * Updates an object
+   *
+   * @param {string} type
+   * @param {string} id
+   * @param {object} attributes
+   * @param {object} options
+   * @prop {integer} options.version - ensures version matches that of persisted object
+   * @prop {object} options.migrationVersion - The optional migrationVersion of this document
+   * @returns
+   */
+  update<T = unknown>(
+    type: string,
+    id: string,
+    attributes: T,
+    options?: SavedObjectsUpdateOptions
+  ): Promise<SimpleSavedObject<T>>;
+
+  /**
+   * Update multiple documents at once
+   *
+   * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
+   * @returns The result of the update operation containing both failed and updated saved objects.
+   */
+  bulkUpdate<T = unknown>(
+    objects: SavedObjectsBulkUpdateObject[]
+  ): Promise<SavedObjectsBatchResponse<T>>;
+}
 
 interface ObjectTypeAndId {
   id: string;
@@ -182,14 +316,14 @@ const getObjectsToResolve = (queue: BatchResolveQueueEntry[]) => {
 };
 
 /**
- * Saved Objects is Kibana's data persisentence mechanism allowing plugins to
+ * Saved Objects is Kibana's data persistence mechanism allowing plugins to
  * use Elasticsearch for storing plugin state. The client-side
  * SavedObjectsClient is a thin convenience library around the SavedObjects
  * HTTP API for interacting with Saved Objects.
  *
- * @public
+ * @internal
  */
-export class SavedObjectsClient {
+export class SavedObjectsClient implements SavedObjectsClientContract {
   private http: HttpSetup;
   private batchGetQueue: BatchGetQueueEntry[];
   private batchResolveQueue: BatchResolveQueueEntry[];
@@ -270,14 +404,6 @@ export class SavedObjectsClient {
     this.batchResolveQueue = [];
   }
 
-  /**
-   * Persists an object
-   *
-   * @param type
-   * @param attributes
-   * @param options
-   * @returns
-   */
   public create = <T = unknown>(
     type: string,
     attributes: T,
@@ -334,13 +460,6 @@ export class SavedObjectsClient {
     });
   };
 
-  /**
-   * Deletes an object
-   *
-   * @param type
-   * @param id
-   * @returns
-   */
   public delete = (
     type: string,
     id: string,
@@ -357,20 +476,6 @@ export class SavedObjectsClient {
     return this.savedObjectsFetch(this.getPath([type, id]), { method: 'DELETE', query });
   };
 
-  /**
-   * Search for objects
-   *
-   * @param {object} [options={}]
-   * @property {string} options.type
-   * @property {string} options.search
-   * @property {string} options.searchFields - see Elasticsearch Simple Query String
-   *                                        Query field argument for more information
-   * @property {integer} [options.page=1]
-   * @property {integer} [options.perPage=20]
-   * @property {array} options.fields
-   * @property {object} [options.hasReference] - { type, id }
-   * @returns A find result with objects matching the specified search.
-   */
   public find = <T = unknown, A = unknown>(
     options: SavedObjectsFindOptions
   ): Promise<SavedObjectsFindResponsePublic<T>> => {
@@ -431,13 +536,6 @@ export class SavedObjectsClient {
     });
   };
 
-  /**
-   * Fetches a single object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @returns The saved object for the given type and id.
-   */
   public get = <T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>> => {
     if (!type || !id) {
       return Promise.reject(new Error('requires type and id'));
@@ -449,18 +547,6 @@ export class SavedObjectsClient {
     });
   };
 
-  /**
-   * Returns an array of objects by id
-   *
-   * @param {array} objects - an array ids, or an array of objects containing id and optionally type
-   * @returns The saved objects with the given type and ids requested
-   * @example
-   *
-   * bulkGet([
-   *   { id: 'one', type: 'config' },
-   *   { id: 'foo', type: 'index-pattern' }
-   * ])
-   */
   public bulkGet = (objects: Array<{ id: string; type: string }> = []) => {
     const filteredObjects = objects.map((obj) => pick(obj, ['id', 'type']));
     return this.performBulkGet(filteredObjects).then((resp) => {
@@ -481,18 +567,6 @@ export class SavedObjectsClient {
     return request;
   }
 
-  /**
-   * Resolves a single object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @returns The resolve result for the saved object for the given type and id.
-   *
-   * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
-   * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. This behavior for the `resolve`
-   * API is unique to the public client, which batches individual calls with `bulkResolve` under the hood. We don't throw an error in that
-   * case for legacy compatibility reasons.
-   */
   public resolve = <T = unknown>(
     type: string,
     id: string
@@ -507,22 +581,6 @@ export class SavedObjectsClient {
     });
   };
 
-  /**
-   * Resolves an array of objects by id, using any legacy URL aliases if they exist
-   *
-   * @param objects - an array of objects containing id, type
-   * @returns The bulk resolve result for the saved objects for the given types and ids.
-   * @example
-   *
-   * bulkResolve([
-   *   { id: 'one', type: 'config' },
-   *   { id: 'foo', type: 'index-pattern' }
-   * ])
-   *
-   * @note Saved objects that Kibana fails to find are replaced with an error object and an "exactMatch" outcome. The rationale behind the
-   * outcome is that "exactMatch" is the default outcome, and the outcome only changes if an alias is found. The `resolve` method in the
-   * public client uses `bulkResolve` under the hood, so it behaves the same way.
-   */
   public bulkResolve = async <T = unknown>(objects: Array<{ id: string; type: string }> = []) => {
     const filteredObjects = objects.map(({ type, id }) => ({ type, id }));
     const response = await this.performBulkResolve<T>(filteredObjects);
@@ -535,24 +593,16 @@ export class SavedObjectsClient {
 
   private async performBulkResolve<T>(objects: ObjectTypeAndId[]) {
     const path = this.getPath(['_bulk_resolve']);
-    const request: Promise<SavedObjectsBulkResolveResponse<T>> = this.savedObjectsFetch(path, {
-      method: 'POST',
-      body: JSON.stringify(objects),
-    });
+    const request: Promise<SavedObjectsBulkResolveResponseServer<T>> = this.savedObjectsFetch(
+      path,
+      {
+        method: 'POST',
+        body: JSON.stringify(objects),
+      }
+    );
     return request;
   }
 
-  /**
-   * Updates an object
-   *
-   * @param {string} type
-   * @param {string} id
-   * @param {object} attributes
-   * @param {object} options
-   * @prop {integer} options.version - ensures version matches that of persisted object
-   * @prop {object} options.migrationVersion - The optional migrationVersion of this document
-   * @returns
-   */
   public update<T = unknown>(
     type: string,
     id: string,
@@ -579,12 +629,6 @@ export class SavedObjectsClient {
     });
   }
 
-  /**
-   * Update multiple documents at once
-   *
-   * @param {array} objects - [{ type, id, attributes, options: { version, references } }]
-   * @returns The result of the update operation containing both failed and updated saved objects.
-   */
   public bulkUpdate<T = unknown>(objects: SavedObjectsBulkUpdateObject[] = []) {
     const path = this.getPath(['_bulk_update']);
 

@@ -7,5 +7,5 @@
 <b>Signature:</b>
 
 ```typescript
-resolved_objects: Array<SavedObjectsResolveResponse<T>>;
+resolved_objects: Array<ResolvedSimpleSavedObject<T>>;
 ```

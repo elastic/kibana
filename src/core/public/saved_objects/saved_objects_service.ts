@@ -14,7 +14,7 @@ import { SavedObjectsClient, SavedObjectsClientContract } from './saved_objects_
  * @public
  */
 export interface SavedObjectsStart {
-  /** {@link SavedObjectsClient} */
+  /** {@link SavedObjectsClientContract} */
   client: SavedObjectsClientContract;
 }
 

@@ -13,7 +13,7 @@ import { SavedObjectsClientContract } from './saved_objects_client';
 
 /**
  * This class is a very simple wrapper for SavedObjects loaded from the server
- * with the {@link SavedObjectsClient}.
+ * with the {@link SavedObjectsClientContract}.
  *
  * It provides basic functionality for creating/saving/deleting saved objects,
  * but doesn't include any type-specific implementations.
