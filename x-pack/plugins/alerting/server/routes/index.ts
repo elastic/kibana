@@ -30,6 +30,7 @@ import { muteAlertRoute } from './mute_alert';
 import { unmuteAllRuleRoute } from './unmute_all_rule';
 import { unmuteAlertRoute } from './unmute_alert';
 import { updateRuleApiKeyRoute } from './update_rule_api_key';
+import { bulkEditInternalRulesRoute } from './bulk_edit_rules';
 import { snoozeRuleRoute } from './snooze_rule';
 import { unsnoozeRuleRoute } from './unsnooze_rule';
 
@@ -65,6 +66,7 @@ export function defineRoutes(opts: RouteOptions) {
   unmuteAllRuleRoute(router, licenseState);
   unmuteAlertRoute(router, licenseState);
   updateRuleApiKeyRoute(router, licenseState);
+  bulkEditInternalRulesRoute(router, licenseState);
   snoozeRuleRoute(router, licenseState);
   unsnoozeRuleRoute(router, licenseState);
 }

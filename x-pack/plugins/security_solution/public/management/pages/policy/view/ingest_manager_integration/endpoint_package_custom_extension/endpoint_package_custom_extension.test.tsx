@@ -11,7 +11,7 @@ import { createFleetContextRendererMock, generateFleetPackageInfo } from '../moc
 import { EndpointPackageCustomExtension } from './endpoint_package_custom_extension';
 import { useEndpointPrivileges as _useEndpointPrivileges } from '../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges';
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../../common/components/user_privileges/endpoint/mocks';
-import { exceptionsListAllHttpMocks } from '../../../../mocks/exceptions_list_http_mocks';
+import { exceptionsListAllHttpMocks } from '../../../../../mocks/exceptions_list_http_mocks';
 import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
@@ -96,5 +96,17 @@ describe('When displaying the EndpointPackageCustomExtension fleet UI extension'
     await waitFor(() => {
       expect(renderResult.queryByTestId('hostIsolationExceptions-fleetCard')).toBeNull();
     });
+  });
+
+  it('should only show loading spinner if loading', () => {
+    useEndpointPrivilegesMock.mockReturnValue({
+      ...getEndpointPrivilegesInitialStateMock(),
+      loading: true,
+    });
+    render();
+
+    expect(renderResult.getByTestId('endpointExtensionLoadingSpinner')).toBeInTheDocument();
+    expect(renderResult.queryByTestId('fleetEndpointPackageCustomContent')).toBeNull();
+    expect(renderResult.queryByTestId('noIngestPermissions')).toBeNull();
   });
 });

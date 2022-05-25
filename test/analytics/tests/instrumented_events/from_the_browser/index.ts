@@ -8,13 +8,11 @@
 
 import { FtrProviderContext } from '../../../services';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('from the browser', () => {
-    beforeEach(async () => {
-      await getService('kibana_ebt_ui').setOptIn(true);
-    });
-
     // Add tests for UI-instrumented events here:
-    // loadTestFile(require.resolve('./some_event'));
+    loadTestFile(require.resolve('./click'));
+    loadTestFile(require.resolve('./loaded_kibana'));
+    loadTestFile(require.resolve('./core_context_providers'));
   });
 }

@@ -6,6 +6,6 @@
  */
 
 export const php = `elastic_apm.server_url="{{{apmServerUrl}}}"
-elastic.apm.secret_token="{{{secretToken}}}"
+elastic_apm.secret_token="{{{secretToken}}}"
 elastic_apm.service_name="My service"
 `;

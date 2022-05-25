@@ -6,7 +6,7 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { loadRuleAggregations } from './aggregate';
+import { loadRuleAggregations, loadRuleTags } from './aggregate';
 
 const http = httpServiceMock.createStartContract();
 
@@ -206,6 +206,150 @@ describe('loadRuleAggregations', () => {
             "search_fields": "[\\"name\\",\\"tags\\"]",
           },
         },
+      ]
+    `);
+  });
+
+  test('should call aggregate API with ruleStatusesFilter', async () => {
+    const resolvedValue = {
+      rule_execution_status: {
+        ok: 4,
+        active: 2,
+        error: 1,
+        pending: 1,
+        unknown: 0,
+      },
+    };
+    http.get.mockResolvedValue(resolvedValue);
+
+    let result = await loadRuleAggregations({
+      http,
+      ruleStatusesFilter: ['enabled'],
+    });
+
+    expect(result).toEqual({
+      ruleExecutionStatus: {
+        ok: 4,
+        active: 2,
+        error: 1,
+        pending: 1,
+        unknown: 0,
+      },
+    });
+
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/alerting/rules/_aggregate",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": "alert.attributes.enabled:(true) and not (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)",
+            "search": undefined,
+            "search_fields": undefined,
+          },
+        },
+      ]
+    `);
+
+    result = await loadRuleAggregations({
+      http,
+      ruleStatusesFilter: ['enabled', 'snoozed'],
+    });
+
+    expect(http.get.mock.calls[1]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/alerting/rules/_aggregate",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": "alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)",
+            "search": undefined,
+            "search_fields": undefined,
+          },
+        },
+      ]
+    `);
+
+    result = await loadRuleAggregations({
+      http,
+      ruleStatusesFilter: ['enabled', 'disabled', 'snoozed'],
+    });
+
+    expect(http.get.mock.calls[1]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/alerting/rules/_aggregate",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": "alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)",
+            "search": undefined,
+            "search_fields": undefined,
+          },
+        },
+      ]
+    `);
+  });
+
+  test('should call aggregate API with tagsFilter', async () => {
+    const resolvedValue = {
+      rule_execution_status: {
+        ok: 4,
+        active: 2,
+        error: 1,
+        pending: 1,
+        unknown: 0,
+      },
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    const result = await loadRuleAggregations({
+      http,
+      searchText: 'baz',
+      tagsFilter: ['a', 'b', 'c'],
+    });
+
+    expect(result).toEqual({
+      ruleExecutionStatus: {
+        ok: 4,
+        active: 2,
+        error: 1,
+        pending: 1,
+        unknown: 0,
+      },
+    });
+
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/alerting/rules/_aggregate",
+        Object {
+          "query": Object {
+            "default_search_operator": "AND",
+            "filter": "alert.attributes.tags:(a or b or c)",
+            "search": "baz",
+            "search_fields": "[\\"name\\",\\"tags\\"]",
+          },
+        },
+      ]
+    `);
+  });
+
+  test('loadRuleTags should call the aggregate API with no filters', async () => {
+    const resolvedValue = {
+      rule_tags: ['a', 'b', 'c'],
+    };
+    http.get.mockResolvedValueOnce(resolvedValue);
+
+    const result = await loadRuleTags({
+      http,
+    });
+
+    expect(result).toEqual({
+      ruleTags: ['a', 'b', 'c'],
+    });
+
+    expect(http.get.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        "/internal/alerting/rules/_aggregate",
       ]
     `);
   });

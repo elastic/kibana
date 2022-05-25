@@ -33,6 +33,9 @@ export interface RequestResult<V = unknown> {
   response: ResponseObject<V>;
 }
 
+const getContentType = (response: Response | undefined) =>
+  (response?.headers.get('Content-Type') as BaseResponseType) ?? '';
+
 let CURRENT_REQ_ID = 0;
 export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
   const requests = args.requests.slice();
@@ -111,7 +114,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
                 timeMs: Date.now() - startTime,
                 statusCode: response.status,
                 statusText: response.statusText,
-                contentType: response.headers.get('Content-Type') as BaseResponseType,
+                contentType: getContentType(response),
                 value,
               },
               request: {
@@ -128,9 +131,8 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
       } catch (error) {
         let value;
         const { response, body } = error as IHttpFetchError;
-        const contentType = response?.headers.get('Content-Type') ?? '';
         const statusCode = response?.status ?? 500;
-        const statusText = error?.response?.statusText ?? 'error';
+        const statusText = response?.statusText ?? 'error';
 
         if (body) {
           value = JSON.stringify(body, null, 2);
@@ -142,10 +144,10 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           value = '# ' + req.method + ' ' + req.url + '\n' + value;
         }
 
-        reject({
+        const result = {
           response: {
             value,
-            contentType,
+            contentType: getContentType(response),
             timeMs: Date.now() - startTime,
             statusCode,
             statusText,
@@ -155,7 +157,16 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
             method,
             path,
           },
-        });
+        };
+
+        // Reject on unknown errors
+        if (!response) {
+          reject(result);
+        }
+
+        // Add error to the list of results
+        results.push(result);
+        await sendNextRequest();
       }
     };
 

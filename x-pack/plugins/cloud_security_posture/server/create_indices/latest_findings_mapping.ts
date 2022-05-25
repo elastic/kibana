@@ -21,7 +21,6 @@ export const latestFindingsMapping: MappingTypeMapping = {
         },
       },
     },
-
     agent: {
       properties: {
         id: {
@@ -49,27 +48,45 @@ export const latestFindingsMapping: MappingTypeMapping = {
     },
     resource: {
       properties: {
-        filename: {
-          type: 'text',
+        type: {
+          type: 'keyword',
+          ignore_above: 1024,
+        },
+        id: {
+          type: 'keyword',
+          ignore_above: 1024,
           fields: {
-            keyword: {
-              ignore_above: 1024,
-              type: 'keyword',
+            text: {
+              type: 'text',
             },
           },
         },
-        type: {
-          type: 'text',
+        name: {
+          type: 'keyword',
+          ignore_above: 1024,
           fields: {
-            keyword: {
-              ignore_above: 1024,
-              type: 'keyword',
+            text: {
+              type: 'text',
             },
           },
+        },
+        sub_type: {
+          ignore_above: 1024,
+          type: 'keyword',
+          fields: {
+            text: {
+              type: 'text',
+            },
+          },
+        },
+        raw: {
+          type: 'object',
+          enabled: false,
         },
       },
     },
     resource_id: {
+      // deprecated - the new field is resource.id
       type: 'text',
       fields: {
         keyword: {
@@ -102,6 +119,24 @@ export const latestFindingsMapping: MappingTypeMapping = {
               },
             },
           },
+        },
+        section: {
+          type: 'text',
+          fields: {
+            keyword: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+          },
+        },
+      },
+    },
+    cluster_id: {
+      type: 'text',
+      fields: {
+        keyword: {
+          ignore_above: 1024,
+          type: 'keyword',
         },
       },
     },

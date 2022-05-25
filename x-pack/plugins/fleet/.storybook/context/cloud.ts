@@ -11,9 +11,9 @@ export const getCloud = ({ isCloudEnabled }: { isCloudEnabled: boolean }) => {
   const cloud: CloudSetup = {
     isCloudEnabled,
     baseUrl: 'https://base.url',
-    cloudId: 'cloud-id',
+    cloudId: isCloudEnabled ? 'cloud-id' : undefined,
     cname: 'found.io',
-    deploymentUrl: 'https://deployment.url',
+    deploymentUrl: isCloudEnabled ? 'https://deployment.url' : undefined,
     organizationUrl: 'https://organization.url',
     profileUrl: 'https://profile.url',
     snapshotsUrl: 'https://snapshots.url',

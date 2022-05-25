@@ -20,3 +20,17 @@ export const ALERTS_TABLE_CONF_ERROR_MESSAGE = i18n.translate(
       'There was an error loading the alerts table. This table is missing the necessary configuration. Please contact your administrator for help',
   }
 );
+
+export const ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsTable.column.actions',
+  {
+    defaultMessage: 'Actions',
+  }
+);
+
+export const ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsTable.leadingControl.viewDetails',
+  {
+    defaultMessage: 'View details',
+  }
+);

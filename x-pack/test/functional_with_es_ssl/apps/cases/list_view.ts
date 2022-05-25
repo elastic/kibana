@@ -7,6 +7,8 @@
 
 import expect from '@kbn/expect';
 import { CaseStatuses } from '@kbn/cases-plugin/common';
+import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { SeverityAll } from '@kbn/cases-plugin/common/ui';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
@@ -140,6 +142,51 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('filters cases by reporter', async () => {
         await cases.casesTable.filterByReporter('elastic');
         await cases.casesTable.validateCasesTableHasNthRows(4);
+      });
+    });
+
+    describe('severity filtering', () => {
+      before(async () => {
+        await cases.api.createCase({ severity: CaseSeverity.LOW });
+        await cases.api.createCase({ severity: CaseSeverity.LOW });
+        await cases.api.createCase({ severity: CaseSeverity.HIGH });
+        await cases.api.createCase({ severity: CaseSeverity.HIGH });
+        await cases.api.createCase({ severity: CaseSeverity.CRITICAL });
+        await header.waitUntilLoadingHasFinished();
+        await cases.casesTable.waitForCasesToBeListed();
+      });
+      beforeEach(async () => {
+        /**
+         * There is no easy way to clear the filtering.
+         * Refreshing the page seems to be easier.
+         */
+        await cases.navigation.navigateToApp();
+      });
+
+      after(async () => {
+        await cases.api.deleteAllCases();
+        await cases.casesTable.waitForCasesToBeDeleted();
+      });
+
+      it('filters cases by severity', async () => {
+        // by default filter by all
+        await cases.casesTable.validateCasesTableHasNthRows(5);
+
+        // low
+        await cases.casesTable.filterBySeverity(CaseSeverity.LOW);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+
+        // high
+        await cases.casesTable.filterBySeverity(CaseSeverity.HIGH);
+        await cases.casesTable.validateCasesTableHasNthRows(2);
+
+        // critical
+        await cases.casesTable.filterBySeverity(CaseSeverity.CRITICAL);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+
+        // back to all
+        await cases.casesTable.filterBySeverity(SeverityAll);
+        await cases.casesTable.validateCasesTableHasNthRows(5);
       });
     });
 

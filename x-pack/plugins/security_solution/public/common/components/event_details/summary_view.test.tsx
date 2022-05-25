@@ -86,10 +86,43 @@ describe('Summary View', () => {
           <SummaryView goToTable={jest.fn()} title="Test Summary View" rows={sampleRows} />
         </TestProviders>
       );
+      // Shows the field name
       expect(screen.getByText(hostIpData.field)).toBeInTheDocument();
+      // Shows all the field values
       hostIpValues.forEach((ipValue) => {
         expect(screen.getByText(ipValue)).toBeInTheDocument();
       });
+
+      // Shows alert prevalence information
+      expect(screen.getByTestId('alert-prevalence')).toBeInTheDocument();
+      // Shows the Investigate in timeline button
+      expect(screen.getByLabelText('Investigate in timeline')).toBeInTheDocument();
+    });
+  });
+
+  describe('when in readOnly mode', () => {
+    test('should only show the name and value cell', () => {
+      const sampleRows: AlertSummaryRow[] = [
+        {
+          title: hostIpData.field,
+          description: enrichedHostIpData,
+        },
+      ];
+
+      render(
+        <TestProviders>
+          <SummaryView
+            goToTable={jest.fn()}
+            title="Test Summary View"
+            rows={sampleRows}
+            isReadOnly={true}
+          />
+        </TestProviders>
+      );
+
+      // Does not render the prevalence and timeline items
+      expect(screen.queryByTestId('alert-prevalence')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Investigate in timeline')).not.toBeInTheDocument();
     });
   });
 });

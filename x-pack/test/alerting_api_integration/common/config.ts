@@ -24,6 +24,8 @@ interface CreateTestConfigOptions {
   preconfiguredAlertHistoryEsIndex?: boolean;
   customizeLocalHostSsl?: boolean;
   rejectUnauthorized?: boolean; // legacy
+  emailDomainsAllowed?: string[];
+  testFiles?: string[];
 }
 
 // test.not-enabled is specifically not enabled
@@ -41,6 +43,8 @@ const enabledActionTypes = [
   '.slack',
   '.webhook',
   '.xmatters',
+  '.test-sub-action-connector',
+  '.test-sub-action-connector-without-sub-actions',
   'test.authorization',
   'test.failing',
   'test.index-record',
@@ -62,6 +66,8 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     preconfiguredAlertHistoryEsIndex = false,
     customizeLocalHostSsl = false,
     rejectUnauthorized = true, // legacy
+    emailDomainsAllowed = undefined,
+    testFiles = undefined,
   } = options;
 
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
@@ -132,8 +138,12 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
       ? [`--xpack.actions.customHostSettings=${JSON.stringify(customHostSettingsValue)}`]
       : [];
 
+    const emailSettings = emailDomainsAllowed
+      ? [`--xpack.actions.email.domain_allowlist=${JSON.stringify(emailDomainsAllowed)}`]
+      : [];
+
     return {
-      testFiles: [require.resolve(`../${name}/tests/`)],
+      testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
       servers,
       services,
       junit: {
@@ -173,6 +183,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           `--xpack.actions.ssl.verificationMode=${verificationMode}`,
           ...actionsProxyUrl,
           ...customHostSettings,
+          ...emailSettings,
           '--xpack.eventLog.logEntries=true',
           '--xpack.task_manager.ephemeral_tasks.enabled=false',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
@@ -185,6 +196,29 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
               name: 'Slack#xyz',
               secrets: {
                 webhookUrl: 'https://hooks.slack.com/services/abcd/efgh/ijklmnopqrstuvwxyz',
+              },
+            },
+            'my-deprecated-servicenow': {
+              actionTypeId: '.servicenow',
+              name: 'ServiceNow#xyz',
+              config: {
+                apiUrl: 'https://ven04334.service-now.com',
+                usesTableApi: true,
+              },
+              secrets: {
+                username: 'elastic_integration',
+                password: 'somepassword',
+              },
+            },
+            'my-deprecated-servicenow-default': {
+              actionTypeId: '.servicenow',
+              name: 'ServiceNow#xyz',
+              config: {
+                apiUrl: 'https://ven04334.service-now.com',
+              },
+              secrets: {
+                username: 'elastic_integration',
+                password: 'somepassword',
               },
             },
             'custom-system-abc-connector': {

@@ -7,18 +7,18 @@
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
-  LATEST_FINDINGS_INDEX_PATTERN,
-  BENCHMARK_SCORE_INDEX_PATTERN,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+  BENCHMARK_SCORE_INDEX_DEFAULT_NS,
 } from '../../common/constants';
 
 export const benchmarkScoreTransform: TransformPutTransformRequest = {
   transform_id: 'cloud_security_posture.score-default-0.0.1',
   description: 'Calculate latest findings score',
   source: {
-    index: LATEST_FINDINGS_INDEX_PATTERN,
+    index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
   },
   dest: {
-    index: BENCHMARK_SCORE_INDEX_PATTERN,
+    index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   },
   frequency: '30m',
   sync: {

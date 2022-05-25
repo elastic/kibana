@@ -20,7 +20,7 @@ const STORYBOOKS = [
   'custom_integrations',
   'dashboard_enhanced',
   'dashboard',
-  'data_enhanced',
+  'data',
   'embeddable',
   'expression_error',
   'expression_image',
@@ -38,6 +38,7 @@ const STORYBOOKS = [
   'security_solution',
   'shared_ux',
   'ui_actions_enhanced',
+  'unified_search',
 ];
 
 const GITHUB_CONTEXT = 'Build and Publish Storybooks';

@@ -14,6 +14,8 @@ import { startLiveDataUpload } from './utils/start_live_data_upload';
 import { parseRunCliFlags } from './utils/parse_run_cli_flags';
 import { getCommonServices } from './utils/get_common_services';
 import { ApmSynthtraceKibanaClient } from '../lib/apm/client/apm_synthtrace_kibana_client';
+import { StreamAggregator } from '../lib/stream_aggregator';
+import { ServiceLatencyAggregator } from '../lib/apm/aggregators/service_latency_aggregator';
 
 function options(y: Argv) {
   return y
@@ -107,7 +109,13 @@ function options(y: Argv) {
         'Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format',
       string: true,
     })
-
+    .option('streamProcessors', {
+      describe:
+        'Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format',
+      string: true,
+      array: true,
+      alias: 'p',
+    })
     .conflicts('target', 'cloudId')
     .conflicts('kibana', 'cloudId')
     .conflicts('local', 'target')
@@ -185,9 +193,24 @@ yargs(process.argv.slice(2))
       if (runOptions.cloudId && runOptions.numShards && runOptions.numShards > 0) {
         await apmEsClient.updateComponentTemplates(runOptions.numShards);
       }
-
+      const aggregators: StreamAggregator[] = [];
+      const registry = new Map<string, () => StreamAggregator[]>([
+        ['service', () => [new ServiceLatencyAggregator()]],
+      ]);
+      if (runOptions.streamProcessors && runOptions.streamProcessors.length > 0) {
+        for (const processorName of runOptions.streamProcessors) {
+          const factory = registry.get(processorName);
+          if (factory) {
+            aggregators.push(...factory());
+          } else {
+            throw new Error(
+              `No processor named ${processorName} configured on known processor registry`
+            );
+          }
+        }
+      }
       if (argv.clean) {
-        await apmEsClient.clean();
+        await apmEsClient.clean(aggregators.map((a) => a.getDataStreamName() + '-*'));
       }
       if (runOptions.gcpRepository) {
         await apmEsClient.registerGcpRepository(runOptions.gcpRepository);
@@ -204,6 +227,8 @@ yargs(process.argv.slice(2))
           2
         )}`
       );
+
+      for (const aggregator of aggregators) await apmEsClient.createDataStream(aggregator);
 
       if (runOptions.maxDocs !== 0)
         await startHistoricalDataUpload(apmEsClient, logger, runOptions, from, to, version);

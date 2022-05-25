@@ -7,29 +7,23 @@
  */
 
 import React from 'react';
-import { applicationServiceFactory } from '@kbn/shared-ux-storybook';
 
 import {
-  ElasticAgentCardComponent,
-  ElasticAgentCardComponentProps,
+  ElasticAgentCardComponent as Component,
+  ElasticAgentCardComponentProps as ComponentProps,
 } from './elastic_agent_card.component';
 
+import { ElasticAgentCard } from './elastic_agent_card';
+
 export default {
-  title: 'Page Template/No Data Page/Elastic Agent Data Card',
+  title: 'Page Template/No Data/Elastic Agent Data Card',
   description: 'A solution-specific wrapper around NoDataCard, to be used on NoData page',
 };
 
-type Params = Pick<ElasticAgentCardComponentProps, 'canAccessFleet'>;
+type Params = Pick<ComponentProps, 'canAccessFleet'>;
 
 export const PureComponent = (params: Params) => {
-  const { currentAppId$, navigateToUrl } = applicationServiceFactory();
-  return (
-    <ElasticAgentCardComponent
-      {...params}
-      currentAppId$={currentAppId$}
-      navigateToUrl={navigateToUrl}
-    />
-  );
+  return <Component {...params} />;
 };
 
 PureComponent.argTypes = {
@@ -37,4 +31,8 @@ PureComponent.argTypes = {
     control: 'boolean',
     defaultValue: true,
   },
+};
+
+export const ConnectedComponent = () => {
+  return <ElasticAgentCard href="#" />;
 };

@@ -18,12 +18,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiHealth,
+  EuiToolTip,
 } from '@elastic/eui';
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
 import { Case, DeleteCase } from '../../../common/ui/types';
-import { CaseStatuses, ActionConnector } from '../../../common/api';
+import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
@@ -40,6 +42,7 @@ import { TruncatedText } from '../truncated_text';
 import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
+import { severities } from '../severity/config';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -48,14 +51,6 @@ export type CasesColumns =
 
 const MediumShadeText = styled.p`
   color: ${({ theme }) => theme.eui.euiColorMediumShade};
-`;
-
-const Spacer = styled.span`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.s};
-`;
-
-const TagWrapper = styled(EuiBadgeGroup)`
-  width: 100%;
 `;
 
 const renderStringField = (field: string, dataTestSubj: string) =>
@@ -183,16 +178,18 @@ export const useCasesColumns = ({
       render: (createdBy: Case['createdBy']) => {
         if (createdBy != null) {
           return (
-            <>
+            <EuiToolTip
+              position="top"
+              content={createdBy.username ?? i18n.UNKNOWN}
+              data-test-subj="case-table-column-createdBy-tooltip"
+            >
               <EuiAvatar
                 className="userAction__circle"
                 name={createdBy.fullName ? createdBy.fullName : createdBy.username ?? i18n.UNKNOWN}
                 size="s"
+                data-test-subj="case-table-column-createdBy"
               />
-              <Spacer data-test-subj="case-table-column-createdBy">
-                {createdBy.username ?? i18n.UNKNOWN}
-              </Spacer>
-            </>
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();
@@ -203,8 +200,8 @@ export const useCasesColumns = ({
       name: i18n.TAGS,
       render: (tags: Case['tags']) => {
         if (tags != null && tags.length > 0) {
-          return (
-            <TagWrapper>
+          const badges = (
+            <EuiBadgeGroup data-test-subj="case-table-column-tags">
               {tags.map((tag: string, i: number) => (
                 <EuiBadge
                   color="hollow"
@@ -214,7 +211,17 @@ export const useCasesColumns = ({
                   {tag}
                 </EuiBadge>
               ))}
-            </TagWrapper>
+            </EuiBadgeGroup>
+          );
+
+          return (
+            <EuiToolTip
+              data-test-subj="case-table-column-tags-tooltip"
+              position="left"
+              content={badges}
+            >
+              {badges}
+            </EuiToolTip>
           );
         }
         return getEmptyTagValue();
@@ -300,30 +307,6 @@ export const useCasesColumns = ({
         return getEmptyTagValue();
       },
     },
-    ...(isSelectorView
-      ? [
-          {
-            align: RIGHT_ALIGNMENT,
-            render: (theCase: Case) => {
-              if (theCase.id != null) {
-                return (
-                  <EuiButton
-                    data-test-subj={`cases-table-row-select-${theCase.id}`}
-                    onClick={() => {
-                      assignCaseAction(theCase);
-                    }}
-                    size="s"
-                    fill={true}
-                  >
-                    {i18n.SELECT}
-                  </EuiButton>
-                );
-              }
-              return getEmptyTagValue();
-            },
-          },
-        ]
-      : []),
     ...(!isSelectorView
       ? [
           {
@@ -347,6 +330,45 @@ export const useCasesColumns = ({
                   }
                 />
               );
+            },
+          },
+        ]
+      : []),
+    {
+      name: i18n.SEVERITY,
+      render: (theCase: Case) => {
+        if (theCase.severity != null) {
+          const severityData = severities[theCase.severity ?? CaseSeverity.LOW];
+          return (
+            <EuiHealth data-test-subj="case-table-column-severity" color={severityData.color}>
+              {severityData.label}
+            </EuiHealth>
+          );
+        }
+        return getEmptyTagValue();
+      },
+    },
+
+    ...(isSelectorView
+      ? [
+          {
+            align: RIGHT_ALIGNMENT,
+            render: (theCase: Case) => {
+              if (theCase.id != null) {
+                return (
+                  <EuiButton
+                    data-test-subj={`cases-table-row-select-${theCase.id}`}
+                    onClick={() => {
+                      assignCaseAction(theCase);
+                    }}
+                    size="s"
+                    fill={true}
+                  >
+                    {i18n.SELECT}
+                  </EuiButton>
+                );
+              }
+              return getEmptyTagValue();
             },
           },
         ]

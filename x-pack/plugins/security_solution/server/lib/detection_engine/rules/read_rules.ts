@@ -6,7 +6,6 @@
  */
 
 import { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/common';
-import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
 import { RuleParams } from '../schemas/rule_schemas';
 import { findRules } from './find_rules';
 import { isAlertType, ReadRuleOptions } from './types';
@@ -17,7 +16,7 @@ import { isAlertType, ReadRuleOptions } from './types';
  * and the id will either be found through `rulesClient.get({ id })` or it will not
  * be returned as a not-found or a thrown error that is not 404.
  * @param ruleId - This is a close second to being fast as long as it can find the rule_id from
- * a filter query against the tags using `alert.attributes.tags: "__internal:${ruleId}"]`
+ * a filter query against the ruleId property in params using `alert.attributes.params.ruleId: "${ruleId}"`
  */
 export const readRules = async ({
   rulesClient,
@@ -49,7 +48,7 @@ export const readRules = async ({
   } else if (ruleId != null) {
     const ruleFromFind = await findRules({
       rulesClient,
-      filter: `alert.attributes.tags: "${INTERNAL_RULE_ID_KEY}:${ruleId}"`,
+      filter: `alert.attributes.params.ruleId: "${ruleId}"`,
       page: 1,
       fields: undefined,
       perPage: undefined,

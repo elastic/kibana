@@ -135,15 +135,37 @@ describe('ServiceNowITSM Fields', () => {
     );
   });
 
-  it('shows the deprecated callout when the connector uses the table API', async () => {
-    const tableApiConnector = { ...connector, config: { usesTableApi: true } };
+  it('shows the deprecated callout if the connector is deprecated', async () => {
+    const tableApiConnector = { ...connector, isDeprecated: true };
     render(<Fields fields={fields} onChange={onChange} connector={tableApiConnector} />);
     expect(screen.getByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
-  it('does not show the deprecated callout when the connector does not uses the table API', async () => {
+  it('does not show the deprecated callout when the connector is not deprecated', async () => {
     render(<Fields fields={fields} onChange={onChange} connector={connector} />);
     expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
+  });
+
+  it('does not show the deprecated callout when the connector is preconfigured and not deprecated', async () => {
+    render(
+      <Fields
+        fields={fields}
+        onChange={onChange}
+        connector={{ ...connector, isPreconfigured: true }}
+      />
+    );
+    expect(screen.queryByTestId('deprecated-connector-warning-callout')).not.toBeInTheDocument();
+  });
+
+  it('shows the deprecated callout when the connector is preconfigured and deprecated', async () => {
+    render(
+      <Fields
+        fields={fields}
+        onChange={onChange}
+        connector={{ ...connector, isPreconfigured: true, isDeprecated: true }}
+      />
+    );
+    expect(screen.queryByTestId('deprecated-connector-warning-callout')).toBeInTheDocument();
   });
 
   it('should hide subcategory if selecting a category without subcategories', async () => {

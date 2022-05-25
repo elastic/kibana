@@ -17,7 +17,7 @@ import {
 import { Rule, RuleTypeModel } from '../../../types';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 
-const config = { minimumScheduleInterval: { value: '1m', enforce: false } };
+const config = { isUsingSecurity: true, minimumScheduleInterval: { value: '1m', enforce: false } };
 describe('rule_errors', () => {
   describe('validateBaseProperties()', () => {
     it('should validate the name', () => {
@@ -60,6 +60,7 @@ describe('rule_errors', () => {
       const rule = mockRule();
       rule.schedule.interval = '2s';
       const result = validateBaseProperties(rule, {
+        isUsingSecurity: true,
         minimumScheduleInterval: { value: '1m', enforce: true },
       });
       expect(result.errors).toStrictEqual({

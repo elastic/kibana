@@ -102,6 +102,8 @@ interface Props {
   hideTopN?: boolean;
   isDraggable?: boolean;
   render: RenderFunctionProp;
+  isAggregatable?: boolean;
+  fieldType?: string;
   timelineId?: string;
   truncate?: boolean;
   onFilterAdded?: () => void;
@@ -131,6 +133,8 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   hideTopN = false,
   onFilterAdded,
   render,
+  fieldType = '',
+  isAggregatable = false,
   timelineId,
   truncate,
 }) => {
@@ -154,6 +158,8 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     hideTopN,
     onFilterAdded,
     render,
+    fieldType,
+    isAggregatable,
     timelineId,
     truncate,
   });
@@ -313,6 +319,8 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   isDraggable = false,
   onFilterAdded,
   render,
+  isAggregatable = false,
+  fieldType = '',
   timelineId,
   truncate,
 }) => {
@@ -327,6 +335,8 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     dataProvider,
     hideTopN,
     isDraggable,
+    isAggregatable,
+    fieldType,
     onFilterAdded,
     render,
     timelineId,
@@ -372,6 +382,8 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       dataProvider={dataProvider}
       hideTopN={hideTopN}
       onFilterAdded={onFilterAdded}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       render={render}
       timelineId={timelineId}
       truncate={truncate}

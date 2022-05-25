@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile, getService }: FtrProviderContext) => {
   describe('Actions and Triggers app', function () {
-    this.tags('ciGroup10');
     loadTestFile(require.resolve('./home_page'));
     loadTestFile(require.resolve('./alerts_list'));
     loadTestFile(require.resolve('./alert_create_flyout'));
@@ -17,5 +16,10 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
     loadTestFile(require.resolve('./connectors'));
     loadTestFile(require.resolve('./alerts_table'));
     loadTestFile(require.resolve('./rule_status_dropdown'));
+    loadTestFile(require.resolve('./rule_tag_filter'));
+    loadTestFile(require.resolve('./rule_status_filter'));
+    loadTestFile(require.resolve('./rule_tag_badge'));
+    loadTestFile(require.resolve('./rule_event_log_list'));
+    loadTestFile(require.resolve('./rules_list'));
   });
 };

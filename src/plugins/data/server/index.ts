@@ -70,6 +70,7 @@ import {
   // tabify
   calcAutoIntervalLessThan,
 } from '../common';
+import { configDeprecationProvider } from './config_deprecations';
 
 export type {
   ParsedInterval,
@@ -122,6 +123,7 @@ export type { DataPluginSetup as PluginSetup, DataPluginStart as PluginStart };
 export { DataServerPlugin as Plugin };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
+  deprecations: configDeprecationProvider,
   exposeToBrowser: {
     search: true,
   },

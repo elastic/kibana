@@ -18,6 +18,7 @@ export interface CreateSavedObjectsParams<T> {
   importStateMap: ImportStateMap;
   namespace?: string;
   overwrite?: boolean;
+  refresh?: boolean | 'wait_for';
 }
 export interface CreateSavedObjectsResult<T> {
   createdObjects: Array<CreatedObject<T>>;
@@ -35,6 +36,7 @@ export const createSavedObjects = async <T>({
   importStateMap,
   namespace,
   overwrite,
+  refresh,
 }: CreateSavedObjectsParams<T>): Promise<CreateSavedObjectsResult<T>> => {
   // filter out any objects that resulted in errors
   const errorSet = accumulatedErrors.reduce(
@@ -87,6 +89,7 @@ export const createSavedObjects = async <T>({
     const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {
       namespace,
       overwrite,
+      refresh,
     });
     expectedResults = bulkCreateResponse.saved_objects;
   }

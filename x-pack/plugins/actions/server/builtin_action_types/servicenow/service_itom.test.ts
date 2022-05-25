@@ -35,15 +35,16 @@ describe('ServiceNow SIR service', () => {
   let service: ExternalServiceITOM;
 
   beforeEach(() => {
-    service = createExternalServiceITOM(
-      {
-        config: { apiUrl: 'https://example.com/' },
+    service = createExternalServiceITOM({
+      credentials: {
+        config: { apiUrl: 'https://example.com/', isOAuth: false },
         secrets: { username: 'admin', password: 'admin' },
       },
       logger,
       configurationUtilities,
-      snExternalServiceConfig['.servicenow-itom']
-    ) as ExternalServiceITOM;
+      serviceConfig: snExternalServiceConfig['.servicenow-itom'],
+      axiosInstance: axios,
+    }) as ExternalServiceITOM;
   });
 
   beforeEach(() => {

@@ -60,6 +60,7 @@ jest.mock('../../lib/kibana', () => ({
     addError: jest.fn(),
     addSuccess: jest.fn(),
     addWarning: mockAddWarning,
+    remove: jest.fn(),
   }),
   useKibana: () => ({
     services: {
@@ -117,17 +118,7 @@ describe('Sourcerer Hooks', () => {
         payload: {
           id: 'timeline',
           selectedDataViewId: 'security-solution',
-          selectedPatterns: [
-            '.siem-signals-spacename',
-            'apm-*-transaction*',
-            'auditbeat-*',
-            'endgame-*',
-            'filebeat-*',
-            'logs-*',
-            'packetbeat-*',
-            'traces-apm*',
-            'winlogbeat-*',
-          ],
+          selectedPatterns: ['.siem-signals-spacename', ...DEFAULT_INDEX_PATTERN],
         },
       });
     });
@@ -297,24 +288,7 @@ describe('Sourcerer Hooks', () => {
   });
 
   describe('useSourcererDataView', () => {
-    it('Should exclude elastic cloud alias when selected patterns include "logs-*" as an alias', async () => {
-      await act(async () => {
-        const { result, rerender, waitForNextUpdate } = renderHook<
-          SourcererScopeName,
-          SelectedDataView
-        >(() => useSourcererDataView(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
-        await waitForNextUpdate();
-        rerender();
-        expect(result.current.selectedPatterns).toEqual([
-          '-*elastic-cloud-logs-*',
-          ...mockGlobalState.sourcerer.sourcererScopes.default.selectedPatterns,
-        ]);
-      });
-    });
-
-    it('Should NOT exclude elastic cloud alias when selected patterns does NOT include "logs-*" as an alias', async () => {
+    it('Should put any excludes in the index pattern at the end of the pattern list, and sort both the includes and excludes', async () => {
       await act(async () => {
         store = createStore(
           {
@@ -326,13 +300,15 @@ describe('Sourcerer Hooks', () => {
                 [SourcererScopeName.default]: {
                   ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
                   selectedPatterns: [
-                    'apm-*-transaction*',
-                    'auditbeat-*',
+                    '-packetbeat-*',
                     'endgame-*',
+                    'auditbeat-*',
                     'filebeat-*',
+                    'winlogbeat-*',
+                    '-filebeat-*',
                     'packetbeat-*',
                     'traces-apm*',
-                    'winlogbeat-*',
+                    'apm-*-transaction*',
                   ],
                 },
               },
@@ -358,56 +334,8 @@ describe('Sourcerer Hooks', () => {
           'packetbeat-*',
           'traces-apm*',
           'winlogbeat-*',
-        ]);
-      });
-    });
-
-    it('Should NOT exclude elastic cloud alias when selected patterns include "logs-endpoint.event-*" as an alias', async () => {
-      await act(async () => {
-        store = createStore(
-          {
-            ...mockGlobalState,
-            sourcerer: {
-              ...mockGlobalState.sourcerer,
-              sourcererScopes: {
-                ...mockGlobalState.sourcerer.sourcererScopes,
-                [SourcererScopeName.default]: {
-                  ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.default],
-                  selectedPatterns: [
-                    'apm-*-transaction*',
-                    'auditbeat-*',
-                    'endgame-*',
-                    'filebeat-*',
-                    'packetbeat-*',
-                    'traces-apm*',
-                    'winlogbeat-*',
-                    'logs-endpoint.event-*',
-                  ],
-                },
-              },
-            },
-          },
-          SUB_PLUGINS_REDUCER,
-          kibanaObservable,
-          storage
-        );
-        const { result, rerender, waitForNextUpdate } = renderHook<
-          SourcererScopeName,
-          SelectedDataView
-        >(() => useSourcererDataView(), {
-          wrapper: ({ children }) => <Provider store={store}>{children}</Provider>,
-        });
-        await waitForNextUpdate();
-        rerender();
-        expect(result.current.selectedPatterns).toEqual([
-          'apm-*-transaction*',
-          'auditbeat-*',
-          'endgame-*',
-          'filebeat-*',
-          'logs-endpoint.event-*',
-          'packetbeat-*',
-          'traces-apm*',
-          'winlogbeat-*',
+          '-filebeat-*',
+          '-packetbeat-*',
         ]);
       });
     });
