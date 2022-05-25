@@ -25,7 +25,7 @@ echo "--- Upload new git sha"
 
 .buildkite/scripts/bootstrap.sh
 
-echo "--- Download coverage arctifacts"
+echo "--- Download coverage artifacts"
 buildkite-agent artifact download target/kibana-coverage/jest/* .
 buildkite-agent artifact download target/kibana-coverage/functional/* .
 buildkite-agent artifact download target/ran_files/* .
