@@ -134,7 +134,11 @@ const createFindingsByResource = (resource: FindingsAggBucket) => {
     !Array.isArray(resource.cis_sections.buckets) ||
     !Array.isArray(resource.name.buckets) ||
     !Array.isArray(resource.subtype.buckets) ||
-    !Array.isArray(resource.cluster_id.buckets)
+    !Array.isArray(resource.cluster_id.buckets) ||
+    !resource.cis_sections.buckets.length ||
+    !resource.name.buckets.length ||
+    !resource.subtype.buckets.length ||
+    !resource.cluster_id.buckets.length
   )
     throw new Error('expected buckets to be an array');
 
