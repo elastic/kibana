@@ -31,7 +31,7 @@ describe('Use get case hook', () => {
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'resolveCase');
     const { waitForNextUpdate } = renderHook(() => useGetCase('case-1'), { wrapper });
-    waitForNextUpdate();
+    await waitForNextUpdate();
     expect(spy).toHaveBeenCalledWith('case-1', true, expect.any(AbortSignal));
   });
 
