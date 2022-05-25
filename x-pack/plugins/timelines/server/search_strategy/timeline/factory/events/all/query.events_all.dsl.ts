@@ -15,6 +15,7 @@ import {
   TimelineRequestSortField,
 } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
+import { getPreferredEsType } from './helpers';
 
 export const buildTimelineEventsAllQuery = ({
   authFilter,
@@ -58,7 +59,7 @@ export const buildTimelineEventsAllQuery = ({
       return {
         [field]: {
           order: item.direction,
-          unmapped_type: item.type,
+          unmapped_type: getPreferredEsType(item.esTypes),
         },
       };
     });

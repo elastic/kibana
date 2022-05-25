@@ -12,6 +12,7 @@ import type {
   SingleCaseMetrics,
   SingleCaseMetricsFeature,
   AlertComment,
+  CasesMetrics,
 } from '../../common/ui/types';
 import {
   Actions,
@@ -74,6 +75,25 @@ export const basicComment: Comment = {
 export const alertComment: AlertComment = {
   alertId: 'alert-id-1',
   index: 'alert-index-1',
+  type: CommentType.alert,
+  id: 'alert-comment-id',
+  createdAt: basicCreatedAt,
+  createdBy: elasticUser,
+  owner: SECURITY_SOLUTION_OWNER,
+  pushedAt: null,
+  pushedBy: null,
+  rule: {
+    id: 'rule-id-1',
+    name: 'Awesome rule',
+  },
+  updatedAt: null,
+  updatedBy: null,
+  version: 'WzQ3LDFc',
+};
+
+export const alertCommentWithIndices: AlertComment = {
+  alertId: 'alert-id-1',
+  index: '.alerts-matchme.alerts',
   type: CommentType.alert,
   id: 'alert-comment-id',
   createdAt: basicCreatedAt,
@@ -290,6 +310,10 @@ export const casesStatus: CasesStatus = {
   countOpenCases: 20,
   countInProgressCases: 40,
   countClosedCases: 130,
+};
+
+export const casesMetrics: CasesMetrics = {
+  mttr: 12,
 };
 
 export const basicPush = {

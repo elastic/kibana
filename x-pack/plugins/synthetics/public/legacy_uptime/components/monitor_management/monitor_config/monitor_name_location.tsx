@@ -16,16 +16,19 @@ import { ServiceLocations } from './locations';
 import { useMonitorName } from './use_monitor_name';
 
 interface Props {
-  validate: Validation;
+  validate?: Validation;
   onFieldBlur?: (field: ConfigKey) => void;
+  readOnly?: boolean;
 }
 
-export const MonitorNameAndLocation = ({ validate, onFieldBlur }: Props) => {
+export const MonitorNameAndLocation = ({ validate, onFieldBlur, readOnly }: Props) => {
   const { name, setName, locations = [], setLocations } = usePolicyConfigContext();
-  const isNameInvalid = !!validate[ConfigKey.NAME]?.({ [ConfigKey.NAME]: name });
-  const isLocationsInvalid = !!validate[ConfigKey.LOCATIONS]?.({
-    [ConfigKey.LOCATIONS]: locations,
-  });
+  const isNameInvalid = validate ? !!validate[ConfigKey.NAME]?.({ [ConfigKey.NAME]: name }) : false;
+  const isLocationsInvalid = validate
+    ? !!validate[ConfigKey.LOCATIONS]?.({
+        [ConfigKey.LOCATIONS]: locations,
+      })
+    : false;
 
   const [localName, setLocalName] = useState(name);
 
@@ -67,6 +70,7 @@ export const MonitorNameAndLocation = ({ validate, onFieldBlur }: Props) => {
           onChange={(event) => setLocalName(event.target.value)}
           onBlur={() => onFieldBlur?.(ConfigKey.NAME)}
           data-test-subj="monitorManagementMonitorName"
+          readOnly={readOnly}
         />
       </EuiFormRow>
       <ServiceLocations
@@ -74,6 +78,7 @@ export const MonitorNameAndLocation = ({ validate, onFieldBlur }: Props) => {
         selectedLocations={locations}
         isInvalid={isLocationsInvalid}
         onBlur={() => onFieldBlur?.(ConfigKey.LOCATIONS)}
+        readOnly={readOnly}
       />
     </>
   );

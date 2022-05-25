@@ -57,6 +57,7 @@ export const AdvancedTab: React.FunctionComponent = () => {
       serviceToken,
       fleetServerHost: fleetServerHostForm.fleetServerHost,
       fleetServerPolicyId,
+      deploymentMode,
       disabled: !Boolean(serviceToken),
     }),
     getConfirmFleetServerConnectionStep({ isFleetServerReady, disabled: !Boolean(serviceToken) }),

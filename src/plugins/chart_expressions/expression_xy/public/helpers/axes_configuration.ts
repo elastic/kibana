@@ -7,9 +7,17 @@
  */
 
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
-import { AxisExtentConfig, CommonXYDataLayerConfig, ExtendedYConfig, YConfig } from '../../common';
+import {
+  AxisExtentConfig,
+  CommonXYDataLayerConfig,
+  ExtendedYConfig,
+  YConfig,
+  YScaleType,
+} from '../../common';
 import { isDataLayer } from './visualization';
+import { getFormat } from './format';
 
 export interface Series {
   layer: string;
@@ -25,6 +33,7 @@ export type GroupsConfiguration = Array<{
   position: 'left' | 'right' | 'bottom' | 'top';
   formatter?: IFieldFormat;
   series: Series[];
+  scale?: YScaleType;
 }>;
 
 export function isFormatterCompatible(
@@ -51,10 +60,12 @@ export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
     const { table } = layer;
     layer.accessors.forEach((accessor) => {
       const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
+      const yAccessor = getAccessorByDimension(accessor, table?.columns || []);
       const mode =
-        yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor)?.axisMode || 'auto';
-      let formatter: SerializedFieldFormat = table.columns?.find((column) => column.id === accessor)
-        ?.meta?.params || { id: 'number' };
+        yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === yAccessor)?.axisMode || 'auto';
+      let formatter: SerializedFieldFormat = getFormat(table.columns, accessor) || {
+        id: 'number',
+      };
       if (
         isDataLayer(layer) &&
         layer.seriesType.includes('percentage') &&
@@ -69,7 +80,7 @@ export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
       }
       series[mode].push({
         layer: layer.layerId,
-        accessor,
+        accessor: yAccessor,
         fieldFormat: formatter,
       });
     });
@@ -106,7 +117,9 @@ export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
 export function getAxesConfiguration(
   layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
-  formatFactory?: FormatFactory
+  formatFactory?: FormatFactory,
+  yLeftScale?: YScaleType,
+  yRightScale?: YScaleType
 ): GroupsConfiguration {
   const series = groupAxesByType(layers);
 
@@ -118,6 +131,7 @@ export function getAxesConfiguration(
       position: shouldRotate ? 'bottom' : 'left',
       formatter: formatFactory?.(series.left[0].fieldFormat),
       series: series.left.map(({ fieldFormat, ...currentSeries }) => currentSeries),
+      scale: yLeftScale,
     });
   }
 
@@ -127,6 +141,7 @@ export function getAxesConfiguration(
       position: shouldRotate ? 'top' : 'right',
       formatter: formatFactory?.(series.right[0].fieldFormat),
       series: series.right.map(({ fieldFormat, ...currentSeries }) => currentSeries),
+      scale: yRightScale,
     });
   }
 

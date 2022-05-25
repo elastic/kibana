@@ -8,8 +8,6 @@
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 // @ts-ignore
-import { checkParam } from '../../error_missing_required';
-// @ts-ignore
 import { ElasticsearchMetric } from '../../metrics';
 // @ts-ignore
 import { createQuery } from '../../create_query';

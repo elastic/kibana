@@ -23,6 +23,8 @@ import type {
 import { createFilterAction } from './actions/apply_filter_action';
 import { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 
+import './index.scss';
+
 export class UnifiedSearchPublicPlugin
   implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
 {
@@ -55,7 +57,7 @@ export class UnifiedSearchPublicPlugin
 
   public start(
     core: CoreStart,
-    { data, dataViews, uiActions }: UnifiedSearchStartDependencies
+    { data, dataViews, uiActions, screenshotMode }: UnifiedSearchStartDependencies
   ): UnifiedSearchPublicPluginStart {
     setTheme(core.theme);
     setOverlays(core.overlays);
@@ -68,6 +70,7 @@ export class UnifiedSearchPublicPlugin
       data,
       storage: this.storage,
       usageCollection: this.usageCollection,
+      isScreenshotMode: Boolean(screenshotMode?.isScreenshotMode()),
     });
 
     uiActions.addTriggerAction(

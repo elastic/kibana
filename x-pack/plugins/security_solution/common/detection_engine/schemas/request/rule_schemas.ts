@@ -33,7 +33,9 @@ import {
   id,
   index,
   filters,
+  timestamp_field,
   event_category_override,
+  tiebreaker_field,
   building_block_type,
   note,
   license,
@@ -67,6 +69,9 @@ import {
   created_by,
   namespace,
   ruleExecutionSummary,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../common';
 
 export const createSchema = <
@@ -210,7 +215,9 @@ const eqlRuleParams = {
   optional: {
     index,
     filters,
+    timestamp_field,
     event_category_override,
+    tiebreaker_field,
   },
   defaultable: {},
 };
@@ -412,6 +419,14 @@ const responseRequiredFields = {
   updated_by,
   created_at,
   created_by,
+
+  // NOTE: For now, Related Integrations, Required Fields and Setup Guide are supported for prebuilt
+  // rules only. We don't want to allow users to edit these 3 fields via the API. If we added them
+  // to baseParams.defaultable, they would become a part of the request schema as optional fields.
+  // This is why we add them here, in order to add them only to the response schema.
+  related_integrations: RelatedIntegrationArray,
+  required_fields: RequiredFieldArray,
+  setup: SetupGuide,
 };
 
 const responseOptionalFields = {

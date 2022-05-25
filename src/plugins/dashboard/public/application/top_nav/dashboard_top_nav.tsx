@@ -82,6 +82,7 @@ export interface DashboardTopNavProps {
   dashboardAppState: CompleteDashboardAppState;
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
+  printMode: boolean;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
@@ -90,6 +91,7 @@ export function DashboardTopNav({
   dashboardAppState,
   embedSettings,
   redirectTo,
+  printMode,
 }: DashboardTopNavProps) {
   const {
     core,
@@ -488,7 +490,9 @@ export function DashboardTopNav({
 
     const isFullScreenMode = dashboardState.fullScreenMode;
     const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
-    const showQueryInput = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowQueryInput));
+    const showQueryInput = shouldShowNavBarComponent(
+      Boolean(embedSettings?.forceShowQueryInput || printMode)
+    );
     const showDatePicker = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
     const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
@@ -535,6 +539,7 @@ export function DashboardTopNav({
       useDefaultBehaviors: true,
       savedQuery: state.savedQuery,
       savedQueryId: dashboardState.savedQuery,
+      visible: printMode !== true,
       onQuerySubmit: (_payload, isUpdate) => {
         if (isUpdate === false) {
           dashboardAppState.$triggerDashboardRefresh.next({ force: true });
@@ -585,10 +590,10 @@ export function DashboardTopNav({
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
-      {isLabsEnabled && isLabsShown ? (
+      {!printMode && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      {dashboardState.viewMode !== ViewMode.VIEW ? (
+      {dashboardState.viewMode !== ViewMode.VIEW && !printMode ? (
         <>
           <EuiHorizontalRule margin="none" />
           <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>

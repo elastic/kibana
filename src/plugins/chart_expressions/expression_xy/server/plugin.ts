@@ -15,15 +15,14 @@ import {
   extendedYAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,
-  dataLayerFunction,
   axisExtentConfigFunction,
   tickLabelsConfigFunction,
   annotationLayerFunction,
   labelsOrientationConfigFunction,
-  referenceLineLayerFunction,
+  referenceLineFunction,
   axisTitlesVisibilityConfigFunction,
   extendedDataLayerFunction,
-  extendedReferenceLineLayerFunction,
+  referenceLineLayerFunction,
   layeredXyVisFunction,
   extendedAnnotationLayerFunction,
 } from '../common/expression_functions';
@@ -37,15 +36,14 @@ export class ExpressionXyPlugin
     expressions.registerFunction(extendedYAxisConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(gridlinesConfigFunction);
-    expressions.registerFunction(dataLayerFunction);
     expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(tickLabelsConfigFunction);
     expressions.registerFunction(annotationLayerFunction);
     expressions.registerFunction(extendedAnnotationLayerFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
+    expressions.registerFunction(referenceLineFunction);
     expressions.registerFunction(referenceLineLayerFunction);
-    expressions.registerFunction(extendedReferenceLineLayerFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);
     expressions.registerFunction(layeredXyVisFunction);

@@ -30,6 +30,7 @@ import {
   getRuleForSignalTestingWithTimestampOverride,
   waitForAlertToComplete,
   waitForSignalsToBePresent,
+  getThresholdRuleForSignalTesting,
 } from '../../utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
 
@@ -170,6 +171,9 @@ export default ({ getService }: FtrProviderContext) => {
             name: 'Simple Rule Query',
             query: 'user.name: root or user.name: admin',
             references: [],
+            related_integrations: [],
+            required_fields: [],
+            setup: '',
             severity: 'high',
             severity_mapping: [],
             updated_by: 'elastic',
@@ -267,6 +271,89 @@ export default ({ getService }: FtrProviderContext) => {
             .set('kbn-xsrf', 'true')
             .send(getSimpleRule())
             .expect(403);
+        });
+      });
+
+      describe('threshold validation', () => {
+        it('should result in 400 error if no threshold-specific fields are provided', async () => {
+          const { threshold, ...rule } = getThresholdRuleForSignalTesting(['*']);
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send(rule)
+            .expect(400);
+
+          expect(body).to.eql({
+            error: 'Bad Request',
+            message: '[request body]: Invalid value "undefined" supplied to "threshold"',
+            statusCode: 400,
+          });
+        });
+
+        it('should result in 400 error if more than 3 threshold fields', async () => {
+          const rule = getThresholdRuleForSignalTesting(['*']);
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ...rule,
+              threshold: {
+                ...rule.threshold,
+                field: ['field-1', 'field-2', 'field-3', 'field-4'],
+              },
+            })
+            .expect(400);
+
+          expect(body).to.eql({
+            message: ['Number of fields must be 3 or less'],
+            status_code: 400,
+          });
+        });
+
+        it('should result in 400 error if threshold value is less than 1', async () => {
+          const rule = getThresholdRuleForSignalTesting(['*']);
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ...rule,
+              threshold: {
+                ...rule.threshold,
+                value: 0,
+              },
+            })
+            .expect(400);
+
+          expect(body).to.eql({
+            error: 'Bad Request',
+            message: '[request body]: Invalid value "0" supplied to "threshold,value"',
+            statusCode: 400,
+          });
+        });
+
+        it('should result in 400 error if cardinality is also an agg field', async () => {
+          const rule = getThresholdRuleForSignalTesting(['*']);
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .send({
+              ...rule,
+              threshold: {
+                ...rule.threshold,
+                cardinality: [
+                  {
+                    field: 'process.name',
+                    value: 5,
+                  },
+                ],
+              },
+            })
+            .expect(400);
+
+          expect(body).to.eql({
+            message: ['Cardinality of a field that is being aggregated on is always 1'],
+            status_code: 400,
+          });
         });
       });
     });

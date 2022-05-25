@@ -92,7 +92,9 @@ function mixFactory(isRollup: boolean, rollupFields: RollupFields) {
 }
 
 function getKeywordFields(fields: Field[]): Field[] {
-  return fields.filter((f) => f.type === ES_FIELD_TYPES.KEYWORD);
+  return fields.filter(
+    (f) => f.type === ES_FIELD_TYPES.KEYWORD || f.type === ES_FIELD_TYPES.VERSION
+  );
 }
 
 function getTextFields(fields: Field[]): Field[] {

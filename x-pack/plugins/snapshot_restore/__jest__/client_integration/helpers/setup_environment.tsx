@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { merge } from 'lodash';
 import { LocationDescriptorObject } from 'history';
 
 import { HttpSetup } from '@kbn/core/public';
@@ -16,15 +17,29 @@ import {
   breadcrumbService,
   docTitleService,
 } from '../../../public/application/services/navigation';
+import {
+  AuthorizationContext,
+  Authorization,
+  Privileges,
+  GlobalFlyout,
+} from '../../../public/shared_imports';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { textService } from '../../../public/application/services/text';
 import { init as initHttpRequests } from './http_requests';
 import { UiMetricService } from '../../../public/application/services';
 
+const { GlobalFlyoutProvider } = GlobalFlyout;
 const history = scopedHistoryMock.create();
 history.createHref.mockImplementation((location: LocationDescriptorObject) => {
   return `${location.pathname}?${location.search}`;
 });
+
+const createAuthorizationContextValue = (privileges: Privileges) => {
+  return {
+    isLoading: false,
+    privileges: privileges ?? { hasAllPrivileges: false, missingPrivileges: {} },
+  } as Authorization;
+};
 
 export const services = {
   uiMetricService: new UiMetricService('snapshot_restore'),
@@ -60,16 +75,24 @@ export const setupEnvironment = () => {
   this.terminate = () => {};
 };
 
-export const WithAppDependencies = (Comp: any, httpSetup?: HttpSetup) => (props: any) => {
-  // We need to optionally setup the httpService since some cit helpers (such as snapshot_list.helpers)
-  // use jest mocks to stub the fetch hooks instead of mocking api responses.
-  if (httpSetup) {
-    httpService.setup(httpSetup);
-  }
+export const WithAppDependencies =
+  (Comp: any, httpSetup?: HttpSetup, { privileges, ...overrides }: Record<string, unknown> = {}) =>
+  (props: any) => {
+    // We need to optionally setup the httpService since some cit helpers (such as snapshot_list.helpers)
+    // use jest mocks to stub the fetch hooks instead of mocking api responses.
+    if (httpSetup) {
+      httpService.setup(httpSetup);
+    }
 
-  return (
-    <AppContextProvider value={appDependencies as any}>
-      <Comp {...props} />
-    </AppContextProvider>
-  );
-};
+    return (
+      <AuthorizationContext.Provider
+        value={createAuthorizationContextValue(privileges as Privileges)}
+      >
+        <AppContextProvider value={merge(appDependencies, overrides) as any}>
+          <GlobalFlyoutProvider>
+            <Comp {...props} />
+          </GlobalFlyoutProvider>
+        </AppContextProvider>
+      </AuthorizationContext.Provider>
+    );
+  };

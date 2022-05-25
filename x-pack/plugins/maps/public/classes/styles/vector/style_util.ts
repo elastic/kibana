@@ -87,16 +87,16 @@ export function makeMbClampedNumberExpression({
     [
       'case',
       ['==', [lookupFunction, fieldName], null],
-      minValue - 1, // == does a JS-y like check where returns true for null and undefined
+      fallback, // == does a JS-y like check where returns true for null and undefined
       clamp,
     ],
     fallback,
   ];
 }
 
-export function getHasLabel(label: StaticTextProperty | DynamicTextProperty) {
+export function getHasLabel(label: StaticTextProperty | DynamicTextProperty): boolean {
   return label.isDynamic()
     ? label.isComplete()
     : (label as StaticTextProperty).getOptions().value != null &&
-        (label as StaticTextProperty).getOptions().value.length;
+        (label as StaticTextProperty).getOptions().value.length > 0;
 }
