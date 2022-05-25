@@ -81,7 +81,7 @@ export function getActionType(): ActionTypeModel<
       if (action.config.createIncidentUrl && !isValidUrl(action.config.createIncidentUrl)) {
         configErrors.createIncidentUrl = [
           ...configErrors.createIncidentUrl,
-          translations.URL_INVALID,
+          translations.URL_INVALID('Create incident'),
         ];
       }
       if (!action.config.createIncidentJson) {
@@ -95,6 +95,12 @@ export function getActionType(): ActionTypeModel<
       }
       if (!action.config.getIncidentUrl) {
         configErrors.getIncidentUrl.push(translations.GET_INCIDENT_URL_REQUIRED);
+      }
+      if (action.config.getIncidentUrl && !isValidUrl(action.config.getIncidentUrl)) {
+        configErrors.getIncidentUrl = [
+          ...configErrors.getIncidentUrl,
+          translations.URL_INVALID('Get incident'),
+        ];
       }
       if (!action.config.getIncidentResponseExternalTitleKey) {
         configErrors.getIncidentResponseExternalTitleKey.push(
@@ -114,13 +120,19 @@ export function getActionType(): ActionTypeModel<
       if (!action.config.incidentViewUrl) {
         configErrors.incidentViewUrl.push(translations.GET_INCIDENT_VIEW_URL);
       }
+      if (action.config.incidentViewUrl && !isValidUrl(action.config.incidentViewUrl)) {
+        configErrors.incidentViewUrl = [
+          ...configErrors.incidentViewUrl,
+          translations.URL_INVALID('View incident'),
+        ];
+      }
       if (!action.config.updateIncidentUrl) {
         configErrors.updateIncidentUrl.push(translations.UPDATE_URL_REQUIRED);
       }
       if (action.config.updateIncidentUrl && !isValidUrl(action.config.updateIncidentUrl)) {
         configErrors.updateIncidentUrl = [
           ...configErrors.updateIncidentUrl,
-          translations.URL_INVALID,
+          translations.URL_INVALID('Update incident'),
         ];
       }
       if (!action.config.updateIncidentJson) {
@@ -135,7 +147,7 @@ export function getActionType(): ActionTypeModel<
       if (action.config.createCommentUrl && !isValidUrl(action.config.createCommentUrl)) {
         configErrors.createCommentUrl = [
           ...configErrors.createCommentUrl,
-          translations.URL_INVALID,
+          translations.URL_INVALID('Create comment'),
         ];
       }
       if (!action.config.createCommentJson) {
@@ -164,7 +176,6 @@ export function getActionType(): ActionTypeModel<
       const translations = await import('./translations');
       const errors = {
         'subActionParams.incident.summary': new Array<string>(),
-        'subActionParams.incident.description': new Array<string>(),
       };
       const validationResult = { errors };
       if (
@@ -172,14 +183,7 @@ export function getActionType(): ActionTypeModel<
         actionParams.subActionParams.incident &&
         !actionParams.subActionParams.incident.summary?.length
       ) {
-        errors['subActionParams.incident.summary'].push(translations.BODY_REQUIRED);
-      }
-      if (
-        actionParams.subActionParams &&
-        actionParams.subActionParams.incident &&
-        !actionParams.subActionParams.incident.description?.length
-      ) {
-        errors['subActionParams.incident.description'].push(translations.BODY_REQUIRED);
+        errors['subActionParams.incident.summary'].push(translations.SUMMARY_REQUIRED);
       }
       return validationResult;
     },

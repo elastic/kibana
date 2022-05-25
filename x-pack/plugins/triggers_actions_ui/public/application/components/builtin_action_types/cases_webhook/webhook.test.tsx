@@ -8,14 +8,15 @@
 import { TypeRegistry } from '../../../type_registry';
 import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel } from '../../../../types';
-import { WebhookActionConnector } from '../types';
+import { CasesWebhookActionConnector } from './types';
+import { registrationServicesMock } from '../../../../mocks';
 
-const ACTION_TYPE_ID = '.webhook';
+const ACTION_TYPE_ID = '.cases-webhook';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
+  registerBuiltInActionTypes({ actionTypeRegistry, services: registrationServicesMock });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
@@ -25,7 +26,7 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('action type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.iconClass).toEqual('logoWebhook');
+    expect(actionTypeModel.iconClass).toEqual('indexManagementApp');
   });
 });
 
@@ -37,22 +38,51 @@ describe('webhook connector validation', () => {
         password: 'pass',
       },
       id: 'test',
-      actionTypeId: '.webhook',
-      name: 'webhook',
+      actionTypeId: '.cases-webhook',
+      name: 'Jira Webhook',
+      isDeprecated: false,
       isPreconfigured: false,
       config: {
-        method: 'PUT',
-        url: 'http://test.com',
-        headers: { 'content-type': 'text' },
+        createCommentJson: '{"body":"$COMMENT"}',
+        createCommentMethod: 'post',
+        createCommentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/$ID/comment',
+        createIncidentJson:
+          '{"fields":{"summary":"$SUM","description":"$DESC","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+        createIncidentMethod: 'post',
+        createIncidentResponseKey: 'id',
+        createIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+        getIncidentResponseCreatedDateKey: 'fields.created',
+        getIncidentResponseExternalTitleKey: 'key',
+        getIncidentResponseUpdatedDateKey: 'fields.udpated',
         hasAuth: true,
+        headers: { 'content-type': 'text' },
+        incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/$TITLE',
+        getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/$ID',
+        updateIncidentJson:
+          '{"fields":{"summary":"$SUM","description":"$DESC","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+        updateIncidentMethod: 'put',
+        updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/$ID',
       },
-    } as WebhookActionConnector;
+    } as CasesWebhookActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          url: [],
-          method: [],
+          createCommentJson: [],
+          createCommentMethod: [],
+          createCommentUrl: [],
+          createIncidentJson: [],
+          createIncidentMethod: [],
+          createIncidentResponseKey: [],
+          createIncidentUrl: [],
+          getIncidentResponseCreatedDateKey: [],
+          getIncidentResponseExternalTitleKey: [],
+          getIncidentResponseUpdatedDateKey: [],
+          incidentViewUrl: [],
+          getIncidentUrl: [],
+          updateIncidentJson: [],
+          updateIncidentMethod: [],
+          updateIncidentUrl: [],
         },
       },
       secrets: {
@@ -71,22 +101,51 @@ describe('webhook connector validation', () => {
         password: '',
       },
       id: 'test',
-      actionTypeId: '.webhook',
-      name: 'webhook',
+      actionTypeId: '.cases-webhook',
+      name: 'Jira Webhook',
+      isDeprecated: false,
       isPreconfigured: false,
       config: {
-        method: 'PUT',
-        url: 'http://test.com',
-        headers: { 'content-type': 'text' },
+        createCommentJson: '{"body":"$COMMENT"}',
+        createCommentMethod: 'post',
+        createCommentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/$ID/comment',
+        createIncidentJson:
+          '{"fields":{"summary":"$SUM","description":"$DESC","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+        createIncidentMethod: 'post',
+        createIncidentResponseKey: 'id',
+        createIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue',
+        getIncidentResponseCreatedDateKey: 'fields.created',
+        getIncidentResponseExternalTitleKey: 'key',
+        getIncidentResponseUpdatedDateKey: 'fields.udpated',
         hasAuth: false,
+        headers: { 'content-type': 'text' },
+        incidentViewUrl: 'https://siem-kibana.atlassian.net/browse/$TITLE',
+        getIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/$ID',
+        updateIncidentJson:
+          '{"fields":{"summary":"$SUM","description":"$DESC","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+        updateIncidentMethod: 'put',
+        updateIncidentUrl: 'https://siem-kibana.atlassian.net/rest/api/2/issue/$ID',
       },
-    } as WebhookActionConnector;
+    } as CasesWebhookActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          url: [],
-          method: [],
+          createCommentJson: [],
+          createCommentMethod: [],
+          createCommentUrl: [],
+          createIncidentJson: [],
+          createIncidentMethod: [],
+          createIncidentResponseKey: [],
+          createIncidentUrl: [],
+          getIncidentResponseCreatedDateKey: [],
+          getIncidentResponseExternalTitleKey: [],
+          getIncidentResponseUpdatedDateKey: [],
+          incidentViewUrl: [],
+          getIncidentUrl: [],
+          updateIncidentJson: [],
+          updateIncidentMethod: [],
+          updateIncidentUrl: [],
         },
       },
       secrets: {
@@ -102,21 +161,49 @@ describe('webhook connector validation', () => {
     const actionConnector = {
       secrets: {
         user: 'user',
+        password: '',
       },
       id: 'test',
-      actionTypeId: '.webhook',
-      name: 'webhook',
+      actionTypeId: '.cases-webhook',
+      name: 'Jira Webhook',
+      isDeprecated: false,
+      isPreconfigured: false,
       config: {
-        method: 'PUT',
+        createCommentJson: '{"body":"$COMMENT"}',
+        createCommentMethod: 'post',
+        createIncidentJson:
+          '{"fields":{"summary":"$SUM","description":"$DESC","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+        createIncidentMethod: 'post',
+        createIncidentResponseKey: 'id',
+        getIncidentResponseCreatedDateKey: 'fields.created',
+        getIncidentResponseExternalTitleKey: 'key',
+        getIncidentResponseUpdatedDateKey: 'fields.udpated',
         hasAuth: true,
+        headers: { 'content-type': 'text' },
+        updateIncidentJson:
+          '{"fields":{"summary":"$SUM","description":"$DESC","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+        updateIncidentMethod: 'put',
       },
-    } as WebhookActionConnector;
+    } as unknown as CasesWebhookActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          url: ['URL is required.'],
-          method: [],
+          createCommentJson: [],
+          createCommentMethod: [],
+          createCommentUrl: ['Create comment URL is required.'],
+          createIncidentJson: [],
+          createIncidentMethod: [],
+          createIncidentResponseKey: [],
+          createIncidentUrl: ['Create incident URL is required.'],
+          getIncidentResponseCreatedDateKey: [],
+          getIncidentResponseExternalTitleKey: [],
+          getIncidentResponseUpdatedDateKey: [],
+          incidentViewUrl: ['View incident URL is required.'],
+          getIncidentUrl: ['Get incident URL is required.'],
+          updateIncidentJson: [],
+          updateIncidentMethod: [],
+          updateIncidentUrl: ['Update incident URL is required.'],
         },
       },
       secrets: {
@@ -135,20 +222,51 @@ describe('webhook connector validation', () => {
         password: 'pass',
       },
       id: 'test',
-      actionTypeId: '.webhook',
-      name: 'webhook',
+      actionTypeId: '.cases-webhook',
+      name: 'Jira Webhook',
+      isDeprecated: false,
+      isPreconfigured: false,
       config: {
-        method: 'PUT',
-        url: 'invalid.url',
+        createCommentJson: '{"body":"$COMMENT"}',
+        createCommentMethod: 'post',
+        createCommentUrl: 'invalid.url',
+        createIncidentJson:
+          '{"fields":{"summary":"$SUM","description":"$DESC","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+        createIncidentMethod: 'post',
+        createIncidentResponseKey: 'id',
+        createIncidentUrl: 'invalid.url',
+        getIncidentResponseCreatedDateKey: 'fields.created',
+        getIncidentResponseExternalTitleKey: 'key',
+        getIncidentResponseUpdatedDateKey: 'fields.udpated',
         hasAuth: true,
+        headers: { 'content-type': 'text' },
+        incidentViewUrl: 'invalid.url',
+        getIncidentUrl: 'invalid.url',
+        updateIncidentJson:
+          '{"fields":{"summary":"$SUM","description":"$DESC","project":{"key":"ROC"},"issuetype":{"id":"10024"}}}',
+        updateIncidentMethod: 'put',
+        updateIncidentUrl: 'invalid.url',
       },
-    } as WebhookActionConnector;
+    } as CasesWebhookActionConnector;
 
     expect(await actionTypeModel.validateConnector(actionConnector)).toEqual({
       config: {
         errors: {
-          url: ['URL is invalid.'],
-          method: [],
+          createCommentJson: [],
+          createCommentMethod: [],
+          createCommentUrl: ['Create comment URL is invalid.'],
+          createIncidentJson: [],
+          createIncidentMethod: [],
+          createIncidentResponseKey: [],
+          createIncidentUrl: ['Create incident URL is invalid.'],
+          getIncidentResponseCreatedDateKey: [],
+          getIncidentResponseExternalTitleKey: [],
+          getIncidentResponseUpdatedDateKey: [],
+          incidentViewUrl: ['View incident URL is invalid.'],
+          getIncidentUrl: ['Get incident URL is invalid.'],
+          updateIncidentJson: [],
+          updateIncidentMethod: [],
+          updateIncidentUrl: ['Update incident URL is invalid.'],
         },
       },
       secrets: {
@@ -164,22 +282,22 @@ describe('webhook connector validation', () => {
 describe('webhook action params validation', () => {
   test('action params validation succeeds when action params is valid', async () => {
     const actionParams = {
-      body: 'message {test}',
+      subActionParams: { incident: { summary: 'some title {{test}}' }, comments: [] },
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
-      errors: { body: [] },
+      errors: { 'subActionParams.incident.summary': [] },
     });
   });
 
   test('params validation fails when body is not valid', async () => {
     const actionParams = {
-      body: '',
+      subActionParams: { incident: { summary: '' }, comments: [] },
     };
 
     expect(await actionTypeModel.validateParams(actionParams)).toEqual({
       errors: {
-        body: ['Body is required.'],
+        'subActionParams.incident.summary': ['Summary is required.'],
       },
     });
   });

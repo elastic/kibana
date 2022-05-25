@@ -22,12 +22,21 @@ jest.mock(kibanaReactPath, () => {
   };
 });
 
+const actionParams = {
+  subAction: 'pushToService',
+  subActionParams: {
+    incident: {
+      summary: 'sn title',
+      description: 'some description',
+      labels: ['kibana'],
+      externalId: null,
+    },
+    comments: [],
+  },
+};
+
 describe('WebhookParamsFields renders', () => {
   test('all params fields is rendered', () => {
-    const actionParams = {
-      body: 'test message',
-    };
-
     const wrapper = mountWithIntl(
       <WebhookParamsFields
         actionParams={actionParams}
@@ -43,10 +52,7 @@ describe('WebhookParamsFields renders', () => {
         ]}
       />
     );
-    expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="bodyJsonEditor"]').first().prop('value')).toStrictEqual(
-      'test message'
-    );
-    expect(wrapper.find('[data-test-subj="bodyAddVariableButton"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="summaryInput"]').length > 0).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="descriptionTextArea"]').length > 0).toBeTruthy();
   });
 });

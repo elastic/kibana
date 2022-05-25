@@ -57,13 +57,13 @@ export const UPDATE_METHOD_REQUIRED = i18n.translate(
 export const CREATE_COMMENT_URL_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredCreateCommentUrlText',
   {
-    defaultMessage: 'Create comment incident URL is required.',
+    defaultMessage: 'Create comment URL is required.',
   }
 );
 export const CREATE_COMMENT_INCIDENT_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.requiredCreateCommentIncidentText',
   {
-    defaultMessage: 'Create comment incident object is required.',
+    defaultMessage: 'Create comment object is required.',
   }
 );
 
@@ -101,16 +101,20 @@ export const GET_RESPONSE_EXTERNAL_UPDATED_KEY_REQUIRED = i18n.translate(
 export const GET_INCIDENT_VIEW_URL = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredGetIncidentViewUrlKeyText',
   {
-    defaultMessage: 'Get external incident view URL.',
+    defaultMessage: 'View incident URL is required.',
   }
 );
 
-export const URL_INVALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.invalidUrlTextField',
-  {
-    defaultMessage: 'URL is invalid.',
-  }
-);
+export const URL_INVALID = (urlType: string) =>
+  i18n.translate(
+    'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.error.invalidUrlTextField',
+    {
+      defaultMessage: '{urlType} URL is invalid.',
+      values: {
+        urlType,
+      },
+    }
+  );
 
 export const USERNAME_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredAuthUserNameText',
@@ -140,9 +144,9 @@ export const USERNAME_REQUIRED_FOR_PASSWORD = i18n.translate(
   }
 );
 
-export const BODY_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookBodyText',
+export const SUMMARY_REQUIRED = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredWebhookSummaryText',
   {
-    defaultMessage: 'Body is required.',
+    defaultMessage: 'Summary is required.',
   }
 );
