@@ -103,7 +103,7 @@ export class GaugeVis extends Component {
       props.circleBackground.stroke = this.props.innerColor;
     }
 
-    let svg = (
+    const svg = (
       <svg width={120.72} height={type === 'half' ? 78.72 : 120.72}>
         <circle {...props.circleBackground} data-test-subj="gaugeCircleInner" />
         <circle {...props.circle} data-test-subj="gaugeCircle" />
