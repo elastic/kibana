@@ -29,7 +29,9 @@ export default function ({ getService }: FtrProviderContext) {
       expect(initialEvent.context.overall_status_level).to.be.a('string'); // Ideally we would test it as `initializing`, but we can't do that as it may result flaky for many side effects in the CI.
       expect(initialEvent.context).to.have.property('overall_status_summary');
       expect(initialEvent.context.overall_status_summary).to.be.a('string');
-      expect(initialEvent.properties).to.have.property('overall_status_level', 'degraded');
+      expect(initialEvent.properties).to.have.property('overall_status_level');
+      expect(initialEvent.properties.overall_status_level).to.be.a('string');
+      expect(initialEvent.properties).to.have.property('overall_status_summary');
       expect(initialEvent.properties.overall_status_summary).to.be.a('string');
     });
 
