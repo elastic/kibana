@@ -21,10 +21,17 @@ import { Assign } from '@kbn/utility-types';
 import { i18n } from '@kbn/i18n';
 
 import { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '@kbn/discover-plugin/public';
 import { PersistedState } from './persisted_state';
-import { getTypes, getAggs, getSearch, getSavedObjects, getSpaces } from './services';
+import {
+  getTypes,
+  getAggs,
+  getSearch,
+  getSavedObjects,
+  getSpaces,
+  getFieldsFormats,
+} from './services';
 import { BaseVisType } from './vis_types';
 import { SerializedVis, SerializedVisData, VisParams } from '../common/types';
 
@@ -120,9 +127,14 @@ export class Vis<TVisParams = VisParams> {
     if (state.params || typeChanged) {
       this.params = this.getParams(state.params);
     }
-    if (state.data && state.data.searchSource) {
-      this.data.searchSource = await getSearch().searchSource.create(state.data.searchSource!);
-      this.data.indexPattern = this.data.searchSource.getField('index');
+
+    try {
+      if (state.data && state.data.searchSource) {
+        this.data.searchSource = await getSearch().searchSource.create(state.data.searchSource!);
+        this.data.indexPattern = this.data.searchSource.getField('index');
+      }
+    } catch (e) {
+      // nothing to be here
     }
     if (state.data && state.data.savedSearchId) {
       this.data.savedSearchId = state.data.savedSearchId;
@@ -137,19 +149,24 @@ export class Vis<TVisParams = VisParams> {
     if (state.data && (state.data.aggs || !this.data.aggs)) {
       const aggs = state.data.aggs ? cloneDeep(state.data.aggs) : [];
       const configStates = this.initializeDefaultsFromSchemas(aggs, this.type.schemas.all || []);
-      if (!this.data.indexPattern) {
-        if (aggs.length) {
-          const errorMessage = i18n.translate(
-            'visualizations.initializeWithoutIndexPatternErrorMessage',
-            {
-              defaultMessage: 'Trying to initialize aggs without index pattern',
-            }
-          );
-          throw new Error(errorMessage);
-        }
-        return;
+
+      if (!this.data.indexPattern && aggs.length) {
+        this.data.indexPattern = new DataView({
+          spec: {
+            id: state.data.searchSource?.index,
+            title: i18n.translate('visualizations.noDataView.text', {
+              defaultMessage: 'Data view not found',
+            }),
+          },
+          fieldFormats: getFieldsFormats(),
+        });
+        this.data.searchSource = await getSearch().searchSource.createEmpty();
+        this.data.searchSource?.setField('index', this.data.indexPattern);
       }
-      this.data.aggs = getAggs().createAggConfigs(this.data.indexPattern, configStates);
+
+      if (this.data.indexPattern) {
+        this.data.aggs = getAggs().createAggConfigs(this.data.indexPattern, configStates);
+      }
     }
   }
 

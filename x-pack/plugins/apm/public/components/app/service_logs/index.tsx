@@ -36,7 +36,7 @@ export function ServiceLogs() {
     (callApmApi) => {
       if (start && end) {
         return callApmApi(
-          'GET /internal/apm/services/{serviceName}/infrastructure',
+          'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs',
           {
             params: {
               path: { serviceName },
@@ -97,7 +97,7 @@ export function ServiceLogs() {
 
 export const getInfrastructureKQLFilter = (
   data:
-    | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure'>
+    | APIReturnType<'GET /internal/apm/services/{serviceName}/infrastructure_attributes_for_logs'>
     | undefined,
   serviceName: string
 ) => {
