@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { waitFor, act, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestProviders } from '../../mock';
@@ -39,21 +39,19 @@ jest.mock('../../lib/kibana', () => {
 
 const eventId = '1c84d9bff4884dabe6aa1bb15f08433463b848d9269e587078dc56669550d27a';
 
-describe.skip('Related Cases', () => {
+describe('Related Cases', () => {
   describe('When user does not have cases read permissions', () => {
-    test('should not show related cases when user does not have permissions', async () => {
+    test('should not show related cases when user does not have permissions', () => {
       (useGetUserCasesPermissions as jest.Mock).mockReturnValue({
         read: false,
       });
-      await act(async () => {
-        render(
-          <TestProviders>
-            <RelatedCases eventId={eventId} />
-          </TestProviders>
-        );
-      });
+      render(
+        <TestProviders>
+          <RelatedCases eventId={eventId} />
+        </TestProviders>
+      );
 
-      await waitFor(() => expect(screen.queryByText('cases')).toBeNull());
+      expect(screen.queryByText('cases')).toBeNull();
     });
   });
   describe('When user does have case read permissions', () => {
@@ -66,31 +64,26 @@ describe.skip('Related Cases', () => {
     describe('When related cases are unable to be retrieved', () => {
       test('should show 0 related cases when there are none', async () => {
         mockGetRelatedCases.mockReturnValue([]);
-        await act(async () => {
-          render(
-            <TestProviders>
-              <RelatedCases eventId={eventId} />
-            </TestProviders>
-          );
-          await waitFor(async () => {
-            expect(await screen.findByText('0 cases.')).toBeInTheDocument();
-          });
-        });
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
+
+        expect(await screen.findByText('0 cases.')).toBeInTheDocument();
       });
     });
 
     describe('When 1 related case is retrieved', () => {
       test('should show 1 related case', async () => {
         mockGetRelatedCases.mockReturnValue([{ id: '789', title: 'Test Case' }]);
-        await act(async () => {
-          render(
-            <TestProviders>
-              <RelatedCases eventId={eventId} />
-            </TestProviders>
-          );
-          expect(await screen.findByText('1 case:')).toBeInTheDocument();
-          expect(await screen.findByTestId('case-details-link')).toHaveTextContent('Test Case');
-        });
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
+        expect(await screen.findByText('1 case:')).toBeInTheDocument();
+        expect(await screen.findByTestId('case-details-link')).toHaveTextContent('Test Case');
       });
     });
 
@@ -100,20 +93,16 @@ describe.skip('Related Cases', () => {
           { id: '789', title: 'Test Case 1' },
           { id: '456', title: 'Test Case 2' },
         ]);
-        await act(async () => {
-          render(
-            <TestProviders>
-              <RelatedCases eventId={eventId} />
-            </TestProviders>
-          );
-          await waitFor(async () => {
-            expect(await screen.findByText('2 cases:')).toBeInTheDocument();
-            const cases = await screen.findAllByTestId('case-details-link');
-            expect(cases).toHaveLength(2);
-            expect(cases[0]).toHaveTextContent('Test Case 1');
-            expect(cases[1]).toHaveTextContent('Test Case 2');
-          });
-        });
+        render(
+          <TestProviders>
+            <RelatedCases eventId={eventId} />
+          </TestProviders>
+        );
+        expect(await screen.findByText('2 cases:')).toBeInTheDocument();
+        const cases = await screen.findAllByTestId('case-details-link');
+        expect(cases).toHaveLength(2);
+        expect(cases[0]).toHaveTextContent('Test Case 1');
+        expect(cases[1]).toHaveTextContent('Test Case 2');
       });
     });
   });
