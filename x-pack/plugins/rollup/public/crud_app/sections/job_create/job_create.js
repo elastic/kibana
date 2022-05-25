@@ -336,8 +336,12 @@ export class JobCreateUi extends Component {
 
     return stepIds.map((stepId, index) => ({
       title: stepIdToTitleMap[stepId],
-      isComplete: index < indexOfCurrentStep,
-      isSelected: index === indexOfCurrentStep,
+      status:
+        index === indexOfCurrentStep
+          ? 'selected'
+          : index < indexOfCurrentStep
+          ? 'complete'
+          : 'incomplete',
       onClick: () => this.goToStep(stepId),
       disabled:
         !this.canGoToStep(stepId) || stepIds.indexOf(stepId) > stepIds.indexOf(checkpointStepId),
