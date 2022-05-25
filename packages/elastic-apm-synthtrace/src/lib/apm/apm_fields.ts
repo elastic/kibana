@@ -50,7 +50,9 @@ export type ApmFields = Fields &
     'error.grouping_name': string;
     'error.grouping_key': string;
     'host.name': string;
+    'host.hostname': string;
     'kubernetes.pod.uid': string;
+    'kubernetes.pod.name': string;
     'metricset.name': string;
     observer: Observer;
     'parent.id': string;
