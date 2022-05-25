@@ -49,10 +49,9 @@ describe('useGetCaseMetrics', () => {
     });
 
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(
-        () => useFetchCaseMetrics(basicCase.id, features),
-        { wrapper }
-      );
+      const { waitForNextUpdate } = renderHook(() => useFetchCaseMetrics(basicCase.id, features), {
+        wrapper,
+      });
       await waitForNextUpdate();
       expect(spyOnGetCaseMetrics).toBeCalledWith(basicCase.id, features, abortCtrl.signal);
       expect(addError).toHaveBeenCalled();
