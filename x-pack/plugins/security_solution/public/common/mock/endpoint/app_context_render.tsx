@@ -34,7 +34,7 @@ import { ExperimentalFeatures } from '../../../../common/experimental_features';
 import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { getDeepLinks } from '../../../app/deep_links';
-import { fleetGetPackageListHttpMock } from '../../../management/pages/mocks';
+import { fleetGetPackageListHttpMock } from '../../../management/mocks';
 
 export type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
