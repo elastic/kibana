@@ -10,6 +10,7 @@ import React, { FC, memo, useCallback, useMemo, useState, useEffect } from 'reac
 import styled from 'styled-components';
 import { isEqual, isEmpty } from 'lodash';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
+import usePrevious from 'react-use/lib/usePrevious';
 
 import {
   DEFAULT_INDEX_KEY,
@@ -59,7 +60,6 @@ import { ThreatMatchInput } from '../threatmatch_input';
 import { BrowserField, BrowserFields, useFetchIndex } from '../../../../common/containers/source';
 import { RulePreview } from '../rule_preview';
 import { getIsRulePreviewDisabled } from '../rule_preview/helpers';
-import { usePrevious } from './use_previous';
 
 const CommonUseField = getUseField({ component: Field });
 
