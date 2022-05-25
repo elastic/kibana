@@ -6,7 +6,12 @@
  */
 
 import { isNil, omitBy } from 'lodash';
-import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import {
+  BrowserFields,
+  ConfigKey,
+  MonitorFields,
+  SyntheticsMonitor,
+} from '../../../common/runtime_types';
 import { formatters } from '.';
 
 const UI_KEYS_TO_SKIP = [
@@ -52,3 +57,25 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
 
   return omitBy(formattedMonitor, isNil) as Partial<MonitorFields>;
 };
+
+export const formatHeartbeatRequest = ({
+  monitor,
+  monitorId,
+  customHeartbeatId,
+  customFieldsUnderRoot,
+}: {
+  monitor: SyntheticsMonitor;
+  monitorId: string;
+  customHeartbeatId?: string;
+  customFieldsUnderRoot?: Record<string, unknown>;
+}) => ({
+  ...monitor,
+  id: customHeartbeatId || monitorId,
+  fields: {
+    config_id: monitorId,
+    'monitor.project.name': (monitor as BrowserFields)[ConfigKey.PROJECT_ID] || null,
+    'monitor.project.id': (monitor as BrowserFields)[ConfigKey.PROJECT_ID] || null,
+    ...(customFieldsUnderRoot || {}),
+  },
+  fields_under_root: true,
+});
