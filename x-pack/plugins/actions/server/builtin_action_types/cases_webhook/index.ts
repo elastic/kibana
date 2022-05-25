@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { curry } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
@@ -27,9 +26,10 @@ import {
 } from './schema';
 import { api } from './api';
 import { validate } from './validators';
+import * as i18n from './translations';
 
 const supportedSubActions: string[] = ['pushToService'];
-
+export type ActionParamsType = CasesWebhookActionParamsType;
 export const ActionTypeId = '.cases-webhook';
 // action type definition
 export function getActionType({
@@ -47,9 +47,7 @@ export function getActionType({
   return {
     id: ActionTypeId,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.actions.builtin.casesWebhookTitle', {
-      defaultMessage: 'Cases Webhook',
-    }),
+    name: i18n.NAME,
     validate: {
       config: schema.object(ExternalIncidentServiceConfiguration, {
         validate: curry(validate.config)(configurationUtilities),
