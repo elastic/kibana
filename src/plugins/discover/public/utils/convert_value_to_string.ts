@@ -37,7 +37,7 @@ export const convertValueToString = ({
   const valuesArray = Array.isArray(value) ? value : [value];
   const disableMultiline = options?.allowMultiline === false;
 
-  const stringify = (val: object) => {
+  const stringify = (val: object | string) => {
     return disableMultiline ? JSON.stringify(val) : JSON.stringify(val, null, 2);
   };
 
@@ -59,7 +59,11 @@ export const convertValueToString = ({
         }
       );
 
-      return typeof formattedValue === 'string' ? formattedValue : stringify(formattedValue);
+      if (typeof formattedValue !== 'string' || typeof subValue === 'string') {
+        return stringify(formattedValue);
+      }
+
+      return formattedValue;
     })
     .join(', ');
 
