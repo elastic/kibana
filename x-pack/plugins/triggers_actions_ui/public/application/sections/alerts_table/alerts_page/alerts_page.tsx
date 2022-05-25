@@ -32,6 +32,7 @@ const AlertsPage: React.FunctionComponent = () => {
     featureIds: consumers,
     query: { bool: { must: [] } },
     showExpandToDetails: true,
+    pageSize: 10,
   };
 
   return (

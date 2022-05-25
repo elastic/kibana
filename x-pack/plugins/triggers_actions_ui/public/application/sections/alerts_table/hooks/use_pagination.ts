@@ -49,7 +49,7 @@ export function usePagination({ onPageChange, pageIndex, pageSize, alertsCount }
 
   const paginateFlyout = useCallback(
     (newFlyoutAlertIndex: number) => {
-      const lastPage = Math.floor(alertsCount / pagination.pageSize) - 1;
+      const lastPage = Math.floor(alertsCount / pagination.pageSize);
       if (newFlyoutAlertIndex < 0) {
         setFlyoutAlertIndex(pagination.pageSize - 1);
         onChangePageIndex(pagination.pageIndex === 0 ? lastPage : pagination.pageIndex - 1);
@@ -70,9 +70,11 @@ export function usePagination({ onPageChange, pageIndex, pageSize, alertsCount }
   );
 
   const onPaginateFlyout = useCallback(
-    (nextPageIndex: number) => {
-      nextPageIndex -= pagination.pageSize * pagination.pageIndex;
-      paginateFlyout(nextPageIndex);
+    (nextAlertIndex: number) => {
+      // We want to normalize the index range to just 1 - pageSize to make the above code easier
+      // to manage
+      nextAlertIndex -= pagination.pageSize * pagination.pageIndex;
+      paginateFlyout(nextAlertIndex);
     },
     [paginateFlyout, pagination.pageSize, pagination.pageIndex]
   );
