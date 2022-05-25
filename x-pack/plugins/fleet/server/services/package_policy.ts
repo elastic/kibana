@@ -172,7 +172,7 @@ class PackagePolicyService implements PackagePolicyServiceInterface {
       if (isPackageLimited(pkgInfo)) {
         if (agentPolicy && doesAgentPolicyAlreadyIncludePackage(agentPolicy, pkgInfo.name)) {
           throw new IngestManagerError(
-            `Unable to create agent policy. Integration '${pkgInfo.name}' already exists on this agent policy.`
+            `Unable to create integration policy. Integration '${pkgInfo.name}' already exists on this agent policy.`
           );
         }
       }
