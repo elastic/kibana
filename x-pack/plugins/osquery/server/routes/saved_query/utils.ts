@@ -19,14 +19,16 @@ const getInstallation = async (osqueryContext: OsqueryAppContext) =>
 
 export const getInstalledSavedQueriesMap = async (osqueryContext: OsqueryAppContext) => {
   const installation = await getInstallation(osqueryContext);
+
   if (installation) {
-    return reduce(
+    return reduce<KibanaAssetReference, Record<string, KibanaAssetReference>>(
       installation.installed_kibana,
-      // @ts-expect-error not sure why it shouts, but still it's properly typed
-      (acc: Record<string, KibanaAssetReference>, item: KibanaAssetReference) => {
+      (acc, item) => {
         if (item.type === savedQuerySavedObjectType) {
           return { ...acc, [item.id]: item };
         }
+
+        return acc;
       },
       {}
     );
