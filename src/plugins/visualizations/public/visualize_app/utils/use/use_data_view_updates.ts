@@ -17,9 +17,19 @@ import type {
 } from '../../types';
 import { VisualizeAppState } from '../../types';
 
-export const updateDataView = (visInstance: VisualizeEditorVisInstance, dataView: DataView) => {
+const updateDataView = (
+  services: VisualizeServices,
+  visInstance: VisualizeEditorVisInstance,
+  dataView: DataView
+) => {
+  const initialSerializedVis = visInstance.vis.serialize();
+
   visInstance.vis.data.indexPattern = dataView;
   visInstance.vis.data.searchSource?.setField('index', dataView);
+  visInstance.vis.data.aggs = services.data.search.aggs.createAggConfigs(
+    dataView,
+    initialSerializedVis.data.aggs
+  );
   visInstance.vis.data.savedSearchId = undefined;
 };
 
@@ -41,7 +51,7 @@ export const useDataViewUpdates = (
         ) {
           const selectedDataView = await services.dataViews.get(dataView);
           if (selectedDataView) {
-            updateDataView(visInstance, selectedDataView);
+            updateDataView(services, visInstance, selectedDataView);
             visInstance.embeddableHandler.reload();
             eventEmitter.emit('updateEditor');
           }
@@ -54,5 +64,5 @@ export const useDataViewUpdates = (
     return () => {
       stateUpdatesSubscription?.unsubscribe();
     };
-  }, [appState, eventEmitter, services.dataViews, visInstance]);
+  }, [appState, eventEmitter, services, visInstance]);
 };
