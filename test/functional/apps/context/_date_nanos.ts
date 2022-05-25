@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const dataGrid = getService('dataGrid');
   const security = getService('security');
+  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
 
@@ -55,8 +56,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qjisd');
       await PageObjects.context.clickPredecessorLoadMoreButton();
       await PageObjects.context.clickSuccessorLoadMoreButton();
+      await testSubjects.click('dataGridFullScreenButton');
       const actualRowsText = await dataGrid.getRowsText();
-      await PageObjects.common.sleep(10000);
       const expectedRowsText = [
         'Sep 22, 2019 @ 23:50:13.2531233455',
         'Sep 18, 2019 @ 06:50:13.0000001044',
