@@ -21,7 +21,7 @@ If you don't specify an encryption key, {kib} might disable features that rely o
 
 [TIP]
 ============================================================================
-For help generating the encryption key, see the <<kibana-encryption-keys, `kibana-encryption-keys`>> script.
+For help generating the encryption key, refer to the <<kibana-encryption-keys, `kibana-encryption-keys`>> script.
 ============================================================================
 
 [[encryption-key-rotation]]
@@ -54,9 +54,9 @@ At some point, you might want to dispose of old encryption keys completely. Make
 [[encryption-key-docker-configuration]]
 ==== Docker configuration
 
-It's also possible to configure the encryption keys using <<environment-variable-config,Docker Environment Variables>>.
+It's also possible to configure the encryption keys using <<environment-variable-config,Docker environment variables>>.
 
-Docker Environment Variable Examples:
+Docker environment variable examples:
 
 [source,sh]
 --------------------------------------------------------------------------------

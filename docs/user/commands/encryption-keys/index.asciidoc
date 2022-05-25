@@ -28,7 +28,7 @@ From here, you should manually copy the keys into either `kibana.yml` or where e
 +
 `-i, --interactive`::: Prompts you for which encryption keys to set and optionally where to save a sample configuration file.
 `-q, --quiet`::: Outputs the config options/encryption keys only (without helper information).
-`-f, --force`::: Generate new keys for all settings. By default, only un-configured encryption keys will be generated.
+`-f, --force`::: Generates new keys for all settings. By default, only un-configured encryption keys will be generated.
 `-h, --help`::: Shows help information.
 
 [discrete]
