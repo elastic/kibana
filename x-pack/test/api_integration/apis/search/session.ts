@@ -132,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(updatedSession.name).to.equal(newName);
       });
 
-      it('should sync search ids into persisted session', async () => {
+      it.skip('should sync search ids into persisted session', async () => {
         const sessionId = `my-session-${Math.random()}`;
 
         // run search
