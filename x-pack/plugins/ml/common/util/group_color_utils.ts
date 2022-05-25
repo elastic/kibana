@@ -7,7 +7,7 @@
 
 import { euiDarkVars as euiVars } from '@kbn/ui-theme';
 
-import { stringHash } from './string_utils';
+import { stringHash } from '@kbn/ml-data-utils';
 
 const COLORS = [
   euiVars.euiColorVis0,

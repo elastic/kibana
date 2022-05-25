@@ -18,8 +18,8 @@ import type {
 import {
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
-} from '../../../../../common/utils/query_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
+  isPopulatedObject,
+} from '@kbn/ml-data-utils';
 import type { FieldStatsCommonRequestParams } from '../../../../../common/types/field_stats';
 import type { Field, DateFieldStats, Aggs } from '../../../../../common/types/field_stats';
 import { FieldStatsError, isIKibanaSearchResponse } from '../../../../../common/types/field_stats';

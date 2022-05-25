@@ -3235,6 +3235,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-data-utils@link:bazel-bin/x-pack/packages/ml/data-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/monaco@link:bazel-bin/packages/kbn-monaco":
   version "0.0.0"
   uid ""
@@ -6607,6 +6611,10 @@
   uid ""
 
 "@types/kbn__mapbox-gl@link:bazel-bin/packages/kbn-mapbox-gl/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__ml-data-utils@link:bazel-bin/x-pack/packages/ml/data-utils/npm_module_types":
   version "0.0.0"
   uid ""
 

@@ -7,8 +7,9 @@
 
 import Boom from '@hapi/boom';
 
+import { isPopulatedObject } from '@kbn/ml-data-utils';
+
 import { NODES_INFO_PRIVILEGES } from '../../../common/constants';
-import { isPopulatedObject } from '../../../common/shared_imports';
 
 import { RouteDependencies } from '../../types';
 

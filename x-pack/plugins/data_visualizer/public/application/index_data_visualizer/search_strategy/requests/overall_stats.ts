@@ -10,13 +10,15 @@ import { get } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import {
-  buildBaseFilterCriteria,
   buildSamplerAggregation,
-  getSafeAggregationName,
   getSamplerAggregationsResponsePath,
+  isPopulatedObject,
+} from '@kbn/ml-data-utils';
+import {
+  buildBaseFilterCriteria,
+  getSafeAggregationName,
 } from '../../../../../common/utils/query_utils';
 import { getDatafeedAggregations } from '../../../../../common/utils/datafeed_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
 import { AggregatableField, NonAggregatableField } from '../../types/overall_stats';
 import { AggCardinality, Aggs } from '../../../../../common/types/field_stats';
 

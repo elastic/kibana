@@ -17,8 +17,8 @@ import type {
 import {
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
-} from '../../../../../common/utils/query_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
+  isPopulatedObject,
+} from '@kbn/ml-data-utils';
 import type {
   Field,
   BooleanFieldStats,

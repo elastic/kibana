@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isPopulatedObject } from '../shared_imports';
+import { isPopulatedObject } from '@kbn/ml-data-utils';
 
 export interface ErrorResponse {
   body: {

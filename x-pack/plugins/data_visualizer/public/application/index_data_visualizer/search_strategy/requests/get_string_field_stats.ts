@@ -15,12 +15,12 @@ import type {
   ISearchOptions,
   ISearchStart,
 } from '@kbn/data-plugin/public';
-import { SAMPLER_TOP_TERMS_SHARD_SIZE, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import {
   buildSamplerAggregation,
   getSamplerAggregationsResponsePath,
-} from '../../../../../common/utils/query_utils';
-import { isPopulatedObject } from '../../../../../common/utils/object_utils';
+  isPopulatedObject,
+} from '@kbn/ml-data-utils';
+import { SAMPLER_TOP_TERMS_SHARD_SIZE, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {
   Aggs,
   Bucket,
