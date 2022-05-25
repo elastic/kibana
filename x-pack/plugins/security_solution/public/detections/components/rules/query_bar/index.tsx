@@ -29,7 +29,7 @@ import * as i18n from './translations';
 export interface FieldValueQueryBar {
   filters: Filter[];
   query: Query;
-  saved_id?: string | null;
+  saved_id: string | null;
 }
 interface QueryBarDefineRuleProps {
   browserFields: BrowserFields;
