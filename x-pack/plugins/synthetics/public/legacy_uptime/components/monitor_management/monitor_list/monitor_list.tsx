@@ -36,6 +36,7 @@ import * as labels from '../../overview/monitor_list/translations';
 import { Actions } from './actions';
 import { MonitorEnabled } from './monitor_enabled';
 import { MonitorLocations } from './monitor_locations';
+import { ManagementSettingsPortal } from './management_settings_portal';
 import { MonitorTags } from './tags';
 
 export interface MonitorManagementListPageState {
@@ -222,6 +223,7 @@ export const MonitorManagementList = ({
 
   return (
     <EuiPanel hasBorder>
+      <ManagementSettingsPortal />
       <EuiSpacer size="m" />
       <EuiBasicTable
         aria-label={i18n.translate('xpack.synthetics.monitorManagement.monitorList.title', {

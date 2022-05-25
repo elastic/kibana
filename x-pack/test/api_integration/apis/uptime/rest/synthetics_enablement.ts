@@ -57,6 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
 
             expect(apiResponse.body).eql({
               areApiKeysEnabled: true,
+              canManageApiKeys: true,
               canEnable: true,
               isEnabled: false,
             });
@@ -98,6 +99,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponse.body).eql({
             areApiKeysEnabled: true,
+            canManageApiKeys: false,
             canEnable: false,
             isEnabled: false,
           });
@@ -148,6 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponse.body).eql({
             areApiKeysEnabled: true,
+            canManageApiKeys: true,
             canEnable: true,
             isEnabled: true,
           });
@@ -197,6 +200,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
           expect(apiResponse.body).eql({
             areApiKeysEnabled: true,
+            canManageApiKeys: false,
             canEnable: false,
             isEnabled: false,
           });
@@ -252,6 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponse.body).eql({
             areApiKeysEnabled: true,
+            canManageApiKeys: true,
             canEnable: true,
             isEnabled: false,
           });
@@ -300,6 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
             .expect(200);
           expect(apiResponse.body).eql({
             areApiKeysEnabled: true,
+            canManageApiKeys: false,
             canEnable: false,
             isEnabled: true,
           });
@@ -361,6 +367,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponse.body).eql({
             areApiKeysEnabled: true,
+            canManageApiKeys: true,
             canEnable: true,
             isEnabled: false,
           });
@@ -384,6 +391,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           expect(apiResponse2.body).eql({
             areApiKeysEnabled: true,
+            canManageApiKeys: true,
             canEnable: true,
             isEnabled: false,
           });

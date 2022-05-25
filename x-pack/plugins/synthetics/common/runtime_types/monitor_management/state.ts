@@ -23,6 +23,7 @@ export type FetchMonitorManagementListQueryArgs = t.TypeOf<
 export const MonitorManagementEnablementResultCodec = t.type({
   isEnabled: t.boolean,
   canEnable: t.boolean,
+  canManageApiKeys: t.boolean,
   areApiKeysEnabled: t.boolean,
 });
 

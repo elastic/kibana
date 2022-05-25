@@ -11,9 +11,10 @@ import type {
 import { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import {
-  getSyntheticsServiceAPIKey,
   deleteSyntheticsServiceApiKey,
+  getSyntheticsServiceAPIKey,
   setSyntheticsServiceApiKey,
   syntheticsServiceApiKey,
 } from '../legacy_uptime/lib/saved_objects/service_api_key';
@@ -56,17 +57,16 @@ export const getAPIKeyForSyntheticsService = async ({
   }
 };
 
-export const generateAndSaveServiceAPIKey = async ({
+export const generateAPIKey = async ({
   server,
   security,
   request,
-  authSavedObjectsClient,
+  uptimePrivileges = false,
 }: {
   server: UptimeServerSetup;
   request?: KibanaRequest;
   security: SecurityPluginStart;
-  // authSavedObject is needed for write operations
-  authSavedObjectsClient?: SavedObjectsClientContract;
+  uptimePrivileges?: boolean;
 }) => {
   const isApiKeysEnabled = await security.authc.apiKeys?.areAPIKeysEnabled();
 
@@ -83,7 +83,31 @@ export const generateAndSaveServiceAPIKey = async ({
     throw new SyntheticsForbiddenError();
   }
 
-  const apiKeyResult = await security.authc.apiKeys?.create(request, {
+  if (uptimePrivileges) {
+    return security.authc.apiKeys?.create(request, {
+      name: 'uptime-api-key',
+      kibana_role_descriptors: {
+        uptime_save: {
+          elasticsearch: {},
+          kibana: [
+            {
+              base: [],
+              spaces: [ALL_SPACES_ID],
+              feature: {
+                uptime: ['all'],
+              },
+            },
+          ],
+        },
+      },
+      metadata: {
+        description:
+          'Created for the Synthetics Agent to be able to communicate with Kibana for generating monitors for projects',
+      },
+    });
+  }
+
+  return security.authc.apiKeys?.create(request, {
     name: 'synthetics-api-key',
     role_descriptors: {
       synthetics_writer: serviceApiKeyPrivileges,
@@ -93,6 +117,21 @@ export const generateAndSaveServiceAPIKey = async ({
         'Created for synthetics service to be passed to the heartbeat to communicate with ES',
     },
   });
+};
+
+export const generateAndSaveServiceAPIKey = async ({
+  server,
+  security,
+  request,
+  authSavedObjectsClient,
+}: {
+  server: UptimeServerSetup;
+  request?: KibanaRequest;
+  security: SecurityPluginStart;
+  // authSavedObject is needed for write operations
+  authSavedObjectsClient?: SavedObjectsClientContract;
+}) => {
+  const apiKeyResult = await generateAPIKey({ server, request, security });
 
   if (apiKeyResult) {
     const { id, name, api_key: apiKey } = apiKeyResult;
@@ -162,6 +201,7 @@ export const getSyntheticsEnablement = async ({
 
   return {
     canEnable: canManageApiKeys && hasClusterPermissions && hasIndexPermissions,
+    canManageApiKeys,
     isEnabled: Boolean(apiKey),
     areApiKeysEnabled,
   };

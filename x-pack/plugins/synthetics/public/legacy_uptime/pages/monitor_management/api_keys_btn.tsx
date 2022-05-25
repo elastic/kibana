@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { OutPortal } from 'react-reverse-portal';
-import { ActionBarPortalNode } from './portals';
+import { APIKeysPortalNode } from './portals';
 
-export const MonitorManagementBottomBar = () => {
+export const APIKeysButton = () => {
   return (
     <div>
-      <OutPortal node={ActionBarPortalNode} />
+      <OutPortal node={APIKeysPortalNode} />
     </div>
   );
 };
