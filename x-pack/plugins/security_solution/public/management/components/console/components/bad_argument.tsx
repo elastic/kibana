@@ -46,7 +46,7 @@ export const BadArgument = memo<CommandExecutionComponentProps>(({ command, setS
         <CommandInputUsage commandDef={command.commandDefinition} />
         <EuiText size="s">
           <FormattedMessage
-            id="xpack.securitySolution.console.unknownCommand.helpMessage"
+            id="xpack.securitySolution.console.badArgument.helpMessage"
             defaultMessage="Type {helpCmd} for assistance."
             values={{
               helpCmd: <EuiCode>{`${command.commandDefinition.name} --help`}</EuiCode>,
