@@ -9,12 +9,8 @@ import React from 'react';
 
 import { ActionCell } from './action_cell';
 import { FieldValueCell } from './field_value_cell';
-import { AlertSummaryRow } from '../helpers';
+import { AlertSummaryRow, hasHoverOrRowActions } from '../helpers';
 import { TimelineId } from '../../../../../common/types';
-
-import { AGENT_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
-
-const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = { [AGENT_STATUS_FIELD_NAME]: true };
 
 const style = { flexGrow: 0 };
 
@@ -28,7 +24,7 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   values,
   isReadOnly,
 }) => {
-  const hoverActionsEnabled = !FIELDS_WITHOUT_ACTIONS[data.field];
+  const hoverActionsEnabled = hasHoverOrRowActions(data.field);
 
   return (
     <>
