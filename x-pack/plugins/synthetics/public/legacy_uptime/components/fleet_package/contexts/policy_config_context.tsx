@@ -11,6 +11,7 @@ import { MONITOR_ADD_ROUTE } from '../../../../../common/constants';
 import { DEFAULT_NAMESPACE_STRING } from '../../../../../common/constants/monitor_defaults';
 import {
   ScheduleUnit,
+  SourceType,
   MonitorServiceLocations,
   ThrottlingOptions,
   DEFAULT_THROTTLING,
@@ -41,6 +42,7 @@ interface IPolicyConfigContext {
   defaultNamespace?: string;
   namespace?: string;
   throttling: ThrottlingOptions;
+  sourceType?: SourceType;
 }
 
 export interface IPolicyConfigContextProvider {
@@ -56,6 +58,7 @@ export interface IPolicyConfigContextProvider {
   isZipUrlSourceEnabled?: boolean;
   allowedScheduleUnits?: ScheduleUnit[];
   throttling?: ThrottlingOptions;
+  sourceType?: SourceType;
 }
 
 export const initialMonitorTypeValue = DataStream.HTTP;
@@ -93,6 +96,7 @@ export const defaultContext: IPolicyConfigContext = {
   allowedScheduleUnits: [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
   defaultNamespace: DEFAULT_NAMESPACE_STRING,
   throttling: DEFAULT_THROTTLING,
+  sourceType: SourceType.UI,
 };
 
 export const PolicyConfigContext = createContext(defaultContext);
@@ -110,6 +114,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   runsOnService = false,
   isZipUrlSourceEnabled = true,
   allowedScheduleUnits = [ScheduleUnit.MINUTES, ScheduleUnit.SECONDS],
+  sourceType,
 }: IPolicyConfigContextProvider) {
   const [monitorType, setMonitorType] = useState<DataStream>(defaultMonitorType);
   const [name, setName] = useState<string>(defaultName);
@@ -121,10 +126,10 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
   const isAddMonitorRoute = useRouteMatch(MONITOR_ADD_ROUTE);
 
   useEffect(() => {
-    if (isAddMonitorRoute) {
+    if (isAddMonitorRoute?.isExact) {
       setMonitorType(DataStream.BROWSER);
     }
-  }, [isAddMonitorRoute]);
+  }, [isAddMonitorRoute?.isExact]);
 
   const value = useMemo(() => {
     return {
@@ -150,6 +155,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
       namespace,
       setNamespace,
       throttling,
+      sourceType,
     } as IPolicyConfigContext;
   }, [
     monitorType,
@@ -168,6 +174,7 @@ export function PolicyConfigContextProvider<ExtraFields = unknown>({
     allowedScheduleUnits,
     namespace,
     throttling,
+    sourceType,
   ]);
 
   return <PolicyConfigContext.Provider value={value} children={children} />;
