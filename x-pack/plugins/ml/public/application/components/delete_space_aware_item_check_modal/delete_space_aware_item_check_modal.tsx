@@ -367,19 +367,21 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
                   )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  onClick={
-                    itemCheckRespSummary?.canTakeAnyAction &&
-                    itemCheckRespSummary?.canRemoveFromSpace &&
-                    !itemCheckRespSummary?.canDelete
-                      ? onUntagClick
-                      : onClick
-                  }
-                  fill
-                >
-                  {buttonContent}
-                </EuiButton>
+                {buttonContent === undefined ? null : (
+                  <EuiButton
+                    size="s"
+                    onClick={
+                      itemCheckRespSummary?.canTakeAnyAction &&
+                      itemCheckRespSummary?.canRemoveFromSpace &&
+                      !itemCheckRespSummary?.canDelete
+                        ? onUntagClick
+                        : onClick
+                    }
+                    fill
+                  >
+                    {buttonContent}
+                  </EuiButton>
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiModalFooter>
