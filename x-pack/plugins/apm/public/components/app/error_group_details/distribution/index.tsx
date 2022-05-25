@@ -17,6 +17,7 @@ import {
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
@@ -41,6 +42,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   const { urlParams } = useLegacyUrlParams();
   const { comparisonEnabled } = urlParams;
 
+  const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
       data: distribution.currentPeriod,
@@ -54,10 +56,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
           {
             data: distribution.previousPeriod,
             color: theme.eui.euiColorMediumShade,
-            title: i18n.translate(
-              'xpack.apm.errorGroup.chart.ocurrences.previousPeriodLabel',
-              { defaultMessage: 'Previous period' }
-            ),
+            title: previousPeriodLabel,
           },
         ]
       : []),
