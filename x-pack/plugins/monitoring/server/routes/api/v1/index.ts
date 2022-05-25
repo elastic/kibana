@@ -16,3 +16,4 @@ export { registerV1EnterpriseSearchRoutes } from './enterprise_search';
 export { registerV1HealthRoute } from './_health';
 export { registerV1LogstashRoutes } from './logstash';
 export { registerV1SetupRoutes } from './setup';
+export { registerV1KibanaRoutes } from './kibana';
