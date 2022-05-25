@@ -175,12 +175,6 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(indexIndexPatterns);
 
   useEffect(() => {
-    if (ruleIndices != null && (dataViewId === '' || dataViewId == null)) {
-      setIndexPattern(indexIndexPatterns);
-    }
-  }, [dataViewId, indexIndexPatterns, ruleIndices]);
-
-  useEffect(() => {
     const fetchSingleDataView = async () => {
       if (dataViewId != null && dataViewId !== '') {
         const dv = await data.dataViews.get(dataViewId);
