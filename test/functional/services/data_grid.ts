@@ -121,6 +121,17 @@ export class DataGridService extends FtrService {
     return this.getDocTableRows();
   }
 
+  public async getRowsText() {
+    const table = await this.getTable();
+    const rows = await table.findAllByCssSelector('.euiDataGridRow');
+
+    const rowsText = [];
+    for (const row of rows) {
+      rowsText.push((await row.getVisibleText()).replace(/[\r\n]/gm, ''));
+    }
+    return rowsText;
+  }
+
   /**
    * Returns an array of rows (which are array of cells)
    */

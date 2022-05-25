@@ -39,13 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('displays predecessors - anchor - successors in right order for data grid', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, '1');
-      const table = await dataGrid.getTable();
-      const rows = await table.findAllByCssSelector('.euiDataGridRow > :nth-child(2)');
-
-      const actualRowsText = [];
-      for (const row of rows) {
-        actualRowsText.push(await row.getVisibleText());
-      }
+      const actualRowsText = await dataGrid.getRowsText();
 
       const expectedRowsText = [
         'Oct 21, 2019 @ 08:30:04.828733000',

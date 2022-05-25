@@ -16,6 +16,7 @@ const TEST_STEP_SIZE = 3;
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const docTable = getService('docTable');
+  const dataGrid = getService('dataGrid');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
@@ -30,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
-        'doc_table:legacy': true,
+        'doc_table:legacy': false,
       });
     });
 
@@ -40,7 +41,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
 
-    it('displays predessors - anchor - successors in right order ', async function () {
+    it('displays predecessors - anchor - successors in right order using data grid', async function () {
+      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qj999Z');
+      const actualRowsText = await dataGrid.getRowsText();
+      const expectedRowsText = [
+        'Sep 18, 2019 @ 06:50:13.000000000-2',
+        'Sep 18, 2019 @ 06:50:12.999999999-3',
+        'Sep 19, 2015 @ 06:50:13.0001000011',
+      ];
+      expect(actualRowsText).to.eql(expectedRowsText);
+    });
+
+    it('displays correctly when predecessors and successors are loaded using data grid', async function () {
+      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qjisd');
+      await PageObjects.context.clickPredecessorLoadMoreButton();
+      await PageObjects.context.clickSuccessorLoadMoreButton();
+      const actualRowsText = await dataGrid.getRowsText();
+      await PageObjects.common.sleep(10000);
+      const expectedRowsText = [
+        'Sep 22, 2019 @ 23:50:13.2531233455',
+        'Sep 18, 2019 @ 06:50:13.0000001044',
+        'Sep 18, 2019 @ 06:50:13.0000001032',
+        'Sep 18, 2019 @ 06:50:13.0000001021',
+        'Sep 18, 2019 @ 06:50:13.0000001010',
+        'Sep 18, 2019 @ 06:50:13.000000001-1',
+        'Sep 18, 2019 @ 06:50:13.000000000-2',
+        'Sep 18, 2019 @ 06:50:12.999999999-3',
+        'Sep 19, 2015 @ 06:50:13.0001000011',
+      ];
+      expect(actualRowsText).to.eql(expectedRowsText);
+    });
+
+    it('displays predecessors - anchor - successors in right order using classic table', async function () {
+      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qj999Z');
       const actualRowsText = await docTable.getRowsText();
       const expectedRowsText = [
@@ -51,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(actualRowsText).to.eql(expectedRowsText);
     });
 
-    it('displays correctly when predecessors and successors are loaded', async function () {
+    it('displays correctly when predecessors and successors are loaded using classic table', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qjisd');
       await PageObjects.context.clickPredecessorLoadMoreButton();
       await PageObjects.context.clickSuccessorLoadMoreButton();
