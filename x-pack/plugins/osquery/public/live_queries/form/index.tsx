@@ -374,7 +374,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           <EuiFlexItem>{queryFieldStepContent}</EuiFlexItem>
           <EuiFlexItem>{resultsStepContent}</EuiFlexItem>
         </EuiFlexGroup>
-        <UseField path="savedQueryId" component={GhostFormField} />
       </Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout
