@@ -82,8 +82,13 @@ done <<<"$configs"
 
 echo "--- Replace paths after all configs:"
 fileHeads "target/file-heads-jest-post-thread-and-before-replacement.txt" target/kibana-coverage/jest
-replacePaths "$KIBANA_DIR/target/kibana-coverage/jest"
-fileHeads "target/file-heads-jest-post-thread-and-after-replacement.txt" target/kibana-coverage/jest
+# Nyc uses matching absolute paths for reporting / merging
+# So, set all coverage json files to a specific prefx.
+# The prefix will be changed to the kibana dir, in the final stage,
+# so nyc doesnt error.
+echo "--- Normalize file paths prefix"
+replacePaths "$KIBANA_DIR/target/kibana-coverage/jest" "$KIBANA_DIR" "CC_REPLACEMENT_ANCHOR"
+fileHeads "target/file-heads-jest-after-loop-and-after-replacement.txt" target/kibana-coverage/jest
 
 echo "--- Jest configs complete"
 printf "%s\n" "${results[@]}"

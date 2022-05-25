@@ -17,9 +17,15 @@ dirListing() {
 }
 
 replacePaths() {
-  for x in $(ls "$1"); do
-    echo "### KIBANA_DIR: $KIBANA_DIR"
-    node .buildkite/scripts/steps/code_coverage/clean_coverage_paths.js "$1/$x"
+  local dirName=$1
+  local search=$2
+  local replace=$3
+
+  for x in $(find "$dirName" -maxdepth 1 -type f -name '*.json'); do
+    node .buildkite/scripts/steps/code_coverage/clean_coverage_paths.js \
+      "$x" \
+      "$search" \
+      "$replace"
   done
 }
 
@@ -69,7 +75,7 @@ uploadRanFile() {
 
   local fileName="target/ran_files/$ran.txt"
 
-  echo "$ran" > "$fileName"
+  echo "$ran" >"$fileName"
 
   buildkite-agent artifact upload "$fileName"
 }

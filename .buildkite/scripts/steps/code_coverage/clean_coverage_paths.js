@@ -8,9 +8,10 @@
 
 const { readFileSync, writeFileSync } = require('fs');
 
-const FILE = process.argv[2];
-const replacementAnchor = 'CC_REPLACEMENT_ANCHOR';
+const file = process.argv[2];
+const search = process.argv[3];
+const replace = process.argv[4]
 writeFileSync(
-  FILE,
-  readFileSync(FILE).toString().replaceAll(process.env.KIBANA_DIR, replacementAnchor)
+  file,
+  readFileSync(file).toString().replaceAll(search, replace)
 );

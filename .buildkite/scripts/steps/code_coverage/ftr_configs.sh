@@ -103,8 +103,12 @@ else
   echo "--- Code coverage not found in: $functionalTarget"
 fi
 
-echo "--- Replace paths after all configs:"
-replacePaths "$KIBANA_DIR/target/kibana-coverage/functional"
+# Nyc uses matching absolute paths for reporting / merging
+# So, set all coverage json files to a specific prefx.
+# The prefix will be changed to the kibana dir, in the final stage,
+# so nyc doesnt error.
+echo "--- Normalize file paths prefix"
+replacePaths "$KIBANA_DIR/target/kibana-coverage/functional" "$KIBANA_DIR" "CC_REPLACEMENT_ANCHOR"
 
 if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
