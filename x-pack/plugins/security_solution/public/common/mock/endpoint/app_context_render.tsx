@@ -13,7 +13,15 @@ import { AppDeepLink } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider, setLogger } from 'react-query';
 import { coreMock } from '@kbn/core/public/mocks';
 import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
-import { StartPlugins, StartServices } from '../../../types';
+import {
+  renderHook as reactRenderHoook,
+  RenderHookOptions,
+  RenderHookResult,
+} from '@testing-library/react-hooks';
+import { ReactHooksRenderer, WrapperComponent } from '@testing-library/react-hooks/src/types/react';
+import type { UseBaseQueryResult } from 'react-query/types/react/types';
+import { ConsoleManager } from '../../../management/components/console';
+import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
 import { MiddlewareActionSpyHelper, createSpyMiddleware } from '../../store/test_utils';
 import { kibanaObservable } from '../test_providers';
@@ -29,6 +37,44 @@ import { getDeepLinks } from '../../../app/deep_links';
 import { fleetGetPackageListHttpMock } from '../../../management/pages/mocks';
 
 export type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
+
+/**
+ * Have the renderer wait for one of the ReactQuery state flag properties. Default is `isSuccess`.
+ * To disable this `await`, the value `false` can be used.
+ */
+export type WaitForReactHookState =
+  | keyof Pick<
+      UseBaseQueryResult,
+      | 'isSuccess'
+      | 'isLoading'
+      | 'isError'
+      | 'isIdle'
+      | 'isLoadingError'
+      | 'isStale'
+      | 'isFetched'
+      | 'isFetching'
+      | 'isRefetching'
+    >
+  | false;
+
+type HookRendererFunction<TProps, TResult> = (props: TProps) => TResult;
+
+/**
+ * A utility renderer for hooks that return React Query results
+ */
+export type ReactQueryHookRenderer<
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  TProps = any,
+  TResult extends UseBaseQueryResult = UseBaseQueryResult
+> = (
+  hookFn: HookRendererFunction<TProps, TResult>,
+  /**
+   * If defined (default is `isSuccess`), the renderer will wait for the given react
+   * query response state value to be true
+   */
+  waitForHook?: WaitForReactHookState,
+  options?: RenderHookOptions<TProps>
+) => Promise<TResult>;
 
 // hide react-query output in console
 setLogger({
@@ -60,6 +106,16 @@ export interface AppContextTestRender {
    * endpoint runtime context environment
    */
   render: UiRender;
+
+  /**
+   * Renders a hook within a mocked security solution app context
+   */
+  renderHook: ReactHooksRenderer['renderHook'];
+
+  /**
+   * A helper utility for rendering specifically hooks that wrap ReactQuery
+   */
+  renderReactQueryHook: ReactQueryHookRenderer;
 
   /**
    * Set technical preview features on/off. Calling this method updates the Store with the new values
@@ -136,7 +192,9 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
     <KibanaContextProvider services={startServices}>
       <AppRootProvider store={store} history={history} coreStart={coreStart} depsStart={depsStart}>
-        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+        <QueryClientProvider client={queryClient}>
+          <ConsoleManager>{children}</ConsoleManager>
+        </QueryClientProvider>
       </AppRootProvider>
     </KibanaContextProvider>
   );
@@ -146,6 +204,35 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
       wrapper: AppWrapper,
       ...options,
     });
+  };
+
+  const renderHook: ReactHooksRenderer['renderHook'] = <TProps, TResult>(
+    hookFn: HookRendererFunction<TProps, TResult>,
+    options: RenderHookOptions<TProps> = {}
+  ): RenderHookResult<TProps, TResult> => {
+    return reactRenderHoook<TProps, TResult>(hookFn, {
+      wrapper: AppWrapper as WrapperComponent<TProps>,
+      ...options,
+    });
+  };
+
+  const renderReactQueryHook: ReactQueryHookRenderer = async <
+    TProps,
+    TResult extends UseBaseQueryResult = UseBaseQueryResult
+  >(
+    hookFn: HookRendererFunction<TProps, TResult>,
+    waitForHook: WaitForReactHookState = 'isSuccess',
+    options: RenderHookOptions<TProps> = {}
+  ) => {
+    const { result: hookResult, waitFor } = renderHook<TProps, TResult>(hookFn, options);
+
+    if (waitForHook) {
+      await waitFor(() => {
+        return hookResult.current[waitForHook];
+      });
+    }
+
+    return hookResult.current;
   };
 
   const setExperimentalFlag: AppContextTestRender['setExperimentalFlag'] = (flags) => {
@@ -181,6 +268,8 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     middlewareSpy,
     AppWrapper,
     render,
+    renderHook,
+    renderReactQueryHook,
     setExperimentalFlag,
   };
 };

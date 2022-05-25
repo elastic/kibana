@@ -12,7 +12,7 @@ To get started, open the main menu, click *Dev Tools*, then click *Console*.
 [role="screenshot"]
 image::dev-tools/console/images/console.png["Console"]
 
-NOTE: You cannot to interact with the REST API of {kib} with the Console.
+NOTE: **Console** supports only Elasticsearch APIs. You are unable to interact with the {kib} APIs with **Console** and must use curl or another HTTP tool instead.
 
 [float]
 [[console-api]]

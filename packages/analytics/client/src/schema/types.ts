@@ -31,7 +31,7 @@ export type AllowedSchemaTypes =
 /**
  * Helper to ensure the declared types match the schema types
  */
-export type PossibleSchemaTypes<Value> = Value extends string
+export type PossibleSchemaTypes<Value> = Value extends string | Date
   ? AllowedSchemaStringTypes
   : Value extends number
   ? AllowedSchemaNumberTypes
@@ -66,6 +66,8 @@ export type SchemaValue<Value> =
       : // Otherwise, try to infer the type and enforce the schema
       NonNullable<Value> extends Array<infer U> | ReadonlyArray<infer U>
       ? SchemaArray<U, Value>
+      : NonNullable<Value> extends Date
+      ? SchemaChildValue<Value>
       : NonNullable<Value> extends object
       ? SchemaObject<Value>
       : SchemaChildValue<Value>);

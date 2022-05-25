@@ -6,16 +6,18 @@
  */
 
 import { NerInference } from './ner';
+import { QuestionAnsweringInference } from './question_answering';
 import {
   TextClassificationInference,
   ZeroShotClassificationInference,
   FillMaskInference,
+  LangIdentInference,
 } from './text_classification';
 import { TextEmbeddingInference } from './text_embedding';
-import { LangIdentInference } from './lang_ident';
 
 export type InferrerType =
   | NerInference
+  | QuestionAnsweringInference
   | TextClassificationInference
   | TextEmbeddingInference
   | ZeroShotClassificationInference

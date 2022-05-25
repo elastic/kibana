@@ -79,6 +79,7 @@ export type ColumnHeaderOptions = Pick<
   category?: string;
   columnHeaderType: ColumnHeaderType;
   description?: string | null;
+  esTypes?: string[];
   example?: string | number | null;
   format?: string;
   linkField?: string;

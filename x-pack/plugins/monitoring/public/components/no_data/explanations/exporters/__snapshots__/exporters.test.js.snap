@@ -19,7 +19,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-ilegow-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText euiText--medium eui-textLeft"
@@ -142,7 +142,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-ilegow-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText euiText--medium eui-textLeft"

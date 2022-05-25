@@ -20,5 +20,8 @@ export const searchBarStyles = ({ euiTheme }: UseEuiTheme) => {
     inPage: css`
       padding: 0;
     `,
+    hidden: css`
+      display: none;
+    `,
   };
 };

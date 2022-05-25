@@ -10,7 +10,7 @@ import { relative } from 'path';
 import * as Rx from 'rxjs';
 import { setTimeout } from 'timers/promises';
 import { startWith, switchMap, take } from 'rxjs/operators';
-import { withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner } from '@kbn/dev-proc-runner';
 import { ToolingLog } from '@kbn/tooling-log';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/utils';
@@ -107,14 +107,26 @@ export async function runTests(options: RunTestsParams) {
 
       await withProcRunner(log, async (procs) => {
         const config = await readConfigFile(log, options.esVersion, configPath);
+        const abortCtrl = new AbortController();
+
+        const onEarlyExit = (msg: string) => {
+          log.error(msg);
+          abortCtrl.abort();
+        };
 
         let shutdownEs;
         try {
           if (process.env.TEST_ES_DISABLE_STARTUP !== 'true') {
-            shutdownEs = await runElasticsearch({ ...options, log, config });
+            shutdownEs = await runElasticsearch({ ...options, log, config, onEarlyExit });
+            if (abortCtrl.signal.aborted) {
+              return;
+            }
           }
-          await runKibanaServer({ procs, config, options });
-          await runFtr({ configPath, options: { ...options, log } });
+          await runKibanaServer({ procs, config, options, onEarlyExit });
+          if (abortCtrl.signal.aborted) {
+            return;
+          }
+          await runFtr({ configPath, options: { ...options, log } }, abortCtrl.signal);
         } finally {
           try {
             const delay = config.get('kbnTestServer.delayShutdown');

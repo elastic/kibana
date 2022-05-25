@@ -44,6 +44,8 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
         field={INDICATOR_MATCHED_FIELD}
         isDraggable={isDraggable}
         value={sourceField}
+        isAggregatable={true}
+        fieldType={'keyword'}
       />
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
@@ -62,6 +64,8 @@ export const MatchDetails: React.FC<MatchDetailsProps> = ({
         field={sourceField}
         isDraggable={isDraggable}
         value={sourceValue}
+        isAggregatable={true}
+        fieldType={'keyword'}
       />
     </EuiFlexItem>
   </EuiFlexGroup>

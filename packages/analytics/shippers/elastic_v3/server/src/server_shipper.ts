@@ -258,17 +258,21 @@ export class ElasticV3ServerShipper implements IShipper {
   }
 
   private async sendEvents(events: Event[]) {
+    this.initContext.logger.debug(`Reporting ${events.length} events...`);
     try {
       const code = await this.makeRequest(events);
       this.reportTelemetryCounters(events, { code });
+      this.initContext.logger.debug(`Reported ${events.length} events...`);
     } catch (error) {
+      this.initContext.logger.debug(`Failed to report ${events.length} events...`);
+      this.initContext.logger.debug(error);
       this.reportTelemetryCounters(events, { code: error.code, error });
       this.firstTimeOffline = undefined;
     }
   }
 
   private async makeRequest(events: Event[]): Promise<string> {
-    const { status, text, ok } = await fetch(this.url, {
+    const response = await fetch(this.url, {
       method: 'POST',
       body: eventsToNDJSON(events),
       headers: buildHeaders(this.clusterUuid, this.options.version, this.licenseId),
@@ -276,15 +280,16 @@ export class ElasticV3ServerShipper implements IShipper {
     });
 
     if (this.options.debug) {
-      this.initContext.logger.debug(
-        `[${ElasticV3ServerShipper.shipperName}]: ${status} - ${await text()}`
+      this.initContext.logger.debug(`${response.status} - ${await response.text()}`);
+    }
+
+    if (!response.ok) {
+      throw new ErrorWithCode(
+        `${response.status} - ${await response.text()}`,
+        `${response.status}`
       );
     }
 
-    if (!ok) {
-      throw new ErrorWithCode(`${status} - ${await text()}`, `${status}`);
-    }
-
-    return `${status}`;
+    return `${response.status}`;
   }
 }

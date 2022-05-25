@@ -17,7 +17,9 @@ import Url from 'url';
 import readline from 'readline';
 import Fs from 'fs';
 
-import { RunWithCommands, createFlagError, CA_CERT_PATH } from '@kbn/dev-utils';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { RunWithCommands } from '@kbn/dev-cli-runner';
+import { createFlagError } from '@kbn/dev-cli-errors';
 import { readConfigFile, KbnClient, EsVersion } from '@kbn/test';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 
@@ -33,7 +35,7 @@ export function runCli() {
       string: ['es-url', 'kibana-url', 'config', 'es-ca', 'kibana-ca'],
       help: `
         --config           path to an FTR config file that sets --es-url and --kibana-url
-                             default: ${defaultConfigPath}
+                             default: ${Path.relative(process.cwd(), defaultConfigPath)}
         --es-url           url for Elasticsearch, prefer the --config flag
         --kibana-url       url for Kibana, prefer the --config flag
         --kibana-ca        if Kibana url points to https://localhost we default to the CA from @kbn/dev-utils, customize the CA with this flag

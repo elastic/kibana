@@ -47,7 +47,7 @@ interface DataViewInfo {
  * HOT Code path where the fields can be 16087 in length or larger. This is
  * VERY mutatious on purpose to improve the performance of the transform.
  */
-const getDataViewStateFromIndexFields = memoizeOne(
+export const getDataViewStateFromIndexFields = memoizeOne(
   (_title: string, fields: IndexField[]): DataViewInfo => {
     // Adds two dangerous casts to allow for mutations within this function
     type DangerCastForMutation = Record<string, {}>;

@@ -10,7 +10,7 @@ import { writeFileSync } from 'fs';
 import { resolve } from 'path';
 import { isNull, isUndefined } from 'lodash';
 
-import { run } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
 
 import { getInstalledPackages } from './npm';
 import { engines } from '../../package.json';

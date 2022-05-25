@@ -15,7 +15,7 @@ import { IDataPluginServices } from '@kbn/data-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FilterItem } from './filter_item';
+import { FilterItem, FilterItemProps } from './filter_item';
 
 export interface Props {
   filters: Filter[];
@@ -23,6 +23,7 @@ export interface Props {
   indexPatterns: DataView[];
   intl: InjectedIntl;
   timeRangeForSuggestionsOverride?: boolean;
+  hiddenPanelOptions?: FilterItemProps['hiddenPanelOptions'];
 }
 
 const FilterItemsUI = React.memo(function FilterItemsUI(props: Props) {
@@ -56,6 +57,7 @@ const FilterItemsUI = React.memo(function FilterItemsUI(props: Props) {
           onRemove={() => onRemove(i)}
           indexPatterns={props.indexPatterns}
           uiSettings={uiSettings!}
+          hiddenPanelOptions={props.hiddenPanelOptions}
           timeRangeForSuggestionsOverride={props.timeRangeForSuggestionsOverride}
         />
       </EuiFlexItem>

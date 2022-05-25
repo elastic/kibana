@@ -56,7 +56,7 @@ const generatedActionsPercentilesAgg = {
 
 const alertsPercentilesAgg = {
   percentiles: {
-    field: 'kibana.alert.rule.execution.metrics.total_number_of_alerts',
+    field: 'kibana.alert.rule.execution.metrics.alert_counts.active',
     percents: [50, 90, 99],
   },
 };
