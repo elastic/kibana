@@ -114,5 +114,8 @@ echo "--- FTR configs complete, result(s):"
 printf "%s\n" "${results[@]}"
 echo ""
 
+# So the last step "knows" this config ran
+uploadRanFile "ftr_configs"
+
 # Force exit 0 to ensure the next build step starts.
 exit 0

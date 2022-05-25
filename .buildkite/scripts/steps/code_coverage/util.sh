@@ -59,3 +59,17 @@ collectAndUpload() {
 
   printf "\n### %s Uploaded\n" "$fileName"
 }
+
+# Jest, Jest Integration, and FTR Configs will use this to "tell"
+# the last stage they ran.
+uploadRanFile() {
+  local ran=$1
+
+  mkdir -p target/ran_files
+
+  local fileName="target/ran_files/$ran.txt"
+
+  echo "$ran" > "$fileName"
+
+  buildkite-agent artifact upload "$fileName"
+}

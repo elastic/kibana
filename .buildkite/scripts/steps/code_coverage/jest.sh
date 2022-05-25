@@ -3,6 +3,7 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
+source .buildkite/scripts/steps/code_coverage/util.sh
 
 is_test_execution_step
 
@@ -22,3 +23,6 @@ rm -rf target/kibana-coverage/jest/*
   fileHeads "target/file-heads-jest-combined-after-thread-merge-after-jest-dir-delete.txt" target/kibana-coverage/jest-combined
   dirListing "target/dir-listing-jest-combined-after-thread-merge-after-jest-dir-delete.txt" target/kibana-coverage/jest-combined
 mv target/kibana-coverage/jest-combined/coverage-final.json "target/kibana-coverage/jest/jest-merged-coverage-$(date +%s%3N).json"
+
+# So the last step "knows" this config ran
+uploadRanFile "jest"
