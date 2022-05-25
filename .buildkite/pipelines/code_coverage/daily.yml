@@ -21,8 +21,7 @@ steps:
       queue: kibana-default
     env:
       FTR_CONFIGS_DEPS: ''
-#      LIMIT_CONFIG_TYPE: 'unit,functional,integration'
-      LIMIT_CONFIG_TYPE: 'unit,functional'
+      LIMIT_CONFIG_TYPE: 'unit,functional,integration'
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/code_coverage/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/code_coverage/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/code_coverage/ftr_configs.sh'
@@ -33,7 +32,7 @@ steps:
       queue: c2-16
     depends_on:
       - jest
-#      - jest-integration
+      - jest-integration
       - ftr-configs
     timeout_in_minutes: 30
     key: ingest
