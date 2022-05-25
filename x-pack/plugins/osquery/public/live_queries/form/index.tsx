@@ -245,6 +245,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 />
               </>
             )}
+            <UseField path="savedQueryId" component={GhostFormField} />
             <UseField
               path="query"
               component={LiveQueryQueryField}
