@@ -199,6 +199,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async toggleChartVisibility() {
+    await this.testSubjects.moveMouseTo('discoverChartOptionsToggle');
     await this.testSubjects.click('discoverChartOptionsToggle');
     await this.testSubjects.exists('discoverChartToggle');
     await this.testSubjects.click('discoverChartToggle');
