@@ -171,7 +171,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         updateFieldValues({
           query: savedQuery.query,
           savedQueryId: savedQuery.savedQueryId,
-          // @ts-expect-error update types
           ecs_mapping: savedQuery.ecs_mapping
             ? map(savedQuery.ecs_mapping, (value, key) => ({
                 key,
@@ -349,7 +348,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         agentSelection: defaultValue.agentSelection,
         query: defaultValue.query,
         savedQueryId: defaultValue.savedQueryId,
-        // @ts-expect-error update types
         ecs_mapping: defaultValue.ecs_mapping
           ? map(defaultValue.ecs_mapping, (value, key) => ({
               key,
