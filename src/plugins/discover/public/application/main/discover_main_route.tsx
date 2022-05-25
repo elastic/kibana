@@ -57,6 +57,8 @@ export function DiscoverMainRoute() {
   const [indexPatternList, setIndexPatternList] = useState<Array<SavedObject<DataViewAttributes>>>(
     []
   );
+  const [hasESData, setHasESData] = useState(false);
+  const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const { id } = useParams<DiscoverLandingParams>();
 
@@ -69,23 +71,33 @@ export function DiscoverMainRoute() {
   const loadDefaultOrCurrentIndexPattern = useCallback(
     async (searchSource: ISearchSource) => {
       try {
-        const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
-        const hasEsData = await data.dataViews.hasData.hasESData().catch(() => false);
-        if (!hasUserDataView || !hasEsData) {
+        const hasUserDataViewValue = await data.dataViews.hasData
+          .hasUserDataView()
+          .catch(() => false);
+
+        const hasESDataValue = await data.dataViews.hasData.hasESData().catch(() => false);
+
+        setHasUserDataView(hasUserDataViewValue);
+        setHasESData(hasESDataValue);
+
+        if (!hasUserDataViewValue || !hasESDataValue) {
           setShowNoDataPage(true);
           return;
         }
+
         const defaultDataView = await data.dataViews.getDefaultDataView();
+
         if (!defaultDataView) {
           setShowNoDataPage(true);
           return;
         }
+
         const { appStateContainer } = getState({ history, uiSettings: config });
         const { index } = appStateContainer.getState();
         const ip = await loadIndexPattern(index || '', data.dataViews, config);
 
         const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
-        const indexPatternData = await resolveIndexPattern(ip, searchSource, toastNotifications);
+        const indexPatternData = resolveIndexPattern(ip, searchSource, toastNotifications);
 
         setIndexPatternList(ipList);
 
@@ -189,9 +201,20 @@ export function DiscoverMainRoute() {
   if (showNoDataPage) {
     const analyticsServices = {
       coreStart: core,
-      dataViews: data.dataViews,
+      dataViews: {
+        ...data.dataViews,
+        hasData: {
+          ...data.dataViews.hasData,
+
+          // We've already called this, so we can optimize the analytics services to
+          // use the already-retrieved data to avoid a double-call.
+          hasESData: () => Promise.resolve(hasESData),
+          hasUserDataView: () => Promise.resolve(hasUserDataView),
+        },
+      },
       dataViewEditor,
     };
+
     return (
       <AnalyticsNoDataPageKibanaProvider {...analyticsServices}>
         <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} />
