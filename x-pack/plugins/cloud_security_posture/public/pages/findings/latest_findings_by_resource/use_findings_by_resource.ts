@@ -13,8 +13,8 @@ import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, FindingsQueryResult } from '../types';
 
-// a large number to probably get all the buckets
-const MAX_BUCKETS = 1000 * 1000;
+// Maximum number of grouped findings, default limit in elasticsearch is set to 65,536 (ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html#search-settings-max-buckets)
+const MAX_BUCKETS = 60 * 1000;
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
   from: NonNullable<estypes.SearchRequest['from']>;
