@@ -8,3 +8,5 @@
 import { createPortalNode } from 'react-reverse-portal';
 
 export const ActionBarPortalNode = createPortalNode();
+
+export const APIKeysPortalNode = createPortalNode();
