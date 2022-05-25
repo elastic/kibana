@@ -69,6 +69,12 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     sortable: true,
   },
   {
+    field: 'rules',
+    name: TABLE_COLUMN_HEADERS.ACTIVE_RULES,
+    truncateText: true,
+    render: (rules: Benchmark['rules']) => `${rules.enabled} of ${rules.all}`,
+  },
+  {
     field: 'package_policy.package.title',
     name: TABLE_COLUMN_HEADERS.INTEGRATION_TYPE,
     dataType: 'string',
@@ -102,13 +108,6 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     truncateText: true,
     render: (date: Benchmark['package_policy']['created_at']) => moment(date).fromNow(),
     sortable: true,
-  },
-  {
-    field: 'package_policy.rules', // TODO: add fields
-    name: TABLE_COLUMN_HEADERS.ACTIVE_RULES,
-    truncateText: true,
-    // render: (benchmarkIntegration) =>
-    //   `${benchmarkIntegration.rules.active} of ${benchmarkIntegration.rules.total}`,
   },
 ];
 
