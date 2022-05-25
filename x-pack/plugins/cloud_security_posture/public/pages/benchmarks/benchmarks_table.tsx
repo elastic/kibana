@@ -16,6 +16,7 @@ import React from 'react';
 import moment from 'moment';
 import { Link, useHistory, generatePath } from 'react-router-dom';
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TABLE_COLUMN_HEADERS } from './translations';
 import type { Benchmark } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
@@ -72,7 +73,13 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     field: 'rules',
     name: TABLE_COLUMN_HEADERS.ACTIVE_RULES,
     truncateText: true,
-    render: (rules: Benchmark['rules']) => `${rules.enabled} of ${rules.all}`,
+    render: ({ enabled, all }: Benchmark['rules']) => (
+      <FormattedMessage
+        id="xpack.csp.benchmark.benchmarkTable.activeRulesColumnRenderTitle"
+        defaultMessage="{enabled} of {all}"
+        values={{ enabled, all }}
+      />
+    ),
   },
   {
     field: 'package_policy.package.title',
