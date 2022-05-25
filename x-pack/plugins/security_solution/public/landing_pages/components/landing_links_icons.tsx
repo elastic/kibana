@@ -12,7 +12,7 @@ import {
   SecuritySolutionLinkAnchor,
   withSecuritySolutionLink,
 } from '../../common/components/links';
-import { NavLinkItem } from '../../common/links/types';
+import { NavLinkItem } from '../../common/components/navigation/types';
 
 interface LandingLinksImagesProps {
   items: NavLinkItem[];
@@ -48,7 +48,7 @@ export const LandingLinksIcons: React.FC<LandingLinksImagesProps> = ({ items }) 
               <EuiIcon aria-hidden="true" size="xl" type={icon ?? ''} role="presentation" />
             </SecuritySolutionLink>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <StyledEuiTitle size="xxs">
               <SecuritySolutionLinkAnchor deepLinkId={id}>
                 <h2>{title}</h2>

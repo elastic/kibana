@@ -100,7 +100,6 @@
         { "id": "kibCoreSavedObjectsPluginApi" },
         { "id": "kibFieldFormatsPluginApi" },
         { "id": "kibDataPluginApi" },
-        { "id": "kibDataEnhancedPluginApi" },
         { "id": "kibDataViewsPluginApi" },
         { "id": "kibDataQueryPluginApi" },
         { "id": "kibDataSearchPluginApi" },
@@ -181,7 +180,9 @@
           "items": [
             { "id": "kibDevDocsOpsOptimizer" },
             { "id": "kibDevDocsOpsBabelPreset" },
-            { "id": "kibDevDocsOpsTypeSummarizer" }
+            { "id": "kibDevDocsOpsTypeSummarizer" },
+            { "id": "kibDevDocsOpsBabelPluginSyntheticPackages" },
+            { "id": "kibDevDocsOpsUiSharedDepsSrc" }
           ]
         },
         {
@@ -197,8 +198,11 @@
           "label": "Utilities",
           "items": [
             { "id": "kibDevDocsToolingLog" },
-            { "id": "kibDevDocsOpsJestSerializers"},
-            { "id": "kibDevDocsOpsExpect" }
+            { "id": "kibDevDocsOpsJestSerializers" },
+            { "id": "kibDevDocsOpsExpect" },
+            { "id": "kibDevDocsOpsAmbientStorybookTypes" },
+            { "id": "kibDevDocsOpsAmbientUiTypes" },
+            { "id": "kibDevDocsOpsTestSubjSelector" }
           ]
         }
       ]

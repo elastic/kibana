@@ -8,7 +8,6 @@
 import { createSelector } from 'reselect';
 import { FeatureCollection } from 'geojson';
 import _ from 'lodash';
-import { Adapters } from '@kbn/inspector-plugin/public';
 import type { Query } from '@kbn/data-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { TimeRange } from '@kbn/data-plugin/public';
@@ -23,10 +22,7 @@ import {
 import { VectorStyle } from '../classes/styles/vector/vector_style';
 import { HeatmapLayer } from '../classes/layers/heatmap_layer';
 import { getTimeFilter } from '../kibana_services';
-import {
-  getChartsPaletteServiceGetColor,
-  getInspectorAdapters,
-} from '../reducers/non_serializable_instances';
+import { getChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
 import { InnerJoin } from '../classes/joins/inner_join';
 import { getSourceByType } from '../classes/sources/source_registry';
@@ -75,10 +71,9 @@ function createJoinInstances(vectorLayerDescriptor: VectorLayerDescriptor, sourc
 export function createLayerInstance(
   layerDescriptor: LayerDescriptor,
   customIcons: CustomIcon[],
-  inspectorAdapters?: Adapters,
   chartsPaletteServiceGetColor?: (value: string) => string | null
 ): ILayer {
-  const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor, inspectorAdapters);
+  const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor);
 
   switch (layerDescriptor.type) {
     case LAYER_TYPE.RASTER_TILE:
@@ -123,10 +118,7 @@ export function createLayerInstance(
   }
 }
 
-function createSourceInstance(
-  sourceDescriptor: AbstractSourceDescriptor | null,
-  inspectorAdapters?: Adapters
-): ISource {
+function createSourceInstance(sourceDescriptor: AbstractSourceDescriptor | null): ISource {
   if (sourceDescriptor === null) {
     throw new Error('Source-descriptor should be initialized');
   }
@@ -134,7 +126,7 @@ function createSourceInstance(
   if (!source) {
     throw new Error(`Unrecognized sourceType ${sourceDescriptor.type}`);
   }
-  return new source.ConstructorFunction(sourceDescriptor, inspectorAdapters);
+  return new source.ConstructorFunction(sourceDescriptor);
 }
 
 export const getMapSettings = ({ map }: MapStoreState): MapSettings => map.settings;
@@ -321,17 +313,11 @@ export const getSpatialFiltersLayer = createSelector(
 
 export const getLayerList = createSelector(
   getLayerListRaw,
-  getInspectorAdapters,
   getChartsPaletteServiceGetColor,
   getCustomIcons,
-  (layerDescriptorList, inspectorAdapters, chartsPaletteServiceGetColor, customIcons) => {
+  (layerDescriptorList, chartsPaletteServiceGetColor, customIcons) => {
     return layerDescriptorList.map((layerDescriptor) =>
-      createLayerInstance(
-        layerDescriptor,
-        customIcons,
-        inspectorAdapters,
-        chartsPaletteServiceGetColor
-      )
+      createLayerInstance(layerDescriptor, customIcons, chartsPaletteServiceGetColor)
     );
   }
 );

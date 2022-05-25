@@ -10,7 +10,7 @@ import { Position } from '@elastic/charts';
 import type { PaletteOutput } from '@kbn/coloring';
 import { Datatable, DatatableRow } from '@kbn/expressions-plugin';
 import { LayerTypes } from '../constants';
-import { DataLayerConfig, XYProps } from '../types';
+import { DataLayerConfig, ExtendedDataLayerConfig, XYProps } from '../types';
 
 export const mockPaletteOutput: PaletteOutput = {
   type: 'palette',
@@ -49,6 +49,22 @@ export const createSampleDatatableWithRows = (rows: DatatableRow[]): Datatable =
 export const sampleLayer: DataLayerConfig = {
   layerId: 'first',
   type: 'dataLayer',
+  layerType: LayerTypes.DATA,
+  showLines: true,
+  seriesType: 'line',
+  xAccessor: 'c',
+  accessors: ['a', 'b'],
+  splitAccessor: 'd',
+  columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
+  xScaleType: 'ordinal',
+  isHistogram: false,
+  palette: mockPaletteOutput,
+  table: createSampleDatatableWithRows([]),
+};
+
+export const sampleExtendedLayer: ExtendedDataLayerConfig = {
+  layerId: 'first',
+  type: 'extendedDataLayer',
   layerType: LayerTypes.DATA,
   seriesType: 'line',
   xAccessor: 'c',
@@ -113,8 +129,8 @@ export const createArgsWithLayers = (
 
 export function sampleArgs() {
   const data = createSampleDatatableWithRows([
-    { a: 1, b: 2, c: 'I', d: 'Foo' },
-    { a: 1, b: 5, c: 'J', d: 'Bar' },
+    { a: 1, b: 2, c: 1652034840000, d: 'Foo' },
+    { a: 1, b: 5, c: 1652122440000, d: 'Bar' },
   ]);
 
   return {
