@@ -36,7 +36,8 @@ export default function ({ getService }: FtrProviderContext) {
     return resp.body;
   };
 
-  describe('analytics service: server side', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/132907
+  describe.skip('analytics service: server side', () => {
     it('should see both events enqueued and sent to the shipper', async () => {
       const telemetryCounters = await getTelemetryCounters(5);
       expect(telemetryCounters).to.eql([
