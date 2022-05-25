@@ -69,11 +69,16 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
     // We shouldn't activate interactive setup mode if we detect that user has already configured
     // Elasticsearch connection manually: either if Kibana system user credentials are specified or
     // user specified non-default host for the Elasticsearch.
+    const connectionStatus = ElasticsearchConnectionStatus.Configured;
     const shouldActiveSetupMode =
       !core.elasticsearch.config.credentialsSpecified &&
       core.elasticsearch.config.hosts.length === 1 &&
       DEFAULT_ELASTICSEARCH_HOSTS.includes(core.elasticsearch.config.hosts[0]);
-    if (!shouldActiveSetupMode) {
+      if(!connectionStatus){
+        this.#logger.debug(
+          'Kibana is unable to connect to elasticsearch'
+        );
+      } else if (!shouldActiveSetupMode) {
       const reason = core.elasticsearch.config.credentialsSpecified
         ? 'Kibana system user credentials are specified'
         : core.elasticsearch.config.hosts.length > 1
