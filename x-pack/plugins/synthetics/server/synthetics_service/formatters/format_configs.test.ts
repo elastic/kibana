@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { omit } from 'lodash';
 import { FormattedValue } from './common';
 import { formatMonitorConfig } from './format_configs';
 import {
@@ -93,7 +93,10 @@ describe('formatMonitorConfig', () => {
         'source.zip_url.proxy_url': '',
         'source.inline.script':
           "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
-        params: '',
+        params: '{"a":"param"}',
+        playwright_options: {
+          playWright: 'options',
+        },
         screenshots: 'on',
         synthetics_args: ['--hasTouch true'],
         'filter_journeys.match': '',
@@ -124,6 +127,12 @@ describe('formatMonitorConfig', () => {
         timeout: '16s',
         type: 'browser',
         synthetics_args: ['--hasTouch true'],
+        params: {
+          a: 'param',
+        },
+        playwright_options: {
+          playWright: 'options',
+        },
       };
     });
 
@@ -134,6 +143,16 @@ describe('formatMonitorConfig', () => {
       );
 
       expect(yamlConfig).toEqual(formattedBrowserConfig);
+    });
+
+    it('does not set empty strings or empty objects for params and playwright options', () => {
+      const yamlConfig = formatMonitorConfig(Object.keys(testBrowserConfig) as ConfigKey[], {
+        ...testBrowserConfig,
+        playwright_options: {},
+        params: '',
+      });
+
+      expect(yamlConfig).toEqual(omit(formattedBrowserConfig, ['params', 'playwright_options']));
     });
 
     it('excludes UI fields', () => {
