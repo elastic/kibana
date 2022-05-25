@@ -367,7 +367,7 @@ describe('<EditRolePage />', () => {
   });
 
   describe('in create mode', () => {
-    it('renders an error for exisitng role name', async () => {
+    it('renders an error for existing role name', async () => {
       const props = getProps({ action: 'edit' });
       const wrapper = mountWithIntl(<EditRolePage {...props} />);
 
