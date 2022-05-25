@@ -78,18 +78,18 @@ describe('usePagination', () => {
 
   it('should paginate the flyout when we need to change the page index going back', () => {
     const { result } = renderHook(() =>
-      usePagination({ onPageChange, pageIndex: 0, pageSize: 1, alertsCount })
+      usePagination({ onPageChange, pageIndex: 1, pageSize, alertsCount })
     );
 
     act(() => {
-      result.current.onPaginateFlyout(-2);
+      result.current.onPaginateFlyout(pageSize - 1);
     });
 
     // It should reset to the first alert in the table
-    expect(result.current.flyoutAlertIndex).toBe(0);
+    expect(result.current.flyoutAlertIndex).toBe(pageSize - 1);
 
     // It should go to the last page
-    expect(result.current.pagination).toStrictEqual({ pageIndex: 4, pageSize: 1 });
+    expect(result.current.pagination).toStrictEqual({ pageIndex: 0, pageSize });
   });
 
   it('should paginate the flyout when we need to change the page index going forward', () => {
@@ -106,5 +106,33 @@ describe('usePagination', () => {
 
     // It should go to the first page
     expect(result.current.pagination).toStrictEqual({ pageIndex: 1, pageSize: 1 });
+  });
+
+  it('should paginate the flyout when we need to change the page index going forward using odd-count data', () => {
+    const { result } = renderHook(() =>
+      usePagination({ onPageChange, pageIndex: 0, pageSize: 7, alertsCount: 12 })
+    );
+
+    act(() => {
+      result.current.onPaginateFlyout(1);
+    });
+    expect(result.current.flyoutAlertIndex).toBe(1);
+
+    // Navigate to an alert index beyond the current page size to force a page change
+    act(() => {
+      result.current.onPaginateFlyout(8);
+    });
+    expect(result.current.flyoutAlertIndex).toBe(0);
+    expect(result.current.pagination).toStrictEqual({ pageIndex: 1, pageSize: 7 });
+
+    // We are on the last page and should be able to navigate until the end
+    act(() => {
+      result.current.onPaginateFlyout(8);
+    });
+    expect(result.current.flyoutAlertIndex).toBe(1);
+    act(() => {
+      result.current.onPaginateFlyout(12);
+    });
+    expect(result.current.flyoutAlertIndex).toBe(5);
   });
 });
