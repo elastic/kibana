@@ -8,11 +8,13 @@
 import React, { memo, useMemo } from 'react';
 import {
   EuiBadge,
+  EuiCode,
   EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CommandDefinition } from '../types';
@@ -32,8 +34,8 @@ export const CommandList = memo<CommandListProps>(({ commands }) => {
         id="xpack.securitySolution.console.commandList.footerText"
         defaultMessage="For more details on the commands above use the {helpOption} argument. Example: {cmdExample}"
         values={{
-          helpOption: '--help',
-          cmdExample: <code>{'some-command --help'}</code>,
+          helpOption: <EuiCode>{'--help'}</EuiCode>,
+          cmdExample: <EuiCode>{'some-command --help'}</EuiCode>,
         }}
       />
     );
@@ -62,7 +64,9 @@ export const CommandList = memo<CommandListProps>(({ commands }) => {
 
       <EuiSpacer />
 
-      <EuiText size="s">{footerMessage}</EuiText>
+      <EuiText size="s">
+        <EuiTextColor color="subdued">{footerMessage}</EuiTextColor>
+      </EuiText>
     </>
   );
 });
