@@ -135,7 +135,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       it('should contain comments starting with # symbol', async () => {
         await sendRequests();
-
         await retry.try(async () => {
           const response = await PageObjects.console.getResponse();
           log.debug(response);
@@ -146,8 +145,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should display status badges', async () => {
         // This request should fail
         await PageObjects.console.enterRequest('\n GET test-index');
-        await sendRequests();
 
+        await sendRequests();
         await retry.waitFor('success badge', () => PageObjects.console.hasSuccessBadge());
         await retry.waitFor('warning badge', () => PageObjects.console.hasWarningBadge());
       });

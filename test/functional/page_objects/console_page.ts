@@ -14,7 +14,6 @@ export class ConsolePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
-  private readonly browser = this.ctx.getService('browser');
 
   public async getVisibleTextFromAceEditor(editor: WebElementWrapper) {
     const lines = await editor.findAllByClassName('ace_line_group');
@@ -166,12 +165,9 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async selectAllRequests() {
-    const textArea = await this.getEditorTextArea();
-    if (this.browser.isFirefox) {
-      await textArea.pressKeys([Key.COMMAND, 'A']);
-    } else {
-      await textArea.pressKeys([Key.CONTROL, Key.COMMAND, 'A']);
-    }
+    const editor = await this.getEditorTextArea();
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await editor.pressKeys([selectionKey, 'a']);
   }
 
   public async hasSuccessBadge(): Promise<boolean> {
