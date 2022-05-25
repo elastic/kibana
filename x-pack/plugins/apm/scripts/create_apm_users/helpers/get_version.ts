@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Elasticsearch, Kibana } from '../create_apm_users_and_roles';
+import { Elasticsearch, Kibana } from '../create_apm_users';
 import { AbortError } from './call_kibana';
 import { callKibana, isAxiosError } from './call_kibana';
 

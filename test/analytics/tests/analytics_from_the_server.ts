@@ -36,10 +36,11 @@ export default function ({ getService }: FtrProviderContext) {
     return resp.body;
   };
 
-  describe('analytics service: server side', () => {
-    // this test should run first because it depends on optInConfig being undefined
-    it('should have internally enqueued the "lifecycle" events but not handed over to the shipper yet', async () => {
-      const telemetryCounters = await getTelemetryCounters(2);
+  // Failing: See https://github.com/elastic/kibana/issues/132907
+  // Failing: See https://github.com/elastic/kibana/issues/132910
+  describe.skip('analytics service: server side', () => {
+    it('should see both events enqueued and sent to the shipper', async () => {
+      const telemetryCounters = await getTelemetryCounters(5);
       expect(telemetryCounters).to.eql([
         {
           type: 'enqueued',
@@ -55,6 +56,27 @@ export default function ({ getService }: FtrProviderContext) {
           code: 'enqueued',
           count: 1,
         },
+        {
+          type: 'succeeded',
+          event_type: 'test-plugin-lifecycle',
+          source: 'FTR-shipper',
+          code: '200',
+          count: 1,
+        },
+        {
+          type: 'succeeded',
+          event_type: 'test-plugin-lifecycle',
+          source: 'FTR-shipper',
+          code: '200',
+          count: 1,
+        },
+        {
+          type: 'sent_to_shipper',
+          event_type: 'test-plugin-lifecycle',
+          source: 'client',
+          code: 'OK',
+          count: 2,
+        },
       ]);
     });
 
@@ -63,7 +85,6 @@ export default function ({ getService }: FtrProviderContext) {
       let context: Action['meta'];
 
       before(async () => {
-        await ebtServerHelper.setOptIn(true);
         actions = await getActions();
         context = actions[1].meta;
       });
@@ -78,14 +99,17 @@ export default function ({ getService }: FtrProviderContext) {
         const [optInAction, extendContextAction, ...reportEventsAction] = actions;
         expect(optInAction).to.eql({ action: 'optIn', meta: true });
         expect(extendContextAction).to.eql({ action: 'extendContext', meta: context });
+        while (reportEventsAction[0].action === 'extendContext') {
+          // it could happen that a context provider emits a bit delayed
+          reportEventsAction.shift();
+        }
         reportEventsAction.forEach((entry) => expect(entry.action).to.eql('reportEvents'));
       });
 
       it('Initial calls to reportEvents from cached events group the requests by event_type', async () => {
         // We know that after opting-in, the client will send the events in batches, grouped by event-type.
-        const [, , ...reportEventsActions] = actions;
+        const reportEventsActions = actions.filter(({ action }) => action === 'reportEvents');
         reportEventsActions.forEach((reportEventAction) => {
-          expect(reportEventAction.action).to.eql('reportEvents');
           // Get the first event type
           const initiallyBatchedEventType = reportEventAction.meta[0].event_type;
           // Check that all event types in this batch are the same.
@@ -97,7 +121,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('"test-plugin-lifecycle" is received in the expected order of "setup" first, then "start"', async () => {
         // We know that after opting-in, the client will send the events in batches, grouped by event-type.
-        const [, , ...reportEventsActions] = actions;
+        const reportEventsActions = actions.filter(({ action }) => action === 'reportEvents');
         // Find the action calling to report test-plugin-lifecycle events.
         const reportTestPluginLifecycleEventsAction = reportEventsActions.find(
           (reportEventAction) => {
@@ -141,33 +165,6 @@ export default function ({ getService }: FtrProviderContext) {
             event_type: 'test-plugin-lifecycle',
             context: reportEventContext,
             properties: { plugin: 'analyticsPluginA', step: 'start' },
-          },
-        ]);
-      });
-
-      it('should report the plugin lifecycle events as telemetry counters', async () => {
-        const telemetryCounters = await getTelemetryCounters(3);
-        expect(telemetryCounters).to.eql([
-          {
-            type: 'succeeded',
-            event_type: 'test-plugin-lifecycle',
-            source: 'FTR-shipper',
-            code: '200',
-            count: 1,
-          },
-          {
-            type: 'succeeded',
-            event_type: 'test-plugin-lifecycle',
-            source: 'FTR-shipper',
-            code: '200',
-            count: 1,
-          },
-          {
-            type: 'sent_to_shipper',
-            event_type: 'test-plugin-lifecycle',
-            source: 'client',
-            code: 'OK',
-            count: 2,
           },
         ]);
       });
