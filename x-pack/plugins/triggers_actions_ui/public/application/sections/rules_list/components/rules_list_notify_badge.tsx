@@ -10,13 +10,7 @@ import moment from 'moment';
 import { EuiButton, EuiButtonIcon, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
-import {
-  SnoozePanel,
-  SnoozeUnit,
-  futureTimeToInterval,
-  usePreviousSnoozeInterval,
-} from './rule_snooze_panel';
-import { RuleSnoozeScheduler } from './rule_snooze_scheduler';
+import { SnoozePanel, futureTimeToInterval } from './rule_snooze_panel';
 
 export interface RulesListNotifyBadgeProps {
   rule: RuleTableItem;
@@ -40,27 +34,9 @@ const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boolean })
   );
 
 export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = (props) => {
-  const {
-    rule,
-    isOpen,
-    previousSnoozeInterval: propsPreviousSnoozeInterval,
-    onClick,
-    onClose,
-    onRuleChanged,
-    snoozeRule,
-    unsnoozeRule,
-  } = props;
-
-  const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
-  const [initialSchedule, setInitialSchedule] = useState<SnoozeSchedule | null>(null);
+  const { rule, isOpen, onClick, onClose, onRuleChanged, snoozeRule, unsnoozeRule } = props;
 
   const { isSnoozedUntil, muteAll } = rule;
-
-  const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval(
-    propsPreviousSnoozeInterval
-  );
-
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const isSnoozedIndefinitely = muteAll;
 
@@ -189,106 +165,45 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     return <EuiToolTip content={snoozeTooltipText}>{button}</EuiToolTip>;
   }, [isOpen, button, snoozeTooltipText]);
 
-  const snoozeRuleAndStoreInterval = useCallback(
-    (newSnoozeEndTime: string | -1, interval: string | null) => {
-      if (interval) {
-        setPreviousSnoozeInterval(interval);
-      }
-      const newSnoozeSchedule = {
-        id: null,
-        duration: newSnoozeEndTime === -1 ? -1 : Date.parse(newSnoozeEndTime) - Date.now(),
-        rRule: { dtstart: new Date().toISOString(), count: 1, tzid: moment.tz.guess() },
-      };
-      return snoozeRule(newSnoozeSchedule, newSnoozeEndTime === -1);
-    },
-    [setPreviousSnoozeInterval, snoozeRule]
-  );
+  const onClosePopover = useCallback(() => {
+    onClose();
+    // Set a timeout on closing the scheduler to avoid flicker
+    // setTimeout(onCloseScheduler, 1000);
+  }, [onClose]);
 
-  const saveSnoozeSchedule = useCallback(
-    async (schedule: SnoozeSchedule) => {
-      setIsLoading(true);
+  const onApplySnooze = useCallback(
+    async (schedule: SnoozeSchedule, muteAll?: boolean) => {
       try {
-        await snoozeRule(schedule);
+        await snoozeRule(schedule, muteAll);
         onRuleChanged();
       } finally {
         onClosePopover();
-        setIsLoading(false);
       }
     },
-    [snoozeRule]
+    [snoozeRule, onRuleChanged, onClosePopover]
   );
 
-  const cancelSnoozeSchedules = useCallback(
-    async (scheduleIds: string[]) => {
-      setIsLoading(true);
+  const onApplyUnsnooze = useCallback(
+    async (scheduleIds?: string[]) => {
       try {
-        console.log('UNSNOOZE', scheduleIds);
         await unsnoozeRule(scheduleIds);
         onRuleChanged();
       } finally {
         onClosePopover();
-        setIsLoading(false);
       }
     },
-    [unsnoozeRule]
-  );
-
-  const onOpenScheduler = useCallback(
-    (schedule?: SnoozeSchedule) => {
-      setInitialSchedule(schedule ?? null);
-      setIsSchedulerOpen(true);
-    },
-    [setInitialSchedule, setIsSchedulerOpen]
-  );
-
-  const onCloseScheduler = useCallback(() => setIsSchedulerOpen(false), [setIsSchedulerOpen]);
-  const onClosePopover = useCallback(() => {
-    onClose();
-    // Set a timeout on closing the scheduler to avoid flicker
-    setTimeout(onCloseScheduler, 1000);
-  }, [onClose, onCloseScheduler]);
-
-  const onChangeSnooze = useCallback(
-    async (value: number, unit?: SnoozeUnit) => {
-      setIsLoading(true);
-      try {
-        if (value === -1) {
-          await snoozeRuleAndStoreInterval(-1, null);
-        } else if (value !== 0) {
-          const newSnoozeEndTime = moment().add(value, unit).toISOString();
-          await snoozeRuleAndStoreInterval(newSnoozeEndTime, `${value}${unit}`);
-        } else await unsnoozeRule();
-        onRuleChanged();
-      } finally {
-        onClosePopover();
-        setIsLoading(false);
-      }
-    },
-    [onRuleChanged, onClosePopover, snoozeRuleAndStoreInterval, unsnoozeRule, setIsLoading]
+    [snoozeRule, onRuleChanged, onClosePopover]
   );
 
   return (
     <EuiPopover isOpen={isOpen} closePopover={onClosePopover} button={buttonWithToolTip}>
-      {!isSchedulerOpen ? (
-        <SnoozePanel
-          isLoading={isLoading}
-          applySnooze={onChangeSnooze}
-          interval={futureTimeToInterval(isSnoozedUntil)}
-          showCancel={isSnoozed}
-          previousSnoozeInterval={previousSnoozeInterval}
-          scheduledSnoozes={rule.snoozeSchedule}
-          navigateToScheduler={onOpenScheduler}
-          onRemoveAllSchedules={cancelSnoozeSchedules}
-        />
-      ) : (
-        <RuleSnoozeScheduler
-          isLoading={isLoading}
-          initialSchedule={initialSchedule}
-          onClose={onCloseScheduler}
-          onSaveSchedule={saveSnoozeSchedule}
-          onCancelSchedules={cancelSnoozeSchedules}
-        />
-      )}
+      <SnoozePanel
+        snoozeRule={onApplySnooze}
+        unsnoozeRule={onApplyUnsnooze}
+        interval={futureTimeToInterval(isSnoozedUntil)}
+        showCancel={isSnoozed}
+        scheduledSnoozes={rule.snoozeSchedule}
+      />
     </EuiPopover>
   );
 };

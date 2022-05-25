@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import uuid from 'uuid';
@@ -85,7 +85,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   // Component initializes in State C
   const [selectingEndDate, setSelectingEndDate] = useState(false);
   const [selectingEndTime, setSelectingEndTime] = useState(false);
-  const minDate = useMemo(() => moment(), []);
+  const minDate = useMemo(() => moment(initialSchedule?.rRule.dtstart ?? undefined), []);
 
   const initialState = useMemo(() => {
     if (!initialSchedule) {

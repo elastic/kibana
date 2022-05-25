@@ -22,6 +22,7 @@ import {
 import { parseInterval } from '../../../../../common';
 import type { RecurrenceSchedule, SnoozeSchedule } from '../../../../types';
 import { recurrenceSummary } from './recurrence_scheduler';
+import { RuleSnoozeScheduler } from './rule_snooze_scheduler';
 
 export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [
@@ -33,14 +34,102 @@ const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [
 
 interface SnoozePanelProps {
   interval?: string;
-  isLoading?: boolean;
-  applySnooze: (value: number | -1, unit?: SnoozeUnit) => void;
+  snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
+  unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   showCancel: boolean;
-  previousSnoozeInterval: string | null;
   scheduledSnoozes?: RuleSnooze;
+}
+
+interface BaseSnoozePanelProps extends SnoozePanelProps {
   navigateToScheduler: (sched?: SnoozeSchedule) => void;
+  isLoading: boolean;
   onRemoveAllSchedules: (ids: string[]) => void;
 }
+
+export const SnoozePanel: React.FC<SnoozePanelProps> = ({
+  interval,
+  snoozeRule,
+  unsnoozeRule,
+  showCancel,
+  scheduledSnoozes,
+}) => {
+  const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
+  const [initialSchedule, setInitialSchedule] = useState<SnoozeSchedule | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onSnoozeRule = useCallback(async (schedule: SnoozeSchedule, muteAll?: boolean) => {
+    setIsLoading(true);
+    try {
+      await snoozeRule(schedule, muteAll);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const onUnsnoozeRule = useCallback(async (scheduleIds?: string[]) => {
+    setIsLoading(true);
+    try {
+      await unsnoozeRule(scheduleIds);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  const saveSnoozeSchedule = useCallback(
+    async (schedule: SnoozeSchedule) => {
+      setIsLoading(true);
+      try {
+        await snoozeRule(schedule);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [snoozeRule]
+  );
+
+  const cancelSnoozeSchedules = useCallback(
+    async (scheduleIds: string[]) => {
+      setIsLoading(true);
+      try {
+        await unsnoozeRule(scheduleIds);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [unsnoozeRule]
+  );
+
+  const onOpenScheduler = useCallback(
+    (schedule?: SnoozeSchedule) => {
+      setInitialSchedule(schedule ?? null);
+      setIsSchedulerOpen(true);
+    },
+    [setInitialSchedule, setIsSchedulerOpen]
+  );
+
+  const onCloseScheduler = useCallback(() => setIsSchedulerOpen(false), [setIsSchedulerOpen]);
+
+  return !isSchedulerOpen ? (
+    <BaseSnoozePanel
+      isLoading={isLoading}
+      snoozeRule={onSnoozeRule}
+      unsnoozeRule={onUnsnoozeRule}
+      interval={interval}
+      showCancel={showCancel}
+      scheduledSnoozes={scheduledSnoozes}
+      navigateToScheduler={onOpenScheduler}
+      onRemoveAllSchedules={cancelSnoozeSchedules}
+    />
+  ) : (
+    <RuleSnoozeScheduler
+      isLoading={isLoading}
+      initialSchedule={initialSchedule}
+      onClose={onCloseScheduler}
+      onSaveSchedule={saveSnoozeSchedule}
+      onCancelSchedules={cancelSnoozeSchedules}
+    />
+  );
+};
 
 const PREV_SNOOZE_INTERVAL_KEY = 'triggersActionsUi_previousSnoozeInterval';
 export const usePreviousSnoozeInterval: (
@@ -59,12 +148,12 @@ export const usePreviousSnoozeInterval: (
   return [previousSnoozeInterval, storeAndSetPreviousSnoozeInterval];
 };
 
-export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
+const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
+  isLoading,
   interval = '3d',
-  isLoading = false,
-  applySnooze,
+  snoozeRule,
+  unsnoozeRule,
   showCancel,
-  previousSnoozeInterval,
   scheduledSnoozes,
   navigateToScheduler,
   onRemoveAllSchedules,
@@ -74,6 +163,8 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
 
   const [isRemoveAllModalVisible, setIsRemoveAllModalVisible] = useState(false);
 
+  const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval('3d');
+
   const onChangeValue = useCallback(
     ({ target }) => setIntervalValue(target.value),
     [setIntervalValue]
@@ -81,6 +172,33 @@ export const SnoozePanel: React.FunctionComponent<SnoozePanelProps> = ({
   const onChangeUnit = useCallback(
     ({ target }) => setIntervalUnit(target.value),
     [setIntervalUnit]
+  );
+
+  const snoozeRuleAndStoreInterval = useCallback(
+    (newSnoozeEndTime: string | -1, interval: string | null) => {
+      if (interval) {
+        setPreviousSnoozeInterval(interval);
+      }
+      const newSnoozeSchedule = {
+        id: null,
+        duration: newSnoozeEndTime === -1 ? -1 : Date.parse(newSnoozeEndTime) - Date.now(),
+        rRule: { dtstart: new Date().toISOString(), count: 1, tzid: moment.tz.guess() },
+      };
+      return snoozeRule(newSnoozeSchedule, newSnoozeEndTime === -1);
+    },
+    [setPreviousSnoozeInterval, snoozeRule]
+  );
+
+  const applySnooze = useCallback(
+    async (value: number, unit?: SnoozeUnit) => {
+      if (value === -1) {
+        await snoozeRuleAndStoreInterval(-1, null);
+      } else if (value !== 0) {
+        const newSnoozeEndTime = moment().add(value, unit).toISOString();
+        await snoozeRuleAndStoreInterval(newSnoozeEndTime, `${value}${unit}`);
+      } else await unsnoozeRule();
+    },
+    [snoozeRuleAndStoreInterval, unsnoozeRule]
   );
 
   const onApplyIndefinite = useCallback(() => applySnooze(-1), [applySnooze]);
