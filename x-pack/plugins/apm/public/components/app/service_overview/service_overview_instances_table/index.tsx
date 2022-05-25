@@ -73,7 +73,7 @@ export function ServiceOverviewInstancesTable({
   const { agentName } = useApmServiceContext();
 
   const {
-    query: { kuery, latencyAggregationType, comparisonEnabled },
+    query: { kuery, latencyAggregationType, comparisonEnabled, offset },
   } = useApmParams('/services/{serviceName}');
 
   const [itemIdToOpenActionMenuRowMap, setItemIdToOpenActionMenuRowMap] =
@@ -134,6 +134,7 @@ export function ServiceOverviewInstancesTable({
     toggleRowActionMenu,
     itemIdToOpenActionMenuRowMap,
     shouldShowSparkPlots,
+    offset,
   });
 
   const pagination = {

@@ -371,7 +371,7 @@ export function dataFeedRoutes({ router, routeGuard }: RouteInitialization) {
           {
             datafeed_id: datafeedId,
           },
-          getAuthorizationHeader(request)
+          { ...getAuthorizationHeader(request), maxRetries: 0 }
         );
 
         return response.ok({

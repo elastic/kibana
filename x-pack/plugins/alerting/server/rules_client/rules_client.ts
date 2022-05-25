@@ -2214,7 +2214,7 @@ export class RulesClient {
       id,
       updateAttributes,
       updateOptions
-    );
+    ).then(() => this.updateSnoozedUntilTime({ id }));
   }
 
   public async updateSnoozedUntilTime({ id }: { id: string }): Promise<void> {
@@ -2224,10 +2224,10 @@ export class RulesClient {
     );
 
     const isSnoozedUntil = getRuleSnoozeEndTime(attributes);
-    if (!isSnoozedUntil) return;
+    if (!isSnoozedUntil && !attributes.isSnoozedUntil) return;
 
     const updateAttributes = this.updateMeta({
-      isSnoozedUntil: isSnoozedUntil.toISOString(),
+      isSnoozedUntil: isSnoozedUntil ? isSnoozedUntil.toISOString() : null,
       updatedBy: await this.getUserName(),
       updatedAt: new Date().toISOString(),
     });

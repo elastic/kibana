@@ -16,10 +16,12 @@ export const EnvironmentsContext = React.createContext<{
   environment: Environment;
   environments: Environment[];
   status: FETCH_STATUS;
+  preferredEnvironment: Environment;
 }>({
   environment: ENVIRONMENT_ALL.value,
   environments: [],
   status: FETCH_STATUS.NOT_INITIATED,
+  preferredEnvironment: ENVIRONMENT_ALL.value,
 });
 
 export function EnvironmentsContextProvider({
@@ -44,6 +46,10 @@ export function EnvironmentsContextProvider({
     start,
     end,
   });
+  const preferredEnvironment =
+    environment === ENVIRONMENT_ALL.value && environments.length === 1
+      ? environments[0]
+      : environment;
 
   return (
     <EnvironmentsContext.Provider
@@ -51,6 +57,7 @@ export function EnvironmentsContextProvider({
         environment,
         environments,
         status,
+        preferredEnvironment,
       }}
     >
       {children}
