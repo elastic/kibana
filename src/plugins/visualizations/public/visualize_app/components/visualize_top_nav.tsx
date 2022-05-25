@@ -267,8 +267,8 @@ const TopNav = ({
 
   const shouldShowDataViewPicker = Boolean(
     vis.type.editorConfig?.enableDataViewChange &&
-      !vis.data.savedSearchId &&
-      vis.data.indexPattern &&
+      ((vis.data.indexPattern && !vis.data.savedSearchId) ||
+        isFallbackDataView(vis.data.indexPattern)) &&
       indexPatterns.length
   );
 
@@ -280,6 +280,8 @@ const TopNav = ({
     },
     [stateContainer.transitions]
   );
+
+  const isMissingCurrentDataView = isFallbackDataView(vis.data.indexPattern);
 
   return isChromeVisible ? (
     /**
@@ -309,9 +311,22 @@ const TopNav = ({
           ? {
               currentDataViewId: vis.data.indexPattern.id,
               trigger: {
-                label: vis.data.indexPattern.title,
+                label: isMissingCurrentDataView
+                  ? i18n.translate('visualizations.fallbackDataView.label', {
+                      defaultMessage: '{type} not found',
+                      values: {
+                        type: vis.data.savedSearchId
+                          ? i18n.translate('visualizations.search.label', {
+                              defaultMessage: 'Search',
+                            })
+                          : i18n.translate('visualizations.dataView.label', {
+                              defaultMessage: 'Data view',
+                            }),
+                      },
+                    })
+                  : vis.data.indexPattern.title,
               },
-              isMissingCurrent: isFallbackDataView(vis.data.indexPattern),
+              isMissingCurrent: isMissingCurrentDataView,
               onChangeDataView,
               showNewMenuTour: false,
             }

@@ -22,7 +22,11 @@ import { i18n } from '@kbn/i18n';
 
 import { IAggConfigs, ISearchSource, AggConfigSerialized } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { getSavedSearch, throwErrorOnSavedSearchUrlConflict } from '@kbn/discover-plugin/public';
+import {
+  getSavedSearch,
+  SavedSearch,
+  throwErrorOnSavedSearchUrlConflict,
+} from '@kbn/discover-plugin/public';
 import { PersistedState } from './persisted_state';
 import {
   getTypes,
@@ -47,11 +51,17 @@ export interface VisData {
 
 const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?: string) => {
   if (savedSearchId) {
-    const savedSearch = await getSavedSearch(savedSearchId, {
-      search: getSearch(),
-      savedObjectsClient: getSavedObjects().client,
-      spaces: getSpaces(),
-    });
+    let savedSearch: SavedSearch;
+
+    try {
+      savedSearch = await getSavedSearch(savedSearchId, {
+        search: getSearch(),
+        savedObjectsClient: getSavedObjects().client,
+        spaces: getSpaces(),
+      });
+    } catch (e) {
+      return inputSearchSource;
+    }
 
     await throwErrorOnSavedSearchUrlConflict(savedSearch);
 
@@ -136,16 +146,22 @@ export class Vis<TVisParams = VisParams> {
     } catch (e) {
       // nothing to be here
     }
-    if (state.data && state.data.savedSearchId) {
-      this.data.savedSearchId = state.data.savedSearchId;
-      if (this.data.searchSource) {
-        this.data.searchSource = await getSearchSource(
-          this.data.searchSource,
-          this.data.savedSearchId
-        );
-        this.data.indexPattern = this.data.searchSource.getField('index');
+
+    try {
+      if (state.data && state.data.savedSearchId) {
+        if (this.data.searchSource) {
+          this.data.searchSource = await getSearchSource(
+            this.data.searchSource,
+            state.data.savedSearchId
+          );
+          this.data.indexPattern = this.data.searchSource.getField('index');
+        }
+        this.data.savedSearchId = state.data.savedSearchId;
       }
+    } catch (e) {
+      // nothing to be here
     }
+
     if (state.data && (state.data.aggs || !this.data.aggs)) {
       const aggs = state.data.aggs ? cloneDeep(state.data.aggs) : [];
       const configStates = this.initializeDefaultsFromSchemas(aggs, this.type.schemas.all || []);
@@ -153,10 +169,7 @@ export class Vis<TVisParams = VisParams> {
       if (!this.data.indexPattern && aggs.length) {
         this.data.indexPattern = new DataView({
           spec: {
-            id: state.data.searchSource?.index,
-            title: i18n.translate('visualizations.noDataView.text', {
-              defaultMessage: 'Data view not found',
-            }),
+            id: state.data.savedSearchId ?? state.data.searchSource?.index,
           },
           fieldFormats: getFieldsFormats(),
         });
