@@ -22,7 +22,7 @@ const AgentEnrollmentPrePollInstructions: React.FC<{ troubleshootLink: string }>
   return (
     <EuiText>
       <FormattedMessage
-        id="xpack.fleet.confirmIncomingDataWithPreview.loading"
+        id="xpack.fleet.confirmIncomingDataWithPreview.prePollingInstructions"
         defaultMessage="After the agent starts up, the Elastic Stack listens for the agent and confirms the enrollment in Fleet. If you're having trouble connecting, check out the {link}."
         values={{
           link: (
