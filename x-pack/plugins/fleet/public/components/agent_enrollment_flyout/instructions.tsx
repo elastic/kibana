@@ -104,7 +104,11 @@ export const Instructions = (props: InstructionProps) => {
               <EuiSpacer size="l" />
             </>
           )}
-          {isFleetServerPolicySelected ? <AdvancedTab /> : <ManagedSteps {...props} />}
+          {isFleetServerPolicySelected ? (
+            <AdvancedTab selectedPolicyId={props.selectedPolicy?.id} />
+          ) : (
+            <ManagedSteps {...props} />
+          )}
         </>
       );
     }

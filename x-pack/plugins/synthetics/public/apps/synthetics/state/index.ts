@@ -7,7 +7,7 @@
 
 export { store, storage } from './store';
 
-export type { RooState as AppState } from './root_reducer';
+export type { SyntheticsAppState as AppState } from './root_reducer';
 
 export * from './ui';
 export * from './index_status';
