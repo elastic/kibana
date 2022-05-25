@@ -18,47 +18,47 @@ open target/coverage/jest/index.html
 
 ## API Tests
 
-API tests are separated in two suites:
+| Option    | Description                                     |
+| --------- | ----------------------------------------------- |
+| --basic   | Run tests with basic license                    |
+| --trial   | Run tests with trial license                    |
+| --server  | Only start ES and Kibana                        |
+| --runner  | Only run tests                                  |
+| --grep    | Specify the spec files to run                   |
+| --inspect | Add --inspect-brk flag to the ftr for debugging |
+| --times   | Repeat the test n number of times               |
 
-- a basic license test suite [default]
-- a trial license test suite (the equivalent of gold+)
+The API tests are located in [`x-pack/test/apm_api_integration/`](/x-pack/test/apm_api_integration/).
 
-### Run tests with [--trial] license
+### Start server and run test in a single process
 
 ```
-node scripts/test/api [--trial] [--help]
+node scripts/test/api [--trial/--basic] [--help]
 ```
 
-The above command will initiate an Elasticsearch instance on http://localhost:9220 and a kibana instance on http://localhost:5620 and will run the api test against these environments.
+The above command will start an ES instance on http://localhost:9220, a Kibana instance on http://localhost:5620 and run the api tests.
 Once the tests finish, the instances will be terminated.
 
-### Start test server
+### Start server and run test in separate processes
 
+```sh
+
+# start server
+node scripts/test/api --server --basic
+
+# run tests
+node scripts/test/api --runner --basic
 ```
-node scripts/test/api --server
-```
-
-Start Elasticsearch and Kibana instances.
-
-### Run all tests
-
-```
-node scripts/test/api --runner
-```
-
-Run all tests. The test server needs to be running, see [Start Test Server](#start-test-server).
 
 ### Update snapshots (from Kibana root)
 
-To update snapshots append `--updateSnapshots` to the `functional_test_runner` command
+To update snapshots append `--updateSnapshots` to the `--runner` command:
 
 ```
-node scripts/functional_test_runner --config x-pack/test/apm_api_integration/[basic | trial]/config.ts --quiet --updateSnapshots
+node scripts/test/api --runner --basic --updateSnapshots
 ```
 
-The test server needs to be running, see [Start Test Server](#start-test-server).
-
-The API tests are located in [`x-pack/test/apm_api_integration/`](/x-pack/test/apm_api_integration/).
+(The test server needs to be running)
 
 **API Test tips**
 
