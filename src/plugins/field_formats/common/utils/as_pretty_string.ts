@@ -9,13 +9,13 @@
 /**
  * Convert a value to a presentable string
  */
-export function asPrettyString(val: unknown, flat = false): string {
+export function asPrettyString(val: unknown, options?: { flat?: boolean }): string {
   if (val === null || val === undefined) return ' - ';
   switch (typeof val) {
     case 'string':
       return val;
     case 'object':
-      return flat ? JSON.stringify(val) : JSON.stringify(val, null, '  ');
+      return options?.flat ? JSON.stringify(val) : JSON.stringify(val, null, '  ');
     default:
       return '' + val;
   }
