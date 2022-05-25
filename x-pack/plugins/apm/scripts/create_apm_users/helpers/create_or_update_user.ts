@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 import { difference, union } from 'lodash';
-import { Elasticsearch, Kibana } from '../create_apm_users_and_roles';
+import { Elasticsearch, Kibana } from '../create_apm_users';
 import { callKibana, isAxiosError } from './call_kibana';
 
 interface User {
