@@ -17,10 +17,8 @@ import { createRequestHash } from './utils';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ConfigSchema } from '../../../config';
-import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { nodeBuilder, SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
-import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 const MAX_UPDATE_RETRIES = 3;
 
@@ -29,7 +27,6 @@ const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 describe('SearchSessionService', () => {
   let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
   let service: SearchSessionService;
-  let mockTaskManager: jest.Mocked<TaskManagerStartContract>;
 
   const MOCK_STRATEGY = 'ese';
 
@@ -89,21 +86,12 @@ describe('SearchSessionService', () => {
         error: jest.fn(),
       };
       service = new SearchSessionService(mockLogger, config, '8.0.0');
-      service.setup(coreMock.createSetup(), { taskManager: taskManagerMock.createSetup() });
-      const coreStart = coreMock.createStart();
-      mockTaskManager = taskManagerMock.createStart();
+      service.setup(coreMock.createSetup(), {});
       await flushPromises();
-      await service.start(coreStart, {
-        taskManager: mockTaskManager,
-      });
     });
 
     afterEach(() => {
       service.stop();
-    });
-
-    it('task is cleared, if exists', async () => {
-      expect(mockTaskManager.removeIfExists).toHaveBeenCalled();
     });
 
     it('trackId ignores', async () => {
@@ -170,22 +158,15 @@ describe('SearchSessionService', () => {
         error: jest.fn(),
       };
       service = new SearchSessionService(mockLogger, config, '8.0.0');
-      service.setup(coreMock.createSetup(), { taskManager: taskManagerMock.createSetup() });
+      service.setup(coreMock.createSetup(), {});
       const coreStart = coreMock.createStart();
-      mockTaskManager = taskManagerMock.createStart();
+
       await flushPromises();
-      await service.start(coreStart, {
-        taskManager: mockTaskManager,
-      });
+      await service.start(coreStart, {});
     });
 
     afterEach(() => {
       service.stop();
-    });
-
-    it('task is cleared and re-created', async () => {
-      expect(mockTaskManager.removeIfExists).toHaveBeenCalled();
-      expect(mockTaskManager.ensureScheduled).toHaveBeenCalled();
     });
 
     describe('save', () => {
