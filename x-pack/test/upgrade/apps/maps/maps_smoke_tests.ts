@@ -123,7 +123,7 @@ export default function ({
         });
         it('should load layers', async () => {
           const percentDifference = await screenshot.compareAgainstBaseline(
-            'ecommerce_map',
+            'upgrade_ecommerce_map',
             updateBaselines
           );
           expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
@@ -147,7 +147,7 @@ export default function ({
         });
         it('should load saved object and display layers', async () => {
           const percentDifference = await screenshot.compareAgainstBaseline(
-            'flights_map',
+            'upgrade_flights_map',
             updateBaselines
           );
           expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
@@ -172,7 +172,7 @@ export default function ({
         });
         it('should load saved object and display layers', async () => {
           const percentDifference = await screenshot.compareAgainstBaseline(
-            'web_logs_map',
+            'upgrade_web_logs_map',
             updateBaselines
           );
           expect(percentDifference.toFixed(3)).to.be.lessThan(0.05);
