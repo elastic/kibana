@@ -40,7 +40,7 @@ describe('Use get case hook', () => {
     (useToasts as jest.Mock).mockReturnValue({ addError });
     const spy = jest.spyOn(api, 'resolveCase').mockRejectedValue(new Error("C'est la vie"));
     const { waitForNextUpdate } = renderHook(() => useGetCase('case-1'), { wrapper });
-    waitForNextUpdate();
+    await waitForNextUpdate();
     await waitFor(() => {
       expect(spy).toHaveBeenCalledWith('case-1', true, expect.any(AbortSignal));
       expect(addError).toHaveBeenCalled();
