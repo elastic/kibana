@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { EuiButton, EuiButtonIcon, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -172,9 +172,9 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   }, [onClose]);
 
   const onApplySnooze = useCallback(
-    async (schedule: SnoozeSchedule, muteAll?: boolean) => {
+    async (schedule: SnoozeSchedule) => {
       try {
-        await snoozeRule(schedule, muteAll);
+        await snoozeRule(schedule);
         onRuleChanged();
       } finally {
         onClosePopover();
@@ -202,7 +202,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         unsnoozeRule={onApplyUnsnooze}
         interval={futureTimeToInterval(isSnoozedUntil)}
         showCancel={isSnoozed}
-        scheduledSnoozes={rule.snoozeSchedule}
+        scheduledSnoozes={rule.snoozeSchedule ?? []}
       />
     </EuiPopover>
   );

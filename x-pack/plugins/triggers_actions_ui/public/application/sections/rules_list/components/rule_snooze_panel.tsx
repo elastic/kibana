@@ -34,10 +34,10 @@ const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [
 
 interface SnoozePanelProps {
   interval?: string;
-  snoozeRule: (schedule: SnoozeSchedule, muteAll?: boolean) => Promise<void>;
+  snoozeRule: (schedule: SnoozeSchedule) => Promise<void>;
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   showCancel: boolean;
-  scheduledSnoozes?: RuleSnooze;
+  scheduledSnoozes: RuleSnooze;
 }
 
 interface BaseSnoozePanelProps extends SnoozePanelProps {
@@ -57,10 +57,10 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
   const [initialSchedule, setInitialSchedule] = useState<SnoozeSchedule | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSnoozeRule = useCallback(async (schedule: SnoozeSchedule, muteAll?: boolean) => {
+  const onSnoozeRule = useCallback(async (schedule: SnoozeSchedule) => {
     setIsLoading(true);
     try {
-      await snoozeRule(schedule, muteAll);
+      await snoozeRule(schedule);
     } finally {
       setIsLoading(false);
     }
@@ -163,7 +163,7 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
 
   const [isRemoveAllModalVisible, setIsRemoveAllModalVisible] = useState(false);
 
-  const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval('3d');
+  const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval();
 
   const onChangeValue = useCallback(
     ({ target }) => setIntervalValue(target.value),
@@ -184,7 +184,7 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
         duration: newSnoozeEndTime === -1 ? -1 : Date.parse(newSnoozeEndTime) - Date.now(),
         rRule: { dtstart: new Date().toISOString(), count: 1, tzid: moment.tz.guess() },
       };
-      return snoozeRule(newSnoozeSchedule, newSnoozeEndTime === -1);
+      return snoozeRule(newSnoozeSchedule);
     },
     [setPreviousSnoozeInterval, snoozeRule]
   );
@@ -257,6 +257,7 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       <EuiFlexGroup data-test-subj="snoozePanel" gutterSize="xs">
         <EuiFlexItem>
           <EuiFieldNumber
+            min={0}
             value={intervalValue}
             onChange={onChangeValue}
             aria-label={i18n.translate(

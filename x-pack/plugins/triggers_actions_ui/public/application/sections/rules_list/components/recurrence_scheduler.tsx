@@ -464,7 +464,6 @@ export const recurrenceSummary = ({
   bymonth,
 }: RecurrenceSchedule) => {
   const frequencySummary = i18nFreqSummary(interval)[freq];
-  console.log('freq', freq);
 
   // For weekday summaries
   const firstWeekday = byweekday ? byweekday[0] : '';
