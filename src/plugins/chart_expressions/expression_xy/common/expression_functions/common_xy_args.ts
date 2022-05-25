@@ -128,6 +128,11 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: ['string'],
     help: strings.getAriaLabelHelp(),
   },
+  orderBucketsBySum: {
+    types: ['boolean'],
+    default: false,
+    help: strings.getOrderBucketsBySum(),
+  },
   addTimeMarker: {
     types: ['boolean'],
     default: false,

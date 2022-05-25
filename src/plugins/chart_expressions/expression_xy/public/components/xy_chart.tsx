@@ -25,6 +25,7 @@ import {
   RecursivePartial,
   AxisStyle,
   Placement,
+  Direction,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
@@ -609,6 +610,13 @@ export function XYChart({
         showLegendExtra={isHistogramViz && valuesInLegend}
         ariaLabel={args.ariaLabel}
         ariaUseDefaultSummary={!args.ariaLabel}
+        orderOrdinalBinsBy={
+          args.orderBucketsBySum
+            ? {
+                direction: Direction.Descending,
+              }
+            : undefined
+        }
       />
       <XYCurrentTime
         enabled={Boolean(args.addTimeMarker && isTimeViz)}
