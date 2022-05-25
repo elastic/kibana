@@ -94,6 +94,7 @@ export const TIMELINE_EVENTS_FIELDS = [
   'event.timezone',
   'event.type',
   'agent.type',
+  'agent.id',
   'auditd.result',
   'auditd.session',
   'auditd.data.acct',

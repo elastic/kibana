@@ -32,6 +32,10 @@ export const extendedDataLayerFunction: ExtendedDataLayerFn = {
       help: strings.getAccessorsHelp(),
       multi: true,
     },
+    markSizeAccessor: {
+      types: ['string'],
+      help: strings.getMarkSizeAccessorHelp(),
+    },
     table: {
       types: ['datatable'],
       help: strings.getTableHelp(),

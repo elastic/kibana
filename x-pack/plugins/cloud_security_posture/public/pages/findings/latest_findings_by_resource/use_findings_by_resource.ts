@@ -13,7 +13,7 @@ import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, FindingsQueryResult } from '../types';
 
-// a large number to probably get all the buckets
+// Maximum number of grouped findings, default limit in elasticsearch is set to 65,536 (ref: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-settings.html#search-settings-max-buckets)
 const MAX_BUCKETS = 60 * 1000;
 
 interface UseResourceFindingsOptions extends FindingsBaseEsQuery {
@@ -43,6 +43,8 @@ interface FindingsByResourceAggs {
 
 interface FindingsAggBucket extends estypes.AggregationsStringRareTermsBucketKeys {
   failed_findings: estypes.AggregationsMultiBucketBase;
+  name: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
+  subtype: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringTermsBucketKeys>;
   cis_sections: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
@@ -57,10 +59,16 @@ export const getFindingsByResourceAggQuery = ({
     query,
     size: 0,
     aggs: {
-      resource_total: { cardinality: { field: 'resource.id.keyword' } },
+      resource_total: { cardinality: { field: 'resource.id' } },
       resources: {
-        terms: { field: 'resource.id.keyword', size: MAX_BUCKETS },
+        terms: { field: 'resource.id', size: MAX_BUCKETS },
         aggs: {
+          name: {
+            terms: { field: 'resource.name', size: 1 },
+          },
+          subtype: {
+            terms: { field: 'resource.sub_type', size: 1 },
+          },
           cis_sections: {
             terms: { field: 'rule.section.keyword' },
           },
@@ -117,16 +125,24 @@ export const useFindingsByResource = ({ index, query, from, size }: UseResourceF
   );
 };
 
-const createFindingsByResource = (bucket: FindingsAggBucket) => {
-  if (!Array.isArray(bucket.cis_sections.buckets))
+const createFindingsByResource = (resource: FindingsAggBucket) => {
+  if (
+    !Array.isArray(resource.cis_sections.buckets) ||
+    !Array.isArray(resource.name.buckets) ||
+    !Array.isArray(resource.subtype.buckets)
+  )
     throw new Error('expected buckets to be an array');
 
   return {
-    resource_id: bucket.key,
-    cis_sections: bucket.cis_sections.buckets.map((v) => v.key),
+    resource_id: resource.key,
+    resource_name: resource.name.buckets.map((v) => v.key).at(0),
+    resource_subtype: resource.subtype.buckets.map((v) => v.key).at(0),
+    cis_sections: resource.cis_sections.buckets.map((v) => v.key),
     failed_findings: {
-      total: bucket.failed_findings.doc_count,
-      normalized: bucket.doc_count > 0 ? bucket.failed_findings.doc_count / bucket.doc_count : 0,
+      count: resource.failed_findings.doc_count,
+      normalized:
+        resource.doc_count > 0 ? resource.failed_findings.doc_count / resource.doc_count : 0,
+      total_findings: resource.doc_count,
     },
   };
 };

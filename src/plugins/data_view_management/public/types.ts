@@ -25,6 +25,7 @@ import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { IndexPatternManagementStart } from '.';
 
 export interface IndexPatternManagmentContext {
@@ -46,6 +47,7 @@ export interface IndexPatternManagmentContext {
   fieldFormats: FieldFormatsStart;
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export type IndexPatternManagmentContextValue =
