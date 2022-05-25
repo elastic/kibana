@@ -94,7 +94,7 @@ export class Gauge extends Component {
           </div>
           <div
             className="tvbVisGauge__value"
-            style={{ valueColor: this.props.valueColor }}
+            style={this.props.valueColor ? { color: this.props.valueColor } : {}}
             ref="label"
             data-test-subj="gaugeValue"
           >
@@ -109,7 +109,7 @@ export class Gauge extends Component {
         <div css={innerCSS} className="tvbVisCircleGauge__metrics" ref={(el) => (this.inner = el)}>
           <div
             className="tvbVisGauge__value"
-            style={{ valueColor: this.props.valueColor }}
+            style={this.props.valueColor ? { color: this.props.valueColor } : {}}
             ref="label"
             data-test-subj="gaugeValue"
           >
