@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { DataViewBase } from '@kbn/es-query';
+import { DataViewBaseSerializable } from '@kbn/es-query';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 
-export const DataViewPersistableStateService: PersistableStateService<DataViewBase> = {
+export const DataViewPersistableStateService: PersistableStateService<DataViewBaseSerializable> = {
   inject: (state, references) => {
     return state;
   },

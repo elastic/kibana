@@ -6,17 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { DataViewFieldBase } from '@kbn/es-query';
+import { DataViewFieldBaseSerializable } from '@kbn/es-query';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 
-export const DataViewPersistableStateService: PersistableStateService<DataViewFieldBase> = {
-  inject: (state, references) => {
-    return state;
-  },
-  extract: (state) => {
-    return { state, references: [] };
-  },
-  getAllMigrations: () => ({}),
-  migrateToLatest: ({ state }) => state,
-  telemetry: () => ({}),
-};
+export const DataViewPersistableStateService: PersistableStateService<DataViewFieldBaseSerializable> =
+  {
+    inject: (state, references) => {
+      return state;
+    },
+    extract: (state) => {
+      return { state, references: [] };
+    },
+    getAllMigrations: () => ({}),
+    migrateToLatest: ({ state }) => state,
+    telemetry: () => ({}),
+  };

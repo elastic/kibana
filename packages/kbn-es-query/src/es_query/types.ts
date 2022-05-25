@@ -35,7 +35,7 @@ export interface IFieldSubTypeNested {
  * A base interface for an index pattern field
  * @public
  */
-export interface DataViewFieldBase extends SerializableRecord {
+export interface DataViewFieldBase {
   name: string;
   /**
    * Kibana field type
@@ -54,15 +54,19 @@ export interface DataViewFieldBase extends SerializableRecord {
   scripted?: boolean;
 }
 
+export type DataViewFieldBaseSerializable = SerializableRecord & DataViewFieldBase;
+
 /**
  * A base interface for an index pattern
  * @public
  */
-export interface DataViewBase extends SerializableRecord {
+export interface DataViewBase {
   fields: DataViewFieldBase[];
   id?: string;
   title: string;
 }
+
+export type DataViewBaseSerializable = SerializableRecord & DataViewBase;
 
 export interface BoolQuery {
   must: estypes.QueryDslQueryContainer[];

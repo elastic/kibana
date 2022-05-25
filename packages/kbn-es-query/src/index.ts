@@ -9,7 +9,9 @@
 export type {
   BoolQuery,
   DataViewBase,
+  DataViewBaseSerializable,
   DataViewFieldBase,
+  DataViewFieldBaseSerializable,
   EsQueryConfig,
   IFieldSubType,
   IFieldSubTypeMulti,
