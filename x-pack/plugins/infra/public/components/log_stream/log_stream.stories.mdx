@@ -250,16 +250,16 @@ class MyPlugin {
 
 It's possible to pass a `height` prop, e.g. `60vh` or `300px`, to specify how much vertical space the component should consume.
 
-### With a `flyoutEnabled` prop
+### With a `showFlyoutAction` prop
 
-The component can render a button on the row that opens a flyout, via the `flyoutEnabled` prop. The flyout will display the log details for that each entry
+The component can render a button on the row that opens a flyout, via the `showFlyoutAction` prop. The flyout will display the log details for that each entry
 
 ```tsx
 <LogStream
   sourceId="my_source"
   startTimestamp={...}
   endTimestamp={...}
-  flyoutEnabled />
+  showFlyoutAction />
 ```
 
 <Story id="infra-logstream--flyout" />

@@ -73,7 +73,7 @@ interface LogStreamContentProps {
   center?: LogEntryCursor;
   highlight?: string;
   columns?: LogColumnDefinition[];
-  flyoutEnabled?: boolean;
+  showFlyoutAction?: boolean;
 }
 
 export const LogStream: React.FC<LogStreamProps> = ({ height = 400, ...contentProps }) => {
@@ -95,7 +95,7 @@ export const LogStreamContent: React.FC<LogStreamContentProps> = ({
   center,
   highlight,
   columns,
-  flyoutEnabled = false,
+  showFlyoutAction = false,
 }) => {
   const customColumns = useMemo(
     () => (columns ? convertLogColumnDefinitionToLogSourceColumnDefinition(columns) : undefined),
@@ -228,7 +228,7 @@ Read more at https://github.com/elastic/kibana/blob/main/src/plugins/kibana_reac
       jumpToTarget={noop}
       reportVisibleInterval={handlePagination}
       reloadItems={fetchEntries}
-      onOpenLogEntryFlyout={flyoutEnabled ? openLogEntryFlyout : undefined}
+      onOpenLogEntryFlyout={showFlyoutAction ? openLogEntryFlyout : undefined}
       highlightedItem={highlight ?? null}
       currentHighlightKey={null}
       startDateExpression={''}

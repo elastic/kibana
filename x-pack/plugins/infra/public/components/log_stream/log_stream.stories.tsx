@@ -84,5 +84,5 @@ CustomColumnRendering.args = {
 
 export const Flyout = LogStreamStoryTemplate.bind({});
 Flyout.args = {
-  flyoutEnabled: true,
+  showFlyoutAction: true,
 };
