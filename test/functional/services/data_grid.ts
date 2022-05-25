@@ -95,8 +95,11 @@ export class DataGridService extends FtrService {
     return Number(await grid.getAttribute('data-document-number'));
   }
 
-  public async getFields() {
-    const cells = await this.find.allByCssSelector('.euiDataGridRowCell');
+  public async getFields({ isAnchorRow = false }) {
+    const selector = isAnchorRow
+      ? '.euiDataGridRowCell.dscDocsGrid__cell--highlight'
+      : '.euiDataGridRowCell';
+    const cells = await this.find.allByCssSelector(selector);
 
     const rows: string[][] = [];
     let rowIdx = -1;

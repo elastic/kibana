@@ -37,22 +37,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('displays predecessors - anchor - successors in right order for data grid', async function () {
+    it('displays predecessors - anchor - successors in right order', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, '1');
       const actualRowsText = await dataGrid.getRowsText();
 
-      const expectedRowsText = [
-        'Oct 21, 2019 @ 08:30:04.828733000',
-        'Oct 21, 2019 @ 00:30:04.828740000',
-        'Oct 21, 2019 @ 00:30:04.828723000',
-      ];
-      expect(actualRowsText).to.eql(expectedRowsText);
-    });
-
-    it('displays predecessors - anchor - successors in right order using doc table', async function () {
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
-      await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, '1');
-      const actualRowsText = await docTable.getRowsText();
       const expectedRowsText = [
         'Oct 21, 2019 @ 08:30:04.828733000',
         'Oct 21, 2019 @ 00:30:04.828740000',

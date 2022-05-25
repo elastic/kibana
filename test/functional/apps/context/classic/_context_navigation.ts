@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const TEST_FILTER_COLUMN_NAMES = [
   [
@@ -20,17 +20,17 @@ const TEST_FILTER_COLUMN_NAMES = [
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
-  const dataGrid = getService('dataGrid');
+  const docTable = getService('docTable');
   const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const find = getService('find');
 
-  describe('discover - context - back navigation', function contextSize() {
+  describe('discover - context - back navigation using classic table', function contextSize() {
     before(async function () {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
       await PageObjects.common.navigateToApp('discover');
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItem(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
@@ -45,17 +45,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('user navigating to context and returning to discover', async () => {
         // navigate to the context view
         const initialHitCount = await PageObjects.discover.getHitCount();
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
-
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
-        await rowActions[1].click();
+        await docTable.clickRowToggle({ rowIndex: 0 });
+        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+        await rowActions[0].click();
         await PageObjects.context.waitUntilContextLoadingHasFinished();
         await PageObjects.context.clickSuccessorLoadMoreButton();
         await PageObjects.context.clickSuccessorLoadMoreButton();
         await PageObjects.context.clickSuccessorLoadMoreButton();
         await PageObjects.context.waitUntilContextLoadingHasFinished();
         await browser.goBack();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitForDocTableLoadingComplete();
         const hitCount = await PageObjects.discover.getHitCount();
         return initialHitCount === hitCount;
       });
@@ -65,13 +64,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         'user navigating to context and returning to discover via breadcrumbs',
         async () => {
-          await dataGrid.clickRowToggle({ rowIndex: 0 });
-          const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
-          await rowActions[1].click();
+          await docTable.clickRowToggle({ rowIndex: 0 });
+          const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+          await rowActions[0].click();
           await PageObjects.context.waitUntilContextLoadingHasFinished();
 
           await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await PageObjects.discover.waitForDocTableLoadingComplete();
 
           for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
             expect(await filterBar.hasFilter(columnName, value)).to.eql(true);

@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const TEST_INDEX_PATTERN = 'date-nanos';
 const TEST_DEFAULT_CONTEXT_SIZE = 1;
@@ -15,12 +15,12 @@ const TEST_STEP_SIZE = 3;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const dataGrid = getService('dataGrid');
+  const docTable = getService('docTable');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
   const esArchiver = getService('esArchiver');
 
-  describe('context view for date_nanos', () => {
+  describe('context view for date_nanos using classic table', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_date_nanos']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/date_nanos');
@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
-        'doc_table:legacy': false,
+        'doc_table:legacy': true,
       });
     });
 
@@ -40,9 +40,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
     });
 
-    it('displays predecessors - anchor - successors in right order', async function () {
+    it('displays predessors - anchor - successors in right order ', async function () {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qj999Z');
-      const actualRowsText = await dataGrid.getRowsText();
+      const actualRowsText = await docTable.getRowsText();
       const expectedRowsText = [
         'Sep 18, 2019 @ 06:50:13.000000000-2',
         'Sep 18, 2019 @ 06:50:12.999999999-3',
@@ -55,8 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, 'AU_x3-TaGFA8no6Qjisd');
       await PageObjects.context.clickPredecessorLoadMoreButton();
       await PageObjects.context.clickSuccessorLoadMoreButton();
-      const actualRowsText = await dataGrid.getRowsText();
-      await PageObjects.common.sleep(10000);
+      const actualRowsText = await docTable.getRowsText();
       const expectedRowsText = [
         'Sep 22, 2019 @ 23:50:13.2531233455',
         'Sep 18, 2019 @ 06:50:13.0000001044',

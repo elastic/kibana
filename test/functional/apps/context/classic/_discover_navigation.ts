@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const TEST_COLUMN_NAMES = ['@message'];
 const TEST_FILTER_COLUMN_NAMES = [
@@ -17,7 +17,7 @@ const TEST_FILTER_COLUMN_NAMES = [
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const dataGrid = getService('dataGrid');
+  const docTable = getService('docTable');
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects([
     'common',
@@ -33,11 +33,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
 
-  describe('context link in discover', () => {
+  describe('context link in discover using classic table', () => {
     before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
-        'doc_table:legacy': false,
+        'doc_table:legacy': true,
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');
@@ -61,18 +61,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
        * @param isAnchorRow - determins if just the anchor row of context should be selected
        */
       const getTimestamp = async (isAnchorRow: boolean = false) => {
-        const contextFields = await dataGrid.getFields({ isAnchorRow });
+        const contextFields = await docTable.getFields({ isAnchorRow });
         return contextFields[0][0];
       };
       // get the timestamp of the first row
+
       const firstDiscoverTimestamp = await getTimestamp();
 
       // check the anchor timestamp in the context view
       await retry.waitFor('selected document timestamp matches anchor timestamp ', async () => {
         // navigate to the context view
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
-        await rowActions[1].click();
+        await docTable.clickRowToggle({ rowIndex: 0 });
+        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+        await rowActions[0].click();
         await PageObjects.context.waitUntilContextLoadingHasFinished();
         const anchorTimestamp = await getTimestamp(true);
         return anchorTimestamp === firstDiscoverTimestamp;
@@ -81,9 +82,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('next anchor timestamp matches previous anchor timestamp', async () => {
         // get the timestamp of the first row
         const firstContextTimestamp = await getTimestamp(false);
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
-        await rowActions[1].click();
+        await docTable.clickRowToggle({ rowIndex: 0 });
+        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+        await rowActions[0].click();
         await PageObjects.context.waitUntilContextLoadingHasFinished();
         const anchorTimestamp = await getTimestamp(true);
         return anchorTimestamp === firstContextTimestamp;
@@ -91,7 +92,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should open the context view with the same columns', async () => {
-      const columnNames = await dataGrid.getHeaderFields();
+      const columnNames = await docTable.getHeaderFields();
       expect(columnNames).to.eql(['@timestamp', ...TEST_COLUMN_NAMES]);
     });
 
@@ -110,15 +111,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.context.waitUntilContextLoadingHasFinished();
 
       // navigate to the doc view
-      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      await docTable.clickRowToggle({ rowIndex: 0 });
 
       // click the open action
       await retry.try(async () => {
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const rowActions = await docTable.getRowActions({ rowIndex: 0 });
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }
-        await rowActions[0].click();
+        await rowActions[1].click();
       });
 
       const hasDocHit = await testSubjects.exists('doc-hit');
@@ -126,7 +127,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('breadcrumb first');
       await PageObjects.discover.waitForDiscoverAppOnScreen();
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.waitForDocTableLoadingComplete();
     });
 
     it('navigates to doc view from embeddable', async () => {
@@ -141,9 +142,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addSavedSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
-      await rowActions[0].click();
+      await docTable.clickRowToggle({ rowIndex: 0 });
+      const rowActions = await docTable.getRowActions({ rowIndex: 0 });
+      await rowActions[1].click();
       await PageObjects.common.sleep(250);
       // accept alert if it pops up
       const alert = await browser.getAlert();
