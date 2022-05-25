@@ -12,27 +12,23 @@ export const DashboardTourStrings = {
   viewModeTour: {
     getTitle: () =>
       i18n.translate('dashboard.tour.viewMode.title', {
-        defaultMessage: 'Ready to create something brilliant?',
+        defaultMessage: 'Ready to create beautiful visualizations?',
       }),
     getDescription: () =>
       i18n.translate('dashboard.tour.viewMode.firstStep.description', {
-        defaultMessage: 'Start editing here.',
+        defaultMessage: 'Open your dashboard in Edit mode here.',
       }),
   },
   editModeTour: {
-    getTitle: () =>
-      i18n.translate('dashboard.tour.editMode.title', {
-        defaultMessage: 'Dashboard tour',
-      }),
     createVisualization: {
       getTitle: () =>
         i18n.translate('dashboard.tour.editMode.createVisualization.title', {
-          defaultMessage: 'Create visualizations',
+          defaultMessage: 'Get creative',
         }),
       getDescription: () =>
         i18n.translate('dashboard.tour.editMode.createVisualization.description', {
           defaultMessage:
-            'Build maps, charts, gauges, and other visualizations that best display your data.',
+            'Create charts, maps, and other visualizations that best display your data.',
         }),
     },
     panelOptions: {
@@ -42,29 +38,28 @@ export const DashboardTourStrings = {
         }),
       getDescription: () =>
         i18n.translate('dashboard.tour.editMode.panelOptions.description', {
-          defaultMessage: 'Customize your visualization to give your data its best look.',
+          defaultMessage: 'Customize your visualization to add a personal touch.',
         }),
     },
     timePicker: {
       getTitle: () =>
         i18n.translate('dashboard.tour.editMode.timePicker.title', {
-          defaultMessage: 'Expand the time range',
+          defaultMessage: 'Adjust the time range',
         }),
       getDescription: () =>
         i18n.translate('dashboard.tour.editMode.timePicker.description', {
           defaultMessage:
-            'View hits for a particular day, the last year, or whatever gets you the data you want.',
+            'View data for a particular day, the last year, or whatever time range you want.',
         }),
     },
     filters: {
       getTitle: () =>
         i18n.translate('dashboard.tour.editMode.addFilter.title', {
-          defaultMessage: 'Filter the data',
+          defaultMessage: 'Refine your data',
         }),
       getDescription: () =>
         i18n.translate('dashboard.tour.editMode.addFilter.description', {
-          defaultMessage:
-            'To reduce the amount of data displayed, filter for data that exists, does not exist, contains a value, and more.',
+          defaultMessage: 'Filter for only the data you want to explore.',
         }),
     },
     controls: {
@@ -74,7 +69,7 @@ export const DashboardTourStrings = {
         }),
       getDescription: () =>
         i18n.translate('dashboard.tour.editMode.controls.description', {
-          defaultMessage: 'Add controls for a more engaging, more memorable experience.',
+          defaultMessage: 'Add Controls, or custom filters, for a more engaging experience.',
         }),
     },
   },

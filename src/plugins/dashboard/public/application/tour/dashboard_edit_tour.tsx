@@ -26,7 +26,7 @@ const dashboardEditTourConfig = {
   currentTourStep: 1,
   isTourActive: true,
   tourPopoverWidth: 360,
-  tourSubtitle: DashboardTourStrings.editModeTour.getTitle(),
+  tourSubtitle: '',
 };
 
 const dashboardEditTourSteps = [
