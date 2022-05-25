@@ -72,6 +72,13 @@ export const RESULT = i18n.translate(
   }
 );
 
+export const RESOURCE_TYPE = i18n.translate(
+  'xpack.csp.findings.findingsTable.findingsTableColumn.resourceTypeColumnLabel',
+  {
+    defaultMessage: 'Resource Type',
+  }
+);
+
 export const CLUSTER_ID = i18n.translate(
   'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
   {

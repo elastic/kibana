@@ -38,7 +38,12 @@ interface CspFindingsData {
 
 export type CspFindingsResult = FindingsQueryResult<CspFindingsData | undefined, unknown>;
 
-const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set(['@timestamp']);
+const FIELDS_WITHOUT_KEYWORD_MAPPING = new Set([
+  '@timestamp',
+  'resource.sub_type',
+  'resource.name',
+  'rule.name',
+]);
 
 // NOTE: .keyword comes from the mapping we defined for the Findings index
 const getSortKey = (key: string): string =>
