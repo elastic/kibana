@@ -101,7 +101,15 @@ export const ElementSettings: FunctionComponent<Props> = ({ element }) => {
   const tabsContent = useMemo(
     () =>
       tabs.map(({ id, content }) =>
-        id === selectedTab ? content : <div style={{ display: 'none' }}>{content}</div>
+        id === selectedTab ? (
+          content
+        ) : (
+          // tabs must be hidden, but mounted, because `Display` tab, for example,
+          // contains args, which should react on input changes and change the expression,
+          // according to the logic they encapsulate.
+          // Good example: columns have changed, the args of expression `math` should be changed, containing the new columns.
+          <div style={{ display: 'none' }}>{content}</div>
+        )
       ),
     [selectedTab, tabs]
   );
