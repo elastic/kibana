@@ -10,6 +10,7 @@ import { isEqual } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
+import { ContentSourceDetails } from '../../../../../common/types/sources';
 import {
   clearFlashMessages,
   flashAPIErrors,
@@ -19,7 +20,7 @@ import {
 import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { GROUPS_PATH } from '../../routes';
-import { ContentSourceDetails, GroupDetails, SourcePriority } from '../../types';
+import { GroupDetails, SourcePriority } from '../../types';
 
 export const MAX_NAME_LENGTH = 40;
 

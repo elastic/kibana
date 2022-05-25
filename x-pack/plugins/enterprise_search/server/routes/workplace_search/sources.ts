@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { fetchSources } from '../../lib/fetch_sources';
+
 import { getOAuthTokenPackageParams } from '../../lib/get_oauth_token_package_params';
 
 import { skipBodyValidation } from '../../lib/route_config_helpers';
@@ -126,6 +128,30 @@ export function registerAccountSourcesRoute({
     enterpriseSearchRequestHandler.createRequest({
       path: '/ws/sources',
     })
+  );
+}
+
+export function registerFetchSources({ router }: RouteDependencies) {
+  router.get(
+    {
+      path: '/internal/workplace_search/custom_sources',
+      validate: false,
+    },
+    async (context, _, response) => {
+      const { client } = (await context.core).elasticsearch;
+      try {
+        const indices = await fetchSources(client);
+        return response.ok({
+          body: indices,
+          headers: { 'content-type': 'application/json' },
+        });
+      } catch (error) {
+        return response.customError({
+          statusCode: 502,
+          body: 'Error fetching data from Enterprise Search',
+        });
+      }
+    }
   );
 }
 
@@ -986,6 +1012,7 @@ export function registerOauthConnectorParamsRoute({
 }
 
 export const registerSourcesRoutes = (dependencies: RouteDependencies) => {
+  registerFetchSources(dependencies);
   registerAccountSourcesRoute(dependencies);
   registerAccountSourcesStatusRoute(dependencies);
   registerAccountSourceRoute(dependencies);

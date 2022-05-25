@@ -11,10 +11,11 @@ import { cloneDeep, findIndex } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 
+import { ContentSourceDetails } from '../../../../../common/types/sources';
 import { flashAPIErrors, flashSuccessToast } from '../../../shared/flash_messages';
 import { HttpLogic } from '../../../shared/http';
 import { AppLogic } from '../../app_logic';
-import { Connector, ContentSourceDetails, ContentSourceStatus, SourceDataItem } from '../../types';
+import { Connector, ContentSourceStatus, SourceDataItem } from '../../types';
 import { sortByName } from '../../utils';
 
 import { staticSourceData } from './source_data';
@@ -172,15 +173,18 @@ export const SourcesLogic = kea<MakeLogicType<ISourcesValues, ISourcesActions>>(
   listeners: ({ actions, values }) => ({
     initializeSources: async (_, breakpoint) => {
       const { isOrganization } = AppLogic.values;
-      const route = isOrganization
-        ? '/internal/workplace_search/org/sources'
-        : '/internal/workplace_search/account/sources';
+      // const route = isOrganization
+      //   ? '/internal/workplace_search/org/sources'
+      //   : '/internal/workplace_search/account/sources';
 
       try {
-        const response = await HttpLogic.values.http.get<ISourcesServerResponse>(route);
+        const customSources = await HttpLogic.values.http.get<ISourcesServerResponse>(
+          '/internal/workplace_search/custom_sources'
+        );
+        // const response = await HttpLogic.values.http.get<ISourcesServerResponse>(route);
         breakpoint(); // Prevents errors if logic unmounts while fetching
         actions.pollForSourceStatusChanges();
-        actions.onInitializeSources(response);
+        actions.onInitializeSources(customSources);
       } catch (e) {
         if (isBreakpoint(e)) {
           return; // do not continue if logic is unmounted

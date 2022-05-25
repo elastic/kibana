@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ContentSource, ContentSourceDetails } from '../../../common/types/sources';
 import { RoleMapping } from '../shared/types';
 
 export * from '../../../common/types/workplace_search';
@@ -83,34 +84,10 @@ export interface SourceDataItem {
   accountContextOnly: boolean;
   isBeta?: boolean;
 }
-
-export interface ContentSource {
-  id: string;
-  serviceType: string;
-  baseServiceType?: string;
-  name: string;
-}
-
 export interface SourceContentItem {
   id: string;
   last_updated: string;
   [key: string]: string | CustomAPIFieldValue;
-}
-
-export interface ContentSourceDetails extends ContentSource {
-  status: string;
-  statusMessage: string;
-  documentCount: string;
-  isFederatedSource: boolean;
-  searchable: boolean;
-  supportedByLicense: boolean;
-  errorReason: string | null;
-  allowsReauth: boolean;
-  boost: number;
-  activities: SourceActivity[];
-  isOauth1: boolean;
-  altIcon?: string; // base64 encoded png
-  mainIcon?: string; // base64 encoded png
 }
 
 interface DescriptionList {
@@ -121,13 +98,6 @@ interface DescriptionList {
 export interface DocumentSummaryItem {
   count: number;
   type: string;
-}
-
-interface SourceActivity {
-  details: string[];
-  event: string;
-  time: string;
-  status: string;
 }
 
 export interface SyncEstimate {

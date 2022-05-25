@@ -11,8 +11,8 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
+import { ContentSourceDetails } from '../../../../../../common/types/sources';
 import { SourceIcon } from '../../../components/shared/source_icon';
-import { ContentSourceDetails } from '../../../types';
 
 import { GroupRowSourcesDropdown } from './group_row_sources_dropdown';
 import { GroupSources } from './group_sources';
