@@ -56,11 +56,7 @@ const TabNavigationItemComponent = ({
 
 const TabNavigationItem = React.memo(TabNavigationItemComponent);
 
-export const TabNavigationComponent: React.FC<TabNavigationProps> = ({
-  display,
-  navTabs,
-  tabName,
-}) => {
+export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs, tabName }) => {
   const mapLocationToTab = useCallback(
     (): string =>
       getOr(

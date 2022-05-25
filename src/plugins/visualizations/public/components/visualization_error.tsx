@@ -9,12 +9,12 @@
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React from 'react';
 
-interface VisualizationNoResultsProps {
+interface VisualizationErrorProps {
   onInit?: () => void;
   error: string | Error;
 }
 
-export class VisualizationError extends React.Component<VisualizationNoResultsProps> {
+export class VisualizationError extends React.Component<VisualizationErrorProps> {
   public render() {
     return (
       <EuiEmptyPrompt

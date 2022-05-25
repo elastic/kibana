@@ -59,6 +59,7 @@ import {
   FormArrayField,
 } from '../../shared_imports';
 import { OsqueryIcon } from '../../components/osquery_icon';
+import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -187,7 +188,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
           }
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__labelDisplay--expand">
+          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__label--expand">
             {option.value.field}
           </StyledFieldSpan>
         </EuiFlexItem>
@@ -362,7 +363,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         gutterSize="none"
       >
         <EuiFlexItem grow={false}>
-          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__labelDisplay--expand">
+          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__label--expand">
             {option.value.suggestion_label}
           </StyledFieldSpan>
         </EuiFlexItem>
@@ -773,11 +774,13 @@ export const ECSMappingEditorField = React.memo(
         return;
       }
 
+      const oneLineQuery = removeMultilines(query);
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let ast: Record<string, any> | undefined;
 
       try {
-        ast = sqliteParser(query)?.statement?.[0];
+        ast = sqliteParser(oneLineQuery)?.statement?.[0];
       } catch (e) {
         return;
       }
