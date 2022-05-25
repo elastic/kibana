@@ -44,6 +44,18 @@ export const syntheticsMonitor: SavedObjectsType = {
           },
         },
       },
+      journey_id: {
+        type: 'keyword',
+      },
+      project_id: {
+        type: 'keyword',
+      },
+      'monitor.origin': {
+        type: 'keyword',
+      },
+      custom_heartbeat_id: {
+        type: 'keyword',
+      },
     },
   },
   management: {
