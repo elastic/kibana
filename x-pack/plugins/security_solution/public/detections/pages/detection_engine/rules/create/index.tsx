@@ -77,6 +77,9 @@ const MyEuiPanel = styled(EuiPanel)<{
 
 MyEuiPanel.displayName = 'MyEuiPanel';
 
+const isShouldRerenderStep = (step: RuleStep, activeStep: RuleStep) =>
+  activeStep !== step ? '0' : '1';
+
 const CreateRulePageComponent: React.FC = () => {
   const [
     {
@@ -287,8 +290,6 @@ const CreateRulePageComponent: React.FC = () => {
     return null;
   }
 
-  const isShouldRerenderStep = (step: RuleStep) => (activeStep !== step ? '0' : '1');
-
   return (
     <>
       <SecuritySolutionPageWrapper>
@@ -333,7 +334,7 @@ const CreateRulePageComponent: React.FC = () => {
                   setForm={setFormHook}
                   onSubmit={submitStepDefineRule}
                   descriptionColumns="singleSplit"
-                  key={isShouldRerenderStep(RuleStep.defineRule)}
+                  key={isShouldRerenderStep(RuleStep.defineRule, activeStep)}
                 />
               </EuiAccordion>
             </MyEuiPanel>
@@ -369,7 +370,7 @@ const CreateRulePageComponent: React.FC = () => {
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.aboutRule)}
-                  key={isShouldRerenderStep(RuleStep.aboutRule)}
+                  key={isShouldRerenderStep(RuleStep.aboutRule, activeStep)}
                 />
               </EuiAccordion>
             </MyEuiPanel>
@@ -404,7 +405,7 @@ const CreateRulePageComponent: React.FC = () => {
                   isLoading={isLoading || loading}
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.scheduleRule)}
-                  key={isShouldRerenderStep(RuleStep.scheduleRule)}
+                  key={isShouldRerenderStep(RuleStep.scheduleRule, activeStep)}
                 />
               </EuiAccordion>
             </MyEuiPanel>
@@ -438,7 +439,7 @@ const CreateRulePageComponent: React.FC = () => {
                   setForm={setFormHook}
                   onSubmit={() => submitStep(RuleStep.ruleActions)}
                   actionMessageParams={actionMessageParams}
-                  key={isShouldRerenderStep(RuleStep.ruleActions)}
+                  key={isShouldRerenderStep(RuleStep.ruleActions, activeStep)}
                 />
               </EuiAccordion>
             </MyEuiPanel>
