@@ -50,7 +50,8 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'scenarioOpts',
       'forceLegacyIndices',
       'dryRun',
-      'gcpRepository'
+      'gcpRepository',
+      'streamProcessors'
     ),
     logLevel: parsedLogLevel,
     file: parsedFile,
