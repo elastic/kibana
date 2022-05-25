@@ -42,7 +42,7 @@ describe('<ManagementSettings />', () => {
     expect(screen.queryByText('Generate API key')).not.toBeInTheDocument();
     userEvent.click(screen.getByTestId('uptimeMonitorManagementApiKeyPopoverTrigger'));
     expect(
-      screen.getByText('Use an API key to push monitors remotely from a CLI or CD pipeline.')
+      screen.getByText(/Use an API key to push monitors remotely from a CLI or CD pipeline/)
     ).toBeInTheDocument();
   });
 
