@@ -38,7 +38,10 @@ import { PanelModelContext } from '../contexts/panel_model_context';
 import { FormValidationContext } from '../contexts/form_validation_context';
 import { getUISettings, getDataViewsStart } from '../../services';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { fetchIndexPattern } from '../../../common/index_patterns_utils';
+import {
+  fetchIndexPattern,
+  isDataViewTypeIndexPattern,
+} from '../../../common/index_patterns_utils';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 const LEVEL_OF_DETAIL_STEPS = 10;
@@ -161,7 +164,9 @@ export const IndexPattern = ({
               defaultIndex: await dataViews.getDefault(),
             };
       } catch {
-        // nothing to be here
+        if (isDataViewTypeIndexPattern(index)) {
+          fetchedIndexPattern.missedIndex = index.id;
+        }
       }
 
       setFetchedIndex(fetchedIndexPattern);

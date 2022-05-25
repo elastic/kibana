@@ -7,22 +7,27 @@
 
 import { Formatter, commonFormatters, objectFormatter, arrayFormatter } from './common';
 import { BrowserFields, ConfigKey } from '../../../common/runtime_types/monitor_management';
+import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../common/constants/monitor_defaults';
 
 export type BrowserFormatMap = Record<keyof BrowserFields, Formatter>;
 
 const throttlingFormatter: Formatter = (fields) => {
   if (!fields[ConfigKey.IS_THROTTLING_ENABLED]) return false;
 
-  const getThrottlingValue = (v: string | undefined, suffix: 'd' | 'u' | 'l') =>
-    v !== '' && v !== undefined ? `${v}${suffix}` : null;
-
-  return [
-    getThrottlingValue(fields[ConfigKey.DOWNLOAD_SPEED], 'd'),
-    getThrottlingValue(fields[ConfigKey.UPLOAD_SPEED], 'u'),
-    getThrottlingValue(fields[ConfigKey.LATENCY], 'l'),
-  ]
-    .filter((v) => v !== null)
-    .join('/');
+  return {
+    download: parseInt(
+      fields[ConfigKey.DOWNLOAD_SPEED] || DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.DOWNLOAD_SPEED],
+      10
+    ),
+    upload: parseInt(
+      fields[ConfigKey.UPLOAD_SPEED] || DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.UPLOAD_SPEED],
+      10
+    ),
+    latency: parseInt(
+      fields[ConfigKey.LATENCY] || DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.LATENCY],
+      10
+    ),
+  };
 };
 
 export const browserFormatters: BrowserFormatMap = {
@@ -36,6 +41,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_ZIP_PASSWORD]: null,
   [ConfigKey.SOURCE_ZIP_FOLDER]: null,
   [ConfigKey.SOURCE_ZIP_PROXY_URL]: null,
+  [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
   [ConfigKey.SOURCE_INLINE]: null,
   [ConfigKey.PARAMS]: null,
   [ConfigKey.SCREENSHOTS]: null,
@@ -54,5 +60,10 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.JOURNEY_FILTERS_TAGS]: (fields) =>
     arrayFormatter(fields[ConfigKey.JOURNEY_FILTERS_TAGS]),
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
+  [ConfigKey.JOURNEY_ID]: null,
+  [ConfigKey.PROJECT_ID]: null,
+  [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
+  [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
+  [ConfigKey.ORIGINAL_SPACE]: null,
   ...commonFormatters,
 };
