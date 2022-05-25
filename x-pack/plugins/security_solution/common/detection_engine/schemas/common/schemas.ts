@@ -65,6 +65,18 @@ export type EventCategoryOverride = t.TypeOf<typeof event_category_override>;
 export const eventCategoryOverrideOrUndefined = t.union([event_category_override, t.undefined]);
 export type EventCategoryOverrideOrUndefined = t.TypeOf<typeof eventCategoryOverrideOrUndefined>;
 
+export const tiebreaker_field = t.string;
+export type TiebreakerField = t.TypeOf<typeof tiebreaker_field>;
+
+export const tiebreakerFieldOrUndefined = t.union([tiebreaker_field, t.undefined]);
+export type TiebreakerFieldOrUndefined = t.TypeOf<typeof tiebreakerFieldOrUndefined>;
+
+export const timestamp_field = t.string;
+export type TimestampField = t.TypeOf<typeof timestamp_field>;
+
+export const timestampFieldOrUndefined = t.union([timestamp_field, t.undefined]);
+export type TimestampFieldOrUndefined = t.TypeOf<typeof timestampFieldOrUndefined>;
+
 export const false_positives = t.array(t.string);
 export type FalsePositives = t.TypeOf<typeof false_positives>;
 
@@ -481,6 +493,8 @@ const bulkActionEditPayloadTimeline = t.type({
   }),
 });
 
+export type BulkActionEditPayloadTimeline = t.TypeOf<typeof bulkActionEditPayloadTimeline>;
+
 export const bulkActionEditPayload = t.union([
   bulkActionEditPayloadTags,
   bulkActionEditPayloadIndexPatterns,
@@ -488,3 +502,9 @@ export const bulkActionEditPayload = t.union([
 ]);
 
 export type BulkActionEditPayload = t.TypeOf<typeof bulkActionEditPayload>;
+
+export type BulkActionEditForRuleAttributes = BulkActionEditPayloadTags;
+
+export type BulkActionEditForRuleParams =
+  | BulkActionEditPayloadIndexPatterns
+  | BulkActionEditPayloadTimeline;

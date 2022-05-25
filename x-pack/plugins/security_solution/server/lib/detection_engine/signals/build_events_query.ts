@@ -177,7 +177,9 @@ export const buildEqlSearchRequest = (
   size: number,
   timestampOverride: TimestampOverrideOrUndefined,
   exceptionLists: ExceptionListItemSchema[],
-  eventCategoryOverride: string | undefined
+  eventCategoryOverride?: string,
+  timestampField?: string,
+  tiebreakerField?: string
 ): estypes.EqlSearchRequest => {
   const defaultTimeFields = ['@timestamp'];
   const timestamps =
@@ -227,7 +229,9 @@ export const buildEqlSearchRequest = (
           filter: requestFilter,
         },
       },
+      timestamp_field: timestampField,
       event_category_field: eventCategoryOverride,
+      tiebreaker_field: tiebreakerField,
       fields,
     },
   };
