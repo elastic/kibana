@@ -11,7 +11,7 @@ import { IRouter, StartServicesAccessor } from '@kbn/core/server';
 import { DataViewsService } from '../../common';
 import { handleErrors } from './util/handle_errors';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
-import { SERVICE_PATH, SERVICE_KEY_MULTIPLE } from '../constants';
+import { SERVICE_KEY, SERVICE_PATH } from '../constants';
 
 interface GetDataViewsArgs {
   dataViewsService: DataViewsService;
@@ -74,7 +74,4 @@ const getDataViewsRouteFactory =
     );
   };
 
-export const registerGetDataViewsRoute = getDataViewsRouteFactory(
-  SERVICE_PATH,
-  SERVICE_KEY_MULTIPLE
-);
+export const registerGetDataViewsRoute = getDataViewsRouteFactory(SERVICE_PATH, SERVICE_KEY);
