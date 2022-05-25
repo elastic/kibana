@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { ChangeEvent, FunctionComponent, HTMLProps } from 'react';
+import type { ChangeEvent, FocusEvent, FunctionComponent, HTMLProps } from 'react';
 import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 
 import type {
@@ -302,6 +302,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
   // eventually enable validation after the first time user tries to save a role.
   const { current: validator } = useRef(new RoleValidator({ shouldValidate: false }));
   const [formError, setFormError] = useState<RoleValidationResult | null>(null);
+  const [creatingRoleAlreadyExists, setCreatingRoleAlreadyExists] = useState<boolean>(false);
+  const [previousName, setPreviousName] = useState<string>('');
   const runAsUsers = useRunAsUsers(userAPIClient, fatalErrors);
   const indexPatternsTitles = useIndexPatternsTitles(dataViews, fatalErrors, notifications);
   const privileges = usePrivileges(privilegesAPIClient, fatalErrors);
@@ -382,6 +384,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
     return (
       <EuiPanel hasShadow={false} hasBorder={true}>
         <EuiFormRow
+          data-test-subj={'roleNameFormRow'}
           label={
             <FormattedMessage
               id="xpack.security.management.editRole.roleNameFormRowTitle"
@@ -397,13 +400,18 @@ export const EditRolePage: FunctionComponent<Props> = ({
             ) : undefined
           }
           {...validator.validateRoleName(role)}
+          {...(creatingRoleAlreadyExists
+            ? { error: 'A role with this name already exists.', isInvalid: true }
+            : {})}
         >
           <EuiFieldText
             name={'name'}
             value={role.name || ''}
             onChange={onNameChange}
+            onBlur={onNameBlur}
             data-test-subj={'roleFormNameInput'}
             readOnly={isRoleReserved || isEditingExistingRole}
+            isInvalid={creatingRoleAlreadyExists}
           />
         </EuiFormRow>
       </EuiPanel>
@@ -415,6 +423,15 @@ export const EditRolePage: FunctionComponent<Props> = ({
       ...role,
       name: e.target.value,
     });
+
+  const onNameBlur = (e: FocusEvent<HTMLInputElement>) => {
+    if (!isEditingExistingRole && previousName !== role.name) {
+      setPreviousName(role.name);
+      doesRoleExist().then((roleExists) => {
+        setCreatingRoleAlreadyExists(roleExists);
+      });
+    }
+  };
 
   const getElasticsearchPrivileges = () => {
     return (
@@ -501,7 +518,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         data-test-subj={`roleFormSaveButton`}
         fill
         onClick={saveRole}
-        disabled={isRoleReserved}
+        disabled={isRoleReserved || creatingRoleAlreadyExists}
       >
         {saveText}
       </EuiButton>
@@ -529,8 +546,13 @@ export const EditRolePage: FunctionComponent<Props> = ({
       setFormError(null);
 
       try {
-        await rolesAPIClient.saveRole({ role });
+        await rolesAPIClient.saveRole({ role, createOnly: !isEditingExistingRole });
       } catch (error) {
+        if (!isEditingExistingRole && error?.body?.statusCode === 409) {
+          setCreatingRoleAlreadyExists(true);
+          window.scroll({ top: 0, behavior: 'smooth' });
+          return;
+        }
         notifications.toasts.addDanger(
           error?.body?.message ??
             i18n.translate('xpack.security.management.editRole.errorSavingRoleError', {
@@ -548,6 +570,15 @@ export const EditRolePage: FunctionComponent<Props> = ({
       );
 
       backToRoleList();
+    }
+  };
+
+  const doesRoleExist = async (): Promise<boolean> => {
+    try {
+      await rolesAPIClient.getRole(role.name);
+      return true;
+    } catch (error) {
+      return false;
     }
   };
 
