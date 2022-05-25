@@ -84,7 +84,7 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
   const [tab, setTab] = useState<FindingsTab>(tabs[0]);
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout ownFocus={false} onClose={onClose}>
       <EuiFlyoutHeader>
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
