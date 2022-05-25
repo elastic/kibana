@@ -27,7 +27,7 @@ export interface ScoreTrendDoc {
 
 export const getTrendsQuery = () => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  size: 99,
+  size: 999,
   sort: '@timestamp:desc',
   query: {
     bool: {
