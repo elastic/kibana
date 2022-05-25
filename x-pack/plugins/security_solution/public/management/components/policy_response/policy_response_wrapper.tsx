@@ -4,14 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useEffect, useState } from 'react';
-import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
+import React, { memo, useEffect, useMemo, useState, useCallback } from 'react';
+import {
+  EuiEmptyPrompt,
+  EuiLoadingSpinner,
+  EuiSpacer,
+  EuiText,
+  htmlIdGenerator,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { HostPolicyResponse } from '../../../../common/endpoint/types';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
 import { useGetEndpointPolicyResponse } from '../../hooks/endpoint/use_get_endpoint_policy_response';
 import { PolicyResponse } from './policy_response';
 import { getFailedOrWarningActionCountFromPolicyResponse } from '../../pages/endpoint_hosts/store/utils';
+import { PolicyResponseActionFormatter } from './policy_response_friendly_names';
+import { PolicyResponseErrorCallout } from './policy_response_error_callout';
 
 export const PolicyResponseWrapper = memo<{
   endpointId: string;
@@ -25,9 +33,13 @@ export const PolicyResponseWrapper = memo<{
   const [policyResponseAttentionCount, setPolicyResponseAttentionCount] = useState<
     Map<string, number>
   >(new Map<string, number>());
+  const [policyResponseErrors, setPolicyResponseErrors] = useState<PolicyResponseActionFormatter[]>(
+    []
+  );
 
   useEffect(() => {
     if (!!data && !isLoading && !isFetching && !isError) {
+      setPolicyResponseErrors([]);
       setPolicyResponseConfig(data.policy_response.Endpoint.policy.applied.response.configurations);
       setPolicyResponseActions(data.policy_response.Endpoint.policy.applied.actions);
       setPolicyResponseAttentionCount(
@@ -37,6 +49,32 @@ export const PolicyResponseWrapper = memo<{
       );
     }
   }, [data, isLoading, isFetching, isError]);
+
+  const addPolicyResponseError = useCallback(
+    (policyResponseError: PolicyResponseActionFormatter) => {
+      setPolicyResponseErrors((state) => [...state, policyResponseError]);
+    },
+    []
+  );
+
+  const generateId = useMemo(() => htmlIdGenerator(), []);
+
+  const policyResponseErrorMessages = useMemo(() => {
+    if (!policyResponseErrors.length) {
+      return;
+    }
+
+    return (
+      <>
+        {policyResponseErrors.map((policyResponseError, index) => (
+          <React.Fragment key={generateId(`key_${policyResponseError.name}_${index}`)}>
+            <EuiSpacer size="m" />
+            <PolicyResponseErrorCallout policyResponseError={policyResponseError} />
+          </React.Fragment>
+        ))}
+      </>
+    );
+  }, [policyResponseErrors, generateId]);
 
   return (
     <>
@@ -80,8 +118,10 @@ export const PolicyResponseWrapper = memo<{
           policyResponseConfig={policyResponseConfig}
           policyResponseActions={policyResponseActions}
           policyResponseAttentionCount={policyResponseAttentionCount}
+          addPolicyResponseError={addPolicyResponseError}
         />
       )}
+      {policyResponseErrorMessages}
     </>
   );
 });

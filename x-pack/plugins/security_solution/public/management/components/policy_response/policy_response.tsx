@@ -20,7 +20,8 @@ import {
   Immutable,
 } from '../../../../common/endpoint/types';
 import { POLICY_STATUS_TO_HEALTH_COLOR } from '../../pages/endpoint_hosts/view/host_constants';
-import { formatResponse } from './policy_response_friendly_names';
+import { formatResponse, PolicyResponseActionFormatter } from './policy_response_friendly_names';
+import { PolicyResponseErrorCallout } from './policy_response_error_callout';
 
 /**
  * Nested accordion in the policy response detailing any concerned
@@ -55,14 +56,6 @@ const PolicyResponseConfigAccordion = styled(EuiAccordion)`
     background-color: ${(props) => props.theme.eui.euiColorLightestShade};
   }
 
-  .policyResponseActionsAccordion {
-    .euiAccordion__iconWrapper,
-    svg {
-      height: ${(props) => props.theme.eui.euiIconSizes.small};
-      width: ${(props) => props.theme.eui.euiIconSizes.small};
-    }
-  }
-
   .policyResponseStatusHealth {
     width: 100px;
   }
@@ -70,27 +63,44 @@ const PolicyResponseConfigAccordion = styled(EuiAccordion)`
   .policyResponseMessage {
     padding-left: ${(props) => props.theme.eui.paddingSizes.l};
   }
+
+  .euiCallOut.policyResponseErrorCallOut {
+    margin-left: ${(props) => props.theme.eui.paddingSizes.l};
+  }
 `;
 
 const PolicyResponseActions = memo(
   ({
     actions,
     responseActions,
+    addPolicyResponseError,
   }: {
     actions: Immutable<string[]>;
     responseActions: Immutable<HostPolicyResponseAppliedAction[]>;
+    addPolicyResponseError: (policyResponseError: PolicyResponseActionFormatter) => void;
   }) => {
     return (
       <>
         {actions.map((action, index) => {
-          const statuses = responseActions.find((responseAction) => responseAction.name === action);
-          if (statuses === undefined) {
+          const policyResponseAppliedAction = responseActions.find(
+            (responseAction) => responseAction.name === action
+          );
+          if (policyResponseAppliedAction === undefined) {
             return undefined;
           }
+          const policyResponseActionFormatter = new PolicyResponseActionFormatter(
+            policyResponseAppliedAction
+          );
+
+          if (policyResponseActionFormatter.hasError) {
+            addPolicyResponseError(policyResponseActionFormatter);
+          }
+
+          const key = action + index;
           return (
             <EuiAccordion
-              id={action + index}
-              key={action + index}
+              id={key}
+              key={key}
               data-test-subj="endpointDetailsPolicyResponseActionsAccordion"
               className="policyResponseActionsAccordion"
               buttonContent={
@@ -99,24 +109,28 @@ const PolicyResponseActions = memo(
                   className="eui-textTruncate"
                   data-test-subj="policyResponseAction"
                 >
-                  <h4>{formatResponse(action)}</h4>
+                  <h4>{policyResponseActionFormatter.title}</h4>
                 </EuiText>
               }
               paddingSize="s"
               extraAction={
                 <EuiHealth
-                  color={POLICY_STATUS_TO_HEALTH_COLOR[statuses.status]}
+                  color={POLICY_STATUS_TO_HEALTH_COLOR[policyResponseAppliedAction.status]}
                   data-test-subj="policyResponseStatusHealth"
                   className="policyResponseStatusHealth"
                 >
                   <EuiText size="xs">
-                    <p>{formatResponse(statuses.status)}</p>
+                    <p>{policyResponseActionFormatter.status}</p>
                   </EuiText>
                 </EuiHealth>
               }
             >
               <EuiText size="xs" data-test-subj="policyResponseMessage">
-                <p className="policyResponseMessage">{statuses.message}</p>
+                {policyResponseActionFormatter.hasError ? (
+                  <PolicyResponseErrorCallout policyResponseError={policyResponseActionFormatter} />
+                ) : (
+                  <p className="policyResponseMessage">{policyResponseAppliedAction.message}</p>
+                )}
               </EuiText>
             </EuiAccordion>
           );
@@ -132,6 +146,7 @@ interface PolicyResponseProps {
   policyResponseConfig: Immutable<HostPolicyResponseConfiguration>;
   policyResponseActions: Immutable<HostPolicyResponseAppliedAction[]>;
   policyResponseAttentionCount: Map<string, number>;
+  addPolicyResponseError: (policyResponseError: PolicyResponseActionFormatter) => void;
 }
 
 /**
@@ -142,6 +157,7 @@ export const PolicyResponse = memo(
     policyResponseConfig,
     policyResponseActions,
     policyResponseAttentionCount,
+    addPolicyResponseError,
   }: PolicyResponseProps) => {
     const generateId = useMemo(() => htmlIdGenerator(), []);
     return (
@@ -174,6 +190,7 @@ export const PolicyResponse = memo(
               <PolicyResponseActions
                 actions={val.concerned_actions}
                 responseActions={policyResponseActions}
+                addPolicyResponseError={addPolicyResponseError}
               />
             </PolicyResponseConfigAccordion>
           );
