@@ -14,7 +14,7 @@ import { EffectScope } from './effect_scope';
 import { CardActionsFlexItem } from './card_actions_flex_item';
 import { ArtifactInfo } from '../types';
 import { ArtifactEntryCollapsibleCardProps } from '../artifact_entry_collapsible_card';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useCollapsedCssClassNames } from '../hooks/use_collapsed_css_class_names';
 import { usePolicyNavLinks } from '../hooks/use_policy_nav_links';
 import { DescriptionField } from './description_field';

@@ -12,7 +12,7 @@ import querystring from 'querystring';
 import { generatePath } from 'react-router-dom';
 import { appendSearch } from '../../common/components/link_to/helpers';
 import { ArtifactListPageUrlParams } from '../components/artifact_list_page';
-import { paginationFromUrlParams } from '../components/hooks/use_url_pagination';
+import { paginationFromUrlParams } from '../hooks/use_url_pagination';
 import { EndpointIndexUIQueryParams } from '../pages/endpoint_hosts/types';
 import { EventFiltersPageLocation } from '../pages/event_filters/types';
 import { PolicyDetailsArtifactsPageLocation } from '../pages/policy/types';

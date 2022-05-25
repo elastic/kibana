@@ -7,7 +7,7 @@
 
 import React, { memo, PropsWithChildren } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
 export type HistoryItemProps = PropsWithChildren<{}>;

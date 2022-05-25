@@ -23,12 +23,12 @@ import {
   composeHttpHandlerMocks,
   httpHandlerMockFactory,
   ResponseProvidersInterface,
-} from '../../../common/mock/endpoint/http_handler_mock_factory';
-import { ExceptionsListItemGenerator } from '../../../../common/endpoint/data_generators/exceptions_list_item_generator';
+} from '../../common/mock/endpoint/http_handler_mock_factory';
+import { ExceptionsListItemGenerator } from '../../../common/endpoint/data_generators/exceptions_list_item_generator';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
   GLOBAL_ARTIFACT_TAG,
-} from '../../../../common/endpoint/service/artifacts';
+} from '../../../common/endpoint/service/artifacts';
 
 interface FindExceptionListItemSchemaQueryParams
   extends Omit<FindExceptionListItemSchema, 'page' | 'per_page'> {

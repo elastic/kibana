@@ -14,7 +14,7 @@ import {
 import { PaginatedContent as _PaginatedContent, PaginatedContentProps } from '../paginated_content';
 import { GridHeader } from './components/grid_header';
 import { MaybeImmutable } from '../../../../common/endpoint/types';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 const PaginatedContent: ArtifactsPaginatedComponent = _PaginatedContent;
 

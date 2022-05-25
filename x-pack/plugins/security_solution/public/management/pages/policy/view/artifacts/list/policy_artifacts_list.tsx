@@ -12,10 +12,10 @@ import { useAppUrl } from '../../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../../common/constants';
 import { SearchExceptions } from '../../../../../components/search_exceptions';
 import { useEndpointPoliciesToArtifactPolicies } from '../../../../../components/artifact_entry_card/hooks/use_endpoint_policies_to_artifact_policies';
-import { useUrlParams } from '../../../../../components/hooks/use_url_params';
-import { useUrlPagination } from '../../../../../components/hooks/use_url_pagination';
+import { useUrlParams } from '../../../../../hooks/use_url_params';
+import { useUrlPagination } from '../../../../../hooks/use_url_pagination';
 import { useGetEndpointSpecificPolicies } from '../../../../../services/policies/hooks';
-import { useOldUrlSearchPaginationReplace } from '../../../../../components/hooks/use_old_url_search_pagination_replace';
+import { useOldUrlSearchPaginationReplace } from '../../../../../hooks/use_old_url_search_pagination_replace';
 import {
   ArtifactCardGrid,
   ArtifactCardGridProps,

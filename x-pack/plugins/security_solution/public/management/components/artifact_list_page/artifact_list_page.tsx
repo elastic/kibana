@@ -18,7 +18,7 @@ import { PaginatedContent, PaginatedContentProps } from '../paginated_content';
 import { ArtifactEntryCard } from '../artifact_entry_card';
 
 import { ArtifactListPageLabels, artifactListPageLabels } from './translations';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { ManagementPageLoader } from '../management_page_loader';
 import { SearchExceptions, SearchExceptionsProps } from '../search_exceptions';
 import {
@@ -32,7 +32,7 @@ import { useSetUrlParams } from './hooks/use_set_url_params';
 import { useWithArtifactListData } from './hooks/use_with_artifact_list_data';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import { ArtifactListPageUrlParams } from './types';
-import { useUrlParams } from '../hooks/use_url_params';
+import { useUrlParams } from '../../hooks/use_url_params';
 import { ListPageRouteState, MaybeImmutable } from '../../../../common/endpoint/types';
 import { DEFAULT_EXCEPTION_LIST_ITEM_SEARCHABLE_FIELDS } from '../../../../common/endpoint/service/artifacts/constants';
 import { ArtifactDeleteModal } from './components/artifact_delete_modal';
@@ -42,7 +42,7 @@ import { useToasts } from '../../../common/lib/kibana';
 import { useMemoizedRouteState } from '../../common/hooks';
 import { BackToExternalAppSecondaryButton } from '../back_to_external_app_secondary_button';
 import { BackToExternalAppButton } from '../back_to_external_app_button';
-import { useIsMounted } from '../hooks/use_is_mounted';
+import { useIsMounted } from '../../hooks/use_is_mounted';
 
 type ArtifactEntryCardType = typeof ArtifactEntryCard;
 

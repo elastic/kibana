@@ -8,7 +8,7 @@
 import { useHistory, useLocation } from 'react-router-dom';
 import { useCallback } from 'react';
 import { pickBy } from 'lodash';
-import { useUrlParams } from '../../hooks/use_url_params';
+import { useUrlParams } from '../../../hooks/use_url_params';
 
 // FIXME:PT Refactor into a more generic hooks for managing url params
 export const useSetUrlParams = (): ((

@@ -27,7 +27,7 @@ import { OperatingSystem } from '@kbn/securitysolution-utils';
 
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
 import type { OnChangeProps } from '@kbn/lists-plugin/public';
-import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { PolicyData } from '../../../../../../common/endpoint/types';
 import { AddExceptionComments } from '../../../../../common/components/exceptions/add_exception_comments';
 import { useFetchIndex } from '../../../../../common/containers/source';

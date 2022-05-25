@@ -10,7 +10,7 @@ import { EuiCallOut, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CommandExecutionComponentProps } from '../types';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const UnknownCommand = memo<CommandExecutionComponentProps>(({ setStatus }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());

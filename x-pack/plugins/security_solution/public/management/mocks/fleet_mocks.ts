@@ -21,10 +21,10 @@ import {
 import {
   httpHandlerMockFactory,
   ResponseProvidersInterface,
-} from '../../../common/mock/endpoint/http_handler_mock_factory';
-import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { GetPolicyListResponse, GetPolicyResponse } from '../policy/types';
-import { FleetAgentPolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_policy_generator';
+} from '../../common/mock/endpoint/http_handler_mock_factory';
+import { EndpointDocGenerator } from '../../../common/endpoint/generate_data';
+import { GetPolicyListResponse, GetPolicyResponse } from '../pages/policy/types';
+import { FleetAgentPolicyGenerator } from '../../../common/endpoint/data_generators/fleet_agent_policy_generator';
 
 interface KqlArgumentType {
   type: string;
