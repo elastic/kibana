@@ -9,15 +9,19 @@
 import { createContext, useContext } from 'react';
 
 export interface DashboardTourContextProps {
+  currentTourStep: number;
   onStartTour: () => void;
   onNextTourStep: () => void;
   onFinishTour: () => void;
+  setTourVisibility: (visibility: boolean) => void;
 }
 
 export const DashboardTourContext = createContext<DashboardTourContextProps>({
+  currentTourStep: -1,
   onStartTour: () => {},
   onNextTourStep: () => {},
   onFinishTour: () => {},
+  setTourVisibility: () => {},
 });
 
 export const useDashboardEditTourContext = () => {

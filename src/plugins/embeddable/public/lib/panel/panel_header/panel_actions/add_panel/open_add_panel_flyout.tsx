@@ -19,6 +19,7 @@ export function openAddPanelFlyout(options: {
   getFactory: EmbeddableStart['getEmbeddableFactory'];
   getAllFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: OverlayStart;
+  showTour: () => void;
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
   showCreateNewMenu?: boolean;
@@ -30,21 +31,26 @@ export function openAddPanelFlyout(options: {
     getFactory,
     getAllFactories,
     overlays,
+    showTour,
     notifications,
     SavedObjectFinder,
     showCreateNewMenu,
     reportUiCounter,
     theme,
   } = options;
+
+  const onClose = (flyoutSession: OverlayRef) => {
+    if (flyoutSession) {
+      flyoutSession.close();
+    }
+    showTour();
+  };
+
   const flyoutSession = overlays.openFlyout(
     toMountPoint(
       <AddPanelFlyout
         container={embeddable}
-        onClose={() => {
-          if (flyoutSession) {
-            flyoutSession.close();
-          }
-        }}
+        onClose={() => onClose(flyoutSession)}
         getFactory={getFactory}
         getAllFactories={getAllFactories}
         notifications={notifications}
@@ -57,6 +63,7 @@ export function openAddPanelFlyout(options: {
     {
       'data-test-subj': 'dashboardAddPanel',
       ownFocus: true,
+      onClose: () => onClose(flyoutSession),
     }
   );
   return flyoutSession;

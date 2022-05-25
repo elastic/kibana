@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEuiTour, EuiTourState, EuiTourStep, EuiTourStepProps, EuiText } from '@elastic/eui';
 import { DashboardTourContext, DashboardTourContextProps } from './dashboard_edit_tour_context';
 import { DashboardTourStrings } from './translations';
@@ -104,8 +104,8 @@ export const DashboardEditTourProvider: React.FC = ({ children }) => {
   }
   const tourSteps = prepareTourSteps(tourStepDefinitions);
   const [steps, actions, reducerState] = useEuiTour(tourSteps, tourState);
-  const currentTourStep = reducerState.currentTourStep;
-  const isTourActive = reducerState.isTourActive;
+  const [stepVisible, setStepVisible] = useState(true);
+  const { currentTourStep, isTourActive } = reducerState;
   // console.log(reducerState);
 
   useEffect(() => {
@@ -116,7 +116,7 @@ export const DashboardEditTourProvider: React.FC = ({ children }) => {
   const onStartTour = useCallback(() => {
     // console.log('on start tour');
     actions.resetTour();
-    actions.goToStep(2);
+    actions.goToStep(FIRST_STEP);
   }, [actions]);
 
   const onNextTourStep = useCallback(() => {
@@ -133,20 +133,36 @@ export const DashboardEditTourProvider: React.FC = ({ children }) => {
     actions.finishTour();
   }, [actions]);
 
+  const setTourVisibility = useCallback(
+    (newVisibility: boolean) => {
+      setStepVisible(newVisibility);
+    },
+    [setStepVisible]
+  );
+
   const contextValue: DashboardTourContextProps = useMemo(
     () => ({
+      currentTourStep,
       onStartTour,
       onNextTourStep,
       onFinishTour,
+      setTourVisibility,
     }),
-    [onStartTour, onNextTourStep, onFinishTour]
+    [currentTourStep, onStartTour, onNextTourStep, onFinishTour, setTourVisibility]
   );
 
   return (
     <>
-      {JSON.stringify(reducerState)}
+      {/* <p>
+        {JSON.stringify(reducerState)}
+        <br />
+        {isTourActive ? 'tour active' : 'tour NOT active'}
+        <br />
+        {stepVisible ? 'step visible' : 'step NOT visible'}
+      </p> */}
       <DashboardTourContext.Provider value={contextValue}>
         {isTourActive &&
+          stepVisible &&
           steps.map((step) => (
             <EuiTourStep
               key={`step-${step.step}-is-${String(step.isStepOpen)}`}

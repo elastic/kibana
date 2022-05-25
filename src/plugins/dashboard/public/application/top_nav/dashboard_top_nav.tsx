@@ -134,7 +134,7 @@ export function DashboardTopNav({
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
-  const { onStartTour } = useDashboardEditTourContext();
+  const { currentTourStep, onNextTourStep, setTourVisibility } = useDashboardEditTourContext();
 
   const trackUiMetric = usageCollection?.reportUiCounter.bind(
     usageCollection,
@@ -160,6 +160,7 @@ export function DashboardTopNav({
 
   const addFromLibrary = useCallback(() => {
     if (!isErrorEmbeddable(dashboardAppState.dashboardContainer)) {
+      setTourVisibility(false);
       setState((s) => ({
         ...s,
         addPanelOverlay: openAddPanelFlyout({
@@ -168,6 +169,9 @@ export function DashboardTopNav({
           getFactory: embeddable.getEmbeddableFactory,
           notifications: core.notifications,
           overlays: core.overlays,
+          showTour: () => {
+            setTourVisibility(true);
+          },
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
           reportUiCounter: usageCollection?.reportUiCounter,
           theme: core.theme,
@@ -184,6 +188,7 @@ export function DashboardTopNav({
     core.theme,
     uiSettings,
     usageCollection,
+    setTourVisibility,
   ]);
 
   const createNewVisType = useCallback(
@@ -215,8 +220,12 @@ export function DashboardTopNav({
           searchSessionId: data.search.session.getSessionId(),
         },
       });
+
+      if (currentTourStep === 1) {
+        onNextTourStep();
+      }
     },
-    [stateTransferService, data.search.session, trackUiMetric]
+    [stateTransferService, data.search.session, trackUiMetric, currentTourStep, onNextTourStep]
   );
 
   const closeAllFlyouts = useCallback(() => {
@@ -438,7 +447,6 @@ export function DashboardTopNav({
       if (!share) return;
       const currentState = dashboardAppState.getLatestDashboardState();
       const timeRange = timefilter.getTime();
-      onStartTour();
       ShowShareModal({
         share,
         timeRange,
@@ -458,7 +466,6 @@ export function DashboardTopNav({
       dashboardAppState,
       dashboardCapabilities,
       dashboardSessionStorage,
-      onStartTour,
     ]
   );
 
