@@ -11,7 +11,6 @@ import { EuiScreenReaderOnly } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useRef } from 'react';
 import { convertMapboxVectorTileToJson } from './mapbox_vector_tile';
-// @ts-ignore
 import { Mode } from '../../../../models/legacy_core_editor/mode/output';
 
 // Ensure the modes we might switch to dynamically are available
