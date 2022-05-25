@@ -23,13 +23,12 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
     });
 
-    it('should emit the initial "degraded" event with the context set to `initializing`', () => {
+    it('should emit the initial "degraded" event', () => {
       expect(initialEvent.event_type).to.eql('core-overall_status_changed');
-      expect(initialEvent.context).to.have.property('overall_status_level', 'initializing');
-      expect(initialEvent.context).to.have.property(
-        'overall_status_summary',
-        'Kibana is starting up'
-      );
+      expect(initialEvent.context).to.have.property('overall_status_level');
+      expect(initialEvent.context.overall_status_level).to.be.a('string'); // Ideally we would test it as `initializing`, but we can't do that as it may result flaky for many side effects in the CI.
+      expect(initialEvent.context).to.have.property('overall_status_summary');
+      expect(initialEvent.context.overall_status_summary).to.be.a('string');
       expect(initialEvent.properties).to.have.property('overall_status_level', 'degraded');
       expect(initialEvent.properties.overall_status_summary).to.be.a('string');
     });
