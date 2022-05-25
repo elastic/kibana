@@ -26,6 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
+  const DASHBOARD_NAME = 'Test Replace Controls';
+
   const changeFieldType = async (controlId: string, newField: string, expectedType?: string) => {
     await dashboardControls.editExistingControl(controlId);
     await dashboardControls.controlsEditorSetfield(newField, expectedType);
@@ -60,6 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
+      await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
     });
 
     describe('Replace options list', async () => {
@@ -71,6 +74,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           fieldName: 'sound.keyword',
         });
         controlId = (await dashboardControls.getAllControlIds())[0];
+      });
+
+      afterEach(async () => {
+        await dashboard.clearUnsavedChanges();
       });
 
       it('with range slider', async () => {
@@ -96,6 +103,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         controlId = (await dashboardControls.getAllControlIds())[0];
       });
 
+      afterEach(async () => {
+        await dashboard.clearUnsavedChanges();
+      });
+
       it('with options list', async () => {
         await replaceWithOptionsList(controlId);
       });
@@ -115,6 +126,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await testSubjects.waitForDeleted('timeSlider-loading-spinner');
         controlId = (await dashboardControls.getAllControlIds())[0];
+      });
+
+      afterEach(async () => {
+        await dashboard.clearUnsavedChanges();
       });
 
       it('with options list', async () => {

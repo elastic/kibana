@@ -28,6 +28,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
+  const DASHBOARD_NAME = 'Test Options List Control';
+
   describe('Dashboard options list integration', () => {
     before(async () => {
       await common.navigateToApp('dashboard');
@@ -35,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
       await elasticChart.setNewChartUiDebugFlag();
+      await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
     });
 
     describe('Options List Control Editor selects relevant data views', async () => {
@@ -78,6 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           fieldName: 'machine.os.raw',
         });
         expect(await dashboardControls.getControlsCount()).to.be(1);
+        await dashboard.clearUnsavedChanges();
       });
 
       it('can add a second options list control with a non-default data view', async () => {
@@ -90,6 +94,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // data views should be properly propagated from the control group to the dashboard
         expect(await filterBar.getIndexPatterns()).to.be('logstash-*,animals-*');
+        await dashboard.clearUnsavedChanges();
       });
 
       it('renames an existing control', async () => {
@@ -100,6 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlEditorSetTitle(newTitle);
         await dashboardControls.controlEditorSave();
         expect(await dashboardControls.doesControlTitleExist(newTitle)).to.be(true);
+        await dashboard.clearUnsavedChanges();
       });
 
       it('can change the data view and field of an existing options list', async () => {
@@ -120,6 +126,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await filterBar.ensureFieldEditorModalIsClosed();
           expect(indexPatternSelectExists).to.be(false);
         });
+        await dashboard.clearUnsavedChanges();
       });
 
       it('editing field clears selections', async () => {
@@ -157,6 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await dashboardControls.removeExistingControl(firstId);
         expect(await dashboardControls.getControlsCount()).to.be(1);
+        await dashboard.clearUnsavedChanges();
       });
 
       after(async () => {
@@ -317,7 +325,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         it('Applies options list control options to dashboard by default on open', async () => {
           await dashboard.gotoDashboardLandingPage();
           await header.waitUntilLoadingHasFinished();
-          await dashboard.clickUnsavedChangesContinueEditing('New Dashboard');
+          await dashboard.clickUnsavedChangesContinueEditing(DASHBOARD_NAME);
           await header.waitUntilLoadingHasFinished();
           expect(await pieChart.getPieSliceCount()).to.be(2);
 
