@@ -27,7 +27,7 @@ export const convertValueToString = ({
   dataView: DataView;
   services: DiscoverServices;
   options?: {
-    allowMultiline: boolean;
+    disableMultiline?: boolean;
   };
 }): string => {
   const { fieldFormats } = services;
@@ -35,15 +35,10 @@ export const convertValueToString = ({
   const field = dataView.fields.getByName(columnId);
   const value = rowFlattened[columnId];
   const valuesArray = Array.isArray(value) ? value : [value];
-  const disableMultiline = options?.allowMultiline === false;
-
-  const stringify = (val: object | string) => {
-    // it will wrap "strings" with quotes
-    return disableMultiline ? JSON.stringify(val) : JSON.stringify(val, null, 2);
-  };
+  const disableMultiline = options?.disableMultiline ?? false;
 
   if (field?.type === '_source') {
-    return stringify(rowFlattened);
+    return stringify(rowFlattened, disableMultiline);
   }
 
   const formatted = valuesArray
@@ -61,7 +56,7 @@ export const convertValueToString = ({
       );
 
       if (typeof formattedValue !== 'string' || typeof subValue === 'string') {
-        return stringify(formattedValue) || '';
+        return stringify(formattedValue, disableMultiline) || '';
       }
 
       return formattedValue;
@@ -69,4 +64,9 @@ export const convertValueToString = ({
     .join(', ');
 
   return formatted;
+};
+
+const stringify = (val: object | string, disableMultiline: boolean) => {
+  // it will wrap "strings" with quotes
+  return disableMultiline ? JSON.stringify(val) : JSON.stringify(val, null, 2);
 };

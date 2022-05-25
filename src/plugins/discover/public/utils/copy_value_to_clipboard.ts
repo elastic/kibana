@@ -24,7 +24,7 @@ export const copyValueToClipboard = ({
 }): string => {
   const { toastNotifications } = services;
 
-  const valueFormatted = valueToStringConverter(rowIndex, columnId, { allowMultiline: true });
+  const valueFormatted = valueToStringConverter(rowIndex, columnId);
 
   copyToClipboard(valueFormatted);
 
@@ -51,7 +51,7 @@ export const copyColumnValuesToClipboard = async ({
   const { toastNotifications } = services;
 
   const valuesFormatted = [...Array(rowsCount)].map((_, rowIndex) => {
-    return valueToStringConverter(rowIndex, columnId, { allowMultiline: false });
+    return valueToStringConverter(rowIndex, columnId, { disableMultiline: true });
   });
 
   const textToCopy = `${columnId}\n${valuesFormatted.join('\n')}`;

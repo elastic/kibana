@@ -38,7 +38,7 @@ describe('copyValueToClipboard', () => {
       valueToStringConverter,
     });
 
-    expect(result).toBe('["abcd1"]');
+    expect(result).toBe('"abcd1"');
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(discoverServiceMock.toastNotifications.addInfo).toHaveBeenCalledWith({
       title: 'Copied to clipboard.',

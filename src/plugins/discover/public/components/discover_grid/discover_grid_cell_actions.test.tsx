@@ -98,6 +98,6 @@ describe('Discover cell actions ', function () {
     );
     const button = findTestSubject(component, 'copyClipboardButton');
     await button.simulate('click');
-    expect(mockCopyToClipboard).toHaveBeenCalledWith('jpg');
+    expect(mockCopyToClipboard).toHaveBeenCalledWith('"jpg"');
   });
 });

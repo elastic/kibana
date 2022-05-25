@@ -15,5 +15,5 @@ export type HitsFlattened = Array<Record<string, unknown>>;
 export type ValueToStringConverter = (
   rowIndex: number,
   columnId: string,
-  options: { allowMultiline: boolean }
+  options?: { disableMultiline?: boolean }
 ) => string;

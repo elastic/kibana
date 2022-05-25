@@ -20,11 +20,11 @@ describe('convertValueToString', () => {
       columnId: 'keyword_key',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
-    expect(result).toBe('abcd1');
+    expect(result).toBe('"abcd1"');
   });
 
   it('should convert a text value to text', () => {
@@ -36,11 +36,11 @@ describe('convertValueToString', () => {
       columnId: 'text_message',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
-    expect(result).toBe('Hi there! I am a sample string.');
+    expect(result).toBe('"Hi there! I am a sample string."');
   });
 
   it('should convert a multiline text value to text', () => {
@@ -52,7 +52,7 @@ describe('convertValueToString', () => {
       columnId: 'text_message',
       rowIndex: 1,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
@@ -68,7 +68,7 @@ describe('convertValueToString', () => {
       columnId: 'number_price',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
@@ -84,11 +84,11 @@ describe('convertValueToString', () => {
       columnId: 'date',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
-    expect(result).toBe('2015-01-01T12:10:30.000Z');
+    expect(result).toBe('"2015-01-01T12:10:30.000Z"');
   });
 
   it('should convert a boolean value to text', () => {
@@ -100,7 +100,7 @@ describe('convertValueToString', () => {
       columnId: 'bool_enabled',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
@@ -116,11 +116,11 @@ describe('convertValueToString', () => {
       columnId: 'binary_blob',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
-    expect(result).toBe('U29tZSBiaW5hcnkgYmxvYg==');
+    expect(result).toBe('"U29tZSBiaW5hcnkgYmxvYg=="');
   });
 
   it('should convert an object value to text', () => {
@@ -132,11 +132,11 @@ describe('convertValueToString', () => {
       columnId: 'object_user.first',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
-    expect(result).toBe('John');
+    expect(result).toBe('"John"');
   });
 
   it('should convert a nested value to text', () => {
@@ -148,7 +148,7 @@ describe('convertValueToString', () => {
       columnId: 'nested_user',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
@@ -166,7 +166,7 @@ describe('convertValueToString', () => {
       columnId: 'flattened_labels',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
@@ -182,7 +182,7 @@ describe('convertValueToString', () => {
       columnId: 'range_time_frame',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
@@ -198,11 +198,11 @@ describe('convertValueToString', () => {
       columnId: 'ip_addr',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
-    expect(result).toBe('192.168.1.1');
+    expect(result).toBe('"192.168.1.1"');
   });
 
   it('should convert a version value to text', () => {
@@ -214,11 +214,11 @@ describe('convertValueToString', () => {
       columnId: 'version',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
-    expect(result).toBe('1.2.3');
+    expect(result).toBe('"1.2.3"');
   });
 
   it('should convert a vector value to text', () => {
@@ -230,7 +230,7 @@ describe('convertValueToString', () => {
       columnId: 'vector',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
@@ -246,7 +246,7 @@ describe('convertValueToString', () => {
       columnId: 'geo_point',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
@@ -262,7 +262,7 @@ describe('convertValueToString', () => {
       columnId: 'geo_point',
       rowIndex: 1,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
@@ -278,11 +278,11 @@ describe('convertValueToString', () => {
       columnId: 'array_tags',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
-    expect(result).toBe('elasticsearch, wow');
+    expect(result).toBe('"elasticsearch", "wow"');
   });
 
   it('should convert a runtime value to text', () => {
@@ -294,7 +294,7 @@ describe('convertValueToString', () => {
       columnId: 'runtime_number',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
@@ -310,11 +310,11 @@ describe('convertValueToString', () => {
       columnId: 'scripted_string',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
-    expect(result).toBe('hi there');
+    expect(result).toBe('"hi there"');
   });
 
   it('should return an empty string and not fail', () => {
@@ -326,7 +326,7 @@ describe('convertValueToString', () => {
       columnId: 'unknown',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
@@ -363,7 +363,7 @@ describe('convertValueToString', () => {
       columnId: '_source',
       rowIndex: 0,
       options: {
-        allowMultiline: false,
+        disableMultiline: true,
       },
     });
 
