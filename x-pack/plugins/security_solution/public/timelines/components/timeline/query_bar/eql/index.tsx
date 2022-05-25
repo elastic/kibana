@@ -90,7 +90,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   const { getFields } = form;
 
   const onOptionsChange = useCallback(
-    (field: FieldsEqlOptions, value: string | null) =>
+    (field: FieldsEqlOptions, value: string | undefined) =>
       dispatch(
         timelineActions.updateEqlOptions({
           id: timelineId,
