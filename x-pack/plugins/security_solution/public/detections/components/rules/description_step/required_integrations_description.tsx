@@ -16,6 +16,7 @@ import {
 } from '../../../../common/components/integrations_popover/helpers';
 
 import {
+  InstalledIntegrationArray,
   RelatedIntegration,
   RelatedIntegrationArray,
 } from '../../../../../common/detection_engine/schemas/common';
@@ -35,7 +36,7 @@ const IntegrationDescriptionComponent: React.FC<{ integration: RelatedIntegratio
   const badgeUninstalledColor = 'accent';
   const { data } = useInstalledIntegrations({ packages: [] });
 
-  const allInstalledIntegrations: RelatedIntegrationArray = data ?? [];
+  const allInstalledIntegrations: InstalledIntegrationArray = data?.installed_integrations ?? [];
   const { availableIntegrations, installedRelatedIntegrations } = getInstalledRelatedIntegrations(
     [integration],
     allInstalledIntegrations
@@ -59,7 +60,7 @@ const IntegrationDescriptionComponent: React.FC<{ integration: RelatedIntegratio
           <EuiIconTip
             type="alert"
             content={INTEGRATIONS_INSTALLED_VERSION_TOOLTIP(
-              installedRelatedIntegrations[0]?.version,
+              installedRelatedIntegrations[0]?.package_version,
               installedRelatedIntegrations[0]?.targetVersion
             )}
             position="right"
