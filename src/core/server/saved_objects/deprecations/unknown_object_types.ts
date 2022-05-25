@@ -6,14 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { AggregationsMultiBucketAggregateBase } from '@elastic/elasticsearch/lib/api/types';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
-import { flatten } from 'lodash';
 import type { DeprecationsDetails } from '../../deprecations';
 import { IScopedClusterClient } from '../../elasticsearch';
+import { getAggregatedTypesDocuments } from '../migrations/actions/check_for_unknown_docs';
+import { addExcludedTypesToBoolQuery } from '../migrations/model/helpers';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsRawDocSource } from '../serialization';
 import { getIndexForType } from '../service/lib';
 
 interface UnknownTypesDeprecationOptions {
@@ -51,70 +49,6 @@ const getTargetIndices = ({
   ];
 };
 
-const getNonRegisteredTypesQuery = (knownTypes: string[]): estypes.QueryDslQueryContainer => {
-  return {
-    bool: {
-      must_not: knownTypes.map((type) => ({
-        term: { type },
-      })),
-    },
-  };
-};
-
-const getNonRegisteredTypesDocuments = async (
-  esClient: IScopedClusterClient,
-  targetIndices: string[],
-  knownTypes: string[]
-) => {
-  const query = getNonRegisteredTypesQuery(knownTypes);
-  const body = await esClient.asInternalUser.search<SavedObjectsRawDocSource>({
-    index: targetIndices,
-    body: {
-      size: 0,
-      // filter the known types
-      query,
-      // aggregate them by type, so that we have a sneak peak of all types
-      aggs: {
-        unknownTypesAggregation: {
-          terms: {
-            // assign type __UNKNOWN__ to those documents that don't define one
-            missing: '__UNKNOWN__',
-            field: 'type',
-            size: 1000, // collect up to 1000 non-registered types
-          },
-          aggs: {
-            docs: {
-              top_hits: {
-                size: 100, // collect up to 100 docs for each non-registered type
-                _source: {
-                  excludes: ['*'],
-                },
-              },
-            },
-          },
-        },
-      },
-    },
-  });
-
-  if (!body.aggregations) return [];
-
-  const { unknownTypesAggregation } = body.aggregations;
-  const buckets = (unknownTypesAggregation as AggregationsMultiBucketAggregateBase).buckets;
-
-  const bucketsArray = Array.isArray(buckets) ? buckets : Object.values(buckets);
-
-  return flatten(
-    bucketsArray.map(
-      (bucket: any) =>
-        bucket.docs?.hits?.hits?.map((doc: any) => ({
-          id: doc._id,
-          type: bucket.key,
-        })) || []
-    )
-  );
-};
-
 const getUnknownSavedObjects = async ({
   typeRegistry,
   esClient,
@@ -128,7 +62,12 @@ const getUnknownSavedObjects = async ({
     kibanaIndex,
     kibanaVersion,
   });
-  return await getNonRegisteredTypesDocuments(esClient, targetIndices, knownTypes);
+  const excludeRegisteredTypes = addExcludedTypesToBoolQuery(knownTypes);
+  return await getAggregatedTypesDocuments(
+    esClient.asInternalUser,
+    targetIndices,
+    excludeRegisteredTypes
+  );
 };
 
 export const getUnknownTypesDeprecations = async (
@@ -194,7 +133,7 @@ export const deleteUnknownTypeObjects = async ({
     kibanaIndex,
     kibanaVersion,
   });
-  const nonRegisteredTypesQuery = getNonRegisteredTypesQuery(knownTypes);
+  const nonRegisteredTypesQuery = addExcludedTypesToBoolQuery(knownTypes);
 
   await esClient.asInternalUser.deleteByQuery({
     index: targetIndices,

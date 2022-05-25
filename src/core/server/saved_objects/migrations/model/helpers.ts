@@ -80,12 +80,12 @@ export function indexBelongsToLaterVersion(indexName: string, kibanaVersion: str
  * @returns a new query container with the enriched query
  */
 export function addExcludedTypesToBoolQuery(
-  boolQuery: QueryDslBoolQuery | undefined,
-  types: string[]
+  types: string[],
+  boolQuery?: QueryDslBoolQuery
 ): QueryDslQueryContainer {
   return addMustNotClausesToBoolQuery(
-    boolQuery,
-    types.map((type) => ({ term: { type } }))
+    types.map((type) => ({ term: { type } })),
+    boolQuery
   );
 }
 
@@ -96,8 +96,8 @@ export function addExcludedTypesToBoolQuery(
  * @returns a new query container with the enriched query
  */
 export function addMustClausesToBoolQuery(
-  boolQuery: QueryDslBoolQuery | undefined,
-  mustClauses: QueryDslQueryContainer[]
+  mustClauses: QueryDslQueryContainer[],
+  boolQuery?: QueryDslBoolQuery
 ): QueryDslQueryContainer {
   let must: QueryDslQueryContainer[] = [];
 
@@ -122,8 +122,8 @@ export function addMustClausesToBoolQuery(
  * @returns a new query container with the enriched query
  */
 export function addMustNotClausesToBoolQuery(
-  boolQuery: QueryDslBoolQuery | undefined,
-  mustNotClauses: QueryDslQueryContainer[]
+  mustNotClauses: QueryDslQueryContainer[],
+  boolQuery?: QueryDslBoolQuery
 ): QueryDslQueryContainer {
   let mustNot: QueryDslQueryContainer[] = [];
 

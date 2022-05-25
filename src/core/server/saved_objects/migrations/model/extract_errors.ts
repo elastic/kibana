@@ -7,7 +7,7 @@
  */
 
 import type { TransformErrorObjects } from '../core';
-import type { CheckForUnknownDocsFoundDoc } from '../actions';
+import type { DocumentIdAndType } from '../actions';
 
 /**
  * Constructs migration failure message strings from corrupt document ids and document transformation errors
@@ -36,7 +36,7 @@ export function extractTransformFailuresReason(
   );
 }
 
-export function extractDiscardedUnknownDocs(unknownDocs: CheckForUnknownDocsFoundDoc[]): string {
+export function extractDiscardedUnknownDocs(unknownDocs: DocumentIdAndType[]): string {
   return (
     `Kibana has been configured to discard unknown documents for this migration.\n` +
     `Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:\n` +
@@ -46,7 +46,7 @@ export function extractDiscardedUnknownDocs(unknownDocs: CheckForUnknownDocsFoun
 
 export function extractUnknownDocFailureReason(
   resolveMigrationFailuresUrl: string,
-  unknownDocs: CheckForUnknownDocsFoundDoc[]
+  unknownDocs: DocumentIdAndType[]
 ): string {
   return (
     `Migration failed because some documents were found which use unknown saved object types:\n` +

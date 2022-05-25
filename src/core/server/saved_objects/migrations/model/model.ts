@@ -397,17 +397,14 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       const unknownTypes = [...new Set(res.right.unknownDocs.map(({ type }) => type))];
 
       excludeOnUpgradeQuery = addExcludedTypesToBoolQuery(
-        stateP.excludeOnUpgradeQuery?.bool,
-        unknownTypes
+        unknownTypes,
+        stateP.excludeOnUpgradeQuery?.bool
       );
 
-      excludeOnUpgradeQuery = addMustClausesToBoolQuery(excludeOnUpgradeQuery.bool, [
-        {
-          exists: {
-            field: 'type',
-          },
-        },
-      ]);
+      excludeOnUpgradeQuery = addMustClausesToBoolQuery(
+        [{ exists: { field: 'type' } }],
+        excludeOnUpgradeQuery.bool
+      );
     }
 
     const source = stateP.sourceIndex;
@@ -451,8 +448,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
     if (Either.isRight(res)) {
       const excludeOnUpgradeQuery = addMustNotClausesToBoolQuery(
-        stateP.excludeOnUpgradeQuery?.bool,
-        res.right.mustNotClauses
+        res.right.mustNotClauses,
+        stateP.excludeOnUpgradeQuery?.bool
       );
 
       return {

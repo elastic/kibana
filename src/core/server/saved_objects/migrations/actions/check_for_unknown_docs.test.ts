@@ -12,6 +12,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 import { checkForUnknownDocs } from './check_for_unknown_docs';
+import { createAggregateTypesSearchResponse } from './check_for_unknown_docs.mocks';
 
 jest.mock('./catch_retryable_es_client_errors');
 
@@ -69,10 +70,30 @@ describe('checkForUnknownDocs', () => {
     expect(client.search).toHaveBeenCalledWith({
       index: '.kibana_8.0.0',
       body: {
-        size: 1000,
+        size: 0,
+        aggs: {
+          typesAggregation: {
+            terms: {
+              // assign type __UNKNOWN__ to those documents that don't define one
+              missing: '__UNKNOWN__',
+              field: 'type',
+              size: 1000, // collect up to 1000 non-registered types
+            },
+            aggs: {
+              docs: {
+                top_hits: {
+                  size: 100, // collect up to 100 docs for each non-registered type
+                  _source: {
+                    excludes: ['*'],
+                  },
+                },
+              },
+            },
+          },
+        },
         query: {
           bool: {
-            must: excludeOnUpgradeQuery,
+            ...excludeOnUpgradeQuery.bool,
             must_not: knownTypes.map((type) => ({
               term: {
                 type,
@@ -105,14 +126,13 @@ describe('checkForUnknownDocs', () => {
   describe('when unknown doc types are found', () => {
     it('resolves with `Either.right`, returning the unknown doc types', async () => {
       const client = elasticsearchClientMock.createInternalClient(
-        Promise.resolve({
-          hits: {
-            hits: [
-              { _id: '12', _source: { type: 'foo' } },
-              { _id: '14', _source: { type: 'bar' } },
-            ],
-          },
-        })
+        Promise.resolve(
+          createAggregateTypesSearchResponse({
+            foo: ['12'],
+            bar: ['14'],
+            __UNKNOWN__: ['16'],
+          })
+        )
       );
 
       const task = checkForUnknownDocs({
@@ -130,32 +150,8 @@ describe('checkForUnknownDocs', () => {
         unknownDocs: [
           { id: '12', type: 'foo' },
           { id: '14', type: 'bar' },
+          { id: '16', type: '__UNKNOWN__' },
         ],
-      });
-    });
-
-    it('uses `unknown` as the type when the document does not contain a type field', async () => {
-      const client = elasticsearchClientMock.createInternalClient(
-        Promise.resolve({
-          hits: {
-            hits: [{ _id: '12', _source: {} }],
-          },
-        })
-      );
-
-      const task = checkForUnknownDocs({
-        client,
-        indexName: '.kibana_8.0.0',
-        knownTypes,
-        excludeOnUpgradeQuery,
-      });
-
-      const result = await task();
-
-      expect(Either.isRight(result)).toBe(true);
-      expect((result as Either.Right<any>).right).toEqual({
-        type: 'unknown_docs_found',
-        unknownDocs: [{ id: '12', type: 'unknown' }],
       });
     });
   });

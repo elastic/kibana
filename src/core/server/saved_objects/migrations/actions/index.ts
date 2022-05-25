@@ -93,7 +93,7 @@ import { ClusterShardLimitExceeded } from './create_index';
 export type {
   CheckForUnknownDocsParams,
   UnknownDocsFound,
-  CheckForUnknownDocsFoundDoc,
+  DocumentIdAndType,
 } from './check_for_unknown_docs';
 export { checkForUnknownDocs } from './check_for_unknown_docs';
 

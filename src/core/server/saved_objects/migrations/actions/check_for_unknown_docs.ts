@@ -8,13 +8,18 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { flatten } from 'lodash';
+import type {
+  AggregationsMultiBucketAggregateBase,
+  QueryDslQueryContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsRawDocSource } from '../../serialization';
 import type { ElasticsearchClient } from '../../../elasticsearch';
 import {
   catchRetryableEsClientErrors,
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
+import { addExcludedTypesToBoolQuery } from '../model/helpers';
 
 /** @internal */
 export interface CheckForUnknownDocsParams {
@@ -25,7 +30,7 @@ export interface CheckForUnknownDocsParams {
 }
 
 /** @internal */
-export interface CheckForUnknownDocsFoundDoc {
+export interface DocumentIdAndType {
   id: string;
   type: string;
 }
@@ -33,7 +38,69 @@ export interface CheckForUnknownDocsFoundDoc {
 /** @internal */
 export interface UnknownDocsFound {
   type: 'unknown_docs_found';
-  unknownDocs: CheckForUnknownDocsFoundDoc[];
+  unknownDocs: DocumentIdAndType[];
+}
+
+/**
+ * Performs a search in ES, aggregating documents by type,
+ * retrieving a bunch of documents for each type.
+ * @internal
+ * @param esClient The ES client to perform the search query
+ * @param targetIndices The ES indices to target
+ * @param query An optional query that can be used to filter
+ * @returns A list of documents with their types
+ */
+export async function getAggregatedTypesDocuments(
+  esClient: ElasticsearchClient,
+  targetIndices: string[] | string,
+  query?: QueryDslQueryContainer
+): Promise<DocumentIdAndType[]> {
+  const body = await esClient.search<SavedObjectsRawDocSource>({
+    index: targetIndices,
+    body: {
+      size: 0,
+      // apply the desired filters (e.g. filter out registered types)
+      query,
+      // aggregate docs by type, so that we have a sneak peak of all types
+      aggs: {
+        typesAggregation: {
+          terms: {
+            // assign type __UNKNOWN__ to those documents that don't define one
+            missing: '__UNKNOWN__',
+            field: 'type',
+            size: 1000, // collect up to 1000 types
+          },
+          aggs: {
+            docs: {
+              top_hits: {
+                size: 100, // collect up to 100 docs for each type
+                _source: {
+                  excludes: ['*'],
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  if (!body.aggregations) return [];
+
+  const { typesAggregation } = body.aggregations;
+  const buckets = (typesAggregation as AggregationsMultiBucketAggregateBase).buckets;
+
+  const bucketsArray = Array.isArray(buckets) ? buckets : Object.values(buckets);
+
+  return flatten(
+    bucketsArray.map(
+      (bucket: any) =>
+        bucket.docs?.hits?.hits?.map((doc: any) => ({
+          id: doc._id,
+          type: bucket.key,
+        })) || []
+    )
+  );
 }
 
 export const checkForUnknownDocs =
@@ -46,45 +113,15 @@ export const checkForUnknownDocs =
     RetryableEsClientError,
     UnknownDocsFound | {}
   > =>
-  () => {
-    const query = createUnknownDocQuery(excludeOnUpgradeQuery, knownTypes);
-    return client
-      .search<SavedObjectsRawDocSource>({
-        index: indexName,
-        body: {
-          size: 1000,
-          query,
-        },
-      })
-      .then((body) => {
-        const { hits } = body.hits;
-        if (!hits.length) {
-          return Either.right({});
+  async () => {
+    const excludeQuery = addExcludedTypesToBoolQuery(knownTypes, excludeOnUpgradeQuery.bool);
+    return getAggregatedTypesDocuments(client, indexName, excludeQuery)
+      .then((unknownDocs) => {
+        if (unknownDocs.length) {
+          return Either.right({ type: 'unknown_docs_found' as const, unknownDocs });
         }
 
-        return Either.right({
-          type: 'unknown_docs_found' as const,
-          unknownDocs: hits.map((hit) => ({
-            id: hit._id,
-            type: hit._source?.type ?? 'unknown',
-          })),
-        });
+        return Either.right({});
       })
       .catch(catchRetryableEsClientErrors);
   };
-
-const createUnknownDocQuery = (
-  excludeOnUpgradeQuery: QueryDslQueryContainer,
-  knownTypes: string[]
-): QueryDslQueryContainer => {
-  return {
-    bool: {
-      must: excludeOnUpgradeQuery,
-      must_not: knownTypes.map((type) => ({
-        term: {
-          type,
-        },
-      })),
-    },
-  };
-};

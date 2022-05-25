@@ -16,7 +16,7 @@ describe('addExcludedTypesToBoolQuery', () => {
   it('generates a bool query which filters out the specified types', () => {
     const boolQuery = { must_not: [] };
     const types = ['type1', 'type2'];
-    const result = addExcludedTypesToBoolQuery(boolQuery, types);
+    const result = addExcludedTypesToBoolQuery(types, boolQuery);
     expect(result).toEqual({
       bool: {
         must_not: [{ term: { type: 'type1' } }, { term: { type: 'type2' } }],
@@ -29,7 +29,7 @@ describe('addMustClausesToBoolQuery', () => {
   it('generates a new bool query when no query is provided', () => {
     const boolQuery = undefined;
     const types = [{ term: { type: 'type1' } }, { term: { type: 'type2' } }];
-    const result = addMustClausesToBoolQuery(boolQuery, types);
+    const result = addMustClausesToBoolQuery(types, boolQuery);
     expect(result).toEqual({
       bool: {
         must: [{ term: { type: 'type1' } }, { term: { type: 'type2' } }],
@@ -45,7 +45,7 @@ describe('addMustClausesToBoolQuery', () => {
       ],
     };
     const types = [{ term: { type: 'type1' } }, { term: { type: 'type2' } }];
-    const result = addMustClausesToBoolQuery(boolQuery, types);
+    const result = addMustClausesToBoolQuery(types, boolQuery);
     expect(result).toEqual({
       bool: {
         should: [
@@ -66,7 +66,7 @@ describe('addMustClausesToBoolQuery', () => {
     };
 
     const types = [{ term: { type: 'type1' } }, { term: { type: 'type2' } }];
-    const result = addMustClausesToBoolQuery(boolQuery, types);
+    const result = addMustClausesToBoolQuery(types, boolQuery);
     expect(result).toEqual({
       bool: {
         must: [
@@ -87,7 +87,7 @@ describe('addMustClausesToBoolQuery', () => {
     };
 
     const types = [{ term: { type: 'type1' } }, { term: { type: 'type2' } }];
-    const result = addMustClausesToBoolQuery(boolQuery, types);
+    const result = addMustClausesToBoolQuery(types, boolQuery);
     expect(result).toEqual({
       bool: {
         must: [
@@ -104,7 +104,7 @@ describe('addMustNotClausesToBoolQuery', () => {
   it('generates a new bool query when no query is provided', () => {
     const boolQuery = undefined;
     const types = [{ term: { type: 'type1' } }, { term: { type: 'type2' } }];
-    const result = addMustNotClausesToBoolQuery(boolQuery, types);
+    const result = addMustNotClausesToBoolQuery(types, boolQuery);
     expect(result).toEqual({
       bool: {
         must_not: [{ term: { type: 'type1' } }, { term: { type: 'type2' } }],
@@ -120,7 +120,7 @@ describe('addMustNotClausesToBoolQuery', () => {
       ],
     };
     const types = [{ term: { type: 'type1' } }, { term: { type: 'type2' } }];
-    const result = addMustNotClausesToBoolQuery(boolQuery, types);
+    const result = addMustNotClausesToBoolQuery(types, boolQuery);
     expect(result).toEqual({
       bool: {
         should: [
@@ -141,7 +141,7 @@ describe('addMustNotClausesToBoolQuery', () => {
     };
 
     const types = [{ term: { type: 'type1' } }, { term: { type: 'type2' } }];
-    const result = addMustNotClausesToBoolQuery(boolQuery, types);
+    const result = addMustNotClausesToBoolQuery(types, boolQuery);
     expect(result).toEqual({
       bool: {
         must_not: [
@@ -162,7 +162,7 @@ describe('addMustNotClausesToBoolQuery', () => {
     };
 
     const types = [{ term: { type: 'type1' } }, { term: { type: 'type2' } }];
-    const result = addMustNotClausesToBoolQuery(boolQuery, types);
+    const result = addMustNotClausesToBoolQuery(types, boolQuery);
     expect(result).toEqual({
       bool: {
         must_not: [

@@ -8,40 +8,11 @@
 
 import { getIndexForTypeMock } from './unknown_object_types.test.mocks';
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { deleteUnknownTypeObjects, getUnknownTypesDeprecations } from './unknown_object_types';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import { elasticsearchClientMock } from '../../elasticsearch/client/mocks';
 import { SavedObjectsType } from '../..';
-
-const createSearchResponse = (typeCount: number, docCount: number = 1): estypes.SearchResponse => {
-  return {
-    took: 0,
-    timed_out: false,
-    _shards: {
-      total: 1,
-      successful: 1,
-      skipped: 0,
-      failed: 0,
-    },
-    hits: {
-      total: {
-        value: typeCount,
-        relation: 'eq',
-      },
-      max_score: null,
-      hits: [],
-    },
-    aggregations: {
-      unknownTypesAggregation: {
-        buckets: new Array(typeCount).fill({
-          type: 'someType',
-          docs: { hits: { hits: new Array(docCount).fill({ _id: 'someId' }) } },
-        }),
-      },
-    },
-  } as estypes.SearchResponse;
-};
+import { createAggregateTypesSearchResponse } from '../migrations/actions/check_for_unknown_docs.mocks';
 
 describe('unknown saved object types deprecation', () => {
   const kibanaVersion = '8.0.0';
@@ -67,7 +38,7 @@ describe('unknown saved object types deprecation', () => {
 
   describe('getUnknownTypesDeprecations', () => {
     beforeEach(() => {
-      esClient.asInternalUser.search.mockResponse(createSearchResponse(0));
+      esClient.asInternalUser.search.mockResponse(createAggregateTypesSearchResponse());
     });
 
     it('calls `esClient.asInternalUser.search` with the correct parameters', async () => {
@@ -84,7 +55,7 @@ describe('unknown saved object types deprecation', () => {
         body: {
           size: 0,
           aggs: {
-            unknownTypesAggregation: {
+            typesAggregation: {
               terms: {
                 missing: '__UNKNOWN__',
                 field: 'type',
@@ -112,7 +83,7 @@ describe('unknown saved object types deprecation', () => {
     });
 
     it('returns no deprecation if no unknown type docs are found', async () => {
-      esClient.asInternalUser.search.mockResponse(createSearchResponse(0));
+      esClient.asInternalUser.search.mockResponse(createAggregateTypesSearchResponse());
 
       const deprecations = await getUnknownTypesDeprecations({
         esClient,
@@ -125,7 +96,13 @@ describe('unknown saved object types deprecation', () => {
     });
 
     it('returns a deprecation if any unknown type docs are found', async () => {
-      esClient.asInternalUser.search.mockResponse(createSearchResponse(1));
+      esClient.asInternalUser.search.mockResponse(
+        createAggregateTypesSearchResponse({
+          someType: ['id1', 'id2'],
+          anotherType: ['id3'],
+          __UNKNOWN__: ['id4'],
+        })
+      );
 
       const deprecations = await getUnknownTypesDeprecations({
         esClient,
