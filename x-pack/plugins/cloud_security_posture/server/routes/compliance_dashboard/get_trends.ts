@@ -27,7 +27,8 @@ export interface ScoreTrendDoc {
 
 export const getTrendsQuery = () => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  size: 99,
+  // large number that should be sufficient for 24 hours considering we write to the score index every 5 minutes
+  size: 999,
   sort: '@timestamp:desc',
   query: {
     bool: {
