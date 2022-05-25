@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import * as i18n from './translations';
 import { ActionsConfigurationUtilities } from '../../actions_config';
 import {
   CasesWebhookPublicConfigurationType,
@@ -17,31 +17,68 @@ const validateConfig = (
   configurationUtilities: ActionsConfigurationUtilities,
   configObject: CasesWebhookPublicConfigurationType
 ) => {
-  const createIncidentUrl = configObject.createIncidentUrl;
+  const {
+    createCommentUrl,
+    createIncidentUrl,
+    incidentViewUrl,
+    getIncidentUrl,
+    updateIncidentUrl,
+  } = configObject;
+
   try {
     new URL(createIncidentUrl);
   } catch (err) {
-    return i18n.translate(
-      'xpack.actions.builtin.casesWebhook.casesWebhookConfigurationErrorNoHostname',
-      {
-        defaultMessage:
-          'error configuring cases webhook action: unable to parse createIncidentUrl: {err}',
-        values: {
-          err,
-        },
-      }
-    );
+    return i18n.INVALID_URL(err, 'createIncidentUrl');
   }
 
   try {
     configurationUtilities.ensureUriAllowed(createIncidentUrl);
   } catch (allowListError) {
-    return i18n.translate('xpack.actions.builtin.casesWebhook.casesWebhookConfigurationError', {
-      defaultMessage: 'error configuring cases webhook action: {message}',
-      values: {
-        message: allowListError.message,
-      },
-    });
+    return i18n.CONFIG_ERR(allowListError.message);
+  }
+  try {
+    new URL(createCommentUrl);
+  } catch (err) {
+    return i18n.INVALID_URL(err, 'createCommentUrl');
+  }
+
+  try {
+    configurationUtilities.ensureUriAllowed(createCommentUrl);
+  } catch (allowListError) {
+    return i18n.CONFIG_ERR(allowListError.message);
+  }
+  try {
+    new URL(incidentViewUrl);
+  } catch (err) {
+    return i18n.INVALID_URL(err, 'incidentViewUrl');
+  }
+
+  try {
+    configurationUtilities.ensureUriAllowed(incidentViewUrl);
+  } catch (allowListError) {
+    return i18n.CONFIG_ERR(allowListError.message);
+  }
+  try {
+    new URL(getIncidentUrl);
+  } catch (err) {
+    return i18n.INVALID_URL(err, 'getIncidentUrl');
+  }
+
+  try {
+    configurationUtilities.ensureUriAllowed(getIncidentUrl);
+  } catch (allowListError) {
+    return i18n.CONFIG_ERR(allowListError.message);
+  }
+  try {
+    new URL(updateIncidentUrl);
+  } catch (err) {
+    return i18n.INVALID_URL(err, 'updateIncidentUrl');
+  }
+
+  try {
+    configurationUtilities.ensureUriAllowed(updateIncidentUrl);
+  } catch (allowListError) {
+    return i18n.CONFIG_ERR(allowListError.message);
   }
 };
 
@@ -49,9 +86,7 @@ export const validateSecrets = (secrets: CasesWebhookSecretConfigurationType) =>
   // user and password must be set together (or not at all)
   if (!secrets.password && !secrets.user) return;
   if (secrets.password && secrets.user) return;
-  return i18n.translate('xpack.actions.builtin.casesWebhook.invalidUsernamePassword', {
-    defaultMessage: 'both user and password must be specified',
-  });
+  return i18n.INVALID_USER_PW;
 };
 
 export const validate: ExternalServiceValidation = {

@@ -8,6 +8,7 @@
 import axios, { AxiosResponse } from 'axios';
 
 import { Logger } from '@kbn/core/server';
+import { isString } from 'lodash';
 import {
   createServiceError,
   getObjectValueByKey,
@@ -52,6 +53,8 @@ export const createExternalService = (
     getIncidentResponseExternalTitleKey,
     getIncidentResponseUpdatedDateKey,
     getIncidentUrl,
+    hasAuth,
+    headers,
     incidentViewUrl,
     updateIncidentJson,
     updateIncidentMethod,
@@ -65,7 +68,10 @@ export const createExternalService = (
   const createIncidentUrl = removeSlash(createIncidentUrlConfig);
 
   const axiosInstance = axios.create({
-    auth: { username: user, password },
+    ...(hasAuth && isString(secrets.user) && isString(secrets.password)
+      ? { auth: { username: secrets.user, password: secrets.password } }
+      : {}),
+    ...(headers != null ? { headers } : {}),
   });
 
   const getIncident = async (id: string): Promise<GetIncidentResponse> => {

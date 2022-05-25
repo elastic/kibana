@@ -156,7 +156,7 @@ export const push = async (
       alerts,
       casesConnectors,
     });
-    console.log('externalServiceIncident', externalServiceIncident);
+
     const pushRes = await actionsClient.execute({
       actionId: connector?.id ?? '',
       params: {
@@ -164,7 +164,6 @@ export const push = async (
         subActionParams: externalServiceIncident,
       },
     });
-    console.log('pushRes', pushRes);
 
     if (pushRes.status === 'error') {
       throw Boom.failedDependency(
