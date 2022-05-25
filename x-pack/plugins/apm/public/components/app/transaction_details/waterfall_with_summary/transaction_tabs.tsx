@@ -142,6 +142,7 @@ function LogsTabContent({ transaction }: { transaction: Transaction }) {
         },
         { type: 'message' },
       ]}
+      showFlyoutAction
     />
   );
 }

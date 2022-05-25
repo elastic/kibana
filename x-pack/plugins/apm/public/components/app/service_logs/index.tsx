@@ -90,6 +90,7 @@ export function ServiceLogs() {
       startTimestamp={moment(start).valueOf()}
       endTimestamp={moment(end).valueOf()}
       query={getInfrastructureKQLFilter(data, serviceName)}
+      showFlyoutAction
     />
   );
 }

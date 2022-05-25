@@ -15,10 +15,12 @@ import { LogEntry } from '../../../../common/search_strategies/log_entries/log_e
 
 const UPTIME_FIELDS = ['container.id', 'host.ip', 'kubernetes.pod.uid'];
 
-export const LogEntryActionsMenu: React.FunctionComponent<{
+export interface LogEntryActionsMenuProps {
   logEntry: LogEntry;
-}> = ({ logEntry }) => {
-  const { hide, isVisible, show } = useVisibilityState(false);
+}
+
+export const LogEntryActionsMenu = ({ logEntry }: LogEntryActionsMenuProps) => {
+  const { hide, isVisible, toggle } = useVisibilityState(false);
 
   const apmLinkDescriptor = useMemo(() => getAPMLink(logEntry), [logEntry]);
   const uptimeLinkDescriptor = useMemo(() => getUptimeLink(logEntry), [logEntry]);
@@ -73,7 +75,7 @@ export const LogEntryActionsMenu: React.FunctionComponent<{
           disabled={!hasMenuItems}
           iconSide="right"
           iconType="arrowDown"
-          onClick={show}
+          onClick={toggle}
         >
           <FormattedMessage
             id="xpack.infra.logEntryActionsMenu.buttonLabel"
