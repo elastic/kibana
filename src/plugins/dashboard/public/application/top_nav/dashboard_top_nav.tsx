@@ -54,7 +54,11 @@ import {
   useDashboardDispatch,
   useDashboardSelector,
 } from '../state';
-import { DashboardViewTour, DASHBOARD_VIEW_TOUR_STORAGE_KEY } from '../tour';
+import {
+  DashboardViewTour,
+  DASHBOARD_VIEW_TOUR_STORAGE_KEY,
+  useDashboardEditTourContext,
+} from '../tour';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -129,6 +133,8 @@ export function DashboardTopNav({
   const stateTransferService = embeddable.getStateTransfer();
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
+
+  const { onStartTour } = useDashboardEditTourContext();
 
   const trackUiMetric = usageCollection?.reportUiCounter.bind(
     usageCollection,
@@ -432,6 +438,7 @@ export function DashboardTopNav({
       if (!share) return;
       const currentState = dashboardAppState.getLatestDashboardState();
       const timeRange = timefilter.getTime();
+      onStartTour();
       ShowShareModal({
         share,
         timeRange,
@@ -451,6 +458,7 @@ export function DashboardTopNav({
       dashboardAppState,
       dashboardCapabilities,
       dashboardSessionStorage,
+      onStartTour,
     ]
   );
 

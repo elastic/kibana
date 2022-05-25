@@ -24,6 +24,7 @@ import { DashboardTopNav, isCompleteDashboardAppState } from './top_nav/dashboar
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../types';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '../services/kibana_utils';
 import { DashboardAppNoDataPage } from './dashboard_app_no_data';
+import { DashboardEditTourProvider } from './tour';
 export interface DashboardAppProps {
   history: History;
   savedDashboardId?: string;
@@ -135,35 +136,37 @@ export function DashboardApp({
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
       {!showNoDataPage && isCompleteDashboardAppState(dashboardAppState) && (
-        <>
-          <DashboardTopNav
-            printMode={printMode}
-            redirectTo={redirectTo}
-            embedSettings={embedSettings}
-            dashboardAppState={dashboardAppState}
-          />
+        <DashboardEditTourProvider>
+          <>
+            <DashboardTopNav
+              printMode={printMode}
+              redirectTo={redirectTo}
+              embedSettings={embedSettings}
+              dashboardAppState={dashboardAppState}
+            />
 
-          {dashboardAppState.savedDashboard.outcome === 'conflict' &&
-          dashboardAppState.savedDashboard.id &&
-          dashboardAppState.savedDashboard.aliasId
-            ? spacesService?.ui.components.getLegacyUrlConflict({
-                currentObjectId: dashboardAppState.savedDashboard.id,
-                otherObjectId: dashboardAppState.savedDashboard.aliasId,
-                otherObjectPath: `#${createDashboardEditUrl(
-                  dashboardAppState.savedDashboard.aliasId
-                )}${history.location.search}`,
-              })
-            : null}
-          <div
-            className={`dashboardViewport ${
-              screenshotModeService && screenshotModeService.isScreenshotMode()
-                ? 'dashboardViewport--screenshotMode'
-                : ''
-            }`}
-          >
-            <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
-          </div>
-        </>
+            {dashboardAppState.savedDashboard.outcome === 'conflict' &&
+            dashboardAppState.savedDashboard.id &&
+            dashboardAppState.savedDashboard.aliasId
+              ? spacesService?.ui.components.getLegacyUrlConflict({
+                  currentObjectId: dashboardAppState.savedDashboard.id,
+                  otherObjectId: dashboardAppState.savedDashboard.aliasId,
+                  otherObjectPath: `#${createDashboardEditUrl(
+                    dashboardAppState.savedDashboard.aliasId
+                  )}${history.location.search}`,
+                })
+              : null}
+            <div
+              className={`dashboardViewport ${
+                screenshotModeService && screenshotModeService.isScreenshotMode()
+                  ? 'dashboardViewport--screenshotMode'
+                  : ''
+              }`}
+            >
+              <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
+            </div>
+          </>
+        </DashboardEditTourProvider>
       )}
     </>
   );
