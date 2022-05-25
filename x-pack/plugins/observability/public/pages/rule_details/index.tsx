@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import moment from 'moment';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -23,6 +23,7 @@ import {
   EuiTabbedContent,
   EuiEmptyPrompt,
   EuiLoadingSpinner,
+  EuiSuperSelectOption,
 } from '@elastic/eui';
 
 import {
@@ -33,12 +34,14 @@ import {
   deleteRules,
   useLoadRuleTypes,
   RuleType,
-  NOTIFY_WHEN_OPTIONS,
+  getNotifyWhenOptions,
   RuleEventLogListProps,
+  AlertsTableFlyoutState,
 } from '@kbn/triggers-actions-ui-plugin/public';
 // TODO: use a Delete modal from triggersActionUI when it's sharable
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { DeleteModalConfirmation } from '../rules/components/delete_modal_confirmation';
 import { CenterJustifiedSpinner } from '../rules/components/center_justified_spinner';
 import { OBSERVABILITY_SOLUTIONS } from '../rules/config';
@@ -54,16 +57,19 @@ import { useFetchLast24hRuleExecutionLog } from '../../hooks/use_fetch_last24h_r
 import { formatInterval } from './utils';
 import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
 import { paths } from '../../config/paths';
+import { observabilityFeatureId } from '../../../common';
 
 export function RuleDetailsPage() {
   const {
     http,
     triggersActionsUi: {
+      alertsTableConfigurationRegistry,
       ruleTypeRegistry,
       getRuleStatusDropdown,
       getEditAlertFlyout,
       actionTypeRegistry,
       getRuleEventLogList,
+      getAlertsStateTable,
     },
     application: { capabilities, navigateToUrl },
     notifications: { toasts },
@@ -89,6 +95,14 @@ export function RuleDetailsPage() {
 
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [isRuleEditPopoverOpen, setIsRuleEditPopoverOpen] = useState(false);
+
+  const NOTIFY_WHEN_OPTIONS = useRef<Array<EuiSuperSelectOption<unknown>>>([]);
+  useEffect(() => {
+    const loadNotifyWhenOption = async () => {
+      NOTIFY_WHEN_OPTIONS.current = await getNotifyWhenOptions();
+    };
+    loadNotifyWhenOption();
+  }, []);
 
   const handleClosePopover = useCallback(() => setIsRuleEditPopoverOpen(false), []);
 
@@ -159,6 +173,26 @@ export function RuleDetailsPage() {
     );
   };
 
+  const alertStateProps = {
+    alertsTableConfigurationRegistry,
+    configurationId: observabilityFeatureId,
+    id: `case-details-alerts-o11y`,
+    flyoutState: AlertsTableFlyoutState.external,
+    featureIds: [features] as AlertConsumers[],
+    query: {
+      bool: {
+        filter: [
+          {
+            term: {
+              'kibana.alert.rule.uuid': ruleId,
+            },
+          },
+        ],
+      },
+    },
+    showExpandToDetails: false,
+  };
+
   const tabs = [
     {
       id: EVENT_LOG_LIST_TAB,
@@ -180,7 +214,12 @@ export function RuleDetailsPage() {
         defaultMessage: 'Alerts',
       }),
       'data-test-subj': 'ruleAlertListTab',
-      content: <EuiText>Alerts</EuiText>,
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          {getAlertsStateTable(alertStateProps)}
+        </>
+      ),
     },
   ];
 
@@ -223,7 +262,7 @@ export function RuleDetailsPage() {
     });
 
   const getNotifyText = () =>
-    NOTIFY_WHEN_OPTIONS.find((option) => option.value === rule?.notifyWhen)?.inputDisplay ||
+    NOTIFY_WHEN_OPTIONS.current.find((option) => option.value === rule?.notifyWhen)?.inputDisplay ||
     rule.notifyWhen;
   return (
     <ObservabilityPageTemplate
