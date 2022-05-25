@@ -6,9 +6,33 @@
  * Side Public License, v 1.
  */
 
-// import { DataViewPersistableStateService } from './persistable_state';
+import { DataViewFieldBaseSerializable } from '@kbn/es-query';
+import { DataViewFieldPersistableStateService } from './persistable_state';
+import { SavedObjectReference } from '@kbn/core/types';
+const { inject, extract } = DataViewFieldPersistableStateService;
 
-describe('filter manager persistable state tests', () => {
-  describe('reference injection', () => {});
-  describe('reference extraction', () => {});
+describe('data view field persistable state tests', () => {
+  test('inject references', () => {
+    const state: DataViewFieldBaseSerializable = {
+      name: 'my-name',
+      type: 'my-type',
+    };
+    const references: SavedObjectReference[] = [];
+
+    const result = inject(state, references);
+
+    expect(result).toBe(state);
+  });
+
+  test('extract references', () => {
+    const state: DataViewFieldBaseSerializable = {
+      name: 'my-name',
+      type: 'my-type',
+    };
+
+    const result = extract(state);
+
+    expect(result.state).toBe(state);
+    expect(result.references).toEqual([]);
+  });
 });

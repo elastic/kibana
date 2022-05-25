@@ -11,7 +11,7 @@ import { DataViewPersistableStateService } from './persistable_state';
 import { SavedObjectReference } from '@kbn/core/types';
 const { inject, extract } = DataViewPersistableStateService;
 
-describe('filter manager persistable state tests', () => {
+describe('data view persistable state tests', () => {
   test('inject references', () => {
     const state: DataViewBaseSerializable = {
       id: 'my-id',

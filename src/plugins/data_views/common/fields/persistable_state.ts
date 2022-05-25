@@ -9,7 +9,7 @@
 import { DataViewFieldBaseSerializable } from '@kbn/es-query';
 import { PersistableStateService } from '@kbn/kibana-utils-plugin/common';
 
-export const DataViewPersistableStateService: PersistableStateService<DataViewFieldBaseSerializable> =
+export const DataViewFieldPersistableStateService: PersistableStateService<DataViewFieldBaseSerializable> =
   {
     inject: (state, references) => {
       return state;
