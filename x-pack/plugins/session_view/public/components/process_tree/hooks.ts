@@ -32,7 +32,6 @@ interface UseProcessTreeDeps {
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
   verboseMode: boolean;
   jumpToEntityId?: string;
-  refreshClicked?: boolean;
 }
 
 export class ProcessImpl implements Process {
@@ -284,7 +283,6 @@ export const useProcessTree = ({
   updatedAlertsStatus,
   verboseMode,
   jumpToEntityId,
-  refreshClicked,
 }: UseProcessTreeDeps) => {
   const firstEvent = data[0]?.events?.[0];
   const sessionLeaderProcess = useMemo(() => {

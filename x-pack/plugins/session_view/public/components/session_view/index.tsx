@@ -77,8 +77,6 @@ export const SessionView = ({
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
 
-  const [refreshSession, setRefreshSession] = useState(false);
-
   const styles = useStyles({ height, isFullScreen });
 
   const detailPanelCollapseFn = useRef(() => {});
@@ -131,16 +129,10 @@ export const SessionView = ({
     refetch: refetchAlerts,
   } = useFetchSessionViewAlerts(sessionEntityId, investigatedAlertId);
 
-  useEffect(() => {
-    refetch().then((val) => {
-      setRefreshSession(val.isLoading);
-    });
-    refetchAlerts();
-  }, [refreshSession, refetch, refetchAlerts]);
-
   const handleRefresh = useCallback(() => {
-    setRefreshSession(true);
-  }, []);
+    refetch();
+    refetchAlerts();
+  }, [refetch, refetchAlerts]);
 
   const alerts = useMemo(() => {
     let events: ProcessEvent[] = [];
@@ -261,7 +253,7 @@ export const SessionView = ({
                 size="m"
                 aria-label="Session View Refresh Button"
                 data-test-subj="sessionView:sessionViewRefreshButton"
-                isLoading={refreshSession}
+                isLoading={isFetching}
               />
             </EuiFlexItem>
 
@@ -342,7 +334,6 @@ export const SessionView = ({
                         onShowAlertDetails={onShowAlertDetails}
                         showTimestamp={displayOptions?.timestamp}
                         verboseMode={displayOptions?.verboseMode}
-                        refreshClicked={refreshSession}
                       />
                     </div>
                   )}
