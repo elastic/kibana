@@ -314,7 +314,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    it('touched time updates when you poll on an search', async () => {
+    it.skip('touched time updates when you poll on an search', async () => {
       const sessionId = `my-session-${Math.random()}`;
 
       // run search
