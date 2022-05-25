@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Fit } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { rgba } from 'polished';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
@@ -18,12 +17,20 @@ import {
 import { ServiceAnomalyTimeseries } from '../../../../../common/anomaly_detection/service_anomaly_timeseries';
 import { APMChartSpec } from '../../../../../typings/timeseries';
 
+export const expectedBoundsTitle = i18n.translate(
+  'xpack.apm.comparison.expectedBoundsTitle',
+  {
+    defaultMessage: 'Expected bounds',
+  }
+);
 export function getChartAnomalyTimeseries({
   anomalyTimeseries,
   theme,
+  anomalyTimeseriesColor,
 }: {
   anomalyTimeseries?: ServiceAnomalyTimeseries;
   theme: EuiTheme;
+  anomalyTimeseriesColor?: string;
 }):
   | {
       boundaries: APMChartSpec[];
@@ -36,21 +43,20 @@ export function getChartAnomalyTimeseries({
 
   const boundaries = [
     {
-      title: 'model plot',
+      title: expectedBoundsTitle,
       type: 'area',
-      fit: Fit.Lookahead,
-      hideLegend: true,
+      hideLegend: false,
       hideTooltipValue: true,
       areaSeriesStyle: {
         point: {
           opacity: 0,
         },
       },
-      color: rgba(theme.eui.euiColorVis1, 0.5),
-      stackAccessors: ['x'],
-      yAccessors: ['y0'],
-      y0Accessors: ['y1'],
+      color: anomalyTimeseriesColor ?? rgba(theme.eui.euiColorVis1, 0.5),
+      yAccessors: ['y1'],
+      y0Accessors: ['y0'],
       data: anomalyTimeseries.bounds,
+      key: 'expected_bounds',
     },
   ];
 
