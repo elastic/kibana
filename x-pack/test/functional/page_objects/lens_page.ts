@@ -124,6 +124,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       },
       layerIndex = 0
     ) {
+      const operationSelector = opts.isPreviousIncompatible
+        ? `lns-indexPatternDimension-${opts.operation} incompatible`
+        : `lns-indexPatternDimension-${opts.operation}`;
       await retry.try(async () => {
         if (!(await testSubjects.exists(operationSelector))) {
           await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
@@ -134,9 +137,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       if (opts.operation === 'formula') {
         await this.switchToFormula();
       } else {
-        const operationSelector = opts.isPreviousIncompatible
-          ? `lns-indexPatternDimension-${opts.operation} incompatible`
-          : `lns-indexPatternDimension-${opts.operation}`;
         async function getAriaPressed() {
           const operationSelectorContainer = await testSubjects.find(operationSelector);
           await testSubjects.click(operationSelector);
