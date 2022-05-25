@@ -9,13 +9,18 @@
 /**
  * Convert a value to a presentable string
  */
-export function asPrettyString(val: unknown, options?: { flat?: boolean }): string {
+export function asPrettyString(
+  val: unknown,
+  options?: { skipStringifiedJSONFormatting?: boolean }
+): string {
   if (val === null || val === undefined) return ' - ';
   switch (typeof val) {
     case 'string':
       return val;
     case 'object':
-      return options?.flat ? JSON.stringify(val) : JSON.stringify(val, null, '  ');
+      return options?.skipStringifiedJSONFormatting
+        ? JSON.stringify(val)
+        : JSON.stringify(val, null, '  ');
     default:
       return '' + val;
   }

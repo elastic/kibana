@@ -38,7 +38,7 @@ describe('copyValueToClipboard', () => {
       valueToStringConverter,
     });
 
-    expect(result).toBe('[\n  "abcd1"\n]');
+    expect(result).toBe('["abcd1"]');
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(discoverServiceMock.toastNotifications.addInfo).toHaveBeenCalledWith({
       title: 'Copied to clipboard.',
@@ -75,7 +75,7 @@ describe('copyValueToClipboard', () => {
       valueToStringConverter,
     });
 
-    expect(result).toBe('bool_enabled\n[false]\n[true]');
+    expect(result).toBe('bool_enabled\nfalse\ntrue');
     expect(discoverServiceMock.toastNotifications.addInfo).toHaveBeenCalledWith({
       title: 'Copied values of "bool_enabled" column to clipboard.',
     });

@@ -121,13 +121,13 @@ export class StringFormat extends FieldFormat {
       case 'title':
         return this.toTitleCase(String(val));
       case 'short':
-        return asPrettyString(shortenDottedString(val));
+        return asPrettyString(shortenDottedString(val), options);
       case 'base64':
         return this.base64Decode(String(val));
       case 'urlparam':
         return decodeURIComponent(String(val));
       default:
-        return asPrettyString(val, options?.flat ?? false);
+        return asPrettyString(val, options);
     }
   };
 

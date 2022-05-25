@@ -106,7 +106,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('"U29tZSBiaW5hcnkgYmxvYg=="');
+    expect(result).toBe('U29tZSBiaW5hcnkgYmxvYg==');
   });
 
   it('should convert an object value to text', () => {

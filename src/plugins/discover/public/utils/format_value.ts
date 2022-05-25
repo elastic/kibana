@@ -10,7 +10,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { FieldFormatsContentType } from '@kbn/field-formats-plugin/common/types';
+import type {
+  FieldFormatsContentType,
+  HtmlContextTypeOptions,
+  TextContextTypeOptions,
+} from '@kbn/field-formats-plugin/common/types';
 
 /**
  * Formats the value of a specific field using the appropriate field formatter if available
@@ -21,7 +25,8 @@ import { FieldFormatsContentType } from '@kbn/field-formats-plugin/common/types'
  * @param fieldFormats Field formatters
  * @param dataView The data view if available
  * @param field The field that value was from if available
- * @param options Options for converter
+ * @param contentType Type of a converter
+ * @param options Options for the converter
  * @returns An sanitized HTML string, that is safe to be applied via dangerouslySetInnerHTML
  */
 export function formatFieldValue(
@@ -30,19 +35,14 @@ export function formatFieldValue(
   fieldFormats: FieldFormatsStart,
   dataView?: DataView,
   field?: DataViewField,
-  options?: {
-    contentType?: FieldFormatsContentType;
-    textOptions?: {
-      flat?: boolean;
-    };
-  }
+  contentType?: FieldFormatsContentType,
+  options?: HtmlContextTypeOptions | TextContextTypeOptions
 ): string {
-  const usedContentType = options?.contentType ?? 'html';
-  const flat = options?.textOptions?.flat ?? false;
-  const converterOptions = {
+  const usedContentType = contentType ?? 'html';
+  const converterOptions: HtmlContextTypeOptions | TextContextTypeOptions = {
     hit,
     field,
-    flat,
+    ...options,
   };
 
   if (!dataView || !field) {

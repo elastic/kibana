@@ -47,21 +47,15 @@ export const convertValueToString = ({
 
   const formatted = valuesArray
     .map((subValue) => {
-      if (!field?.type || field?.type === 'unknown') {
-        return stringify(subValue);
-      }
-
       const formattedValue = formatFieldValue(
         subValue,
         rows[rowIndex],
         fieldFormats,
         dataView,
         field,
+        'text',
         {
-          contentType: 'text',
-          textOptions: {
-            flat: disableMultiline,
-          },
+          skipStringifiedJSONFormatting: disableMultiline,
         }
       );
 
