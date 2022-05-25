@@ -214,7 +214,7 @@ export class SearchInterceptor {
     const { sessionId, strategy } = options;
 
     const search = () => {
-      searchTracker.polled();
+      searchTracker?.polled();
       return this.runSearch(
         { id, ...request },
         {
@@ -225,14 +225,16 @@ export class SearchInterceptor {
       );
     };
 
-    const searchTracker = this.deps.session.trackSearch({
-      abort: () => searchAbortController.abort(),
-      poll: async () => {
-        if (id) {
-          await search();
-        }
-      },
-    });
+    const searchTracker = this.deps.session.isCurrentSession(sessionId)
+      ? this.deps.session.trackSearch({
+          abort: () => searchAbortController.abort(),
+          poll: async () => {
+            if (id) {
+              await search();
+            }
+          },
+        })
+      : undefined;
 
     const cancel = once(() => {
       if (this.deps.session.isCurrentSession(sessionId) && !this.deps.session.isStored()) {
@@ -248,11 +250,11 @@ export class SearchInterceptor {
         id = response.id;
 
         if (isCompleteResponse(response)) {
-          searchTracker.complete();
+          searchTracker?.complete();
         }
       }),
       catchError((e: Error) => {
-        searchTracker.error();
+        searchTracker?.error();
         cancel();
         return throwError(e);
       }),

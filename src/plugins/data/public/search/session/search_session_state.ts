@@ -159,7 +159,7 @@ export interface SessionPureTransitions<
   restore: (state: S) => (sessionId: string) => S;
   clear: (state: S) => () => S;
   store: (state: S) => (searchSessionSavedObject: SearchSessionSavedObject) => S;
-  trackSearch: (state: S) => (search: SearchDescriptor, meta: SearchMeta) => S;
+  trackSearch: (state: S) => (search: SearchDescriptor, meta?: SearchMeta) => S;
   removeSearch: (state: S) => (search: SearchDescriptor) => S;
   completeSearch: (state: S) => (search: SearchDescriptor) => S;
   errorSearch: (state: S) => (search: SearchDescriptor) => S;
@@ -197,19 +197,21 @@ export const sessionPureTransitions: SessionPureTransitions = {
       searchSessionSavedObject,
     };
   },
-  trackSearch: (state) => (search, meta) => {
-    if (!state.sessionId) throw new Error("Can't track search. Missing sessionId");
-    return {
-      ...state,
-      isStarted: true,
-      trackedSearches: state.trackedSearches.concat({
-        state: TrackedSearchState.InProgress,
-        searchDescriptor: search,
-        searchMeta: meta,
-      }),
-      completedTime: undefined,
-    };
-  },
+  trackSearch:
+    (state) =>
+    (search, meta = {}) => {
+      if (!state.sessionId) throw new Error("Can't track search. Missing sessionId");
+      return {
+        ...state,
+        isStarted: true,
+        trackedSearches: state.trackedSearches.concat({
+          state: TrackedSearchState.InProgress,
+          searchDescriptor: search,
+          searchMeta: meta,
+        }),
+        completedTime: undefined,
+      };
+    },
   removeSearch: (state) => (search) => {
     const trackedSearches = state.trackedSearches.filter((s) => s.searchDescriptor !== search);
     return {

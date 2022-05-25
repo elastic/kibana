@@ -37,8 +37,8 @@ import type {
 } from './search_session_state';
 import {
   createSessionStateContainer,
-  TrackedSearchState,
   SearchSessionState,
+  TrackedSearchState,
 } from './search_session_state';
 import { ISessionsClient } from './sessions_client';
 import { ISearchOptions } from '../../../common';
@@ -455,9 +455,12 @@ export class SessionService {
    */
   public async cancel(): Promise<void> {
     const isStoredSession = this.isStored();
-    this.state.get().trackedSearches.forEach((s) => {
-      s.searchDescriptor.abort();
-    });
+    this.state
+      .get()
+      .trackedSearches.filter((s) => s.state === TrackedSearchState.InProgress)
+      .forEach((s) => {
+        s.searchDescriptor.abort();
+      });
     this.state.transitions.cancel();
     if (isStoredSession) {
       await this.sessionsClient.delete(this.state.get().sessionId!);
