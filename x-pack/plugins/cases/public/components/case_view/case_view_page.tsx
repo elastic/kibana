@@ -11,7 +11,6 @@ import { useQueryClient } from 'react-query';
 import styled from 'styled-components';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
 import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseActionBar } from '../case_action_bar';
 import { HeaderPage } from '../header_page';
@@ -60,12 +59,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const init = useRef(true);
     const timelineUi = useTimelineContext()?.ui;
 
-    const {
-      data: userActionsData,
-      refetch: fetchCaseUserActions,
-      isLoading: isLoadingUserActions,
-    } = useGetCaseUserActions(caseData.id, caseData.connector.id);
-
     const handleRefresh = useCallback(() => {
       queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
     }, [queryClient]);
@@ -83,7 +76,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         refreshRef.current = {
           refreshCase: async () => {
             // Do nothing if component (or instance of this render cycle) is stale or it is already loading
-            if (isStale || isLoading || isLoadingUserActions) {
+            if (isStale || isLoading) {
               return;
             }
             handleRefresh();
@@ -94,23 +87,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           refreshRef.current = null;
         };
       }
-    }, [
-      fetchCase,
-      isLoadingUserActions,
-      isLoading,
-      refreshRef,
-      fetchCaseUserActions,
-      handleRefresh,
-    ]);
-
-    const currentExternalIncident = useMemo(
-      () =>
-        userActionsData?.caseServices != null &&
-        userActionsData.caseServices[caseData.connector.id] != null
-          ? userActionsData.caseServices[caseData.connector.id]
-          : null,
-      [userActionsData?.caseServices, caseData.connector]
-    );
+    }, [fetchCase, isLoading, refreshRef, handleRefresh]);
 
     const onSubmitTitle = useCallback(
       (newTitle) =>
@@ -213,7 +190,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         >
           <CaseActionBar
             caseData={caseData}
-            currentExternalIncident={currentExternalIncident}
             userCanCrud={userCanCrud}
             isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
             onRefresh={handleRefresh}
@@ -222,18 +198,18 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         </HeaderPage>
 
         <WhitePageWrapperNoBorder>
-          {!isLoadingUserActions ? (
-            <>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="xs" />
-            </>
-          ) : null}
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <CaseViewMetrics data-test-subj="case-view-metrics" caseId={caseData.id} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+
+          <EuiSpacer size="xs" />
+
           <EuiTabs>{renderTabs()}</EuiTabs>
+
           <EuiSpacer size="l" />
+
           <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`}>
             {selectedTabContent}
           </EuiFlexGroup>
