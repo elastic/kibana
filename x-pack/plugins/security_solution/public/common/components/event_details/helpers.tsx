@@ -235,7 +235,7 @@ export const FIELDS_WITHOUT_ACTIONS: { [field: string]: boolean } = {
 };
 
 /**
- * Checks wether the given field should have hover or row actions.
+ * Checks whether the given field should have hover or row actions.
  * The lookup is fast, so it is not necessary to memoize the result.
  */
 export function hasHoverOrRowActions(field: string): boolean {
