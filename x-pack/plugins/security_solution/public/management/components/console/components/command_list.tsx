@@ -43,7 +43,7 @@ export const CommandList = memo<CommandListProps>(({ commands }) => {
     <>
       <EuiFlexGroup
         wrap={false}
-        gutterSize="xs"
+        gutterSize="l"
         direction="column"
         data-test-subj={getTestId('commandList')}
       >
@@ -59,7 +59,9 @@ export const CommandList = memo<CommandListProps>(({ commands }) => {
           );
         })}
       </EuiFlexGroup>
+
       <EuiSpacer />
+
       <EuiText size="s">{footerMessage}</EuiText>
     </>
   );
