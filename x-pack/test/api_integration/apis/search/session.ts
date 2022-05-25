@@ -241,70 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(404);
     });
 
-    it('should sync search ids into not persisted session', async () => {
-      const sessionId = `my-session-${Math.random()}`;
-
-      // run search
-      const searchRes1 = await supertest
-        .post(`/internal/search/ese`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          sessionId,
-          params: {
-            body: {
-              query: {
-                term: {
-                  agent: '1',
-                },
-              },
-            },
-            wait_for_completion_timeout: '1ms',
-          },
-        })
-        .expect(200);
-
-      const { id: id1 } = searchRes1.body;
-
-      // run search
-      const searchRes2 = await supertest
-        .post(`/internal/search/ese`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          sessionId,
-          params: {
-            body: {
-              query: {
-                match_all: {},
-              },
-            },
-            wait_for_completion_timeout: '1ms',
-          },
-        })
-        .expect(200);
-
-      const { id: id2 } = searchRes2.body;
-
-      await retry.waitFor('searches persisted into session', async () => {
-        const resp = await supertest
-          .get(`/internal/session/${sessionId}`)
-          .set('kbn-xsrf', 'foo')
-          .expect(200);
-
-        const { appId, name, touched, created, persisted, idMapping } = resp.body.attributes;
-        expect(persisted).to.be(false);
-        expect(name).to.be(undefined);
-        expect(appId).to.be(undefined);
-        expect(touched).not.to.be(undefined);
-        expect(created).not.to.be(undefined);
-
-        const idMappings = Object.values(idMapping).map((value: any) => value.id);
-        expect(idMappings).to.contain(id1);
-        expect(idMappings).to.contain(id2);
-        return true;
-      });
-    });
-
-    it('should complete session when searches complete', async () => {
+    it.skip('should complete session when searches complete', async () => {
       const sessionId = `my-session-${Math.random()}`;
 
       // run search
@@ -623,68 +560,7 @@ export default function ({ getService }: FtrProviderContext) {
         await spacesService.delete(spaceId);
       });
 
-      it('should complete and delete non-persistent sessions', async () => {
-        const sessionId = `my-session-${Math.random()}`;
-
-        // run search
-        const searchRes = await supertest
-          .post(`/s/${spaceId}/internal/search/ese`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            sessionId,
-            params: {
-              body: {
-                query: {
-                  term: {
-                    agent: '1',
-                  },
-                },
-              },
-              wait_for_completion_timeout: '1ms',
-            },
-          })
-          .expect(200);
-
-        const { id } = searchRes.body;
-
-        await retry.waitFor('searches persisted into session', async () => {
-          const resp = await supertest
-            .get(`/s/${spaceId}/internal/session/${sessionId}`)
-            .set('kbn-xsrf', 'foo')
-            .expect(200);
-
-          const { touched, created, persisted, idMapping } = resp.body.attributes;
-          expect(persisted).to.be(false);
-          expect(touched).not.to.be(undefined);
-          expect(created).not.to.be(undefined);
-
-          const idMappings = Object.values(idMapping).map((value: any) => value.id);
-          expect(idMappings).to.contain(id);
-          return true;
-        });
-
-        // not touched timeout in tests is 15s, wait to give a chance for status to update
-        await new Promise((resolve) =>
-          setTimeout(() => {
-            resolve(void 0);
-          }, 15_000)
-        );
-
-        await retry.waitForWithTimeout(
-          'searches eventually complete and session gets into the complete state',
-          30_000,
-          async () => {
-            await supertest
-              .get(`/s/${spaceId}/internal/session/${sessionId}`)
-              .set('kbn-xsrf', 'foo')
-              .expect(404);
-
-            return true;
-          }
-        );
-      });
-
-      it('should complete persisted session', async () => {
+      it.skip('should complete persisted session', async () => {
         const sessionId = `my-session-${Math.random()}`;
 
         // run search
