@@ -170,18 +170,6 @@ export class Vis<TVisParams = VisParams> {
         this.data.indexPattern = new DataView({
           spec: {
             id: state.data.savedSearchId ?? state.data.searchSource?.index,
-            title: i18n.translate('visualizations.fallbackDataView.label', {
-              defaultMessage: '{type} not found',
-              values: {
-                type: state.data.savedSearchId
-                  ? i18n.translate('visualizations.search.label', {
-                      defaultMessage: 'Search',
-                    })
-                  : i18n.translate('visualizations.dataView.label', {
-                      defaultMessage: 'Data view',
-                    }),
-              },
-            }),
           },
           fieldFormats: getFieldsFormats(),
         });
