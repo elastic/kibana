@@ -13,6 +13,7 @@ import {
   TLSFields,
   DataStream,
   ScheduleUnit,
+  SourceType,
   ThrottlingOptions,
 } from '../../../../common/runtime_types';
 import { SyntheticsProviders } from '../fleet_package/contexts';
@@ -85,6 +86,7 @@ export const EditMonitorConfig = ({ monitor, throttling }: Props) => {
         isZipUrlSourceEnabled: false,
         allowedScheduleUnits: [ScheduleUnit.MINUTES],
         runsOnService: true,
+        sourceType: monitor[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,
       }}
       httpDefaultValues={fullDefaultConfig[DataStream.HTTP]}
       tcpDefaultValues={fullDefaultConfig[DataStream.TCP]}

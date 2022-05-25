@@ -16,7 +16,12 @@ import {
 import { ml } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
 
-const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP];
+const categoryFieldTypes = [
+  ES_FIELD_TYPES.TEXT,
+  ES_FIELD_TYPES.KEYWORD,
+  ES_FIELD_TYPES.IP,
+  ES_FIELD_TYPES.VERSION,
+];
 
 class NewJobCapsService extends NewJobCapabilitiesServiceBase {
   private _catFields: Field[] = [];
