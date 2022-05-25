@@ -24,36 +24,6 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(204);
       });
 
-      it('createOnly should not allow us to create a role that already exists', async () => {
-        await es.security.putRole({
-          name: 'test_role',
-          body: {
-            cluster: ['monitor'],
-            indices: [
-              {
-                names: ['beats-*'],
-                privileges: ['write'],
-              },
-            ],
-            run_as: ['reporting_user'],
-          },
-        });
-
-        await supertest
-          .put('/api/security/role/test_role?createOnly=true')
-          .set('kbn-xsrf', 'xxx')
-          .send({})
-          .expect(409);
-      });
-
-      it('createOnly should not prevent us from creating a new role', async () => {
-        await supertest
-          .put('/api/security/role/new_role?createOnly=true')
-          .set('kbn-xsrf', 'xxx')
-          .send({})
-          .expect(204);
-      });
-
       it('should create a role with kibana and elasticsearch privileges', async () => {
         await supertest
           .put('/api/security/role/role_with_privileges')
@@ -148,6 +118,38 @@ export default function ({ getService }: FtrProviderContext) {
             },
           })
           .expect(basic ? 403 : 204);
+      });
+
+      describe('with the createOnly option enabled', () => {
+        it('should fail when role already exists', async () => {
+          await es.security.putRole({
+            name: 'test_role',
+            body: {
+              cluster: ['monitor'],
+              indices: [
+                {
+                  names: ['beats-*'],
+                  privileges: ['write'],
+                },
+              ],
+              run_as: ['reporting_user'],
+            },
+          });
+
+          await supertest
+            .put('/api/security/role/test_role?createOnly=true')
+            .set('kbn-xsrf', 'xxx')
+            .send({})
+            .expect(409);
+        });
+
+        it('should succeed when role does not exist', async () => {
+          await supertest
+            .put('/api/security/role/new_role?createOnly=true')
+            .set('kbn-xsrf', 'xxx')
+            .send({})
+            .expect(204);
+        });
       });
     });
 

@@ -518,7 +518,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
         data-test-subj={`roleFormSaveButton`}
         fill
         onClick={saveRole}
-        disabled={isRoleReserved}
+        disabled={isRoleReserved || creatingRoleAlreadyExists}
       >
         {saveText}
       </EuiButton>
@@ -548,6 +548,11 @@ export const EditRolePage: FunctionComponent<Props> = ({
       try {
         await rolesAPIClient.saveRole({ role, createOnly: !isEditingExistingRole });
       } catch (error) {
+        if (!isEditingExistingRole && error?.body?.statusCode === 409) {
+          setCreatingRoleAlreadyExists(true);
+          window.scroll({ top: 0, behavior: 'smooth' });
+          return;
+        }
         notifications.toasts.addDanger(
           error?.body?.message ??
             i18n.translate('xpack.security.management.editRole.errorSavingRoleError', {

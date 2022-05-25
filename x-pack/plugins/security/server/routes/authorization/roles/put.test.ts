@@ -275,9 +275,25 @@ describe('PUT role', () => {
       });
     });
 
-    describe('create only validation', () => {
-      putRoleTest(`creates conflict role`, {
-        name: 'conflict-role',
+    describe('with the create only option enabled', () => {
+      putRoleTest('should fail when role already esists', {
+        name: 'existing-role',
+        createOnly: true,
+        payload: {},
+        apiResponses: {
+          get: () => ({ 'existing-role': 'value-doesnt-matter' }),
+          put: () => {},
+        },
+        asserts: {
+          statusCode: 409,
+          result: {
+            message: 'Role already exists and cannot be created: existing-role',
+          },
+        },
+      });
+
+      putRoleTest(`should succeed when role does not exist`, {
+        name: 'new-role',
         createOnly: true,
         payload: {},
         apiResponses: {
@@ -287,18 +303,6 @@ describe('PUT role', () => {
         asserts: {
           statusCode: 204,
           result: undefined,
-        },
-      });
-
-      putRoleTest('returns conflict error', {
-        name: 'conflict-role',
-        createOnly: true,
-        payload: {},
-        asserts: {
-          statusCode: 409,
-          result: {
-            message: 'Role already exists and cannot be created: conflict-role',
-          },
         },
       });
     });

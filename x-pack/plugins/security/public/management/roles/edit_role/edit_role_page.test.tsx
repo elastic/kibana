@@ -366,92 +366,100 @@ describe('<EditRolePage />', () => {
     expectSaveFormButtons(wrapper);
   });
 
-  it('renders an error for exisitng role name in create mode', async () => {
-    const props = getProps({ action: 'edit' });
-    const wrapper = mountWithIntl(<EditRolePage {...props} />);
+  describe('in create mode', () => {
+    it('renders an error for exisitng role name', async () => {
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(<EditRolePage {...props} />);
 
-    await waitForRender(wrapper);
+      await waitForRender(wrapper);
 
-    const nameInput = wrapper.find('input[name="name"]');
-    nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
-    nameInput.simulate('blur');
+      const nameInput = wrapper.find('input[name="name"]');
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      nameInput.simulate('blur');
 
-    await waitForRender(wrapper);
+      await waitForRender(wrapper);
 
-    expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
-      error: 'A role with this name already exists.',
-      isInvalid: true,
-    });
-    expectSaveFormButtons(wrapper);
-  });
-
-  it('does not render an error for new role name in create mode', async () => {
-    const props = getProps({ action: 'edit' });
-    const wrapper = mountWithIntl(<EditRolePage {...props} />);
-
-    props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
-
-    await waitForRender(wrapper);
-
-    const nameInput = wrapper.find('input[name="name"]');
-    nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
-    nameInput.simulate('blur');
-
-    await waitForRender(wrapper);
-
-    expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
-      isInvalid: false,
-    });
-    expectSaveFormButtons(wrapper);
-  });
-
-  it('renders a notification on save of existing role name in create mode', async () => {
-    const props = getProps({ action: 'edit' });
-    const wrapper = mountWithIntl(<EditRolePage {...props} />);
-
-    props.rolesAPIClient.saveRole.mockRejectedValue({
-      body: { message: 'Role already exists and cannot be created: system_indices_superuser' },
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        error: 'A role with this name already exists.',
+        isInvalid: true,
+      });
+      expectSaveFormButtons(wrapper);
+      expect(wrapper.find('EuiButton[data-test-subj="roleFormSaveButton"]').props().disabled);
     });
 
-    await waitForRender(wrapper);
+    it('renders an error on save of existing role name', async () => {
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(<EditRolePage {...props} />);
 
-    const nameInput = wrapper.find('input[name="name"]');
-    const saveButton = wrapper.find('button[data-test-subj="roleFormSaveButton"]');
+      props.rolesAPIClient.saveRole.mockRejectedValue({
+        body: {
+          statusCode: 409,
+          message: 'Role already exists and cannot be created: system_indices_superuser',
+        },
+      });
 
-    nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
-    saveButton.simulate('click');
+      await waitForRender(wrapper);
 
-    await waitForRender(wrapper);
+      const nameInput = wrapper.find('input[name="name"]');
+      const saveButton = wrapper.find('button[data-test-subj="roleFormSaveButton"]');
 
-    expect(props.notifications.toasts.addDanger).toBeCalledTimes(1);
-    expect(props.notifications.toasts.addDanger.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          "Role already exists and cannot be created: system_indices_superuser",
-        ],
-      ]
-    `);
-    expectSaveFormButtons(wrapper);
-  });
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      saveButton.simulate('click');
 
-  it('does not render a notification on save of new role name in create mode', async () => {
-    const props = getProps({ action: 'edit' });
-    const wrapper = mountWithIntl(<EditRolePage {...props} />);
+      await waitForRender(wrapper);
 
-    props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        error: 'A role with this name already exists.',
+        isInvalid: true,
+      });
+      // A usual toast notification is not expected with this specific error
+      expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
+      expectSaveFormButtons(wrapper);
+      expect(wrapper.find('EuiButton[data-test-subj="roleFormSaveButton"]').props().disabled);
+    });
 
-    await waitForRender(wrapper);
+    it('does not render an error for new role name', async () => {
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(<EditRolePage {...props} />);
 
-    const nameInput = wrapper.find('input[name="name"]');
-    const saveButton = wrapper.find('button[data-test-subj="roleFormSaveButton"]');
+      props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
 
-    nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
-    saveButton.simulate('click');
+      await waitForRender(wrapper);
 
-    await waitForRender(wrapper);
+      const nameInput = wrapper.find('input[name="name"]');
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      nameInput.simulate('blur');
 
-    expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
-    expectSaveFormButtons(wrapper);
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        isInvalid: false,
+      });
+      expectSaveFormButtons(wrapper);
+    });
+
+    it('does not render a notification on save of new role name', async () => {
+      const props = getProps({ action: 'edit' });
+      const wrapper = mountWithIntl(<EditRolePage {...props} />);
+
+      props.rolesAPIClient.getRole.mockRejectedValue(new Error('not found'));
+
+      await waitForRender(wrapper);
+
+      const nameInput = wrapper.find('input[name="name"]');
+      const saveButton = wrapper.find('button[data-test-subj="roleFormSaveButton"]');
+
+      nameInput.simulate('change', { target: { value: 'system_indices_superuser' } });
+      saveButton.simulate('click');
+
+      await waitForRender(wrapper);
+
+      expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
+        isInvalid: false,
+      });
+      expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
+      expectSaveFormButtons(wrapper);
+    });
   });
 });
 

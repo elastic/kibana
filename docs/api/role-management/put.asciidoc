@@ -55,7 +55,7 @@ To use the create or update role API, you must have the `manage_security` cluste
 ==== Query parameters
 
 `createOnly`::
-  (Optional, boolean) When `true`, will disallow operation on an existing role.
+  (Optional, boolean) When `true`, will prevent overwriting the role if it already exists.
 
 [[role-management-api-put-response-codes]]
 ==== Response code

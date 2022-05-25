@@ -84,7 +84,7 @@ export function definePutRolesRoutes({
           });
         }
 
-        if (createOnly && Object.keys(rawRoles).length) {
+        if (createOnly && !!rawRoles[name]) {
           return response.conflict({
             body: {
               message: `Role already exists and cannot be created: ${name}`,
