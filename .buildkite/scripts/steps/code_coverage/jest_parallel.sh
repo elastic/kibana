@@ -44,10 +44,9 @@ while read -r config; do
   lastCode=$?
   set -e
 
-  penulitimate=target/kibana-coverage/jest/coverage-final.json
-  if [[ -f "$penultimate" ]]; then
-    echo "--- Rename $penulitimate to avoid overwrite && Clean Jest Coverage Paths"
-    mv $penulitimate "target/kibana-coverage/jest/coverage-$(date +%s%3N).json"
+  if [[ -f target/kibana-coverage/jest/coverage-final.json ]]; then
+    echo "--- Rename target/kibana-coverage/jest/coverage-final.json to avoid overwrite"
+    mv target/kibana-coverage/jest/coverage-final.json "target/kibana-coverage/jest/coverage-$(date +%s%3N).json"
   else
     echo "Cannot find coverage-final.json"
   fi
