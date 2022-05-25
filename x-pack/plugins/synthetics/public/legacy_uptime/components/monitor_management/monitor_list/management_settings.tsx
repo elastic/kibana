@@ -108,7 +108,7 @@ const GET_API_KEY_LABEL_DESCRIPTION = i18n.translate(
 );
 
 const GET_API_KEY_REDUCED_PERMISSIONS_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.getAPIKeyLabel.description',
+  'xpack.synthetics.monitorManagement.getAPIKeyReducedPermissions.description',
   {
     defaultMessage:
       'Use an API key to push monitors remotely from a CLI or CD pipeline. To generate an API key, you must have permissions to manage API keys and Uptime write access. Please contact your administrator.',
