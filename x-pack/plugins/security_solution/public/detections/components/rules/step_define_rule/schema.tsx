@@ -77,6 +77,7 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
+  eqlOptions: {},
   queryBar: {
     validations: [
       {
@@ -174,6 +175,34 @@ export const schema: FormSchema<DefineStepRule> = {
         },
       },
     ],
+  },
+  relatedIntegrations: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsLabel',
+      {
+        defaultMessage: 'Related integrations',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRelatedIntegrationsHelpText',
+      {
+        defaultMessage: 'Integration related to this Rule.',
+      }
+    ),
+  },
+  requiredFields: {
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRequiredFieldsLabel',
+      {
+        defaultMessage: 'Required fields',
+      }
+    ),
+    helpText: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldRequiredFieldsHelpText',
+      {
+        defaultMessage: 'Fields required for this Rule to function.',
+      }
+    ),
   },
   timeline: {
     label: i18n.translate(
