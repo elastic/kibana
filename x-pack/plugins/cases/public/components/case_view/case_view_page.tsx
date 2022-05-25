@@ -111,7 +111,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             if (isStale || isLoading || isLoadingMetrics || isLoadingUserActions) {
               return;
             }
-            await Promise.all([fetchCase(), fetchCaseMetrics(true), refetchCaseUserActions()]);
+            await Promise.all([fetchCase(true), fetchCaseMetrics(true), refetchCaseUserActions()]);
           },
         };
         return () => {
