@@ -41,6 +41,7 @@ header() {
 fileHeads() {
   local fileName=$1
   local dir=$2
+  local ext=${3:-'*.json'}
 
   header "$fileName"
 
@@ -48,7 +49,7 @@ fileHeads() {
     printf "\n### BEGIN %s\n\n" "$x" >>"$fileName"
     head -2 "$x" >>"$fileName"
     printf "\n### END %s\n\n" "$x" >>"$fileName"
-  done <<<"$(find "$dir" -maxdepth 1 -type f -name '*.json')"
+  done <<<"$(find "$dir" -maxdepth 1 -type f -name "$ext")"
 
   buildkite-agent artifact upload "$fileName"
 

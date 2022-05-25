@@ -29,7 +29,7 @@ echo "--- Download coverage artifacts"
 buildkite-agent artifact download target/kibana-coverage/jest/* .
 buildkite-agent artifact download target/kibana-coverage/functional/* .
 buildkite-agent artifact download target/ran_files/* .
-fileHeads "target/file-heads-ran-files.txt" target/ran_files
+fileHeads "target/file-heads-ran-files.txt" target/ran_files '*.txt'
 dirListing target/dir-listing-jest.txt target/kibana-coverage/jest
 dirListing target/dir-listing-functional.txt target/kibana-coverage/functional
 
