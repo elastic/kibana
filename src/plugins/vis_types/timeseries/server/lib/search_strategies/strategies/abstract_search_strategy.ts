@@ -9,8 +9,6 @@ import { tap } from 'rxjs/operators';
 import { omit } from 'lodash';
 import type { Observable } from 'rxjs';
 import { DataViewsService } from '@kbn/data-views-plugin/common';
-// @ts-expect-error
-import { setMaxListeners } from 'events';
 import { toSanitizedFieldType } from '../../../../common/fields_utils';
 
 import type { FetchedIndexPattern, TrackedEsSearches } from '../../../../common/types';
@@ -47,12 +45,10 @@ export abstract class AbstractSearchStrategy {
 
     // User may abort the request without waiting for the results
     // we need to handle this scenario by aborting underlying server requests
-    const abortSignal = getRequestAbortedSignal(req.events.aborted$);
     const searchContext = await requestContext.search;
 
-    // Each search will attach 3 listeners to the abort signal - setting limit accordingly to catch memory leaks in case too many listeners are attached.
-    setMaxListeners(esRequests.length * 3, abortSignal);
     esRequests.forEach(({ body, index, trackingEsSearchMeta }) => {
+      const abortSignal = getRequestAbortedSignal(req.events.aborted$);
       const startTime = Date.now();
       requests.push(
         searchContext
