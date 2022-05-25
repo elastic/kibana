@@ -38,7 +38,7 @@ The API returns a list of data views:
 [source,sh]
 --------------------------------------------------
 {
-    "data_views": [
+    "data_view": [
         {
             "id": "e9e024f0-d098-11ec-bbe9-c753adcb34bc",
             "namespaces": [
