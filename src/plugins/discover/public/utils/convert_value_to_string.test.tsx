@@ -24,7 +24,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('["abcd1"]');
+    expect(result).toBe('abcd1');
   });
 
   it('should convert a text value to text', () => {
@@ -40,8 +40,10 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('["Hi there! I am a sample string."]');
+    expect(result).toBe('Hi there! I am a sample string.');
   });
+
+  // TODO: add a test for a multiline text
 
   it('should convert a number value to text', () => {
     const result = convertValueToString({
@@ -56,7 +58,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('[10.99]');
+    expect(result).toBe('10.99');
   });
 
   it('should convert a date value to text', () => {
@@ -72,7 +74,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('["2015-01-01T12:10:30.000Z"]');
+    expect(result).toBe('2015-01-01T12:10:30.000Z');
   });
 
   it('should convert a boolean value to text', () => {
@@ -88,7 +90,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('[false]');
+    expect(result).toBe('false');
   });
 
   it('should convert a binary value to text', () => {
@@ -104,7 +106,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('["U29tZSBiaW5hcnkgYmxvYg=="]');
+    expect(result).toBe('"U29tZSBiaW5hcnkgYmxvYg=="');
   });
 
   it('should convert an object value to text', () => {
@@ -120,7 +122,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('["John"]');
+    expect(result).toBe('John');
   });
 
   it('should convert a nested value to text', () => {
@@ -137,7 +139,7 @@ describe('convertValueToString', () => {
     });
 
     expect(result).toBe(
-      '[{"last":["Smith"],"last.keyword":["Smith"],"first":["John"],"first.keyword":["John"]},{"last":["White"],"last.keyword":["White"],"first":["Alice"],"first.keyword":["Alice"]}]'
+      '{"last":["Smith"],"last.keyword":["Smith"],"first":["John"],"first.keyword":["John"]}, {"last":["White"],"last.keyword":["White"],"first":["Alice"],"first.keyword":["Alice"]}'
     );
   });
 
@@ -154,7 +156,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('[{"release":["v1.2.5","v1.3.0"],"priority":"urgent"}]');
+    expect(result).toBe('{"release":["v1.2.5","v1.3.0"],"priority":"urgent"}');
   });
 
   it('should convert a range value to text', () => {
@@ -170,7 +172,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('[{"gte":"2015-10-31 12:00:00","lte":"2015-11-01 00:00:00"}]');
+    expect(result).toBe('{"gte":"2015-10-31 12:00:00","lte":"2015-11-01 00:00:00"}');
   });
 
   it('should convert a IP value to text', () => {
@@ -186,7 +188,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('["192.168.1.1"]');
+    expect(result).toBe('192.168.1.1');
   });
 
   it('should convert a version value to text', () => {
@@ -202,7 +204,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('["1.2.3"]');
+    expect(result).toBe('1.2.3');
   });
 
   it('should convert a vector value to text', () => {
@@ -218,7 +220,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('[0.5,10,6]');
+    expect(result).toBe('0.5, 10, 6');
   });
 
   it('should convert a geo point value to text', () => {
@@ -234,7 +236,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('[{"coordinates":[-71.34,41.12],"type":"Point"}]');
+    expect(result).toBe('{"coordinates":[-71.34,41.12],"type":"Point"}');
   });
 
   it('should convert a geo point object value to text', () => {
@@ -250,7 +252,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('[{"coordinates":[-71.34,41.12],"type":"Point"}]');
+    expect(result).toBe('{"coordinates":[-71.34,41.12],"type":"Point"}');
   });
 
   it('should convert an array value to text', () => {
@@ -266,7 +268,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('["elasticsearch","wow"]');
+    expect(result).toBe('elasticsearch, wow');
   });
 
   it('should convert a runtime value to text', () => {
@@ -282,7 +284,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('[5.5]');
+    expect(result).toBe('5.5');
   });
 
   it('should convert a scripted value to text', () => {
@@ -298,7 +300,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('["hi there"]');
+    expect(result).toBe('hi there');
   });
 
   it('should return an empty string and not fail', () => {

@@ -17,7 +17,7 @@ export type FieldFormatsContentType = 'html' | 'text';
  */
 export interface HtmlContextTypeOptions {
   field?: { name: string };
-  hit?: { highlight: Record<string, string[]> };
+  hit?: { highlight?: Record<string, string[]> };
 }
 
 /**
@@ -30,7 +30,8 @@ export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptio
  * Plain text converter options
  * @remark
  */
-interface TextContextTypeOptions {
+export interface TextContextTypeOptions {
+  field?: { name: string };
   flat?: boolean;
 }
 

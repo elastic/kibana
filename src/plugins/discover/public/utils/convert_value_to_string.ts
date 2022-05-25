@@ -34,28 +34,40 @@ export const convertValueToString = ({
   const rowFlattened = rowsFlattened[rowIndex];
   const field = dataView.fields.getByName(columnId);
   const value = rowFlattened[columnId];
-  const valArr = Array.isArray(value) ? value : [value];
+  const valuesArray = Array.isArray(value) ? value : [value];
+  const disableMultiline = options?.allowMultiline === false;
 
   const stringify = (val: object) => {
-    return (
-      (options?.allowMultiline === false ? JSON.stringify(val) : JSON.stringify(val, null, 2)) || ''
-    );
+    return disableMultiline ? JSON.stringify(val) : JSON.stringify(val, null, 2);
   };
 
-  const formattedValue =
-    field?.type === '_source'
-      ? rowFlattened
-      : valArr
-          .map((v) =>
-            field?.type === 'unknown' || !field?.type
-              ? stringify(v)
-              : formatFieldValue(v, rows[rowIndex], fieldFormats, dataView, field, 'text')
-          )
-          .join(', ');
-
-  if (typeof formattedValue === 'string') {
-    return formattedValue;
+  if (field?.type === '_source') {
+    return stringify(rowFlattened);
   }
 
-  return stringify(formatFieldValue);
+  const formatted = valuesArray
+    .map((subValue) => {
+      if (!field?.type || field?.type === 'unknown') {
+        return stringify(subValue);
+      }
+
+      const formattedValue = formatFieldValue(
+        subValue,
+        rows[rowIndex],
+        fieldFormats,
+        dataView,
+        field,
+        {
+          contentType: 'text',
+          textOptions: {
+            flat: disableMultiline,
+          },
+        }
+      );
+
+      return typeof formattedValue === 'string' ? formattedValue : stringify(formattedValue);
+    })
+    .join(', ');
+
+  return formatted;
 };

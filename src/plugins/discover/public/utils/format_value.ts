@@ -18,8 +18,10 @@ import { FieldFormatsContentType } from '@kbn/field-formats-plugin/common/types'
  *
  * @param value The value to format
  * @param hit The actual search hit (required to get highlight information from)
+ * @param fieldFormats Field formatters
  * @param dataView The data view if available
  * @param field The field that value was from if available
+ * @param options Options for converter
  * @returns An sanitized HTML string, that is safe to be applied via dangerouslySetInnerHTML
  */
 export function formatFieldValue(
@@ -28,18 +30,29 @@ export function formatFieldValue(
   fieldFormats: FieldFormatsStart,
   dataView?: DataView,
   field?: DataViewField,
-  contentType?: FieldFormatsContentType | undefined
+  options?: {
+    contentType?: FieldFormatsContentType;
+    textOptions?: {
+      flat?: boolean;
+    };
+  }
 ): string {
-  const usedContentType = contentType ?? 'html';
-  const flat = contentType === 'text';
+  const usedContentType = options?.contentType ?? 'html';
+  const flat = options?.textOptions?.flat ?? false;
+  const converterOptions = {
+    hit,
+    field,
+    flat,
+  };
+
   if (!dataView || !field) {
     // If either no field is available or no data view, we'll use the default
     // string formatter to format that field.
     return fieldFormats
       .getDefaultInstance(KBN_FIELD_TYPES.STRING)
-      .convert(value, usedContentType, { hit, field, flat });
+      .convert(value, usedContentType, converterOptions);
   }
 
   // If we have a data view and field we use that fields field formatter
-  return dataView.getFormatterForField(field).convert(value, usedContentType, { hit, field, flat });
+  return dataView.getFormatterForField(field).convert(value, usedContentType, converterOptions);
 }
