@@ -6,7 +6,14 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiDescriptionList,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CommandDefinition } from '../types';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
@@ -34,20 +41,26 @@ export const CommandList = memo<CommandListProps>(({ commands }) => {
 
   return (
     <>
-      <EuiFlexGroup wrap gutterSize="xs" data-test-subj={getTestId('commandList')}>
+      <EuiFlexGroup
+        wrap={false}
+        gutterSize="xs"
+        direction="column"
+        data-test-subj={getTestId('commandList')}
+      >
         {commands.map(({ name, about }) => {
           return (
-            <EuiFlexItem grow={2} style={{ flexBasis: '20%' }} key={name}>
+            <EuiFlexItem grow={2} key={name}>
               <EuiDescriptionList
                 compressed
-                listItems={[{ title: name, description: about }]}
+                listItems={[{ title: <EuiBadge>{name}</EuiBadge>, description: about }]}
                 data-test-subj={getTestId('commandList-command')}
               />
             </EuiFlexItem>
           );
         })}
       </EuiFlexGroup>
-      <EuiText>{footerMessage}</EuiText>
+      <EuiSpacer />
+      <EuiText size="s">{footerMessage}</EuiText>
     </>
   );
 });

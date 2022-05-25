@@ -7,7 +7,7 @@
 
 import React, { memo, PropsWithChildren, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiCode, EuiText } from '@elastic/eui';
 import { UnsupportedMessageCallout } from './unsupported_message_callout';
 import { ParsedCommandInput } from '../service/parsed_command_input';
 import { CommandDefinition, CommandExecutionComponentProps } from '../types';
@@ -49,8 +49,6 @@ export const BadArgument = memo<CommandExecutionComponentProps>(({ command, setS
             id="xpack.securitySolution.console.unknownCommand.helpMessage"
             defaultMessage="Type {helpCmd} for assistance."
             values={{
-              userInput: <EuiCode>{command.input}</EuiCode>,
-              helpIcon: <EuiIcon type="help" />,
               helpCmd: <EuiCode>{`${command.commandDefinition.name} --help`}</EuiCode>,
             }}
           />
