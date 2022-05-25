@@ -111,7 +111,7 @@ export const esHitsComplex = [
         },
       ],
       binary_blob: ['U29tZSBiaW5hcnkgYmxvYg=='],
-      text_message: ['*&%$#@'],
+      text_message: ["I'm multiline\n*&%$#@"],
       keyword_key: ['abcd2'],
       'object_user.first': ['Jane'],
       'array_objects.name': ['elastic_list'],

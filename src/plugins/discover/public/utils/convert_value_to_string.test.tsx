@@ -43,7 +43,21 @@ describe('convertValueToString', () => {
     expect(result).toBe('Hi there! I am a sample string.');
   });
 
-  // TODO: add a test for a multiline text
+  it('should convert a multiline text value to text', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      rowsFlattened: discoverGridContextComplexMock.rowsFlattened,
+      dataView: discoverGridContextComplexMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'text_message',
+      rowIndex: 1,
+      options: {
+        allowMultiline: false,
+      },
+    });
+
+    expect(result).toBe('"I\'m multiline\\n*&%$#@"');
+  });
 
   it('should convert a number value to text', () => {
     const result = convertValueToString({

@@ -38,6 +38,7 @@ export const convertValueToString = ({
   const disableMultiline = options?.allowMultiline === false;
 
   const stringify = (val: object | string) => {
+    // it will wrap "strings" with quotes
     return disableMultiline ? JSON.stringify(val) : JSON.stringify(val, null, 2);
   };
 
@@ -60,7 +61,7 @@ export const convertValueToString = ({
       );
 
       if (typeof formattedValue !== 'string' || typeof subValue === 'string') {
-        return stringify(formattedValue);
+        return stringify(formattedValue) || '';
       }
 
       return formattedValue;
