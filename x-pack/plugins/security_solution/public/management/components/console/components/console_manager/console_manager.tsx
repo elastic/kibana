@@ -14,7 +14,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { ConsolePopup } from './components/console_popup';
+import { ResponderOverlay } from './components/responder_overlay';
 import {
   ConsoleManagerClient,
   ConsoleRegistrationInterface,
@@ -242,15 +242,15 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     return Object.values(consoleStorage).find((managedConsole) => managedConsole.isOpen);
   }, [consoleStorage]);
 
-  const handleOnTerminate = useCallback(() => {
-    if (visibleConsole) {
-      consoleManagerClient.terminate(visibleConsole.client.id);
-    }
-  }, [consoleManagerClient, visibleConsole]);
+  // const handleOnTerminate = useCallback(() => {
+  //   if (visibleConsole) {
+  //     consoleManagerClient.terminate(visibleConsole.client.id);
+  //   }
+  // }, [consoleManagerClient, visibleConsole]);
 
   const handleOnHide = useCallback(() => {
     if (visibleConsole) {
-      consoleManagerClient.hide(visibleConsole.client.id);
+      consoleManagerClient.hide(visibleConsole.cl1ient.id);
     }
   }, [consoleManagerClient, visibleConsole]);
 
@@ -262,14 +262,20 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     <ConsoleManagerContext.Provider value={consoleManageContextClients}>
       {children}
 
-      <ConsolePopup
-        title={visibleConsole?.client.title}
-        isHidden={!visibleConsole}
-        onTerminate={handleOnTerminate}
+      {/* <ConsolePopup*/}
+      {/*  title={visibleConsole?.client.title}*/}
+      {/*  isHidden={!visibleConsole}*/}
+      {/*  onTerminate={handleOnTerminate}*/}
+      {/*  onHide={handleOnHide}*/}
+      {/* >*/}
+      {/*  {runningConsoles}*/}
+      {/* </ConsolePopup>*/}
+
+      <ResponderOverlay
         onHide={handleOnHide}
-      >
-        {runningConsoles}
-      </ConsolePopup>
+        runningConsoles={runningConsoles}
+        isHidden={!visibleConsole}
+      />
     </ConsoleManagerContext.Provider>
   );
 });
