@@ -33,6 +33,7 @@ export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptio
  */
 export interface TextContextTypeOptions {
   skipFormattingInStringifiedJSON?: boolean;
+  timezone?: string;
 }
 
 /**
