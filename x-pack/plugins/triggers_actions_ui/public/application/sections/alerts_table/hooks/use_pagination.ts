@@ -26,7 +26,7 @@ export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationP
     pageIndex,
     pageSize,
   });
-  const [flyoutAlertIndex, setFlyoutAlertIndex] = useState<number>(0);
+  const [flyoutAlertIndex, setFlyoutAlertIndex] = useState<number>(-1);
   const onChangePageSize = useCallback(
     (_pageSize) => {
       setPagination((state) => ({
@@ -54,22 +54,15 @@ export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationP
           return 0;
         }
         const actualPageIndex = pagination.pageSize * pagination.pageIndex + prevFlyoutAlertIndex;
-        let tempAlertIdx = actualPageIndex;
-        if (nextPageIndex > actualPageIndex) {
-          const idxToAdd = nextPageIndex - actualPageIndex;
-          tempAlertIdx = actualPageIndex + idxToAdd;
-        } else if (nextPageIndex < actualPageIndex) {
-          const idxToSub = actualPageIndex - nextPageIndex;
-          tempAlertIdx = actualPageIndex - idxToSub;
-        } else {
-          tempAlertIdx = 0;
+        if (nextPageIndex === actualPageIndex) {
+          return prevFlyoutAlertIndex;
         }
-        const newPageIndex = Math.floor(tempAlertIdx / pagination.pageSize);
-        const newAlertIndex =
-          tempAlertIdx >= pagination.pageSize * newPageIndex
-            ? tempAlertIdx - pagination.pageSize * newPageIndex
-            : tempAlertIdx;
 
+        const newPageIndex = Math.floor(nextPageIndex / pagination.pageSize);
+        const newAlertIndex =
+          nextPageIndex >= pagination.pageSize * newPageIndex
+            ? nextPageIndex - pagination.pageSize * newPageIndex
+            : nextPageIndex;
         onChangePageIndex(newPageIndex);
         return newAlertIndex;
       });
