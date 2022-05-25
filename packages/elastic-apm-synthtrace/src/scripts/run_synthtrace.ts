@@ -109,7 +109,13 @@ function options(y: Argv) {
         'Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format',
       string: true,
     })
-
+    .option('streamProcessors', {
+      describe:
+        'Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format',
+      string: true,
+      array: true,
+      alias: 'p',
+    })
     .conflicts('target', 'cloudId')
     .conflicts('kibana', 'cloudId')
     .conflicts('local', 'target')
@@ -187,8 +193,22 @@ yargs(process.argv.slice(2))
       if (runOptions.cloudId && runOptions.numShards && runOptions.numShards > 0) {
         await apmEsClient.updateComponentTemplates(runOptions.numShards);
       }
-
-      const aggregators: StreamAggregator[] = [new ServiceLatencyAggregator()];
+      const aggregators: StreamAggregator[] = [];
+      const registry = new Map<string, () => StreamAggregator[]>([
+        ['service', () => [new ServiceLatencyAggregator()]],
+      ]);
+      if (runOptions.streamProcessors && runOptions.streamProcessors.length > 0) {
+        for (const processorName of runOptions.streamProcessors) {
+          const factory = registry.get(processorName);
+          if (factory) {
+            aggregators.push(...factory());
+          } else {
+            throw new Error(
+              `No processor named ${processorName} configured on known processor registry`
+            );
+          }
+        }
+      }
       if (argv.clean) {
         await apmEsClient.clean(aggregators.map((a) => a.getDataStreamName() + '-*'));
       }
