@@ -1503,10 +1503,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@55.1.3":
-  version "55.1.3"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-55.1.3.tgz#976142b88156caab2ce896102a1e35fecdaa2647"
-  integrity sha512-Hf6eN9YKOKAQMMS9OV5pHLUkzpKKAxGYNVSfc/KK7hN9BlhlHH4OaZIQP3Psgf5GKoqhZrldT/N65hujk3rlLA==
+"@elastic/eui@55.1.4":
+  version "55.1.4"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-55.1.4.tgz#c056aea2467d3ad4bbc2b9ad3156957d7e84a2e6"
+  integrity sha512-K8KBQa+esI+pILsUxUvKdQZ/ruB7SV/IXN3nE4TTyZ7sfzuIV0rkxg2g3+dmXmUP73PkQOI/THpFuUiiippmvQ==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -2892,6 +2892,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/aiops-utils@link:bazel-bin/packages/kbn-aiops-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerts@link:bazel-bin/packages/kbn-alerts":
   version "0.0.0"
   uid ""
@@ -3219,7 +3223,6 @@
 "@kbn/shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data":
   version "0.0.0"
   uid ""
-
 
 "@kbn/shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views":
   version "0.0.0"
@@ -6146,6 +6149,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__aiops-utils@link:bazel-bin/packages/kbn-aiops-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__alerts@link:bazel-bin/packages/kbn-alerts/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6433,7 +6440,6 @@
 "@types/kbn__shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/npm_module_types":
   version "0.0.0"
   uid ""
-
 
 "@types/kbn__shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/npm_module_types":
   version "0.0.0"

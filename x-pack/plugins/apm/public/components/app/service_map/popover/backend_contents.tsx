@@ -12,6 +12,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import React from 'react';
 import { useUiTracker } from '@kbn/observability-plugin/public';
 import { NodeDataDefinition } from 'cytoscape';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { ContentsProps } from '.';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
@@ -56,7 +57,10 @@ export function BackendContents({
               environment,
               start,
               end,
-              offset: comparisonEnabled ? offset : undefined,
+              offset:
+                comparisonEnabled && isTimeComparison(offset)
+                  ? offset
+                  : undefined,
             },
           },
         });
