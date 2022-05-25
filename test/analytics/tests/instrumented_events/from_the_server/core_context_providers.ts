@@ -14,7 +14,8 @@ export default function ({ getService }: FtrProviderContext) {
   const deployment = getService('deployment');
   const ebtServerHelper = getService('kibana_ebt_server');
 
-  describe('Core Context Providers', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/132931
+  describe.skip('Core Context Providers', () => {
     let event: Event;
     before(async () => {
       // Wait for the 2nd "status_changed" event. At that point all the context providers should be set up.
