@@ -37,7 +37,7 @@ describe('Service overview - aws lambda', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   it('displays a cold start rate chart and not a transaction breakdown chart', () => {

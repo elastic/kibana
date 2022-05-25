@@ -16,22 +16,25 @@ To access an Elasticsearch instance that has live data you have three options:
 **Start Elasticsearch & Kibana**
 
 Elasticsearch:
+
 ```
 yarn es snapshot
 ```
+
 Kibana:
+
 ```
 yarn start
 ```
 
-
 **Run Synthtrace**
+
 ```
 node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts \
   --local
 ```
 
-The `--local` flag is a shortcut to specifying `--target` and `--kibana`.  It autodiscovers the current kibana basepath and installs the appropiate APM package.
+The `--local` flag is a shortcut to specifying `--target` and `--kibana`. It autodiscovers the current kibana basepath and installs the appropiate APM package.
 
 **Connect Kibana to ES**
 Update `config/kibana.dev.yml` with:
@@ -61,7 +64,9 @@ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-syntht
 ## 3. Local ES Cluster
 
 ### Start Elasticsearch and APM data generators
+
 _Docker Compose is required_
+
 ```
 git clone git@github.com:elastic/apm-integration-testing.git
 cd apm-integration-testing/
@@ -80,16 +85,16 @@ elasticsearch.password: changeme
 
 # Setup default APM users
 
-APM behaves differently depending on which the role and permissions a logged in user has. To create the users run:
+APM behaves differently depending on which role and permissions a logged in user has. To create APM users run:
 
 ```sh
-node x-pack/plugins/apm/scripts/create_apm_users_and_roles.js --username admin --password changeme --kibana-url http://localhost:5601 --role-suffix <github-username-or-something-unique>
+node x-pack/plugins/apm/scripts/create_apm_users.js --username admin --password changeme --kibana-url http://localhost:5601
 ```
 
 This will create:
 
- - **apm_read_user**: Read only user
- - **apm_power_user**: Read+write user.
+- **viewer_user**: User with `viewer` role (read-only)
+- **editor_user**: User with `editor` role (read/write)
 
 # Debugging Elasticsearch queries
 

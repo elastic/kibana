@@ -72,7 +72,7 @@ describe('Agent configuration', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsPowerUser();
+    cy.loginAsEditorUser();
     cy.visit(agentConfigHref);
   });
 

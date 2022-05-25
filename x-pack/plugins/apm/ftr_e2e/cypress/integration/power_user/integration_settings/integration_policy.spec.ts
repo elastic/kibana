@@ -56,7 +56,7 @@ describe('when navigating to integration page', () => {
   beforeEach(() => {
     const integrationsPath = '/app/integrations/browse';
 
-    cy.loginAsPowerUser();
+    cy.loginAsEditorUser();
     cy.visit(integrationsPath);
 
     // open integration policy form

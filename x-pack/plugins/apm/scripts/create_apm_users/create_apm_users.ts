@@ -6,9 +6,6 @@
  */
 
 import { AbortError, callKibana } from './helpers/call_kibana';
-import { createRole } from './helpers/create_role';
-import { powerUserRole } from './roles/power_user_role';
-import { readOnlyUserRole } from './roles/read_only_user_role';
 import { createOrUpdateUser } from './helpers/create_or_update_user';
 
 export interface Elasticsearch {
@@ -17,11 +14,10 @@ export interface Elasticsearch {
 }
 
 export interface Kibana {
-  roleSuffix: string;
   hostname: string;
 }
 
-export async function createApmAndObsUsersAndRoles({
+export async function createApmUsers({
   kibana,
   elasticsearch,
 }: {
@@ -44,26 +40,10 @@ export async function createApmAndObsUsersAndRoles({
     throw new AbortError('Security must be enabled!');
   }
 
-  const KIBANA_READ_ROLE = `kibana_read_${kibana.roleSuffix}`;
-  const KIBANA_POWER_ROLE = `kibana_power_${kibana.roleSuffix}`;
-
-  // roles definition
-  const roles = [
-    { roleName: KIBANA_READ_ROLE, role: readOnlyUserRole },
-    { roleName: KIBANA_POWER_ROLE, role: powerUserRole },
-  ];
-
-  // create roles
-  await Promise.all(
-    roles.map(async (role) => createRole({ elasticsearch, kibana, ...role }))
-  );
-
   // user definitions
   const users = [
-    { username: 'apm_read_user', roles: [KIBANA_READ_ROLE] },
-    { username: 'apm_power_user', roles: [KIBANA_POWER_ROLE] },
-    { username: 'obs_read_user', roles: [KIBANA_READ_ROLE] },
-    { username: 'obs_admin_user', roles: [KIBANA_POWER_ROLE] },
+    { username: 'viewer_user', roles: ['viewer'] },
+    { username: 'editor_user', roles: ['editor'] },
   ];
 
   // create users

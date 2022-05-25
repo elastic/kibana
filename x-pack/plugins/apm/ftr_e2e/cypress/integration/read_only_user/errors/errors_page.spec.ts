@@ -25,7 +25,7 @@ const nodeServiceErrorsPageHref = url.format({
 
 describe('Errors page', () => {
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   describe('when data is loaded', () => {

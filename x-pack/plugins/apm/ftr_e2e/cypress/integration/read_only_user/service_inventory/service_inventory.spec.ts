@@ -44,7 +44,7 @@ const mainAliasNames = mainApiRequestsToIntercept.map(
 
 describe('When navigating to the service inventory', () => {
   before(async () => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
     cy.visit(serviceInventoryHref);
 
     const { rangeFrom, rangeTo } = timeRange;
@@ -90,7 +90,7 @@ describe('When navigating to the service inventory', () => {
         }
       );
 
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(serviceInventoryHref);
     });
 

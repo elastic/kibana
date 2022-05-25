@@ -32,7 +32,7 @@ describe('Infrastracture feature flag', () => {
   });
 
   beforeEach(() => {
-    cy.loginAsPowerUser();
+    cy.loginAsEditorUser();
   });
 
   describe('when infrastracture feature is disabled', () => {

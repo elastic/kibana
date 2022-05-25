@@ -9,14 +9,13 @@
 
 import { argv } from 'yargs';
 import { AbortError, isAxiosError } from './helpers/call_kibana';
-import { createApmAndObsUsersAndRoles } from './create_apm_users_and_roles';
+import { createApmUsers } from './create_apm_users';
 import { getKibanaVersion } from './helpers/get_version';
 
 async function init() {
   const esUserName = (argv.username as string) || 'elastic';
   const esPassword = argv.password as string | undefined;
   const kibanaBaseUrl = argv.kibanaUrl as string | undefined;
-  const kibanaRoleSuffix = argv.roleSuffix as string | undefined;
 
   if (!esPassword) {
     console.error(
@@ -42,14 +41,7 @@ async function init() {
     process.exit();
   }
 
-  if (!kibanaRoleSuffix) {
-    console.error(
-      'Please specify a unique suffix that will be added to your roles with `--role-suffix <suffix>` '
-    );
-    process.exit();
-  }
-
-  const kibana = { roleSuffix: kibanaRoleSuffix, hostname: kibanaBaseUrl };
+  const kibana = { hostname: kibanaBaseUrl };
   const elasticsearch = { username: esUserName, password: esPassword };
 
   console.log({ kibana, elasticsearch });
@@ -57,7 +49,7 @@ async function init() {
   const version = await getKibanaVersion({ elasticsearch, kibana });
   console.log(`Connected to Kibana ${version}`);
 
-  const users = await createApmAndObsUsersAndRoles({ elasticsearch, kibana });
+  const users = await createApmUsers({ elasticsearch, kibana });
   const credentials = users
     .map((u) => ` - ${u.username} / ${esPassword}`)
     .join('\n');
