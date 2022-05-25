@@ -46,6 +46,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
   const [yaml, setYaml] = useState<any | undefined>('');
   const link = docLinks.links.fleet.troubleshooting;
   const [commandCopied, setCommandCopied] = useState(false);
+  const [policyCopied, setPolicyCopied] = useState(false);
   const [fullAgentPolicy, setFullAgentPolicy] = useState<FullAgentPolicy | undefined>();
 
   useEffect(() => {
@@ -105,7 +106,8 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
       selectedPolicyId: agentPolicy?.id,
       yaml,
       downloadLink,
-      isComplete: commandCopied,
+      isComplete: policyCopied,
+      onCopy: () => setPolicyCopied(true),
     }),
     InstallStandaloneAgentStep({
       installCommand: installManagedCommands,
