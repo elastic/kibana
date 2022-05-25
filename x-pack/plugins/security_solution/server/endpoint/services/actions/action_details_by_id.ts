@@ -6,8 +6,15 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { getActionCompletionInfo, mapToNormalizedActionRequest } from './utils';
+
 import {
+  categorizeActionResults,
+  categorizeResponseResults,
+  getActionCompletionInfo,
+  getUniqueLogData,
+  mapToNormalizedActionRequest,
+} from './utils';
+import type {
   ActionDetails,
   ActivityLogAction,
   ActivityLogActionResponse,
@@ -18,17 +25,14 @@ import {
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
+import { catchAndWrapError } from '../../utils';
+import { EndpointError } from '../../../../common/endpoint/errors';
+import { NotFoundError } from '../../errors';
 import {
   ACTION_REQUEST_INDICES,
   ACTION_RESPONSE_INDICES,
-  catchAndWrapError,
-  categorizeActionResults,
-  categorizeResponseResults,
-  getUniqueLogData,
-} from '../../utils';
-import { EndpointError } from '../../../../common/endpoint/errors';
-import { NotFoundError } from '../../errors';
-import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
+  ACTIONS_SEARCH_PAGE_SIZE,
+} from './constants';
 
 export const getActionDetailsById = async (
   esClient: ElasticsearchClient,

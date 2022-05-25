@@ -13,6 +13,7 @@ import { BaseDataGenerator } from './base_data_generator';
 import {
   ActionDetails,
   ActivityLogItemTypes,
+  EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
   EndpointPendingActions,
   ISOLATION_ACTIONS,
@@ -179,6 +180,21 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     };
 
     return merge(details, overrides);
+  }
+
+  generateActivityLogAction(
+    overrides: DeepPartial<EndpointActivityLogAction>
+  ): EndpointActivityLogAction {
+    return merge(
+      {
+        type: ActivityLogItemTypes.ACTION,
+        item: {
+          id: this.seededUUIDv4(),
+          data: this.generate(),
+        },
+      },
+      overrides
+    );
   }
 
   generateActivityLogActionResponse(

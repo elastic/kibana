@@ -48,3 +48,24 @@ export const ActionDetailsRequestSchema = {
     action_id: schema.string(),
   }),
 };
+
+export const AgentsActionsLogRequestSchema = {
+  query: schema.object({
+    action_types: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 10 })
+    ),
+    page: schema.number({ defaultValue: 1, min: 1 }),
+    page_size: schema.number({ defaultValue: 10, min: 1, max: 100 }),
+    start_date: schema.string(),
+    end_date: schema.string(),
+    user_ids: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 20 })
+    ),
+  }),
+  params: schema.object({
+    agent_ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 }),
+  }),
+};
+
+export type AgentsActionsLogRequestParams = TypeOf<typeof AgentsActionsLogRequestSchema.params>;
+export type AgentsActionsLogRequestQuery = TypeOf<typeof AgentsActionsLogRequestSchema.query>;
