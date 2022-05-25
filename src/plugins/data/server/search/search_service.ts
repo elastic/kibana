@@ -19,7 +19,7 @@ import {
   SharedGlobalConfig,
   StartServicesAccessor,
 } from '@kbn/core/server';
-import { map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { BfetchServerSetup } from '@kbn/bfetch-plugin/server';
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
@@ -389,7 +389,13 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
                   map(() => ({
                     ...response,
                     isStored: true,
-                  }))
+                  })),
+                  catchError((e) => {
+                    this.logger.error(
+                      `Error while trying to track search id: ${e?.message}. This might lead to untracked long-running search.`
+                    );
+                    return of(response);
+                  })
                 );
               } else {
                 return of(response);

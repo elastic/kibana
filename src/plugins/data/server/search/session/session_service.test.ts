@@ -213,7 +213,6 @@ describe('SearchSessionService', () => {
         expect(id).toBe(sessionId);
         expect(callAttributes).not.toHaveProperty('idMapping');
         expect(callAttributes).toHaveProperty('touched');
-        expect(callAttributes).toHaveProperty('persisted', true);
         expect(callAttributes).toHaveProperty('name', 'banana');
         expect(callAttributes).toHaveProperty('appId', 'nanana');
         expect(callAttributes).toHaveProperty('locatorId', 'panama');
@@ -248,7 +247,6 @@ describe('SearchSessionService', () => {
         expect(callAttributes).toHaveProperty('touched');
         expect(callAttributes).toHaveProperty('expires');
         expect(callAttributes).toHaveProperty('created');
-        expect(callAttributes).toHaveProperty('persisted', true);
         expect(callAttributes).toHaveProperty('name', 'banana');
         expect(callAttributes).toHaveProperty('appId', 'nanana');
         expect(callAttributes).toHaveProperty('locatorId', 'panama');
@@ -837,7 +835,6 @@ describe('SearchSessionService', () => {
         expect(callAttributes).toHaveProperty('created');
         expect(callAttributes).toHaveProperty('touched');
         expect(callAttributes).toHaveProperty('sessionId', sessionId);
-        expect(callAttributes).toHaveProperty('persisted', false);
       });
 
       it('retries updating if update returned 404 and then update returned conflict 409 (first create race condition)', async () => {
