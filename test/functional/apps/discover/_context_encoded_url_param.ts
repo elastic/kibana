@@ -11,7 +11,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
-  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings', 'header']);
   const testSubjects = getService('testSubjects');
@@ -30,11 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       });
       await PageObjects.settings.createIndexPattern('context-encoded-param');
-
-      await kibanaServer.uiSettings.update({
-        'doc_table:legacy': false,
-        'discover:searchOnPageLoad': true,
-      });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
