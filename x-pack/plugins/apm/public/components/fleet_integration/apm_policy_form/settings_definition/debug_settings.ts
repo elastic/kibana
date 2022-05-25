@@ -15,11 +15,11 @@ export function getDebugSettings(): SettingsRow[] {
       type: 'boolean',
       labelAppend: OPTIONAL_LABEL,
       rowTitle: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.expvarEnabledTitle',
+        'xpack.apm.fleet_integration.settings.debug.expvarEnabledTitle',
         { defaultMessage: 'Enable APM Server Golang expvar support' }
       ),
       rowDescription: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.expvarEnabledDescription',
+        'xpack.apm.fleet_integration.settings.debug.expvarEnabledDescription',
         { defaultMessage: 'Exposed under /debug/vars' }
       ),
     },
@@ -28,11 +28,11 @@ export function getDebugSettings(): SettingsRow[] {
       type: 'boolean',
       labelAppend: OPTIONAL_LABEL,
       rowTitle: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.pprofEnabledTitle',
+        'xpack.apm.fleet_integration.settings.debug.pprofEnabledTitle',
         { defaultMessage: 'Enable APM Server pprof support' }
       ),
       rowDescription: i18n.translate(
-        'xpack.apm.fleet_integration.settings.apm.pprofEnabledDescription',
+        'xpack.apm.fleet_integration.settings.debug.pprofEnabledDescription',
         {
           defaultMessage: 'Expose HTTP endpoints to retrieve profiling data',
         }
