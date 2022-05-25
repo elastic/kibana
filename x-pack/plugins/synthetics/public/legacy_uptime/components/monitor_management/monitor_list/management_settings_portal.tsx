@@ -7,14 +7,14 @@
 
 import React from 'react';
 import { InPortal } from 'react-reverse-portal';
-import { ActionBarPortalNode } from '../../../pages/monitor_management/portals';
+import { APIKeysPortalNode } from '../../../pages/monitor_management/portals';
 
-import { ActionBar, ActionBarProps } from './action_bar';
+import { ManagementSettings } from './management_settings';
 
-export const ActionBarPortal = (props: ActionBarProps) => {
+export const ManagementSettingsPortal = () => {
   return (
-    <InPortal node={ActionBarPortalNode}>
-      <ActionBar {...props} />
+    <InPortal node={APIKeysPortalNode}>
+      <ManagementSettings />
     </InPortal>
   );
 };
