@@ -14,7 +14,7 @@ import { ROLES } from '../../test';
 const SAVED_QUERY_ID = 'Saved-Query-Id';
 const SAVED_QUERY_DESCRIPTION = 'Test saved query description';
 
-describe('ALL - Saved queries', () => {
+describe.skip('ALL - Saved queries', () => {
   beforeEach(() => {
     login(ROLES.soc_manager);
     navigateTo('/app/osquery');
