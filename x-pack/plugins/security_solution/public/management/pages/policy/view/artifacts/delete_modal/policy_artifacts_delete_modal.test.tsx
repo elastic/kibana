@@ -19,7 +19,7 @@ import {
   createAppRootMockRenderer,
 } from '../../../../../../common/mock/endpoint';
 import { PolicyArtifactsDeleteModal } from './policy_artifacts_delete_modal';
-import { exceptionsListAllHttpMocks } from '../../../../mocks/exceptions_list_http_mocks';
+import { exceptionsListAllHttpMocks } from '../../../../../mocks/exceptions_list_http_mocks';
 import { ExceptionsListApiClient } from '../../../../../services/exceptions_list/exceptions_list_api_client';
 import { POLICY_ARTIFACT_DELETE_MODAL_LABELS } from './translations';
 
