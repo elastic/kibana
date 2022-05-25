@@ -109,7 +109,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     options: {
       stripEmptyFields: false,
     },
-    // @ts-expect-error update types
     serializer: ({
       savedQueryId,
       // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -124,17 +123,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         },
         (value) => !isEmpty(value)
       ),
-    defaultValue: {
-      agentSelection: {
-        agents: [],
-        allAgentsSelected: false,
-        platformsSelected: [],
-        policiesSelected: [],
-      },
-      query: '',
-      savedQueryId: null,
-      ecs_mapping: [],
-    },
   });
 
   const { updateFieldValues, setFieldValue, submit, isSubmitting } = form;

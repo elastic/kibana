@@ -94,10 +94,10 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
       }).click();
       findFormFieldByRowsLabelAndType('Description (optional)', ' Edited');
       // Run in test configuration
-      // cy.contains('Test configuration').click();
-      // selectAllAgents();
-      // submitQuery();
-      // checkResults();
+      cy.contains('Test configuration').click();
+      selectAllAgents();
+      submitQuery();
+      checkResults();
 
       // Save edited
       cy.react('EuiButton').contains('Update query').click();
