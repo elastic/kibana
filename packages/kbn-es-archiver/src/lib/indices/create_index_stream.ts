@@ -22,6 +22,11 @@ interface DocRecord {
   value: estypes.IndicesIndexState & {
     index: string;
     type: string;
+    dataStream: {
+      name: string;
+      template: string;
+      index_patterns: string[];
+    };
   };
 }
 
@@ -55,7 +60,7 @@ export function createCreateIndexStream({
   }
 
   async function handleIndex(record: DocRecord) {
-    const { index, settings, mappings, aliases } = record.value;
+    const { index, settings, mappings, aliases, dataStream } = record.value;
     const isKibanaTaskManager = index.startsWith('.kibana_task_manager');
     const isKibana = index.startsWith('.kibana') && !isKibanaTaskManager;
 
@@ -73,19 +78,36 @@ export function createCreateIndexStream({
           kibanaTaskManagerIndexAlreadyDeleted = true;
         }
 
-        await client.indices.create(
-          {
-            index,
-            body: {
-              settings,
-              mappings,
-              aliases,
+        if (dataStream) {
+          await client.indices.putIndexTemplate(
+            {
+              name: dataStream.template,
+              index_patterns: dataStream.index_patterns,
+              template: { settings, mappings, aliases },
+              data_stream: {},
             },
-          },
-          {
-            headers: ES_CLIENT_HEADERS,
-          }
-        );
+            { headers: ES_CLIENT_HEADERS }
+          );
+
+          await client.indices.createDataStream(
+            { name: dataStream.name },
+            { headers: ES_CLIENT_HEADERS }
+          );
+        } else {
+          await client.indices.create(
+            {
+              index,
+              body: {
+                settings,
+                mappings,
+                aliases,
+              },
+            },
+            {
+              headers: ES_CLIENT_HEADERS,
+            }
+          );
+        }
 
         stats.createdIndex(index, { settings });
       } catch (err) {
@@ -131,6 +153,7 @@ export function createCreateIndexStream({
       try {
         switch (record && record.type) {
           case 'index':
+          case 'data_stream':
             await handleIndex(record);
             break;
 

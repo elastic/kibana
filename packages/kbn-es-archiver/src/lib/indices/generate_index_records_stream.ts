@@ -50,19 +50,35 @@ export function createGenerateIndexRecordsStream({
           )
         ).body;
 
+        const { data_streams } = await client.indices.getDataStream({ name: indexOrAlias });
+
         for (const [index, { settings, mappings }] of Object.entries(resp)) {
-          const { body: aliasBody } = await client.indices.getAlias(
-            { index },
+          const {
+            body: {
+              [index]: { aliases, data_stream },
+            },
+          } = await client.indices.get(
+            { index, filter_path: ['-*.settings', '-*.mappings'] },
             {
               headers: ES_CLIENT_HEADERS,
               meta: true,
             }
           );
-          const aliases = aliasBody[index]?.aliases || {};
+
+          let dataStreamOptions;
+          if (data_stream) {
+            const dataStream = data_streams.find((ds) => ds.name === data_stream);
+            const template = dataStream?.template;
+            const { index_patterns } = await client.indices
+              .getIndexTemplate({ name: template })
+              .then(({ index_templates }) => index_templates[0].index_template);
+
+            dataStreamOptions = { name: data_stream, template, index_patterns };
+          }
 
           stats.archivedIndex(index, { settings, mappings });
           this.push({
-            type: 'index',
+            type: dataStreamOptions ? 'data_stream' : 'index',
             value: {
               // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
               // when it is loaded it can skip migration, if possible
@@ -70,6 +86,7 @@ export function createGenerateIndexRecordsStream({
               settings,
               mappings,
               aliases,
+              dataStream: dataStreamOptions,
             },
           });
         }
