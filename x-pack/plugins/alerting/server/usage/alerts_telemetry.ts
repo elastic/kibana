@@ -172,7 +172,7 @@ export async function getTotalCountAggregations(
         },
       },
     });
-  
+
     const aggregations = results.aggregations as {
       byAlertTypeId: { value: { ruleTypes: Record<string, string> } };
       max_throttle_time: { value: number };
@@ -185,13 +185,13 @@ export async function getTotalCountAggregations(
       min_actions_count: { value: number };
       avg_actions_count: { value: number };
     };
-  
+
     const totalAlertsCount = Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
       (total: number, key: string) =>
         parseInt(aggregations.byAlertTypeId.value.ruleTypes[key], 10) + total,
       0
     );
-  
+
     return {
       count_total: totalAlertsCount,
       count_by_type: Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
@@ -267,7 +267,11 @@ export async function getTotalCountAggregations(
   }
 }
 
-export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaInex: string, logger: Logger) {
+export async function getTotalCountInUse(
+  esClient: ElasticsearchClient,
+  kibanaInex: string,
+  logger: Logger
+) {
   try {
     const { body: searchResult } = await esClient.search({
       index: kibanaInex,
@@ -283,13 +287,13 @@ export async function getTotalCountInUse(esClient: ElasticsearchClient, kibanaIn
         },
       },
     });
-  
+
     const aggregations = searchResult.aggregations as {
       byAlertTypeId: {
         value: { ruleTypes: Record<string, string>; namespaces: Record<string, string> };
       };
     };
-  
+
     return {
       countTotal: Object.keys(aggregations.byAlertTypeId.value.ruleTypes).reduce(
         (total: number, key: string) =>
