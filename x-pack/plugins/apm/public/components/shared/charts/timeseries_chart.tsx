@@ -93,20 +93,12 @@ export function TimeseriesChart({
     query: { comparisonEnabled, offset },
   } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
-  const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
-
-  const timeZone = getTimeZone(core.uiSettings);
-
-  const min = Math.min(...xValues);
-  const max = Math.max(...xValues);
-
   const anomalyChartTimeseries = getChartAnomalyTimeseries({
     anomalyTimeseries,
     theme,
     anomalyTimeseriesColor: anomalyTimeseries?.color,
   });
 
-  const xFormatter = niceTimeFormatter([min, max]);
   const isEmpty = isTimeseriesEmpty(timeseries);
   const annotationColor = theme.eui.euiColorSuccess;
 
@@ -118,19 +110,45 @@ export function TimeseriesChart({
       ? anomalyChartTimeseries?.boundaries
       : []),
     ...(anomalyChartTimeseries?.scores ?? []),
-  ];
+  ]
+    // Sorting series so that area type series are before line series
+    // This is a workaround so that the legendSort works correctly
+    .sort(
+      isComparingExpectedBounds
+        ? (prev, curr) => prev.type.localeCompare(curr.type)
+        : undefined
+    );
+
+  const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
+
+  const timeZone = getTimeZone(core.uiSettings);
+
+  const min = Math.min(...xValues);
+  const max = Math.max(
+    ...xValues,
+    // If the last data point of timeseries ends before (picked end time + bucket_span)
+    // we need to extend the x max domain to the last available data point for the expected bounds
+    // for the area chart to show up correctly
+    isComparingExpectedBounds
+      ? anomalyChartTimeseries?.boundaries[0]?.data?.slice(-1)[0]?.x ?? 0
+      : -Infinity
+  );
+  const xFormatter = niceTimeFormatter([min, max]);
+
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
 
-  const legendSort = (a: SeriesIdentifier, b: SeriesIdentifier) => {
-    // Using custom legendSort here when comparing expected bounds
-    // because by default elastic-charts will show legends for expected bounds first
-    // but for consistency, we are making `Expected bounds` last
-    if ((a as XYChartSeriesIdentifier)?.specId?.startsWith(expectedBoundsTitle))
-      return -1;
-    if ((b as XYChartSeriesIdentifier)?.specId?.startsWith(expectedBoundsTitle))
-      return -1;
-    return 1;
-  };
+  // Using custom legendSort here when comparing expected bounds
+  // because by default elastic-charts will show legends for expected bounds first
+  // but for consistency, we are making `Expected bounds` last
+  const legendSort = isComparingExpectedBounds
+    ? (a: SeriesIdentifier, b: SeriesIdentifier) => {
+        if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
+          return -1;
+        if ((b as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
+          return -1;
+        return 1;
+      }
+    : undefined;
   return (
     <ChartContainer
       hasData={!isEmpty}
@@ -158,7 +176,7 @@ export function TimeseriesChart({
             tooltip: { visible: true },
           }}
           showLegend
-          legendSort={isComparingExpectedBounds ? legendSort : undefined}
+          legendSort={legendSort}
           legendPosition={Position.Bottom}
           xDomain={xDomain}
           onLegendItemClick={(legend) => {

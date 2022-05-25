@@ -25,6 +25,26 @@ import { getAnomalyResultBucketSize } from './get_anomaly_result_bucket_size';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
 const FALLBACK_ML_BUCKET_SPAN = 15; // minutes
+
+function divide(value: number | null, divider: number) {
+  if (value === null) {
+    return null;
+  }
+  return value / divider;
+}
+
+// Expected bounds are retrieved with bucket span interval padded to the time range
+// so we need to cut the excess bounds to just the start and end time
+// so that the chart show up correctly without the padded time
+function getBoundedX(value: number | null, start: number, end: number) {
+  if (value === null) {
+    return null;
+  }
+  if (value < start) return start;
+  if (value > end) return end;
+  return value;
+}
+
 export async function getAnomalyTimeseries({
   serviceName,
   transactionType,
@@ -173,13 +193,6 @@ export async function getAnomalyTimeseries({
 
   const jobsById = keyBy(mlJobs, (job) => job.jobId);
 
-  function divide(value: number | null, divider: number) {
-    if (value === null) {
-      return null;
-    }
-    return value / divider;
-  }
-
   const series: Array<ServiceAnomalyTimeseries | undefined> =
     anomaliesResponse.aggregations?.by_timeseries_id.buckets.map((bucket) => {
       const jobId = bucket.key.jobId as string;
@@ -217,11 +230,13 @@ export async function getAnomalyTimeseries({
             divider
           ),
         })),
-        bounds: bucket.timeseries.buckets.map((dateBucket) => ({
-          x: dateBucket.key as number,
-          y0: divide(dateBucket.model_lower.value, divider),
-          y1: divide(dateBucket.model_upper.value, divider),
-        })),
+        bounds: bucket.timeseries.buckets.map((dateBucket) => {
+          return {
+            x: getBoundedX(dateBucket.key, start, end) as number,
+            y0: divide(dateBucket.model_lower.value, divider),
+            y1: divide(dateBucket.model_upper.value, divider),
+          };
+        }),
       };
     }) ?? [];
 
