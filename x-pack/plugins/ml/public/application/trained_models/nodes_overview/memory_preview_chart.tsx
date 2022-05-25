@@ -72,11 +72,6 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
   const chartData = [
     {
       x: 0,
-      y: memoryOverview.machine_memory.jvm,
-      g: groups.jvm.name,
-    },
-    {
-      x: 0,
       y: memoryOverview.trained_models.total,
       g: groups.trained_models.name,
     },
@@ -99,6 +94,11 @@ export const MemoryPreviewChart: FC<MemoryPreviewChartProps> = ({ memoryOverview
         memoryOverview.dfa_training.total -
         memoryOverview.anomaly_detection.total,
       g: groups.available.name,
+    },
+    {
+      x: 0,
+      y: memoryOverview.machine_memory.jvm,
+      g: groups.jvm.name,
     },
   ];
 

@@ -14,6 +14,7 @@ import {
   startWith,
   tap,
   debounceTime,
+  filter,
 } from 'rxjs/operators';
 import { isEqual, sortBy, uniq } from 'lodash';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
@@ -731,8 +732,7 @@ export class AnomalyTimelineStateService extends StateService {
 
   public getSwimLaneBucketInterval$(): Observable<TimeBucketsInterval> {
     return this._swimLaneBucketInterval$.pipe(
-      // @ts-ignore
-      skipWhile((v) => !v),
+      filter((v): v is TimeBucketsInterval => !v),
       distinctUntilChanged((prev, curr) => {
         return prev.asSeconds() === curr.asSeconds();
       })
