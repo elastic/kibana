@@ -39,7 +39,7 @@ describe('useGetCaseMetrics', () => {
     });
   });
 
-  it('shows an error toeasst when getSingleCaseMetrics throws', async () => {
+  it('shows an error toast when getSingleCaseMetrics throws', async () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
