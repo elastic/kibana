@@ -95,8 +95,8 @@ export class DataGridService extends FtrService {
     return Number(await grid.getAttribute('data-document-number'));
   }
 
-  public async getFields({ isAnchorRow = false }) {
-    const selector = isAnchorRow
+  public async getFields(options = { isAnchorRow: false }) {
+    const selector = options.isAnchorRow
       ? '.euiDataGridRowCell.dscDocsGrid__cell--highlight'
       : '.euiDataGridRowCell';
     const cells = await this.find.allByCssSelector(selector);

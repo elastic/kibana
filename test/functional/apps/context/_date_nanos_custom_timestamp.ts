@@ -15,7 +15,6 @@ const TEST_STEP_SIZE = 3;
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
-  const docTable = getService('docTable');
   const dataGrid = getService('dataGrid');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'context', 'timePicker', 'discover']);
