@@ -27,6 +27,8 @@ type DataView = unknown;
 interface DataViewEditorOptions {
   /** Handler to be invoked when the Data View Editor completes a save operation. */
   onSave: (dataView: DataView) => void;
+  /** If set to false, will skip empty prompt in data view editor. */
+  showEmptyPrompt?: boolean;
 }
 
 /**
@@ -75,9 +77,7 @@ export interface AnalyticsNoDataPageKibanaDependencies {
   coreStart: {
     application: {
       capabilities: {
-        navLinks: {
-          integrations: boolean;
-        };
+        navLinks: Record<string, boolean>;
       };
       currentAppId$: Observable<string | undefined>;
       navigateToUrl: (url: string) => Promise<void>;

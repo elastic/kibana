@@ -46,12 +46,14 @@ import {
 } from '../components';
 import { useFleetServerUnhealthy } from '../hooks/use_fleet_server_unhealthy';
 
+import { CurrentBulkUpgradeCallout } from './components';
 import { AgentTableHeader } from './components/table_header';
 import type { SelectionMode } from './components/types';
 import { SearchAndFilterBar } from './components/search_and_filter_bar';
 import { Tags } from './components/tags';
 import { TableRowActions } from './components/table_row_actions';
 import { EmptyPrompt } from './components/empty_prompt';
+import { useCurrentUpgrades } from './hooks';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -144,6 +146,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }
 
     if (selectedTags.length) {
+      if (kueryBuilder) {
+        kueryBuilder = `(${kueryBuilder}) and`;
+      }
       kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.tags : (${selectedTags
         .map((tag) => `"${tag}"`)
         .join(' or ')})`;
@@ -239,13 +244,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           inactive: agentsRequest.data.totalInactive,
         });
 
-        // Only set tags on the first request - we don't want the list of tags to update based
-        // on the returned set of agents from the API
-        if (allTags === undefined) {
-          const newAllTags = Array.from(
-            new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
-          );
+        const newAllTags = Array.from(
+          new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
+        );
 
+        // We only want to update the list of available tags if we've either received
+        // more tags than we currently have from the API (e.g. new agents have been enrolled)
+        // or we haven't set our list of tags yet. TODO: Would it be possible to remove a tag
+        // from the filterable list if an agent is unenrolled and no agents remain with that tag?
+        if (!allTags || newAllTags.length > allTags.length) {
           setAllTags(newAllTags);
         }
 
@@ -332,12 +339,16 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     flyoutContext.openFleetServerFlyout();
   }, [flyoutContext]);
 
+  // Current upgrades
+  const { abortUpgrade, currentUpgrades, refreshUpgrades } = useCurrentUpgrades(fetchData);
+
   const columns = [
     {
       field: 'local_metadata.host.hostname',
       name: i18n.translate('xpack.fleet.agentList.hostColumnTitle', {
         defaultMessage: 'Host',
       }),
+      width: '185px',
       render: (host: string, agent: Agent) => (
         <EuiLink href={getHref('agent_details', { agentId: agent.id })}>
           {safeMetadata(host)}
@@ -346,7 +357,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'active',
-      width: '120px',
+      width: '85px',
       name: i18n.translate('xpack.fleet.agentList.statusColumnTitle', {
         defaultMessage: 'Status',
       }),
@@ -354,7 +365,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'tags',
-      width: '240px',
+      width: '210px',
       name: i18n.translate('xpack.fleet.agentList.tagsColumnTitle', {
         defaultMessage: 'Tags',
       }),
@@ -365,12 +376,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.fleet.agentList.policyColumnTitle', {
         defaultMessage: 'Agent policy',
       }),
+      width: '260px',
       render: (policyId: string, agent: Agent) => {
         const agentPolicy = agentPoliciesIndexedById[policyId];
         const showWarning = agent.policy_revision && agentPolicy?.revision > agent.policy_revision;
 
         return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
+          <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
             {agentPolicy && <AgentPolicySummaryLine policy={agentPolicy} />}
             {showWarning && (
               <EuiFlexItem grow={false}>
@@ -390,12 +402,12 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     },
     {
       field: 'local_metadata.elastic.agent.version',
-      width: '200px',
+      width: '135px',
       name: i18n.translate('xpack.fleet.agentList.versionTitle', {
         defaultMessage: 'Version',
       }),
       render: (version: string, agent: Agent) => (
-        <EuiFlexGroup gutterSize="s" alignItems="center" style={{ minWidth: 0 }}>
+        <EuiFlexGroup gutterSize="none" style={{ minWidth: 0 }} direction="column">
           <EuiFlexItem grow={false} className="eui-textNoWrap">
             {safeMetadata(version)}
           </EuiFlexItem>
@@ -419,6 +431,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       name: i18n.translate('xpack.fleet.agentList.lastCheckinTitle', {
         defaultMessage: 'Last activity',
       }),
+      width: '180px',
       render: (lastCheckin: string, agent: any) =>
         lastCheckin ? <FormattedRelative value={lastCheckin} /> : null,
     },
@@ -484,7 +497,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiPortal>
       )}
-
       {agentToUpgrade && (
         <EuiPortal>
           <AgentUpgradeAgentModal
@@ -493,12 +505,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             onClose={() => {
               setAgentToUpgrade(undefined);
               fetchData();
+              refreshUpgrades();
             }}
-            version={kibanaVersion}
           />
         </EuiPortal>
       )}
-
       {isFleetServerUnhealthy && (
         <>
           {cloud?.deploymentUrl ? (
@@ -509,7 +520,13 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           <EuiSpacer size="l" />
         </>
       )}
-
+      {/* Current upgrades callout */}
+      {currentUpgrades.map((currentUpgrade) => (
+        <React.Fragment key={currentUpgrade.actionId}>
+          <CurrentBulkUpgradeCallout currentUpgrade={currentUpgrade} abortUpgrade={abortUpgrade} />
+          <EuiSpacer size="l" />
+        </React.Fragment>
+      ))}
       {/* Search and filter bar */}
       <SearchAndFilterBar
         agentPolicies={agentPolicies}
@@ -530,10 +547,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
-        refreshAgents={() => fetchData()}
+        refreshAgents={() => Promise.all([fetchData(), refreshUpgrades()])}
       />
       <EuiSpacer size="m" />
-
       {/* Agent total, bulk actions and status bar */}
       <AgentTableHeader
         showInactive={showInactive}
@@ -551,7 +567,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         }}
       />
       <EuiSpacer size="s" />
-
       {/* Agent list table */}
       <EuiBasicTable<Agent>
         ref={tableRef}

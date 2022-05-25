@@ -33,7 +33,18 @@ export class EMSFileSelect extends Component<Props, State> {
   };
 
   _loadFileOptions = async () => {
-    const fileLayers: FileLayer[] = await getEmsFileLayers();
+    let fileLayers: FileLayer[] = [];
+    try {
+      fileLayers = await getEmsFileLayers();
+    } catch (error) {
+      if (this._isMounted) {
+        this.setState({
+          hasLoadedOptions: true,
+          emsFileOptions: [],
+        });
+      }
+    }
+
     const options = fileLayers.map((fileLayer) => {
       return {
         value: fileLayer.getId(),

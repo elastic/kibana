@@ -13,12 +13,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { IconType } from '@elastic/eui';
-import { AlertConsumers } from '@kbn/rule-data-utils';
-import {
-  EuiDataGridColumn,
-  EuiDataGridControlColumn,
-  EuiDataGridCellValueElementProps,
-} from '@elastic/eui';
+import { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
 import {
   ActionType,
   AlertHistoryEsIndexConnectorId,
@@ -46,6 +41,9 @@ import {
   RuleType as CommonRuleType,
 } from '@kbn/alerting-plugin/common';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import React from 'react';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
@@ -376,6 +374,7 @@ export enum Percentiles {
 }
 
 export interface TriggersActionsUiConfig {
+  isUsingSecurity: boolean;
   minimumScheduleInterval?: {
     value: string;
     enforce: boolean;
@@ -387,19 +386,18 @@ export enum AlertsField {
   reason = 'kibana.alert.reason',
 }
 
-export type AlertsData = Record<AlertsField, any[]>;
-
 export interface FetchAlertData {
   activePage: number;
-  alerts: AlertsData[];
+  alerts: EcsFieldsResponse[];
   alertsCount: number;
   isInitializing: boolean;
   isLoading: boolean;
   getInspectQuery: () => { request: {}; response: {} };
-  onColumnsChange: (columns: EuiDataGridControlColumn[]) => void;
+  onColumnsChange: (columns: EuiDataGridColumn[], visibleColumns: string[]) => void;
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
-  onSortChange: (sort: Array<{ id: string; direction: 'asc' | 'desc' }>) => void;
+  onSortChange: (sort: EuiDataGridSorting['columns']) => void;
   refresh: () => void;
+  sort: SortCombinations[];
 }
 
 export interface BulkActionsObjectProp {
@@ -409,31 +407,60 @@ export interface BulkActionsObjectProp {
 }
 
 export interface AlertsTableProps {
-  configurationId: string;
-  consumers: AlertConsumers[];
+  alertsTableConfiguration: AlertsTableConfigurationRegistry;
+  columns: EuiDataGridColumn[];
   bulkActions: BulkActionsObjectProp;
   // defaultCellActions: TGridCellAction[];
   deletedEventIds: string[];
   disabledCellActions: string[];
+  flyoutState: AlertsTableFlyoutState;
   pageSize: number;
   pageSizeOptions: number[];
   leadingControlColumns: EuiDataGridControlColumn[];
-  renderCellValue: (props: RenderCellValueProps) => React.ReactNode;
   showCheckboxes: boolean;
+  showExpandToDetails: boolean;
   trailingControlColumns: EuiDataGridControlColumn[];
   useFetchAlertsData: () => FetchAlertData;
-  alerts: AlertsData[];
+  visibleColumns: string[];
   'data-test-subj': string;
 }
 
-export type RenderCellValueProps = EuiDataGridCellValueElementProps & {
-  alert: AlertsData;
-  field: AlertsField;
-};
+// TODO We need to create generic type between our plugin, right now we have different one because of the old alerts table
+export type GetRenderCellValue = ({
+  setFlyoutAlert,
+}: {
+  setFlyoutAlert?: (data: unknown) => void;
+}) => (props: unknown) => React.ReactNode;
 
+export type AlertTableFlyoutComponent =
+  | React.FunctionComponent<AlertsTableFlyoutBaseProps>
+  | React.LazyExoticComponent<ComponentType<AlertsTableFlyoutBaseProps>>
+  | null;
 export interface AlertsTableConfigurationRegistry {
   id: string;
   columns: EuiDataGridColumn[];
+  externalFlyout?: {
+    header?: AlertTableFlyoutComponent;
+    body?: AlertTableFlyoutComponent;
+    footer?: AlertTableFlyoutComponent;
+  };
+  internalFlyout?: {
+    header?: AlertTableFlyoutComponent;
+    body?: AlertTableFlyoutComponent;
+    footer?: AlertTableFlyoutComponent;
+  };
+  sort?: SortCombinations[];
+  getRenderCellValue?: GetRenderCellValue;
+}
+
+export interface AlertsTableFlyoutBaseProps {
+  alert: EcsFieldsResponse;
+  isLoading: boolean;
+}
+
+export enum AlertsTableFlyoutState {
+  internal = 'internal',
+  external = 'external',
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';

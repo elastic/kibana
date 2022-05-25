@@ -8,12 +8,13 @@
 import { render } from '@testing-library/react';
 import React from 'react';
 import { SecurityPageName } from '../../app/types';
+import { NavLinkItem } from '../../common/components/navigation/types';
 import { TestProviders } from '../../common/mock';
-import { LandingLinksImages, NavItem } from './landing_links_images';
+import { LandingLinksImages } from './landing_links_images';
 
-const DEFAULT_NAV_ITEM: NavItem = {
+const DEFAULT_NAV_ITEM: NavLinkItem = {
   id: SecurityPageName.overview,
-  label: 'TEST LABEL',
+  title: 'TEST LABEL',
   description: 'TEST DESCRIPTION',
   image: 'TEST_IMAGE.png',
 };
@@ -32,24 +33,24 @@ jest.mock('../../common/lib/kibana/kibana_react', () => {
 
 describe('LandingLinksImages', () => {
   it('renders', () => {
-    const label = 'test label';
+    const title = 'test label';
 
     const { queryByText } = render(
       <TestProviders>
-        <LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, label }]} />
+        <LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, title }]} />
       </TestProviders>
     );
 
-    expect(queryByText(label)).toBeInTheDocument();
+    expect(queryByText(title)).toBeInTheDocument();
   });
 
   it('renders image', () => {
     const image = 'test_image.jpeg';
-    const label = 'TEST_LABEL';
+    const title = 'TEST_LABEL';
 
     const { getByTestId } = render(
       <TestProviders>
-        <LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, image, label }]} />
+        <LandingLinksImages items={[{ ...DEFAULT_NAV_ITEM, image, title }]} />
       </TestProviders>
     );
 

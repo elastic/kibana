@@ -324,6 +324,7 @@ exports[`XYChart component it renders area 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
@@ -332,6 +333,10 @@ exports[`XYChart component it renders area 1`] = `
         "headerFormatter": [Function],
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -401,6 +406,7 @@ exports[`XYChart component it renders area 1`] = `
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={false}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -451,20 +457,20 @@ exports[`XYChart component it renders area 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -476,20 +482,20 @@ exports[`XYChart component it renders area 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -501,20 +507,20 @@ exports[`XYChart component it renders area 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -526,20 +532,20 @@ exports[`XYChart component it renders area 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -551,20 +557,20 @@ exports[`XYChart component it renders area 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -576,20 +582,20 @@ exports[`XYChart component it renders area 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -661,13 +667,13 @@ exports[`XYChart component it renders area 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -693,6 +699,7 @@ exports[`XYChart component it renders area 1`] = `
             "type": "palette",
           },
           "seriesType": "area",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -751,13 +758,13 @@ exports[`XYChart component it renders area 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -766,7 +773,6 @@ exports[`XYChart component it renders area 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -787,26 +793,27 @@ exports[`XYChart component it renders area 1`] = `
             "convert": [MockFunction] {
               "calls": Array [
                 Array [
-                  "I",
+                  1652034840000,
                 ],
                 Array [
-                  "J",
+                  1652122440000,
                 ],
               ],
               "results": Array [
                 Object {
                   "type": "return",
-                  "value": "I",
+                  "value": 1652034840000,
                 },
                 Object {
                   "type": "return",
-                  "value": "J",
+                  "value": 1652122440000,
                 },
               ],
             },
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -868,6 +875,7 @@ exports[`XYChart component it renders bar 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
@@ -876,6 +884,10 @@ exports[`XYChart component it renders bar 1`] = `
         "headerFormatter": [Function],
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -945,6 +957,7 @@ exports[`XYChart component it renders bar 1`] = `
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -995,20 +1008,20 @@ exports[`XYChart component it renders bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -1020,20 +1033,20 @@ exports[`XYChart component it renders bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -1045,20 +1058,20 @@ exports[`XYChart component it renders bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -1070,20 +1083,20 @@ exports[`XYChart component it renders bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -1095,20 +1108,20 @@ exports[`XYChart component it renders bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -1120,20 +1133,20 @@ exports[`XYChart component it renders bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -1205,13 +1218,13 @@ exports[`XYChart component it renders bar 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -1237,6 +1250,7 @@ exports[`XYChart component it renders bar 1`] = `
             "type": "palette",
           },
           "seriesType": "bar",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -1295,13 +1309,13 @@ exports[`XYChart component it renders bar 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -1310,7 +1324,6 @@ exports[`XYChart component it renders bar 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -1331,26 +1344,27 @@ exports[`XYChart component it renders bar 1`] = `
             "convert": [MockFunction] {
               "calls": Array [
                 Array [
-                  "I",
+                  1652034840000,
                 ],
                 Array [
-                  "J",
+                  1652122440000,
                 ],
               ],
               "results": Array [
                 Object {
                   "type": "return",
-                  "value": "I",
+                  "value": 1652034840000,
                 },
                 Object {
                   "type": "return",
-                  "value": "J",
+                  "value": 1652122440000,
                 },
               ],
             },
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -1412,6 +1426,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
@@ -1420,6 +1435,10 @@ exports[`XYChart component it renders horizontal bar 1`] = `
         "headerFormatter": [Function],
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -1489,6 +1508,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -1539,20 +1559,20 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -1564,20 +1584,20 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -1589,20 +1609,20 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -1614,20 +1634,20 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -1639,20 +1659,20 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -1664,20 +1684,20 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -1749,13 +1769,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -1781,6 +1801,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             "type": "palette",
           },
           "seriesType": "bar_horizontal",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -1839,13 +1860,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -1854,7 +1875,6 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -1875,26 +1895,27 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             "convert": [MockFunction] {
               "calls": Array [
                 Array [
-                  "I",
+                  1652034840000,
                 ],
                 Array [
-                  "J",
+                  1652122440000,
                 ],
               ],
               "results": Array [
                 Object {
                   "type": "return",
-                  "value": "I",
+                  "value": 1652034840000,
                 },
                 Object {
                   "type": "return",
-                  "value": "J",
+                  "value": 1652122440000,
                 },
               ],
             },
           },
           "groupId": "left",
           "position": "bottom",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -1956,6 +1977,7 @@ exports[`XYChart component it renders line 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
@@ -1964,6 +1986,10 @@ exports[`XYChart component it renders line 1`] = `
         "headerFormatter": [Function],
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -2033,6 +2059,7 @@ exports[`XYChart component it renders line 1`] = `
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={false}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -2083,20 +2110,20 @@ exports[`XYChart component it renders line 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -2108,20 +2135,20 @@ exports[`XYChart component it renders line 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -2133,20 +2160,20 @@ exports[`XYChart component it renders line 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -2158,20 +2185,20 @@ exports[`XYChart component it renders line 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -2183,20 +2210,20 @@ exports[`XYChart component it renders line 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -2208,20 +2235,20 @@ exports[`XYChart component it renders line 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -2293,13 +2320,13 @@ exports[`XYChart component it renders line 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -2325,6 +2352,7 @@ exports[`XYChart component it renders line 1`] = `
             "type": "palette",
           },
           "seriesType": "line",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -2383,13 +2411,13 @@ exports[`XYChart component it renders line 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -2398,7 +2426,6 @@ exports[`XYChart component it renders line 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -2419,26 +2446,27 @@ exports[`XYChart component it renders line 1`] = `
             "convert": [MockFunction] {
               "calls": Array [
                 Array [
-                  "I",
+                  1652034840000,
                 ],
                 Array [
-                  "J",
+                  1652122440000,
                 ],
               ],
               "results": Array [
                 Object {
                   "type": "return",
-                  "value": "I",
+                  "value": 1652034840000,
                 },
                 Object {
                   "type": "return",
-                  "value": "J",
+                  "value": 1652122440000,
                 },
               ],
             },
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -2500,6 +2528,7 @@ exports[`XYChart component it renders stacked area 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
@@ -2508,6 +2537,10 @@ exports[`XYChart component it renders stacked area 1`] = `
         "headerFormatter": [Function],
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -2577,6 +2610,7 @@ exports[`XYChart component it renders stacked area 1`] = `
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={false}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -2627,20 +2661,20 @@ exports[`XYChart component it renders stacked area 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -2652,20 +2686,20 @@ exports[`XYChart component it renders stacked area 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -2677,20 +2711,20 @@ exports[`XYChart component it renders stacked area 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -2702,20 +2736,20 @@ exports[`XYChart component it renders stacked area 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -2727,20 +2761,20 @@ exports[`XYChart component it renders stacked area 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -2752,20 +2786,20 @@ exports[`XYChart component it renders stacked area 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -2837,13 +2871,13 @@ exports[`XYChart component it renders stacked area 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -2869,6 +2903,7 @@ exports[`XYChart component it renders stacked area 1`] = `
             "type": "palette",
           },
           "seriesType": "area_stacked",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -2927,13 +2962,13 @@ exports[`XYChart component it renders stacked area 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -2942,7 +2977,6 @@ exports[`XYChart component it renders stacked area 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -2963,26 +2997,27 @@ exports[`XYChart component it renders stacked area 1`] = `
             "convert": [MockFunction] {
               "calls": Array [
                 Array [
-                  "I",
+                  1652034840000,
                 ],
                 Array [
-                  "J",
+                  1652122440000,
                 ],
               ],
               "results": Array [
                 Object {
                   "type": "return",
-                  "value": "I",
+                  "value": 1652034840000,
                 },
                 Object {
                   "type": "return",
-                  "value": "J",
+                  "value": 1652122440000,
                 },
               ],
             },
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -3044,6 +3079,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
@@ -3052,6 +3088,10 @@ exports[`XYChart component it renders stacked bar 1`] = `
         "headerFormatter": [Function],
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -3121,6 +3161,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -3171,20 +3212,20 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -3196,20 +3237,20 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -3221,20 +3262,20 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -3246,20 +3287,20 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -3271,20 +3312,20 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -3296,20 +3337,20 @@ exports[`XYChart component it renders stacked bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -3381,13 +3422,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -3413,6 +3454,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "type": "palette",
           },
           "seriesType": "bar_stacked",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -3471,13 +3513,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -3486,7 +3528,6 @@ exports[`XYChart component it renders stacked bar 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -3507,26 +3548,27 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "convert": [MockFunction] {
               "calls": Array [
                 Array [
-                  "I",
+                  1652034840000,
                 ],
                 Array [
-                  "J",
+                  1652122440000,
                 ],
               ],
               "results": Array [
                 Object {
                   "type": "return",
-                  "value": "I",
+                  "value": 1652034840000,
                 },
                 Object {
                   "type": "return",
-                  "value": "J",
+                  "value": 1652122440000,
                 },
               ],
             },
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -3588,6 +3630,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
@@ -3596,6 +3639,10 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
         "headerFormatter": [Function],
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -3665,6 +3712,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -3715,20 +3763,20 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -3740,20 +3788,20 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -3765,20 +3813,20 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -3790,20 +3838,20 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -3815,20 +3863,20 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -3840,20 +3888,20 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -3925,13 +3973,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -3957,6 +4005,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "type": "palette",
           },
           "seriesType": "bar_horizontal_stacked",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -4015,13 +4064,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -4030,7 +4079,6 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -4051,26 +4099,27 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "convert": [MockFunction] {
               "calls": Array [
                 Array [
-                  "I",
+                  1652034840000,
                 ],
                 Array [
-                  "J",
+                  1652122440000,
                 ],
               ],
               "results": Array [
                 Object {
                   "type": "return",
-                  "value": "I",
+                  "value": 1652034840000,
                 },
                 Object {
                   "type": "return",
-                  "value": "J",
+                  "value": 1652122440000,
                 },
               ],
             },
           },
           "groupId": "left",
           "position": "bottom",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -4132,6 +4181,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
@@ -4140,6 +4190,10 @@ exports[`XYChart component split chart should render split chart if both, splitR
         "headerFormatter": [Function],
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -4273,20 +4327,20 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -4298,20 +4352,20 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -4323,20 +4377,20 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -4348,20 +4402,20 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -4373,20 +4427,20 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -4398,20 +4452,20 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -4464,6 +4518,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -4514,20 +4569,20 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -4539,20 +4594,20 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -4564,20 +4619,20 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -4589,20 +4644,20 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -4614,20 +4669,20 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -4639,20 +4694,20 @@ exports[`XYChart component split chart should render split chart if both, splitR
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -4724,13 +4779,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -4756,6 +4811,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
             "type": "palette",
           },
           "seriesType": "bar",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -4814,13 +4870,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -4829,7 +4885,6 @@ exports[`XYChart component split chart should render split chart if both, splitR
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -4850,26 +4905,27 @@ exports[`XYChart component split chart should render split chart if both, splitR
             "convert": [MockFunction] {
               "calls": Array [
                 Array [
-                  "I",
+                  1652034840000,
                 ],
                 Array [
-                  "J",
+                  1652122440000,
                 ],
               ],
               "results": Array [
                 Object {
                   "type": "return",
-                  "value": "I",
+                  "value": 1652034840000,
                 },
                 Object {
                   "type": "return",
-                  "value": "J",
+                  "value": 1652122440000,
                 },
               ],
             },
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -4931,6 +4987,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
@@ -4939,6 +4996,10 @@ exports[`XYChart component split chart should render split chart if splitColumnA
         "headerFormatter": [Function],
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -5072,20 +5133,20 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5097,20 +5158,20 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5122,20 +5183,20 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5147,20 +5208,20 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5172,20 +5233,20 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5197,20 +5258,20 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5262,6 +5323,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -5312,20 +5374,20 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5337,20 +5399,20 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5362,20 +5424,20 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5387,20 +5449,20 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5412,20 +5474,20 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5437,20 +5499,20 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5522,13 +5584,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -5554,6 +5616,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             "type": "palette",
           },
           "seriesType": "bar",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -5612,13 +5675,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -5627,7 +5690,6 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -5648,26 +5710,27 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             "convert": [MockFunction] {
               "calls": Array [
                 Array [
-                  "I",
+                  1652034840000,
                 ],
                 Array [
-                  "J",
+                  1652122440000,
                 ],
               ],
               "results": Array [
                 Object {
                   "type": "return",
-                  "value": "I",
+                  "value": 1652034840000,
                 },
                 Object {
                   "type": "return",
-                  "value": "J",
+                  "value": 1652122440000,
                 },
               ],
             },
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
@@ -5729,6 +5792,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
@@ -5737,6 +5801,10 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
         "headerFormatter": [Function],
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -5870,20 +5938,20 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5895,20 +5963,20 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5920,20 +5988,20 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5945,20 +6013,20 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5970,20 +6038,20 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -5995,20 +6063,20 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -6060,6 +6128,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
   />
   <DataLayers
     chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
     formatFactory={
       [MockFunction] {
         "calls": Array [
@@ -6110,20 +6179,20 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -6135,20 +6204,20 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -6160,20 +6229,20 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -6185,20 +6254,20 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -6210,20 +6279,20 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -6235,20 +6304,20 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               "convert": [MockFunction] {
                 "calls": Array [
                   Array [
-                    "I",
+                    1652034840000,
                   ],
                   Array [
-                    "J",
+                    1652122440000,
                   ],
                 ],
                 "results": Array [
                   Object {
                     "type": "return",
-                    "value": "I",
+                    "value": 1652034840000,
                   },
                   Object {
                     "type": "return",
-                    "value": "J",
+                    "value": 1652122440000,
                   },
                 ],
               },
@@ -6320,13 +6389,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -6352,6 +6421,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             "type": "palette",
           },
           "seriesType": "bar",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -6410,13 +6480,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
               Object {
                 "a": 1,
                 "b": 2,
-                "c": "I",
+                "c": 1652034840000,
                 "d": "Foo",
               },
               Object {
                 "a": 1,
                 "b": 5,
-                "c": "J",
+                "c": 1652122440000,
                 "d": "Bar",
               },
             ],
@@ -6425,7 +6495,6 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           "type": "dataLayer",
           "xAccessor": "c",
           "xScaleType": "ordinal",
-          "yScaleType": "linear",
         },
       ]
     }
@@ -6446,26 +6515,27 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             "convert": [MockFunction] {
               "calls": Array [
                 Array [
-                  "I",
+                  1652034840000,
                 ],
                 Array [
-                  "J",
+                  1652122440000,
                 ],
               ],
               "results": Array [
                 Object {
                   "type": "return",
-                  "value": "I",
+                  "value": 1652034840000,
                 },
                 Object {
                   "type": "return",
-                  "value": "J",
+                  "value": 1652122440000,
                 },
               ],
             },
           },
           "groupId": "left",
           "position": "left",
+          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",

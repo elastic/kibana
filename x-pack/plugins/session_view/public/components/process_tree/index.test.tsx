@@ -8,13 +8,16 @@
 import React from 'react';
 import {
   mockData,
-  mockAlerts,
   nullMockData,
   deepNullMockData,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { Process } from '../../../common/types/process_tree';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { ProcessTreeDeps, ProcessTree } from '.';
+import { useDateFormat } from '../../hooks';
+
+jest.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as jest.Mock;
 
 describe('ProcessTree component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
@@ -24,7 +27,6 @@ describe('ProcessTree component', () => {
   const props: ProcessTreeDeps = {
     sessionEntityId: sessionLeader.process!.entity_id!,
     data: mockData,
-    alerts: mockAlerts,
     isFetching: false,
     fetchNextPage: jest.fn(),
     hasNextPage: false,
@@ -37,6 +39,7 @@ describe('ProcessTree component', () => {
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   });
 
   describe('When ProcessTree is mounted', () => {

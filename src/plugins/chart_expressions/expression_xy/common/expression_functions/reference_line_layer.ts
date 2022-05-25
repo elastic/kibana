@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { LayerTypes, REFERENCE_LINE_LAYER } from '../constants';
+import { REFERENCE_LINE_LAYER, EXTENDED_Y_CONFIG } from '../constants';
 import { ReferenceLineLayerFn } from '../types';
 import { strings } from '../i18n';
-import { commonReferenceLineLayerArgs } from './common_reference_line_layer_args';
 
 export const referenceLineLayerFunction: ReferenceLineLayerFn = {
   name: REFERENCE_LINE_LAYER,
@@ -17,14 +16,32 @@ export const referenceLineLayerFunction: ReferenceLineLayerFn = {
   type: REFERENCE_LINE_LAYER,
   help: strings.getRLHelp(),
   inputTypes: ['datatable'],
-  args: { ...commonReferenceLineLayerArgs },
-  fn(table, args) {
-    return {
-      type: REFERENCE_LINE_LAYER,
-      ...args,
-      accessors: args.accessors ?? [],
-      layerType: LayerTypes.REFERENCELINE,
-      table,
-    };
+  args: {
+    accessors: {
+      types: ['string'],
+      help: strings.getRLAccessorsHelp(),
+      multi: true,
+    },
+    yConfig: {
+      types: [EXTENDED_Y_CONFIG],
+      help: strings.getRLYConfigHelp(),
+      multi: true,
+    },
+    columnToLabel: {
+      types: ['string'],
+      help: strings.getColumnToLabelHelp(),
+    },
+    table: {
+      types: ['datatable'],
+      help: strings.getTableHelp(),
+    },
+    layerId: {
+      types: ['string'],
+      help: strings.getLayerIdHelp(),
+    },
+  },
+  async fn(input, args, context) {
+    const { referenceLineLayerFn } = await import('./reference_line_layer_fn');
+    return await referenceLineLayerFn(input, args, context);
   },
 };

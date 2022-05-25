@@ -53,7 +53,6 @@ import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
-import { PublicMethodsOf } from '@kbn/utility-types';
 import { Readable } from 'stream';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
@@ -1364,11 +1363,17 @@ export interface IRouter<Context extends RequestHandlerContext = RequestHandlerC
 // @public
 export type IsAuthenticated = (request: KibanaRequest) => boolean;
 
-// @public (undocumented)
-export type ISavedObjectsExporter = PublicMethodsOf<SavedObjectsExporter>;
+// @public
+export interface ISavedObjectsExporter {
+    exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
+    exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
+}
 
-// @public (undocumented)
-export type ISavedObjectsImporter = PublicMethodsOf<SavedObjectsImporter>;
+// @public
+export interface ISavedObjectsImporter {
+    import(options: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    resolveImportErrors(options: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
+}
 
 // @public (undocumented)
 export interface ISavedObjectsPointInTimeFinder<T, A> {
@@ -2382,15 +2387,17 @@ export interface SavedObjectsExportByTypeOptions extends SavedObjectExportBaseOp
     types: string[];
 }
 
-// @public (undocumented)
-export class SavedObjectsExporter {
+// @internal (undocumented)
+export class SavedObjectsExporter implements ISavedObjectsExporter {
     constructor({ savedObjectsClient, typeRegistry, exportSizeLimit, logger, }: {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
         exportSizeLimit: number;
         logger: Logger;
     });
+    // (undocumented)
     exportByObjects(options: SavedObjectsExportByObjectOptions): Promise<Readable>;
+    // (undocumented)
     exportByTypes(options: SavedObjectsExportByTypeOptions): Promise<Readable>;
 }
 
@@ -2534,14 +2541,16 @@ export interface SavedObjectsImportConflictError {
     type: 'conflict';
 }
 
-// @public (undocumented)
-export class SavedObjectsImporter {
+// @internal (undocumented)
+export class SavedObjectsImporter implements ISavedObjectsImporter {
     constructor({ savedObjectsClient, typeRegistry, importSizeLimit, }: {
         savedObjectsClient: SavedObjectsClientContract;
         typeRegistry: ISavedObjectTypeRegistry;
         importSizeLimit: number;
     });
+    // (undocumented)
     import({ readStream, createNewCopies, namespace, overwrite, refresh, }: SavedObjectsImportOptions): Promise<SavedObjectsImportResponse>;
+    // (undocumented)
     resolveImportErrors({ readStream, createNewCopies, namespace, retries, }: SavedObjectsResolveImportErrorsOptions): Promise<SavedObjectsImportResponse>;
 }
 
@@ -2939,6 +2948,7 @@ export interface SavedObjectsUpdateObjectsSpacesResponseObject {
 export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedObjectsBaseOptions {
     references?: SavedObjectReference[];
     refresh?: MutatingOperationRefreshSetting;
+    retryOnConflict?: number;
     upsert?: Attributes;
     version?: string;
 }

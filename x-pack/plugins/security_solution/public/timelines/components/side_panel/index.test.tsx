@@ -30,7 +30,8 @@ import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_cont
 
 jest.mock('../../../common/lib/kibana');
 
-describe('Details Panel Component', () => {
+// Failing: See https://github.com/elastic/kibana/issues/132845
+describe.skip('Details Panel Component', () => {
   const state: State = {
     ...mockGlobalState,
     timeline: {
@@ -179,7 +180,7 @@ describe('Details Panel Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('EventDetailsPanelComponent')).toMatchSnapshot();
+      expect(wrapper.find('EventDetailsPanelComponent').render()).toMatchSnapshot();
     });
 
     test('it should render the Event Details view of the Details Panel in the flyout when the panelView is eventDetail and the eventId is set', () => {

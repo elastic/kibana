@@ -13,15 +13,21 @@ import {
   EuiFilterSelectItem,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiPopover,
   EuiPortal,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import styled from 'styled-components';
 
 import type { Agent, AgentPolicy } from '../../../../types';
 import { AgentEnrollmentFlyout, SearchBar } from '../../../../components';
 import { AGENTS_INDEX } from '../../../../constants';
+
+import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
 
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
@@ -58,6 +64,10 @@ const statusFilters = [
     }),
   },
 ];
+
+const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
+  padding: ${(props) => props.theme.eui.paddingSizes.s};
+`;
 
 export const SearchAndFilterBar: React.FunctionComponent<{
   agentPolicies: AgentPolicy[];
@@ -219,21 +229,45 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                   panelPaddingSize="none"
                 >
                   <div className="euiFilterSelect__items">
-                    {tags.map((tag, index) => (
-                      <EuiFilterSelectItem
-                        checked={selectedTags.includes(tag) ? 'on' : undefined}
-                        key={index}
+                    <>
+                      {tags.map((tag, index) => (
+                        <EuiFilterSelectItem
+                          checked={selectedTags.includes(tag) ? 'on' : undefined}
+                          key={index}
+                          onClick={() => {
+                            if (selectedTags.includes(tag)) {
+                              removeTagsFilter(tag);
+                            } else {
+                              addTagsFilter(tag);
+                            }
+                          }}
+                        >
+                          {tag.length > MAX_TAG_DISPLAY_LENGTH ? (
+                            <EuiToolTip content={tag}>
+                              <span>{truncateTag(tag)}</span>
+                            </EuiToolTip>
+                          ) : (
+                            tag
+                          )}
+                        </EuiFilterSelectItem>
+                      ))}
+
+                      <EuiHorizontalRule margin="none" />
+
+                      <ClearAllTagsFilterItem
+                        showIcons={false}
                         onClick={() => {
-                          if (selectedTags.includes(tag)) {
-                            removeTagsFilter(tag);
-                          } else {
-                            addTagsFilter(tag);
-                          }
+                          onSelectedTagsChange([]);
                         }}
                       >
-                        {tag}
-                      </EuiFilterSelectItem>
-                    ))}
+                        <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="crossInACircleFilled" color="danger" size="s" />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>Clear all</EuiFlexItem>
+                        </EuiFlexGroup>
+                      </ClearAllTagsFilterItem>
+                    </>
                   </div>
                 </EuiPopover>
                 <EuiPopover
