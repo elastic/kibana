@@ -125,9 +125,9 @@ export function TimeseriesChart({
     // Using custom legendSort here when comparing expected bounds
     // because by default elastic-charts will show legends for expected bounds first
     // but for consistency, we are making `Expected bounds` last
-    if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
+    if ((a as XYChartSeriesIdentifier)?.specId?.startsWith(expectedBoundsTitle))
       return -1;
-    if ((b as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)
+    if ((b as XYChartSeriesIdentifier)?.specId?.startsWith(expectedBoundsTitle))
       return -1;
     return 1;
   };

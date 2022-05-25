@@ -55,6 +55,7 @@ export function TimeComparison() {
 
   const comparisonOptions = useMemo(() => {
     const matchingRoutes = apmRouter.getRoutesToMatch(location.pathname);
+    // Only show the "Expected bounds" option in Overview and Transactions tabs
     const showExpectedBoundsForThisTab = matchingRoutes.some(
       (d) =>
         d.path === '/services/{serviceName}/overview' ||

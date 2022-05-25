@@ -24,6 +24,7 @@ import { anomalySearch } from './anomaly_search';
 import { getAnomalyResultBucketSize } from './get_anomaly_result_bucket_size';
 import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
 
+const FALLBACK_ML_BUCKET_SPAN = 15; // minutes
 export async function getAnomalyTimeseries({
   serviceName,
   transactionType,
@@ -58,18 +59,24 @@ export async function getAnomalyTimeseries({
       j.datafeedState !== undefined && j.environment === preferredEnvironment
   )?.bucketSpan;
 
-  // If the calculated bucketSize is smaller than the bucket span interval,
-  // use the original job's bucket_span
-  const minBucketSize = preferredBucketSpan
-    ? parseInterval(preferredBucketSpan)?.asSeconds()
-    : undefined;
+  const minBucketSize =
+    parseInterval(
+      preferredBucketSpan ?? `${FALLBACK_ML_BUCKET_SPAN}m`
+    )?.asSeconds() ?? FALLBACK_ML_BUCKET_SPAN * 60; // secs
+
+  // Expected bounds (aka ML model plots) are stored as points in time, in intervals of the predefined bucket_span,
+  // so to query bounds that include start and end time
+  // we need to append bucket size before and after the range
+  const rangeFrom = start - minBucketSize * 1000; // ms
+  const rangeTo = end + minBucketSize * 1000; // ms
 
   const { intervalString } = getAnomalyResultBucketSize({
-    start,
-    end,
+    start: rangeFrom,
+    end: rangeTo,
+    // If the calculated bucketSize is smaller than the bucket span interval,
+    // use the original job's bucket_span
     minBucketSize,
   });
-
   const anomaliesResponse = await anomalySearch(
     mlSetup.mlSystem.mlAnomalySearch,
     {
@@ -82,7 +89,7 @@ export async function getAnomalyTimeseries({
                 serviceName,
                 transactionType,
               }),
-              ...rangeQuery(start, end, 'timestamp'),
+              ...rangeQuery(rangeFrom, rangeTo, 'timestamp'),
               ...apmMlJobsQuery(mlJobs),
             ],
           },
@@ -128,8 +135,8 @@ export async function getAnomalyTimeseries({
                   field: 'timestamp',
                   fixed_interval: intervalString,
                   extended_bounds: {
-                    min: start,
-                    max: end,
+                    min: rangeFrom,
+                    max: rangeTo,
                   },
                 },
                 aggs: {
