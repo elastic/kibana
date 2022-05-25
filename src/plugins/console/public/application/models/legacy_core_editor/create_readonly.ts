@@ -8,8 +8,7 @@
 
 import _ from 'lodash';
 import ace from 'brace';
-// @ts-ignore
-import * as OutputMode from './mode/output';
+import { Mode } from './mode/output';
 import smartResize from './smart_resize';
 
 export interface CustomAceEditor extends ace.Editor {
@@ -24,7 +23,7 @@ export interface CustomAceEditor extends ace.Editor {
 export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
   const output: CustomAceEditor = ace.acequire('ace/ace').edit(element);
 
-  const outputMode = new OutputMode.Mode();
+  const outputMode = new Mode();
 
   output.$blockScrolling = Infinity;
   output.resize = smartResize(output);
@@ -36,7 +35,7 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
 
     const session = output.getSession();
 
-    session.setMode(val ? mode || outputMode : 'ace/mode/text');
+    session.setMode(val ? (mode as string) || (outputMode as unknown as string) : 'ace/mode/text');
     session.setValue(val);
     if (typeof cb === 'function') {
       setTimeout(cb);

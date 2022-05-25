@@ -50,7 +50,7 @@ export class OutputJsonHighlightRules extends JsonHighlightRules {
       }
     );
 
-    if (this.constructor === OutputJsonHighlightRules) {
+    if (this instanceof OutputJsonHighlightRules) {
       this.normalizeRules();
     }
   }
