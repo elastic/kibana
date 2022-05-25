@@ -10,7 +10,12 @@ import type { ViewsCounters } from './types';
 
 export const API_BASE_PATH = '/api/user_content';
 
-export const metadataEventTypes = ['viewed:kibana', 'viewed:api'] as const;
+export const metadataEventTypes = [
+  'viewed:kibana',
+  'viewed:api',
+  'created:kibana',
+  'created:api',
+] as const;
 
 /** The **days** we want to aggregate events count */
 export const EVENTS_COUNT_GRANULARITY = [7, 14, 30, 45, 60, 90] as const;

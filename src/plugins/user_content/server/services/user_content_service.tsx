@@ -108,6 +108,19 @@ export class UserContentService {
       });
       return updatedObject;
     });
+
+    // Hook after saving a user generated saved object
+    this.savedObjects!.post('create', async (objects) => {
+      this.metadataEventsService?.bulkRegisterEvents(
+        objects.map(({ id: soId, type }) => ({
+          type: 'created:kibana',
+          data: {
+            so_id: soId,
+            so_type: type,
+          },
+        }))
+      );
+    });
   }
 
   /**
