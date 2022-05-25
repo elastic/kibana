@@ -44,7 +44,9 @@ export const AlertsList = ({ children, onInspect }: AlertsListDeps) => (
     <div>
       <FormattedMessage id="xpack.kubernetesSecurity.widget.alerts" defaultMessage="Alerts" />
     </div>
-    <div css={alertsList}>{children}</div>
+    <div className="eui-yScroll" css={alertsList}>
+      {children}
+    </div>
     {onInspect && (
       <EuiButtonIcon css={alertsInspect} iconType="inspect" color="primary" onClick={onInspect} />
     )}
