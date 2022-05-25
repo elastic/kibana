@@ -10,6 +10,8 @@ import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
 import {
   BrowserFieldsCodec,
+  ProjectBrowserMonitorCodec,
+  ProjectBrowserMonitor,
   ConfigKey,
   DataStream,
   DataStreamCodec,
@@ -73,6 +75,45 @@ export function validateMonitor(monitorFields: MonitorFields): {
       valid: false,
       reason: `Monitor is not a valid monitor of type ${monitorType}`,
       details: formatErrors(decodedMonitor.left).join(' | '),
+      payload: monitorFields,
+    };
+  }
+
+  return { valid: true, reason: '', details: '', payload: monitorFields };
+}
+
+export function validateProjectMonitor(
+  monitorFields: ProjectBrowserMonitor,
+  projectId: string
+): {
+  valid: boolean;
+  reason: string;
+  details: string;
+  payload: object;
+} {
+  const locationsError =
+    monitorFields.locations && monitorFields.locations.length === 0
+      ? 'Invalid value "[]" supplied to field "locations"'
+      : '';
+  // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
+  const decodedMonitor = ProjectBrowserMonitorCodec.decode(monitorFields);
+
+  if (isLeft(decodedMonitor)) {
+    return {
+      valid: false,
+      reason: `Failed to save or update monitor. Configuration is not valid`,
+      details: [...formatErrors(decodedMonitor.left), locationsError]
+        .filter((error) => error !== '')
+        .join(' | '),
+      payload: monitorFields,
+    };
+  }
+
+  if (locationsError) {
+    return {
+      valid: false,
+      reason: `Failed to save or update monitor. Configuration is not valid`,
+      details: locationsError,
       payload: monitorFields,
     };
   }

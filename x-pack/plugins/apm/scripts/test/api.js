@@ -13,7 +13,7 @@ const childProcess = require('child_process');
 
 const { argv } = yargs(process.argv.slice(2))
   .option('basic', {
-    default: true,
+    default: false,
     type: 'boolean',
     description: 'Run tests with basic license',
   })
@@ -25,13 +25,12 @@ const { argv } = yargs(process.argv.slice(2))
   .option('server', {
     default: false,
     type: 'boolean',
-    description: 'Start Elasticsearch and kibana',
+    description: 'Only start ES and Kibana',
   })
   .option('runner', {
     default: false,
     type: 'boolean',
-    description:
-      'Run all tests (an instance of Elasticsearch and kibana are needs to be available)',
+    description: 'Only run tests',
   })
   .option('grep', {
     alias: 'spec',
@@ -48,6 +47,11 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'number',
     description: 'Repeat the test n number of times',
   })
+  .option('updateSnapshots', {
+    default: false,
+    type: 'boolean',
+    description: 'Update snapshots',
+  })
   .check((argv) => {
     const { inspect, runner } = argv;
     if (inspect && !runner) {
@@ -58,7 +62,11 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const { trial, server, runner, grep, inspect } = argv;
+const { basic, trial, server, runner, grep, inspect, updateSnapshots } = argv;
+
+if (trial === false && basic === false) {
+  throw new Error('Please specify either --trial or --basic');
+}
 
 const license = trial ? 'trial' : 'basic';
 
@@ -71,11 +79,16 @@ if (server) {
   ftrScript = 'functional_test_runner';
 }
 
-const inspectArg = inspect ? '--inspect-brk' : '';
-const grepArg = grep ? `--grep "${grep}"` : '';
-const cmd = `node ${inspectArg} ../../../../scripts/${ftrScript} ${grepArg} --config ../../../../test/apm_api_integration/${license}/config.ts`;
+const cmd = [
+  'node',
+  ...(inspect ? ['--inspect-brk'] : []),
+  `../../../../scripts/${ftrScript}`,
+  ...(grep ? [`--grep "${grep}"`] : []),
+  ...(updateSnapshots ? [`--updateSnapshots`] : []),
+  `--config ../../../../test/apm_api_integration/${license}/config.ts`,
+].join(' ');
 
-console.log(`Running ${cmd}`);
+console.log(`Running: "${cmd}"`);
 
 function runTests() {
   childProcess.execSync(cmd, { cwd: path.join(__dirname), stdio: 'inherit' });

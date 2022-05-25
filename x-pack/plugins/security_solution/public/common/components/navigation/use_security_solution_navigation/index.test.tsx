@@ -122,18 +122,6 @@ describe('useSecuritySolutionNavigation', () => {
     expect(result?.current?.items?.[2].items?.[2].id).toEqual(SecurityPageName.users);
   });
 
-  // TODO: [detectionResponse] remove when page is no longer experimental
-  it('should include detectionAndResponse when feature flag is on', async () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
-      () => useSecuritySolutionNavigation(),
-      { wrapper: TestProviders }
-    );
-    expect(result?.current?.items?.[0].items?.[2].id).toEqual(
-      SecurityPageName.detectionAndResponse
-    );
-  });
-
   // TODO: [kubernetes] remove when no longer experimental
   it('should include kubernetes when feature flag is on', async () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
