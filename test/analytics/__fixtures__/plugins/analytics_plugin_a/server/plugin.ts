@@ -70,7 +70,11 @@ export class AnalyticsPluginAPlugin implements Plugin {
 
         return res.ok({
           body: stats
-            .filter((counter) => counter.event_type === eventType)
+            .filter(
+              (counter) =>
+                counter.event_type === eventType &&
+                ['client', 'FTR-shipper'].includes(counter.source)
+            )
             .slice(-takeNumberOfCounters),
         });
       }
