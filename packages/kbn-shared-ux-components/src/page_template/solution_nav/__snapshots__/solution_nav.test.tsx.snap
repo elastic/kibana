@@ -237,7 +237,7 @@ exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
         size="xs"
       >
         <h2>
-          <ForwardRef
+          <KibanaSolutionAvatar
             className="kbnPageTemplateSolutionNav__avatar"
             iconType="logoElastic"
             name="Solution"

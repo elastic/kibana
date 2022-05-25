@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { AnalyticsNoDataPageProvider, AnalyticsNoDataPageKibanaProvider } from './services';
-export { AnalyticsNoDataPage } from './analytics_no_data_page';
+export { DataViewIllustration } from './data_view_illustration';

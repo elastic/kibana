@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { AnalyticsNoDataPageProvider, AnalyticsNoDataPageKibanaProvider } from './services';
-export { AnalyticsNoDataPage } from './analytics_no_data_page';
+export { ExitFullScreenButtonKibanaProvider, ExitFullScreenButtonProvider } from './services';
+export { ExitFullScreenButton as ExitFullScreenButtonComponent } from './exit_full_screen_button.component';
+export { ExitFullScreenButton } from './exit_full_screen_button';

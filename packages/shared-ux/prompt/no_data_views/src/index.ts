@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { AnalyticsNoDataPageProvider, AnalyticsNoDataPageKibanaProvider } from './services';
-export { AnalyticsNoDataPage } from './analytics_no_data_page';
+export { NoDataViewsPromptKibanaProvider, NoDataViewsPromptProvider } from './services';
+export type { NoDataViewsPromptKibanaServices, NoDataViewsPromptServices } from './services';
+export { NoDataViewsPrompt } from './no_data_views';
+export { NoDataViewsPrompt as NoDataViewsPromptComponent } from './no_data_views.component';

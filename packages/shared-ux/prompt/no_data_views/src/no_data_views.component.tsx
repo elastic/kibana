@@ -9,11 +9,11 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
+import { EuiButton, EuiEmptyPrompt, EuiEmptyPromptProps, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiEmptyPrompt, EuiEmptyPromptProps } from '@elastic/eui';
+import { withSuspense } from '@kbn/shared-ux-utility';
 
-import { DataViewIllustration } from './data_view_illustration';
 import { DocumentationLink } from './documentation_link';
 
 export interface Props {
@@ -87,8 +87,19 @@ export const NoDataViewsPrompt = ({
     </p>
   );
 
-  const icon = <DataViewIllustration />;
   const footer = dataViewsDocLink ? <DocumentationLink href={dataViewsDocLink} /> : undefined;
+
+  // Load this illustration lazily
+  const Illustration = withSuspense(
+    React.lazy(() =>
+      import('./data_view_illustration').then(({ DataViewIllustration }) => {
+        return { default: DataViewIllustration };
+      })
+    ),
+    <EuiPanel color="subdued" style={{ width: 226, height: 206 }} />
+  );
+
+  const icon = <Illustration />;
 
   return (
     <EuiEmptyPrompt
