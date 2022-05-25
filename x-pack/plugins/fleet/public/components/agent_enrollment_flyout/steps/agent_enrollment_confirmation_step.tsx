@@ -63,17 +63,18 @@ export const AgentEnrollmentConfirmationStep = ({
       : i18n.translate('xpack.fleet.agentEnrollment.stepAgentEnrollmentConfirmation', {
           defaultMessage: 'Confirm agent enrollment',
         }),
-    children: poll ? (
-      <ConfirmAgentEnrollment
-        policyId={selectedPolicyId}
-        troubleshootLink={troubleshootLink}
-        onClickViewAgents={onClickViewAgents}
-        agentCount={agentCount}
-        showLoading={showLoading}
-      />
-    ) : (
-      <AgentEnrollmentPrePollInstructions troubleshootLink={troubleshootLink} />
-    ),
+    children:
+      !!isComplete || poll ? (
+        <ConfirmAgentEnrollment
+          policyId={selectedPolicyId}
+          troubleshootLink={troubleshootLink}
+          onClickViewAgents={onClickViewAgents}
+          agentCount={agentCount}
+          showLoading={!isComplete || showLoading}
+        />
+      ) : (
+        <AgentEnrollmentPrePollInstructions troubleshootLink={troubleshootLink} />
+      ),
     status: !isComplete ? 'incomplete' : 'complete',
   };
 };
