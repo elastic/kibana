@@ -420,7 +420,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.jobWizardCommon.advanceToSummarySection();
         });
 
-        it('job creation runs the job and displays it correctly in the job list', async () => {
+        // Failing ES Promotion: https://buildkite.com/elastic/kibana-elasticsearch-snapshot-verify/builds/1253
+        it.skip('job creation runs the job and displays it correctly in the job list', async () => {
           await ml.testExecution.logTestStep(
             'job creation creates the job and finishes processing'
           );

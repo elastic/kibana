@@ -137,11 +137,12 @@ Note:
 
 
 ### Setup options
-| Option                 | Type      | Default    | Description                                                                                             |
-|------------------------|-----------|:-----------|---------------------------------------------------------------------------------------------------------|
-| `--numShards`          | [number]  |            | Updates the component templates to update the number of primary shards, requires cloudId to be provided |
-| `--clean`              | [boolean] | `false`    | Clean APM data before indexing new data                                                                 |
-| `--workers`            | [number]  |            | Amount of Node.js worker threads                                                                        |
-| `--logLevel`           | [enum]    | `info`     | Log level                                                                                               |
-| `--gcpRepository`      | [string]  |            | Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format                    |
+| Option            | Type      | Default    | Description                                                                                             |
+|-------------------|-----------|:-----------|---------------------------------------------------------------------------------------------------------|
+| `--numShards`     | [number]  |            | Updates the component templates to update the number of primary shards, requires cloudId to be provided |
+| `--clean`         | [boolean] | `false`    | Clean APM data before indexing new data                                                                 |
+| `--workers`       | [number]  |            | Amount of Node.js worker threads                                                                        |
+| `--logLevel`      | [enum]    | `info`     | Log level                                                                                               |
+| `--gcpRepository` | [string]  |            | Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format                    |
+| `-p`              | [string]  |            | Specify multiple sets of streamaggregators to be included in the StreamProcessor                        |
 
