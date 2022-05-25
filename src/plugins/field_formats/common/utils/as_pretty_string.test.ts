@@ -21,7 +21,7 @@ describe('asPrettyString', () => {
 
   test('Converts objects values into presentable strings', () => {
     expect(asPrettyString({ key: 'value' })).toBe('{\n  "key": "value"\n}');
-    expect(asPrettyString({ key: 'value' }, { skipStringifiedJSONFormatting: true })).toBe(
+    expect(asPrettyString({ key: 'value' }, { skipFormattingInStringifiedJSON: true })).toBe(
       '{"key":"value"}'
     );
   });

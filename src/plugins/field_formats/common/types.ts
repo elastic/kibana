@@ -18,7 +18,7 @@ export type FieldFormatsContentType = 'html' | 'text';
 export interface HtmlContextTypeOptions {
   field?: { name: string };
   hit?: { highlight?: Record<string, string[]> };
-  skipStringifiedJSONFormatting?: boolean;
+  skipFormattingInStringifiedJSON?: boolean;
 }
 
 /**
@@ -32,7 +32,7 @@ export type HtmlContextTypeConvert = (value: any, options?: HtmlContextTypeOptio
  * @remark
  */
 export interface TextContextTypeOptions {
-  skipStringifiedJSONFormatting?: boolean;
+  skipFormattingInStringifiedJSON?: boolean;
 }
 
 /**

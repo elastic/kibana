@@ -11,14 +11,14 @@
  */
 export function asPrettyString(
   val: unknown,
-  options?: { skipStringifiedJSONFormatting?: boolean }
+  options?: { skipFormattingInStringifiedJSON?: boolean }
 ): string {
   if (val === null || val === undefined) return ' - ';
   switch (typeof val) {
     case 'string':
       return val;
     case 'object':
-      return options?.skipStringifiedJSONFormatting
+      return options?.skipFormattingInStringifiedJSON
         ? JSON.stringify(val)
         : JSON.stringify(val, null, '  ');
     default:

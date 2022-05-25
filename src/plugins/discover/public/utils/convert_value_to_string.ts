@@ -55,7 +55,7 @@ export const convertValueToString = ({
         field,
         'text',
         {
-          skipStringifiedJSONFormatting: disableMultiline,
+          skipFormattingInStringifiedJSON: disableMultiline,
         }
       );
 
