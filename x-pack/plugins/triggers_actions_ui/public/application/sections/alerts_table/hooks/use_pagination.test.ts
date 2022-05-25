@@ -11,25 +11,20 @@ describe('usePagination', () => {
   const onPageChange = jest.fn();
   const pageIndex = 0;
   const pageSize = 10;
-  const alertsCount = 5;
 
   beforeEach(() => {
     onPageChange.mockClear();
   });
 
   it('should return the pagination information and callback functions', () => {
-    const { result } = renderHook(() =>
-      usePagination({ onPageChange, pageIndex, pageSize, alertsCount })
-    );
+    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex, pageSize }));
     expect(result.current.pagination).toStrictEqual({ pageIndex, pageSize });
     expect(result.current.onChangePageSize).toBeDefined();
     expect(result.current.onChangePageIndex).toBeDefined();
   });
 
   it('should change the pagination when `onChangePageSize` is called', () => {
-    const { result } = renderHook(() =>
-      usePagination({ onPageChange, pageIndex, pageSize, alertsCount })
-    );
+    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex, pageSize }));
 
     act(() => {
       result.current.onChangePageSize(20);
@@ -39,9 +34,7 @@ describe('usePagination', () => {
   });
 
   it('should change the pagination when `onChangePageIndex` is called', () => {
-    const { result } = renderHook(() =>
-      usePagination({ onPageChange, pageIndex, pageSize, alertsCount })
-    );
+    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex, pageSize }));
 
     act(() => {
       result.current.onChangePageIndex(1);
@@ -51,11 +44,9 @@ describe('usePagination', () => {
   });
 
   it('should paginate the alert flyout', () => {
-    const { result } = renderHook(() =>
-      usePagination({ onPageChange, pageIndex, pageSize, alertsCount })
-    );
+    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex, pageSize }));
 
-    expect(result.current.flyoutAlertIndex).toBe(-1);
+    expect(result.current.flyoutAlertIndex).toBe(0);
 
     act(() => {
       result.current.onPaginateFlyout(0);
@@ -77,25 +68,21 @@ describe('usePagination', () => {
   });
 
   it('should paginate the flyout when we need to change the page index going back', () => {
-    const { result } = renderHook(() =>
-      usePagination({ onPageChange, pageIndex: 0, pageSize: 1, alertsCount })
-    );
+    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex: 0, pageSize: 1 }));
 
     act(() => {
-      result.current.onPaginateFlyout(-2);
+      result.current.onPaginateFlyout(-1);
     });
 
     // It should reset to the first alert in the table
     expect(result.current.flyoutAlertIndex).toBe(0);
 
     // It should go to the last page
-    expect(result.current.pagination).toStrictEqual({ pageIndex: 4, pageSize: 1 });
+    expect(result.current.pagination).toStrictEqual({ pageIndex: 0, pageSize: 1 });
   });
 
   it('should paginate the flyout when we need to change the page index going forward', () => {
-    const { result } = renderHook(() =>
-      usePagination({ onPageChange, pageIndex: 0, pageSize: 1, alertsCount })
-    );
+    const { result } = renderHook(() => usePagination({ onPageChange, pageIndex: 0, pageSize: 1 }));
 
     act(() => {
       result.current.onPaginateFlyout(1);

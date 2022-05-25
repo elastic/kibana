@@ -9,7 +9,6 @@ import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/c
 
 type PaginationProps = RuleRegistrySearchRequestPagination & {
   onPageChange: (pagination: RuleRegistrySearchRequestPagination) => void;
-  alertsCount: number;
 };
 
 export type UsePagination = (props: PaginationProps) => {
@@ -22,12 +21,12 @@ export type UsePagination = (props: PaginationProps) => {
   setFlyoutAlertIndex: (alertIndex: number) => void;
 };
 
-export function usePagination({ onPageChange, pageIndex, pageSize, alertsCount }: PaginationProps) {
+export function usePagination({ onPageChange, pageIndex, pageSize }: PaginationProps) {
   const [pagination, setPagination] = useState<RuleRegistrySearchRequestPagination>({
     pageIndex,
     pageSize,
   });
-  const [flyoutAlertIndex, setFlyoutAlertIndex] = useState<number>(-1);
+  const [flyoutAlertIndex, setFlyoutAlertIndex] = useState<number>(0);
   const onChangePageSize = useCallback(
     (_pageSize) => {
       setPagination((state) => ({
@@ -47,34 +46,35 @@ export function usePagination({ onPageChange, pageIndex, pageSize, alertsCount }
     [setPagination, onPageChange, pagination.pageSize]
   );
 
-  const paginateFlyout = useCallback(
-    (newFlyoutAlertIndex: number) => {
-      const lastPage = Math.floor(alertsCount / pagination.pageSize) - 1;
-      if (newFlyoutAlertIndex < 0) {
-        setFlyoutAlertIndex(pagination.pageSize - 1);
-        onChangePageIndex(pagination.pageIndex === 0 ? lastPage : pagination.pageIndex - 1);
-        return;
-      }
-
-      if (newFlyoutAlertIndex >= pagination.pageSize) {
-        setFlyoutAlertIndex(0);
-        onChangePageIndex(
-          pagination.pageIndex === lastPage ? 0 : Math.min(pagination.pageIndex + 1, lastPage)
-        );
-        return;
-      }
-
-      setFlyoutAlertIndex(newFlyoutAlertIndex);
-    },
-    [pagination, alertsCount, onChangePageIndex]
-  );
-
   const onPaginateFlyout = useCallback(
     (nextPageIndex: number) => {
-      nextPageIndex -= pagination.pageSize * pagination.pageIndex;
-      paginateFlyout(nextPageIndex);
+      setFlyoutAlertIndex((prevFlyoutAlertIndex) => {
+        if (nextPageIndex < 0) {
+          onChangePageIndex(0);
+          return 0;
+        }
+        const actualPageIndex = pagination.pageSize * pagination.pageIndex + prevFlyoutAlertIndex;
+        let tempAlertIdx = actualPageIndex;
+        if (nextPageIndex > actualPageIndex) {
+          const idxToAdd = nextPageIndex - actualPageIndex;
+          tempAlertIdx = actualPageIndex + idxToAdd;
+        } else if (nextPageIndex < actualPageIndex) {
+          const idxToSub = actualPageIndex - nextPageIndex;
+          tempAlertIdx = actualPageIndex - idxToSub;
+        } else {
+          tempAlertIdx = 0;
+        }
+        const newPageIndex = Math.floor(tempAlertIdx / pagination.pageSize);
+        const newAlertIndex =
+          tempAlertIdx >= pagination.pageSize * newPageIndex
+            ? tempAlertIdx - pagination.pageSize * newPageIndex
+            : tempAlertIdx;
+
+        onChangePageIndex(newPageIndex);
+        return newAlertIndex;
+      });
     },
-    [paginateFlyout, pagination.pageSize, pagination.pageIndex]
+    [onChangePageIndex, pagination.pageIndex, pagination.pageSize]
   );
 
   return {
