@@ -55,6 +55,7 @@ export const syntheticsEnablementReducer = createReducer(initialState, (builder)
       state.enablement = {
         canEnable: state.enablement?.canEnable ?? false,
         areApiKeysEnabled: state.enablement?.areApiKeysEnabled ?? false,
+        canManageApiKeys: state.enablement?.canManageApiKeys ?? false,
         isEnabled: false,
       };
     })
@@ -72,6 +73,7 @@ export const syntheticsEnablementReducer = createReducer(initialState, (builder)
       state.enablement = {
         canEnable: state.enablement?.canEnable ?? false,
         areApiKeysEnabled: state.enablement?.areApiKeysEnabled ?? false,
+        canManageApiKeys: state.enablement?.canManageApiKeys ?? false,
         isEnabled: true,
       };
     })
