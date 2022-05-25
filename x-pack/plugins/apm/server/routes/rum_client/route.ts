@@ -10,9 +10,7 @@ import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
 import { getClientMetrics } from './get_client_metrics';
 import { getLongTaskMetrics } from './get_long_task_metrics';
-import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getPageViewTrends } from './get_page_view_trends';
-import { getPageLoadDistBreakdown } from './get_pl_dist_breakdown';
 import { getVisitorBreakdown } from './get_visitor_breakdown';
 import { hasRumData } from './has_rum_data';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -86,78 +84,6 @@ const rumClientMetricsRoute = createApmServerRoute({
       start,
       end,
     });
-  },
-});
-
-const rumPageLoadDistributionRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/page-load-distribution',
-  params: t.type({
-    query: t.intersection([uxQueryRt, percentileRangeRt]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    pageLoadDistribution: {
-      pageLoadDistribution: Array<{ x: number; y: number }>;
-      percentiles: Record<string, number | null> | undefined;
-      minDuration: number;
-      maxDuration: number;
-    } | null;
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { minPercentile, maxPercentile, urlQuery, start, end },
-    } = resources.params;
-
-    const pageLoadDistribution = await getPageLoadDistribution({
-      setup,
-      minPercentile,
-      maxPercentile,
-      urlQuery,
-      start,
-      end,
-    });
-
-    return { pageLoadDistribution };
-  },
-});
-
-const rumPageLoadDistBreakdownRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/page-load-distribution/breakdown',
-  params: t.type({
-    query: t.intersection([
-      uxQueryRt,
-      percentileRangeRt,
-      t.type({ breakdown: t.string }),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    pageLoadDistBreakdown:
-      | Array<{ name: string; data: Array<{ x: number; y: number }> }>
-      | undefined;
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { minPercentile, maxPercentile, breakdown, urlQuery, start, end },
-    } = resources.params;
-
-    const pageLoadDistBreakdown = await getPageLoadDistBreakdown({
-      setup,
-      minPercentile: Number(minPercentile),
-      maxPercentile: Number(maxPercentile),
-      breakdown,
-      urlQuery,
-      start,
-      end,
-    });
-
-    return { pageLoadDistBreakdown };
   },
 });
 
@@ -298,8 +224,6 @@ async function setupUXRequest<TParams extends SetupUXRequestParams>(
 
 export const rumRouteRepository = {
   ...rumClientMetricsRoute,
-  ...rumPageLoadDistributionRoute,
-  ...rumPageLoadDistBreakdownRoute,
   ...rumPageViewsTrendRoute,
   ...rumVisitorsBreakdownRoute,
   ...rumLongTaskMetrics,
