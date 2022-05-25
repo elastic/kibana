@@ -9,7 +9,6 @@ import React, { useState, useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { sortBy } from 'lodash';
-import usePrevious from 'react-use/lib/usePrevious';
 import { getType } from '@kbn/interpreter';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../../i18n';
@@ -30,8 +29,8 @@ const getMathValue = (argValue, columns) => {
     const val = matchedCol ? maybeQuoteValue(matchedCol.name) : argValue;
     const mathValue = getFormObject(val);
 
-    const validColumn = columns.some(({ name }) => mathValue.column === name);
-    return { ...mathValue, column: validColumn ? mathValue.column : '' };
+    const isValidColumn = columns.some(({ name }) => mathValue.column === name);
+    return { ...mathValue, column: mathValue.column, isValidColumn };
   } catch (e) {
     return { error: e.message };
   }
@@ -47,8 +46,6 @@ const DatacolumnArgInput = ({
   typeInstance,
 }) => {
   const [mathValue, setMathValue] = useState(getMathValue(argValue, columns));
-  const prevColumns = usePrevious(columns);
-  const prevMathValue = usePrevious(mathValue);
 
   const allowedTypes = typeInstance.options.allowedTypes || false;
   const onlyShowMathFunctions = typeInstance.options.onlyMath || false;
@@ -63,10 +60,9 @@ const DatacolumnArgInput = ({
         }
       }
 
-      // if there is no column value, paste empty expression
-      // it means, columns has been changed
+      // if there is no column value, do nothing
       if (valueNotSet(column)) {
-        return onValueChange('');
+        return setMathValue({ ...mathValue, fn });
       }
 
       // if fn is not set, just use the value input
@@ -77,26 +73,31 @@ const DatacolumnArgInput = ({
       // fn has a value, so use it as a math.js expression
       onValueChange(`${fn}(${maybeQuoteValue(column)})`);
     },
-    [onValueChange, columns]
+    [onValueChange, columns, mathValue]
   );
 
   useEffect(() => {
-    setMathValue(getMathValue(argValue, columns));
+    const newMathValue = getMathValue(argValue, columns);
+    setMathValue(newMathValue);
   }, [argValue, columns]);
 
   useEffect(() => {
-    if (
-      columns !== prevColumns &&
-      prevMathValue?.column !== mathValue.column &&
-      mathValue.column === ''
-    ) {
-      updateFunctionValue();
+    if (!mathValue.error && mathValue.column !== '' && !mathValue.isValidColumn) {
+      updateFunctionValue(mathValue.fn, columns[0].id);
     }
-  }, [prevColumns, columns, mathValue.column, prevMathValue?.column, updateFunctionValue]);
+  }, [
+    columns,
+    mathValue.column,
+    mathValue.error,
+    mathValue.fn,
+    mathValue.isValidColumn,
+    updateFunctionValue,
+  ]);
 
   const onChangeFn = useCallback(
-    ({ target: { value } }) => updateFunctionValue(value, mathValue.column),
-    [mathValue.column, updateFunctionValue]
+    ({ target: { value } }) =>
+      updateFunctionValue(value, mathValue.isValidColumn ? mathValue.column : ''),
+    [mathValue.column, mathValue.isValidColumn, updateFunctionValue]
   );
 
   const onChangeColumn = useCallback(
