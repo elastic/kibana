@@ -276,7 +276,7 @@ describe('PUT role', () => {
     });
 
     describe('with the create only option enabled', () => {
-      putRoleTest('should fail when role already esists', {
+      putRoleTest('should fail when role already exists', {
         name: 'existing-role',
         createOnly: true,
         payload: {},
