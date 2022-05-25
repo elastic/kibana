@@ -44,6 +44,11 @@ while read -r config; do
   lastCode=$?
   set -e
 
+  fileHeads "target/file-heads-jest-in-loop-before-rename.txt" target/kibana-coverage/jest
+  dirListing "target/dir-listing-jest-in-loop-before-rename.txt" target/kibana-coverage/jest
+
+exit 11
+
   if [[ -f target/kibana-coverage/jest/coverage-final.json ]]; then
     echo "--- Rename target/kibana-coverage/jest/coverage-final.json to avoid overwrite"
     mv target/kibana-coverage/jest/coverage-final.json "target/kibana-coverage/jest/coverage-$(date +%s%3N).json"
@@ -74,7 +79,6 @@ echo "--- Replace paths after all configs:"
 fileHeads "target/file-heads-jest-post-thread-and-before-replacement.txt" target/kibana-coverage/jest
 replacePaths "$KIBANA_DIR/target/kibana-coverage/jest"
 fileHeads "target/file-heads-jest-post-thread-and-after-replacement.txt" target/kibana-coverage/jest
-
 
 echo "--- Jest configs complete"
 printf "%s\n" "${results[@]}"
