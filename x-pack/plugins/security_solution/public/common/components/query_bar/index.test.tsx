@@ -243,34 +243,32 @@ describe('QueryBar ', () => {
     });
 
     test(' is only reference that changed when timelineId props get updated', async () => {
-      await act(async () => {
-        const wrapper = await getWrapper(
-          <Proxy
-            dateRangeFrom={DEFAULT_FROM}
-            dateRangeTo={DEFAULT_TO}
-            hideSavedQuery={false}
-            indexPattern={mockIndexPattern}
-            isRefreshPaused={true}
-            filterQuery={{ query: 'here: query', language: 'kuery' }}
-            filterManager={new FilterManager(mockUiSettingsForFilterManager)}
-            filters={[]}
-            onChangedQuery={mockOnChangeQuery}
-            onSubmitQuery={mockOnSubmitQuery}
-            onSavedQuery={mockOnSavedQuery}
-          />
-        );
-        const searchBarProps = wrapper.find(SearchBar).props();
-        const onChangedQueryRef = searchBarProps.onQueryChange;
-        const onSubmitQueryRef = searchBarProps.onQuerySubmit;
-        const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
+      const wrapper = await getWrapper(
+        <Proxy
+          dateRangeFrom={DEFAULT_FROM}
+          dateRangeTo={DEFAULT_TO}
+          hideSavedQuery={false}
+          indexPattern={mockIndexPattern}
+          isRefreshPaused={true}
+          filterQuery={{ query: 'here: query', language: 'kuery' }}
+          filterManager={new FilterManager(mockUiSettingsForFilterManager)}
+          filters={[]}
+          onChangedQuery={mockOnChangeQuery}
+          onSubmitQuery={mockOnSubmitQuery}
+          onSavedQuery={mockOnSavedQuery}
+        />
+      );
+      const searchBarProps = wrapper.find(SearchBar).props();
+      const onChangedQueryRef = searchBarProps.onQueryChange;
+      const onSubmitQueryRef = searchBarProps.onQuerySubmit;
+      const onSavedQueryRef = searchBarProps.onSavedQueryUpdated;
 
-        wrapper.setProps({ onSubmitQuery: jest.fn() });
-        wrapper.update();
+      wrapper.setProps({ onSubmitQuery: jest.fn() });
+      wrapper.update();
 
-        expect(onSubmitQueryRef).not.toEqual(wrapper.find(SearchBar).props().onQuerySubmit);
-        expect(onChangedQueryRef).toEqual(wrapper.find(SearchBar).props().onQueryChange);
-        expect(onSavedQueryRef).not.toEqual(wrapper.find(SearchBar).props().onSavedQueryUpdated);
-      });
+      expect(onSubmitQueryRef).not.toEqual(wrapper.find(SearchBar).props().onQuerySubmit);
+      expect(onChangedQueryRef).toEqual(wrapper.find(SearchBar).props().onQueryChange);
+      expect(onSavedQueryRef).not.toEqual(wrapper.find(SearchBar).props().onSavedQueryUpdated);
     });
   });
 
