@@ -27,7 +27,7 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
 
   output.$blockScrolling = Infinity;
   output.resize = smartResize(output);
-  output.update = (val: string, mode?: string | Mode, cb?: () => void) => {
+  output.update = (val, mode, cb) => {
     if (typeof mode === 'function') {
       cb = mode as () => void;
       mode = void 0;
@@ -36,7 +36,10 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
     const session = output.getSession();
     const currentMode = val ? mode || outputMode : 'ace/mode/text';
 
-    session.setMode(currentMode as string);
+    // @ts-ignore
+    // ignore ts error here due to type definition mistake in brace for setMode(mode: string): void;
+    // this method accepts string or SyntaxMode which is an object. See https://github.com/ajaxorg/ace/blob/13dc911dbc0ea31ca343d5744b3f472767458fc3/ace.d.ts#L467
+    session.setMode(currentMode);
     session.setValue(val);
     if (typeof cb === 'function') {
       setTimeout(cb);
