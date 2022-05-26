@@ -18,7 +18,6 @@ import { LogRetentionOptions } from '..';
 import { mountWithIntl } from '../../../../test_helpers';
 
 import { LogRetentionCallout } from '.';
-import { wrap } from 'module';
 
 describe('LogRetentionCallout', () => {
   const actions = { fetchLogRetention: jest.fn() };
