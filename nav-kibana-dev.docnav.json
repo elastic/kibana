@@ -203,7 +203,8 @@
             { "id": "kibDevDocsOpsExpect" },
             { "id": "kibDevDocsOpsAmbientStorybookTypes" },
             { "id": "kibDevDocsOpsAmbientUiTypes" },
-            { "id": "kibDevDocsOpsTestSubjSelector" }
+            { "id": "kibDevDocsOpsTestSubjSelector" },
+            { "id": "kibDevDocsOpsBazelRunner" }
           ]
         }
       ]
