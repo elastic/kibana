@@ -250,7 +250,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
 
   const handleOnHide = useCallback(() => {
     if (visibleConsole) {
-      consoleManagerClient.hide(visibleConsole.cl1ient.id);
+      consoleManagerClient.hide(visibleConsole.client.id);
     }
   }, [consoleManagerClient, visibleConsole]);
 

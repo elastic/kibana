@@ -38,7 +38,13 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
     );
 
     return (
-      <PageOverlay isHidden={isHidden}>
+      <PageOverlay
+        isHidden={isHidden}
+        data-test-subj="responderPageOverlay"
+        hideOnUrlPathnameChange
+        onHide={onHide}
+        enableScrolling
+      >
         <EuiPanel borderRadius="none" hasShadow={false} paddingSize="l" color="transparent">
           <AdministrationListPage
             title={RESPONDER_PAGE_TITLE}
