@@ -27,6 +27,7 @@ import { FlowTarget } from '../../../../common/search_strategy/security_solution
 import { EventDetailsPanel } from './event_details';
 import { useKibana } from '../../../common/lib/kibana';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
+import { first } from 'lodash';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -190,7 +191,7 @@ describe('Details Panel Component', () => {
         </TestProviders>
       );
       expect(
-        wrapper.find('[data-test-subj="timeline:details-panel:flyout"]').render()
+        wrapper.find('[data-test-subj="timeline:details-panel:flyout"]').first().render()
       ).toMatchSnapshot();
     });
 
@@ -264,7 +265,7 @@ describe('Details Panel Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('ExpandableHostDetails').render()).toMatchSnapshot();
+      expect(wrapper.find('ExpandableHostDetails').first().render()).toMatchSnapshot();
     });
   });
 
