@@ -56,8 +56,9 @@ export const PageLayout = memo<PageLayoutProps>(
     children,
     'data-test-subj': dataTestSubj,
   }) => {
+    const hideHeader = !pageTitle && !pageDescription && !actions && !headerBackComponent;
+
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const hideHeader = !pageTitle && !pageDescription && !actions;
 
     const bodyClassname = useMemo(() => {
       return classnames({

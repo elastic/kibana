@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, MouseEventHandler } from 'react';
+import React, { memo, ReactNode, useCallback, MouseEventHandler, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { PageLayout } from './page_layout';
@@ -39,6 +39,28 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
       [onHide]
     );
 
+    const layoutProps = useMemo(() => {
+      // If in `hidden` mode, then we don't render the html for the layout header section
+      // of the layout
+      if (isHidden) return {};
+
+      return {
+        pageTitle: RESPONDER_PAGE_TITLE,
+        headerHasBottomBorder: false,
+        scrollableBody: true,
+        headerBackComponent: (
+          <EuiButtonEmpty
+            flush="left"
+            size="xs"
+            iconType="arrowLeft"
+            onClick={handleBackToPageOnCLick}
+          >
+            {RESPONDER_PAGE_BACK_LABEL}
+          </EuiButtonEmpty>
+        ),
+      };
+    }, [handleBackToPageOnCLick, isHidden]);
+
     return (
       <PageOverlay
         isHidden={isHidden}
@@ -47,23 +69,7 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
         onHide={onHide}
         paddingSize="xl"
       >
-        <PageLayout
-          pageTitle={RESPONDER_PAGE_TITLE}
-          headerHasBottomBorder={false}
-          scrollableBody
-          headerBackComponent={
-            <EuiButtonEmpty
-              flush="left"
-              size="xs"
-              iconType="arrowLeft"
-              onClick={handleBackToPageOnCLick}
-            >
-              {RESPONDER_PAGE_BACK_LABEL}
-            </EuiButtonEmpty>
-          }
-        >
-          {runningConsoles}
-        </PageLayout>
+        <PageLayout {...layoutProps}>{runningConsoles}</PageLayout>
       </PageOverlay>
     );
   }
