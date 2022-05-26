@@ -204,6 +204,7 @@
             { "id": "kibDevDocsOpsAmbientStorybookTypes" },
             { "id": "kibDevDocsOpsAmbientUiTypes" },
             { "id": "kibDevDocsOpsTestSubjSelector" },
+            { "id": "kibDevDocsOpsBazelRunner" },
             { "id": "kibDevDocsOpsCliDevMode" }
           ]
         }
