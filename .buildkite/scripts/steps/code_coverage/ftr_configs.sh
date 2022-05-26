@@ -29,7 +29,7 @@ if [[ "$configs" == "" ]]; then
   configs=$(jq -r '.groups[env.JOB_NUM | tonumber].names | .[]' ftr_run_order.json)
 fi
 
-echo "---  Config(s) for this FTR Group:"
+echo "---   Config(s) for this FTR Group:"
 echo "${configs[@]}"
 
 failedConfigs=""
@@ -90,9 +90,6 @@ while read -r config; do
 
   echo "--- Config complete: $config"
 done <<<"$configs"
-
-#dirListing "target/dir-listing-functional-post-loop.txt" target/kibana-coverage/functional
-#fileHeads "target/file-heads-functional-post-loop.txt" target/kibana-coverage/functional
 
 # Each browser unload event, creates a new coverage file.
 # So, we merge them here.

@@ -21,8 +21,7 @@ echo "--- downloading jest test run order"
 buildkite-agent artifact download jest_run_order.json .
 configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
 
-echo "--- Print KIBANA_DIR"
-echo "### KIBANA_DIR: $KIBANA_DIR"
+echo "--- KIBANA_DIR: $KIBANA_DIR"
 
 echo "---  Config(s) for this JEST Group:"
 echo "${configs[@]}"

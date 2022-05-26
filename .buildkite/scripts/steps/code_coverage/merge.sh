@@ -12,21 +12,11 @@ first="$target/first"
 rest="$target/rest"
 
 filesCount() {
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    count=$(find "$1" -maxdepth 1 -type f | grep -vc ".DS*" | xargs) # xargs trims whitespace
-  else
-    count=$(find "$1" -maxdepth 1 -type f | wc -l | xargs) # xargs trims whitespace
-  fi
+  count=$(find "$1" -maxdepth 1 -type f | wc -l | xargs) # xargs trims whitespace
 }
 
 _head() {
-  if [[ "$OSTYPE" == "darwin"* ]]; then
-    count=$(find "$1" -maxdepth 1 -type f | grep -vc ".DS*" | xargs) # xargs trims whitespace
-    firstFile=$(find "$1" -maxdepth 1 -type f | grep -v ".DS*" | head -1)
-  else
-    count=$(find "$1" -maxdepth 1 -type f | wc -l | xargs) # xargs trims whitespace
-    firstFile=$(find "$1" -maxdepth 1 -type f | head -1)
-  fi
+  firstFile=$(find "$1" -maxdepth 1 -type f | head -1)
 }
 
 splitCoverage() {
@@ -59,10 +49,6 @@ splitMerge() {
   yarn nyc merge target/kibana-coverage/functional/rest target/kibana-coverage/functional/rest.json
   echo "### Report-Merge the 2 halves into one"
   yarn nyc report --nycrc-path src/dev/code_coverage/nyc_config/nyc.functional.config.js
-}
-
-listReports() {
-  ls -R $base
 }
 
 uniqueifyFunctional() {
