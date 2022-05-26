@@ -11,7 +11,9 @@ import * as TaskEither from 'fp-ts/lib/TaskEither';
 import { flatten } from 'lodash';
 import type {
   AggregationsMultiBucketAggregateBase,
+  Indices,
   QueryDslQueryContainer,
+  SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { SavedObjectsRawDocSource } from '../../serialization';
 import type { ElasticsearchClient } from '../../../elasticsearch';
@@ -52,38 +54,38 @@ export interface UnknownDocsFound {
  */
 export async function getAggregatedTypesDocuments(
   esClient: ElasticsearchClient,
-  targetIndices: string[] | string,
+  targetIndices: Indices,
   query?: QueryDslQueryContainer
 ): Promise<DocumentIdAndType[]> {
-  const body = await esClient.search<SavedObjectsRawDocSource>({
+  const params: SearchRequest = {
     index: targetIndices,
-    body: {
-      size: 0,
-      // apply the desired filters (e.g. filter out registered types)
-      query,
-      // aggregate docs by type, so that we have a sneak peak of all types
-      aggs: {
-        typesAggregation: {
-          terms: {
-            // assign type __UNKNOWN__ to those documents that don't define one
-            missing: '__UNKNOWN__',
-            field: 'type',
-            size: 1000, // collect up to 1000 types
-          },
-          aggs: {
-            docs: {
-              top_hits: {
-                size: 100, // collect up to 100 docs for each type
-                _source: {
-                  excludes: ['*'],
-                },
+    size: 0,
+    // apply the desired filters (e.g. filter out registered types)
+    query,
+    // aggregate docs by type, so that we have a sneak peak of all types
+    aggs: {
+      typesAggregation: {
+        terms: {
+          // assign type __UNKNOWN__ to those documents that don't define one
+          missing: '__UNKNOWN__',
+          field: 'type',
+          size: 1000, // collect up to 1000 types
+        },
+        aggs: {
+          docs: {
+            top_hits: {
+              size: 100, // collect up to 100 docs for each type
+              _source: {
+                excludes: ['*'],
               },
             },
           },
         },
       },
     },
-  });
+  };
+
+  const body = await esClient.search<SavedObjectsRawDocSource>(params);
 
   if (!body.aggregations) return [];
 
