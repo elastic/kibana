@@ -117,8 +117,8 @@ export class TaskScheduling {
   /**
    * Bulk updates schedules for tasks by ids.
    *
-   * @param taskIs - list of task ids
-   * @param schedule - new schedule
+   * @param taskIss string[] - list of task ids
+   * @param schedule IntervalSchedule - new schedule
    * @returns {Promise<ConcreteTaskInstance[]>}
    */
   public async bulkUpdateSchedules(

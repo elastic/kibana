@@ -27,6 +27,9 @@ import { TaskRunResult } from './task_running';
 import { mockLogger } from './test_utils';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
+import { mustBeAllOf } from './queries/query_clauses';
+
+const ONE_HOUR_IN_MS = 60 * 60 * 1000;
 
 jest.mock('uuid', () => ({
   v4: () => 'v4uuid',
@@ -134,6 +137,97 @@ describe('TaskScheduling', () => {
     });
   });
 
+  describe('bulkUpdateSchedules', () => {
+    const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+
+    beforeEach(() => {});
+
+    test('should search for tasks by ids and idle status', async () => {
+      mockTaskStore.fetch.mockResolvedValue({ docs: [] });
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '1h' });
+
+      expect(mockTaskStore.fetch).toHaveBeenCalledTimes(1);
+      expect(mockTaskStore.fetch).toHaveBeenCalledWith({
+        query: mustBeAllOf(
+          {
+            terms: {
+              _id: [`task:${id}`],
+            },
+          },
+          {
+            term: {
+              'task.status': 'idle',
+            },
+          }
+        ),
+        size: 100,
+      });
+    });
+
+    test('should split search on chunks when input ids array too large', async () => {
+      mockTaskStore.fetch.mockResolvedValue({ docs: [] });
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.bulkUpdateSchedules(Array.from({ length: 1250 }), { interval: '1h' });
+
+      expect(mockTaskStore.fetch).toHaveBeenCalledTimes(13);
+    });
+
+    test('should postpone task run if new interval is greater than previous', async () => {
+      // task set to be run in one 1hr from now
+      const runInTwoHrs = new Date(Date.now() + 2 * ONE_HOUR_IN_MS);
+      const task = mockTask({ id, schedule: { interval: '3h' }, runAt: runInTwoHrs });
+
+      mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '5h' });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(1);
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '5h' });
+      // if we update rule with schedule of '5h' and prev interval was 3h, task will be run in 2 hours later
+      expect(bulkUpdatePayload[0].runAt.getTime() - runInTwoHrs.getTime()).toBe(2 * ONE_HOUR_IN_MS);
+    });
+
+    test('should set task run sooner if new interval is lesser than previous', async () => {
+      // task set to be run in one 2hrs from now
+      const runInTwoHrs = new Date(Date.now() + 2 * ONE_HOUR_IN_MS);
+      const task = mockTask({ id, schedule: { interval: '3h' }, runAt: runInTwoHrs });
+
+      mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '2h' });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '2h' });
+      // if we update rule with schedule of '2h' and prev interval was 3h, task will be run in 1 hour sooner
+      expect(runInTwoHrs.getTime() - bulkUpdatePayload[0].runAt.getTime()).toBe(ONE_HOUR_IN_MS);
+    });
+
+    test('should set task run to now if time that passed from last run is greater than new interval', async () => {
+      // task set to be run in one 1hr from now
+      const runInOneHr = new Date(Date.now() + ONE_HOUR_IN_MS);
+      const task = mockTask({ id, schedule: { interval: '2h' }, runAt: runInOneHr });
+
+      mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '30m' });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '30m' });
+
+      // if time that passed from last rule task is greater than new interval, task should be set to run at now time
+      expect(bulkUpdatePayload[0].runAt.getTime()).toBeLessThanOrEqual(Date.now());
+    });
+  });
   describe('runNow', () => {
     test('resolves when the task run succeeds', () => {
       const events$ = new Subject<TaskLifecycleEvent>();
