@@ -89,6 +89,14 @@ interface ValidationErrors {
     message: string;
     type: { operation: string; outerType: string; innerType: string };
   };
+  useAlternativeFunction: {
+    message: string;
+    type: {
+      operation: string;
+      params: string;
+      alternativeFn: string;
+    };
+  };
 }
 
 type ErrorTypes = keyof ValidationErrors;
@@ -333,6 +341,12 @@ function getMessageFromId<K extends ErrorTypes>({
         defaultMessage:
           'The Formula filter of type "{outerType}" is not compatible with the inner filter of type "{innerType}" from the {operation} operation.',
         values: { operation: out.operation, outerType: out.outerType, innerType: out.innerType },
+      });
+      break;
+    case 'useAlternativeFunction':
+      message = i18n.translate('xpack.lens.indexPattern.formulaUseAlternative', {
+        defaultMessage: `The operation {operation} in the Formula is missing the {params} argument: use the {alternativeFn} operation instead.`,
+        values: { operation: out.operation, params: out.params, alternativeFn: out.alternativeFn },
       });
       break;
     // case 'mathRequiresFunction':
@@ -985,20 +999,45 @@ export function validateMathNodes(root: TinymathAST, missingVariableSet: Set<str
     const mandatoryArguments = positionalArguments.filter(({ optional }) => !optional);
     // if there is only 1 mandatory arg, this is already handled by the wrongFirstArgument check
     if (mandatoryArguments.length > 1 && node.args.length < mandatoryArguments.length) {
-      const missingArgs = positionalArguments.filter(
-        ({ name, optional }, i) => !optional && node.args[i] == null
+      const missingArgs = mandatoryArguments.filter((_, i) => node.args[i] == null);
+      const [missingArgsWithAlternatives, missingArgsWithoutAlternative] = partition(
+        missingArgs,
+        (
+          v
+        ): v is {
+          name: string;
+          alternativeWhenMissing: string;
+        } => v.alternativeWhenMissing != null
       );
-      errors.push(
-        getMessageFromId({
-          messageId: 'missingMathArgument',
-          values: {
-            operation: node.name,
-            count: mandatoryArguments.length - node.args.length,
-            params: missingArgs.map(({ name }) => name).join(', '),
-          },
-          locations: node.location ? [node.location] : [],
-        })
-      );
+
+      if (missingArgsWithoutAlternative.length) {
+        errors.push(
+          getMessageFromId({
+            messageId: 'missingMathArgument',
+            values: {
+              operation: node.name,
+              count: mandatoryArguments.length - node.args.length,
+              params: missingArgsWithoutAlternative.map(({ name }) => name).join(', '),
+            },
+            locations: node.location ? [node.location] : [],
+          })
+        );
+      }
+      if (missingArgsWithAlternatives.length) {
+        // pick only the first missing argument alternative
+        const [firstArg] = missingArgsWithAlternatives;
+        errors.push(
+          getMessageFromId({
+            messageId: 'useAlternativeFunction',
+            values: {
+              operation: node.name,
+              params: firstArg.name,
+              alternativeFn: firstArg.alternativeWhenMissing,
+            },
+            locations: node.location ? [node.location] : [],
+          })
+        );
+      }
     }
   });
   return errors;

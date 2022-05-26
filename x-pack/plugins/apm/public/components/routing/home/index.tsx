@@ -25,7 +25,7 @@ import { RedirectToBackendOverviewRouteView } from './redirect_to_backend_overvi
 import { ServiceGroupTemplate } from '../templates/service_group_template';
 import { ServiceGroupsRedirect } from '../service_groups_redirect';
 import { RedirectTo } from '../redirect_to';
-import { offsetRt } from '../../../../common/offset_rt';
+import { offsetRt } from '../../../../common/comparison_rt';
 import { TransactionTab } from '../../app/transaction_details/waterfall_with_summary/transaction_tabs';
 
 function page<
