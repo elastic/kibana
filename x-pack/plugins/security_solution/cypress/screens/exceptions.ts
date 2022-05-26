@@ -26,6 +26,9 @@ export const OPERATOR_INPUT = '[data-test-subj="operatorAutocompleteComboBox"]';
 export const VALUES_INPUT =
   '[data-test-subj="valuesAutocompleteMatch"] [data-test-subj="comboBoxInput"]';
 
+export const VALUES_MATCH_ANY_INPUT =
+  '[data-test-subj="valuesAutocompleteMatchAny"] [data-test-subj="comboBoxInput"]';
+
 export const ADD_AND_BTN = '[data-test-subj="exceptionsAndButton"]';
 
 export const ADD_OR_BTN = '[data-test-subj="exceptionsOrButton"]';

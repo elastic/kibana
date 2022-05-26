@@ -159,6 +159,7 @@ const EventDetailsComponent: React.FC<Props> = ({
         ? {
             id: EventsViewType.summaryView,
             name: i18n.OVERVIEW,
+            'data-test-subj': 'overviewTab',
             content: (
               <>
                 <EuiSpacer size="m" />
@@ -174,7 +175,7 @@ const EventDetailsComponent: React.FC<Props> = ({
                 />
                 <EuiSpacer size="l" />
                 <Reason eventId={id} data={data} />
-                <RelatedCases eventId={id} />
+                <RelatedCases eventId={id} isReadOnly={isReadOnly} />
                 <EuiHorizontalRule />
                 <AlertSummaryView
                   {...{

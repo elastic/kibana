@@ -49,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       {
         field: '@timestamp',
         direction: Direction.desc,
-        type: 'number',
+        esTypes: ['date'],
       },
     ],
     timerange: {

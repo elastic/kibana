@@ -44,6 +44,7 @@ import { VISUALIZE_EDITOR_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   IndexPatternDatasource as IndexPatternDatasourceType,
@@ -93,6 +94,7 @@ import type { SaveModalContainerProps } from './app_plugin/save_modal_container'
 
 import { setupExpressions } from './expressions';
 import { getSearchProvider } from './search_provider';
+import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
@@ -106,6 +108,7 @@ export interface LensPluginSetupDependencies {
   globalSearch?: GlobalSearchPluginSetup;
   usageCollection?: UsageCollectionSetup;
   discover?: DiscoverSetup;
+  uiActionsEnhanced: AdvancedUiActionsSetup;
 }
 
 export interface LensPluginStartDependencies {
@@ -224,6 +227,7 @@ export class LensPlugin {
   private heatmapVisualization: HeatmapVisualizationType | undefined;
   private gaugeVisualization: GaugeVisualizationType | undefined;
   private topNavMenuEntries: LensTopNavMenuEntryGenerator[] = [];
+  private hasDiscoverAccess: boolean = false;
 
   private stopReportManager?: () => void;
 
@@ -240,6 +244,8 @@ export class LensPlugin {
       eventAnnotation,
       globalSearch,
       usageCollection,
+      uiActionsEnhanced,
+      discover,
     }: LensPluginSetupDependencies
   ) {
     const startServices = createStartServicesGetter(core.getStartServices);
@@ -285,6 +291,15 @@ export class LensPlugin {
 
     visualizations.registerAlias(getLensAliasConfig());
 
+    if (discover) {
+      uiActionsEnhanced.registerDrilldown(
+        new OpenInDiscoverDrilldown({
+          discover,
+          hasDiscoverAccess: () => this.hasDiscoverAccess,
+        })
+      );
+    }
+
     setupExpressions(
       expressions,
       () => startServices().plugins.fieldFormats.deserialize,
@@ -297,12 +312,6 @@ export class LensPlugin {
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
 
-    const ensureDefaultDataView = () => {
-      // make sure a default index pattern exists
-      // if not, the page will be redirected to management and visualize won't be rendered
-      startServices().plugins.dataViews.ensureDefaultDataView();
-    };
-
     core.application.register({
       id: APP_ID,
       title: NOT_INTERNATIONALIZED_PRODUCT_NAME,
@@ -310,18 +319,15 @@ export class LensPlugin {
       mount: async (params: AppMountParameters) => {
         const { core: coreStart, plugins: deps } = startServices();
 
-        await Promise.all([
-          this.initParts(
-            core,
-            data,
-            charts,
-            expressions,
-            fieldFormats,
-            deps.fieldFormats.deserialize,
-            eventAnnotation
-          ),
-          ensureDefaultDataView(),
-        ]);
+        await this.initParts(
+          core,
+          data,
+          charts,
+          expressions,
+          fieldFormats,
+          deps.fieldFormats.deserialize,
+          eventAnnotation
+        );
 
         const { mountApp, stopReportManager, getLensAttributeService } = await import(
           './async_services'
@@ -427,6 +433,7 @@ export class LensPlugin {
   }
 
   start(core: CoreStart, startDependencies: LensPluginStartDependencies): LensPublicStart {
+    this.hasDiscoverAccess = core.application.capabilities.discover.show as boolean;
     // unregisters the Visualize action and registers the lens one
     if (startDependencies.uiActions.hasAction(ACTION_VISUALIZE_FIELD)) {
       startDependencies.uiActions.unregisterAction(ACTION_VISUALIZE_FIELD);
@@ -443,10 +450,7 @@ export class LensPlugin {
 
     startDependencies.uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      createOpenInDiscoverAction(
-        startDependencies.discover!,
-        core.application.capabilities.discover.show as boolean
-      )
+      createOpenInDiscoverAction(startDependencies.discover!, this.hasDiscoverAccess)
     );
 
     return {

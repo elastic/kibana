@@ -10,11 +10,12 @@ import { mount } from 'enzyme';
 
 import { CaseStatuses } from '../../../common/api';
 import { OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { TestProviders } from '../../common/mock';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { CasesTableFilters } from './table_filters';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
@@ -35,7 +36,9 @@ const props = {
 };
 
 describe('CasesTableFilters ', () => {
+  let appMockRender: AppMockRenderer;
   beforeEach(() => {
+    appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
     (useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags });
     (useGetReporters as jest.Mock).mockReturnValue({
@@ -55,6 +58,19 @@ describe('CasesTableFilters ', () => {
     );
 
     expect(wrapper.find(`[data-test-subj="case-status-filter"]`).first().exists()).toBeTruthy();
+  });
+
+  it('should render the case severity filter dropdown', () => {
+    const result = appMockRender.render(<CasesTableFilters {...props} />);
+    expect(result.getByTestId('case-severity-filter')).toBeTruthy();
+  });
+
+  it('should call onFilterChange when the severity filter changes', () => {
+    const result = appMockRender.render(<CasesTableFilters {...props} />);
+    userEvent.click(result.getByTestId('case-severity-filter'));
+    userEvent.click(result.getByTestId('case-severity-filter-high'));
+
+    expect(onFilterChanged).toBeCalledWith({ severity: 'high' });
   });
 
   it('should call onFilterChange when selected tags change', () => {

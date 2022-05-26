@@ -13,13 +13,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pipelines';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-// @ts-expect-error
-import { Listing } from '../../../components/logstash/listing';
 import { LogstashTemplate } from './logstash_template';
 // @ts-expect-error
 import { DetailStatus } from '../../../components/logstash/detail_status';
-// @ts-expect-error
-import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { useTable } from '../../hooks/use_table';
 // @ts-expect-error
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';

@@ -26,7 +26,22 @@ describe('TelemetryPlugin', () => {
 
         expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
           ElasticV3ServerShipper,
-          { channelName: 'kibana-server', version: 'version' }
+          { channelName: 'kibana-server', version: 'version', sendTo: 'staging' }
+        );
+      });
+
+      it('registers the Server telemetry shipper (sendTo: production)', () => {
+        const initializerContext = coreMock.createPluginInitializerContext({ sendUsageTo: 'prod' });
+        const coreSetupMock = coreMock.createSetup();
+
+        new TelemetryPlugin(initializerContext).setup(coreSetupMock, {
+          usageCollection: usageCollectionPluginMock.createSetupContract(),
+          telemetryCollectionManager: telemetryCollectionManagerPluginMock.createSetupContract(),
+        });
+
+        expect(coreSetupMock.analytics.registerShipper).toHaveBeenCalledWith(
+          ElasticV3ServerShipper,
+          { channelName: 'kibana-server', version: 'version', sendTo: 'production' }
         );
       });
     });

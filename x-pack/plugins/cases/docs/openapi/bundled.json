@@ -157,6 +157,9 @@
                       }
                     }
                   },
+                  "severity": {
+                    "$ref": "#/components/schemas/severity"
+                  },
                   "tags": {
                     "description": "The words and phrases that help categorize cases. It can be an empty array.",
                     "type": "array",
@@ -341,6 +344,11 @@
                       "type": "string",
                       "example": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
                     },
+                    "duration": {
+                      "type": "integer",
+                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.",
+                      "example": 120
+                    },
                     "external_service": {
                       "type": "object",
                       "properties": {
@@ -396,6 +404,9 @@
                           "example": true
                         }
                       }
+                    },
+                    "severity": {
+                      "$ref": "#/components/schemas/severity"
                     },
                     "status": {
                       "$ref": "#/components/schemas/status"
@@ -631,6 +642,9 @@
                             }
                           }
                         },
+                        "severity": {
+                          "$ref": "#/components/schemas/severity"
+                        },
                         "status": {
                           "$ref": "#/components/schemas/status"
                         },
@@ -821,6 +835,11 @@
                       "type": "string",
                       "example": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
                     },
+                    "duration": {
+                      "type": "integer",
+                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.",
+                      "example": 120
+                    },
                     "external_service": {
                       "type": "object",
                       "properties": {
@@ -876,6 +895,9 @@
                           "example": true
                         }
                       }
+                    },
+                    "severity": {
+                      "$ref": "#/components/schemas/severity"
                     },
                     "status": {
                       "$ref": "#/components/schemas/status"
@@ -1573,6 +1595,9 @@
                       }
                     }
                   },
+                  "severity": {
+                    "$ref": "#/components/schemas/severity"
+                  },
                   "tags": {
                     "description": "The words and phrases that help categorize cases. It can be an empty array.",
                     "type": "array",
@@ -1757,6 +1782,11 @@
                       "type": "string",
                       "example": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
                     },
+                    "duration": {
+                      "type": "integer",
+                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.",
+                      "example": 120
+                    },
                     "external_service": {
                       "type": "object",
                       "properties": {
@@ -1812,6 +1842,9 @@
                           "example": true
                         }
                       }
+                    },
+                    "severity": {
+                      "$ref": "#/components/schemas/severity"
                     },
                     "status": {
                       "$ref": "#/components/schemas/status"
@@ -2053,6 +2086,9 @@
                             }
                           }
                         },
+                        "severity": {
+                          "$ref": "#/components/schemas/severity"
+                        },
                         "status": {
                           "$ref": "#/components/schemas/status"
                         },
@@ -2243,6 +2279,11 @@
                       "type": "string",
                       "example": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
                     },
+                    "duration": {
+                      "type": "integer",
+                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.",
+                      "example": 120
+                    },
                     "external_service": {
                       "type": "object",
                       "properties": {
@@ -2298,6 +2339,9 @@
                           "example": true
                         }
                       }
+                    },
+                    "severity": {
+                      "$ref": "#/components/schemas/severity"
                     },
                     "status": {
                       "$ref": "#/components/schemas/status"
@@ -2941,6 +2985,17 @@
           "securitySolution"
         ]
       },
+      "severity": {
+        "type": "string",
+        "description": "The severity of the case.",
+        "enum": [
+          "critical",
+          "high",
+          "low",
+          "medium"
+        ],
+        "default": "low"
+      },
       "status": {
         "type": "string",
         "description": "The status of the case.",
@@ -2996,6 +3051,8 @@
           },
           "owner": "securitySolution",
           "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active",
+          "duration": null,
+          "severity": "low",
           "closed_at": null,
           "closed_by": null,
           "created_at": "2022-05-13T09:16:17.416Z",
@@ -3070,6 +3127,8 @@
             },
             "owner": "securitySolution",
             "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active!",
+            "duration": null,
+            "severity": "low",
             "closed_at": null,
             "closed_by": null,
             "created_at": "2022-05-13T09:16:17.416Z",

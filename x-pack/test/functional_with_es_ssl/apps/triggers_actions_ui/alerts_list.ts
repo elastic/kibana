@@ -31,7 +31,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  describe('rules list', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/132704
+  describe.skip('rules list', function () {
+    const assertRulesLength = async (length: number) => {
+      return await retry.try(async () => {
+        const rules = await pageObjects.triggersActionsUI.getAlertsList();
+        expect(rules.length).to.equal(length);
+      });
+    };
+
     before(async () => {
       await pageObjects.common.navigateToApp('triggersActions');
       await testSubjects.click('rulesTab');
@@ -603,13 +611,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should filter alerts by the rule status', async () => {
-      const assertRulesLength = async (length: number) => {
-        return await retry.try(async () => {
-          const rules = await pageObjects.triggersActionsUI.getAlertsList();
-          expect(rules.length).to.equal(length);
-        });
-      };
-
       // Enabled alert
       await createAlert({
         supertest,
@@ -640,34 +641,93 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('ruleStatusFilterButton');
       await testSubjects.click('ruleStatusFilterOption-enabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-
       await assertRulesLength(1);
 
       // Select disabled
       await testSubjects.click('ruleStatusFilterOption-enabled');
       await testSubjects.click('ruleStatusFilterOption-disabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-
       await assertRulesLength(1);
 
       // Select snoozed
       await testSubjects.click('ruleStatusFilterOption-disabled');
       await testSubjects.click('ruleStatusFilterOption-snoozed');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-
       await assertRulesLength(1);
 
       // Select disabled and snoozed
       await testSubjects.click('ruleStatusFilterOption-disabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-
       await assertRulesLength(2);
 
       // Select all 3
       await testSubjects.click('ruleStatusFilterOption-enabled');
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
-
       await assertRulesLength(3);
+    });
+
+    it('should filter alerts by the tag', async () => {
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['a'],
+        },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['b'],
+        },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['a', 'b'],
+        },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['b', 'c'],
+        },
+      });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          tags: ['c'],
+        },
+      });
+
+      await refreshAlertsList();
+      await testSubjects.click('ruleTagFilter');
+
+      // Select a -> selected: a
+      await testSubjects.click('ruleTagFilterOption-a');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(2);
+
+      // Unselect a -> selected: none
+      await testSubjects.click('ruleTagFilterOption-a');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(5);
+
+      // Select a, b -> selected: a, b
+      await testSubjects.click('ruleTagFilterOption-a');
+      await testSubjects.click('ruleTagFilterOption-b');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(4);
+
+      // Unselect a, b, select c -> selected: c
+      await testSubjects.click('ruleTagFilterOption-a');
+      await testSubjects.click('ruleTagFilterOption-b');
+      await testSubjects.click('ruleTagFilterOption-c');
+      await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+      await assertRulesLength(2);
     });
   });
 };

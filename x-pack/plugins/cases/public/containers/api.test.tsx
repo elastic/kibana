@@ -6,9 +6,10 @@
  */
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
+import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { KibanaServices } from '../common/lib/kibana';
 
-import { ConnectorTypes, CommentType, CaseStatuses } from '../../common/api';
+import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
 import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
@@ -31,6 +32,7 @@ import {
   createAttachments,
   pushCase,
   resolveCase,
+  getFeatureIds,
 } from './api';
 
 import {
@@ -201,6 +203,47 @@ describe('Case Configuration API', () => {
           search: 'hello',
           status: CaseStatuses.open,
           owner: [SECURITY_SOLUTION_OWNER],
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should apply the severity field correctly (with severity value)', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          severity: CaseSeverity.HIGH,
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          reporters: [],
+          tags: [],
+          severity: CaseSeverity.HIGH,
+        },
+        signal: abortCtrl.signal,
+      });
+    });
+
+    test('should not send the severity field with "all" severity value', async () => {
+      await getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          severity: 'all',
+        },
+        queryParams: DEFAULT_QUERY_PARAMS,
+        signal: abortCtrl.signal,
+      });
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/_find`, {
+        method: 'GET',
+        query: {
+          ...DEFAULT_QUERY_PARAMS,
+          reporters: [],
+          tags: [],
         },
         signal: abortCtrl.signal,
       });
@@ -562,6 +605,27 @@ describe('Case Configuration API', () => {
         signal: abortCtrl.signal,
       });
       expect(resp).toBe(undefined);
+    });
+  });
+
+  describe('getFeatureIds', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(['siem', 'observability']);
+    });
+
+    test('should be called with correct check url, method, signal', async () => {
+      const resp = await getFeatureIds(
+        { registrationContext: ['security', 'observability.logs'] },
+        abortCtrl.signal
+      );
+
+      expect(fetchMock).toHaveBeenCalledWith(`${BASE_RAC_ALERTS_API_PATH}/_feature_ids`, {
+        query: { registrationContext: ['security', 'observability.logs'] },
+        signal: abortCtrl.signal,
+      });
+
+      expect(resp).toEqual(['siem', 'observability']);
     });
   });
 });

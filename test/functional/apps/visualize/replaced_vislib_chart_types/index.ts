@@ -27,7 +27,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     before(async () => {
       await kibanaServer.uiSettings.update({
-        'visualization:visualize:legacyPieChartsLibrary': false,
         'visualization:visualize:legacyHeatmapChartsLibrary': false,
       });
       await browser.refresh();
@@ -35,7 +34,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     after(async () => {
       await kibanaServer.uiSettings.update({
-        'visualization:visualize:legacyPieChartsLibrary': true,
         'visualization:visualize:legacyHeatmapChartsLibrary': true,
       });
       await browser.refresh();

@@ -107,6 +107,16 @@ steps:
         - exit_status: '-1'
           limit: 3
 
+  - command: .buildkite/scripts/steps/bazel_cache/bootstrap_linux.sh
+    label: 'Populate local dev bazel cache (Linux)'
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 15
+    retry:
+      automatic:
+        - exit_status: '-1'
+          limit: 3
+
   - wait: ~
     continue_on_failure: true
 

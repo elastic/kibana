@@ -20,6 +20,7 @@ import {
   CasesFindResponse,
   CasesStatusResponse,
   CasesMetricsResponse,
+  CaseSeverity,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
@@ -44,6 +45,9 @@ export const StatusAll = 'all' as const;
 export type StatusAllType = typeof StatusAll;
 
 export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
+
+export const SeverityAll = 'all' as const;
+export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
 
 /**
  * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.
@@ -84,6 +88,7 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
+  severity: CaseSeverityWithAll;
   status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];

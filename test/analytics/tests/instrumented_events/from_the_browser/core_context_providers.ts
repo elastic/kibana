@@ -72,7 +72,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(event.context).not.to.have.property('page'); // In the Home app it's not available.
     });
 
-    it('should have the properties provided by the "license info" context provider', () => {
+    it('should have the properties provided by the "license info" context provider', async () => {
+      await common.clickAndValidate('kibanaChrome', 'kibanaChrome');
+      [event] = await ebtUIHelper.getLastEvents(1, ['click']); // Get a later event to ensure license has been obtained already.
       expect(event.context).to.have.property('license_id');
       expect(event.context.license_id).to.be.a('string');
       expect(event.context).to.have.property('license_status');

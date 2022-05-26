@@ -13,7 +13,6 @@ import {
   httpServerMock,
 } from '@kbn/core/server/mocks';
 import {
-  convertRulesConfigToYaml,
   createRulesConfig,
   defineUpdateRulesConfigRoute,
   getCspRules,
@@ -144,7 +143,9 @@ describe('Update rules configuration API', () => {
       ],
     } as unknown as SavedObjectsFindResponse<CspRuleSchema>;
     const cspConfig = await createRulesConfig(cspRules);
-    expect(cspConfig).toMatchObject({ activated_rules: { cis_k8s: ['cis_1_1_1', 'cis_1_1_3'] } });
+    expect(cspConfig).toMatchObject({
+      data_yaml: { activated_rules: { cis_k8s: ['cis_1_1_1', 'cis_1_1_3'] } },
+    });
   });
 
   it('create empty csp rules config when all rules are disabled', async () => {
@@ -169,21 +170,13 @@ describe('Update rules configuration API', () => {
       ],
     } as unknown as SavedObjectsFindResponse<CspRuleSchema>;
     const cspConfig = await createRulesConfig(cspRules);
-    expect(cspConfig).toMatchObject({ activated_rules: { cis_k8s: [] } });
-  });
-
-  it('validate converting rules config object to Yaml', async () => {
-    const cspRuleConfig = { activated_rules: { cis_k8s: ['1.1.1', '1.1.2'] } };
-
-    const dataYaml = convertRulesConfigToYaml(cspRuleConfig);
-
-    expect(dataYaml).toEqual('activated_rules:\n  cis_k8s:\n    - 1.1.1\n    - 1.1.2\n');
+    expect(cspConfig).toMatchObject({ data_yaml: { activated_rules: { cis_k8s: [] } } });
   });
 
   it('validate adding new data.yaml to package policy instance', async () => {
     const packagePolicy = createPackagePolicyMock();
 
-    const dataYaml = 'activated_rules:\n  cis_k8s:\n    - 1.1.1\n    - 1.1.2\n';
+    const dataYaml = 'data_yaml:\n  activated_rules:\n  cis_k8s:\n    - 1.1.1\n    - 1.1.2\n';
     const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
 
     expect(updatedPackagePolicy.vars).toEqual({ dataYaml: { type: 'config', value: dataYaml } });

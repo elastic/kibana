@@ -83,6 +83,12 @@ describe('renderApp', () => {
         observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
         ObservabilityPageTemplate: KibanaPageTemplate,
         kibanaFeatures: [],
+        usageCollection: {
+          components: {
+            ApplicationUsageTrackingProvider: (props) => null,
+          },
+          reportUiCounter: jest.fn(),
+        },
       });
       unmount();
     }).not.toThrowError();

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+export const INFO_ROUTE_PATH = '/internal/cloud_security_posture/setup_status';
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats';
 export const FINDINGS_ROUTE_PATH = '/internal/cloud_security_posture/findings';
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
@@ -30,8 +31,7 @@ export const RULE_FAILED = `failed`;
 export const INTERNAL_FEATURE_FLAGS = {
   showBenchmarks: true,
   showManageRulesMock: false,
-  showRisksMock: false,
-  showFindingsGroupBy: false,
+  showFindingsGroupBy: true,
 } as const;
 
 export const cspRuleAssetSavedObjectType = 'csp_rule';

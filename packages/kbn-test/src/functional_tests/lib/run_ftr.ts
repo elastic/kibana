@@ -81,8 +81,8 @@ async function createFtr({
   };
 }
 
-export async function assertNoneExcluded({ configPath, options }: CreateFtrParams) {
-  const { config, ftr } = await createFtr({ configPath, options });
+export async function assertNoneExcluded(params: CreateFtrParams) {
+  const { config, ftr } = await createFtr(params);
 
   if (config.get('testRunner')) {
     // tests with custom test runners are not included in this check
@@ -95,21 +95,21 @@ export async function assertNoneExcluded({ configPath, options }: CreateFtrParam
   }
   if (stats.testsExcludedByTag.length > 0) {
     throw new CliError(`
-      ${stats.testsExcludedByTag.length} tests in the ${configPath} config
+      ${stats.testsExcludedByTag.length} tests in the ${params.configPath} config
       are excluded when filtering by the tags run on CI. Make sure that all suites are
       tagged with one of the following tags:
 
-      ${JSON.stringify(options.suiteTags)}
+      ${JSON.stringify(params.options.suiteTags)}
 
       - ${stats.testsExcludedByTag.join('\n      - ')}
     `);
   }
 }
 
-export async function runFtr({ configPath, options }: CreateFtrParams) {
-  const { ftr } = await createFtr({ configPath, options });
+export async function runFtr(params: CreateFtrParams, signal?: AbortSignal) {
+  const { ftr } = await createFtr(params);
 
-  const failureCount = await ftr.run();
+  const failureCount = await ftr.run(signal);
   if (failureCount > 0) {
     throw new CliError(
       `${failureCount} functional test ${failureCount === 1 ? 'failure' : 'failures'}`
@@ -117,8 +117,8 @@ export async function runFtr({ configPath, options }: CreateFtrParams) {
   }
 }
 
-export async function hasTests({ configPath, options }: CreateFtrParams) {
-  const { ftr, config } = await createFtr({ configPath, options });
+export async function hasTests(params: CreateFtrParams) {
+  const { ftr, config } = await createFtr(params);
 
   if (config.get('testRunner')) {
     // configs with custom test runners are assumed to always have tests

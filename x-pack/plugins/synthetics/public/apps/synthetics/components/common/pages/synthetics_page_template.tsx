@@ -10,9 +10,7 @@ import styled from 'styled-components';
 import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
-import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE } from '../../../../../../common/constants';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useNoDataConfig } from '../../../hooks/use_no_data_config';
 import { EmptyStateLoading } from '../../overview/empty_state/empty_state_loading';
 import { EmptyStateError } from '../../overview/empty_state/empty_state_error';
 import { useHasData } from '../../overview/empty_state/use_has_data';
@@ -52,8 +50,6 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
     `;
   }, [PageTemplateComponent]);
 
-  const noDataConfig = useNoDataConfig();
-
   const { loading, error, data } = useHasData();
   const { inspectorAdapters } = useInspectorContext();
 
@@ -65,26 +61,18 @@ export const SyntheticsPageTemplateComponent: React.FC<Props & EuiPageTemplatePr
     return <EmptyStateError errors={[error]} />;
   }
 
-  const isMainRoute = path === OVERVIEW_ROUTE || path === CERTIFICATES_ROUTE;
-
-  const showLoading = loading && isMainRoute && !data;
+  const showLoading = loading && !data;
 
   return (
     <>
       <StyledPageTemplateComponent
         isMobile={isMobile}
         pageHeader={pageHeader}
-        data-test-subj={noDataConfig ? 'data-missing' : undefined}
-        noDataConfig={isMainRoute && !loading ? noDataConfig : undefined}
+        data-test-subj={'synthetics-page-template'}
         {...pageTemplateProps}
       >
         {showLoading && <EmptyStateLoading />}
-        <div
-          style={{ visibility: showLoading ? 'hidden' : 'initial' }}
-          data-test-subj={noDataConfig ? 'data-missing' : undefined}
-        >
-          {children}
-        </div>
+        <div style={{ visibility: showLoading ? 'hidden' : 'initial' }}>{children}</div>
       </StyledPageTemplateComponent>
     </>
   );

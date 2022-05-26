@@ -6,23 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { SeriesTypes, XScaleTypes, YScaleTypes, Y_CONFIG } from '../constants';
+import { ArgumentType } from '@kbn/expressions-plugin/common';
+import { SeriesTypes, XScaleTypes, Y_CONFIG } from '../constants';
 import { strings } from '../i18n';
-import { DataLayerFn, ExtendedDataLayerFn } from '../types';
+import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 
-type CommonDataLayerFn = DataLayerFn | ExtendedDataLayerFn;
+type CommonDataLayerArgs = ExtendedDataLayerArgs | DataLayerArgs;
+type CommonDataLayerFnArgs = {
+  [key in keyof CommonDataLayerArgs]: ArgumentType<CommonDataLayerArgs[key]>;
+};
 
-export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
+export const commonDataLayerArgs: Omit<
+  CommonDataLayerFnArgs,
+  'accessors' | 'xAccessor' | 'splitAccessor'
+> = {
   hide: {
     types: ['boolean'],
     default: false,
     help: strings.getHideHelp(),
   },
-  xAccessor: {
-    types: ['string'],
-    help: strings.getXAccessorHelp(),
-  },
   seriesType: {
+    aliases: ['_'],
     types: ['string'],
     options: [...Object.values(SeriesTypes)],
     help: strings.getSeriesTypeHelp(),
@@ -32,7 +36,6 @@ export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
   xScaleType: {
     options: [...Object.values(XScaleTypes)],
     help: strings.getXScaleTypeHelp(),
-    default: XScaleTypes.ORDINAL,
     strict: true,
   },
   isHistogram: {
@@ -40,20 +43,21 @@ export const commonDataLayerArgs: CommonDataLayerFn['args'] = {
     default: false,
     help: strings.getIsHistogramHelp(),
   },
-  yScaleType: {
-    options: [...Object.values(YScaleTypes)],
-    help: strings.getYScaleTypeHelp(),
-    default: YScaleTypes.LINEAR,
-    strict: true,
+  lineWidth: {
+    types: ['number'],
+    help: strings.getLineWidthHelp(),
   },
-  splitAccessor: {
-    types: ['string'],
-    help: strings.getSplitAccessorHelp(),
+  showPoints: {
+    types: ['boolean'],
+    help: strings.getShowPointsHelp(),
   },
-  accessors: {
-    types: ['string'],
-    help: strings.getAccessorsHelp(),
-    multi: true,
+  pointsRadius: {
+    types: ['number'],
+    help: strings.getPointsRadiusHelp(),
+  },
+  showLines: {
+    types: ['boolean'],
+    help: strings.getShowLinesHelp(),
   },
   yConfig: {
     types: [Y_CONFIG],

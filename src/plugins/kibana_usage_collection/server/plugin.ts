@@ -7,6 +7,7 @@
  */
 
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 import { Subject } from 'rxjs';
 import type {
   PluginInitializerContext,
@@ -21,6 +22,7 @@ import type {
   CoreUsageDataStart,
 } from '@kbn/core/server';
 import { SavedObjectsClient, EventLoopDelaysMonitor } from '@kbn/core/server';
+import { registerEbtCounters } from './ebt_counters';
 import {
   startTrackingEventLoopDelaysUsage,
   startTrackingEventLoopDelaysThreshold,
@@ -46,6 +48,7 @@ import {
 
 interface KibanaUsageCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 type SavedObjectsRegisterType = SavedObjectsServiceSetup['registerType'];
@@ -67,7 +70,15 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     this.instanceUuid = initializerContext.env.instanceUuid;
   }
 
-  public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
+  public setup(
+    coreSetup: CoreSetup,
+    { usageCollection, telemetry }: KibanaUsageCollectionPluginsDepsSetup
+  ) {
+    if (!telemetry) {
+      // If the telemetry plugin is disabled, let's set optIn false to flush the queues.
+      coreSetup.analytics.optIn({ global: { enabled: false } });
+    }
+    registerEbtCounters(coreSetup.analytics, usageCollection);
     usageCollection.createUsageCounter('uiCounters');
     this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
     coreSetup.coreUsageData.registerUsageCounter(usageCollection.createUsageCounter('core'));

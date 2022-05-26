@@ -14,6 +14,8 @@ export type {
   AnomalyResultType as MlAnomalyResultType,
   DatafeedStats as MlDatafeedStats,
   Job as MlJob,
+  MlSummaryJob,
+  SummaryJobState as MlSummaryJobState,
 } from './shared';
 export {
   UnknownMLCapabilitiesError,

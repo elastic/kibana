@@ -125,8 +125,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       layerIndex = 0
     ) {
       await retry.try(async () => {
-        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
-        await testSubjects.exists(`lns-indexPatternDimension-${opts.operation}`);
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+          await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
+        }
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
       });
 
       if (opts.operation === 'formula') {
@@ -1088,6 +1090,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async assertMetric(title: string, count: string) {
       await this.assertExactText('[data-test-subj="metric_label"]', title);
       await this.assertExactText('[data-test-subj="metric_value"]', count);
+    },
+
+    async clickMetric() {
+      await testSubjects.click('metric_label');
     },
 
     async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {

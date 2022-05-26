@@ -20,8 +20,8 @@ function getValueFormatter(indexPattern?: DataView, key?: string) {
   if (!field) {
     throw new Error(
       i18n.translate('data.filter.filterBar.fieldNotFound', {
-        defaultMessage: 'Field {key} not found in index pattern {indexPattern}',
-        values: { key, indexPattern: indexPattern.title },
+        defaultMessage: 'Field {key} not found in data view {dataView}',
+        values: { key, dataView: indexPattern.title },
       })
     );
   }

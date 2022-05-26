@@ -22,10 +22,10 @@ import {
 import type { InstallablePackage, InstallSource, PackageAssetReference } from '../../../../common';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import type { AssetReference, Installation, InstallType } from '../../../types';
-import { installTemplates } from '../elasticsearch/template/install';
+import { prepareToInstallTemplates } from '../elasticsearch/template/install';
 import { removeLegacyTemplates } from '../elasticsearch/template/remove_legacy';
 import {
-  installPipelines,
+  prepareToInstallPipelines,
   isTopLevelPipeline,
   deletePreviousPipelines,
 } from '../elasticsearch/ingest_pipeline';
@@ -39,7 +39,7 @@ import { saveArchiveEntries } from '../archive/storage';
 import { ConcurrentInstallOperationError } from '../../../errors';
 import { packagePolicyService } from '../..';
 
-import { createInstallation } from './install';
+import { createInstallation, updateEsAssetReferences } from './install';
 import { withPackageSpan } from './utils';
 
 // this is only exported for testing
@@ -146,17 +146,45 @@ export async function _installPackage({
       installMlModel(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
     );
 
-    // installs versionized pipelines without removing currently installed ones
-    esReferences = await withPackageSpan('Install ingest pipelines', () =>
-      installPipelines(packageInfo, paths, esClient, savedObjectsClient, logger, esReferences)
+    /**
+     * In order to install assets in parallel, we need to split the preparation step from the installation step. This
+     * allows us to know which asset references are going to be installed so that we can save them on the packages
+     * SO before installation begins. In the case of a failure during installing any individual asset, we'll have the
+     * references necessary to remove any assets in that were successfully installed during the rollback phase.
+     *
+     * This split of prepare/install could be extended to all asset types. Besides performance, it also allows us to
+     * more easily write unit tests against the asset generation code without needing to mock ES responses.
+     */
+    const preparedIngestPipelines = prepareToInstallPipelines(packageInfo, paths);
+    const preparedIndexTemplates = prepareToInstallTemplates(packageInfo, paths, esReferences);
+
+    // Update the references for the templates and ingest pipelines together. Need to be done togther to avoid race
+    // conditions on updating the installed_es field at the same time
+    // These must be saved before we actually attempt to install the templates or pipelines so that we know what to
+    // cleanup in the case that a single asset fails to install.
+    esReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      packageInfo.name,
+      esReferences,
+      {
+        assetsToRemove: preparedIndexTemplates.assetsToRemove,
+        assetsToAdd: [
+          ...preparedIngestPipelines.assetsToAdd,
+          ...preparedIndexTemplates.assetsToAdd,
+        ],
+      }
     );
 
-    // install or update the templates referencing the newly installed pipelines
-    const { installedTemplates, installedEsReferences: esReferencesAfterTemplates } =
-      await withPackageSpan('Install index templates', () =>
-        installTemplates(packageInfo, esClient, logger, paths, savedObjectsClient, esReferences)
-      );
-    esReferences = esReferencesAfterTemplates;
+    // Install index templates and ingest pipelines in parallel since they typically take the longest
+    const [installedTemplates] = await Promise.all([
+      withPackageSpan('Install index templates', () =>
+        preparedIndexTemplates.install(esClient, logger)
+      ),
+      // installs versionized pipelines without removing currently installed ones
+      withPackageSpan('Install ingest pipelines', () =>
+        preparedIngestPipelines.install(esClient, logger)
+      ),
+    ]);
 
     try {
       await removeLegacyTemplates({ packageInfo, esClient, logger });

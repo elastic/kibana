@@ -5,57 +5,100 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
-import type { HeadlessChromiumDriver } from '../browsers';
+import { Logger } from '@kbn/logging';
+import { HeadlessChromiumDriver } from '../browsers';
+import { Layout } from '../layouts';
+import { Actions, EventLogger } from './event_logger';
 import type { ElementsPositionAndAttribute } from './get_element_position_data';
+import type { Screenshot } from './types';
 
-export interface Screenshot {
-  /**
-   * Screenshot PNG image data.
-   */
-  data: Buffer;
+/**
+ * Resize the viewport to contain the element to capture.
+ *
+ * @async
+ * @param {HeadlessChromiumDriver} browser - used for its methods to control the page
+ * @param {ElementsPositionAndAttribute['position']} position - position data for the element to capture
+ * @param {Layout} layout - used for client-side layout data from the job params
+ * @param {Logger} logger
+ */
+const resizeViewport = async (
+  browser: HeadlessChromiumDriver,
+  position: ElementsPositionAndAttribute['position'],
+  layout: Layout,
+  logger: Logger
+) => {
+  const { boundingClientRect, scroll } = position;
 
-  /**
-   * Screenshot title.
-   */
-  title: string | null;
+  // Using width from the layout is preferred, it avoids the elements moving around horizontally,
+  // which would invalidate the position data that was passed in.
+  const width = layout.width || boundingClientRect.left + scroll.x + boundingClientRect.width;
 
-  /**
-   * Screenshot description.
-   */
-  description: string | null;
-}
+  await browser.setViewport(
+    {
+      width,
+      height: boundingClientRect.top + scroll.y + boundingClientRect.height,
+      zoom: layout.getBrowserZoom(),
+    },
+    logger
+  );
+};
 
+/**
+ * Get screenshots of multiple areas of the page
+ *
+ * @async
+ * @param {HeadlessChromiumDriver} browser - used for its methods to control the page
+ * @param {EventLogger} eventLogger
+ * @param {ElementsPositionAndAttribute[]} elements[] - position data about all the elements to capture
+ * @param {Layout} layout - used for client-side layout data from the job params
+ * @returns {Promise<Screenshot[]>}
+ */
 export const getScreenshots = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
-  elementsPositionAndAttributes: ElementsPositionAndAttribute[]
+  eventLogger: EventLogger,
+  elements: ElementsPositionAndAttribute[],
+  layout: Layout
 ): Promise<Screenshot[]> => {
-  logger.info(`taking screenshots`);
+  const { kbnLogger } = eventLogger;
+  kbnLogger.info(`taking screenshots`);
 
   const screenshots: Screenshot[] = [];
 
-  for (let i = 0; i < elementsPositionAndAttributes.length; i++) {
-    const span = apm.startSpan('get_screenshots', 'read');
-    const item = elementsPositionAndAttributes[i];
+  try {
+    for (let i = 0; i < elements.length; i++) {
+      const element = elements[i];
+      const { position, attributes } = element;
 
-    const data = await browser.screenshot(item.position);
+      await resizeViewport(browser, position, layout, eventLogger.kbnLogger);
 
-    if (!data?.byteLength) {
-      throw new Error(`Failure in getScreenshots! Screenshot data is void`);
+      const endScreenshot = eventLogger.logScreenshottingEvent(
+        'screenshot capture',
+        Actions.GET_SCREENSHOT,
+        'read',
+        eventLogger.getPixelsFromElementPosition(position)
+      );
+
+      const data = await browser.screenshot(position);
+
+      if (!data?.byteLength) {
+        throw new Error(`Failure in getScreenshots! Screenshot data is void`);
+      }
+
+      screenshots.push({
+        data,
+        title: attributes.title,
+        description: attributes.description,
+      });
+
+      endScreenshot({ byte_length: data.byteLength });
     }
-
-    screenshots.push({
-      data,
-      title: item.attributes.title,
-      description: item.attributes.description,
-    });
-
-    span?.end();
+  } catch (error) {
+    kbnLogger.error(error);
+    eventLogger.error(error, Actions.GET_SCREENSHOT);
+    throw error;
   }
 
-  logger.info(`screenshots taken: ${screenshots.length}`);
+  kbnLogger.info(`screenshots taken: ${screenshots.length}`);
 
   return screenshots;
 };

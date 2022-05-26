@@ -45,9 +45,11 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   SERVER_APP_ID,
   SOURCERER_API_URL,
+  ENABLE_GROUPED_NAVIGATION,
 } from '../common/constants';
 
-import { getDeepLinks } from './app/deep_links';
+import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
+import { AppLinkItems, subscribeAppLinks, updateAppLinks } from './common/links';
 import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
@@ -140,7 +142,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       searchable: true,
       updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
-      deepLinks: getDeepLinks(this.experimentalFeatures),
       mount: async (params: AppMountParameters) => {
         // required to show the alert table inside cases
         const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
@@ -171,7 +172,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       navLinkStatus: 3,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
-        manageOldSiemRoutes(coreStart);
+
+        const subscription = subscribeAppLinks((links: AppLinkItems) => {
+          // It has to be called once after deep links are initialized
+          if (links.length > 0) {
+            manageOldSiemRoutes(coreStart);
+            subscription.unsubscribe();
+          }
+        });
+
         return () => true;
       },
     });
@@ -220,34 +229,65 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         Component: LazyEndpointCustomAssetsExtension,
       });
     }
+
     licenseService.start(plugins.licensing.license$);
     const licensing = licenseService.getLicenseInformation$();
+
+    const newNavEnabled = core.uiSettings.get(ENABLE_GROUPED_NAVIGATION, false);
+
     /**
      * Register deepLinks and pass an appUpdater for each subPlugin, to change deepLinks as needed when licensing changes.
      */
-    if (licensing !== null) {
-      this.licensingSubscription = licensing.subscribe((currentLicense) => {
-        if (currentLicense.type !== undefined) {
-          this.appUpdater$.next(() => ({
-            navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-            deepLinks: getDeepLinks(
-              this.experimentalFeatures,
-              currentLicense.type,
-              core.application.capabilities
-            ),
-          }));
+
+    if (newNavEnabled) {
+      registerDeepLinksUpdater(this.appUpdater$);
+    }
+
+    // Not using await to prevent blocking start execution
+    this.lazyApplicationLinks().then(({ getAppLinks }) => {
+      getAppLinks(core, plugins).then((appLinks) => {
+        if (licensing !== null) {
+          this.licensingSubscription = licensing.subscribe((currentLicense) => {
+            if (currentLicense.type !== undefined) {
+              updateAppLinks(appLinks, {
+                experimentalFeatures: this.experimentalFeatures,
+                license: currentLicense,
+                capabilities: core.application.capabilities,
+              });
+
+              if (!newNavEnabled) {
+                // TODO: remove block when nav flag no longer needed
+                this.appUpdater$.next(() => ({
+                  navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+                  deepLinks: getDeepLinks(
+                    this.experimentalFeatures,
+                    currentLicense.type,
+                    core.application.capabilities
+                  ),
+                }));
+              }
+            }
+          });
+        } else {
+          updateAppLinks(appLinks, {
+            experimentalFeatures: this.experimentalFeatures,
+            capabilities: core.application.capabilities,
+          });
+
+          if (!newNavEnabled) {
+            // TODO: remove block when nav flag no longer needed
+            this.appUpdater$.next(() => ({
+              navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+              deepLinks: getDeepLinks(
+                this.experimentalFeatures,
+                undefined,
+                core.application.capabilities
+              ),
+            }));
+          }
         }
       });
-    } else {
-      this.appUpdater$.next(() => ({
-        navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-        deepLinks: getDeepLinks(
-          this.experimentalFeatures,
-          undefined,
-          core.application.capabilities
-        ),
-      }));
-    }
+    });
 
     return {};
   }
@@ -295,8 +335,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
     return import(
-      /* webpackChunkName: "lazy_sub_plugins" */
+      /* webpackChunkName: "lazy_register_alerts_table_configuration" */
       './common/lib/triggers_actions_ui/register_alerts_table_configuration'
+    );
+  }
+
+  private lazyApplicationLinks() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazy_app_links" */
+      './common/links/app_links'
     );
   }
 
