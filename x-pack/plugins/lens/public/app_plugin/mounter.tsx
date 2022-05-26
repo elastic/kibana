@@ -246,8 +246,11 @@ export async function mountApp(
       if (!initialContext) {
         data.query.filterManager.setAppFilters([]);
       }
-      lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
-      lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
+
+      useEffect(() => {
+        lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
+        lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
+      }, []);
 
       if (editorState === 'loading') {
         return <EuiLoadingSpinner />;
