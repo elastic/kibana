@@ -10,7 +10,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import { getLastValue, isEmptyValue } from '../../../../common/last_value_utils';
 import { getValueOrEmpty } from '../../../../common/empty_label';
-import reactcss from 'reactcss';
 
 const RENDER_MODES = {
   POSITIVE: 'positive',
@@ -106,37 +105,29 @@ export class TopN extends Component {
       const width = 100 * (Math.abs(lastValueFormatted) / intervalLength) || 0;
       const widthWithUnit = isEmptyValue(lastValue) ? '1px' : `${width}%`;
       const label = item.label;
-      const styles = reactcss(
-        {
-          default: {
-            innerBar: {
-              ...TopN.calcInnerBarStyles(renderMode, isPositiveValue),
-            },
-            innerBarValue: {
-              ...TopN.calcInnerBarDivStyles(item, widthWithUnit, isPositiveValue),
-            },
-            label: {
-              maxWidth: this.state.labelMaxWidth,
-            },
-          },
-          onClickStyle: {
-            row: {
-              cursor: 'pointer',
-            },
-          },
-        },
-        {
-          onClickStyle: typeof this.props.onClick === 'function',
-        }
-      );
+
       return (
-        <tr key={key} onClick={this.handleClick({ lastValue, ...item })} style={styles.row}>
-          <td title={item.label} className="tvbVisTopN__label" style={styles.label}>
+        <tr
+          key={key}
+          onClick={this.handleClick({ lastValue, ...item })}
+          style={typeof this.props.onClick === 'function' ? { cursor: 'pointer' } : {}}
+        >
+          <td
+            title={item.label}
+            className="tvbVisTopN__label"
+            style={{ maxWidth: `${this.state.labelMaxWidth}px` }}
+          >
             {getValueOrEmpty(label)}
           </td>
           <td width="100%" className="tvbVisTopN__bar">
-            <div className="tvbVisTopN__innerBar" style={styles.innerBar}>
-              <div style={styles.innerBarValue} data-test-subj="topNInnerBar" />
+            <div
+              className="tvbVisTopN__innerBar"
+              style={TopN.calcInnerBarStyles(renderMode, isPositiveValue)}
+            >
+              <div
+                style={TopN.calcInnerBarDivStyles(item, widthWithUnit, isPositiveValue)}
+                data-test-subj="topNInnerBar"
+              />
             </div>
           </td>
           <td className="tvbVisTopN__value" data-test-subj="tsvbTopNValue">
