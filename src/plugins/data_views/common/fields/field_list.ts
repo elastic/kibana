@@ -7,7 +7,6 @@
  */
 
 import { findIndex } from 'lodash';
-import { IFieldType } from './types';
 import { DataViewField } from './data_view_field';
 import { FieldSpec, DataViewFieldMap } from '../types';
 import { DataView } from '../data_views';
@@ -19,7 +18,7 @@ export interface IIndexPatternFieldList extends Array<DataViewField> {
   getAll(): DataViewField[];
   getByName(name: DataViewField['name']): DataViewField | undefined;
   getByType(type: DataViewField['type']): DataViewField[];
-  remove(field: IFieldType): void;
+  remove(field: DataViewField | FieldSpec): void;
   removeAll(): void;
   replaceAll(specs: FieldSpec[]): void;
   update(field: FieldSpec): void;
@@ -43,7 +42,8 @@ export const fieldList = (
       }
       this.groups.get(field.type)!.set(field.name, field);
     };
-    private removeByGroup = (field: IFieldType) => this.groups.get(field.type)!.delete(field.name);
+    private removeByGroup = (field: DataViewField) =>
+      this.groups.get(field.type)!.delete(field.name);
 
     constructor() {
       super();
@@ -63,7 +63,7 @@ export const fieldList = (
       return newField;
     };
 
-    public readonly remove = (field: IFieldType) => {
+    public readonly remove = (field: DataViewField) => {
       this.removeByGroup(field);
       this.byName.delete(field.name);
 

@@ -189,24 +189,28 @@ describe('FieldSuggestions', () => {
       };
 
       await getValueSuggestions({
+        // @ts-ignore
         indexPattern: customIndexPattern,
         field: fields[0],
         query: '',
         useTimeRange: false,
       });
       await getValueSuggestions({
+        // @ts-ignore
         indexPattern: customIndexPattern,
         field: fields[0],
         query: 'query',
         useTimeRange: false,
       });
       await getValueSuggestions({
+        // @ts-ignore
         indexPattern: customIndexPattern,
         field: fields[1],
         query: '',
         useTimeRange: false,
       });
       await getValueSuggestions({
+        // @ts-ignore
         indexPattern: customIndexPattern,
         field: fields[1],
         query: 'query',

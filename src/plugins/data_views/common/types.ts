@@ -13,7 +13,6 @@ import type { SavedObject } from 'src/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { IFieldType } from './fields';
 import { RUNTIME_FIELD_TYPES } from './constants';
 import { DataViewField } from './fields';
 
@@ -72,18 +71,20 @@ export interface RuntimeFieldSubField extends FieldConfiguration {
  */
 export interface IIndexPattern extends DataViewBase {
   title: string;
-  fields: IFieldType[];
+  fields: DataViewField[];
   /**
    * Type is used for identifying rollup indices, otherwise left undefined
    */
   type?: string;
   timeFieldName?: string;
-  getTimeField?(): IFieldType | undefined;
+  getTimeField?(): DataViewField | undefined;
   fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
   /**
    * Look up a formatter for a given field
    */
-  getFormatterForField?: (field: DataViewField | DataViewField['spec'] | IFieldType) => FieldFormat;
+  getFormatterForField?: (
+    field: DataViewField | DataViewField['spec'] | DataViewField
+  ) => FieldFormat;
 }
 
 /**

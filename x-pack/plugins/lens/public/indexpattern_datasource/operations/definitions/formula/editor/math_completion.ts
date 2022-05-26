@@ -21,6 +21,7 @@ import type {
   QuerySuggestion,
 } from '@kbn/unified-search-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { IndexPattern } from '../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
 import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
@@ -371,7 +372,7 @@ export async function getNamedArgumentSuggestions({
     query,
     selectionStart: position,
     selectionEnd: position,
-    indexPatterns: [indexPattern],
+    indexPatterns: [indexPattern as unknown as DataView],
     boolFilter: [],
   });
   return {

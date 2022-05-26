@@ -20,7 +20,7 @@ import {
 import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType, FieldConfiguration } from '../types';
 
-import { IIndexPattern, IFieldType } from '..';
+import { IIndexPattern } from '..';
 import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
 import { flattenHitWrapper } from './flatten_hit';
 import { DataViewSpec, TypeMeta, SourceFilter, DataViewFieldMap } from '../types';
@@ -307,7 +307,7 @@ export class DataView implements IIndexPattern {
    * Provide a field, get its formatter
    * @param field
    */
-  getFormatterForField(field: DataViewField | DataViewField['spec'] | IFieldType): FieldFormat {
+  getFormatterForField(field: DataViewField | DataViewField['spec']): FieldFormat {
     const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
     if (fieldFormat) {
       return fieldFormat;
