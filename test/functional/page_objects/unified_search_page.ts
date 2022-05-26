@@ -9,7 +9,9 @@
 import { FtrService } from '../ftr_provider_context';
 
 export class UnifiedSearchPageObject extends FtrService {
+  private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
+  private readonly find = this.ctx.getService('find');
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
   public async closeTour() {
@@ -22,5 +24,16 @@ export class UnifiedSearchPageObject extends FtrService {
   public async closeTourPopoverByLocalStorage() {
     await this.browser.setLocalStorageItem('data.newDataViewMenu', 'true');
     await this.browser.refresh();
+  }
+
+  public async switchDataView(switchButtonSelector: string, dataViewTitle: string) {
+    await this.testSubjects.click(switchButtonSelector);
+
+    await this.retry.waitFor(
+      'wait for indexPattern-switcher',
+      async () => await this.testSubjects.exists('indexPattern-switcher', { timeout: 500 })
+    );
+    await this.testSubjects.setValue('indexPattern-switcher--input', dataViewTitle);
+    await this.find.clickByCssSelector(`[title="${dataViewTitle}"]`);
   }
 }
