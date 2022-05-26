@@ -906,6 +906,39 @@ describe('state_helpers', () => {
       );
     });
 
+    it('should set incompleteColumns without crashing when switching to a field-based operation from managed reference column with custom label', () => {
+      expect(
+        replaceColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'My formula',
+                dataType: 'number',
+                isBucketed: false,
+                customLabel: true,
+
+                // Private
+                operationType: 'formula',
+              } as FormulaIndexPatternColumn,
+            },
+          },
+          columnId: 'col1',
+          indexPattern,
+          op: 'median',
+          visualizationGroups: [],
+        })
+      ).toEqual(
+        expect.objectContaining({
+          columns: { col1: expect.objectContaining({ operationType: 'formula' }) },
+          incompleteColumns: {
+            col1: { operationType: 'median' },
+          },
+        })
+      );
+    });
+
     it('should carry over params from old column if switching fields', () => {
       expect(
         replaceColumn({
