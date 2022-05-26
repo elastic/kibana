@@ -33,6 +33,8 @@ import {
   usePollingIncomingData,
 } from '../../../../../../../components/agent_enrollment_flyout/use_get_agent_incoming_data';
 
+import { ConfirmIncomingDataTimeout } from './confirm_incoming_data_timeout';
+
 interface Props {
   agentIds: string[];
   installedPolicy?: InstalledIntegrationPolicy;
@@ -125,7 +127,7 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
   setAgentDataConfirmed,
   troubleshootLink,
 }) => {
-  const { incomingData, dataPreview, isLoading } = usePollingIncomingData(
+  const { incomingData, dataPreview, isLoading, hasReachedTimeout } = usePollingIncomingData(
     agentIds,
     true,
     MAX_AGENT_DATA_PREVIEW_COUNT
@@ -154,20 +156,24 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
             }
           />
           <EuiSpacer size="m" />
-          <FormattedMessage
-            id="xpack.fleet.confirmIncomingDataWithPreview.loading"
-            defaultMessage="It might take a few minutes for the data to get to Elasticsearch. If you're not seeing any, try generating some to verify. If you're having trouble connecting, check out the {link}."
-            values={{
-              link: (
-                <EuiLink target="_blank" external href={troubleshootLink}>
-                  <FormattedMessage
-                    id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
-                    defaultMessage="troubleshooting guide"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
+          {hasReachedTimeout ? (
+            <ConfirmIncomingDataTimeout troubleshootLink={troubleshootLink} />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.confirmIncomingDataWithPreview.loading"
+              defaultMessage="It might take a few minutes for the data to get to Elasticsearch. If you're not seeing any, try generating some to verify. If you're having trouble connecting, check out the {link}."
+              values={{
+                link: (
+                  <EuiLink target="_blank" external href={troubleshootLink}>
+                    <FormattedMessage
+                      id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
+                      defaultMessage="troubleshooting guide"
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          )}
         </EuiText>
         <EuiSpacer size="m" />
         <EuiLoadingContent lines={10} />

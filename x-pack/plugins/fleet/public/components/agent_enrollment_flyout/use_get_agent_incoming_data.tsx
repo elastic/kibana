@@ -74,15 +74,16 @@ export const useGetAgentIncomingData = (
   };
 };
 
+const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
+const POLLING_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
+
 /**
  * Hook for polling incoming data for the selected agent policy.
  * @param agentIds
  * @returns incomingData, isLoading
  */
-const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
-
 export const usePollingIncomingData = (
-  agentsIds: string[],
+  agentIds: string[],
   previewData?: boolean,
   stopPollingAfterPreviewLength: number = 0
 ) => {
@@ -95,11 +96,28 @@ export const usePollingIncomingData = (
     dataPreview: [],
   });
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasReachedTimeout, setHasReachedTimeout] = useState(false);
+
+  const startedPollingAt = useRef<number>();
+
   useEffect(() => {
     let isAborted = false;
+
     const poll = () => {
       timeout.current = window.setTimeout(async () => {
-        const { data } = await sendGetAgentIncomingData({ agentsIds, previewData });
+        // On the first run, set an initial timestamp so we can track timeouts
+        if (!startedPollingAt.current) {
+          startedPollingAt.current = Date.now();
+        }
+
+        // If we've been polling for more than 5 minutes, we consider the request "timed out", but
+        // don't actually stop polling. This flag just allows consumers of this hook to display an
+        // appropriate timeout UI as needed.
+        if (Date.now() - startedPollingAt.current > POLLING_TIMEOUT_MS) {
+          setHasReachedTimeout(true);
+        }
+
+        const { data } = await sendGetAgentIncomingData({ agentsIds: agentIds, previewData });
         if (data?.items) {
           // filter out  agents that have `data = false` and keep polling
           const filtered = data?.items.filter((item) => {
@@ -115,6 +133,7 @@ export const usePollingIncomingData = (
             setIsLoading(false);
           }
         }
+
         if (!isAborted) {
           poll();
         }
@@ -122,15 +141,23 @@ export const usePollingIncomingData = (
     };
 
     poll();
+
     const previewLengthReached = result.dataPreview.length >= stopPollingAfterPreviewLength;
     const incomingDataReceived = result.incomingData.length > 0;
     const dataReceived = previewData ? previewLengthReached : incomingDataReceived;
-    if (isAborted || dataReceived) clearTimeout(timeout.current);
+
+    if (isAborted || dataReceived) {
+      clearTimeout(timeout.current);
+    }
 
     return () => {
       isAborted = true;
     };
-  }, [agentsIds, result, previewData, stopPollingAfterPreviewLength]);
+  }, [agentIds, result, previewData, stopPollingAfterPreviewLength, startedPollingAt]);
 
-  return { ...result, isLoading };
+  return {
+    ...result,
+    isLoading,
+    hasReachedTimeout,
+  };
 };
