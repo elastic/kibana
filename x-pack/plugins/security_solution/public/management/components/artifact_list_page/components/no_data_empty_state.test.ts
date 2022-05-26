@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  trustedAppsAllHttpMocks,
-  TrustedAppsGetListHttpMocksInterface,
-} from '../../../pages/mocks';
+import { trustedAppsAllHttpMocks, TrustedAppsGetListHttpMocksInterface } from '../../../mocks';
 import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ArtifactListPageProps } from '../artifact_list_page';
