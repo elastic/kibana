@@ -44,6 +44,7 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
         hideOnUrlPathnameChange
         onHide={onHide}
         enableScrolling
+        paddingSize="xl"
       >
         <EuiPanel borderRadius="none" hasShadow={false} paddingSize="l" color="transparent">
           <AdministrationListPage

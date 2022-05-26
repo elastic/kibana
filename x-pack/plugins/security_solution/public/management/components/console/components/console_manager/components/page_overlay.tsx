@@ -37,6 +37,22 @@ const OverlayRootContainer = styled.div`
   &.hidden {
     display: none;
   }
+
+  &.padding-xs {
+    padding: ${({ theme: { eui } }) => eui.paddingSizes.xs};
+  }
+  &.padding-s {
+    padding: ${({ theme: { eui } }) => eui.paddingSizes.s};
+  }
+  &.padding-m {
+    padding: ${({ theme: { eui } }) => eui.paddingSizes.m};
+  }
+  &.padding-l {
+    padding: ${({ theme: { eui } }) => eui.paddingSizesl};
+  }
+  &.padding-xl {
+    padding: ${({ theme: { eui } }) => eui.paddingSizes.xl};
+  }
 `;
 
 const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = 'securitySolution-page-overlay-lock';
@@ -60,12 +76,27 @@ export interface PageOverlayProps {
   /** If the overlay should be hidden. NOTE: it will remain rendered/mounted, but `display: none` */
   isHidden?: boolean;
   /**
-   * By default, the
+   * Setting this to `true` will enable scrolling inside of the overlay
    */
   enableScrolling?: boolean;
+  /**
+   * When set to `true`, the browser's scroll bar will be "locked" (`overflow: hidden`), so that
+   * the only scroll bar visible (possibly) is the one inside of the overlay
+   */
   lockDocumentBody?: boolean;
+  /**
+   * If `true`, then the page's URL `pathname` will be tracked when the overlay is shown, and if
+   * the pathname changes, the `onHide()` prop will be called.
+   */
   hideOnUrlPathnameChange?: boolean;
+  /**
+   * Callback for when the user leaves the overlay
+   */
   onHide?: () => void;
+  /**
+   * Optional padding size around the overlay
+   */
+  paddingSize?: 'xs' | 's' | 'm' | 'l' | 'xl';
   'data-test-subj'?: string;
 }
 
@@ -80,6 +111,7 @@ export const PageOverlay = memo<PageOverlayProps>(
     onHide,
     hideOnUrlPathnameChange,
     lockDocumentBody,
+    paddingSize,
     children,
     'data-test-subj': dataTestSubj,
   }) => {
@@ -92,8 +124,13 @@ export const PageOverlay = memo<PageOverlayProps>(
         'eui-scrollBar': enableScrolling,
         scrolling: enableScrolling,
         hidden: isHidden,
+        'padding-xs': paddingSize === 'xs',
+        'padding-s': paddingSize === 's',
+        'padding-m': paddingSize === 'm',
+        'padding-l': paddingSize === 'l',
+        'padding-xl': paddingSize === 'xl',
       });
-    }, [enableScrolling, isHidden]);
+    }, [enableScrolling, isHidden, paddingSize]);
 
     // Capture the URL `pathname` that the overlay was opened for
     useEffect(() => {
@@ -129,13 +166,13 @@ export const PageOverlay = memo<PageOverlayProps>(
       if (isMounted) {
         if (isHidden) {
           unSetDocumentBodyLock();
-        } else {
+        } else if (lockDocumentBody) {
           setDocumentBodyLock();
         }
       }
 
       return () => unSetDocumentBodyLock();
-    }, [isHidden, isMounted]);
+    }, [isHidden, isMounted, lockDocumentBody]);
 
     return (
       <EuiPortal>
