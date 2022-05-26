@@ -613,10 +613,13 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
 
   private async performBulkResolve<T>(objects: ObjectTypeAndId[]) {
     const path = this.getPath(['_bulk_resolve']);
-    const request: Promise<SavedObjectsBulkResolveResponseServer<T>> = this.savedObjectsFetch(path, {
-      method: 'POST',
-      body: JSON.stringify(objects),
-    });
+    const request: Promise<SavedObjectsBulkResolveResponseServer<T>> = this.savedObjectsFetch(
+      path,
+      {
+        method: 'POST',
+        body: JSON.stringify(objects),
+      }
+    );
 
     return request;
   }
