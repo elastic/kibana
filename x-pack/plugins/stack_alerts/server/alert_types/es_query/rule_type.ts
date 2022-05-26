@@ -187,5 +187,6 @@ export function getRuleType(
       return await executor(logger, core, options);
     },
     producer: STACK_ALERTS_FEATURE_ID,
+    doesSetRecoveryContext: true,
   };
 }
