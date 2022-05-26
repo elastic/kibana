@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import classnames from 'classnames';
+import { EuiPageHeaderProps } from '@elastic/eui/src/components/page/page_header/page_header';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 
 const EuiPanelStyled = styled(EuiPanel)`
@@ -34,7 +35,7 @@ const EuiPanelStyled = styled(EuiPanel)`
 export type PageLayoutProps = PropsWithChildren<{
   pageTitle?: ReactNode;
   pageDescription?: ReactNode;
-  actions?: ReactNode;
+  actions?: ReactNode | ReactNode[];
   headerHasBottomBorder?: boolean;
   restrictWidth?: boolean | number | string;
   paddingSize?: EuiPanelProps['paddingSize'];
@@ -59,6 +60,16 @@ export const PageLayout = memo<PageLayoutProps>(
     const hideHeader = !pageTitle && !pageDescription && !actions && !headerBackComponent;
 
     const getTestId = useTestIdGenerator(dataTestSubj);
+
+    const headerRightSideItems = useMemo(() => {
+      return Array.isArray(actions) ? actions : actions ? [actions] : undefined;
+    }, [actions]);
+
+    const headerRightSideGroupProps = useMemo<EuiPageHeaderProps['rightSideGroupProps']>(() => {
+      return {
+        gutterSize: 'm',
+      };
+    }, []);
 
     const bodyClassname = useMemo(() => {
       return classnames({
@@ -108,7 +119,8 @@ export const PageLayout = memo<PageLayoutProps>(
                 pageTitle={headerTitleContainer}
                 description={pageDescription}
                 bottomBorder={headerHasBottomBorder}
-                rightSideItems={actions ? [actions] : undefined}
+                rightSideItems={headerRightSideItems}
+                rightSideGroupProps={headerRightSideGroupProps}
                 restrictWidth={restrictWidth}
                 data-test-subj={getTestId('header')}
               />

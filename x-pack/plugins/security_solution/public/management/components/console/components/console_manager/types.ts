@@ -23,7 +23,7 @@ export interface ConsoleRegistrationInterface<Meta extends object = Record<strin
   /**
    * An optional component that will be rendered above the Console
    */
-  BodyComponent?: ComponentType; // FIXME:PT type this interface
+  BodyComponent?: ComponentType; // FIXME:PT type props for this component
 }
 
 export interface RegisteredConsoleClient<Meta extends object = Record<string, unknown>>

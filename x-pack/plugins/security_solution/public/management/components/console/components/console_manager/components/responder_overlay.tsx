@@ -7,7 +7,8 @@
 
 import React, { memo, ReactNode, useCallback, MouseEventHandler, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { PageLayout, PageLayoutProps } from './page_layout';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { PageOverlay } from '../../../../page_overlay/page_overlay';
@@ -27,13 +28,13 @@ export interface ResponderOverlayProps {
   isHidden: boolean;
   onHide: () => void;
   body?: ReactNode;
-  actions?: ReactNode;
+  actions?: ReactNode | ReactNode[];
 }
 
 export const ResponderOverlay = memo<ResponderOverlayProps>(
   ({ runningConsoles, onHide, isHidden, body, actions }) => {
     const getTestId = useTestIdGenerator('responder');
-    const handleBackToPageOnCLick: MouseEventHandler = useCallback(
+    const handleCloseOverlayOnClick: MouseEventHandler = useCallback(
       (ev) => {
         ev.preventDefault();
         onHide();
@@ -49,20 +50,34 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
       return {
         pageTitle: RESPONDER_PAGE_TITLE,
         headerHasBottomBorder: false,
-        scrollableBody: true,
+        scrollableBody: true, // FIXME:PT remove once pending PR with console's new UI is merged
         headerBackComponent: (
           <EuiButtonEmpty
             flush="left"
             size="xs"
             iconType="arrowLeft"
-            onClick={handleBackToPageOnCLick}
+            onClick={handleCloseOverlayOnClick}
           >
             {RESPONDER_PAGE_BACK_LABEL}
           </EuiButtonEmpty>
         ),
-        actions,
+        actions: [
+          <EuiButton
+            fill
+            onClick={handleCloseOverlayOnClick}
+            minWidth="auto"
+            data-test-subj={getTestId('doneButton')}
+          >
+            <FormattedMessage
+              id="xpack.securitySolution.responder_overlay.doneButtonLabel"
+              defaultMessage="Done"
+            />
+          </EuiButton>,
+
+          // FIXME:PT append actions defined by the caller
+        ],
       };
-    }, [actions, handleBackToPageOnCLick, isHidden]);
+    }, [getTestId, handleCloseOverlayOnClick, isHidden]);
 
     return (
       <PageOverlay
