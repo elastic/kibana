@@ -14,7 +14,10 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { getEndpointPrivilegesInitialStateMock } from '../../../../../common/components/user_privileges/endpoint/mocks';
 import { composeHttpHandlerMocks } from '../../../../../common/mock/endpoint/http_handler_mock_factory';
 import { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { fleetGetAgentStatusHttpMock, fleetGetEndpointPackagePolicyHttpMock } from '../../../mocks';
+import {
+  fleetGetAgentStatusHttpMock,
+  fleetGetEndpointPackagePolicyHttpMock,
+} from '../../../../mocks';
 import { EndpointPolicyEditExtension } from './endpoint_policy_edit_extension';
 import { createFleetContextRendererMock } from './mocks';
 

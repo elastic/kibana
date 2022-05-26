@@ -91,7 +91,7 @@ export const normalizeProjectMonitor = ({
     [ConfigKey.TAGS]: monitor.tags || defaultFields[ConfigKey.TAGS],
     [ConfigKey.PLAYWRIGHT_OPTIONS]: Object.keys(monitor.playwrightOptions || {}).length
       ? JSON.stringify(monitor.playwrightOptions)
-      : defaultFields[ConfigKey.PARAMS],
+      : defaultFields[ConfigKey.PLAYWRIGHT_OPTIONS],
     [ConfigKey.PARAMS]: Object.keys(monitor.params || {}).length
       ? JSON.stringify(monitor.params)
       : defaultFields[ConfigKey.PARAMS],

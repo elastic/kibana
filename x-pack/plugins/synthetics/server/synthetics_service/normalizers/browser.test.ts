@@ -176,7 +176,7 @@ describe('browser normalizers', () => {
           ],
           name: 'test-name-2',
           params: '',
-          playwright_options: {},
+          playwright_options: '{}',
           schedule: {
             number: '10',
             unit: 'm',
@@ -228,7 +228,7 @@ describe('browser normalizers', () => {
           ],
           name: 'test-name-3',
           params: JSON.stringify(params),
-          playwright_options: playwrightOptions,
+          playwright_options: JSON.stringify(playwrightOptions),
           schedule: {
             number: '10',
             unit: 'm',
