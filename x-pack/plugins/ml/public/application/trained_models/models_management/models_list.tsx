@@ -121,6 +121,7 @@ export const ModelsList: FC<Props> = ({
 
   const canDeleteTrainedModels = capabilities.ml.canDeleteTrainedModels as boolean;
   const canStartStopTrainedModels = capabilities.ml.canStartStopTrainedModels as boolean;
+  const canTestTrainedModels = capabilities.ml.canTestTrainedModels as boolean;
 
   const trainedModelsApiService = useTrainedModelsApiService();
   const savedObjectsApiService = useSavedObjectsApiService();
@@ -484,7 +485,7 @@ export const ModelsList: FC<Props> = ({
           isPrimary: true,
           available: isTestable,
           onClick: setShowTestFlyout,
-          enabled: isTestEnabled,
+          enabled: (item) => canTestTrainedModels && isTestEnabled(item),
         },
       ] as Array<Action<ModelItem>>)
     );
