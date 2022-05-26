@@ -250,6 +250,7 @@ export async function mountApp(
       useEffect(() => {
         lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
         lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
 
       if (editorState === 'loading') {
