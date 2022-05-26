@@ -38,18 +38,20 @@ export interface EsQueryRuleActionContext extends AlertInstanceContext {
 export function addMessages(
   ruleInfo: RuleInfo,
   baseContext: EsQueryRuleActionContext,
-  params: OnlyEsQueryRuleParams | OnlySearchSourceRuleParams
+  params: OnlyEsQueryRuleParams | OnlySearchSourceRuleParams,
+  isRecovered: boolean = false
 ): ActionContext {
   const title = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle', {
-    defaultMessage: `rule '{name}' matched query`,
+    defaultMessage: `rule '{name}' {verb}`,
     values: {
       name: ruleInfo.name,
+      verb: isRecovered ? 'recovered' : 'matched query',
     },
   });
 
   const window = `${params.timeWindowSize}${params.timeWindowUnit}`;
   const message = i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextMessageDescription', {
-    defaultMessage: `rule '{name}' is active:
+    defaultMessage: `rule '{name}' is {verb}:
 
 - Value: {value}
 - Conditions Met: {conditions} over {window}
@@ -62,6 +64,7 @@ export function addMessages(
       window,
       date: baseContext.date,
       link: baseContext.link,
+      verb: isRecovered ? 'recovered' : 'active,',
     },
   });
 

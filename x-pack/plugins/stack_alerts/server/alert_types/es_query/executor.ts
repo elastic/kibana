@@ -24,7 +24,7 @@ export async function executor(
   options: ExecutorOptions<EsQueryRuleParams>
 ) {
   const esQueryRule = isEsQueryRule(options.params.searchType);
-  const { alertId, name, services, params, state } = options;
+  const { alertId: ruleId, name, services, params, state } = options;
   const { alertFactory, scopedClusterClient, searchSourceClient } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
@@ -44,11 +44,11 @@ export async function executor(
   // avoid counting a document multiple times.
 
   const { numMatches, searchResult, dateStart, dateEnd } = esQueryRule
-    ? await fetchEsQuery(alertId, name, params as OnlyEsQueryRuleParams, latestTimestamp, {
+    ? await fetchEsQuery(ruleId, name, params as OnlyEsQueryRuleParams, latestTimestamp, {
         scopedClusterClient,
         logger,
       })
-    : await fetchSearchSourceQuery(alertId, params as OnlySearchSourceRuleParams, latestTimestamp, {
+    : await fetchSearchSourceQuery(ruleId, params as OnlySearchSourceRuleParams, latestTimestamp, {
         searchSourceClient,
         logger,
       });
@@ -56,28 +56,27 @@ export async function executor(
   // apply the rule condition
   const conditionMet = compareFn(numMatches, params.threshold);
 
+  const base = publicBaseUrl;
+  const link = esQueryRule
+    ? `${base}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`
+    : `${base}/app/discover#/viewAlert/${ruleId}?from=${dateStart}&to=${dateEnd}&checksum=${getChecksum(
+        params as OnlyEsQueryRuleParams
+      )}`;
+  const baseContext: Omit<EsQueryRuleActionContext, 'conditions'> = {
+    title: name,
+    date: currentTimestamp,
+    value: numMatches,
+    hits: searchResult.hits.hits,
+    link,
+  };
+
   if (conditionMet) {
-    const base = publicBaseUrl;
-    const link = esQueryRule
-      ? `${base}/app/management/insightsAndAlerting/triggersActions/rule/${alertId}`
-      : `${base}/app/discover#/viewAlert/${alertId}?from=${dateStart}&to=${dateEnd}&checksum=${getChecksum(
-          params
-        )}`;
+    const baseActiveContext: EsQueryRuleActionContext = {
+      ...baseContext,
+      conditions: getContextConditionsDescription(params.thresholdComparator, params.threshold),
+    } as EsQueryRuleActionContext;
 
-    const conditions = getContextConditionsDescription(
-      params.thresholdComparator,
-      params.threshold
-    );
-    const baseContext: EsQueryRuleActionContext = {
-      title: name,
-      date: currentTimestamp,
-      value: numMatches,
-      conditions,
-      hits: searchResult.hits.hits,
-      link,
-    };
-
-    const actionContext = addMessages(options, baseContext, params);
+    const actionContext = addMessages(options, baseActiveContext, params);
     const alertInstance = alertFactory.create(ConditionMetAlertInstanceId);
     alertInstance
       // store the params we would need to recreate the query that led to this alert instance
@@ -91,6 +90,20 @@ export async function executor(
     if (firstValidTimefieldSort) {
       latestTimestamp = firstValidTimefieldSort;
     }
+  }
+
+  const { getRecoveredAlerts } = alertFactory.done();
+  for (const alert of getRecoveredAlerts()) {
+    const baseRecoveryContext: EsQueryRuleActionContext = {
+      ...baseContext,
+      conditions: getContextConditionsDescription(
+        params.thresholdComparator,
+        params.threshold,
+        true
+      ),
+    } as EsQueryRuleActionContext;
+    const recoveryContext = addMessages(options, baseRecoveryContext, params, true);
+    alert.setContext(recoveryContext);
   }
 
   return { latestTimestamp };
@@ -174,12 +187,17 @@ export function getInvalidComparatorError(comparator: string) {
   });
 }
 
-export function getContextConditionsDescription(comparator: Comparator, threshold: number[]) {
+export function getContextConditionsDescription(
+  comparator: Comparator,
+  threshold: number[],
+  isRecovered: boolean = false
+) {
   return i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription', {
-    defaultMessage: 'Number of matching documents is {thresholdComparator} {threshold}',
+    defaultMessage: 'Number of matching documents is {negation}{thresholdComparator} {threshold}',
     values: {
       thresholdComparator: getHumanReadableComparator(comparator),
       threshold: threshold.join(' and '),
+      negation: isRecovered ? 'NOT ' : ' ',
     },
   });
 }
