@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await visChart.waitForVisualizationRenderingStabilized();
   };
 
-  describe('visual builder 124', function describeIndexTests() {
+  describe('visual builder', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
     });
@@ -82,7 +82,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(tableData).to.be(EXPECTED);
       });
 
-      it('should render correctly after saving 1', async () => {
+      it('should render correctly after saving', async () => {
         const EXPECTED = 'OS Count\nwin 8 13\nwin xp 10\nwin 7 12\nios 5\nosx 3';
 
         await applyChanges();
