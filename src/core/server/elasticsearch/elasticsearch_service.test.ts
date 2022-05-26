@@ -16,10 +16,13 @@ jest.mock('./version_check/ensure_es_version', () => ({
   pollEsNodesVersion: jest.fn(),
 }));
 
+// Mocking the module to disable caching for tests
+jest.mock('../ui_settings/cache');
+
 import { MockClusterClient, isScriptingEnabledMock } from './elasticsearch_service.test.mocks';
 
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '../config';
@@ -197,13 +200,8 @@ describe('#setup', () => {
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
-    return new Promise<void>((done) => {
-      const subscription = setupContract.esNodesCompatibility$.subscribe(() => {
-        expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-        subscription.unsubscribe();
-        done();
-      });
-    });
+    await firstValueFrom(setupContract.esNodesCompatibility$);
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
   });
 
   it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
@@ -216,18 +214,15 @@ describe('#setup', () => {
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
 
-    return new Promise<void>((done) => {
-      const subscription = setupContract.esNodesCompatibility$.subscribe(async () => {
-        subscription.unsubscribe();
-        await delay(100);
-        expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-        done();
-      });
-    });
+    await firstValueFrom(setupContract.esNodesCompatibility$);
+    await delay(100);
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
   });
 });
 
 describe('#start', () => {
+  afterEach(async () => await elasticsearchService?.stop());
+
   it('throws if called before `setup`', async () => {
     await expect(() => elasticsearchService.start()).rejects.toMatchInlineSnapshot(
       `[Error: ElasticsearchService needs to be setup before calling start]`
