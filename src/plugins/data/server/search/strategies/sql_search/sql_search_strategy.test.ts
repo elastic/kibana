@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { merge } from 'lodash';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
@@ -27,6 +28,7 @@ describe('SQL search strategy', () => {
   const mockSqlGetAsync = jest.fn();
   const mockSqlQuery = jest.fn();
   const mockSqlDelete = jest.fn();
+  const mockSqlClearCursor = jest.fn();
   const mockLogger: any = {
     debug: () => {},
   };
@@ -37,6 +39,7 @@ describe('SQL search strategy', () => {
           getAsync: mockSqlGetAsync,
           query: mockSqlQuery,
           deleteAsync: mockSqlDelete,
+          clearCursor: mockSqlClearCursor,
         },
       },
     },
@@ -47,6 +50,7 @@ describe('SQL search strategy', () => {
     mockSqlGetAsync.mockClear();
     mockSqlQuery.mockClear();
     mockSqlDelete.mockClear();
+    mockSqlClearCursor.mockClear();
   });
 
   it('returns a strategy with `search and `cancel`, `extend`', async () => {
@@ -229,6 +233,52 @@ describe('SQL search strategy', () => {
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);
       expect(err?.errBody).toBe(undefined);
+    });
+
+    it('does not close the cursor if the search is incomplete', async () => {
+      mockSqlGetAsync.mockResolvedValueOnce(
+        merge({}, mockSqlResponse, {
+          body: { is_partial: false, is_running: true, cursor: 'cursor' },
+        })
+      );
+
+      const esSearch = await sqlSearchStrategyProvider(mockLogger);
+      await esSearch.search({ id: 'foo', params: { query: 'query' } }, {}, mockDeps).toPromise();
+
+      expect(mockSqlClearCursor).not.toHaveBeenCalled();
+    });
+
+    it('does not close the cursor if there is a request parameter to keep it', async () => {
+      mockSqlGetAsync.mockResolvedValueOnce(
+        merge({}, mockSqlResponse, { body: { cursor: 'cursor' } })
+      );
+
+      const esSearch = await sqlSearchStrategyProvider(mockLogger);
+      await esSearch
+        .search({ id: 'foo', params: { query: 'query', keep_cursor: true } }, {}, mockDeps)
+        .toPromise();
+
+      expect(mockSqlClearCursor).not.toHaveBeenCalled();
+    });
+
+    it('closes the cursor when the search is complete', async () => {
+      mockSqlGetAsync.mockResolvedValueOnce(
+        merge({}, mockSqlResponse, { body: { cursor: 'cursor' } })
+      );
+
+      const esSearch = await sqlSearchStrategyProvider(mockLogger);
+      await esSearch.search({ id: 'foo', params: { query: 'query' } }, {}, mockDeps).toPromise();
+
+      expect(mockSqlClearCursor).toHaveBeenCalledWith({ cursor: 'cursor' });
+    });
+
+    it('returns the time it took to run a search', async () => {
+      mockSqlGetAsync.mockResolvedValueOnce(mockSqlResponse);
+
+      const esSearch = await sqlSearchStrategyProvider(mockLogger);
+      await expect(
+        esSearch.search({ id: 'foo', params: { query: 'query' } }, {}, mockDeps).toPromise()
+      ).resolves.toHaveProperty('took', expect.any(Number));
     });
   });
 

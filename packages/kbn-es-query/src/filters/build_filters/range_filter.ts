@@ -130,7 +130,7 @@ const formatValue = (params: any[]) =>
 export const buildRangeFilter = (
   field: DataViewFieldBase,
   params: RangeFilterParams,
-  indexPattern: DataViewBase,
+  indexPattern?: DataViewBase,
   formattedValue?: string
 ): RangeFilter | ScriptedRangeFilter | MatchAllRangeFilter => {
   params = mapValues(params, (value: any) => (field.type === 'number' ? parseFloat(value) : value));
@@ -153,7 +153,7 @@ export const buildRangeFilter = (
   }, 0);
 
   const meta: RangeFilterMeta = {
-    index: indexPattern.id,
+    index: indexPattern?.id,
     params: {},
     field: field.name,
     ...(formattedValue ? { formattedValue } : {}),

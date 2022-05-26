@@ -19,14 +19,14 @@ interface Arguments {
 }
 
 export type ExpressionFunctionPhraseFilter = ExpressionFunctionDefinition<
-  'rangeFilter',
+  'phraseFilter',
   null,
   Arguments,
   KibanaFilter
 >;
 
 export const phraseFilterFunction: ExpressionFunctionPhraseFilter = {
-  name: 'rangeFilter',
+  name: 'phraseFilter',
   type: 'kibana_filter',
   inputTypes: ['null'],
   help: i18n.translate('data.search.functions.phraseFilter.help', {

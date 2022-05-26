@@ -58,7 +58,7 @@ import { AggsService, AggsStartDependencies } from './aggs';
 import { IKibanaSearchResponse, IndexPatternsContract, SearchRequest } from '..';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
-import { getEsaggs, getEsdsl, getEql } from './expressions';
+import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { ConfigSchema } from '../../config';
 import {
@@ -169,6 +169,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     expressions.registerFunction(
       getEsdsl({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
+    expressions.registerFunction(
+      getEssql({ getStartServices } as {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
     );
