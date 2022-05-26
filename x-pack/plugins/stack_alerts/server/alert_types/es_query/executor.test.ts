@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { getSearchParams, getValidTimefieldSort, tryToParseAsDate } from './executor';
+import {
+  getSearchParams,
+  getValidTimefieldSort,
+  tryToParseAsDate,
+  getContextConditionsDescription,
+} from './executor';
 import { OnlyEsQueryRuleParams } from './types';
+import { Comparator } from '../../../common/comparator_types';
 
 describe('es_query executor', () => {
   const defaultProps = {
@@ -76,6 +82,23 @@ describe('es_query executor', () => {
           timeWindowUnit: 'r',
         } as OnlyEsQueryRuleParams)
       ).toThrow('invalid format for windowSize: "5r"');
+    });
+  });
+
+  describe('getContextConditionsDescription', () => {
+    it('should return conditions correctly', () => {
+      const result = getContextConditionsDescription(Comparator.GT, [10]);
+      expect(result).toBe(`Number of matching documents is greater than 10`);
+    });
+
+    it('should return conditions correctly when isRecovered is true', () => {
+      const result = getContextConditionsDescription(Comparator.GT, [10], true);
+      expect(result).toBe(`Number of matching documents is NOT greater than 10`);
+    });
+
+    it('should return conditions correctly when multiple thresholds provided', () => {
+      const result = getContextConditionsDescription(Comparator.BETWEEN, [10, 20], true);
+      expect(result).toBe(`Number of matching documents is NOT between 10 and 20`);
     });
   });
 });

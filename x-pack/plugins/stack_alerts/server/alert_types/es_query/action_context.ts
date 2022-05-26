@@ -64,7 +64,7 @@ export function addMessages(
       window,
       date: baseContext.date,
       link: baseContext.link,
-      verb: isRecovered ? 'recovered' : 'active,',
+      verb: isRecovered ? 'recovered' : 'active',
     },
   });
 

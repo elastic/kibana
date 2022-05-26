@@ -197,7 +197,7 @@ export function getContextConditionsDescription(
     values: {
       thresholdComparator: getHumanReadableComparator(comparator),
       threshold: threshold.join(' and '),
-      negation: isRecovered ? 'NOT ' : ' ',
+      negation: isRecovered ? 'NOT ' : '',
     },
   });
 }
