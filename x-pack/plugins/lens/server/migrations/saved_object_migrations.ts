@@ -13,9 +13,7 @@ import {
   SavedObjectReference,
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
-import { Filter } from '@kbn/es-query';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { Query } from '@kbn/data-plugin/public';
+import type { Query, Filter } from '@kbn/es-query';
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { PersistableFilter } from '../../common';
@@ -51,6 +49,7 @@ import {
   commonSetIncludeEmptyRowsDateHistogram,
   commonFixValueLabelsInXY,
   commonLockOldMetricVisSettings,
+  commonPreserveOldLegendSizeDefault,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -199,7 +198,7 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShapePre710, LensDocShap
       },
     };
   } catch (e) {
-    context.log.warning(e.message);
+    context.log.warn(e.message);
     return { ...doc };
   }
 };
@@ -266,7 +265,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShapePre710, LensDocSh
       },
     };
   } catch (e) {
-    context.log.warning(e.message);
+    context.log.warn(e.message);
     return { ...doc };
   }
 };
@@ -499,10 +498,6 @@ const fixValueLabelsInXY: SavedObjectMigrationFn<
   LensDocShape830<XYVisualizationStatePre830>,
   LensDocShape830<XYVisualizationState830 | unknown>
 > = (doc) => {
-  if (doc.attributes.visualizationType !== 'lnsXY') {
-    return doc;
-  }
-
   const newDoc = cloneDeep(doc);
   return { ...newDoc, attributes: commonFixValueLabelsInXY(newDoc.attributes) };
 };
@@ -510,6 +505,10 @@ const fixValueLabelsInXY: SavedObjectMigrationFn<
 const lockOldMetricVisSettings: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
   doc
 ) => ({ ...doc, attributes: commonLockOldMetricVisSettings(doc.attributes) });
+
+const preserveOldLegendSizeDefault: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => ({ ...doc, attributes: commonPreserveOldLegendSizeDefault(doc.attributes) });
 
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
@@ -530,7 +529,7 @@ const lensMigrations: SavedObjectMigrationMap = {
     setIncludeEmptyRowsDateHistogram,
     enhanceTableRowHeight
   ),
-  '8.3.0': flow(lockOldMetricVisSettings, fixValueLabelsInXY),
+  '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
 };
 
 export const getAllMigrations = (

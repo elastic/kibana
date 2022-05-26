@@ -7,7 +7,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { BehaviorSubject, Subject, combineLatest, from } from 'rxjs';
+import { BehaviorSubject, Subject, combineLatest, from, merge } from 'rxjs';
 import {
   buffer,
   bufferCount,
@@ -208,6 +208,21 @@ export class AnalyticsClient implements IAnalyticsClient {
     this.shipperRegistered$.next();
   };
 
+  public shutdown = () => {
+    this.shippersRegistry.allShippers.forEach((shipper, shipperName) => {
+      try {
+        shipper.shutdown();
+      } catch (err) {
+        this.initContext.logger.warn(`Failed to shutdown shipper "${shipperName}"`, err);
+      }
+    });
+    this.internalEventQueue$.complete();
+    this.internalTelemetryCounter$.complete();
+    this.shipperRegistered$.complete();
+    this.optInConfig$.complete();
+    this.context$.complete();
+  };
+
   /**
    * Forwards the `events` to the registered shippers, bearing in mind if the shipper is opted-in for that eventType.
    * @param eventType The event type's name
@@ -252,7 +267,11 @@ export class AnalyticsClient implements IAnalyticsClient {
     // Observer that will emit when both events occur: the OptInConfig is set + a shipper has been registered
     const configReceivedAndShipperReceivedObserver$ = combineLatest([
       this.optInConfigWithReplay$,
-      this.shipperRegistered$,
+      merge([
+        this.shipperRegistered$,
+        // Merging shipperRegistered$ with the optInConfigWithReplay$ when optedIn is false, so that we don't need to wait for the shipper if opted-in === false
+        this.optInConfigWithReplay$.pipe(filter((cfg) => cfg?.isOptedIn() === false)),
+      ]),
     ]);
 
     // Flush the internal queue when we get any optInConfig and, at least, 1 shipper

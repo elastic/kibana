@@ -28,7 +28,8 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
   if (!appContextService.getSecurityLicense().isEnabled()) {
     return response.ok({ body: missingSecurityBody });
   } else {
-    if (!context.fleet.authz.fleet.all) {
+    const fleetContext = await context.fleet;
+    if (!fleetContext.authz.fleet.all) {
       return response.ok({
         body: {
           success: false,
@@ -38,7 +39,7 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
     }
     // check the manage_service_account cluster privilege
     else if (request.query.fleetServerSetup) {
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
         body: { cluster: ['manage_service_account'] },
       });
@@ -59,7 +60,7 @@ export const getCheckPermissionsHandler: FleetRequestHandler<
 
 export const generateServiceTokenHandler: RequestHandler = async (context, request, response) => {
   // Generate the fleet server service token as the current user as the internal user do not have the correct permissions
-  const esClient = context.core.elasticsearch.client.asCurrentUser;
+  const esClient = (await context.core).elasticsearch.client.asCurrentUser;
   try {
     const tokenResponse = await esClient.transport.request<{
       created?: boolean;

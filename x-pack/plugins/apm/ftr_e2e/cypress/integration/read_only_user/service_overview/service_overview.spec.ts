@@ -101,7 +101,7 @@ describe('Service Overview', () => {
 
   describe('renders', () => {
     before(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(baseUrl);
     });
 
@@ -121,7 +121,7 @@ describe('Service Overview', () => {
 
   describe('transactions', () => {
     beforeEach(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(baseUrl);
     });
 
@@ -174,7 +174,7 @@ describe('Service Overview', () => {
 
   describe('when RUM service', () => {
     before(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(
         url.format({
           pathname: '/app/apm/services/opbeans-rum/overview',
@@ -203,7 +203,7 @@ describe('Service Overview', () => {
 
   describe('Calls APIs', () => {
     beforeEach(() => {
-      cy.loginAsReadOnlyUser();
+      cy.loginAsViewerUser();
       cy.visit(baseUrl);
       apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);
@@ -216,7 +216,22 @@ describe('Service Overview', () => {
     it('with the correct environment when changing the environment', () => {
       cy.wait(aliasNames, { requestTimeout: 10000 });
 
-      cy.get('[data-test-subj="environmentFilter"]').select('production');
+      cy.intercept('GET', 'internal/apm/suggestions?*').as(
+        'suggestionsRequest'
+      );
+
+      cy.get('[data-test-subj="environmentFilter"]').type('production');
+
+      cy.expectAPIsToHaveBeenCalledWith({
+        apisIntercepted: ['@suggestionsRequest'],
+        value: 'fieldValue=production',
+      });
+
+      cy.get(
+        '[data-test-subj="comboBoxOptionsList environmentFilter-optionsList"]'
+      )
+        .contains('production')
+        .click({ force: true });
 
       cy.expectAPIsToHaveBeenCalledWith({
         apisIntercepted: aliasNames,

@@ -35,7 +35,6 @@ export const updatePrepackagedRules = async (
   savedObjectsClient: SavedObjectsClientContract,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string,
-  isRuleRegistryEnabled: boolean,
   ruleExecutionLog: IRuleExecutionLogForRoutes
 ): Promise<void> => {
   const ruleChunks = chunk(MAX_RULES_TO_UPDATE_IN_PARALLEL, rules);
@@ -45,7 +44,6 @@ export const updatePrepackagedRules = async (
       savedObjectsClient,
       ruleChunk,
       outputIndex,
-      isRuleRegistryEnabled,
       ruleExecutionLog
     );
     await Promise.all(rulePromises);
@@ -65,7 +63,6 @@ export const createPromises = (
   savedObjectsClient: SavedObjectsClientContract,
   rules: AddPrepackagedRulesSchemaDecoded[],
   outputIndex: string,
-  isRuleRegistryEnabled: boolean,
   ruleExecutionLog: IRuleExecutionLogForRoutes
 ): Array<Promise<PartialRule<RuleParams> | null>> => {
   return rules.map(async (rule) => {
@@ -73,7 +70,9 @@ export const createPromises = (
       author,
       building_block_type: buildingBlockType,
       description,
+      timestamp_field: timestampField,
       event_category_override: eventCategoryOverride,
+      tiebreaker_field: tiebreakerField,
       false_positives: falsePositives,
       from,
       query,
@@ -86,10 +85,13 @@ export const createPromises = (
       index,
       interval,
       max_signals: maxSignals,
+      related_integrations: relatedIntegrations,
+      required_fields: requiredFields,
       risk_score: riskScore,
       risk_score_mapping: riskScoreMapping,
       rule_name_override: ruleNameOverride,
       name,
+      setup,
       severity,
       severity_mapping: severityMapping,
       tags,
@@ -118,7 +120,6 @@ export const createPromises = (
     } = rule;
 
     const existingRule = await readRules({
-      isRuleRegistryEnabled,
       rulesClient,
       ruleId,
       id: undefined,
@@ -149,14 +150,15 @@ export const createPromises = (
 
       return (await createRules({
         id: migratedRule.id,
-        isRuleRegistryEnabled,
         rulesClient,
         anomalyThreshold,
         author,
         buildingBlockType,
         description,
         enabled: migratedRule.enabled, // Enabled comes from existing rule
+        timestampField,
         eventCategoryOverride,
+        tiebreakerField,
         falsePositives,
         from,
         immutable: true, // At the moment we force all prepackaged rules to be immutable
@@ -174,10 +176,13 @@ export const createPromises = (
         index,
         interval,
         maxSignals,
+        relatedIntegrations,
+        requiredFields,
         riskScore,
         riskScoreMapping,
         ruleNameOverride,
         name,
+        setup,
         severity,
         severityMapping,
         tags,
@@ -211,7 +216,9 @@ export const createPromises = (
         author,
         buildingBlockType,
         description,
+        timestampField,
         eventCategoryOverride,
+        tiebreakerField,
         falsePositives,
         from,
         query,
@@ -225,10 +232,13 @@ export const createPromises = (
         index,
         interval,
         maxSignals,
+        relatedIntegrations,
+        requiredFields,
         riskScore,
         riskScoreMapping,
         ruleNameOverride,
         name,
+        setup,
         severity,
         severityMapping,
         tags,

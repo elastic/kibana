@@ -248,11 +248,7 @@ describe('When using ConsoleManager', () => {
       const mockedContext = createAppRootMockRenderer();
 
       render = async () => {
-        renderResult = mockedContext.render(
-          <ConsoleManager>
-            <ConsoleManagerTestComponent />
-          </ConsoleManager>
-        );
+        renderResult = mockedContext.render(<ConsoleManagerTestComponent />);
 
         clickOnRegisterNewConsole();
 
@@ -304,12 +300,13 @@ describe('When using ConsoleManager', () => {
     it("should persist a console's command output history on hide/show", async () => {
       await render();
       enterConsoleCommand(renderResult, 'help', { dataTestSubj: 'testRunningConsole' });
-      enterConsoleCommand(renderResult, 'help', { dataTestSubj: 'testRunningConsole' });
+      enterConsoleCommand(renderResult, 'cmd1', { dataTestSubj: 'testRunningConsole' });
 
       await waitFor(() => {
         expect(renderResult.queryAllByTestId('testRunningConsole-historyItem')).toHaveLength(2);
       });
 
+      // Hide the console
       userEvent.click(renderResult.getByTestId('consolePopupHideButton'));
       await waitFor(() => {
         expect(
@@ -317,11 +314,52 @@ describe('When using ConsoleManager', () => {
         ).toBe(true);
       });
 
+      // Open the console back up and ensure prior items still there
       await openRunningConsole();
 
       await waitFor(() => {
         expect(renderResult.queryAllByTestId('testRunningConsole-historyItem')).toHaveLength(2);
       });
+    });
+
+    it('should provide console rendering state between show/hide', async () => {
+      const expectedStoreValue = JSON.stringify({ foo: 'bar' }, null, 2);
+      await render();
+      enterConsoleCommand(renderResult, 'cmd1', { dataTestSubj: 'testRunningConsole' });
+
+      // Command should have `pending` status and no store values
+      expect(renderResult.getByTestId('exec-output-statusState').textContent).toEqual(
+        'status: pending'
+      );
+      expect(renderResult.getByTestId('exec-output-storeStateJson').textContent).toEqual('{}');
+
+      // Wait for component to update the status and store values
+      await waitFor(() => {
+        expect(renderResult.getByTestId('exec-output-statusState').textContent).toMatch(
+          'status: success'
+        );
+      });
+      expect(renderResult.getByTestId('exec-output-storeStateJson').textContent).toEqual(
+        expectedStoreValue
+      );
+
+      // Hide the console
+      userEvent.click(renderResult.getByTestId('consolePopupHideButton'));
+      await waitFor(() => {
+        expect(
+          renderResult.getByTestId('consolePopupWrapper').classList.contains('is-hidden')
+        ).toBe(true);
+      });
+
+      // Open the console back up and ensure `status` and `store` are the last set of values
+      await openRunningConsole();
+
+      expect(renderResult.getByTestId('exec-output-statusState').textContent).toMatch(
+        'status: success'
+      );
+      expect(renderResult.getByTestId('exec-output-storeStateJson').textContent).toEqual(
+        expectedStoreValue
+      );
     });
 
     describe('and the terminate confirmation is shown', () => {

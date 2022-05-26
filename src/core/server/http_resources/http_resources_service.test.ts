@@ -27,7 +27,7 @@ describe('HttpResources service', () => {
   let setupDeps: SetupDeps;
   let router: jest.Mocked<IRouter>;
   const kibanaRequest = httpServerMock.createKibanaRequest();
-  const context = { core: coreMock.createRequestHandlerContext() };
+  const context = coreMock.createCustomRequestHandlerContext({});
   const apmConfig = { mockApmConfig: true };
 
   beforeEach(() => {
@@ -71,7 +71,7 @@ describe('HttpResources service', () => {
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
-              context.core.uiSettings.client,
+              (await context.core).uiSettings.client,
               {
                 isAnonymousPage: false,
                 vars: {
@@ -101,7 +101,7 @@ describe('HttpResources service', () => {
               headers: {
                 'x-kibana': '42',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -117,7 +117,7 @@ describe('HttpResources service', () => {
             await routeHandler(context, kibanaRequest, responseFactory);
             expect(getDeps().rendering.render).toHaveBeenCalledWith(
               kibanaRequest,
-              context.core.uiSettings.client,
+              (await context.core).uiSettings.client,
               {
                 isAnonymousPage: true,
                 vars: {
@@ -147,7 +147,7 @@ describe('HttpResources service', () => {
               headers: {
                 'x-kibana': '42',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -167,7 +167,7 @@ describe('HttpResources service', () => {
               headers: {
                 'content-type': 'text/html',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -196,7 +196,7 @@ describe('HttpResources service', () => {
                 'content-type': 'text/html',
                 'x-kibana': '42',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -216,7 +216,7 @@ describe('HttpResources service', () => {
               headers: {
                 'content-type': 'text/javascript',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });
@@ -245,7 +245,7 @@ describe('HttpResources service', () => {
                 'content-type': 'text/javascript',
                 'x-kibana': '42',
                 'content-security-policy':
-                  "script-src 'unsafe-eval' 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
+                  "script-src 'self'; worker-src blob: 'self'; style-src 'unsafe-inline' 'self'",
               },
             });
           });

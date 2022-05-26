@@ -26,6 +26,7 @@ import {
 } from '../shared/marker_decoration_settings';
 import { LineStyleSettings } from '../shared/line_style_settings';
 import { referenceLineIconsSet } from './icon_set';
+import { defaultReferenceLineColor } from '../../color_assignment';
 
 export const ReferenceLinePanel = (
   props: VisualizationDimensionEditorProps<State> & {
@@ -93,6 +94,7 @@ export const ReferenceLinePanel = (
       <FillSetting isHorizontal={isHorizontal} setConfig={setConfig} currentConfig={localConfig} />
       <ColorPicker
         {...props}
+        defaultColor={defaultReferenceLineColor}
         setConfig={setConfig}
         disableHelpTooltip
         label={i18n.translate('xpack.lens.xyChart.lineColor.label', {

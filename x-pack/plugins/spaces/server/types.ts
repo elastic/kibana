@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type { IRouter, RequestHandlerContext } from '@kbn/core/server';
+import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
 /**
  * @internal
  */
-export interface SpacesRequestHandlerContext extends RequestHandlerContext {
+export type SpacesRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal

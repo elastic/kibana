@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
-import { CaseStatuses } from '../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import {
   DEFAULT_FILTER_OPTIONS,
@@ -219,6 +219,7 @@ describe('useGetCases', () => {
       const spyOnGetCases = jest.spyOn(api, 'getCases');
       const newFilters = {
         search: 'new',
+        severity: CaseSeverity.LOW,
         tags: ['new'],
         status: CaseStatuses.closed,
         owner: [SECURITY_SOLUTION_OWNER],

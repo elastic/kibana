@@ -219,8 +219,9 @@ export default function ({ getService }: FtrProviderContext) {
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
-  describe('advanced job', function () {
-    this.tags(['mlqa']);
+  // Failing: See https://github.com/elastic/kibana/issues/132955
+  describe.skip('advanced job', function () {
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -420,7 +421,8 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.jobWizardCommon.advanceToSummarySection();
         });
 
-        it('job creation runs the job and displays it correctly in the job list', async () => {
+        // Failing ES Promotion: https://buildkite.com/elastic/kibana-elasticsearch-snapshot-verify/builds/1253
+        it.skip('job creation runs the job and displays it correctly in the job list', async () => {
           await ml.testExecution.logTestStep(
             'job creation creates the job and finishes processing'
           );

@@ -6,7 +6,7 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
-import { MapAdapter } from '../inspector/map_adapter';
+import { MapAdapter, VectorTileAdapter } from '../inspector';
 import { getShowMapsInspectorAdapter } from '../kibana_services';
 
 const REGISTER_CANCEL_CALLBACK = 'REGISTER_CANCEL_CALLBACK';
@@ -17,6 +17,7 @@ const SET_CHARTS_PALETTE_SERVICE_GET_COLOR = 'SET_CHARTS_PALETTE_SERVICE_GET_COL
 function createInspectorAdapters() {
   const inspectorAdapters = {
     requests: new RequestAdapter(),
+    vectorTiles: new VectorTileAdapter(),
   };
   if (getShowMapsInspectorAdapter()) {
     inspectorAdapters.map = new MapAdapter();

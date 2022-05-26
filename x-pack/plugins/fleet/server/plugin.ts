@@ -42,8 +42,8 @@ import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
-import type { FleetConfigType, FleetAuthz } from '../common';
-import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import type { FleetConfigType, FleetAuthz, ExperimentalFeatures } from '../common';
+import { INTEGRATIONS_PLUGIN_ID, parseExperimentalConfigValue } from '../common';
 
 import {
   PLUGIN_ID,
@@ -119,6 +119,7 @@ export interface FleetAppContext {
   securityStart: SecurityPluginStart;
   config$?: Observable<FleetConfigType>;
   configInitialValue: FleetConfigType;
+  experimentalFeatures: ExperimentalFeatures;
   savedObjects: SavedObjectsServiceStart;
   isProductionMode: PluginInitializerContext['env']['mode']['prod'];
   kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
@@ -283,18 +284,11 @@ export class FleetPlugin
         category: DEFAULT_APP_CATEGORIES.management,
         app: [INTEGRATIONS_PLUGIN_ID],
         catalogue: ['fleet'],
-        privilegesTooltip: i18n.translate(
-          'xpack.fleet.serverPlugin.integrationsPrivilegesTooltip',
-          {
-            defaultMessage: 'All Spaces is required for All Integrations access.',
-          }
-        ),
         privileges: {
           all: {
             api: [`${INTEGRATIONS_PLUGIN_ID}-read`, `${INTEGRATIONS_PLUGIN_ID}-all`],
             app: [INTEGRATIONS_PLUGIN_ID],
             catalogue: ['fleet'],
-            requireAllSpaces: true,
             savedObject: {
               all: allSavedObjectTypes,
               read: [],
@@ -319,12 +313,11 @@ export class FleetPlugin
       PLUGIN_ID,
       async (context, request) => {
         const plugin = this;
+        const esClient = (await context.core).elasticsearch.client;
 
         return {
           get agentClient() {
-            const agentService = plugin.setupAgentService(
-              context.core.elasticsearch.client.asInternalUser
-            );
+            const agentService = plugin.setupAgentService(esClient.asInternalUser);
 
             return {
               asCurrentUser: agentService.asScoped(request),
@@ -382,6 +375,7 @@ export class FleetPlugin
 
     this.telemetryEventsSender.setup(deps.telemetry);
   }
+
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
     appContextService.start({
       elasticsearch: core.elasticsearch,
@@ -392,6 +386,9 @@ export class FleetPlugin
       securityStart: plugins.security,
       configInitialValue: this.configInitialValue,
       config$: this.config$,
+      experimentalFeatures: parseExperimentalConfigValue(
+        this.configInitialValue.enableExperimental || []
+      ),
       savedObjects: core.savedObjects,
       isProductionMode: this.isProductionMode,
       kibanaVersion: this.kibanaVersion,

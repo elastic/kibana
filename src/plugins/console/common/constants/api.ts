@@ -7,3 +7,4 @@
  */
 
 export const API_BASE_PATH = '/api/console';
+export const KIBANA_API_PREFIX = 'kbn:';

@@ -8,7 +8,7 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import { AppLeaveHandler } from '@kbn/core/public';
 import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';

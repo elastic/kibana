@@ -231,6 +231,28 @@ describe('HeaderSection', () => {
     expect(wrapper.find('[data-test-subj="header-section-filters"]').first().exists()).toBe(true);
     expect(wrapper.find('[data-test-subj="inspect-icon-button"]').first().exists()).toBe(true);
   });
+
+  test('it appends `toggle-expand` class to Header when toggleStatus = true', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <HeaderSection
+          id="an id"
+          title="Test title"
+          subtitle="subtitle"
+          headerFilters="headerFilters"
+          toggleQuery={jest.fn()}
+          toggleStatus={true}
+        >
+          <p>{'Test children'}</p>
+        </HeaderSection>
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="header-section"]').first().prop('className')).toBe(
+      'toggle-expand siemHeaderSection'
+    );
+  });
+
   test('it does not render anything but title when toggleStatus = false', () => {
     const wrapper = mount(
       <TestProviders>

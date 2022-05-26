@@ -9,25 +9,11 @@
 const execSync = require('child_process').execSync;
 const fs = require('fs');
 const { areChangesSkippable, doAnyChangesMatch } = require('kibana-buildkite-library');
+const prConfigs = require('../../../pull_requests.json');
+const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
 
-const SKIPPABLE_PATHS = [
-  /^docs\//,
-  /^rfcs\//,
-  /^.ci\/.+\.yml$/,
-  /^.ci\/es-snapshots\//,
-  /^.ci\/pipeline-library\//,
-  /^.ci\/Jenkinsfile_[^\/]+$/,
-  /^\.github\//,
-  /\.md$/,
-  /^\.backportrc\.json$/,
-];
-
-const REQUIRED_PATHS = [
-  // this file is auto-generated and changes to it need to be validated with CI
-  /^docs\/developer\/plugin-list.asciidoc$/,
-  // don't skip CI on prs with changes to plugin readme files /i is for case-insensitive matching
-  /\/plugins\/[^\/]+\/readme\.(md|asciidoc)$/i,
-];
+const REQUIRED_PATHS = prConfig.always_require_ci_on_changed.map((r) => new RegExp(r, 'i'));
+const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed.map((r) => new RegExp(r, 'i'));
 
 const getPipeline = (filename, removeSteps = true) => {
   const str = fs.readFileSync(filename).toString();
@@ -46,7 +32,7 @@ const uploadPipeline = (pipelineContent) => {
 
 (async () => {
   try {
-    const skippable = await areChangesSkippable(SKIPPABLE_PATHS, REQUIRED_PATHS);
+    const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
       console.log('All changes in PR are skippable. Skipping CI.');
@@ -64,12 +50,12 @@ const uploadPipeline = (pipelineContent) => {
 
     if (
       (await doAnyChangesMatch([
-        /^x-pack\/plugins\/security_solution/,
         /^x-pack\/plugins\/lists/,
+        /^x-pack\/plugins\/security_solution/,
         /^x-pack\/plugins\/timelines/,
-        /^x-pack\/test\/security_solution_cypress/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/sections\/action_connector_form/,
         /^x-pack\/plugins\/triggers_actions_ui\/public\/application\/context\/actions_connectors_context\.tsx/,
+        /^x-pack\/test\/security_solution_cypress/,
       ])) ||
       process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
@@ -77,10 +63,24 @@ const uploadPipeline = (pipelineContent) => {
     }
 
     if (
-      (await doAnyChangesMatch([/^x-pack\/plugins\/cases/])) ||
+      (await doAnyChangesMatch([
+        /^src\/plugins\/data/,
+        /^x-pack\/plugins\/actions/,
+        /^x-pack\/plugins\/alerting/,
+        /^x-pack\/plugins\/event_log/,
+        /^x-pack\/plugins\/rule_registry/,
+        /^x-pack\/plugins\/task_manager/,
+      ])) ||
       process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([/^x-pack\/plugins\/cases/])) ||
+      process.env.GITHUB_PR_LABELS.includes('ci:all-cypress-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/response_ops_cases.yml'));
     }
 
     if (

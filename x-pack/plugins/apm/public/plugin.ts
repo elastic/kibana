@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { i18n } from '@kbn/i18n';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -17,9 +18,10 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import type {
-  DataPublicPluginSetup,
   DataPublicPluginStart,
+  DataPublicPluginSetup,
 } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
@@ -45,6 +47,8 @@ import type {
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { enableServiceGroups } from '@kbn/observability-plugin/public';
+import { InfraClientStartExports } from '@kbn/infra-plugin/public';
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { registerApmAlerts } from './components/alerting/register_apm_alerts';
 import {
   getApmEnrollmentFlyoutData,
@@ -63,6 +67,7 @@ export type ApmPluginStart = void;
 export interface ApmPluginSetupDeps {
   alerting?: AlertingPluginPublicSetup;
   data: DataPublicPluginSetup;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   features: FeaturesPluginSetup;
   home?: HomePublicPluginSetup;
   licensing: LicensingPluginSetup;
@@ -85,11 +90,22 @@ export interface ApmPluginStartDeps {
   fleet?: FleetStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
+  infra?: InfraClientStartExports;
+  dataViews: DataViewsPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
   defaultMessage: 'Services',
 });
+
+const allServicesTitle = i18n.translate(
+  'xpack.apm.navigation.allServicesTitle',
+  {
+    defaultMessage: 'All services',
+  }
+);
+
 const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
   defaultMessage: 'Traces',
 });
@@ -267,12 +283,16 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           ? [
               {
                 id: 'service-groups-list',
-                title: 'Service groups',
+                title: servicesTitle,
                 path: '/service-groups',
               },
             ]
           : []),
-        { id: 'services', title: servicesTitle, path: '/services' },
+        {
+          id: 'services',
+          title: serviceGroupsEnabled ? allServicesTitle : servicesTitle,
+          path: '/services',
+        },
         { id: 'traces', title: tracesTitle, path: '/traces' },
         { id: 'service-map', title: serviceMapTitle, path: '/service-map' },
         { id: 'backends', title: dependenciesTitle, path: '/backends' },

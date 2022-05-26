@@ -9,8 +9,8 @@
 export const XY_VIS = 'xyVis';
 export const LAYERED_XY_VIS = 'layeredXyVis';
 export const Y_CONFIG = 'yConfig';
+export const REFERENCE_LINE_Y_CONFIG = 'referenceLineYConfig';
 export const EXTENDED_Y_CONFIG = 'extendedYConfig';
-export const MULTITABLE = 'lens_multitable';
 export const DATA_LAYER = 'dataLayer';
 export const EXTENDED_DATA_LAYER = 'extendedDataLayer';
 export const LEGEND_CONFIG = 'legendConfig';
@@ -20,6 +20,7 @@ export const ANNOTATION_LAYER = 'annotationLayer';
 export const EXTENDED_ANNOTATION_LAYER = 'extendedAnnotationLayer';
 export const TICK_LABELS_CONFIG = 'tickLabelsConfig';
 export const AXIS_EXTENT_CONFIG = 'axisExtentConfig';
+export const REFERENCE_LINE = 'referenceLine';
 export const REFERENCE_LINE_LAYER = 'referenceLineLayer';
 export const EXTENDED_REFERENCE_LINE_LAYER = 'extendedReferenceLineLayer';
 export const LABELS_ORIENTATION_CONFIG = 'labelsOrientationConfig';

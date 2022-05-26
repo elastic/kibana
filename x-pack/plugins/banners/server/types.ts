@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { RequestHandlerContext, IRouter } from '@kbn/core/server';
+import { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
 import { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
 
-export interface BannersRequestHandlerContext extends RequestHandlerContext {
+export type BannersRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
-}
+}>;
 
 export type BannersRouter = IRouter<BannersRequestHandlerContext>;

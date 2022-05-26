@@ -224,6 +224,7 @@ export class Execution<
         inspectorAdapters.tables[name] = datatable;
       },
       isSyncColorsEnabled: () => execution.params.syncColors!,
+      isSyncTooltipsEnabled: () => execution.params.syncTooltips!,
       ...execution.executor.context,
       getExecutionContext: () => execution.params.executionContext,
     };
@@ -480,7 +481,7 @@ export class Execution<
       );
 
       // Check for missing required arguments.
-      for (const { aliases, default: argDefault, name, required } of Object.values(argDefs)) {
+      for (const { default: argDefault, name, required } of Object.values(argDefs)) {
         if (!(name in dealiasedArgAsts) && typeof argDefault !== 'undefined') {
           dealiasedArgAsts[name] = [parse(argDefault as string, 'argument')];
         }
@@ -489,9 +490,7 @@ export class Execution<
           continue;
         }
 
-        // use an alias if _ is the missing arg
-        const errorArg = name === '_' ? aliases[0] : name;
-        throw new Error(`${fnDef.name} requires an "${errorArg}" argument`);
+        throw new Error(`${fnDef.name} requires the "${name}" argument`);
       }
 
       // Create the functions to resolve the argument ASTs into values

@@ -12,15 +12,13 @@ import { useAddToExistingCase } from './use_add_to_existing_case';
 
 jest.mock('../../lib/kibana/kibana_react');
 
-describe('', () => {
+describe('useAddToExistingCase', () => {
   const mockCases = mockCasesContract();
   const mockOnAddToCaseClicked = jest.fn();
   const timeRange = {
     from: '2022-03-06T16:00:00.000Z',
     to: '2022-03-07T15:59:59.999Z',
   };
-  const owner = 'securitySolution';
-  const type = 'user';
   beforeEach(() => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
@@ -39,16 +37,6 @@ describe('', () => {
       })
     );
     expect(mockCases.hooks.getUseCasesAddToExistingCaseModal).toHaveBeenCalledWith({
-      attachments: [
-        {
-          comment: `!{lens${JSON.stringify({
-            timeRange,
-            attributes: kpiHostMetricLensAttributes,
-          })}}`,
-          owner,
-          type,
-        },
-      ],
       onClose: mockOnAddToCaseClicked,
       toastContent: 'Successfully added visualization to the case',
     });

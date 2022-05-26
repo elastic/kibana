@@ -1,26 +1,37 @@
 [[create-connector-api]]
-=== Create connector API
+== Create connector API
 ++++
 <titleabbrev>Create connector</titleabbrev>
 ++++
 
 Creates a connector.
 
+[discrete]
 [[create-connector-api-request]]
-==== Request
+=== {api-request-title}
 
 `POST <kibana host>:<port>/api/actions/connector`
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/connector`
 
+[discrete]
+=== {api-prereq-title}
+
+You must have `all` privileges for the *Actions and Connectors* feature in the
+*Management* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
+[discrete]
 [[create-connector-api-path-params]]
-==== Path parameters
+=== {api-path-parms-title}
 
 `space_id`::
-  (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
+  (Optional, string) An identifier for the space. If `space_id` is not provided
+  in the URL, the default space is used.
 
+[discrete]
 [[create-connector-api-request-body]]
-==== Request body
+=== {api-request-body-title}
 
 `name`::
   (Required, string) The display name for the connector.
@@ -38,25 +49,27 @@ Creates a connector.
 +
 WARNING: Remember these values. You must provide them each time you call the <<update-connector-api, update>> API.
 
+[discrete]
 [[create-connector-api-request-codes]]
-==== Response code
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
+[discrete]
 [[create-connector-api-example]]
-==== Example
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/actions/connector  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+POST api/actions/connector
 {
   "name": "my-connector",
   "connector_type_id": ".index",
   "config": {
     "index": "test-index"
   }
-}'
+}
 --------------------------------------------------
 // KIBANA
 
@@ -74,6 +87,7 @@ The API returns the following:
     "executionTimeField": null
   },
   "is_preconfigured": false,
+  "is_deprecated": false,
   "is_missing_secrets": false
 }
 --------------------------------------------------

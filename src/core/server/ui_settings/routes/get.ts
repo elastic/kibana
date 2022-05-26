@@ -14,7 +14,7 @@ export function registerGetRoute(router: IRouter) {
     { path: '/api/kibana/settings', validate: false },
     async (context, request, response) => {
       try {
-        const uiSettingsClient = context.core.uiSettings.client;
+        const uiSettingsClient = (await context.core).uiSettings.client;
         return response.ok({
           body: {
             settings: await uiSettingsClient.getUserProvided(),

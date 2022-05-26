@@ -128,8 +128,8 @@ const getColumns = ({
     ),
   },
   {
-    field: 'section', // TODO: what field is this?
-    name: TEXT.SECTION,
+    field: 'attributes.section',
+    name: TEXT.CIS_SECTION,
     width: '15%',
   },
   {
@@ -148,7 +148,7 @@ const getColumns = ({
           label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
           checked={enabled}
           onChange={() => toggleRule(rule)}
-          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.attributes.id)}
+          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
         />
       </EuiToolTip>
     ),

@@ -7,8 +7,10 @@
 
 import { act } from 'react-dom/test-utils';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../helpers';
 import { getDefaultHotPhasePolicy } from '../constants';
+import { API_BASE_PATH } from '../../../../common/constants';
 import {
   SearchableSnapshotsTestBed,
   setupSearchableSnapshotsTestBed,
@@ -16,17 +18,13 @@ import {
 
 describe('<EditPolicy /> searchable snapshots', () => {
   let testBed: SearchableSnapshotsTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setupSearchableSnapshotsTestBed();
+      testBed = await setupSearchableSnapshotsTestBed(httpSetup);
     });
 
     const { component } = testBed;
@@ -78,14 +76,21 @@ describe('<EditPolicy /> searchable snapshots', () => {
     await actions.frozen.setMinAgeValue('15');
 
     await actions.savePolicy();
-    const latestRequest = server.requests[server.requests.length - 1];
-    expect(latestRequest.method).toBe('POST');
-    expect(latestRequest.url).toBe('/api/index_lifecycle_management/policies');
-    const reqBody = JSON.parse(JSON.parse(latestRequest.requestBody).body);
 
-    expect(reqBody.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe(repository);
-    expect(reqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toBe(repository);
-    expect(reqBody.phases.frozen.actions.searchable_snapshot.snapshot_repository).toBe(repository);
+    const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+    const [requestUrl, requestBody] = lastReq;
+    const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+    expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+    expect(parsedReqBody.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe(
+      repository
+    );
+    expect(parsedReqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toBe(
+      repository
+    );
+    expect(parsedReqBody.phases.frozen.actions.searchable_snapshot.snapshot_repository).toBe(
+      repository
+    );
   });
 
   test('should update the repository in all searchable snapshot actions', async () => {
@@ -101,13 +106,22 @@ describe('<EditPolicy /> searchable snapshots', () => {
     // We update the repository in one phase
     await actions.frozen.setSearchableSnapshot('changed');
     await actions.savePolicy();
-    const latestRequest = server.requests[server.requests.length - 1];
-    const reqBody = JSON.parse(JSON.parse(latestRequest.requestBody).body);
 
+    const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+    const [requestUrl, requestBody] = lastReq;
+    const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+    expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
     // And all phases should be updated
-    expect(reqBody.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe('changed');
-    expect(reqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toBe('changed');
-    expect(reqBody.phases.frozen.actions.searchable_snapshot.snapshot_repository).toBe('changed');
+    expect(parsedReqBody.phases.hot.actions.searchable_snapshot.snapshot_repository).toBe(
+      'changed'
+    );
+    expect(parsedReqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toBe(
+      'changed'
+    );
+    expect(parsedReqBody.phases.frozen.actions.searchable_snapshot.snapshot_repository).toBe(
+      'changed'
+    );
   });
 
   describe('on cloud', () => {
@@ -123,7 +137,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
         httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
         await act(async () => {
-          testBed = await setupSearchableSnapshotsTestBed({
+          testBed = await setupSearchableSnapshotsTestBed(httpSetup, {
             appServicesContext: { cloud: { isCloudEnabled: true } },
           });
         });
@@ -152,7 +166,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
         httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['found-snapshots'] });
 
         await act(async () => {
-          testBed = await setupSearchableSnapshotsTestBed({
+          testBed = await setupSearchableSnapshotsTestBed(httpSetup, {
             appServicesContext: { cloud: { isCloudEnabled: true } },
           });
         });
@@ -166,12 +180,15 @@ describe('<EditPolicy /> searchable snapshots', () => {
         await actions.togglePhase('cold');
         await actions.cold.setMinAgeValue('10');
         await actions.cold.toggleSearchableSnapshot();
+
         await actions.savePolicy();
-        const latestRequest = server.requests[server.requests.length - 1];
-        expect(latestRequest.method).toBe('POST');
-        expect(latestRequest.url).toBe('/api/index_lifecycle_management/policies');
-        const reqBody = JSON.parse(JSON.parse(latestRequest.requestBody).body);
-        expect(reqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
+
+        const lastReq: HttpFetchOptionsWithPath[] = httpSetup.post.mock.calls.pop() || [];
+        const [requestUrl, requestBody] = lastReq;
+        const parsedReqBody = JSON.parse((requestBody as Record<string, any>).body);
+
+        expect(requestUrl).toBe(`${API_BASE_PATH}/policies`);
+        expect(parsedReqBody.phases.cold.actions.searchable_snapshot.snapshot_repository).toEqual(
           'found-snapshots'
         );
       });
@@ -189,7 +206,7 @@ describe('<EditPolicy /> searchable snapshots', () => {
       httpRequestsMockHelpers.setListSnapshotRepos({ repositories: ['my-repo'] });
 
       await act(async () => {
-        testBed = await setupSearchableSnapshotsTestBed({
+        testBed = await setupSearchableSnapshotsTestBed(httpSetup, {
           appServicesContext: {
             license: licensingMock.createLicense({ license: { type: 'basic' } }),
           },

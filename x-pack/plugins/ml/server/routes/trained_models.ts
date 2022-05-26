@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { schema } from '@kbn/config-schema';
 import { RouteInitialization } from '../types';
 import { wrapError } from '../client/error_wrapper';
@@ -14,7 +13,6 @@ import {
   modelIdSchema,
   optionalModelIdSchema,
   putTrainedModelQuerySchema,
-  pipelineSchema,
   inferTrainedModelQuery,
   inferTrainedModelBody,
 } from './schemas/inference_schema';
@@ -373,7 +371,7 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         body: inferTrainedModelBody,
       },
       options: {
-        tags: ['access:ml:canStartStopTrainedModels'],
+        tags: ['access:ml:canTestTrainedModels'],
       },
     },
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
@@ -381,45 +379,13 @@ export function trainedModelsRoutes({ router, routeGuard }: RouteInitialization)
         const { modelId } = request.params;
         const body = await mlClient.inferTrainedModelDeployment({
           model_id: modelId,
-          docs: request.body.docs,
-          ...(request.query.timeout ? { timeout: request.query.timeout } : {}),
-        });
-        return response.ok({
-          body,
-        });
-      } catch (e) {
-        return response.customError(wrapError(e));
-      }
-    })
-  );
-
-  /**
-   * @apiGroup TrainedModels
-   *
-   * @api {post} /api/ml/trained_models/ingest_pipeline_simulate Ingest pipeline simulate
-   * @apiName IngestPipelineSimulate
-   * @apiDescription Simulates an ingest pipeline call using supplied documents
-   */
-  router.post(
-    {
-      path: '/api/ml/trained_models/ingest_pipeline_simulate',
-      validate: {
-        body: pipelineSchema,
-      },
-      options: {
-        tags: ['access:ml:canStartStopTrainedModels'],
-      },
-    },
-    routeGuard.fullLicenseAPIGuard(async ({ client, request, response }) => {
-      try {
-        const { pipeline, docs, verbose } = request.body;
-
-        const body = await client.asCurrentUser.ingest.simulate({
-          verbose,
           body: {
-            pipeline,
-            docs: docs as estypes.IngestSimulateDocument[],
+            docs: request.body.docs,
+            ...(request.body.inference_config
+              ? { inference_config: request.body.inference_config }
+              : {}),
           },
+          ...(request.query.timeout ? { timeout: request.query.timeout } : {}),
         });
         return response.ok({
           body,

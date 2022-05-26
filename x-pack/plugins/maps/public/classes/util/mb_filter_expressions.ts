@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FilterSpecification } from '@kbn/mapbox-gl';
 import { GEO_JSON_TYPE, KBN_IS_CENTROID_FEATURE } from '../../../common/constants';
 
 import { Timeslice } from '../../../common/descriptor_types';
@@ -14,14 +15,18 @@ export interface TimesliceMaskConfig {
   timeslice: Timeslice;
 }
 
-export const EXCLUDE_CENTROID_FEATURES = ['!=', ['get', KBN_IS_CENTROID_FEATURE], true];
+export const EXCLUDE_CENTROID_FEATURES = [
+  '!=',
+  ['get', KBN_IS_CENTROID_FEATURE],
+  true,
+] as FilterSpecification;
 
 function getFilterExpression(
-  filters: unknown[],
-  joinFilter?: unknown,
+  filters: FilterSpecification[],
+  joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
-) {
-  const allFilters: unknown[] = [...filters];
+): FilterSpecification {
+  const allFilters: FilterSpecification[] = [...filters];
 
   if (joinFilter) {
     allFilters.push(joinFilter);
@@ -45,12 +50,12 @@ function getFilterExpression(
 }
 
 export function getFillFilterExpression(
-  joinFilter?: unknown,
+  joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
-): unknown[] {
+): FilterSpecification {
   return getFilterExpression(
     [
-      // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
+      // explicit "exclude centroid features" filter not needed. Label features are points and are filtered out by geometry narrowing
       [
         'any',
         ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
@@ -63,12 +68,12 @@ export function getFillFilterExpression(
 }
 
 export function getLineFilterExpression(
-  joinFilter?: unknown,
+  joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
-): unknown[] {
+): FilterSpecification {
   return getFilterExpression(
     [
-      // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
+      // explicit "exclude centroid features" filter not needed. Label features are points and are filtered out by geometry narrowing
       [
         'any',
         ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
@@ -89,28 +94,37 @@ const IS_POINT_FEATURE = [
 ];
 
 export function getPointFilterExpression(
-  joinFilter?: unknown,
+  isSourceGeoJson: boolean,
+  isESSource: boolean,
+  joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
-): unknown[] {
-  return getFilterExpression(
-    [EXCLUDE_CENTROID_FEATURES, IS_POINT_FEATURE],
-    joinFilter,
-    timesliceMaskConfig
-  );
+): FilterSpecification {
+  const filters: FilterSpecification[] = [];
+  if (isSourceGeoJson) {
+    filters.push(EXCLUDE_CENTROID_FEATURES);
+  } else if (!isSourceGeoJson && isESSource) {
+    filters.push(['!=', ['get', '_mvt_label_position'], true]);
+  }
+  filters.push(IS_POINT_FEATURE);
+
+  return getFilterExpression(filters, joinFilter, timesliceMaskConfig);
 }
 
 export function getLabelFilterExpression(
   isSourceGeoJson: boolean,
-  joinFilter?: unknown,
+  isESSource: boolean,
+  joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
-): unknown[] {
-  const filters: unknown[] = [];
+): FilterSpecification {
+  const filters: FilterSpecification[] = [];
 
   if (isSourceGeoJson) {
     // Centroid feature added to GeoJSON feature collection for LINE_STRING, MULTI_LINE_STRING, POLYGON, MULTI_POLYGON, and GEOMETRY_COLLECTION geometries
     // For GeoJSON sources, show label for centroid features or point/multi-point features only.
     // no explicit isCentroidFeature filter is needed, centroids are points and are included in the geometry filter.
     filters.push(IS_POINT_FEATURE);
+  } else if (!isSourceGeoJson && isESSource) {
+    filters.push(['==', ['get', '_mvt_label_position'], true]);
   }
 
   return getFilterExpression(filters, joinFilter, timesliceMaskConfig);

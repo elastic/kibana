@@ -6,70 +6,107 @@
  * Side Public License, v 1.
  */
 
-import { i18n } from '@kbn/i18n';
-import { Dimension, prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
-import { AxisExtentModes, LayerTypes, ValueLabelModes, XY_VIS_RENDERER } from '../constants';
-import { appendLayerIds } from '../helpers';
-import { AxisExtentConfigResult, DataLayerConfigResult, XYLayerConfig, XyVisFn } from '../types';
+import {
+  Dimension,
+  prepareLogTable,
+  validateAccessor,
+} from '@kbn/visualizations-plugin/common/utils';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER, REFERENCE_LINE } from '../constants';
+import { appendLayerIds, getAccessors, getShowLines, normalizeTable } from '../helpers';
+import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
 import { getLayerDimensions } from '../utils';
+import {
+  hasAreaLayer,
+  hasBarLayer,
+  hasHistogramBarLayer,
+  validateExtent,
+  validateFillOpacity,
+  validateMarkSizeRatioLimits,
+  validateValueLabels,
+  validateAddTimeMarker,
+  validateMinTimeBarInterval,
+  validateMarkSizeForChartType,
+  validateMarkSizeRatioWithAccessor,
+  validateShowPointsForChartType,
+  validateLineWidthForChartType,
+  validatePointsRadiusForChartType,
+  validateLinesVisibilityForChartType,
+} from './validate';
 
-const errors = {
-  extendBoundsAreInvalidError: () =>
-    i18n.translate('expressionXY.reusable.function.xyVis.errors.extendBoundsAreInvalidError', {
-      defaultMessage:
-        'For area and bar modes, and custom extent mode, the lower bound should be less or greater than 0 and the upper bound - be greater or equal than 0',
-    }),
-  notUsedFillOpacityError: () =>
-    i18n.translate('expressionXY.reusable.function.xyVis.errors.notUsedFillOpacityError', {
-      defaultMessage: '`fillOpacity` argument is applicable only for area charts.',
-    }),
-  valueLabelsForNotBarsOrHistogramBarsChartsError: () =>
-    i18n.translate(
-      'expressionXY.reusable.function.xyVis.errors.valueLabelsForNotBarsOrHistogramBarsChartsError',
-      {
-        defaultMessage:
-          '`valueLabels` argument is applicable only for bar charts, which are not histograms.',
-      }
-    ),
-  dataBoundsForNotLineChartError: () =>
-    i18n.translate('expressionXY.reusable.function.xyVis.errors.dataBoundsForNotLineChartError', {
-      defaultMessage: 'Only line charts can be fit to the data bounds',
-    }),
-};
-
-const validateExtent = (
-  extent: AxisExtentConfigResult,
-  hasBarOrArea: boolean,
-  dataLayers: DataLayerConfigResult[]
-) => {
-  const isValidLowerBound =
-    extent.lowerBound === undefined || (extent.lowerBound !== undefined && extent.lowerBound <= 0);
-  const isValidUpperBound =
-    extent.upperBound === undefined || (extent.upperBound !== undefined && extent.upperBound >= 0);
-
-  const areValidBounds = isValidLowerBound && isValidUpperBound;
-
-  if (hasBarOrArea && extent.mode === AxisExtentModes.CUSTOM && !areValidBounds) {
-    throw new Error(errors.extendBoundsAreInvalidError());
-  }
-
-  const lineSeries = dataLayers.filter(({ seriesType }) => seriesType.includes('line'));
-  if (!lineSeries.length && extent.mode === AxisExtentModes.DATA_BOUNDS) {
-    throw new Error(errors.dataBoundsForNotLineChartError());
-  }
+const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
+  const accessors = getAccessors<string | ExpressionValueVisDimension, XYArgs>(args, table);
+  const normalizedTable = normalizeTable(table, accessors.xAccessor);
+  return {
+    type: DATA_LAYER,
+    seriesType: args.seriesType,
+    hide: args.hide,
+    columnToLabel: args.columnToLabel,
+    xScaleType: args.xScaleType,
+    isHistogram: args.isHistogram,
+    palette: args.palette,
+    yConfig: args.yConfig,
+    showPoints: args.showPoints,
+    pointsRadius: args.pointsRadius,
+    lineWidth: args.lineWidth,
+    layerType: LayerTypes.DATA,
+    table: normalizedTable,
+    showLines: args.showLines,
+    ...accessors,
+  };
 };
 
 export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
-  const { dataLayers = [], referenceLineLayers = [], annotationLayers = [], ...restArgs } = args;
+  validateAccessor(args.splitRowAccessor, data.columns);
+  validateAccessor(args.splitColumnAccessor, data.columns);
+
+  const {
+    referenceLines = [],
+    annotationLayers = [],
+    // data_layer args
+    seriesType,
+    accessors,
+    xAccessor,
+    hide,
+    splitAccessor,
+    columnToLabel,
+    xScaleType,
+    isHistogram,
+    yConfig,
+    palette,
+    markSizeAccessor,
+    showPoints,
+    pointsRadius,
+    lineWidth,
+    showLines: realShowLines,
+    ...restArgs
+  } = args;
+
+  validateLinesVisibilityForChartType(args.showLines, args.seriesType);
+  const showLines = getShowLines(args);
+
+  const dataLayers: DataLayerConfigResult[] = [createDataLayer({ ...args, showLines }, data)];
+
+  validateAccessor(dataLayers[0].xAccessor, data.columns);
+  validateAccessor(dataLayers[0].splitAccessor, data.columns);
+  dataLayers[0].accessors.forEach((accessor) => validateAccessor(accessor, data.columns));
+
+  validateMarkSizeForChartType(dataLayers[0].markSizeAccessor, args.seriesType);
+  validateAccessor(dataLayers[0].markSizeAccessor, data.columns);
+
   const layers: XYLayerConfig[] = [
     ...appendLayerIds(dataLayers, 'dataLayers'),
-    ...appendLayerIds(referenceLineLayers, 'referenceLineLayers'),
+    ...appendLayerIds(referenceLines, 'referenceLines'),
     ...appendLayerIds(annotationLayers, 'annotationLayers'),
   ];
 
   if (handlers.inspectorAdapters.tables) {
+    handlers.inspectorAdapters.tables.reset();
+    handlers.inspectorAdapters.tables.allowCsvExport = true;
+
     const layerDimensions = layers.reduce<Dimension[]>((dimensions, layer) => {
-      if (layer.layerType === LayerTypes.ANNOTATIONS) {
+      if (layer.layerType === LayerTypes.ANNOTATIONS || layer.type === REFERENCE_LINE) {
         return dimensions;
       }
 
@@ -80,23 +117,23 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
     handlers.inspectorAdapters.tables.logDatatable('default', logTable);
   }
 
-  const hasBar = dataLayers.filter(({ seriesType }) => seriesType.includes('bar')).length > 0;
-  const hasArea = dataLayers.filter(({ seriesType }) => seriesType.includes('area')).length > 0;
+  const hasBar = hasBarLayer(dataLayers);
+  const hasArea = hasAreaLayer(dataLayers);
 
   validateExtent(args.yLeftExtent, hasBar || hasArea, dataLayers);
   validateExtent(args.yRightExtent, hasBar || hasArea, dataLayers);
+  validateFillOpacity(args.fillOpacity, hasArea);
+  validateAddTimeMarker(dataLayers, args.addTimeMarker);
+  validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
 
-  if (!hasArea && args.fillOpacity !== undefined) {
-    throw new Error(errors.notUsedFillOpacityError());
-  }
+  const hasNotHistogramBars = !hasHistogramBarLayer(dataLayers);
 
-  const hasNotHistogramBars =
-    dataLayers.filter(({ seriesType, isHistogram }) => seriesType.includes('bar') && !isHistogram)
-      .length > 0;
-
-  if ((!hasBar || !hasNotHistogramBars) && args.valueLabels !== ValueLabelModes.HIDE) {
-    throw new Error(errors.valueLabelsForNotBarsOrHistogramBarsChartsError());
-  }
+  validateValueLabels(args.valueLabels, hasBar, hasNotHistogramBars);
+  validateMarkSizeRatioWithAccessor(args.markSizeRatio, dataLayers[0].markSizeAccessor);
+  validateMarkSizeRatioLimits(args.markSizeRatio);
+  validateLineWidthForChartType(lineWidth, args.seriesType);
+  validateShowPointsForChartType(showPoints, args.seriesType);
+  validatePointsRadiusForChartType(pointsRadius, args.seriesType);
 
   return {
     type: 'render',
@@ -106,6 +143,8 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
         ...restArgs,
         layers,
         showTooltip: args.showTooltip ?? false,
+        markSizeRatio:
+          dataLayers[0].markSizeAccessor && !args.markSizeRatio ? 10 : args.markSizeRatio,
         ariaLabel:
           args.ariaLabel ??
           (handlers.variables?.embeddableTitle as string) ??

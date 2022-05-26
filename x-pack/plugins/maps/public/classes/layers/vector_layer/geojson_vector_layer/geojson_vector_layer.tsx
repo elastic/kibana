@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon } from '@elastic/eui';
 import { Feature, FeatureCollection } from 'geojson';
-import type { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from '@kbn/mapbox-gl';
+import type { FilterSpecification, Map as MbMap, GeoJSONSource } from '@kbn/mapbox-gl';
 import {
   EMPTY_FEATURE_COLLECTION,
   FEATURE_VISIBLE_PROPERTY_NAME,
@@ -160,7 +160,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     this._setMbLinePolygonProperties(mbMap, undefined, timesliceMaskConfig);
   }
 
-  _getJoinFilterExpression(): unknown | undefined {
+  _getJoinFilterExpression(): FilterSpecification | undefined {
     return this.hasJoins()
       ? // Remove unjoined source features by filtering out features without GeoJSON feature.property[FEATURE_VISIBLE_PROPERTY_NAME] is true
         ['==', ['get', FEATURE_VISIBLE_PROPERTY_NAME], true]
@@ -168,7 +168,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
   }
 
   _syncFeatureCollectionWithMb(mbMap: MbMap) {
-    const mbGeoJSONSource = mbMap.getSource(this.getId()) as MbGeoJSONSource;
+    const mbGeoJSONSource = mbMap.getSource(this.getId()) as GeoJSONSource;
     const featureCollection = this._getSourceFeatureCollection();
     const featureCollectionOnMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
 
@@ -237,7 +237,8 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
           syncContext.isForceRefresh,
           syncContext.dataFilters,
           source,
-          style
+          style,
+          syncContext.isFeatureEditorOpenForLayer
         ),
         syncContext,
         source,

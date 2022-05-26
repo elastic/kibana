@@ -9,7 +9,7 @@ import React, { useMemo } from 'react';
 import prettyMilliseconds from 'pretty-ms';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { CaseMetrics, CaseMetricsFeature } from '../../../../common/ui';
+import { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import {
   CASE_CREATED,
   CASE_IN_PROGRESS_DURATION,
@@ -90,10 +90,10 @@ export const CaseStatusMetrics: React.FC<Pick<CaseViewMetricsProps, 'metrics' | 
 CaseStatusMetrics.displayName = 'CaseStatusMetrics';
 
 const useGetLifespanMetrics = (
-  metrics: CaseMetrics | null,
-  features: CaseMetricsFeature[]
-): CaseMetrics['lifespan'] | undefined => {
-  return useMemo<CaseMetrics['lifespan']>(() => {
+  metrics: SingleCaseMetrics | null,
+  features: SingleCaseMetricsFeature[]
+): SingleCaseMetrics['lifespan'] | undefined => {
+  return useMemo<SingleCaseMetrics['lifespan']>(() => {
     const lifespan = metrics?.lifespan ?? {
       closeDate: '',
       creationDate: '',

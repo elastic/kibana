@@ -22,12 +22,16 @@ import { FormattedRelative } from '@kbn/i18n-react';
 import { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { HeaderSection } from '../../../../common/components/header_section';
 
-import { LastUpdatedAt, SEVERITY_COLOR } from '../util';
+import { LastUpdatedAt, SEVERITY_COLOR } from '../utils';
 import * as i18n from '../translations';
 import { useRuleAlertsItems, RuleAlertsItem } from './use_rule_alerts_items';
 import { useNavigation, NavigateTo, GetAppUrl } from '../../../../common/lib/kibana';
 import { SecurityPageName } from '../../../../../common/constants';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { HoverVisibilityContainer } from '../../../../common/components/hover_visibility_container';
+import { BUTTON_CLASS as INPECT_BUTTON_CLASS } from '../../../../common/components/inspect';
+import { FormattedCount } from '../../../../common/components/formatted_number';
+import { useNavigateToTimeline } from '../hooks/use_navigate_to_timeline';
 
 export interface RuleAlertsTableProps {
   signalIndexName: string | null;
@@ -36,12 +40,13 @@ export interface RuleAlertsTableProps {
 export type GetTableColumns = (params: {
   getAppUrl: GetAppUrl;
   navigateTo: NavigateTo;
+  openRuleInTimeline: (ruleName: string) => void;
 }) => Array<EuiBasicTableColumn<RuleAlertsItem>>;
 
 const DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID =
   'detection-response-rule-alerts-severity-table' as const;
 
-export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
+export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo, openRuleInTimeline }) => [
   {
     field: 'name',
     name: i18n.RULE_ALERTS_COLUMN_RULE_NAME,
@@ -76,6 +81,11 @@ export const getTableColumns: GetTableColumns = ({ getAppUrl, navigateTo }) => [
     field: 'alert_count',
     name: i18n.RULE_ALERTS_COLUMN_ALERT_COUNT,
     'data-test-subj': 'severityRuleAlertsTable-alertCount',
+    render: (alertCount: number, { name }) => (
+      <EuiLink disabled={alertCount === 0} onClick={() => openRuleInTimeline(name)}>
+        <FormattedCount count={alertCount} />
+      </EuiLink>
+    ),
   },
   {
     field: 'severity',
@@ -96,43 +106,47 @@ export const RuleAlertsTable = React.memo<RuleAlertsTableProps>(({ signalIndexNa
     skip: !toggleStatus,
   });
 
+  const { openRuleInTimeline } = useNavigateToTimeline();
+
   const navigateToAlerts = useCallback(() => {
     navigateTo({ deepLinkId: SecurityPageName.alerts });
   }, [navigateTo]);
 
   const columns = useMemo(
-    () => getTableColumns({ getAppUrl, navigateTo }),
-    [getAppUrl, navigateTo]
+    () => getTableColumns({ getAppUrl, navigateTo, openRuleInTimeline }),
+    [getAppUrl, navigateTo, openRuleInTimeline]
   );
 
   return (
-    <EuiPanel hasBorder data-test-subj="severityRuleAlertsPanel">
-      <HeaderSection
-        id={DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID}
-        title={i18n.RULE_ALERTS_SECTION_TITLE}
-        titleSize="s"
-        toggleStatus={toggleStatus}
-        toggleQuery={setToggleStatus}
-        subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
-      />
-      {toggleStatus && (
-        <>
-          <EuiBasicTable
-            data-test-subj="severityRuleAlertsTable"
-            columns={columns}
-            items={items}
-            loading={isLoading}
-            noItemsMessage={
-              <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
-            }
-          />
-          <EuiSpacer size="m" />
-          <EuiButton data-test-subj="severityRuleAlertsButton" onClick={navigateToAlerts}>
-            {i18n.OPEN_ALL_ALERTS_BUTTON}
-          </EuiButton>
-        </>
-      )}
-    </EuiPanel>
+    <HoverVisibilityContainer show={true} targetClassNames={[INPECT_BUTTON_CLASS]}>
+      <EuiPanel hasBorder data-test-subj="severityRuleAlertsPanel">
+        <HeaderSection
+          id={DETECTION_RESPONSE_RULE_ALERTS_QUERY_ID}
+          title={i18n.RULE_ALERTS_SECTION_TITLE}
+          titleSize="s"
+          toggleStatus={toggleStatus}
+          toggleQuery={setToggleStatus}
+          subtitle={<LastUpdatedAt updatedAt={updatedAt} isUpdating={isLoading} />}
+        />
+        {toggleStatus && (
+          <>
+            <EuiBasicTable
+              data-test-subj="severityRuleAlertsTable"
+              columns={columns}
+              items={items}
+              loading={isLoading}
+              noItemsMessage={
+                <EuiEmptyPrompt title={<h3>{i18n.NO_ALERTS_FOUND}</h3>} titleSize="xs" />
+              }
+            />
+            <EuiSpacer size="m" />
+            <EuiButton data-test-subj="severityRuleAlertsButton" onClick={navigateToAlerts}>
+              {i18n.OPEN_ALL_ALERTS_BUTTON}
+            </EuiButton>
+          </>
+        )}
+      </EuiPanel>
+    </HoverVisibilityContainer>
   );
 });
 RuleAlertsTable.displayName = 'RuleAlertsTable';

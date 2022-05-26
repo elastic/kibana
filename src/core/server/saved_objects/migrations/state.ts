@@ -8,6 +8,7 @@
 
 import * as Option from 'fp-ts/lib/Option';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DocLinks } from '@kbn/doc-links';
 import { ControlState } from './state_action_machine';
 import { AliasAction } from './actions';
 import { IndexMapping } from '../mappings';
@@ -122,6 +123,10 @@ export interface BaseState extends ControlState {
     string,
     SavedObjectTypeExcludeFromUpgradeFilterHook
   >;
+  /**
+   * DocLinks for savedObjects. to reference online documentation
+   */
+  readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
 }
 
 export interface InitState extends BaseState {

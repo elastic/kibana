@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type { AwaitedProperties } from '@kbn/utility-types';
+import { httpServerMock, savedObjectsClientMock, coreMock } from '@kbn/core/server/mocks';
 
 import type { PostFleetSetupResponse } from '../../../common';
 import { RegistryError } from '../../errors';
@@ -29,7 +30,7 @@ jest.mock('../../services/setup', () => {
 const mockSetupFleet = setupFleet as jest.MockedFunction<typeof setupFleet>;
 
 describe('FleetSetupHandler', () => {
-  let context: FleetRequestHandlerContext;
+  let context: AwaitedProperties<Omit<FleetRequestHandlerContext, 'resolve'>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
 
@@ -69,7 +70,7 @@ describe('FleetSetupHandler', () => {
         nonFatalErrors: [],
       })
     );
-    await fleetSetupHandler(context, request, response);
+    await fleetSetupHandler(coreMock.createCustomRequestHandlerContext(context), request, response);
 
     const expectedBody: PostFleetSetupResponse = {
       isInitialized: true,
@@ -81,7 +82,7 @@ describe('FleetSetupHandler', () => {
 
   it('POST /setup fails w/500 on custom error', async () => {
     mockSetupFleet.mockImplementation(() => Promise.reject(new Error('SO method mocked to throw')));
-    await fleetSetupHandler(context, request, response);
+    await fleetSetupHandler(coreMock.createCustomRequestHandlerContext(context), request, response);
 
     expect(response.customError).toHaveBeenCalledTimes(1);
     expect(response.customError).toHaveBeenCalledWith({
@@ -97,7 +98,7 @@ describe('FleetSetupHandler', () => {
       Promise.reject(new RegistryError('Registry method mocked to throw'))
     );
 
-    await fleetSetupHandler(context, request, response);
+    await fleetSetupHandler(coreMock.createCustomRequestHandlerContext(context), request, response);
     expect(response.customError).toHaveBeenCalledTimes(1);
     expect(response.customError).toHaveBeenCalledWith({
       statusCode: 502,

@@ -15,7 +15,7 @@ import {
   catchRetryableEsClientErrors,
   RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
-import type { IndexNotFound, AcknowledgeResponse } from '.';
+import type { IndexNotFound, AcknowledgeResponse, IndexNotYellowTimeout } from '.';
 import { waitForIndexStatusYellow } from './wait_for_index_status_yellow';
 import {
   DEFAULT_TIMEOUT,
@@ -23,6 +23,8 @@ import {
   INDEX_NUMBER_OF_SHARDS,
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
+import { isClusterShardLimitExceeded } from './es_errors';
+import { ClusterShardLimitExceeded } from './create_index';
 export type CloneIndexResponse = AcknowledgeResponse;
 
 /** @internal */
@@ -49,11 +51,11 @@ export const cloneIndex = ({
   target,
   timeout = DEFAULT_TIMEOUT,
 }: CloneIndexParams): TaskEither.TaskEither<
-  RetryableEsClientError | IndexNotFound,
+  RetryableEsClientError | IndexNotFound | IndexNotYellowTimeout | ClusterShardLimitExceeded,
   CloneIndexResponse
 > => {
   const cloneTask: TaskEither.TaskEither<
-    RetryableEsClientError | IndexNotFound,
+    RetryableEsClientError | IndexNotFound | ClusterShardLimitExceeded,
     AcknowledgeResponse
   > = () => {
     return client.indices
@@ -113,6 +115,10 @@ export const cloneIndex = ({
             acknowledged: true,
             shardsAcknowledged: false,
           });
+        } else if (isClusterShardLimitExceeded(error?.body?.error)) {
+          return Either.left({
+            type: 'cluster_shard_limit_exceeded' as const,
+          });
         } else {
           throw error;
         }
@@ -122,7 +128,7 @@ export const cloneIndex = ({
 
   return pipe(
     cloneTask,
-    TaskEither.chain((res) => {
+    TaskEither.chainW((res) => {
       if (res.acknowledged && res.shardsAcknowledged) {
         // If the cluster state was updated and all shards ackd we're done
         return TaskEither.right(res);

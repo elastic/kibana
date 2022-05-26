@@ -32,15 +32,18 @@ export const SummarySection = ({ complianceData }: { complianceData: ComplianceD
     const [layerValue] = element;
     const evaluation = layerValue[0].groupByRollup as Evaluation;
 
-    navToFindings({ 'result.evaluation': evaluation });
+    navToFindings({ 'result.evaluation.keyword': evaluation });
   };
 
-  const handleCellClick = (resourceTypeName: string) => {
-    navToFindings({ 'resource.type': resourceTypeName, 'result.evaluation': RULE_FAILED });
+  const handleCellClick = (ruleSection: string) => {
+    navToFindings({
+      'rule.section.keyword': ruleSection,
+      'result.evaluation.keyword': RULE_FAILED,
+    });
   };
 
   const handleViewAllClick = () => {
-    navToFindings({ 'result.evaluation': RULE_FAILED });
+    navToFindings({ 'result.evaluation.keyword': RULE_FAILED });
   };
 
   return (
@@ -58,7 +61,7 @@ export const SummarySection = ({ complianceData }: { complianceData: ComplianceD
       <EuiFlexItem>
         <ChartPanel title={TEXT.RISKS}>
           <RisksTable
-            data={complianceData.resourcesTypes}
+            data={complianceData.groupedFindingsEvaluation}
             maxItems={5}
             onCellClick={handleCellClick}
             onViewAllClick={handleViewAllClick}

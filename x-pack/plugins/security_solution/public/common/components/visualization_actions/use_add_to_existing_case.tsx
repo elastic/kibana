@@ -41,7 +41,6 @@ export const useAddToExistingCase = ({
   }, [lensAttributes, timeRange]);
 
   const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({
-    attachments,
     onClose: onAddToCaseClicked,
     toastContent: ADD_TO_CASE_SUCCESS,
   });
@@ -50,8 +49,8 @@ export const useAddToExistingCase = ({
     if (onAddToCaseClicked) {
       onAddToCaseClicked();
     }
-    selectCaseModal.open();
-  }, [onAddToCaseClicked, selectCaseModal]);
+    selectCaseModal.open({ attachments });
+  }, [attachments, onAddToCaseClicked, selectCaseModal]);
 
   return {
     onAddToExistingCaseClicked,

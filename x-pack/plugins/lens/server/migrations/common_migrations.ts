@@ -255,6 +255,38 @@ export const commonLockOldMetricVisSettings = (
   return newAttributes as LensDocShape830<VisState830>;
 };
 
+export const commonPreserveOldLegendSizeDefault = (
+  attributes: LensDocShape810
+): LensDocShape830<VisState830> => {
+  const newAttributes = cloneDeep(attributes);
+
+  const pixelsToLegendSize: Record<string, string> = {
+    undefined: 'auto',
+    '80': 'small',
+    '130': 'medium',
+    '180': 'large',
+    '230': 'xlarge',
+  };
+
+  if (['lnsXY', 'lnsHeatmap'].includes(newAttributes.visualizationType + '')) {
+    const legendConfig = (newAttributes.state.visualization as { legend: { legendSize: number } })
+      .legend;
+    (legendConfig.legendSize as unknown as string) =
+      pixelsToLegendSize[String(legendConfig.legendSize)];
+  }
+
+  if (newAttributes.visualizationType === 'lnsPie') {
+    const layers = (newAttributes.state.visualization as { layers: Array<{ legendSize: number }> })
+      .layers;
+
+    layers.forEach((layer) => {
+      (layer.legendSize as unknown as string) = pixelsToLegendSize[String(layer.legendSize)];
+    });
+  }
+
+  return newAttributes as LensDocShape830<VisState830>;
+};
+
 const getApplyCustomVisualizationMigrationToLens = (id: string, migration: MigrateFunction) => {
   return (savedObject: { attributes: LensDocShape }) => {
     if (savedObject.attributes.visualizationType !== id) return savedObject;
@@ -348,6 +380,10 @@ export const fixLensTopValuesCustomFormatting = (attributes: LensDocShape810): L
 export const commonFixValueLabelsInXY = (
   attributes: LensDocShape830<VisStatePre830>
 ): LensDocShape830<VisState830> => {
+  if (attributes.visualizationType !== 'lnsXY') {
+    return attributes as LensDocShape830<VisState830>;
+  }
+
   const newAttributes: LensDocShape830<VisStatePre830> = cloneDeep(attributes);
   const { visualization } = newAttributes.state;
   const { valueLabels } = visualization;

@@ -226,6 +226,9 @@ export function DiscoverLayout({
         stateContainer={stateContainer}
         updateQuery={onUpdateQuery}
         resetSavedSearch={resetSavedSearch}
+        onChangeIndexPattern={onChangeIndexPattern}
+        onEditRuntimeField={onEditRuntimeField}
+        useNewFieldsApi={useNewFieldsApi}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout
@@ -245,7 +248,7 @@ export function DiscoverLayout({
                 defaultMessage: 'Discover - Search not yet saved',
               })}
         </h1>
-        <EuiFlexGroup className="dscPageBody__contents" gutterSize="none">
+        <EuiFlexGroup className="dscPageBody__contents" gutterSize="s">
           <EuiFlexItem grow={false}>
             <SidebarMemoized
               columns={columns}

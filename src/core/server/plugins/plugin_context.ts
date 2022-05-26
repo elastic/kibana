@@ -185,7 +185,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerRouteHandlerContext: <
         Context extends RequestHandlerContext,
-        ContextName extends keyof Context
+        ContextName extends keyof Omit<Context, 'resolve'>
       >(
         contextName: ContextName,
         provider: RequestHandlerContextProvider<Context, ContextName>

@@ -5,55 +5,30 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useEffect, useState } from 'react';
-import { EuiCallOut, EuiCallOutProps, EuiLoadingChart } from '@elastic/eui';
-import { UserCommandInput } from './user_command_input';
-import { CommandExecutionFailure } from './command_execution_failure';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import React, { memo, PropsWithChildren, ReactNode } from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { MaybeImmutable } from '../../../../../common/endpoint/types';
+import { Command } from '..';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
-export interface HelpOutputProps extends Pick<EuiCallOutProps, 'title'> {
-  input: string;
-  children: ReactNode | Promise<{ result: ReactNode }>;
-}
-export const HelpOutput = memo<HelpOutputProps>(({ input, children, ...euiCalloutProps }) => {
-  const [content, setContent] = useState<ReactNode>(<EuiLoadingChart size="l" mono />);
+type HelpOutputProps = PropsWithChildren<{
+  command: MaybeImmutable<Command>;
+  title?: ReactNode;
+}>;
+export const HelpOutput = memo<HelpOutputProps>(({ title, children }) => {
   const getTestId = useTestIdGenerator(useDataTestSubj());
 
-  useEffect(() => {
-    if (children instanceof Promise) {
-      (async () => {
-        try {
-          const response = await (children as Promise<{
-            result: ReactNode;
-          }>);
-          setContent(response.result);
-        } catch (error) {
-          setContent(<CommandExecutionFailure error={error} />);
-        }
-      })();
-
-      return;
-    }
-
-    setContent(children);
-  }, [children]);
-
   return (
-    <div>
-      <div>
-        <UserCommandInput input={input} />
-      </div>
-      <EuiCallOut
-        {...euiCalloutProps}
-        color="primary"
-        size="s"
-        iconType="help"
-        data-test-subj={getTestId('helpOutput')}
-      >
-        {content}
-      </EuiCallOut>
-    </div>
+    <EuiCallOut
+      title={title}
+      color="primary"
+      size="s"
+      iconType="help"
+      data-test-subj={getTestId('helpOutput')}
+    >
+      {children}
+    </EuiCallOut>
   );
 });
 HelpOutput.displayName = 'HelpOutput';

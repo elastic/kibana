@@ -34,7 +34,6 @@ import { getDeprecatedBulkEndpointHeader, logDeprecatedBulkEndpoint } from './ut
 export const patchRulesBulkRoute = (
   router: SecuritySolutionPluginRouter,
   ml: SetupPlugins['ml'],
-  isRuleRegistryEnabled: boolean,
   logger: Logger
 ) => {
   router.patch(
@@ -54,12 +53,14 @@ export const patchRulesBulkRoute = (
 
       const siemResponse = buildSiemResponse(response);
 
-      const rulesClient = context.alerting.getRulesClient();
-      const ruleExecutionLog = context.securitySolution.getRuleExecutionLog();
-      const savedObjectsClient = context.core.savedObjects.client;
+      const ctx = await context.resolve(['core', 'securitySolution', 'alerting', 'licensing']);
+
+      const rulesClient = ctx.alerting.getRulesClient();
+      const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
+      const savedObjectsClient = ctx.core.savedObjects.client;
 
       const mlAuthz = buildMlAuthz({
-        license: context.licensing.license,
+        license: ctx.licensing.license,
         ml,
         request,
         savedObjectsClient,
@@ -72,7 +73,9 @@ export const patchRulesBulkRoute = (
             building_block_type: buildingBlockType,
             description,
             enabled,
+            timestamp_field: timestampField,
             event_category_override: eventCategoryOverride,
+            tiebreaker_field: tiebreakerField,
             false_positives: falsePositives,
             from,
             query,
@@ -129,7 +132,6 @@ export const patchRulesBulkRoute = (
             }
 
             const existingRule = await readRules({
-              isRuleRegistryEnabled,
               rulesClient,
               ruleId,
               id,
@@ -152,7 +154,9 @@ export const patchRulesBulkRoute = (
               buildingBlockType,
               description,
               enabled,
+              timestampField,
               eventCategoryOverride,
+              tiebreakerField,
               falsePositives,
               from,
               query,
@@ -198,12 +202,7 @@ export const patchRulesBulkRoute = (
             });
             if (rule != null && rule.enabled != null && rule.name != null) {
               const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(rule.id);
-              return transformValidateBulkError(
-                rule.id,
-                rule,
-                ruleExecutionSummary,
-                isRuleRegistryEnabled
-              );
+              return transformValidateBulkError(rule.id, rule, ruleExecutionSummary);
             } else {
               return getIdBulkError({ id, ruleId });
             }

@@ -65,6 +65,7 @@ export const closeAlerts = () => {
 
 export const expandFirstAlertActions = () => {
   cy.get(TIMELINE_CONTEXT_MENU_BTN).should('be.visible');
+  cy.get(TIMELINE_CONTEXT_MENU_BTN).find('svg').should('have.class', 'euiIcon-isLoaded');
   cy.get(TIMELINE_CONTEXT_MENU_BTN).first().click({ force: true });
 };
 
@@ -93,8 +94,8 @@ export const setEnrichmentDates = (from?: string, to?: string) => {
 
 export const goToClosedAlerts = () => {
   cy.get(CLOSED_ALERTS_FILTER_BTN).click();
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
-  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
@@ -104,13 +105,13 @@ export const goToManageAlertsDetectionRules = () => {
 
 export const goToOpenedAlerts = () => {
   cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
-  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
 };
 
 export const refreshAlerts = () => {
   // ensure we've refetched fields the first time index is defined
-  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(REFRESH_BUTTON).first().click({ force: true });
 };
 
@@ -126,8 +127,8 @@ export const openAlerts = () => {
 
 export const goToAcknowledgedAlerts = () => {
   cy.get(ACKNOWLEDGED_ALERTS_FILTER_BTN).click();
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
-  cy.get(REFRESH_BUTTON).should('have.text', 'Refresh');
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
 };
 
@@ -153,7 +154,7 @@ export const investigateFirstAlertInTimeline = () => {
 };
 
 export const waitForAlerts = () => {
-  cy.get(REFRESH_BUTTON).should('not.have.text', 'Updating');
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
 };
 
 export const waitForAlertsPanelToBeLoaded = () => {

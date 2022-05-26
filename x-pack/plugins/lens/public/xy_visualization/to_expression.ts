@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { Ast } from '@kbn/interpreter';
+import { Ast, AstFunction } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { ExtendedYConfig, YConfig } from '@kbn/expression-xy-plugin/common';
-import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
+import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import type { AxisExtentConfig, YConfig, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
 import {
   State,
   XYDataLayerConfig,
@@ -30,7 +30,7 @@ import {
   getReferenceLayers,
   getAnnotationsLayers,
 } from './visualization_helpers';
-import { getUniqueLabels, defaultAnnotationLabel } from './annotations/helpers';
+import { getUniqueLabels } from './annotations/helpers';
 import { layerTypes } from '../../common';
 
 export const getSortedAccessors = (
@@ -86,7 +86,7 @@ const simplifiedLayerExpression = {
   [layerTypes.REFERENCELINE]: (layer: XYReferenceLineLayerConfig) => ({
     ...layer,
     hide: true,
-    yConfig: layer.yConfig?.map(({ lineWidth, ...rest }) => ({
+    yConfig: layer.yConfig?.map(({ ...rest }) => ({
       ...rest,
       lineWidth: 1,
       icon: undefined,
@@ -96,12 +96,6 @@ const simplifiedLayerExpression = {
   [layerTypes.ANNOTATIONS]: (layer: XYAnnotationLayerConfig) => ({
     ...layer,
     hide: true,
-    annotations: layer.annotations?.map(({ lineWidth, ...rest }) => ({
-      ...rest,
-      lineWidth: 1,
-      icon: undefined,
-      textVisibility: false,
-    })),
   }),
 };
 
@@ -220,10 +214,11 @@ export const buildExpression = (
                       : [],
                     position: !state.legend.isInside ? [state.legend.position] : [],
                     isInside: state.legend.isInside ? [state.legend.isInside] : [],
-                    legendSize:
-                      !state.legend.isInside && state.legend.legendSize
-                        ? [state.legend.legendSize]
-                        : [],
+                    legendSize: state.legend.isInside
+                      ? [LegendSize.AUTO]
+                      : state.legend.legendSize
+                      ? [state.legend.legendSize]
+                      : [],
                     horizontalAlignment:
                       state.legend.horizontalAlignment && state.legend.isInside
                         ? [state.legend.horizontalAlignment]
@@ -234,9 +229,10 @@ export const buildExpression = (
                         : [],
                     // ensure that even if the user types more than 5 columns
                     // we will only show 5
-                    floatingColumns: state.legend.floatingColumns
-                      ? [Math.min(5, state.legend.floatingColumns)]
-                      : [],
+                    floatingColumns:
+                      state.legend.floatingColumns && state.legend.isInside
+                        ? [Math.min(5, state.legend.floatingColumns)]
+                        : [],
                     maxLines: state.legend.maxLines ? [state.legend.maxLines] : [],
                     shouldTruncate: [
                       state.legend.shouldTruncate ??
@@ -252,50 +248,10 @@ export const buildExpression = (
           emphasizeFitting: [state.emphasizeFitting || false],
           curveType: [state.curveType || 'LINEAR'],
           fillOpacity: [state.fillOpacity || 0.3],
-          yLeftExtent: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'axisExtentConfig',
-                  arguments: {
-                    mode: [state?.yLeftExtent?.mode || 'full'],
-                    lowerBound:
-                      state?.yLeftExtent?.lowerBound !== undefined
-                        ? [state?.yLeftExtent?.lowerBound]
-                        : [],
-                    upperBound:
-                      state?.yLeftExtent?.upperBound !== undefined
-                        ? [state?.yLeftExtent?.upperBound]
-                        : [],
-                  },
-                },
-              ],
-            },
-          ],
-          yRightExtent: [
-            {
-              type: 'expression',
-              chain: [
-                {
-                  type: 'function',
-                  function: 'axisExtentConfig',
-                  arguments: {
-                    mode: [state?.yRightExtent?.mode || 'full'],
-                    lowerBound:
-                      state?.yRightExtent?.lowerBound !== undefined
-                        ? [state?.yRightExtent?.lowerBound]
-                        : [],
-                    upperBound:
-                      state?.yRightExtent?.upperBound !== undefined
-                        ? [state?.yRightExtent?.upperBound]
-                        : [],
-                  },
-                },
-              ],
-            },
-          ],
+          yLeftExtent: [axisExtentConfigToExpression(state.yLeftExtent, validDataLayers)],
+          yRightExtent: [axisExtentConfigToExpression(state.yRightExtent, validDataLayers)],
+          yLeftScale: [state.yLeftScale || 'linear'],
+          yRightScale: [state.yRightScale || 'linear'],
           axisTitlesVisibilitySettings: [
             {
               type: 'expression',
@@ -390,11 +346,6 @@ export const buildExpression = (
   };
 };
 
-const buildTableExpression = (datasourceExpression: Ast): ExpressionAstExpression => ({
-  type: 'expression',
-  chain: [{ type: 'function', function: 'kibana', arguments: {} }, ...datasourceExpression.chain],
-});
-
 const referenceLineLayerToExpression = (
   layer: XYReferenceLineLayerConfig,
   datasourceLayer: DatasourcePublicAPI,
@@ -415,7 +366,7 @@ const referenceLineLayerToExpression = (
             : [],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(getColumnToLabelMap(layer, datasourceLayer))],
-          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
+          ...(datasourceExpression ? { table: [datasourceExpression] } : {}),
         },
       },
     ],
@@ -436,19 +387,7 @@ const annotationLayerToExpression = (
           hide: [Boolean(layer.hide)],
           layerId: [layer.layerId],
           annotations: layer.annotations
-            ? layer.annotations.map(
-                (ann): Ast =>
-                  eventAnnotationService.toExpression({
-                    time: ann.key.timestamp,
-                    label: ann.label || defaultAnnotationLabel,
-                    textVisibility: ann.textVisibility,
-                    icon: ann.icon,
-                    lineStyle: ann.lineStyle,
-                    lineWidth: ann.lineWidth,
-                    color: ann.color,
-                    isHidden: Boolean(ann.isHidden),
-                  })
-              )
+            ? layer.annotations.map((ann): Ast => eventAnnotationService.toExpression(ann))
             : [],
         },
       },
@@ -484,19 +423,40 @@ const dataLayerToExpression = (
           layerId: [layer.layerId],
           hide: [Boolean(layer.hide)],
           xAccessor: layer.xAccessor ? [layer.xAccessor] : [],
-          yScaleType: [
-            getScaleType(metadata[layer.layerId][layer.accessors[0]], ScaleType.Ordinal),
-          ],
           xScaleType: [getScaleType(metadata[layer.layerId][layer.xAccessor], ScaleType.Linear)],
           isHistogram: [isHistogramDimension],
-          splitAccessor: layer.splitAccessor ? [layer.splitAccessor] : [],
+          splitAccessor: layer.collapseFn || !layer.splitAccessor ? [] : [layer.splitAccessor],
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig))
             : [],
           seriesType: [layer.seriesType],
           accessors: layer.accessors,
           columnToLabel: [JSON.stringify(columnToLabel)],
-          ...(datasourceExpression ? { table: [buildTableExpression(datasourceExpression)] } : {}),
+          ...(datasourceExpression
+            ? {
+                table: [
+                  {
+                    ...datasourceExpression,
+                    chain: [
+                      ...datasourceExpression.chain,
+                      ...(layer.collapseFn
+                        ? [
+                            {
+                              type: 'function',
+                              function: 'lens_collapse',
+                              arguments: {
+                                by: layer.xAccessor ? [layer.xAccessor] : [],
+                                metric: layer.accessors,
+                                fn: [layer.collapseFn!],
+                              },
+                            } as AstFunction,
+                          ]
+                        : []),
+                    ],
+                  },
+                ],
+              }
+            : {}),
           palette: [
             {
               type: 'expression',
@@ -570,3 +530,21 @@ const extendedYConfigToExpression = (yConfig: ExtendedYConfig, defaultColor?: st
     ],
   };
 };
+
+const axisExtentConfigToExpression = (
+  extent: AxisExtentConfig | undefined,
+  layers: ValidXYDataLayerConfig[]
+): Ast => ({
+  type: 'expression',
+  chain: [
+    {
+      type: 'function',
+      function: 'axisExtentConfig',
+      arguments: {
+        mode: [extent?.mode ?? 'full'],
+        lowerBound: extent?.lowerBound !== undefined ? [extent?.lowerBound] : [],
+        upperBound: extent?.upperBound !== undefined ? [extent?.upperBound] : [],
+      },
+    },
+  ],
+});

@@ -20,6 +20,7 @@ import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,
@@ -36,6 +37,7 @@ import {
   changeLayerIndexPattern,
   extractReferences,
   injectReferences,
+  loadIndexPatterns,
 } from './loader';
 import { toExpression } from './to_expression';
 import {
@@ -115,6 +117,7 @@ export function getIndexPatternDatasource({
   core,
   storage,
   data,
+  unifiedSearch,
   dataViews,
   fieldFormats,
   charts,
@@ -124,6 +127,7 @@ export function getIndexPatternDatasource({
   core: CoreStart;
   storage: IStorageWrapper;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   fieldFormats: FieldFormatsStart;
   charts: ChartsPluginSetup;
@@ -178,6 +182,10 @@ export function getIndexPatternDatasource({
 
     getPersistableState(state: IndexPatternPrivateState) {
       return extractReferences(state);
+    },
+
+    getCurrentIndexPatternId(state: IndexPatternPrivateState) {
+      return state.currentIndexPatternId;
     },
 
     insertLayer(state: IndexPatternPrivateState, newLayerId: string) {
@@ -371,6 +379,7 @@ export function getIndexPatternDatasource({
                 savedObjectsClient={core.savedObjects.client}
                 http={core.http}
                 data={data}
+                unifiedSearch={unifiedSearch}
                 uniqueLabel={columnLabelMap[props.columnId]}
                 {...props}
               />
@@ -440,6 +449,30 @@ export function getIndexPatternDatasource({
             );
           }
         : undefined;
+    },
+
+    updateCurrentIndexPatternId: ({ state, indexPatternId, setState }) => {
+      handleChangeIndexPattern(indexPatternId, state, setState);
+    },
+
+    refreshIndexPatternsList: async ({ indexPatternId, setState }) => {
+      const newlyMappedIndexPattern = await loadIndexPatterns({
+        indexPatternsService: dataViews,
+        cache: {},
+        patterns: [indexPatternId],
+      });
+      const indexPatternRefs = await dataViews.getIdsWithTitle();
+      const indexPattern = newlyMappedIndexPattern[indexPatternId];
+      setState((s) => {
+        return {
+          ...s,
+          indexPatterns: {
+            ...s.indexPatterns,
+            [indexPattern.id]: indexPattern,
+          },
+          indexPatternRefs,
+        };
+      });
     },
 
     // Reset the temporary invalid state when closing the editor, but don't

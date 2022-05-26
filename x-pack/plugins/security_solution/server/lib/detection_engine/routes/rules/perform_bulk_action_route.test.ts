@@ -14,42 +14,55 @@ import {
   getBulkActionEditRequest,
   getFindResultWithSingleHit,
   getFindResultWithMultiHits,
+  getRuleMock,
 } from '../__mocks__/request_responses';
 import { requestContextMock, serverMock, requestMock } from '../__mocks__';
 import { performBulkActionRoute } from './perform_bulk_action_route';
 import {
-  getPerformBulkActionSchemaMock,
   getPerformBulkActionEditSchemaMock,
+  getPerformBulkActionSchemaMock,
 } from '../../../../../common/detection_engine/schemas/request/perform_bulk_action_schema.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { readRules } from '../../rules/read_rules';
+import { legacyMigrate } from '../../rules/utils';
+import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 
 jest.mock('../../../machine_learning/authz', () => mockMlAuthzFactory.create());
 jest.mock('../../rules/read_rules', () => ({ readRules: jest.fn() }));
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('perform_bulk_action - %s', (_, isRuleRegistryEnabled) => {
+jest.mock('../../rules/utils', () => {
+  const actual = jest.requireActual('../../rules/utils');
+  return {
+    ...actual,
+    legacyMigrate: jest.fn(),
+  };
+});
+
+describe('perform_bulk_action', () => {
   const readRulesMock = readRules as jest.Mock;
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let ml: ReturnType<typeof mlServicesMock.createSetupContract>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
-  const mockRule = getFindResultWithSingleHit(isRuleRegistryEnabled).data[0];
+  const mockRule = getFindResultWithSingleHit().data[0];
 
   beforeEach(() => {
     server = serverMock.create();
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
     ml = mlServicesMock.createSetupContract();
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-    performBulkActionRoute(server.router, ml, logger, isRuleRegistryEnabled);
+    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
+
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    performBulkActionRoute(server.router, ml, logger);
   });
 
   describe('status codes', () => {
     it('returns 200 when performing bulk action with all dependencies present', async () => {
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(
+        getBulkActionRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         success: true,
@@ -67,7 +80,10 @@ describe.each([
 
     it("returns 200 when provided filter query doesn't match any rules", async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(
+        getBulkActionRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
       expect(response.body).toEqual({
         success: true,
@@ -87,7 +103,10 @@ describe.each([
       clients.rulesClient.find.mockResolvedValue(
         getFindResultWithMultiHits({ data: [], total: Infinity })
       );
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(
+        getBulkActionRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(400);
       expect(response.body).toEqual({
         message: 'More than 10000 rules matched the filter query. Try to narrow it down.',
@@ -97,48 +116,14 @@ describe.each([
   });
 
   describe('rules execution failures', () => {
-    it('returns error if rule is immutable/elastic', async () => {
-      clients.rulesClient.find.mockResolvedValue(
-        getFindResultWithMultiHits({
-          data: [{ ...mockRule, params: { ...mockRule.params, immutable: true } }],
-          total: 1,
-        })
-      );
-
-      const response = await server.inject(getBulkActionEditRequest(), context);
-
-      expect(response.status).toEqual(500);
-      expect(response.body).toEqual({
-        message: 'Bulk edit failed',
-        status_code: 500,
-        attributes: {
-          errors: [
-            {
-              message: 'Elastic rule can`t be edited',
-              status_code: 400,
-              rules: [
-                {
-                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-                  name: 'Detect Root/Admin Users',
-                },
-              ],
-            },
-          ],
-          results: someBulkActionResults(),
-          summary: {
-            failed: 1,
-            succeeded: 0,
-            total: 1,
-          },
-        },
-      });
-    });
-
     it('returns error if disable rule throws error', async () => {
       clients.rulesClient.disable.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(
+        getBulkActionRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Bulk edit failed',
@@ -172,7 +157,10 @@ describe.each([
           .fn()
           .mockResolvedValue({ valid: false, message: 'mocked validation message' }),
       });
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(
+        getBulkActionRequest(),
+        requestContextMock.convertContext(context)
+      );
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
@@ -201,131 +189,30 @@ describe.each([
       });
     });
 
-    it('returns error if index patterns action is applied to machine learning rule', async () => {
-      readRulesMock.mockImplementationOnce(() =>
-        Promise.resolve({ ...mockRule, params: { ...mockRule.params, type: 'machine_learning' } })
-      );
-
-      const request = requestMock.create({
-        method: 'patch',
-        path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: {
-          ...getPerformBulkActionEditSchemaMock(),
-          ids: ['failed-mock-id'],
-          query: undefined,
-          edit: [
-            {
-              type: 'add_index_patterns',
-              value: ['new-index-*'],
-            },
-          ],
-        },
-      });
-
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(500);
-      expect(response.body).toEqual({
-        attributes: {
-          summary: {
-            failed: 1,
-            succeeded: 0,
-            total: 1,
+    it('returns partial failure error if update of few rules fail', async () => {
+      clients.rulesClient.bulkEdit.mockResolvedValue({
+        rules: [mockRule, mockRule],
+        errors: [
+          {
+            message: 'mocked validation message',
+            rule: { id: 'failed-rule-id-1', name: 'Detect Root/Admin Users' },
           },
-          errors: [
-            {
-              message:
-                "Index patterns can't be added. Machine learning rule doesn't have index patterns property",
-              status_code: 500,
-              rules: [
-                {
-                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-                  name: 'Detect Root/Admin Users',
-                },
-              ],
-            },
-          ],
-          results: someBulkActionResults(),
-        },
-        message: 'Bulk edit failed',
-        status_code: 500,
-      });
-    });
-
-    it('returns error if all index pattern tried to be deleted', async () => {
-      readRulesMock.mockImplementationOnce(() =>
-        Promise.resolve({ ...mockRule, params: { ...mockRule.params, index: ['index-*'] } })
-      );
-
-      const request = requestMock.create({
-        method: 'patch',
-        path: DETECTION_ENGINE_RULES_BULK_ACTION,
-        body: {
-          ...getPerformBulkActionEditSchemaMock(),
-          ids: ['failed-mock-id'],
-          query: undefined,
-          edit: [
-            {
-              type: 'delete_index_patterns',
-              value: ['index-*'],
-            },
-          ],
-        },
-      });
-
-      const response = await server.inject(request, context);
-
-      expect(response.status).toEqual(500);
-      expect(response.body).toEqual({
-        attributes: {
-          summary: {
-            failed: 1,
-            succeeded: 0,
-            total: 1,
+          {
+            message: 'mocked validation message',
+            rule: { id: 'failed-rule-id-2', name: 'Detect Root/Admin Users' },
           },
-          errors: [
-            {
-              message: "Can't delete all index patterns. At least one index pattern must be left",
-              status_code: 500,
-              rules: [
-                {
-                  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-                  name: 'Detect Root/Admin Users',
-                },
-              ],
-            },
-          ],
-          results: someBulkActionResults(),
-        },
-        message: 'Bulk edit failed',
-        status_code: 500,
+          {
+            message: 'test failure',
+            rule: { id: 'failed-rule-id-3', name: 'Detect Root/Admin Users' },
+          },
+        ],
+        total: 5,
       });
-    });
 
-    it('returns partial failure error if couple of rule validations fail and the rest are successful', async () => {
-      clients.rulesClient.find.mockResolvedValue(
-        getFindResultWithMultiHits({
-          data: [
-            { ...mockRule, id: 'failed-rule-id-1' },
-            { ...mockRule, id: 'failed-rule-id-2' },
-            { ...mockRule, id: 'failed-rule-id-3' },
-            mockRule,
-            mockRule,
-          ],
-          total: 5,
-        })
+      const response = await server.inject(
+        getBulkActionEditRequest(),
+        requestContextMock.convertContext(context)
       );
-
-      (buildMlAuthz as jest.Mock).mockReturnValueOnce({
-        validateRuleType: jest
-          .fn()
-          .mockImplementationOnce(() => ({ valid: false, message: 'mocked validation message' }))
-          .mockImplementationOnce(() => ({ valid: false, message: 'mocked validation message' }))
-          .mockImplementationOnce(() => ({ valid: false, message: 'test failure' }))
-          .mockImplementationOnce(() => ({ valid: true }))
-          .mockImplementationOnce(() => ({ valid: true })),
-      });
-      const response = await server.inject(getBulkActionEditRequest(), context);
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
@@ -338,7 +225,6 @@ describe.each([
           errors: [
             {
               message: 'mocked validation message',
-              status_code: 403,
               rules: [
                 {
                   id: 'failed-rule-id-1',
@@ -349,16 +235,17 @@ describe.each([
                   name: 'Detect Root/Admin Users',
                 },
               ],
+              status_code: 500,
             },
             {
               message: 'test failure',
-              status_code: 403,
               rules: [
                 {
                   id: 'failed-rule-id-3',
                   name: 'Detect Root/Admin Users',
                 },
               ],
+              status_code: 500,
             },
           ],
           results: someBulkActionResults(),
@@ -372,7 +259,10 @@ describe.each([
       clients.rulesClient.disable.mockImplementation(async () => {
         throw new Error('a'.repeat(1_300));
       });
-      const response = await server.inject(getBulkActionRequest(), context);
+      const response = await server.inject(
+        getBulkActionRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body.attributes.errors[0].message.length).toEqual(1000);
     });
@@ -392,7 +282,7 @@ describe.each([
         },
       });
 
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
@@ -489,7 +379,7 @@ describe.each([
         },
       });
 
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual('More than 100 ids sent for bulk edit action.');
@@ -506,11 +396,33 @@ describe.each([
         },
       });
 
-      const response = await server.inject(request, context);
+      const response = await server.inject(request, requestContextMock.convertContext(context));
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
         'Both query and ids are sent. Define either ids or query in request payload.'
+      );
+    });
+
+    it('rejects payloads if ids is empty', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: { ...getPerformBulkActionSchemaMock(), ids: [] },
+      });
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "[]" supplied to "ids"');
+    });
+
+    it('rejects payloads if property "edit" actions is empty', async () => {
+      const request = requestMock.create({
+        method: 'patch',
+        path: DETECTION_ENGINE_RULES_BULK_ACTION,
+        body: { ...getPerformBulkActionEditSchemaMock(), edit: [] },
+      });
+      const result = server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
+        expect.stringContaining('Invalid value "[]" supplied to "edit"')
       );
     });
   });
@@ -524,7 +436,10 @@ describe.each([
       })
     );
 
-    const response = await server.inject(getBulkActionEditRequest(), context);
+    const response = await server.inject(
+      getBulkActionRequest(),
+      requestContextMock.convertContext(context)
+    );
 
     expect(response.status).toEqual(200);
     expect(response.body).toEqual(

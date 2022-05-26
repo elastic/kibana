@@ -24,12 +24,15 @@ import {
   PortOrServiceNameLink,
   DEFAULT_NUMBER_OF_LINK,
   ExternalLink,
+  SecuritySolutionLinkButton,
 } from '.';
+import { SecurityPageName } from '../../../app/types';
 
 jest.mock('../link_to');
 
 jest.mock('../../../overview/components/events_by_dataset');
 
+const mockNavigateTo = jest.fn();
 jest.mock('../../lib/kibana', () => {
   return {
     useUiSetting$: jest.fn(),
@@ -39,6 +42,9 @@ jest.mock('../../lib/kibana', () => {
           navigateToApp: jest.fn(),
         },
       },
+    }),
+    useNavigateTo: () => ({
+      navigateTo: mockNavigateTo,
     }),
   };
 });
@@ -578,6 +584,29 @@ describe('Custom Links', () => {
       expect(wrapper.find('a').prop('href')).toEqual(
         "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
       );
+    });
+  });
+
+  describe('SecuritySolutionLinkButton', () => {
+    it('injects href prop with hosts page path', () => {
+      const path = 'testTabPath';
+
+      const wrapper = mount(
+        <SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} path={path} />
+      );
+
+      expect(wrapper.find('LinkButton').prop('href')).toEqual(path);
+    });
+
+    it('injects onClick prop that calls navigateTo', () => {
+      const path = 'testTabPath';
+
+      const wrapper = mount(
+        <SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} path={path} />
+      );
+      wrapper.find('LinkButton').simulate('click');
+
+      expect(mockNavigateTo).toHaveBeenLastCalledWith({ url: path });
     });
   });
 });

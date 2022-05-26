@@ -16,10 +16,6 @@ jest.mock('../../../../contexts/editor_context/editor_registry', () => ({
   },
 }));
 jest.mock('../../../../components/editor_example', () => {});
-jest.mock('../../../../../lib/mappings/mappings', () => ({
-  retrieveAutoCompleteInfo: () => {},
-  clearSubscriptions: () => {},
-}));
 jest.mock('../../../../models/sense_editor', () => {
   return {
     create: () => ({
@@ -39,8 +35,8 @@ jest.mock('../../../../models/sense_editor', () => {
   };
 });
 
-jest.mock('../../../../hooks/use_send_current_request_to_es/send_request_to_es', () => ({
-  sendRequestToES: jest.fn(),
+jest.mock('../../../../hooks/use_send_current_request/send_request', () => ({
+  sendRequest: jest.fn(),
 }));
 jest.mock('../../../../../lib/autocomplete/get_endpoint_from_position', () => ({
   getEndpointFromPosition: jest.fn(),
