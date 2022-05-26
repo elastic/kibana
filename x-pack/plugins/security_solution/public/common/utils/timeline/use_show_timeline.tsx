@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { matchPath, useLocation } from 'react-router-dom';
 
 import { getLinksWithHiddenTimeline } from '../../links';
 import { useIsGroupedNavigationEnabled } from '../../components/navigation/helpers';
+import { SourcererScopeName } from '../../store/sourcerer/model';
+import { useSourcererDataView } from '../../containers/sourcerer';
 
 const DEPRECATED_HIDDEN_TIMELINE_ROUTES: readonly string[] = [
   `/cases/configure`,
@@ -34,14 +36,20 @@ const isTimelineHidden = (currentPath: string, isGroupedNavigationEnabled: boole
 export const useShowTimeline = () => {
   const isGroupedNavigationEnabled = useIsGroupedNavigationEnabled();
   const { pathname } = useLocation();
+  const { indicesExist, dataViewId } = useSourcererDataView(SourcererScopeName.timeline);
 
-  const [showTimeline, setShowTimeline] = useState(
+  const [isTimelinePath, setIsTimelinePath] = useState(
     !isTimelineHidden(pathname, isGroupedNavigationEnabled)
   );
 
   useEffect(() => {
-    setShowTimeline(!isTimelineHidden(pathname, isGroupedNavigationEnabled));
+    setIsTimelinePath(!isTimelineHidden(pathname, isGroupedNavigationEnabled));
   }, [pathname, isGroupedNavigationEnabled]);
+
+  const showTimeline = useMemo(
+    () => isTimelinePath && (dataViewId === null || indicesExist),
+    [isTimelinePath, indicesExist, dataViewId]
+  );
 
   return [showTimeline];
 };
