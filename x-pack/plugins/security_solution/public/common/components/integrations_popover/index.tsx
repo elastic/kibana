@@ -15,6 +15,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { InstalledIntegrationArray } from '../../../../common/detection_engine/schemas/common';
 import { useBasePath } from '../../lib/kibana';
 import { getInstalledRelatedIntegrations, getIntegrationLink } from './helpers';
 import { useInstalledIntegrations } from '../../../detections/containers/detection_engine/rules/use_installed_integrations';
@@ -50,12 +51,13 @@ const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps
   const { data } = useInstalledIntegrations({ packages: [] });
   const basePath = useBasePath();
 
-  const allInstalledIntegrations: RelatedIntegrationArray = data ?? [];
+  const allInstalledIntegrations: InstalledIntegrationArray = data?.installed_integrations ?? [];
   const { availableIntegrations, installedRelatedIntegrations } = getInstalledRelatedIntegrations(
     integrations,
     allInstalledIntegrations
   );
 
+  // TODO: Add loader to installed integrations value
   const badgeTitle =
     data != null
       ? `${installedRelatedIntegrations.length}/${integrations.length} ${i18n.INTEGRATIONS_BADGE}`
@@ -72,7 +74,7 @@ const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps
         data-test-subj={'IntegrationsDisplayPopover'}
         button={
           <EuiBadge
-            iconType={'tag'}
+            iconType={'package'}
             color="hollow"
             data-test-subj={'IntegrationsDisplayPopoverButton'}
             onClick={() => setPopoverOpen(!isPopoverOpen)}
@@ -105,7 +107,7 @@ const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps
                       <EuiIconTip
                         type="alert"
                         content={i18n.INTEGRATIONS_INSTALLED_VERSION_TOOLTIP(
-                          integration.version,
+                          integration.package_version,
                           integration.targetVersion
                         )}
                         position="right"
