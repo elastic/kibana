@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CommonFields, ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import { CommonFields, ConfigKey, MonitorFields, SourceType } from '../../../common/runtime_types';
 
-export type FormattedValue = boolean | string | string[] | Record<string, string> | null;
+export type FormattedValue = boolean | string | string[] | Record<string, unknown> | null;
 
 export type Formatter = null | ((fields: Partial<MonitorFields>) => FormattedValue);
 
@@ -26,6 +26,8 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.TIMEOUT]: (fields) => secondsToCronFormatter(fields[ConfigKey.TIMEOUT] || undefined),
   [ConfigKey.NAMESPACE]: null,
   [ConfigKey.REVISION]: null,
+  [ConfigKey.MONITOR_SOURCE_TYPE]: (fields) =>
+    fields[ConfigKey.MONITOR_SOURCE_TYPE] || SourceType.UI,
 };
 
 export const arrayFormatter = (value: string[] = []) => (value.length ? value : null);

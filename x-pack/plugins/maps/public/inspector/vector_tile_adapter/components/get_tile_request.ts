@@ -35,11 +35,16 @@ export function getTileRequest(tileRequest: TileRequest): { path?: string; body?
   }
   const geometryFieldName = searchParams.get('geometryFieldName') as string;
 
+  const hasLabels = searchParams.has('hasLabels')
+    ? searchParams.get('hasLabels') === 'true'
+    : false;
+
   if (tileRequest.tileUrl.includes(MVT_GETGRIDTILE_API_PATH)) {
     return getAggsTileRequest({
       encodedRequestBody,
       geometryFieldName,
       gridPrecision: parseInt(searchParams.get('gridPrecision') as string, 10),
+      hasLabels,
       index,
       renderAs: searchParams.get('renderAs') as RENDER_AS,
       x: tileRequest.x,
@@ -52,6 +57,7 @@ export function getTileRequest(tileRequest: TileRequest): { path?: string; body?
     return getHitsTileRequest({
       encodedRequestBody,
       geometryFieldName,
+      hasLabels,
       index,
       x: tileRequest.x,
       y: tileRequest.y,

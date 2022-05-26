@@ -21,7 +21,7 @@ import { QueryService, QueryStart } from '../query_service';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import { TimefilterContract } from '../timefilter';
 import { syncQueryStateWithUrl } from './sync_state_with_url';
-import { QueryState } from './types';
+import { GlobalQueryStateFromUrl } from './types';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 const setupMock = coreMock.createSetup();
@@ -100,14 +100,14 @@ describe('sync_query_state_with_url', () => {
   test('when filters change, global filters synced to urlStorage', () => {
     const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     filterManager.setFilters([gF, aF]);
-    expect(kbnUrlStateStorage.get<QueryState>('_g')?.filters).toHaveLength(1);
+    expect(kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g')?.filters).toHaveLength(1);
     stop();
   });
 
   test('when time range changes, time synced to urlStorage', () => {
     const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     timefilter.setTime({ from: 'now-30m', to: 'now' });
-    expect(kbnUrlStateStorage.get<QueryState>('_g')?.time).toEqual({
+    expect(kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g')?.time).toEqual({
       from: 'now-30m',
       to: 'now',
     });
@@ -117,7 +117,7 @@ describe('sync_query_state_with_url', () => {
   test('when refresh interval changes, refresh interval is synced to urlStorage', () => {
     const { stop } = syncQueryStateWithUrl(queryServiceStart, kbnUrlStateStorage);
     timefilter.setRefreshInterval({ pause: true, value: 100 });
-    expect(kbnUrlStateStorage.get<QueryState>('_g')?.refreshInterval).toEqual({
+    expect(kbnUrlStateStorage.get<GlobalQueryStateFromUrl>('_g')?.refreshInterval).toEqual({
       pause: true,
       value: 100,
     });

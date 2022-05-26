@@ -120,6 +120,7 @@ The API returns details about the case and its comments. For example:
   },
   "owner": "cases",
   "duration": null,
+  "severity": "low",
   "closed_at": null,
   "closed_by": null,
   "created_at": "2022-03-24T00:37:03.906Z",
