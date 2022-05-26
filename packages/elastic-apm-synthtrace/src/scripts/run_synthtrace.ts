@@ -110,8 +110,7 @@ function options(y: Argv) {
       string: true,
     })
     .option('streamProcessors', {
-      describe:
-        'Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format',
+      describe: 'Specify multiple sets of stream aggregators to be included in the StreamProcessor',
       string: true,
       array: true,
       alias: 'p',
