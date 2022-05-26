@@ -18,6 +18,7 @@ import { LogRetentionOptions } from '..';
 import { mountWithIntl } from '../../../../test_helpers';
 
 import { LogRetentionCallout } from '.';
+import { wrap } from 'module';
 
 describe('LogRetentionCallout', () => {
   const actions = { fetchLogRetention: jest.fn() };
@@ -35,7 +36,7 @@ describe('LogRetentionCallout', () => {
   it('renders an analytics callout', () => {
     setMockValues({ ...values, logRetention: { analytics: DISABLED } });
     const wrapper = mountWithIntl(<LogRetentionCallout type={LogRetentionOptions.Analytics} />);
-
+    wrapper.debug();
     expect(wrapper.find(EuiCallOut)).toHaveLength(1);
     expect(wrapper.find('.euiCallOutHeader__title').text()).toEqual(
       'Analytics have been disabled since January 1, 1970.'
