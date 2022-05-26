@@ -69,7 +69,7 @@ export const getDefaultIndex = () => {
 
   return defaultIndexId
     ? getSavedObjectsClient()
-        .get<IndexPatternAttributes>('index-pattern', defaultIndexId)
+        .get<{ title: string }>('index-pattern', defaultIndexId)
         .then((defaultIndex) => defaultIndex.attributes.title)
         .catch((err) => {
           const notifyService = pluginServices.getServices().notify;
