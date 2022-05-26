@@ -26,11 +26,18 @@ which may cause a delay before pages start being served.
 Set to `false` to disable Console. *Default: `true`*
 
 | `csp.rules:`
- | deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
+| deprecated:[7.14.0,"In 8.0 and later, this setting will no longer be supported."]
 A https://w3c.github.io/webappsec-csp/[Content Security Policy] template
 that disables certain unnecessary and potentially insecure capabilities in
 the browser. It is strongly recommended that you keep the default CSP rules
 that ship with {kib}.
+
+| `csp.disableUnsafeEval`
+| experimental[] Set this to `true` to remove the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src#unsafe_eval_expressions[`unsafe-eval`] source expression from the `script-src` directive. *Default: `false`*
+
+By enabling `csp.disableUnsafeEval`, Kibana will use a custom version of the Handlebars template library which doesn't support https://handlebarsjs.com/guide/partials.html#inline-partials[inline partials].
+Handlebars is used in various locations in the Kibana frontend where custom templates can be supplied by the user when for instance setting up a visualisation.
+If you experience any issues rendering Handlebars templates after turning on `csp.disableUnsafeEval`, or if you rely on inline partials, please revert this setting to `false` and https://github.com/elastic/kibana/issues/new/choose[open an issue] in the Kibana GitHub repository.
 
 | `csp.script_src:`
 | Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/script-src[Content Security Policy `script-src` directive].
@@ -433,7 +440,7 @@ running behind a proxy. Use the <<server-rewriteBasePath, `server.rewriteBasePat
 if it should remove the basePath from requests it receives, and to prevent a
 deprecation warning at startup. This setting cannot end in a slash (`/`).
 
-|[[server-publicBaseUrl]] `server.publicBaseUrl:` {ess-icon}
+|[[server-publicBaseUrl]] `server.publicBaseUrl:`
  | The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port
  (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the
  <<server-basePath, `server.basePath`>> (if configured). This setting cannot end in a slash (`/`).

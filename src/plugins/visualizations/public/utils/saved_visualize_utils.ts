@@ -299,9 +299,6 @@ export async function getSavedVisualization(
   }
 
   savedObject.visState = await updateOldState(savedObject.visState);
-  if (savedObject.searchSourceFields?.index) {
-    await services.dataViews.get(savedObject.searchSourceFields.index as any);
-  }
 
   return savedObject;
 }
@@ -404,3 +401,6 @@ export async function saveVisualization(
     return Promise.reject(err);
   }
 }
+
+export const shouldShowMissedDataViewError = (error: Error): error is SavedObjectNotFound =>
+  error instanceof SavedObjectNotFound && error.savedObjectType === 'data view';
