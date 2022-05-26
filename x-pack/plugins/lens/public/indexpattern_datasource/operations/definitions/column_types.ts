@@ -38,12 +38,6 @@ export interface FieldBasedIndexPatternColumn extends BaseIndexPatternColumn {
   sourceField: string;
 }
 
-export interface FieldBasedIndexPatternColumnMultipleValues extends FieldBasedIndexPatternColumn {
-  params: {
-    value: number;
-  };
-}
-
 export interface ReferenceBasedIndexPatternColumn extends FormattedIndexPatternColumn {
   references: string[];
 }

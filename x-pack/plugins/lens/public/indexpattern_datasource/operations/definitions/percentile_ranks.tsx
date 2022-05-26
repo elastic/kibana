@@ -20,14 +20,16 @@ import {
   isColumnOfType,
   combineErrorMessages,
 } from './helpers';
-import { FieldBasedIndexPatternColumnMultipleValues } from './column_types';
+import { FieldBasedIndexPatternColumn } from './column_types';
 import { adjustTimeScaleLabelSuffix } from '../time_scale_utils';
 import { useDebouncedValue } from '../../../shared_components';
 import { getDisallowedPreviousShiftMessage } from '../../time_shift_utils';
 
-export interface PercentileRanksIndexPatternColumn
-  extends FieldBasedIndexPatternColumnMultipleValues {
-  operationType: 'percentile_ranks';
+export interface PercentileRanksIndexPatternColumn extends FieldBasedIndexPatternColumn {
+  operationType: 'percentile_rank';
+  params: {
+    value: number;
+  };
 }
 
 function ofName(name: string, value: number, timeShift: string | undefined) {
@@ -52,9 +54,9 @@ export const percentileRanksOperation: OperationDefinition<
   'field',
   { value: number }
 > = {
-  type: 'percentile_ranks',
-  displayName: i18n.translate('xpack.lens.indexPattern.percentileRanks', {
-    defaultMessage: 'Percentile ranks',
+  type: 'percentile_rank',
+  displayName: i18n.translate('xpack.lens.indexPattern.percentileRank', {
+    defaultMessage: 'Percentile rank',
   }),
   input: 'field',
   operationParams: [
@@ -72,7 +74,6 @@ export const percentileRanksOperation: OperationDefinition<
       return {
         dataType: 'number',
         isBucketed: false,
-        isMultiValuesAggregation: true,
         scale: 'ratio',
       };
     }
@@ -92,7 +93,7 @@ export const percentileRanksOperation: OperationDefinition<
   buildColumn: ({ field, previousColumn, indexPattern }, columnParams) => {
     const existingPercentileRanksParam =
       previousColumn &&
-      isColumnOfType<PercentileRanksIndexPatternColumn>('percentile_ranks', previousColumn) &&
+      isColumnOfType<PercentileRanksIndexPatternColumn>('percentile_rank', previousColumn) &&
       previousColumn.params.value;
     const newPercentileRanksParam =
       columnParams?.value ?? (existingPercentileRanksParam || DEFAULT_PERCENTILE_RANKS_VALUE);
@@ -103,8 +104,7 @@ export const percentileRanksOperation: OperationDefinition<
         previousColumn?.timeShift
       ),
       dataType: 'number',
-      operationType: 'percentile_ranks',
-      isMultiValuesAggregation: true,
+      operationType: 'percentile_rank',
       sourceField: field.name,
       isBucketed: false,
       scale: 'ratio',
@@ -124,14 +124,14 @@ export const percentileRanksOperation: OperationDefinition<
     };
   },
   toEsAggsFn: (column, columnId, _indexPattern) => {
-    return buildExpressionFunction<AggFunctionsMapping['aggPercentileRanks']>(
-      'aggPercentileRanks',
+    return buildExpressionFunction<AggFunctionsMapping['aggSinglePercentileRank']>(
+      'aggSinglePercentileRank',
       {
         id: columnId,
         enabled: true,
         schema: 'metric',
         field: column.sourceField,
-        values: [column.params.value],
+        value: column.params.value,
         // time shift is added to wrapping aggFilteredMetric if filter is set
         timeShift: column.filter ? undefined : column.timeShift,
       }
@@ -139,10 +139,7 @@ export const percentileRanksOperation: OperationDefinition<
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
     combineErrorMessages([
-      getInvalidFieldMessage(
-        layer.columns[columnId] as FieldBasedIndexPatternColumnMultipleValues,
-        indexPattern
-      ),
+      getInvalidFieldMessage(layer.columns[columnId] as FieldBasedIndexPatternColumn, indexPattern),
       getDisallowedPreviousShiftMessage(layer, columnId),
     ]),
   paramEditor: function PercentileParamEditor({
@@ -238,7 +235,7 @@ export const percentileRanksOperation: OperationDefinition<
 Returns the percentage of values which are below a certain value. For example, if a value is greater than or equal to 95% of the observed values it is said to be at the 95th percentile rank
 
 Example: Get the percentage of values which are below of 100:
-\`percentile_ranks(bytes, value=100)\`
+\`percentile_rank(bytes, value=100)\`
       `,
     }),
   },

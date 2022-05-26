@@ -28,7 +28,7 @@ export const getPercentileRankSeries = (
 ) => {
   return values?.map((value, index) => {
     return {
-      agg: 'percentile_ranks',
+      agg: 'percentile_rank',
       isFullReference: false,
       color: colors?.[index],
       fieldName: fieldName ?? 'document',
@@ -93,7 +93,7 @@ export const computeParentSeries = (
         ...(currentMetric.window && { window: currentMetric.window }),
         ...(timeScale && { timeScale }),
         ...(pipelineAgg === 'percentile' && meta && { percentile: meta }),
-        ...(pipelineAgg === 'percentile_ranks' && meta && { value: meta }),
+        ...(pipelineAgg === 'percentile_rank' && meta && { value: meta }),
       },
     },
   ];
@@ -168,7 +168,7 @@ export const getParentPipelineSeriesFormula = (
     if (additionalPipelineAggMap.name === 'percentile' && nestedMetaValue) {
       additionalFunctionArgs = `, percentile=${nestedMetaValue}`;
     }
-    if (additionalPipelineAggMap.name === 'percentile_ranks' && nestedMetaValue) {
+    if (additionalPipelineAggMap.name === 'percentile_rank' && nestedMetaValue) {
       additionalFunctionArgs = `, value=${nestedMetaValue}`;
     }
     formula = `${aggMap.name}(${pipelineAgg}(${additionalPipelineAggMap.name}(${
@@ -179,7 +179,7 @@ export const getParentPipelineSeriesFormula = (
     if (pipelineAgg === 'percentile' && percentileValue) {
       additionalFunctionArgs = `, percentile=${percentileValue}`;
     }
-    if (pipelineAgg === 'percentile_ranks' && percentileValue) {
+    if (pipelineAgg === 'percentile_rank' && percentileValue) {
       additionalFunctionArgs = `, value=${percentileValue}`;
     }
     if (pipelineAgg === 'filter_ratio') {
@@ -238,12 +238,12 @@ export const getSiblingPipelineSeriesFormula = (
     }))${minMax})`;
   } else {
     let additionalFunctionArgs;
-    // handle percentile and percentile_ranks
+    // handle percentile and percentile_rank
     const nestedMetaValue = Number(nestedMeta?.replace(']', ''));
     if (pipelineAggMap.name === 'percentile' && nestedMetaValue) {
       additionalFunctionArgs = `, percentile=${nestedMetaValue}`;
     }
-    if (pipelineAggMap.name === 'percentile_ranks' && nestedMetaValue) {
+    if (pipelineAggMap.name === 'percentile_rank' && nestedMetaValue) {
       additionalFunctionArgs = `, value=${nestedMetaValue}`;
     }
     if (currentMetric.type === 'positive_only') {

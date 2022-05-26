@@ -29,30 +29,4 @@ describe('getPercentileValue', () => {
     const value = getPercentileValue(agg, bucket);
     expect(value).toEqual(24.21909648206358);
   });
-
-  test('should return the correct value for an TAggConfig', () => {
-    const agg = {
-      id: '0-metric',
-      enabled: true,
-      type: 'percentile_ranks',
-      params: {
-        field: 'AvgTicketPrice',
-        values: [400],
-      },
-      schema: 'metric',
-    } as unknown as IResponseAggConfig;
-    const bucket = {
-      doc_count: 290,
-      '0-metric': {
-        values: [
-          {
-            key: 400,
-            value: 25.84782692356769,
-          },
-        ],
-      },
-    };
-    const value = getPercentileValue(agg, bucket);
-    expect(value).toEqual(25.84782692356769);
-  });
 });

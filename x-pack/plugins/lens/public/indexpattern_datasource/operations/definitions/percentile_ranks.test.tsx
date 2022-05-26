@@ -75,9 +75,8 @@ describe('percentile ranks', () => {
           label: 'Percentile (100) of a',
           dataType: 'number',
           isBucketed: false,
-          isMultiValuesAggregation: true,
           sourceField: 'a',
-          operationType: 'percentile_ranks',
+          operationType: 'percentile_rank',
           params: {
             value: 100,
           },
@@ -100,7 +99,6 @@ describe('percentile ranks', () => {
       ).toEqual({
         dataType: 'number',
         isBucketed: false,
-        isMultiValuesAggregation: true,
         scale: 'ratio',
       });
     });
@@ -118,7 +116,6 @@ describe('percentile ranks', () => {
       ).toEqual({
         dataType: 'number',
         isBucketed: false,
-        isMultiValuesAggregation: true,
         scale: 'ratio',
       });
     });
@@ -151,7 +148,7 @@ describe('percentile ranks', () => {
       expect(esAggsFn).toEqual(
         expect.objectContaining({
           arguments: expect.objectContaining({
-            values: [100],
+            value: [100],
             field: ['a'],
           }),
         })
@@ -162,7 +159,7 @@ describe('percentile ranks', () => {
   describe('onFieldChange', () => {
     it('should change correctly to new field', () => {
       const oldColumn: PercentileRanksIndexPatternColumn = {
-        operationType: 'percentile_ranks',
+        operationType: 'percentile_rank',
         sourceField: 'bytes',
         label: 'Percentile rank (100) of bytes',
         isBucketed: true,
@@ -256,7 +253,7 @@ describe('percentile ranks', () => {
             sourceField: 'response_time',
             isBucketed: false,
             dataType: 'number',
-            operationType: 'percentile_ranks',
+            operationType: 'percentile_rank',
             params: {
               value: 10,
             },

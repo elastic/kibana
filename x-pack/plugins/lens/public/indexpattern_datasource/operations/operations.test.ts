@@ -93,7 +93,7 @@ describe('getOperationTypesForField', () => {
         'max',
         'unique_count',
         'percentile',
-        'percentile_ranks',
+        'percentile_rank',
         'last_value',
       ]);
     });
@@ -118,7 +118,7 @@ describe('getOperationTypesForField', () => {
         'max',
         'unique_count',
         'percentile',
-        'percentile_ranks',
+        'percentile_rank',
         'last_value',
       ]);
     });
@@ -373,6 +373,11 @@ describe('getOperationTypesForField', () => {
               },
               Object {
                 "field": "bytes",
+                "operationType": "percentile_rank",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
                 "operationType": "last_value",
                 "type": "field",
               },
@@ -406,21 +411,6 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "timestamp",
                 "operationType": "last_value",
-                "type": "field",
-              },
-            ],
-          },
-          Object {
-            "operationMetaData": Object {
-              "dataType": "number",
-              "isBucketed": false,
-              "isMultiValuesAggregation": true,
-              "scale": "ratio",
-            },
-            "operations": Array [
-              Object {
-                "field": "bytes",
-                "operationType": "percentile_ranks",
                 "type": "field",
               },
             ],

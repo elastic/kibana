@@ -1,0 +1,17 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`AggTypeMetricSinglePercentileRankProvider class supports scripted fields 1`] = `
+Object {
+  "single_percentile_rank": Object {
+    "percentile_ranks": Object {
+      "script": Object {
+        "lang": undefined,
+        "source": "return 456",
+      },
+      "values": Array [
+        1024,
+      ],
+    },
+  },
+}
+`;

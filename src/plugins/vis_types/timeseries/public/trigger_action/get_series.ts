@@ -114,7 +114,7 @@ export const getSeries = (
       break;
     }
     case 'cumulative_sum': {
-      //  percentile and percentile_ranks value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
+      //  percentile and percentile_rank value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
       const [fieldId, meta] = metrics[metricIdx]?.field?.split('[') ?? [];
       const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
       if (!subFunctionMetric || subFunctionMetric.type === 'static') {

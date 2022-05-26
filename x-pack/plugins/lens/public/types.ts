@@ -524,7 +524,6 @@ export interface OperationMetadata {
   isStaticValue?: boolean;
   // There are some aggregations, such as the percentile ranks, that accept multi values
   // and they need to be treated with a different way. This flag is used to identify these operations
-  isMultiValuesAggregation?: boolean;
 }
 
 /**

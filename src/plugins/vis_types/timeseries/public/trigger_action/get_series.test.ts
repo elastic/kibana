@@ -338,7 +338,7 @@ describe('getSeries', () => {
     const config = getSeries(metric, 1);
     expect(config).toStrictEqual([
       {
-        agg: 'percentile_ranks',
+        agg: 'percentile_rank',
         color: 'rgba(211,96,134,1)',
         fieldName: 'day_of_week_i',
         isFullReference: false,
@@ -347,7 +347,7 @@ describe('getSeries', () => {
         },
       },
       {
-        agg: 'percentile_ranks',
+        agg: 'percentile_rank',
         color: 'rgba(155,33,230,1)',
         fieldName: 'day_of_week_i',
         isFullReference: false,
@@ -356,7 +356,7 @@ describe('getSeries', () => {
         },
       },
       {
-        agg: 'percentile_ranks',
+        agg: 'percentile_rank',
         color: '#68BC00',
         fieldName: 'day_of_week_i',
         isFullReference: false,
@@ -549,7 +549,7 @@ describe('getSeries', () => {
         isFullReference: true,
         params: {
           formula:
-            'percentile_ranks(day_of_week_i, value=1) + percentile_ranks(day_of_week_i, value=5) + average(day_of_week_i)',
+            'percentile_rank(day_of_week_i, value=1) + percentile_rank(day_of_week_i, value=5) + average(day_of_week_i)',
         },
       },
     ]);

@@ -89,21 +89,21 @@ describe('getPercentileRankSeries', () => {
     const config = getPercentileRankSeries(values, colors, 'day_of_week_i');
     expect(config).toStrictEqual([
       {
-        agg: 'percentile_ranks',
+        agg: 'percentile_rank',
         color: '#68BC00',
         fieldName: 'day_of_week_i',
         isFullReference: false,
         params: { value: '1' },
       },
       {
-        agg: 'percentile_ranks',
+        agg: 'percentile_rank',
         color: 'rgba(0,63,188,1)',
         fieldName: 'day_of_week_i',
         isFullReference: false,
         params: { value: '5' },
       },
       {
-        agg: 'percentile_ranks',
+        agg: 'percentile_rank',
         color: 'rgba(188,38,0,1)',
         fieldName: 'day_of_week_i',
         isFullReference: false,
@@ -184,7 +184,7 @@ describe('getParentPipelineSeries', () => {
         params: {
           value: 400,
         },
-        pipelineAggType: 'percentile_ranks',
+        pipelineAggType: 'percentile_rank',
       },
     ]);
   });

@@ -13,15 +13,9 @@ export const getPercentileValue = <TAggConfig extends IResponseAggConfig>(
   agg: TAggConfig,
   bucket: any
 ) => {
-  const { values } = bucket[agg.parentId ?? agg.id] ?? {};
+  const { values } = bucket[agg.parentId] ?? {};
 
-  const percentile: any = find(values, ({ key }) => {
-    if (agg.key) {
-      return key === agg.key;
-    }
-
-    return key === agg.params.values[0];
-  });
+  const percentile: any = find(values, ({ key }) => key === agg.key);
 
   return percentile ? percentile.value : NaN;
 };

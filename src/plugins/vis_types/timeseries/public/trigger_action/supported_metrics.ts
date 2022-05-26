@@ -73,7 +73,7 @@ export const SUPPORTED_METRICS: { [key: string]: AggOptions } = {
     isFullReference: false,
   },
   percentile_rank: {
-    name: 'percentile_ranks',
+    name: 'percentile_rank',
     isFullReference: false,
   },
   sum: {

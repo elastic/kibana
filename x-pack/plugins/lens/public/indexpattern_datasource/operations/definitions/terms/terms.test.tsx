@@ -227,42 +227,6 @@ describe('terms', () => {
       );
     });
 
-    it('should reflect multivalue aggs terms params correctly', () => {
-      const newLayer = {
-        ...layer,
-        columns: {
-          ...layer.columns,
-          col2: {
-            ...layer.columns.col2,
-            isMultiValuesAggregation: true,
-            params: {
-              value: 100,
-            },
-          },
-        },
-      };
-      const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
-      const esAggsFn = termsOperation.toEsAggsFn(
-        {
-          ...termsColumn,
-          params: { ...termsColumn.params, orderBy: { type: 'column', columnId: 'col2' } },
-        },
-        'col1',
-        {} as IndexPattern,
-        newLayer,
-        uiSettingsMock,
-        ['col1', 'col2']
-      );
-      expect(esAggsFn).toEqual(
-        expect.objectContaining({
-          function: 'aggTerms',
-          arguments: expect.objectContaining({
-            orderBy: ['1.100'],
-          }),
-        })
-      );
-    });
-
     it('should not enable missing bucket if other bucket is not set', () => {
       const termsColumn = layer.columns.col1 as TermsIndexPatternColumn;
       const esAggsFn = termsOperation.toEsAggsFn(

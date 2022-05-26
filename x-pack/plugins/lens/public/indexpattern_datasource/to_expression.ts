@@ -24,10 +24,7 @@ import { GenericIndexPatternColumn } from './indexpattern';
 import { operationDefinitionMap } from './operations';
 import { IndexPattern, IndexPatternPrivateState, IndexPatternLayer } from './types';
 import { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
-import {
-  FormattedIndexPatternColumn,
-  FieldBasedIndexPatternColumnMultipleValues,
-} from './operations/definitions/column_types';
+import { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 
 type OriginalColumn = { id: string } & GenericIndexPatternColumn;
@@ -168,22 +165,9 @@ function getExpressionForLayer(
     }
 
     const idMap = esAggEntries.reduce((currentIdMap, [colId, column], index) => {
-      let esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
+      const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
         ? `col-${index + (column.isBucketed ? 0 : 1)}-${index}`
         : `col-${index}-${index}`;
-      // for aggregations that accept multiple values, the id also contains the
-      // values that are being aggregated over, for example for a percentile_ranks agg
-      // of 400 this must be specified as `col-0-0.400`
-      if (
-        column.isMultiValuesAggregation &&
-        !column.filter &&
-        'params' in column &&
-        column.params &&
-        'value' in column.params
-      ) {
-        const params = column.params as FieldBasedIndexPatternColumnMultipleValues['params'];
-        esAggsId += `.${params.value}`;
-      }
 
       return {
         ...currentIdMap,
