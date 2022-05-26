@@ -23,7 +23,7 @@ const errorDetailsPageHref = url.format({
 
 describe('Error details', () => {
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   describe('when data is loaded', () => {

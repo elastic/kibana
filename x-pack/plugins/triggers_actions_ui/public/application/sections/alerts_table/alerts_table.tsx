@@ -55,7 +55,6 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     onPageChange,
     pageIndex: activePage,
     pageSize: props.pageSize,
-    alertsCount,
   });
 
   const [visibleColumns, setVisibleColumns] = useState(props.visibleColumns);
@@ -125,7 +124,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const handleFlyoutClose = useCallback(() => setFlyoutAlertIndex(-1), [setFlyoutAlertIndex]);
 
-  // TODO when every solution is using this table, we will be bale to simplify it by just passing the alert index
+  // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
   const handleFlyoutAlert = useCallback(
     (alert) => {
       const idx = alerts.findIndex((a) =>

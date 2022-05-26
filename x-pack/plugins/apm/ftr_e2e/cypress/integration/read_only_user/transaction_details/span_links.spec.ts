@@ -30,7 +30,7 @@ function getServiceInventoryUrl({ serviceName }: { serviceName: string }) {
 
 describe('Span links', () => {
   beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+    cy.loginAsViewerUser();
   });
 
   describe('when data is loaded', () => {
