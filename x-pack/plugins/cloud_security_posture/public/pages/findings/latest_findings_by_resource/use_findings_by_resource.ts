@@ -39,8 +39,9 @@ interface FindingsByResourcePage {
     total_findings: number;
   };
   resource_id: string;
-  resource_name?: string;
-  resource_subtype?: string;
+  resource_name: string;
+  resource_subtype: string;
+  cluster_id: string;
   cis_sections: string[];
 }
 
