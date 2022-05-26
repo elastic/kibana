@@ -121,7 +121,7 @@ describe('AlertsFlyout', () => {
         await nextTick();
         wrapper.update();
       });
-      expect(wrapper.find('h2').first().text()).toBe('Sample title');
+      expect(wrapper.find('h2').first().text()).toBe('one');
       expect(wrapper.find('h5').first().text()).toBe('Body');
     });
 
@@ -142,7 +142,7 @@ describe('AlertsFlyout', () => {
         await nextTick();
         wrapper.update();
       });
-      expect(wrapper.find('h2').first().text()).toBe('Sample title');
+      expect(wrapper.find('h2').first().text()).toBe('one');
       expect(wrapper.find('h5').first().text()).toBe('Body');
       expect(wrapper.find('h6').first().text()).toBe('Footer');
     });
