@@ -203,6 +203,8 @@ describe('formatHeartbeatRequest', () => {
         config_id: monitorId,
         'monitor.project.name': testBrowserConfig.project_id,
         'monitor.project.id': testBrowserConfig.project_id,
+        run_once: undefined,
+        test_run_id: undefined,
       },
       fields_under_root: true,
     });
@@ -221,6 +223,8 @@ describe('formatHeartbeatRequest', () => {
         config_id: monitorId,
         'monitor.project.name': testBrowserConfig.project_id,
         'monitor.project.id': testBrowserConfig.project_id,
+        run_once: undefined,
+        test_run_id: undefined,
       },
       fields_under_root: true,
     });
@@ -239,8 +243,10 @@ describe('formatHeartbeatRequest', () => {
       id: monitorId,
       fields: {
         config_id: monitorId,
-        'monitor.project.name': null,
-        'monitor.project.id': null,
+        'monitor.project.name': undefined,
+        'monitor.project.id': undefined,
+        run_once: undefined,
+        test_run_id: undefined,
       },
       fields_under_root: true,
     });
@@ -261,7 +267,8 @@ describe('formatHeartbeatRequest', () => {
         config_id: monitorId,
         'monitor.project.name': testBrowserConfig.project_id,
         'monitor.project.id': testBrowserConfig.project_id,
-        runOnce: true,
+        run_once: undefined,
+        test_run_id: undefined,
       },
       fields_under_root: true,
     });
@@ -283,6 +290,7 @@ describe('formatHeartbeatRequest', () => {
         config_id: monitorId,
         'monitor.project.name': testBrowserConfig.project_id,
         'monitor.project.id': testBrowserConfig.project_id,
+        run_once: undefined,
         test_run_id: testRunId,
       },
       fields_under_root: true,
