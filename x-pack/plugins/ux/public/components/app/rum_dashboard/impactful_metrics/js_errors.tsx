@@ -19,7 +19,7 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { useJsErrorsQuery } from '../../../../hooks/use_js_errors_query';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
@@ -41,7 +41,7 @@ export function JSErrors() {
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
 
-  const { data, status } = useFetcher(
+  const { data: dataAsync, status } = useFetcher(
     (callApmApi) => {
       if (start && end && serviceName) {
         return callApmApi('GET /internal/apm/ux/js-errors', {
@@ -63,6 +63,13 @@ export function JSErrors() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [start, end, serviceName, uxUiFilters, pagination, searchTerm, rangeId]
   );
+
+  const { data, loading } = useJsErrorsQuery(pagination);
+
+  // eslint-disable-next-line no-console
+  console.log('dataSync: ', dataAsync);
+  // eslint-disable-next-line no-console
+  console.log('data: ', data);
 
   const {
     sharedData: { totalPageViews },
@@ -130,16 +137,16 @@ export function JSErrors() {
               )
             }
             description={I18LABELS.totalErrors}
-            isLoading={status === FETCH_STATUS.LOADING}
+            isLoading={!!loading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiBasicTable
         data-test-subj={'uxJsErrorTable'}
-        loading={status === FETCH_STATUS.LOADING}
+        loading={!!loading}
         error={
-          status === FETCH_STATUS.FAILURE
+          !loading && !data
             ? i18n.translate('xpack.ux.jsErrorsTable.errorMessage', {
                 defaultMessage: 'Failed to fetch',
               })
