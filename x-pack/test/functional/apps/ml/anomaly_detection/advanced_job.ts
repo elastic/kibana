@@ -219,7 +219,8 @@ export default function ({ getService }: FtrProviderContext) {
 
   const calendarId = `wizard-test-calendar_${Date.now()}`;
 
-  describe('advanced job', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/133020
+  describe.skip('advanced job', function () {
     this.tags(['mlqa']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
