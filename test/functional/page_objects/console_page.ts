@@ -170,19 +170,19 @@ export class ConsolePageObject extends FtrService {
     await editor.pressKeys([selectionKey, 'a']);
   }
 
-  public async hasSuccessBadge(): Promise<boolean> {
+  public async hasSuccessBadge() {
     try {
       const responseEditor = await this.testSubjects.find('response-editor');
-      return Boolean(responseEditor.findByCssSelector('.ace_badge-success'));
+      return Boolean(await responseEditor.findByCssSelector('.ace_badge--success'));
     } catch (e) {
       return false;
     }
   }
 
-  public async hasWarningBadge(): Promise<boolean> {
+  public async hasWarningBadge() {
     try {
       const responseEditor = await this.testSubjects.find('response-editor');
-      return Boolean(responseEditor.findByCssSelector('.ace_badge-warning'));
+      return Boolean(await responseEditor.findByCssSelector('.ace_badge--warning'));
     } catch (e) {
       return false;
     }

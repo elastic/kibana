@@ -48,31 +48,31 @@
     cursor: default;
     max-width: 100%;
     text-align: left;
-  }
 
-  .ace_badge-success {
-    background-color: $euiColorSuccess;
-    color: chooseLightOrDarkText($euiColorSuccess);
-  }
+    &--success {
+      background-color: $euiColorSuccess;
+      color: chooseLightOrDarkText($euiColorSuccess);
+    }
 
-  .ace_badge-primary {
-    background-color: $euiColorPrimary;
-    color: chooseLightOrDarkText($euiColorPrimary);
-  }
+    &--warning {
+      background-color: $euiColorWarning;
+      color: chooseLightOrDarkText($euiColorWarning);
+    }
 
-  .ace_badge-default {
-    background-color: $euiColorGhost;
-    color: chooseLightOrDarkText($euiColorGhost);
-  }
+    &--primary {
+      background-color: $euiColorPrimary;
+      color: chooseLightOrDarkText($euiColorPrimary);
+    }
 
-  .ace_badge-warning {
-    background-color: $euiColorWarning;
-    color: chooseLightOrDarkText($euiColorWarning);
-  }
+    &--default {
+      background-color: $euiColorGhost;
+      color: chooseLightOrDarkText($euiColorGhost);
+    }
 
-  .ace_badge-danger {
-    background-color: $euiColorDanger;
-    color: chooseLightOrDarkText($euiColorDanger);
+    &--danger {
+      background-color: $euiColorDanger;
+      color: chooseLightOrDarkText($euiColorDanger);
+    }
   }
 }
 

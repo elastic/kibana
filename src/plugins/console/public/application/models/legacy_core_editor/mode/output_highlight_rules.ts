@@ -32,18 +32,18 @@ export class OutputJsonHighlightRules extends JsonHighlightRules {
           if (regExpMatchArray) {
             const status = parseInt(regExpMatchArray[0], 10);
             if (status <= 199) {
-              return 'badge.badge-default';
+              return 'badge.badge--default';
             }
             if (status <= 299) {
-              return 'badge.badge-success';
+              return 'badge.badge--success';
             }
             if (status <= 399) {
-              return 'badge.badge-primary';
+              return 'badge.badge--primary';
             }
             if (status <= 499) {
-              return 'badge.badge-warning';
+              return 'badge.badge--warning';
             }
-            return 'badge.badge-danger';
+            return 'badge.badge--danger';
           }
         },
         regex: /(\d+\s[\sA-Za-z]+$)/,

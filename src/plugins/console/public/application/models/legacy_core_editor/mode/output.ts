@@ -27,7 +27,7 @@ export class Mode extends JSONMode {
   }
 }
 
-(function (this: any) {
+(function (this: Mode) {
   this.createWorker = function () {
     return null;
   };

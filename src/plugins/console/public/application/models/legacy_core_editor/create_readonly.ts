@@ -12,7 +12,7 @@ import { Mode } from './mode/output';
 import smartResize from './smart_resize';
 
 export interface CustomAceEditor extends ace.Editor {
-  update: (text: string, mode?: unknown, cb?: () => void) => void;
+  update: (text: string, mode?: string | Mode, cb?: () => void) => void;
   append: (text: string, foldPrevious?: boolean, cb?: () => void) => void;
 }
 
@@ -27,15 +27,16 @@ export function createReadOnlyAceEditor(element: HTMLElement): CustomAceEditor {
 
   output.$blockScrolling = Infinity;
   output.resize = smartResize(output);
-  output.update = (val: string, mode?: unknown, cb?: () => void) => {
+  output.update = (val: string, mode?: string | Mode, cb?: () => void) => {
     if (typeof mode === 'function') {
       cb = mode as () => void;
       mode = void 0;
     }
 
     const session = output.getSession();
+    const currentMode = val ? mode || outputMode : 'ace/mode/text';
 
-    session.setMode(val ? (mode as string) || (outputMode as unknown as string) : 'ace/mode/text');
+    session.setMode(currentMode as string);
     session.setValue(val);
     if (typeof cb === 'function') {
       setTimeout(cb);

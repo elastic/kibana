@@ -7,6 +7,7 @@
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const DEFAULT_REQUEST = `
@@ -24,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
   const browser = getService('browser');
-  const PageObjects = getPageObjects(['common', 'console']);
+  const PageObjects = getPageObjects(['common', 'console', 'header']);
   const toasts = getService('toasts');
 
   describe('console app', function describeIndexTests() {
@@ -124,17 +125,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('multiple requests output', () => {
-      const sendRequests = async () => {
-        await PageObjects.console.enterRequest('\n PUT test-index');
-        await PageObjects.console.enterRequest('\n DELETE test-index');
+      const sendMultipleRequests = async (requests: string[]) => {
+        await asyncForEach(requests, async (request) => {
+          await PageObjects.console.enterRequest(request);
+        });
         await PageObjects.console.selectAllRequests();
         await PageObjects.console.clickPlay();
       };
+
       beforeEach(async () => {
         await PageObjects.console.clearTextArea();
       });
+
       it('should contain comments starting with # symbol', async () => {
-        await sendRequests();
+        await sendMultipleRequests(['\n PUT test-index', '\n DELETE test-index']);
         await retry.try(async () => {
           const response = await PageObjects.console.getResponse();
           log.debug(response);
@@ -142,13 +146,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(response).to.contain('# DELETE test-index 200 OK');
         });
       });
-      it('should display status badges', async () => {
-        // This request should fail
-        await PageObjects.console.enterRequest('\n GET test-index');
 
-        await sendRequests();
-        await retry.waitFor('success badge', () => PageObjects.console.hasSuccessBadge());
-        await retry.waitFor('warning badge', () => PageObjects.console.hasWarningBadge());
+      it('should display status badges', async () => {
+        await sendMultipleRequests(['\n GET _search/test', '\n GET _search']);
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await PageObjects.console.hasWarningBadge()).to.be(true);
+        expect(await PageObjects.console.hasSuccessBadge()).to.be(true);
       });
     });
   });
