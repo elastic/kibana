@@ -6,16 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { FunctionalTestRunner } from './functional_test_runner';
-export {
-  readConfigFile,
-  Config,
-  createAsyncInstance,
-  EsVersion,
-  Lifecycle,
-  LifecyclePhase,
-  runCheckFtrConfigsCli,
-} from './lib';
-export { runFtrCli } from './cli';
-export * from './lib/docker_servers';
-export * from './public_types';
+require('../src/setup_node_env');
+require('@kbn/test').runCheckFtrConfigsCli();
