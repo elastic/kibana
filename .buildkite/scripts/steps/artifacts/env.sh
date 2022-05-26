@@ -22,7 +22,7 @@ if [[ "$RELEASE_BUILD" == "true" ]]; then
   WORKFLOW="staging"
 else
   FULL_VERSION="$QUALIFIER_VERSION-SNAPSHOT"
-  BUILD_ARGS="--version-qualifier=$VERSION_QUALIFIER"
+  BUILD_ARGS="--skip-docker-cloud --version-qualifier=$VERSION_QUALIFIER"
   WORKFLOW="snapshot"
 fi
 
