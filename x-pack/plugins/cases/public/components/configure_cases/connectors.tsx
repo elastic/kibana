@@ -43,7 +43,7 @@ export interface Props {
   isLoading: boolean;
   mappings: CaseConnectorMapping[];
   onChangeConnector: (id: string) => void;
-  selectedConnector: { id: string; type: string };
+  selectedConnector: { id: string; type: ConnectorTypes };
   updateConnectorDisabled: boolean;
 }
 const ConnectorsComponent: React.FC<Props> = ({

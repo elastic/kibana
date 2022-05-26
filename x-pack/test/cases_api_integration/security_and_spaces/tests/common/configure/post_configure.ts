@@ -284,11 +284,11 @@ export default ({ getService }: FtrProviderContext): void => {
       await createConfiguration(
         supertest,
         {
+          // @ts-expect-error
           connector: {
             id: 'test-id',
             type: ConnectorTypes.none,
             name: 'Connector',
-            // @ts-expect-error
             fields: {},
           },
           closure_type: 'close-by-user',
