@@ -12,7 +12,7 @@ import { HistoryOutput } from './components/history_output';
 import { CommandInput, CommandInputProps } from './components/command_input';
 import { ConsoleProps } from './types';
 import { ConsoleStateProvider } from './components/console_state';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import { useWithManagedConsole } from './components/console_manager/console_manager';
 
 // FIXME:PT implement dark mode for the console or light mode switch
