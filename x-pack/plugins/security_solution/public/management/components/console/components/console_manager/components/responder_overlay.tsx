@@ -8,7 +8,7 @@
 import React, { memo, ReactNode, useCallback, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiPanel } from '@elastic/eui';
-import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { AdministrationListPage } from '../../../../administration_list_page';
 import { PageOverlay } from './page_overlay';
 

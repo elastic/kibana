@@ -7,10 +7,10 @@
 
 import React, { memo, ReactNode, useEffect, useMemo, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
-import { EuiPortal } from '@elastic/eui';
+import { EuiFocusTrap, EuiPortal } from '@elastic/eui';
 import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
-import { useIsMounted } from '../../../../hooks/use_is_mounted';
+import { useIsMounted } from '../../../../../hooks/use_is_mounted';
 
 const OverlayRootContainer = styled.div`
   border: none;
@@ -177,7 +177,7 @@ export const PageOverlay = memo<PageOverlayProps>(
     return (
       <EuiPortal>
         <OverlayRootContainer data-test-subj={dataTestSubj} className={containerClassName}>
-          {children}
+          <EuiFocusTrap data-test-subj="trap-focus">{children}</EuiFocusTrap>
         </OverlayRootContainer>
         <PageOverlayGlobalStyles />
       </EuiPortal>
