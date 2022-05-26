@@ -282,7 +282,7 @@ describe('SavedObjectsService', () => {
       expect(KibanaMigratorMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
     });
 
-    it('waits for all es nodes to be compatible before running migrations', async (done) => {
+    it('waits for all es nodes to be compatible before running migrations', async () => {
       expect.assertions(2);
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
@@ -307,9 +307,12 @@ describe('SavedObjectsService', () => {
         warningNodes: [],
         kibanaVersion: '8.0.0',
       });
-      setImmediate(() => {
-        expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
-        done();
+
+      return new Promise<void>((done) => {
+        setImmediate(() => {
+          expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
+          done();
+        });
       });
     });
 
