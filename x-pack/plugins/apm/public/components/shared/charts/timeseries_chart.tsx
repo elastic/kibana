@@ -129,6 +129,7 @@ export function TimeseriesChart({
     // If the last data point of timeseries ends before (picked end time + bucket_span)
     // we need to extend the x max domain to the last available data point for the expected bounds
     // for the area chart to show up correctly
+    // See https://github.com/elastic/elastic-charts/issues/1685
     isComparingExpectedBounds
       ? anomalyChartTimeseries?.boundaries[0]?.data?.slice(-1)[0]?.x ?? 0
       : -Infinity
