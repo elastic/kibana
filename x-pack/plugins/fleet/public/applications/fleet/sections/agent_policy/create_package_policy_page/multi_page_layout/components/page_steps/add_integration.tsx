@@ -229,7 +229,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
         loadingMessage={
           <FormattedMessage
             id="xpack.fleet.createFirstPackagePolicy.savingPackagePolicy"
-            defaultMessage="Saving package policy..."
+            defaultMessage="Saving policy..."
           />
         }
         actionMessage={

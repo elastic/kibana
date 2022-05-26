@@ -42,6 +42,7 @@ const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
  */
 export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCountOptions) => {
   const [agentIds, setAgentIds] = useState<string[]>([]);
+  const [didPollInitially, setDidPollInitially] = useState(false);
   const timeout = useRef<number | undefined>(undefined);
 
   const lowerTimeLimitKuery = opts?.noLowerTimeLimit
@@ -62,9 +63,10 @@ export const usePollingAgentCount = (policyId: string, opts?: UsePollingAgentCou
   }, [agentIds, kuery]);
 
   // optionally poll once on first render
-  useEffect(() => {
-    if (opts?.pollImmediately) getNewAgentIds();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  if (!didPollInitially && opts?.pollImmediately) {
+    getNewAgentIds();
+    setDidPollInitially(true);
+  }
 
   useEffect(() => {
     let isAborted = false;

@@ -126,7 +126,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
   return (
     <>
       <StandaloneModeWarningCallout setIsManaged={setIsManaged} />
-      <EuiSpacer size={'xl'} />
+      <EuiSpacer size="xl" />
       <EuiSteps steps={steps} />
       {!!enrolledAgentIds.length && (
         <>

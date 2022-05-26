@@ -31,14 +31,18 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
     settings,
     enrolledAgentIds,
   } = props;
+
   const core = useStartServices();
-  const kibanaVersion = useKibanaVersion();
   const { docLinks } = core;
   const link = docLinks.links.fleet.troubleshooting;
+
+  const kibanaVersion = useKibanaVersion();
+
+  const [commandCopied, setCommandCopied] = useState(false);
+
   const fleetServerHosts = useMemo(() => {
     return settings?.fleet_server_hosts || [];
   }, [settings]);
-  const [commandCopied, setCommandCopied] = useState(false);
 
   if (!enrollmentAPIKey) {
     return (

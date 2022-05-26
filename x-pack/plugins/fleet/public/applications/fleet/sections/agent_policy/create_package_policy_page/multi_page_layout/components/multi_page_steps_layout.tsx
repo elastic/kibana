@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React from 'react';
-import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -20,11 +19,7 @@ import type { MultiPageStepLayoutProps } from '../types';
 
 import { PageSteps } from '.';
 
-const CentralH1 = styled('h1')`
-  text-align: center;
-`;
-
-export const MultiPageStepsLayout = (props: MultiPageStepLayoutProps) => {
+export const MultiPageStepsLayout: React.FunctionComponent<MultiPageStepLayoutProps> = (props) => {
   const { packageInfo, integrationInfo, steps, currentStep, error } = props;
 
   if (error) {
@@ -44,8 +39,8 @@ export const MultiPageStepsLayout = (props: MultiPageStepLayoutProps) => {
   const StepComponent = steps[currentStep].component;
   const topContent = (
     <>
-      <EuiTitle size="l">
-        <CentralH1>
+      <EuiTitle size="l" className="eui-textCenter">
+        <h1>
           <FormattedMessage
             id="xpack.fleet.createPackagePolicy.multiPageTitle"
             defaultMessage="Set up {title} integration"
@@ -53,7 +48,7 @@ export const MultiPageStepsLayout = (props: MultiPageStepLayoutProps) => {
               title: packageInfo.title,
             }}
           />
-        </CentralH1>
+        </h1>
       </EuiTitle>
       <EuiSpacer size="m" />
       <PageSteps currentStep={currentStep} steps={steps.map((s) => s.title)} />
