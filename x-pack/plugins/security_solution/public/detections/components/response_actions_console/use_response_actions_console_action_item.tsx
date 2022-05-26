@@ -35,7 +35,12 @@ export const useResponseActionsConsoleActionItem = (
   return useMemo(() => {
     const actions: JSX.Element[] = [];
 
-    if (isResponseActionsConsoleEnabled && !isAuthzLoading && canAccessEndpointManagement) {
+    if (
+      isResponseActionsConsoleEnabled &&
+      !isAuthzLoading &&
+      canAccessEndpointManagement &&
+      isEndpointAlert
+    ) {
       actions.push(
         <ResponseActionsConsoleContextMenuItem
           endpointId={isEndpointAlert ? endpointId : ''}

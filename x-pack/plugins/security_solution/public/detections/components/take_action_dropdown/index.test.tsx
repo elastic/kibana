@@ -431,6 +431,13 @@ describe('take action dropdown', () => {
         expect(findLaunchResponderButton()).toHaveLength(0);
       });
 
+      it('should not display the button for Events', async () => {
+        setAlertDetailsDataMockToEvent();
+        render();
+
+        expect(findLaunchResponderButton()).toHaveLength(0);
+      });
+
       it('should disable the button if alert NOT from a host running endpoint', async () => {
         setTypeOnEcsDataWithAgentType('filebeat');
         if (defaultProps.detailsData) {

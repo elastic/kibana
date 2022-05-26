@@ -18,7 +18,7 @@ const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_ov
 const RESPONDER_PAGE_BACK_LABEL = i18n.translate(
   'xpack.securitySolution.responder_overlay.backButtonLabel',
   {
-    defaultMessage: 'Back',
+    defaultMessage: 'Return to page content',
   }
 );
 
