@@ -7,9 +7,9 @@
 
 import React, { memo, ReactNode, useCallback, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonEmpty, EuiPanel } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
+import { PageLayout } from './page_layout';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import { AdministrationListPage } from '../../../../administration_list_page';
 import { PageOverlay } from './page_overlay';
 
 const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_overlay.pageTitle', {
@@ -45,28 +45,25 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
         data-test-subj={getTestId('pageOverlay')}
         hideOnUrlPathnameChange
         onHide={onHide}
-        enableScrolling
         paddingSize="xl"
       >
-        <EuiPanel borderRadius="none" hasShadow={false} paddingSize="l" color="transparent">
-          <AdministrationListPage
-            title={RESPONDER_PAGE_TITLE}
-            hasBottomBorder={false}
-            hideHeader={isHidden}
-            headerBackComponent={
-              <EuiButtonEmpty
-                flush="left"
-                size="xs"
-                iconType="arrowLeft"
-                onClick={handleBackToPageOnCLick}
-              >
-                {RESPONDER_PAGE_BACK_LABEL}
-              </EuiButtonEmpty>
-            }
-          >
-            {runningConsoles}
-          </AdministrationListPage>
-        </EuiPanel>
+        <PageLayout
+          pageTitle={RESPONDER_PAGE_TITLE}
+          headerHasBottomBorder={false}
+          scrollableBody
+          headerBackComponent={
+            <EuiButtonEmpty
+              flush="left"
+              size="xs"
+              iconType="arrowLeft"
+              onClick={handleBackToPageOnCLick}
+            >
+              {RESPONDER_PAGE_BACK_LABEL}
+            </EuiButtonEmpty>
+          }
+        >
+          {runningConsoles}
+        </PageLayout>
       </PageOverlay>
     );
   }

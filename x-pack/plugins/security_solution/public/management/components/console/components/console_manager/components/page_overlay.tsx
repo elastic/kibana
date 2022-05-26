@@ -53,6 +53,10 @@ const OverlayRootContainer = styled.div`
   &.padding-xl {
     padding: ${({ theme: { eui } }) => eui.paddingSizes.xl};
   }
+
+  .fullHeight {
+    height: 100%;
+  }
 `;
 
 const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = 'securitySolution-page-overlay-lock';
@@ -177,7 +181,9 @@ export const PageOverlay = memo<PageOverlayProps>(
     return (
       <EuiPortal>
         <OverlayRootContainer data-test-subj={dataTestSubj} className={containerClassName}>
-          <EuiFocusTrap data-test-subj="trap-focus">{children}</EuiFocusTrap>
+          <EuiFocusTrap data-test-subj="trap-focus" className="fullHeight">
+            {children}
+          </EuiFocusTrap>
         </OverlayRootContainer>
         <PageOverlayGlobalStyles />
       </EuiPortal>
