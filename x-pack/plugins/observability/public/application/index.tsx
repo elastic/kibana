@@ -17,6 +17,8 @@ import {
   KibanaThemeProvider,
   RedirectAppLinks,
 } from '@kbn/kibana-react-plugin/public';
+import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
+import type { SharedUXPluginStart } from '@kbn/shared-ux-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ConfigSchema } from '..';
@@ -56,6 +58,7 @@ export const renderApp = ({
   ObservabilityPageTemplate,
   kibanaFeatures,
   usageCollection,
+  sharedUX,
 }: {
   config: ConfigSchema;
   core: CoreStart;
@@ -65,10 +68,12 @@ export const renderApp = ({
   ObservabilityPageTemplate: React.ComponentType<LazyObservabilityPageTemplateProps>;
   kibanaFeatures: KibanaFeature[];
   usageCollection: UsageCollectionSetup;
+  sharedUX: SharedUXPluginStart;
 }) => {
   const { element, history, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
   const isDarkMode = core.uiSettings.get('theme:darkMode');
+  const sharedUXServices = sharedUX.getContextServices();
 
   core.chrome.setHelpExtension({
     appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
@@ -105,7 +110,9 @@ export const renderApp = ({
                   <RedirectAppLinks application={core.application} className={APP_WRAPPER_CLASS}>
                     <DatePickerContextProvider>
                       <HasDataContextProvider>
-                        <App />
+                        <SharedUxServicesProvider {...sharedUXServices}>
+                          <App />
+                        </SharedUxServicesProvider>
                       </HasDataContextProvider>
                     </DatePickerContextProvider>
                   </RedirectAppLinks>

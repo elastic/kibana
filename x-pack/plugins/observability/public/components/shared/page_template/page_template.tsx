@@ -12,7 +12,7 @@ import { matchPath, useLocation } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 import type { Observable } from 'rxjs';
 import type { ApplicationStart } from '@kbn/core/public';
-import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import type { NavigationSection } from '../../../services/navigation_registry';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 
