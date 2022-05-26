@@ -12,6 +12,6 @@ import { mount } from 'enzyme';
 describe('Loading indicator', () => {
   it('renders correctly', () => {
     const component = mount(<LoadingIndicator />);
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 });
