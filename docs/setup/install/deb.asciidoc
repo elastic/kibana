@@ -23,6 +23,7 @@ include::key.asciidoc[]
 [source,sh]
 -------------------------
 wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo gpg --dearmor -o /usr/share/keyrings/elasticsearch-keyring.gpg
+-------------------------
 
 [[deb-repo]]
 ==== Install from the APT repository
