@@ -8,11 +8,14 @@
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
-import { TaskInstance } from '@kbn/task-manager-plugin/server';
+import type { TaskInstance } from '@kbn/task-manager-plugin/server';
+
+type Require<T extends object, P extends keyof T> = Omit<T, P> & Required<Pick<T, P>>;
+type TaskInstanceWithId = Require<TaskInstance, 'id'>;
 
 export async function scheduleTaskSafe(
   taskManager: TaskManagerStartContract,
-  taskConfig: Required<TaskInstance>,
+  taskConfig: TaskInstanceWithId,
   logger: Logger
 ): Promise<boolean> {
   try {

@@ -25,7 +25,7 @@ import {
 describe('create CSP rules with post package create callback', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let mockSoClient: jest.Mocked<SavedObjectsClientContract>;
-  let savedObjectRepositorysMock: jest.Mocked<ISavedObjectsRepository>;
+  let savedObjectRepositoryMock: jest.Mocked<ISavedObjectsRepository>;
   const ruleAttributes = {
     id: '41308bcdaaf665761478bb6f0d745a5c',
     name: 'Ensure that the API server pod specification file permissions are set to 644 or more restrictive (Automated)',
@@ -97,9 +97,9 @@ describe('create CSP rules with post package create callback', () => {
   });
 
   it('validate that all rules templates are deleted', async () => {
-    const mockSavedObjectsRepository = savedObjectsRepositoryMock.create();
+    savedObjectRepositoryMock = savedObjectsRepositoryMock.create();
     const mockDeletePackagePolicy = deletePackagePolicyMock();
-    mockSavedObjectsRepository.find.mockResolvedValueOnce({
+    savedObjectRepositoryMock.find.mockResolvedValueOnce({
       saved_objects: [
         {
           type: 'csp-rule-template',
@@ -111,10 +111,10 @@ describe('create CSP rules with post package create callback', () => {
     } as unknown as SavedObjectsFindResponse);
     await removeCspRulesInstancesCallback(
       mockDeletePackagePolicy[0],
-      mockSavedObjectsRepository,
+      savedObjectRepositoryMock,
       logger
     );
 
-    expect(mockSavedObjectsRepository.find.mock.calls[0][0]).toMatchObject({ perPage: 10000 });
+    expect(savedObjectRepositoryMock.find.mock.calls[0][0]).toMatchObject({ perPage: 10000 });
   });
 });
