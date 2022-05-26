@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { IFieldType } from './types';
+export type { IFieldType } from './types';
 export {
   isFilterable,
   isNestedField,
