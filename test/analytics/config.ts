@@ -34,8 +34,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
         ...functionalConfig.get('kbnTestServer.serverArgs'),
-        // Disabling telemetry, so it doesn't call opt-in before the tests run.
-        '--telemetry.enabled=false',
+        '--telemetry.optIn=true',
         `--plugin-path=${path.resolve(__dirname, './__fixtures__/plugins/analytics_plugin_a')}`,
         `--plugin-path=${path.resolve(__dirname, './__fixtures__/plugins/analytics_ftr_helpers')}`,
       ],
