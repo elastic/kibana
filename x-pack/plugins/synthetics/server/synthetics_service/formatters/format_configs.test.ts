@@ -129,7 +129,7 @@ describe('formatMonitorConfig', () => {
           a: 'param',
         },
         playwright_options: {
-          playWright: 'options',
+          playwright: 'option',
         },
       };
     });
