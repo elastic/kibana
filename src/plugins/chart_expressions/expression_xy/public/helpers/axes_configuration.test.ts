@@ -224,6 +224,7 @@ describe('axes_configuration', () => {
     layerId: 'first',
     type: 'dataLayer',
     layerType: LayerTypes.DATA,
+    showLines: true,
     seriesType: 'line',
     xAccessor: 'c',
     accessors: ['yAccessorId'],

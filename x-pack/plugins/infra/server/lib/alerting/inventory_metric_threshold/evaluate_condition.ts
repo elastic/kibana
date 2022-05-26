@@ -16,7 +16,7 @@ import { InfraSource } from '../../sources';
 import { calculateFromBasedOnMetric } from './lib/calculate_from_based_on_metric';
 import { getData } from './lib/get_data';
 
-type ConditionResult = InventoryMetricConditions & {
+export type ConditionResult = InventoryMetricConditions & {
   shouldFire: boolean;
   shouldWarn: boolean;
   currentValue: number;

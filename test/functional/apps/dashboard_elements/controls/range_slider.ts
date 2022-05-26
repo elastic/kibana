@@ -26,6 +26,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
+  const DASHBOARD_NAME = 'Test Range Slider Control';
+
   const validateRange = async (
     compare: 'value' | 'placeholder', // if 'value', compare actual selections; otherwise, compare the default range
     controlId: string,
@@ -67,6 +69,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Oct 22, 2018 @ 00:00:00.000',
         'Dec 3, 2018 @ 00:00:00.000'
       );
+      await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
     });
 
     after(async () => {
@@ -88,6 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           width: 'small',
         });
         expect(await dashboardControls.getControlsCount()).to.be(1);
+        await dashboard.clearUnsavedChanges();
       });
 
       it('can add a second range list control with a non-default data view', async () => {
@@ -102,6 +106,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         validateRange('placeholder', secondId, '100', '1200');
         // data views should be properly propagated from the control group to the dashboard
         expect(await filterBar.getIndexPatterns()).to.be('logstash-*,kibana_sample_data_flights');
+        await dashboard.clearUnsavedChanges();
       });
 
       it('renames an existing control', async () => {
@@ -111,6 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.controlEditorSetTitle(newTitle);
         await dashboardControls.controlEditorSave();
         expect(await dashboardControls.doesControlTitleExist(newTitle)).to.be(true);
+        await dashboard.clearUnsavedChanges();
       });
 
       it('can edit range slider control', async () => {
@@ -133,6 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await filterBar.ensureFieldEditorModalIsClosed();
           expect(indexPatternSelectExists).to.be(false);
         });
+        await dashboard.clearUnsavedChanges();
       });
 
       it('can enter lower bound selection from the number field', async () => {
@@ -196,6 +203,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const firstId = (await dashboardControls.getAllControlIds())[0];
         await dashboardControls.removeExistingControl(firstId);
         expect(await dashboardControls.getControlsCount()).to.be(1);
+        await dashboard.clearUnsavedChanges();
       });
     });
 
