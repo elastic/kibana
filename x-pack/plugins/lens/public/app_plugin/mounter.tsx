@@ -251,7 +251,7 @@ export async function mountApp(
         lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
         lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
         // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, []);
+      }, [props.id, props.editByValue]);
 
       if (editorState === 'loading') {
         return <EuiLoadingSpinner />;
