@@ -246,15 +246,12 @@ describe('formatHeartbeatRequest', () => {
     });
   });
 
-  it('supports custom fields under root', () => {
+  it('supports run once', () => {
     const monitorId = 'test-monitor-id';
-    const customFieldsUnderRoot = {
-      a: 'field',
-    };
     const actual = formatHeartbeatRequest({
       monitor: testBrowserConfig as SyntheticsMonitor,
       monitorId,
-      customFieldsUnderRoot,
+      runOnce: true,
     });
 
     expect(actual).toEqual({
@@ -264,7 +261,29 @@ describe('formatHeartbeatRequest', () => {
         config_id: monitorId,
         'monitor.project.name': testBrowserConfig.project_id,
         'monitor.project.id': testBrowserConfig.project_id,
-        ...customFieldsUnderRoot,
+        runOnce: true,
+      },
+      fields_under_root: true,
+    });
+  });
+
+  it('supports test_run_id', () => {
+    const monitorId = 'test-monitor-id';
+    const testRunId = 'beep';
+    const actual = formatHeartbeatRequest({
+      monitor: testBrowserConfig as SyntheticsMonitor,
+      monitorId,
+      testRunId,
+    });
+
+    expect(actual).toEqual({
+      ...testBrowserConfig,
+      id: monitorId,
+      fields: {
+        config_id: monitorId,
+        'monitor.project.name': testBrowserConfig.project_id,
+        'monitor.project.id': testBrowserConfig.project_id,
+        test_run_id: testRunId,
       },
       fields_under_root: true,
     });

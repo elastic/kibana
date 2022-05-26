@@ -58,9 +58,7 @@ export const testNowMonitorRoute: UMRestApiRouteFactory = () => ({
         customHeartbeatId: (normalizedMonitor.attributes as MonitorFields)[
           ConfigKey.CUSTOM_HEARTBEAT_ID
         ],
-        customFieldsUnderRoot: {
-          test_run_id: testRunId,
-        },
+        testRunId,
       }),
     ]);
 

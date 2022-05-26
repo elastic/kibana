@@ -37,6 +37,7 @@ export const runOnceSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       formatHeartbeatRequest({
         monitor,
         monitorId,
+        runOnce: true,
       }),
     ]);
 
