@@ -553,8 +553,6 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       ? currentColumn.params.secondaryFields.length
       : 0;
 
-    // console.log(toValue(currentColumn.params.orderBy));
-
     return (
       <>
         <ValuesInput
