@@ -593,8 +593,8 @@ describe('XYChart component', () => {
       );
       expect(component.find(Axis).find('[id="left"]').prop('domain')).toEqual({
         fit: false,
-        min: 123,
-        max: 456,
+        min: NaN,
+        max: NaN,
         includeDataFromIds: [],
       });
     });
