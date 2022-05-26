@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { IntegrationsPopover } from '../../../../../common/components/integrations_popover';
+import { IntegrationsPopover } from '../../../../components/rules/related_integrations/integrations_popover';
 import {
   APP_UI_ID,
   DEFAULT_RELATIVE_DATE_THRESHOLD,

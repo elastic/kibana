@@ -14,11 +14,10 @@ import {
   InstalledIntegrationArray,
   RelatedIntegration,
   RelatedIntegrationArray,
-} from '../../../../common/detection_engine/schemas/common';
+} from '../../../../../common/detection_engine/schemas/common';
 
 /**
  * Returns an `EuiLink` that will link to a given package/integration/version page within fleet
- * TODO: Add `title` to RelatedIntegration so we can accurately display the integration pretty name
  *
  * @param integration either RelatedIntegration or InstalledIntegration
  * @param basePath kbn basepath for composing the fleet URL
@@ -36,7 +35,7 @@ export const getIntegrationLink = (
   if ('package_name' in integration) {
     packageName = integration.package_name;
     integrationName = integration.integration_name;
-    integrationTitle = integration.integration_title ?? integration.package_name;
+    integrationTitle = integration.integration_title ?? integration.package_title;
     version = integration.package_version;
   } else {
     // RelatedIntegration
@@ -59,44 +58,49 @@ export const getIntegrationLink = (
   );
 };
 
-export interface InstalledIntegrationAugmented extends InstalledIntegration {
-  targetVersion: string;
-  versionSatisfied: boolean;
+export interface IntegrationDetails extends InstalledIntegration {
+  target_version: string;
+  version_satisfied: boolean;
 }
 
 /**
- * Given an array of integrations and an array of installed integrations this will return which
- * integrations are `available`/`uninstalled` and which are `installed`, and also augmented with
- * `targetVersion` and `versionSatisfied`
+ * Given an array of integrations and an array of installed integrations this will return an
+ * array of integrations augmented with install details like targetVersion, and `version_satisfied`
+ * has
  * @param integrations
  * @param installedIntegrations
  */
 export const getInstalledRelatedIntegrations = (
   integrations: RelatedIntegrationArray,
-  installedIntegrations: InstalledIntegrationArray
-): {
-  availableIntegrations: RelatedIntegrationArray;
-  installedRelatedIntegrations: InstalledIntegrationAugmented[];
-} => {
-  const availableIntegrations: RelatedIntegrationArray = [];
-  const installedRelatedIntegrations: InstalledIntegrationAugmented[] = [];
+  installedIntegrations: InstalledIntegrationArray | undefined
+): IntegrationDetails[] => {
+  const integrationDetails: IntegrationDetails[] = [];
 
   integrations.forEach((i: RelatedIntegration) => {
-    const match = installedIntegrations.find(
+    const match = installedIntegrations?.find(
       (installed) =>
         installed.package_name === i.package && installed?.integration_name === i?.integration
     );
     if (match != null) {
       // Version check e.g. fleet match `1.2.3` satisfies rule dependency `~1.2.1`
       const versionSatisfied = semver.satisfies(match.package_version, i.version);
-      installedRelatedIntegrations.push({ ...match, targetVersion: i.version, versionSatisfied });
+      integrationDetails.push({
+        ...match,
+        target_version: i.version,
+        version_satisfied: versionSatisfied,
+      });
     } else {
-      availableIntegrations.push(i);
+      integrationDetails.push({
+        package_name: i.package,
+        // TODO: Add `title` to RelatedIntegration so we can accurately display the integration pretty name
+        package_title: capitalize(i.package),
+        package_version: i.version,
+        target_version: i.version,
+        version_satisfied: false,
+        is_enabled: false,
+      });
     }
   });
 
-  return {
-    availableIntegrations,
-    installedRelatedIntegrations,
-  };
+  return integrationDetails;
 };
