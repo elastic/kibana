@@ -7,11 +7,12 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { SecurityPageName } from '../../../app/types';
-import { NavLinkItem } from '../../links/types';
+import { AppLinkItems } from '../../links';
 import { TestProviders } from '../../mock';
 import { useAppNavLinks, useAppRootNavLink } from './nav_links';
+import { NavLinkItem } from './types';
 
-const mockNavLinks = [
+const mockNavLinks: AppLinkItems = [
   {
     description: 'description',
     id: SecurityPageName.administration,
@@ -22,6 +23,10 @@ const mockNavLinks = [
         links: [],
         path: '/path_2',
         title: 'title 2',
+        sideNavDisabled: true,
+        landingIcon: 'someicon',
+        landingImage: 'someimage',
+        skipUrlState: true,
       },
     ],
     path: '/path',
@@ -30,7 +35,7 @@ const mockNavLinks = [
 ];
 
 jest.mock('../../links', () => ({
-  getNavLinkItems: () => mockNavLinks,
+  useAppLinks: () => mockNavLinks,
 }));
 
 const renderUseAppNavLinks = () =>
@@ -44,11 +49,47 @@ const renderUseAppRootNavLink = (id: SecurityPageName) =>
 describe('useAppNavLinks', () => {
   it('should return all nav links', () => {
     const { result } = renderUseAppNavLinks();
-    expect(result.current).toEqual(mockNavLinks);
+    expect(result.current).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "description": "description",
+          "id": "administration",
+          "links": Array [
+            Object {
+              "description": "description 2",
+              "disabled": true,
+              "icon": "someicon",
+              "id": "endpoints",
+              "image": "someimage",
+              "skipUrlState": true,
+              "title": "title 2",
+            },
+          ],
+          "title": "title",
+        },
+      ]
+    `);
   });
 
   it('should return a root nav links', () => {
     const { result } = renderUseAppRootNavLink(SecurityPageName.administration);
-    expect(result.current).toEqual(mockNavLinks[0]);
+    expect(result.current).toMatchInlineSnapshot(`
+      Object {
+        "description": "description",
+        "id": "administration",
+        "links": Array [
+          Object {
+            "description": "description 2",
+            "disabled": true,
+            "icon": "someicon",
+            "id": "endpoints",
+            "image": "someimage",
+            "skipUrlState": true,
+            "title": "title 2",
+          },
+        ],
+        "title": "title",
+      }
+    `);
   });
 });

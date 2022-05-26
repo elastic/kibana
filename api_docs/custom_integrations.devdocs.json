@@ -351,6 +351,19 @@
           },
           {
             "parentPluginId": "customIntegrations",
+            "id": "def-server.CustomIntegration.uiExternalLink",
+            "type": "string",
+            "tags": [],
+            "label": "uiExternalLink",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
             "id": "def-server.CustomIntegration.isBeta",
             "type": "boolean",
             "tags": [],
@@ -400,7 +413,7 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
+              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -610,6 +623,19 @@
           },
           {
             "parentPluginId": "customIntegrations",
+            "id": "def-common.CustomIntegration.uiExternalLink",
+            "type": "string",
+            "tags": [],
+            "label": "uiExternalLink",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
             "id": "def-common.CustomIntegration.isBeta",
             "type": "boolean",
             "tags": [],
@@ -659,7 +685,7 @@
             "label": "shipper",
             "description": [],
             "signature": [
-              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
+              "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
             ],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false
@@ -851,7 +877,7 @@
           "\nThe list of all known shippers."
         ],
         "signature": [
-          "(\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\")[]"
+          "(\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\")[]"
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -867,7 +893,7 @@
           "\nA shipper-- an internal or external system capable of storing data in ES/Kibana-- applicable to an Integration."
         ],
         "signature": [
-          "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\""
+          "\"beats\" | \"enterprise_search\" | \"language_clients\" | \"other\" | \"sample_data\" | \"tests\" | \"tutorial\" | \"placeholders\""
         ],
         "path": "src/plugins/custom_integrations/common/index.ts",
         "deprecated": false,
@@ -1290,6 +1316,16 @@
             "type": "string",
             "tags": [],
             "label": "tutorial",
+            "description": [],
+            "path": "src/plugins/custom_integrations/common/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "customIntegrations",
+            "id": "def-common.SHIPPER_DISPLAY.placeholders",
+            "type": "string",
+            "tags": [],
+            "label": "placeholders",
             "description": [],
             "path": "src/plugins/custom_integrations/common/index.ts",
             "deprecated": false

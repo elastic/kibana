@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { NoDataViews, NoDataViewsComponent } from './no_data_views';
 export { KibanaNoDataPage } from './kibana_no_data_page';

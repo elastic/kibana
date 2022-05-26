@@ -25,6 +25,7 @@ import {
   RecursivePartial,
   AxisStyle,
   Placement,
+  Direction,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
@@ -42,16 +43,24 @@ import {
   LegendSizeToPixels,
 } from '@kbn/visualizations-plugin/common/constants';
 import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
-import type { CommonXYDataLayerConfig, SeriesType, XYChartProps } from '../../common/types';
+import { isTimeChart } from '../../common/helpers';
+import type {
+  CommonXYDataLayerConfig,
+  ExtendedYConfig,
+  ReferenceLineYConfig,
+  SeriesType,
+  XYChartProps,
+} from '../../common/types';
 import {
   isHorizontalChart,
   getAnnotationsLayers,
   getDataLayers,
   Series,
-  getFormattedTablesByLayers,
-  validateExtent,
   getFormat,
+  isReferenceLineYConfig,
+  getFormattedTablesByLayers,
 } from '../helpers';
+
 import {
   getFilteredLayers,
   getReferenceLayers,
@@ -59,10 +68,11 @@ import {
   getAxesConfiguration,
   GroupsConfiguration,
   getLinesCausedPaddings,
+  validateExtent,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
-import { ReferenceLineAnnotations, computeChartMargins } from './reference_lines';
+import { ReferenceLines, computeChartMargins } from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { CommonXYLayerConfig } from '../../common/types';
 import { SplitChart } from './split_chart';
@@ -73,8 +83,10 @@ import {
   OUTSIDE_RECT_ANNOTATION_WIDTH,
   OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION,
 } from './annotations';
-import { AxisExtentModes, SeriesTypes, ValueLabelModes } from '../../common/constants';
+import { AxisExtentModes, SeriesTypes, ValueLabelModes, XScaleTypes } from '../../common/constants';
 import { DataLayers } from './data_layers';
+import { XYCurrentTime } from './xy_current_time';
+
 import './xy_chart.scss';
 
 declare global {
@@ -241,7 +253,10 @@ export function XYChart({
     filteredBarLayers.some((layer) => layer.accessors.length > 1) ||
     filteredBarLayers.some((layer) => isDataLayer(layer) && layer.splitAccessor);
 
-  const isTimeViz = Boolean(dataLayers.every((l) => l.xScaleType === 'time'));
+  const isTimeViz = isTimeChart(dataLayers);
+
+  const defaultXScaleType = isTimeViz ? XScaleTypes.TIME : XScaleTypes.ORDINAL;
+
   const isHistogramViz = dataLayers.every((l) => l.isHistogram);
 
   const { baseDomain: rawXDomain, extendedDomain: xDomain } = getXDomain(
@@ -272,6 +287,7 @@ export function XYChart({
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
+
   const annotationsLayers = getAnnotationsLayers(layers);
   const firstTable = dataLayers[0]?.table;
 
@@ -288,7 +304,9 @@ export function XYChart({
   const rangeAnnotations = getRangeAnnotations(annotationsLayers);
 
   const visualConfigs = [
-    ...referenceLineLayers.flatMap(({ yConfig }) => yConfig),
+    ...referenceLineLayers.flatMap<ExtendedYConfig | ReferenceLineYConfig | undefined>(
+      ({ yConfig }) => yConfig
+    ),
     ...groupedLineAnnotations,
   ].filter(Boolean);
 
@@ -366,9 +384,10 @@ export function XYChart({
           l.yConfig ? l.yConfig.map((yConfig) => ({ layerId: l.layerId, yConfig })) : []
         )
         .filter(({ yConfig }) => yConfig.axisMode === axis.groupId)
-        .map(
-          ({ layerId, yConfig }) =>
-            `${layerId}-${yConfig.forAccessor}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
+        .map(({ layerId, yConfig }) =>
+          isReferenceLineYConfig(yConfig)
+            ? `${layerId}-${yConfig.value}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
+            : `${layerId}-${yConfig.forAccessor}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
         ),
     };
   };
@@ -571,6 +590,7 @@ export function XYChart({
               shouldRotate
             ),
           },
+          markSizeRatio: args.markSizeRatio,
         }}
         baseTheme={chartBaseTheme}
         tooltip={{
@@ -590,6 +610,18 @@ export function XYChart({
         showLegendExtra={isHistogramViz && valuesInLegend}
         ariaLabel={args.ariaLabel}
         ariaUseDefaultSummary={!args.ariaLabel}
+        orderOrdinalBinsBy={
+          args.orderBucketsBySum
+            ? {
+                direction: Direction.Descending,
+              }
+            : undefined
+        }
+      />
+      <XYCurrentTime
+        enabled={Boolean(args.addTimeMarker && isTimeViz)}
+        isDarkMode={darkMode}
+        domain={rawXDomain}
       />
 
       <Axis
@@ -666,10 +698,11 @@ export function XYChart({
           shouldShowValueLabels={shouldShowValueLabels}
           formattedDatatables={formattedDatatables}
           chartHasMoreThanOneBarSeries={chartHasMoreThanOneBarSeries}
+          defaultXScaleType={defaultXScaleType}
         />
       )}
       {referenceLineLayers.length ? (
-        <ReferenceLineAnnotations
+        <ReferenceLines
           layers={referenceLineLayers}
           formatters={{
             left: yAxesMap.left?.formatter,
