@@ -71,7 +71,7 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
   ) : (
     <FormattedMessage
       id="xpack.fleet.currentUpgrade.calloutTitle"
-      defaultMessage="Upgrading {nbAgents} agents to version {version}"
+      defaultMessage="Upgrading {nbAgents, plural, one {# agent} other {# agents}} to version {version}"
       values={{
         nbAgents: currentUpgrade.nbAgents - currentUpgrade.nbAgentsAck,
         version: currentUpgrade.version,

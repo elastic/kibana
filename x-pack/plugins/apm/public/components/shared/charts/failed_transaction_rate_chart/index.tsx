@@ -9,6 +9,8 @@ import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
+import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
+import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { useFetcher } from '../../../../hooks/use_fetcher';
@@ -89,7 +91,10 @@ export function FailedTransactionRateChart({
                 end,
                 transactionType,
                 transactionName,
-                offset: comparisonEnabled ? offset : undefined,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
               },
             },
           }
@@ -113,6 +118,7 @@ export function FailedTransactionRateChart({
     ChartType.FAILED_TRANSACTION_RATE
   );
 
+  const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
       data: data.currentPeriod.timeseries,
@@ -128,10 +134,7 @@ export function FailedTransactionRateChart({
             data: data.previousPeriod.timeseries,
             type: 'area',
             color: previousPeriodColor,
-            title: i18n.translate(
-              'xpack.apm.errorRate.chart.errorRate.previousPeriodLabel',
-              { defaultMessage: 'Previous period' }
-            ),
+            title: previousPeriodLabel,
           },
         ]
       : []),
@@ -170,7 +173,14 @@ export function FailedTransactionRateChart({
         yLabelFormat={yLabelFormat}
         yDomain={{ min: 0, max: 1 }}
         customTheme={comparisonChartTheme}
-        anomalyTimeseries={preferredAnomalyTimeseries}
+        anomalyTimeseries={
+          preferredAnomalyTimeseries
+            ? {
+                ...preferredAnomalyTimeseries,
+                color: previousPeriodColor,
+              }
+            : undefined
+        }
       />
     </EuiPanel>
   );
