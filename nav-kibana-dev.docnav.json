@@ -100,7 +100,6 @@
         { "id": "kibCoreSavedObjectsPluginApi" },
         { "id": "kibFieldFormatsPluginApi" },
         { "id": "kibDataPluginApi" },
-        { "id": "kibDataEnhancedPluginApi" },
         { "id": "kibDataViewsPluginApi" },
         { "id": "kibDataQueryPluginApi" },
         { "id": "kibDataSearchPluginApi" },
@@ -182,7 +181,9 @@
             { "id": "kibDevDocsOpsOptimizer" },
             { "id": "kibDevDocsOpsBabelPreset" },
             { "id": "kibDevDocsOpsTypeSummarizer" },
-            { "id": "kibDevDocsOpsBabelPluginSyntheticPackages" }
+            { "id": "kibDevDocsOpsBabelPluginSyntheticPackages" },
+            { "id": "kibDevDocsOpsUiSharedDepsNpm" },
+            { "id": "kibDevDocsOpsUiSharedDepsSrc" }
           ]
         },
         {
