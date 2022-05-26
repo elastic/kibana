@@ -106,11 +106,6 @@ export interface DataViewAttributes {
 }
 
 /**
- * @deprecated Use DataViewAttributes. All index pattern interfaces were renamed.
- */
-export type IndexPatternAttributes = DataViewAttributes;
-
-/**
  * @intenal
  * Storage of field attributes. Necessary since the field list isn't saved.
  */

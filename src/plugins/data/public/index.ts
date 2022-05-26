@@ -81,7 +81,6 @@ export { IndexPattern, IndexPatternField } from './data_views';
 export type {
   IIndexPattern,
   IFieldType,
-  IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,

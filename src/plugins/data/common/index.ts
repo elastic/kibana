@@ -107,7 +107,6 @@ export type {
   RuntimeField,
   IIndexPattern,
   DataViewAttributes,
-  IndexPatternAttributes,
   FieldAttrs,
   FieldAttrSet,
   OnNotification,
