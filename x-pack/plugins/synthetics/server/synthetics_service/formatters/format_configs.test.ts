@@ -94,9 +94,7 @@ describe('formatMonitorConfig', () => {
         'source.inline.script':
           "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
         params: '{"a":"param"}',
-        playwright_options: {
-          playWright: 'options',
-        },
+        playwright_options: '{"playwright":"option"}',
         screenshots: 'on',
         synthetics_args: ['--hasTouch true'],
         'filter_journeys.match': '',
@@ -148,7 +146,7 @@ describe('formatMonitorConfig', () => {
     it('does not set empty strings or empty objects for params and playwright options', () => {
       const yamlConfig = formatMonitorConfig(Object.keys(testBrowserConfig) as ConfigKey[], {
         ...testBrowserConfig,
-        playwright_options: {},
+        playwright_options: '{}',
         params: '',
       });
 

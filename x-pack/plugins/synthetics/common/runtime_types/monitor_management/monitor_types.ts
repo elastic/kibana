@@ -210,7 +210,7 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
       [ConfigKey.SOURCE_ZIP_PROXY_URL]: t.string,
     }),
     t.partial({
-      [ConfigKey.PLAYWRIGHT_OPTIONS]: t.record(t.string, t.unknown),
+      [ConfigKey.PLAYWRIGHT_OPTIONS]: t.string,
       [ConfigKey.JOURNEY_ID]: t.string,
       [ConfigKey.PROJECT_ID]: t.string,
       [ConfigKey.ORIGINAL_SPACE]: t.string,
