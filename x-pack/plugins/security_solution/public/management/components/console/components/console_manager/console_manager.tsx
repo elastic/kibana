@@ -29,6 +29,7 @@ interface ManagedConsole {
   isOpen: boolean;
   key: symbol;
   onBeforeTerminate?: ConsoleRegistrationInterface['onBeforeTerminate'];
+  BodyComponent: ConsoleRegistrationInterface['BodyComponent'];
 }
 
 type RunningConsoleStorage = Record<string, ManagedConsole>;
@@ -178,6 +179,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       const isThisConsoleVisible = isVisible.bind(null, id);
 
       const managedConsole: ManagedConsole = {
+        BodyComponent: undefined,
         ...otherRegisterProps,
         client: {
           id,
@@ -260,6 +262,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
         onHide={handleOnHide}
         runningConsoles={runningConsoles}
         isHidden={!visibleConsole}
+        body={visibleConsole && visibleConsole.BodyComponent && <visibleConsole.BodyComponent />}
       />
     </ConsoleManagerContext.Provider>
   );

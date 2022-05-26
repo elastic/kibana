@@ -8,7 +8,7 @@
 import React, { memo, ReactNode, useCallback, MouseEventHandler, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { PageLayout } from './page_layout';
+import { PageLayout, PageLayoutProps } from './page_layout';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { PageOverlay } from '../../../../page_overlay/page_overlay';
 
@@ -26,10 +26,12 @@ export interface ResponderOverlayProps {
   runningConsoles: ReactNode;
   isHidden: boolean;
   onHide: () => void;
+  body?: ReactNode;
+  actions?: ReactNode;
 }
 
 export const ResponderOverlay = memo<ResponderOverlayProps>(
-  ({ runningConsoles, onHide, isHidden }) => {
+  ({ runningConsoles, onHide, isHidden, body, actions }) => {
     const getTestId = useTestIdGenerator('responder');
     const handleBackToPageOnCLick: MouseEventHandler = useCallback(
       (ev) => {
@@ -39,7 +41,7 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
       [onHide]
     );
 
-    const layoutProps = useMemo(() => {
+    const layoutProps = useMemo<PageLayoutProps>(() => {
       // If in `hidden` mode, then we don't render the html for the layout header section
       // of the layout
       if (isHidden) return {};
@@ -58,8 +60,9 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
             {RESPONDER_PAGE_BACK_LABEL}
           </EuiButtonEmpty>
         ),
+        actions,
       };
-    }, [handleBackToPageOnCLick, isHidden]);
+    }, [actions, handleBackToPageOnCLick, isHidden]);
 
     return (
       <PageOverlay
@@ -69,7 +72,11 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
         onHide={onHide}
         paddingSize="xl"
       >
-        <PageLayout {...layoutProps}>{runningConsoles}</PageLayout>
+        <PageLayout {...layoutProps}>
+          {body}
+
+          {runningConsoles}
+        </PageLayout>
       </PageOverlay>
     );
   }

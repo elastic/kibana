@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { ReactNode } from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import { ConsoleProps } from '../../types';
 
 export interface ConsoleRegistrationInterface<Meta extends object = Record<string, unknown>> {
   id: string;
   /** The title for the console popup */
-  title: ReactNode;
+  title: ReactNode; // FIXME:PT remove this once pending PR is merged
   consoleProps: ConsoleProps;
   onBeforeTerminate?: () => void;
   /**
@@ -19,6 +19,11 @@ export interface ConsoleRegistrationInterface<Meta extends object = Record<strin
    * (ex. could hold the details data for the Host that the console is opened against)
    */
   meta?: Meta;
+
+  /**
+   * An optional component that will be rendered above the Console
+   */
+  BodyComponent?: ComponentType; // FIXME:PT type this interface
 }
 
 export interface RegisteredConsoleClient<Meta extends object = Record<string, unknown>>
