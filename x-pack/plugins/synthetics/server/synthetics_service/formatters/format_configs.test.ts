@@ -267,7 +267,7 @@ describe('formatHeartbeatRequest', () => {
         config_id: monitorId,
         'monitor.project.name': testBrowserConfig.project_id,
         'monitor.project.id': testBrowserConfig.project_id,
-        run_once: undefined,
+        run_once: true,
         test_run_id: undefined,
       },
       fields_under_root: true,
