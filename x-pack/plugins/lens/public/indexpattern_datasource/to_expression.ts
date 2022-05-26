@@ -269,10 +269,8 @@ function getExpressionForLayer(
       };
     }
 
-    const configColumns = Object.values(columns);
-
-    const allDateHistogramFields = configColumns
-      .map((column) =>
+    const allDateHistogramFields = columnEntries
+      .map(([, column]) =>
         isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
         !column.params.ignoreTimeRange
           ? column.sourceField
@@ -283,13 +281,26 @@ function getExpressionForLayer(
     // the combination of Interval with extended bounds + Top values (any combination)
     // requires partial rows to be enabled
     const shouldEnablePartialRows =
-      configColumns.some((column) => isColumnOfType<TermsIndexPatternColumn>('terms', column)) &&
-      configColumns.some(
-        (column) =>
+      columnEntries.some(([, column]) =>
+        isColumnOfType<TermsIndexPatternColumn>('terms', column)
+      ) &&
+      columnEntries.some(
+        ([, column]) =>
           isColumnOfType<RangeIndexPatternColumn>('range', column) &&
           column.params.includeEmptyRows &&
           column.params.customBounds
       );
+    // This special function will override partial rows value to empty strings
+    // to make it work for the renderer.
+    const partialRowsOverride: ExpressionAstFunction[] = shouldEnablePartialRows
+      ? [
+          {
+            type: 'function',
+            function: 'lens_partialRows_override',
+            arguments: {},
+          },
+        ]
+      : [];
 
     return {
       type: 'expression',
@@ -314,6 +325,7 @@ function getExpressionForLayer(
             idMap: [JSON.stringify(idMap)],
           },
         },
+        ...partialRowsOverride,
         ...expressions,
         ...formatterOverrides,
         ...timeScaleFunctions,

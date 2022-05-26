@@ -9,6 +9,7 @@ import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import { getDatatable } from '../common/expressions/datatable/datatable';
 import { datatableColumn } from '../common/expressions/datatable/datatable_column';
 import { renameColumns } from '../common/expressions/rename_columns/rename_columns';
+import { partialRowsOverride } from '../common/expressions/partialRows_override/partial_rows_override';
 import { formatColumn } from '../common/expressions/format_column';
 import { counterRate } from '../common/expressions/counter_rate';
 import { getTimeScale } from '../common/expressions/time_scale/time_scale';
@@ -24,6 +25,7 @@ export const setupExpressions = (
     counterRate,
     formatColumn,
     renameColumns,
+    partialRowsOverride,
     datatableColumn,
     getDatatable(formatFactory),
     getTimeScale(getTimeZone),

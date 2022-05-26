@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export * from './counter_rate';
-export * from './collapse';
-export * from './format_column';
-export * from './rename_columns';
-export * from './partial_rows_override';
-export * from './time_scale';
-export * from './datatable';
+export { partialRowsOverride } from './partial_rows_override';
