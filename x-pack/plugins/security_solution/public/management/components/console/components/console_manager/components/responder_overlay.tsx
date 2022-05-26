@@ -8,6 +8,7 @@
 import React, { memo, ReactNode, useCallback, MouseEventHandler } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiPanel } from '@elastic/eui';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { AdministrationListPage } from '../../../../administration_list_page';
 import { PageOverlay } from './page_overlay';
 
@@ -29,6 +30,7 @@ export interface ResponderOverlayProps {
 
 export const ResponderOverlay = memo<ResponderOverlayProps>(
   ({ runningConsoles, onHide, isHidden }) => {
+    const getTestId = useTestIdGenerator('responder');
     const handleBackToPageOnCLick: MouseEventHandler = useCallback(
       (ev) => {
         ev.preventDefault();
@@ -40,7 +42,7 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
     return (
       <PageOverlay
         isHidden={isHidden}
-        data-test-subj="responderPageOverlay"
+        data-test-subj={getTestId('pageOverlay')}
         hideOnUrlPathnameChange
         onHide={onHide}
         enableScrolling

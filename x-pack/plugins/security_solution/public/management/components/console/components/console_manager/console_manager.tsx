@@ -242,12 +242,6 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     return Object.values(consoleStorage).find((managedConsole) => managedConsole.isOpen);
   }, [consoleStorage]);
 
-  // const handleOnTerminate = useCallback(() => {
-  //   if (visibleConsole) {
-  //     consoleManagerClient.terminate(visibleConsole.client.id);
-  //   }
-  // }, [consoleManagerClient, visibleConsole]);
-
   const handleOnHide = useCallback(() => {
     if (visibleConsole) {
       consoleManagerClient.hide(visibleConsole.client.id);
@@ -261,15 +255,6 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
   return (
     <ConsoleManagerContext.Provider value={consoleManageContextClients}>
       {children}
-
-      {/* <ConsolePopup*/}
-      {/*  title={visibleConsole?.client.title}*/}
-      {/*  isHidden={!visibleConsole}*/}
-      {/*  onTerminate={handleOnTerminate}*/}
-      {/*  onHide={handleOnHide}*/}
-      {/* >*/}
-      {/*  {runningConsoles}*/}
-      {/* </ConsolePopup>*/}
 
       <ResponderOverlay
         onHide={handleOnHide}
