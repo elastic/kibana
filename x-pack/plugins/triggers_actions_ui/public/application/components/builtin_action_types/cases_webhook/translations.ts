@@ -218,7 +218,7 @@ export const CREATE_INCIDENT_URL = i18n.translate(
 export const CREATE_INCIDENT_JSON = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentJsonTextFieldLabel',
   {
-    defaultMessage: 'Create Incident JSON',
+    defaultMessage: 'Create Incident Object',
   }
 );
 
@@ -350,7 +350,7 @@ export const UPDATE_INCIDENT_URL_HELP = i18n.translate(
 export const UPDATE_INCIDENT_JSON = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentJsonTextFieldLabel',
   {
-    defaultMessage: 'Update Incident JSON',
+    defaultMessage: 'Update Incident Object',
   }
 );
 export const UPDATE_INCIDENT_JSON_HELP = i18n.translate(
@@ -385,7 +385,7 @@ export const CREATE_COMMENT_URL_HELP = i18n.translate(
 export const CREATE_COMMENT_JSON = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentJsonTextFieldLabel',
   {
-    defaultMessage: 'Create Comment JSON',
+    defaultMessage: 'Create Comment Object',
   }
 );
 export const CREATE_COMMENT_JSON_HELP = i18n.translate(
