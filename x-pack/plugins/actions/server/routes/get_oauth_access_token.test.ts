@@ -6,8 +6,7 @@
  */
 
 import { getOAuthAccessToken } from './get_oauth_access_token';
-import { Logger } from '@kbn/core/server';
-import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { mockHandlerArguments } from './legacy/_mock_handler_arguments';
 import { verifyAccessAndContext } from './verify_access_and_context';
@@ -18,7 +17,6 @@ jest.mock('./verify_access_and_context', () => ({
   verifyAccessAndContext: jest.fn(),
 }));
 
-const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
 
 beforeEach(() => {
@@ -31,7 +29,7 @@ describe('getOAuthAccessToken', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getOAuthAccessToken(router, licenseState, logger, configurationUtilities);
+    getOAuthAccessToken(router, licenseState, configurationUtilities);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -77,7 +75,6 @@ describe('getOAuthAccessToken', () => {
     expect(actionsClient.getOAuthAccessToken).toHaveBeenCalledTimes(1);
     expect(actionsClient.getOAuthAccessToken.mock.calls[0]).toEqual([
       requestBody,
-      logger,
       configurationUtilities,
     ]);
 
@@ -92,7 +89,7 @@ describe('getOAuthAccessToken', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getOAuthAccessToken(router, licenseState, logger, configurationUtilities);
+    getOAuthAccessToken(router, licenseState, configurationUtilities);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -137,7 +134,6 @@ describe('getOAuthAccessToken', () => {
     expect(actionsClient.getOAuthAccessToken).toHaveBeenCalledTimes(1);
     expect(actionsClient.getOAuthAccessToken.mock.calls[0]).toEqual([
       requestBody,
-      logger,
       configurationUtilities,
     ]);
 
@@ -152,7 +148,7 @@ describe('getOAuthAccessToken', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getOAuthAccessToken(router, licenseState, logger, configurationUtilities);
+    getOAuthAccessToken(router, licenseState, configurationUtilities);
 
     const [config, handler] = router.post.mock.calls[0];
 
@@ -193,7 +189,7 @@ describe('getOAuthAccessToken', () => {
       throw new Error('OMG');
     });
 
-    getOAuthAccessToken(router, licenseState, logger, configurationUtilities);
+    getOAuthAccessToken(router, licenseState, configurationUtilities);
 
     const [config, handler] = router.post.mock.calls[0];
 

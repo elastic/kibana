@@ -77,6 +77,7 @@ export const getGaugeVisTypeDefinition = (
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: getGaugeOptions(props),
     schemas: [
       {

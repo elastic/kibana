@@ -31,10 +31,10 @@ import { useVisible } from '../../hooks/use_visible';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
 import { AlertButton, ChildrenProcessesButton } from './buttons';
 import { useButtonStyles } from './use_button_styles';
-import { KIBANA_DATE_FORMAT } from '../../../common/constants';
 import { useStyles } from './styles';
 import { SplitText } from './split_text';
 import { Nbsp } from './nbsp';
+import { useDateFormat } from '../../hooks';
 
 export interface ProcessDeps {
   process: Process;
@@ -79,6 +79,8 @@ export function ProcessTreeNode({
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
   const { searchMatched } = process;
+
+  const dateFormat = useDateFormat();
 
   // forces nodes to expand if the selected process is a descendant
   useEffect(() => {
@@ -144,7 +146,7 @@ export function ProcessTreeNode({
         });
 
         // eslint-disable-next-line no-unsanitized/property
-        textRef.current.innerHTML = html;
+        textRef.current.innerHTML = '<span>' + html + '</span>';
       }
     }
   }, [searchMatched, styles.searchHighlight]);
@@ -229,7 +231,7 @@ export function ProcessTreeNode({
     ? 'sessionView:processTreeNodeExecIcon'
     : 'sessionView:processTreeNodeForkIcon';
 
-  const timeStampsNormal = formatDate(start, KIBANA_DATE_FORMAT);
+  const timeStampsNormal = formatDate(start, dateFormat);
 
   return (
     <div>

@@ -23,6 +23,7 @@ import {
   WAIT_FOR_ALL_SHARDS_TO_BE_ACTIVE,
 } from './constants';
 import { IndexNotYellowTimeout, waitForIndexStatusYellow } from './wait_for_index_status_yellow';
+import { isClusterShardLimitExceeded } from './es_errors';
 
 function aliasArrayToRecord(aliases: string[]): Record<string, estypes.IndicesAlias> {
   const result: Record<string, estypes.IndicesAlias> = {};
@@ -30,6 +31,11 @@ function aliasArrayToRecord(aliases: string[]): Record<string, estypes.IndicesAl
     result[alias] = {};
   }
   return result;
+}
+
+/** @internal */
+export interface ClusterShardLimitExceeded {
+  type: 'cluster_shard_limit_exceeded';
 }
 
 /** @internal */
@@ -55,11 +61,11 @@ export const createIndex = ({
   mappings,
   aliases = [],
 }: CreateIndexParams): TaskEither.TaskEither<
-  RetryableEsClientError | IndexNotYellowTimeout,
+  RetryableEsClientError | IndexNotYellowTimeout | ClusterShardLimitExceeded,
   'create_index_succeeded'
 > => {
   const createIndexTask: TaskEither.TaskEither<
-    RetryableEsClientError,
+    RetryableEsClientError | ClusterShardLimitExceeded,
     AcknowledgeResponse
   > = () => {
     const aliasesObject = aliasArrayToRecord(aliases);
@@ -120,6 +126,10 @@ export const createIndex = ({
             acknowledged: true,
             shardsAcknowledged: false,
           });
+        } else if (isClusterShardLimitExceeded(error?.body?.error)) {
+          return Either.left({
+            type: 'cluster_shard_limit_exceeded' as const,
+          });
         } else {
           throw error;
         }
@@ -129,7 +139,11 @@ export const createIndex = ({
 
   return pipe(
     createIndexTask,
-    TaskEither.chain((res) => {
+    TaskEither.chain<
+      RetryableEsClientError | IndexNotYellowTimeout | ClusterShardLimitExceeded,
+      AcknowledgeResponse,
+      'create_index_succeeded'
+    >((res) => {
       if (res.acknowledged && res.shardsAcknowledged) {
         // If the cluster state was updated and all shards ackd we're done
         return TaskEither.right('create_index_succeeded');

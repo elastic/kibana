@@ -88,6 +88,7 @@ export { updateAndPickupMappings } from './update_and_pickup_mappings';
 
 import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
+import { ClusterShardLimitExceeded } from './create_index';
 
 export type {
   CheckForUnknownDocsParams,
@@ -153,6 +154,7 @@ export interface ActionErrorTypeMap {
   unknown_docs_found: UnknownDocsFound;
   incompatible_cluster_routing_allocation: IncompatibleClusterRoutingAllocation;
   index_not_yellow_timeout: IndexNotYellowTimeout;
+  cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
 }
 
 /**

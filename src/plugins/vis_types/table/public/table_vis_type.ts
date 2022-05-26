@@ -39,6 +39,7 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: TableOptions,
     schemas: [
       {

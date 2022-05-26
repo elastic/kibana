@@ -69,6 +69,7 @@ export type LayerDescriptor = {
   id: string;
   colorFilter?: ColorFilter;
   label?: string | null;
+  locale?: string | null;
   areLabelsOnTop?: boolean;
   minZoom?: number;
   maxZoom?: number;
