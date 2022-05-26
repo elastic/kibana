@@ -331,10 +331,6 @@ describe('Custom query rules', () => {
         // expect define step to populate
         cy.get(CUSTOM_QUERY_INPUT).should('have.value', getExistingRule().customQuery);
         if (getExistingRule().index && getExistingRule().index.length > 0) {
-          // cy.get('[id="indexPatterns"]').click({ force: true });
-          // cy.get('[data-test-subj="detectionEngineStepDefineRuleIndexPatternsAccordion"]').click({
-          //   force: true,
-          // });
           cy.get(DEFINE_INDEX_INPUT).should('have.text', getExistingRule().index.join(''));
         }
 

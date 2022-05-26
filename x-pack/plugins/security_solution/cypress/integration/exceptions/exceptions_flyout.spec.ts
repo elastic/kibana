@@ -130,12 +130,12 @@ describe('Exceptions flyout', () => {
     cy.get(ADD_AND_BTN).click();
     addExceptionEntryFieldValue('@timestamp', 1);
     cy.get(ADD_AND_BTN).click();
-    addExceptionEntryFieldValue('agent.hostname', 2);
+    addExceptionEntryFieldValue('c', 2);
 
     // delete second item, invalid values 'a' and 'c' should remain
     cy.get(ENTRY_DELETE_BTN).eq(1).click();
     cy.get(FIELD_INPUT).eq(0).should('have.text', 'agent.name');
-    cy.get(FIELD_INPUT).eq(1).should('have.text', 'agent.hostname');
+    cy.get(FIELD_INPUT).eq(1).should('have.text', 'c');
 
     closeExceptionBuilderFlyout();
   });
@@ -158,7 +158,7 @@ describe('Exceptions flyout', () => {
     cy.get(ADD_AND_BTN).click();
     addExceptionEntryFieldValueOfItemX('user.last', 1, 1);
     cy.get(ADD_AND_BTN).click();
-    addExceptionEntryFieldValueOfItemX('host.architecture', 1, 2);
+    addExceptionEntryFieldValueOfItemX('e', 1, 2);
 
     // delete single entry from exception item 2
     cy.get(ENTRY_DELETE_BTN).eq(3).click();
@@ -177,11 +177,7 @@ describe('Exceptions flyout', () => {
       .find(FIELD_INPUT)
       .eq(0)
       .should('have.text', 'user.first');
-    cy.get(EXCEPTION_ITEM_CONTAINER)
-      .eq(1)
-      .find(FIELD_INPUT)
-      .eq(1)
-      .should('have.text', 'host.architecture');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(1).should('have.text', 'e');
 
     // delete remaining entries in exception item 2
     cy.get(ENTRY_DELETE_BTN).eq(2).click();
@@ -214,9 +210,9 @@ describe('Exceptions flyout', () => {
     cy.get(ADD_OR_BTN).click();
     addExceptionEntryFieldValueOfItemX('agent.name', 1, 0);
     cy.get(ADD_NESTED_BTN).click();
-    addExceptionEntryFieldValueOfItemX('file.elf.sections{downArrow}{enter}', 1, 1);
+    addExceptionEntryFieldValueOfItemX('user.id{downarrow}{enter}', 1, 1);
     cy.get(ADD_AND_BTN).click();
-    addExceptionEntryFieldValueOfItemX('chi2{downArrow}{enter}', 1, 3);
+    addExceptionEntryFieldValueOfItemX('last{downarrow}{enter}', 1, 3);
     // This button will now read `Add non-nested button`
     cy.get(ADD_NESTED_BTN).scrollIntoView();
     cy.get(ADD_NESTED_BTN).focus().click();
@@ -229,22 +225,14 @@ describe('Exceptions flyout', () => {
       .find(FIELD_INPUT)
       .eq(0)
       .should('have.text', 'agent.name');
-    cy.get(EXCEPTION_ITEM_CONTAINER)
-      .eq(0)
-      .find(FIELD_INPUT)
-      .eq(1)
-      .should('have.text', 'agent.build.original');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(1).should('have.text', 'b');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
       .find(FIELD_INPUT)
       .eq(0)
       .should('have.text', 'agent.name');
-    cy.get(EXCEPTION_ITEM_CONTAINER)
-      .eq(1)
-      .find(FIELD_INPUT)
-      .eq(1)
-      .should('have.text', 'file.elf.sections');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(2).should('have.text', 'chi2');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(1).should('have.text', 'user');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(2).should('have.text', 'last');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
       .find(FIELD_INPUT)
@@ -258,11 +246,7 @@ describe('Exceptions flyout', () => {
       .find(FIELD_INPUT)
       .eq(0)
       .should('have.text', 'agent.name');
-    cy.get(EXCEPTION_ITEM_CONTAINER)
-      .eq(0)
-      .find(FIELD_INPUT)
-      .eq(1)
-      .should('have.text', 'agent.build.original');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(1).should('have.text', 'b');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
       .find(FIELD_INPUT)
@@ -284,7 +268,6 @@ describe('Exceptions flyout', () => {
         return $el.find(ADD_AND_BTN);
       })
       .should('be.visible');
-    addExceptionEntryFieldValueOfItemX('unique_value.test', 0, 0);
     cy.get(FIELD_INPUT).eq(0).click({ force: true });
     cy.get(EXCEPTION_FIELD_LIST).contains('unique_value.test');
 

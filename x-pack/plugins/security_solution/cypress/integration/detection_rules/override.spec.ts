@@ -169,8 +169,8 @@ describe('Detection rules, override', () => {
     cy.get(NUMBER_OF_ALERTS)
       .invoke('text')
       .should('match', /^[1-9].+$/); // Any number of alerts
-    cy.get(ALERT_GRID_CELL).contains('siem-kibana');
-    cy.get(ALERT_GRID_CELL).contains('test');
-    cy.get(ALERT_GRID_CELL).contains('zsh');
+    cy.get(ALERT_GRID_CELL).contains('auditbeat');
+    cy.get(ALERT_GRID_CELL).contains('critical');
+    cy.get(ALERT_GRID_CELL).contains('80');
   });
 });
