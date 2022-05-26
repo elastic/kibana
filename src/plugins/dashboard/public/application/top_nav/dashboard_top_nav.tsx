@@ -250,6 +250,9 @@ export function DashboardTopNav({
             JSON.stringify({ ...initialTourState, isTourActive: false })
           );
         }
+        setTourVisibility(true);
+      } else {
+        setTourVisibility(false);
       }
       closeAllFlyouts();
       const willLoseChanges = newMode === ViewMode.VIEW && dashboardAppState.hasUnsavedChanges;
@@ -263,7 +266,13 @@ export function DashboardTopNav({
         dashboardAppState.resetToLastSavedState?.()
       );
     },
-    [closeAllFlyouts, core.overlays, dashboardAppState, dispatchDashboardStateChange]
+    [
+      closeAllFlyouts,
+      core.overlays,
+      dashboardAppState,
+      dispatchDashboardStateChange,
+      setTourVisibility,
+    ]
   );
 
   const runSaveAs = useCallback(async () => {

@@ -137,35 +137,33 @@ export function DashboardApp({
       )}
       {!showNoDataPage && isCompleteDashboardAppState(dashboardAppState) && (
         <DashboardEditTourProvider>
-          <>
-            <DashboardTopNav
-              printMode={printMode}
-              redirectTo={redirectTo}
-              embedSettings={embedSettings}
-              dashboardAppState={dashboardAppState}
-            />
+          <DashboardTopNav
+            printMode={printMode}
+            redirectTo={redirectTo}
+            embedSettings={embedSettings}
+            dashboardAppState={dashboardAppState}
+          />
 
-            {dashboardAppState.savedDashboard.outcome === 'conflict' &&
-            dashboardAppState.savedDashboard.id &&
-            dashboardAppState.savedDashboard.aliasId
-              ? spacesService?.ui.components.getLegacyUrlConflict({
-                  currentObjectId: dashboardAppState.savedDashboard.id,
-                  otherObjectId: dashboardAppState.savedDashboard.aliasId,
-                  otherObjectPath: `#${createDashboardEditUrl(
-                    dashboardAppState.savedDashboard.aliasId
-                  )}${history.location.search}`,
-                })
-              : null}
-            <div
-              className={`dashboardViewport ${
-                screenshotModeService && screenshotModeService.isScreenshotMode()
-                  ? 'dashboardViewport--screenshotMode'
-                  : ''
-              }`}
-            >
-              <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
-            </div>
-          </>
+          {dashboardAppState.savedDashboard.outcome === 'conflict' &&
+          dashboardAppState.savedDashboard.id &&
+          dashboardAppState.savedDashboard.aliasId
+            ? spacesService?.ui.components.getLegacyUrlConflict({
+                currentObjectId: dashboardAppState.savedDashboard.id,
+                otherObjectId: dashboardAppState.savedDashboard.aliasId,
+                otherObjectPath: `#${createDashboardEditUrl(
+                  dashboardAppState.savedDashboard.aliasId
+                )}${history.location.search}`,
+              })
+            : null}
+          <div
+            className={`dashboardViewport ${
+              screenshotModeService && screenshotModeService.isScreenshotMode()
+                ? 'dashboardViewport--screenshotMode'
+                : ''
+            }`}
+          >
+            <EmbeddableRenderer embeddable={dashboardAppState.dashboardContainer} />
+          </div>
         </DashboardEditTourProvider>
       )}
     </>
