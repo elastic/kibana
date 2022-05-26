@@ -10,7 +10,7 @@ import { CommonProps, EuiFlexGroup } from '@elastic/eui';
 import { CommandExecutionOutput } from './command_execution_output';
 import { useCommandHistory } from '../hooks/state_selectors/use_command_history';
 import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_state_dispatch';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { HistoryItem } from './history_item';
 

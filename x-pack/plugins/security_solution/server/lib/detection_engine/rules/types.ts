@@ -42,7 +42,7 @@ import type { VersionOrUndefined, Version } from '@kbn/securitysolution-io-ts-ty
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 
 import type { ListArrayOrUndefined, ListArray } from '@kbn/securitysolution-io-ts-list-types';
-import { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
+import { RulesClient, PartialRule, BulkEditOperation } from '@kbn/alerting-plugin/server';
 import { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { UpdateRulesSchema } from '../../../../common/detection_engine/schemas/request';
 import { RuleAlertAction } from '../../../../common/detection_engine/types';
@@ -91,7 +91,9 @@ import {
   TimestampOverrideOrUndefined,
   BuildingBlockTypeOrUndefined,
   RuleNameOverrideOrUndefined,
+  TimestampFieldOrUndefined,
   EventCategoryOverrideOrUndefined,
+  TiebreakerFieldOrUndefined,
   NamespaceOrUndefined,
   RelatedIntegrationArray,
   RequiredFieldArray,
@@ -147,7 +149,9 @@ export interface CreateRulesOptions {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: Description;
   enabled: Enabled;
+  timestampField: TimestampFieldOrUndefined;
   eventCategoryOverride: EventCategoryOverrideOrUndefined;
+  tiebreakerField: TiebreakerFieldOrUndefined;
   falsePositives: FalsePositives;
   from: From;
   query: QueryOrUndefined;
@@ -216,7 +220,9 @@ interface PatchRulesFieldsOptions {
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
   enabled: EnabledOrUndefined;
+  timestampField: TimestampFieldOrUndefined;
   eventCategoryOverride: EventCategoryOverrideOrUndefined;
+  tiebreakerField: TiebreakerFieldOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
   from: FromOrUndefined;
   query: QueryOrUndefined;
@@ -284,6 +290,15 @@ export interface FindRuleOptions {
   filter: QueryFilterOrUndefined;
   fields: FieldsOrUndefined;
   sortOrder: SortOrderOrUndefined;
+}
+
+export interface BulkEditRulesOptions {
+  isRuleRegistryEnabled: boolean;
+  rulesClient: RulesClient;
+  operations: BulkEditOperation[];
+  filter?: QueryFilterOrUndefined;
+  ids?: string[];
+  paramsModifier?: (params: RuleParams) => Promise<RuleParams>;
 }
 
 export interface LegacyMigrateParams {

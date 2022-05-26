@@ -65,7 +65,7 @@ import { isValidHash } from '../../../../../../common/endpoint/service/artifacts
 import { isArtifactGlobal } from '../../../../../../common/endpoint/service/artifacts';
 import type { PolicyData } from '../../../../../../common/endpoint/types';
 import { isGlobalPolicyEffected } from '../../../../components/effected_policy_select/utils';
-import { useTestIdGenerator } from '../../../../components/hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 
 const testIdPrefix = 'blocklist-form';
 
