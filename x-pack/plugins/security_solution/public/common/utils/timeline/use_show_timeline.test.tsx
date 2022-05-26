@@ -6,12 +6,10 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
-import { coreMock } from '@kbn/core/public/mocks';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
 import { updateAppLinks } from '../../links';
-import { getAppLinks } from '../../links/app_links';
+import { links } from '../../links/app_links';
 import { useShowTimeline } from './use_show_timeline';
-import { StartPlugins } from '../../../types';
 
 const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/overview' });
 jest.mock('react-router-dom', () => {
@@ -29,10 +27,9 @@ jest.mock('../../components/navigation/helpers', () => ({
 }));
 
 describe('use show timeline', () => {
-  beforeAll(async () => {
+  beforeAll(() => {
     // initialize all App links before running test
-    const appLinks = await getAppLinks(coreMock.createStart(), {} as StartPlugins);
-    updateAppLinks(appLinks, {
+    updateAppLinks(links, {
       experimentalFeatures: allowedExperimentalValues,
       capabilities: {
         navLinks: {},
