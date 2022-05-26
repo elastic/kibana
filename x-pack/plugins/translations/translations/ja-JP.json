@@ -21703,7 +21703,6 @@
     "xpack.observability.navigation.newBadge": "新規",
     "xpack.observability.news.readFullStory": "詳細なストーリーを読む",
     "xpack.observability.news.title": "新機能",
-    "xpack.observability.noDataConfig.beatsCard.description": "BeatsとAPMエージェントを使用して、オブザーバビリティデータをElasticsearchに送信します。多数の一般的なシステム、アプリ、言語では、サポートによって処理が簡単になりました。",
     "xpack.observability.noDataConfig.beatsCard.title": "統合の追加",
     "xpack.observability.noDataConfig.solutionName": "Observability",
     "xpack.observability.notAvailable": "N/A",

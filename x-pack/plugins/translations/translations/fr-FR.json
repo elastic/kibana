@@ -21564,7 +21564,6 @@
     "xpack.observability.navigation.newBadge": "NOUVEAUTÉ",
     "xpack.observability.news.readFullStory": "Lire toute l'histoire",
     "xpack.observability.news.title": "Nouveautés",
-    "xpack.observability.noDataConfig.beatsCard.description": "Utilisez des agents Beats et APM pour envoyer des données d’observabilité à Elasticsearch. Nous facilitons les choses en proposant un support technique pour un grand nombre de langues, d’applications et de systèmes courants.",
     "xpack.observability.noDataConfig.beatsCard.title": "Ajouter des intégrations",
     "xpack.observability.noDataConfig.solutionName": "Observabilité",
     "xpack.observability.notAvailable": "S. O.",

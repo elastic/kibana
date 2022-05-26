@@ -21735,7 +21735,6 @@
     "xpack.observability.navigation.newBadge": "新建",
     "xpack.observability.news.readFullStory": "详细了解",
     "xpack.observability.news.title": "最新动态",
-    "xpack.observability.noDataConfig.beatsCard.description": "使用 Beats 和 APM 代理将 Observability 数据发送到 Elasticsearch。我们使许多流行系统、应用和语言都可以轻松获取支持。",
     "xpack.observability.noDataConfig.beatsCard.title": "添加集成",
     "xpack.observability.noDataConfig.solutionName": "Observability",
     "xpack.observability.notAvailable": "不可用",
