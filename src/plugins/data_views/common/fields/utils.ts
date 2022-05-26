@@ -55,6 +55,11 @@ export function isDataViewFieldSubtypeMulti(field: HasSubtype) {
   return !!subTypeNested?.multi?.parent;
 }
 
+/**
+ * Returns subtype data for multi field
+ * @param field field to get subtype data from
+ */
+
 export function getDataViewFieldSubtypeMulti(field: HasSubtype) {
   return isDataViewFieldSubtypeMulti(field) ? (field.subType as IFieldSubTypeMulti) : undefined;
 }

@@ -21,7 +21,10 @@ import {
   getDataViewFieldSubtypeNested,
 } from './utils';
 
-/** @public */
+/**
+ *  @public
+ * Data view field class
+ * */
 export class DataViewField implements IFieldType {
   readonly spec: FieldSpec;
   // not writable or serialized
@@ -35,20 +38,30 @@ export class DataViewField implements IFieldType {
 
   // writable attrs
   /**
-   * Count is used for field popularity
+   * Count is used for field popularity in discover
    */
   public get count() {
     return this.spec.count || 0;
   }
 
+  /**
+   * set count, which is used for field popularity in discover
+   */
   public set count(count: number) {
     this.spec.count = count;
   }
+
+  /**
+   * Returns runtime field definition or undefined if field is not runtime field
+   */
 
   public get runtimeField() {
     return this.spec.runtimeField;
   }
 
+  /**
+   * Sets runtime field definition or unsets if undefined is provided
+   */
   public set runtimeField(runtimeField: RuntimeFieldSpec | undefined) {
     this.spec.runtimeField = runtimeField;
   }
@@ -60,6 +73,9 @@ export class DataViewField implements IFieldType {
     return this.spec.script;
   }
 
+  /**
+   * Sets scripted field painless code
+   */
   public set script(script) {
     this.spec.script = script;
   }
@@ -71,14 +87,24 @@ export class DataViewField implements IFieldType {
     return this.spec.lang;
   }
 
+  /**
+   * Sets scripted field langauge
+   */
   public set lang(lang) {
     this.spec.lang = lang;
   }
+
+  /**
+   * Returns custom label if set, otherwise undefined
+   */
 
   public get customLabel() {
     return this.spec.customLabel;
   }
 
+  /**
+   * Sets custom label for field, or unsets if passed undefined
+   */
   public set customLabel(customLabel) {
     this.spec.customLabel = customLabel;
   }
@@ -90,14 +116,26 @@ export class DataViewField implements IFieldType {
     return this.spec.conflictDescriptions;
   }
 
+  /**
+   * sSts conflict descriptions for field
+   */
+
   public set conflictDescriptions(conflictDescriptions) {
     this.spec.conflictDescriptions = conflictDescriptions;
   }
 
   // read only attrs
+
+  /**
+   * Get field name
+   */
   public get name() {
     return this.spec.name;
   }
+
+  /**
+   * Gets display name, calcualted based on name, custom label and shortDotsEnable
+   */
 
   public get displayName(): string {
     return this.spec.customLabel
@@ -107,29 +145,56 @@ export class DataViewField implements IFieldType {
       : this.spec.name;
   }
 
+  /**
+   * Gets field type
+   */
   public get type() {
     return this.spec.type;
   }
+
+  /**
+   * Gets ES types as string array
+   */
 
   public get esTypes() {
     return this.spec.esTypes;
   }
 
+  /**
+   * Returns true if scripted field
+   */
+
   public get scripted() {
     return !!this.spec.scripted;
   }
+
+  /**
+   * Returns true if field is searchable
+   */
 
   public get searchable() {
     return !!(this.spec.searchable || this.scripted);
   }
 
+  /**
+   * Returns true if field is aggregatable
+   */
+
   public get aggregatable() {
     return !!(this.spec.aggregatable || this.scripted);
   }
 
+  /**
+   * Returns true if field is available vai doc values
+   */
+
   public get readFromDocValues() {
     return !!(this.spec.readFromDocValues && !this.scripted);
   }
+
+  /**
+   * Returns field subtype, multi, nested, or undefined if neither
+   */
 
   public get subType() {
     return this.spec.subType;
@@ -142,17 +207,29 @@ export class DataViewField implements IFieldType {
     return this.spec.isMapped;
   }
 
+  /**
+   * Returns true if runtime field defined on data view
+   */
+
   public get isRuntimeField() {
     return !this.isMapped && this.runtimeField !== undefined;
   }
 
   // not writable, not serialized
+
+  /**
+   * Returns true if field is sortable
+   */
   public get sortable() {
     return (
       this.name === '_score' ||
       ((this.spec.indexed || this.aggregatable) && this.kbnFieldType.sortable)
     );
   }
+
+  /**
+   * Returns true if field is filterable
+   */
 
   public get filterable() {
     return (
@@ -162,31 +239,58 @@ export class DataViewField implements IFieldType {
     );
   }
 
+  /**
+   * Returns true if field is visualizable
+   */
+
   public get visualizable() {
     const notVisualizableFieldTypes: string[] = [KBN_FIELD_TYPES.UNKNOWN, KBN_FIELD_TYPES.CONFLICT];
     return this.aggregatable && !notVisualizableFieldTypes.includes(this.spec.type);
   }
 
+  /**
+   * Returns true if field is subtype nested
+   */
   public isSubtypeNested() {
     return isDataViewFieldSubtypeNested(this);
   }
+
+  /**
+   * Returns true if field is subtype multi
+   */
 
   public isSubtypeMulti() {
     return isDataViewFieldSubtypeMulti(this);
   }
 
+  /**
+   * Returns subtype nested data if exists
+   */
+
   public getSubtypeNested() {
     return getDataViewFieldSubtypeNested(this);
   }
+
+  /**
+   * Returns subtype multi data if exists
+   */
 
   public getSubtypeMulti() {
     return getDataViewFieldSubtypeMulti(this);
   }
 
+  /**
+   * Deletes count value. Popularity as used by discover
+   */
+
   public deleteCount() {
     delete this.spec.count;
   }
 
+  /**
+   *
+   * @returns JSON version of field
+   */
   public toJSON() {
     return {
       count: this.count,
@@ -205,6 +309,11 @@ export class DataViewField implements IFieldType {
     };
   }
 
+  /**
+   * Get field in serialized form - fieldspec
+   * @param param0 provide a method to get a field formatter
+   * @returns field in serialized form - field spec
+   */
   public toSpec({
     getFormatterForField,
   }: {
@@ -230,6 +339,10 @@ export class DataViewField implements IFieldType {
       isMapped: this.isMapped,
     };
   }
+
+  /**
+   * Returns true if composite runtime field
+   */
 
   public isRuntimeCompositeSubField() {
     return this.runtimeField?.type === 'composite';

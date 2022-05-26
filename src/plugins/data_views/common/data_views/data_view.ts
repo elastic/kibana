@@ -52,15 +52,33 @@ export interface TimeBasedDataView extends DataView {
   getTimeField: () => DataViewField;
 }
 
+/**
+ * Data view class. Central kibana abstraction around multiple indices.
+ */
 export class DataView implements IIndexPattern {
+  /**
+   * saved object id
+   */
   public id?: string;
+  /**
+   * Title of data view
+   */
   public title: string = '';
+  /**
+   * Map of field formats by field name
+   */
   public fieldFormatMap: Record<string, any>;
   /**
    * Only used by rollup indices, used by rollup specific endpoint to load field list
    */
   public typeMeta?: TypeMeta;
+  /**
+   * Field list, in extended array format
+   */
   public fields: IIndexPatternFieldList & { toSpec: () => DataViewFieldMap };
+  /**
+   * Timestamp field name
+   */
   public timeFieldName: string | undefined;
   /**
    * Type is used to identify rollup index patterns
@@ -70,17 +88,41 @@ export class DataView implements IIndexPattern {
    * @deprecated Use `flattenHit` utility method exported from data plugin instead.
    */
   public flattenHit: (hit: Record<string, any>, deep?: boolean) => Record<string, any>;
+  /**
+   * List of meta fields by name
+   */
   public metaFields: string[];
   /**
    * SavedObject version
    */
   public version: string | undefined;
+  /**
+   * Array of filters - hides fields in discover
+   */
   public sourceFilters?: SourceFilter[];
+  /**
+   * Array of namespace ids
+   */
   public namespaces: string[];
+  /**
+   * Original saved object body. Used to check for saved object changes.
+   */
   private originalSavedObjectBody: SavedObjectBody = {};
+  /**
+   * Returns true if short dot notation is enabled
+   */
   private shortDotsEnable: boolean = false;
+  /**
+   * FieldFormats service interface
+   */
   private fieldFormats: FieldFormatsStartCommon;
+  /**
+   * Map of field attributes by field name. Currently count and customLabel
+   */
   private fieldAttrs: FieldAttrs;
+  /**
+   * Map of runtime field definitions by field name
+   */
   private runtimeFieldMap: Record<string, RuntimeFieldSpec>;
 
   /**
@@ -129,6 +171,9 @@ export class DataView implements IIndexPattern {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
   };
 
+  /**
+   * Returns field attributes map
+   */
   getFieldAttrs = () => {
     const newFieldAttrs = { ...this.fieldAttrs };
 
@@ -153,6 +198,10 @@ export class DataView implements IIndexPattern {
 
     return newFieldAttrs;
   };
+
+  /**
+   * Returns scripted fields
+   */
 
   getComputedFields() {
     const scriptFields: Record<string, estypes.ScriptField> = {};
@@ -510,9 +559,21 @@ export class DataView implements IIndexPattern {
     this.fieldFormatMap[fieldName] = format;
   };
 
+  /**
+   * Remove field format from the field format map
+   * @param fieldName field name associated with the format for removal
+   */
+
   public readonly deleteFieldFormat = (fieldName: string) => {
     delete this.fieldFormatMap[fieldName];
   };
+
+  /**
+   *
+   * @param name field name
+   * @param runtimeField runtime field definition
+   * @returns data view field instance
+   */
 
   private addCompositeRuntimeField(name: string, runtimeField: RuntimeField): DataViewField[] {
     const { fields } = runtimeField;

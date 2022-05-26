@@ -91,17 +91,44 @@ export interface IIndexPattern extends DataViewBase {
 }
 
 /**
- * Interface for an index pattern saved object
+ * Interface for the data view saved object
  */
 export interface DataViewAttributes {
+  /**
+   * fields as a serialized array of field specs
+   */
   fields: string;
+  /**
+   * data view title
+   */
   title: string;
+  /**
+   * data view type. default or rollup
+   */
   type?: string;
+  /**
+   * type metadata information, serialized. Only used by rollup data views
+   */
   typeMeta?: string;
+  /**
+   * time field name
+   */
   timeFieldName?: string;
+  /**
+   * serialized array of filters. used by discover to hide fields
+   */
   sourceFilters?: string;
+  /**
+   * serialized map of field formats by field name
+   */
   fieldFormatMap?: string;
+  /**
+   * serialized map of field attributes, currently field count and name
+   */
   fieldAttrs?: string;
+  /**
+   * serialized map of runtime field definitions, by field name
+   */
   runtimeFieldMap?: string;
   /**
    * prevents errors when index pattern exists before indices
@@ -199,9 +226,22 @@ export type AggregationRestrictions = Record<
   }
 >;
 
+/**
+ * interface for metadata about rollup indices
+ */
+
 export interface TypeMeta {
+  /**
+   * Aggregation restrictions for rollup fields
+   */
   aggs?: Record<string, AggregationRestrictions>;
+  /**
+   * Params for retrieving rollup field data
+   */
   params?: {
+    /**
+     * Rollup index name used for loading field list
+     */
     rollup_index: string;
   };
 }
@@ -241,32 +281,67 @@ export interface FieldSpecExportFmt {
 
 /**
  * @public
- * Serialized version of IndexPatternField
+ * Serialized version of DataViewField
  */
 export interface FieldSpec extends DataViewFieldBase {
   /**
    * Popularity count is used by discover
    */
   count?: number;
+  /**
+   * description of field type conflicts across indices
+   */
   conflictDescriptions?: Record<string, string[]>;
+  /**
+   * field formatting in serialized format
+   */
   format?: SerializedFieldFormat;
+  /**
+   * elasticsearch field types used by backing indices
+   */
   esTypes?: string[];
+  /**
+   * true if field is searchable
+   */
   searchable: boolean;
+  /**
+   * true if field is aggregatable
+   */
   aggregatable: boolean;
+  /**
+   * true if can be read from doc values
+   */
   readFromDocValues?: boolean;
+  /**
+   * true if field is indexed
+   */
   indexed?: boolean;
+  /**
+   * custom label for field - used for display in kibana
+   */
   customLabel?: string;
+  /**
+   * runtime field definition
+   */
   runtimeField?: RuntimeFieldSpec;
+
   // not persisted
+
+  /**
+   * Whether short dots are enabled. based on uiSettings
+   */
   shortDotsEnable?: boolean;
+  /**
+   * Is this field in the mapping? False if a scripted or runtime field defined on the data view
+   */
   isMapped?: boolean;
 }
 
 export type DataViewFieldMap = Record<string, FieldSpec>;
 
 /**
- * Static index pattern format
- * Serialized data object, representing index pattern attributes and state
+ * Static data view format
+ * Serialized data object, representing data view attributes and state
  */
 export interface DataViewSpec {
   /**
@@ -277,16 +352,49 @@ export interface DataViewSpec {
    * saved object version string
    */
   version?: string;
+  /**
+   * data view title
+   */
   title?: string;
+  /**
+   * name of timestamp field
+   */
   timeFieldName?: string;
+  /**
+   * list of filters which discover uses to hide fields
+   */
   sourceFilters?: SourceFilter[];
+  /**
+   * map of fields by name
+   */
   fields?: DataViewFieldMap;
+  /**
+   * metadata about data view, only used by rollup data views
+   */
   typeMeta?: TypeMeta;
+  /**
+   * default or rollup
+   */
   type?: string;
+  /**
+   * map of serialized field formats by field name
+   */
   fieldFormats?: Record<string, SerializedFieldFormat>;
+  /**
+   * map of runtime fields by field name
+   */
   runtimeFieldMap?: Record<string, RuntimeFieldSpec>;
+  /**
+   * map of field attributes by field name, currently customName and count
+   */
   fieldAttrs?: FieldAttrs;
+  /**
+   * determines whether failure to load field list should be reported as error
+   */
   allowNoIndex?: boolean;
+  /**
+   * array of namespace ids
+   */
   namespaces?: string[];
 }
 
