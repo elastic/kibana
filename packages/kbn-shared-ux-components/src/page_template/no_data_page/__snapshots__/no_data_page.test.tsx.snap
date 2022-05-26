@@ -7,7 +7,7 @@ exports[`NoDataPage render 1`] = `
   <EuiText
     textAlign="center"
   >
-    <ForwardRef
+    <KibanaSolutionAvatar
       iconType="logoKibana"
       name="Analytics"
       size="xxl"
