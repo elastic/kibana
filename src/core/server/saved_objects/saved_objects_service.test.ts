@@ -8,6 +8,7 @@
 
 import { join } from 'path';
 import loadJsonFile from 'load-json-file';
+import { setImmediate } from 'timers/promises';
 
 import {
   clientProviderInstanceMock,
@@ -308,12 +309,8 @@ describe('SavedObjectsService', () => {
         kibanaVersion: '8.0.0',
       });
 
-      return new Promise<void>((done) => {
-        setImmediate(() => {
-          expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
-          done();
-        });
-      });
+      await setImmediate();
+      expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('resolves with KibanaMigrator after waiting for migrations to complete', async () => {

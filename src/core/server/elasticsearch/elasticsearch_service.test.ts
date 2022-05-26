@@ -23,7 +23,7 @@ import { MockClusterClient, isScriptingEnabledMock } from './elasticsearch_servi
 
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { first, concatMap } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '../config';
 import { configServiceMock, getEnvOptions } from '../config/mocks';
@@ -414,18 +414,18 @@ describe('#stop', () => {
 
     const setupContract = await elasticsearchService.setup(setupDeps);
 
-    return new Promise<void>((done) => {
-      const subscription = setupContract.esNodesCompatibility$.subscribe(async () => {
-        expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-        await delay(10);
-        expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
+    await firstValueFrom(
+      setupContract.esNodesCompatibility$.pipe(
+        concatMap(async () => {
+          expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+          await delay(10);
+          expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
-        await elasticsearchService.stop();
-        await delay(100);
-        expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
-        subscription.unsubscribe();
-        done();
-      });
-    });
+          await elasticsearchService.stop();
+          await delay(100);
+          expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
+        })
+      )
+    );
   });
 });
