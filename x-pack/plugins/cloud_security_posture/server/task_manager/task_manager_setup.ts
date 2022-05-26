@@ -44,12 +44,13 @@ export function registerTask(
   taskManager.registerTaskDefinitions({
     [taskId]: {
       title: 'Aggregate latest findings index for score calculation',
-      createTaskRunner: taskRunner(coreStartServices, logger),
+      createTaskRunner: taskRunner(taskId, coreStartServices, logger),
     },
   });
 }
 
 export function taskRunner(
+  taskId: string,
   coreStartServices: Promise<[CoreStart, CspServerPluginStartDeps, CspServerPluginStart]>,
   logger: Logger
 ) {
@@ -58,8 +59,16 @@ export function taskRunner(
     return {
       async run() {
         try {
+          logger.info(`Runs task: ${taskId}`);
           const esClient = (await coreStartServices)[0].elasticsearch.client.asInternalUser;
-          return await aggregateLatestFindings(esClient, state.runs, logger);
+          await aggregateLatestFindings(esClient, taskId, state.runs, logger);
+
+          return {
+            state: {
+              runs: (state.runs || 0) + 1,
+              health_status: HealthStatus.OK,
+            },
+          };
         } catch (errMsg) {
           const error = transformError(errMsg);
           logger.warn(`Error executing alerting health check task: ${error.message}`);
@@ -77,15 +86,14 @@ export function taskRunner(
 
 const aggregateLatestFindings = async (
   esClient: ElasticsearchClient,
+  taskId: string,
   stateRuns: number,
   logger: Logger
 ) => {
   try {
+    const startAggTime = performance.now();
     const evaluationsQueryResult = await esClient.search<unknown, ScoreBucket>(getScoreQuery());
-    if (
-      evaluationsQueryResult.aggregations &&
-      evaluationsQueryResult.aggregations.total_findings.value
-    ) {
+    if (evaluationsQueryResult.aggregations) {
       const clustersStats = Object.fromEntries(
         evaluationsQueryResult.aggregations.score_by_cluster_id.buckets.map(
           (clusterStats: AggregatedFindingsByCluster) => {
@@ -100,7 +108,11 @@ const aggregateLatestFindings = async (
           }
         )
       );
-
+      const totalAggregationTime = performance.now() - startAggTime;
+      logger.debug(
+        `Task ${taskId}, ${Number(totalAggregationTime).toFixed(2)} milliseconds for aggregation`
+      );
+      const startIndexTime = performance.now();
       await esClient.index({
         index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
         document: {
@@ -110,6 +122,11 @@ const aggregateLatestFindings = async (
           score_by_cluster_id: clustersStats,
         },
       });
+      const totalIndexTime = Number(performance.now() - startIndexTime).toFixed(2);
+      const totalTaskTime = Number(performance.now() - startAggTime).toFixed(2);
+      logger.debug(`task: ${taskId} was indexed new document`);
+      logger.debug(`Task ${taskId}, ${totalIndexTime} milliseconds for indexing`);
+      logger.debug(`Task ${taskId}, took ${totalTaskTime} milliseconds to run`);
       return {
         state: {
           runs: (stateRuns || 0) + 1,
@@ -213,7 +230,7 @@ export async function scheduleIndexScoreTask(
       state: {},
       params: {},
     });
-    logger.info(`task: ${taskConfig.id} is scheduled`);
+    logger.info(`task: ${taskConfig.id} scheduled with interval ${taskConfig.schedule!.interval}`);
   } catch (errMsg) {
     const error = transformError(errMsg);
     logger.error(`Error scheduling task, received ${error.message}`);

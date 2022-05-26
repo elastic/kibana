@@ -13,6 +13,7 @@ import type {
   CoreStart,
   Plugin,
   Logger,
+  ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
 import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -28,11 +29,13 @@ import type {
 import { defineRoutes } from './routes';
 import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
 import { cspRuleAssetType } from './saved_objects/csp_rule_type';
-import { initializeCspTransformsIndices } from './create_indices/create_indices';
+import { initializeCspIndices } from './create_indices/create_indices';
 import { initializeCspTransforms } from './create_transforms/create_transforms';
 import {
+  isCspPackageInstalled,
   onPackagePolicyPostCreateCallback,
-  onPackagePolicyDeleteCallback,
+  removeCspRulesInstancesCallback,
+  removeTaskFromTaskManagerCallback,
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 
@@ -130,13 +133,18 @@ export class CspPlugin
         async (deletedPackagePolicies: DeepReadonly<DeletePackagePoliciesResponse>) => {
           for (const deletedPackagePolicy of deletedPackagePolicies) {
             if (deletedPackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
-              await onPackagePolicyDeleteCallback(
-                this.logger,
-                deletedPackagePolicy,
-                core.savedObjects.createInternalRepository(),
-                plugins.taskManager,
-                findingsAggregationConfig.id!
-              );
+              const soClient = core.savedObjects.createInternalRepository();
+              await removeCspRulesInstancesCallback(deletedPackagePolicy, soClient, this.logger);
+              // check if there is another CSP package that installed
+              const isPackageExists = await isCspPackageInstalled(soClient, this.logger);
+              if (isPackageExists) {
+                await this.uninstallResources(
+                  soClient,
+                  plugins,
+                  findingsAggregationConfig.id!,
+                  this.logger
+                );
+              }
             }
           }
         }
@@ -150,8 +158,17 @@ export class CspPlugin
 
   async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
     this.logger.debug('initialize');
-    await initializeCspTransformsIndices(core.elasticsearch.client.asInternalUser, this.logger);
+    await initializeCspIndices(core.elasticsearch.client.asInternalUser, this.logger);
     await initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger);
-    scheduleIndexScoreTask(taskManager, findingsAggregationConfig, this.logger);
+    await scheduleIndexScoreTask(taskManager, findingsAggregationConfig, this.logger);
+  }
+
+  async uninstallResources(
+    soClient: ISavedObjectsRepository,
+    plugins: CspServerPluginStartDeps,
+    taskId: string,
+    logger: Logger
+  ): Promise<void> {
+    await removeTaskFromTaskManagerCallback(soClient, plugins, taskId, logger);
   }
 }

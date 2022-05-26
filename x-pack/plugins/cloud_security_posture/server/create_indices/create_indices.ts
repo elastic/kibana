@@ -19,61 +19,26 @@ import {
 import { createPipelineIfNotExists } from './create_processor';
 
 // TODO: Add integration tests
-export const initializeCspTransformsIndices = async (
-  esClient: ElasticsearchClient,
-  logger: Logger
-) => {
+export const initializeCspIndices = async (esClient: ElasticsearchClient, logger: Logger) => {
+  await createPipelineIfNotExists(esClient, CSP_INGEST_TIMESTAMP_PIPELINE, logger);
   return Promise.all([
-    createLatestFindingsIndex(
+    createIndexIfNotExists(
       esClient,
       LATEST_FINDINGS_INDEX_NAME,
       LATEST_FINDINGS_INDEX_DEFAULT_NS,
       latestFindingsMapping,
+      {},
       logger
     ),
-    createBenchmarkScoreIndex(
+    createIndexIfNotExists(
       esClient,
       BENCHMARK_SCORE_INDEX_NAME,
       BENCHMARK_SCORE_INDEX_DEFAULT_NS,
       benchmarkScoreMapping,
+      { default_pipeline: CSP_INGEST_TIMESTAMP_PIPELINE },
       logger
     ),
   ]);
-};
-
-const createLatestFindingsIndex = async (
-  esClient: ElasticsearchClient,
-  indexTemplateName: string,
-  indexPattern: string,
-  mappings: MappingTypeMapping,
-  logger: Logger
-) => {
-  createIndexIfNotExists(esClient, indexTemplateName, indexPattern, mappings, {}, logger);
-};
-
-const createBenchmarkScoreIndex = async (
-  esClient: ElasticsearchClient,
-  indexTemplateName: string,
-  indexPattern: string,
-  mappings: MappingTypeMapping,
-  logger: Logger
-) => {
-  const createPipelineResponse = await createPipelineIfNotExists(
-    esClient,
-    CSP_INGEST_TIMESTAMP_PIPELINE,
-    logger
-  );
-  if (createPipelineResponse) {
-    const createScoreIndexSettings = { default_pipeline: CSP_INGEST_TIMESTAMP_PIPELINE };
-    createIndexIfNotExists(
-      esClient,
-      indexTemplateName,
-      indexPattern,
-      mappings,
-      createScoreIndexSettings,
-      logger
-    );
-  }
 };
 
 export const createIndexIfNotExists = async (

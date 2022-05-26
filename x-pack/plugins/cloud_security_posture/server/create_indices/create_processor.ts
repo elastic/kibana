@@ -18,8 +18,12 @@ export const createPipelineIfNotExists = async (
   logger: Logger
 ) => {
   try {
-    const pipelines = await esClient.ingest.getPipeline();
-    if (!pipelines.hasOwnProperty(pipelineId)) {
+    await esClient.ingest.getPipeline({ id: pipelineId });
+    logger.trace(`pipeline: ${pipelineId} already exists`);
+    return true;
+  } catch (exitErr) {
+    const exitError = transformError(exitErr);
+    if (exitError.statusCode === 404) {
       try {
         await esClient.ingest.putPipeline({
           id: pipelineId,
@@ -41,18 +45,17 @@ export const createPipelineIfNotExists = async (
             },
           ],
         });
+        logger.trace(`pipeline: ${pipelineId} was created`);
         return true;
       } catch (existError) {
         logger.error(`Failed to create CSP pipeline ${pipelineId}. error: ${existError.message}`);
         return false;
       }
+    } else {
+      logger.error(
+        `Failed to check if CSP pipeline ${pipelineId} exists. error: ${exitError.message}`
+      );
     }
-  } catch (existErr) {
-    const existError = transformError(existErr);
-    logger.error(
-      `Failed to check if CSP pipeline ${pipelineId} exists. error: ${existError.message}`
-    );
-
-    return false;
   }
+  return false;
 };
