@@ -1,7 +1,7 @@
 If the stack monitoring UI isn't showing data for any cluster, it may first be useful to survey the available data using a query like this:
 
 ```Kibana Dev Tools
-POST .monitoring-*/_search
+POST .monitoring-*,*:.monitoring-*,metrics-*,*:metrics-*/_search
 {
   "size": 0,
   "query": {
