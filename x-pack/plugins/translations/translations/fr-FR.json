@@ -27760,8 +27760,6 @@
     "xpack.stackAlerts.esQuery.actionVariableContextThresholdLabel": "Tableau de valeurs à utiliser comme seuil ; \"between\" et \"notBetween\" requièrent deux valeurs, les autres n'en requièrent qu'une seule.",
     "xpack.stackAlerts.esQuery.actionVariableContextTitleLabel": "Titre pour l'alerte.",
     "xpack.stackAlerts.esQuery.actionVariableContextValueLabel": "Valeur ayant rempli la condition de seuil.",
-    "xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription": "Le nombre de documents correspondants est {thresholdComparator} {threshold}",
-    "xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle": "l'alerte \"{name}\" correspond à la recherche",
     "xpack.stackAlerts.esQuery.alertTypeTitle": "Recherche Elasticsearch",
     "xpack.stackAlerts.esQuery.invalidComparatorErrorMessage": "thresholdComparator spécifié non valide : {comparator}",
     "xpack.stackAlerts.esQuery.invalidEsQueryErrorMessage": "[esQuery] : doit être au format JSON valide",
