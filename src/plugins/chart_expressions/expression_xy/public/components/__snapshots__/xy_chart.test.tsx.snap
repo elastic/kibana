@@ -4195,6 +4195,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
@@ -5001,6 +5002,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
@@ -5806,6 +5808,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
