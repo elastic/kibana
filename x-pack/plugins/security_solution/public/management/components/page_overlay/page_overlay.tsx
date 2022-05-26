@@ -10,7 +10,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFocusTrap, EuiPortal } from '@elastic/eui';
 import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
-import { useIsMounted } from '../../../../../hooks/use_is_mounted';
+import { useIsMounted } from '../../hooks/use_is_mounted';
 
 const OverlayRootContainer = styled.div`
   border: none;

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { PageLayout } from './page_layout';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
-import { PageOverlay } from './page_overlay';
+import { PageOverlay } from '../../../../page_overlay/page_overlay';
 
 const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_overlay.pageTitle', {
   defaultMessage: 'Responder',
