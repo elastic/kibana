@@ -14,7 +14,9 @@ import { formatSecrets } from '../../../../../plugins/uptime/server/lib/syntheti
 import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('[GET] /internal/uptime/service/monitors', () => {
+  describe('[GET] /internal/uptime/service/monitors', function () {
+    this.tags('skipCloud');
+
     const supertest = getService('supertest');
 
     let _monitors: MonitorFields[];
