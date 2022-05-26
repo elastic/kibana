@@ -88,7 +88,8 @@ async function updateRoutingAllocations(
   });
 }
 
-describe('incompatible_cluster_routing_allocation', () => {
+// Failing ES snapshot verification: https://github.com/elastic/kibana/issues/133014
+describe.skip('incompatible_cluster_routing_allocation', () => {
   let client: ElasticsearchClient;
   let root: Root;
 
@@ -109,7 +110,6 @@ describe('incompatible_cluster_routing_allocation', () => {
     await updateRoutingAllocations(client, 'persistent', 'none');
 
     const updatedSettings = await client.cluster.getSettings({ flat_settings: true });
-
     expect(getClusterRoutingAllocations(updatedSettings)).toBe(false);
 
     // Start Kibana
