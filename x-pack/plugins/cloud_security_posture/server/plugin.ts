@@ -13,11 +13,13 @@ import type {
   CoreStart,
   Plugin,
   Logger,
-  ISavedObjectsRepository,
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
 import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
@@ -25,6 +27,7 @@ import type {
   CspServerPluginSetupDeps,
   CspServerPluginStartDeps,
   CspRequestHandlerContext,
+  CspServerPluginStartServices,
 } from './types';
 import { defineRoutes } from './routes';
 import { cspRuleTemplateAssetType } from './saved_objects/csp_rule_template';
@@ -35,15 +38,15 @@ import {
   isCspPackageInstalled,
   onPackagePolicyPostCreateCallback,
   removeCspRulesInstancesCallback,
-  removeTaskFromTaskManagerCallback,
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 
 import {
-  initializeFindingsAggregationTask,
-  scheduleIndexScoreTask,
-} from './task_manager/task_manager_setup';
-import { findingsAggregationConfig } from './task_manager/task_manager_config';
+  removeFindingsStatsTask,
+  scheduleFindingsStatsTask,
+  setupFindingsStatsTask,
+} from './tasks/findings_stats_task';
+
 export interface CspAppContext {
   logger: Logger;
   service: CspAppService;
@@ -84,13 +87,8 @@ export class CspPlugin
     defineRoutes(router, cspAppContext);
 
     const coreStartServices = core.getStartServices();
+    this.setupCspTasks(plugins.taskManager, coreStartServices, this.logger);
 
-    initializeFindingsAggregationTask(
-      plugins.taskManager,
-      findingsAggregationConfig.id!,
-      coreStartServices,
-      this.logger
-    );
     return {};
   }
 
@@ -135,15 +133,11 @@ export class CspPlugin
             if (deletedPackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
               const soClient = core.savedObjects.createInternalRepository();
               await removeCspRulesInstancesCallback(deletedPackagePolicy, soClient, this.logger);
-              // check if there is another CSP package that installed
+
               const isPackageExists = await isCspPackageInstalled(soClient, this.logger);
+
               if (isPackageExists) {
-                await this.uninstallResources(
-                  soClient,
-                  plugins,
-                  findingsAggregationConfig.id!,
-                  this.logger
-                );
+                await this.uninstallResources(plugins.taskManager, this.logger);
               }
             }
           }
@@ -160,15 +154,18 @@ export class CspPlugin
     this.logger.debug('initialize');
     await initializeCspIndices(core.elasticsearch.client.asInternalUser, this.logger);
     await initializeCspTransforms(core.elasticsearch.client.asInternalUser, this.logger);
-    await scheduleIndexScoreTask(taskManager, findingsAggregationConfig, this.logger);
+    await scheduleFindingsStatsTask(taskManager, this.logger);
   }
 
-  async uninstallResources(
-    soClient: ISavedObjectsRepository,
-    plugins: CspServerPluginStartDeps,
-    taskId: string,
+  async uninstallResources(taskManager: TaskManagerStartContract, logger: Logger): Promise<void> {
+    await removeFindingsStatsTask(taskManager, logger);
+  }
+
+  setupCspTasks(
+    taskManager: TaskManagerSetupContract,
+    coreStartServices: CspServerPluginStartServices,
     logger: Logger
-  ): Promise<void> {
-    await removeTaskFromTaskManagerCallback(soClient, plugins, taskId, logger);
+  ) {
+    setupFindingsStatsTask(taskManager, coreStartServices, logger);
   }
 }

@@ -14,7 +14,13 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
-import type { RouteMethod, KibanaResponseFactory, RequestHandler, IRouter } from '@kbn/core/server';
+import type {
+  RouteMethod,
+  KibanaResponseFactory,
+  RequestHandler,
+  IRouter,
+  CoreStart,
+} from '@kbn/core/server';
 
 import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
 
@@ -38,6 +44,9 @@ export interface CspServerPluginStartDeps {
   taskManager: TaskManagerStartContract;
 }
 
+export type CspServerPluginStartServices = Promise<
+  [CoreStart, CspServerPluginStartDeps, CspServerPluginStart]
+>;
 export type CspRequestHandlerContext = FleetRequestHandlerContext;
 
 /**

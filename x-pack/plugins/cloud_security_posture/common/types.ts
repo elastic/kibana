@@ -69,9 +69,3 @@ export interface Benchmark {
   agent_policy: Pick<GetAgentPoliciesResponseItem, 'id' | 'name' | 'agents'>;
   rules: CspRulesStatus;
 }
-
-export enum HealthStatus {
-  OK = 'ok',
-  Warning = 'warn',
-  Error = 'error',
-}

@@ -19,8 +19,6 @@ import {
 } from '../../common/schemas/csp_rule_template';
 import { cspRuleAssetSavedObjectType } from '../../common/constants';
 import { CspRuleSchema } from '../../common/schemas/csp_rule';
-import { removeTask } from '../task_manager/task_manager_setup';
-import { CspServerPluginStartDeps } from '../types';
 
 type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends ReadonlyArray<
   infer ElementType
@@ -104,23 +102,6 @@ export const isCspPackageInstalled = async (
   } catch (e) {
     logger.error(e);
     return false;
-  }
-};
-
-/**
- * Callback to handle deletion of PackagePolicies in Fleet
- */
-export const removeTaskFromTaskManagerCallback = async (
-  soClient: ISavedObjectsRepository,
-  plugins: CspServerPluginStartDeps,
-  taskId: string,
-  logger: Logger
-): Promise<void> => {
-  try {
-    removeTask(plugins.taskManager, taskId, logger);
-  } catch (e) {
-    logger.error(`Failed to remove task:  ${taskId}`);
-    logger.error(e);
   }
 };
 
