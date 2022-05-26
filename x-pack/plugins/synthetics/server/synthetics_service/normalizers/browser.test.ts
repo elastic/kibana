@@ -176,7 +176,7 @@ describe('browser normalizers', () => {
           ],
           name: 'test-name-2',
           params: '',
-          playwright_options: '{}',
+          playwright_options: '',
           schedule: {
             number: '10',
             unit: 'm',
