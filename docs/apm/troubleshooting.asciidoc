@@ -176,7 +176,7 @@ These are dynamic by default, which means they will be indexed and become search
 
 If the service map is not showing an expected connection between the client and server,
 it's likely because you haven't configured
-{apm-agent-rum}/configuration.html#distributed-tracing-origins[`distributedTracingOrigins`].
+{apm-rum-ref}/distributed-tracing-guide.html[`distributedTracingOrigins`].
 
 
 This setting is necessary, for example, for cross-origin requests.
