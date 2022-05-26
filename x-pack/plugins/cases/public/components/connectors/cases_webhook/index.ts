@@ -9,17 +9,10 @@ import { lazy } from 'react';
 
 import { CaseConnector } from '../types';
 import { ConnectorTypes, CasesWebhookFieldsType } from '../../../../common/api';
-import * as i18n from './translations';
 
 export const getCaseConnector = (): CaseConnector<CasesWebhookFieldsType> => {
   return {
     id: ConnectorTypes.casesWebhook,
     fieldsComponent: lazy(() => import('./case_fields')),
   };
-};
-
-export const fieldLabels = {
-  caseId: i18n.CASE_ID_LABEL,
-  caseName: i18n.CASE_NAME_LABEL,
-  severity: i18n.SEVERITY_LABEL,
 };

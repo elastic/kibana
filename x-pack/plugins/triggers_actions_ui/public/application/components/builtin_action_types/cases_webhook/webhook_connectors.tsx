@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   EuiFieldPassword,
@@ -24,11 +23,11 @@ import {
   EuiSwitch,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { CasesWebhookActionConnector, CasesWebhookConfig, CasesWebhookSecrets } from './types';
 import { getEncryptedFieldNotifyLabel } from '../../get_encrypted_field_notify_label';
 import { JsonEditorWithMessageVariables } from '../../json_editor_with_message_variables';
+import * as i18n from './translations';
 
 const HTTP_VERBS = ['post', 'put', 'patch'];
 
@@ -79,37 +78,30 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const headerErrors = {
-    keyHeader: new Array<string>(),
-    valueHeader: new Array<string>(),
-  };
-  if (!httpHeaderKey && httpHeaderValue) {
-    headerErrors.keyHeader.push(
-      i18n.translate(
-        'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredHeaderKeyText',
-        {
-          defaultMessage: 'Key is required.',
-        }
-      )
-    );
-  }
-  if (httpHeaderKey && !httpHeaderValue) {
-    headerErrors.valueHeader.push(
-      i18n.translate(
-        'xpack.triggersActionsUI.sections.addAction.casesWebhookAction.error.requiredHeaderValueText',
-        {
-          defaultMessage: 'Value is required.',
-        }
-      )
-    );
-  }
-  const hasHeaderErrors: boolean =
-    (headerErrors.keyHeader !== undefined &&
-      headerErrors.valueHeader !== undefined &&
-      headerErrors.keyHeader.length > 0) ||
-    headerErrors.valueHeader.length > 0;
+  const headerErrors = useMemo(() => {
+    const hErrors = {
+      keyHeader: new Array<string>(),
+      valueHeader: new Array<string>(),
+    };
+    if (!httpHeaderKey && httpHeaderValue) {
+      hErrors.keyHeader.push(i18n.KEY_REQUIRED);
+    }
+    if (httpHeaderKey && !httpHeaderValue) {
+      hErrors.valueHeader.push(i18n.VALUE_REQUIRED);
+    }
+    return hErrors;
+  }, [httpHeaderKey, httpHeaderValue]);
 
-  function addHeader() {
+  const hasHeaderErrors: boolean = useMemo(
+    () =>
+      (headerErrors.keyHeader !== undefined &&
+        headerErrors.valueHeader !== undefined &&
+        headerErrors.keyHeader.length > 0) ||
+      headerErrors.valueHeader.length > 0,
+    [headerErrors.keyHeader, headerErrors.valueHeader]
+  );
+
+  const addHeader = useCallback(() => {
     if (headers && !!Object.keys(headers).find((key) => key === httpHeaderKey)) {
       return;
     }
@@ -119,139 +111,136 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
     editActionConfig('headers', updatedHeaders);
     setHttpHeaderKey('');
     setHttpHeaderValue('');
-  }
+  }, [editActionConfig, headers, httpHeaderKey, httpHeaderValue]);
 
-  function viewHeaders() {
+  const viewHeaders = useCallback(() => {
     setHasHeaders(!hasHeaders);
     if (!hasHeaders && !headers) {
       editActionConfig('headers', {});
     }
-  }
+  }, [editActionConfig, hasHeaders, headers]);
 
-  function removeHeader(keyToRemove: string) {
-    const updatedHeaders =
-      headers != null
-        ? Object.keys(headers)
-            .filter((key) => key !== keyToRemove)
-            .reduce((headerToRemove: Record<string, string>, key: string) => {
-              headerToRemove[key] = headers[key];
-              return headerToRemove;
-            }, {})
-        : {};
-    editActionConfig('headers', updatedHeaders);
-  }
+  const removeHeader = useCallback(
+    (keyToRemove: string) => {
+      const updatedHeaders =
+        headers != null
+          ? Object.keys(headers)
+              .filter((key) => key !== keyToRemove)
+              .reduce((headerToRemove: Record<string, string>, key: string) => {
+                headerToRemove[key] = headers[key];
+                return headerToRemove;
+              }, {})
+          : {};
+      editActionConfig('headers', updatedHeaders);
+    },
+    [editActionConfig, headers]
+  );
 
-  let headerControl;
-  if (hasHeaders) {
-    headerControl = (
-      <>
-        <EuiTitle size="xxs">
-          <h5>
-            <FormattedMessage
-              defaultMessage="Add header"
-              id="xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.addHeader"
-            />
-          </h5>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              id="webhookHeaderKey"
-              fullWidth
-              error={headerErrors.keyHeader}
-              isInvalid={hasHeaderErrors && httpHeaderKey !== undefined}
-              label={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.keyTextFieldLabel',
-                {
-                  defaultMessage: 'Key',
-                }
-              )}
-            >
-              <EuiFieldText
+  const headerControl = useMemo(() => {
+    if (hasHeaders) {
+      return (
+        <>
+          <EuiTitle size="xxs">
+            <h5>{i18n.ADD_HEADER}</h5>
+          </EuiTitle>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup gutterSize="s" alignItems="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+                id="webhookHeaderKey"
                 fullWidth
+                error={headerErrors.keyHeader}
                 isInvalid={hasHeaderErrors && httpHeaderKey !== undefined}
-                name="keyHeader"
-                readOnly={readOnly}
-                value={httpHeaderKey}
-                data-test-subj="webhookHeadersKeyInput"
-                onChange={(e) => {
-                  setHttpHeaderKey(e.target.value);
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow
-              id="webhookHeaderValue"
-              fullWidth
-              error={headerErrors.valueHeader}
-              isInvalid={hasHeaderErrors && httpHeaderValue !== undefined}
-              label={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.valueTextFieldLabel',
-                {
-                  defaultMessage: 'Value',
-                }
-              )}
-            >
-              <EuiFieldText
-                fullWidth
-                isInvalid={hasHeaderErrors && httpHeaderValue !== undefined}
-                name="valueHeader"
-                readOnly={readOnly}
-                value={httpHeaderValue}
-                data-test-subj="webhookHeadersValueInput"
-                onChange={(e) => {
-                  setHttpHeaderValue(e.target.value);
-                }}
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFormRow hasEmptyLabelSpace>
-              <EuiButtonEmpty
-                isDisabled={hasHeaders && (hasHeaderErrors || !httpHeaderKey || !httpHeaderValue)}
-                data-test-subj="webhookAddHeaderButton"
-                onClick={addHeader}
+                label={i18n.KEY_LABEL}
               >
-                <FormattedMessage
-                  defaultMessage="Add"
-                  id="xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.addHeaderButton"
+                <EuiFieldText
+                  fullWidth
+                  isInvalid={hasHeaderErrors && httpHeaderKey !== undefined}
+                  name="keyHeader"
+                  readOnly={readOnly}
+                  value={httpHeaderKey}
+                  data-test-subj="webhookHeadersKeyInput"
+                  onChange={(e) => {
+                    setHttpHeaderKey(e.target.value);
+                  }}
                 />
-              </EuiButtonEmpty>
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  }
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow
+                id="webhookHeaderValue"
+                fullWidth
+                error={headerErrors.valueHeader}
+                isInvalid={hasHeaderErrors && httpHeaderValue !== undefined}
+                label={i18n.VALUE_LABEL}
+              >
+                <EuiFieldText
+                  fullWidth
+                  isInvalid={hasHeaderErrors && httpHeaderValue !== undefined}
+                  name="valueHeader"
+                  readOnly={readOnly}
+                  value={httpHeaderValue}
+                  data-test-subj="webhookHeadersValueInput"
+                  onChange={(e) => {
+                    setHttpHeaderValue(e.target.value);
+                  }}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFormRow hasEmptyLabelSpace>
+                <EuiButtonEmpty
+                  isDisabled={hasHeaders && (hasHeaderErrors || !httpHeaderKey || !httpHeaderValue)}
+                  data-test-subj="webhookAddHeaderButton"
+                  onClick={addHeader}
+                >
+                  {i18n.ADD_BUTTON}
+                </EuiButtonEmpty>
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      );
+    }
+    return null;
+  }, [
+    addHeader,
+    hasHeaderErrors,
+    hasHeaders,
+    headerErrors.keyHeader,
+    headerErrors.valueHeader,
+    httpHeaderKey,
+    httpHeaderValue,
+    readOnly,
+  ]);
 
-  const headersList = Object.keys(headers || {}).map((key: string) => {
-    return (
-      <EuiFlexGroup key={key} data-test-subj="webhookHeaderText" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiButtonIcon
-            aria-label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.deleteHeaderButton',
-              {
-                defaultMessage: 'Delete',
-                description: 'Delete HTTP header',
-              }
-            )}
-            iconType="trash"
-            color="danger"
-            onClick={() => removeHeader(key)}
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiDescriptionList compressed>
-            <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
-            <EuiDescriptionListDescription>{headers && headers[key]}</EuiDescriptionListDescription>
-          </EuiDescriptionList>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  });
+  const headersList = useMemo(
+    () =>
+      Object.keys(headers || {}).map((key: string) => {
+        return (
+          <EuiFlexGroup key={key} data-test-subj="webhookHeaderText" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon
+                aria-label={i18n.DELETE_BUTTON}
+                iconType="trash"
+                color="danger"
+                onClick={() => removeHeader(key)}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiDescriptionList compressed>
+                <EuiDescriptionListTitle>{key}</EuiDescriptionListTitle>
+                <EuiDescriptionListDescription>
+                  {headers && headers[key]}
+                </EuiDescriptionListDescription>
+              </EuiDescriptionList>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      }),
+    [headers, removeHeader]
+  );
+
   const isConfigKeyValueInvalid = useCallback(
     (key: keyof CasesWebhookConfig): boolean =>
       errors[key] !== undefined && errors[key].length > 0 && action.config[key] !== undefined,
@@ -263,28 +252,46 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
     [action.secrets, errors]
   );
 
+  const onConfigChange = useCallback(
+    (key: keyof CasesWebhookConfig, value: string) => editActionConfig(key, value),
+    [editActionConfig]
+  );
+
+  const onConfigBlur = useCallback(
+    (key: keyof CasesWebhookConfig) => {
+      if (!action.config[key]) {
+        editActionConfig(key, '');
+      }
+    },
+    [action.config, editActionConfig]
+  );
+  const onSecretsChange = useCallback(
+    (key: keyof CasesWebhookSecrets, value: string) => editActionSecrets(key, value),
+    [editActionSecrets]
+  );
+
+  const onSecretsBlur = useCallback(
+    (key: keyof CasesWebhookSecrets) => {
+      if (!action.secrets[key]) {
+        editActionSecrets(key, '');
+      }
+    },
+    [action.secrets, editActionSecrets]
+  );
+
   return (
     <>
       {/* start CREATE INCIDENT INPUTS */}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentMethodTextFieldLabel',
-              {
-                defaultMessage: 'Create Incident Method',
-              }
-            )}
-          >
+          <EuiFormRow label={i18n.CREATE_INCIDENT_METHOD}>
             <EuiSelect
               name="createIncidentMethod"
               value={createIncidentMethod || 'post'}
               disabled={readOnly}
               data-test-subj="webhookCreateMethodSelect"
               options={HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb }))}
-              onChange={(e) => {
-                editActionConfig('createIncidentMethod', e.target.value);
-              }}
+              onChange={(e) => onConfigChange('createIncidentMethod', e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -294,12 +301,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             fullWidth
             error={errors.createIncidentUrl}
             isInvalid={isConfigKeyValueInvalid('createIncidentUrl')}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentUrlTextFieldLabel',
-              {
-                defaultMessage: 'Create Incident URL',
-              }
-            )}
+            label={i18n.CREATE_INCIDENT_URL}
           >
             <EuiFieldText
               name="createIncidentUrl"
@@ -308,14 +310,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               readOnly={readOnly}
               value={createIncidentUrl || ''}
               data-test-subj="webhookCreateUrlText"
-              onChange={(e) => {
-                editActionConfig('createIncidentUrl', e.target.value);
-              }}
-              onBlur={() => {
-                if (!createIncidentUrl) {
-                  editActionConfig('createIncidentUrl', '');
-                }
-              }}
+              onChange={(e) => onConfigChange('createIncidentUrl', e.target.value)}
+              onBlur={() => onConfigBlur('createIncidentUrl')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -326,44 +322,17 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             id="createIncidentJson"
             fullWidth
             isInvalid={isConfigKeyValueInvalid('createIncidentJson')}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentJsonTextFieldLabel',
-              {
-                defaultMessage: 'Create Incident Object',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentJsonTextFieldLabel',
-              {
-                defaultMessage:
-                  'JSON object to create incident. Sub $SUM where the summary/title should go, $DESC where the description should go, and $TAGS where tags should go (optional).',
-              }
-            )}
+            label={i18n.CREATE_INCIDENT_JSON}
+            helpText={i18n.CREATE_INCIDENT_JSON_HELP}
           >
             <JsonEditorWithMessageVariables
               inputTargetValue={createIncidentJson}
               paramsProperty={'createIncidentJson'}
-              label={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.bodyFieldLabel',
-                {
-                  defaultMessage: 'JSON',
-                }
-              )}
-              aria-label={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.bodyCodeEditorAriaLabel',
-                {
-                  defaultMessage: 'Code editor',
-                }
-              )}
+              label={i18n.JSON}
+              aria-label={i18n.CODE_EDITOR}
               errors={errors.createIncidentJson as string[]}
-              onDocumentsChange={(json: string) => {
-                editActionConfig('createIncidentJson', json);
-              }}
-              onBlur={() => {
-                if (!createIncidentJson) {
-                  editActionConfig('createIncidentJson', '');
-                }
-              }}
+              onDocumentsChange={(json: string) => onConfigChange('createIncidentJson', json)}
+              onBlur={() => onConfigBlur('createIncidentJson')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -375,19 +344,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             fullWidth
             error={errors.createIncidentResponseKey}
             isInvalid={isConfigKeyValueInvalid('createIncidentResponseKey')}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentResponseKeyTextFieldLabel',
-              {
-                defaultMessage: 'Create Incident Response Incident Key',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createIncidentResponseKeyTextFieldLabel',
-              {
-                defaultMessage:
-                  'JSON key in create incident response that contains the external incident id',
-              }
-            )}
+            label={i18n.CREATE_INCIDENT_RESPONSE_KEY}
+            helpText={i18n.CREATE_INCIDENT_RESPONSE_KEY_HELP}
           >
             <EuiFieldText
               name="createIncidentResponseKey"
@@ -396,14 +354,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               readOnly={readOnly}
               value={createIncidentResponseKey || ''}
               data-test-subj="createIncidentResponseKeyText"
-              onChange={(e) => {
-                editActionConfig('createIncidentResponseKey', e.target.value);
-              }}
-              onBlur={() => {
-                if (!createIncidentResponseKey) {
-                  editActionConfig('createIncidentResponseKey', '');
-                }
-              }}
+              onChange={(e) => onConfigChange('createIncidentResponseKey', e.target.value)}
+              onBlur={() => onConfigBlur('createIncidentResponseKey')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -417,19 +369,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             fullWidth
             error={errors.getIncidentUrl}
             isInvalid={isConfigKeyValueInvalid('getIncidentUrl')}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentUrlTextFieldLabel',
-              {
-                defaultMessage: 'Get Incident URL',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentUrlTextFieldLabel',
-              {
-                defaultMessage:
-                  'API URL to GET incident details JSON from external system. Use $ID and Kibana will dynamically update the url with the external incident id.',
-              }
-            )}
+            label={i18n.GET_INCIDENT_URL}
+            helpText={i18n.GET_INCIDENT_URL_HELP}
           >
             <EuiFieldText
               name="getIncidentUrl"
@@ -438,14 +379,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               readOnly={readOnly}
               value={getIncidentUrl || ''}
               data-test-subj="webhookCreateUrlText"
-              onChange={(e) => {
-                editActionConfig('getIncidentUrl', e.target.value);
-              }}
-              onBlur={() => {
-                if (!getIncidentUrl) {
-                  editActionConfig('getIncidentUrl', '');
-                }
-              }}
+              onChange={(e) => onConfigChange('getIncidentUrl', e.target.value)}
+              onBlur={() => onConfigBlur('getIncidentUrl')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -455,19 +390,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             fullWidth
             error={errors.getIncidentResponseExternalTitleKey}
             isInvalid={isConfigKeyValueInvalid('getIncidentResponseExternalTitleKey')}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseExternalTitleKeyTextFieldLabel',
-              {
-                defaultMessage: 'Get Incident Response External Title Key',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseExternalTitleKeyTextFieldLabel',
-              {
-                defaultMessage:
-                  'JSON key in get incident response that contains the external incident title',
-              }
-            )}
+            label={i18n.GET_INCIDENT_TITLE_KEY}
+            helpText={i18n.GET_INCIDENT_TITLE_KEY_HELP}
           >
             <EuiFieldText
               name="getIncidentResponseExternalTitleKey"
@@ -476,14 +400,10 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               readOnly={readOnly}
               value={getIncidentResponseExternalTitleKey || ''}
               data-test-subj="getIncidentResponseExternalTitleKeyText"
-              onChange={(e) => {
-                editActionConfig('getIncidentResponseExternalTitleKey', e.target.value);
-              }}
-              onBlur={() => {
-                if (!getIncidentResponseExternalTitleKey) {
-                  editActionConfig('getIncidentResponseExternalTitleKey', '');
-                }
-              }}
+              onChange={(e) =>
+                onConfigChange('getIncidentResponseExternalTitleKey', e.target.value)
+              }
+              onBlur={() => onConfigBlur('getIncidentResponseExternalTitleKey')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -493,19 +413,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             fullWidth
             error={errors.getIncidentResponseCreatedDateKey}
             isInvalid={isConfigKeyValueInvalid('getIncidentResponseCreatedDateKey')}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseCreatedDateKeyTextFieldLabel',
-              {
-                defaultMessage: 'Get Incident Response Created Date Key',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseCreatedDateKeyTextFieldLabel',
-              {
-                defaultMessage:
-                  'JSON key in get incident response that contains the date the incident was created.',
-              }
-            )}
+            label={i18n.GET_INCIDENT_CREATED_KEY}
+            helpText={i18n.GET_INCIDENT_CREATED_KEY_HELP}
           >
             <EuiFieldText
               name="getIncidentResponseCreatedDateKey"
@@ -514,14 +423,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               readOnly={readOnly}
               value={getIncidentResponseCreatedDateKey || ''}
               data-test-subj="getIncidentResponseCreatedDateKeyText"
-              onChange={(e) => {
-                editActionConfig('getIncidentResponseCreatedDateKey', e.target.value);
-              }}
-              onBlur={() => {
-                if (!getIncidentResponseCreatedDateKey) {
-                  editActionConfig('getIncidentResponseCreatedDateKey', '');
-                }
-              }}
+              onChange={(e) => onConfigChange('getIncidentResponseCreatedDateKey', e.target.value)}
+              onBlur={() => onConfigBlur('getIncidentResponseCreatedDateKey')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -531,19 +434,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             fullWidth
             error={errors.getIncidentResponseUpdatedDateKey}
             isInvalid={isConfigKeyValueInvalid('getIncidentResponseUpdatedDateKey')}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseUpdatedDateKeyTextFieldLabel',
-              {
-                defaultMessage: 'Get Incident Response Updated Date Key',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.getIncidentResponseUpdatedDateKeyTextFieldLabel',
-              {
-                defaultMessage:
-                  'JSON key in get incident response that contains the date the incident was updated.',
-              }
-            )}
+            label={i18n.GET_INCIDENT_UPDATED_KEY}
+            helpText={i18n.GET_INCIDENT_UPDATED_KEY_HELP}
           >
             <EuiFieldText
               name="getIncidentResponseUpdatedDateKey"
@@ -552,14 +444,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               readOnly={readOnly}
               value={getIncidentResponseUpdatedDateKey || ''}
               data-test-subj="getIncidentResponseUpdatedDateKeyText"
-              onChange={(e) => {
-                editActionConfig('getIncidentResponseUpdatedDateKey', e.target.value);
-              }}
-              onBlur={() => {
-                if (!getIncidentResponseUpdatedDateKey) {
-                  editActionConfig('getIncidentResponseUpdatedDateKey', '');
-                }
-              }}
+              onChange={(e) => onConfigChange('getIncidentResponseUpdatedDateKey', e.target.value)}
+              onBlur={() => onConfigBlur('getIncidentResponseUpdatedDateKey')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -569,19 +455,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             fullWidth
             error={errors.incidentViewUrl}
             isInvalid={isConfigKeyValueInvalid('incidentViewUrl')}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.incidentViewUrlTextFieldLabel',
-              {
-                defaultMessage: 'External Incident View URL',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.incidentViewUrlTextFieldLabel',
-              {
-                defaultMessage:
-                  'URL to view incident in external system. Use $ID or $TITLE and Kibana will dynamically update the url with the external incident id or external incident title.',
-              }
-            )}
+            label={i18n.EXTERNAL_INCIDENT_VIEW_URL}
+            helpText={i18n.EXTERNAL_INCIDENT_VIEW_URL_HELP}
           >
             <EuiFieldText
               name="incidentViewUrl"
@@ -590,14 +465,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               readOnly={readOnly}
               value={incidentViewUrl || ''}
               data-test-subj="incidentViewUrlText"
-              onChange={(e) => {
-                editActionConfig('incidentViewUrl', e.target.value);
-              }}
-              onBlur={() => {
-                if (!incidentViewUrl) {
-                  editActionConfig('incidentViewUrl', '');
-                }
-              }}
+              onChange={(e) => onConfigChange('incidentViewUrl', e.target.value)}
+              onBlur={() => onConfigBlur('incidentViewUrl')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -606,23 +475,14 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
       {/* start UPDATE INCIDENT INPUTS */}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentMethodTextFieldLabel',
-              {
-                defaultMessage: 'Update Incident Method',
-              }
-            )}
-          >
+          <EuiFormRow label={i18n.UPDATE_INCIDENT_METHOD}>
             <EuiSelect
               name="updateIncidentMethod"
               value={updateIncidentMethod || 'put'}
               disabled={readOnly}
               data-test-subj="webhookUpdateMethodSelect"
               options={HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb }))}
-              onChange={(e) => {
-                editActionConfig('updateIncidentMethod', e.target.value);
-              }}
+              onChange={(e) => onConfigChange('updateIncidentMethod', e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -632,19 +492,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             fullWidth
             error={errors.updateIncidentUrl}
             isInvalid={isConfigKeyValueInvalid('updateIncidentUrl')}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentUrlTextFieldLabel',
-              {
-                defaultMessage: 'Update Incident URL',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentUrlTextFieldLabel',
-              {
-                defaultMessage:
-                  'API URL to update incident. Use $ID and Kibana will dynamically update the url with the external incident id.',
-              }
-            )}
+            label={i18n.UPDATE_INCIDENT_URL}
+            helpText={i18n.UPDATE_INCIDENT_URL_HELP}
           >
             <EuiFieldText
               name="updateIncidentUrl"
@@ -653,14 +502,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               readOnly={readOnly}
               value={updateIncidentUrl || ''}
               data-test-subj="webhookUpdateUrlText"
-              onChange={(e) => {
-                editActionConfig('updateIncidentUrl', e.target.value);
-              }}
-              onBlur={() => {
-                if (!updateIncidentUrl) {
-                  editActionConfig('updateIncidentUrl', '');
-                }
-              }}
+              onChange={(e) => onConfigChange('updateIncidentUrl', e.target.value)}
+              onBlur={() => onConfigBlur('updateIncidentUrl')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -671,44 +514,17 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             id="updateIncidentJson"
             fullWidth
             isInvalid={isConfigKeyValueInvalid('updateIncidentJson')}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentJsonTextFieldLabel',
-              {
-                defaultMessage: 'Update Incident Object',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.updateIncidentJsonTextFieldLabel',
-              {
-                defaultMessage:
-                  'JSON object to update incident. Sub $SUM where the summary/title should go, $DESC where the description should go, and $TAGS where tags should go (optional).',
-              }
-            )}
+            label={i18n.UPDATE_INCIDENT_JSON}
+            helpText={i18n.UPDATE_INCIDENT_JSON_HELP}
           >
             <JsonEditorWithMessageVariables
               inputTargetValue={updateIncidentJson}
               paramsProperty={'updateIncidentJson'}
-              label={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.bodyFieldLabel',
-                {
-                  defaultMessage: 'JSON',
-                }
-              )}
-              aria-label={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.bodyCodeEditorAriaLabel',
-                {
-                  defaultMessage: 'Code editor',
-                }
-              )}
+              label={i18n.JSON}
+              aria-label={i18n.CODE_EDITOR}
               errors={errors.updateIncidentJson as string[]}
-              onDocumentsChange={(json: string) => {
-                editActionConfig('updateIncidentJson', json);
-              }}
-              onBlur={() => {
-                if (!updateIncidentJson) {
-                  editActionConfig('updateIncidentJson', '');
-                }
-              }}
+              onDocumentsChange={(json: string) => onConfigChange('updateIncidentJson', json)}
+              onBlur={() => onConfigBlur('updateIncidentJson')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -717,23 +533,14 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
       {/* start CREATE COMMENT INCIDENT INPUTS */}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiFormRow
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentMethodTextFieldLabel',
-              {
-                defaultMessage: 'Create Comment Method',
-              }
-            )}
-          >
+          <EuiFormRow label={i18n.CREATE_COMMENT_METHOD}>
             <EuiSelect
               name="createCommentMethod"
               value={createCommentMethod || 'put'}
               disabled={readOnly}
               data-test-subj="webhookCreateCommentMethodSelect"
               options={HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb }))}
-              onChange={(e) => {
-                editActionConfig('createCommentMethod', e.target.value);
-              }}
+              onChange={(e) => onConfigChange('createCommentMethod', e.target.value)}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -743,19 +550,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             fullWidth
             error={errors.createCommentUrl}
             isInvalid={isConfigKeyValueInvalid('createCommentUrl')}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentUrlTextFieldLabel',
-              {
-                defaultMessage: 'Create Comment URL',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentUrlTextFieldLabel',
-              {
-                defaultMessage:
-                  'API URL to add comment to incident. Use $ID and Kibana will dynamically update the url with the external incident id.',
-              }
-            )}
+            label={i18n.CREATE_COMMENT_URL}
+            helpText={i18n.CREATE_COMMENT_URL_HELP}
           >
             <EuiFieldText
               name="createCommentUrl"
@@ -764,14 +560,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
               readOnly={readOnly}
               value={createCommentUrl || ''}
               data-test-subj="webhookUpdateUrlText"
-              onChange={(e) => {
-                editActionConfig('createCommentUrl', e.target.value);
-              }}
-              onBlur={() => {
-                if (!createCommentUrl) {
-                  editActionConfig('createCommentUrl', '');
-                }
-              }}
+              onChange={(e) => onConfigChange('createCommentUrl', e.target.value)}
+              onBlur={() => onConfigBlur('createCommentUrl')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -782,44 +572,17 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             id="createCommentJson"
             fullWidth
             isInvalid={isConfigKeyValueInvalid('createCommentJson')}
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentJsonTextFieldLabel',
-              {
-                defaultMessage: 'Create Comment Object',
-              }
-            )}
-            helpText={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.createCommentJsonTextFieldLabel',
-              {
-                defaultMessage:
-                  'JSON object to update incident. Sub $COMMENT where the comment should go',
-              }
-            )}
+            label={i18n.CREATE_COMMENT_JSON}
+            helpText={i18n.CREATE_COMMENT_JSON_HELP}
           >
             <JsonEditorWithMessageVariables
               inputTargetValue={createCommentJson}
               paramsProperty={'createCommentJson'}
-              label={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.bodyFieldLabel',
-                {
-                  defaultMessage: 'JSON',
-                }
-              )}
-              aria-label={i18n.translate(
-                'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.bodyCodeEditorAriaLabel',
-                {
-                  defaultMessage: 'Code editor',
-                }
-              )}
+              label={i18n.JSON}
+              aria-label={i18n.CODE_EDITOR}
               errors={errors.createCommentJson as string[]}
-              onDocumentsChange={(json: string) => {
-                editActionConfig('createCommentJson', json);
-              }}
-              onBlur={() => {
-                if (!createCommentJson) {
-                  editActionConfig('createCommentJson', '');
-                }
-              }}
+              onDocumentsChange={(json: string) => onConfigChange('createCommentJson', json)}
+              onBlur={() => onConfigBlur('createCommentJson')}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -829,21 +592,11 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
         <EuiFlexItem>
           <EuiSpacer size="m" />
           <EuiTitle size="xxs">
-            <h4>
-              <FormattedMessage
-                id="xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.authenticationLabel"
-                defaultMessage="Authentication"
-              />
-            </h4>
+            <h4>{i18n.AUTH_TITLE}</h4>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiSwitch
-            label={i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.hasAuthSwitchLabel',
-              {
-                defaultMessage: 'Require authentication for this webhook',
-              }
-            )}
+            label={i18n.HAS_AUTH}
             disabled={readOnly}
             checked={hasAuth}
             onChange={(e) => {
@@ -862,13 +615,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
             !action.id,
             2,
             action.isMissingSecrets ?? false,
-            i18n.translate(
-              'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.reenterValuesLabel',
-              {
-                defaultMessage:
-                  'Username and password are encrypted. Please reenter values for these fields.',
-              }
-            )
+            i18n.REENTER_VALUES
           )}
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
@@ -877,12 +624,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
                 fullWidth
                 error={errors.user}
                 isInvalid={isSecretsKeyValueInvalid('user')}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.userTextFieldLabel',
-                  {
-                    defaultMessage: 'Username',
-                  }
-                )}
+                label={i18n.USERNAME}
               >
                 <EuiFieldText
                   fullWidth
@@ -891,14 +633,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
                   readOnly={readOnly}
                   value={user || ''}
                   data-test-subj="webhookUserInput"
-                  onChange={(e) => {
-                    editActionSecrets('user', e.target.value);
-                  }}
-                  onBlur={() => {
-                    if (!user) {
-                      editActionSecrets('user', '');
-                    }
-                  }}
+                  onChange={(e) => onSecretsChange('user', e.target.value)}
+                  onBlur={() => onSecretsBlur('user')}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -908,12 +644,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
                 fullWidth
                 error={errors.password}
                 isInvalid={isSecretsKeyValueInvalid('password')}
-                label={i18n.translate(
-                  'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.passwordTextFieldLabel',
-                  {
-                    defaultMessage: 'Password',
-                  }
-                )}
+                label={i18n.PASSWORD}
               >
                 <EuiFieldPassword
                   fullWidth
@@ -922,14 +653,8 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
                   isInvalid={isSecretsKeyValueInvalid('password')}
                   value={password || ''}
                   data-test-subj="webhookPasswordInput"
-                  onChange={(e) => {
-                    editActionSecrets('password', e.target.value);
-                  }}
-                  onBlur={() => {
-                    if (!password) {
-                      editActionSecrets('password', '');
-                    }
-                  }}
+                  onChange={(e) => onSecretsChange('password', e.target.value)}
+                  onBlur={() => onSecretsBlur('password')}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -940,12 +665,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
       <EuiSwitch
         data-test-subj="webhookViewHeadersSwitch"
         disabled={readOnly}
-        label={i18n.translate(
-          'xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.viewHeadersSwitch',
-          {
-            defaultMessage: 'Add HTTP header',
-          }
-        )}
+        label={i18n.HEADERS_SWITCH}
         checked={hasHeaders}
         onChange={viewHeaders}
       />
@@ -956,12 +676,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<
           <>
             <EuiSpacer size="m" />
             <EuiTitle size="xxs">
-              <h5>
-                <FormattedMessage
-                  defaultMessage="Headers in use"
-                  id="xpack.triggersActionsUI.components.builtinActionTypes.casesWebhookAction.httpHeadersTitle"
-                />
-              </h5>
+              <h5>{i18n.HEADERS_TITLE}</h5>
             </EuiTitle>
             <EuiSpacer size="s" />
             {headersList}

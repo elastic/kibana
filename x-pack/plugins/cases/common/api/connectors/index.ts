@@ -53,8 +53,6 @@ export enum ConnectorTypes {
   swimlane = '.swimlane',
 }
 
-export const connectorTypes = Object.values(ConnectorTypes);
-
 const ConnectorCasesWebhookTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.casesWebhook),
   fields: rt.union([CasesWebhookFieldsRT, rt.null]),
@@ -62,7 +60,7 @@ const ConnectorCasesWebhookTypeFieldsRt = rt.type({
 
 const ConnectorJiraTypeFieldsRt = rt.type({
   type: rt.literal(ConnectorTypes.jira),
-  fields: rt.union([CasesWebhookFieldsRT, rt.null]),
+  fields: rt.union([JiraFieldsRT, rt.null]),
 });
 
 const ConnectorResilientTypeFieldsRt = rt.type({

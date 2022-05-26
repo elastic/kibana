@@ -7,14 +7,9 @@
 
 import * as rt from 'io-ts';
 
-// New fields should also be added at: x-pack/plugins/cases/server/connectors/case/schema.ts
 export const CasesWebhookFieldsRT = rt.record(
   rt.string,
   rt.union([rt.string, rt.array(rt.string), rt.undefined, rt.null])
 );
 
 export type CasesWebhookFieldsType = rt.TypeOf<typeof CasesWebhookFieldsRT>;
-
-export enum CasesWebhookConnectorType {
-  Cases = 'cases',
-}

@@ -129,6 +129,7 @@ const ConnectorsComponent: React.FC<Props> = ({
               <EuiFlexItem grow={false}>
                 <Mapping
                   actionTypeName={actionTypeName}
+                  connectorType={selectedConnector.type}
                   isLoading={isLoading}
                   mappings={mappings}
                 />

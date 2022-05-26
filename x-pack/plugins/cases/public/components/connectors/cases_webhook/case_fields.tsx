@@ -5,43 +5,26 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { EuiCallOut } from '@elastic/eui';
-import * as i18n from './translations';
+import React from 'react';
 
 import { ConnectorTypes, CasesWebhookFieldsType } from '../../../../common/api';
 import { ConnectorFieldsProps } from '../types';
 import { ConnectorCard } from '../card';
-import { connectorValidator } from './validator';
 
 const CasesWebhookComponent: React.FunctionComponent<
   ConnectorFieldsProps<CasesWebhookFieldsType>
-> = ({ connector, isEdit = true }) => {
-  const showMappingWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
-
-  return (
-    <>
-      {!isEdit && (
-        <ConnectorCard
-          connectorType={ConnectorTypes.casesWebhook}
-          isLoading={false}
-          listItems={[]}
-          title={connector.name}
-        />
-      )}
-      {showMappingWarning && (
-        <EuiCallOut
-          title={i18n.EMPTY_MAPPING_WARNING_TITLE}
-          color="danger"
-          iconType="alert"
-          data-test-subj="mapping-warning-callout"
-        >
-          {i18n.EMPTY_MAPPING_WARNING_DESC}
-        </EuiCallOut>
-      )}
-    </>
-  );
-};
+> = ({ connector, isEdit = true }) => (
+  <>
+    {!isEdit && (
+      <ConnectorCard
+        connectorType={ConnectorTypes.casesWebhook}
+        isLoading={false}
+        listItems={[]}
+        title={connector.name}
+      />
+    )}
+  </>
+);
 CasesWebhookComponent.displayName = 'CasesWebhook';
 
 // eslint-disable-next-line import/no-default-export
