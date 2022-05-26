@@ -195,6 +195,10 @@ export interface VisTypeDefinition<TVisParams> {
    */
   readonly stage?: 'experimental' | 'beta' | 'production';
   /**
+   * It sets the vis type on a deprecated mode when is true
+   */
+  readonly isDeprecated?: boolean;
+  /**
    * Describes the experience group that the visualization belongs.
    * It can be on tools, aggregation based or promoted group.
    * @default 'aggbased'

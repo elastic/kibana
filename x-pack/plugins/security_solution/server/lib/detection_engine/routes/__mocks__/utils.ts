@@ -90,4 +90,7 @@ export const getOutputRuleAlertForRest = (): Omit<
   note: '# Investigative notes',
   version: 1,
   execution_summary: undefined,
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
 });

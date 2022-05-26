@@ -16,7 +16,12 @@ import { getFilterQuery, getMockPropsObj, mockHistory, testCases } from './test_
 import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { useLocation } from 'react-router-dom';
-import { MANAGEMENT_PATH } from '../../../../common/constants';
+import { DASHBOARDS_PATH, MANAGEMENT_PATH } from '../../../../common/constants';
+import { getAppLinks } from '../../links/app_links';
+import { StartPlugins } from '../../../types';
+import { updateAppLinks } from '../../links';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import { coreMock } from '@kbn/core/public/mocks';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -45,7 +50,31 @@ jest.mock('react-redux', () => {
   };
 });
 
+const mockedUseIsGroupedNavigationEnabled = jest.fn();
+jest.mock('../navigation/helpers', () => ({
+  useIsGroupedNavigationEnabled: () => mockedUseIsGroupedNavigationEnabled(),
+}));
+
 describe('UrlStateContainer - lodash.throttle mocked to test update url', () => {
+  beforeAll(async () => {
+    mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
+
+    const appLinks = await getAppLinks(coreMock.createStart(), {} as StartPlugins);
+    updateAppLinks(appLinks, {
+      experimentalFeatures: allowedExperimentalValues,
+      capabilities: {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        actions: { show: true, crud: true },
+        siem: {
+          show: true,
+          crud: true,
+        },
+      },
+    });
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
     jest.resetAllMocks();
@@ -210,7 +239,8 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       });
     });
 
-    test("administration page doesn't has query string", () => {
+    test("administration page doesn't has query string when grouped nav disabled", () => {
+      mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
       mockProps = getMockPropsObj({
         page: CONSTANTS.networkPage,
         examplePath: '/network',
@@ -281,6 +311,83 @@ describe('UrlStateContainer - lodash.throttle mocked to test update url', () => 
       expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
         hash: '',
         pathname: MANAGEMENT_PATH,
+        search: '?',
+        state: '',
+      });
+    });
+
+    test("dashboards page doesn't has query string when grouped nav enabled", () => {
+      mockedUseIsGroupedNavigationEnabled.mockReturnValue(true);
+      mockProps = getMockPropsObj({
+        page: CONSTANTS.networkPage,
+        examplePath: '/network',
+        namespaceLower: 'network',
+        pageName: SecurityPageName.network,
+        detailName: undefined,
+      }).noSearch.definedQuery;
+
+      const urlState = {
+        ...mockProps.urlState,
+        [CONSTANTS.appQuery]: getFilterQuery(),
+        [CONSTANTS.timerange]: {
+          global: {
+            [CONSTANTS.timerange]: {
+              from: '2020-07-07T08:20:18.966Z',
+              fromStr: 'now-24h',
+              kind: 'relative',
+              to: '2020-07-08T08:20:18.966Z',
+              toStr: 'now',
+            },
+            linkTo: ['timeline'],
+          },
+          timeline: {
+            [CONSTANTS.timerange]: {
+              from: '2020-07-07T08:20:18.966Z',
+              fromStr: 'now-24h',
+              kind: 'relative',
+              to: '2020-07-08T08:20:18.966Z',
+              toStr: 'now',
+            },
+            linkTo: ['global'],
+          },
+        },
+      };
+
+      const updatedMockProps = {
+        ...getMockPropsObj({
+          ...mockProps,
+          page: CONSTANTS.unknown,
+          examplePath: DASHBOARDS_PATH,
+          namespaceLower: 'dashboards',
+          pageName: SecurityPageName.dashboardsLanding,
+          detailName: undefined,
+        }).noSearch.definedQuery,
+        urlState,
+      };
+
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: mockProps.pathName,
+      });
+
+      const wrapper = mount(
+        <HookWrapper
+          hookProps={{ ...mockProps, urlState }}
+          hook={(args) => useUrlStateHooks(args)}
+        />
+      );
+
+      (useLocation as jest.Mock).mockReturnValue({
+        pathname: updatedMockProps.pathName,
+      });
+
+      wrapper.setProps({
+        hookProps: updatedMockProps,
+      });
+
+      wrapper.update();
+      expect(mockHistory.replace.mock.calls[1][0]).toStrictEqual({
+        hash: '',
+        pathname: DASHBOARDS_PATH,
         search: '?',
         state: '',
       });
