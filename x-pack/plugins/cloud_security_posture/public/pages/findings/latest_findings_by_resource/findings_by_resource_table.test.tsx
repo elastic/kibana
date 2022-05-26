@@ -27,6 +27,7 @@ const getFakeFindingsByResource = (): CspFindingsByResource => {
   const normalized = count / total;
 
   return {
+    cluster_id: chance.guid(),
     resource_id: chance.guid(),
     resource_name: chance.word(),
     resource_subtype: chance.word(),

@@ -27,6 +27,7 @@ import { MlPluginSetup as MlSetup } from '@kbn/ml-plugin/server';
 import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { UptimeESClient } from '../../lib';
 import type { TelemetryEventsSender } from '../../telemetry/sender';
@@ -50,6 +51,7 @@ export interface UptimeServerSetup {
   router: UptimeRouter;
   config: UptimeConfig;
   cloud?: CloudSetup;
+  spaces: SpacesPluginSetup;
   fleet: FleetStartContract;
   security: SecurityPluginStart;
   savedObjectsClient?: SavedObjectsClientContract;
@@ -71,6 +73,7 @@ export interface UptimeCorePluginsSetup {
   usageCollection: UsageCollectionSetup;
   ml: MlSetup;
   cloud?: CloudSetup;
+  spaces: SpacesPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
