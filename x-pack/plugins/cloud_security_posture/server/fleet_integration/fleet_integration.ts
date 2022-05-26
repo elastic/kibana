@@ -86,6 +86,7 @@ export const onPackagePolicyDeleteCallback = async (
       await soClient.find({
         type: cspRuleAssetSavedObjectType,
         filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${deletedPackagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${deletedPackagePolicy.policy_id}`,
+        perPage: 10000,
       });
     await Promise.all(
       cspRules.map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id))
