@@ -28,6 +28,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { LoadingHistogram } from './loading_histogram';
 import { FieldValueThreshold } from '../threshold_input';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
+import { EqlOptionsSelected } from '../../../../../common/search_strategy';
 
 const HelpTextComponent = (
   <EuiFlexGroup direction="column" gutterSize="none">
@@ -48,6 +49,7 @@ export interface RulePreviewProps {
   threshold: FieldValueThreshold;
   machineLearningJobId: string[];
   anomalyThreshold: number;
+  eqlOptions: EqlOptionsSelected;
 }
 
 const Select = styled(EuiSelect)`
@@ -72,6 +74,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
   threshold,
   machineLearningJobId,
   anomalyThreshold,
+  eqlOptions,
 }) => {
   const { spaces } = useKibana().services;
   const { loading: isMlLoading, jobs } = useSecurityJobs(false);
@@ -115,6 +118,7 @@ const RulePreviewComponent: React.FC<RulePreviewProps> = ({
     threshold,
     machineLearningJobId,
     anomalyThreshold,
+    eqlOptions,
   });
 
   // Resets the timeFrame to default when rule type is changed because not all time frames are supported by all rule types

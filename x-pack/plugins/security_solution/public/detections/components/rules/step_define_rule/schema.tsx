@@ -119,6 +119,7 @@ export const schema: FormSchema<DefineStepRule> = {
       },
     ],
   },
+  eqlOptions: {},
   queryBar: {
     validations: [
       {

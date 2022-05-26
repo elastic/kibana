@@ -42,7 +42,9 @@ import {
   data_view_id,
   description,
   enabled,
+  timestamp_field,
   event_category_override,
+  tiebreaker_field,
   false_positives,
   id,
   immutable,
@@ -135,7 +137,9 @@ export const dependentRulesSchema = t.partial({
   query,
 
   // eql only fields
+  timestamp_field,
   event_category_override,
+  tiebreaker_field,
 
   // when type = saved_query, saved_id is required
   saved_id,
@@ -278,9 +282,11 @@ export const addThresholdFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.
 export const addEqlFields = (typeAndTimelineOnly: TypeAndTimelineOnly): t.Mixed[] => {
   if (typeAndTimelineOnly.type === 'eql') {
     return [
+      t.exact(t.partial({ timestamp_field: dependentRulesSchema.props.timestamp_field })),
       t.exact(
         t.partial({ event_category_override: dependentRulesSchema.props.event_category_override })
       ),
+      t.exact(t.partial({ tiebreaker_field: dependentRulesSchema.props.tiebreaker_field })),
       t.exact(t.type({ query: dependentRulesSchema.props.query })),
       t.exact(t.type({ language: dependentRulesSchema.props.language })),
       t.exact(t.partial({ data_view_id: dependentRulesSchema.props.data_view_id })),

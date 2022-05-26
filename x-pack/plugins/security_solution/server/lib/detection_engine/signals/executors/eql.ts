@@ -82,8 +82,10 @@ export const eqlExecutor = async ({
       completeRule.ruleParams.maxSignals,
       ruleParams.timestampOverride,
       exceptionItems,
+      runtimeMappings,
       ruleParams.eventCategoryOverride,
-      runtimeMappings
+      ruleParams.timestampField,
+      ruleParams.tiebreakerField
     );
 
     const eqlSignalSearchStart = performance.now();

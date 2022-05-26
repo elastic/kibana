@@ -61,7 +61,9 @@ import {
   license,
   rule_name_override,
   timestamp_override,
+  timestamp_field,
   event_category_override,
+  tiebreaker_field,
 } from '../common';
 
 /**
@@ -80,7 +82,9 @@ export const patchRulesSchema = t.exact(
     actions,
     anomaly_threshold,
     enabled,
+    timestamp_field,
     event_category_override,
+    tiebreaker_field,
     false_positives,
     filters,
     from,

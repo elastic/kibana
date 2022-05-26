@@ -54,7 +54,9 @@ import {
   LicenseOrUndefined,
   RuleNameOverrideOrUndefined,
   TimestampOverrideOrUndefined,
+  TimestampFieldOrUndefined,
   EventCategoryOverrideOrUndefined,
+  TiebreakerFieldOrUndefined,
   NamespaceOrUndefined,
   DataViewIdOrUndefined,
   RelatedIntegrationArray,
@@ -96,7 +98,9 @@ export interface UpdateProperties {
   author: AuthorOrUndefined;
   buildingBlockType: BuildingBlockTypeOrUndefined;
   description: DescriptionOrUndefined;
+  timestampField: TimestampFieldOrUndefined;
   eventCategoryOverride: EventCategoryOverrideOrUndefined;
+  tiebreakerField: TiebreakerFieldOrUndefined;
   falsePositives: FalsePositivesOrUndefined;
   from: FromOrUndefined;
   query: QueryOrUndefined;

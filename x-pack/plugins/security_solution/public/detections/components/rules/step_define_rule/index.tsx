@@ -18,8 +18,9 @@ import {
 import React, { FC, memo, useCallback, useState, useEffect, useMemo } from 'react';
 
 import styled from 'styled-components';
-import { isEqual } from 'lodash';
 import { i18n as i18nCore } from '@kbn/i18n';
+import { isEqual, isEmpty } from 'lodash';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,6 +35,7 @@ import { hasMlAdminPermissions } from '../../../../../common/machine_learning/ha
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
+import { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
 import { filterRuleFieldsForType } from '../../../pages/detection_engine/rules/create/helpers';
 import {
   DefineStepRule,
@@ -124,6 +126,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
     id: null,
     title: DEFAULT_TIMELINE_TITLE,
   },
+  eqlOptions: {},
 };
 
 /**
@@ -232,6 +235,9 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   // TODO: update the logic for browserField stuff.
   // if 'index' is selected, use these browser fields
   // otherwise use the dataview browserfields
+  const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
+    defaultValues?.eqlOptions || {}
+  );
   const [initIsIndexPatternLoading, { browserFields, indexPatterns: initIndexPattern }] =
     useFetchIndex(index, false);
   const [indexPattern, setIndexPattern] = useState<DataViewBase>(initIndexPattern);
@@ -331,13 +337,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const getData = useCallback(async () => {
     const result = await submit();
+    result.data = {
+      ...result.data,
+      eqlOptions: optionsSelected,
+    };
     return result.isValid
       ? result
       : {
           isValid: false,
-          data: getFormData(),
+          data: {
+            ...getFormData(),
+            eqlOptions: optionsSelected,
+          },
         };
-  }, [getFormData, submit]);
+  }, [getFormData, optionsSelected, submit]);
 
   useEffect(() => {
     let didCancel = false;
@@ -568,6 +581,35 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       openTimelineSearch,
     ]
   );
+  const onOptionsChange = useCallback((field: FieldsEqlOptions, value: string | undefined) => {
+    setOptionsSelected((prevOptions) => ({
+      ...prevOptions,
+      [field]: value,
+    }));
+  }, []);
+
+  const optionsData = useMemo(
+    () =>
+      isEmpty(indexPattern.fields)
+        ? {
+            keywordFields: [],
+            dateFields: [],
+            nonDateFields: [],
+          }
+        : {
+            keywordFields: (indexPattern.fields as FieldSpec[])
+              .filter((f) => f.esTypes?.includes('keyword'))
+              .map((f) => ({ label: f.name })),
+            dateFields: indexPattern.fields
+              .filter((f) => f.type === 'date')
+              .map((f) => ({ label: f.name })),
+            nonDateFields: indexPattern.fields
+              .filter((f) => f.type !== 'date')
+              .map((f) => ({ label: f.name })),
+          },
+    [indexPattern]
+  );
+
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
@@ -602,6 +644,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="queryBar"
                   component={EqlQueryBar}
                   componentProps={{
+                    optionsData,
+                    optionsSelected,
+                    isSizeOptionDisabled: true,
+                    onOptionsChange,
                     onValidityChange: setIsQueryBarValid,
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
@@ -712,6 +758,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           threshold={formThreshold}
           machineLearningJobId={machineLearningJobId}
           anomalyThreshold={anomalyThreshold}
+          eqlOptions={optionsSelected}
         />
       </StepContentWrapper>
 

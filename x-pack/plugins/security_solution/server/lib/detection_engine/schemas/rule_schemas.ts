@@ -64,7 +64,9 @@ import {
   timestampOverrideOrUndefined,
   to,
   references,
+  timestampFieldOrUndefined,
   eventCategoryOverrideOrUndefined,
+  tiebreakerFieldOrUndefined,
   savedIdOrUndefined,
   saved_id,
   thresholdNormalized,
@@ -123,8 +125,10 @@ const eqlSpecificRuleParams = t.type({
   index: indexOrUndefined,
   query,
   filters: filtersOrUndefined,
+  timestampField: timestampFieldOrUndefined,
   eventCategoryOverride: eventCategoryOverrideOrUndefined,
   dataViewId: dataViewIdOrUndefined,
+  tiebreakerField: tiebreakerFieldOrUndefined,
 });
 export const eqlRuleParams = t.intersection([baseRuleParams, eqlSpecificRuleParams]);
 export type EqlRuleParams = t.TypeOf<typeof eqlRuleParams>;

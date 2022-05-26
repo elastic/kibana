@@ -45,6 +45,7 @@ import { stepDefineDefaultValue } from '../../../../components/rules/step_define
 import { stepAboutDefaultValue } from '../../../../components/rules/step_about_rule/default_value';
 import { stepActionsDefaultValue } from '../../../../components/rules/step_rule_actions';
 import { FieldValueThreshold } from '../../../../components/rules/threshold_input';
+import { EqlOptionsSelected } from '../../../../../../common/search_strategy';
 
 export const getTimeTypeValue = (time: string): { unit: string; value: number } => {
   const timeObj = {
@@ -95,6 +96,7 @@ export interface RuleFields {
   threatQueryBar?: unknown;
   threatMapping?: unknown;
   threatLanguage?: unknown;
+  eqlOptions: unknown;
 }
 
 type QueryRuleFields<T> = Omit<
@@ -105,33 +107,86 @@ type QueryRuleFields<T> = Omit<
   | 'threatIndex'
   | 'threatQueryBar'
   | 'threatMapping'
+  | 'eqlOptions'
+>;
+type EqlQueryRuleFields<T> = Omit<
+  T,
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threshold'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
 >;
 type ThresholdRuleFields<T> = Omit<
   T,
-  'anomalyThreshold' | 'machineLearningJobId' | 'threatIndex' | 'threatQueryBar' | 'threatMapping'
+  | 'anomalyThreshold'
+  | 'machineLearningJobId'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
+  | 'eqlOptions'
 >;
 type MlRuleFields<T> = Omit<
   T,
-  'queryBar' | 'index' | 'threshold' | 'threatIndex' | 'threatQueryBar' | 'threatMapping'
+  | 'queryBar'
+  | 'index'
+  | 'threshold'
+  | 'threatIndex'
+  | 'threatQueryBar'
+  | 'threatMapping'
+  | 'eqlOptions'
 >;
-type ThreatMatchRuleFields<T> = Omit<T, 'anomalyThreshold' | 'machineLearningJobId' | 'threshold'>;
+type ThreatMatchRuleFields<T> = Omit<
+  T,
+  'anomalyThreshold' | 'machineLearningJobId' | 'threshold' | 'eqlOptions'
+>;
 
 const isMlFields = <T>(
-  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
 ): fields is MlRuleFields<T> => has('anomalyThreshold', fields);
 
 const isThresholdFields = <T>(
-  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
 ): fields is ThresholdRuleFields<T> => has('threshold', fields);
 
 const isThreatMatchFields = <T>(
-  fields: QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T>
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
 ): fields is ThreatMatchRuleFields<T> => has('threatIndex', fields);
+
+const isEqlFields = <T>(
+  fields:
+    | QueryRuleFields<T>
+    | EqlQueryRuleFields<T>
+    | MlRuleFields<T>
+    | ThresholdRuleFields<T>
+    | ThreatMatchRuleFields<T>
+): fields is EqlQueryRuleFields<T> => has('eqlOptions', fields);
 
 export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
   fields: T,
   type: Type
-): QueryRuleFields<T> | MlRuleFields<T> | ThresholdRuleFields<T> | ThreatMatchRuleFields<T> => {
+):
+  | QueryRuleFields<T>
+  | EqlQueryRuleFields<T>
+  | MlRuleFields<T>
+  | ThresholdRuleFields<T>
+  | ThreatMatchRuleFields<T> => {
   switch (type) {
     case 'machine_learning':
       const {
@@ -141,6 +196,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatIndex,
         threatQueryBar,
         threatMapping,
+        eqlOptions,
         ...mlRuleFields
       } = fields;
       return mlRuleFields;
@@ -151,6 +207,7 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatIndex: _removedThreatIndex,
         threatQueryBar: _removedThreatQueryBar,
         threatMapping: _removedThreatMapping,
+        eqlOptions: _eqlOptions,
         ...thresholdRuleFields
       } = fields;
       return thresholdRuleFields;
@@ -159,12 +216,12 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         anomalyThreshold: _removedAnomalyThreshold,
         machineLearningJobId: _removedMachineLearningJobId,
         threshold: _removedThreshold,
+        eqlOptions: __eqlOptions,
         ...threatMatchRuleFields
       } = fields;
       return threatMatchRuleFields;
     case 'query':
     case 'saved_query':
-    case 'eql':
       const {
         anomalyThreshold: _a,
         machineLearningJobId: _m,
@@ -172,9 +229,21 @@ export const filterRuleFieldsForType = <T extends Partial<RuleFields>>(
         threatIndex: __removedThreatIndex,
         threatQueryBar: __removedThreatQueryBar,
         threatMapping: __removedThreatMapping,
+        eqlOptions: ___eqlOptions,
         ...queryRuleFields
       } = fields;
       return queryRuleFields;
+    case 'eql':
+      const {
+        anomalyThreshold: __a,
+        machineLearningJobId: __m,
+        threshold: __t,
+        threatIndex: ___removedThreatIndex,
+        threatQueryBar: ___removedThreatQueryBar,
+        threatMapping: ___removedThreatMapping,
+        ...eqlRuleFields
+      } = fields;
+      return eqlRuleFields;
   }
   assertUnreachable(type);
 };
@@ -258,6 +327,17 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         threat_filters: ruleFields.threatQueryBar?.filters,
         threat_mapping: ruleFields.threatMapping,
         threat_language: ruleFields.threatQueryBar?.query?.language,
+      }
+    : isEqlFields(ruleFields)
+    ? {
+        index: ruleFields.index,
+        filters: ruleFields.queryBar?.filters,
+        language: ruleFields.queryBar?.query?.language,
+        query: ruleFields.queryBar?.query?.query as string,
+        saved_id: ruleFields.queryBar?.saved_id,
+        timestamp_field: ruleFields.eqlOptions?.timestampField,
+        event_category_override: ruleFields.eqlOptions?.eventCategoryField,
+        tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
       }
     : {
         index: ruleFields.index,
@@ -408,6 +488,7 @@ export const formatPreviewRule = ({
   threshold,
   machineLearningJobId,
   anomalyThreshold,
+  eqlOptions,
 }: {
   index: string[];
   dataViewId?: string;
@@ -420,6 +501,7 @@ export const formatPreviewRule = ({
   threshold: FieldValueThreshold;
   machineLearningJobId: string[];
   anomalyThreshold: number;
+  eqlOptions: EqlOptionsSelected;
 }): CreateRulesSchema => {
   const defineStepData = {
     ...stepDefineDefaultValue,
@@ -433,6 +515,7 @@ export const formatPreviewRule = ({
     threshold,
     machineLearningJobId,
     anomalyThreshold,
+    eqlOptions,
   };
   const aboutStepData = {
     ...stepAboutDefaultValue,

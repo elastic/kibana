@@ -212,6 +212,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
       value: '2',
     },
   },
+  eqlOptions: {},
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

@@ -534,6 +534,7 @@ describe('create_signals', () => {
         100,
         'event.ingested',
         [],
+        undefined,
         'event.other_category',
         undefined
       );

@@ -71,7 +71,9 @@ import {
   rule_name_override,
   timestamp_override,
   Author,
+  timestamp_field,
   event_category_override,
+  tiebreaker_field,
   namespace,
   RelatedIntegrationArray,
   RequiredFieldArray,
@@ -106,7 +108,9 @@ export const addPrepackagedRulesSchema = t.intersection([
       author: DefaultStringArray, // defaults to empty array of strings if not set during decode
       building_block_type, // defaults to undefined if not set during decode
       enabled: DefaultBooleanFalse, // defaults to false if not set during decode
+      timestamp_field, // defaults to "undefined" if not set during decode
       event_category_override, // defaults to "undefined" if not set during decode
+      tiebreaker_field, // defaults to "undefined" if not set during decode
       false_positives: DefaultStringArray, // defaults to empty string array if not set during decode
       filters, // defaults to undefined if not set during decode
       from: DefaultFromString, // defaults to "now-6m" if not set during decode
