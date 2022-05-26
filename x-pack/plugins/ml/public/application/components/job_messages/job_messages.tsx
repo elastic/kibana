@@ -27,7 +27,7 @@ interface JobMessagesProps {
   messages: JobMessage[];
   loading: boolean;
   error: string;
-  refreshMessage?: React.MouseEventHandler<HTMLButtonElement>;
+  refreshMessage?: () => Promise<void>;
   actionHandler?: (message: JobMessage) => void;
 }
 
@@ -51,7 +51,7 @@ export const JobMessages: FC<JobMessagesProps> = ({
           })}
         >
           <EuiButtonIcon
-            onClick={refreshMessage}
+            onClick={() => refreshMessage()}
             iconType="refresh"
             aria-label={i18n.translate('xpack.ml.jobMessages.refreshAriaLabel', {
               defaultMessage: 'Refresh',

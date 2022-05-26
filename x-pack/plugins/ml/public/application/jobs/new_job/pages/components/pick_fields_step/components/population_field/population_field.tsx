@@ -25,7 +25,10 @@ export const PopulationFieldSelector: FC = () => {
 
   const runtimeCategoryFields = useMemo(() => filterCategoryFields(jobCreator.runtimeFields), []);
   const allCategoryFields = useMemo(
-    () => [...newJobCapsService.categoryFields, ...runtimeCategoryFields],
+    () =>
+      [...newJobCapsService.categoryFields, ...runtimeCategoryFields].sort((a, b) =>
+        a.name.localeCompare(b.name)
+      ),
     []
   );
   const categoryFields = useFilteredCategoryFields(
