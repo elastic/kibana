@@ -14,6 +14,8 @@ import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('[PUT] /api/uptime/service/monitors', () => {
+    this.tags('skipCloud');
+
     const supertest = getService('supertest');
     const security = getService('security');
     const kibanaServer = getService('kibanaServer');

@@ -14,6 +14,8 @@ import { getFixtureJson } from './helper/get_fixture_json';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('[GET] /internal/uptime/service/monitors', () => {
+    this.tags('skipCloud');
+
     const supertest = getService('supertest');
 
     let _monitors: MonitorFields[];
