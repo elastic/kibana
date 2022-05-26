@@ -81,12 +81,17 @@ type GetColorFn = (
   }
 ) => string | null;
 
-type GetLineConfigFn = (config: {
+type GetPointConfigFn = (config: {
   xAccessor: string | undefined;
   markSizeAccessor: string | undefined;
   emphasizeFitting?: boolean;
   showPoints?: boolean;
   pointsRadius?: number;
+}) => Partial<AreaSeriesStyle['point']>;
+
+type GetLineConfigFn = (config: {
+  showLines?: boolean;
+  lineWidth?: number;
 }) => Partial<AreaSeriesStyle['line']>;
 
 export interface DatatableWithFormatInfo {
@@ -243,7 +248,7 @@ const getSeriesName: GetSeriesNameFn = (
   return splitColumnId ? data.seriesKeys[0] : columnToLabelMap[data.seriesKeys[0]] ?? null;
 };
 
-const getPointConfig: GetLineConfigFn = ({
+const getPointConfig: GetPointConfigFn = ({
   xAccessor,
   markSizeAccessor,
   emphasizeFitting,
@@ -262,7 +267,10 @@ const getFitLineConfig = () => ({
   dash: [],
 });
 
-const getLineConfig = (strokeWidth?: number) => ({ strokeWidth });
+const getLineConfig: GetLineConfigFn = ({ showLines, lineWidth }) => ({
+  strokeWidth: lineWidth,
+  visible: showLines,
+});
 
 const getColor: GetColorFn = (
   { yAccessor, seriesKeys },
@@ -399,7 +407,10 @@ export const getSeriesProps: GetSeriesPropsFn = ({
       ...(emphasizeFitting && {
         fit: { area: { opacity: fillOpacity || 0.5 }, line: getFitLineConfig() },
       }),
-      line: getLineConfig(layer.lineWidth),
+      line: getLineConfig({
+        showLines: layer.showLines,
+        lineWidth: layer.lineWidth,
+      }),
     },
     lineSeriesStyle: {
       point: getPointConfig({
@@ -410,7 +421,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
         pointsRadius: layer.pointsRadius,
       }),
       ...(emphasizeFitting && { fit: { line: getFitLineConfig() } }),
-      line: getLineConfig(layer.lineWidth),
+      line: getLineConfig({ lineWidth: layer.lineWidth, showLines: layer.showLines }),
     },
     name(d) {
       return getSeriesName(d, {

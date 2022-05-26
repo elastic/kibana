@@ -15,6 +15,11 @@ export const isStringTypeIndexPattern = (
   indexPatternValue: IndexPatternValue
 ): indexPatternValue is string => typeof indexPatternValue === 'string';
 
+export const isDataViewTypeIndexPattern = (
+  indexPatternValue: IndexPatternValue
+): indexPatternValue is { id: string } =>
+  Boolean(indexPatternValue) && typeof indexPatternValue === 'object';
+
 export const getIndexPatternKey = (indexPatternValue: IndexPatternValue) =>
   isStringTypeIndexPattern(indexPatternValue) ? indexPatternValue : indexPatternValue?.id ?? '';
 
