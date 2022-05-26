@@ -58,7 +58,8 @@ export const useAppLinks = (): AppLinkItems => {
 };
 
 /**
- * Hook to get the app links updated value
+ * Hook to check if a link exists in the application links,
+ * It can be used to know if a link access is authorized.
  */
 export const useLinkExists = (id: SecurityPageName): boolean => {
   const [linkExists, setLinkExists] = useState(!!getNormalizedLink(id));
@@ -68,7 +69,7 @@ export const useLinkExists = (id: SecurityPageName): boolean => {
       setLinkExists(!!getNormalizedLink(id));
     });
     return () => linksSubscription.unsubscribe();
-  }, []);
+  }, [id]);
 
   return linkExists;
 };
