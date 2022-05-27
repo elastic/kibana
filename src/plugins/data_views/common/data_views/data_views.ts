@@ -55,14 +55,41 @@ export interface DataViewListItem {
   typeMeta?: TypeMeta;
 }
 
+/**
+ * Data views API service dependencies
+ */
 export interface DataViewsServiceDeps {
+  /**
+   * UiSettings service instance wrapped in a common interface
+   */
   uiSettings: UiSettingsCommon;
+  /**
+   * Saved objects client interface wrapped in a common interface
+   */
   savedObjectsClient: SavedObjectsClientCommon;
+  /**
+   * Wrapper around http call functionality so it can be used on client or server
+   */
   apiClient: IDataViewsApiClient;
+  /**
+   * Field formats service
+   */
   fieldFormats: FieldFormatsStartCommon;
+  /**
+   * Hander for service notifications
+   */
   onNotification: OnNotification;
+  /**
+   * Handler for service errors
+   */
   onError: OnError;
+  /**
+   * Redirects when there's no data view. only used on client
+   */
   onRedirectNoIndexPattern?: () => void;
+  /**
+   * Determines whether the user can save data views
+   */
   getCanSave: () => Promise<boolean>;
 }
 
@@ -116,6 +143,9 @@ export interface DataViewsServicePublicMethods {
    * @param id - Id of the data view to get.
    */
   get: (id: string) => Promise<DataView>;
+  /**
+   * Get populated data view saved object cache
+   */
   getCache: () => Promise<Array<SavedObject<IndexPatternSavedObjectAttrs>> | null | undefined>;
   /**
    * If user can save data view, return true.
