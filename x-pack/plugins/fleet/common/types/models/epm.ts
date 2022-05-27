@@ -334,7 +334,7 @@ export interface RegistryDataStreamPrivileges {
   indices?: string[];
 }
 
-export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string';
+export type RegistryVarType = 'integer' | 'bool' | 'password' | 'text' | 'yaml' | 'string' | 'textarea';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
