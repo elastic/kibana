@@ -9,15 +9,15 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   createBootstrapIndex,
   deleteAllIndex,
-  deletePolicy,
   deleteIndexTemplate,
+  deletePolicy,
   deleteTemplate,
   getBootstrapIndexExists,
   getIndexTemplateExists,
   getPolicyExists,
   getTemplateExists,
-  setPolicy,
   setIndexTemplate,
+  setPolicy,
 } from '@kbn/securitysolution-es-utils';
 import type {
   FoundListItemSchema,
@@ -319,25 +319,25 @@ export class ListClient {
     return getIndexTemplateExists(esClient, listItemIndex);
   };
 
-    /**
+  /**
    * Returns true if the list template for ILM exists, otherwise false
    * @returns True if the list template for ILM exists, otherwise false.
    */
-     public getLegacyListTemplateExists = async (): Promise<boolean> => {
-      const { esClient } = this;
-      const listIndex = this.getListIndex();
-      return getTemplateExists(esClient, listIndex);
-    };
-  
-    /**
-     * Returns true if the list item template for ILM exists, otherwise false
-     * @returns True if the list item template for ILM exists, otherwise false.
-     */
-    public getLegacyListItemTemplateExists = async (): Promise<boolean> => {
-      const { esClient } = this;
-      const listItemIndex = this.getListItemIndex();
-      return getTemplateExists(esClient, listItemIndex);
-    };
+  public getLegacyListTemplateExists = async (): Promise<boolean> => {
+    const { esClient } = this;
+    const listIndex = this.getListIndex();
+    return getTemplateExists(esClient, listIndex);
+  };
+
+  /**
+   * Returns true if the list item template for ILM exists, otherwise false
+   * @returns True if the list item template for ILM exists, otherwise false.
+   */
+  public getLegacyListItemTemplateExists = async (): Promise<boolean> => {
+    const { esClient } = this;
+    const listItemIndex = this.getListItemIndex();
+    return getTemplateExists(esClient, listItemIndex);
+  };
 
   /**
    * Returns the list template for ILM.
@@ -459,7 +459,7 @@ export class ListClient {
     return deleteIndexTemplate(esClient, listItemIndex);
   };
 
-   /**
+  /**
    * Deletes the list boot strap index for ILM policies.
    * @returns The contents of the bootstrap response from Elasticsearch
    */

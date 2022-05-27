@@ -25,7 +25,7 @@ export const getListItemTemplate = (index: string): Record<string, unknown> => {
         },
       },
       mappings: listsItemsMappings,
-    } 
+    },
   };
   return template;
 };
