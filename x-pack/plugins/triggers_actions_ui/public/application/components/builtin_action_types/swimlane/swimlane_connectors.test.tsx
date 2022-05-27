@@ -213,7 +213,7 @@ describe('SwimlaneActionConnectorFields renders', () => {
       actionTypeId: '.swimlane',
       name: 'swimlane',
       config: {
-        apiUrl: 'http://test',
+        apiUrl: 'http://test.com',
         appId: '1234567asbd32',
         connectorType: 'all',
         mappings,

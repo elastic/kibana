@@ -203,7 +203,7 @@ const UpdateConnectorComponent: React.FC<Props> = ({
                 onClick={onSubmit}
                 color="danger"
                 fill
-                disabled={isValid}
+                disabled={!isValid}
                 isLoading={isLoading}
               >
                 {confirmButtonText}

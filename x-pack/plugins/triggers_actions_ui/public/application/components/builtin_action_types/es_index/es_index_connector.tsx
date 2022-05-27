@@ -20,6 +20,7 @@ import {
   FieldConfig,
   getFieldValidityAndErrorMessage,
   UseField,
+  useFormContext,
   useFormData,
   VALIDATION_TYPES,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
@@ -73,6 +74,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
   readOnly,
 }) => {
   const { http, docLinks } = useKibana().services;
+  const { getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: ['config.executionTimeField', 'config.index', '__internal__.hasTimeFieldCheckbox'],
   });
@@ -83,8 +85,11 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
   const [timeFieldOptions, setTimeFieldOptions] = useState<TimeFieldOptions[]>([]);
   const [areIndiciesLoading, setAreIndicesLoading] = useState<boolean>(false);
 
-  const hasTimeFieldCheckbox = __internal__ != null ? __internal__.hasTimeFieldCheckbox : false;
+  const hasTimeFieldCheckboxDefaultValue = !!getFieldDefaultValue<string | undefined>(
+    'config.executionTimeField'
+  );
   const showTimeFieldCheckbox = index != null && timeFieldOptions.length > 0;
+  const showTimeFieldSelect = __internal__ != null ? __internal__.hasTimeFieldCheckbox : false;
 
   const setTimeFields = (fields: TimeFieldOptions[]) => {
     if (fields.length > 0) {
@@ -236,7 +241,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
         <UseField
           path="__internal__.hasTimeFieldCheckbox"
           component={ToggleField}
-          config={{ defaultValue: false }}
+          config={{ defaultValue: hasTimeFieldCheckboxDefaultValue }}
           componentProps={{
             euiFieldProps: {
               label: (
@@ -258,7 +263,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
           }}
         />
       ) : null}
-      {hasTimeFieldCheckbox ? (
+      {showTimeFieldSelect ? (
         <>
           <EuiSpacer size="m" />
           <UseField

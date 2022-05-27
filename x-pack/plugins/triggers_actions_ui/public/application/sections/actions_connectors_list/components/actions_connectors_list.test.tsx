@@ -83,10 +83,10 @@ describe('actions_connectors_list component empty', () => {
     ).toHaveLength(1);
   });
 
-  test('if click create button should render ConnectorAddFlyout', async () => {
+  test('if click create button should render CreateConnectorFlyout', async () => {
     await setup();
     wrapper.find('[data-test-subj="createFirstActionButton"]').first().simulate('click');
-    expect(wrapper.find('ConnectorAddFlyout')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="create-connector-flyout"]').exists()).toBeTruthy();
   });
 });
 
@@ -256,12 +256,10 @@ describe('actions_connectors_list component with items', () => {
     `);
   });
 
-  test('if select item for edit should render ConnectorEditFlyout', async () => {
+  test('if select item for edit should render EditConnectorFlyout', async () => {
     await setup();
-    await wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
-
-    const edit = await wrapper.find('ConnectorEditFlyout');
-    expect(edit).toHaveLength(1);
+    wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
+    expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBeTruthy();
   });
 });
 

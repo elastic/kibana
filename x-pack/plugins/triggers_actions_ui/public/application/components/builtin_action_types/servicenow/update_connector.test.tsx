@@ -6,8 +6,12 @@
  */
 
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
+import userEvent from '@testing-library/user-event';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Props, UpdateConnector } from './update_connector';
+import { act } from 'react-dom/test-utils';
+import { render, act as reactAct } from '@testing-library/react';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -69,8 +73,9 @@ describe('UpdateConnector renders', () => {
     ).toBeTruthy();
   });
 
-  it('should disable inputs on loading', () => {
+  it('should disable inputs on loading', async () => {
     const wrapper = mountUpdateConnector({ isLoading: true });
+
     expect(
       wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').first().prop('disabled')
     ).toBeTruthy();
@@ -198,24 +203,58 @@ describe('UpdateConnector renders', () => {
     ).toBeTruthy();
   });
 
-  it('should disable submit button on form errors', () => {
+  it('should disable submit button on form errors', async () => {
     const wrapper = mountUpdateConnector();
 
-    wrapper.find('[data-test-subj="snUpdateInstallationSubmit"]').first().simulate('click');
-    wrapper.update();
+    await act(async () => {
+      wrapper.find('[data-test-subj="snUpdateInstallationSubmit"]').first().simulate('click');
+      wrapper.update();
+    });
 
     expect(
       wrapper.find('[data-test-subj="snUpdateInstallationSubmit"]').first().prop('disabled')
     ).toBeTruthy();
   });
 
-  it('should confirm the update when submit button clicked', () => {
+  it('should confirm the update when submit button clicked', async () => {
     const onConfirm = jest.fn();
-    const wrapper = mountUpdateConnector({ onConfirm });
+
+    const { getByTestId } = render(
+      <I18nProvider>
+        <UpdateConnector
+          actionTypeId=".servicenow"
+          isOAuth={false}
+          updateErrorMessage={null}
+          readOnly={false}
+          isLoading={false}
+          onConfirm={onConfirm}
+          onCancel={() => {}}
+        />
+      </I18nProvider>
+    );
 
     expect(onConfirm).not.toHaveBeenCalled();
-    wrapper.find('[data-test-subj="snUpdateInstallationSubmit"]').first().simulate('click');
-    expect(onConfirm).toHaveBeenCalled();
+
+    await reactAct(async () => {
+      const urlInput = getByTestId('credentialsApiUrlFromInput');
+      const usernameInput = getByTestId('connector-servicenow-username-form-input');
+      const passwordInput = getByTestId('connector-servicenow-password-form-input');
+
+      await userEvent.type(urlInput, 'https://example.com', { delay: 100 });
+      await userEvent.type(usernameInput, 'user', { delay: 100 });
+      await userEvent.type(passwordInput, 'pass', { delay: 100 });
+      userEvent.click(getByTestId('snUpdateInstallationSubmit'));
+    });
+
+    expect(onConfirm).toHaveBeenCalledWith({
+      config: {
+        apiUrl: 'https://example.com',
+      },
+      secrets: {
+        password: 'pass',
+        username: 'user',
+      },
+    });
   });
 
   it('should cancel the update when cancel button clicked', () => {

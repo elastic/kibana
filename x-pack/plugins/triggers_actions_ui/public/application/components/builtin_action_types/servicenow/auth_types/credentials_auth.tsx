@@ -38,7 +38,8 @@ const CredentialsAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPr
           euiFieldProps: {
             'data-test-subj': 'connector-servicenow-username-form-input',
             isLoading,
-            disabled: readOnly,
+            readOnly,
+            disabled: readOnly || isLoading,
           },
         }}
       />
@@ -48,6 +49,7 @@ const CredentialsAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPr
         readOnly={readOnly}
         data-test-subj="connector-servicenow-password-form-input"
         isLoading={isLoading}
+        disabled={readOnly || isLoading}
       />
     </>
   );

@@ -108,6 +108,7 @@ describe('IndexActionConnectorFields renders', () => {
       wrapper.update();
     });
 
+    wrapper.update();
     expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="executionTimeFieldSelect"]').exists()).toBeFalsy();
 
@@ -263,6 +264,7 @@ describe('IndexActionConnectorFields renders', () => {
     const wrapper = await setup(props);
 
     await waitFor(() => {
+      wrapper.update();
       expect(wrapper.find('[data-test-subj="connectorIndexesComboBox"]').exists()).toBeTruthy();
       expect(wrapper.find('[data-test-subj="indexRefreshCheckbox"]').exists()).toBeTruthy();
       expect(wrapper.find('[data-test-subj="hasTimeFieldCheckbox"]').exists()).toBeTruthy();

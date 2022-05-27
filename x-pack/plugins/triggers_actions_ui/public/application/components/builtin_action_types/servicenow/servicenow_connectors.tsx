@@ -137,17 +137,17 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
           id: id ?? '',
         });
 
-        updateFieldValues({
-          isDeprecated: res.isDeprecated,
-          config: updatedConnector.config,
-        });
-
         toasts.addSuccess({
           title: i18n.UPDATE_SUCCESS_TOAST_TITLE(name ?? ''),
           text: i18n.UPDATE_SUCCESS_TOAST_TEXT,
         });
 
         setShowUpdateConnector(false);
+
+        updateFieldValues({
+          isDeprecated: res.isDeprecated,
+          config: updatedConnector.config,
+        });
       } catch (err) {
         setUpdateErrorMessage(err.message);
       }

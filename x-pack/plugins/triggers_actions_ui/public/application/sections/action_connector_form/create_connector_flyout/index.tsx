@@ -146,7 +146,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   }, []);
 
   return (
-    <EuiFlyout onClose={onClose}>
+    <EuiFlyout onClose={onClose} data-test-subj="create-connector-flyout">
       <FlyoutHeader
         icon={actionTypeModel?.iconClass}
         actionTypeName={actionType?.name}

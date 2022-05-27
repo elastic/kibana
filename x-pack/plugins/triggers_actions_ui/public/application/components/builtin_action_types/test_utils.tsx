@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { ReactWrapper } from 'enzyme';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { act } from 'react-dom/test-utils';
 import { ConnectorFormSchema } from '../../sections/action_connector_form/types';
@@ -21,10 +22,12 @@ const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({ children, 
   const { form } = useForm({ defaultValue: connector });
 
   return (
-    <Form form={form}>
-      <ConnectorFormFieldsGlobal canSave={true} />
-      {children}
-    </Form>
+    <I18nProvider>
+      <Form form={form}>
+        <ConnectorFormFieldsGlobal canSave={true} />
+        {children}
+      </Form>
+    </I18nProvider>
   );
 };
 

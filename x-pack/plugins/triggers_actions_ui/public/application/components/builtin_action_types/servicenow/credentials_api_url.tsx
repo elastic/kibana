@@ -59,7 +59,8 @@ const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly, path
           euiFieldProps: {
             'data-test-subj': 'credentialsApiUrlFromInput',
             isLoading,
-            disabled: readOnly,
+            readOnly,
+            disabled: readOnly || isLoading,
           },
         }}
       />

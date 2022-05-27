@@ -228,7 +228,12 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   }, []);
 
   return (
-    <EuiFlyout onClose={closeFlyout} aria-labelledby="flyoutActionEditTitle" size="m">
+    <EuiFlyout
+      onClose={closeFlyout}
+      aria-labelledby="flyoutActionEditTitle"
+      size="m"
+      data-test-subj="edit-connector-flyout"
+    >
       <FlyoutHeader
         isPreconfigured={connector.isPreconfigured}
         connectorName={connector.name}

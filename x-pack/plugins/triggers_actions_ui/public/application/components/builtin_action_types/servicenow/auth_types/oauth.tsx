@@ -39,6 +39,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
             'data-test-subj': 'connector-servicenow-client-id-form-input',
             readOnly,
             isLoading,
+            disabled: readOnly || isLoading,
           },
         }}
       />
@@ -57,6 +58,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
           euiFieldProps: {
             'data-test-subj': 'connector-servicenow-user-identifier-form-input',
             readOnly,
+            disabled: readOnly || isLoading,
             isLoading,
           },
         }}
@@ -76,6 +78,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
           euiFieldProps: {
             'data-test-subj': 'connector-servicenow-jwt-key-id-form-input',
             readOnly,
+            disabled: readOnly || isLoading,
             isLoading,
           },
         }}
@@ -86,6 +89,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
         readOnly={readOnly}
         data-test-subj="connector-servicenow-client-secret-form-input"
         isLoading={isLoading}
+        disabled={readOnly || isLoading}
       />
       <UseField
         path="secrets.privateKey"
@@ -100,8 +104,9 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
         }}
         componentProps={{
           euiFieldProps: {
+            readOnly,
             'data-test-subj': 'connector-servicenow-private-key-form-input',
-            disabled: readOnly,
+            disabled: readOnly || isLoading,
           },
         }}
       />
@@ -113,6 +118,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
         data-test-subj="connector-servicenow-private-key-password-form-input"
         readOnly={readOnly}
         isLoading={isLoading}
+        disabled={readOnly || isLoading}
       />
     </>
   );
