@@ -28,5 +28,3 @@ steps:
       - ftr-configs
     timeout_in_minutes: 30
     key: ingest
-
-    continue_on_failure: true
