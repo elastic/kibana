@@ -148,7 +148,7 @@ paths:
                       description: Turns alert syncing on or off.
                       type: boolean
                 severity:
-                  $ref: '#/components/schemas/severity'
+                  $ref: '#/components/schemas/severity_property'
                 tags:
                   description: >-
                     The words and phrases that help categorize cases. It can be
@@ -366,7 +366,7 @@ paths:
                         type: boolean
                         example: true
                   severity:
-                    $ref: '#/components/schemas/severity'
+                    $ref: '#/components/schemas/severity_property'
                   status:
                     $ref: '#/components/schemas/status'
                   tags:
@@ -574,7 +574,7 @@ paths:
                             description: Turns alert syncing on or off.
                             type: boolean
                       severity:
-                        $ref: '#/components/schemas/severity'
+                        $ref: '#/components/schemas/severity_property'
                       status:
                         $ref: '#/components/schemas/status'
                       tags:
@@ -791,7 +791,7 @@ paths:
                         type: boolean
                         example: true
                   severity:
-                    $ref: '#/components/schemas/severity'
+                    $ref: '#/components/schemas/severity_property'
                   status:
                     $ref: '#/components/schemas/status'
                   tags:
@@ -864,12 +864,17 @@ paths:
               type: string
         - name: from
           in: query
-          description: >-
-            Returns only cases that were created after a specific date. The date
-            must be specified as a KQL data range or date match expression.
+          description: >
+            [preview] Returns only cases that were created after a specific
+            date. The date must be specified as a KQL data range or date match
+            expression. This functionality is in technical preview and may be
+            changed or removed in a future release. Elastic will apply best
+            effort to fix any issues, but features in technical preview are not
+            subject to the support SLA of official GA features.
           schema:
             type: string
           example: now-1d
+          x-preview: true
         - $ref: '#/components/parameters/owner'
         - name: page
           in: query
@@ -902,7 +907,6 @@ paths:
             in the response.
           schema:
             type: string
-          example: '%2A'
         - name: searchFields
           in: query
           description: The fields to perform the simple_query_string parsed query against.
@@ -912,6 +916,7 @@ paths:
               - type: array
                 items:
                   type: string
+        - $ref: '#/components/parameters/severity'
         - name: sortField
           in: query
           description: Determines which field is used to sort the results.
@@ -960,6 +965,7 @@ paths:
           schema:
             type: string
           example: now%2B1d
+          x-preview: true
       responses:
         '200':
           description: Indicates a successful call.
@@ -1120,6 +1126,13 @@ paths:
                             banner advertising cheap holidays for underpaid
                             civil servants. Operation bubblegum is active.
                             Repeat - operation bubblegum is now active
+                        duration:
+                          type: integer
+                          description: >-
+                            The elapsed time from the creation of the case to
+                            its closure (in seconds). If the case has not been
+                            closed, the duration is set to null.
+                          example: 120
                         external_service:
                           type: object
                           properties:
@@ -1158,6 +1171,8 @@ paths:
                             syncAlerts:
                               type: boolean
                               example: true
+                        severity:
+                          $ref: '#/components/schemas/severity_property'
                         status:
                           $ref: '#/components/schemas/status'
                         tags:
@@ -1347,7 +1362,7 @@ paths:
                       description: Turns alert syncing on or off.
                       type: boolean
                 severity:
-                  $ref: '#/components/schemas/severity'
+                  $ref: '#/components/schemas/severity_property'
                 tags:
                   description: >-
                     The words and phrases that help categorize cases. It can be
@@ -1565,7 +1580,7 @@ paths:
                         type: boolean
                         example: true
                   severity:
-                    $ref: '#/components/schemas/severity'
+                    $ref: '#/components/schemas/severity_property'
                   status:
                     $ref: '#/components/schemas/status'
                   tags:
@@ -1775,7 +1790,7 @@ paths:
                             description: Turns alert syncing on or off.
                             type: boolean
                       severity:
-                        $ref: '#/components/schemas/severity'
+                        $ref: '#/components/schemas/severity_property'
                       status:
                         $ref: '#/components/schemas/status'
                       tags:
@@ -1992,7 +2007,7 @@ paths:
                         type: boolean
                         example: true
                   severity:
-                    $ref: '#/components/schemas/severity'
+                    $ref: '#/components/schemas/severity_property'
                   status:
                     $ref: '#/components/schemas/status'
                   tags:
@@ -2066,9 +2081,13 @@ paths:
               type: string
         - name: from
           in: query
-          description: >-
-            Returns only cases that were created after a specific date. The date
-            must be specified as a KQL data range or date match expression.
+          description: >
+            [preview] Returns only cases that were created after a specific
+            date. The date must be specified as a KQL data range or date match
+            expression. This functionality is in technical preview and may be
+            changed or removed in a future release. Elastic will apply best
+            effort to fix any issues, but features in technical preview are not
+            subject to the support SLA of official GA features.
           schema:
             type: string
           example: now-1d
@@ -2104,7 +2123,6 @@ paths:
             in the response.
           schema:
             type: string
-          example: '%2A'
         - name: searchFields
           in: query
           description: The fields to perform the simple_query_string parsed query against.
@@ -2114,6 +2132,7 @@ paths:
               - type: array
                 items:
                   type: string
+        - $ref: '#/components/parameters/severity'
         - name: sortField
           in: query
           description: Determines which field is used to sort the results.
@@ -2156,9 +2175,13 @@ paths:
           example: phishing
         - name: to
           in: query
-          description: >-
-            Returns only cases that were created before a specific date. The
-            date must be specified as a KQL data range or date match expression.
+          description: >
+            [preview] Returns only cases that were created before a specific
+            date. The date must be specified as a KQL data range or date match
+            expression. This functionality is in technical preview and may be
+            changed or removed in a future release. Elastic will apply best
+            effort to fix any issues, but features in technical preview are not
+            subject to the support SLA of official GA features.
           schema:
             type: string
           example: now+1d
@@ -2322,6 +2345,13 @@ paths:
                             banner advertising cheap holidays for underpaid
                             civil servants. Operation bubblegum is active.
                             Repeat - operation bubblegum is now active
+                        duration:
+                          type: integer
+                          description: >-
+                            The elapsed time from the creation of the case to
+                            its closure (in seconds). If the case has not been
+                            closed, the duration is set to null.
+                          example: 120
                         external_service:
                           type: object
                           properties:
@@ -2360,6 +2390,8 @@ paths:
                             syncAlerts:
                               type: boolean
                               example: true
+                        severity:
+                          $ref: '#/components/schemas/severity_property'
                         status:
                           $ref: '#/components/schemas/status'
                         tags:
@@ -2447,6 +2479,17 @@ components:
             items:
               $ref: '#/components/schemas/owners'
       example: cases
+    severity:
+      in: query
+      name: severity
+      description: The severity of the case.
+      schema:
+        type: string
+        enum:
+          - critical
+          - high
+          - low
+          - medium
     space_id:
       in: path
       name: spaceId
@@ -2473,7 +2516,7 @@ components:
         - cases
         - observability
         - securitySolution
-    severity:
+    severity_property:
       type: string
       description: The severity of the case.
       enum:
@@ -2641,79 +2684,42 @@ components:
       value:
         page: 1
         per_page: 5
-        total: 2
+        total: 1
         cases:
           - id: abed3a70-71bd-11ea-a0b2-c51ea50a58e2
             version: WzExMCwxXQ==
             comments: []
-            totalComment: 0
+            totalComment: 1
             totalAlerts: 0
-            title: The Long Game
+            title: Case title
             tags:
-              - windows
               - phishing
-            description: Windows 95
+            description: Case description
             settings:
               syncAlerts: true
             owner: securitySolution
+            duration: null
+            severity: low
             closed_at: null
             closed_by: null
-            created_at: '2022-03-29T13:03:23.533Z'
+            created_at: '2022-05-12T00:16:36.371Z'
             created_by:
-              email: rhustler@email.com
-              full_name: Rat Hustler
-              username: rhustler
+              email: jdoe@email.com
+              full_name: Jane Doe
+              username: jdoe
             status: open
-            updated_at: null
-            updated_by: null
-            connector:
-              id: 131d4448-abe0-4789-939d-8ef60680b498
-              name: My connector
-              type: .jira
-              fields:
-                issueType: '10006'
-                priority: null
-            external_service: null
-          - id: a18b38a0-71b0-11ea-a0b2-c51ea50a58e2
-            version: Wzk4LDFd
-            comments: []
-            totalComment: 0
-            totalAlerts: 0
-            title: This case will self-destruct in 5 seconds
-            tags:
-              - phishing
-              - social engineering
-              - bubblegum
-            description: >-
-              James Bond clicked on a highly suspicious email banner advertising
-              cheap holidays for underpaid civil servants. Operation bubblegum
-              is active. Repeat - operation bubblegum is now active!
-            settings:
-              syncAlerts: false
-            owner: cases
-            closed_at: null
-            closed_by: null
-            created_at: '2022-03-29T11:30:02.658Z'
-            created_by:
-              email: ahunley@imf.usa.gov
-              full_name: Alan Hunley
-              username: ahunley
-            status: open
-            updated_at: '2022-03-29T12:01:50.244Z'
+            updated_at: '2022-05-12T00:27:58.162Z'
             updated_by:
-              full_name: Classified
-              email: classified@hms.oo.gov.uk
-              username: M
+              email: jsmith@email.com
+              full_name: Joe Smith
+              username: jsmith
             connector:
-              id: 131d4448-abe0-4789-939d-8ef60680b498
-              name: My connector
-              type: .resilient
-              fields:
-                issueTypes:
-                  - 13
-                severityCode: 6
+              id: none
+              name: none
+              type: .none
+              fields: null
             external_service: null
-        count_open_cases: 2
+        count_open_cases: 1
         count_in_progress_cases: 0
         count_closed_cases: 0
 security:

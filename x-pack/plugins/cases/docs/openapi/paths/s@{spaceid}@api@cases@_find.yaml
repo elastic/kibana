@@ -23,7 +23,13 @@ get:
           type: string
     - name: from
       in: query
-      description: Returns only cases that were created after a specific date. The date must be specified as a KQL data range or date match expression.
+      description: >
+        [preview] Returns only cases that were created after a specific date.
+        The date must be specified as a KQL data range or date match expression.
+        This functionality is in technical preview and may be changed or removed
+        in a future release. Elastic will apply best effort to fix any issues,
+        but features in technical preview are not subject to the support SLA of
+        official GA features.
       schema:
         type: string
       example: now-1d
@@ -57,7 +63,6 @@ get:
       description: An Elasticsearch simple_query_string query that filters the objects in the response.
       schema:
         type: string
-      example: '%2A'
     - name: searchFields
       in: query
       description: The fields to perform the simple_query_string parsed query against.
@@ -67,6 +72,7 @@ get:
           - type: array
             items:
               type: string
+    - $ref: '../components/parameters/severity.yaml' 
     - name: sortField
       in: query
       description: Determines which field is used to sort the results.
@@ -109,7 +115,13 @@ get:
       example: phishing
     - name: to
       in: query
-      description: Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression.
+      description: >
+        [preview] Returns only cases that were created before a specific date.
+        The date must be specified as a KQL data range or date match expression.
+        This functionality is in technical preview and may be changed or removed
+        in a future release. Elastic will apply best effort to fix any issues,
+        but features in technical preview are not subject to the support SLA of
+        official GA features.
       schema:
         type: string
       example: now+1d
