@@ -9,7 +9,7 @@
 
 import Url from 'url';
 import { run as playwrightRun } from '@elastic/synthetics';
-import { createApmAndObsUsersAndRoles } from '@kbn/apm-plugin/scripts/create_apm_users_and_roles/create_apm_users_and_roles';
+import { createApmUsers } from '@kbn/apm-plugin/scripts/create_apm_users/create_apm_users';
 import { esArchiverLoad, esArchiverUnload } from './tasks/es_archiver';
 
 import './journeys';
@@ -43,9 +43,9 @@ async function playwrightStart(getService: any, headless = true, match?: string)
     port: config.get('servers.kibana.port'),
   });
 
-  await createApmAndObsUsersAndRoles({
+  await createApmUsers({
     elasticsearch: { username: 'elastic', password: 'changeme' },
-    kibana: { roleSuffix: 'e2e', hostname: kibanaUrl },
+    kibana: { hostname: kibanaUrl },
   });
 
   const res = await playwrightRun({
