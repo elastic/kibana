@@ -248,10 +248,14 @@ export async function mountApp(
       }
 
       useEffect(() => {
-        lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
-        lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
+        if (editorState === 'data') {
+          lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
+          lensStore.dispatch(
+            loadInitial({ redirectCallback, initialInput, history: props.history })
+          );
+        }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, [props.id, props.editByValue]);
+      }, [props.id, props.editByValue, editorState]);
 
       if (editorState === 'loading') {
         return <EuiLoadingSpinner />;
