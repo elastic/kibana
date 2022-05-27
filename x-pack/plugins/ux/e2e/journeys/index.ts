@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './aa_ux_query.journey';
+export * from './url_ux_query.journey';

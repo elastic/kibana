@@ -5,17 +5,15 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
-import { argv } from '@kbn/synthetics-plugin/e2e/parse_args_params';
-import { SyntheticsRunner } from '@kbn/synthetics-plugin/e2e/synthetics_start';
 import path from 'path';
+import { SyntheticsRunner } from './synthetics_start';
+
+import { argv } from './parse_args_params';
 
 const { headless, grep, pauseOnError } = argv;
 
 async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
-  const kibanaConfig = await readConfigFile(
-    require.resolve('@kbn/synthetics-plugin/e2e/config')
-  );
-
+  const kibanaConfig = await readConfigFile(require.resolve('./config.ts'));
   return {
     ...kibanaConfig.getAll(),
     testRunner: async ({ getService }: any) => {
@@ -26,16 +24,14 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
       });
 
       await syntheticsRunner.setup();
-
       const fixturesDir = path.join(__dirname, '../e2e/fixtures');
 
-      await syntheticsRunner.loadTestData(fixturesDir, [
-        'rum_8.0.0',
-        'rum_test_data',
-      ]);
+      await syntheticsRunner.loadTestData(fixturesDir, ['full_heartbeat', 'browser']);
+
       await syntheticsRunner.loadTestFiles(async () => {
         require('./journeys');
       });
+
       await syntheticsRunner.run();
     },
   };

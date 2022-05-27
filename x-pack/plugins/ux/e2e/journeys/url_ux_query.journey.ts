@@ -7,20 +7,19 @@
 
 import { journey, step, expect, before } from '@elastic/synthetics';
 import { UXDashboardDatePicker } from '../page_objects/date_picker';
-import { UXDashboardFilters } from '../page_objects/dashboard';
-import { loginToKibana, waitForLoadingToFinish } from './utils';
+import { byTestId, loginToKibana, waitForLoadingToFinish } from './utils';
 
 journey('UX URL Query', async ({ page, params }) => {
-  const filtersPage = new UXDashboardFilters(page);
-
   before(async () => {
     await waitForLoadingToFinish({ page });
   });
 
   const queryParams = {
     percentile: '50',
+    rangeFrom: '2020-05-18T11:51:00.000Z',
+    rangeTo: '2021-10-30T06:37:15.536Z',
   };
-  const queryString = new URLSearchParams().toString();
+  const queryString = new URLSearchParams(queryParams).toString();
 
   const baseUrl = `${params.kibanaUrl}/app/ux`;
 
@@ -30,7 +29,7 @@ journey('UX URL Query', async ({ page, params }) => {
     });
     await loginToKibana({
       page,
-      user: { username: 'obs_read_user', password: 'changeme' },
+      user: { username: 'viewer_user', password: 'changeme' },
     });
   });
 
@@ -40,7 +39,11 @@ journey('UX URL Query', async ({ page, params }) => {
   });
 
   step('Confirm query params', async () => {
-    const fiftiethPercentile = filtersPage.getPercentileOption('50');
-    expect(fiftiethPercentile).toHaveProperty('value', queryParams.percentile);
+    const value = await page.$eval(
+      byTestId('uxPercentileSelect'),
+      (sel: HTMLInputElement) => sel.value
+    );
+
+    expect(value).toBe(queryParams.percentile);
   });
 });
