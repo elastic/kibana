@@ -30,7 +30,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async function () {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
+      await kibanaServer.uiSettings.update({
+        'doc_table:legacy': false,
+        defaultIndex: 'logstash-*',
+      });
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItem(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);

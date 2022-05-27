@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const TEST_INDEX_PATTERN = 'logstash-*';
 const TEST_ANCHOR_ID = 'AU_x3_BrGFA8no6QjjaI';
@@ -17,9 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const retry = getService('retry');
-  const dataGrid = getService('dataGrid');
+  const docTable = getService('docTable');
   const browser = getService('browser');
-  const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['context']);
   let expectedRowLength = 2 * TEST_DEFAULT_CONTEXT_SIZE + 1;
 
@@ -29,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
-        'doc_table:legacy': false,
+        'doc_table:legacy': true,
       });
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID);
     });
@@ -38,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         `number of rows displayed initially is ${expectedRowLength}`,
         async function () {
-          const rows = await dataGrid.getRowsText();
+          const rows = await docTable.getRowsText();
           return rows.length === expectedRowLength;
         }
       );
@@ -59,11 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         `number of rows displayed after clicking load more predecessors is ${expectedRowLength}`,
         async function () {
-          // open full screen mode
-          await testSubjects.click('dataGridFullScreenButton');
-          const rows = await dataGrid.getRowsText();
-          // close full screen mode
-          await testSubjects.click('dataGridFullScreenButton');
+          const rows = await docTable.getRowsText();
           return rows.length === expectedRowLength;
         }
       );
@@ -76,11 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         `number of rows displayed after clicking load more successors is ${expectedRowLength}`,
         async function () {
-          // open full screen mode
-          await testSubjects.click('dataGridFullScreenButton');
-          const rows = await dataGrid.getRowsText();
-          // close full screen mode
-          await testSubjects.click('dataGridFullScreenButton');
+          const rows = await docTable.getRowsText();
           return rows.length === expectedRowLength;
         }
       );
@@ -100,9 +91,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor(
         `number of rows displayed after clicking load more successors is ${expectedRowLength}`,
         async function () {
-          const dataGridWrapper = await testSubjects.find('discoverDocTable');
-          const length = await dataGridWrapper.getAttribute('data-document-number');
-          return Number(length) === 101;
+          const rows = await docTable.getRowsText();
+          return rows.length === 101;
         }
       );
     });
