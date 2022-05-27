@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useEffect, useMemo, useState } from 'react';
+import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFocusTrap, EuiPortal } from '@elastic/eui';
 import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
+import { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
 import { useIsMounted } from '../../hooks/use_is_mounted';
 
 const OverlayRootContainer = styled.div`
@@ -107,6 +108,15 @@ export interface PageOverlayProps {
    * Optional padding size around the overlay
    */
   paddingSize?: 'xs' | 's' | 'm' | 'l' | 'xl';
+
+  /**
+   * If set to `true` (default), whenever the page overlay is displayed, it will be moved so that
+   * it is the last child of inside of the `<body>`. This happens only when the page overlay is
+   * displayed (ie. it does NOT attempt to track nodes added/removed from `<body>` in order to ensure
+   * it is always the last one).
+   */
+  appendAsBodyLastNode?: boolean;
+
   'data-test-subj'?: string;
 }
 
@@ -122,12 +132,18 @@ export const PageOverlay = memo<PageOverlayProps>(
     isHidden = false,
     hideOnUrlPathnameChange = true,
     lockDocumentBody = true,
+    appendAsBodyLastNode = true,
     paddingSize,
     'data-test-subj': dataTestSubj,
   }) => {
     const { pathname } = useLocation();
     const isMounted = useIsMounted();
     const [openedOnPathName, setOpenedOnPathName] = useState<null | string>(null);
+    const portalEleRef = useRef<Node>();
+
+    const setPortalEleRef: EuiPortalProps['portalRef'] = useCallback((node) => {
+      portalEleRef.current = node;
+    }, []);
 
     const containerClassName = useMemo(() => {
       return classnames({
@@ -149,7 +165,13 @@ export const PageOverlay = memo<PageOverlayProps>(
           if (isHidden) {
             return null;
           } else {
+            // capture pathname if not yet set (first show)
             if (!prevState) {
+              // append the portal to the end of `<body>`?
+              if (appendAsBodyLastNode && portalEleRef.current) {
+                document.body.appendChild(portalEleRef.current);
+              }
+
               return pathname;
             }
           }
@@ -157,8 +179,9 @@ export const PageOverlay = memo<PageOverlayProps>(
           return pathname;
         });
       }
-    }, [isHidden, isMounted, pathname]);
+    }, [appendAsBodyLastNode, isHidden, isMounted, pathname]);
 
+    // If `hideOnUrlPathNameChange` is true, then determine if the pathname changed and if so, call `onHide()`
     useEffect(() => {
       if (
         isMounted &&
@@ -172,6 +195,7 @@ export const PageOverlay = memo<PageOverlayProps>(
       }
     }, [hideOnUrlPathnameChange, isHidden, isMounted, onHide, openedOnPathName, pathname]);
 
+    // Handle locking the document.body scrolling
     useEffect(() => {
       if (isMounted) {
         if (isHidden) {
@@ -185,7 +209,7 @@ export const PageOverlay = memo<PageOverlayProps>(
     }, [isHidden, isMounted, lockDocumentBody]);
 
     return (
-      <EuiPortal>
+      <EuiPortal portalRef={setPortalEleRef}>
         <OverlayRootContainer data-test-subj={dataTestSubj} className={containerClassName}>
           <EuiFocusTrap data-test-subj="trap-focus" className="fullHeight">
             {children}
