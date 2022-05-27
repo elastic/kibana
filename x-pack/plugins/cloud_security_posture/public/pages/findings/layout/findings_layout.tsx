@@ -98,6 +98,17 @@ export const getFindingsColumns = (): Array<EuiBasicTableColumn<CspFinding>> => 
     ),
   },
   {
+    field: 'resource.sub_type',
+    name: TEXT.RESOURCE_TYPE,
+    sortable: true,
+    width: '150px',
+  },
+  {
+    field: 'resource.name',
+    name: TEXT.RESOURCE_NAME,
+    sortable: true,
+  },
+  {
     field: 'rule.name',
     name: TEXT.RULE,
     sortable: true,
