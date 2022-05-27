@@ -153,10 +153,12 @@ export const initializeCanvas = async (
     content: (domNode) => {
       ReactDOM.render(
         <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-          <HelpMenu
-            functionRegistry={expressions.getFunctions()}
-            notifyService={canvasServices.getServices().notify}
-          />
+          <Provider store={canvasStore}>
+            <HelpMenu
+              functionRegistry={expressions.getFunctions()}
+              notifyService={canvasServices.getServices().notify}
+            />
+          </Provider>
         </KibanaThemeProvider>,
         domNode
       );
