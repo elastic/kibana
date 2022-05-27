@@ -89,8 +89,8 @@ export function createTestConfig(config: ApmFtrConfig) {
 
           return {
             noAccessUser: await getApmApiClient(servers.kibana, security, ApmUser.noAccessUser, es),
-            readUser: await getApmApiClient(servers.kibana, security, ApmUser.apmReadUser, es),
-            writeUser: await getApmApiClient(servers.kibana, security, ApmUser.apmWriteUser, es),
+            readUser: await getApmApiClient(servers.kibana, security, ApmUser.viewerUser, es),
+            writeUser: await getApmApiClient(servers.kibana, security, ApmUser.editorUser, es),
             annotationWriterUser: await getApmApiClient(
               servers.kibana,
               security,
@@ -120,8 +120,8 @@ export function createTestConfig(config: ApmFtrConfig) {
         ml: MachineLearningAPIProvider,
         // legacy clients
         legacySupertestAsNoAccessUser: getLegacySupertestClient(kibanaServer, ApmUser.noAccessUser),
-        legacySupertestAsApmReadUser: getLegacySupertestClient(kibanaServer, ApmUser.apmReadUser),
-        legacySupertestAsApmWriteUser: getLegacySupertestClient(kibanaServer, ApmUser.apmWriteUser),
+        legacySupertestAsApmReadUser: getLegacySupertestClient(kibanaServer, ApmUser.viewerUser),
+        legacySupertestAsApmWriteUser: getLegacySupertestClient(kibanaServer, ApmUser.editorUser),
         legacySupertestAsApmAnnotationsWriteUser: getLegacySupertestClient(
           kibanaServer,
           ApmUser.apmAnnotationsWriteUser
