@@ -3,7 +3,7 @@ id: kibDevDocsDeprecationsByApi
 slug: /kibana-dev-docs/api-meta/deprecated-api-list-by-api
 title: Deprecated API usage by API
 summary: A list of deprecated APIs, which plugins are still referencing them, and when they need to be removed by.
-date: 2022-05-27
+date: 2022-05-24
 tags: ['contributor', 'dev', 'apidocs', 'kibana']
 warning: This document is auto-generated and is meant to be viewed inside our experimental, new docs system.
 ---
@@ -24,6 +24,7 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibDataPluginApi" section="def-common.IndexPatternsContract" text="IndexPatternsContract"/> | dataViews, maps, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IndexPatternField" text="IndexPatternField"/> | dataViews, dataViewEditor, maps, visDefaultEditor, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IndexPatternsService" text="IndexPatternsService"/> | dataViews, maps, data | - |
+| <DocLink id="kibDataPluginApi" section="def-common.DataViewsService.ensureDefaultDataView" text="ensureDefaultDataView"/> | dataViews | - |
 | <DocLink id="kibDataPluginApi" section="def-common.IndexPattern" text="IndexPattern"/> | dataViews, discover, ux, savedObjects, dataViewEditor, maps, visDefaultEditor, data | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.flattenHit" text="flattenHit"/> | dataViews, maps | - |
 | <DocLink id="kibDataPluginApi" section="def-common.DataView.removeScriptedField" text="removeScriptedField"/> | dataViewManagement, dataViews | - |
@@ -62,7 +63,6 @@ warning: This document is auto-generated and is meant to be viewed inside our ex
 | <DocLink id="kibTaskManagerPluginApi" section="def-server.TaskManagerSetupContract.index" text="index"/> | actions, alerting | - |
 | <DocLink id="kibSecurityPluginApi" section="def-server.SecurityPluginSetup.authc" text="authc"/> | encryptedSavedObjects, actions, data, cloud, ml, logstash, securitySolution | - |
 | <DocLink id="kibDataPluginApi" section="def-public.DataPublicPluginStart.fieldFormats" text="fieldFormats"/> | dashboard, lens, stackAlerts, visTypeTable, visTypeTimeseries, visTypeXy, visTypeVislib, expressionPartitionVis | - |
-| <DocLink id="kibDataViewsPluginApi" section="def-common.DataViewsServicePublicMethods.ensureDefaultDataView" text="ensureDefaultDataView"/> | dashboard | - |
 | <DocLink id="kibKibanaReactPluginApi" section="def-public.ExitFullScreenButton" text="ExitFullScreenButton"/> | dashboard | - |
 | <DocLink id="kibDataViewsPluginApi" section="def-public.DataView.getNonScriptedFields" text="getNonScriptedFields"/> | visTypeTimeseries, graph, dataViewManagement | - |
 | <DocLink id="kibDataPluginApi" section="def-server.DataPluginStart.fieldFormats" text="fieldFormats"/> | visTypeTimeseries | - |
@@ -188,7 +188,6 @@ Safe to remove.
 | <DocLink id="kibDataPluginApi" section="def-server.KueryNode" text="KueryNode"/> | data | 
 | <DocLink id="kibDataViewsPluginApi" section="def-public.DataViewsService.ensureDefaultDataView" text="ensureDefaultDataView"/> | dataViews | 
 | <DocLink id="kibDataViewsPluginApi" section="def-common.DataViewsService.ensureDefaultDataView" text="ensureDefaultDataView"/> | dataViews | 
-| <DocLink id="kibDataViewsPluginApi" section="def-server.DataViewsService.ensureDefaultDataView" text="ensureDefaultDataView"/> | dataViews | 
 | <DocLink id="kibExpressionsPluginApi" section="def-public.ExpressionExecutor" text="ExpressionExecutor"/> | expressions | 
 | <DocLink id="kibExpressionsPluginApi" section="def-public.Executor.functions" text="functions"/> | expressions | 
 | <DocLink id="kibExpressionsPluginApi" section="def-public.Executor.types" text="types"/> | expressions | 
