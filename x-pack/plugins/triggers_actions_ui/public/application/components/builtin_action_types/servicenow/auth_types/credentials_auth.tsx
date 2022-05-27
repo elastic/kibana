@@ -15,15 +15,16 @@ import * as i18n from '../translations';
 interface Props {
   readOnly: boolean;
   isLoading: boolean;
+  pathPrefix?: string;
 }
 
 const { emptyField } = fieldValidators;
 
-const CredentialsAuthComponent: React.FC<Props> = ({ isLoading, readOnly }) => {
+const CredentialsAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' }) => {
   return (
     <>
       <UseField
-        path="secrets.username"
+        path={`${pathPrefix}secrets.username`}
         component={TextField}
         config={{
           label: i18n.USERNAME_LABEL,
@@ -33,8 +34,21 @@ const CredentialsAuthComponent: React.FC<Props> = ({ isLoading, readOnly }) => {
             },
           ],
         }}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'connector-servicenow-username-form-input',
+            isLoading,
+            disabled: readOnly,
+          },
+        }}
       />
-      <PasswordField path="secrets.password" label={i18n.PASSWORD_LABEL} readOnly={readOnly} />
+      <PasswordField
+        path={`${pathPrefix}secrets.password`}
+        label={i18n.PASSWORD_LABEL}
+        readOnly={readOnly}
+        data-test-subj="connector-servicenow-password-form-input"
+        isLoading={isLoading}
+      />
     </>
   );
 };

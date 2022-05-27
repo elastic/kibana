@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { ConnectorEditFlyout } from '../application/sections/action_connector_form';
-import type { ConnectorEditFlyoutProps } from '../types';
+import { EditConnectorFlyout } from '../application/sections/action_connector_form';
+import { EditConnectorFlyoutProps } from '../application/sections/action_connector_form/edit_connector_flyout';
 
-export const getEditConnectorFlyoutLazy = (props: ConnectorEditFlyoutProps) => {
-  return <ConnectorEditFlyout {...props} />;
+export const getEditConnectorFlyoutLazy = (props: EditConnectorFlyoutProps) => {
+  return <EditConnectorFlyout {...props} />;
 };

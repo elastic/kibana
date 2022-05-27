@@ -12,7 +12,7 @@ import { getAppInfo } from './api';
 import { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
 
 export interface UseGetAppInfoProps {
-  actionTypeId: string;
+  actionTypeId?: string;
   http: HttpStart;
 }
 
@@ -31,7 +31,7 @@ export const useGetAppInfo = ({ actionTypeId, http }: UseGetAppInfoProps): UseGe
   const fetchAppInfo = useCallback(
     async (connector) => {
       try {
-        if (isEmpty(actionTypeId)) {
+        if (!actionTypeId || isEmpty(actionTypeId)) {
           return;
         }
 

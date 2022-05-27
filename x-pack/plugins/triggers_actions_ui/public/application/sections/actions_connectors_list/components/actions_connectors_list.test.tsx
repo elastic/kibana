@@ -18,11 +18,7 @@ import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../../../common/lib/kibana');
-import {
-  ActionConnector,
-  ConnectorValidationResult,
-  GenericValidationResult,
-} from '../../../../types';
+import { ActionConnector, GenericValidationResult } from '../../../../types';
 import { times } from 'lodash';
 
 jest.mock('../../../lib/action_connector_api', () => ({
@@ -168,9 +164,6 @@ describe('actions_connectors_list component with items', () => {
       id: 'test',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);

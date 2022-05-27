@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { EditConnectorTabs } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { EditConnectorTabs } from '../../../../types';
 
 const FlyoutHeaderComponent: React.FC<{
   isPreconfigured: boolean;

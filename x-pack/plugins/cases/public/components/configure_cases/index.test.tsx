@@ -572,9 +572,6 @@ describe('ConfigureCases', () => {
     test('it show the edit flyout when pressing the update connector button', async () => {
       const actionType = actionTypeRegistryMock.createMockActionTypeModel({
         id: '.resilient',
-        validateConnector: () => {
-          return Promise.resolve({});
-        },
         validateParams: () => {
           const validationResult = { errors: {} };
           return Promise.resolve(validationResult);

@@ -8,60 +8,15 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { Props, UpdateConnector } from './update_connector';
-import { ServiceNowActionConnector } from './types';
-import { ActionConnectorFieldsProps } from '../../../../types';
 
 jest.mock('../../../../common/lib/kibana');
 
-const actionConnectorBasicAuth: ServiceNowActionConnector = {
-  secrets: {
-    username: 'user',
-    password: 'pass',
-  },
-  id: 'test',
-  actionTypeId: '.servicenow',
-  isPreconfigured: false,
-  isDeprecated: false,
-  name: 'servicenow',
-  config: {
-    apiUrl: 'https://test/',
-    usesTableApi: true,
-    isOAuth: false,
-  },
-};
-
-const actionConnectorOAuth: ServiceNowActionConnector = {
-  secrets: {
-    clientSecret: 'clientSecret',
-    privateKey: 'privateKey',
-    privateKeyPassword: 'privateKeyPassword',
-  },
-  id: 'test',
-  actionTypeId: '.servicenow',
-  isPreconfigured: false,
-  isDeprecated: false,
-  name: 'servicenow',
-  config: {
-    apiUrl: 'https://test/',
-    usesTableApi: true,
-    isOAuth: true,
-    clientId: 'cid',
-    userIdentifierValue: 'test@testuserIdentifierValue.com',
-    jwtKeyId: 'jwtKeyId',
-  },
-};
-
-const mountUpdateConnector = (
-  props: Partial<Props> = {},
-  action: ActionConnectorFieldsProps<ServiceNowActionConnector>['action'] = actionConnectorBasicAuth
-) => {
+const mountUpdateConnector = (props: Partial<Props> = {}, isOAuth: boolean = false) => {
   return mountWithIntl(
     <UpdateConnector
-      action={action}
-      applicationInfoErrorMsg={null}
-      errors={{ apiUrl: [], username: [], password: [] }}
-      editActionConfig={() => {}}
-      editActionSecrets={() => {}}
+      actionTypeId=".servicenow"
+      isOAuth={isOAuth}
+      updateErrorMessage={null}
       readOnly={false}
       isLoading={false}
       onConfirm={() => {}}
@@ -87,7 +42,7 @@ describe('UpdateConnector renders', () => {
   });
 
   it('should render update connector fields for OAuth', () => {
-    const wrapper = mountUpdateConnector({}, actionConnectorOAuth);
+    const wrapper = mountUpdateConnector({}, true);
     expect(
       wrapper.find('[data-test-subj="connector-servicenow-client-id-form-input"]').exists()
     ).toBeTruthy();
@@ -134,7 +89,7 @@ describe('UpdateConnector renders', () => {
   });
 
   it('should disable inputs on loading for OAuth', () => {
-    const wrapper = mountUpdateConnector({ isLoading: true }, actionConnectorOAuth);
+    const wrapper = mountUpdateConnector({ isLoading: true }, true);
 
     expect(
       wrapper
@@ -199,7 +154,7 @@ describe('UpdateConnector renders', () => {
   });
 
   it('should set inputs as read-only for OAuth', () => {
-    const wrapper = mountUpdateConnector({ readOnly: true }, actionConnectorOAuth);
+    const wrapper = mountUpdateConnector({ readOnly: true }, true);
 
     expect(
       wrapper
@@ -243,107 +198,15 @@ describe('UpdateConnector renders', () => {
     ).toBeTruthy();
   });
 
-  it('should disable submit button if errors or fields missing', () => {
-    const wrapper = mountUpdateConnector(
-      {
-        errors: { apiUrl: ['some error'], username: [], password: [] },
-      },
-      actionConnectorBasicAuth
-    );
+  it('should disable submit button on form errors', () => {
+    const wrapper = mountUpdateConnector();
+
+    wrapper.find('[data-test-subj="snUpdateInstallationSubmit"]').first().simulate('click');
+    wrapper.update();
 
     expect(
       wrapper.find('[data-test-subj="snUpdateInstallationSubmit"]').first().prop('disabled')
     ).toBeTruthy();
-
-    wrapper.setProps({ ...wrapper.props(), errors: { apiUrl: [], username: [], password: [] } });
-    expect(
-      wrapper.find('[data-test-subj="snUpdateInstallationSubmit"]').first().prop('disabled')
-    ).toBeFalsy();
-
-    wrapper.setProps({
-      ...wrapper.props(),
-      action: {
-        ...actionConnectorBasicAuth,
-        secrets: { ...actionConnectorBasicAuth.secrets, username: undefined },
-      },
-    });
-    expect(
-      wrapper.find('[data-test-subj="snUpdateInstallationSubmit"]').first().prop('disabled')
-    ).toBeTruthy();
-  });
-
-  it('should call editActionConfig when editing api url', () => {
-    const editActionConfig = jest.fn();
-    const wrapper = mountUpdateConnector({ editActionConfig });
-
-    expect(editActionConfig).not.toHaveBeenCalled();
-    wrapper
-      .find('input[data-test-subj="credentialsApiUrlFromInput"]')
-      .simulate('change', { target: { value: 'newUrl' } });
-    expect(editActionConfig).toHaveBeenCalledWith('apiUrl', 'newUrl');
-  });
-
-  it('should call editActionSecrets when editing username or password', () => {
-    const editActionSecrets = jest.fn();
-    const wrapper = mountUpdateConnector({ editActionSecrets });
-
-    expect(editActionSecrets).not.toHaveBeenCalled();
-    wrapper
-      .find('input[data-test-subj="connector-servicenow-username-form-input"]')
-      .simulate('change', { target: { value: 'new username' } });
-    expect(editActionSecrets).toHaveBeenCalledWith('username', 'new username');
-
-    wrapper
-      .find('input[data-test-subj="connector-servicenow-password-form-input"]')
-      .simulate('change', { target: { value: 'new pass' } });
-
-    expect(editActionSecrets).toHaveBeenCalledTimes(2);
-    expect(editActionSecrets).toHaveBeenLastCalledWith('password', 'new pass');
-  });
-
-  it('should call editActionSecrets and/or editActionConfig when editing oAuth fields', () => {
-    const editActionSecrets = jest.fn();
-    const editActionConfig = jest.fn();
-    const wrapper = mountUpdateConnector(
-      { editActionSecrets, editActionConfig },
-      actionConnectorOAuth
-    );
-
-    expect(editActionSecrets).not.toHaveBeenCalled();
-
-    wrapper
-      .find('input[data-test-subj="connector-servicenow-client-id-form-input"]')
-      .simulate('change', { target: { value: 'new-value' } });
-    expect(editActionConfig).toHaveBeenCalledWith('clientId', 'new-value');
-
-    wrapper
-      .find('input[data-test-subj="connector-servicenow-user-identifier-form-input"]')
-      .simulate('change', { target: { value: 'new-value' } });
-    expect(editActionConfig).toHaveBeenCalledWith('userIdentifierValue', 'new-value');
-
-    wrapper
-      .find('input[data-test-subj="connector-servicenow-jwt-key-id-form-input"]')
-      .simulate('change', { target: { value: 'new-value' } });
-    expect(editActionConfig).toHaveBeenCalledWith('jwtKeyId', 'new-value');
-
-    wrapper
-      .find('input[data-test-subj="connector-servicenow-client-secret-form-input"]')
-      .simulate('change', { target: { value: 'new-value' } });
-    expect(editActionSecrets).toHaveBeenCalledWith('clientSecret', 'new-value');
-
-    wrapper
-      .find('textarea[data-test-subj="connector-servicenow-private-key-form-input"]')
-      .simulate('change', { target: { value: 'new-value' } });
-    expect(editActionSecrets).toHaveBeenCalledWith('privateKey', 'new-value');
-
-    wrapper
-      .find('input[data-test-subj="connector-servicenow-private-key-password-form-input"]')
-      .simulate('change', { target: { value: 'new-value' } });
-    expect(editActionSecrets).toHaveBeenCalledWith('privateKeyPassword', 'new-value');
-
-    expect(editActionConfig).toHaveBeenCalledTimes(3);
-    expect(editActionSecrets).toHaveBeenCalledTimes(3);
-    expect(editActionSecrets).toHaveBeenLastCalledWith('privateKeyPassword', 'new-value');
   });
 
   it('should confirm the update when submit button clicked', () => {
@@ -365,14 +228,14 @@ describe('UpdateConnector renders', () => {
   });
 
   it('should show error message if present', () => {
-    const applicationInfoErrorMsg = 'some application error';
+    const updateErrorMessage = 'some application error';
     const wrapper = mountUpdateConnector({
-      applicationInfoErrorMsg,
+      updateErrorMessage,
     });
 
     expect(wrapper.find('[data-test-subj="snApplicationCallout"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="snApplicationCallout"]').first().text()).toContain(
-      applicationInfoErrorMsg
+      updateErrorMessage
     );
   });
 });

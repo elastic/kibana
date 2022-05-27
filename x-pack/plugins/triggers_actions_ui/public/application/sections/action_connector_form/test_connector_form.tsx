@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
 
-export interface ConnectorAddFlyoutProps {
+export interface TestConnectorFormProps {
   connector: ActionConnector;
   executeEnabled: boolean;
   isExecutingAction: boolean;
@@ -45,7 +45,7 @@ export const TestConnectorForm = ({
   onExecutionAction,
   isExecutingAction,
   actionTypeRegistry,
-}: ConnectorAddFlyoutProps) => {
+}: TestConnectorFormProps) => {
   const [actionErrors, setActionErrors] = useState<IErrorObject>({});
   const [hasErrors, setHasErrors] = useState<boolean>(false);
   const actionTypeModel = actionTypeRegistry.get(connector.actionTypeId);

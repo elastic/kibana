@@ -27,22 +27,19 @@ import { ActionType, ActionConnector, ActionTypeRegistryContract } from '../../.
 import { useKibana } from '../../../common/lib/kibana';
 import { useCreateConnector } from '../../hooks/use_create_connector';
 import { ConnectorForm, ConnectorFormState } from './connector_form';
-import { Connector } from './types';
+import { ConnectorFormSchema } from './types';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-type ConnectorAddModalProps = {
+export interface ConnectorAddModalProps {
   actionType: ActionType;
   onClose: () => void;
   postSaveEventHandler?: (savedAction: ActionConnector) => void;
-  consumer?: string;
   actionTypeRegistry: ActionTypeRegistryContract;
-};
+}
 
 const ConnectorAddModal = ({
   actionType,
   onClose,
   postSaveEventHandler,
-  consumer,
   actionTypeRegistry,
 }: ConnectorAddModalProps) => {
   const {
@@ -52,8 +49,9 @@ const ConnectorAddModal = ({
   const { isLoading: isSavingConnector, createConnector } = useCreateConnector();
   const isMounted = useRef(false);
   const initialConnector = {
-    actionTypeId: actionType?.id ?? '',
-    name: '',
+    actionTypeId: actionType.id,
+    isDeprecated: false,
+    isMissingSecrets: false,
     config: {},
     secrets: {},
   };
@@ -68,7 +66,7 @@ const ConnectorAddModal = ({
     isSubmitted: false,
     isSubmitting: false,
     isValid: undefined,
-    submit: async () => ({ isValid: false, data: {} as Connector }),
+    submit: async () => ({ isValid: false, data: {} as ConnectorFormSchema }),
     preSubmitValidator: null,
   });
 
@@ -102,16 +100,16 @@ const ConnectorAddModal = ({
        */
 
       const { actionTypeId, name, config, secrets } = data;
-      const validConnector = { actionTypeId, name, config, secrets };
+      const validConnector = { actionTypeId, name: name ?? '', config, secrets };
 
       const createdConnector = await createConnector(validConnector);
       return createdConnector;
     }
-  }, [submit, preSubmitValidator]);
+  }, [submit, preSubmitValidator, createConnector]);
 
   const closeModal = useCallback(() => {
     onClose();
-  }, [initialConnector, onClose]);
+  }, [onClose]);
 
   const onSubmit = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
@@ -122,7 +120,7 @@ const ConnectorAddModal = ({
         postSaveEventHandler(createdConnector);
       }
     }
-  }, [validateAndCreateConnector, postSaveEventHandler]);
+  }, [validateAndCreateConnector, closeModal, postSaveEventHandler]);
 
   useEffect(() => {
     isMounted.current = true;

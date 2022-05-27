@@ -47,8 +47,6 @@ import type {
   RuleAddProps,
   RuleEditProps,
   RuleTypeModel,
-  ConnectorAddFlyoutProps,
-  ConnectorEditFlyoutProps,
   AlertsTableProps,
   RuleStatusDropdownProps,
   RuleTagFilterProps,
@@ -56,6 +54,8 @@ import type {
   RuleTagBadgeProps,
   RuleEventLogListProps,
   AlertsTableConfigurationRegistry,
+  CreateConnectorFlyoutProps,
+  EditConnectorFlyoutProps,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
@@ -74,11 +74,11 @@ export interface TriggersAndActionsUIPublicPluginStart {
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
   alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
   getAddConnectorFlyout: (
-    props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>
-  ) => ReactElement<ConnectorAddFlyoutProps>;
+    props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>
+  ) => ReactElement<CreateConnectorFlyoutProps>;
   getEditConnectorFlyout: (
-    props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>
-  ) => ReactElement<ConnectorEditFlyoutProps>;
+    props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
+  ) => ReactElement<EditConnectorFlyoutProps>;
   getAddAlertFlyout: (
     props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleAddProps>;
@@ -235,10 +235,10 @@ export class Plugin
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
       alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
-      getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
+      getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
         return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry: this.actionTypeRegistry });
       },
-      getEditConnectorFlyout: (props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>) => {
+      getEditConnectorFlyout: (props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>) => {
         return getEditConnectorFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,

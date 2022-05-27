@@ -19,7 +19,6 @@ import {
   Rule,
   RuleAddProps,
   RuleFlyoutCloseReason,
-  ConnectorValidationResult,
   GenericValidationResult,
   ValidationResult,
 } from '../../../types';
@@ -137,9 +136,6 @@ describe('rule_add', () => {
       id: 'my-action-type',
       iconClass: 'test',
       selectMessage: 'test',
-      validateConnector: (): Promise<ConnectorValidationResult<unknown, unknown>> => {
-        return Promise.resolve({});
-      },
       validateParams: (): Promise<GenericValidationResult<unknown>> => {
         const validationResult = { errors: {} };
         return Promise.resolve(validationResult);

@@ -6,9 +6,9 @@
  */
 
 import React from 'react';
-import { ConnectorAddFlyout } from '../application/sections/action_connector_form';
-import type { ConnectorAddFlyoutProps } from '../types';
+import { CreateConnectorFlyout } from '../application/sections/action_connector_form';
+import { CreateConnectorFlyoutProps } from '../application/sections/action_connector_form/create_connector_flyout';
 
-export const getAddConnectorFlyoutLazy = (props: ConnectorAddFlyoutProps) => {
-  return <ConnectorAddFlyout {...props} />;
+export const getAddConnectorFlyoutLazy = (props: CreateConnectorFlyoutProps) => {
+  return <CreateConnectorFlyout {...props} />;
 };

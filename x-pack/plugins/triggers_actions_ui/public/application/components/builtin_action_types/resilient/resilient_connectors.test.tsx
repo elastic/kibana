@@ -25,6 +25,7 @@ describe('ResilientActionConnectorFields renders', () => {
         apiKeyId: 'key',
         apiKeySecret: 'secret',
       },
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(

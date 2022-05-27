@@ -23,6 +23,7 @@ describe('XmattersActionConnectorFields renders', () => {
         user: 'user',
         password: 'pass',
       },
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(
@@ -55,6 +56,7 @@ describe('XmattersActionConnectorFields renders', () => {
         user: 'user',
         password: 'pass',
       },
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(

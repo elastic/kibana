@@ -55,6 +55,8 @@ import type { RuleTagFilterProps } from './application/sections/rules_list/compo
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
 import type { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
 import type { RuleEventLogListProps } from './application/sections/rule_details/components/rule_event_log_list';
+import type { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
+import type { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 
 // In Triggers and Actions we treat all `Alert`s as `SanitizedRule<RuleTypeParams>`
 // so the `Params` is a black-box of Record<string, unknown>
@@ -91,6 +93,8 @@ export type {
   RuleStatusFilterProps,
   RuleTagBadgeProps,
   RuleEventLogListProps,
+  CreateConnectorFlyoutProps,
+  EditConnectorFlyoutProps,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -180,11 +184,6 @@ export interface ValidationResult {
   errors: Record<string, any>;
 }
 
-export interface ConnectorValidationResult<Config, Secrets> {
-  config?: GenericValidationResult<Config>;
-  secrets?: GenericValidationResult<Secrets>;
-}
-
 export interface ActionConnectorProps<Config, Secrets> {
   secrets: Secrets;
   id: string;
@@ -219,16 +218,6 @@ export type ActionConnectorWithoutId<
   Config = Record<string, unknown>,
   Secrets = Record<string, unknown>
 > = Omit<UserConfiguredActionConnector<Config, Secrets>, 'id'>;
-
-export interface UpdateConnectorSchema {
-  id: string;
-  name: string;
-  config: Record<string, unknown>;
-  secrets: Record<string, unknown>;
-}
-export interface CreateConnectorSchema extends Omit<UpdateConnectorSchema, 'id'> {
-  actionTypeId: string;
-}
 
 export type ActionConnectorTableItem = ActionConnector & {
   actionType: ActionType['name'];
@@ -319,26 +308,9 @@ export interface IErrorObject {
   [key: string]: string | string[] | IErrorObject;
 }
 
-export interface ConnectorAddFlyoutProps {
-  onClose: () => void;
-  actionTypes?: ActionType[];
-  onTestConnector?: (connector: ActionConnector) => void;
-  reloadConnectors?: () => Promise<ActionConnector[] | void>;
-  consumer?: string;
-  actionTypeRegistry: ActionTypeRegistryContract;
-}
 export enum EditConnectorTabs {
   Configuration = 'configuration',
   Test = 'test',
-}
-
-export interface ConnectorEditFlyoutProps {
-  initialConnector: ActionConnector;
-  onClose: () => void;
-  tab?: EditConnectorTabs;
-  reloadConnectors?: () => Promise<ActionConnector[] | void>;
-  consumer?: string;
-  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export interface RuleEditProps<MetaData = Record<string, any>> {

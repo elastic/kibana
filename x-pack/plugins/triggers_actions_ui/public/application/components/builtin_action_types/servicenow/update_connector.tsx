@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import {
+  EuiButton,
+  EuiButtonEmpty,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyout,
   EuiFlyoutBody,
+  EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiSteps,
   EuiTitle,
@@ -19,10 +22,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { CredentialsApiUrl } from './credentials_api_url';
 import { CredentialsAuth, OAuth } from './auth_types';
 import { SNStoreLink } from './sn_store_button';
+import { ApplicationRequiredCallout } from './application_required_callout';
+import { ServiceNowConfig, ServiceNowSecrets } from './types';
 
 const title = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.serviceNow.updateFormTitle',
@@ -72,88 +77,142 @@ const warningMessage = i18n.translate(
     defaultMessage: 'This updates all instances of this connector and cannot be reversed.',
   }
 );
-
-export interface Props {
-  isLoading: boolean;
-  readOnly: boolean;
-  onCancel: () => void;
-  onConfirm: () => void;
+export interface UpdateConnectorFormSchema {
+  updatedConnector: {
+    config: ServiceNowConfig;
+    secrets: ServiceNowSecrets;
+  };
 }
 
+export interface Props {
+  actionTypeId: string;
+  isOAuth: boolean;
+  isLoading: boolean;
+  readOnly: boolean;
+  updateErrorMessage?: string | null;
+  onCancel: () => void;
+  onConfirm: (connector: UpdateConnectorFormSchema['updatedConnector']) => void;
+}
+
+const PATH_PREFIX = 'updatedConnector.';
+
 const UpdateConnectorComponent: React.FC<Props> = ({
+  actionTypeId,
+  isOAuth,
   isLoading,
   readOnly,
   onCancel,
   onConfirm,
+  updateErrorMessage,
 }) => {
-  const [{ actionTypeId, config }] = useFormData({
-    watch: ['actionTypeId', 'config.isOAuth'],
-  });
+  const { form } = useForm<UpdateConnectorFormSchema>();
+  const { submit, isValid } = form;
 
-  const { isOAuth = false } = config ?? {};
+  const onSubmit = useCallback(async () => {
+    const { data, isValid: isSubmitValid } = await submit();
+    if (!isSubmitValid) {
+      return;
+    }
+
+    const { updatedConnector } = data;
+    onConfirm(updatedConnector);
+  }, [onConfirm, submit]);
 
   return (
-    <EuiFlyout ownFocus onClose={onCancel} data-test-subj="updateConnectorForm">
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h1>{title}</h1>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody
-        banner={
-          <EuiCallOut
-            size="m"
-            color="danger"
-            iconType="alert"
-            data-test-subj="snUpdateInstallationCallout"
-            title={warningMessage}
-          />
-        }
-      >
-        <EuiFlexGroup>
-          <EuiSteps
-            steps={[
-              {
-                title: step1InstallTitle,
-                children: (
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.serviceNowAppRunning"
-                    defaultMessage="The Elastic App from the ServiceNow app store must be installed prior to running the update. {visitLink} to install the app"
-                    values={{
-                      visitLink: (
-                        <SNStoreLink appId={snExternalServiceConfig[actionTypeId].appId ?? ''} />
-                      ),
-                    }}
-                  />
-                ),
-              },
-              {
-                title: step2InstanceUrlTitle,
-                children: <CredentialsApiUrl readOnly={readOnly} isLoading={isLoading} />,
-              },
-              {
-                title: step3CredentialsTitle,
-                children: isOAuth ? (
-                  <OAuth readOnly={readOnly} isLoading={isLoading} />
-                ) : (
-                  <CredentialsAuth readOnly={readOnly} isLoading={isLoading} />
-                ),
-              },
-            ]}
-          />
-        </EuiFlexGroup>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            {/* {applicationInfoErrorMsg && (
-              <ApplicationRequiredCallout
-                message={applicationInfoErrorMsg}
-                appId={snExternalServiceConfig[actionTypeId].appId ?? ''}
-              />
-            )} */}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutBody>
-    </EuiFlyout>
+    <Form form={form}>
+      <EuiFlyout ownFocus onClose={onCancel} data-test-subj="updateConnectorForm">
+        <EuiFlyoutHeader hasBorder>
+          <EuiTitle size="m">
+            <h1>{title}</h1>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody
+          banner={
+            <EuiCallOut
+              size="m"
+              color="danger"
+              iconType="alert"
+              data-test-subj="snUpdateInstallationCallout"
+              title={warningMessage}
+            />
+          }
+        >
+          <EuiFlexGroup>
+            <EuiSteps
+              steps={[
+                {
+                  title: step1InstallTitle,
+                  children: (
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.components.builtinActionTypes.serviceNowAction.serviceNowAppRunning"
+                      defaultMessage="The Elastic App from the ServiceNow app store must be installed prior to running the update. {visitLink} to install the app"
+                      values={{
+                        visitLink: (
+                          <SNStoreLink appId={snExternalServiceConfig[actionTypeId].appId ?? ''} />
+                        ),
+                      }}
+                    />
+                  ),
+                },
+                {
+                  title: step2InstanceUrlTitle,
+                  children: (
+                    <CredentialsApiUrl
+                      readOnly={readOnly}
+                      isLoading={isLoading}
+                      pathPrefix={PATH_PREFIX}
+                    />
+                  ),
+                },
+                {
+                  title: step3CredentialsTitle,
+                  children: isOAuth ? (
+                    <OAuth readOnly={readOnly} isLoading={isLoading} pathPrefix={PATH_PREFIX} />
+                  ) : (
+                    <CredentialsAuth
+                      readOnly={readOnly}
+                      isLoading={isLoading}
+                      pathPrefix={PATH_PREFIX}
+                    />
+                  ),
+                },
+              ]}
+            />
+          </EuiFlexGroup>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              {updateErrorMessage != null ? (
+                <ApplicationRequiredCallout
+                  message={updateErrorMessage}
+                  appId={snExternalServiceConfig[actionTypeId].appId ?? ''}
+                />
+              ) : null}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
+          <EuiFlexGroup justifyContent="flexEnd">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty data-test-subj="snUpdateInstallationCancel" onClick={onCancel}>
+                {cancelButtonText}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="snUpdateInstallationSubmit"
+                onClick={onSubmit}
+                color="danger"
+                fill
+                disabled={isValid}
+                isLoading={isLoading}
+              >
+                {confirmButtonText}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
+    </Form>
   );
 };
 

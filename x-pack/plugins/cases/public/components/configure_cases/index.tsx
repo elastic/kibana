@@ -81,7 +81,7 @@ export const ConfigureCases: React.FC = React.memo(() => {
     [actionTypes]
   );
 
-  const onConnectorUpdate = useCallback(async () => {
+  const onConnectorUpdated = useCallback(async () => {
     refetchConnectors();
     refetchActionTypes();
     refetchCaseConfigure();
@@ -159,10 +159,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
     () =>
       addFlyoutVisible
         ? triggersActionsUi.getAddConnectorFlyout({
-            consumer: 'case',
             onClose: onCloseAddFlyout,
-            actionTypes: supportedActionTypes,
-            reloadConnectors: onConnectorUpdate,
+            supportedActionTypes,
+            onConnectorCreated: onConnectorUpdated,
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -173,10 +172,9 @@ export const ConfigureCases: React.FC = React.memo(() => {
     () =>
       editedConnectorItem && editFlyoutVisible
         ? triggersActionsUi.getEditConnectorFlyout({
-            initialConnector: editedConnectorItem,
-            consumer: 'case',
+            connector: editedConnectorItem,
             onClose: onCloseEditFlyout,
-            reloadConnectors: onConnectorUpdate,
+            onConnectorUpdated,
           })
         : null,
     // eslint-disable-next-line react-hooks/exhaustive-deps

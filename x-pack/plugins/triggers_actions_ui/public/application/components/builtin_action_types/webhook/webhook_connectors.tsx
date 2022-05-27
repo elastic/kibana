@@ -19,6 +19,7 @@ import {
 import {
   UseArray,
   UseField,
+  useFormContext,
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
@@ -38,9 +39,12 @@ const { emptyField } = fieldValidators;
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
+  const { getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: ['config.hasAuth', '__internal__.hasHeaders'],
   });
+
+  const hasHeadersDefaultValue = !!getFieldDefaultValue<boolean | undefined>('config.headers');
 
   const hasAuth = config == null ? true : config.hasAuth;
   const hasHeaders = __internal__ != null ? __internal__.hasHeaders : false;
@@ -145,7 +149,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       <UseField
         path="__internal__.hasHeaders"
         component={ToggleField}
-        config={{ defaultValue: false, label: i18n.ADD_HEADERS_LABEL }}
+        config={{ defaultValue: hasHeadersDefaultValue, label: i18n.ADD_HEADERS_LABEL }}
         componentProps={{
           euiFieldProps: {
             disabled: readOnly,
@@ -164,7 +168,9 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                     <EuiFlexItem>
                       <UseField
                         path={`${item.path}.key`}
-                        config={{ label: i18n.HEADER_KEY_LABEL }}
+                        config={{
+                          label: i18n.HEADER_KEY_LABEL,
+                        }}
                         component={TextField}
                         // Make sure to add this prop otherwise when you delete
                         // a row and add a new one, the stale values will appear

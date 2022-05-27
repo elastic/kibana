@@ -7,6 +7,7 @@
 
 import { lazy } from 'react';
 import { suspendedComponentWithProps } from '../../lib/suspended_component_with_props';
+import { ConnectorAddModalProps } from './connector_add_modal';
 import type { CreateConnectorFlyoutProps } from './create_connector_flyout';
 import type { EditConnectorFlyoutProps } from './edit_connector_flyout';
 
@@ -18,7 +19,7 @@ export const EditConnectorFlyout = suspendedComponentWithProps<EditConnectorFlyo
 );
 export const ActionForm = suspendedComponentWithProps(lazy(() => import('./action_form')));
 
-export const ConnectorAddModal = suspendedComponentWithProps(
+export const ConnectorAddModal = suspendedComponentWithProps<ConnectorAddModalProps>(
   lazy(() => import('./connector_add_modal'))
 );
 

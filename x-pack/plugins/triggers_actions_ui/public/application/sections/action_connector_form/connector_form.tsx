@@ -14,20 +14,20 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
-import { Connector } from './types';
+import { ConnectorFormSchema } from './types';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 
 export interface ConnectorFormState {
   isValid: boolean | undefined;
   isSubmitted: boolean;
   isSubmitting: boolean;
-  submit: FormHook<Connector>['submit'];
+  submit: FormHook<ConnectorFormSchema>['submit'];
   preSubmitValidator: ConnectorValidationFunc | null;
 }
 
 interface Props {
   actionTypeModel: ActionTypeModel | null;
-  connector: Connector;
+  connector: ConnectorFormSchema & { isMissingSecrets: boolean };
   isEdit: boolean;
   /** Handler to receive state changes updates */
   onChange?: (state: ConnectorFormState) => void;

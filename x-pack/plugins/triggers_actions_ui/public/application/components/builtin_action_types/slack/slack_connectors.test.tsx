@@ -23,6 +23,7 @@ describe('SlackActionFields renders', () => {
       actionTypeId: '.slack',
       name: 'slack',
       config: {},
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(

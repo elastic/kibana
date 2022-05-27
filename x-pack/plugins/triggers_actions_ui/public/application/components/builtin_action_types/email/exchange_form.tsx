@@ -99,6 +99,7 @@ const ExchangeFormFields: React.FC<ExchangeFormFieldsProps> = ({ readOnly }) => 
                 />
               </EuiLink>
             }
+            data-test-subj="emailClientSecret"
           />
         </EuiFlexItem>
       </EuiFlexGroup>

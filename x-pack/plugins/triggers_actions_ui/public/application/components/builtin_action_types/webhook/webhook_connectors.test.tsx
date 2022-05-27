@@ -25,6 +25,7 @@ describe('WebhookActionConnectorFields renders', () => {
         user: 'user',
         password: 'pass',
       },
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(

@@ -7,36 +7,33 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { EmailActionConnector } from '../types';
 import ExchangeFormFields from './exchange_form';
+import { FormTestProvider } from '../test_utils';
 
 jest.mock('../../../../common/lib/kibana');
 
 describe('ExchangeFormFields renders', () => {
+  const actionConnector = {
+    secrets: {
+      user: 'user',
+      password: 'pass',
+    },
+    id: 'test',
+    actionTypeId: '.email',
+    name: 'email',
+    config: {
+      from: 'test@test.com',
+      hasAuth: true,
+      service: 'other',
+    },
+    isDeprecated: false,
+  };
+
   test('should display exchange form fields', () => {
-    const actionConnector = {
-      secrets: {
-        clientSecret: 'user',
-      },
-      id: 'test',
-      actionTypeId: '.email',
-      name: 'exchange email',
-      config: {
-        from: 'test@test.com',
-        hasAuth: true,
-        service: 'exchange_server',
-        clientId: '123',
-        tenantId: '1234',
-      },
-    } as EmailActionConnector;
     const wrapper = mountWithIntl(
-      <ExchangeFormFields
-        action={actionConnector}
-        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-      />
+      <FormTestProvider connector={actionConnector}>
+        <ExchangeFormFields readOnly={false} />
+      </FormTestProvider>
     );
     expect(wrapper.find('[data-test-subj="emailClientSecret"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailClientId"]').length > 0).toBeTruthy();
@@ -44,25 +41,10 @@ describe('ExchangeFormFields renders', () => {
   });
 
   test('exchange field defaults to empty when not defined', () => {
-    const actionConnector = {
-      secrets: {},
-      id: 'test',
-      actionTypeId: '.email',
-      name: 'email',
-      config: {
-        from: 'test@test.com',
-        hasAuth: true,
-        service: 'exchange_server',
-      },
-    } as EmailActionConnector;
     const wrapper = mountWithIntl(
-      <ExchangeFormFields
-        action={actionConnector}
-        errors={{ from: [], port: [], host: [], user: [], password: [], service: [] }}
-        editActionConfig={() => {}}
-        editActionSecrets={() => {}}
-        readOnly={false}
-      />
+      <FormTestProvider connector={actionConnector}>
+        <ExchangeFormFields readOnly={false} />
+      </FormTestProvider>
     );
     expect(wrapper.find('[data-test-subj="emailClientSecret"]').length > 0).toBeTruthy();
     expect(wrapper.find('input[data-test-subj="emailClientSecret"]').prop('value')).toEqual('');

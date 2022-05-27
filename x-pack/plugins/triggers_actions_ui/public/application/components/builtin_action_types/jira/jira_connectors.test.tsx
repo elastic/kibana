@@ -25,6 +25,7 @@ describe('JiraActionConnectorFields renders', () => {
         email: 'email',
         apiToken: 'token',
       },
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(

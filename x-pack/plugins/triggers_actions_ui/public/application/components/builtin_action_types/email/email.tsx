@@ -9,13 +9,9 @@ import { uniq } from 'lodash';
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiSelectOption } from '@elastic/eui';
-import { AdditionalEmailServices, InvalidEmailReason } from '@kbn/actions-plugin/common';
-import {
-  ActionTypeModel,
-  ConnectorValidationResult,
-  GenericValidationResult,
-} from '../../../../types';
-import { EmailActionParams, EmailConfig, EmailSecrets, EmailActionConnector } from '../types';
+import { InvalidEmailReason } from '@kbn/actions-plugin/common';
+import { ActionTypeModel, GenericValidationResult } from '../../../../types';
+import { EmailActionParams, EmailConfig, EmailSecrets } from '../types';
 import { RegistrationServices } from '..';
 
 const emailServices: EuiSelectOption[] = [

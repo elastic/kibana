@@ -19,7 +19,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { ActionTypeMenu } from '../action_type_menu';
 import { useCreateConnector } from '../../../hooks/use_create_connector';
 import { ConnectorForm, ConnectorFormState } from '../connector_form';
-import { Connector } from '../types';
+import { ConnectorFormSchema } from '../types';
 import { FlyoutHeader } from './header';
 import { FlyoutFooter } from './foooter';
 import { UpgradeLicenseCallOut } from './upgrade_license_callout';
@@ -27,12 +27,14 @@ import { UpgradeLicenseCallOut } from './upgrade_license_callout';
 export interface CreateConnectorFlyoutProps {
   actionTypeRegistry: ActionTypeRegistryContract;
   onClose: () => void;
+  supportedActionTypes?: ActionType[];
   onConnectorCreated?: (connector: ActionConnector) => void;
   onTestConnector?: (connector: ActionConnector) => void;
 }
 
 const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
   actionTypeRegistry,
+  supportedActionTypes,
   onClose,
   onConnectorCreated,
   onTestConnector,
@@ -54,13 +56,13 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     isSubmitted: false,
     isSubmitting: false,
     isValid: undefined,
-    submit: async () => ({ isValid: false, data: {} as Connector }),
+    submit: async () => ({ isValid: false, data: {} as ConnectorFormSchema }),
     preSubmitValidator: null,
   });
 
   const initialConnector = {
     actionTypeId: actionType?.id ?? '',
-    name: '',
+    isDeprecated: false,
     config: {},
     secrets: {},
     isMissingSecrets: false,
@@ -99,7 +101,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
        */
 
       const { actionTypeId, name, config, secrets } = data;
-      const validConnector = { actionTypeId, name, config, secrets };
+      const validConnector = { actionTypeId, name: name ?? '', config, secrets };
 
       const createdConnector = await createConnector(validConnector);
       return createdConnector;
@@ -155,6 +157,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       >
         {actionType == null ? (
           <ActionTypeMenu
+            actionTypes={supportedActionTypes}
             onActionTypeChange={setActionType}
             setHasActionsUpgradeableByTrial={setHasActionsUpgradeableByTrial}
             actionTypeRegistry={actionTypeRegistry}

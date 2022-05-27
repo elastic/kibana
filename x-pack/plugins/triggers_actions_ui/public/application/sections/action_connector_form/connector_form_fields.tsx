@@ -8,46 +8,19 @@
 import React, { memo, Suspense } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiErrorBoundary } from '@elastic/eui';
-import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { SectionLoading } from '../../components/section_loading';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import { useKibana } from '../../../common/lib/kibana';
-import { HiddenField } from '../../components/hidden_field';
-
-interface ConnectorFormData {
-  name: string;
-  [key: string]: unknown;
-}
+import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 
 interface ConnectorFormFieldsProps {
   actionTypeModel: ActionTypeModel | null;
   isEdit: boolean;
   registerPreSubmitValidator: (validator: ConnectorValidationFunc) => void;
 }
-
-const { emptyField } = fieldValidators;
-
-const nameConfig: FieldConfig<{ name: string }, ConnectorFormData> = {
-  label: 'Connector name',
-  validations: [
-    {
-      validator: emptyField(
-        i18n.translate(
-          'xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredNameText',
-          {
-            defaultMessage: 'Name is required.',
-          }
-        )
-      ),
-    },
-  ],
-};
 
 const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   actionTypeModel,
@@ -61,15 +34,7 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
   return (
     <>
-      <HiddenField path={'actionTypeId'} />
-      <UseField
-        path="name"
-        config={nameConfig}
-        component={Field}
-        componentProps={{
-          euiFieldProps: { readOnly: !canSave, 'data-test-subj': 'nameInput', fullWidth: true },
-        }}
-      />
+      <ConnectorFormFieldsGlobal canSave={canSave} />
       <EuiSpacer size="m" />
       {FieldsComponent !== null ? (
         <>

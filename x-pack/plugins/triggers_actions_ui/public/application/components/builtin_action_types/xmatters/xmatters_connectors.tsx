@@ -33,6 +33,17 @@ const isBasicAuth = (auth: { auth: string } | null | undefined) => {
   return auth.auth === XmattersAuthenticationType.Basic ? true : false;
 };
 
+const authenticationButtons = [
+  {
+    id: XmattersAuthenticationType.Basic,
+    label: i18n.BASIC_AUTH_BUTTON_LABEL,
+  },
+  {
+    id: XmattersAuthenticationType.URL,
+    label: i18n.URL_AUTH_BUTTON_LABEL,
+  },
+];
+
 const XmattersUrlField: React.FC<{ path: string }> = ({ path }) => {
   return (
     <UseField
@@ -65,21 +76,17 @@ const XmattersUrlField: React.FC<{ path: string }> = ({ path }) => {
 const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
-  const { setFieldValue } = useFormContext();
+  const { setFieldValue, getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: ['config.usesBasic', '__internal__.auth'],
   });
 
-  const authenticationButtons = [
-    {
-      id: XmattersAuthenticationType.Basic,
-      label: i18n.BASIC_AUTH_BUTTON_LABEL,
-    },
-    {
-      id: XmattersAuthenticationType.URL,
-      label: i18n.URL_AUTH_BUTTON_LABEL,
-    },
-  ];
+  const usesBasicDefaultValue =
+    getFieldDefaultValue<boolean | undefined>('config.usesBasic') ?? true;
+
+  const selectedAuthDefaultValue = usesBasicDefaultValue
+    ? XmattersAuthenticationType.Basic
+    : XmattersAuthenticationType.URL;
 
   const selectedAuth =
     config != null && !config.usesBasic
@@ -102,7 +109,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
       </EuiTitle>
       <EuiSpacer size="xs" />
       <ButtonGroupField
-        defaultValue={selectedAuth}
+        defaultValue={selectedAuthDefaultValue}
         path={'__internal__.auth'}
         label={i18n.BASIC_AUTH_LABEL}
         legend={i18n.BASIC_AUTH_BUTTON_GROUP_LEGEND}

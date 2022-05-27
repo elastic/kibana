@@ -473,7 +473,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
           onClose={() => {
             setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
           }}
-          onConnectorCreated={(connector) => {
+          onConnectorUpdated={(connector) => {
             setEditConnectorProps({ initialConnector: connector });
             loadActions();
           }}

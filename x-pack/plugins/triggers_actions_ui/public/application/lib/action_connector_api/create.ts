@@ -7,12 +7,15 @@
 import { HttpSetup } from '@kbn/core/public';
 import { RewriteRequestCase, RewriteResponseCase } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../constants';
-import type { ActionConnector, ActionConnectorProps, CreateConnectorSchema } from '../../../types';
+import type {
+  ActionConnector,
+  ActionConnectorProps,
+  ActionConnectorWithoutId,
+} from '../../../types';
 
-const rewriteBodyRequest: RewriteResponseCase<CreateConnectorSchema> = ({
-  actionTypeId,
-  ...res
-}) => ({
+const rewriteBodyRequest: RewriteResponseCase<
+  Pick<ActionConnectorWithoutId, 'actionTypeId' | 'name' | 'config' | 'secrets'>
+> = ({ actionTypeId, ...res }) => ({
   ...res,
   connector_type_id: actionTypeId,
 });
@@ -38,7 +41,7 @@ export async function createActionConnector({
   connector,
 }: {
   http: HttpSetup;
-  connector: CreateConnectorSchema;
+  connector: Pick<ActionConnectorWithoutId, 'actionTypeId' | 'name' | 'config' | 'secrets'>;
 }): Promise<ActionConnector> {
   const res = await http.post<Parameters<typeof rewriteBodyRes>[0]>(
     `${BASE_ACTION_API_PATH}/connector`,

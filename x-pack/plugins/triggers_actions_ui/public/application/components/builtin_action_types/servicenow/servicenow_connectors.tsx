@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 
 import { EuiSpacer } from '@elastic/eui';
 import { snExternalServiceConfig } from '@kbn/actions-plugin/common';
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -18,13 +18,13 @@ import { useGetAppInfo } from './use_get_app_info';
 import { ApplicationRequiredCallout } from './application_required_callout';
 import { isRESTApiError } from './helpers';
 import { InstallationCallout } from './installation_callout';
-import { UpdateConnector } from './update_connector';
+import { UpdateConnector, UpdateConnectorFormSchema } from './update_connector';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import { Credentials } from './credentials';
 import * as i18n from './translations';
 import { ServiceNowActionConnector, ServiceNowConfig, ServiceNowSecrets } from './types';
 import { HiddenField } from '../../hidden_field';
-import { Connector } from '../../../sections/action_connector_form/types';
+import { ConnectorFormSchema } from '../../../sections/action_connector_form/types';
 
 // eslint-disable-next-line import/no-default-export
 export { ServiceNowConnectorFields as default };
@@ -38,8 +38,9 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const [{ id, name, isDeprecated, actionTypeId, config, secrets }] = useFormData<
-    Connector<ServiceNowConfig, ServiceNowSecrets>
+  const { updateFieldValues } = useFormContext();
+  const [{ id, isDeprecated, actionTypeId, name, config, secrets }] = useFormData<
+    ConnectorFormSchema<ServiceNowConfig, ServiceNowSecrets>
   >({
     watch: [
       'id',
@@ -52,7 +53,9 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
     ],
   });
 
-  const requiresNewApplication = isDeprecated ?? true;
+  const requiresNewApplication = isDeprecated != null ? !isDeprecated : true;
+  const { isOAuth = false } = config ?? {};
+
   const action = useMemo(
     () => ({
       name,
@@ -64,41 +67,44 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   ) as ServiceNowActionConnector;
 
   const [showUpdateConnector, setShowUpdateConnector] = useState(false);
-
+  const [updateErrorMessage, setUpdateErrorMessage] = useState<string | null>(null);
   const { fetchAppInfo, isLoading } = useGetAppInfo({
     actionTypeId,
     http,
   });
 
-  const getApplicationInfo = useCallback(async () => {
-    try {
-      const res = await fetchAppInfo(action);
-      if (isRESTApiError(res)) {
-        throw new Error(res.error?.message ?? i18n.UNKNOWN);
-      }
+  const getApplicationInfo = useCallback(
+    async (connector: ServiceNowActionConnector) => {
+      try {
+        const res = await fetchAppInfo(connector);
+        if (isRESTApiError(res)) {
+          throw new Error(res.error?.message ?? i18n.UNKNOWN);
+        }
 
-      return res;
-    } catch (e) {
-      throw e;
-    }
-  }, [action, fetchAppInfo]);
+        return res;
+      } catch (e) {
+        throw e;
+      }
+    },
+    [fetchAppInfo]
+  );
 
   const preSubmitValidator = useCallback(async () => {
     if (requiresNewApplication) {
       try {
-        await getApplicationInfo();
+        await getApplicationInfo(action);
       } catch (error) {
         return {
           message: (
             <ApplicationRequiredCallout
-              appId={snExternalServiceConfig[actionTypeId]?.appId ?? ''}
+              appId={actionTypeId != null ? snExternalServiceConfig[actionTypeId]?.appId : ''}
               message={error.message}
             />
           ),
         };
       }
     }
-  }, [actionTypeId, getApplicationInfo, requiresNewApplication]);
+  }, [action, actionTypeId, getApplicationInfo, requiresNewApplication]);
 
   useEffect(
     () => registerPreSubmitValidator(preSubmitValidator),
@@ -108,44 +114,58 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
   const onMigrateClick = useCallback(() => setShowUpdateConnector(true), []);
   const onModalCancel = useCallback(() => setShowUpdateConnector(false), []);
 
-  const onUpdateConnectorConfirm = useCallback(async () => {
-    try {
-      await getApplicationInfo();
-
-      await updateActionConnector({
-        http,
-        connector: {
-          name: name ?? '',
-          config: { apiUrl: config.apiUrl, usesTableApi: false },
-          secrets: { username: secrets.username, password: secrets.password },
-        },
+  const onUpdateConnectorConfirm = useCallback(
+    async (updatedConnector: UpdateConnectorFormSchema['updatedConnector']) => {
+      const connectorToUpdate = {
+        name: name ?? '',
+        config: { ...updatedConnector.config, usesTableApi: false },
+        secrets: { ...updatedConnector.secrets },
         id: id ?? '',
-      });
+      };
 
-      setShowUpdateConnector(false);
+      try {
+        await getApplicationInfo({
+          ...connectorToUpdate,
+          isDeprecated,
+          isPreconfigured: false,
+          actionTypeId,
+        });
 
-      toasts.addSuccess({
-        title: i18n.UPDATE_SUCCESS_TOAST_TITLE(action.name),
-        text: i18n.UPDATE_SUCCESS_TOAST_TEXT,
-      });
-    } catch (err) {
-      /**
-       * getApplicationInfo may throw an error if the request
-       * fails or if there is a REST api error.
-       *
-       * We silent the errors as a callout will show and inform the user
-       */
-    }
-  }, [getApplicationInfo, http, name, config, secrets, id, toasts, action.name]);
+        const res = await updateActionConnector({
+          http,
+          connector: connectorToUpdate,
+          id: id ?? '',
+        });
+
+        updateFieldValues({
+          isDeprecated: res.isDeprecated,
+          config: updatedConnector.config,
+        });
+
+        toasts.addSuccess({
+          title: i18n.UPDATE_SUCCESS_TOAST_TITLE(name ?? ''),
+          text: i18n.UPDATE_SUCCESS_TOAST_TEXT,
+        });
+
+        setShowUpdateConnector(false);
+      } catch (err) {
+        setUpdateErrorMessage(err.message);
+      }
+    },
+    [name, id, getApplicationInfo, isDeprecated, actionTypeId, http, updateFieldValues, toasts]
+  );
 
   return (
     <>
-      {showUpdateConnector && (
+      {actionTypeId && showUpdateConnector && (
         <UpdateConnector
+          actionTypeId={actionTypeId}
           readOnly={readOnly}
           isLoading={isLoading}
+          updateErrorMessage={updateErrorMessage}
           onConfirm={onUpdateConnectorConfirm}
           onCancel={onModalCancel}
+          isOAuth={isOAuth}
         />
       )}
       {requiresNewApplication && (
@@ -153,7 +173,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
       )}
       {!requiresNewApplication && <SpacedDeprecatedCallout onMigrate={onMigrateClick} />}
       <HiddenField path={'config.usesTableApi'} config={{ defaultValue: false }} />
-      <Credentials readOnly={readOnly} isLoading={isLoading} />
+      <Credentials readOnly={readOnly} isLoading={isLoading} isOAuth={isOAuth} />
     </>
   );
 };

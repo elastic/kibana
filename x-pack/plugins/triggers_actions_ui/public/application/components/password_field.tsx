@@ -42,6 +42,7 @@ interface PasswordFieldProps {
   label: string;
   helpText?: string | ReactNode;
   validate?: boolean;
+  isLoading?: boolean;
   [key: string]: any;
 }
 
@@ -50,6 +51,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = ({
   label,
   helpText,
   validate = true,
+  isLoading,
   ...rest
 }) => {
   return (
@@ -70,7 +72,7 @@ const PasswordFieldComponent: React.FC<PasswordFieldProps> = ({
               isInvalid={isInvalid}
               value={field.value}
               onChange={field.onChange}
-              isLoading={field.isValidating}
+              isLoading={field.isValidating || isLoading === true}
               fullWidth
               {...rest}
             />

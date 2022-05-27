@@ -25,6 +25,7 @@ describe('PagerDutyActionConnectorFields renders', () => {
       config: {
         apiUrl: 'http:\\test',
       },
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(

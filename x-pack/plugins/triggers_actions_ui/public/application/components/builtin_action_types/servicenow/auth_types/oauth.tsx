@@ -15,15 +15,16 @@ import { PasswordField } from '../../../password_field';
 interface Props {
   readOnly: boolean;
   isLoading: boolean;
+  pathPrefix?: string;
 }
 
 const { emptyField } = fieldValidators;
 
-const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly }) => {
+const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' }) => {
   return (
     <>
       <UseField
-        path="config.clientId"
+        path={`${pathPrefix}config.clientId`}
         component={TextField}
         config={{
           label: i18n.CLIENTID_LABEL,
@@ -42,7 +43,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly }) => {
         }}
       />
       <UseField
-        path="config.userIdentifierValue"
+        path={`${pathPrefix}config.userIdentifierValue`}
         component={TextField}
         config={{
           label: i18n.USER_EMAIL_LABEL,
@@ -61,7 +62,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly }) => {
         }}
       />
       <UseField
-        path="config.jwtKeyId"
+        path={`${pathPrefix}config.jwtKeyId`}
         component={TextField}
         config={{
           label: i18n.KEY_ID_LABEL,
@@ -80,7 +81,7 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly }) => {
         }}
       />
       <PasswordField
-        path="secrets.clientSecret"
+        path={`${pathPrefix}secrets.clientSecret`}
         label={i18n.CLIENTSECRET_LABEL}
         readOnly={readOnly}
         data-test-subj="connector-servicenow-client-secret-form-input"
@@ -100,13 +101,12 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly }) => {
         componentProps={{
           euiFieldProps: {
             'data-test-subj': 'connector-servicenow-private-key-form-input',
-            readOnly,
-            isLoading,
+            disabled: readOnly,
           },
         }}
       />
       <PasswordField
-        path="secrets.privateKeyPassword"
+        path={`${pathPrefix}secrets.privateKeyPassword`}
         label={i18n.PRIVATE_KEY_PASSWORD_LABEL}
         helpText={i18n.PRIVATE_KEY_PASSWORD_HELPER_TEXT}
         validate={false}

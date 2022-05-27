@@ -37,7 +37,6 @@ const createSelectedOption = (field: SwimlaneFieldMappingConfig | null | undefin
   field != null ? [formatOption(field)] : EMPTY_COMBO_BOX_ARRAY;
 
 interface Props {
-  updateCurrentStep: (step: number) => void;
   fields: SwimlaneFieldMappingConfig[];
 }
 
@@ -131,7 +130,7 @@ const MappingField: React.FC<{
   }
 );
 
-const SwimlaneFieldsComponent: React.FC<Props> = ({ updateCurrentStep, fields }) => {
+const SwimlaneFieldsComponent: React.FC<Props> = ({ fields }) => {
   const [{ config }] = useFormData({
     watch: ['config.connectorType'],
   });
@@ -171,8 +170,6 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ updateCurrentStep, fields })
         label={i18n.SW_CONNECTOR_TYPE_LABEL}
         legend={i18n.SW_CONNECTOR_TYPE_LABEL}
         options={connectorTypeButtons}
-        fieldIdMap={fieldIdMap}
-        connectorType={connectorType}
       />
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType.All, 'alertIdConfig') && (
         <MappingField
@@ -182,6 +179,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ updateCurrentStep, fields })
           options={textOptions}
           fieldIdMap={fieldIdMap}
           connectorType={connectorType}
+          dataTestSubj="swimlaneAlertIdInput"
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'ruleNameConfig') && (
@@ -190,7 +188,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ updateCurrentStep, fields })
           label={i18n.SW_RULE_NAME_FIELD_LABEL}
           validationLabel={i18n.SW_REQUIRED_ALERT_ID}
           options={textOptions}
-          dataTestSubj="swimlaneApiUrlInput"
+          dataTestSubj="swimlaneAlertNameInput"
           fieldIdMap={fieldIdMap}
           connectorType={connectorType}
         />

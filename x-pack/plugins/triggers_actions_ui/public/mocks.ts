@@ -19,8 +19,6 @@ import {
   RuleAddProps,
   RuleEditProps,
   RuleTypeModel,
-  ConnectorAddFlyoutProps,
-  ConnectorEditFlyoutProps,
   AlertsTableProps,
   AlertsTableConfigurationRegistry,
 } from './types';
@@ -33,6 +31,8 @@ import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRulesListLazy } from './common/get_rules_list';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
+import { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
+import { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
@@ -42,10 +42,10 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     actionTypeRegistry,
     ruleTypeRegistry,
     alertsTableConfigurationRegistry,
-    getAddConnectorFlyout: (props: Omit<ConnectorAddFlyoutProps, 'actionTypeRegistry'>) => {
+    getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
       return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry });
     },
-    getEditConnectorFlyout: (props: Omit<ConnectorEditFlyoutProps, 'actionTypeRegistry'>) => {
+    getEditConnectorFlyout: (props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>) => {
       return getEditConnectorFlyoutLazy({
         ...props,
         actionTypeRegistry,

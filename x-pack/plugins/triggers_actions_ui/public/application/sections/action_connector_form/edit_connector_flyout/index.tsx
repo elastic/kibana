@@ -19,7 +19,7 @@ import {
   UserConfiguredActionConnector,
 } from '../../../../types';
 import { ConnectorForm, ConnectorFormState } from '../connector_form';
-import type { Connector } from '../types';
+import type { ConnectorFormSchema } from '../types';
 import { useUpdateConnector } from '../../../hooks/use_edit_connector';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
@@ -33,13 +33,14 @@ export interface EditConnectorFlyoutProps {
   connector: ActionConnector;
   onClose: () => void;
   tab?: EditConnectorTabs;
-  onConnectorCreated?: (connector: ActionConnector) => void;
+  onConnectorUpdated?: (connector: ActionConnector) => void;
 }
 
 const getConnectorWithoutSecrets = (
   connector: UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>
 ) => ({
   ...connector,
+  isMissingSecrets: connector.isMissingSecrets ?? false,
   secrets: {},
 });
 
@@ -66,7 +67,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   connector,
   onClose,
   tab = EditConnectorTabs.Configuration,
-  onConnectorCreated,
+  onConnectorUpdated,
 }) => {
   const {
     docLinks,
@@ -84,7 +85,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     isSubmitted: false,
     isSubmitting: false,
     isValid: undefined,
-    submit: async () => ({ isValid: false, data: {} as Connector }),
+    submit: async () => ({ isValid: false, data: {} as ConnectorFormSchema }),
     preSubmitValidator: null,
   });
 
@@ -181,19 +182,19 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
          */
 
         const { name, config, secrets } = data;
-        const validConnector = { id: connector.id, name, config, secrets };
+        const validConnector = { id: connector.id, name: name ?? '', config, secrets };
 
         const updatedConnector = await updateConnector(validConnector);
 
         if (updatedConnector) {
           /**
-           * Connector has been saved.
+           * ConnectorFormSchema has been saved.
            * Set the from to clean state.
            */
           onFormModifiedChange(false);
 
-          if (onConnectorCreated && updatedConnector) {
-            onConnectorCreated(updatedConnector);
+          if (onConnectorUpdated && updatedConnector) {
+            onConnectorUpdated(updatedConnector);
           }
 
           if (closeAfterSave) {
@@ -210,7 +211,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       connector.id,
       updateConnector,
       onFormModifiedChange,
-      onConnectorCreated,
+      onConnectorUpdated,
       closeFlyout,
     ]
   );

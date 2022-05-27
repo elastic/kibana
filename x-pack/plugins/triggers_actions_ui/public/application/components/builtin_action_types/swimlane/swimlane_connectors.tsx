@@ -6,8 +6,15 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import { EuiForm, EuiSpacer, EuiStepsHorizontal, EuiButton, EuiFormRow } from '@elastic/eui';
-import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import {
+  EuiForm,
+  EuiSpacer,
+  EuiStepsHorizontal,
+  EuiButton,
+  EuiFormRow,
+  EuiStepStatus,
+} from '@elastic/eui';
+import { useFormContext, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionConnectorFieldsProps } from '../../../../types';
 import { SwimlaneFieldMappingConfig } from './types';
@@ -22,6 +29,8 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
     notifications: { toasts },
   } = useKibana().services;
 
+  const [hasConfigurationErrors, setHasConfigurationError] = useState(false);
+  const { isValid, validateFields } = useFormContext();
   const [{ config, secrets }] = useFormData({
     watch: ['config.apiUrl', 'config.appId', 'secrets.apiToken'],
   });
@@ -40,6 +49,19 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
   }, []);
 
   const onNextStep = useCallback(async () => {
+    setHasConfigurationError(false);
+
+    const { areFieldsValid } = await validateFields([
+      'config.apiUrl',
+      'config.appId',
+      'secrets.apiToken',
+    ]);
+
+    if (!areFieldsValid) {
+      setHasConfigurationError(true);
+      return;
+    }
+
     // fetch swimlane application configuration
     const application = await getApplication({
       apiUrl,
@@ -52,7 +74,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
       setFields(allFields);
       setCurrentStep(2);
     }
-  }, [apiToken, apiUrl, appId, getApplication]);
+  }, [apiToken, apiUrl, appId, getApplication, validateFields]);
 
   const resetConnection = useCallback(() => {
     setCurrentStep(1);
@@ -65,29 +87,25 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         isSelected: currentStep === 1,
         isComplete: currentStep === 2,
         onClick: () => updateCurrentStep(1),
+        status: hasConfigurationErrors ? ('danger' as EuiStepStatus) : undefined,
       },
       {
         title: i18n.SW_MAPPING_TITLE_TEXT_FIELD_LABEL,
-        // disabled: hasConfigurationErrors || isLoadingApplication,
+        disabled: hasConfigurationErrors || isLoadingApplication,
         isSelected: currentStep === 2,
         onClick: onNextStep,
-        // status: hasMappingErrors ? ('danger' as EuiStepStatus) : undefined,
+        status: isValid !== undefined && !isValid ? ('danger' as EuiStepStatus) : undefined,
       },
     ],
-    [currentStep, onNextStep, updateCurrentStep]
+    [
+      currentStep,
+      hasConfigurationErrors,
+      isLoadingApplication,
+      isValid,
+      onNextStep,
+      updateCurrentStep,
+    ]
   );
-
-  /**
-   * Connector type needs to be updated on mount to All.
-   * Otherwise it is undefined and this will cause an error
-   * if the user saves the connector without going to the
-   * second step.  Same for mapping.
-   */
-  // useEffect(() => {
-  //   editActionConfig('connectorType', connectorType ?? SwimlaneConnectorType.All);
-  //   editActionConfig('mappings', mappings ?? {});
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, []);
 
   return (
     <Fragment>
@@ -111,7 +129,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
           </EuiFormRow>
         </div>
         <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
-          <SwimlaneFields updateCurrentStep={updateCurrentStep} fields={fields} />
+          <SwimlaneFields fields={fields} />
           <EuiButton onClick={resetConnection} iconType="arrowLeft">
             {i18n.SW_BACK}
           </EuiButton>

@@ -8,10 +8,10 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { screen, fireEvent, waitFor } from '@testing-library/react';
+import { screen, fireEvent, waitFor, render } from '@testing-library/react';
 import IndexActionConnectorFields from './es_index_connector';
 import { EuiComboBox, EuiSwitch, EuiSwitchEvent, EuiSelect } from '@elastic/eui';
-import { createTestFormRenderer, FormTestProvider } from '../test_utils';
+import { FormTestProvider } from '../test_utils';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -293,17 +293,19 @@ describe('IndexActionConnectorFields renders', () => {
     const connector = {
       actionTypeId: '.index',
       name: 'index',
+      isDeprecated: false,
       config: {},
       secrets: {},
     };
 
-    const formMock = createTestFormRenderer({ connector });
-    formMock.render(
-      <IndexActionConnectorFields
-        readOnly={false}
-        isEdit={false}
-        registerPreSubmitValidator={() => {}}
-      />
+    render(
+      <FormTestProvider connector={connector}>
+        <IndexActionConnectorFields
+          readOnly={false}
+          isEdit={false}
+          registerPreSubmitValidator={() => {}}
+        />
+      </FormTestProvider>
     );
 
     const indexComboBox = await screen.findByTestId('connectorIndexesComboBox');

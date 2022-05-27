@@ -8,23 +8,18 @@
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from './translations';
 import { CredentialsApiUrl } from './credentials_api_url';
 import { CredentialsAuth, OAuth } from './auth_types';
 
 interface Props {
+  isOAuth: boolean;
   readOnly: boolean;
   isLoading: boolean;
 }
 
-const CredentialsComponent: React.FC<Props> = ({ readOnly, isLoading }) => {
-  const [{ config }] = useFormData({
-    watch: ['config.isOAuth'],
-  });
-
-  const { isOAuth = false } = config ?? {};
-
+const CredentialsComponent: React.FC<Props> = ({ readOnly, isLoading, isOAuth }) => {
   return (
     <>
       <EuiFlexGroup direction="column">

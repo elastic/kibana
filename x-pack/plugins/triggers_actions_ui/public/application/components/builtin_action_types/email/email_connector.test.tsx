@@ -27,6 +27,7 @@ describe('EmailActionConnectorFields renders', () => {
         from: 'test@test.com',
         hasAuth: true,
       },
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(
@@ -62,6 +63,7 @@ describe('EmailActionConnectorFields renders', () => {
         from: 'test@test.com',
         hasAuth: false,
       },
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(
@@ -99,6 +101,7 @@ describe('EmailActionConnectorFields renders', () => {
         from: 'test@test.com',
         hasAuth: true,
       },
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(
@@ -136,6 +139,7 @@ describe('EmailActionConnectorFields renders', () => {
         hasAuth: true,
         service: 'gmail',
       },
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(
@@ -177,6 +181,7 @@ describe('EmailActionConnectorFields renders', () => {
         hasAuth: true,
         service: 'gmail',
       },
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(
@@ -220,6 +225,7 @@ describe('EmailActionConnectorFields renders', () => {
         hasAuth: true,
         service: 'other',
       },
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(

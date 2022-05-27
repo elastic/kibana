@@ -18,11 +18,12 @@ import * as i18n from './translations';
 interface Props {
   readOnly: boolean;
   isLoading: boolean;
+  pathPrefix?: string;
 }
 
 const { urlField } = fieldValidators;
 
-const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly }) => {
+const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' }) => {
   const { docLinks } = useKibana().services;
 
   return (
@@ -44,7 +45,7 @@ const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly }) =>
       </EuiFormRow>
       <EuiSpacer size="l" />
       <UseField
-        path="config.apiUrl"
+        path={`${pathPrefix}config.apiUrl`}
         component={TextField}
         config={{
           label: i18n.API_URL_LABEL,
@@ -53,6 +54,13 @@ const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly }) =>
               validator: urlField(i18n.API_URL_REQUIRED),
             },
           ],
+        }}
+        componentProps={{
+          euiFieldProps: {
+            'data-test-subj': 'credentialsApiUrlFromInput',
+            isLoading,
+            disabled: readOnly,
+          },
         }}
       />
     </>

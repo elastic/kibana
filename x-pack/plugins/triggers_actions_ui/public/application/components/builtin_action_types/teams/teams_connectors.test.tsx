@@ -22,6 +22,7 @@ describe('TeamsActionFields renders', () => {
       actionTypeId: '.teams',
       name: 'teams',
       config: {},
+      isDeprecated: false,
     };
 
     const wrapper = mountWithIntl(
