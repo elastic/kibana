@@ -64,7 +64,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
             onChange={(e) => onChange(e.target.value)}
             onBlur={() => setIsDirty(true)}
             disabled={frozen}
-            resize='vertical'
+            resize="vertical"
           />
         );
       case 'yaml':
