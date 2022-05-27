@@ -16,7 +16,12 @@ export {
 export { onRedirectNoIndexPattern } from './data_views';
 
 export type { IIndexPatternFieldList, TypeMeta, RuntimeType } from '../common';
-export type { DataViewSpec, FieldSpec, DataViewAttributes } from '../common';
+export type {
+  DataViewSpec,
+  FieldSpec,
+  DataViewAttributes,
+  SavedObjectsClientCommon,
+} from '../common';
 export {
   IndexPatternField,
   DataViewField,

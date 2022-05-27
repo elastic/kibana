@@ -56,3 +56,6 @@ export {
 } from './constants';
 
 export type { SERVICE_KEY_TYPE } from './constants';
+
+export type { FieldSpec, SavedObjectsClientCommon } from '../common/types';
+export { DataViewsService, DataView } from '../common/data_views';
