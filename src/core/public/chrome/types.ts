@@ -35,6 +35,7 @@ export interface ChromeUserBanner {
   content: MountPoint<HTMLDivElement>;
 }
 
+/** @public */
 export interface ChromeHelpMenuActions {
   hideHelpMenu: () => void;
 }
