@@ -9,7 +9,7 @@ import React, { memo } from 'react';
 import styled, { css } from 'styled-components';
 import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { ManagementEmptyStateWrapper } from '../../management_empty_state_wrapper';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 const EmptyPrompt = styled(EuiEmptyPrompt)`
   ${() => css`
