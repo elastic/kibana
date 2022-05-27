@@ -431,35 +431,37 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           });
         },
       ] as const,
-      // [
-      //   'searchSource',
-      //   async () => {
-      //     const esTestDataView = await indexPatterns.create(
-      //       { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
-      //       { override: true },
-      //       getUrlPrefix(Spaces.space1.id)
-      //     );
-      //     // This rule should be active initially when the number of documents is below the threshold
-      //     // and then recover when we add more documents.
-      //     await createRule({
-      //       name: 'fire then recovers',
-      //       size: 100,
-      //       thresholdComparator: '<',
-      //       threshold: [1],
-      //       searchType: 'searchSource',
-      //       searchConfiguration: {
-      //         query: {
-      //           query: '',
-      //           language: 'kuery',
-      //         },
-      //         index: esTestDataView.id,
-      //         filter: [],
-      //       },
-      //     });
-      //   },
-      // ] as const,
+      [
+        'searchSource',
+        async () => {
+          const esTestDataView = await indexPatterns.create(
+            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date' },
+            { override: true },
+            getUrlPrefix(Spaces.space1.id)
+          );
+          // This rule should be active initially when the number of documents is below the threshold
+          // and then recover when we add more documents.
+          await createRule({
+            name: 'fire then recovers',
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [1],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+            notifyWhen: 'onActionGroupChange',
+            timeWindowSize: RULE_INTERVAL_SECONDS,
+          });
+        },
+      ] as const,
     ].forEach(([searchType, initData]) =>
-      it('es_query runs correctly and populates recovery context', async () => {
+      it(`runs correctly and populates recovery context for ${searchType} search type`, async () => {
         await initData();
 
         // delay to let rule run once before adding data
