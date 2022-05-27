@@ -17,9 +17,16 @@ interface Props {
   setLocations: React.Dispatch<React.SetStateAction<MonitorServiceLocations>>;
   isInvalid: boolean;
   onBlur?: () => void;
+  readOnly?: boolean;
 }
 
-export const ServiceLocations = ({ selectedLocations, setLocations, isInvalid, onBlur }: Props) => {
+export const ServiceLocations = ({
+  selectedLocations,
+  setLocations,
+  isInvalid,
+  onBlur,
+  readOnly = false,
+}: Props) => {
   const [error, setError] = useState<string | null>(null);
   const [checkboxIdToSelectedMap, setCheckboxIdToSelectedMap] = useState<Record<string, boolean>>(
     {}
@@ -76,6 +83,7 @@ export const ServiceLocations = ({ selectedLocations, setLocations, isInvalid, o
         idToSelectedMap={checkboxIdToSelectedMap}
         onChange={(id) => onLocationChange(id)}
         onBlur={() => onBlur?.()}
+        disabled={readOnly}
       />
     </EuiFormRow>
   );

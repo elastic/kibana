@@ -6,12 +6,22 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/artifacts/env.sh
 
-echo "--- Publish Cloud image"
+echo "--- Build and publish Cloud image"
 mkdir -p target
-cd target
 
-buildkite-agent artifact download "kibana-cloud-$FULL_VERSION-docker-image.tar.gz" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-docker load --input kibana-cloud-$FULL_VERSION-docker-image.tar.gz
+buildkite-agent artifact download "kibana-$FULL_VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+
+node scripts/build \
+  --skip-initialize \
+  --skip-generic-folders \
+  --skip-platform-folders \
+  --skip-archives \
+  --docker-images \
+  --skip-docker-ubi \
+  --skip-docker-ubuntu \
+  --skip-docker-contexts
+
+docker load --input target/kibana-cloud-$FULL_VERSION-docker-image.tar.gz
 
 TAG="$FULL_VERSION-$GIT_COMMIT"
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-cloud:$FULL_VERSION"
@@ -24,8 +34,6 @@ trap 'docker logout docker.elastic.co' EXIT
 
 docker push "$KIBANA_TEST_IMAGE"
 docker logout docker.elastic.co
-
-cd -
 
 echo "--- Create deployment"
 CLOUD_DEPLOYMENT_NAME="kibana-artifacts-$TAG"
