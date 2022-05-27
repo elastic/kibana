@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useRef } from 'react';
 import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
+import { catchError, concatMap, EMPTY, from, ObservableInput, Subject } from 'rxjs';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { CanvasWorkpad, State } from '../../../../types';
 import { getWorkpad, getFullWorkpadPersisted } from '../../../state/selectors/workpad';
 import { canUserWrite } from '../../../state/selectors/app';
@@ -34,6 +36,8 @@ const strings = {
 export const useWorkpadPersist = () => {
   const service = useWorkpadService();
   const notifyService = useNotifyService();
+  const { current: updateRequests$ } = useRef(new Subject<() => Promise<void>>());
+
   const notifyError = useCallback(
     (err: any) => {
       const statusCode = err.response && err.response.status;
@@ -54,6 +58,25 @@ export const useWorkpadPersist = () => {
     },
     [notifyService]
   );
+
+  useEffectOnce(() => {
+    const subscription = updateRequests$
+      .pipe(
+        concatMap<() => Promise<void>, ObservableInput<unknown>>((updateRequest) =>
+          from(updateRequest()).pipe(
+            catchError((err) => {
+              notifyService.error(err);
+              return EMPTY;
+            })
+          )
+        )
+      )
+      .subscribe();
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  });
 
   // Watch for workpad state or workpad assets to change and then persist those changes
   const [workpad, assetIds, fullWorkpad, canWrite]: [
@@ -77,13 +100,22 @@ export const useWorkpadPersist = () => {
   useEffect(() => {
     if (canWrite) {
       if (workpadChanged && assetsChanged) {
-        service.update(workpad.id, fullWorkpad).catch(notifyError);
+        updateRequests$.next(() => service.update(workpad.id, fullWorkpad));
       }
       if (workpadChanged) {
-        service.updateWorkpad(workpad.id, workpad).catch(notifyError);
+        updateRequests$.next(() => service.updateWorkpad(workpad.id, workpad));
       } else if (assetsChanged) {
-        service.updateAssets(workpad.id, fullWorkpad.assets).catch(notifyError);
+        updateRequests$.next(() => service.updateAssets(workpad.id, fullWorkpad.assets));
       }
     }
-  }, [service, workpad, fullWorkpad, workpadChanged, assetsChanged, canWrite, notifyError]);
+  }, [
+    service,
+    workpad,
+    fullWorkpad,
+    workpadChanged,
+    assetsChanged,
+    canWrite,
+    notifyError,
+    updateRequests$,
+  ]);
 };
