@@ -158,7 +158,13 @@ export interface DataViewsServicePublicMethods {
    * @param refresh - clear cache and fetch from server
    */
   getIdsWithTitle: (refresh?: boolean) => Promise<DataViewListItem[]>;
+  /**
+   * Get list of data view ids and title (and more) for each data view.
+   */
   getTitles: (refresh?: boolean) => Promise<string[]>;
+  /**
+   * Returns true if user has access to view a data view.
+   */
   hasUserDataView: () => Promise<boolean>;
   refreshFields: (indexPattern: DataView) => Promise<void>;
   savedObjectToSpec: (savedObject: SavedObject<DataViewAttributes>) => DataViewSpec;
@@ -170,6 +176,9 @@ export interface DataViewsServicePublicMethods {
   ) => Promise<void | Error>;
 }
 
+/**
+ * Data views service, providing CRUD operations for data views.
+ */
 export class DataViewsService {
   private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientCommon;
@@ -261,9 +270,9 @@ export class DataViewsService {
 
   /**
    * Find and load index patterns by title
-   * @param search
-   * @param size
-   * @returns IndexPattern[]
+   * @param search Search string
+   * @param size  Number of data views to return
+   * @returns DataView[]
    */
   find = async (search: string, size: number = 10): Promise<DataView[]> => {
     const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
@@ -312,6 +321,10 @@ export class DataViewsService {
     }
   };
 
+  /**
+   * Get cache. Contains dat  view saved objects
+   */
+
   getCache = async () => {
     if (!this.savedObjectsCache) {
       await this.refreshSavedObjectsCache();
@@ -341,8 +354,8 @@ export class DataViewsService {
 
   /**
    * Optionally set default index pattern, unless force = true
-   * @param id
-   * @param force
+   * @param id data view id
+   * @param force set default data view even if there's an existing default
    */
   setDefault = async (id: string | null, force = false) => {
     if (force || !(await this.config.get('defaultIndex'))) {
@@ -359,7 +372,7 @@ export class DataViewsService {
 
   /**
    * Get field list by providing { pattern }
-   * @param options
+   * @param options options for getting field list
    * @returns FieldSpec[]
    */
   getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
@@ -376,7 +389,7 @@ export class DataViewsService {
 
   /**
    * Get field list by providing an index patttern (or spec)
-   * @param options
+   * @param options options for getting field list
    * @returns FieldSpec[]
    */
   getFieldsForIndexPattern = async (

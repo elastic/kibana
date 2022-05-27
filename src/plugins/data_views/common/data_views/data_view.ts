@@ -48,7 +48,13 @@ interface SavedObjectBody {
  * An interface representing a data view that is time based.
  */
 export interface TimeBasedDataView extends DataView {
+  /**
+   * The timestamp field name.
+   */
   timeFieldName: NonNullable<DataView['timeFieldName']>;
+  /**
+   * The timestamp field
+   */
   getTimeField: () => DataViewField;
 }
 
@@ -278,7 +284,7 @@ export class DataView implements IIndexPattern {
 
   /**
    * Remove scripted field from field list
-   * @param fieldName
+   * @param fieldName name of scripted field to remove
    * @deprecated use runtime field instead
    */
 
@@ -332,6 +338,7 @@ export class DataView implements IIndexPattern {
 
   /**
    * Get field by name
+   * @param name field name
    */
 
   getFieldByName(name: string): DataViewField | undefined {
@@ -373,7 +380,7 @@ export class DataView implements IIndexPattern {
 
   /**
    * Provide a field, get its formatter
-   * @param field
+   * @param field field to get formatter for
    */
   getFormatterForField(field: DataViewField | DataViewField['spec'] | IFieldType): FieldFormat {
     const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
@@ -421,7 +428,7 @@ export class DataView implements IIndexPattern {
 
   /**
    * Checks if runtime field exists
-   * @param name
+   * @param name field name
    */
   hasRuntimeField(name: string): boolean {
     return !!this.runtimeFieldMap[name];
@@ -429,7 +436,7 @@ export class DataView implements IIndexPattern {
 
   /**
    * Returns runtime field if exists
-   * @param name
+   * @param name Runtime field name
    */
   getRuntimeField(name: string): RuntimeField | null {
     if (!this.runtimeFieldMap[name]) {
@@ -501,7 +508,7 @@ export class DataView implements IIndexPattern {
 
   /**
    * Replaces all existing runtime fields with new fields
-   * @param newFields
+   * @param newFields Map of runtime field definitions by field name
    */
   replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
     const oldRuntimeFieldNames = Object.keys(this.runtimeFieldMap);
@@ -543,7 +550,7 @@ export class DataView implements IIndexPattern {
 
   /**
    * Get formatter for a given field name. Return undefined if none exists
-   * @param field
+   * @param fieldname name of field to get formatter for
    */
   getFormatterForFieldNoDefault(fieldname: string) {
     const formatSpec = this.fieldFormatMap[fieldname];
@@ -604,6 +611,11 @@ export class DataView implements IIndexPattern {
     this.setFieldAttrs(fieldName, 'count', newCount);
   }
 
+  /**
+   * set field formatter
+   * @param fieldName name of field to set format on
+   * @param format field format in serialized form
+   */
   public readonly setFieldFormat = (fieldName: string, format: SerializedFieldFormat) => {
     this.fieldFormatMap[fieldName] = format;
   };
