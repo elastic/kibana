@@ -38,8 +38,32 @@ export function InputHighlightRules() {
     ],
     start: mergeTokens(
       [
+        {
+          token: ['comment.punctuation', 'comment.line'],
+          regex: /(#)(.*$)/,
+        },
+        {
+          token: 'comment.punctuation',
+          regex: /\/\*/,
+          push: [
+            {
+              token: 'comment.punctuation',
+              regex: /\*\//,
+              next: 'pop',
+            },
+            {
+              defaultToken: 'comment.block',
+            },
+          ],
+        },
+        {
+          token: ['comment.punctuation', 'comment.line'],
+          regex: /(\/\/)(.*$)/,
+        },
+      ],
+      [
         { token: 'warning', regex: '#!.*$' },
-        { token: 'comment', regex: /^#.*$/ },
+        // { token: 'comment', regex: /^#.*$/ },
         { token: 'paren.lparen', regex: '{', next: 'json', push: true },
       ],
       addEOL(['method'], /([a-zA-Z]+)/, 'start', 'method_sep'),

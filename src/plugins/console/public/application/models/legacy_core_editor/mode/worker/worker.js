@@ -1902,7 +1902,8 @@ ace.define(
         return text.substring(currentAt, i);
       },
       peek = function (c) {
-        return text.substr(at, c.length) === c; // nocommit - double check
+        // return text.substr(at, c.length) === c; // nocommit - double check
+        return text.charAt(at + c);
       },
       number = function () {
         let number,
@@ -1941,51 +1942,102 @@ ace.define(
           return number;
         }
       },
-      string = function () {
-        let hex,
-          i,
-          string = '',
-          uffff;
+      string = function (allowML) {
+        // let hex,
+        //   i,
+        //   string = '',
+        //   uffff;
+        //
+        // if (ch === '"') {
+        //   if (peek('""')) {
+        //     // literal
+        //     next('"');
+        //     next('"');
+        //     return nextUpTo('"""', 'failed to find closing \'"""\'');
+        //   } else {
+        //     while (next()) {
+        //       if (ch === '"') {
+        //         next();
+        //         return string;
+        //       } else if (ch === '\\') {
+        //         next();
+        //         if (ch === 'u') {
+        //           uffff = 0;
+        //           for (i = 0; i < 4; i += 1) {
+        //             hex = parseInt(next(), 16);
+        //             if (!isFinite(hex)) {
+        //               break;
+        //             }
+        //             uffff = uffff * 16 + hex;
+        //           }
+        //           string += String.fromCharCode(uffff);
+        //         } else if (typeof escapee[ch] === 'string') {
+        //           string += escapee[ch];
+        //         } else {
+        //           break;
+        //         }
+        //       } else {
+        //         string += ch;
+        //       }
+        //     }
+        //   }
+        // }
+        // error('Bad string');
+        // Parse a string value.
+        // callers make sure that (ch === '"' || ch === "'")
+        var string = '';
 
-        if (ch === '"') {
-          if (peek('""')) {
-            // literal
-            next('"');
-            next('"');
-            return nextUpTo('"""', 'failed to find closing \'"""\'');
-          } else {
-            while (next()) {
-              if (ch === '"') {
+        // When parsing for string values, we must look for "/' and \ characters.
+        var exitCh = ch;
+        while (next()) {
+          if (ch === exitCh) {
+            next();
+            if (allowML && exitCh === "'" && ch === "'" && string.length === 0) {
+              // ''' indicates a multiline string
+              next();
+              return mlString();
+            } else return string;
+          }
+          if (ch === '\\') {
+            next();
+            if (ch === 'u') {
+              var uffff = 0;
+              for (var i = 0; i < 4; i++) {
                 next();
-                return string;
-              } else if (ch === '\\') {
-                next();
-                if (ch === 'u') {
-                  uffff = 0;
-                  for (i = 0; i < 4; i += 1) {
-                    hex = parseInt(next(), 16);
-                    if (!isFinite(hex)) {
-                      break;
-                    }
-                    uffff = uffff * 16 + hex;
-                  }
-                  string += String.fromCharCode(uffff);
-                } else if (typeof escapee[ch] === 'string') {
-                  string += escapee[ch];
-                } else {
-                  break;
-                }
-              } else {
-                string += ch;
+                var c = ch.charCodeAt(0), hex;
+                if (ch >= '0' && ch <= '9') hex = c - 48;
+                else if (ch >= 'a' && ch <= 'f') hex = c - 97 + 0xa;
+                else if (ch >= 'A' && ch <= 'F') hex = c - 65 + 0xa;
+                else error("Bad \\u char " + ch);
+                uffff = uffff * 16 + hex;
               }
-            }
+              string += String.fromCharCode(uffff);
+            } else if (typeof escapee[ch] === 'string') {
+              string += escapee[ch];
+            } else break;
+          } else if (ch === '\n' || ch === '\r') {
+            error("Bad string containing newline");
+          } else {
+            string += ch;
           }
         }
-        error('Bad string');
+        error("Bad string");
       },
       white = function () {
-        while (ch && ch <= ' ') {
-          next();
+        // while (ch && ch <= ' ') {
+        //   next();
+        // }
+        while (ch) {
+          // Skip whitespace.
+          while (ch && ch <= ' ') next();
+          // Hjson allows comments
+          if (ch === '#' || ch === '/' && peek(0) === '/') {
+            while (ch && ch !== '\n') next();
+          } else if (ch === '/' && peek(0) === '*') {
+            next(); next();
+            while (ch && !(ch === '*' && peek(0) === '/')) next();
+            if (ch) { next(); next(); }
+          } else break;
         }
       },
       strictWhite = function () {
@@ -2121,35 +2173,136 @@ ace.define(
         }
         error('Bad array');
       },
-      object = function () {
-        let key,
-          object = {};
+      getComment = function(cAt, first) {
+      var i;
+      cAt--;
+      // remove trailing whitespace
+      // but only up to EOL
+      for (i = at - 2; i > cAt && text[i] <= ' ' && text[i] !== '\n'; i--);
+      if (text[i] === '\n') i--;
+      if (text[i] === '\r') i--;
+      var res = text.substr(cAt, i-cAt+1);
+      // return if we find anything other than whitespace
+      for (i = 0; i < res.length; i++) {
+        if (res[i] > ' ') {
+          var j = res.indexOf('\n');
+          if (j >= 0) {
+            var c = [res.substr(0, j), res.substr(j+1)];
+            if (first && c[0].trim().length === 0) c.shift();
+            return c;
+          } else return [res];
+        }
+      }
+      return [];
+    },
+      isPunctuatorChar = function(c) {
+      return c === '{' || c === '}' || c === '[' || c === ']' || c === ',' || c === ':';
+    },
+      keyname = function() {
+      // quotes for keys are optional in Hjson
+      // unless they include {}[],: or whitespace.
 
-        if (ch === '{') {
-          next('{');
+      if (ch === '"' || ch === "'") return string(false);
+
+      var name = "", start = at, space = -1;
+      for (;;) {
+        if (ch === ':') {
+          if (!name) error("Found ':' but no key name (for an empty key name use quotes)");
+          else if (space >=0 && space !== name.length) { at = start + space; error("Found whitespace in your key name (use quotes to include)"); }
+          return name;
+        } else if (ch <= ' ') {
+          if (!ch) error("Found EOF while looking for a key name (check your syntax)");
+          else if (space < 0) space = name.length;
+        } else if (isPunctuatorChar(ch)) {
+          error("Found '" + ch + "' where a key name was expected (check your syntax or use quotes if the key name includes {}[],: or whitespace)");
+        } else {
+          name += ch;
+        }
+        next();
+      }
+    },
+      object = function (withoutBraces) {
+        // let key,
+        //   object = {};
+        //
+        // if (ch === '{') {
+        //   next('{');
+        //   white();
+        //   if (ch === '}') {
+        //     next('}');
+        //     return object; // empty object
+        //   }
+        //   while (ch) {
+        //     key = string();
+        //     white();
+        //     next(':');
+        //     if (Object.hasOwnProperty.call(object, key)) {
+        //       error('Duplicate key "' + key + '"');
+        //     }
+        //     object[key] = value();
+        //     white();
+        //     if (ch === '}') {
+        //       next('}');
+        //       return object;
+        //     }
+        //     next(',');
+        //     white();
+        //   }
+        // }
+        // error('Bad object');
+        // Parse an object value.
+
+        var key = "", object = {};
+        var comments, cAt, nextComment;
+
+        try {
+          // if (keepComments) comments = common.createComment(object, { c: {}, o: []  });
+
+          if (!withoutBraces) {
+            // assuming ch === '{'
+            next();
+            cAt = at;
+          } else cAt = 1;
+
           white();
-          if (ch === '}') {
-            next('}');
-            return object; // empty object
+          if (comments) nextComment = getComment(cAt, true).join('\n');
+          if (ch === '}' && !withoutBraces) {
+            if (comments) comments.e = [nextComment];
+            next();
+            return object;  // empty object
           }
           while (ch) {
-            key = string();
+            key = keyname();
             white();
-            next(':');
-            if (Object.hasOwnProperty.call(object, key)) {
-              error('Duplicate key "' + key + '"');
-            }
+            if (ch !== ':') error("Expected ':' instead of '" + ch + "'");
+            next();
+            // duplicate keys overwrite the previous value
             object[key] = value();
+            cAt = at;
             white();
-            if (ch === '}') {
-              next('}');
+            // in Hjson the comma is optional and trailing commas are allowed
+            // note that we do not keep comments before the , if there are any
+            if (ch === ',') { next(); cAt = at; white(); }
+            if (comments) {
+              var c = getComment(cAt);
+              comments.c[key] = [nextComment||"", c[0]||""];
+              nextComment = c[1];
+              comments.o.push(key);
+            }
+            if (ch === '}' && !withoutBraces) {
+              next();
+              if (comments) comments.c[key][1] += nextComment||"";
               return object;
             }
-            next(',');
             white();
           }
+
+          if (withoutBraces) return object;
+          else error("End of input while parsing an object (missing '}')");
+        } catch (e) {
+          // e.hint=e.hint||errorClosingHint(object);
+          throw e;
         }
-        error('Bad object');
       };
 
     value = function () {

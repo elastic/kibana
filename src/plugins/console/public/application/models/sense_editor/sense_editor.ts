@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import { parse } from 'hjson';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
@@ -265,7 +266,8 @@ export class SenseEditor {
         end: dataEndPos,
       };
       const data = this.coreEditor.getValueInRange(bodyRange)!;
-      request.data.push(data.trim());
+      const parsedData = parse(data);
+      request.data.push(JSON.stringify(parsedData));
       bodyStartLineNumber = dataEndPos.lineNumber + 1;
     }
 
