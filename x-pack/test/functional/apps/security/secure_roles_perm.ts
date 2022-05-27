@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('users');
+      await security.testUser.setRoles(['manage_security']);
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(
@@ -89,6 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async function () {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
+      await security.testUser.restoreDefaults();
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
       );

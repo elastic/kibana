@@ -29,6 +29,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await PageObjects.security.initTests();
+      await security.testUser.setRoles(['manage_security']);
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
@@ -51,6 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.role.delete('logstash-readonly');
       await security.user.delete('dashuser');
       await security.user.delete('new-user');
+      await security.testUser.restoreDefaults();
     });
 
     describe('Security', () => {

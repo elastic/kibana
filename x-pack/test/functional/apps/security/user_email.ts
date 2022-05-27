@@ -12,6 +12,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'accountSetting']);
   const log = getService('log');
+  const security = getService('security');
   const kibanaServer = getService('kibanaServer');
 
   describe('useremail', function () {
@@ -19,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
       );
+      await security.testUser.setRoles(['manage_security']);
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });
@@ -63,6 +65,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/security/discover'
       );
+      await security.testUser.restoreDefaults();
     });
   });
 }
