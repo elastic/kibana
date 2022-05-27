@@ -1,11 +1,3 @@
-env:
-  SLACK_NOTIFICATIONS_CHANNEL: "#kibana-qa"
-  SLACK_NOTIFICATIONS_ENABLED: "true"
-  CODE_COVERAGE: 1
-notify:
-  - slack:
-      channels:
-        - "#kibana-qa"
 steps:
   - command: .buildkite/scripts/lifecycle/pre_build.sh
     label: Pre-Build
@@ -37,5 +29,4 @@ steps:
     timeout_in_minutes: 30
     key: ingest
 
-  - wait: ~
     continue_on_failure: true
