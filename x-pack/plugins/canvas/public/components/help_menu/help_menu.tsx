@@ -7,6 +7,7 @@
 
 import React, { FC, useCallback } from 'react';
 import { ExpressionFunction } from '@kbn/expressions-plugin';
+import { ChromeHelpMenuActions } from '@kbn/core/public';
 import { useDispatch } from 'react-redux';
 import { HelpMenu as Component } from './help_menu.component';
 import { CanvasPluginServices } from '../../services';
@@ -15,6 +16,7 @@ import { setKeyboardShortcutsDocVisibility } from '../../state/actions/flyouts';
 interface Props {
   functionRegistry: Record<string, ExpressionFunction>;
   notifyService: CanvasPluginServices['notify'];
+  hideHelpMenu: ChromeHelpMenuActions['hideHelpMenu'];
 }
 
 export const HelpMenu: FC<Props> = (props) => {

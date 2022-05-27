@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import React, { FC, lazy, Suspense } from 'react';
+import React, { FC, lazy, Suspense, useCallback } from 'react';
 import { EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ChromeHelpMenuActions } from '@kbn/core/public';
 import { ExpressionFunction } from '@kbn/expressions-plugin';
-
 import { CanvasPluginServices } from '../../services';
 
 let FunctionReferenceGenerator: null | React.LazyExoticComponent<any> = null;
@@ -33,20 +33,27 @@ interface Props {
   functionRegistry: Record<string, ExpressionFunction>;
   notifyService: CanvasPluginServices['notify'];
   showKeyboardShortcutsDocFlyout: () => void;
+  hideHelpMenu: ChromeHelpMenuActions['hideHelpMenu'];
 }
 
 export const HelpMenu: FC<Props> = ({
   functionRegistry,
   notifyService,
+  hideHelpMenu,
   showKeyboardShortcutsDocFlyout,
 }) => {
+  const onKeyboardShortcutButtonClick = useCallback(() => {
+    hideHelpMenu();
+    showKeyboardShortcutsDocFlyout();
+  }, [hideHelpMenu, showKeyboardShortcutsDocFlyout]);
+
   return (
     <>
       <EuiButtonEmpty
         size="s"
         flush="left"
         iconType="keyboardShortcut"
-        onClick={showKeyboardShortcutsDocFlyout}
+        onClick={onKeyboardShortcutButtonClick}
       >
         {strings.getKeyboardShortcutsLinkLabel()}
       </EuiButtonEmpty>

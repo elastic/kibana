@@ -35,6 +35,10 @@ export interface ChromeUserBanner {
   content: MountPoint<HTMLDivElement>;
 }
 
+export interface ChromeHelpMenuActions {
+  hideHelpMenu: () => void;
+}
+
 /** @public */
 export interface ChromeHelpExtension {
   /**
@@ -48,7 +52,7 @@ export interface ChromeHelpExtension {
   /**
    * Custom content to occur below the list of links
    */
-  content?: (element: HTMLDivElement) => () => void;
+  content?: (element: HTMLDivElement, menuActions: ChromeHelpMenuActions) => () => void;
 }
 
 /**
