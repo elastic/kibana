@@ -51,9 +51,10 @@ const getFieldConfig = ({
     {
       validator: emptyField(
         i18n.translate(
-          'xpack.triggersActionsUI.sections.actionConnectorForm.error.requiredNameText',
+          'xpack.triggersActionsUI.sections.actionConnectorForm.error.requireFieldText',
           {
-            defaultMessage: `${label} is required.`,
+            values: { label },
+            defaultMessage: `{label} is required.`,
           }
         )
       ),

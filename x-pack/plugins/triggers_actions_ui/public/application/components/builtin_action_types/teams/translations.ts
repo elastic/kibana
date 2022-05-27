@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const WEBHOOK_URL_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.requiredWebhookUrlText',
+  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.webhookUrlTextLabel',
   {
     defaultMessage: 'Webhook URL',
   }

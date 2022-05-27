@@ -62,7 +62,7 @@ const EncryptedFieldsCalloutComponent: React.FC<Props> = ({ isEdit, isMissingSec
     return (
       <Callout
         title={i18n.translate(
-          'xpack.triggersActionsUI.components.simpleConnectorForm.secrets.reenterValuesLabel',
+          'xpack.triggersActionsUI.components.simpleConnectorForm.secrets.missingSecretsValuesLabel',
           {
             defaultMessage:
               'Sensitive values are encrypted. Please reenter values for these fields.',
