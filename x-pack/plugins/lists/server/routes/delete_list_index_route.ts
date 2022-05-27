@@ -82,6 +82,17 @@ export const deleteListIndexRoute = (router: ListsPluginRouter): void => {
             await lists.deleteListItemTemplate();
           }
 
+          // check if legacy template exists
+          const legacyTemplateExists = await lists.getLegacyListTemplateExists();
+          const legacyItemTemplateExists = await lists.getLegacyListItemTemplateExists();
+          if (legacyTemplateExists) {
+            await lists.deleteLegacyListBootStrapIndex();
+          }
+
+          if (legacyItemTemplateExists) {
+            await lists.deleteLegacyListItemBootStrapIndex();
+          }
+
           const [validated, errors] = validate({ acknowledged: true }, acknowledgeSchema);
           if (errors != null) {
             return siemResponse.error({ body: errors, statusCode: 500 });

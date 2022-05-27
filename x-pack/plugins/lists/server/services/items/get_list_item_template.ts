@@ -10,15 +10,22 @@ import listsItemsMappings from './list_item_mappings.json';
 export const getListItemTemplate = (index: string): Record<string, unknown> => {
   const template = {
     index_patterns: [`${index}-*`],
-    mappings: listsItemsMappings,
-    settings: {
-      index: {
-        lifecycle: {
-          name: index,
-          rollover_alias: index,
+    template: {
+      settings: {
+        index: {
+          lifecycle: {
+            name: index,
+            rollover_alias: index,
+          },
+        },
+        mapping: {
+          total_fields: {
+            limit: 10000,
+          },
         },
       },
-    },
+      mappings: listsItemsMappings,
+    } 
   };
   return template;
 };
