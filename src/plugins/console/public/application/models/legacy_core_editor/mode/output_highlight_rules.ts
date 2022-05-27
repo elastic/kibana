@@ -12,6 +12,26 @@ import { addXJsonToRules } from '@kbn/ace';
 
 const JsonHighlightRules = ace.acequire('ace/mode/json_highlight_rules').JsonHighlightRules;
 
+export const mapStatusCodeToBadge = (value: string) => {
+  const regExpMatchArray = value.match(/\d+/);
+  if (regExpMatchArray) {
+    const status = parseInt(regExpMatchArray[0], 10);
+    if (status <= 199) {
+      return 'badge.badge--default';
+    }
+    if (status <= 299) {
+      return 'badge.badge--success';
+    }
+    if (status <= 399) {
+      return 'badge.badge--primary';
+    }
+    if (status <= 499) {
+      return 'badge.badge--warning';
+    }
+    return 'badge.badge--danger';
+  }
+};
+
 export class OutputJsonHighlightRules extends JsonHighlightRules {
   constructor() {
     super();
@@ -27,25 +47,7 @@ export class OutputJsonHighlightRules extends JsonHighlightRules {
         regex: /#(.*?)(?=\d+\s(?:[\sA-Za-z]+)|$)/,
       },
       {
-        token(value: string) {
-          const regExpMatchArray = value.match(/\d+/);
-          if (regExpMatchArray) {
-            const status = parseInt(regExpMatchArray[0], 10);
-            if (status <= 199) {
-              return 'badge.badge--default';
-            }
-            if (status <= 299) {
-              return 'badge.badge--success';
-            }
-            if (status <= 399) {
-              return 'badge.badge--primary';
-            }
-            if (status <= 499) {
-              return 'badge.badge--warning';
-            }
-            return 'badge.badge--danger';
-          }
-        },
+        token: mapStatusCodeToBadge,
         regex: /(\d+\s[\sA-Za-z]+$)/,
       }
     );
