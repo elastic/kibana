@@ -15,12 +15,10 @@ import {
   DataViewsPublicStartDependencies,
 } from './types';
 
-import {
-  onRedirectNoIndexPattern,
-  DataViewsApiClient,
-  UiSettingsPublicToCommon,
-  SavedObjectsClientPublicToCommon,
-} from '.';
+import { onRedirectNoIndexPattern, DataViewsApiClient } from '.';
+import { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
+
+import { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 
 import { DataViewsServicePublic } from './data_views_service_public';
 import { HasData } from './services';

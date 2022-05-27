@@ -70,30 +70,96 @@ export interface DataViewsServiceDeps {
 }
 
 export interface DataViewsServicePublicMethods {
+  /**
+   * Clear the cache of data views.
+   */
   clearCache: (id?: string | undefined) => void;
+  /**
+   * Create data view based on the provided spec.
+   * @param spec - Data view spec.
+   * @param skipFetchFields - If true, do not fetch fields.
+   */
   create: (spec: DataViewSpec, skipFetchFields?: boolean) => Promise<DataView>;
+  /**
+   * Create and save data view based on provided spec.
+   * @param spec - Data view spec.
+   * @param override - If true, save over existing data view
+   * @param skipFetchFields - If true, do not fetch fields.
+   */
   createAndSave: (
     spec: DataViewSpec,
     override?: boolean,
     skipFetchFields?: boolean
   ) => Promise<DataView>;
+  /**
+   * Save data view.
+   * @param dataView - Data view instance to save.
+   * @param override - If true, save over existing data view
+   */
   createSavedObject: (indexPattern: DataView, override?: boolean) => Promise<DataView>;
+  /**
+   * Delete data view.
+   * @param indexPatternId - Id of the data view to delete.
+   */
   delete: (indexPatternId: string) => Promise<{}>;
+  /**
+   * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
+   *             'no data view' case in api consumer code - no more auto redirect
+   */
   ensureDefaultDataView: EnsureDefaultDataView;
   fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => DataViewFieldMap;
+  /**
+   * Search for data views based on title
+   * @param search - Search string
+   * @param size - Number of results to return
+   */
   find: (search: string, size?: number) => Promise<DataView[]>;
+  /**
+   * Get data view by id.
+   * @param id - Id of the data view to get.
+   */
   get: (id: string) => Promise<DataView>;
   getCache: () => Promise<Array<SavedObject<IndexPatternSavedObjectAttrs>> | null | undefined>;
+  /**
+   * If user can save data view, return true.
+   */
   getCanSave: () => Promise<boolean>;
+  /**
+   * Get default data view as data view instance.
+   */
   getDefault: () => Promise<DataView | null>;
+  /**
+   * Get default data view id.
+   */
   getDefaultId: () => Promise<string | null>;
+  /**
+   * Get default data view, if it doesn't exist, choose and save new default data view and return it.
+   */
   getDefaultDataView: () => Promise<DataView | null>;
+  /**
+   * Get fields for data view
+   * @param dataView - Data view instance or spec
+   * @param options - Options for getting fields
+   * @returns FieldSpec array
+   */
   getFieldsForIndexPattern: (
     indexPattern: DataView | DataViewSpec,
     options?: GetFieldsOptions | undefined
   ) => Promise<FieldSpec[]>;
+  /**
+   * Get fields for index pattern string
+   * @param options - options for getting fields
+   */
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
+  /**
+   * Get list of data view ids.
+   * @param refresh - clear cache and fetch from server
+   */
   getIds: (refresh?: boolean) => Promise<string[]>;
+  /**
+   * Get list of data view ids and title (and more) for each data view.
+   * @param refresh - clear cache and fetch from server
+   */
   getIdsWithTitle: (refresh?: boolean) => Promise<DataViewListItem[]>;
   getTitles: (refresh?: boolean) => Promise<string[]>;
   hasUserDataView: () => Promise<boolean>;

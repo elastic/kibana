@@ -305,24 +305,43 @@ export class DataView implements IIndexPattern {
     return [...this.fields.getAll().filter((field) => field.scripted)];
   }
 
+  /**
+   * Does the data view have a timestamp field?
+   */
+
   isTimeBased(): this is TimeBasedDataView {
     return !!this.timeFieldName && (!this.fields || !!this.getTimeField());
   }
+
+  /**
+   * Does the data view have a timestamp field and is it a date nanos field?
+   */
 
   isTimeNanosBased(): this is TimeBasedDataView {
     const timeField = this.getTimeField();
     return !!(timeField && timeField.esTypes && timeField.esTypes.indexOf('date_nanos') !== -1);
   }
 
+  /**
+   * Get timestamp field as DataViewField or return undefined
+   */
   getTimeField() {
     if (!this.timeFieldName || !this.fields || !this.fields.getByName) return undefined;
     return this.fields.getByName(this.timeFieldName);
   }
 
+  /**
+   * Get field by name
+   */
+
   getFieldByName(name: string): DataViewField | undefined {
     if (!this.fields || !this.fields.getByName) return undefined;
     return this.fields.getByName(name);
   }
+
+  /**
+   * Get aggregation restrictions
+   */
 
   getAggregationRestrictions() {
     return this.typeMeta?.aggs;
@@ -430,6 +449,11 @@ export class DataView implements IIndexPattern {
     return runtimeField;
   }
 
+  /**
+   * Get all runtime field definitions
+   * @returns map of runtime field definitions by field name
+   */
+
   getAllRuntimeFields(): Record<string, RuntimeField> {
     return Object.keys(this.runtimeFieldMap).reduce<Record<string, RuntimeField>>(
       (acc, fieldName) => ({
@@ -439,6 +463,12 @@ export class DataView implements IIndexPattern {
       {}
     );
   }
+
+  /**
+   * Returns data view fields backed by runtime fields
+   * @param name runtime field name
+   * @returns map of DataViewFields (that are runtime fields) by field name
+   */
 
   getFieldsByRuntimeFieldName(name: string): Record<string, DataViewField> | undefined {
     const runtimeField = this.getRuntimeField(name);
@@ -522,6 +552,13 @@ export class DataView implements IIndexPattern {
     }
   }
 
+  /**
+   * Set field attribute
+   * @param fieldName name of field to set attribute on
+   * @param attrName name of attribute to set
+   * @param value value of attribute
+   */
+
   protected setFieldAttrs<K extends keyof FieldAttrSet>(
     fieldName: string,
     attrName: K,
@@ -533,6 +570,12 @@ export class DataView implements IIndexPattern {
     this.fieldAttrs[fieldName][attrName] = value;
   }
 
+  /**
+   * Set field custom label
+   * @param fieldName name of field to set custom label on
+   * @param customLabel custom label value. If undefined, custom label is removed
+   */
+
   public setFieldCustomLabel(fieldName: string, customLabel: string | undefined | null) {
     const fieldObject = this.fields.getByName(fieldName);
     const newCustomLabel: string | undefined = customLabel === null ? undefined : customLabel;
@@ -543,6 +586,12 @@ export class DataView implements IIndexPattern {
 
     this.setFieldAttrs(fieldName, 'customLabel', newCustomLabel);
   }
+
+  /**
+   * Set field count
+   * @param fieldName name of field to set count on
+   * @param count count value. If undefined, count is removed
+   */
 
   public setFieldCount(fieldName: string, count: number | undefined | null) {
     const fieldObject = this.fields.getByName(fieldName);
