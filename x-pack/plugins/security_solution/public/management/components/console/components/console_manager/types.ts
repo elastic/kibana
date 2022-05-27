@@ -21,9 +21,18 @@ export interface ConsoleRegistrationInterface<Meta extends object = Record<strin
   meta?: Meta;
 
   /**
-   * An optional component that will be rendered above the Console
+   * An optional component that will be rendered in the Responder page overlay, above the Console area
    */
   BodyComponent?: ComponentType; // FIXME:PT type props for this component
+
+  /**
+   * An array of Action components (likely buttons) that will be rendered into the Responder page
+   * overlay header (next to the `Done` button).
+   *
+   * NOTE: this is an Array of `Component`'s - not `JSX`. These will be initialized/rendered when
+   * the Responder page overlay is shown.
+   */
+  ActionComponents?: ComponentType[];
 }
 
 export interface RegisteredConsoleClient<Meta extends object = Record<string, unknown>>

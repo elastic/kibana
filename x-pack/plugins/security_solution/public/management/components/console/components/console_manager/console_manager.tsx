@@ -30,6 +30,7 @@ interface ManagedConsole {
   key: symbol;
   onBeforeTerminate?: ConsoleRegistrationInterface['onBeforeTerminate'];
   BodyComponent: ConsoleRegistrationInterface['BodyComponent'];
+  ActionComponents: ConsoleRegistrationInterface['ActionComponents'];
 }
 
 type RunningConsoleStorage = Record<string, ManagedConsole>;
@@ -180,6 +181,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
 
       const managedConsole: ManagedConsole = {
         BodyComponent: undefined,
+        ActionComponents: undefined,
         ...otherRegisterProps,
         client: {
           id,
@@ -263,6 +265,13 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
         runningConsoles={runningConsoles}
         isHidden={!visibleConsole}
         body={visibleConsole && visibleConsole.BodyComponent && <visibleConsole.BodyComponent />}
+        actions={
+          visibleConsole &&
+          visibleConsole.ActionComponents &&
+          visibleConsole.ActionComponents.map((ActionComponent) => {
+            return <ActionComponent meta={visibleConsole.client.meta} />;
+          })
+        }
       />
     </ConsoleManagerContext.Provider>
   );

@@ -28,7 +28,7 @@ export interface ResponderOverlayProps {
   isHidden: boolean;
   onHide: () => void;
   body?: ReactNode;
-  actions?: ReactNode | ReactNode[];
+  actions?: ReactNode[];
 }
 
 export const ResponderOverlay = memo<ResponderOverlayProps>(
@@ -74,16 +74,15 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
             />
           </EuiButton>,
 
-          // FIXME:PT append actions defined by the caller
+          ...(actions ?? []),
         ],
       };
-    }, [getTestId, handleCloseOverlayOnClick, isHidden]);
+    }, [actions, getTestId, handleCloseOverlayOnClick, isHidden]);
 
     return (
       <PageOverlay
         isHidden={isHidden}
         data-test-subj={getTestId('pageOverlay')}
-        hideOnUrlPathnameChange
         onHide={onHide}
         paddingSize="xl"
       >

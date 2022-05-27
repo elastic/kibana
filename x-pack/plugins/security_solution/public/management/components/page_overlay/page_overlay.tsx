@@ -77,26 +77,32 @@ const unSetDocumentBodyLock = () => {
 
 export interface PageOverlayProps {
   children: ReactNode;
+
+  /**
+   * Callback for when the user leaves the overlay
+   */
+  onHide: () => void;
+
   /** If the overlay should be hidden. NOTE: it will remain rendered/mounted, but `display: none` */
   isHidden?: boolean;
+
   /**
    * Setting this to `true` will enable scrolling inside of the overlay
    */
   enableScrolling?: boolean;
+
   /**
-   * When set to `true`, the browser's scroll bar will be "locked" (`overflow: hidden`), so that
-   * the only scroll bar visible (possibly) is the one inside of the overlay
+   * When set to `true` (default), the browser's scroll bar will be "locked" (`overflow: hidden`),
+   * so that the only scroll bar visible (possibly) is the one inside of the overlay
    */
   lockDocumentBody?: boolean;
+
   /**
-   * If `true`, then the page's URL `pathname` will be tracked when the overlay is shown, and if
+   * If `true` (default), then the page's URL `pathname` will be tracked when the overlay is shown, and if
    * the pathname changes, the `onHide()` prop will be called.
    */
   hideOnUrlPathnameChange?: boolean;
-  /**
-   * Callback for when the user leaves the overlay
-   */
-  onHide?: () => void;
+
   /**
    * Optional padding size around the overlay
    */
@@ -110,13 +116,13 @@ export interface PageOverlayProps {
  */
 export const PageOverlay = memo<PageOverlayProps>(
   ({
+    children,
+    onHide,
     enableScrolling = false,
     isHidden = false,
-    onHide,
-    hideOnUrlPathnameChange,
-    lockDocumentBody,
+    hideOnUrlPathnameChange = true,
+    lockDocumentBody = true,
     paddingSize,
-    children,
     'data-test-subj': dataTestSubj,
   }) => {
     const { pathname } = useLocation();

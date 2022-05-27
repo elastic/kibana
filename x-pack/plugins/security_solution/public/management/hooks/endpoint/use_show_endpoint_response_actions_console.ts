@@ -6,6 +6,7 @@
  */
 
 import { useCallback } from 'react';
+import { ActionLogButton } from '../../components/endpoint_console';
 import { getEndpointResponseActionsConsoleCommands } from '../../components/endpoint_console/endpoint_response_actions_console_commands';
 import { useConsoleManager } from '../../components/console';
 import type { HostMetadata } from '../../../../common/endpoint/types';
@@ -32,6 +33,7 @@ export const useShowEndpointResponseActionsConsole = (): ShowEndpointResponseAct
               'data-test-subj': 'endpointResponseActionsConsole',
               prompt: `endpoint-${endpointMetadata.agent.version}`,
             },
+            ActionComponents: [ActionLogButton],
           })
           .show();
       }
