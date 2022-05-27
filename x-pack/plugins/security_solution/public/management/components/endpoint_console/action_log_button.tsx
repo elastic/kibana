@@ -8,8 +8,9 @@
 import React, { memo, useCallback, useState } from 'react';
 import { EuiButton, EuiFlyout } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EndpointResponderExtensionComponentProps } from './types';
 
-export const ActionLogButton = memo((props) => {
+export const ActionLogButton = memo<EndpointResponderExtensionComponentProps>((props) => {
   const [showActionLogFlyout, setShowActionLogFlyout] = useState<boolean>(false);
   const toggleActionLog = useCallback(() => {
     setShowActionLogFlyout((prevState) => {

@@ -246,6 +246,10 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     return Object.values(consoleStorage).find((managedConsole) => managedConsole.isOpen);
   }, [consoleStorage]);
 
+  const visibleConsoleMeta = useMemo(() => {
+    return visibleConsole?.client.meta ?? {};
+  }, [visibleConsole?.client.meta]);
+
   const handleOnHide = useCallback(() => {
     if (visibleConsole) {
       consoleManagerClient.hide(visibleConsole.client.id);
@@ -264,12 +268,15 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
         onHide={handleOnHide}
         runningConsoles={runningConsoles}
         isHidden={!visibleConsole}
-        body={visibleConsole && visibleConsole.BodyComponent && <visibleConsole.BodyComponent />}
+        body={
+          visibleConsole &&
+          visibleConsole.BodyComponent && <visibleConsole.BodyComponent meta={visibleConsoleMeta} />
+        }
         actions={
           visibleConsole &&
           visibleConsole.ActionComponents &&
           visibleConsole.ActionComponents.map((ActionComponent) => {
-            return <ActionComponent meta={visibleConsole.client.meta} />;
+            return <ActionComponent meta={visibleConsoleMeta} />;
           })
         }
       />
