@@ -113,7 +113,7 @@ export class LensAttributes {
     {
       layerData: PersistedIndexPatternLayer;
       layerState: XYState['layers'];
-      indexPattern: IndexPattern;
+      indexPattern: DataView;
     }
   >;
   visualization: XYState;
@@ -816,49 +816,11 @@ export class LensAttributes {
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       preferredSeriesType: 'line',
-      layers: this.layerConfigs.map((layerConfig, index) => ({
-        accessors: [
-          `y-axis-column-layer${index}`,
-          ...Object.keys(this.getChildYAxises(layerConfig)),
-        ],
-        layerId: `layer${index}`,
-        layerType: 'data',
-        seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
-        palette: layerConfig.seriesConfig.palette,
-        yConfig: layerConfig.seriesConfig.yConfig || [
-          {
-            forAccessor: `y-axis-column-layer${index}`,
-            color: layerConfig.color,
-            /* if the fields format matches the field format of the first layer, use the default y axis (right)
-             * if not, use the secondary y axis (left) */
-            axisMode:
-              layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
-              this.layerConfigs[0].indexPattern.fieldFormatMap[
-                this.layerConfigs[0].selectedMetricField
-              ]?.id
-                ? 'left'
-                : 'right',
-          },
-        ],
-        xAccessor: `x-axis-column-layer${index}`,
-        ...(layerConfig.breakdown &&
-        layerConfig.breakdown !== PERCENTILE &&
-        layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
-          ? { splitAccessor: `breakdown-column-layer${index}` }
-          : {}),
-      })),
+      layers: this.getDataLayers(),
       ...(this.layerConfigs[0].seriesConfig.yTitle
         ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
         : {}),
-    }));
-
-    const referenceLineLayers: XYState['layers'] = [];
-
-    Object.entries(this.seriesReferenceLines).forEach(([_id, { layerState }]) => {
-      referenceLineLayers.push(layerState[0]);
-    });
-
-    return [...dataLayers, ...referenceLineLayers];
+    };
   }
 
   getDataLayers(): XYState['layers'] {
@@ -872,7 +834,19 @@ export class LensAttributes {
       seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
       palette: layerConfig.seriesConfig.palette,
       yConfig: layerConfig.seriesConfig.yConfig || [
-        { forAccessor: `y-axis-column-layer${index}`, color: layerConfig.color },
+        {
+          forAccessor: `y-axis-column-layer${index}`,
+          color: layerConfig.color,
+          /* if the fields format matches the field format of the first layer, use the default y axis (right)
+           * if not, use the secondary y axis (left) */
+          axisMode:
+            layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
+            this.layerConfigs[0].indexPattern.fieldFormatMap[
+              this.layerConfigs[0].selectedMetricField
+            ]?.id
+              ? 'left'
+              : 'right',
+        },
       ],
       xAccessor: `x-axis-column-layer${index}`,
       ...(layerConfig.breakdown &&
@@ -930,7 +904,7 @@ export class LensAttributes {
         layerId: referenceLineLayerId,
         accessors: Object.keys(columns),
         layerType: 'referenceLine',
-        seriesType: 'line',
+        seriesType: 'line' as SeriesType,
         yConfig: Object.keys(columns).map((columnId) => ({
           axisMode: 'bottom',
           color: '#6092C0',
