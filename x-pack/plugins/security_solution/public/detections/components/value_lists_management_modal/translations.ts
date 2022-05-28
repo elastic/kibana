@@ -7,14 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const MODAL_TITLE = i18n.translate('xpack.securitySolution.lists.uploadValueListTitle', {
-  defaultMessage: 'Upload value lists',
+export const VALUE_LISTS_MODAL_TITLE = i18n.translate('xpack.securitySolution.lists.importValueListTitle', {
+  defaultMessage: 'Import value lists',
 });
 
 export const FILE_PICKER_LABEL = i18n.translate(
-  'xpack.securitySolution.lists.uploadValueListDescription',
+  'xpack.securitySolution.lists.importValueListDescription',
   {
-    defaultMessage: 'Upload single value lists to use while writing rule exceptions.',
+    defaultMessage: 'Import single value lists to use while writing rule exceptions.',
   }
 );
 
@@ -39,20 +39,20 @@ export const CLOSE_BUTTON = i18n.translate(
 );
 
 export const CANCEL_BUTTON = i18n.translate(
-  'xpack.securitySolution.lists.cancelValueListsUploadTitle',
+  'xpack.securitySolution.lists.cancelValueListsImportTitle',
   {
-    defaultMessage: 'Cancel upload',
+    defaultMessage: 'Cancel import',
   }
 );
 
-export const UPLOAD_BUTTON = i18n.translate('xpack.securitySolution.lists.valueListsUploadButton', {
-  defaultMessage: 'Upload list',
+export const UPLOAD_BUTTON = i18n.translate('xpack.securitySolution.lists.valueListsImportButton', {
+  defaultMessage: 'Import list',
 });
 
 export const UPLOAD_SUCCESS_TITLE = i18n.translate(
-  'xpack.securitySolution.lists.valueListsUploadSuccessTitle',
+  'xpack.securitySolution.lists.valueListsImportSuccessTitle',
   {
-    defaultMessage: 'Value list uploaded',
+    defaultMessage: 'Value list imported',
   }
 );
 
@@ -61,8 +61,8 @@ export const UPLOAD_ERROR = i18n.translate('xpack.securitySolution.lists.valueLi
 });
 
 export const uploadSuccessMessage = (fileName: string) =>
-  i18n.translate('xpack.securitySolution.lists.valueListsUploadSuccess', {
-    defaultMessage: "Value list '{fileName}' was uploaded",
+  i18n.translate('xpack.securitySolution.lists.valueListsImportSuccess', {
+    defaultMessage: "Value list '{fileName}' was imported",
     values: { fileName },
   });
 
@@ -85,9 +85,9 @@ export const COLUMN_TYPE = i18n.translate(
 );
 
 export const COLUMN_UPLOAD_DATE = i18n.translate(
-  'xpack.securitySolution.lists.valueListsTable.uploadDateColumn',
+  'xpack.securitySolution.lists.valueListsTable.importDateColumn',
   {
-    defaultMessage: 'Upload Date',
+    defaultMessage: 'Import Date',
   }
 );
 

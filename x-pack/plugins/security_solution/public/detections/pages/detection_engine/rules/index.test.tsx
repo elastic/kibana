@@ -76,7 +76,7 @@ jest.mock('../../../containers/detection_engine/rules/api', () => ({
 
 jest.mock('../../../components/value_lists_management_modal', () => {
   return {
-    ValueListsModal: jest.fn().mockReturnValue(<div />),
+    ValueListsFlyout: jest.fn().mockReturnValue(<div />),
   };
 });
 

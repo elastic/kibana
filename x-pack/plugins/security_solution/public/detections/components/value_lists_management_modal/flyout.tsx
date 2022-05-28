@@ -10,11 +10,11 @@ import { isEmpty } from 'lodash/fp';
 import {
   EuiBasicTable,
   EuiButton,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiTitle,
   EuiPanel,
   EuiSpacer,
   EuiText,
@@ -33,28 +33,28 @@ import { ValueListsForm } from './form';
 import { ReferenceErrorModal } from './reference_error_modal';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 
-interface ValueListsModalProps {
+interface ValueListsFlyoutProps {
   onClose: () => void;
-  showModal: boolean;
+  showFlyout: boolean;
 }
 
-interface ReferenceModalState {
+interface ReferenceFlyoutState {
   contentText: string;
   exceptionListReferences: string[];
   isLoading: boolean;
   valueListId: string;
 }
 
-const referenceModalInitialState: ReferenceModalState = {
+const referenceModalInitialState: ReferenceFlyoutState = {
   contentText: '',
   exceptionListReferences: [],
   isLoading: false,
   valueListId: '',
 };
 
-export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
+export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
   onClose,
-  showModal,
+  showFlyout,
 }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(5);
@@ -67,7 +67,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const { addError, addSuccess } = useAppToasts();
   const [showReferenceErrorModal, setShowReferenceErrorModal] = useState<boolean>(false);
-  const [referenceModalState, setReferenceModalState] = useState<ReferenceModalState>(
+  const [referenceFlyoutState, setReferenceFlyoutState] = useState<ReferenceFlyoutState>(
     referenceModalInitialState
   );
 
@@ -92,10 +92,10 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
 
   const handleReferenceDelete = useCallback(async () => {
     setShowReferenceErrorModal(false);
-    deleteList({ deleteReferences: true, http, id: referenceModalState.valueListId });
-    setReferenceModalState(referenceModalInitialState);
+    deleteList({ deleteReferences: true, http, id: referenceFlyoutState.valueListId });
+    setReferenceFlyoutState(referenceModalInitialState);
     setDeletingListIds([]);
-  }, [deleteList, http, referenceModalState.valueListId]);
+  }, [deleteList, http, referenceFlyoutState.valueListId]);
 
   useEffect(() => {
     if (deleteResult != null) {
@@ -116,7 +116,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
         ) ?? [];
       const uniqueExceptionListReferences = Array.from(new Set(references));
       setShowReferenceErrorModal(true);
-      setReferenceModalState({
+      setReferenceFlyoutState({
         contentText: i18n.referenceErrorMessage(uniqueExceptionListReferences.length),
         exceptionListReferences: uniqueExceptionListReferences,
         isLoading: false,
@@ -170,10 +170,10 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   );
 
   useEffect(() => {
-    if (showModal) {
+    if (showFlyout) {
       fetchLists();
     }
-  }, [showModal, fetchLists]);
+  }, [showFlyout, fetchLists]);
 
   useEffect(() => {
     if (!lists.loading && lists.result?.cursor) {
@@ -184,7 +184,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   const handleCloseReferenceErrorModal = useCallback(() => {
     setDeletingListIds([]);
     setShowReferenceErrorModal(false);
-    setReferenceModalState({
+    setReferenceFlyoutState({
       contentText: '',
       exceptionListReferences: [],
       isLoading: false,
@@ -192,7 +192,7 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
     });
   }, []);
 
-  if (!showModal) {
+  if (!showFlyout) {
     return null;
   }
 
@@ -212,11 +212,13 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
 
   return (
     <>
-      <EuiModal onClose={onClose} maxWidth={800}>
-        <EuiModalHeader>
-          <EuiModalHeaderTitle>{i18n.MODAL_TITLE}</EuiModalHeaderTitle>
-        </EuiModalHeader>
-        <EuiModalBody>
+      <EuiFlyout onClose={onClose} maxWidth={800}>
+        <EuiFlyoutHeader>
+          <EuiTitle>
+            <h2>{i18n.VALUE_LISTS_MODAL_TITLE}</h2>
+          </EuiTitle>
+        </EuiFlyoutHeader>
+        <EuiFlyoutBody>
           <ValueListsForm onSuccess={handleUploadSuccess} onError={handleUploadError} />
           <EuiSpacer />
           <EuiPanel hasBorder>
@@ -232,21 +234,21 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
               pagination={pagination}
             />
           </EuiPanel>
-        </EuiModalBody>
-        <EuiModalFooter>
+        </EuiFlyoutBody>
+        <EuiFlyoutFooter>
           <EuiButton data-test-subj="value-lists-modal-close-action" onClick={onClose}>
             {i18n.CLOSE_BUTTON}
           </EuiButton>
-        </EuiModalFooter>
-      </EuiModal>
+        </EuiFlyoutFooter>
+      </EuiFlyout>
       <ReferenceErrorModal
         cancelText={i18n.REFERENCE_MODAL_CANCEL_BUTTON}
         confirmText={i18n.REFERENCE_MODAL_CONFIRM_BUTTON}
-        contentText={referenceModalState.contentText}
+        contentText={referenceFlyoutState.contentText}
         onCancel={handleCloseReferenceErrorModal}
         onClose={handleCloseReferenceErrorModal}
         onConfirm={handleReferenceDelete}
-        references={referenceModalState.exceptionListReferences}
+        references={referenceFlyoutState.exceptionListReferences}
         showModal={showReferenceErrorModal}
         titleText={i18n.REFERENCE_MODAL_TITLE}
       />
@@ -259,8 +261,8 @@ export const ValueListsModalComponent: React.FC<ValueListsModalProps> = ({
   );
 };
 
-ValueListsModalComponent.displayName = 'ValueListsModalComponent';
+ValueListsFlyoutComponent.displayName = 'ValueListsFlyoutComponent';
 
-export const ValueListsModal = React.memo(ValueListsModalComponent);
+export const ValueListsFlyout = React.memo(ValueListsFlyoutComponent);
 
-ValueListsModal.displayName = 'ValueListsModal';
+ValueListsFlyout.displayName = 'ValueListsFlyout';
