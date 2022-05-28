@@ -24,7 +24,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
-} from '../response_actions_console/response_actions_console_context_menu_item';
+} from '../endpoint_responder/responder_context_menu_item';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import { HttpSetup } from '@kbn/core/public';
 import {

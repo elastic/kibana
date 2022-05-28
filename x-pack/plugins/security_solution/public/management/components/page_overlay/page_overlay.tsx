@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import React, { memo, ReactNode, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {
+  memo,
+  ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  CSSProperties,
+} from 'react';
 import styled, { createGlobalStyle } from 'styled-components';
 import { EuiFocusTrap, EuiPortal } from '@elastic/eui';
 import classnames from 'classnames';
@@ -117,12 +126,17 @@ export interface PageOverlayProps {
    */
   appendAsBodyLastNode?: boolean;
 
+  /**
+   * Explicitly set the overlay's z-index. Use with caution.
+   */
+  zIndex?: CSSProperties['zIndex'];
+
   'data-test-subj'?: string;
 }
 
 /**
  * A generic component for taking over the entire Kibana UI main content area (everything below the
- * top header that includes the breadcrumbs)
+ * top header that includes the breadcrumbs).
  */
 export const PageOverlay = memo<PageOverlayProps>(
   ({
@@ -134,6 +148,7 @@ export const PageOverlay = memo<PageOverlayProps>(
     lockDocumentBody = true,
     appendAsBodyLastNode = true,
     paddingSize,
+    zIndex,
     'data-test-subj': dataTestSubj,
   }) => {
     const { pathname } = useLocation();
@@ -144,6 +159,16 @@ export const PageOverlay = memo<PageOverlayProps>(
     const setPortalEleRef: EuiPortalProps['portalRef'] = useCallback((node) => {
       portalEleRef.current = node;
     }, []);
+
+    const containerCssOverrides = useMemo<CSSProperties>(() => {
+      const css: CSSProperties = {};
+
+      if (zIndex) {
+        css.zIndex = zIndex;
+      }
+
+      return css;
+    }, [zIndex]);
 
     const containerClassName = useMemo(() => {
       return classnames({
@@ -210,7 +235,11 @@ export const PageOverlay = memo<PageOverlayProps>(
 
     return (
       <EuiPortal portalRef={setPortalEleRef}>
-        <OverlayRootContainer data-test-subj={dataTestSubj} className={containerClassName}>
+        <OverlayRootContainer
+          data-test-subj={dataTestSubj}
+          className={containerClassName}
+          style={containerCssOverrides}
+        >
           <EuiFocusTrap data-test-subj="trap-focus" className="fullHeight">
             {children}
           </EuiFocusTrap>

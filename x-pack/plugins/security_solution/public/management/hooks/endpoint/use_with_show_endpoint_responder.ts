@@ -6,15 +6,15 @@
  */
 
 import { useCallback } from 'react';
-import { EndpointResponderExtensionComponentProps } from '../../components/endpoint_console/types';
-import { ActionLogButton } from '../../components/endpoint_console';
-import { getEndpointResponseActionsConsoleCommands } from '../../components/endpoint_console/endpoint_response_actions_console_commands';
+import { EndpointResponderExtensionComponentProps } from '../../components/endpoint_responder/types';
+import { ActionLogButton } from '../../components/endpoint_responder';
+import { getEndpointResponseActionsConsoleCommands } from '../../components/endpoint_responder/endpoint_response_actions_console_commands';
 import { useConsoleManager } from '../../components/console';
 import type { HostMetadata } from '../../../../common/endpoint/types';
 
-type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
+type ShowEndpointResponder = (endpointMetadata: HostMetadata) => void;
 
-export const useShowEndpointResponseActionsConsole = (): ShowEndpointResponseActionsConsole => {
+export const useWithShowEndpointResponder = (): ShowEndpointResponder => {
   const consoleManager = useConsoleManager();
 
   return useCallback(
