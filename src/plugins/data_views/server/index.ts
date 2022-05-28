@@ -8,11 +8,7 @@
 
 export { getFieldByName, findIndexPatternById } from './utils';
 export type { FieldDescriptor } from './fetcher';
-export {
-  IndexPatternsFetcher,
-  mergeCapabilitiesWithFields,
-  getCapabilitiesForRollupIndices,
-} from './fetcher';
+export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './fetcher';
 export type { IndexPatternsServiceStart } from './types';
 
 import { PluginInitializerContext } from '@kbn/core/server';
