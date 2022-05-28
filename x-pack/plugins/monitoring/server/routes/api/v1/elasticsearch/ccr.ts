@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import moment from 'moment';
 import { get, groupBy } from 'lodash';
-// @ts-ignore
-import { handleError } from '../../../../lib/errors/handle_error';
-// @ts-ignore
-import { prefixIndexPattern } from '../../../../../common/ccs_utils';
+import { prefixIndexPatternWithCcs } from '../../../../../common/ccs_utils';
 import { INDEX_PATTERN_ELASTICSEARCH } from '../../../../../common/constants';
 import {
-  ElasticsearchResponse,
+  postElasticsearchCcrRequestParamsRT,
+  postElasticsearchCcrRequestPayloadRT,
+  postElasticsearchCcrResponsePayloadRT,
+} from '../../../../../common/http_api/elasticsearch';
+import { TimeRange } from '../../../../../common/http_api/shared';
+import {
   ElasticsearchLegacySource,
   ElasticsearchMetricbeatSource,
+  ElasticsearchResponse,
 } from '../../../../../common/types/es';
-import { LegacyRequest } from '../../../../types';
+import { MonitoringConfig } from '../../../../config';
+import { createValidationFunction } from '../../../../lib/create_route_validation_function';
+import { handleError } from '../../../../lib/errors/handle_error';
+import { LegacyRequest, MonitoringCore } from '../../../../types';
 
 function getBucketScript(max: string, min: string) {
   return {
@@ -33,15 +37,12 @@ function getBucketScript(max: string, min: string) {
 }
 
 function buildRequest(
-  req: LegacyRequest,
-  config: {
-    get: (key: string) => string | undefined;
-  },
+  req: LegacyRequest<unknown, unknown, { timeRange: TimeRange }>,
+  config: MonitoringConfig,
   esIndexPattern: string
 ) {
-  const min = moment.utc(req.payload.timeRange.min).valueOf();
-  const max = moment.utc(req.payload.timeRange.max).valueOf();
-  const maxBucketSize = config.get('monitoring.ui.max_bucket_size');
+  const { min, max } = req.payload.timeRange;
+  const maxBucketSize = config.ui.max_bucket_size;
   const aggs = {
     ops_synced_max: {
       max: {
@@ -200,33 +201,21 @@ function buildRequest(
   };
 }
 
-export function ccrRoute(server: {
-  route: (p: any) => void;
-  config: () => {
-    get: (key: string) => string | undefined;
-  };
-}) {
+export function ccrRoute(server: MonitoringCore) {
+  const validateParams = createValidationFunction(postElasticsearchCcrRequestParamsRT);
+  const validateBody = createValidationFunction(postElasticsearchCcrRequestPayloadRT);
+
   server.route({
-    method: 'POST',
+    method: 'post',
     path: '/api/monitoring/v1/clusters/{clusterUuid}/elasticsearch/ccr',
-    config: {
-      validate: {
-        params: schema.object({
-          clusterUuid: schema.string(),
-        }),
-        payload: schema.object({
-          ccs: schema.maybe(schema.string()),
-          timeRange: schema.object({
-            min: schema.string(),
-            max: schema.string(),
-          }),
-        }),
-      },
+    validate: {
+      params: validateParams,
+      body: validateBody,
     },
-    async handler(req: LegacyRequest) {
-      const config = server.config();
+    async handler(req) {
+      const config = server.config;
       const ccs = req.payload.ccs;
-      const esIndexPattern = prefixIndexPattern(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
+      const esIndexPattern = prefixIndexPatternWithCcs(config, INDEX_PATTERN_ELASTICSEARCH, ccs);
 
       try {
         const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
@@ -332,7 +321,7 @@ export function ccrRoute(server: {
           return accum;
         }, []);
 
-        return { data };
+        return postElasticsearchCcrResponsePayloadRT.encode({ data });
       } catch (err) {
         return handleError(err, req);
       }

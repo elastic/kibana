@@ -7,18 +7,34 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
+import { CoreTheme } from '@kbn/core/public';
+import { Observable } from 'rxjs';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { defaultTheme$ } from '@kbn/presentation-util-plugin/common/lib';
+import { StartInitializer } from '../plugin';
 import { RendererStrings } from '../../i18n';
 import { RendererFactory } from '../../types';
 
 const { text: strings } = RendererStrings;
 
-export const text: RendererFactory<{ text: string }> = () => ({
-  name: 'text',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  render(domNode, { text: textString }, handlers) {
-    ReactDOM.render(<div>{textString}</div>, domNode, () => handlers.done());
-    handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
-  },
-});
+export const getTextRenderer =
+  (theme$: Observable<CoreTheme> = defaultTheme$): RendererFactory<{ text: string }> =>
+  () => ({
+    name: 'text',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    render(domNode, { text: textString }, handlers) {
+      ReactDOM.render(
+        <KibanaThemeProvider theme$={theme$}>
+          <div>{textString}</div>
+        </KibanaThemeProvider>,
+        domNode,
+        () => handlers.done()
+      );
+      handlers.onDestroy(() => ReactDOM.unmountComponentAtNode(domNode));
+    },
+  });
+
+export const textFactory: StartInitializer<RendererFactory<{ text: string }>> = (core, plugins) =>
+  getTextRenderer(core.theme.theme$);

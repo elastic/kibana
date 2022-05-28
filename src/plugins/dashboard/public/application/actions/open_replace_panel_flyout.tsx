@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'src/core/public';
+import { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '../../services/kibana_react';
 import { ReplacePanelFlyout } from './replace_panel_flyout';
 import {
@@ -47,7 +47,8 @@ export async function openReplacePanelFlyout(options: {
         savedObjectsFinder={savedObjectFinder}
         notifications={notifications}
         getEmbeddableFactories={getEmbeddableFactories}
-      />
+      />,
+      { theme$: core.theme.theme$ }
     ),
     {
       'data-test-subj': 'dashboardReplacePanel',

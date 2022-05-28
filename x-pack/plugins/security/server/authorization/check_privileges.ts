@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { pick, transform, uniq } from 'lodash';
 
-import type { IClusterClient, KibanaRequest } from 'src/core/server';
+import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
 
 import { GLOBAL_RESOURCE } from '../../common/constants';
 import { ResourceSerializer } from './resource_serializer';
@@ -58,13 +59,13 @@ export function checkPrivilegesWithRequestFactory(
       ]);
 
       const clusterClient = await getClusterClient();
-      const { body } = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
+      const body = await clusterClient.asScoped(request).asCurrentUser.security.hasPrivileges({
         body: {
-          cluster: privileges.elasticsearch?.cluster,
+          cluster: privileges.elasticsearch?.cluster as estypes.SecurityClusterPrivilege[],
           index: Object.entries(privileges.elasticsearch?.index ?? {}).map(
             ([name, indexPrivileges]) => ({
               names: [name],
-              privileges: indexPrivileges,
+              privileges: indexPrivileges as estypes.SecurityIndexPrivilege[],
             })
           ),
           application: [

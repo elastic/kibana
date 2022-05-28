@@ -6,10 +6,10 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import {
-  IKbnUrlStateStorage,
-  ISessionStorageStateStorage,
-} from '../../../../../../../../src/plugins/kibana_utils/public';
+import { IKbnUrlStateStorage, ISessionStorageStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { OperationType, SeriesType } from '@kbn/lens-plugin/public';
+import { ChartTimeRange } from '../header/last_updated';
+import { useUiTracker } from '../../../../hooks/use_track_metric';
 import type {
   AppDataType,
   ReportViewType,
@@ -18,8 +18,8 @@ import type {
   URLReportDefinition,
 } from '../types';
 import { convertToShortUrl } from '../configurations/utils';
-import { OperationType, SeriesType } from '../../../../../../lens/public';
 import { URL_KEYS } from '../configurations/constants/url_constants';
+import { trackTelemetryOnApply } from '../utils/telemetry';
 
 export interface SeriesContextValue {
   firstSeries?: SeriesUrl;
@@ -30,9 +30,11 @@ export interface SeriesContextValue {
   setSeries: (seriesIndex: number, newValue: SeriesUrl) => void;
   getSeries: (seriesIndex: number) => SeriesUrl | undefined;
   removeSeries: (seriesIndex: number) => void;
-  setReportType: (reportType: string) => void;
+  setReportType: (reportType: ReportViewType) => void;
   storage: IKbnUrlStateStorage | ISessionStorageStateStorage;
   reportType: ReportViewType;
+  chartTimeRangeContext?: ChartTimeRange;
+  setChartTimeRangeContext: React.Dispatch<React.SetStateAction<ChartTimeRange | undefined>>;
 }
 export const UrlStorageContext = createContext<SeriesContextValue>({} as SeriesContextValue);
 
@@ -57,11 +59,15 @@ export function UrlStorageContextProvider({
 
   const [lastRefresh, setLastRefresh] = useState<number>(() => Date.now());
 
-  const [reportType, setReportType] = useState<string>(
-    () => (storage as IKbnUrlStateStorage).get(reportTypeKey) ?? ''
+  const [chartTimeRangeContext, setChartTimeRangeContext] = useState<ChartTimeRange | undefined>();
+
+  const [reportType, setReportType] = useState<ReportViewType>(
+    () => ((storage as IKbnUrlStateStorage).get(reportTypeKey) ?? '') as ReportViewType
   );
 
   const [firstSeries, setFirstSeries] = useState<SeriesUrl>();
+
+  const trackEvent = useUiTracker();
 
   useEffect(() => {
     const firstSeriesT = allSeries?.[0];
@@ -93,10 +99,6 @@ export function UrlStorageContextProvider({
     });
   }, []);
 
-  useEffect(() => {
-    (storage as IKbnUrlStateStorage).set(reportTypeKey, reportType);
-  }, [reportType, storage]);
-
   const removeSeries = useCallback((seriesIndex: number) => {
     setAllSeries((prevAllSeries) =>
       prevAllSeries.filter((seriesT, index) => index !== seriesIndex)
@@ -113,14 +115,18 @@ export function UrlStorageContextProvider({
   const applyChanges = useCallback(
     (onApply?: () => void) => {
       const allShortSeries = allSeries.map((series) => convertToShortUrl(series));
+      (storage as IKbnUrlStateStorage).set(reportTypeKey, reportType);
 
       (storage as IKbnUrlStateStorage).set(allSeriesKey, allShortSeries);
       setLastRefresh(Date.now());
+
+      trackTelemetryOnApply(trackEvent, allSeries, reportType);
+
       if (onApply) {
         onApply();
       }
     },
-    [allSeries, storage]
+    [allSeries, storage, trackEvent, reportType]
   );
 
   const value = {
@@ -133,7 +139,9 @@ export function UrlStorageContextProvider({
     lastRefresh,
     setLastRefresh,
     setReportType,
-    reportType: storage.get(reportTypeKey) as ReportViewType,
+    reportType,
+    chartTimeRangeContext,
+    setChartTimeRangeContext,
     firstSeries: firstSeries!,
   };
   return <UrlStorageContext.Provider value={value}>{children}</UrlStorageContext.Provider>;

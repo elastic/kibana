@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { getOr } from 'lodash/fp';
 import React, { useCallback, Fragment, useMemo, useState } from 'react';
 import styled from 'styled-components';
@@ -19,16 +19,13 @@ import {
 } from '../../../../common/search_strategy';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { DefaultDraggable } from '../../../common/components/draggables';
-import { getEmptyTagValue } from '../../../common/components/empty_value';
+import { defaultToEmptyTag, getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import {
-  HostDetailsLink,
-  ReputationLink,
-  WhoIsLink,
-  ReputationLinkSetting,
-} from '../../../common/components/links';
+import { HostDetailsLink, ReputationLink, WhoIsLink } from '../../../common/components/links';
 import { Spacer } from '../../../common/components/page';
 import * as i18n from '../../../network/components/details/translations';
+import { IS_OPERATOR, QueryOperator } from '../../../../common/types';
+import { DraggableWrapper } from '../../../common/components/drag_and_drop/draggable_wrapper';
 
 const DraggableContainerFlexGroup = styled(EuiFlexGroup)`
   flex-grow: unset;
@@ -60,6 +57,8 @@ export const locationRenderer = (
                 isDraggable={isDraggable ?? false}
                 field={fieldName}
                 value={locationValue}
+                isAggregatable={true}
+                fieldType={'keyword'}
               />
             </EuiFlexItem>
           </Fragment>
@@ -101,6 +100,8 @@ export const autonomousSystemRenderer = (
           isDraggable={false}
           field={`${flowTarget}.as.number`}
           value={`${as.number}`}
+          isAggregatable={true}
+          fieldType={'number'}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -133,6 +134,8 @@ export const hostIdRenderer = ({
           isDraggable={isDraggable}
           field="host.id"
           value={host.id[0]}
+          isAggregatable={true}
+          fieldType={'keyword'}
         >
           {noLink ? (
             <>{host.id}</>
@@ -166,6 +169,8 @@ export const hostNameRenderer = (
       isDraggable={isDraggable ?? false}
       field={'host.name'}
       value={host.name[0]}
+      isAggregatable={true}
+      fieldType={'keyword'}
     >
       <HostDetailsLink hostName={host.name[0]}>
         {host.name ? host.name : getEmptyTagValue()}
@@ -182,16 +187,14 @@ export const reputationRenderer = (ip: string): React.ReactElement => (
 );
 
 interface DefaultFieldRendererProps {
-  rowItems: string[] | null | undefined;
   attrName: string;
+  displayCount?: number;
   idPrefix: string;
   isDraggable?: boolean;
-  render?: (item: string) => JSX.Element;
-  displayCount?: number;
   moreMaxHeight?: string;
+  render?: (item: string) => React.ReactNode;
+  rowItems: string[] | null | undefined;
 }
-
-type OverflowRenderer = (item: string | ReputationLinkSetting) => JSX.Element;
 
 export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> = ({
   attrName,
@@ -216,7 +219,14 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
             </>
           )}
           {typeof rowItem === 'string' && (
-            <DefaultDraggable id={id} isDraggable={isDraggable} field={attrName} value={rowItem}>
+            <DefaultDraggable
+              id={id}
+              isDraggable={isDraggable}
+              field={attrName}
+              value={rowItem}
+              isAggregatable={true}
+              fieldType={'keyword'}
+            >
               {render ? render(rowItem) : rowItem}
             </DefaultDraggable>
           )}
@@ -229,11 +239,14 @@ export const DefaultFieldRendererComponent: React.FC<DefaultFieldRendererProps> 
         <EuiFlexItem grow={false}>{draggables} </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <DefaultFieldRendererOverflow
-            rowItems={rowItems}
+            attrName={attrName}
+            fieldType="keyword"
             idPrefix={idPrefix}
-            render={render as OverflowRenderer}
-            overflowIndexStart={displayCount}
+            isAggregatable={true}
             moreMaxHeight={moreMaxHeight}
+            overflowIndexStart={displayCount}
+            render={render}
+            rowItems={rowItems}
           />
         </EuiFlexItem>
       </DraggableContainerFlexGroup>
@@ -249,47 +262,134 @@ export const DefaultFieldRenderer = React.memo(DefaultFieldRendererComponent);
 
 DefaultFieldRenderer.displayName = 'DefaultFieldRenderer';
 
-type RowItemTypes = string | ReputationLinkSetting;
 interface DefaultFieldRendererOverflowProps {
-  rowItems: string[] | ReputationLinkSetting[];
+  attrName?: string;
+  fieldType?: string;
+  rowItems: string[];
   idPrefix: string;
-  render?: (item: RowItemTypes) => React.ReactNode;
+  isAggregatable?: boolean;
+  render?: (item: string) => React.ReactNode;
   overflowIndexStart?: number;
   moreMaxHeight: string;
 }
 
 interface MoreContainerProps {
+  attrName?: string;
+  dragDisplayValue?: string;
+  fieldType?: string;
   idPrefix: string;
-  render?: (item: RowItemTypes) => React.ReactNode;
-  rowItems: RowItemTypes[];
+  isAggregatable?: boolean;
   moreMaxHeight: string;
   overflowIndexStart: number;
+  render?: (item: string) => React.ReactNode;
+  rowItems: string[];
 }
 
 /** A container (with overflow) for showing "More" items in a popover */
 export const MoreContainer = React.memo<MoreContainerProps>(
-  ({ idPrefix, render, rowItems, moreMaxHeight, overflowIndexStart }) => (
-    <div
-      data-test-subj="more-container"
-      style={{
-        maxHeight: moreMaxHeight,
-        overflow: 'auto',
-        paddingRight: '2px',
-      }}
-    >
-      {rowItems.slice(overflowIndexStart).map((rowItem, i) => (
-        <EuiText key={`${idPrefix}-${rowItem}-${i}`} size="s">
-          {render ? render(rowItem) : rowItem}
-        </EuiText>
-      ))}
-    </div>
-  )
-);
+  ({
+    attrName,
+    dragDisplayValue,
+    fieldType,
+    idPrefix,
+    isAggregatable,
+    moreMaxHeight,
+    overflowIndexStart,
+    render,
+    rowItems,
+  }) => {
+    const moreItemsWithHoverActions = useMemo(
+      () =>
+        rowItems.slice(overflowIndexStart).reduce<React.ReactElement[]>((acc, rowItem, index) => {
+          const id = escapeDataProviderId(`${idPrefix}-${attrName}-${rowItem}-${index}`);
+          const dataProvider =
+            typeof rowItem === 'string' && attrName != null
+              ? {
+                  and: [],
+                  enabled: true,
+                  id,
+                  name: rowItem,
+                  excluded: false,
+                  kqlQuery: '',
+                  queryMatch: {
+                    field: attrName,
+                    value: rowItem,
+                    displayValue: dragDisplayValue ?? rowItem,
+                    operator: IS_OPERATOR as QueryOperator,
+                  },
+                }
+              : undefined;
 
+          if (dataProvider != null) {
+            acc.push(
+              <EuiFlexItem key={`${idPrefix}-${id}`}>
+                <DraggableWrapper
+                  dataProvider={dataProvider}
+                  isDraggable={false}
+                  render={() => (render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}
+                  timelineId={undefined}
+                  fieldType={fieldType}
+                  isAggregatable={isAggregatable}
+                />
+              </EuiFlexItem>
+            );
+          }
+
+          return acc;
+        }, []),
+      [
+        attrName,
+        dragDisplayValue,
+        fieldType,
+        idPrefix,
+        isAggregatable,
+        overflowIndexStart,
+        render,
+        rowItems,
+      ]
+    );
+
+    const moreItems = useMemo(
+      () =>
+        rowItems.slice(overflowIndexStart).map((rowItem, index) => {
+          return (
+            <EuiFlexItem grow={1} key={`${rowItem}-${index}`}>
+              {(render && render(rowItem)) ?? defaultToEmptyTag(rowItem)}
+            </EuiFlexItem>
+          );
+        }),
+      [overflowIndexStart, render, rowItems]
+    );
+
+    return (
+      <div
+        data-test-subj="more-container"
+        className="eui-yScroll"
+        style={{
+          maxHeight: moreMaxHeight,
+          paddingRight: '2px',
+        }}
+      >
+        <EuiFlexGroup gutterSize="s" direction="column" data-test-subj="overflow-items">
+          {attrName != null ? moreItemsWithHoverActions : moreItems}
+        </EuiFlexGroup>
+      </div>
+    );
+  }
+);
 MoreContainer.displayName = 'MoreContainer';
 
 export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverflowProps>(
-  ({ idPrefix, moreMaxHeight, overflowIndexStart = 5, render, rowItems }) => {
+  ({
+    attrName,
+    idPrefix,
+    moreMaxHeight,
+    overflowIndexStart = 5,
+    render,
+    rowItems,
+    fieldType,
+    isAggregatable,
+  }) => {
     const [isOpen, setIsOpen] = useState(false);
     const togglePopover = useCallback(() => setIsOpen((currentIsOpen) => !currentIsOpen), []);
     const button = useMemo(
@@ -317,13 +417,17 @@ export const DefaultFieldRendererOverflow = React.memo<DefaultFieldRendererOverf
             isOpen={isOpen}
             closePopover={togglePopover}
             repositionOnScroll
+            panelClassName="withHoverActions__popover"
           >
             <MoreContainer
+              attrName={attrName}
               idPrefix={idPrefix}
               render={render}
               rowItems={rowItems}
               moreMaxHeight={moreMaxHeight}
               overflowIndexStart={overflowIndexStart}
+              fieldType={fieldType}
+              isAggregatable={isAggregatable}
             />
           </EuiPopover>
         )}

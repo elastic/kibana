@@ -8,11 +8,11 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
 import { ApmTemplate } from './apm_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 // @ts-ignore
 import { ApmOverview } from '../../../components/apm/overview';
@@ -50,7 +50,7 @@ export const ApmOverviewPage: React.FC<ComponentProps> = ({ clusters }) => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/apm`;
 
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<any>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,

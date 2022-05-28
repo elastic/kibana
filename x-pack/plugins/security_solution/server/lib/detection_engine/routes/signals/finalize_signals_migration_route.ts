@@ -6,6 +6,7 @@
  */
 
 import { transformError, BadRequestError } from '@kbn/securitysolution-es-utils';
+import { RuleDataPluginService } from '@kbn/rule-registry-plugin/server';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { SetupPlugins } from '../../../../plugin';
 import { DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL } from '../../../../../common/constants';
@@ -19,6 +20,7 @@ import { getMigrationSavedObjectsById } from '../../migrations/get_migration_sav
 
 export const finalizeSignalsMigrationRoute = (
   router: SecuritySolutionPluginRouter,
+  ruleDataService: RuleDataPluginService,
   security: SetupPlugins['security']
 ) => {
   router.post(
@@ -33,12 +35,16 @@ export const finalizeSignalsMigrationRoute = (
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const soClient = context.core.savedObjects.client;
+
+      const core = await context.core;
+      const securitySolution = await context.securitySolution;
+
+      const esClient = core.elasticsearch.client.asCurrentUser;
+      const soClient = core.savedObjects.client;
       const { migration_ids: migrationIds } = request.body;
 
       try {
-        const appClient = context.securitySolution?.getAppClient();
+        const appClient = securitySolution?.getAppClient();
         if (!appClient) {
           return siemResponse.error({ statusCode: 404 });
         }
@@ -53,12 +59,14 @@ export const finalizeSignalsMigrationRoute = (
           soClient,
         });
 
+        const spaceId = securitySolution.getSpaceId();
+        const signalsAlias = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
         const finalizeResults = await Promise.all(
           migrations.map(async (migration) => {
             try {
               const finalizedMigration = await migrationService.finalize({
                 migration,
-                signalsAlias: appClient.getSignalsIndex(),
+                signalsAlias,
               });
 
               if (isMigrationFailed(finalizedMigration)) {

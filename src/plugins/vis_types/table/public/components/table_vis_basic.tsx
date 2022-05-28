@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { memo, useCallback, useMemo, useEffect, useState, useRef } from 'react';
-import { EuiDataGrid, EuiDataGridProps, EuiDataGridSorting, EuiTitle } from '@elastic/eui';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
+import {
+  EuiDataGrid,
+  EuiDataGridProps,
+  EuiDataGridRefProps,
+  EuiDataGridSorting,
+  EuiTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
 
-import { IInterpreterRenderHandlers } from 'src/plugins/expressions';
+import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin';
 import { createTableVisCell } from './table_vis_cell';
 import { TableContext, TableVisConfig, TableVisUseUiStateProps } from '../types';
 import { usePagination } from '../utils';
@@ -34,6 +40,8 @@ export const TableVisBasic = memo(
     title,
     uiStateProps: { columnsWidth, sort, setColumnsWidth, setSort },
   }: TableVisBasicProps) => {
+    const dataGridRef = useRef<EuiDataGridRefProps>(null);
+
     const { columns, rows, formattedColumns } = table;
 
     // custom sorting is in place until the EuiDataGrid sorting gets rid of flaws -> https://github.com/elastic/eui/issues/4108
@@ -65,7 +73,8 @@ export const TableVisBasic = memo(
       sortedRows,
       formattedColumns,
       columnsWidth,
-      fireEvent
+      fireEvent,
+      dataGridRef.current?.closeCellPopover
     );
 
     // Pagination config
@@ -111,26 +120,6 @@ export const TableVisBasic = memo(
       [columns, setColumnsWidth]
     );
 
-    const firstRender = useRef(true);
-    const [dataGridUpdateCounter, setDataGridUpdateCounter] = useState(0);
-
-    // key was added as temporary solution to force re-render if we change autoFitRowToContent or we get new data
-    // cause we have problem with correct updating height cache in EUI datagrid when we use auto-height
-    // will be removed as soon as fix problem on EUI side
-    useEffect(() => {
-      // skip first render
-      if (firstRender.current) {
-        firstRender.current = false;
-        return;
-      }
-      // skip if auto height was turned off
-      if (!visConfig.autoFitRowToContent) {
-        return;
-      }
-      // update counter to remount grid from scratch
-      setDataGridUpdateCounter((counter) => counter + 1);
-    }, [visConfig.autoFitRowToContent, table, sort, pagination, columnsWidth]);
-
     return (
       <>
         {title && (
@@ -139,7 +128,6 @@ export const TableVisBasic = memo(
           </EuiTitle>
         )}
         <EuiDataGrid
-          key={String(dataGridUpdateCounter)}
           aria-label={dataGridAriaLabel}
           columns={gridColumns}
           gridStyle={{
@@ -157,7 +145,7 @@ export const TableVisBasic = memo(
               showColumnSelector: false,
               showFullScreenSelector: false,
               showSortSelector: false,
-              showStyleSelector: false,
+              showDisplaySelector: false,
               additionalControls: (
                 <TableVisControls
                   dataGridAriaLabel={dataGridAriaLabel}
@@ -179,6 +167,7 @@ export const TableVisBasic = memo(
           sorting={{ columns: sortingColumns, onSort }}
           onColumnResize={onColumnResize}
           minSizeForControls={1}
+          ref={dataGridRef}
         />
       </>
     );

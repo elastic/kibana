@@ -10,23 +10,20 @@ import { findTestSubject } from '@elastic/eui/lib/test';
 import React from 'react';
 import { skip } from 'rxjs/operators';
 import { mount } from 'enzyme';
-import { I18nProvider } from '@kbn/i18n/react';
-import { nextTick } from '@kbn/test/jest';
+import { I18nProvider } from '@kbn/i18n-react';
+import { nextTick } from '@kbn/test-jest-helpers';
 import { DashboardViewport, DashboardViewportProps } from './dashboard_viewport';
 import { DashboardContainer, DashboardContainerServices } from '../dashboard_container';
 import { getSampleDashboardInput } from '../../test_helpers';
 import { KibanaContextProvider } from '../../../services/kibana_react';
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
-import {
-  applicationServiceMock,
-  coreMock,
-  uiSettingsServiceMock,
-} from '../../../../../../core/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { applicationServiceMock, coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import {
   ContactCardEmbeddableFactory,
   CONTACT_CARD_EMBEDDABLE,
-} from '../../../../../embeddable/public/lib/test_samples';
-import { getStubPluginServices } from '../../../../../presentation_util/public';
+} from '@kbn/embeddable-plugin/public/lib/test_samples';
+import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 let dashboardContainer: DashboardContainer | undefined;
 const presentationUtil = getStubPluginServices();
@@ -48,6 +45,7 @@ function getProps(props?: Partial<DashboardViewportProps>): {
     application: applicationServiceMock.createStartContract(),
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreMock.createStart().http,
+    theme: coreMock.createStart().theme,
     embeddable: {
       getTriggerCompatibleActions: (() => []) as any,
       getEmbeddablePanel: jest.fn(),
@@ -65,6 +63,7 @@ function getProps(props?: Partial<DashboardViewportProps>): {
       getTriggerCompatibleActions: (() => []) as any,
     } as any,
     presentationUtil,
+    screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
 
   const input = getSampleDashboardInput({

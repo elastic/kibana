@@ -6,8 +6,8 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ActionTypeMenu } from './action_type_menu';
 import { ConnectorValidationResult, GenericValidationResult } from '../../../types';

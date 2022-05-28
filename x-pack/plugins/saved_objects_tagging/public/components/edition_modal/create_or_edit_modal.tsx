@@ -26,7 +26,7 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   TagAttributes,
   TagValidation,
@@ -34,7 +34,7 @@ import {
   tagNameMaxLength,
   tagDescriptionMaxLength,
 } from '../../../common';
-import { TagBadge } from '../../components';
+import { TagBadge } from '..';
 import { getRandomColor, useIfMounted } from './utils';
 
 interface CreateOrEditModalProps {

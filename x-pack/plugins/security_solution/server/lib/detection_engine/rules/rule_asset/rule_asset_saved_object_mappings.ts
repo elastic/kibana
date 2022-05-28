@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsType } from '../../../../../../../../src/core/server';
+import { SavedObjectsType } from '@kbn/core/server';
 
 export const ruleAssetSavedObjectType = 'security-rule';
 
@@ -27,6 +27,10 @@ export const ruleAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
 export const ruleAssetType: SavedObjectsType = {
   name: ruleAssetSavedObjectType,
   hidden: false,
+  management: {
+    importableAndExportable: true,
+    visibleInManagement: false,
+  },
   namespaceType: 'agnostic',
   mappings: ruleAssetSavedObjectMappings,
 };

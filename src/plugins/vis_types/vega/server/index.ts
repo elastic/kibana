@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from 'kibana/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { configSchema, ConfigSchema } from '../config';
 import { VisTypeVegaPlugin } from './plugin';
@@ -22,4 +22,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new VisTypeVegaPlugin(initializerContext);
 }
 
-export { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';
+export type { VisTypeVegaPluginStart, VisTypeVegaPluginSetup } from './types';

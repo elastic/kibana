@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'kibana/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { getPackageInfo, getInstallation } from '../epm/packages';
 import { getDataStreamPrivileges } from '../package_policies_to_agent_permissions';
@@ -28,6 +28,14 @@ function buildDefault(enabled: { logs: boolean; metrics: boolean }, namespace: s
     names = names.concat(
       AGENT_POLICY_DEFAULT_MONITORING_DATASETS.map((dataset) => `metrics-${dataset}-${namespace}`)
     );
+  }
+
+  if (names.length === 0) {
+    return {
+      _elastic_agent_monitoring: {
+        indices: [],
+      },
+    };
   }
 
   return {

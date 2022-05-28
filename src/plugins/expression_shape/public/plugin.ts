@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../core/public';
-import { ExpressionsStart, ExpressionsSetup } from '../../expressions/public';
-import { shapeRenderer, progressRenderer } from './expression_renderers';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { ExpressionsStart, ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import { shapeRendererFactory, progressRendererFactory } from './expression_renderers';
 import { shapeFunction, progressFunction } from '../common/expression_functions';
 
 interface SetupDeps {
@@ -28,8 +28,8 @@ export class ExpressionShapePlugin
   public setup(core: CoreSetup, { expressions }: SetupDeps): ExpressionShapePluginSetup {
     expressions.registerFunction(shapeFunction);
     expressions.registerFunction(progressFunction);
-    expressions.registerRenderer(shapeRenderer);
-    expressions.registerRenderer(progressRenderer);
+    expressions.registerRenderer(shapeRendererFactory(core));
+    expressions.registerRenderer(progressRendererFactory(core));
   }
 
   public start(core: CoreStart): ExpressionShapePluginStart {}

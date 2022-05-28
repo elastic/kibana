@@ -58,6 +58,7 @@ export const IgnoredQueriesLogic = kea<MakeLogicType<IgnoredQueriesValues, Ignor
     dataLoading: [
       true,
       {
+        loadIgnoredQueries: () => true,
         onIgnoredQueriesLoad: () => false,
       },
     ],
@@ -89,7 +90,7 @@ export const IgnoredQueriesLogic = kea<MakeLogicType<IgnoredQueriesValues, Ignor
 
       try {
         const response: { results: CurationSuggestion[]; meta: Meta } = await http.post(
-          `/internal/app_search/engines/${engineName}/search_relevance_suggestions`,
+          `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions`,
           {
             body: JSON.stringify({
               page: {
@@ -116,7 +117,7 @@ export const IgnoredQueriesLogic = kea<MakeLogicType<IgnoredQueriesValues, Ignor
       try {
         const response = await http.put<{
           results: Array<CurationSuggestion | SuggestionUpdateError>;
-        }>(`/internal/app_search/engines/${engineName}/search_relevance_suggestions`, {
+        }>(`/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions`, {
           body: JSON.stringify([
             {
               query: ignoredQuery,

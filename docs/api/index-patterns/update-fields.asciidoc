@@ -4,6 +4,8 @@
 <titleabbrev>Update index pattern fields metadata</titleabbrev>
 ++++
 
+deprecated::[8.0.0,Use <<data-views-fields-api-update>> instead.]
+
 experimental[] Update fields presentation metadata, such as `count`,
 `customLabel`, and `format`. You can update multiple fields in one request. Updates
 are merged with persisted metadata. To remove existing metadata, specify `null` as the value.
@@ -44,7 +46,7 @@ Set popularity `count` for field `foo`:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
+$ curl -X POST api/index_patterns/index-pattern/my-pattern/fields
 {
     "fields": {
         "foo": {
@@ -59,7 +61,7 @@ Update multiple metadata fields in one request:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
+$ curl -X POST api/index_patterns/index-pattern/my-pattern/fields
 {
     "fields": {
         "foo": {
@@ -77,7 +79,7 @@ $ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
 Use `null` value to delete metadata:
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/saved_objects/index-pattern/my-pattern/fields
+$ curl -X POST api/index_patterns/index-pattern/my-pattern/fields
 {
     "fields": {
         "foo": {

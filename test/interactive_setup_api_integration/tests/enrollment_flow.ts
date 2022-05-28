@@ -20,7 +20,7 @@ export default function (context: FtrProviderContext) {
   const config = context.getService('config');
 
   describe('Interactive setup APIs - Enrollment flow', function () {
-    this.tags(['skipCloud', 'ciGroup2']);
+    this.tags('skipCloud');
 
     let kibanaVerificationCode: string;
     let elasticsearchCaFingerprint: string;
@@ -38,9 +38,7 @@ export default function (context: FtrProviderContext) {
     let enrollmentAPIKey: string;
     beforeEach(async () => {
       const apiResponse = await es.security.createApiKey({ body: { name: 'enrollment_api_key' } });
-      enrollmentAPIKey = Buffer.from(`${apiResponse.body.id}:${apiResponse.body.api_key}`).toString(
-        'base64'
-      );
+      enrollmentAPIKey = Buffer.from(`${apiResponse.id}:${apiResponse.api_key}`).toString('base64');
     });
 
     afterEach(async () => {

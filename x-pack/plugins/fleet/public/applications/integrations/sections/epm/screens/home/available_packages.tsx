@@ -5,10 +5,28 @@
  * 2.0.
  */
 
+import type { FunctionComponent } from 'react';
 import React, { memo, useMemo, useState } from 'react';
 import { useLocation, useHistory, useParams } from 'react-router-dom';
 import _ from 'lodash';
-import { EuiHorizontalRule, EuiFlexItem } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiHorizontalRule,
+  EuiFlexItem,
+  EuiFlexGrid,
+  EuiSpacer,
+  EuiCard,
+  EuiIcon,
+  EuiCallOut,
+  EuiLink,
+} from '@elastic/eui';
+
+import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
+
+import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
+
+import { useStartServices } from '../../../../hooks';
 
 import { pagePathGetters } from '../../../../constants';
 import {
@@ -22,8 +40,6 @@ import {
 import { doesPackageHaveIntegrations } from '../../../../services';
 import type { PackageList } from '../../../../types';
 import { PackageListGrid } from '../../components/package_list_grid';
-
-import type { CustomIntegration } from '../../../../../../../../../../src/plugins/custom_integrations/common';
 
 import type { PackageListItem } from '../../../../types';
 
@@ -40,6 +56,76 @@ import type { CategoryFacet } from './category_facets';
 
 import type { CategoryParams } from '.';
 import { getParams, categoryExists, mapToCard } from '.';
+
+const NoEprCallout: FunctionComponent<{ statusCode?: number }> = ({
+  statusCode,
+}: {
+  statusCode?: number;
+}) => {
+  let titleMessage;
+  let descriptionMessage;
+  if (statusCode === 502) {
+    titleMessage = i18n.translate('xpack.fleet.epmList.eprUnavailableBadGatewayCalloutTitle', {
+      defaultMessage:
+        'Kibana cannot reach the Elastic Package Registry, which provides Elastic Agent integrations\n',
+    });
+    descriptionMessage = (
+      <FormattedMessage
+        id="xpack.fleet.epmList.eprUnavailableCallouBdGatewaytTitleMessage"
+        defaultMessage="To view these integrations, configure a  {registryproxy} or host {onpremregistry}."
+        values={{
+          registryproxy: <ProxyLink />,
+          onpremregistry: <OnPremLink />,
+        }}
+      />
+    );
+  } else {
+    titleMessage = i18n.translate('xpack.fleet.epmList.eprUnavailable400500CalloutTitle', {
+      defaultMessage:
+        'Kibana cannot connect to the Elastic Package Registry, which provides Elastic Agent integrations\n',
+    });
+    descriptionMessage = (
+      <FormattedMessage
+        id="xpack.fleet.epmList.eprUnavailableCallout400500TitleMessage"
+        defaultMessage="Ensure the {registryproxy} or {onpremregistry} is configured correctly, or try again later."
+        values={{
+          registryproxy: <ProxyLink />,
+          onpremregistry: <OnPremLink />,
+        }}
+      />
+    );
+  }
+
+  return (
+    <EuiCallOut title={titleMessage} iconType="iInCircle" color={'warning'}>
+      <p>{descriptionMessage}</p>
+    </EuiCallOut>
+  );
+};
+
+function ProxyLink() {
+  const { docLinks } = useStartServices();
+
+  return (
+    <EuiLink href={docLinks.links.fleet.settingsFleetServerProxySettings} target="_blank">
+      {i18n.translate('xpack.fleet.epmList.proxyLinkSnippedText', {
+        defaultMessage: 'proxy server',
+      })}
+    </EuiLink>
+  );
+}
+
+function OnPremLink() {
+  const { docLinks } = useStartServices();
+
+  return (
+    <EuiLink href={docLinks.links.fleet.onPremRegistry} target="_blank">
+      {i18n.translate('xpack.fleet.epmList.onPremLinkSnippetText', {
+        defaultMessage: 'your own registry',
+      })}
+    </EuiLink>
+  );
+}
 
 function getAllCategoriesFromIntegrations(pkg: PackageListItem) {
   if (!doesPackageHaveIntegrations(pkg)) {
@@ -98,6 +184,9 @@ export const AvailablePackages: React.FC = memo(() => {
   const [preference, setPreference] = useState<IntegrationPreferenceType>('recommended');
   useBreadcrumbs('integrations_all');
 
+  const { http } = useStartServices();
+  const addBasePath = http.basePath.prepend;
+
   const { selectedCategory, searchParam } = getParams(
     useParams<CategoryParams>(),
     useLocation().search
@@ -119,12 +208,16 @@ export const AvailablePackages: React.FC = memo(() => {
     history.replace(pagePathGetters.integrations_all({ searchTerm: search })[1]);
   }
 
-  const { data: eprPackages, isLoading: isLoadingAllPackages } = useGetPackages({
+  const {
+    data: eprPackages,
+    isLoading: isLoadingAllPackages,
+    error: eprPackageLoadingError,
+  } = useGetPackages({
     category: '',
+    excludeInstallStatus: true,
   });
-
   const eprIntegrationList = useMemo(
-    () => packageListToIntegrationsList(eprPackages?.response || []),
+    () => packageListToIntegrationsList(eprPackages?.items || []),
     [eprPackages]
   );
 
@@ -152,18 +245,23 @@ export const AvailablePackages: React.FC = memo(() => {
     return a.title.localeCompare(b.title);
   });
 
-  const { data: eprCategories, isLoading: isLoadingCategories } = useGetCategories({
+  const {
+    data: eprCategories,
+    isLoading: isLoadingCategories,
+    error: eprCategoryLoadingError,
+  } = useGetCategories({
     include_policy_templates: true,
   });
 
   const categories = useMemo(() => {
-    const eprAndCustomCategories: CategoryFacet[] =
-      isLoadingCategories || !eprCategories
-        ? []
-        : mergeCategoriesAndCount(
-            eprCategories.response as Array<{ id: string; title: string; count: number }>,
-            cards
-          );
+    const eprAndCustomCategories: CategoryFacet[] = isLoadingCategories
+      ? []
+      : mergeCategoriesAndCount(
+          eprCategories
+            ? (eprCategories.items as Array<{ id: string; title: string; count: number }>)
+            : [],
+          cards
+        );
     return [
       {
         ...ALL_CATEGORY,
@@ -207,11 +305,75 @@ export const AvailablePackages: React.FC = memo(() => {
     if (selectedCategory === '') {
       return true;
     }
+
     return c.categories.includes(selectedCategory);
   });
 
+  // TODO: Remove this hard coded list of integrations with a suggestion service
+  const featuredList = (
+    <>
+      <EuiFlexGrid columns={3}>
+        <EuiFlexItem>
+          <TrackApplicationView viewId="integration-card:epr:app_search_web_crawler:featured">
+            <EuiCard
+              data-test-subj="integration-card:epr:app_search_web_crawler:featured"
+              icon={<EuiIcon type="logoAppSearch" size="xxl" />}
+              href={addBasePath('/app/enterprise_search/app_search/engines/new?method=crawler')}
+              title={i18n.translate('xpack.fleet.featuredSearchTitle', {
+                defaultMessage: 'Web site crawler',
+              })}
+              description={i18n.translate('xpack.fleet.featuredSearchDesc', {
+                defaultMessage: 'Add search to your website with the App Search web crawler.',
+              })}
+            />
+          </TrackApplicationView>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <TrackApplicationView viewId="integration-card:epr:apm:featured">
+            <EuiCard
+              data-test-subj="integration-card:epr:apm:featured"
+              title={i18n.translate('xpack.fleet.featuredObsTitle', {
+                defaultMessage: 'Elastic APM',
+              })}
+              description={i18n.translate('xpack.fleet.featuredObsDesc', {
+                defaultMessage:
+                  'Monitor, detect and diagnose complex performance issues from your application.',
+              })}
+              href={addBasePath('/app/home#/tutorial/apm')}
+              icon={<EuiIcon type="logoObservability" size="xxl" />}
+            />
+          </TrackApplicationView>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <TrackApplicationView viewId="integration-card:epr:endpoint:featured">
+            <EuiCard
+              data-test-subj="integration-card:epr:endpoint:featured"
+              icon={<EuiIcon type="logoSecurity" size="xxl" />}
+              href={addBasePath('/app/integrations/detail/endpoint/')}
+              title={i18n.translate('xpack.fleet.featuredSecurityTitle', {
+                defaultMessage: 'Endpoint and Cloud Security',
+              })}
+              description={i18n.translate('xpack.fleet.featuredSecurityDesc', {
+                defaultMessage:
+                  'Protect your hosts and cloud workloads with threat prevention, detection, and deep security data visibility.',
+              })}
+            />
+          </TrackApplicationView>
+        </EuiFlexItem>
+      </EuiFlexGrid>
+      <EuiSpacer size="xl" />
+    </>
+  );
+
+  let noEprCallout;
+  if (eprPackageLoadingError || eprCategoryLoadingError) {
+    const error = eprPackageLoadingError || eprCategoryLoadingError;
+    noEprCallout = <NoEprCallout statusCode={error?.statusCode} />;
+  }
+
   return (
     <PackageListGrid
+      featuredList={featuredList}
       isLoading={isLoadingAllPackages}
       controls={controls}
       initialSearch={searchParam}
@@ -219,6 +381,7 @@ export const AvailablePackages: React.FC = memo(() => {
       setSelectedCategory={setSelectedCategory}
       onSearchChange={setSearchTerm}
       showMissingIntegrationMessage
+      callout={noEprCallout}
     />
   );
 });

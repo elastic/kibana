@@ -23,12 +23,10 @@ export const registerStatsRoute = ({
       validate: false,
     },
     license.guardApiRoute(async (context, request, response) => {
-      const { client } = context.core.elasticsearch;
+      const { client } = (await context.core).elasticsearch;
 
       try {
-        const {
-          body: { auto_follow_stats: autoFollowStats },
-        } = await client.asCurrentUser.ccr.stats();
+        const { auto_follow_stats: autoFollowStats } = await client.asCurrentUser.ccr.stats();
 
         return response.ok({
           // @ts-expect-error Once #98266 is merged, test this again.

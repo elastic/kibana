@@ -10,7 +10,7 @@ import { Subject } from 'rxjs';
 import useMount from 'react-use/lib/useMount';
 import { Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ChromeBreadcrumb, CoreStart } from 'src/core/public';
+import { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { EuiSpacer } from '@elastic/eui';
 import { TagWithRelations, TagsCapabilities } from '../../common';
 import { getCreateModalOpener } from '../components/edition_modal';
@@ -40,7 +40,7 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   capabilities,
   assignableTypes,
 }) => {
-  const { overlays, notifications, application, http } = core;
+  const { overlays, notifications, application, http, theme } = core;
   const [loading, setLoading] = useState<boolean>(false);
   const [allTags, setAllTags] = useState<TagWithRelations[]>([]);
   const [selectedTags, setSelectedTags] = useState<TagWithRelations[]>([]);
@@ -75,8 +75,8 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
   });
 
   const createModalOpener = useMemo(
-    () => getCreateModalOpener({ overlays, tagClient }),
-    [overlays, tagClient]
+    () => getCreateModalOpener({ overlays, theme, tagClient }),
+    [overlays, theme, tagClient]
   );
 
   const tableActions = useMemo(() => {
@@ -122,7 +122,6 @@ export const TagManagementPage: FC<TagManagementPageParams> = ({
         text: i18n.translate('xpack.savedObjectsTagging.management.breadcrumb.index', {
           defaultMessage: 'Tags',
         }),
-        href: '/',
       },
     ]);
   }, [setBreadcrumbs]);

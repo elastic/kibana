@@ -18,6 +18,7 @@ const defaultOptions: VisTypeOptions = {
   showQueryBar: true,
   showFilterBar: true,
   showIndexSelection: true,
+  showQueryInput: true,
   hierarchicalData: false, // we should get rid of this i guess ?
 };
 
@@ -27,9 +28,11 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly description;
   public readonly note;
   public readonly getSupportedTriggers;
+  public readonly navigateToLens;
   public readonly icon;
   public readonly image;
   public readonly stage;
+  public readonly isDeprecated;
   public readonly group;
   public readonly titleInWizard;
   public readonly options: VisTypeOptions;
@@ -43,6 +46,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly inspectorAdapters;
   public readonly toExpressionAst;
   public readonly getInfoMessage;
+  public readonly updateVisTypeOnParamsChange;
   public readonly schemas;
 
   constructor(opts: VisTypeDefinition<TVisParams>) {
@@ -54,6 +58,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.description = opts.description ?? '';
     this.note = opts.note ?? '';
     this.getSupportedTriggers = opts.getSupportedTriggers;
+    this.navigateToLens = opts.navigateToLens;
     this.title = opts.title;
     this.icon = opts.icon;
     this.image = opts.image;
@@ -61,6 +66,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.editorConfig = defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage ?? 'production';
+    this.isDeprecated = opts.isDeprecated ?? false;
     this.group = opts.group ?? VisGroups.AGGBASED;
     this.titleInWizard = opts.titleInWizard ?? '';
     this.hidden = opts.hidden ?? false;
@@ -71,6 +77,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.inspectorAdapters = opts.inspectorAdapters;
     this.toExpressionAst = opts.toExpressionAst;
     this.getInfoMessage = opts.getInfoMessage;
+    this.updateVisTypeOnParamsChange = opts.updateVisTypeOnParamsChange;
 
     this.schemas = new Schemas(this.editorConfig?.schemas ?? []);
   }

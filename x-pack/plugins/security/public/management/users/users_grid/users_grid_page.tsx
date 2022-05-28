@@ -20,12 +20,12 @@ import {
 } from '@elastic/eui';
 import React, { Component } from 'react';
 
+import type { ApplicationStart, NotificationsStart, ScopedHistory } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { ApplicationStart, NotificationsStart, ScopedHistory } from 'src/core/public';
 
-import { reactRouterNavigate } from '../../../../../../../src/plugins/kibana_react/public';
 import type { Role, User } from '../../../../common/model';
 import { DeprecatedBadge, DisabledBadge, ReservedBadge } from '../../badges';
 import { RoleTableDisplay } from '../../role_table_display';
@@ -51,6 +51,7 @@ interface State {
   permissionDenied: boolean;
   filter: string;
   includeReservedUsers: boolean;
+  isTableLoading: boolean;
 }
 
 export class UsersGridPage extends Component<Props, State> {
@@ -65,6 +66,7 @@ export class UsersGridPage extends Component<Props, State> {
       permissionDenied: false,
       filter: '',
       includeReservedUsers: true,
+      isTableLoading: false,
     };
   }
 
@@ -73,7 +75,7 @@ export class UsersGridPage extends Component<Props, State> {
   }
 
   public render() {
-    const { users, roles, permissionDenied, showDeleteConfirmation, selection } = this.state;
+    const { roles, permissionDenied, showDeleteConfirmation, selection } = this.state;
 
     if (permissionDenied) {
       return (
@@ -268,7 +270,7 @@ export class UsersGridPage extends Component<Props, State> {
             selection={selectionConfig}
             pagination={pagination}
             items={this.state.visibleUsers}
-            loading={users.length === 0}
+            loading={this.state.isTableLoading}
             search={search}
             sorting={sorting}
             rowProps={rowProps}
@@ -311,11 +313,15 @@ export class UsersGridPage extends Component<Props, State> {
 
   private async loadUsersAndRoles() {
     try {
+      this.setState({
+        isTableLoading: true,
+      });
       const [users, roles] = await Promise.all([
         this.props.userAPIClient.getUsers(),
         this.props.rolesAPIClient.getRoles(),
       ]);
       this.setState({
+        isTableLoading: false,
         users,
         roles,
         visibleUsers: this.getVisibleUsers(
@@ -325,9 +331,8 @@ export class UsersGridPage extends Component<Props, State> {
         ),
       });
     } catch (e) {
-      if (e.body.statusCode === 403) {
-        this.setState({ permissionDenied: true });
-      } else {
+      this.setState({ permissionDenied: e.body.statusCode === 403, isTableLoading: false });
+      if (e.body.statusCode !== 403) {
         this.props.notifications.toasts.addDanger(
           i18n.translate('xpack.security.management.users.fetchingUsersErrorMessage', {
             defaultMessage: 'Error fetching users: {message}',

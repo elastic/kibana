@@ -9,6 +9,8 @@ import expect from '@kbn/expect';
 import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EXCEPTION_LIST_URL, EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
 
+import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
+import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   removeExceptionListServerGeneratedProperties,
@@ -16,18 +18,16 @@ import {
   binaryToString,
   deleteAllExceptions,
 } from '../../utils';
-import { getCreateExceptionListMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_schema.mock';
-import { getCreateExceptionListItemMinimalSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_exception_list_item_schema.mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
-  const es = getService('es');
+  const log = getService('log');
 
   describe('export_exception_list_route', () => {
     describe('exporting exception lists', () => {
       afterEach(async () => {
-        await deleteAllExceptions(es);
+        await deleteAllExceptions(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(400);
 
         expect(exportBody).to.eql({
-          message: 'exception list with list_id: not_exist does not exist',
+          message: 'exception list with list_id: not_exist or id: not_exist does not exist',
           status_code: 400,
         });
       });

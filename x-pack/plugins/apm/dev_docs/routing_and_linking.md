@@ -6,7 +6,7 @@ This document describes routing in the APM plugin.
 
 ### Server-side
 
-Route definitions for APM's server-side API are in the [server/routes directory](../server/routes). Routes are created with [the `createApmServerRoute` function](../server/routes/create_apm_server_route.ts). Routes are added to the API in [the `registerRoutes` function](../server/routes/register_routes.ts), which is initialized in the plugin `setup` lifecycle method.
+Route definitions for APM's server-side API are in the [server/routes directory](../server/routes). Routes are created with [the `createApmServerRoute` function](../server/routes/apm_routes/create_apm_server_route.ts). Routes are added to the API in [the `registerRoutes` function](../server/routes/apm_routes/register_apm_server_routes.ts), which is initialized in the plugin `setup` lifecycle method.
 
 The path and query string parameters are defined in the calls to `createApmServerRoute` with io-ts types, so that each route has its parameters type checked.
 
@@ -46,13 +46,13 @@ To be able to use the parameters, you can use `useApmParams`, which will automat
 ```ts
 const {
   path: { serviceName }, // string
-  query: { transactionType } // string | undefined
+  query: { transactionType }, // string | undefined
 } = useApmParams('/services/:serviceName');
 ```
 
 `useApmParams` will strip query parameters for which there is no validation. The route path should match exactly, but you can also use wildcards: `useApmParams('/*)`. In that case, the return type will be a union type of all possible matching routes.
 
-Previously we used `useUrlParams` for path and query parameters, which we are trying to get away from. When possible, any usage of `useUrlParams` should be replaced by `useApmParams` or other custom hooks that use `useApmParams` internally.
+Previously we used `useLegacyUrlParams` for path and query parameters, which we are trying to get away from. When possible, any usage of `useLegacyUrlParams` should be replaced by `useApmParams` or other custom hooks that use `useApmParams` internally.
 
 ## Linking
 
@@ -64,13 +64,16 @@ For links that stay inside APM, the preferred way of linking is to call the `use
 
 ```ts
 const apmRouter = useApmRouter();
-const serviceOverviewLink = apmRouter.link('/services/:serviceName', { path: { serviceName: 'opbeans-java' }, query: { transactionType: 'request' }});
+const serviceOverviewLink = apmRouter.link('/services/:serviceName', {
+  path: { serviceName: 'opbeans-java' },
+  query: { transactionType: 'request' },
+});
 ```
 
- If you're not in React context, you can also import `apmRouter` directly and call its `link` function - but you have to prepend the basePath manually in that case.
+If you're not in React context, you can also import `apmRouter` directly and call its `link` function - but you have to prepend the basePath manually in that case.
 
-We also have the [`getAPMHref` function and `APMLink` component](../public/components/shared/Links/apm/APMLink.tsx), but we should consider them deprecated, in favor of `router.link`. Other components inside that directory contain other functions and components that provide the same functionality for linking to more specific sections inside the APM plugin.
+We also have the [`getLegacyApmHref` function and `APMLink` component](../public/components/shared/links/apm/APMLink.tsx), but we should consider them deprecated, in favor of `router.link`. Other components inside that directory contain other functions and components that provide the same functionality for linking to more specific sections inside the APM plugin.
 
 ### Cross-app linking
 
-Other helpers and components in [the Links directory](../public/components/shared/Links) allow linking to other Kibana apps.
+Other helpers and components in [the Links directory](../public/components/shared/links) allow linking to other Kibana apps.

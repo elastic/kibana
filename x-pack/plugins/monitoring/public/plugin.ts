@@ -13,22 +13,31 @@ import {
   CoreStart,
   Plugin,
   PluginInitializerContext,
-} from 'kibana/public';
-import { Legacy } from './legacy_shims';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
 import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-} from '../../../../src/plugins/home/public';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/public';
-import { MonitoringStartPluginDependencies, MonitoringConfig } from './types';
-import { TriggersAndActionsUIPublicPluginSetup } from '../../triggers_actions_ui/public';
-import {
+  RULE_DETAILS,
   RULE_THREAD_POOL_SEARCH_REJECTIONS,
   RULE_THREAD_POOL_WRITE_REJECTIONS,
-  RULE_DETAILS,
 } from '../common/constants';
+import { createCCRReadExceptionsAlertType } from './alerts/ccr_read_exceptions_alert';
+import { createCpuUsageAlertType } from './alerts/cpu_usage_alert';
+import { createDiskUsageAlertType } from './alerts/disk_usage_alert';
+import { createLargeShardSizeAlertType } from './alerts/large_shard_size_alert';
+import { createLegacyAlertTypes } from './alerts/legacy_alert';
+import { createMemoryUsageAlertType } from './alerts/memory_usage_alert';
+import { createMissingMonitoringDataAlertType } from './alerts/missing_monitoring_data_alert';
+import { createThreadPoolRejectionsAlertType } from './alerts/thread_pool_rejections_alert';
 import { setConfig } from './external_config';
+import { Legacy } from './legacy_shims';
+import {
+  MonitoringConfig,
+  MonitoringStartPluginDependencies,
+  LegacyMonitoringStartPluginDependencies,
+} from './types';
 
 interface MonitoringSetupPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -36,13 +45,14 @@ interface MonitoringSetupPluginDependencies {
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
   usageCollection: UsageCollectionSetup;
 }
+
 export class MonitoringPlugin
   implements
     Plugin<void, void, MonitoringSetupPluginDependencies, MonitoringStartPluginDependencies>
 {
   constructor(private initializerContext: PluginInitializerContext<MonitoringConfig>) {}
 
-  public async setup(
+  public setup(
     core: CoreSetup<MonitoringStartPluginDependencies>,
     plugins: MonitoringSetupPluginDependencies
   ) {
@@ -67,7 +77,7 @@ export class MonitoringPlugin
         icon,
         path: '/app/monitoring',
         showOnHomePage: true,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
         description: i18n.translate('xpack.monitoring.featureCatalogueDescription', {
           defaultMessage: 'Track the real-time health and performance of your deployment.',
         }),
@@ -75,7 +85,7 @@ export class MonitoringPlugin
       });
     }
 
-    await this.registerAlerts(plugins, monitoring);
+    this.registerAlerts(plugins, monitoring);
 
     const app: App = {
       id,
@@ -86,7 +96,7 @@ export class MonitoringPlugin
       mount: async (params: AppMountParameters) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const externalConfig = this.getExternalConfig();
-        const deps: MonitoringStartPluginDependencies = {
+        const deps: LegacyMonitoringStartPluginDependencies = {
           navigation: pluginsStart.navigation,
           element: params.element,
           core: coreStart,
@@ -97,6 +107,7 @@ export class MonitoringPlugin
           triggersActionsUi: pluginsStart.triggersActionsUi,
           usageCollection: plugins.usageCollection,
           appMountParameters: params,
+          dataViews: pluginsStart.dataViews,
         };
 
         Legacy.init({
@@ -110,6 +121,7 @@ export class MonitoringPlugin
           triggersActionsUi: deps.triggersActionsUi,
           usageCollection: deps.usageCollection,
           appMountParameters: deps.appMountParameters,
+          dataViews: deps.dataViews,
         });
 
         const config = Object.fromEntries(externalConfig);
@@ -136,26 +148,10 @@ export class MonitoringPlugin
     ];
   }
 
-  private async registerAlerts(
-    plugins: MonitoringSetupPluginDependencies,
-    config: MonitoringConfig
-  ) {
+  private registerAlerts(plugins: MonitoringSetupPluginDependencies, config: MonitoringConfig) {
     const {
       triggersActionsUi: { ruleTypeRegistry },
     } = plugins;
-
-    const { createCpuUsageAlertType } = await import('./alerts/cpu_usage_alert');
-    const { createMissingMonitoringDataAlertType } = await import(
-      './alerts/missing_monitoring_data_alert'
-    );
-    const { createLegacyAlertTypes } = await import('./alerts/legacy_alert');
-    const { createDiskUsageAlertType } = await import('./alerts/disk_usage_alert');
-    const { createThreadPoolRejectionsAlertType } = await import(
-      './alerts/thread_pool_rejections_alert'
-    );
-    const { createMemoryUsageAlertType } = await import('./alerts/memory_usage_alert');
-    const { createCCRReadExceptionsAlertType } = await import('./alerts/ccr_read_exceptions_alert');
-    const { createLargeShardSizeAlertType } = await import('./alerts/large_shard_size_alert');
 
     ruleTypeRegistry.register(createCpuUsageAlertType(config));
     ruleTypeRegistry.register(createDiskUsageAlertType(config));

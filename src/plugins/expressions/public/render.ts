@@ -11,14 +11,14 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { isNumber } from 'lodash';
 import { SerializableRecord } from '@kbn/utility-types';
-import { ExpressionRenderError, RenderErrorHandlerFnType, IExpressionLoaderParams } from './types';
-import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
 import {
-  IInterpreterRenderHandlers,
-  IInterpreterRenderEvent,
-  IInterpreterRenderUpdateParams,
-  RenderMode,
-} from '../common';
+  ExpressionRenderError,
+  RenderErrorHandlerFnType,
+  IExpressionLoaderParams,
+  ExpressionRendererEvent,
+} from './types';
+import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
+import { IInterpreterRenderHandlers, IInterpreterRenderUpdateParams, RenderMode } from '../common';
 
 import { getRenderersRegistry } from './services';
 
@@ -28,12 +28,10 @@ export interface ExpressionRenderHandlerParams {
   onRenderError?: RenderErrorHandlerFnType;
   renderMode?: RenderMode;
   syncColors?: boolean;
+  syncTooltips?: boolean;
   interactive?: boolean;
   hasCompatibleActions?: (event: ExpressionRendererEvent) => Promise<boolean>;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type ExpressionRendererEvent = IInterpreterRenderEvent<any>;
 
 type UpdateValue = IInterpreterRenderUpdateParams<IExpressionLoaderParams>;
 
@@ -57,6 +55,7 @@ export class ExpressionRenderHandler {
       onRenderError,
       renderMode,
       syncColors,
+      syncTooltips,
       interactive,
       hasCompatibleActions = async () => false,
     }: ExpressionRenderHandlerParams = {}
@@ -96,6 +95,9 @@ export class ExpressionRenderHandler {
       },
       isSyncColorsEnabled: () => {
         return syncColors || false;
+      },
+      isSyncTooltipsEnabled: () => {
+        return syncTooltips || false;
       },
       isInteractive: () => {
         return interactive ?? true;
@@ -154,12 +156,14 @@ export class ExpressionRenderHandler {
   };
 }
 
-export function render(
+export type IExpressionRenderer = (
   element: HTMLElement,
   data: unknown,
   options?: ExpressionRenderHandlerParams
-): ExpressionRenderHandler {
+) => Promise<ExpressionRenderHandler>;
+
+export const render: IExpressionRenderer = async (element, data, options) => {
   const handler = new ExpressionRenderHandler(element, options);
   handler.render(data as SerializableRecord);
   return handler;
-}
+};

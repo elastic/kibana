@@ -7,10 +7,9 @@
 
 import { of } from 'rxjs';
 
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { LICENSE_TYPE } from '../../../licensing/server';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import type { LicenseType } from '../../../licensing/server';
+import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
+
 import type { SecurityLicenseFeatures } from './license_features';
 import type { SecurityLicense } from './license_service';
 

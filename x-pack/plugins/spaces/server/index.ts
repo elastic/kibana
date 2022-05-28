@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { ConfigSchema } from './config';
 import { SpacesPlugin } from './plugin';
@@ -19,9 +19,13 @@ export { addSpaceIdToPath } from '../common';
 
 // end public contract exports
 
-export { SpacesPluginSetup, SpacesPluginStart } from './plugin';
-export { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
-export { ISpacesClient, SpacesClientRepositoryFactory, SpacesClientWrapper } from './spaces_client';
+export type { SpacesPluginSetup, SpacesPluginStart } from './plugin';
+export type { SpacesServiceSetup, SpacesServiceStart } from './spaces_service';
+export type {
+  ISpacesClient,
+  SpacesClientRepositoryFactory,
+  SpacesClientWrapper,
+} from './spaces_client';
 
 export type {
   Space,

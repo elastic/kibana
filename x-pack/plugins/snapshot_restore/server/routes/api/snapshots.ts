@@ -47,7 +47,7 @@ export function registerSnapshotsRoutes({
   router.get(
     { path: addBasePath('snapshots'), validate: { query: snapshotListSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const sortField =
         sortFieldToESParams[(req.query as TypeOf<typeof snapshotListSchema>).sortField];
       const sortDirection = (req.query as TypeOf<typeof snapshotListSchema>).sortDirection;
@@ -65,7 +65,7 @@ export function registerSnapshotsRoutes({
       // Attempt to retrieve policies
       // This could fail if user doesn't have access to read SLM policies
       try {
-        const { body: policiesByName } = await clusterClient.asCurrentUser.slm.getLifecycle();
+        const policiesByName = await clusterClient.asCurrentUser.slm.getLifecycle();
         policies = Object.keys(policiesByName);
       } catch (e) {
         // Silently swallow error as policy names aren't required in UI
@@ -74,10 +74,9 @@ export function registerSnapshotsRoutes({
       let repositories: string[] = [];
 
       try {
-        const { body: repositoriesByName } =
-          await clusterClient.asCurrentUser.snapshot.getRepository({
-            repository: '_all',
-          });
+        const repositoriesByName = await clusterClient.asCurrentUser.snapshot.getRepository({
+          name: '_all',
+        });
         repositories = Object.keys(repositoriesByName);
 
         if (repositories.length === 0) {
@@ -108,7 +107,7 @@ export function registerSnapshotsRoutes({
       }
       try {
         // If any of these repositories 504 they will cost the request significant time.
-        const { body: fetchedSnapshots } = await clusterClient.asCurrentUser.snapshot.get({
+        const fetchedSnapshots = await clusterClient.asCurrentUser.snapshot.get({
           repository:
             searchField === 'repository'
               ? getSnapshotSearchWildcard({
@@ -128,8 +127,6 @@ export function registerSnapshotsRoutes({
                   operator: searchOperator,
                 })
               : '_all',
-          // @ts-expect-error @elastic/elasticsearch new API params
-          // https://github.com/elastic/elasticsearch-specification/issues/845
           slm_policy_filter:
             searchField === 'policyName'
               ? getSnapshotSearchWildcard({
@@ -140,6 +137,7 @@ export function registerSnapshotsRoutes({
                 })
               : '*,_none',
           order: sortDirection,
+          // @ts-expect-error sortField: string is not compatible with SnapshotSnapshotSort type
           sort: sortField,
           size: pageSize,
           offset: pageIndex * pageSize,
@@ -157,7 +155,6 @@ export function registerSnapshotsRoutes({
             repositories,
             // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/845
             errors: fetchedSnapshots?.failures,
-            // @ts-expect-error @elastic/elasticsearch "total" is a new field in the response
             total: fetchedSnapshots?.total,
           },
         });
@@ -179,7 +176,7 @@ export function registerSnapshotsRoutes({
       validate: { params: getOneParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { repository, snapshot } = req.params as TypeOf<typeof getOneParamsSchema>;
       const managedRepository = await getManagedRepositoryName(clusterClient.asCurrentUser);
 
@@ -190,7 +187,7 @@ export function registerSnapshotsRoutes({
           ignore_unavailable: true,
         });
 
-        const { snapshots: snapshotsList } = response.body;
+        const { snapshots: snapshotsList } = response;
 
         if (!snapshotsList || snapshotsList.length === 0) {
           return res.notFound({ body: 'Snapshot not found' });
@@ -235,7 +232,7 @@ export function registerSnapshotsRoutes({
   router.post(
     { path: addBasePath('snapshots/bulk_delete'), validate: { body: deleteSchema } },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       const response: {
         itemsDeleted: Array<{ snapshot: string; repository: string }>;

@@ -6,15 +6,17 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { QUERY_RULE_TYPE_ID } from '../../../../../common/constants';
-import { QueryRuleParams, queryRuleParams } from '../../schemas/rule_schemas';
+import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
+
+import { queryRuleParams, QueryRuleParams } from '../../schemas/rule_schemas';
 import { queryExecutor } from '../../signals/executors/query';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
-
+import { validateImmutable, validateIndexPatterns } from '../utils';
 export const createQueryAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<QueryRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
   return {
     id: QUERY_RULE_TYPE_ID,
     name: 'Custom Query Rule',
@@ -30,6 +32,18 @@ export const createQueryAlertType = (
           }
           return validated;
         },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
+        },
       },
     },
     actionGroups: [
@@ -44,7 +58,7 @@ export const createQueryAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {
@@ -52,7 +66,7 @@ export const createQueryAlertType = (
           bulkCreate,
           exceptionItems,
           listClient,
-          rule,
+          completeRule,
           searchAfterSize,
           tuple,
           wrapHits,
@@ -66,10 +80,10 @@ export const createQueryAlertType = (
         bulkCreate,
         exceptionItems,
         experimentalFeatures,
-        eventsTelemetry: undefined,
+        eventsTelemetry,
         listClient,
         logger,
-        rule,
+        completeRule,
         searchAfterSize,
         services,
         tuple,

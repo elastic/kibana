@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectReference } from 'src/core/types';
+import { SavedObjectReference } from '@kbn/core/types';
 import { Filter } from '@kbn/es-query';
-import { SearchSourceFields } from './types';
+import { SerializedSearchSourceFields } from './types';
 
-import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../../../data/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../..';
 
 export const extractReferences = (
-  state: SearchSourceFields
-): [SearchSourceFields & { indexRefName?: string }, SavedObjectReference[]] => {
-  let searchSourceFields: SearchSourceFields & { indexRefName?: string } = { ...state };
+  state: SerializedSearchSourceFields
+): [SerializedSearchSourceFields, SavedObjectReference[]] => {
+  let searchSourceFields: SerializedSearchSourceFields & { indexRefName?: string } = { ...state };
   const references: SavedObjectReference[] = [];
   if (searchSourceFields.index) {
-    const indexId = searchSourceFields.index.id || (searchSourceFields.index as any as string);
+    const indexId = searchSourceFields.index;
     const refName = 'kibanaSavedObjectMeta.searchSourceJSON.index';
     references.push({
       name: refName,

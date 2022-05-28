@@ -24,12 +24,12 @@ export function squidLogsSpecProvider(context: TutorialContext): TutorialSchema 
   return {
     id: 'squidLogs',
     name: i18n.translate('home.tutorials.squidLogs.nameTitle', {
-      defaultMessage: 'Squid logs',
+      defaultMessage: 'Squid Logs',
     }),
     moduleName,
     category: TutorialsCategory.SECURITY_SOLUTION,
     shortDescription: i18n.translate('home.tutorials.squidLogs.shortDescription', {
-      defaultMessage: 'Collect Squid logs over syslog or from a file.',
+      defaultMessage: 'Collect and parse logs from Squid servers with Filebeat.',
     }),
     longDescription: i18n.translate('home.tutorials.squidLogs.longDescription', {
       defaultMessage:
@@ -54,8 +54,8 @@ export function squidLogsSpecProvider(context: TutorialContext): TutorialSchema 
     },
     completionTimeMinutes: 10,
     onPrem: onPremInstructions(moduleName, platforms, context),
-    elasticCloud: cloudInstructions(moduleName, platforms),
-    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms),
+    elasticCloud: cloudInstructions(moduleName, platforms, context),
+    onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
     integrationBrowserCategories: ['security'],
   };
 }

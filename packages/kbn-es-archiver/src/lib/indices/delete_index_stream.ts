@@ -7,14 +7,14 @@
  */
 
 import { Transform } from 'stream';
-import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
-import { ToolingLog } from '@kbn/dev-utils';
+import type { Client } from '@elastic/elasticsearch';
+import { ToolingLog } from '@kbn/tooling-log';
 
 import { Stats } from '../stats';
 import { deleteIndex } from './delete_index';
 import { cleanKibanaIndices } from './kibana_index';
 
-export function createDeleteIndexStream(client: KibanaClient, stats: Stats, log: ToolingLog) {
+export function createDeleteIndexStream(client: Client, stats: Stats, log: ToolingLog) {
   return new Transform({
     readableObjectMode: true,
     writableObjectMode: true,

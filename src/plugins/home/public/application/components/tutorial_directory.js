@@ -9,13 +9,13 @@
 import _ from 'lodash';
 import React from 'react';
 import PropTypes from 'prop-types';
-import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiLink } from '@elastic/eui';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { Synopsis } from './synopsis';
 import { SampleDataSetCards } from './sample_data_set_cards';
 import { getServices } from '../kibana_services';
-import { KibanaPageTemplate } from '../../../../kibana_react/public';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 import { getTutorials } from '../load_tutorials';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';
@@ -218,7 +218,23 @@ class TutorialDirectoryUi extends React.Component {
           pageTitle: (
             <FormattedMessage
               id="home.tutorial.addDataToKibanaTitle"
-              defaultMessage="Alternative ways to add data"
+              defaultMessage="More ways to add data"
+            />
+          ),
+          description: (
+            <FormattedMessage
+              id="home.tutorial.addDataToKibanaDescription"
+              defaultMessage="In addition to adding {integrationsLink}, you can try our sample data or upload your own data."
+              values={{
+                integrationsLink: (
+                  <EuiLink href={this.props.addBasePath(`/app/integrations/browse`)}>
+                    <FormattedMessage
+                      id="home.tutorial.addDataToKibanaDescription.integrations"
+                      defaultMessage="integrations"
+                    />
+                  </EuiLink>
+                ),
+              }}
             />
           ),
           tabs,

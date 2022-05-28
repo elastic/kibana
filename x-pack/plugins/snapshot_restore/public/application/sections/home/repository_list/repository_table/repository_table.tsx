@@ -6,7 +6,7 @@
  */
 
 import React, { useState, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -16,6 +16,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { REPOSITORY_TYPES } from '../../../../../../common';
 import { Repository, RepositoryType } from '../../../../../../common/types';
 import { UseRequestResponse } from '../../../../../shared_imports';
@@ -24,8 +25,6 @@ import { UIM_REPOSITORY_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import { textService } from '../../../../services/text';
 import { linkToEditRepository, linkToAddRepository } from '../../../../services/navigation';
-
-import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
 
 interface Props {
   repositories: Repository[];
@@ -238,7 +237,7 @@ export const RepositoryTable: React.FunctionComponent<Props> = ({
     toolsRight: [
       <EuiButton
         key="reloadButton"
-        color="secondary"
+        color="success"
         iconType="refresh"
         onClick={reload}
         data-test-subj="reloadButton"

@@ -8,9 +8,9 @@
 import uuid from 'uuid';
 import { getActionsMigrations } from './actions_migrations';
 import { RawAction } from '../types';
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
-import { migrationMocks } from 'src/core/server/mocks';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { migrationMocks } from '@kbn/core/server/mocks';
 
 const context = migrationMocks.createContext();
 const encryptedSavedObjectsSetup = encryptedSavedObjectsMock.createSetup();
@@ -166,9 +166,9 @@ describe('successful migrations', () => {
       expect(migratedAction).toEqual(action);
     });
 
-    test('set isLegacy config property for .servicenow', () => {
+    test('set usesTableApi config property for .servicenow', () => {
       const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
-      const action = getMockDataForServiceNow();
+      const action = getMockDataForServiceNow716({ usesTableApi: true });
       const migratedAction = migration716(action, context);
 
       expect(migratedAction).toEqual({
@@ -177,15 +177,15 @@ describe('successful migrations', () => {
           ...action.attributes,
           config: {
             apiUrl: 'https://example.com',
-            isLegacy: true,
+            usesTableApi: true,
           },
         },
       });
     });
 
-    test('set isLegacy config property for .servicenow-sir', () => {
+    test('set usesTableApi config property for .servicenow-sir', () => {
       const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
-      const action = getMockDataForServiceNow({ actionTypeId: '.servicenow-sir' });
+      const action = getMockDataForServiceNow716({ actionTypeId: '.servicenow-sir' });
       const migratedAction = migration716(action, context);
 
       expect(migratedAction).toEqual({
@@ -194,13 +194,13 @@ describe('successful migrations', () => {
           ...action.attributes,
           config: {
             apiUrl: 'https://example.com',
-            isLegacy: true,
+            usesTableApi: true,
           },
         },
       });
     });
 
-    test('it does not set isLegacy config for other connectors', () => {
+    test('it does not set usesTableApi config for other connectors', () => {
       const migration716 = getActionsMigrations(encryptedSavedObjectsSetup)['7.16.0'];
       const action = getMockData();
       const migratedAction = migration716(action, context);
@@ -213,6 +213,52 @@ describe('successful migrations', () => {
       const migration800 = getActionsMigrations(encryptedSavedObjectsSetup)['8.0.0'];
       const action = getMockData({});
       expect(migration800(action, context)).toEqual(action);
+    });
+  });
+
+  describe('8.3.0', () => {
+    test('set isOAuth config property for .servicenow', () => {
+      const migration830 = getActionsMigrations(encryptedSavedObjectsSetup)['8.3.0'];
+      const action = getMockDataForServiceNow83();
+      const migratedAction = migration830(action, context);
+
+      expect(migratedAction.attributes.config).toEqual({
+        apiUrl: 'https://example.com',
+        usesTableApi: true,
+        isOAuth: false,
+      });
+    });
+
+    test('set isOAuth config property for .servicenow-sir', () => {
+      const migration830 = getActionsMigrations(encryptedSavedObjectsSetup)['8.3.0'];
+      const action = getMockDataForServiceNow83({ actionTypeId: '.servicenow-sir' });
+      const migratedAction = migration830(action, context);
+
+      expect(migratedAction.attributes.config).toEqual({
+        apiUrl: 'https://example.com',
+        usesTableApi: true,
+        isOAuth: false,
+      });
+    });
+
+    test('set isOAuth config property for .servicenow-itom', () => {
+      const migration830 = getActionsMigrations(encryptedSavedObjectsSetup)['8.3.0'];
+      const action = getMockDataForServiceNow83({ actionTypeId: '.servicenow-itom' });
+      const migratedAction = migration830(action, context);
+
+      expect(migratedAction.attributes.config).toEqual({
+        apiUrl: 'https://example.com',
+        usesTableApi: true,
+        isOAuth: false,
+      });
+    });
+
+    test('it does not set isOAuth config for other connectors', () => {
+      const migration830 = getActionsMigrations(encryptedSavedObjectsSetup)['8.3.0'];
+      const action = getMockData();
+      const migratedAction = migration830(action, context);
+
+      expect(migratedAction).toEqual(action);
     });
   });
 });
@@ -348,7 +394,7 @@ function getMockData(
   };
 }
 
-function getMockDataForServiceNow(
+function getMockDataForServiceNow716(
   overwrites: Record<string, unknown> = {}
 ): SavedObjectUnsanitizedDoc<Omit<RawAction, 'isMissingSecrets'>> {
   return {
@@ -362,4 +408,12 @@ function getMockDataForServiceNow(
     id: uuid.v4(),
     type: 'action',
   };
+}
+
+function getMockDataForServiceNow83(
+  overwrites: Record<string, unknown> = {}
+): SavedObjectUnsanitizedDoc<Omit<RawAction, 'isMissingSecrets'>> {
+  return getMockDataForServiceNow716({
+    config: { apiUrl: 'https://example.com', usesTableApi: true },
+  });
 }

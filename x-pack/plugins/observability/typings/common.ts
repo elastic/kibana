@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Request } from '../../../../src/plugins/inspector';
+import { Request } from '@kbn/inspector-plugin';
 
 export type ObservabilityApp =
   | 'infra_metrics'
@@ -19,10 +19,6 @@ export type ObservabilityApp =
   | 'ux'
   | 'fleet';
 
-export type PromiseReturnType<Func> = Func extends (...args: any[]) => Promise<infer Value>
-  ? Value
-  : Func;
-
-export { Coordinates } from '../public/typings/fetch_overview_data/';
+export type { Coordinates } from '../public/typings/fetch_overview_data';
 
 export type InspectResponse = Request[];

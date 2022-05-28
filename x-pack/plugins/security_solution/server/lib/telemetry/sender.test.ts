@@ -7,8 +7,8 @@
 
 /* eslint-disable dot-notation */
 import { TelemetryEventsSender } from './sender';
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { usageCountersServiceMock } from 'src/plugins/usage_collection/server/usage_counters/usage_counters_service.mock';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { URL } from 'url';
 
 describe('TelemetryEventsSender', () => {
@@ -35,6 +35,7 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+            id: 'test',
           },
           dns: {
             question: {
@@ -57,7 +58,12 @@ describe('TelemetryEventsSender', () => {
             path: 'X',
             test: 'me',
             another: 'nope',
+            pe: {
+              original_file_name: 'malware.exe',
+            },
             Ext: {
+              bytes_compressed: 'data up to 4mb',
+              bytes_compressed_present: 'data up to 4mb',
               code_signature: {
                 key1: 'X',
                 key2: 'Y',
@@ -68,6 +74,7 @@ describe('TelemetryEventsSender', () => {
               malware_signature: {
                 key1: 'X',
               },
+              header_bytes: 'data in here',
               quarantine_result: true,
               quarantine_message: 'this file is bad',
               something_else: 'nope',
@@ -85,6 +92,9 @@ describe('TelemetryEventsSender', () => {
             executable: null, // null fields are never allowlisted
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
+            Ext: {
+              protection: 'PsProtectedSignerAntimalware-Light',
+            },
           },
           Responses: '{ "result": 0 }', // >= 7.15
           Target: {
@@ -107,6 +117,7 @@ describe('TelemetryEventsSender', () => {
         {
           event: {
             kind: 'alert',
+            id: 'test',
           },
           dns: {
             question: {
@@ -127,11 +138,17 @@ describe('TelemetryEventsSender', () => {
             size: 3,
             created: 0,
             path: 'X',
+            pe: {
+              original_file_name: 'malware.exe',
+            },
             Ext: {
+              bytes_compressed: 'data up to 4mb',
+              bytes_compressed_present: 'data up to 4mb',
               code_signature: {
                 key1: 'X',
                 key2: 'Y',
               },
+              header_bytes: 'data in here',
               malware_classification: {
                 key1: 'X',
               },
@@ -151,6 +168,9 @@ describe('TelemetryEventsSender', () => {
             name: 'foo.exe',
             working_directory: '/some/usr/dir',
             entity_id: 'some_entity_id',
+            Ext: {
+              protection: 'PsProtectedSignerAntimalware-Light',
+            },
           },
           Responses: '{ "result": 0 }',
           Target: {

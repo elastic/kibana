@@ -6,27 +6,30 @@
  */
 
 import expect from '@kbn/expect';
-import { InfraSource } from '../../../../plugins/infra/common/source_configuration/source_configuration';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import {
-  evaluateAlert,
-  EvaluatedAlertParams,
-} from '../../../../plugins/infra/server/lib/alerting/metric_threshold/lib/evaluate_alert';
+import moment from 'moment';
 import {
   Aggregators,
+  Comparator,
   CountMetricExpressionParams,
   NonCountMetricExpressionParams,
-} from '../../../../plugins/infra/server/lib/alerting/metric_threshold/types';
-import { Comparator } from '../../../../plugins/infra/server/lib/alerting/common/types';
+} from '@kbn/infra-plugin/common/alerting/metrics';
+import { InfraSource } from '@kbn/infra-plugin/common/source_configuration/source_configuration';
+import {
+  EvaluatedRuleParams,
+  evaluateRule,
+} from '@kbn/infra-plugin/server/lib/alerting/metric_threshold/lib/evaluate_rule';
+import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
+import { createFakeLogger } from './create_fake_logger';
 
 const { gauge, rate } = DATES['alert-test-data'];
-
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
+  const log = getService('log');
+  const logger = createFakeLogger(log);
 
-  const baseParams: EvaluatedAlertParams = {
+  const baseParams: EvaluatedRuleParams = {
     groupBy: void 0,
     filterQuery: void 0,
     criteria: [
@@ -53,11 +56,6 @@ export default function ({ getService }: FtrProviderContext) {
     metricsExplorerDefaultView: 'default',
     anomalyThreshold: 70,
     fields: {
-      container: 'container.id',
-      host: 'host.name',
-      pod: 'kubernetes.od.uid',
-      tiebreaker: '_doc',
-      timestamp: '@timestamp',
       message: ['message'],
     },
     logColumns: [
@@ -81,10 +79,368 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('Metric Threshold Alerts Executor', () => {
-    before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
-    after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
-
+    describe('with 10K plus docs', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/ten_thousand_plus'));
+      describe('without group by', () => {
+        it('should alert on document count', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [10000],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              '*': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [10000],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 20895,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+              },
+            },
+          ]);
+        });
+      });
+      describe('with group by', () => {
+        it('should trigger on document count', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['event.category'],
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [20000],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              web: {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [20000],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 20895,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+              },
+            },
+          ]);
+        });
+        it('shouldFire on document count and isNoData for missing group ', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['event.category'],
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [20000],
+                comparator: Comparator.GT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const config = {
+            ...configuration,
+            metricAlias: 'filebeat-*',
+          };
+          const timeFrame = { end: DATES.ten_thousand_plus.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            config,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame,
+            ['middleware']
+          );
+          expect(results).to.eql([
+            {
+              web: {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [20000],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 20895,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+              },
+              middleware: {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [20000],
+                comparator: '>=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: null,
+                timestamp: '2021-10-19T00:53:59.997Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
+              },
+            },
+          ]);
+        });
+      });
+    });
+    describe('without ANY data', () => {
+      describe('without groupBy', () => {
+        it('should trigger NO_DATA for document count queries', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [0],
+                comparator: Comparator.LT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const timeFrame = { end: gauge.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              '*': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [0],
+                comparator: '<=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: null,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
+              },
+            },
+          ]);
+        });
+        it('should trigger NO_DATA for basic metric', async () => {
+          const params = { ...baseParams };
+          const timeFrame = { end: gauge.max };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              '*': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'sum',
+                metric: 'value',
+                currentValue: null,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
+              },
+            },
+          ]);
+        });
+      });
+      describe('with groupBy', () => {
+        describe('without pre-existing groups', () => {
+          it('should trigger NO_DATA for document count queries', async () => {
+            const params = {
+              ...baseParams,
+              groupBy: ['event.category'],
+              criteria: [
+                {
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  threshold: [0],
+                  comparator: Comparator.LT_OR_EQ,
+                  aggType: Aggregators.COUNT,
+                } as CountMetricExpressionParams,
+              ],
+            };
+            const timeFrame = { end: gauge.max };
+            const results = await evaluateRule(
+              esClient,
+              params,
+              configuration,
+              10000,
+              true,
+              logger,
+              void 0,
+              timeFrame
+            );
+            expect(results).to.eql([
+              {
+                '*': {
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  threshold: [0],
+                  comparator: '<=',
+                  aggType: 'count',
+                  metric: 'Document count',
+                  currentValue: null,
+                  timestamp: '2021-01-01T01:00:00.000Z',
+                  shouldFire: false,
+                  shouldWarn: false,
+                  isNoData: true,
+                },
+              },
+            ]);
+          });
+        });
+        describe('with pre-existing groups', () => {
+          it('should trigger NO_DATA for document count queries', async () => {
+            const params = {
+              ...baseParams,
+              groupBy: ['event.category'],
+              criteria: [
+                {
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  threshold: [0],
+                  comparator: Comparator.LT_OR_EQ,
+                  aggType: Aggregators.COUNT,
+                } as CountMetricExpressionParams,
+              ],
+            };
+            const timeFrame = { end: gauge.max };
+            const results = await evaluateRule(
+              esClient,
+              params,
+              configuration,
+              10000,
+              true,
+              logger,
+              void 0,
+              timeFrame,
+              ['web', 'prod']
+            );
+            expect(results).to.eql([
+              {
+                '*': {
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  threshold: [0],
+                  comparator: '<=',
+                  aggType: 'count',
+                  metric: 'Document count',
+                  currentValue: null,
+                  timestamp: '2021-01-01T01:00:00.000Z',
+                  shouldFire: false,
+                  shouldWarn: false,
+                  isNoData: true,
+                },
+                web: {
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  threshold: [0],
+                  comparator: '<=',
+                  aggType: 'count',
+                  metric: 'Document count',
+                  currentValue: null,
+                  timestamp: '2021-01-01T01:00:00.000Z',
+                  shouldFire: false,
+                  shouldWarn: false,
+                  isNoData: true,
+                },
+                prod: {
+                  timeSize: 5,
+                  timeUnit: 'm',
+                  threshold: [0],
+                  comparator: '<=',
+                  aggType: 'count',
+                  metric: 'Document count',
+                  currentValue: null,
+                  timestamp: '2021-01-01T01:00:00.000Z',
+                  shouldFire: false,
+                  shouldWarn: false,
+                  isNoData: true,
+                },
+              },
+            ]);
+          });
+        });
+      });
+    });
     describe('with gauge data', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+
       describe('without groupBy', () => {
         it('should alert on document count', async () => {
           const params = {
@@ -100,7 +456,16 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -111,11 +476,52 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 4,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: [true],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
+              },
+            },
+          ]);
+        });
+        it('should alert on ZERO document count outside the time frame', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [0],
+                comparator: Comparator.LT_OR_EQ,
+                aggType: Aggregators.COUNT,
+              } as CountMetricExpressionParams,
+            ],
+          };
+          const timeFrame = { end: gauge.max + 600_000 };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
+              '*': {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [0],
+                comparator: '<=',
+                aggType: 'count',
+                metric: 'Document count',
+                currentValue: 0,
+                timestamp: '2021-01-01T01:10:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
               },
             },
           ]);
@@ -123,7 +529,16 @@ export default function ({ getService }: FtrProviderContext) {
         it('should alert on the last value when the end date is the same as the last event', async () => {
           const params = { ...baseParams };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -134,11 +549,10 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'sum',
                 metric: 'value',
                 currentValue: 1,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: [true],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
               },
             },
           ]);
@@ -160,7 +574,16 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               dev: {
@@ -171,11 +594,10 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 2,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: [true],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
               },
               prod: {
                 timeSize: 5,
@@ -185,11 +607,10 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'count',
                 metric: 'Document count',
                 currentValue: 2,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: [true],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
               },
             },
           ]);
@@ -200,23 +621,18 @@ export default function ({ getService }: FtrProviderContext) {
             groupBy: ['env'],
           };
           const timeFrame = { end: gauge.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
-              dev: {
-                timeSize: 5,
-                timeUnit: 'm',
-                threshold: [1],
-                comparator: '>=',
-                aggType: 'sum',
-                metric: 'value',
-                currentValue: 0,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: [false],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
-              },
               prod: {
                 timeSize: 5,
                 timeUnit: 'm',
@@ -225,11 +641,10 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'sum',
                 metric: 'value',
                 currentValue: 1,
-                timestamp: '2021-01-01T00:55:00.000Z',
-                shouldFire: [true],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                timestamp: '2021-01-01T01:00:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
               },
             },
           ]);
@@ -241,12 +656,16 @@ export default function ({ getService }: FtrProviderContext) {
             groupBy: ['env'],
           };
           const timeFrame = { end: gauge.midpoint };
-          const results = await evaluateAlert(
+          const results = await evaluateRule(
             esClient,
             params,
             configuration,
-            ['dev', 'prod'],
-            timeFrame
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame,
+            ['dev']
           );
           expect(results).to.eql([
             {
@@ -258,12 +677,63 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'sum',
                 metric: 'value',
                 currentValue: null,
-                timestamp: '2021-01-01T00:25:00.000Z',
-                shouldFire: [false],
-                shouldWarn: [false],
-                isNoData: [true],
-                isError: false,
+                timestamp: '2021-01-01T00:30:00.000Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
               },
+            },
+          ]);
+        });
+
+        it('should NOT resport any alerts when missing group recovers', async () => {
+          const params = {
+            ...baseParams,
+            criteria: [
+              {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [100],
+                comparator: Comparator.GT,
+                aggType: Aggregators.SUM,
+                metric: 'value',
+              } as NonCountMetricExpressionParams,
+            ],
+            groupBy: ['env'],
+          };
+          const timeFrame = { end: moment(gauge.midpoint).add(10, 'm').valueOf() };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            moment(gauge.midpoint).subtract(1, 'm').valueOf(),
+            timeFrame,
+            ['dev']
+          );
+          expect(results).to.eql([{}]);
+        });
+
+        it('should report no data when both groups stop reporting', async () => {
+          const params = {
+            ...baseParams,
+            groupBy: ['env'],
+          };
+          const timeFrame = { end: moment(gauge.max).add(6, 'm').valueOf() };
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            gauge.max,
+            timeFrame
+          );
+          expect(results).to.eql([
+            {
               prod: {
                 timeSize: 5,
                 timeUnit: 'm',
@@ -271,20 +741,33 @@ export default function ({ getService }: FtrProviderContext) {
                 comparator: '>=',
                 aggType: 'sum',
                 metric: 'value',
-                currentValue: 0,
-                timestamp: '2021-01-01T00:25:00.000Z',
-                shouldFire: [false],
-                shouldWarn: [false],
-                isNoData: [false],
-                isError: false,
+                currentValue: null,
+                timestamp: '2021-01-01T01:06:00.000Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
+              },
+              dev: {
+                timeSize: 5,
+                timeUnit: 'm',
+                threshold: [1],
+                comparator: '>=',
+                aggType: 'sum',
+                metric: 'value',
+                currentValue: null,
+                timestamp: '2021-01-01T01:06:00.000Z',
+                shouldFire: false,
+                shouldWarn: false,
+                isNoData: true,
               },
             },
           ]);
         });
       });
     });
-
     describe('with rate data', () => {
+      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
       describe('without groupBy', () => {
         it('should alert on rate', async () => {
           const params = {
@@ -301,7 +784,16 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: rate.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               '*': {
@@ -312,11 +804,10 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'rate',
                 metric: 'value',
                 currentValue: 0.6666666666666666,
-                timestamp: '2021-01-02T00:04:00.000Z',
-                shouldFire: [false, false, false, false, true],
-                shouldWarn: [false],
-                isNoData: [true, false, false, false, false],
-                isError: false,
+                timestamp: '2021-01-02T00:05:00.000Z',
+                shouldFire: true,
+                shouldWarn: false,
+                isNoData: false,
               },
             },
           ]);
@@ -341,7 +832,16 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           };
           const timeFrame = { end: rate.max };
-          const results = await evaluateAlert(esClient, params, configuration, [], timeFrame);
+          const results = await evaluateRule(
+            esClient,
+            params,
+            configuration,
+            10000,
+            true,
+            logger,
+            void 0,
+            timeFrame
+          );
           expect(results).to.eql([
             {
               dev: {
@@ -354,11 +854,10 @@ export default function ({ getService }: FtrProviderContext) {
                 aggType: 'rate',
                 metric: 'value',
                 currentValue: 0.6666666666666666,
-                timestamp: '2021-01-02T00:04:00.000Z',
-                shouldFire: [false, false, false, false, false],
-                shouldWarn: [false, false, false, false, true],
-                isNoData: [true, false, false, false, false],
-                isError: false,
+                timestamp: '2021-01-02T00:05:00.000Z',
+                shouldFire: false,
+                shouldWarn: true,
+                isNoData: false,
               },
             },
           ]);

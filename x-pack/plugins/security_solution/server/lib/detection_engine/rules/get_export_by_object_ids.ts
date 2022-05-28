@@ -8,19 +8,20 @@
 import { chunk } from 'lodash';
 import { transformDataToNdjson } from '@kbn/securitysolution-utils';
 
-import { Logger } from 'src/core/server';
+import { Logger } from '@kbn/core/server';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
+import { RulesClient, RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { RulesSchema } from '../../../../common/detection_engine/schemas/response/rules_schema';
-import { RulesClient, AlertServices } from '../../../../../alerting/server';
 
 import { getExportDetailsNdjson } from './get_export_details_ndjson';
 
-import { isAlertType } from '../rules/types';
-import { transformAlertToRule } from '../routes/rules/utils';
-import { INTERNAL_RULE_ID_KEY } from '../../../../common/constants';
+import { isAlertType } from './types';
 import { findRules } from './find_rules';
+import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../rule_actions/legacy_get_bulk_rule_actions_saved_object';
+import { internalRuleToAPIResponse } from '../schemas/rule_converters';
 
 interface ExportSuccessRule {
   statusCode: 200;
@@ -40,33 +41,46 @@ export interface RulesErrors {
 
 export const getExportByObjectIds = async (
   rulesClient: RulesClient,
-  savedObjectsClient: AlertServices['savedObjectsClient'],
+  exceptionsClient: ExceptionListClient | undefined,
+  savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
   objects: Array<{ rule_id: string }>,
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ): Promise<{
   rulesNdjson: string;
   exportDetails: string;
+  exceptionLists: string | null;
 }> => {
   const rulesAndErrors = await getRulesFromObjects(
     rulesClient,
     savedObjectsClient,
     objects,
-    logger,
-    isRuleRegistryEnabled
+    logger
   );
 
+  // Retrieve exceptions
+  const exceptions = rulesAndErrors.rules.flatMap((rule) => rule.exceptions_list ?? []);
+  const { exportData: exceptionLists, exportDetails: exceptionDetails } =
+    await getRuleExceptionsForExport(exceptions, exceptionsClient);
+
   const rulesNdjson = transformDataToNdjson(rulesAndErrors.rules);
-  const exportDetails = getExportDetailsNdjson(rulesAndErrors.rules, rulesAndErrors.missingRules);
-  return { rulesNdjson, exportDetails };
+  const exportDetails = getExportDetailsNdjson(
+    rulesAndErrors.rules,
+    rulesAndErrors.missingRules,
+    exceptionDetails
+  );
+
+  return {
+    rulesNdjson,
+    exportDetails,
+    exceptionLists,
+  };
 };
 
 export const getRulesFromObjects = async (
   rulesClient: RulesClient,
-  savedObjectsClient: AlertServices['savedObjectsClient'],
+  savedObjectsClient: RuleExecutorServices['savedObjectsClient'],
   objects: Array<{ rule_id: string }>,
-  logger: Logger,
-  isRuleRegistryEnabled: boolean
+  logger: Logger
 ): Promise<RulesErrors> => {
   // If we put more than 1024 ids in one block like "alert.attributes.tags: (id1 OR id2 OR ... OR id1100)"
   // then the KQL -> ES DSL query generator still puts them all in the same "should" array, but ES defaults
@@ -77,14 +91,11 @@ export const getRulesFromObjects = async (
   const chunkedObjects = chunk(objects, 1024);
   const filter = chunkedObjects
     .map((chunkedArray) => {
-      const joinedIds = chunkedArray
-        .map((object) => `"${INTERNAL_RULE_ID_KEY}:${object.rule_id}"`)
-        .join(' OR ');
-      return `alert.attributes.tags: (${joinedIds})`;
+      const joinedIds = chunkedArray.map((object) => object.rule_id).join(' OR ');
+      return `alert.attributes.params.ruleId: (${joinedIds})`;
     })
     .join(' OR ');
   const rules = await findRules({
-    isRuleRegistryEnabled,
     rulesClient,
     filter,
     page: 1,
@@ -104,12 +115,12 @@ export const getRulesFromObjects = async (
     const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
     if (
       matchingRule != null &&
-      isAlertType(isRuleRegistryEnabled, matchingRule) &&
+      isAlertType(matchingRule) &&
       matchingRule.params.immutable !== true
     ) {
       return {
         statusCode: 200,
-        rule: transformAlertToRule(matchingRule, undefined, legacyActions[matchingRule.id]),
+        rule: internalRuleToAPIResponse(matchingRule, null, legacyActions[matchingRule.id]),
       };
     } else {
       return {

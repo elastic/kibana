@@ -8,26 +8,22 @@
 /* eslint-disable react/display-name */
 
 import React from 'react';
-import { useLocation } from 'react-router-dom';
-import { KibanaPageTemplateProps } from '../../../../../../../../src/plugins/kibana_react/public';
-import { AppLeaveHandler } from '../../../../../../../../src/core/public';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
+import { AppLeaveHandler } from '@kbn/core/public';
 import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
-import { useSourcererScope, getScopeFromPath } from '../../../../common/containers/sourcerer';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { AutoSaveWarningMsg } from '../../../../timelines/components/timeline/auto_save_warning';
 import { Flyout } from '../../../../timelines/components/flyout';
+import { useResolveRedirect } from '../../../../common/hooks/use_resolve_redirect';
 
 export const BOTTOM_BAR_CLASSNAME = 'timeline-bottom-bar';
 
 export const SecuritySolutionBottomBar = React.memo(
   ({ onAppLeave }: { onAppLeave: (handler: AppLeaveHandler) => void }) => {
-    const { pathname } = useLocation();
-
     const [showTimeline] = useShowTimeline();
 
-    const { indicesExist } = useSourcererScope(getScopeFromPath(pathname));
-
-    return indicesExist && showTimeline ? (
+    useResolveRedirect();
+    return showTimeline ? (
       <>
         <AutoSaveWarningMsg />
         <Flyout timelineId={TimelineId.active} onAppLeave={onAppLeave} />

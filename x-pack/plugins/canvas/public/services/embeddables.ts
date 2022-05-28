@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EmbeddableFactory } from '../../../../../src/plugins/embeddable/public';
+import { EmbeddableFactory, EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 
 export interface CanvasEmbeddablesService {
   getEmbeddableFactories: () => IterableIterator<EmbeddableFactory>;
+  getStateTransfer: () => EmbeddableStateTransfer;
 }

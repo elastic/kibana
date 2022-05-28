@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import { RequestEvent } from '@elastic/elasticsearch/lib/Transport';
-import { SavedObjectsErrorHelpers } from 'src/core/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ScopedClusterClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { ScopedClusterClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import moment from 'moment';
 
 import {
-  IndexGroup,
   REINDEX_OP_TYPE,
   ReindexSavedObject,
   ReindexStatus,
@@ -257,21 +255,14 @@ describe('ReindexActions', () => {
   });
 
   describe('getFlatSettings', () => {
-    const asApiResponse = <T>(body: T): RequestEvent<T> =>
-      ({
-        body,
-      } as RequestEvent<T>);
-
     it('returns flat settings', async () => {
-      clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(
-        // @ts-expect-error not full interface
-        asApiResponse({
-          myIndex: {
-            settings: { 'index.mySetting': '1' },
-            mappings: {},
-          },
-        })
-      );
+      clusterClient.asCurrentUser.indices.get.mockResponse({
+        myIndex: {
+          // @ts-expect-error not full interface
+          settings: { 'index.mySetting': '1' },
+          mappings: {},
+        },
+      });
       await expect(actions.getFlatSettings('myIndex')).resolves.toEqual({
         settings: { 'index.mySetting': '1' },
         mappings: {},
@@ -279,50 +270,8 @@ describe('ReindexActions', () => {
     });
 
     it('returns null if index does not exist', async () => {
-      clusterClient.asCurrentUser.indices.get.mockResolvedValueOnce(asApiResponse({}));
+      clusterClient.asCurrentUser.indices.get.mockResponse({});
       await expect(actions.getFlatSettings('myIndex')).resolves.toBeNull();
-    });
-  });
-
-  describe('runWhileConsumerLocked', () => {
-    Object.entries(IndexGroup).forEach(([typeKey, consumerType]) => {
-      describe(`IndexConsumerType.${typeKey}`, () => {
-        it('creates the lock doc if it does not exist and executes callback', async () => {
-          expect.assertions(3);
-          client.get.mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError()); // mock no ML doc exists yet
-          client.create.mockImplementationOnce((type: any, attributes: any, { id }: any) =>
-            Promise.resolve({
-              type,
-              id,
-              attributes,
-            })
-          );
-
-          let flip = false;
-          await actions.runWhileIndexGroupLocked(consumerType, async (mlDoc) => {
-            expect(mlDoc.id).toEqual(consumerType);
-            expect(mlDoc.attributes.runningReindexCount).toEqual(0);
-            flip = true;
-            return mlDoc;
-          });
-          expect(flip).toEqual(true);
-        });
-
-        it('fails after 10 attempts to lock', async () => {
-          client.get.mockResolvedValue({
-            type: REINDEX_OP_TYPE,
-            id: consumerType,
-            attributes: { mlReindexCount: 0 },
-          });
-
-          client.update.mockRejectedValue(new Error('NO LOCKING!'));
-
-          await expect(
-            actions.runWhileIndexGroupLocked(consumerType, async (m) => m)
-          ).rejects.toThrow('Could not acquire lock for ML jobs');
-          expect(client.update).toHaveBeenCalledTimes(10);
-        }, 20000);
-      });
     });
   });
 });

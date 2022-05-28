@@ -6,31 +6,37 @@
  */
 
 import React from 'react';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
-import { toMountPoint } from '../../../../src/plugins/kibana_react/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Banner } from './components';
 import { getBannerInfo } from './get_banner_info';
+import { BannerPluginStartDependencies } from './types';
 
-export class BannersPlugin implements Plugin<{}, {}, {}, {}> {
+export class BannersPlugin implements Plugin<{}, {}, {}, BannerPluginStartDependencies> {
   constructor(context: PluginInitializerContext) {}
 
   setup({}: CoreSetup<{}, {}>) {
     return {};
   }
 
-  start({ chrome, uiSettings, http }: CoreStart) {
-    getBannerInfo(http).then(
-      ({ allowed, banner }) => {
-        if (allowed && banner.placement === 'top') {
-          chrome.setHeaderBanner({
-            content: toMountPoint(<Banner bannerConfig={banner} />),
-          });
+  start(
+    { chrome, uiSettings, http }: CoreStart,
+    { screenshotMode }: BannerPluginStartDependencies
+  ) {
+    if (!screenshotMode.isScreenshotMode()) {
+      getBannerInfo(http).then(
+        ({ allowed, banner }) => {
+          if (allowed && banner.placement === 'top') {
+            chrome.setHeaderBanner({
+              content: toMountPoint(<Banner bannerConfig={banner} />),
+            });
+          }
+        },
+        () => {
+          chrome.setHeaderBanner(undefined);
         }
-      },
-      () => {
-        chrome.setHeaderBanner(undefined);
-      }
-    );
+      );
+    }
 
     return {};
   }

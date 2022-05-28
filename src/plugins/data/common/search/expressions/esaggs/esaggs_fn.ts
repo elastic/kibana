@@ -9,10 +9,10 @@
 import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 
-import type { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { buildExpressionFunction } from '../../../../../../plugins/expressions/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import { IndexPatternExpressionType } from '../../../../../data_views/common/expressions';
+import { IndexPatternExpressionType } from '@kbn/data-views-plugin/common/expressions';
 import { IndexPatternsContract } from '../../..';
 
 import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';
@@ -62,7 +62,7 @@ export const getEsaggsMeta: () => Omit<EsaggsExpressionFunctionDefinition, 'fn'>
       types: ['index_pattern'],
       required: true,
       help: i18n.translate('data.search.functions.esaggs.index.help', {
-        defaultMessage: 'Index pattern retrieved with indexPatternLoad',
+        defaultMessage: 'Data view retrieved with indexPatternLoad',
       }),
     },
     aggs: {

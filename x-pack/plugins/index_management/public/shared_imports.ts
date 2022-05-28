@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
+export { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
-export {
+export type {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
   UseRequestResponse,
+  Error,
+} from '@kbn/es-ui-shared-plugin/public';
+
+export {
   sendRequest,
   useRequest,
   Forms,
@@ -20,41 +24,42 @@ export {
   attemptToURIDecode,
   PageLoading,
   PageError,
-  Error,
   SectionLoading,
   EuiCodeEditor,
-} from '../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
+
+export type { FormSchema, FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {
-  FormSchema,
   FIELD_TYPES,
   VALIDATION_TYPES,
-  FieldConfig,
   useForm,
   useFormData,
   Form,
   getUseField,
   UseField,
   FormDataProvider,
-} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {
   fieldFormatters,
   fieldValidators,
   serializers,
-} from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
+} from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 export {
   getFormRow,
   Field,
   ToggleField,
   JsonEditorField,
-} from '../../../../src/plugins/es_ui_shared/static/forms/components';
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 
-export { isJSON } from '../../../../src/plugins/es_ui_shared/static/validators/string';
+export { isJSON } from '@kbn/es-ui-shared-plugin/static/validators/string';
 
 export {
   createKibanaReactContext,
   reactRouterNavigate,
   useKibana,
-} from '../../../../src/plugins/kibana_react/public';
+  KibanaThemeProvider,
+  useExecutionContext,
+} from '@kbn/kibana-react-plugin/public';

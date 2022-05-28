@@ -6,33 +6,42 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type {
   Logger,
   KibanaRequest,
   ISavedObjectsRepository,
   IBasePath,
   ExecutionContextStart,
-} from '../../../../../src/core/server';
-import { RunContext } from '../../../task_manager/server';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { PluginStartContract as ActionsPluginStartContract } from '../../../actions/server';
+  SavedObjectsServiceStart,
+  ElasticsearchServiceStart,
+  UiSettingsServiceStart,
+} from '@kbn/core/server';
+import { RunContext } from '@kbn/task-manager-plugin/server';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { IEventLogger } from '@kbn/event-log-plugin/server';
+import { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import {
-  AlertTypeParams,
+  RuleTypeParams,
   RuleTypeRegistry,
-  GetServicesFunction,
   SpaceIdToNamespaceFunction,
-  AlertTypeState,
+  RuleTypeState,
   AlertInstanceState,
   AlertInstanceContext,
 } from '../types';
 import { TaskRunner } from './task_runner';
-import { IEventLogger } from '../../../event_log/server';
 import { RulesClient } from '../rules_client';
-import { NormalizedAlertType } from '../rule_type_registry';
+import { NormalizedRuleType } from '../rule_type_registry';
+import { InMemoryMetrics } from '../monitoring';
+import { ActionsConfigMap } from '../lib/get_actions_config_map';
 
 export interface TaskRunnerContext {
   logger: Logger;
-  getServices: GetServicesFunction;
+  data: DataPluginStart;
+  savedObjects: SavedObjectsServiceStart;
+  uiSettings: UiSettingsServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
   getRulesClientWithRequest(request: KibanaRequest): PublicMethodsOf<RulesClient>;
   actionsPlugin: ActionsPluginStartContract;
   eventLogger: IEventLogger;
@@ -44,7 +53,10 @@ export interface TaskRunnerContext {
   ruleTypeRegistry: RuleTypeRegistry;
   kibanaBaseUrl: string | undefined;
   supportsEphemeralTasks: boolean;
-  maxEphemeralActionsPerAlert: Promise<number>;
+  maxEphemeralActionsPerRule: number;
+  actionsConfigMap: ActionsConfigMap;
+  cancelAlertsOnRuleTimeout: boolean;
+  usageCounter?: UsageCounter;
 }
 
 export class TaskRunnerFactory {
@@ -60,15 +72,15 @@ export class TaskRunnerFactory {
   }
 
   public create<
-    Params extends AlertTypeParams,
-    ExtractedParams extends AlertTypeParams,
-    State extends AlertTypeState,
+    Params extends RuleTypeParams,
+    ExtractedParams extends RuleTypeParams,
+    State extends RuleTypeState,
     InstanceState extends AlertInstanceState,
     InstanceContext extends AlertInstanceContext,
     ActionGroupIds extends string,
     RecoveryActionGroupId extends string
   >(
-    alertType: NormalizedAlertType<
+    ruleType: NormalizedRuleType<
       Params,
       ExtractedParams,
       State,
@@ -77,7 +89,8 @@ export class TaskRunnerFactory {
       ActionGroupIds,
       RecoveryActionGroupId
     >,
-    { taskInstance }: RunContext
+    { taskInstance }: RunContext,
+    inMemoryMetrics: InMemoryMetrics
   ) {
     if (!this.isInitialized) {
       throw new Error('TaskRunnerFactory not initialized');
@@ -91,6 +104,6 @@ export class TaskRunnerFactory {
       InstanceContext,
       ActionGroupIds,
       RecoveryActionGroupId
-    >(alertType, taskInstance, this.taskRunnerContext!);
+    >(ruleType, taskInstance, this.taskRunnerContext!, inMemoryMetrics);
   }
 }

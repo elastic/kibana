@@ -26,6 +26,10 @@
   padding: $euiSize;
 }
 
+.lnsIndexPatternDimensionEditor__section--collapseNext {
+  margin-bottom: -$euiSizeL;
+}
+
 .lnsIndexPatternDimensionEditor__section--shaded {
   background-color: $euiColorLightestShade;
   border-bottom: $euiBorderThin;
@@ -33,13 +37,7 @@
 
 .lnsIndexPatternDimensionEditor__columns {
   column-count: 2;
-  column-gap: $euiSizeXL;
-}
-
-// overrides the .euiListGroupItem display flex.
-// The parent container has a column-count property that only works properly with block elements.
-.lnsIndexPatternDimensionEditor__operation {
-  display: block;
+  column-gap: $euiSizeM;
 }
 
 .lnsIndexPatternDimensionEditor__operation .euiListGroupItem__label {
@@ -49,10 +47,4 @@
 .lnsIndexPatternDimensionEditor__operation > button {
   padding-top: 0;
   padding-bottom: 0;
-}
-
-.lnsIndexPatternDimensionEditor__warning {
-  @include kbnThemeStyle('v7') {
-    border: none;
-  }
 }

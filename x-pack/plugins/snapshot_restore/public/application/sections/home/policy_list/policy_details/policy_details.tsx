@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -26,7 +26,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { reactRouterNavigate } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { SlmPolicy } from '../../../../../../common/types';
 import { useServices } from '../../../../app_context';
@@ -307,7 +307,7 @@ export const PolicyDetails: React.FunctionComponent<Props> = ({
             {policyName}{' '}
             <EuiButtonIcon
               iconType="refresh"
-              color="subdued"
+              color="text"
               aria-label={i18n.translate(
                 'xpack.snapshotRestore.policyDetails.reloadButtonAriaLabel',
                 { defaultMessage: 'Reload' }

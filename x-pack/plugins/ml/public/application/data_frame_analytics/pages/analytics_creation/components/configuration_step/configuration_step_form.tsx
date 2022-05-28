@@ -19,6 +19,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { debounce, cloneDeep } from 'lodash';
 
+import { Query } from '@kbn/data-plugin/common/query';
 import { newJobCapsServiceAnalytics } from '../../../../../services/new_job_capabilities/new_job_capabilities_service_analytics';
 import { useMlContext } from '../../../../../contexts/ml';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
@@ -27,10 +28,10 @@ import {
   ANALYSIS_CONFIG_TYPE,
   TRAINING_PERCENT_MIN,
   TRAINING_PERCENT_MAX,
-  FieldSelectionItem,
 } from '../../../../common/analytics';
 import { getScatterplotMatrixLegendType } from '../../../../common/get_scatterplot_matrix_legend_type';
 import { RuntimeMappings as RuntimeMappingsType } from '../../../../../../../common/types/fields';
+import { FieldSelectionItem } from '../../../../../../../common/types/data_frame_analytics';
 import {
   isRuntimeMappings,
   isRuntimeField,
@@ -56,7 +57,6 @@ import { ExplorationQueryBar } from '../../../analytics_exploration/components/e
 import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
 import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
-import { Query } from '../../../../../../../../../../src/plugins/data/common/query';
 
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';
 import { RuntimeMappings } from '../runtime_mappings';
@@ -88,7 +88,6 @@ function getRuntimeDepVarOptions(jobType: AnalyticsJobType, runtimeMappings: Run
     if (isRuntimeField(field) && shouldAddAsDepVarOption(id, field.type, jobType)) {
       runtimeOptions.push({
         label: id,
-        key: `runtime_mapping_${id}`,
       });
     }
   });
@@ -102,7 +101,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   setCurrentStep,
 }) => {
   const mlContext = useMlContext();
-  const { currentSavedSearch, currentIndexPattern } = mlContext;
+  const { currentSavedSearch, currentDataView } = mlContext;
   const { savedSearchQuery, savedSearchQueryStr } = useSavedSearch();
 
   const [fieldOptionsFetchFail, setFieldOptionsFetchFail] = useState<boolean>(false);
@@ -127,6 +126,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     dependentVariable,
     includes,
     jobConfigQuery,
+    jobConfigQueryLanguage,
     jobConfigQueryString,
     jobType,
     modelMemoryLimit,
@@ -150,20 +150,24 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   const [query, setQuery] = useState<Query>({
     query: jobConfigQueryString ?? '',
-    language: SEARCH_QUERY_LANGUAGE.KUERY,
+    language: jobConfigQueryLanguage ?? SEARCH_QUERY_LANGUAGE.KUERY,
   });
 
   const toastNotifications = getToastNotifications();
 
   const setJobConfigQuery: ExplorationQueryBarProps['setSearchQuery'] = (update) => {
     if (update.query) {
-      setFormState({ jobConfigQuery: update.query, jobConfigQueryString: update.queryString });
+      setFormState({
+        jobConfigQuery: update.query,
+        jobConfigQueryLanguage: update.language,
+        jobConfigQueryString: update.queryString,
+      });
     }
     setQuery({ query: update.queryString, language: update.language });
   };
 
   const indexData = useIndexData(
-    currentIndexPattern,
+    currentDataView,
     getIndexDataQuery(savedSearchQuery, jobConfigQuery),
     toastNotifications,
     runtimeMappings
@@ -192,7 +196,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     setMaxDistinctValuesError(undefined);
 
     try {
-      if (currentIndexPattern !== undefined) {
+      if (currentDataView !== undefined) {
         const depVarOptions = [];
         let depVarUpdate = formState.dependentVariable;
         // Get fields and filter for supported types for job type
@@ -330,7 +334,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   }, 300);
 
   useEffect(() => {
-    setFormState({ sourceIndex: currentIndexPattern.title });
+    setFormState({ sourceIndex: currentDataView.title });
   }, []);
 
   const indexPatternFieldsTableItems = useMemo(() => {
@@ -352,7 +356,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   useEffect(() => {
     if (isJobTypeWithDepVar) {
-      const indexPatternRuntimeFields = getCombinedRuntimeMappings(currentIndexPattern);
+      const indexPatternRuntimeFields = getCombinedRuntimeMappings(currentDataView);
       let runtimeOptions;
 
       if (indexPatternRuntimeFields) {
@@ -494,14 +498,14 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       fields: includesTableItems
         .filter((d) => d.feature_type === 'numerical' && d.is_included)
         .map((d) => d.name),
-      index: currentIndexPattern.title,
+      index: currentDataView.title,
       legendType: getScatterplotMatrixLegendType(jobType),
       searchQuery: jobConfigQuery,
       runtimeMappings,
-      indexPattern: currentIndexPattern,
+      indexPattern: currentDataView,
     }),
     [
-      currentIndexPattern.title,
+      currentDataView.title,
       dependentVariable,
       includesTableItems,
       isJobTypeWithDepVar,
@@ -544,7 +548,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           fullWidth
         >
           <ExplorationQueryBar
-            indexPattern={currentIndexPattern}
+            indexPattern={currentDataView}
             setSearchQuery={setJobConfigQuery}
             query={query}
           />
@@ -564,7 +568,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
             <EuiBadge color="hollow">
               {savedSearchQuery !== null
                 ? currentSavedSearch?.attributes.title
-                : currentIndexPattern.title}
+                : currentDataView.title}
             </EuiBadge>
           </Fragment>
         }
@@ -582,11 +586,11 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
             helpText={
               dependentVariableOptions.length === 0 &&
               dependentVariableFetchFail === false &&
-              currentIndexPattern &&
+              currentDataView &&
               i18n.translate(
                 'xpack.ml.dataframe.analytics.create.dependentVariableOptionsNoNumericalFields',
                 {
-                  defaultMessage: 'No numeric type fields were found for this index pattern.',
+                  defaultMessage: 'No numeric type fields were found for this data view.',
                 }
               )
             }
@@ -663,6 +667,17 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
           </EuiFormRow>
         </Fragment>
       )}
+      <AnalysisFieldsTable
+        dependentVariable={dependentVariable}
+        includes={includes}
+        isJobTypeWithDepVar={isJobTypeWithDepVar}
+        minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
+        setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
+        tableItems={firstUpdate.current ? includesTableItems : tableItems}
+        unsupportedFieldsError={unsupportedFieldsError}
+        setUnsupportedFieldsError={setUnsupportedFieldsError}
+        setFormState={setFormState}
+      />
       <EuiFormRow
         fullWidth
         isInvalid={requiredFieldsError !== undefined}
@@ -673,17 +688,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       >
         <Fragment />
       </EuiFormRow>
-
-      <AnalysisFieldsTable
-        dependentVariable={dependentVariable}
-        includes={includes}
-        minimumFieldsRequiredMessage={minimumFieldsRequiredMessage}
-        setMinimumFieldsRequiredMessage={setMinimumFieldsRequiredMessage}
-        tableItems={firstUpdate.current ? includesTableItems : tableItems}
-        unsupportedFieldsError={unsupportedFieldsError}
-        setUnsupportedFieldsError={setUnsupportedFieldsError}
-        setFormState={setFormState}
-      />
+      <EuiSpacer />
       {showScatterplotMatrix && (
         <>
           <EuiFormRow

@@ -26,15 +26,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      // logout, so the other tests don't accidentally run as the custom users we're testing below
+      // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      await PageObjects.security.forceLogout();
+
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/dashboard/feature_controls/security'
       );
-
-      // logout, so the other tests don't accidentally run as the custom users we're testing below
-      await PageObjects.security.forceLogout();
     });
 
-    describe('global all privileges', () => {
+    // https://github.com/elastic/kibana/issues/132628
+    describe.skip('global all privileges', () => {
       before(async () => {
         await security.role.create('global_all_role', {
           elasticsearch: {},
@@ -77,7 +79,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows the "Manage" action item', async () => {
-        await testSubjects.existOrFail('homManagementActionItem', {
+        await testSubjects.existOrFail('homeManage', {
           timeout: 2000,
         });
       });
@@ -127,7 +129,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('does not show the "Manage" action item', async () => {
-        await testSubjects.missingOrFail('homManagementActionItem', {
+        await testSubjects.missingOrFail('homeManage', {
           timeout: 2000,
         });
       });

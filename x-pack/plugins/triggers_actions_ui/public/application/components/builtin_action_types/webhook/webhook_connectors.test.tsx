@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { WebhookActionConnector } from '../types';
 import WebhookActionConnectorFields from './webhook_connectors';
 
@@ -20,6 +20,7 @@ describe('WebhookActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.webhook',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'webhook',
       config: {
         method: 'PUT',
@@ -53,6 +54,7 @@ describe('WebhookActionConnectorFields renders', () => {
       secrets: {},
       actionTypeId: '.webhook',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         hasAuth: true,
       },
@@ -81,6 +83,7 @@ describe('WebhookActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.webhook',
       isPreconfigured: false,
+      isDeprecated: false,
       name: 'webhook',
       config: {
         method: 'PUT',
@@ -113,6 +116,7 @@ describe('WebhookActionConnectorFields renders', () => {
       id: 'test',
       actionTypeId: '.webhook',
       isPreconfigured: false,
+      isDeprecated: false,
       isMissingSecrets: true,
       name: 'webhook',
       config: {

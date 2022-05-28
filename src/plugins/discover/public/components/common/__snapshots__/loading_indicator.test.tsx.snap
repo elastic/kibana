@@ -1,0 +1,73 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Loading indicator default renders correctly 1`] = `
+<LoadingIndicator>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="none"
+    justifyContent="spaceAround"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiLoadingSpinner
+            size="l"
+          >
+            <span
+              className="euiLoadingSpinner euiLoadingSpinner--large"
+            />
+          </EuiLoadingSpinner>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</LoadingIndicator>
+`;
+
+exports[`Loading indicator elastic renders correctly 1`] = `
+<LoadingIndicator
+  type="elastic"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="none"
+    justifyContent="spaceAround"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiLoadingElastic
+            size="xxl"
+          >
+            <span
+              className="euiLoadingElastic euiLoadingElastic--xxLarge"
+            >
+              <EuiIcon
+                size="xxl"
+                type="logoElastic"
+              >
+                <span
+                  data-euiicon-type="logoElastic"
+                  size="xxl"
+                />
+              </EuiIcon>
+            </span>
+          </EuiLoadingElastic>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</LoadingIndicator>
+`;

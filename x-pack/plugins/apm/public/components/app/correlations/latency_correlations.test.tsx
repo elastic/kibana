@@ -10,23 +10,22 @@ import { createMemoryHistory } from 'history';
 import React, { ReactNode } from 'react';
 import { of } from 'rxjs';
 
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { merge } from 'lodash';
-import { dataPluginMock } from 'src/plugins/data/public/mocks';
-import type { IKibanaSearchResponse } from 'src/plugins/data/public';
-import { EuiThemeProvider } from 'src/plugins/kibana_react/common';
-import { createKibanaReactContext } from 'src/plugins/kibana_react/public';
-import type { LatencyCorrelationsRawResponse } from '../../../../common/search_strategies/latency_correlations/types';
-import type { RawResponseBase } from '../../../../common/search_strategies/types';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import type { LatencyCorrelationsResponse } from '../../../../common/correlations/latency_correlations/types';
 import { MockUrlParamsContextProvider } from '../../../context/url_params_context/mock_url_params_context_provider';
 import { ApmPluginContextValue } from '../../../context/apm_plugin/apm_plugin_context';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
 } from '../../../context/apm_plugin/mock_apm_plugin_context';
-import { fromQuery } from '../../shared/Links/url_helpers';
+import { fromQuery } from '../../shared/links/url_helpers';
 
 import { LatencyCorrelations } from './latency_correlations';
 
@@ -35,9 +34,7 @@ function Wrapper({
   dataSearchResponse,
 }: {
   children?: ReactNode;
-  dataSearchResponse: IKibanaSearchResponse<
-    LatencyCorrelationsRawResponse & RawResponseBase
-  >;
+  dataSearchResponse: IKibanaSearchResponse<LatencyCorrelationsResponse>;
 }) {
   const mockDataSearch = jest.fn(() => of(dataSearchResponse));
 
@@ -99,9 +96,7 @@ describe('correlations', () => {
             isRunning: true,
             rawResponse: {
               ccsWarning: false,
-              took: 1234,
               latencyCorrelations: [],
-              log: [],
             },
           }}
         >
@@ -122,9 +117,7 @@ describe('correlations', () => {
             isRunning: false,
             rawResponse: {
               ccsWarning: false,
-              took: 1234,
               latencyCorrelations: [],
-              log: [],
             },
           }}
         >

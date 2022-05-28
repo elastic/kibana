@@ -5,39 +5,8 @@
  * 2.0.
  */
 
-import { isFunction, get } from 'lodash';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { MonitoringConfig } from '../server/config';
-
-type Config = Partial<MonitoringConfig> & {
-  get?: (key: string) => any;
-};
-
-export function appendMetricbeatIndex(
-  config: Config,
-  indexPattern: string,
-  ccs?: string,
-  bypass: boolean = false
-) {
-  if (bypass) {
-    return indexPattern;
-  }
-  // Leverage this function to also append the dynamic metricbeat index too
-  let mbIndex = null;
-  // TODO: NP
-  // This function is called with both NP config and LP config
-  if (isFunction(config.get)) {
-    mbIndex = config.get('monitoring.ui.metricbeat.index');
-  } else {
-    mbIndex = get(config, 'ui.metricbeat.index');
-  }
-
-  if (ccs) {
-    mbIndex = `${mbIndex},${ccs}:${mbIndex}`;
-  }
-
-  return `${indexPattern},${mbIndex}`;
-}
 
 /**
  * Prefix all comma separated index patterns within the original {@code indexPattern}.
@@ -50,28 +19,14 @@ export function appendMetricbeatIndex(
  * @param  {String} ccs The optional cluster-prefix to prepend.
  * @return {String} The index pattern with the {@code cluster} prefix appropriately prepended.
  */
-export function prefixIndexPattern(
-  config: Config,
+export function prefixIndexPatternWithCcs(
+  config: MonitoringConfig,
   indexPattern: string,
-  ccs?: string,
-  monitoringIndicesOnly: boolean = false
-) {
-  let ccsEnabled = false;
-  // TODO: NP
-  // This function is called with both NP config and LP config
-  if (isFunction(config.get)) {
-    ccsEnabled = config.get('monitoring.ui.ccs.enabled');
-  } else {
-    ccsEnabled = get(config, 'ui.ccs.enabled');
-  }
-
+  ccs?: string
+): string {
+  const ccsEnabled = config.ui.ccs.enabled;
   if (!ccsEnabled || !ccs) {
-    return appendMetricbeatIndex(
-      config,
-      indexPattern,
-      ccsEnabled ? ccs : undefined,
-      monitoringIndicesOnly
-    );
+    return indexPattern;
   }
 
   const patterns = indexPattern.split(',');
@@ -79,15 +34,9 @@ export function prefixIndexPattern(
 
   // if a wildcard is used, then we also want to search the local indices
   if (ccs === '*') {
-    return appendMetricbeatIndex(
-      config,
-      `${prefixedPattern},${indexPattern}`,
-      ccs,
-      monitoringIndicesOnly
-    );
+    return `${prefixedPattern},${indexPattern}`;
   }
-
-  return appendMetricbeatIndex(config, prefixedPattern, ccs, monitoringIndicesOnly);
+  return prefixedPattern;
 }
 
 /**
@@ -118,7 +67,7 @@ export function prefixIndexPattern(
  * @param  {String} indexName The index's name, possibly including the cross-cluster prefix
  * @return {String} {@code null} if none. Otherwise the cluster prefix.
  */
-export function parseCrossClusterPrefix(indexName: string) {
+export function parseCrossClusterPrefix(indexName: string): string | null {
   const colonIndex = indexName.indexOf(':');
 
   if (colonIndex === -1) {

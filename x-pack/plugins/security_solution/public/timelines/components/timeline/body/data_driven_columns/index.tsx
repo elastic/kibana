@@ -10,9 +10,9 @@ import React, { useMemo } from 'react';
 import { getOr } from 'lodash/fp';
 import { DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 
+import type { SetEventsLoading, SetEventsDeleted } from '@kbn/timelines-plugin/common';
 import { Ecs } from '../../../../../../common/ecs';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
-import type { SetEventsLoading, SetEventsDeleted } from '../../../../../../../timelines/common';
 import {
   ColumnHeaderOptions,
   CellValueElementProps,
@@ -240,9 +240,10 @@ const TgridTdCell = ({
   tabType,
   timelineId,
 }: CellProps) => {
+  const ariaColIndex = index + ARIA_COLUMN_INDEX_OFFSET;
   return (
     <EventsTd
-      $ariaColumnIndex={index + ARIA_COLUMN_INDEX_OFFSET}
+      $ariaColumnIndex={ariaColIndex}
       key={tabType != null ? `${header.id}_${tabType}` : `${header.id}`}
       onKeyDown={onKeyDown}
       role="button"
@@ -252,10 +253,11 @@ const TgridTdCell = ({
       <EventsTdContent data-test-subj="cell-container">
         <>
           <EuiScreenReaderOnly data-test-subj="screenReaderOnly">
-            <p>{i18n.YOU_ARE_IN_A_TABLE_CELL({ row: ariaRowindex, column: index + 2 })}</p>
+            <p>{i18n.YOU_ARE_IN_A_TABLE_CELL({ row: ariaRowindex, column: ariaColIndex })}</p>
           </EuiScreenReaderOnly>
           <StatefulCell
-            ariaRowindex={ariaRowindex}
+            rowIndex={ariaRowindex - 1}
+            colIndex={ariaColIndex - 1}
             data={data}
             header={header}
             eventId={_id}
@@ -447,4 +449,14 @@ export const getMappedNonEcsValue = ({
     return item.value;
   }
   return undefined;
+};
+
+export const useGetMappedNonEcsValue = ({
+  data,
+  fieldName,
+}: {
+  data: TimelineNonEcsData[];
+  fieldName: string;
+}): string[] | undefined => {
+  return useMemo(() => getMappedNonEcsValue({ data, fieldName }), [data, fieldName]);
 };

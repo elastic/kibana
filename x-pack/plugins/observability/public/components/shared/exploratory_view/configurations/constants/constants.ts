@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { OperationType } from '../../../../../../../lens/public';
+import { OperationType } from '@kbn/lens-plugin/public';
+import { DOCUMENT_FIELD_NAME } from '@kbn/lens-plugin/common/constants';
 import { ReportViewType } from '../../types';
 import {
   CLS_FIELD,
@@ -17,10 +18,12 @@ import {
 } from './elasticsearch_fieldnames';
 import {
   AGENT_HOST_LABEL,
+  AGENT_TYPE_LABEL,
   BROWSER_FAMILY_LABEL,
   BROWSER_VERSION_LABEL,
   CLS_LABEL,
   CORE_WEB_VITALS_LABEL,
+  DCL_LABEL,
   DEVICE_DISTRIBUTION_LABEL,
   DEVICE_LABEL,
   ENVIRONMENT_LABEL,
@@ -42,6 +45,7 @@ import {
   PORT_LABEL,
   REQUEST_METHOD,
   SERVICE_NAME_LABEL,
+  SERVICE_TYPE_LABEL,
   TAGS_LABEL,
   TBT_LABEL,
   URL_LABEL,
@@ -50,12 +54,24 @@ import {
   PAGE_LOAD_TIME_LABEL,
   LABELS_FIELD,
   STEP_NAME_LABEL,
+  STEP_DURATION_LABEL,
+  EVENT_DATASET_LABEL,
+  MESSAGE_LABEL,
 } from './labels';
-import { SYNTHETICS_STEP_NAME } from './field_names/synthetics';
+import {
+  MONITOR_DURATION_US,
+  SYNTHETICS_CLS,
+  SYNTHETICS_DCL,
+  SYNTHETICS_DOCUMENT_ONLOAD,
+  SYNTHETICS_FCP,
+  SYNTHETICS_LCP,
+  SYNTHETICS_STEP_DURATION,
+  SYNTHETICS_STEP_NAME,
+} from './field_names/synthetics';
 
 export const DEFAULT_TIME = { from: 'now-1h', to: 'now' };
 
-export const RECORDS_FIELD = 'Records';
+export const RECORDS_FIELD = DOCUMENT_FIELD_NAME;
 export const RECORDS_PERCENTAGE_FIELD = 'RecordsPercentage';
 
 export const FieldLabels: Record<string, string> = {
@@ -67,21 +83,32 @@ export const FieldLabels: Record<string, string> = {
   'observer.geo.name': OBSERVER_LOCATION_LABEL,
   'service.name': SERVICE_NAME_LABEL,
   'service.environment': ENVIRONMENT_LABEL,
+  'service.type': SERVICE_TYPE_LABEL,
+  'event.dataset': EVENT_DATASET_LABEL,
+  message: MESSAGE_LABEL,
 
   [LCP_FIELD]: LCP_LABEL,
   [FCP_FIELD]: FCP_LABEL,
   [TBT_FIELD]: TBT_LABEL,
   [FID_FIELD]: FID_LABEL,
   [CLS_FIELD]: CLS_LABEL,
+
+  [SYNTHETICS_CLS]: CLS_LABEL,
+  [SYNTHETICS_DCL]: DCL_LABEL,
+  [SYNTHETICS_STEP_DURATION]: STEP_DURATION_LABEL,
+  [SYNTHETICS_LCP]: LCP_LABEL,
+  [SYNTHETICS_FCP]: FCP_LABEL,
+  [SYNTHETICS_DOCUMENT_ONLOAD]: PAGE_LOAD_TIME_LABEL,
   [TRANSACTION_TIME_TO_FIRST_BYTE]: BACKEND_TIME_LABEL,
   [TRANSACTION_DURATION]: PAGE_LOAD_TIME_LABEL,
 
   'monitor.id': MONITOR_ID_LABEL,
   'monitor.status': MONITOR_STATUS_LABEL,
-  'monitor.duration.us': MONITORS_DURATION_LABEL,
+  [MONITOR_DURATION_US]: MONITORS_DURATION_LABEL,
   [SYNTHETICS_STEP_NAME]: STEP_NAME_LABEL,
 
   'agent.hostname': AGENT_HOST_LABEL,
+  'agent.type': AGENT_TYPE_LABEL,
   'host.hostname': HOST_NAME_LABEL,
   'monitor.name': MONITOR_NAME_LABEL,
   'monitor.type': MONITOR_TYPE_LABEL,
@@ -117,6 +144,8 @@ export enum DataTypes {
   SYNTHETICS = 'synthetics',
   UX = 'ux',
   MOBILE = 'mobile',
+  METRICS = 'infra_metrics',
+  LOGS = 'infra_logs',
 }
 
 export const USE_BREAK_DOWN_COLUMN = 'USE_BREAK_DOWN_COLUMN';

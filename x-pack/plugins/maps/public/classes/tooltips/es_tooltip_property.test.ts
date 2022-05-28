@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndexPatternField, IndexPattern } from 'src/plugins/data/public';
+import type { IndexPatternField, IndexPattern } from '@kbn/data-plugin/public';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { TooltipProperty } from './tooltip_property';
 import { AbstractField } from '../fields/field';
@@ -102,6 +102,40 @@ describe('getESFilters', () => {
         query: {
           match_phrase: {
             ['machine.os']: 'my value',
+          },
+        },
+      },
+    ]);
+  });
+
+  test('Should return phrase filters when field value is an array', async () => {
+    const esTooltipProperty = new ESTooltipProperty(
+      new TooltipProperty(featurePropertyField.getName(), await featurePropertyField.getLabel(), [
+        'my value',
+        'my other value',
+      ]),
+      indexPattern,
+      featurePropertyField,
+      APPLY_GLOBAL_QUERY
+    );
+    expect(await esTooltipProperty.getESFilters()).toEqual([
+      {
+        meta: {
+          index: 'indexPatternId',
+        },
+        query: {
+          match_phrase: {
+            ['machine.os']: 'my value',
+          },
+        },
+      },
+      {
+        meta: {
+          index: 'indexPatternId',
+        },
+        query: {
+          match_phrase: {
+            ['machine.os']: 'my other value',
           },
         },
       },

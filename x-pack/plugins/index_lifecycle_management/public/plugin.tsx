@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { first } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, PluginInitializerContext, Plugin } from 'src/core/public';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
+import { CoreSetup, PluginInitializerContext, Plugin } from '@kbn/core/public';
 import { PLUGIN } from '../common/constants';
 import { init as initHttp } from './application/services/http';
-import { init as initDocumentation } from './application/services/documentation';
 import { init as initUiMetric } from './application/services/ui_metric';
 import { init as initNotification } from './application/services/notification';
 import { BreadcrumbService } from './application/services/breadcrumbs';
@@ -50,24 +48,20 @@ export class IndexLifecycleManagementPlugin
         id: PLUGIN.ID,
         title: PLUGIN.TITLE,
         order: 2,
-        mount: async ({ element, history, setBreadcrumbs }) => {
+        mount: async ({ element, history, setBreadcrumbs, theme$ }) => {
           const [coreStart, { licensing }] = await getStartServices();
           const {
             chrome: { docTitle },
             i18n: { Context: I18nContext },
-            docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
             application,
+            docLinks,
+            executionContext,
           } = coreStart;
 
-          const license = await licensing.license$.pipe(first()).toPromise();
+          const license = await firstValueFrom(licensing.license$);
 
           docTitle.change(PLUGIN.TITLE);
           this.breadcrumbService.setup(setBreadcrumbs);
-
-          // Initialize additional services.
-          initDocumentation(
-            `${ELASTIC_WEBSITE_URL}guide/en/elasticsearch/reference/${DOC_LINK_VERSION}/`
-          );
 
           const { renderApp } = await import('./application');
 
@@ -78,6 +72,9 @@ export class IndexLifecycleManagementPlugin
             application,
             this.breadcrumbService,
             license,
+            theme$,
+            docLinks,
+            executionContext,
             cloud
           );
 
@@ -101,7 +98,7 @@ export class IndexLifecycleManagementPlugin
           icon: 'indexRollupApp',
           path: '/app/management/data/index_lifecycle_management',
           showOnHomePage: true,
-          category: FeatureCatalogueCategory.ADMIN,
+          category: 'admin',
           order: 640,
         });
       }
@@ -119,5 +116,6 @@ export class IndexLifecycleManagementPlugin
   }
 
   public start() {}
+
   public stop() {}
 }

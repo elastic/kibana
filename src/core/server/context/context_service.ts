@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { PluginOpaqueId } from '../../server';
+import { PluginOpaqueId } from '..';
 import { IContextContainer, ContextContainer } from './container';
 import { CoreContext } from '../core_context';
 
 type PrebootDeps = SetupDeps;
 
-interface SetupDeps {
+export interface SetupDeps {
   pluginDependencies: ReadonlyMap<PluginOpaqueId, PluginOpaqueId[]>;
 }
 

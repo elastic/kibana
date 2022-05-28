@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { OsqueryManagerPackagePolicy } from '../../../common/types';
 import {
@@ -48,9 +48,14 @@ const CommonUseField = getUseField({ component: Field });
 interface PackFormProps {
   defaultValue?: OsqueryManagerPackagePolicy;
   editMode?: boolean;
+  isReadOnly?: boolean;
 }
 
-const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = false }) => {
+const PackFormComponent: React.FC<PackFormProps> = ({
+  defaultValue,
+  editMode = false,
+  isReadOnly = false,
+}) => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
@@ -98,14 +103,17 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
       description: {
         type: FIELD_TYPES.TEXT,
         label: i18n.translate('xpack.osquery.pack.form.descriptionFieldLabel', {
-          defaultMessage: 'Description',
+          defaultMessage: 'Description (optional)',
         }),
       },
       policy_ids: {
         defaultValue: [],
         type: FIELD_TYPES.COMBO_BOX,
         label: i18n.translate('xpack.osquery.pack.form.agentPoliciesFieldLabel', {
-          defaultMessage: 'Agent policies',
+          defaultMessage: 'Scheduled agent policies (optional)',
+        }),
+        helpText: i18n.translate('xpack.osquery.pack.form.agentPoliciesFieldHelpText', {
+          defaultMessage: 'Queries in this pack are scheduled for agents in the selected policies.',
         }),
       },
       enabled: {
@@ -154,6 +162,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
         policyIds,
         (acc, policyId) => {
           const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
+
           return acc + (agentPolicy?.agents ?? 0);
         },
         0
@@ -169,6 +178,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
   const handleSaveClick = useCallback(() => {
     if (agentCount) {
       setShowConfirmationModal(true);
+
       return;
     }
 
@@ -180,18 +190,20 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
     setShowConfirmationModal(false);
   }, [submit]);
 
+  const euiFieldProps = useMemo(() => ({ isDisabled: isReadOnly }), [isReadOnly]);
+
   return (
     <>
       <Form form={form}>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <CommonUseField path="name" />
+            <CommonUseField path="name" euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiFlexGroup>
           <EuiFlexItem>
-            <CommonUseField path="description" />
+            <CommonUseField path="description" euiFieldProps={euiFieldProps} />
           </EuiFlexItem>
         </EuiFlexGroup>
 
@@ -210,6 +222,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
           path="queries"
           component={QueriesField}
           handleNameChange={handleNameChange}
+          euiFieldProps={euiFieldProps}
         />
 
         <CommonUseField path="enabled" component={GhostFormField} />

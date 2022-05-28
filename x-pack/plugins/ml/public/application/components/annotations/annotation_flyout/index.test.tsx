@@ -9,12 +9,12 @@ import useObservable from 'react-use/lib/useObservable';
 import mockAnnotations from '../annotations_table/__mocks__/mock_annotations.json';
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 import { Annotation } from '../../../../../common/types/annotations';
 import { AnnotationUpdatesService } from '../../../services/annotations_service';
 
-import { AnnotationFlyout } from './index';
+import { AnnotationFlyout } from '.';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 jest.mock('../../../util/dependency_cache', () => ({

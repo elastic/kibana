@@ -9,7 +9,7 @@
 /* eslint-disable max-classes-per-file */
 
 import Chalk from 'chalk';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
 export interface Log {
   toolingLog: ToolingLog;
@@ -20,16 +20,18 @@ export interface Log {
 }
 
 export class CliLog implements Log {
-  public toolingLog = new ToolingLog({
-    level: this.silent ? 'silent' : 'info',
-    writeTo: {
-      write: (msg) => {
-        this.write(msg);
-      },
-    },
-  });
+  public toolingLog: ToolingLog;
 
-  constructor(private readonly silent: boolean) {}
+  constructor(private readonly silent: boolean) {
+    this.toolingLog = new ToolingLog({
+      level: this.silent ? 'silent' : 'info',
+      writeTo: {
+        write: (msg) => {
+          this.write(msg);
+        },
+      },
+    });
+  }
 
   good(label: string, ...args: any[]) {
     if (this.silent) {

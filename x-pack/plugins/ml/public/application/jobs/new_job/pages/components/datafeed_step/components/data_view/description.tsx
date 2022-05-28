@@ -7,12 +7,12 @@
 
 import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescribedFormGroup, EuiFormRow } from '@elastic/eui';
 
 export const Description: FC = memo(({ children }) => {
   const title = i18n.translate('xpack.ml.newJob.wizard.datafeedStep.dataView.title', {
-    defaultMessage: 'Index pattern',
+    defaultMessage: 'Data view',
   });
   return (
     <EuiDescribedFormGroup
@@ -20,7 +20,7 @@ export const Description: FC = memo(({ children }) => {
       description={
         <FormattedMessage
           id="xpack.ml.newJob.wizard.datafeedStep.dataView.description"
-          defaultMessage="The index pattern that is currently used for this job."
+          defaultMessage="The data view that is currently used for this job."
         />
       }
     >

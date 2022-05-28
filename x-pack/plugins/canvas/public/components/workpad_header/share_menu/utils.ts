@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { RedirectOptions } from 'src/plugins/share/public';
-import { CANVAS_APP_LOCATOR } from '../../../../common/locator';
-import { CanvasAppLocatorParams } from '../../../../common/locator';
+import type { RedirectOptions } from '@kbn/share-plugin/public';
+import { JobAppParamsPDFV2 } from '@kbn/reporting-plugin/common/types';
+import { CanvasAppLocatorParams, CANVAS_APP_LOCATOR } from '../../../../common/locator';
 import { CanvasWorkpad } from '../../../../types';
 
 export interface CanvasWorkpadSharingData {
@@ -18,7 +18,7 @@ export interface CanvasWorkpadSharingData {
 export function getPdfJobParams(
   { workpad: { id, name: title, width, height }, pageCount }: CanvasWorkpadSharingData,
   version: string
-) {
+): JobAppParamsPDFV2 {
   // The viewport in Reporting by specifying the dimensions. In order for things to work,
   // we need a viewport that will include all of the pages in the workpad. The viewport
   // also needs to include any offset values from the 0,0 position, otherwise the cropped

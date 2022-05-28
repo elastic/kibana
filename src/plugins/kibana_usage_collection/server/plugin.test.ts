@@ -10,16 +10,18 @@ import {
   coreMock,
   savedObjectsRepositoryMock,
   uiSettingsServiceMock,
-} from '../../../core/server/mocks';
+} from '@kbn/core/server/mocks';
 import {
   CollectorOptions,
   createUsageCollectionSetupMock,
-} from '../../usage_collection/server/mocks';
-import { cloudDetailsMock } from './mocks';
-import { plugin } from './';
+} from '@kbn/usage-collection-plugin/server/mocks';
+import { telemetryPluginMock } from '@kbn/telemetry-plugin/server/mocks';
+import { cloudDetailsMock, registerEbtCountersMock } from './plugin.test.mocks';
+import { plugin } from '.';
 
 describe('kibana_usage_collection', () => {
   const pluginInstance = plugin(coreMock.createPluginInitializerContext({}));
+  const telemetry = telemetryPluginMock.createSetupContract();
 
   const usageCollectors: CollectorOptions[] = [];
 
@@ -43,6 +45,9 @@ describe('kibana_usage_collection', () => {
     expect(pluginInstance.setup(coreSetup, { usageCollection })).toBe(undefined);
 
     expect(coreSetup.coreUsageData.registerUsageCounter).toHaveBeenCalled();
+
+    expect(registerEbtCountersMock).toHaveBeenCalledTimes(1);
+    expect(registerEbtCountersMock).toHaveBeenCalledWith(coreSetup.analytics, usageCollection);
 
     await expect(
       Promise.all(
@@ -137,5 +142,27 @@ describe('kibana_usage_collection', () => {
 
   test('Runs the stop method without issues', () => {
     expect(pluginInstance.stop()).toBe(undefined);
+  });
+
+  describe('optIn fallback from telemetry', () => {
+    test('should call optIn(false) when telemetry is disabled', () => {
+      const coreSetup = coreMock.createSetup();
+      const usageCollectionMock = createUsageCollectionSetupMock();
+
+      expect(pluginInstance.setup(coreSetup, { usageCollection: usageCollectionMock })).toBe(
+        undefined
+      );
+      expect(coreSetup.analytics.optIn).toHaveBeenCalledWith({ global: { enabled: false } });
+    });
+
+    test('should NOT call optIn(false) when telemetry is enabled', () => {
+      const coreSetup = coreMock.createSetup();
+      const usageCollectionMock = createUsageCollectionSetupMock();
+
+      expect(
+        pluginInstance.setup(coreSetup, { usageCollection: usageCollectionMock, telemetry })
+      ).toBe(undefined);
+      expect(coreSetup.analytics.optIn).not.toHaveBeenCalled();
+    });
   });
 });

@@ -6,10 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { first } from 'rxjs/operators';
-import { CoreSetup, Plugin, PluginInitializerContext } from 'kibana/server';
+import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { registerKqlTelemetryRoute } from './route';
-import { UsageCollectionSetup } from '../../../usage_collection/server';
 import { makeKQLUsageCollector } from './usage_collector';
 import { kqlTelemetry } from '../saved_objects';
 
@@ -28,15 +27,13 @@ export class KqlTelemetryService implements Plugin<void> {
     );
 
     if (usageCollection) {
-      this.initializerContext.config.legacy.globalConfig$
-        .pipe(first())
-        .toPromise()
-        .then((config) => makeKQLUsageCollector(usageCollection, config.kibana.index))
-        .catch((e) => {
-          this.initializerContext.logger
-            .get('kql-telemetry')
-            .warn(`Registering KQL telemetry collector failed: ${e}`);
-        });
+      try {
+        makeKQLUsageCollector(usageCollection, savedObjects.getKibanaIndex());
+      } catch (e) {
+        this.initializerContext.logger
+          .get('kql-telemetry')
+          .warn(`Registering KQL telemetry collector failed: ${e}`);
+      }
     }
   }
 

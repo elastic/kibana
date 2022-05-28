@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
+export type {
+  KibanaReactContext,
+  KibanaReactContextValue,
+  ExitFullScreenButtonProps,
+} from '@kbn/kibana-react-plugin/public';
 export {
   context,
   useKibana,
@@ -13,9 +18,7 @@ export {
   toMountPoint,
   TableListView,
   reactToUiComponent,
-  KibanaReactContext,
   ExitFullScreenButton,
   KibanaContextProvider,
-  KibanaReactContextValue,
-  ExitFullScreenButtonProps,
-} from '../../../kibana_react/public';
+  KibanaThemeProvider,
+} from '@kbn/kibana-react-plugin/public';

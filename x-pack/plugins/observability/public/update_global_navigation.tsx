@@ -6,13 +6,9 @@
  */
 
 import { Subject } from 'rxjs';
+import { AppNavLinkStatus, AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
+import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { ConfigSchema } from '.';
-import {
-  AppNavLinkStatus,
-  AppUpdater,
-  ApplicationStart,
-  AppDeepLink,
-} from '../../../../src/core/public';
 import { casesFeatureId } from '../common';
 
 export function updateGlobalNavigation({
@@ -31,7 +27,7 @@ export function updateGlobalNavigation({
 
   const updatedDeepLinks = deepLinks.map((link) => {
     switch (link.id) {
-      case 'cases':
+      case CasesDeepLinkId.cases:
         return {
           ...link,
           navLinkStatus:
@@ -44,6 +40,14 @@ export function updateGlobalNavigation({
           ...link,
           navLinkStatus:
             config.unsafe.alertingExperience.enabled && someVisible
+              ? AppNavLinkStatus.visible
+              : AppNavLinkStatus.hidden,
+        };
+      case 'rules':
+        return {
+          ...link,
+          navLinkStatus:
+            config.unsafe.rules.enabled && someVisible
               ? AppNavLinkStatus.visible
               : AppNavLinkStatus.hidden,
         };

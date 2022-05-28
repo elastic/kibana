@@ -8,11 +8,11 @@
 import React, { FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../shared_imports';
 
-import { LoadFromJsonButton, OnDoneLoadJsonHandler, TestPipelineActions } from './';
+import { LoadFromJsonButton, OnDoneLoadJsonHandler, TestPipelineActions } from '.';
 
 export interface Props {
   onLoadJson: OnDoneLoadJsonHandler;

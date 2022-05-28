@@ -10,7 +10,8 @@ import { access, link, unlink, chmod } from 'fs';
 import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog, kibanaPackageJson } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
+import { kibanaPackageJson } from '@kbn/utils';
 
 import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
 import * as dockerTemplates from './templates';
@@ -28,20 +29,21 @@ export async function runDockerGenerator(
   build: Build,
   flags: {
     architecture?: string;
+    baseImage: 'none' | 'ubi' | 'ubuntu';
     context: boolean;
     image: boolean;
-    ubi?: boolean;
     ironbank?: boolean;
     cloud?: boolean;
     dockerBuildDate?: string;
   }
 ) {
-  // UBI var config
-  const baseOSImage = flags.ubi ? 'docker.elastic.co/ubi8/ubi-minimal:latest' : 'centos:8';
+  let baseImageName = '';
+  if (flags.baseImage === 'ubuntu') baseImageName = 'ubuntu:20.04';
+  if (flags.baseImage === 'ubi') baseImageName = 'docker.elastic.co/ubi8/ubi-minimal:latest';
   const ubiVersionTag = 'ubi8';
 
   let imageFlavor = '';
-  if (flags.ubi) imageFlavor += `-${ubiVersionTag}`;
+  if (flags.baseImage === 'ubi') imageFlavor += `-${ubiVersionTag}`;
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
 
@@ -58,7 +60,6 @@ export async function runDockerGenerator(
   const artifactsDir = config.resolveFromTarget('.');
   const beatsDir = config.resolveFromRepo('.beats');
   const dockerBuildDate = flags.dockerBuildDate || new Date().toISOString();
-  // That would produce oss, default and default-ubi7
   const dockerBuildDir = config.resolveFromRepo('build', 'kibana-docker', `default${imageFlavor}`);
   const imageArchitecture = flags.architecture === 'aarch64' ? '-aarch64' : '';
   const dockerTargetFilename = config.resolveFromTarget(
@@ -71,6 +72,11 @@ export async function runDockerGenerator(
       : []),
   ];
 
+  const dockerPush = config.getDockerPush();
+  const dockerTagQualifier = config.getDockerTagQualfiier();
+  const dockerCrossCompile = config.getDockerCrossCompile();
+  const publicArtifactSubdomain = config.isRelease ? 'artifacts' : 'snapshots-no-kpi';
+
   const scope: TemplateContext = {
     artifactPrefix,
     artifactTarball,
@@ -82,15 +88,19 @@ export async function runDockerGenerator(
     imageTag,
     dockerBuildDir,
     dockerTargetFilename,
-    baseOSImage,
+    dockerPush,
+    dockerTagQualifier,
+    dockerCrossCompile,
+    baseImageName,
     dockerBuildDate,
-    ubi: flags.ubi,
+    baseImage: flags.baseImage,
     cloud: flags.cloud,
     metricbeatTarball,
     filebeatTarball,
     ironbank: flags.ironbank,
     architecture: flags.architecture,
     revision: config.getBuildSha(),
+    publicArtifactSubdomain,
   };
 
   type HostArchitectureToDocker = Record<string, string>;
@@ -99,7 +109,7 @@ export async function runDockerGenerator(
     arm64: 'aarch64',
   };
   const buildArchitectureSupported = hostTarget[process.arch] === flags.architecture;
-  if (flags.architecture && !buildArchitectureSupported) {
+  if (flags.architecture && !buildArchitectureSupported && !dockerCrossCompile) {
     return;
   }
 

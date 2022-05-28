@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { getConfigurationMock, agentMock } from './get_apm_config.test.mocks';
+import {
+  getConfigurationMock,
+  agentMock,
+  shouldInstrumentClientMock,
+} from './get_apm_config.test.mocks';
 import { getApmConfig } from './get_apm_config';
 
 const defaultApmConfig = {
@@ -17,6 +21,7 @@ const defaultApmConfig = {
 describe('getApmConfig', () => {
   beforeEach(() => {
     getConfigurationMock.mockReturnValue(defaultApmConfig);
+    shouldInstrumentClientMock.mockReturnValue(true);
   });
 
   afterEach(() => {
@@ -25,12 +30,7 @@ describe('getApmConfig', () => {
   });
 
   it('returns null if apm is disabled', () => {
-    getConfigurationMock.mockReturnValue({
-      active: false,
-    });
-    expect(getApmConfig('/path')).toBeNull();
-
-    getConfigurationMock.mockReturnValue(undefined);
+    shouldInstrumentClientMock.mockReturnValue(false);
     expect(getApmConfig('/path')).toBeNull();
   });
 
@@ -54,6 +54,16 @@ describe('getApmConfig', () => {
         pageLoadTransactionName: '/some-other-path',
       })
     );
+  });
+
+  it('omits secret token', () => {
+    getConfigurationMock.mockReturnValue({
+      ...defaultApmConfig,
+      secretToken: 'smurfs',
+    });
+    const config = getApmConfig('/some-other-path');
+
+    expect(config).not.toHaveProperty('secretToken');
   });
 
   it('enhance the configuration with values from the current server-side transaction', () => {

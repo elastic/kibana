@@ -5,28 +5,11 @@
  * 2.0.
  */
 
-import { FindResult } from '../../../../../alerting/server';
-import { SIGNALS_ID } from '../../../../common/constants';
-import { RuleParams } from '../schemas/rule_schemas';
-import { ruleTypeMappings } from '../signals/utils';
-import { FindRuleOptions } from './types';
+import { FindResult } from '@kbn/alerting-plugin/server';
+import { enrichFilterWithRuleTypeMapping } from './enrich_filter_with_rule_type_mappings';
 
-export const getFilter = (
-  filter: string | null | undefined,
-  isRuleRegistryEnabled: boolean = false
-) => {
-  const alertTypeFilter = isRuleRegistryEnabled
-    ? `(${Object.values(ruleTypeMappings)
-        .map((type) => (type !== SIGNALS_ID ? `alert.attributes.alertTypeId: ${type}` : undefined))
-        .filter((type) => type != null)
-        .join(' OR ')})`
-    : `alert.attributes.alertTypeId: ${SIGNALS_ID}`;
-  if (filter == null) {
-    return alertTypeFilter;
-  } else {
-    return `${alertTypeFilter} AND ${filter}`;
-  }
-};
+import { RuleParams } from '../schemas/rule_schemas';
+import { FindRuleOptions } from './types';
 
 export const findRules = ({
   rulesClient,
@@ -36,14 +19,13 @@ export const findRules = ({
   filter,
   sortField,
   sortOrder,
-  isRuleRegistryEnabled,
 }: FindRuleOptions): Promise<FindResult<RuleParams>> => {
   return rulesClient.find({
     options: {
       fields,
       page,
       perPage,
-      filter: getFilter(filter, isRuleRegistryEnabled),
+      filter: enrichFilterWithRuleTypeMapping(filter),
       sortOrder,
       sortField,
     },

@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/server';
+import { PluginInitializerContext } from '@kbn/core/server';
 
 import { ConsoleServerPlugin } from './plugin';
 
-export { ConsoleSetup, ConsoleStart } from './types';
+export type { ConsoleSetup, ConsoleStart } from './types';
 
 export { config } from './config';
 

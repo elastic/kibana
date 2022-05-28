@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  PersistableState,
-  PersistableStateDefinition,
-} from '../../../../src/plugins/kibana_utils/common';
+import { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
 
 import { SerializedAction, SerializedEvent, DynamicActionsState } from '../common/types';
 
@@ -24,4 +21,4 @@ export interface ActionFactory<P extends SerializedEvent = SerializedEvent>
   id: string;
 }
 
-export { SerializedEvent, SerializedAction, DynamicActionsState };
+export type { SerializedEvent, SerializedAction, DynamicActionsState };

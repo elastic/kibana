@@ -1,0 +1,489 @@
+{
+  "id": "@kbn/shared-ux-components",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.AddFromLibraryButton",
+        "type": "Function",
+        "tags": [],
+        "label": "AddFromLibraryButton",
+        "description": [],
+        "signature": [
+          "({ onClick, ...rest }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/toolbar/buttons/add_from_library/add_from_library.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.AddFromLibraryButton.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ onClick, ...rest }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/kbn-shared-ux-components/src/toolbar/buttons/add_from_library/add_from_library.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.IconButtonGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "IconButtonGroup",
+        "description": [
+          "\nThe IconButtonGroup component that is wrapped by the `withSuspence` HOC."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "Props",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.IconButtonGroup.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.KibanaNoDataPage",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaNoDataPage",
+        "description": [
+          "\nA `KibanaNoDataPage` component. The component is wrapped by the `withSuspense` HOC.\nThis component can be used directly by consumers and will load the `KibanaNoDataPageLazy` lazily with\na predefined fallback and error boundary."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "Props",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.KibanaNoDataPage.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.KibanaNoDataPageLazy",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaNoDataPageLazy",
+        "description": [
+          "\n A `KibanaNoDataPage` component, with service hooks. Consumers should use `React.Suspennse` or the\n`withSuspense` HOC to load this component."
+        ],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          "> & { readonly _result: ({ onDataViewCreated, noDataConfig }: ",
+          "Props",
+          ") => JSX.Element | null; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.KibanaNoDataPageLazy.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.KibanaPageTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaPageTemplate",
+        "description": [
+          "\nA `KibanaPageTemplate` component that is wrapped by the `withSuspense` HOC.  This component can\nbe used directly by consumers and will load the `KibanaPageTemplateLazy` component lazily with\na predefined fallback and error boundary."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<Omit<",
+          "EuiPageProps",
+          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          "EuiPageSideBarProps",
+          " | undefined; pageHeader?: ",
+          "EuiPageHeaderProps",
+          " | undefined; pageBodyProps?: ",
+          "EuiPageBodyProps",
+          "<\"main\"> | undefined; pageContentProps?: ",
+          "EuiPageContentProps",
+          " | undefined; pageContentBodyProps?: ",
+          "EuiPageContentBodyProps",
+          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
+          "EuiBottomBarProps",
+          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
+          "Property",
+          ".MinHeight<string | number> | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
+          "KibanaPageTemplateSolutionNavProps",
+          " | undefined; noDataConfig?: ",
+          "NoDataPageProps",
+          " | undefined; } & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.KibanaPageTemplate.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.KibanaPageTemplateLazy",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaPageTemplateLazy",
+        "description": [
+          "\nThe lazily loaded `KibanaPageTemplate` component that is wrapped by the `withSuspense` HOC. Consumers should use\n`React.Suspense` or `withSuspense` HOC to load this component."
+        ],
+        "signature": [
+          "React.ExoticComponent<Omit<",
+          "EuiPageProps",
+          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          "EuiPageSideBarProps",
+          " | undefined; pageHeader?: ",
+          "EuiPageHeaderProps",
+          " | undefined; pageBodyProps?: ",
+          "EuiPageBodyProps",
+          "<\"main\"> | undefined; pageContentProps?: ",
+          "EuiPageContentProps",
+          " | undefined; pageContentBodyProps?: ",
+          "EuiPageContentBodyProps",
+          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
+          "EuiBottomBarProps",
+          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
+          "Property",
+          ".MinHeight<string | number> | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
+          "KibanaPageTemplateSolutionNavProps",
+          " | undefined; noDataConfig?: ",
+          "NoDataPageProps",
+          " | undefined; } & { children?: React.ReactNode; }> & { readonly _result: React.FunctionComponent<",
+          {
+            "pluginId": "@kbn/shared-ux-components",
+            "scope": "common",
+            "docId": "kibKbnSharedUxComponentsPluginApi",
+            "section": "def-common.KibanaPageTemplateProps",
+            "text": "KibanaPageTemplateProps"
+          },
+          ">; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.KibanaPageTemplateLazy.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.KibanaPageTemplateSolutionNavLazy",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaPageTemplateSolutionNavLazy",
+        "description": [
+          "\nThe lazily loaded `KibanaPageTemplateSolutionNav` component that is wrapped by the `withSuspense` HOC. Consumers should use\n`React.Suspense` or `withSuspense` HOC to load this component."
+        ],
+        "signature": [
+          "React.ExoticComponent<Omit<",
+          "EuiSideNavProps",
+          "<{}>, \"children\" | \"heading\" | \"items\"> & { name: string; icon?: ",
+          "IconType",
+          " | undefined; items?: ",
+          "EuiSideNavItemType",
+          "<{}>[] | undefined; children?: React.ReactNode; closeFlyoutButtonPosition?: \"outside\" | \"inside\" | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; } & { children?: React.ReactNode; }> & { readonly _result: React.FunctionComponent<",
+          "KibanaPageTemplateSolutionNavProps",
+          ">; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.KibanaPageTemplateSolutionNavLazy.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.LazyIconButtonGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyIconButtonGroup",
+        "description": [
+          "\nThe Lazily-loaded `IconButtonGroup` component.  Consumers should use `React.Suspense` or the\n`withSuspense` HOC to load this component."
+        ],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          "> & { readonly _result: ({ buttons, legend }: ",
+          "Props",
+          ") => JSX.Element; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.LazyIconButtonGroup.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.LazyToolbarButton",
+        "type": "Function",
+        "tags": [],
+        "label": "LazyToolbarButton",
+        "description": [],
+        "signature": [
+          "React.ExoticComponent<",
+          "Props",
+          "> & { readonly _result: ({ label, iconSide, ...rest }: ",
+          "Props",
+          ") => JSX.Element; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.LazyToolbarButton.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.ToolbarButton",
+        "type": "Function",
+        "tags": [],
+        "label": "ToolbarButton",
+        "description": [
+          "\nA `ToolbarButton` component that is wrapped by the `withSuspense` HOC.  This component can\nbe used directly by consumers and will load the `LazyToolbarButton` component lazily with\na predefined fallback and error boundary."
+        ],
+        "signature": [
+          "React.ForwardRefExoticComponent<",
+          "Props",
+          " & React.RefAttributes<{}>>"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/index.ts",
+        "deprecated": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.ToolbarButton.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.ToolbarPopover",
+        "type": "Function",
+        "tags": [],
+        "label": "ToolbarPopover",
+        "description": [],
+        "signature": [
+          "({ label, iconType, children, iconSide, ...popover }: ",
+          "Props",
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/toolbar/popovers/popover.tsx",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-components",
+            "id": "def-common.ToolbarPopover.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ label, iconType, children, iconSide, ...popover }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/kbn-shared-ux-components/src/toolbar/popovers/popover.tsx",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-components",
+        "id": "def-common.KibanaPageTemplateProps",
+        "type": "Type",
+        "tags": [],
+        "label": "KibanaPageTemplateProps",
+        "description": [],
+        "signature": [
+          "Omit<",
+          "EuiPageProps",
+          ", \"paddingSize\"> & { template?: \"default\" | \"empty\" | \"centeredBody\" | \"centeredContent\" | undefined; paddingSize?: \"none\" | \"m\" | \"s\" | \"l\" | undefined; pageSideBar?: React.ReactNode; pageSideBarProps?: ",
+          "EuiPageSideBarProps",
+          " | undefined; pageHeader?: ",
+          "EuiPageHeaderProps",
+          " | undefined; pageBodyProps?: ",
+          "EuiPageBodyProps",
+          "<\"main\"> | undefined; pageContentProps?: ",
+          "EuiPageContentProps",
+          " | undefined; pageContentBodyProps?: ",
+          "EuiPageContentBodyProps",
+          " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
+          "EuiBottomBarProps",
+          " | undefined; fullHeight?: boolean | \"noscroll\" | undefined; minHeight?: ",
+          "Property",
+          ".MinHeight<string | number> | undefined; } & { isEmptyState?: boolean | undefined; solutionNav?: ",
+          "KibanaPageTemplateSolutionNavProps",
+          " | undefined; noDataConfig?: ",
+          "NoDataPageProps",
+          " | undefined; }"
+        ],
+        "path": "packages/kbn-shared-ux-components/src/page_template/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

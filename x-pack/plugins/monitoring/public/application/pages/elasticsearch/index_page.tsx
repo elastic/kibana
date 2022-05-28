@@ -8,12 +8,12 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { find } from 'lodash';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 // @ts-ignore
-import { IndexReact } from '../../../components/elasticsearch/index/index_react';
+import { Index } from '../../../components/elasticsearch/index/index.js';
 import { ComponentProps } from '../../route_init';
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { useCharts } from '../../hooks/use_charts';
 import { ItemTemplate } from './item_template';
@@ -33,6 +33,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
   const { index }: { index: string } = useParams();
   const { zoomInfo, onBrush } = useCharts();
   const clusterUuid = globalState.cluster_uuid;
+  const ccs = globalState.ccs;
   const [data, setData] = useState({} as any);
   const [indexLabel, setIndexLabel] = useState(labels.index as any);
   const [nodesByIndicesData, setNodesByIndicesData] = useState([]);
@@ -69,9 +70,10 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/elasticsearch/indices/${index}`;
     if (services.http?.fetch && clusterUuid) {
-      const response = await services.http?.fetch(url, {
+      const response = await services.http?.fetch<{ shards: unknown[]; nodes: unknown[] }>(url, {
         method: 'POST',
         body: JSON.stringify({
+          ccs,
           timeRange: {
             min: bounds.min.toISOString(),
             max: bounds.max.toISOString(),
@@ -103,7 +105,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
       });
       setAlerts(alertsResponse);
     }
-  }, [clusterUuid, services.data?.query.timefilter.timefilter, services.http, index]);
+  }, [services.data?.query.timefilter.timefilter, services.http, clusterUuid, index, ccs]);
 
   return (
     <ItemTemplate
@@ -118,7 +120,7 @@ export const ElasticsearchIndexPage: React.FC<ComponentProps> = ({ clusters }) =
         render={({ setupMode, flyoutComponent, bottomBarComponent }: SetupModeProps) => (
           <SetupModeContext.Provider value={{ setupModeSupported: true }}>
             {flyoutComponent}
-            <IndexReact
+            <Index
               setupMode={setupMode}
               labels={indexLabel}
               alerts={alerts}

@@ -20,7 +20,7 @@ import {
   ContextMenuItemNavByRouter,
   ContextMenuItemNavByRouterProps,
 } from './context_menu_item_nav_by_router';
-import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 
 export interface ContextMenuWithRouterSupportProps
   extends CommonProps,
@@ -32,6 +32,11 @@ export interface ContextMenuWithRouterSupportProps
    * overwritten to `true`. Setting this prop's value to `undefined` will suppress the default behaviour.
    */
   maxWidth?: CSSProperties['maxWidth'];
+  /**
+   * If `true`, then the menu will have a fixed width and will not be adjusted if the content it holds
+   * is shorter than `maxWidth` prop value.
+   */
+  fixedWidth?: boolean;
   /**
    * The max height for the popup menu. Default is `255px`.
    */
@@ -57,6 +62,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
     anchorPosition,
     maxWidth = '32ch',
     maxHeight = '255px',
+    fixedWidth = false,
     title,
     loading = false,
     hoverInfo,
@@ -101,26 +107,31 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
       });
     }, [getTestId, handleCloseMenu, items, maxWidth, loading, hoverInfo]);
 
-    type AdditionalPanelProps = Partial<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>>;
+    type AdditionalPanelProps = Partial<
+      Omit<EuiContextMenuPanelProps & HTMLAttributes<HTMLDivElement>, 'style'>
+    > & {
+      style: Required<HTMLAttributes<HTMLDivElement>>['style'];
+    };
     const additionalContextMenuPanelProps = useMemo<AdditionalPanelProps>(() => {
       const newAdditionalProps: AdditionalPanelProps = {
+        className: 'eui-yScroll',
         style: {},
       };
 
-      if (maxWidth) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        newAdditionalProps.style!.maxWidth = maxWidth;
+      if (maxWidth && !fixedWidth) {
+        newAdditionalProps.style.maxWidth = maxWidth;
       }
 
       if (maxHeight) {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        newAdditionalProps.style!.overflowY = 'scroll';
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        newAdditionalProps.style!.maxHeight = maxHeight;
+        newAdditionalProps.style.maxHeight = maxHeight;
+      }
+
+      if (fixedWidth) {
+        newAdditionalProps.style.width = maxWidth ?? '32ch';
       }
 
       return newAdditionalProps;
-    }, [maxWidth, maxHeight]);
+    }, [maxWidth, fixedWidth, maxHeight]);
 
     return (
       <EuiPopover
@@ -142,11 +153,7 @@ export const ContextMenuWithRouterSupport = memo<ContextMenuWithRouterSupportPro
         closePopover={handleCloseMenu}
       >
         {title ? <EuiPopoverTitle paddingSize="m">{title}</EuiPopoverTitle> : null}
-        <EuiContextMenuPanel
-          hasFocus={false}
-          {...additionalContextMenuPanelProps}
-          items={menuItems}
-        />
+        <EuiContextMenuPanel {...additionalContextMenuPanelProps} items={menuItems} />
       </EuiPopover>
     );
   }

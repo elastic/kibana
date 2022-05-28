@@ -1,14 +1,16 @@
 {
   "id": "kibanaUsageCollection",
   "owner": {
-    "name": "Kibana Telemtry",
+    "name": "Kibana Telemetry",
     "githubTeam": "kibana-telemetry"
   },
   "version": "kibana",
   "server": true,
-  "ui": false,
+  "ui": true,
   "requiredPlugins": [
     "usageCollection"
   ],
-  "optionalPlugins": []
+  "optionalPlugins": [
+    "telemetry"
+  ]
 }

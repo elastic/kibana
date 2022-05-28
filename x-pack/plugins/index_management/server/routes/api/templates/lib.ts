@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { serializeTemplate, serializeLegacyTemplate } from '../../../../common/lib';
 import { TemplateDeserialized, LegacyTemplateSerialized } from '../../../../common';
 
@@ -51,7 +51,6 @@ export const saveTemplate = async ({
 
     return await client.asCurrentUser.indices.putTemplate({
       name: template.name,
-      // @ts-expect-error @elastic/elasticsearch https://github.com/elastic/elasticsearch-specification/issues/533
       order,
       body: {
         index_patterns,

@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ChromeBreadcrumb } from 'src/core/public';
+import type { ChromeBreadcrumb } from '@kbn/core/public';
 
 import type { Page, DynamicPagePathValues } from '../constants';
 import { FLEET_BASE_PATH, INTEGRATIONS_BASE_PATH, pagePathGetters } from '../constants';
 
-import { useStartServices } from './';
+import { useStartServices } from '.';
 
 interface AdditionalBreadcrumbOptions {
   useIntegrationsBasePath: boolean;
@@ -108,7 +108,7 @@ const breadcrumbGetters: {
       text: policyName,
     },
     {
-      text: i18n.translate('xpack.fleet.breadcrumbs.upgradePacagePolicyPageTitle', {
+      text: i18n.translate('xpack.fleet.breadcrumbs.upgradePackagePolicyPageTitle', {
         defaultMessage: 'Upgrade integration ',
       }),
     },
@@ -144,6 +144,14 @@ const breadcrumbGetters: {
     {
       text: i18n.translate('xpack.fleet.breadcrumbs.datastreamsPageTitle', {
         defaultMessage: 'Data streams',
+      }),
+    },
+  ],
+  settings: () => [
+    BASE_BREADCRUMB,
+    {
+      text: i18n.translate('xpack.fleet.breadcrumbs.settingsPageTitle', {
+        defaultMessage: 'Settings',
       }),
     },
   ],

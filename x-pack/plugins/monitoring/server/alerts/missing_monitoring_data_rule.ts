@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { Alert } from '@kbn/alerting-plugin/server';
+import { RawAlertInstance, SanitizedRule } from '@kbn/alerting-plugin/common';
+import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { BaseRule } from './base_rule';
 import {
   AlertData,
@@ -19,13 +22,8 @@ import {
   CommonAlertFilter,
   AlertNodeState,
 } from '../../common/types/alerts';
-import { AlertInstance } from '../../../alerting/server';
-import { INDEX_PATTERN, RULE_MISSING_MONITORING_DATA, RULE_DETAILS } from '../../common/constants';
-import { getCcsIndexPattern } from '../lib/alerts/get_ccs_index_pattern';
+import { RULE_MISSING_MONITORING_DATA, RULE_DETAILS } from '../../common/constants';
 import { AlertMessageTokenType, AlertSeverity } from '../../common/enums';
-import { RawAlertInstance, SanitizedAlert } from '../../../alerting/common';
-import { parseDuration } from '../../../alerting/common/parse_duration';
-import { appendMetricbeatIndex } from '../lib/alerts/append_mb_index';
 import { fetchMissingMonitoringData } from '../lib/alerts/fetch_missing_monitoring_data';
 import { AlertingDefaults, createLink } from './alert_helpers';
 import { Globals } from '../static_globals';
@@ -34,7 +32,7 @@ import { Globals } from '../static_globals';
 const LIMIT_BUFFER = 3 * 60 * 1000;
 
 export class MissingMonitoringDataRule extends BaseRule {
-  constructor(public sanitizedRule?: SanitizedAlert) {
+  constructor(public sanitizedRule?: SanitizedRule) {
     super(sanitizedRule, {
       id: RULE_MISSING_MONITORING_DATA,
       name: RULE_DETAILS[RULE_MISSING_MONITORING_DATA].label,
@@ -59,20 +57,14 @@ export class MissingMonitoringDataRule extends BaseRule {
   protected async fetchData(
     params: CommonAlertParams,
     esClient: ElasticsearchClient,
-    clusters: AlertCluster[],
-    availableCcs: string[]
+    clusters: AlertCluster[]
   ): Promise<AlertData[]> {
-    let indexPattern = appendMetricbeatIndex(Globals.app.config, INDEX_PATTERN);
-    if (availableCcs) {
-      indexPattern = getCcsIndexPattern(indexPattern, availableCcs);
-    }
     const duration = parseDuration(params.duration);
     const limit = parseDuration(params.limit!);
     const now = +new Date();
     const missingData = await fetchMissingMonitoringData(
       esClient,
       clusters,
-      indexPattern,
       Globals.app.config.ui.max_bucket_size,
       now,
       now - limit - LIMIT_BUFFER,
@@ -145,7 +137,7 @@ export class MissingMonitoringDataRule extends BaseRule {
   }
 
   protected executeActions(
-    instance: AlertInstance,
+    instance: Alert,
     { alertStates }: { alertStates: AlertState[] },
     item: AlertData | null,
     cluster: AlertCluster

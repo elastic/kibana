@@ -7,17 +7,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, PluginInitializerContext } from 'src/core/public';
+import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 
-import { FeatureCatalogueCategory } from '../../home/public';
 import {
   AppSetupUIPluginDependencies,
   ClientConfigType,
   ConsolePluginSetup,
   ConsoleUILocatorParams,
 } from './types';
+import { AutocompleteInfo, setAutocompleteInfo } from './services';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
+  private readonly autocompleteInfo = new AutocompleteInfo();
   constructor(private ctx: PluginInitializerContext) {}
 
   public setup(
@@ -27,6 +28,9 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     const {
       ui: { enabled: isConsoleUiEnabled },
     } = this.ctx.config.get<ClientConfigType>();
+
+    this.autocompleteInfo.setup(http);
+    setAutocompleteInfo(this.autocompleteInfo);
 
     if (isConsoleUiEnabled) {
       if (home) {
@@ -41,7 +45,7 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           icon: 'consoleApp',
           path: '/app/dev_tools#/console',
           showOnHomePage: false,
-          category: FeatureCatalogueCategory.ADMIN,
+          category: 'admin',
         });
       }
 
@@ -52,12 +56,12 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           defaultMessage: 'Console',
         }),
         enableRouting: false,
-        mount: async ({ element }) => {
+        mount: async ({ element, theme$ }) => {
           const [core] = await getStartServices();
 
           const {
             i18n: { Context: I18nContext },
-            docLinks: { DOC_LINK_VERSION },
+            docLinks: { DOC_LINK_VERSION, links },
           } = core;
 
           const { renderApp } = await import('./application');
@@ -65,10 +69,13 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
           return renderApp({
             http,
             docLinkVersion: DOC_LINK_VERSION,
+            docLinks: links,
             I18nContext,
             notifications,
             usageCollection,
             element,
+            theme$,
+            autocompleteInfo: this.autocompleteInfo,
           });
         },
       });

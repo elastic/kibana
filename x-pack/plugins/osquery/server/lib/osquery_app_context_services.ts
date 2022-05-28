@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { CoreSetup, Logger, LoggerFactory } from '../../../../../src/core/server';
-import { SecurityPluginStart } from '../../../security/server';
+import { CoreSetup, Logger, LoggerFactory } from '@kbn/core/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
   AgentService,
   FleetStartContract,
   PackageService,
   AgentPolicyServiceInterface,
   PackagePolicyServiceInterface,
-} from '../../../fleet/server';
+} from '@kbn/fleet-plugin/server';
 import { ConfigType } from '../config';
+import { TelemetryEventsSender } from './telemetry/sender';
 
 export type OsqueryAppContextServiceStartContract = Partial<
   Pick<
@@ -72,6 +73,7 @@ export interface OsqueryAppContext {
   config(): ConfigType;
   security: SecurityPluginStart;
   getStartServices: CoreSetup['getStartServices'];
+  telemetryEventsSender: TelemetryEventsSender;
   /**
    * Object readiness is tied to plugin start method
    */

@@ -35,9 +35,9 @@ import {
 import { Direction } from '@elastic/eui/src/services/sort/sort_direction';
 import { i18n } from '@kbn/i18n';
 
-import { SimpleSavedObject, CoreStart } from 'src/core/public';
+import { SimpleSavedObject, CoreStart } from '@kbn/core/public';
 
-import { LISTING_LIMIT_SETTING } from '../../../../../../../../src/plugins/saved_objects/public';
+import { LISTING_LIMIT_SETTING } from '@kbn/saved-objects-plugin/public';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
@@ -102,6 +102,8 @@ export type SavedObjectFinderUiProps = {
   uiSettings: CoreStart['uiSettings'];
 } & SavedObjectFinderProps;
 
+// TODO: Fix this manually. Issue #123375
+// eslint-disable-next-line react/display-name
 export class SavedObjectFinderUi extends React.Component<
   SavedObjectFinderUiProps,
   SavedObjectFinderState
@@ -201,10 +203,10 @@ export class SavedObjectFinderUi extends React.Component<
 
   public render() {
     return (
-      <React.Fragment>
+      <>
         {this.renderSearchBar()}
         {this.renderListing()}
-      </React.Fragment>
+      </>
     );
   }
 
@@ -392,10 +394,7 @@ export class SavedObjectFinderUi extends React.Component<
                   </EuiFilterButton>
                 }
               >
-                <EuiContextMenuPanel
-                  watchedItemProps={['icon', 'disabled']}
-                  items={this.getSortOptions()}
-                />
+                <EuiContextMenuPanel items={this.getSortOptions()} />
               </EuiPopover>
               {this.props.showFilter && (
                 <EuiPopover
@@ -428,7 +427,6 @@ export class SavedObjectFinderUi extends React.Component<
                   }
                 >
                   <EuiContextMenuPanel
-                    watchedItemProps={['icon', 'disabled']}
                     items={this.props.savedObjectMetaData.map((metaData) => (
                       <EuiContextMenuItem
                         key={metaData.type}
@@ -481,16 +479,23 @@ export class SavedObjectFinderUi extends React.Component<
               {items.map((item) => {
                 const currentSavedObjectMetaData = savedObjectMetaData.find(
                   (metaData) => metaData.type === item.type
-                )!;
+                );
+
+                if (currentSavedObjectMetaData == null) {
+                  return null;
+                }
+
                 const fullName = currentSavedObjectMetaData.getTooltipForSavedObject
                   ? currentSavedObjectMetaData.getTooltipForSavedObject(item.savedObject)
-                  : `${item.title} (${currentSavedObjectMetaData!.name})`;
+                  : `${item.title} (${currentSavedObjectMetaData.name})`;
+
                 const iconType = (
                   currentSavedObjectMetaData ||
                   ({
                     getIconForSavedObject: () => 'document',
                   } as Pick<SavedObjectMetaData<{ title: string }>, 'getIconForSavedObject'>)
                 ).getIconForSavedObject(item.savedObject);
+
                 return (
                   <EuiListGroupItem
                     key={item.id}

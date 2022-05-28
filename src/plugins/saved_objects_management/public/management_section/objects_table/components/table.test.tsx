@@ -7,10 +7,10 @@
  */
 
 import React from 'react';
-import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test/jest';
+import { shallowWithI18nProvider, mountWithI18nProvider } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { keys } from '@elastic/eui';
-import { httpServiceMock } from '../../../../../../core/public/mocks';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
 import { columnServiceMock } from '../../../services/column_service.mock';
 import { Table, TableProps } from './table';
@@ -28,9 +28,9 @@ const defaultProps: TableProps = {
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
-        editUrl: '#/management/kibana/indexPatterns/patterns/1',
+        editUrl: '#/management/kibana/dataViews/dataView/1',
         inAppUrl: {
-          path: '/management/kibana/indexPatterns/patterns/1',
+          path: '/management/kibana/dataViews/dataView/1',
           uiCapabilitiesPath: 'management.kibana.indexPatterns',
         },
       },
@@ -50,6 +50,10 @@ const defaultProps: TableProps = {
   canGoInApp: () => true,
   pageIndex: 1,
   pageSize: 2,
+  sort: {
+    field: 'updated_at',
+    direction: 'desc',
+  },
   items: [
     {
       id: '1',
@@ -59,9 +63,9 @@ const defaultProps: TableProps = {
       meta: {
         title: `MyIndexPattern*`,
         icon: 'indexPatternApp',
-        editUrl: '#/management/kibana/indexPatterns/patterns/1',
+        editUrl: '#/management/kibana/dataViews/dataView/1',
         inAppUrl: {
-          path: '/management/kibana/indexPatterns/patterns/1',
+          path: '/management/kibana/dataViews/dataView/1',
           uiCapabilitiesPath: 'management.kibana.indexPatterns',
         },
       },

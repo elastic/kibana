@@ -9,14 +9,15 @@ import { schema, TypeOf } from '@kbn/config-schema';
 import {
   PluginConfigDescriptor,
   PluginInitializerContext,
-} from 'src/core/server';
-import { maxSuggestions } from '../../observability/common';
+} from '@kbn/core/server';
+import { maxSuggestions } from '@kbn/observability-plugin/common';
 import { SearchAggregatedTransactionSetting } from '../common/aggregated_transactions';
 import { APMPlugin } from './plugin';
 
-// All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/master/docs/settings/apm-settings.asciidoc
+// All options should be documented in the APM configuration settings: https://github.com/elastic/kibana/blob/main/docs/settings/apm-settings.asciidoc
 // and be included on cloud allow list unless there are specific reasons not to
 const configSchema = schema.object({
+  autoCreateApmDataView: schema.boolean({ defaultValue: true }),
   serviceMapEnabled: schema.boolean({ defaultValue: true }),
   serviceMapFingerprintBucketSize: schema.number({ defaultValue: 100 }),
   serviceMapTraceIdBucketSize: schema.number({ defaultValue: 65 }),
@@ -25,7 +26,6 @@ const configSchema = schema.object({
   }),
   serviceMapTraceIdGlobalBucketSize: schema.number({ defaultValue: 6 }),
   serviceMapMaxTracesPerRequest: schema.number({ defaultValue: 50 }),
-  autocreateApmIndexPattern: schema.boolean({ defaultValue: true }),
   ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
     transactionGroupBucketSize: schema.number({ defaultValue: 1000 }),
@@ -37,7 +37,7 @@ const configSchema = schema.object({
       schema.literal(SearchAggregatedTransactionSetting.always),
       schema.literal(SearchAggregatedTransactionSetting.never),
     ],
-    { defaultValue: SearchAggregatedTransactionSetting.never }
+    { defaultValue: SearchAggregatedTransactionSetting.auto }
   ),
   telemetryCollectionEnabled: schema.boolean({ defaultValue: true }),
   metricsInterval: schema.number({ defaultValue: 30 }),
@@ -59,26 +59,49 @@ const configSchema = schema.object({
 
 // plugin config
 export const config: PluginConfigDescriptor<APMConfig> = {
-  deprecations: ({ renameFromRoot, deprecateFromRoot, unusedFromRoot }) => [
+  deprecations: ({
+    rename,
+    renameFromRoot,
+    deprecateFromRoot,
+    unusedFromRoot,
+  }) => [
+    rename('autocreateApmIndexPattern', 'autoCreateApmDataView', {
+      level: 'warning',
+    }),
     renameFromRoot(
       'apm_oss.transactionIndices',
-      'xpack.apm.indices.transaction'
+      'xpack.apm.indices.transaction',
+      { level: 'warning' }
     ),
-    renameFromRoot('apm_oss.spanIndices', 'xpack.apm.indices.span'),
-    renameFromRoot('apm_oss.errorIndices', 'xpack.apm.indices.error'),
-    renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.indices.metric'),
-    renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.indices.sourcemap'),
-    renameFromRoot('apm_oss.onboardingIndices', 'xpack.apm.indices.onboarding'),
-    deprecateFromRoot('apm_oss.enabled', '8.0.0'),
-    unusedFromRoot('apm_oss.fleetMode'),
-    unusedFromRoot('apm_oss.indexPattern'),
+    renameFromRoot('apm_oss.spanIndices', 'xpack.apm.indices.span', {
+      level: 'warning',
+    }),
+    renameFromRoot('apm_oss.errorIndices', 'xpack.apm.indices.error', {
+      level: 'warning',
+    }),
+    renameFromRoot('apm_oss.metricsIndices', 'xpack.apm.indices.metric', {
+      level: 'warning',
+    }),
+    renameFromRoot('apm_oss.sourcemapIndices', 'xpack.apm.indices.sourcemap', {
+      level: 'warning',
+    }),
+    renameFromRoot(
+      'apm_oss.onboardingIndices',
+      'xpack.apm.indices.onboarding',
+      { level: 'warning' }
+    ),
+    deprecateFromRoot('apm_oss.enabled', '8.0.0', { level: 'warning' }),
+    unusedFromRoot('apm_oss.fleetMode', { level: 'warning' }),
+    unusedFromRoot('apm_oss.indexPattern', { level: 'warning' }),
     renameFromRoot(
       'xpack.apm.maxServiceEnvironments',
-      `uiSettings.overrides[${maxSuggestions}]`
+      `uiSettings.overrides[${maxSuggestions}]`,
+      { level: 'warning' }
     ),
     renameFromRoot(
       'xpack.apm.maxServiceSelections',
-      `uiSettings.overrides[${maxSuggestions}]`
+      `uiSettings.overrides[${maxSuggestions}]`,
+      { level: 'warning' }
     ),
   ],
   exposeToBrowser: {
@@ -97,11 +120,11 @@ export const plugin = (initContext: PluginInitializerContext) =>
 
 export { APM_SERVER_FEATURE_ID } from '../common/alert_types';
 export { APMPlugin } from './plugin';
-export { APMPluginSetup } from './types';
-export {
+export type { APMPluginSetup } from './types';
+export type {
   APMServerRouteRepository,
   APIEndpoint,
-} from './routes/get_global_apm_server_route_repository';
-export { APMRouteHandlerResources } from './routes/typings';
+} from './routes/apm_routes/get_global_apm_server_route_repository';
+export type { APMRouteHandlerResources } from './routes/typings';
 
 export type { ProcessorEvent } from '../common/processor_event';

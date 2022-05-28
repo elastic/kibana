@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import dateMath from '@elastic/datemath';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import dateMath from '@kbn/datemath';
 import { omitBy } from 'lodash';
 import { buildRangeFilter } from '@kbn/es-query';
 import type { Moment } from 'moment';
@@ -73,6 +74,18 @@ export function getRelativeTime(
   );
 }
 
+function getTimeField(indexPattern?: IIndexPattern, fieldName?: string) {
+  if (!indexPattern && fieldName) {
+    return { name: fieldName, type: KBN_FIELD_TYPES.DATE };
+  }
+
+  if (!indexPattern) {
+    return;
+  }
+
+  return indexPattern.fields.find((f) => f.name === (fieldName || indexPattern.timeFieldName));
+}
+
 function createTimeRangeFilter(
   indexPattern: IIndexPattern | undefined,
   timeRange: TimeRange,
@@ -80,12 +93,7 @@ function createTimeRangeFilter(
   forceNow?: Date,
   coerceRelativeTimeToAbsoluteTime: boolean = true
 ) {
-  if (!indexPattern) {
-    return;
-  }
-  const field = indexPattern.fields.find(
-    (f) => f.name === (fieldName || indexPattern.timeFieldName)
-  );
+  const field = getTimeField(indexPattern, fieldName);
   if (!field) {
     return;
   }

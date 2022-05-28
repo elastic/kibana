@@ -9,7 +9,7 @@ import { EuiBreadcrumb } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ChromeBreadcrumb } from 'kibana/public';
+import { ChromeBreadcrumb } from '@kbn/core/public';
 
 import { NavigateToPath } from '../contexts/kibana';
 
@@ -41,11 +41,25 @@ export const DATA_FRAME_ANALYTICS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   href: '/data_frame_analytics',
 });
 
+export const TRAINED_MODELS: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.modelManagementLabel', {
+    defaultMessage: 'Model Management',
+  }),
+  href: '/trained_models',
+});
+
 export const DATA_VISUALIZER_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
   text: i18n.translate('xpack.ml.datavisualizerBreadcrumbLabel', {
     defaultMessage: 'Data Visualizer',
   }),
   href: '/datavisualizer',
+});
+
+export const AIOPS_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
+  text: i18n.translate('xpack.ml.aiopsBreadcrumbLabel', {
+    defaultMessage: 'AIOps',
+  }),
+  href: '/aiops/explain_log_rate_spikes_index_select',
 });
 
 export const CREATE_JOB_BREADCRUMB: ChromeBreadcrumb = Object.freeze({
@@ -74,7 +88,9 @@ const breadcrumbs = {
   SETTINGS_BREADCRUMB,
   ANOMALY_DETECTION_BREADCRUMB,
   DATA_FRAME_ANALYTICS_BREADCRUMB,
+  TRAINED_MODELS,
   DATA_VISUALIZER_BREADCRUMB,
+  AIOPS_BREADCRUMB,
   CREATE_JOB_BREADCRUMB,
   CALENDAR_MANAGEMENT_BREADCRUMB,
   FILTER_LISTS_BREADCRUMB,
@@ -93,12 +109,16 @@ export const breadcrumbOnClickFactory = (
 
 export const getBreadcrumbWithUrlForApp = (
   breadcrumbName: Breadcrumb,
-  navigateToPath: NavigateToPath,
-  basePath: string
+  navigateToPath?: NavigateToPath,
+  basePath?: string
 ): EuiBreadcrumb => {
   return {
     text: breadcrumbs[breadcrumbName].text,
-    href: `${basePath}/app/ml${breadcrumbs[breadcrumbName].href}`,
-    onClick: breadcrumbOnClickFactory(breadcrumbs[breadcrumbName].href, navigateToPath),
+    ...(navigateToPath
+      ? {
+          href: `${basePath}/app/ml${breadcrumbs[breadcrumbName].href}`,
+          onClick: breadcrumbOnClickFactory(breadcrumbs[breadcrumbName].href, navigateToPath),
+        }
+      : {}),
   };
 };

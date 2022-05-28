@@ -6,11 +6,11 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { estypes } from '@elastic/elasticsearch';
-import type { IScopedClusterClient } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/common';
-import type { DataViewsService } from '../../../../../../../src/plugins/data_views/common';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
 import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';
@@ -32,6 +32,7 @@ const supportedTypes: string[] = [
   ES_FIELD_TYPES.GEO_POINT,
   ES_FIELD_TYPES.GEO_SHAPE,
   ES_FIELD_TYPES.BOOLEAN,
+  ES_FIELD_TYPES.VERSION,
 ];
 
 export function fieldServiceProvider(
@@ -62,11 +63,13 @@ class FieldsService {
   }
 
   private async loadFieldCaps(): Promise<any> {
-    const { body } = await this._mlClusterClient.asCurrentUser.fieldCaps({
-      index: this._indexPattern,
-      fields: '*',
-    });
-    return body;
+    return await this._mlClusterClient.asCurrentUser.fieldCaps(
+      {
+        index: this._indexPattern,
+        fields: '*',
+      },
+      { maxRetries: 0 }
+    );
   }
 
   // create field object from the results from _field_caps
@@ -113,7 +116,7 @@ class FieldsService {
         this._mlClusterClient,
         this._dataViewsService
       );
-      const rollupConfigs: estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[] | null =
+      const rollupConfigs: estypes.RollupGetRollupCapsRollupCapabilitySummary[] | null =
         await rollupService.getRollupJobs();
 
       // if a rollup index has been specified, yet there are no
@@ -137,7 +140,7 @@ class FieldsService {
 }
 
 function combineAllRollupFields(
-  rollupConfigs: estypes.RollupGetRollupCapabilitiesRollupCapabilitySummary[]
+  rollupConfigs: estypes.RollupGetRollupCapsRollupCapabilitySummary[]
 ): RollupFields {
   const rollupFields: RollupFields = {};
   rollupConfigs.forEach((conf) => {

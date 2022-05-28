@@ -9,36 +9,83 @@
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
-import { VisualizationContainer } from '../../../../visualizations/public';
-import { ExpressionRenderDefinition } from '../../../../expressions/common/expression_renderers';
-import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig } from '../../common';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import {
+  ExpressionValueVisDimension,
+  VisualizationContainer,
+} from '@kbn/visualizations-plugin/public';
+import {
+  ExpressionRenderDefinition,
+  IInterpreterRenderHandlers,
+} from '@kbn/expressions-plugin/common/expression_renderers';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { Datatable } from '@kbn/expressions-plugin';
+import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
 
 // @ts-ignore
 const MetricVisComponent = lazy(() => import('../components/metric_component'));
 
-export const metricVisRenderer: () => ExpressionRenderDefinition<MetricVisRenderConfig> = () => ({
-  name: EXPRESSION_METRIC_NAME,
-  displayName: 'metric visualization',
-  reuseDomNode: true,
-  render: async (domNode, { visData, visConfig }, handlers) => {
-    handlers.onDestroy(() => {
-      unmountComponentAtNode(domNode);
-    });
+async function metricFilterable(
+  dimensions: VisParams['dimensions'],
+  table: Datatable,
+  handlers: IInterpreterRenderHandlers
+) {
+  return Promise.all(
+    dimensions.metrics.map(async (metric: string | ExpressionValueVisDimension) => {
+      const column = getColumnByAccessor(metric, table.columns);
+      const colIndex = table.columns.indexOf(column!);
+      return Boolean(
+        await handlers.hasCompatibleActions?.({
+          name: 'filter',
+          data: {
+            data: [
+              {
+                table,
+                column: colIndex,
+                row: 0,
+              },
+            ],
+          },
+        })
+      );
+    })
+  );
+}
 
-    render(
-      <VisualizationContainer
-        className="mtrVis"
-        showNoResult={!visData.rows?.length}
-        handlers={handlers}
-      >
-        <MetricVisComponent
-          visData={visData}
-          visParams={visConfig}
-          renderComplete={handlers.done}
-          fireEvent={handlers.event}
-        />
-      </VisualizationContainer>,
-      domNode
-    );
-  },
-});
+export const getMetricVisRenderer = (
+  theme: ThemeServiceStart
+): (() => ExpressionRenderDefinition<MetricVisRenderConfig>) => {
+  return () => ({
+    name: EXPRESSION_METRIC_NAME,
+    displayName: 'metric visualization',
+    reuseDomNode: true,
+    render: async (domNode, { visData, visConfig }, handlers) => {
+      handlers.onDestroy(() => {
+        unmountComponentAtNode(domNode);
+      });
+
+      const filterable = await metricFilterable(visConfig.dimensions, visData, handlers);
+
+      render(
+        <KibanaThemeProvider theme$={theme.theme$}>
+          <VisualizationContainer
+            data-test-subj="mtrVis"
+            className="mtrVis"
+            showNoResult={!visData.rows?.length}
+            handlers={handlers}
+          >
+            <MetricVisComponent
+              visData={visData}
+              visParams={visConfig}
+              renderComplete={handlers.done}
+              fireEvent={handlers.event}
+              filterable={filterable}
+            />
+          </VisualizationContainer>
+        </KibanaThemeProvider>,
+        domNode
+      );
+    },
+  });
+};

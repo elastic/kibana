@@ -7,7 +7,7 @@
  */
 
 import { shareReplay } from 'rxjs/operators';
-import type { RequestHandlerContext } from 'src/core/server';
+import type { RequestHandlerContext } from '..';
 import { CoreContext } from '../core_context';
 import { PluginWrapper } from './plugin';
 import {
@@ -108,6 +108,15 @@ export function createPluginPrebootSetupContext(
   plugin: PluginWrapper
 ): CorePreboot {
   return {
+    analytics: {
+      optIn: deps.analytics.optIn,
+      registerContextProvider: deps.analytics.registerContextProvider,
+      removeContextProvider: deps.analytics.removeContextProvider,
+      registerEventType: deps.analytics.registerEventType,
+      registerShipper: deps.analytics.registerShipper,
+      reportEvent: deps.analytics.reportEvent,
+      telemetryCounter$: deps.analytics.telemetryCounter$,
+    },
     elasticsearch: {
       config: deps.elasticsearch.config,
       createClient: deps.elasticsearch.createClient,
@@ -147,6 +156,15 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
   const router = deps.http.createRouter('', plugin.opaqueId);
 
   return {
+    analytics: {
+      optIn: deps.analytics.optIn,
+      registerContextProvider: deps.analytics.registerContextProvider,
+      removeContextProvider: deps.analytics.removeContextProvider,
+      registerEventType: deps.analytics.registerEventType,
+      registerShipper: deps.analytics.registerShipper,
+      reportEvent: deps.analytics.reportEvent,
+      telemetryCounter$: deps.analytics.telemetryCounter$,
+    },
     capabilities: {
       registerProvider: deps.capabilities.registerProvider,
       registerSwitcher: deps.capabilities.registerSwitcher,
@@ -154,17 +172,20 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
     context: {
       createContextContainer: deps.context.createContextContainer,
     },
+    docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
+      setUnauthorizedErrorHandler: deps.elasticsearch.setUnauthorizedErrorHandler,
     },
     executionContext: {
       withContext: deps.executionContext.withContext,
+      getAsLabels: deps.executionContext.getAsLabels,
     },
     http: {
       createCookieSessionStorageFactory: deps.http.createCookieSessionStorageFactory,
       registerRouteHandlerContext: <
         Context extends RequestHandlerContext,
-        ContextName extends keyof Context
+        ContextName extends keyof Omit<Context, 'resolve'>
       >(
         contextName: ContextName,
         provider: RequestHandlerContextProvider<Context, ContextName>
@@ -178,10 +199,6 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerOnPostAuth: deps.http.registerOnPostAuth,
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
-      auth: {
-        get: deps.http.auth.get,
-        isAuthenticated: deps.http.auth.isAuthenticated,
-      },
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
     },
@@ -197,6 +214,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       setClientFactoryProvider: deps.savedObjects.setClientFactoryProvider,
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
+      getKibanaIndex: deps.savedObjects.getKibanaIndex,
     },
     status: {
       core$: deps.status.core$,
@@ -235,13 +253,18 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
   plugin: PluginWrapper<TPlugin, TPluginDependencies>
 ): CoreStart {
   return {
+    analytics: {
+      optIn: deps.analytics.optIn,
+      reportEvent: deps.analytics.reportEvent,
+      telemetryCounter$: deps.analytics.telemetryCounter$,
+    },
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
+    docLinks: deps.docLinks,
     elasticsearch: {
       client: deps.elasticsearch.client,
       createClient: deps.elasticsearch.createClient,
-      legacy: deps.elasticsearch.legacy,
     },
     executionContext: deps.executionContext,
     http: {

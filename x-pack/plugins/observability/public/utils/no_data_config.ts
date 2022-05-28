@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from '../../../../../src/core/public';
-import { KibanaPageTemplateProps } from '../../../../../src/plugins/kibana_react/public';
+import { IBasePath } from '@kbn/core/public';
+import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
 
 export function getNoDataConfig({
   docsLink,
@@ -32,7 +32,7 @@ export function getNoDataConfig({
             defaultMessage:
               'Use Beats and APM agents to send observability data to Elasticsearch. We make it easy with support for many popular systems, apps, and languages.',
           }),
-          href: basePath.prepend(`/app/integrations`),
+          href: basePath.prepend(`/app/integrations/browse`),
         },
       },
       docsLink,

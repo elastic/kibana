@@ -9,11 +9,10 @@ import { isEqual } from 'lodash';
 import {
   ExpressionRendererEvent,
   IInterpreterRenderHandlers,
-} from 'src/plugins/expressions/public';
-// @ts-expect-error untyped local
-import { setFilter } from '../state/actions/elements';
+} from '@kbn/expressions-plugin/public';
 import { updateEmbeddableExpression, fetchEmbeddableRenderable } from '../state/actions/embeddable';
 import { RendererHandlers, CanvasElement } from '../../types';
+import { pluginServices } from '../services';
 import { clearValue } from '../state/actions/resolved_args';
 
 // This class creates stub handlers to ensure every element and renderer fulfills the contract.
@@ -28,6 +27,7 @@ export const createBaseHandlers = (): IInterpreterRenderHandlers => ({
   onDestroy() {},
   getRenderMode: () => 'view',
   isSyncColorsEnabled: () => false,
+  isSyncTooltipsEnabled: () => false,
   isInteractive: () => true,
 });
 
@@ -58,7 +58,6 @@ export const createHandlers = (baseHandlers = createBaseHandlers()): RendererHan
   },
 
   resize(_size: { height: number; width: number }) {},
-  setFilter() {},
 });
 
 export const assignHandlers = (handlers: Partial<RendererHandlers> = {}): RendererHandlers =>
@@ -79,6 +78,8 @@ export const createDispatchedHandlerFactory = (
       oldElement = element;
     }
 
+    const { filters } = pluginServices.getServices();
+
     const handlers: RendererHandlers & {
       event: IInterpreterRenderHandlers['event'];
       done: IInterpreterRenderHandlers['done'];
@@ -89,8 +90,8 @@ export const createDispatchedHandlerFactory = (
           case 'embeddableInputChange':
             this.onEmbeddableInputChange(event.data);
             break;
-          case 'setFilter':
-            this.setFilter(event.data);
+          case 'applyFilterAction':
+            filters.updateFilter(element.id, event.data);
             break;
           case 'onComplete':
             this.onComplete(event.data);
@@ -106,10 +107,6 @@ export const createDispatchedHandlerFactory = (
             break;
         }
       },
-      setFilter(text: string) {
-        dispatch(setFilter(text, element.id, true));
-      },
-
       getFilter() {
         return element.filter || '';
       },

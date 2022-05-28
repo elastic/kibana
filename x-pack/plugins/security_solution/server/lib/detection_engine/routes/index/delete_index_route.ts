@@ -36,13 +36,13 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
         tags: ['access:securitySolution'],
       },
     },
-    async (context, request, response) => {
+    async (context, _, response) => {
       const siemResponse = buildSiemResponse(response);
 
       try {
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-        const siemClient = context.securitySolution?.getAppClient();
+        const siemClient = (await context.securitySolution)?.getAppClient();
 
         if (!siemClient) {
           return siemResponse.error({ statusCode: 404 });
@@ -57,7 +57,7 @@ export const deleteIndexRoute = (router: SecuritySolutionPluginRouter) => {
             body: `index: "${index}" does not exist`,
           });
         } else {
-          await deleteAllIndex(esClient, `${index}-*`);
+          await deleteAllIndex(esClient, index);
           const policyExists = await getPolicyExists(esClient, index);
           if (policyExists) {
             await deletePolicy(esClient, index);

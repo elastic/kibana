@@ -10,6 +10,7 @@ import { renderHook, act } from '@testing-library/react-hooks';
 import { useGetAppInfo, UseGetAppInfo, UseGetAppInfoProps } from './use_get_app_info';
 import { getAppInfo } from './api';
 import { ServiceNowActionConnector } from './types';
+import { httpServiceMock } from '@kbn/core/public/mocks';
 
 jest.mock('./api');
 jest.mock('../../../../common/lib/kibana');
@@ -32,13 +33,16 @@ const actionConnector = {
   actionTypeId: '.servicenow',
   name: 'ServiceNow ITSM',
   isPreconfigured: false,
+  isDeprecated: false,
   config: {
     apiUrl: 'https://test.service-now.com/',
-    isLegacy: false,
+    usesTableApi: false,
   },
 } as ServiceNowActionConnector;
 
 describe('useGetAppInfo', () => {
+  const http = httpServiceMock.createStartContract();
+
   getAppInfoMock.mockResolvedValue(applicationInfoData);
 
   beforeEach(() => {
@@ -49,6 +53,7 @@ describe('useGetAppInfo', () => {
     const { result } = renderHook<UseGetAppInfoProps, UseGetAppInfo>(() =>
       useGetAppInfo({
         actionTypeId,
+        http,
       })
     );
 
@@ -62,6 +67,7 @@ describe('useGetAppInfo', () => {
     const { result } = renderHook<UseGetAppInfoProps, UseGetAppInfo>(() =>
       useGetAppInfo({
         actionTypeId,
+        http,
       })
     );
 
@@ -83,6 +89,7 @@ describe('useGetAppInfo', () => {
     const { result } = renderHook<UseGetAppInfoProps, UseGetAppInfo>(() =>
       useGetAppInfo({
         actionTypeId,
+        http,
       })
     );
 

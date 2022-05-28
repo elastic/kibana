@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 
-import { AsApiContract, RewriteRequestCase } from '../../../../../actions/common';
+import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '../../constants';
 import type { ActionType } from '../../../types';
 
@@ -27,6 +27,8 @@ const rewriteBodyReq: RewriteRequestCase<ActionType> = ({
 });
 
 export async function loadActionTypes({ http }: { http: HttpSetup }): Promise<ActionType[]> {
-  const res = await http.get(`${BASE_ACTION_API_PATH}/connector_types`);
+  const res = await http.get<Parameters<typeof rewriteResponseRes>[0]>(
+    `${BASE_ACTION_API_PATH}/connector_types`
+  );
   return rewriteResponseRes(res);
 }

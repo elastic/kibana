@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { SavedObjectReference } from 'src/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectReference } from '@kbn/core/server';
 import { EXCEPTION_LIST_NAMESPACE } from '@kbn/securitysolution-list-constants';
 import { injectExceptionsReferences } from './inject_exceptions_list';
 import { RuleParams } from '../../schemas/rule_schemas';
@@ -103,17 +103,6 @@ describe('inject_exceptions_list', () => {
         savedObjectReferences: [{ ...mockSavedObjectReferences()[0], id: '456' }],
       })
     ).toEqual<FuncReturn>([{ ...mockExceptionsList()[0], id: '456' }]);
-  });
-
-  test('logs an error if found with a different saved object reference id', () => {
-    injectExceptionsReferences({
-      logger,
-      exceptionsList: mockExceptionsList(),
-      savedObjectReferences: [{ ...mockSavedObjectReferences()[0], id: '456' }],
-    });
-    expect(logger.error).toBeCalledWith(
-      'The id of the "saved object reference id": 456 is not the same as the "saved object id": 123. Preferring and using the "saved object reference id" instead of the "saved object id"'
-    );
   });
 
   test('returns exceptionItem if the saved object reference cannot match as a fall back', () => {

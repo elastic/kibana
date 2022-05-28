@@ -8,9 +8,9 @@
 import expect from '@kbn/expect';
 import type { CreateListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { LIST_ITEM_URL, LIST_URL } from '@kbn/securitysolution-list-constants';
-import { getCreateMinimalListItemSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_list_item_schema.mock';
-import { getCreateMinimalListSchemaMock } from '../../../../plugins/lists/common/schemas/request/create_list_schema.mock';
-import { LIST_ID, NAME } from '../../../../plugins/lists/common/constants.mock';
+import { getCreateMinimalListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_item_schema.mock';
+import { getCreateMinimalListSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_list_schema.mock';
+import { LIST_ID, NAME } from '@kbn/lists-plugin/common/constants.mock';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 import { createListsIndex, deleteListsIndex, binaryToString } from '../../utils';
@@ -18,15 +18,16 @@ import { createListsIndex, deleteListsIndex, binaryToString } from '../../utils'
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const log = getService('log');
 
   describe('export_list_items', () => {
     describe('exporting lists', () => {
       beforeEach(async () => {
-        await createListsIndex(supertest);
+        await createListsIndex(supertest, log);
       });
 
       afterEach(async () => {
-        await deleteListsIndex(supertest);
+        await deleteListsIndex(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {

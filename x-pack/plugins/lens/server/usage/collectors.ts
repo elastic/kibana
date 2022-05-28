@@ -7,13 +7,16 @@
 
 import moment from 'moment';
 import { get } from 'lodash';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-import { TaskManagerStartContract } from '../../../task_manager/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
 import { LensUsage, LensTelemetryState } from './types';
 import { lensUsageSchema } from './schema';
 
 const emptyUsageCollection = {
+  saved_multiterms_overall: {},
+  saved_multiterms_30_days: {},
+  saved_multiterms_90_days: {},
   saved_overall: {},
   saved_30_days: {},
   saved_90_days: {},
@@ -44,6 +47,7 @@ export function registerLensUsageCollector(
         return {
           ...emptyUsageCollection,
           ...state.saved,
+          ...state.multiterms,
           events_30_days: events.last30,
           events_90_days: events.last90,
           suggestion_events_30_days: suggestions.last30,

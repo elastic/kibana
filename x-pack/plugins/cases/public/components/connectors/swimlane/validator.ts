@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SwimlaneConnectorType } from '../../../../common';
+import { SwimlaneConnectorType } from '../../../../common/api';
 import { ValidationConfig } from '../../../common/shared_imports';
 import { CaseActionConnector } from '../../types';
 
@@ -28,10 +28,21 @@ export const isAnyRequiredFieldNotSet = (mapping: Record<string, unknown> | unde
 export const connectorValidator = (
   connector: CaseActionConnector
 ): ReturnType<ValidationConfig['validator']> => {
-  const {
-    config: { mappings, connectorType },
-  } = connector;
-  if (connectorType === SwimlaneConnectorType.Alerts || isAnyRequiredFieldNotSet(mappings)) {
+  const config = connector.config as
+    | {
+        mappings: Record<string, unknown> | undefined;
+        connectorType: string;
+      }
+    | undefined;
+
+  if (config == null) {
+    return;
+  }
+
+  if (
+    config.connectorType === SwimlaneConnectorType.Alerts ||
+    isAnyRequiredFieldNotSet(config.mappings)
+  ) {
     return {
       message: 'Invalid connector',
     };

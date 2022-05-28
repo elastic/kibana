@@ -20,6 +20,21 @@ import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
 import { integrationsServiceMock } from './integrations/integrations_service.mock';
 import { coreAppMock } from './core_app/core_app.mock';
+import { themeServiceMock } from './theme/theme_service.mock';
+import { analyticsServiceMock } from './analytics/analytics_service.mock';
+
+export const analyticsServiceStartMock = analyticsServiceMock.createAnalyticsServiceStart();
+export const MockAnalyticsService = analyticsServiceMock.create();
+MockAnalyticsService.start.mockReturnValue(analyticsServiceStartMock);
+export const AnalyticsServiceConstructor = jest.fn().mockReturnValue(MockAnalyticsService);
+jest.doMock('./analytics', () => ({
+  AnalyticsService: AnalyticsServiceConstructor,
+}));
+
+export const fetchOptionalMemoryInfoMock = jest.fn();
+jest.doMock('./fetch_optional_memory_info', () => ({
+  fetchOptionalMemoryInfo: fetchOptionalMemoryInfoMock,
+}));
 
 export const MockInjectedMetadataService = injectedMetadataServiceMock.create();
 export const InjectedMetadataServiceConstructor = jest
@@ -115,4 +130,10 @@ export const MockCoreApp = coreAppMock.create();
 export const CoreAppConstructor = jest.fn().mockImplementation(() => MockCoreApp);
 jest.doMock('./core_app', () => ({
   CoreApp: CoreAppConstructor,
+}));
+
+export const MockThemeService = themeServiceMock.create();
+export const ThemeServiceConstructor = jest.fn().mockImplementation(() => MockThemeService);
+jest.doMock('./theme', () => ({
+  ThemeService: ThemeServiceConstructor,
 }));

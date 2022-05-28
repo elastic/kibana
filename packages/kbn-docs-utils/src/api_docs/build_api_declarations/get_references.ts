@@ -7,7 +7,7 @@
  */
 
 import { Node, ReferenceFindableNode } from 'ts-morph';
-import { ToolingLog } from '@kbn/dev-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 import { getPluginForPath } from '../utils';
 import { getSourceForNode } from './utils';
 import { ApiDeclaration, ApiReference, PluginOrPackage } from '../types';
@@ -73,7 +73,7 @@ export function maybeCollectReferences({
   apiDec,
   captureReferences,
 }: MaybeCollectReferencesOpt): ApiReference[] | undefined {
-  if (Node.isReferenceFindableNode(node)) {
+  if (Node.isReferenceFindable(node)) {
     return captureReferences || apiDec.deprecated
       ? getReferences({ node, plugins, currentPluginId, log })
       : undefined;

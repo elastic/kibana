@@ -15,7 +15,7 @@ import {
   EuiTitle,
   EuiLink,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionParamsProps } from '../../../../types';
@@ -24,8 +24,9 @@ import { TextFieldWithMessageVariables } from '../../text_field_with_message_var
 
 import * as i18n from './translations';
 import { useGetChoices } from './use_get_choices';
-import { ServiceNowSIRActionParams, Fields, Choice, ServiceNowActionConnector } from './types';
-import { choicesToEuiOptions, isLegacyConnector, DEFAULT_CORRELATION_ID } from './helpers';
+import { ServiceNowSIRActionParams, Fields, Choice } from './types';
+import { choicesToEuiOptions, DEFAULT_CORRELATION_ID } from './helpers';
+import { DeprecatedCallout } from './deprecated_callout';
 
 const useGetChoicesFields = ['category', 'subcategory', 'priority'];
 const defaultFields: Fields = {
@@ -43,9 +44,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
     notifications: { toasts },
   } = useKibana().services;
 
-  const isDeprecatedConnector = isLegacyConnector(
-    actionConnector as unknown as ServiceNowActionConnector
-  );
+  const isDeprecatedActionConnector = actionConnector?.isDeprecated;
 
   const actionConnectorRef = useRef(actionConnector?.id ?? '');
   const { incident, comments } = useMemo(
@@ -76,9 +75,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
 
   const editComment = useCallback(
     (key, value) => {
-      if (value.length > 0) {
-        editSubActionProperty(key, [{ commentId: '1', comment: value }]);
-      }
+      editSubActionProperty(key, [{ commentId: '1', comment: value }]);
     },
     [editSubActionProperty]
   );
@@ -151,6 +148,7 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
 
   return (
     <>
+      {isDeprecatedActionConnector && <DeprecatedCallout />}
       <EuiTitle size="s">
         <h3>{i18n.SECURITY_INCIDENT}</h3>
       </EuiTitle>
@@ -213,23 +211,25 @@ const ServiceNowSIRParamsFields: React.FunctionComponent<
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow fullWidth label={i18n.SUBCATEGORY_LABEL}>
-            <EuiSelect
-              fullWidth
-              data-test-subj="subcategorySelect"
-              hasNoInitialSelection
-              isLoading={isLoadingChoices}
-              disabled={isLoadingChoices}
-              options={subcategoryOptions}
-              // Needs an empty string instead of undefined to select the blank option when changing categories
-              value={incident.subcategory ?? ''}
-              onChange={(e) => editSubActionProperty('subcategory', e.target.value)}
-            />
-          </EuiFormRow>
+          {subcategoryOptions?.length > 0 ? (
+            <EuiFormRow fullWidth label={i18n.SUBCATEGORY_LABEL}>
+              <EuiSelect
+                fullWidth
+                data-test-subj="subcategorySelect"
+                hasNoInitialSelection
+                isLoading={isLoadingChoices}
+                disabled={isLoadingChoices}
+                options={subcategoryOptions}
+                // Needs an empty string instead of undefined to select the blank option when changing categories
+                value={incident.subcategory ?? ''}
+                onChange={(e) => editSubActionProperty('subcategory', e.target.value)}
+              />
+            </EuiFormRow>
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      {!isDeprecatedConnector && (
+      {!isDeprecatedActionConnector && (
         <>
           <EuiFlexGroup>
             <EuiFlexItem>

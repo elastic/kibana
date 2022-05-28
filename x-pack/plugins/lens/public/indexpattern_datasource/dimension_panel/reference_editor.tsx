@@ -15,9 +15,10 @@ import {
   EuiComboBox,
   EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DateRange } from '../../../common';
 import type { OperationSupportMatrix } from './operation_support';
 import type { OperationType } from '../indexpattern';
@@ -31,11 +32,11 @@ import {
   RequiredReference,
 } from '../operations';
 import { FieldSelect } from './field_select';
-import { hasField } from '../utils';
+import { hasField } from '../pure_utils';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { trackUiEvent } from '../../lens_ui_telemetry';
-import { VisualizationDimensionGroupConfig } from '../../types';
-import { IndexPatternDimensionEditorProps } from './dimension_panel';
+import type { ParamEditorCustomProps, VisualizationDimensionGroupConfig } from '../../types';
+import type { IndexPatternDimensionEditorProps } from './dimension_panel';
 
 const operationPanels = getOperationDisplay();
 
@@ -65,6 +66,8 @@ export interface ReferenceEditorProps {
   savedObjectsClient: SavedObjectsClientContract;
   http: HttpSetup;
   data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
+  paramEditorCustomProps?: ParamEditorCustomProps;
 }
 
 export function ReferenceEditor(props: ReferenceEditorProps) {
@@ -84,6 +87,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
     isFullscreen,
     toggleFullscreen,
     setIsCloseable,
+    paramEditorCustomProps,
     ...services
   } = props;
 
@@ -303,7 +307,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
           <EuiFormRow
             data-test-subj="indexPattern-reference-field-selection-row"
             label={i18n.translate('xpack.lens.indexPattern.chooseField', {
-              defaultMessage: 'Select a field',
+              defaultMessage: 'Field',
             })}
             fullWidth
             isInvalid={showFieldInvalid || showFieldMissingInvalid}
@@ -313,7 +317,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               fieldIsInvalid={showFieldInvalid || showFieldMissingInvalid}
               currentIndexPattern={currentIndexPattern}
               existingFields={existingFields}
-              operationSupportMatrix={operationSupportMatrix}
+              operationByField={operationSupportMatrix.operationByField}
               selectedOperationType={
                 // Allows operation to be selected before creating a valid column
                 column ? column.operationType : incompleteOperation
@@ -364,6 +368,7 @@ export function ReferenceEditor(props: ReferenceEditorProps) {
               isFullscreen={isFullscreen}
               toggleFullscreen={toggleFullscreen}
               setIsCloseable={setIsCloseable}
+              paramEditorCustomProps={paramEditorCustomProps}
               {...services}
             />
           </>

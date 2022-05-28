@@ -11,12 +11,11 @@ import {
   KibanaRequest,
   IKibanaResponse,
   KibanaResponseFactory,
-} from 'kibana/server';
-import { Logger } from '../../../../../../src/core/server';
+} from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { TimeSeriesQueryParameters } from '../lib/time_series_query';
-
 import { TimeSeriesQuery, TimeSeriesQuerySchema, TimeSeriesResult } from '../lib/time_series_types';
-export { TimeSeriesQuery, TimeSeriesResult } from '../lib/time_series_types';
+export type { TimeSeriesQuery, TimeSeriesResult } from '../lib/time_series_types';
 
 export function createTimeSeriesQueryRoute(
   logger: Logger,
@@ -42,9 +41,10 @@ export function createTimeSeriesQueryRoute(
   ): Promise<IKibanaResponse> {
     logger.debug(`route ${path} request: ${JSON.stringify(req.body)}`);
 
+    const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
     const result = await timeSeriesQuery({
       logger,
-      esClient: ctx.core.elasticsearch.client.asCurrentUser,
+      esClient,
       query: req.body,
     });
 

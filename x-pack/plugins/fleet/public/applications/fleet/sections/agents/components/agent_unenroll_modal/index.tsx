@@ -8,7 +8,7 @@
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiConfirmModal, EuiFormFieldset, EuiCheckbox, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent } from '../../../../types';
 import {
@@ -85,6 +85,7 @@ export const AgentUnenrollAgentModal: React.FunctionComponent<Props> = ({
 
   return (
     <EuiConfirmModal
+      data-test-subj="agentUnenrollModal"
       title={
         isSingleAgent ? (
           <FormattedMessage

@@ -10,8 +10,8 @@ import Boom from '@hapi/boom';
 import { act } from '@testing-library/react';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import type { Space } from '../../../common';
 import { getSpacesContextProviderWrapper } from '../../spaces_context';
@@ -112,8 +112,7 @@ const setup = async (opts: SetupOpts = {}) => {
   return { wrapper, onClose, mockSpacesManager, mockToastNotifications, savedObjectToCopy };
 };
 
-// flaky https://github.com/elastic/kibana/issues/96708
-describe.skip('CopyToSpaceFlyout', () => {
+describe('CopyToSpaceFlyout', () => {
   it('waits for spaces to load', async () => {
     const { wrapper } = await setup({ returnBeforeSpacesLoad: true });
 

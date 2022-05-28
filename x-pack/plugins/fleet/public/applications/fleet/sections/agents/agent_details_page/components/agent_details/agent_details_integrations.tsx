@@ -139,6 +139,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
               <EuiFlexItem className="eui-textTruncate">
                 <EuiLink
                   className="eui-textTruncate"
+                  data-test-subj="agentPolicyDetailsLink"
                   href={getHref('edit_integration', {
                     policyId: agentPolicy.id,
                     packagePolicyId: packagePolicy.id,

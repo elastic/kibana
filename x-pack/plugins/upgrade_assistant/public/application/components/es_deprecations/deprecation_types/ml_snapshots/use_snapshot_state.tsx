@@ -7,7 +7,8 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-import { ApiService, ResponseError } from '../../../../lib/api';
+import { ResponseError } from '../../../../../../common/types';
+import { ApiService } from '../../../../lib/api';
 import { Status } from '../../../types';
 
 const POLL_INTERVAL_MS = 1000;
@@ -68,7 +69,7 @@ export const useSnapshotState = ({
       return;
     }
 
-    setSnapshotState(data);
+    setSnapshotState({ ...data, action: 'upgrade' });
 
     // Only keep polling if it exists and is in progress.
     if (data?.status === 'in_progress') {
@@ -97,7 +98,7 @@ export const useSnapshotState = ({
       return;
     }
 
-    setSnapshotState(data);
+    setSnapshotState({ ...data, action: 'upgrade' });
     updateSnapshotStatus();
   }, [api, jobId, snapshotId, updateSnapshotStatus]);
 

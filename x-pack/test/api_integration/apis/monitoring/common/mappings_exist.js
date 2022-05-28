@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { get } from 'lodash';
-import * as esMetrics from '../../../../../plugins/monitoring/server/lib/metrics/elasticsearch/metrics';
-import * as kibanaMetrics from '../../../../../plugins/monitoring/server/lib/metrics/kibana/metrics';
-import * as logstashMetrics from '../../../../../plugins/monitoring/server/lib/metrics/logstash/metrics';
-import * as beatsMetrics from '../../../../../plugins/monitoring/server/lib/metrics/beats/metrics';
-import * as apmMetrics from '../../../../../plugins/monitoring/server/lib/metrics/apm/metrics';
+import * as esMetrics from '@kbn/monitoring-plugin/server/lib/metrics/elasticsearch/metrics';
+import * as kibanaMetrics from '@kbn/monitoring-plugin/server/lib/metrics/kibana/metrics';
+import * as logstashMetrics from '@kbn/monitoring-plugin/server/lib/metrics/logstash/metrics';
+import * as beatsMetrics from '@kbn/monitoring-plugin/server/lib/metrics/beats/metrics';
+import * as apmMetrics from '@kbn/monitoring-plugin/server/lib/metrics/apm/metrics';
 
 export default function ({ getService }) {
   const es = getService('es');
@@ -49,7 +49,7 @@ export default function ({ getService }) {
       let mappings;
 
       before('load mappings', async () => {
-        const { body: template } = await es.indices.getTemplate({ name: indexTemplate });
+        const template = await es.indices.getTemplate({ name: indexTemplate });
         mappings = get(template, [indexTemplate, 'mappings', 'properties']);
       });
 

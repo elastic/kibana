@@ -4,43 +4,62 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useLicense } from '../../../../common/hooks/use_license';
 import { useCanSeeHostIsolationExceptionsMenu } from './hooks';
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook as _renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { getHostIsolationExceptionSummary } from '../service';
+import { useEndpointPrivileges } from '../../../../common/components/user_privileges/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import { exceptionsGetSummaryHttpMock } from '../../../mocks/exceptions_list_http_mocks';
 
 jest.mock('../../../../common/hooks/use_license');
-jest.mock('../service');
-
-const getHostIsolationExceptionSummaryMock = getHostIsolationExceptionSummary as jest.Mock;
+jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
 
 describe('host isolation exceptions hooks', () => {
-  const isPlatinumPlusMock = useLicense().isPlatinumPlus as jest.Mock;
+  const useEndpointPrivilegesMock = useEndpointPrivileges as jest.Mock;
+  let renderHook: typeof _renderHook;
+  let mockedApis: ReturnType<typeof exceptionsGetSummaryHttpMock>;
+
   describe('useCanSeeHostIsolationExceptionsMenu', () => {
     beforeEach(() => {
-      isPlatinumPlusMock.mockReset();
+      const mockedContext = createAppRootMockRenderer();
+
+      mockedApis = exceptionsGetSummaryHttpMock(mockedContext.coreStart.http);
+      renderHook = (callback, options = {}) => {
+        return _renderHook(callback, {
+          ...options,
+          wrapper: mockedContext.AppWrapper,
+        });
+      };
     });
-    it('should return true if the license is platinum plus', () => {
-      isPlatinumPlusMock.mockReturnValue(true);
+
+    afterEach(() => {
+      useEndpointPrivilegesMock.mockReset();
+    });
+
+    it('should return true if has the correct privileges', () => {
+      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: true });
       const { result } = renderHook(() => useCanSeeHostIsolationExceptionsMenu(), {
         wrapper: TestProviders,
       });
       expect(result.current).toBe(true);
     });
 
-    it('should return false if the license is lower platinum plus and there are not existing host isolation items', () => {
-      isPlatinumPlusMock.mockReturnValue(false);
-      getHostIsolationExceptionSummaryMock.mockReturnValueOnce({ total: 0 });
+    it('should return false if does not have privileges and there are not existing host isolation items', () => {
+      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
+      mockedApis.responseProvider.exceptionsSummary.mockReturnValue({
+        total: 0,
+        linux: 0,
+        macos: 0,
+        windows: 0,
+      });
       const { result } = renderHook(() => useCanSeeHostIsolationExceptionsMenu(), {
         wrapper: TestProviders,
       });
       expect(result.current).toBe(false);
     });
 
-    it('should return true if the license is lower platinum plus and there are existing host isolation items', async () => {
-      isPlatinumPlusMock.mockReturnValue(false);
-      getHostIsolationExceptionSummaryMock.mockReturnValueOnce({ total: 11 });
+    it('should return true if does not have privileges and there are existing host isolation items', async () => {
+      useEndpointPrivilegesMock.mockReturnValue({ canIsolateHost: false });
       const { result, waitForNextUpdate } = renderHook(
         () => useCanSeeHostIsolationExceptionsMenu(),
         {

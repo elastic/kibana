@@ -6,17 +6,17 @@
  */
 
 import React from 'react';
-import { I18nProvider } from '@kbn/i18n/react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, EuiEmptyPrompt } from '@elastic/eui';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
   ReactExpressionRendererProps,
-} from 'src/plugins/expressions/public';
-import type { KibanaExecutionContext } from 'src/core/public';
-import { ExecutionContextSearch } from 'src/plugins/data/public';
-import { DefaultInspectorAdapters, RenderMode } from 'src/plugins/expressions';
+} from '@kbn/expressions-plugin/public';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import { DefaultInspectorAdapters, RenderMode } from '@kbn/expressions-plugin';
 import classNames from 'classnames';
 import { getOriginalRequestErrorMessages } from '../editor_frame_service/error_helper';
 import { ErrorMessage } from '../editor_frame_service/types';
@@ -35,8 +35,10 @@ export interface ExpressionWrapperProps {
     data: unknown,
     inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
   ) => void;
+  onRender$: () => void;
   renderMode?: RenderMode;
   syncColors?: boolean;
+  syncTooltips?: boolean;
   hasCompatibleActions?: ReactExpressionRendererProps['hasCompatibleActions'];
   style?: React.CSSProperties;
   className?: string;
@@ -106,8 +108,10 @@ export function ExpressionWrapper({
   interactive,
   searchSessionId,
   onData$,
+  onRender$,
   renderMode,
   syncColors,
+  syncTooltips,
   hasCompatibleActions,
   style,
   className,
@@ -132,9 +136,11 @@ export function ExpressionWrapper({
             searchContext={searchContext}
             searchSessionId={searchSessionId}
             onData$={onData$}
+            onRender$={onRender$}
             inspectorAdapters={lensInspector.adapters}
             renderMode={renderMode}
             syncColors={syncColors}
+            syncTooltips={syncTooltips}
             executionContext={executionContext}
             renderError={(errorMessage, error) => {
               onRuntimeError();

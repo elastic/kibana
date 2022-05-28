@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-// TODO: https://github.com/elastic/kibana/issues/110903
-/* eslint-disable @kbn/eslint/no_export_all */
+export { getExceptionBuilderComponentLazy } from './exceptions/components/builder';
+export type { OnChangeProps } from './exceptions/components/builder';
 
-export * from './shared_exports';
-
-import type { PluginInitializerContext } from '../../../../src/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { Plugin } from './plugin';
 import type { PluginSetup, PluginStart } from './types';

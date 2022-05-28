@@ -7,10 +7,10 @@
  */
 
 import { uniq } from 'lodash';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { shouldReadFieldFromDocValues } from './should_read_field_from_doc_values';
-import { FieldDescriptor } from '../../../fetcher';
+import { FieldDescriptor } from '../..';
 
 /**
  *  Read the response from the _field_caps API to determine the type and
@@ -116,7 +116,6 @@ export function readFieldCapsResponse(
             }),
             {}
           ),
-          // @ts-expect-error
           metadata_field: capsByType[types[0]].metadata_field,
         };
         // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes
@@ -133,7 +132,6 @@ export function readFieldCapsResponse(
         searchable: isSearchable,
         aggregatable: isAggregatable,
         readFromDocValues: shouldReadFieldFromDocValues(isAggregatable, esType),
-        // @ts-expect-error
         metadata_field: capsByType[types[0]].metadata_field,
       };
       // This is intentionally using a "hash" and a "push" to be highly optimized with very large indexes

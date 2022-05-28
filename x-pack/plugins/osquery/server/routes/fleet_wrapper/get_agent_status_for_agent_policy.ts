@@ -6,9 +6,9 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { GetAgentStatusResponse } from '@kbn/fleet-plugin/common';
+import { IRouter } from '@kbn/core/server';
 import { PLUGIN_ID } from '../../../common';
-import { GetAgentStatusResponse } from '../../../../fleet/common';
-import { IRouter } from '../../../../../../src/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 export const getAgentStatusForAgentPolicyRoute = (
@@ -17,7 +17,7 @@ export const getAgentStatusForAgentPolicyRoute = (
 ) => {
   router.get(
     {
-      path: '/internal/osquery/fleet_wrapper/agent-status',
+      path: '/internal/osquery/fleet_wrapper/agent_status',
       validate: {
         query: schema.object({
           policyId: schema.string(),
@@ -28,11 +28,10 @@ export const getAgentStatusForAgentPolicyRoute = (
       options: { tags: [`access:${PLUGIN_ID}-read`] },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asInternalUser;
-
       const results = await osqueryContext.service
         .getAgentService()
-        ?.getAgentStatusForAgentPolicy(esClient, request.query.policyId, request.query.kuery);
+        ?.asScoped(request)
+        .getAgentStatusForAgentPolicy(request.query.policyId, request.query.kuery);
 
       if (!results) {
         return response.ok({ body: {} });

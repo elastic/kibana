@@ -27,6 +27,7 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   kubernetes: 'Kubernetes',
   languages: 'Languages',
   message_queue: 'Message queue',
+  microsoft_365: 'Microsoft 365',
   monitoring: 'Monitoring',
   network: 'Network',
   notification: 'Notification',
@@ -40,16 +41,13 @@ export const INTEGRATION_CATEGORY_DISPLAY = {
   web: 'Web',
 
   // Kibana added
-  communication: 'Communication',
-  customer_support: 'Customer Support',
-  document_storage: 'Document Storage',
-  enterprise_management: 'Enterprise Management',
-  knowledge_platform: 'Knowledge Platform',
+  communications: 'Communications',
+  enterprise_search: 'Enterprise search',
+  file_storage: 'File storage',
   language_client: 'Language client',
-  project_management: 'Project Management',
-  software_development: 'Software Development',
   upload_file: 'Upload a file',
-  website_search: 'Website Search',
+  website_search: 'Website search',
+  geo: 'Geo',
 };
 
 /**
@@ -84,6 +82,7 @@ export const SHIPPER_DISPLAY = {
   sample_data: 'Sample data',
   tests: 'Tests',
   tutorial: 'Tutorials',
+  placeholders: 'Extra Integrations',
 };
 
 /**
@@ -115,6 +114,7 @@ export interface CustomIntegration {
   description: string;
   type: 'ui_link';
   uiInternalPath: string;
+  uiExternalLink?: string;
   isBeta: boolean;
   icons: CustomIntegrationIcon[];
   categories: IntegrationCategory[];

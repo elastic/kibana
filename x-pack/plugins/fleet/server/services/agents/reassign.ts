@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import type { SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
 import Boom from '@hapi/boom';
 
 import type { Agent, BulkActionResult } from '../../types';
@@ -19,8 +19,8 @@ import {
   updateAgent,
   bulkUpdateAgents,
 } from './crud';
-import type { GetAgentsOptions } from './index';
-import { createAgentAction, bulkCreateAgentActions } from './actions';
+import type { GetAgentsOptions } from '.';
+import { createAgentAction } from './actions';
 import { searchHitToAgent } from './helpers';
 
 export async function reassignAgent(
@@ -42,7 +42,7 @@ export async function reassignAgent(
   });
 
   await createAgentAction(esClient, {
-    agent_id: agentId,
+    agents: [agentId],
     created_at: new Date().toISOString(),
     type: 'POLICY_REASSIGN',
   });
@@ -71,6 +71,9 @@ export async function reassignAgentIsAllowed(
   return true;
 }
 
+function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
+  return Boolean(doc && 'found' in doc);
+}
 export async function reassignAgents(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
@@ -89,7 +92,7 @@ export async function reassignAgents(
   } else if ('agentIds' in options) {
     const givenAgentsResults = await getAgentDocuments(esClient, options.agentIds);
     for (const agentResult of givenAgentsResults) {
-      if (agentResult.found === false) {
+      if (isMgetDoc(agentResult) && agentResult.found === false) {
         outgoingErrors[agentResult._id] = new AgentReassignmentError(
           `Cannot find agent ${agentResult._id}`
         );
@@ -158,14 +161,11 @@ export async function reassignAgents(
   });
 
   const now = new Date().toISOString();
-  await bulkCreateAgentActions(
-    esClient,
-    agentsToUpdate.map((agent) => ({
-      agent_id: agent.id,
-      created_at: now,
-      type: 'POLICY_REASSIGN',
-    }))
-  );
+  await createAgentAction(esClient, {
+    agents: agentsToUpdate.map((agent) => agent.id),
+    created_at: now,
+    type: 'POLICY_REASSIGN',
+  });
 
   return { items: orderedOut };
 }

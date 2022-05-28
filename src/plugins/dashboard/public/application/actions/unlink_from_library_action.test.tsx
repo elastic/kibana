@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 
 import {
   ViewMode,
@@ -17,11 +17,11 @@ import {
   SavedObjectEmbeddableInput,
 } from '../../services/embeddable';
 import { UnlinkFromLibraryAction } from '.';
-import { DashboardContainer } from '../embeddable';
 import { getSampleDashboardInput } from '../test_helpers';
-import { coreMock, uiSettingsServiceMock } from '../../../../../core/public/mocks';
+import { DashboardContainer } from '../embeddable/dashboard_container';
+import { coreMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 
-import { embeddablePluginMock } from 'src/plugins/embeddable/public/mocks';
+import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import {
   ContactCardEmbeddable,
   ContactCardEmbeddableFactory,
@@ -29,7 +29,8 @@ import {
   ContactCardEmbeddableOutput,
   CONTACT_CARD_EMBEDDABLE,
 } from '../../services/embeddable_test_samples';
-import { getStubPluginServices } from '../../../../presentation_util/public';
+import { getStubPluginServices } from '@kbn/presentation-util-plugin/public';
+import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 
 const { setup, doStart } = embeddablePluginMock.createInstance();
 setup.registerEmbeddableFactory(
@@ -56,7 +57,9 @@ beforeEach(async () => {
     uiActions: {} as any,
     uiSettings: uiSettingsServiceMock.createStartContract(),
     http: coreStart.http,
+    theme: coreStart.theme,
     presentationUtil: getStubPluginServices(),
+    screenshotMode: screenshotModePluginMock.createSetupContract(),
   };
 
   container = new DashboardContainer(getSampleDashboardInput(), containerOptions);

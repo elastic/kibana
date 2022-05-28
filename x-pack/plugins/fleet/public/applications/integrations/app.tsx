@@ -5,117 +5,36 @@
  * 2.0.
  */
 
-import React, { memo, useEffect, useState } from 'react';
-import type { AppMountParameters } from 'kibana/public';
+import React, { memo } from 'react';
+import type { AppMountParameters } from '@kbn/core/public';
 import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
 import { Router, Redirect, Route, Switch } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n/react';
 import useObservable from 'react-use/lib/useObservable';
 
-import {
-  ConfigContext,
-  FleetStatusProvider,
-  KibanaVersionContext,
-  sendGetPermissionsCheck,
-  sendSetup,
-} from '../../hooks';
+import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { Chat } from '@kbn/cloud-plugin/public';
+
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 
-import {
-  KibanaContextProvider,
-  RedirectAppLinks,
-} from '../../../../../../src/plugins/kibana_react/public';
-import { EuiThemeProvider } from '../../../../../../src/plugins/kibana_react/common';
+import { ConfigContext, FleetStatusProvider, KibanaVersionContext } from '../../hooks';
 
-import { AgentPolicyContextProvider, useUrlModal } from './hooks';
+import { FleetServerFlyout } from '../fleet/components';
+
+import { AgentPolicyContextProvider, useFlyoutContext } from './hooks';
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from './constants';
-
-import { Error, Loading, SettingFlyout } from './components';
 
 import type { UIExtensionsStorage } from './types';
 
 import { EPMApp } from './sections/epm';
-import { DefaultLayout } from './layouts';
-import { PackageInstallProvider } from './hooks';
-import { useBreadcrumbs, UIExtensionsContext } from './hooks';
+import { PackageInstallProvider, UIExtensionsContext, FlyoutContextProvider } from './hooks';
 import { IntegrationsHeader } from './components/header';
+import { AgentEnrollmentFlyout } from './components';
 
-const ErrorLayout = ({ children }: { children: JSX.Element }) => (
-  <EuiErrorBoundary>
-    <DefaultLayout>{children}</DefaultLayout>
-  </EuiErrorBoundary>
-);
-
-export const WithPermissionsAndSetup: React.FC = memo(({ children }) => {
-  useBreadcrumbs('integrations');
-
-  const [isPermissionsLoading, setIsPermissionsLoading] = useState<boolean>(false);
-  const [isInitialized, setIsInitialized] = useState(false);
-  const [initializationError, setInitializationError] = useState<Error | null>(null);
-
-  useEffect(() => {
-    (async () => {
-      setIsInitialized(false);
-      setInitializationError(null);
-      try {
-        // Attempt Fleet Setup if user has permissions, otherwise skip
-        setIsPermissionsLoading(true);
-        const permissionsResponse = await sendGetPermissionsCheck();
-        setIsPermissionsLoading(false);
-
-        if (permissionsResponse.data?.success) {
-          try {
-            const setupResponse = await sendSetup();
-            if (setupResponse.error) {
-              setInitializationError(setupResponse.error);
-            }
-          } catch (err) {
-            setInitializationError(err);
-          }
-          setIsInitialized(true);
-        } else {
-          setIsInitialized(true);
-        }
-      } catch {
-        // If there's an error checking permissions, default to proceeding without running setup
-        // User will only have access to EPM endpoints if they actually have permission
-        setIsInitialized(true);
-      }
-    })();
-  }, []);
-
-  if (isPermissionsLoading) {
-    return (
-      <ErrorLayout>
-        <Loading />
-      </ErrorLayout>
-    );
-  }
-
-  if (!isInitialized || initializationError) {
-    return (
-      <ErrorLayout>
-        {initializationError ? (
-          <Error
-            title={
-              <FormattedMessage
-                id="xpack.fleet.initializationErrorMessageTitle"
-                defaultMessage="Unable to initialize Fleet"
-              />
-            }
-            error={initializationError}
-          />
-        ) : (
-          <Loading />
-        )}
-      </ErrorLayout>
-    );
-  }
-
-  return <>{children}</>;
-});
+const EmptyContext = () => <></>;
 
 /**
  * Fleet Application context all the way down to the Router, but with no permissions or setup checks
@@ -129,6 +48,7 @@ export const IntegrationsAppContext: React.FC<{
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
   /** For testing purposes only */
   routerHistory?: History<any>; // TODO remove
 }> = memo(
@@ -140,8 +60,10 @@ export const IntegrationsAppContext: React.FC<{
     kibanaVersion,
     extensions,
     setHeaderActionMenu,
+    theme$,
   }) => {
     const isDarkMode = useObservable<boolean>(startServices.uiSettings.get$('theme:darkMode'));
+    const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
       <RedirectAppLinks application={startServices.application}>
@@ -150,22 +72,32 @@ export const IntegrationsAppContext: React.FC<{
             <EuiErrorBoundary>
               <ConfigContext.Provider value={config}>
                 <KibanaVersionContext.Provider value={kibanaVersion}>
-                  <EuiThemeProvider darkMode={isDarkMode}>
-                    <UIExtensionsContext.Provider value={extensions}>
-                      <FleetStatusProvider>
-                        <startServices.customIntegrations.ContextProvider>
-                          <Router history={history}>
-                            <AgentPolicyContextProvider>
-                              <PackageInstallProvider notifications={startServices.notifications}>
-                                <IntegrationsHeader {...{ setHeaderActionMenu }} />
-                                {children}
-                              </PackageInstallProvider>
-                            </AgentPolicyContextProvider>
-                          </Router>
-                        </startServices.customIntegrations.ContextProvider>
-                      </FleetStatusProvider>
-                    </UIExtensionsContext.Provider>
-                  </EuiThemeProvider>
+                  <KibanaThemeProvider theme$={theme$}>
+                    <EuiThemeProvider darkMode={isDarkMode}>
+                      <UIExtensionsContext.Provider value={extensions}>
+                        <FleetStatusProvider>
+                          <startServices.customIntegrations.ContextProvider>
+                            <CloudContext>
+                              <Router history={history}>
+                                <AgentPolicyContextProvider>
+                                  <PackageInstallProvider
+                                    notifications={startServices.notifications}
+                                    theme$={theme$}
+                                  >
+                                    <FlyoutContextProvider>
+                                      <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
+                                      {children}
+                                      <Chat />
+                                    </FlyoutContextProvider>
+                                  </PackageInstallProvider>
+                                </AgentPolicyContextProvider>
+                              </Router>
+                            </CloudContext>
+                          </startServices.customIntegrations.ContextProvider>
+                        </FleetStatusProvider>
+                      </UIExtensionsContext.Provider>
+                    </EuiThemeProvider>
+                  </KibanaThemeProvider>
                 </KibanaVersionContext.Provider>
               </ConfigContext.Provider>
             </EuiErrorBoundary>
@@ -177,18 +109,10 @@ export const IntegrationsAppContext: React.FC<{
 );
 
 export const AppRoutes = memo(() => {
-  const { modal, setModal } = useUrlModal();
+  const flyoutContext = useFlyoutContext();
+
   return (
     <>
-      {modal === 'settings' && (
-        <EuiPortal>
-          <SettingFlyout
-            onClose={() => {
-              setModal(null);
-            }}
-          />
-        </EuiPortal>
-      )}
       <Switch>
         <Route path={INTEGRATIONS_ROUTING_PATHS.integrations}>
           <EPMApp />
@@ -214,6 +138,22 @@ export const AppRoutes = memo(() => {
           }}
         />
       </Switch>
+
+      {flyoutContext.isEnrollmentFlyoutOpen && (
+        <EuiPortal>
+          <AgentEnrollmentFlyout
+            defaultMode="standalone"
+            isIntegrationFlow={true}
+            onClose={() => flyoutContext.closeEnrollmentFlyout()}
+          />
+        </EuiPortal>
+      )}
+
+      {flyoutContext.isFleetServerFlyoutOpen && (
+        <EuiPortal>
+          <FleetServerFlyout onClose={() => flyoutContext.closeFleetServerFlyout()} />
+        </EuiPortal>
+      )}
     </>
   );
 });

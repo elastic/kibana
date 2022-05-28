@@ -10,13 +10,13 @@ import {
   SavedObjectAttribute,
   SavedObjectAttributes,
   SavedObjectReference,
-} from '../../../../../core/public';
-import { SavedVisState, VisSavedObject } from '../../types';
+} from '@kbn/core/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
-  SearchSourceFields,
-} from '../../../../data/public';
+  SerializedSearchSourceFields,
+} from '@kbn/data-plugin/public';
+import { SavedVisState, VisSavedObject } from '../../types';
 
 import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
 import { extractControlsReferences, injectControlsReferences } from './controls_references';
@@ -33,7 +33,7 @@ export function extractReferences({
 
   if (updatedAttributes.searchSourceFields) {
     const [searchSource, searchSourceReferences] = extractSearchSourceReferences(
-      updatedAttributes.searchSourceFields as SearchSourceFields
+      updatedAttributes.searchSourceFields as SerializedSearchSourceFields
     );
     updatedAttributes.searchSourceFields = searchSource as SavedObjectAttribute;
     searchSourceReferences.forEach((r) => updatedReferences.push(r));

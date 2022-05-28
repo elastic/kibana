@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 import { RemoteClustersUIPlugin } from './plugin';
 
-export { RemoteClustersPluginSetup } from './plugin';
+export type { RemoteClustersPluginSetup } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new RemoteClustersUIPlugin(initializerContext);

@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { SecurityLicense } from '../../common/licensing';
 import type { ConfigType } from '../config';
 
 interface Usage {
   auditLoggingEnabled: boolean;
-  auditLoggingType?: 'ecs' | 'legacy';
   loginSelectorEnabled: boolean;
   accessAgreementEnabled: boolean;
   authProviderCount: number;
@@ -21,6 +20,7 @@ interface Usage {
   sessionIdleTimeoutInMinutes: number;
   sessionLifespanInMinutes: number;
   sessionCleanupInMinutes: number;
+  anonymousCredentialType: string | undefined;
 }
 
 interface Deps {
@@ -60,13 +60,6 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         _meta: {
           description:
             'Indicates if audit logging is both enabled and supported by the current license.',
-        },
-      },
-      auditLoggingType: {
-        type: 'keyword',
-        _meta: {
-          description:
-            'If auditLoggingEnabled is true, indicates what type is enabled (ECS or legacy).',
         },
       },
       loginSelectorEnabled: {
@@ -130,10 +123,16 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
             'The session cleanup interval that is configured, in minutes (0 if disabled).',
         },
       },
+      anonymousCredentialType: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'The credential type that is configured for the anonymous authentication provider.',
+        },
+      },
     },
     fetch: () => {
-      const { allowRbac, allowAccessAgreement, allowAuditLogging, allowLegacyAuditLogging } =
-        license.getFeatures();
+      const { allowRbac, allowAccessAgreement, allowAuditLogging } = license.getFeatures();
       if (!allowRbac) {
         return {
           auditLoggingEnabled: false,
@@ -145,20 +144,11 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
           sessionIdleTimeoutInMinutes: 0,
           sessionLifespanInMinutes: 0,
           sessionCleanupInMinutes: 0,
+          anonymousCredentialType: undefined,
         };
       }
 
-      const legacyAuditLoggingEnabled = allowLegacyAuditLogging && config.audit.enabled;
-      const ecsAuditLoggingEnabled =
-        allowAuditLogging && config.audit.enabled && config.audit.appender != null;
-
-      let auditLoggingType: Usage['auditLoggingType'];
-      if (ecsAuditLoggingEnabled) {
-        auditLoggingType = 'ecs';
-      } else if (legacyAuditLoggingEnabled) {
-        auditLoggingType = 'legacy';
-      }
-
+      const auditLoggingEnabled = allowAuditLogging && config.audit.enabled;
       const loginSelectorEnabled = config.authc.selector.enabled;
       const authProviderCount = config.authc.sortedProviders.length;
       const enabledAuthProviders = [
@@ -182,9 +172,26 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
       const sessionLifespanInMinutes = sessionExpirations.lifespan?.asMinutes() ?? 0;
       const sessionCleanupInMinutes = config.session.cleanupInterval?.asMinutes() ?? 0;
 
+      const anonProviders = config.authc.providers.anonymous ?? ({} as Record<string, any>);
+      const foundProvider = Object.entries(anonProviders).find(
+        ([_, provider]) => !!provider.credentials && provider.enabled
+      );
+
+      const credElasticAnonUser = 'elasticsearch_anonymous_user';
+      const credApiKey = 'api_key';
+      const credUsernamePassword = 'username_password';
+
+      let anonymousCredentialType;
+      if (foundProvider) {
+        if (!!foundProvider[1].credentials.apiKey) anonymousCredentialType = credApiKey;
+        else if (foundProvider[1].credentials === credElasticAnonUser)
+          anonymousCredentialType = credElasticAnonUser;
+        else if (!!foundProvider[1].credentials.username && !!foundProvider[1].credentials.password)
+          anonymousCredentialType = credUsernamePassword;
+      }
+
       return {
-        auditLoggingEnabled: legacyAuditLoggingEnabled || ecsAuditLoggingEnabled,
-        auditLoggingType,
+        auditLoggingEnabled,
         loginSelectorEnabled,
         accessAgreementEnabled,
         authProviderCount,
@@ -193,6 +200,7 @@ export function registerSecurityUsageCollector({ usageCollection, config, licens
         sessionIdleTimeoutInMinutes,
         sessionLifespanInMinutes,
         sessionCleanupInMinutes,
+        anonymousCredentialType,
       };
     },
   });

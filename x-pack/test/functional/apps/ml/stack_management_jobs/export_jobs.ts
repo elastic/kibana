@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import type { DataFrameAnalyticsConfig } from '../../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
   {
-    // @ts-expect-error not full interface
     job: {
       job_id: 'fq_single_1_smv',
       groups: ['farequote', 'automated', 'single-metric'],
@@ -64,7 +63,6 @@ const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
     },
   },
   {
-    // @ts-expect-error not full interface
     job: {
       job_id: 'fq_single_2_smv',
       groups: ['farequote', 'automated', 'single-metric'],
@@ -117,7 +115,6 @@ const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
     },
   },
   {
-    // @ts-expect-error not full interface
     job: {
       job_id: 'fq_single_3_smv',
       groups: ['farequote', 'automated', 'single-metric'],
@@ -172,7 +169,6 @@ const testADJobs: Array<{ job: Job; datafeed: Datafeed }> = [
 ];
 
 const testDFAJobs: DataFrameAnalyticsConfig[] = [
-  // @ts-expect-error not full interface
   {
     id: `bm_1_1`,
     description:
@@ -201,7 +197,6 @@ const testDFAJobs: DataFrameAnalyticsConfig[] = [
     model_memory_limit: '60mb',
     allow_lazy_start: false,
   },
-  // @ts-expect-error not full interface
   {
     id: `ihp_1_2`,
     description: 'This is the job description',
@@ -224,7 +219,6 @@ const testDFAJobs: DataFrameAnalyticsConfig[] = [
     },
     model_memory_limit: '5mb',
   },
-  // @ts-expect-error not full interface
   {
     id: `egs_1_3`,
     description: 'This is the job description',
@@ -258,7 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('export jobs', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await ml.api.cleanMlIndices();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -293,6 +287,10 @@ export default function ({ getService }: FtrProviderContext) {
         'anomaly_detection_jobs',
         'data_frame_analytics_jobs',
       ]);
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
+      await ml.testResources.deleteIndexPatternByTitle('ft_ihp_outlier');
+      await ml.testResources.deleteIndexPatternByTitle('ft_egs_regression');
     });
 
     it('opens export flyout and exports anomaly detector jobs', async () => {

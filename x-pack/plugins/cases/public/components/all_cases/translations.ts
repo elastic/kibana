@@ -10,24 +10,19 @@ import { i18n } from '@kbn/i18n';
 export * from '../../common/translations';
 
 export const NO_CASES = i18n.translate('xpack.cases.caseTable.noCases.title', {
-  defaultMessage: 'No Cases',
+  defaultMessage: 'No cases to display',
 });
 
 export const NO_CASES_BODY = i18n.translate('xpack.cases.caseTable.noCases.body', {
-  defaultMessage:
-    'There are no cases to display. Please create a new case or change your filter settings above.',
+  defaultMessage: 'Create a case or edit your filters.',
 });
 
 export const NO_CASES_BODY_READ_ONLY = i18n.translate(
   'xpack.cases.caseTable.noCases.readonly.body',
   {
-    defaultMessage: 'There are no cases to display. Please change your filter settings above.',
+    defaultMessage: 'Edit your filter settings.',
   }
 );
-
-export const ADD_NEW_CASE = i18n.translate('xpack.cases.caseTable.addNewCase', {
-  defaultMessage: 'Add New Case',
-});
 
 export const SHOWING_SELECTED_CASES = (totalRules: number) =>
   i18n.translate('xpack.cases.caseTable.selectedCasesTitle', {
@@ -59,6 +54,10 @@ export const EXTERNAL_INCIDENT = i18n.translate('xpack.cases.caseTable.snInciden
   defaultMessage: 'External Incident',
 });
 
+export const SEVERITY = i18n.translate('xpack.cases.caseTable.severity', {
+  defaultMessage: 'Severity',
+});
+
 export const INCIDENT_MANAGEMENT_SYSTEM = i18n.translate('xpack.cases.caseTable.incidentSystem', {
   defaultMessage: 'Incident Management System',
 });
@@ -73,6 +72,10 @@ export const CLOSED = i18n.translate('xpack.cases.caseTable.closed', {
 
 export const DELETE = i18n.translate('xpack.cases.caseTable.delete', {
   defaultMessage: 'Delete',
+});
+
+export const SELECT = i18n.translate('xpack.cases.caseTable.select', {
+  defaultMessage: 'Select',
 });
 
 export const REQUIRES_UPDATE = i18n.translate('xpack.cases.caseTable.requiresUpdate', {
@@ -101,4 +104,13 @@ export const STATUS = i18n.translate('xpack.cases.caseTable.status', {
 
 export const CHANGE_STATUS = i18n.translate('xpack.cases.caseTable.changeStatus', {
   defaultMessage: 'Change status',
+});
+
+export const ATTC_STAT = i18n.translate('xpack.cases.casesStats.mttr', {
+  defaultMessage: 'Average time to close',
+});
+
+export const ATTC_DESCRIPTION = i18n.translate('xpack.cases.casesStats.mttrDescription', {
+  defaultMessage:
+    'Average time to close is the average duration of cases from creation to closure.',
 });

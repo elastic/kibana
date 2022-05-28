@@ -7,9 +7,9 @@
 
 import Boom from '@hapi/boom';
 import { each, get } from 'lodash';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ANNOTATION_EVENT_USER, ANNOTATION_TYPE } from '../../../common/constants/annotations';
 import { PARTITION_FIELDS } from '../../../common/constants/anomalies';
 import {
@@ -24,7 +24,6 @@ import {
   isAnnotations,
   getAnnotationFieldName,
   getAnnotationFieldValue,
-  EsAggregationResult,
 } from '../../../common/types/annotations';
 import { JobId } from '../../../common/types/anomaly_detection_jobs';
 
@@ -35,36 +34,27 @@ interface EsResult {
   _id: string;
 }
 
-export interface FieldToBucket {
-  field: string;
-  missing?: string | number;
-}
-
 export interface IndexAnnotationArgs {
   jobIds: string[];
   earliestMs: number | null;
   latestMs: number | null;
   maxAnnotations: number;
-  fields?: FieldToBucket[];
   detectorIndex?: number;
   entities?: any[];
   event?: Annotation['event'];
-}
-
-export interface AggTerm {
-  terms: FieldToBucket;
 }
 
 export interface GetParams {
   index: string;
   size: number;
   body: object;
+  track_total_hits: boolean;
 }
 
 export interface GetResponse {
   success: true;
   annotations: Record<JobId, Annotations>;
-  aggregations: EsAggregationResult;
+  totalCount: number;
 }
 
 export interface IndexParams {
@@ -81,7 +71,38 @@ export interface DeleteParams {
   id: string;
 }
 
+export interface AggByJob {
+  key: string;
+  doc_count: number;
+  latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
+}
+
 export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
+  // Find the index the annotation is stored in.
+  async function fetchAnnotationIndex(id: string) {
+    const searchParams: estypes.SearchRequest = {
+      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
+      size: 1,
+      body: {
+        query: {
+          ids: {
+            values: [id],
+          },
+        },
+      },
+    };
+
+    const body = await asInternalUser.search(searchParams, { maxRetries: 0 });
+    const totalCount =
+      typeof body.hits.total === 'number' ? body.hits.total : body.hits.total!.value;
+
+    if (totalCount === 0) {
+      throw Boom.notFound(`Cannot find annotation with ID ${id}`);
+    }
+
+    return body.hits.hits[0]._index;
+  }
+
   async function indexAnnotation(annotation: Annotation, username: string) {
     if (isAnnotation(annotation) === false) {
       // No need to translate, this will not be exposed in the UI.
@@ -105,12 +126,13 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
 
     if (typeof annotation._id !== 'undefined') {
       params.id = annotation._id;
+      params.index = await fetchAnnotationIndex(annotation._id);
+      params.require_alias = false;
       delete params.body._id;
       delete params.body.key;
     }
 
-    const { body } = await asInternalUser.index(params);
-    return body;
+    return await asInternalUser.index(params, { maxRetries: 0 });
   }
 
   async function getAnnotations({
@@ -118,7 +140,6 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     earliestMs,
     latestMs,
     maxAnnotations,
-    fields,
     detectorIndex,
     entities,
     event,
@@ -126,7 +147,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     const obj: GetResponse = {
       success: true,
       annotations: {},
-      aggregations: {},
+      totalCount: 0,
     };
 
     const boolCriteria: object[] = [];
@@ -215,18 +236,6 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       });
     }
 
-    // Find unique buckets (e.g. events) from the queried annotations to show in dropdowns
-    const aggs: Record<string, AggTerm> = {};
-    if (fields) {
-      fields.forEach((fieldToBucket) => {
-        aggs[fieldToBucket.field] = {
-          terms: {
-            ...fieldToBucket,
-          },
-        };
-      });
-    }
-
     // Build should clause to further query for annotations in SMV
     // we want to show either the exact match with detector index and by/over/partition fields
     // OR annotations without any partition fields defined
@@ -276,6 +285,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
     const params: GetParams = {
       index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
       size: maxAnnotations,
+      track_total_hits: true,
       body: {
         query: {
           bool: {
@@ -295,18 +305,20 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
             ...(shouldClauses ? { should: shouldClauses, minimum_should_match: 1 } : {}),
           },
         },
-        ...(fields ? { aggs } : {}),
       },
     };
 
     try {
-      const { body } = await asInternalUser.search(params);
+      const body = await asInternalUser.search(params, { maxRetries: 0 });
 
       // @ts-expect-error TODO fix search response types
       if (body.error !== undefined && body.message !== undefined) {
         // No need to translate, this will not be exposed in the UI.
         throw new Error(`Annotations couldn't be retrieved from Elasticsearch.`);
       }
+
+      // @ts-expect-error incorrect search response type
+      obj.totalCount = body.hits.total.value;
 
       // @ts-expect-error TODO fix search response types
       const docs: Annotations = get(body, ['hits', 'hits'], []).map((d: EsResult) => {
@@ -321,10 +333,6 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
         } as Annotation;
       });
 
-      const aggregations = get(body, ['aggregations'], {}) as EsAggregationResult;
-      if (fields) {
-        obj.aggregations = aggregations;
-      }
       if (isAnnotations(docs) === false) {
         // No need to translate, this will not be exposed in the UI.
         throw new Error(`Annotations didn't pass integrity check.`);
@@ -393,15 +401,12 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       },
     };
 
-    const { body } = await asInternalUser.search<Annotation>(params);
+    const body = await asInternalUser.search<Annotation>(params, { maxRetries: 0 });
 
     const annotations = (
-      body.aggregations!.by_job as estypes.AggregationsTermsAggregate<{
-        key: string;
-        doc_count: number;
-        latest_delayed: Pick<estypes.SearchResponse<Annotation>, 'hits'>;
-      }>
-    ).buckets.map((bucket) => {
+      (body.aggregations!.by_job as estypes.AggregationsTermsAggregateBase<AggByJob>)
+        .buckets as AggByJob[]
+    ).map((bucket) => {
       return bucket.latest_delayed.hits.hits[0]._source!;
     });
 
@@ -409,28 +414,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
   }
 
   async function deleteAnnotation(id: string) {
-    // Find the index the annotation is stored in.
-    const searchParams: estypes.SearchRequest = {
-      index: ML_ANNOTATIONS_INDEX_ALIAS_READ,
-      size: 1,
-      body: {
-        query: {
-          ids: {
-            values: [id],
-          },
-        },
-      },
-    };
-
-    const { body } = await asInternalUser.search(searchParams);
-    const totalCount =
-      typeof body.hits.total === 'number' ? body.hits.total : body.hits.total.value;
-
-    if (totalCount === 0) {
-      throw Boom.notFound(`Cannot find annotation with ID ${id}`);
-    }
-
-    const index = body.hits.hits[0]._index;
+    const index = await fetchAnnotationIndex(id);
 
     const deleteParams: DeleteParams = {
       index,
@@ -438,8 +422,7 @@ export function annotationProvider({ asInternalUser }: IScopedClusterClient) {
       refresh: 'wait_for',
     };
 
-    const { body: deleteResponse } = await asInternalUser.delete(deleteParams);
-    return deleteResponse;
+    return await asInternalUser.delete(deleteParams);
   }
 
   return {

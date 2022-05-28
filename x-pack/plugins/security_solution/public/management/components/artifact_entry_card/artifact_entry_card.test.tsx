@@ -65,12 +65,11 @@ describe.each([
     );
   });
 
-  // FLAKY https://github.com/elastic/kibana/issues/113892
-  it.skip('should display dates in expected format', () => {
+  it('should display dates in expected format', () => {
     render();
 
     expect(renderResult.getByTestId('testCard-header-updated').textContent).toEqual(
-      expect.stringMatching(/Last updated(\s seconds? ago|now)/)
+      expect.stringMatching(/Last updated(?:(\s*\d+ seconds? ago)|now)/)
     );
   });
 
@@ -109,7 +108,7 @@ describe.each([
     render();
 
     expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
-      ' OSIS WindowsAND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS /one/two/three'
+      ' OSIS WindowsAND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS c:\\fol\\bin.exe'
     );
   });
 
@@ -125,7 +124,7 @@ describe.each([
     render();
 
     expect(renderResult.getByTestId('testCard-criteriaConditions').textContent).toEqual(
-      ` OSIS ${OS_LINUX}, ${OS_MAC}, ${OS_WINDOWS}AND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS /one/two/three`
+      ` OSIS ${OS_LINUX}, ${OS_MAC}, ${OS_WINDOWS}AND process.hash.*IS 1234234659af249ddf3e40864e9fb241AND process.executable.caselessIS c:\\fol\\bin.exe`
     );
   });
 

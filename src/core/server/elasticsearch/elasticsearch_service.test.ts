@@ -21,7 +21,7 @@ import { MockClusterClient, isScriptingEnabledMock } from './elasticsearch_servi
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
-import { REPO_ROOT } from '@kbn/dev-utils';
+import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '../config';
 import { configServiceMock, getEnvOptions } from '../config/mocks';
 import { CoreContext } from '../core_context';
@@ -34,6 +34,7 @@ import { elasticsearchClientMock } from './client/mocks';
 import { duration } from 'moment';
 import { isValidConnection as isValidConnectionMock } from './is_valid_connection';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';
+import { analyticsServiceMock } from '../analytics/analytics_service.mock';
 
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
   './version_check/ensure_es_version'
@@ -53,6 +54,7 @@ let setupDeps: SetupDeps;
 
 beforeEach(() => {
   setupDeps = {
+    analytics: analyticsServiceMock.createAnalyticsServiceSetup(),
     http: httpServiceMock.createInternalSetupContract(),
     executionContext: executionContextServiceMock.createInternalSetupContract(),
   };
@@ -127,7 +129,9 @@ describe('#preboot', () => {
       expect(clusterClient).toBe(mockClusterClientInstance);
 
       expect(MockClusterClient).toHaveBeenCalledTimes(1);
-      expect(MockClusterClient.mock.calls[0][0]).toEqual(expect.objectContaining(customConfig));
+      expect(MockClusterClient.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ config: expect.objectContaining(customConfig) })
+      );
     });
 
     it('creates a new client on each call', async () => {
@@ -151,7 +155,7 @@ describe('#preboot', () => {
       };
 
       prebootContract.createClient('some-custom-type', customConfig);
-      const config = MockClusterClient.mock.calls[0][0];
+      const config = MockClusterClient.mock.calls[0][0].config;
 
       expect(config).toMatchInlineSnapshot(`
         Object {
@@ -334,7 +338,9 @@ describe('#start', () => {
       expect(clusterClient).toBe(mockClusterClientInstance);
 
       expect(MockClusterClient).toHaveBeenCalledTimes(1);
-      expect(MockClusterClient.mock.calls[0][0]).toEqual(expect.objectContaining(customConfig));
+      expect(MockClusterClient.mock.calls[0][0]).toEqual(
+        expect.objectContaining({ config: expect.objectContaining(customConfig) })
+      );
     });
     it('creates a new client on each call', async () => {
       await elasticsearchService.setup(setupDeps);
@@ -365,7 +371,7 @@ describe('#start', () => {
       };
 
       startContract.createClient('some-custom-type', customConfig);
-      const config = MockClusterClient.mock.calls[0][0];
+      const config = MockClusterClient.mock.calls[0][0].config;
 
       expect(config).toMatchInlineSnapshot(`
         Object {

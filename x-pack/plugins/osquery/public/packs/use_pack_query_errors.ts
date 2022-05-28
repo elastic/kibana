@@ -6,21 +6,22 @@
  */
 
 import { useQuery } from 'react-query';
-import { IndexPattern, SortDirection } from '../../../../../src/plugins/data/common';
+import { lastValueFrom } from 'rxjs';
+import { DataView, SortDirection } from '@kbn/data-plugin/common';
 
 import { useKibana } from '../common/lib/kibana';
 
 interface UsePackQueryErrorsProps {
   actionId: string;
   interval: number;
-  logsIndexPattern?: IndexPattern;
+  logsDataView?: DataView;
   skip?: boolean;
 }
 
 export const usePackQueryErrors = ({
   actionId,
   interval,
-  logsIndexPattern,
+  logsDataView,
   skip = false,
 }: UsePackQueryErrorsProps) => {
   const data = useKibana().services.data;
@@ -29,7 +30,6 @@ export const usePackQueryErrors = ({
     ['scheduledQueryErrors', { actionId, interval }],
     async () => {
       const searchSource = await data.search.searchSource.create({
-        index: logsIndexPattern,
         fields: ['*'],
         sort: [
           {
@@ -69,11 +69,13 @@ export const usePackQueryErrors = ({
         size: 1000,
       });
 
-      return searchSource.fetch$().toPromise();
+      searchSource.setField('index', logsDataView);
+
+      return lastValueFrom(searchSource.fetch$());
     },
     {
       keepPreviousData: true,
-      enabled: !!(!skip && actionId && interval && logsIndexPattern),
+      enabled: !!(!skip && actionId && interval && logsDataView),
       select: (response) => response.rawResponse.hits ?? [],
       refetchOnReconnect: false,
       refetchOnWindowFocus: false,

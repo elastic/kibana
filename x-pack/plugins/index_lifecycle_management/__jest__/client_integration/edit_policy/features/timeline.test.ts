@@ -11,17 +11,13 @@ import { setupTimelineTestBed, TimelineTestBed } from './timeline.helpers';
 
 describe('<EditPolicy /> timeline', () => {
   let testBed: TimelineTestBed;
-  const { server, httpRequestsMockHelpers } = setupEnvironment();
-
-  afterAll(() => {
-    server.restore();
-  });
+  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
 
   beforeEach(async () => {
     httpRequestsMockHelpers.setDefaultResponses();
 
     await act(async () => {
-      testBed = await setupTimelineTestBed();
+      testBed = await setupTimelineTestBed(httpSetup);
     });
 
     const { component } = testBed;

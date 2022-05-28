@@ -12,6 +12,18 @@ import { EuiHorizontalRule } from '@elastic/eui';
 import UseUnmount from 'react-use/lib/useUnmount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { OverlayRef } from '@kbn/core/public';
+import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import {
+  AddFromLibraryButton,
+  LazyLabsFlyout,
+  PrimaryActionButton,
+  QuickButtonGroup,
+  QuickButtonProps,
+  SolutionToolbar,
+  withSuspense,
+} from '@kbn/presentation-util-plugin/public';
 import { saveDashboard } from '../lib';
 import { TopNavIds } from './top_nav_ids';
 import { EditorMenu } from './editor_menu';
@@ -21,13 +33,10 @@ import { DashboardSaveModal } from './save_modal';
 import { showCloneModal } from './show_clone_modal';
 import { ShowShareModal } from './show_share_modal';
 import { getTopNavConfig } from './get_top_nav_config';
-import { OverlayRef } from '../../../../../core/public';
 import { useKibana } from '../../services/kibana_react';
 import { showOptionsPopover } from './show_options_popover';
 import { DashboardConstants } from '../../dashboard_constants';
-import { TopNavMenuProps } from '../../../../navigation/public';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
-import { BaseVisType, VisTypeAlias } from '../../../../visualizations/public';
 import { DashboardAppState, DashboardSaveOptions, NavAction } from '../../types';
 import { isErrorEmbeddable, openAddPanelFlyout, ViewMode } from '../../services/embeddable';
 import { DashboardAppServices, DashboardEmbedSettings, DashboardRedirect } from '../../types';
@@ -39,21 +48,12 @@ import {
   setSavedQueryId,
   setStateFromSaveModal,
   setSyncColors,
+  setSyncTooltips,
   setUseMargins,
   setViewMode,
   useDashboardDispatch,
   useDashboardSelector,
 } from '../state';
-
-import {
-  AddFromLibraryButton,
-  LazyLabsFlyout,
-  PrimaryActionButton,
-  QuickButtonGroup,
-  QuickButtonProps,
-  SolutionToolbar,
-  withSuspense,
-} from '../../../../presentation_util/public';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -82,6 +82,7 @@ export interface DashboardTopNavProps {
   dashboardAppState: CompleteDashboardAppState;
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
+  printMode: boolean;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
@@ -90,6 +91,7 @@ export function DashboardTopNav({
   dashboardAppState,
   embedSettings,
   redirectTo,
+  printMode,
 }: DashboardTopNavProps) {
   const {
     core,
@@ -110,7 +112,9 @@ export function DashboardTopNav({
   } = useKibana<DashboardAppServices>().services;
   const { version: kibanaVersion } = initializerContext.env.packageInfo;
   const timefilter = data.query.timefilter.timefilter;
-  const toasts = core.notifications.toasts;
+  const { notifications, theme } = core;
+  const { toasts } = notifications;
+  const { theme$ } = theme;
 
   const dispatchDashboardStateChange = useDashboardDispatch();
   const dashboardState = useDashboardSelector((state) => state.dashboardStateReducer);
@@ -159,6 +163,7 @@ export function DashboardTopNav({
           overlays: core.overlays,
           SavedObjectFinder: getSavedObjectFinder(core.savedObjects, uiSettings),
           reportUiCounter: usageCollection?.reportUiCounter,
+          theme: core.theme,
         }),
       }));
     }
@@ -169,6 +174,7 @@ export function DashboardTopNav({
     core.notifications,
     core.savedObjects,
     core.overlays,
+    core.theme,
     uiSettings,
     usageCollection,
   ]);
@@ -206,16 +212,17 @@ export function DashboardTopNav({
     [stateTransferService, data.search.session, trackUiMetric]
   );
 
-  const clearAddPanel = useCallback(() => {
+  const closeAllFlyouts = useCallback(() => {
+    dashboardAppState.dashboardContainer.controlGroup?.closeAllFlyouts();
     if (state.addPanelOverlay) {
       state.addPanelOverlay.close();
       setState((s) => ({ ...s, addPanelOverlay: undefined }));
     }
-  }, [state.addPanelOverlay]);
+  }, [state.addPanelOverlay, dashboardAppState.dashboardContainer.controlGroup]);
 
   const onChangeViewMode = useCallback(
     (newMode: ViewMode) => {
-      clearAddPanel();
+      closeAllFlyouts();
       const willLoseChanges = newMode === ViewMode.VIEW && dashboardAppState.hasUnsavedChanges;
 
       if (!willLoseChanges) {
@@ -227,7 +234,7 @@ export function DashboardTopNav({
         dashboardAppState.resetToLastSavedState?.()
       );
     },
-    [clearAddPanel, core.overlays, dashboardAppState, dispatchDashboardStateChange]
+    [closeAllFlyouts, core.overlays, dashboardAppState, dispatchDashboardStateChange]
   );
 
   const runSaveAs = useCallback(async () => {
@@ -292,7 +299,7 @@ export function DashboardTopNav({
         showCopyOnSave={lastDashboardId ? true : false}
       />
     );
-    clearAddPanel();
+    closeAllFlyouts();
     showSaveModal(dashboardSaveModal, core.i18n.Context);
   }, [
     dispatchDashboardStateChange,
@@ -301,7 +308,7 @@ export function DashboardTopNav({
     dashboardAppState,
     core.i18n.Context,
     chrome.docTitle,
-    clearAddPanel,
+    closeAllFlyouts,
     kibanaVersion,
     timefilter,
     redirectTo,
@@ -367,7 +374,7 @@ export function DashboardTopNav({
       });
       return saveResult.id ? { id: saveResult.id } : { error: saveResult.error };
     };
-    showCloneModal(onClone, currentState.title);
+    showCloneModal({ onClone, title: currentState.title, theme$ });
   }, [
     dashboardSessionStorage,
     savedObjectsTagging,
@@ -375,6 +382,7 @@ export function DashboardTopNav({
     kibanaVersion,
     redirectTo,
     timefilter,
+    theme$,
     toasts,
   ]);
 
@@ -391,13 +399,18 @@ export function DashboardTopNav({
         onSyncColorsChange: (isChecked: boolean) => {
           dispatchDashboardStateChange(setSyncColors(isChecked));
         },
+        syncTooltips: Boolean(currentState.options.syncTooltips),
+        onSyncTooltipsChange: (isChecked: boolean) => {
+          dispatchDashboardStateChange(setSyncTooltips(isChecked));
+        },
         hidePanelTitles: currentState.options.hidePanelTitles,
         onHidePanelTitlesChange: (isChecked: boolean) => {
           dispatchDashboardStateChange(setHidePanelTitles(isChecked));
         },
+        theme$,
       });
     },
-    [dashboardAppState, dispatchDashboardStateChange]
+    [dashboardAppState, dispatchDashboardStateChange, theme$]
   );
 
   const showShare = useCallback(
@@ -407,16 +420,24 @@ export function DashboardTopNav({
       const timeRange = timefilter.getTime();
       ShowShareModal({
         share,
+        timeRange,
         kibanaVersion,
         anchorElement,
         dashboardCapabilities,
+        dashboardSessionStorage,
         currentDashboardState: currentState,
         savedDashboard: dashboardAppState.savedDashboard,
         isDirty: Boolean(dashboardAppState.hasUnsavedChanges),
-        timeRange,
       });
     },
-    [dashboardAppState, dashboardCapabilities, share, kibanaVersion, timefilter]
+    [
+      share,
+      timefilter,
+      kibanaVersion,
+      dashboardAppState,
+      dashboardCapabilities,
+      dashboardSessionStorage,
+    ]
   );
 
   const dashboardTopNavActions = useMemo(() => {
@@ -454,7 +475,7 @@ export function DashboardTopNav({
   ]);
 
   UseUnmount(() => {
-    clearAddPanel();
+    closeAllFlyouts();
     setMounted(false);
   });
 
@@ -469,10 +490,12 @@ export function DashboardTopNav({
 
     const isFullScreenMode = dashboardState.fullScreenMode;
     const showTopNavMenu = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowTopNavMenu));
-    const showQueryInput = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowQueryInput));
+    const showQueryInput = shouldShowNavBarComponent(
+      Boolean(embedSettings?.forceShowQueryInput || printMode)
+    );
     const showDatePicker = shouldShowNavBarComponent(Boolean(embedSettings?.forceShowDatePicker));
     const showFilterBar = shouldShowFilterBar(Boolean(embedSettings?.forceHideFilterBar));
-    const showQueryBar = showQueryInput || showDatePicker;
+    const showQueryBar = showQueryInput || showDatePicker || showFilterBar;
     const showSearchBar = showQueryBar || showFilterBar;
     const screenTitle = dashboardState.title;
 
@@ -494,7 +517,7 @@ export function DashboardTopNav({
             {
               'data-test-subj': 'dashboardUnsavedChangesBadge',
               badgeText: unsavedChangesBadge.getUnsavedChangedBadgeText(),
-              color: 'secondary',
+              color: 'success',
             },
           ]
         : undefined;
@@ -511,11 +534,12 @@ export function DashboardTopNav({
       showDatePicker,
       showFilterBar,
       setMenuMountPoint: embedSettings ? undefined : setHeaderActionMenu,
-      indexPatterns: dashboardAppState.indexPatterns,
+      indexPatterns: dashboardAppState.dataViews,
       showSaveQuery: dashboardCapabilities.saveQuery,
       useDefaultBehaviors: true,
       savedQuery: state.savedQuery,
       savedQueryId: dashboardState.savedQuery,
+      visible: printMode !== true,
       onQuerySubmit: (_payload, isUpdate) => {
         if (isUpdate === false) {
           dashboardAppState.$triggerDashboardRefresh.next({ force: true });
@@ -566,10 +590,10 @@ export function DashboardTopNav({
   return (
     <>
       <TopNavMenu {...getNavBarProps()} />
-      {isLabsEnabled && isLabsShown ? (
+      {!printMode && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />
       ) : null}
-      {dashboardState.viewMode !== ViewMode.VIEW ? (
+      {dashboardState.viewMode !== ViewMode.VIEW && !printMode ? (
         <>
           <EuiHorizontalRule margin="none" />
           <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>
@@ -584,17 +608,16 @@ export function DashboardTopNav({
                 />
               ),
               quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-              addFromLibraryButton: (
-                <AddFromLibraryButton
-                  onClick={addFromLibrary}
-                  data-test-subj="dashboardAddPanelButton"
-                />
-              ),
               extraButtons: [
                 <EditorMenu
                   createNewVisType={createNewVisType}
                   dashboardContainer={dashboardAppState.dashboardContainer}
                 />,
+                <AddFromLibraryButton
+                  onClick={addFromLibrary}
+                  data-test-subj="dashboardAddPanelButton"
+                />,
+                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons(),
               ],
             }}
           </SolutionToolbar>

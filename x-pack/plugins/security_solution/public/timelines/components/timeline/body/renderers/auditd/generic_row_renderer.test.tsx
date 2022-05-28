@@ -9,9 +9,7 @@ import { shallow } from 'enzyme';
 import { cloneDeep } from 'lodash/fp';
 import React from 'react';
 
-import { RowRenderer } from '../../../../../../../common';
-import { BrowserFields } from '../../../../../../common/containers/source';
-import { mockBrowserFields } from '../../../../../../common/containers/source/mock';
+import { RowRenderer } from '../../../../../../../common/types';
 import { Ecs } from '../../../../../../../common/ecs';
 import { mockTimelineData, TestProviders } from '../../../../../../common/mock';
 import { useMountAppended } from '../../../../../../common/utils/use_mount_appended';
@@ -49,10 +47,7 @@ describe('GenericRowRenderer', () => {
       });
     });
     test('renders correctly against snapshot', () => {
-      // I cannot and do not want to use BrowserFields mocks for the snapshot tests as they are too heavy
-      const browserFields: BrowserFields = {};
       const children = connectedToRenderer.renderRow({
-        browserFields,
         data: auditd,
         isDraggable: true,
         timelineId: 'test',
@@ -82,7 +77,6 @@ describe('GenericRowRenderer', () => {
 
     test('should render a auditd row', () => {
       const children = connectedToRenderer.renderRow({
-        browserFields: mockBrowserFields,
         data: auditd,
         isDraggable: true,
         timelineId: 'test',
@@ -113,10 +107,7 @@ describe('GenericRowRenderer', () => {
     });
 
     test('renders correctly against snapshot', () => {
-      // I cannot and do not want to use BrowserFields mocks for the snapshot tests as they are too heavy
-      const browserFields: BrowserFields = {};
       const children = fileToRenderer.renderRow({
-        browserFields,
         data: auditdFile,
         isDraggable: true,
         timelineId: 'test',
@@ -146,7 +137,6 @@ describe('GenericRowRenderer', () => {
 
     test('should render a auditd row', () => {
       const children = fileToRenderer.renderRow({
-        browserFields: mockBrowserFields,
         data: auditdFile,
         isDraggable: true,
         timelineId: 'test',

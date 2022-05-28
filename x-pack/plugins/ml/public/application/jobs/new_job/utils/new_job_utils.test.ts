@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from 'kibana/public';
-import { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import { IUiSettingsClient } from '@kbn/core/public';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearchSavedObject } from '../../../../../common/types/kibana';
 import { createSearchItems } from './new_job_utils';
 
@@ -56,7 +56,7 @@ describe('createSearchItems', () => {
     } as unknown as SavedSearchSavedObject;
   });
 
-  test('should match index pattern', () => {
+  test('should match data view', () => {
     const resp = createSearchItems(kibanaConfig, indexPattern, null);
     expect(resp).toStrictEqual({
       combinedQuery: { bool: { must: [{ match_all: {} }] } },

@@ -8,7 +8,7 @@
 import { castArray } from 'lodash';
 import { EuiCode, EuiLoadingContent, EuiEmptyPrompt } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { LiveQueryForm } from './form';
 import { useActionResultsPrivileges } from '../action_results/use_action_privileges';
@@ -28,6 +28,8 @@ interface LiveQueryProps {
   ecsMappingField?: boolean;
   enabled?: boolean;
   formType?: 'steps' | 'simple';
+  hideAgentsField?: boolean;
+  addToTimeline?: (payload: { query: [string, string]; isIcon?: true }) => React.ReactElement;
 }
 
 const LiveQueryComponent: React.FC<LiveQueryProps> = ({
@@ -39,23 +41,29 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   savedQueryId,
   // eslint-disable-next-line @typescript-eslint/naming-convention
   ecs_mapping,
-  agentsField,
   queryField,
   ecsMappingField,
   formType,
   enabled,
+  hideAgentsField,
+  addToTimeline,
 }) => {
-  const { data: hasActionResultsPrivileges, isFetched } = useActionResultsPrivileges();
+  const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
   const defaultValue = useMemo(() => {
-    if (agentId || agentPolicyIds || query) {
+    if (agentId || agentPolicyIds?.length || query?.length) {
+      const agentSelection =
+        agentId || agentPolicyIds?.length
+          ? {
+              allAgentsSelected: false,
+              agents: castArray(agentId ?? agentIds ?? []),
+              platformsSelected: [],
+              policiesSelected: agentPolicyIds ?? [],
+            }
+          : null;
+
       return {
-        agentSelection: {
-          allAgentsSelected: false,
-          agents: castArray(agentId ?? agentIds ?? []),
-          platformsSelected: [],
-          policiesSelected: agentPolicyIds ?? [],
-        },
+        ...(agentSelection ? { agentSelection } : {}),
         query,
         savedQueryId,
         ecs_mapping,
@@ -65,7 +73,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
     return undefined;
   }, [agentId, agentIds, agentPolicyIds, ecs_mapping, query, savedQueryId]);
 
-  if (!isFetched) {
+  if (isLoading) {
     return <EuiLoadingContent lines={10} />;
   }
 
@@ -101,13 +109,14 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
 
   return (
     <LiveQueryForm
-      agentsField={agentId ? !agentId : agentsField}
       queryField={queryField}
       ecsMappingField={ecsMappingField}
       defaultValue={defaultValue}
       onSuccess={onSuccess}
       formType={formType}
       enabled={enabled}
+      hideAgentsField={hideAgentsField}
+      addToTimeline={addToTimeline}
     />
   );
 };

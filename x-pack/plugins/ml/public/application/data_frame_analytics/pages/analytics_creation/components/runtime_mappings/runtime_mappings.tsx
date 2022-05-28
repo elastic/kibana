@@ -18,11 +18,11 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { XJsonMode } from '@kbn/ace';
+import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { useMlContext } from '../../../../../contexts/ml';
 import { CreateAnalyticsFormProps } from '../../../analytics_management/hooks/use_create_analytics_form';
-import { XJson } from '../../../../../../../../../../src/plugins/es_ui_shared/public';
 import { getCombinedRuntimeMappings } from '../../../../../components/data_grid/common';
 import { isPopulatedObject } from '../../../../../../../common/util/object_utils';
 import { RuntimeMappingsEditor } from './runtime_mappings_editor';
@@ -95,7 +95,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   } = useXJsonMode(runtimeMappings || '');
 
   const mlContext = useMlContext();
-  const { currentIndexPattern } = mlContext;
+  const { currentDataView } = mlContext;
 
   const applyChanges = () => {
     const removeRuntimeMappings = advancedRuntimeMappingsConfig === '';
@@ -133,10 +133,7 @@ export const RuntimeMappings: FC<Props> = ({ actions, state }) => {
   };
 
   useEffect(function getInitialRuntimeMappings() {
-    const combinedRuntimeMappings = getCombinedRuntimeMappings(
-      currentIndexPattern,
-      runtimeMappings
-    );
+    const combinedRuntimeMappings = getCombinedRuntimeMappings(currentDataView, runtimeMappings);
 
     const prettySourceConfig = JSON.stringify(combinedRuntimeMappings, null, 2);
 

@@ -7,7 +7,10 @@
  */
 
 import { assign, cloneDeep } from 'lodash';
-import { SavedObjectsClientContract } from 'kibana/public';
+import { SavedObjectsClientContract } from '@kbn/core/public';
+import type { ResolvedSimpleSavedObject } from '@kbn/core/public';
+import { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/types';
+import { RawControlGroupAttributes } from '@kbn/controls-plugin/common';
 import { EmbeddableStart } from '../services/embeddable';
 import { SavedObject, SavedObjectsStart } from '../services/saved_objects';
 import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data';
@@ -15,7 +18,6 @@ import { Filter, ISearchSource, Query, RefreshInterval } from '../services/data'
 import { createDashboardEditUrl } from '../dashboard_constants';
 import { extractReferences, injectReferences } from '../../common/saved_dashboard_references';
 
-import { SavedObjectAttributes, SavedObjectReference } from '../../../../core/types';
 import { DashboardOptions } from '../types';
 
 export interface DashboardSavedObject extends SavedObject {
@@ -34,8 +36,11 @@ export interface DashboardSavedObject extends SavedObject {
   getQuery(): Query;
   getFilters(): Filter[];
   getFullEditPath: (editMode?: boolean) => string;
-  outcome?: string;
-  aliasId?: string;
+  outcome?: ResolvedSimpleSavedObject['outcome'];
+  aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
+  aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
+
+  controlGroupInput?: Omit<RawControlGroupAttributes, 'id'>;
 }
 
 const defaults = {
@@ -47,6 +52,7 @@ const defaults = {
     // for BWC reasons we can't default dashboards that already exist without this setting to true.
     useMargins: true,
     syncColors: false,
+    syncTooltips: false,
     hidePanelTitles: false,
   } as DashboardOptions),
   version: 1,
@@ -86,13 +92,21 @@ export function createSavedDashboardClass(
           value: { type: 'integer' },
         },
       },
+      controlGroupInput: {
+        type: 'object',
+        properties: {
+          controlStyle: { type: 'keyword' },
+          panelsJSON: { type: 'text' },
+        },
+      },
     };
     public static fieldOrder = ['title', 'description'];
     public static searchSource = true;
     public showInRecentlyAccessed = true;
 
-    public outcome?: string;
-    public aliasId?: string;
+    public outcome?: ResolvedSimpleSavedObject['outcome'];
+    public aliasId?: ResolvedSimpleSavedObject['alias_target_id'];
+    public aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 
     constructor(arg: { id: string; useResolve: boolean } | string) {
       super({
@@ -143,6 +157,7 @@ export function createSavedDashboardClass(
           const {
             outcome,
             alias_target_id: aliasId,
+            alias_purpose: aliasPurpose,
             saved_object: resp,
           } = await savedObjectsClient.resolve(esType, id);
 
@@ -156,6 +171,7 @@ export function createSavedDashboardClass(
 
           this.outcome = outcome;
           this.aliasId = aliasId;
+          this.aliasPurpose = aliasPurpose;
           await this.applyESResp(respMapped);
 
           return this;

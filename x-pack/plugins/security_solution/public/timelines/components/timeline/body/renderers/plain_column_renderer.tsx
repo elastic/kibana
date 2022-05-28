@@ -7,9 +7,9 @@
 
 import { head } from 'lodash/fp';
 import React from 'react';
-import { Filter } from '../../../../../../../../../src/plugins/data/public';
+import type { Filter } from '@kbn/es-query';
 
-import { ColumnHeaderOptions } from '../../../../../../common';
+import { ColumnHeaderOptions } from '../../../../../../common/types';
 import { TimelineNonEcsData } from '../../../../../../common/search_strategy/timeline';
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { ColumnRenderer } from './column_renderer';
@@ -50,9 +50,10 @@ export const plainColumnRenderer: ColumnRenderer = {
             asPlainText={asPlainText}
             contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
             eventId={eventId}
-            fieldFormat={field.format || ''}
+            fieldFormat={field.format ?? ''}
             fieldName={columnName}
-            fieldType={field.type || ''}
+            isAggregatable={field.aggregatable ?? false}
+            fieldType={field.type ?? ''}
             isDraggable={isDraggable}
             key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
             linkValue={head(linkValues)}

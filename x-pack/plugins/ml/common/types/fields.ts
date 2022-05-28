@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 import {
   ML_JOB_AGGREGATION,
   KIBANA_AGGREGATION,

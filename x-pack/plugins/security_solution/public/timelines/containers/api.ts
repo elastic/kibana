@@ -10,7 +10,7 @@ import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isEmpty } from 'lodash';
 
-import { throwErrors } from '../../../../cases/common';
+import { throwErrors } from '@kbn/cases-plugin/common';
 import {
   TimelineResponse,
   TimelineResponseType,
@@ -336,19 +336,6 @@ export const getTimelineTemplate = async (templateTimelineId: string) => {
   });
 
   return decodeSingleTimelineResponse(response);
-};
-
-export const getResolvedTimelineTemplate = async (templateTimelineId: string) => {
-  const response = await KibanaServices.get().http.get<SingleTimelineResolveResponse>(
-    TIMELINE_RESOLVE_URL,
-    {
-      query: {
-        template_timeline_id: templateTimelineId,
-      },
-    }
-  );
-
-  return decodeResolvedSingleTimelineResponse(response);
 };
 
 export const getAllTimelines = async (args: GetTimelinesArgs, abortSignal: AbortSignal) => {

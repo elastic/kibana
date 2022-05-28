@@ -44,6 +44,8 @@ export const UserProcess = React.memo<{
               isDraggable={isDraggable}
               value={user}
               iconType="user"
+              isAggregatable={true}
+              fieldType="keyword"
             />
           </EuiFlexItem>
         ))
@@ -60,6 +62,8 @@ export const UserProcess = React.memo<{
               isDraggable={isDraggable}
               value={process}
               iconType="console"
+              isAggregatable={true}
+              fieldType="keyword"
             />
           </EuiFlexItem>
         ))

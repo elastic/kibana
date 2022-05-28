@@ -9,10 +9,11 @@
 import {
   extractIndexPatternValues,
   isStringTypeIndexPattern,
+  isDataViewTypeIndexPattern,
   fetchIndexPattern,
 } from './index_patterns_utils';
 import { Panel } from './types';
-import { IndexPattern, IndexPatternsService } from '../../../data/common';
+import type { DataView, DataViewsService } from '@kbn/data-views-plugin/public';
 
 describe('isStringTypeIndexPattern', () => {
   test('should returns true on string-based index', () => {
@@ -20,6 +21,21 @@ describe('isStringTypeIndexPattern', () => {
   });
   test('should returns false on object-based index', () => {
     expect(isStringTypeIndexPattern({ id: 'id' })).toBeFalsy();
+  });
+  test('should returns false on undefined', () => {
+    expect(isStringTypeIndexPattern(undefined)).toBeFalsy();
+  });
+});
+
+describe('isDataViewTypeIndexPattern', () => {
+  test('should returns true on data-view index', () => {
+    expect(isDataViewTypeIndexPattern({ id: 'id' })).toBeTruthy();
+  });
+  test('should returns false on string-based index', () => {
+    expect(isDataViewTypeIndexPattern('index')).toBeFalsy();
+  });
+  test('should returns false on undefined', () => {
+    expect(isDataViewTypeIndexPattern(undefined)).toBeFalsy();
   });
 });
 
@@ -54,8 +70,8 @@ describe('extractIndexPatterns', () => {
 });
 
 describe('fetchIndexPattern', () => {
-  let mockedIndices: IndexPattern[] | [];
-  let indexPatternsService: IndexPatternsService;
+  let mockedIndices: DataView[] | [];
+  let indexPatternsService: DataViewsService;
 
   beforeEach(() => {
     mockedIndices = [];
@@ -64,7 +80,7 @@ describe('fetchIndexPattern', () => {
       getDefault: jest.fn(() => Promise.resolve({ id: 'default', title: 'index' })),
       get: jest.fn(() => Promise.resolve(mockedIndices[0])),
       find: jest.fn(() => Promise.resolve(mockedIndices || [])),
-    } as unknown as IndexPatternsService;
+    } as unknown as DataViewsService;
   });
 
   test('should return default index on no input value', async () => {
@@ -87,7 +103,7 @@ describe('fetchIndexPattern', () => {
           id: 'indexId',
           title: 'indexTitle',
         },
-      ] as IndexPattern[];
+      ] as DataView[];
 
       const value = await fetchIndexPattern('indexTitle', indexPatternsService, {
         fetchKibanaIndexForStringIndexes: true,
@@ -125,7 +141,7 @@ describe('fetchIndexPattern', () => {
           id: 'indexId',
           title: 'indexTitle',
         },
-      ] as IndexPattern[];
+      ] as DataView[];
 
       const value = await fetchIndexPattern({ id: 'indexId' }, indexPatternsService);
 

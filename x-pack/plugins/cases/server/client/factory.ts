@@ -10,9 +10,12 @@ import {
   SavedObjectsServiceStart,
   Logger,
   ElasticsearchClient,
-} from 'kibana/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../../security/server';
-import { SAVED_OBJECT_TYPES } from '../../common';
+} from '@kbn/core/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
 import { GetSpaceFn } from '../authorization/types';
 import {
@@ -23,9 +26,6 @@ import {
   AttachmentService,
   AlertService,
 } from '../services';
-import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
-import { PluginStartContract as ActionsPluginStart } from '../../../actions/server';
-import { LensServerPluginSetup } from '../../../lens/server';
 
 import { AuthorizationAuditLogger } from '../authorization';
 import { CasesClient, createCasesClient } from '.';
@@ -91,25 +91,32 @@ export class CasesClientFactory {
       logger: this.logger,
     });
 
-    const caseService = new CasesService(this.logger, this.options?.securityPluginStart?.authc);
+    const unsecuredSavedObjectsClient = savedObjectsService.getScopedClient(request, {
+      includedHiddenTypes: SAVED_OBJECT_TYPES,
+      // this tells the security plugin to not perform SO authorization and audit logging since we are handling
+      // that manually using our Authorization class and audit logger.
+      excludedWrappers: ['security'],
+    });
+
+    const attachmentService = new AttachmentService(this.logger);
+    const caseService = new CasesService({
+      log: this.logger,
+      authentication: this.options?.securityPluginStart?.authc,
+      unsecuredSavedObjectsClient,
+      attachmentService,
+    });
     const userInfo = caseService.getUser({ request });
 
     return createCasesClient({
-      alertsService: new AlertService(),
-      scopedClusterClient,
-      unsecuredSavedObjectsClient: savedObjectsService.getScopedClient(request, {
-        includedHiddenTypes: SAVED_OBJECT_TYPES,
-        // this tells the security plugin to not perform SO authorization and audit logging since we are handling
-        // that manually using our Authorization class and audit logger.
-        excludedWrappers: ['security'],
-      }),
+      alertsService: new AlertService(scopedClusterClient, this.logger),
+      unsecuredSavedObjectsClient,
       // We only want these fields from the userInfo object
       user: { username: userInfo.username, email: userInfo.email, full_name: userInfo.full_name },
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),
       userActionService: new CaseUserActionService(this.logger),
-      attachmentService: new AttachmentService(this.logger),
+      attachmentService,
       logger: this.logger,
       lensEmbeddableFactory: this.options.lensEmbeddableFactory,
       authorization: auth,

@@ -8,14 +8,14 @@
 // brace/ace uses the Worker class, which is not currently provided by JSDOM.
 // This is not required for the tests to pass, but it rather suppresses lengthy
 // warnings in the console which adds unnecessary noise to the test output.
-import '@kbn/test/target_node/jest/utils/stub_web_worker';
+import '@kbn/test-jest-helpers/target_node/stub_web_worker';
 
 import React from 'react';
 
-import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test/jest';
+import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { coreMock, scopedHistoryMock } from 'src/core/public/mocks';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
 
 import type { Role } from '../../../../common/model';
 import { RoleComboBox } from '../../role_combo_box';
@@ -39,6 +39,7 @@ describe('EditRoleMappingPage', () => {
     return mountWithIntl(
       <KibanaContextProvider services={coreStart}>
         <EditRoleMappingPage
+          action="edit"
           name={name}
           roleMappingsAPI={roleMappingsAPI}
           rolesAPIClient={rolesAPI}

@@ -8,9 +8,13 @@
 
 import { render, unmountComponentAtNode } from 'react-dom';
 import React from 'react';
-import { ExpressionRenderDefinition } from 'src/plugins/expressions/common';
+import { Observable } from 'rxjs';
+import { CoreTheme } from '@kbn/core/public';
+import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { withSuspense } from '../../../../../src/plugins/presentation_util/public';
+import { CoreSetup } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { withSuspense, defaultTheme$ } from '@kbn/presentation-util-plugin/public';
 import { LazyDebugRenderComponent } from '../components';
 import { JSON } from '../../common';
 
@@ -30,13 +34,22 @@ const strings = {
     }),
 };
 
-export const debugRenderer = (): ExpressionRenderDefinition<any> => ({
-  name: 'debug',
-  displayName: strings.getDisplayName(),
-  help: strings.getHelpDescription(),
-  reuseDomNode: true,
-  render(domNode, config, handlers) {
-    handlers.onDestroy(() => unmountComponentAtNode(domNode));
-    render(<Debug parentNode={domNode} payload={config} onLoaded={handlers.done} />, domNode);
-  },
-});
+export const getDebugRenderer =
+  (theme$: Observable<CoreTheme> = defaultTheme$) =>
+  (): ExpressionRenderDefinition<any> => ({
+    name: 'debug',
+    displayName: strings.getDisplayName(),
+    help: strings.getHelpDescription(),
+    reuseDomNode: true,
+    render(domNode, config, handlers) {
+      handlers.onDestroy(() => unmountComponentAtNode(domNode));
+      render(
+        <KibanaThemeProvider theme$={theme$}>
+          <Debug parentNode={domNode} payload={config} onLoaded={handlers.done} />
+        </KibanaThemeProvider>,
+        domNode
+      );
+    },
+  });
+
+export const debugRendererFactory = (core: CoreSetup) => getDebugRenderer(core.theme.theme$);

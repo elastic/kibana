@@ -14,14 +14,14 @@ import {
   EuiComboBoxOptionOption,
   EuiComboBox,
 } from '@elastic/eui';
-import { IndexPatternBase, IndexPatternFieldBase } from '@kbn/es-query';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 
 import { uniq } from 'lodash';
 
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 // TODO: I have to use any here for now, but once this is available below, we should use the correct types, https://github.com/elastic/kibana/issues/100715
-// import { AutocompleteStart } from '../../../../../../../src/plugins/data/public';
+// import { AutocompleteStart } from '../../../../../../../src/plugins/unified_search/public';
 type AutocompleteStart = any;
 
 import * as i18n from '../translations';
@@ -41,9 +41,9 @@ const SINGLE_SELECTION = { asPlainText: true };
 
 interface AutocompleteFieldMatchProps {
   placeholder: string;
-  selectedField: IndexPatternFieldBase | undefined;
+  selectedField: DataViewFieldBase | undefined;
   selectedValue: string | undefined;
-  indexPattern: IndexPatternBase | undefined;
+  indexPattern: DataViewBase | undefined;
   isLoading: boolean;
   isDisabled: boolean;
   isClearable: boolean;

@@ -6,24 +6,41 @@
  * Side Public License, v 1.
  */
 
-import { FormattedMessage } from '@kbn/i18n/react';
-import { EuiLink, EuiButton, EuiEmptyPrompt, EuiBasicTableColumn } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiLink,
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiBasicTableColumn,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { ApplicationStart, SavedObjectsFindOptionsReference } from '@kbn/core/public';
+import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import useMount from 'react-use/lib/useMount';
 import { attemptLoadDashboardByTitle } from '../lib';
 import { DashboardAppServices, DashboardRedirect } from '../../types';
 import {
   getDashboardBreadcrumb,
   dashboardListingTable,
   noItemsStrings,
+  dashboardUnsavedListingStrings,
+  getNewDashboardTitle,
 } from '../../dashboard_strings';
-import { ApplicationStart, SavedObjectsFindOptionsReference } from '../../../../../core/public';
 import { syncQueryStateWithUrl } from '../../services/data';
 import { IKbnUrlStateStorage } from '../../services/kibana_utils';
 import { TableListView, useKibana } from '../../services/kibana_react';
 import { SavedObjectsTaggingApi } from '../../services/saved_objects_tagging_oss';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
-import { confirmCreateWithUnsaved } from './confirm_overlays';
+import { confirmCreateWithUnsaved, confirmDiscardUnsavedChanges } from './confirm_overlays';
 import { getDashboardListItemLink } from './get_dashboard_list_item_link';
+import { DASHBOARD_PANELS_UNSAVED_ID } from '../lib/dashboard_session_storage';
+import { DashboardAppNoDataPage, isDashboardAppInNoDataState } from '../dashboard_app_no_data';
+
+const SAVED_OBJECTS_LIMIT_SETTING = 'savedObjects:listingLimit';
+const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 
 export interface DashboardListingProps {
   kbnUrlStateStorage: IKbnUrlStateStorage;
@@ -42,7 +59,7 @@ export const DashboardListing = ({
     services: {
       core,
       data,
-      savedObjects,
+      dataViews,
       savedDashboards,
       savedObjectsClient,
       savedObjectsTagging,
@@ -52,9 +69,19 @@ export const DashboardListing = ({
     },
   } = useKibana<DashboardAppServices>();
 
+  const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  useMount(() => {
+    (async () => setShowNoDataPage(await isDashboardAppInNoDataState(dataViews)))();
+  });
+
   const [unsavedDashboardIds, setUnsavedDashboardIds] = useState<string[]>(
     dashboardSessionStorage.getDashboardIdsWithUnsavedChanges()
   );
+
+  useExecutionContext(core.executionContext, {
+    type: 'application',
+    page: 'list',
+  });
 
   // Set breadcrumbs useEffect
   useEffect(() => {
@@ -88,7 +115,8 @@ export const DashboardListing = ({
   }, [title, savedObjectsClient, redirectTo, data.query, kbnUrlStateStorage]);
 
   const { showWriteControls } = dashboardCapabilities;
-  const listingLimit = savedObjects.settings.getListingLimit();
+  const listingLimit = core.uiSettings.get(SAVED_OBJECTS_LIMIT_SETTING);
+  const initialPageSize = core.uiSettings.get(SAVED_OBJECTS_PER_PAGE_SETTING);
   const defaultFilter = title ? `"${title}"` : '';
 
   const tableColumns = useMemo(
@@ -108,6 +136,7 @@ export const DashboardListing = ({
     } else {
       confirmCreateWithUnsaved(
         core.overlays,
+        core.theme,
         () => {
           dashboardSessionStorage.clearState();
           redirectTo({ destination: 'dashboard' });
@@ -115,12 +144,111 @@ export const DashboardListing = ({
         () => redirectTo({ destination: 'dashboard' })
       );
     }
-  }, [dashboardSessionStorage, redirectTo, core.overlays]);
+  }, [dashboardSessionStorage, redirectTo, core.overlays, core.theme]);
 
-  const emptyPrompt = useMemo(
-    () => getNoItemsMessage(showWriteControls, core.application, createItem),
-    [createItem, core.application, showWriteControls]
-  );
+  const emptyPrompt = useMemo(() => {
+    if (!showWriteControls) {
+      return (
+        <EuiEmptyPrompt
+          iconType="glasses"
+          title={<h1 id="dashboardListingHeading">{noItemsStrings.getReadonlyTitle()}</h1>}
+          body={<p>{noItemsStrings.getReadonlyBody()}</p>}
+        />
+      );
+    }
+
+    const isEditingFirstDashboard = unsavedDashboardIds.length === 1;
+
+    const emptyAction = isEditingFirstDashboard ? (
+      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            size="s"
+            color="danger"
+            onClick={() =>
+              confirmDiscardUnsavedChanges(core.overlays, () => {
+                dashboardSessionStorage.clearState(DASHBOARD_PANELS_UNSAVED_ID);
+                setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges());
+              })
+            }
+            data-test-subj="discardDashboardPromptButton"
+            aria-label={dashboardUnsavedListingStrings.getDiscardAriaLabel(getNewDashboardTitle())}
+          >
+            {dashboardUnsavedListingStrings.getDiscardTitle()}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            iconType="pencil"
+            color="primary"
+            onClick={() => redirectTo({ destination: 'dashboard' })}
+            data-test-subj="createDashboardPromptButton"
+            aria-label={dashboardUnsavedListingStrings.getEditAriaLabel(getNewDashboardTitle())}
+          >
+            {dashboardUnsavedListingStrings.getEditTitle()}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
+      <EuiButton
+        onClick={createItem}
+        fill
+        iconType="plusInCircle"
+        data-test-subj="createDashboardPromptButton"
+      >
+        {noItemsStrings.getCreateNewDashboardText()}
+      </EuiButton>
+    );
+
+    return (
+      <EuiEmptyPrompt
+        iconType="dashboardApp"
+        title={
+          <h1 id="dashboardListingHeading">
+            {isEditingFirstDashboard
+              ? noItemsStrings.getReadEditInProgressTitle()
+              : noItemsStrings.getReadEditTitle()}
+          </h1>
+        }
+        body={
+          <>
+            <p>{noItemsStrings.getReadEditDashboardDescription()}</p>
+            {!isEditingFirstDashboard && (
+              <p>
+                <FormattedMessage
+                  id="dashboard.listing.createNewDashboard.newToKibanaDescription"
+                  defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
+                  values={{
+                    sampleDataInstallLink: (
+                      <EuiLink
+                        onClick={() =>
+                          core.application.navigateToApp('home', {
+                            path: '#/tutorial_directory/sampleData',
+                          })
+                        }
+                      >
+                        {noItemsStrings.getSampleDataLinkText()}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </p>
+            )}
+          </>
+        }
+        actions={emptyAction}
+      />
+    );
+  }, [
+    redirectTo,
+    createItem,
+    core.overlays,
+    core.application,
+    showWriteControls,
+    unsavedDashboardIds,
+    dashboardSessionStorage,
+  ]);
 
   const fetchItems = useCallback(
     (filter: string) => {
@@ -166,35 +294,44 @@ export const DashboardListing = ({
   const { getEntityName, getTableCaption, getTableListTitle, getEntityNamePlural } =
     dashboardListingTable;
   return (
-    <TableListView
-      createItem={!showWriteControls ? undefined : createItem}
-      deleteItems={!showWriteControls ? undefined : deleteItems}
-      initialPageSize={savedObjects.settings.getPerPage()}
-      editItem={!showWriteControls ? undefined : editItem}
-      initialFilter={initialFilter ?? defaultFilter}
-      toastNotifications={core.notifications.toasts}
-      headingId="dashboardListingHeading"
-      findItems={fetchItems}
-      rowHeader="title"
-      entityNamePlural={getEntityNamePlural()}
-      tableListTitle={getTableListTitle()}
-      tableCaption={getTableCaption()}
-      entityName={getEntityName()}
-      {...{
-        emptyPrompt,
-        searchFilters,
-        listingLimit,
-        tableColumns,
-      }}
-    >
-      <DashboardUnsavedListing
-        redirectTo={redirectTo}
-        unsavedDashboardIds={unsavedDashboardIds}
-        refreshUnsavedDashboards={() =>
-          setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges())
-        }
-      />
-    </TableListView>
+    <>
+      {showNoDataPage && (
+        <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
+      )}
+      {!showNoDataPage && (
+        <TableListView
+          createItem={!showWriteControls ? undefined : createItem}
+          deleteItems={!showWriteControls ? undefined : deleteItems}
+          initialPageSize={initialPageSize}
+          editItem={!showWriteControls ? undefined : editItem}
+          initialFilter={initialFilter ?? defaultFilter}
+          toastNotifications={core.notifications.toasts}
+          headingId="dashboardListingHeading"
+          findItems={fetchItems}
+          rowHeader="title"
+          entityNamePlural={getEntityNamePlural()}
+          tableListTitle={getTableListTitle()}
+          tableCaption={getTableCaption()}
+          entityName={getEntityName()}
+          {...{
+            emptyPrompt,
+            searchFilters,
+            listingLimit,
+            tableColumns,
+          }}
+          theme={core.theme}
+          application={core.application}
+        >
+          <DashboardUnsavedListing
+            redirectTo={redirectTo}
+            unsavedDashboardIds={unsavedDashboardIds}
+            refreshUnsavedDashboards={() =>
+              setUnsavedDashboardIds(dashboardSessionStorage.getDashboardIdsWithUnsavedChanges())
+            }
+          />
+        </TableListView>
+      )}
+    </>
   );
 };
 
@@ -232,61 +369,4 @@ const getTableColumns = (
     },
     ...(savedObjectsTagging ? [savedObjectsTagging.ui.getTableColumnDefinition()] : []),
   ] as unknown as Array<EuiBasicTableColumn<Record<string, unknown>>>;
-};
-
-const getNoItemsMessage = (
-  showWriteControls: boolean,
-  application: ApplicationStart,
-  createItem: () => void
-) => {
-  if (!showWriteControls) {
-    return (
-      <EuiEmptyPrompt
-        iconType="glasses"
-        title={<h1 id="dashboardListingHeading">{noItemsStrings.getReadonlyTitle()}</h1>}
-        body={<p>{noItemsStrings.getReadonlyBody()}</p>}
-      />
-    );
-  }
-
-  return (
-    <EuiEmptyPrompt
-      iconType="dashboardApp"
-      title={<h1 id="dashboardListingHeading">{noItemsStrings.getReadEditTitle()}</h1>}
-      body={
-        <>
-          <p>{noItemsStrings.getReadEditDashboardDescription()}</p>
-          <p>
-            <FormattedMessage
-              id="dashboard.listing.createNewDashboard.newToKibanaDescription"
-              defaultMessage="New to Kibana? {sampleDataInstallLink} to take a test drive."
-              values={{
-                sampleDataInstallLink: (
-                  <EuiLink
-                    onClick={() =>
-                      application.navigateToApp('home', {
-                        path: '#/tutorial_directory/sampleData',
-                      })
-                    }
-                  >
-                    {noItemsStrings.getSampleDataLinkText()}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-        </>
-      }
-      actions={
-        <EuiButton
-          onClick={createItem}
-          fill
-          iconType="plusInCircle"
-          data-test-subj="createDashboardPromptButton"
-        >
-          {noItemsStrings.getCreateNewDashboardText()}
-        </EuiButton>
-      }
-    />
-  );
 };

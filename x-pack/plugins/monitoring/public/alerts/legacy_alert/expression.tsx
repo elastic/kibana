@@ -15,23 +15,36 @@ import { Props } from '../components/param_details_form/expression';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
-export const Expression = ({ alertParams, config, setAlertParams, data }: Props) => {
-  const { derivedIndexPattern } = useDerivedIndexPattern(data, config);
+export const Expression = ({ ruleParams, config, setRuleParams, dataViews }: Props) => {
+  const { derivedIndexPattern } = useDerivedIndexPattern(dataViews, config);
   const onFilterChange = useCallback(
     (filter: string) => {
-      setAlertParams('filterQueryText', filter);
-      setAlertParams(
-        'filterQuery',
-        convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
-      );
+      if (derivedIndexPattern) setRuleParams('filterQueryText', filter);
+      if (derivedIndexPattern)
+        setRuleParams(
+          'filterQuery',
+          convertKueryToElasticSearchQuery(filter, derivedIndexPattern) || ''
+        );
     },
-    [setAlertParams, derivedIndexPattern]
+    [setRuleParams, derivedIndexPattern]
   );
 
   /* eslint-disable-next-line react-hooks/exhaustive-deps */
   const debouncedOnFilterChange = useCallback(debounce(onFilterChange, FILTER_TYPING_DEBOUNCE_MS), [
     onFilterChange,
   ]);
+
+  const kueryBar = derivedIndexPattern ? (
+    <KueryBar
+      value={ruleParams.filterQueryText}
+      derivedIndexPattern={derivedIndexPattern}
+      onSubmit={onFilterChange}
+      onChange={debouncedOnFilterChange}
+    />
+  ) : (
+    <></>
+  );
+
   return (
     <EuiForm component="form">
       <EuiFormRow
@@ -43,14 +56,13 @@ export const Expression = ({ alertParams, config, setAlertParams, data }: Props)
           defaultMessage: 'Use a KQL expression to limit the scope of your alert trigger.',
         })}
       >
-        <KueryBar
-          value={alertParams.filterQueryText}
-          derivedIndexPattern={derivedIndexPattern}
-          onSubmit={onFilterChange}
-          onChange={debouncedOnFilterChange}
-        />
+        {kueryBar}
       </EuiFormRow>
       <EuiSpacer />
     </EuiForm>
   );
 };
+
+// for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default Expression;

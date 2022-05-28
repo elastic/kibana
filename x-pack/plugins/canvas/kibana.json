@@ -25,14 +25,13 @@
     "features",
     "inspector",
     "presentationUtil",
+    "visualizations",
     "uiActions",
     "share"
   ],
   "optionalPlugins": ["home", "reporting", "spaces", "usageCollection"],
   "requiredBundles": [
     "discover",
-    "home",
-    "kibanaLegacy",
     "kibanaReact",
     "kibanaUtils",
     "lens",

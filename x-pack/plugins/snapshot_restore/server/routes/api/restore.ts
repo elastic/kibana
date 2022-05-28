@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { SnapshotRestore, SnapshotRestoreShardEs } from '../../../common/types';
 import { serializeRestoreSettings } from '../../../common/lib';
@@ -24,11 +24,11 @@ export function registerRestoreRoutes({
   router.get(
     { path: addBasePath('restores'), validate: false },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
 
       try {
         const snapshotRestores: SnapshotRestore[] = [];
-        const { body: recoveryByIndexName } = await clusterClient.asCurrentUser.indices.recovery({
+        const recoveryByIndexName = await clusterClient.asCurrentUser.indices.recovery({
           human: true,
         });
 
@@ -99,7 +99,7 @@ export function registerRestoreRoutes({
       validate: { body: restoreSettingsSchema, params: restoreParamsSchema },
     },
     license.guardApiRoute(async (ctx, req, res) => {
-      const { client: clusterClient } = ctx.core.elasticsearch;
+      const { client: clusterClient } = (await ctx.core).elasticsearch;
       const { repository, snapshot } = req.params as TypeOf<typeof restoreParamsSchema>;
       const restoreSettings = req.body as TypeOf<typeof restoreSettingsSchema>;
 
@@ -111,7 +111,7 @@ export function registerRestoreRoutes({
           body: serializeRestoreSettings(restoreSettings) as estypes.SnapshotRestoreRequest['body'],
         });
 
-        return res.ok({ body: response.body });
+        return res.ok({ body: response });
       } catch (e) {
         return handleEsError({ error: e, response: res });
       }

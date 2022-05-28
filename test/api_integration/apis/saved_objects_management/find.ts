@@ -158,6 +158,39 @@ export default function ({ getService }: FtrProviderContext) {
             });
         });
       });
+
+      describe('`sortField` and `sortOrder` parameters', () => {
+        it('sort objects by "type" in "asc" order', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: ['visualization', 'dashboard'],
+              sortField: 'type',
+              sortOrder: 'asc',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects.length).be.greaterThan(1); // Need more than 1 result for our test
+              expect(objects[0].type).to.be('dashboard');
+            });
+        });
+
+        it('sort objects by "type" in "desc" order', async () => {
+          await supertest
+            .get('/api/kibana/management/saved_objects/_find')
+            .query({
+              type: ['visualization', 'dashboard'],
+              sortField: 'type',
+              sortOrder: 'desc',
+            })
+            .expect(200)
+            .then((resp) => {
+              const objects = resp.body.saved_objects;
+              expect(objects[0].type).to.be('visualization');
+            });
+        });
+      });
     });
 
     describe('meta attributes injected properly', () => {
@@ -202,7 +235,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
             });
           }));
 
@@ -244,13 +277,12 @@ export default function ({ getService }: FtrProviderContext) {
               icon: 'indexPatternApp',
               title: 'saved_objects*',
               hiddenType: false,
-              editUrl:
-                '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+              editUrl: '/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                path: '/app/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple',
             });
           }));
     });

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTitle, EuiLink, EuiIcon, EuiText, EuiSpacer } from '@elastic/eui';
 
 import { useCollapsibleList } from './use_collapsible_list';
@@ -28,15 +28,13 @@ export const CollapsibleDataStreamsList: React.FunctionComponent<Props> = ({ dat
   ) : (
     <>
       <EuiText>
-        <ul>
-          {items.map((dataStream) => (
-            <li key={dataStream}>
-              <EuiTitle size="xs">
-                <span>{dataStream}</span>
-              </EuiTitle>
-            </li>
-          ))}
-        </ul>
+        {items.map((dataStream) => (
+          <div key={dataStream}>
+            <EuiTitle size="xs">
+              <span>{dataStream}</span>
+            </EuiTitle>
+          </div>
+        ))}
       </EuiText>
       {hiddenItemsCount ? (
         <>

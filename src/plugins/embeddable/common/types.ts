@@ -7,12 +7,17 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { KibanaExecutionContext } from 'src/core/public';
-import { PersistableStateService, PersistableState } from '../../kibana_utils/common';
+import type { KibanaExecutionContext } from '@kbn/core/public';
+import type {
+  PersistableStateService,
+  PersistableState,
+  PersistableStateDefinition,
+} from '@kbn/kibana-utils-plugin/common';
 
 export enum ViewMode {
   EDIT = 'edit',
   PREVIEW = 'preview',
+  PRINT = 'print',
   VIEW = 'view',
 }
 
@@ -53,6 +58,11 @@ export type EmbeddableInput = {
    */
   syncColors?: boolean;
 
+  /**
+   * Flag whether tooltips should be synced with other panels on hover
+   */
+  syncTooltips?: boolean;
+
   executionContext?: KibanaExecutionContext;
 };
 
@@ -67,6 +77,12 @@ export interface PanelState<E extends EmbeddableInput & { id: string } = { id: s
 }
 
 export type EmbeddableStateWithType = EmbeddableInput & { type: string };
+
+export interface EmbeddableRegistryDefinition<
+  P extends EmbeddableStateWithType = EmbeddableStateWithType
+> extends PersistableStateDefinition<P> {
+  id: string;
+}
 
 export type EmbeddablePersistableStateService = PersistableStateService<EmbeddableStateWithType>;
 

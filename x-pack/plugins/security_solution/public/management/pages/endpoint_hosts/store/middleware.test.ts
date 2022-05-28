@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup } from 'kibana/public';
+import { CoreStart, HttpSetup } from '@kbn/core/public';
 import { applyMiddleware, createStore, Store } from 'redux';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { History, createBrowserHistory } from 'history';
 import { DepsStartMock, depsStartMock } from '../../../../common/mock/endpoint';
 import {
@@ -16,10 +16,10 @@ import {
 } from '../../../../common/store/test_utils';
 import {
   Immutable,
-  HostResultList,
   HostIsolationResponse,
   ISOLATION_ACTIONS,
   ActivityLog,
+  MetadataListResponse,
 } from '../../../../../common/endpoint/types';
 import { AppAction } from '../../../../common/store/actions';
 import { mockEndpointResultList } from './mock_endpoint_result_list';
@@ -30,7 +30,6 @@ import { endpointMiddlewareFactory } from './middleware';
 import { getEndpointListPath, getEndpointDetailsPath } from '../../../common/routing';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import {
-  createUninitialisedResourceState,
   createLoadingResourceState,
   FailedResourceState,
   isFailedResourceState,
@@ -50,7 +49,7 @@ import {
   HOST_METADATA_LIST_ROUTE,
 } from '../../../../../common/endpoint/constants';
 
-jest.mock('../../policy/store/services/ingest', () => ({
+jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({ version: '1.1.1' }),
@@ -73,8 +72,8 @@ describe('endpoint list middleware', () => {
   let actionSpyMiddleware;
   let history: History<never>;
 
-  const getEndpointListApiResponse = (): HostResultList => {
-    return mockEndpointResultList({ request_page_size: 1, request_page_index: 1, total: 10 });
+  const getEndpointListApiResponse = (): MetadataListResponse => {
+    return mockEndpointResultList({ pageSize: 1, page: 0, total: 10 });
   };
 
   const dispatchUserChangedUrlToEndpointList = (locationOverrides: Partial<Location> = {}) => {
@@ -106,25 +105,26 @@ describe('endpoint list middleware', () => {
   it('handles `userChangedUrl`', async () => {
     endpointPageHttpMock(fakeHttpServices);
     const apiResponse = getEndpointListApiResponse();
-    fakeHttpServices.post.mockResolvedValue(apiResponse);
-    expect(fakeHttpServices.post).not.toHaveBeenCalled();
+    fakeHttpServices.get.mockResolvedValue(apiResponse);
+    expect(fakeHttpServices.get).not.toHaveBeenCalled();
 
     dispatchUserChangedUrlToEndpointList();
     await waitForAction('serverReturnedEndpointList');
-    expect(fakeHttpServices.post).toHaveBeenCalledWith('/api/endpoint/metadata', {
-      body: JSON.stringify({
-        paging_properties: [{ page_index: '0' }, { page_size: '10' }],
-        filters: { kql: '' },
-      }),
+    expect(fakeHttpServices.get).toHaveBeenNthCalledWith(1, HOST_METADATA_LIST_ROUTE, {
+      query: {
+        page: '0',
+        pageSize: '10',
+        kuery: '',
+      },
     });
-    expect(listData(getState())).toEqual(apiResponse.hosts);
+    expect(listData(getState())).toEqual(apiResponse.data);
   });
 
   it('handles `appRequestedEndpointList`', async () => {
     endpointPageHttpMock(fakeHttpServices);
     const apiResponse = getEndpointListApiResponse();
-    fakeHttpServices.post.mockResolvedValue(apiResponse);
-    expect(fakeHttpServices.post).not.toHaveBeenCalled();
+    fakeHttpServices.get.mockResolvedValue(apiResponse);
+    expect(fakeHttpServices.get).not.toHaveBeenCalled();
 
     // First change the URL
     dispatchUserChangedUrlToEndpointList();
@@ -145,13 +145,14 @@ describe('endpoint list middleware', () => {
       waitForAction('serverReturnedAgenstWithEndpointsTotal'),
     ]);
 
-    expect(fakeHttpServices.post).toHaveBeenCalledWith(HOST_METADATA_LIST_ROUTE, {
-      body: JSON.stringify({
-        paging_properties: [{ page_index: '0' }, { page_size: '10' }],
-        filters: { kql: '' },
-      }),
+    expect(fakeHttpServices.get).toHaveBeenNthCalledWith(1, HOST_METADATA_LIST_ROUTE, {
+      query: {
+        page: '0',
+        pageSize: '10',
+        kuery: '',
+      },
     });
-    expect(listData(getState())).toEqual(apiResponse.hosts);
+    expect(listData(getState())).toEqual(apiResponse.data);
   });
 
   describe('handling of IsolateEndpointHost action', () => {
@@ -243,7 +244,7 @@ describe('endpoint list middleware', () => {
     });
 
     const endpointList = getEndpointListApiResponse();
-    const agentId = endpointList.hosts[0].metadata.agent.id;
+    const agentId = endpointList.data[0].metadata.agent.id;
     const search = getEndpointDetailsPath({
       name: 'endpointActivityLog',
       selected_endpoint: agentId,
@@ -255,9 +256,7 @@ describe('endpoint list middleware', () => {
     const dispatchGetActivityLogLoading = () => {
       dispatch({
         type: 'endpointDetailsActivityLogChanged',
-        // Ignore will be fixed with when AsyncResourceState is refactored (#830)
-        // @ts-ignore
-        payload: createLoadingResourceState({ previousState: createUninitialisedResourceState() }),
+        payload: createLoadingResourceState(),
       });
     };
 
@@ -425,16 +424,16 @@ describe('endpoint list middleware', () => {
         path: expect.any(String),
         query: {
           agent_ids: [
-            '6db499e5-4927-4350-abb8-d8318e7d0eec',
-            'c082dda9-1847-4997-8eda-f1192d95bec3',
-            '8aa1cd61-cc25-4783-afb5-0eefc4919c07',
-            '47fe24c1-7370-419a-9732-3ff38bf41272',
-            '0d2b2fa7-a9cd-49fc-ad5f-0252c642290e',
-            'f480092d-0445-4bf3-9c96-8a3d5cb97824',
-            '3850e676-0940-4c4b-aaca-571bd1bc66d9',
-            '46efcc7a-086a-47a3-8f09-c4ecd6d2d917',
-            'afa55826-b81b-4440-a2ac-0644d77a3fc6',
-            '25b49e50-cb5c-43df-824f-67b8cf697d9d',
+            '0dc3661d-6e67-46b0-af39-6f12b025fcb0',
+            'a8e32a61-2685-47f0-83eb-edf157b8e616',
+            '37e219a8-fe16-4da9-bf34-634c5824b484',
+            '2484eb13-967e-4491-bf83-dffefdfe607c',
+            '0bc08ef6-6d6a-4113-92f2-b97811187c63',
+            'f4127d87-b567-4a6e-afa6-9a1c7dc95f01',
+            'f9ab5b8c-a43e-4e80-99d6-11570845a697',
+            '406c4b6a-ca57-4bd1-bc66-d9d999df3e70',
+            '2da1dd51-f7af-4f0e-b64c-e7751c74b0e7',
+            '89a94ea4-073c-4cb6-90a2-500805837027',
           ],
         },
       });
@@ -517,7 +516,7 @@ describe('endpoint list middleware', () => {
     });
 
     const endpointList = getEndpointListApiResponse();
-    const agentId = endpointList.hosts[0].metadata.agent.id;
+    const agentId = endpointList.data[0].metadata.agent.id;
     const search = getEndpointDetailsPath({
       name: 'endpointDetails',
       selected_endpoint: agentId,

@@ -6,7 +6,7 @@
  */
 
 import { APMEventESSearchRequest } from '.';
-import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
 import { unpackProcessorEvents } from './unpack_processor_events';
 
 describe('unpackProcessorEvents', () => {
@@ -14,7 +14,10 @@ describe('unpackProcessorEvents', () => {
   beforeEach(() => {
     const request = {
       apm: { events: ['transaction', 'error'] },
-      body: { query: { bool: { filter: [{ terms: { foo: 'bar' } }] } } },
+      body: {
+        size: 0,
+        query: { bool: { filter: [{ terms: { foo: 'bar' } }] } },
+      },
     } as APMEventESSearchRequest;
 
     const indices = {

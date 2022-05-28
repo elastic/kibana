@@ -11,10 +11,11 @@ import { i18n } from '@kbn/i18n';
 
 import { debounce } from 'lodash';
 import { fromKueryExpression, luceneStringToDsl, toElasticsearchQuery } from '@kbn/es-query';
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { DataView } from '@kbn/data-views-plugin/common';
+import { Query } from '@kbn/data-plugin/public';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { Dictionary } from '../../../../../../../common/types/common';
-import { DataView } from '../../../../../../../../../../src/plugins/data_views/common';
-import { Query, QueryStringInput } from '../../../../../../../../../../src/plugins/data/public';
 
 import {
   SEARCH_QUERY_LANGUAGE,
@@ -192,7 +193,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
                     })
               }
               disableAutoFocus={true}
-              dataTestSubj="transformQueryInput"
+              dataTestSubj="mlDFAnalyticsQueryInput"
               languageSwitcherPopoverAnchorPosition="rightDown"
             />
           </EuiFlexItem>

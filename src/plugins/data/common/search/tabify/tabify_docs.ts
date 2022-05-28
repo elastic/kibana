@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPlainObject } from 'lodash';
+import { Datatable, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { IndexPattern } from '../..';
-import { Datatable, DatatableColumn, DatatableColumnType } from '../../../../expressions/common';
 
 type ValidMetaFieldNames = keyof Pick<
   estypes.SearchHit,
@@ -23,7 +23,6 @@ type ValidMetaFieldNames = keyof Pick<
   | '_seq_no'
   | '_shard'
   | '_source'
-  | '_type'
   | '_version'
 >;
 const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
@@ -37,7 +36,6 @@ const VALID_META_FIELD_NAMES: ValidMetaFieldNames[] = [
   '_seq_no',
   '_shard',
   '_source',
-  '_type',
   '_version',
 ];
 
@@ -48,7 +46,7 @@ function isValidMetaFieldName(field: string): field is ValidMetaFieldNames {
   return (VALID_META_FIELD_NAMES as string[]).includes(field);
 }
 
-export interface TabifyDocsOptions {
+interface TabifyDocsOptions {
   shallow?: boolean;
   /**
    * If set to `false` the _source of the document, if requested, won't be

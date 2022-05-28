@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import { AwaitedProperties } from '@kbn/utility-types';
 import { initializeESFieldsRoute } from './es_fields';
-import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from 'src/core/server';
-import { httpServerMock, elasticsearchServiceMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory, RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { httpServerMock, elasticsearchServiceMock, coreMock } from '@kbn/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 
 const mockRouteContext = {
@@ -16,7 +17,7 @@ const mockRouteContext = {
       client: elasticsearchServiceMock.createScopedClusterClient(),
     },
   },
-} as unknown as RequestHandlerContext;
+} as unknown as AwaitedProperties<RequestHandlerContext>;
 
 const path = `api/canvas/workpad/find`;
 
@@ -30,32 +31,30 @@ describe('Retrieve ES Fields', () => {
     routeHandler = routerDeps.router.get.mock.calls[0][1];
   });
 
-  it(`returns 200 with fields from existing index/index pattern`, async () => {
+  it(`returns 200 with fields from existing index/data view`, async () => {
     const index = 'test';
     const mockResults = {
-      body: {
-        indices: ['test'],
-        fields: {
-          '@timestamp': {
-            date: {
-              type: 'date',
-              searchable: true,
-              aggregatable: true,
-            },
+      indices: ['test'],
+      fields: {
+        '@timestamp': {
+          date: {
+            type: 'date',
+            searchable: true,
+            aggregatable: true,
           },
-          name: {
-            text: {
-              type: 'text',
-              searchable: true,
-              aggregatable: false,
-            },
+        },
+        name: {
+          text: {
+            type: 'text',
+            searchable: true,
+            aggregatable: false,
           },
-          products: {
-            object: {
-              type: 'object',
-              searchable: false,
-              aggregatable: false,
-            },
+        },
+        products: {
+          object: {
+            type: 'object',
+            searchable: false,
+            aggregatable: false,
           },
         },
       },
@@ -73,7 +72,11 @@ describe('Retrieve ES Fields', () => {
 
     fieldCapsMock.mockResolvedValueOnce(mockResults);
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toMatchInlineSnapshot(`
@@ -85,9 +88,9 @@ describe('Retrieve ES Fields', () => {
     `);
   });
 
-  it(`returns 200 with empty object when index/index pattern has no fields`, async () => {
+  it(`returns 200 with empty object when index/data view has no fields`, async () => {
     const index = 'test';
-    const mockResults = { body: { indices: [index], fields: {} } };
+    const mockResults = { indices: [index], fields: {} };
     const request = httpServerMock.createKibanaRequest({
       method: 'get',
       path,
@@ -101,20 +104,22 @@ describe('Retrieve ES Fields', () => {
 
     fieldCapsMock.mockResolvedValueOnce(mockResults);
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toMatchInlineSnapshot('Object {}');
   });
 
-  it(`returns 200 with empty object when index/index pattern does not have specified field(s)`, async () => {
+  it(`returns 200 with empty object when index/data view does not have specified field(s)`, async () => {
     const index = 'test';
 
     const mockResults = {
-      body: {
-        indices: [index],
-        fields: {},
-      },
+      indices: [index],
+      fields: {},
     };
 
     const request = httpServerMock.createKibanaRequest({
@@ -131,7 +136,11 @@ describe('Retrieve ES Fields', () => {
 
     fieldCapsMock.mockResolvedValueOnce(mockResults);
 
-    const response = await routeHandler(mockRouteContext, request, kibanaResponseFactory);
+    const response = await routeHandler(
+      coreMock.createCustomRequestHandlerContext(mockRouteContext),
+      request,
+      kibanaResponseFactory
+    );
 
     expect(response.status).toBe(200);
     expect(response.payload).toMatchInlineSnapshot(`Object {}`);
@@ -152,7 +161,11 @@ describe('Retrieve ES Fields', () => {
     fieldCapsMock.mockRejectedValueOnce(new Error('Index not found'));
 
     await expect(
-      routeHandler(mockRouteContext, request, kibanaResponseFactory)
+      routeHandler(
+        coreMock.createCustomRequestHandlerContext(mockRouteContext),
+        request,
+        kibanaResponseFactory
+      )
     ).rejects.toThrowError('Index not found');
   });
 });

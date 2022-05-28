@@ -32,13 +32,13 @@ import {
   StateContainer,
   syncState,
   useContainerSelector,
-} from '../../../../src/plugins/kibana_utils/public';
+} from '@kbn/kibana-utils-plugin/public';
 import {
   defaultState,
   pureTransitions,
   TodoActions,
   TodoState,
-} from '../../../../src/plugins/kibana_utils/demos/state_containers/todomvc';
+} from '@kbn/kibana-utils-plugin/demos/state_containers/todomvc';
 
 interface TodoAppProps {
   filter: 'completed' | 'not-completed' | null;
@@ -63,12 +63,12 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter, stateContainer }) => {
     <>
       <div>
         <Link to={{ ...location, pathname: '/' }} data-test-subj={'filterLinkAll'}>
-          <EuiButton size={'s'} color={!filter ? 'primary' : 'secondary'}>
+          <EuiButton size={'s'} color={!filter ? 'primary' : 'success'}>
             All
           </EuiButton>
         </Link>
         <Link to={{ ...location, pathname: '/completed' }} data-test-subj={'filterLinkCompleted'}>
-          <EuiButton size={'s'} color={filter === 'completed' ? 'primary' : 'secondary'}>
+          <EuiButton size={'s'} color={filter === 'completed' ? 'primary' : 'success'}>
             Completed
           </EuiButton>
         </Link>
@@ -76,7 +76,7 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter, stateContainer }) => {
           to={{ ...location, pathname: '/not-completed' }}
           data-test-subj={'filterLinkNotCompleted'}
         >
-          <EuiButton size={'s'} color={filter === 'not-completed' ? 'primary' : 'secondary'}>
+          <EuiButton size={'s'} color={filter === 'not-completed' ? 'primary' : 'success'}>
             Not Completed
           </EuiButton>
         </Link>

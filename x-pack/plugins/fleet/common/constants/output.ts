@@ -11,13 +11,17 @@ export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
 export const outputType = {
   Elasticsearch: 'elasticsearch',
+  Logstash: 'logstash',
 } as const;
 
-export const DEFAULT_OUTPUT_ID = 'default';
+export const DEFAULT_OUTPUT_ID = 'fleet-default-output';
 
 export const DEFAULT_OUTPUT: NewOutput = {
-  name: DEFAULT_OUTPUT_ID,
+  name: 'default',
   is_default: true,
+  is_default_monitoring: true,
   type: outputType.Elasticsearch,
   hosts: [''],
 };
+
+export const LICENCE_FOR_PER_POLICY_OUTPUT = 'platinum';

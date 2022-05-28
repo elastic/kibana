@@ -27,16 +27,21 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
     z-index: 9900 !important;
     min-width: 24px;
   }
+  .euiPopover__panel.euiPopover__panel-isOpen.sourcererPopoverPanel {
+    // needs to appear under modal
+    z-index: 5900 !important;
+  }
   .euiToolTip {
     z-index: 9950 !important;
   }
 
-  .euiDataGridRowCell__expandButton .euiDataGridRowCell__actionButtonIcon {
+  .euiDataGridRowCell .euiDataGridRowCell__expandActions .euiDataGridRowCell__actionButtonIcon {
     display: none;
 
     &:first-child,
     &:nth-child(2),
-    &:nth-child(3) {
+    &:nth-child(3),
+    &:last-child {
       display: inline-flex;
     }
 
@@ -70,17 +75,17 @@ export const AppGlobalStyle = createGlobalStyle<{ theme: { eui: { euiColorPrimar
 
     .euiPopoverFooter {
       border: 0;
+      margin-top: 0 !important;
       .euiFlexGroup {
         flex-direction: column;
+      }
+    }
 
-        .euiButtonEmpty .euiButtonContent {
-          justify-content: left;
-        }
-
-        .euiFlexItem:first-child,
-        .euiFlexItem:nth-child(2) {
-            display: none;
-        }
+    // Hide EUI's 'Filter in' and 'Filter out' footer buttons - replaced with our own buttons
+    .euiPopoverFooter:nth-child(2) {
+      .euiFlexItem:first-child,
+      .euiFlexItem:nth-child(2) {
+          display: none;
       }
     }
   }

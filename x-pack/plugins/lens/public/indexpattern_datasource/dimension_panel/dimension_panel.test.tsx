@@ -6,7 +6,6 @@
  */
 
 import { ReactWrapper, ShallowWrapper } from 'enzyme';
-import 'jest-canvas-mock';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import {
@@ -17,17 +16,28 @@ import {
   EuiSelect,
   EuiButtonIcon,
 } from '@elastic/eui';
-import { DataPublicPluginStart } from '../../../../../../src/plugins/data/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   IndexPatternDimensionEditorComponent,
   IndexPatternDimensionEditorProps,
 } from './dimension_panel';
-import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test/jest';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup, CoreSetup } from 'kibana/public';
-import { IStorageWrapper } from 'src/plugins/kibana_utils/public';
+import { mountWithIntl as mount, shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
+import {
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+  HttpSetup,
+  CoreSetup,
+} from '@kbn/core/public';
+import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { generateId } from '../../id_generator';
 import { IndexPatternPrivateState } from '../types';
-import { IndexPatternColumn, replaceColumn } from '../operations';
+import {
+  FiltersIndexPatternColumn,
+  GenericIndexPatternColumn,
+  replaceColumn,
+  TermsIndexPatternColumn,
+} from '../operations';
 import { documentField } from '../document_field';
 import { OperationMetadata } from '../../types';
 import { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';
@@ -108,13 +118,13 @@ const expectedIndexPatterns = {
   },
 };
 
-const bytesColumn: IndexPatternColumn = {
-  label: 'Max of bytes',
+const bytesColumn: GenericIndexPatternColumn = {
+  label: 'Sum of bytes',
   dataType: 'number',
   isBucketed: false,
 
   // Private
-  operationType: 'max',
+  operationType: 'sum',
   sourceField: 'bytes',
   params: { format: { id: 'bytes' } },
 };
@@ -133,7 +143,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   let setState: jest.Mock;
   let defaultProps: IndexPatternDimensionEditorProps;
 
-  function getStateWithColumns(columns: Record<string, IndexPatternColumn>) {
+  function getStateWithColumns(columns: Record<string, GenericIndexPatternColumn>) {
     return {
       ...state,
       layers: { first: { ...state.layers.first, columns, columnOrder: Object.keys(columns) } },
@@ -171,7 +181,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
                 interval: '1d',
               },
               sourceField: 'timestamp',
-            },
+            } as DateHistogramIndexPatternColumn,
           },
           incompleteColumns: {},
         },
@@ -199,6 +209,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       uiSettings: {} as IUiSettingsClient,
       savedObjectsClient: {} as SavedObjectsClientContract,
       http: {} as HttpSetup,
+      unifiedSearch: unifiedSearchPluginMock.createStartContract(),
       data: {
         fieldFormats: {
           getType: jest.fn().mockReturnValue({
@@ -212,7 +223,12 @@ describe('IndexPatternDimensionEditorPanel', () => {
           deserialize: jest.fn().mockReturnValue({
             convert: () => 'formatted',
           }),
-        } as unknown as DataPublicPluginStart['fieldFormats'],
+        },
+        search: {
+          aggs: {
+            calculateAutoTimeExpression: jest.fn(),
+          },
+        },
       } as unknown as DataPublicPluginStart,
       core: {} as CoreSetup,
       dimensionGroups: [],
@@ -264,7 +280,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             // Private
             operationType: 'filters',
             params: { filters: [] },
-          },
+          } as FiltersIndexPatternColumn,
         })}
       />
     );
@@ -346,7 +362,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
       .filter('[data-test-subj="indexPattern-dimension-field"]')
       .prop('options');
 
-    expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-Records');
+    expect(options![0]['data-test-subj']).toEqual('lns-fieldOptionIncompatible-___records___');
 
     expect(
       options![1].options!.filter(({ label }) => label === 'timestampLabel')[0]['data-test-subj']
@@ -427,7 +443,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             operationType: 'date_histogram',
             sourceField: '@timestamp',
             params: { interval: 'auto' },
-          },
+          } as DateHistogramIndexPatternColumn,
           col1: {
             label: 'Counter rate',
             dataType: 'number',
@@ -464,7 +480,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             operationType: 'date_histogram',
             sourceField: '@timestamp',
             params: { interval: 'auto' },
-          },
+          } as DateHistogramIndexPatternColumn,
           col1: {
             label: 'Cumulative sum',
             dataType: 'number',
@@ -477,7 +493,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             dataType: 'number',
             isBucketed: false,
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
         })}
       />
@@ -525,7 +541,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columns: {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
-              operationType: 'max',
+              operationType: 'sum',
               sourceField: 'memory',
               params: { format: { id: 'bytes' } },
               // Other parts of this don't matter for this test
@@ -593,7 +609,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             col1: expect.objectContaining({
               operationType: 'min',
               sourceField: 'bytes',
-              params: { format: { id: 'bytes' } },
+              params: { format: { id: 'bytes' }, emptyAsNull: true },
               // Other parts of this don't matter for this test
             }),
           },
@@ -619,7 +635,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     act(() => {
       wrapper
-        .find('input[data-test-subj="indexPattern-label-edit"]')
+        .find('input[data-test-subj="column-label-edit"]')
         .simulate('change', { target: { value: 'New Label' } });
     });
 
@@ -723,8 +739,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
     act(() => {
       wrapper
-        .find('input[data-test-subj="indexPattern-label-edit"]')
-        .simulate('change', { target: { value: 'Maximum of bytes' } });
+        .find('input[data-test-subj="column-label-edit"]')
+        .simulate('change', { target: { value: 'Sum of bytes' } });
     });
 
     expect(setState.mock.calls[0]).toEqual([expect.any(Function)]);
@@ -736,7 +752,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
           columns: {
             ...state.layers.first.columns,
             col1: expect.objectContaining({
-              label: 'Maximum of bytes',
+              label: 'Sum of bytes',
               customLabel: false,
               // Other parts of this don't matter for this test
             }),
@@ -839,7 +855,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               // Private
               operationType: 'filters',
               params: { filters: [] },
-            },
+            } as FiltersIndexPatternColumn,
           })}
         />
       );
@@ -987,7 +1003,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
 
       const newColumnState = setState.mock.calls[0][0](state).layers.first.columns.col2;
       expect(newColumnState.operationType).toEqual('count');
-      expect(newColumnState.sourceField).toEqual('Records');
+      expect(newColumnState.sourceField).toEqual('___records___');
     });
 
     it('should indicate document and field compatibility with selected document operation', () => {
@@ -1000,7 +1016,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               isBucketed: false,
               label: '',
               operationType: 'count',
-              sourceField: 'Records',
+              sourceField: '___records___',
             },
           })}
           columnId="col2"
@@ -1066,7 +1082,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   describe('time scaling', () => {
-    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+    function getProps(colOverrides: Partial<GenericIndexPatternColumn>) {
       return {
         ...defaultProps,
         state: getStateWithColumns({
@@ -1080,15 +1096,15 @@ describe('IndexPatternDimensionEditorPanel', () => {
             params: {
               interval: '1d',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             ...colOverrides,
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
       };
@@ -1296,7 +1312,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
   });
 
   describe('time shift', () => {
-    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+    function getProps(colOverrides: Partial<GenericIndexPatternColumn>) {
       return {
         ...defaultProps,
         state: getStateWithColumns({
@@ -1310,15 +1326,15 @@ describe('IndexPatternDimensionEditorPanel', () => {
             params: {
               interval: '1d',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             ...colOverrides,
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
       };
@@ -1333,8 +1349,8 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
-          } as IndexPatternColumn,
+            sourceField: '___records___',
+          } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
       };
@@ -1480,10 +1496,27 @@ describe('IndexPatternDimensionEditorPanel', () => {
         },
       });
     });
+
+    it('should report a generic error for invalid shift string', () => {
+      const props = getProps({
+        timeShift: '5 months',
+      });
+      wrapper = mount(<IndexPatternDimensionEditorComponent {...props} />);
+
+      expect(wrapper.find(TimeShift).find(EuiComboBox).prop('isInvalid')).toBeTruthy();
+
+      expect(
+        wrapper
+          .find(TimeShift)
+          .find('[data-test-subj="indexPattern-dimension-time-shift-row"]')
+          .first()
+          .prop('error')
+      ).toBe('Time shift value is not valid.');
+    });
   });
 
   describe('filtering', () => {
-    function getProps(colOverrides: Partial<IndexPatternColumn>) {
+    function getProps(colOverrides: Partial<GenericIndexPatternColumn>) {
       return {
         ...defaultProps,
         state: getStateWithColumns({
@@ -1497,15 +1530,15 @@ describe('IndexPatternDimensionEditorPanel', () => {
             params: {
               interval: '1d',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
             label: 'Count of records',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
             ...colOverrides,
-          } as IndexPatternColumn,
+          } as GenericIndexPatternColumn,
         }),
         columnId: 'col2',
       };
@@ -1522,7 +1555,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
               orderBy: { type: 'alphabetical' },
               size: 5,
             },
-          })}
+          } as TermsIndexPatternColumn)}
         />
       );
       expect(
@@ -1850,7 +1883,7 @@ describe('IndexPatternDimensionEditorPanel', () => {
             isBucketed: false,
             label: '',
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
         })}
         columnId={'col2'}

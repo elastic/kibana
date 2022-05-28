@@ -6,21 +6,26 @@
  */
 
 export { parseDuration, validateDurationSchema } from '../../common/parse_duration';
-export { ILicenseState, LicenseState } from './license_state';
-export { validateAlertTypeParams } from './validate_alert_type_params';
-export { getAlertNotifyWhenType } from './get_alert_notify_when_type';
+export type { ILicenseState } from './license_state';
+export { LicenseState } from './license_state';
+export { validateRuleTypeParams } from './validate_rule_type_params';
+export { validateMutatedRuleTypeParams } from './validate_mutated_rule_type_params';
+export { getRuleNotifyWhenType } from './get_rule_notify_when_type';
 export { verifyApiAccess } from './license_api_access';
 export { ErrorWithReason, getReasonFromError, isErrorWithReason } from './error_with_reason';
-export {
-  AlertTypeDisabledError,
-  AlertTypeDisabledReason,
+export type {
+  RuleTypeDisabledReason,
   ErrorThatHandlesItsOwnResponse,
-  isErrorThatHandlesItsOwnResponse,
   ElasticsearchError,
 } from './errors';
+export { RuleTypeDisabledError, RuleMutedError, isErrorThatHandlesItsOwnResponse } from './errors';
 export {
   executionStatusFromState,
   executionStatusFromError,
-  alertExecutionStatusToRaw,
-  alertExecutionStatusFromRaw,
-} from './alert_execution_status';
+  ruleExecutionStatusToRaw,
+  ruleExecutionStatusFromRaw,
+} from './rule_execution_status';
+export { getRecoveredAlerts } from './get_recovered_alerts';
+export { createWrappedScopedClusterClientFactory } from './wrap_scoped_cluster_client';
+export { isRuleSnoozed, getRuleSnoozeEndTime } from './is_rule_snoozed';
+export { convertRuleIdsToKueryNode } from './convert_rule_ids_to_kuery_node';

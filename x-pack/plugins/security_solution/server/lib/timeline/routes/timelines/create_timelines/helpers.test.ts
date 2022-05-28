@@ -9,10 +9,10 @@ import * as module from './helpers';
 import { savePinnedEvents } from '../../../saved_object/pinned_events';
 import { getNote } from '../../../saved_object/notes';
 import { FrameworkRequest } from '../../../../framework';
-import { SavedTimeline } from '../../../../../../common/types/timeline';
+import { SavedTimeline } from '../../../../../../common/types';
 import { mockTemplate, mockTimeline } from '../../../__mocks__/create_timelines';
 import { buildFrameworkRequest } from '../../../utils/common';
-import { SecurityPluginSetup } from '../../../../../../../security/server';
+import { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { requestContextMock } from '../../../../detection_engine/routes/__mocks__';
 import {
   getCreateTimelinesRequest,
@@ -31,18 +31,6 @@ const notes = [
 ];
 const existingNoteIds = undefined;
 const isImmutable = true;
-
-jest.mock('moment', () => {
-  const mockMoment = {
-    toISOString: jest
-      .fn()
-      .mockReturnValueOnce('2020-11-03T11:37:31.655Z')
-      .mockReturnValue('2020-11-04T11:37:31.655Z'),
-    subtract: jest.fn(),
-  };
-  mockMoment.subtract.mockReturnValue(mockMoment);
-  return jest.fn().mockReturnValue(mockMoment);
-});
 
 jest.mock('../../../saved_object/timelines', () => ({
   persistTimeline: jest.fn().mockResolvedValue({
@@ -81,7 +69,12 @@ describe('createTimelines', () => {
     const { context } = requestContextMock.createTools();
     const mockRequest = getCreateTimelinesRequest(createTimelineWithoutTimelineId);
 
-    frameworkRequest = await buildFrameworkRequest(context, securitySetup, mockRequest);
+    frameworkRequest = await buildFrameworkRequest(
+      requestContextMock.convertContext(context),
+      securitySetup,
+      mockRequest
+    );
+    Date.now = jest.fn().mockReturnValue(new Date('2020-11-04T11:37:31.655Z'));
   });
 
   describe('create timelines', () => {

@@ -5,39 +5,22 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'kibana/public';
-import type { ExpressionsSetup } from '../../../../../src/plugins/expressions/public';
+import type { CoreSetup } from '@kbn/core/public';
+import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { EditorFrameSetup } from '../types';
-import type { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { getTimeZone } from '../utils';
-import type { FormatFactory } from '../../common';
 
 export interface HeatmapVisualizationPluginSetupPlugins {
-  expressions: ExpressionsSetup;
-  formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
 }
 
 export class HeatmapVisualization {
-  setup(
-    core: CoreSetup,
-    { expressions, formatFactory, editorFrame, charts }: HeatmapVisualizationPluginSetupPlugins
-  ) {
+  setup(core: CoreSetup, { editorFrame, charts }: HeatmapVisualizationPluginSetupPlugins) {
     editorFrame.registerVisualization(async () => {
-      const timeZone = getTimeZone(core.uiSettings);
-      const { getHeatmapVisualization, getHeatmapRenderer } = await import('../async_services');
+      const { getHeatmapVisualization } = await import('../async_services');
       const palettes = await charts.palettes.getPalettes();
 
-      expressions.registerRenderer(
-        getHeatmapRenderer({
-          formatFactory,
-          chartsThemeService: charts.theme,
-          paletteService: palettes,
-          timeZone,
-        })
-      );
-      return getHeatmapVisualization({ paletteService: palettes });
+      return getHeatmapVisualization({ paletteService: palettes, theme: core.theme });
     });
   }
 }

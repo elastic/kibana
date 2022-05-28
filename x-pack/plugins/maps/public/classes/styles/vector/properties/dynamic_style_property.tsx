@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import React from 'react';
-import { Feature, FeatureCollection } from 'geojson';
+import { FeatureCollection } from 'geojson';
 import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty, IStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
@@ -28,45 +28,67 @@ import {
 } from '../components/data_mapping';
 import {
   Category,
-  CategoryFieldMeta,
   FieldMetaOptions,
   PercentilesFieldMeta,
   RangeFieldMeta,
   StyleMetaData,
-  TileMetaFeature,
 } from '../../../../../common/descriptor_types';
 import { IField } from '../../../fields/field';
 import { IVectorLayer } from '../../../layers/vector_layer';
 import { InnerJoin } from '../../../joins/inner_join';
 import { IVectorStyle } from '../vector_style';
 import { getComputedFieldName } from '../style_util';
-import { pluckRangeFieldMeta } from '../../../../../common/pluck_range_field_meta';
-import {
-  pluckCategoryFieldMeta,
-  trimCategories,
-} from '../../../../../common/pluck_category_field_meta';
 
 export interface IDynamicStyleProperty<T> extends IStyleProperty<T> {
   getFieldMetaOptions(): FieldMetaOptions;
   getField(): IField | null;
   getFieldName(): string;
+  getMbFieldName(): string;
   getFieldOrigin(): FIELD_ORIGIN | null;
   getRangeFieldMeta(): RangeFieldMeta | null;
-  getCategoryFieldMeta(): CategoryFieldMeta | null;
+  getCategoryFieldMeta(): Category[];
+
   /*
    * Returns hash that signals style meta needs to be re-fetched when value changes
    */
   getStyleMetaHash(): string;
   isFieldMetaEnabled(): boolean;
+  isCategorical(): boolean;
   isOrdinal(): boolean;
+  getNumberOfCategories(): number;
   supportsFieldMeta(): boolean;
+
+  /*
+   * Maplibre layers have two sub-properties that determine how data is rendered: layout and paint.
+   *
+   * Layout properties are applied early in the rendering process and define how data for that layer is passed to the GPU.
+   * Changes to a layout property require an asynchronous "layout" step.
+   *
+   * Paint properties are applied later in the rendering process. Changes to a paint property are cheap and happen synchronously.
+   *
+   * Paint properties support feature-state. Layout properties do not support feature-state
+   *
+   * Returns true when the style only sets paints properties. Returns false when the style sets any layout properties.
+   */
+  supportsFeatureState(): boolean;
+
+  /*
+   * Maplibre stores vector properties in 2 locations: feature.properties and feature-state
+   *
+   * Feature-state is a set of runtime defined attributes that can be dynamically assigned to a feature and used to style features.
+   * Feature-state is paired to a feature by feature id or feature.properties[promoteId] (when 'source.promoteId' is set).
+   *
+   * Feature-state provides a significant boost in performance allowing for the update of individual styles
+   * without the map rendering engine having to re-parse the underlying geometry and feature properties.
+   *
+   * 'paint' properties may retrieve style data from feature-state or feature.properties.
+   * 'layout' properties may only retrieve style from feature.properties.
+   *
+   * Returns true when style data is stored in feature-state.  Returns false when style data is stored in feature.properties.
+   */
+  usesFeatureState(): boolean;
+
   getFieldMetaRequest(): Promise<unknown | null>;
-  pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null;
-  pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null;
-  pluckOrdinalStyleMetaFromTileMetaFeatures(features: TileMetaFeature[]): RangeFieldMeta | null;
-  pluckCategoricalStyleMetaFromTileMetaFeatures(
-    features: TileMetaFeature[]
-  ): CategoryFieldMeta | null;
   getValueSuggestions(query: string): Promise<string[]>;
   enrichGeoJsonAndMbFeatureState(
     featureCollection: FeatureCollection,
@@ -180,19 +202,19 @@ export class DynamicStyleProperty<T>
   _getCategoryFieldMetaFromStyleMetaRequest() {
     const dataRequestId = this._getStyleMetaDataRequestId(this.getFieldName());
     if (!dataRequestId) {
-      return null;
+      return [];
     }
 
     const styleMetaDataRequest = this._layer.getDataRequest(dataRequestId);
     if (!styleMetaDataRequest || !styleMetaDataRequest.hasData()) {
-      return null;
+      return [];
     }
 
     const data = styleMetaDataRequest.getData() as StyleMetaData;
     return this._pluckCategoricalStyleMetaFromFieldMetaData(data);
   }
 
-  getCategoryFieldMeta(): CategoryFieldMeta | null {
+  getCategoryFieldMeta(): Category[] {
     const categoryFieldMetaFromLocalFeatures = this._getCategoryFieldMetaFromLocalFeatures();
 
     if (!this.isFieldMetaEnabled()) {
@@ -200,7 +222,7 @@ export class DynamicStyleProperty<T>
     }
 
     const categoricalFieldMetaFromServer = this._getCategoryFieldMetaFromStyleMetaRequest();
-    return categoricalFieldMetaFromServer
+    return categoricalFieldMetaFromServer.length
       ? categoricalFieldMetaFromServer
       : categoryFieldMetaFromLocalFeatures;
   }
@@ -211,6 +233,10 @@ export class DynamicStyleProperty<T>
 
   getFieldName() {
     return this._field ? this._field.getName() : '';
+  }
+
+  getMbFieldName() {
+    return this._field ? this._field.getMbFieldName() : '';
   }
 
   isDynamic() {
@@ -261,7 +287,7 @@ export class DynamicStyleProperty<T>
   }
 
   supportsFieldMeta() {
-    return this.isComplete() && !!this._field && this._field.supportsFieldMeta();
+    return this.isComplete() && !!this._field && this._field.supportsFieldMetaFromEs();
   }
 
   async getFieldMetaRequest() {
@@ -287,101 +313,43 @@ export class DynamicStyleProperty<T>
     return null;
   }
 
-  supportsMbFeatureState() {
-    return !!this._field && this._field.canReadFromGeoJson();
+  supportsFeatureState() {
+    return true;
+  }
+
+  usesFeatureState() {
+    if (!this._field) {
+      return false;
+    }
+
+    return this._field.getSource().isMvt() ? false : this.supportsFeatureState();
   }
 
   getMbLookupFunction(): MB_LOOKUP_FUNCTION {
-    return this.supportsMbFeatureState()
-      ? MB_LOOKUP_FUNCTION.FEATURE_STATE
-      : MB_LOOKUP_FUNCTION.GET;
+    return this.usesFeatureState() ? MB_LOOKUP_FUNCTION.FEATURE_STATE : MB_LOOKUP_FUNCTION.GET;
   }
 
   getFieldMetaOptions() {
-    return _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+    const fieldMetaOptions = _.get(this.getOptions(), 'fieldMetaOptions', { isEnabled: true });
+
+    // In 8.0, UI changed to not allow setting isEnabled to false when fieldMeta from local not supported
+    // Saved objects created prior to 8.0 may have a configuration where
+    // fieldMetaOptions.isEnabled is false and the field does not support fieldMeta from local.
+    // In these cases, force isEnabled to true
+    // The exact case that spawned this fix is with ES_SEARCH sources and 8.0 where vector tiles switched
+    // from vector tiles generated via Kibana server to vector tiles generated via Elasticsearch.
+    // Kibana vector tiles supported fieldMeta from local while Elasticsearch vector tiles do not support fieldMeta from local.
+    if (this._field && !this._field.supportsFieldMetaFromLocalData()) {
+      fieldMetaOptions.isEnabled = true;
+    }
+
+    return fieldMetaOptions;
   }
 
   getDataMappingFunction() {
     return 'dataMappingFunction' in this._options
       ? (this._options as T & { dataMappingFunction: DATA_MAPPING_FUNCTION }).dataMappingFunction
       : DATA_MAPPING_FUNCTION.INTERPOLATE;
-  }
-
-  pluckOrdinalStyleMetaFromTileMetaFeatures(
-    metaFeatures: TileMetaFeature[]
-  ): RangeFieldMeta | null {
-    if (!this.isOrdinal()) {
-      return null;
-    }
-
-    const name = this.getFieldName();
-    let min = Infinity;
-    let max = -Infinity;
-    for (let i = 0; i < metaFeatures.length; i++) {
-      const fieldMeta = metaFeatures[i].properties.fieldMeta;
-      if (fieldMeta && fieldMeta[name] && fieldMeta[name].range) {
-        min = Math.min(fieldMeta[name].range?.min as number, min);
-        max = Math.max(fieldMeta[name].range?.max as number, max);
-      }
-    }
-    return {
-      min,
-      max,
-      delta: max - min,
-    };
-  }
-
-  pluckCategoricalStyleMetaFromTileMetaFeatures(
-    metaFeatures: TileMetaFeature[]
-  ): CategoryFieldMeta | null {
-    const size = this.getNumberOfCategories();
-    if (!this.isCategorical() || size <= 0) {
-      return null;
-    }
-
-    const name = this.getFieldName();
-
-    const counts = new Map<string, number>();
-    for (let i = 0; i < metaFeatures.length; i++) {
-      const fieldMeta = metaFeatures[i].properties.fieldMeta;
-      if (fieldMeta && fieldMeta[name] && fieldMeta[name].categories) {
-        const categoryFieldMeta: CategoryFieldMeta = fieldMeta[name]
-          .categories as CategoryFieldMeta;
-        for (let c = 0; c < categoryFieldMeta.categories.length; c++) {
-          const category: Category = categoryFieldMeta.categories[c];
-          // properties object may be sparse, so need to check if the field is effectively present
-          if (typeof category.key !== undefined) {
-            if (counts.has(category.key)) {
-              counts.set(category.key, (counts.get(category.key) as number) + category.count);
-            } else {
-              counts.set(category.key, category.count);
-            }
-          }
-        }
-      }
-    }
-
-    return trimCategories(counts, size);
-  }
-
-  pluckOrdinalStyleMetaFromFeatures(features: Feature[]): RangeFieldMeta | null {
-    if (!this.isOrdinal()) {
-      return null;
-    }
-
-    const name = this.getFieldName();
-    return pluckRangeFieldMeta(features, name, (rawValue: unknown) => {
-      return parseFloat(rawValue as string);
-    });
-  }
-
-  pluckCategoricalStyleMetaFromFeatures(features: Feature[]): CategoryFieldMeta | null {
-    const size = this.getNumberOfCategories();
-    if (!this.isCategorical() || size <= 0) {
-      return null;
-    }
-
-    return pluckCategoryFieldMeta(features, this.getFieldName(), size);
   }
 
   _pluckOrdinalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData): RangeFieldMeta | null {
@@ -408,26 +376,22 @@ export class DynamicStyleProperty<T>
     };
   }
 
-  _pluckCategoricalStyleMetaFromFieldMetaData(
-    styleMetaData: StyleMetaData
-  ): CategoryFieldMeta | null {
+  _pluckCategoricalStyleMetaFromFieldMetaData(styleMetaData: StyleMetaData): Category[] {
     if (!this.isCategorical() || !this._field) {
-      return null;
+      return [];
     }
 
     const fieldMeta = styleMetaData[`${this._field.getRootName()}_terms`];
     if (!fieldMeta || !('buckets' in fieldMeta)) {
-      return null;
+      return [];
     }
 
-    return {
-      categories: fieldMeta.buckets.map((bucket) => {
-        return {
-          key: bucket.key,
-          count: bucket.doc_count,
-        };
-      }),
-    };
+    return fieldMeta.buckets.map((bucket) => {
+      return {
+        key: bucket.key,
+        count: bucket.doc_count,
+      };
+    });
   }
 
   formatField(value: RawValue): string | number {
@@ -445,13 +409,14 @@ export class DynamicStyleProperty<T>
   }
 
   renderDataMappingPopover(onChange: (updatedOptions: Partial<T>) => void) {
-    if (!this.supportsFieldMeta()) {
+    if (!this._field || !this.supportsFieldMeta()) {
       return null;
     }
     return this.isCategorical() ? (
       <CategoricalDataMappingPopover<T>
         fieldMetaOptions={this.getFieldMetaOptions()}
         onChange={onChange}
+        supportsFieldMetaFromLocalData={this._field.supportsFieldMetaFromLocalData()}
       />
     ) : (
       <OrdinalDataMappingPopover<T>
@@ -460,6 +425,7 @@ export class DynamicStyleProperty<T>
         onChange={onChange}
         dataMappingFunction={this.getDataMappingFunction()}
         supportedDataMappingFunctions={this._getSupportedDataMappingFunctions()}
+        supportsFieldMetaFromLocalData={this._field.supportsFieldMetaFromLocalData()}
       />
     );
   }
@@ -476,28 +442,25 @@ export class DynamicStyleProperty<T>
     }
 
     let targetName;
-    if (this.supportsMbFeatureState()) {
+    if (this.usesFeatureState()) {
       // Base case for any properties that can support feature-state (e.g. color, size, ...)
       // They just re-use the original property-name
       targetName = this._field.getName();
     } else {
-      if (this._field.canReadFromGeoJson() && this._field.supportsAutoDomain()) {
+      if (!this._field.getSource().isMvt() && this._field.supportsFieldMetaFromLocalData()) {
         // Geojson-sources can support rewrite
         // e.g. field-formatters will create duplicate field
         targetName = getComputedFieldName(this.getStyleName(), this._field.getName());
       } else {
         // Non-geojson sources (e.g. 3rd party mvt or ES-source as mvt)
-        targetName = this._field.getName();
+        targetName = this._field.getMbFieldName();
       }
     }
     return targetName;
   }
 
   getMbPropertyValue(rawValue: RawValue): RawValue {
-    // Maps only uses feature-state for numerical values.
-    // `supportsMbFeatureState` will only return true when the mb-style rule does a feature-state lookup on a numerical value
-    // Calling `isOrdinal` would be equivalent.
-    return this.supportsMbFeatureState() ? getNumericalMbFeatureStateValue(rawValue) : rawValue;
+    return this.isOrdinal() ? getNumericalMbFeatureStateValue(rawValue) : rawValue;
   }
 
   enrichGeoJsonAndMbFeatureState(
@@ -505,7 +468,7 @@ export class DynamicStyleProperty<T>
     mbMap: MbMap,
     mbSourceId: string
   ): boolean {
-    const supportsFeatureState = this.supportsMbFeatureState();
+    const usesFeatureState = this.usesFeatureState();
     const featureIdentifier: FeatureIdentifier = {
       source: mbSourceId,
       id: undefined,
@@ -516,7 +479,7 @@ export class DynamicStyleProperty<T>
       const feature = featureCollection.features[i];
       const rawValue = feature.properties ? feature.properties[this.getFieldName()] : undefined;
       const targetMbValue = this.getMbPropertyValue(rawValue);
-      if (supportsFeatureState) {
+      if (usesFeatureState) {
         featureState[targetMbName] = targetMbValue; // the same value will be potentially overridden multiple times, if the name remains identical
         featureIdentifier.id = feature.id;
         mbMap.setFeatureState(featureIdentifier, featureState);
@@ -526,7 +489,7 @@ export class DynamicStyleProperty<T>
         }
       }
     }
-    return supportsFeatureState;
+    return usesFeatureState;
   }
 }
 

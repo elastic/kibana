@@ -6,10 +6,12 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+// eslint-disable-next-line @kbn/eslint/module_migration
+import { ThemeProvider } from 'styled-components';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
 import ActionsConnectorsList from './actions_connectors_list';
-import { coreMock } from '../../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
@@ -103,6 +105,7 @@ describe('actions_connectors_list component with items', () => {
           actionTypeId: 'test',
           description: 'My test',
           isPreconfigured: false,
+          isDeprecated: false,
           referencedByCount: 1,
           config: {},
         },
@@ -112,6 +115,7 @@ describe('actions_connectors_list component with items', () => {
           description: 'My test 2',
           referencedByCount: 1,
           isPreconfigured: false,
+          isDeprecated: false,
           config: {},
         },
         {
@@ -121,6 +125,7 @@ describe('actions_connectors_list component with items', () => {
           isMissingSecrets: true,
           referencedByCount: 1,
           isPreconfigured: true,
+          isDeprecated: false,
           config: {},
         },
         {
@@ -129,6 +134,7 @@ describe('actions_connectors_list component with items', () => {
           description: 'My invalid connector type',
           referencedByCount: 1,
           isPreconfigured: false,
+          isDeprecated: false,
           config: {},
         },
       ]
@@ -235,6 +241,7 @@ describe('actions_connectors_list component with items', () => {
         secrets: {},
         description: `My test ${index}`,
         isPreconfigured: false,
+        isDeprecated: false,
         referencedByCount: 1,
         config: {},
       }))
@@ -456,5 +463,84 @@ describe('actions_connectors_list component with disabled items', () => {
     expect(wrapper.find('EuiTableRow').at(1).prop('className')).toEqual(
       'actConnectorsList__tableRowDisabled'
     );
+  });
+});
+
+describe('actions_connectors_list component with deprecated connectors', () => {
+  let wrapper: ReactWrapper<any>;
+
+  async function setup() {
+    loadAllActions.mockResolvedValueOnce([
+      {
+        id: '1',
+        actionTypeId: '.servicenow',
+        description: 'My test',
+        referencedByCount: 1,
+        config: { usesTableApi: true },
+        isDeprecated: true,
+      },
+      {
+        id: '2',
+        actionTypeId: '.servicenow-sir',
+        description: 'My test 2',
+        referencedByCount: 1,
+        config: { usesTableApi: true },
+        isDeprecated: true,
+      },
+    ]);
+    loadActionTypes.mockResolvedValueOnce([
+      {
+        id: 'test',
+        name: '.servicenow',
+        enabled: false,
+        enabledInConfig: false,
+        enabledInLicense: true,
+      },
+      {
+        id: 'test2',
+        name: '.servicenow-sir',
+        enabled: false,
+        enabledInConfig: true,
+        enabledInLicense: false,
+      },
+    ]);
+
+    const [
+      {
+        application: { capabilities },
+      },
+    ] = await mocks.getStartServices();
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.application.capabilities = {
+      ...capabilities,
+      actions: {
+        show: true,
+        save: true,
+        delete: true,
+      },
+    };
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+    wrapper = mountWithIntl(
+      <ThemeProvider theme={() => ({ eui: { euiSizeS: '15px' }, darkMode: true })}>
+        <ActionsConnectorsList />
+      </ThemeProvider>
+    );
+
+    // Wait for active space to resolve before requesting the component to update
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(loadAllActions).toHaveBeenCalled();
+  }
+
+  it('shows the warning icon', async () => {
+    await setup();
+    expect(wrapper.find('EuiInMemoryTable')).toHaveLength(1);
+    expect(wrapper.find('EuiTableRow')).toHaveLength(2);
+    expect(wrapper.find('.euiToolTipAnchor [aria-label="Warning"]').exists()).toBe(true);
   });
 });

@@ -5,15 +5,21 @@
  * 2.0.
  */
 
-import { VisualizeFieldContext } from 'src/plugins/ui_actions/public';
-import { EmbeddableEditorState } from 'src/plugins/embeddable/public';
-import { Filter, Query, SavedQuery } from '../../../../../src/plugins/data/public';
+import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { EmbeddableEditorState } from '@kbn/embeddable-plugin/public';
+import { Filter } from '@kbn/es-query';
+import { Query, SavedQuery } from '@kbn/data-plugin/public';
 import { Document } from '../persistence';
 
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { DateRange } from '../../common';
 import { LensAppServices } from '../app_plugin/types';
-import { DatasourceMap, VisualizationMap, SharingSavedObjectProps } from '../types';
+import {
+  DatasourceMap,
+  VisualizationMap,
+  SharingSavedObjectProps,
+  VisualizeEditorContext,
+} from '../types';
 export interface VisualizationState {
   activeId: string | null;
   state: unknown;
@@ -27,6 +33,9 @@ export interface PreviewState {
 export interface EditorFrameState extends PreviewState {
   activeDatasourceId: string | null;
   stagedPreview?: PreviewState;
+  autoApplyDisabled?: boolean;
+  applyChangesCounter?: number;
+  changesApplied?: boolean;
   isFullscreenDatasource?: boolean;
 }
 export interface LensAppState extends EditorFrameState {
@@ -59,6 +68,6 @@ export interface LensStoreDeps {
   lensServices: LensAppServices;
   datasourceMap: DatasourceMap;
   visualizationMap: VisualizationMap;
-  initialContext?: VisualizeFieldContext;
+  initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   embeddableEditorIncomingState?: EmbeddableEditorState;
 }

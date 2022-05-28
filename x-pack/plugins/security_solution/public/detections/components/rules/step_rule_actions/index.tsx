@@ -17,7 +17,7 @@ import {
 import { findIndex } from 'lodash/fp';
 import React, { FC, memo, useCallback, useEffect, useMemo } from 'react';
 
-import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
+import { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   RuleStep,
   RuleStepProps,
@@ -35,7 +35,7 @@ import { RuleActionsField } from '../rule_actions_field';
 import { useKibana } from '../../../../common/lib/kibana';
 import { getSchema } from './schema';
 import * as I18n from './translations';
-import { APP_ID } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
 import { useManageCaseAction } from './use_manage_case_action';
 
 interface StepRuleActionsProps extends RuleStepProps {
@@ -43,7 +43,7 @@ interface StepRuleActionsProps extends RuleStepProps {
   actionMessageParams: ActionVariables;
 }
 
-const stepActionsDefaultValue: ActionsStepRule = {
+export const stepActionsDefaultValue: ActionsStepRule = {
   enabled: true,
   actions: [],
   kibanaSiemAppUrl: '',
@@ -80,7 +80,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
   } = useKibana();
   const kibanaAbsoluteUrl = useMemo(
     () =>
-      application.getUrlForApp(`${APP_ID}`, {
+      application.getUrlForApp(`${APP_UI_ID}`, {
         absolute: true,
       }),
     [application]
@@ -230,7 +230,7 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 isLoading={isLoading}
                 onClick={() => handleSubmit(false)}
               >
-                {I18n.COMPLETE_WITHOUT_ACTIVATING}
+                {I18n.COMPLETE_WITHOUT_ENABLING}
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -239,9 +239,9 @@ const StepRuleActionsComponent: FC<StepRuleActionsProps> = ({
                 isDisabled={isLoading}
                 isLoading={isLoading}
                 onClick={() => handleSubmit(true)}
-                data-test-subj="create-activate"
+                data-test-subj="create-enable"
               >
-                {I18n.COMPLETE_WITH_ACTIVATING}
+                {I18n.COMPLETE_WITH_ENABLING}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>

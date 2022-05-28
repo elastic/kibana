@@ -15,13 +15,12 @@ import transformListRow from '../../../../common/__mocks__/transform_list_row.js
 import { within } from '@testing-library/dom';
 
 jest.mock('../../../../../shared_imports');
-jest.mock('../../../../../app/app_dependencies');
+jest.mock('../../../../app_dependencies');
 
-import { MlSharedContext } from '../../../../../app/__mocks__/shared_context';
+import { MlSharedContext } from '../../../../__mocks__/shared_context';
 import { getMlSharedImports } from '../../../../../shared_imports';
 
-// FLAKY https://github.com/elastic/kibana/issues/112922
-describe.skip('Transform: Transform List <ExpandedRow />', () => {
+describe('Transform: Transform List <ExpandedRow />', () => {
   const onAlertEdit = jest.fn();
   // Set timezone to US/Eastern for consistent test results.
   beforeEach(() => {

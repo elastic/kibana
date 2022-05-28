@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-jest.mock('../../../../../../../core/server/http/router/request', () => ({
+jest.mock('@kbn/core/server/http/router/request', () => ({
   ensureRawRequest: jest.fn(),
 }));
 
-import { kibanaResponseFactory } from '../../../../../../../core/server';
+import { kibanaResponseFactory } from '@kbn/core/server';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ensureRawRequest } from '../../../../../../../core/server/http/router/request';
+import { ensureRawRequest } from '@kbn/core/server/http/router/request';
 
 import { getProxyRouteHandlerDeps } from './mocks';
 
@@ -73,6 +73,25 @@ describe('Console Proxy Route', () => {
       expect(headers['x-forwarded-proto']).toBe('http');
       expect(headers).toHaveProperty('x-forwarded-host');
       expect(headers['x-forwarded-host']).toBe('test');
+    });
+
+    it('sends product-origin header when withProductOrigin query param is set', async () => {
+      await handler(
+        {} as any,
+        {
+          headers: {},
+          query: {
+            method: 'POST',
+            path: '/api/console/proxy?path=_aliases&method=GET',
+            withProductOrigin: true,
+          },
+        } as any,
+        kibanaResponseFactory
+      );
+
+      const [[{ headers }]] = (requestModule.proxyRequest as jest.Mock).mock.calls;
+      expect(headers).toHaveProperty('x-elastic-product-origin');
+      expect(headers['x-elastic-product-origin']).toBe('kibana');
     });
   });
 });

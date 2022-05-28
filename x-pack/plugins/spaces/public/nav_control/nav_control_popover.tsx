@@ -10,7 +10,7 @@ import { EuiHeaderSectionItemButton, EuiLoadingSpinner, EuiPopover } from '@elas
 import React, { Component, lazy, Suspense } from 'react';
 import type { Subscription } from 'rxjs';
 
-import type { ApplicationStart, Capabilities } from 'src/core/public';
+import type { ApplicationStart, Capabilities } from '@kbn/core/public';
 
 import type { Space } from '../../common';
 import { getSpaceAvatarComponent } from '../space_avatar';
@@ -98,14 +98,13 @@ export class NavControlPopover extends Component<Props, State> {
 
     return (
       <EuiPopover
-        id={'spcMenuPopover'}
-        data-test-subj={`${this.state.loading ? 'spacesNavSelectorLoading' : 'spacesNavSelector'}`}
+        id="spcMenuPopover"
         button={button}
         isOpen={this.state.showSpaceSelector}
         closePopover={this.closeSpaceSelector}
         anchorPosition={this.props.anchorPosition}
         panelPaddingSize="none"
-        repositionOnScroll={true}
+        repositionOnScroll
         ownFocus
       >
         {element}
@@ -154,6 +153,7 @@ export class NavControlPopover extends Component<Props, State> {
         aria-expanded={this.state.showSpaceSelector}
         aria-haspopup="true"
         aria-label={linkTitle}
+        data-test-subj="spacesNavSelector"
         title={linkTitle}
         onClick={this.toggleSpaceSelector}
       >

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { config } from './index';
+import { config } from '.';
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
-import { configDeprecationsMock } from '../../../../../src/core/server/mocks';
+import { configDeprecationsMock } from '@kbn/core/server/mocks';
 
 const CONFIG_PATH = 'xpack.reporting';
 
@@ -40,7 +40,7 @@ describe('deprecations', () => {
     const { messages } = applyReportingDeprecations({ roles: { enabled: true } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "Use Kibana application privileges to grant reporting privileges. Using  \\"xpack.reporting.roles.allow\\" to grant reporting privileges prevents users from using API Keys to create reports. The \\"xpack.reporting.roles.enabled\\" setting will default to false in a future release.",
+        "The default mechanism for Reporting privileges will work differently in future versions, which will affect the behavior of this cluster. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
       ]
     `);
   });

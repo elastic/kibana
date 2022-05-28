@@ -8,13 +8,16 @@
 import { lazy } from 'react';
 import { suspendedComponentWithProps } from '../lib/suspended_component_with_props';
 
-export type { ActionGroupWithCondition, AlertConditionsProps } from './alert_form/alert_conditions';
+export type {
+  ActionGroupWithCondition,
+  RuleConditionsProps as AlertConditionsProps,
+} from './rule_form/rule_conditions';
 
-export const AlertConditions = lazy(() => import('./alert_form/alert_conditions'));
-export const AlertConditionsGroup = lazy(() => import('./alert_form/alert_conditions_group'));
+export const AlertConditions = lazy(() => import('./rule_form/rule_conditions'));
+export const AlertConditionsGroup = lazy(() => import('./rule_form/rule_conditions_group'));
 
-export const AlertAdd = suspendedComponentWithProps(lazy(() => import('./alert_form/alert_add')));
-export const AlertEdit = suspendedComponentWithProps(lazy(() => import('./alert_form/alert_edit')));
+export const AlertAdd = suspendedComponentWithProps(lazy(() => import('./rule_form/rule_add')));
+export const AlertEdit = suspendedComponentWithProps(lazy(() => import('./rule_form/rule_edit')));
 
 export const ConnectorAddFlyout = suspendedComponentWithProps(
   lazy(() => import('./action_connector_form/connector_add_flyout'))
@@ -24,4 +27,23 @@ export const ConnectorEditFlyout = suspendedComponentWithProps(
 );
 export const ActionForm = suspendedComponentWithProps(
   lazy(() => import('./action_connector_form/action_form'))
+);
+
+export const RuleStatusDropdown = suspendedComponentWithProps(
+  lazy(() => import('./rules_list/components/rule_status_dropdown'))
+);
+export const RuleTagFilter = suspendedComponentWithProps(
+  lazy(() => import('./rules_list/components/rule_tag_filter'))
+);
+export const RuleStatusFilter = suspendedComponentWithProps(
+  lazy(() => import('./rules_list/components/rule_status_filter'))
+);
+export const RuleTagBadge = suspendedComponentWithProps(
+  lazy(() => import('./rules_list/components/rule_tag_badge'))
+);
+export const RuleEventLogList = suspendedComponentWithProps(
+  lazy(() => import('./rule_details/components/rule_event_log_list'))
+);
+export const RulesList = suspendedComponentWithProps(
+  lazy(() => import('./rules_list/components/rules_list'))
 );

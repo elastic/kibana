@@ -24,7 +24,7 @@ import {
 } from './response';
 import { RouteConfig, RouteConfigOptions, RouteMethod, validBodyOutput } from './route';
 import { HapiResponseAdapter } from './response_adapter';
-import { RequestHandlerContext } from '../../../server';
+import { RequestHandlerContext } from '../..';
 import { wrapErrors } from './error_wrapper';
 import { RouteValidator } from './validator';
 
@@ -289,10 +289,10 @@ export class Router<Context extends RequestHandlerContext = RequestHandlerContex
 
 const convertEsUnauthorized = (e: EsNotAuthorizedError): ErrorHttpResponseOptions => {
   const getAuthenticateHeaderValue = () => {
-    const header = Object.entries(e.headers).find(
+    const header = Object.entries(e.headers || {}).find(
       ([key]) => key.toLowerCase() === 'www-authenticate'
     );
-    return header ? header[1] : 'Basic realm="Authorization Required"';
+    return header ? (header[1] as string) : 'Basic realm="Authorization Required"';
   };
   return {
     body: e.message,

@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { ThemeProvider } from 'styled-components';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ExceptionItemsSummary } from './exception_items_summary';
 import * as reactTestingLibrary from '@testing-library/react';
-import { getMockTheme } from '../../../../../../../../public/common/lib/kibana/kibana_react.mock';
+import { getMockTheme } from '../../../../../../../common/lib/kibana/kibana_react.mock';
 import { GetExceptionSummaryResponse } from '../../../../../../../../common/endpoint/types';
 
 const mockTheme = getMockTheme({
@@ -24,18 +24,19 @@ const getStatValue = (el: reactTestingLibrary.RenderResult, stat: string) => {
 };
 
 describe('Fleet event filters card', () => {
-  const renderComponent: (stats: GetExceptionSummaryResponse) => reactTestingLibrary.RenderResult =
-    (stats) => {
-      const Wrapper: React.FC = ({ children }) => (
-        <I18nProvider>
-          <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
-        </I18nProvider>
-      );
-      const component = reactTestingLibrary.render(<ExceptionItemsSummary stats={stats} />, {
-        wrapper: Wrapper,
-      });
-      return component;
-    };
+  const renderComponent: (
+    stats: GetExceptionSummaryResponse
+  ) => reactTestingLibrary.RenderResult = (stats) => {
+    const Wrapper: React.FC = ({ children }) => (
+      <I18nProvider>
+        <ThemeProvider theme={mockTheme}>{children}</ThemeProvider>
+      </I18nProvider>
+    );
+    const component = reactTestingLibrary.render(<ExceptionItemsSummary stats={stats} />, {
+      wrapper: Wrapper,
+    });
+    return component;
+  };
   it('should renders correctly', () => {
     const summary: GetExceptionSummaryResponse = {
       windows: 3,

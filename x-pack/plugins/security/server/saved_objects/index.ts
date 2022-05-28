@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import type { CoreSetup } from 'src/core/server';
+import type { CoreSetup } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 
-import { SavedObjectsClient } from '../../../../../src/core/server';
-import type { AuditServiceSetup, SecurityAuditLogger } from '../audit';
+import type { AuditServiceSetup } from '../audit';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
 import type { SpacesService } from '../plugin';
 import { SecureSavedObjectsClientWrapper } from './secure_saved_objects_client_wrapper';
 
 interface SetupSavedObjectsParams {
-  legacyAuditLogger: SecurityAuditLogger;
   audit: AuditServiceSetup;
   authz: Pick<
     AuthorizationServiceSetupInternal,
@@ -38,7 +37,6 @@ export {
 } from './ensure_authorized';
 
 export function setupSavedObjects({
-  legacyAuditLogger,
   audit,
   authz,
   savedObjects,
@@ -59,7 +57,6 @@ export function setupSavedObjects({
     return authz.mode.useRbacForRequest(request)
       ? new SecureSavedObjectsClientWrapper({
           actions: authz.actions,
-          legacyAuditLogger,
           auditLogger: audit.asScoped(request),
           baseClient: client,
           checkSavedObjectsPrivilegesAsCurrentUser:

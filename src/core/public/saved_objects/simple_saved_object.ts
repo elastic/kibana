@@ -13,7 +13,7 @@ import { SavedObjectsClientContract } from './saved_objects_client';
 
 /**
  * This class is a very simple wrapper for SavedObjects loaded from the server
- * with the {@link SavedObjectsClient}.
+ * with the {@link SavedObjectsClientContract}.
  *
  * It provides basic functionality for creating/saving/deleting saved objects,
  * but doesn't include any type-specific implementations.
@@ -30,6 +30,7 @@ export class SimpleSavedObject<T = unknown> {
   public coreMigrationVersion: SavedObjectType<T>['coreMigrationVersion'];
   public error: SavedObjectType<T>['error'];
   public references: SavedObjectType<T>['references'];
+  public updatedAt: SavedObjectType<T>['updated_at'];
   /**
    * Space(s) that this saved object exists in. This attribute is not used for "global" saved object types which are registered with
    * `namespaceType: 'agnostic'`.
@@ -48,6 +49,7 @@ export class SimpleSavedObject<T = unknown> {
       migrationVersion,
       coreMigrationVersion,
       namespaces,
+      updated_at: updatedAt,
     }: SavedObjectType<T>
   ) {
     this.id = id;
@@ -58,6 +60,7 @@ export class SimpleSavedObject<T = unknown> {
     this.migrationVersion = migrationVersion;
     this.coreMigrationVersion = coreMigrationVersion;
     this.namespaces = namespaces;
+    this.updatedAt = updatedAt;
     if (error) {
       this.error = error;
     }
@@ -77,15 +80,25 @@ export class SimpleSavedObject<T = unknown> {
 
   public save(): Promise<SimpleSavedObject<T>> {
     if (this.id) {
-      return this.client.update(this.type, this.id, this.attributes, {
-        references: this.references,
-      });
+      return this.client
+        .update(this.type, this.id, this.attributes, {
+          references: this.references,
+        })
+        .then((sso) => {
+          this.updatedAt = sso.updatedAt;
+          return sso;
+        });
     } else {
-      return this.client.create(this.type, this.attributes, {
-        migrationVersion: this.migrationVersion,
-        coreMigrationVersion: this.coreMigrationVersion,
-        references: this.references,
-      });
+      return this.client
+        .create(this.type, this.attributes, {
+          migrationVersion: this.migrationVersion,
+          coreMigrationVersion: this.coreMigrationVersion,
+          references: this.references,
+        })
+        .then((sso) => {
+          this.updatedAt = sso.updatedAt;
+          return sso;
+        });
     }
   }
 

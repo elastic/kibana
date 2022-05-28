@@ -16,20 +16,27 @@ import {
   EuiText,
   EuiIcon,
   EuiToolTip,
+  EuiFlexGrid,
 } from '@elastic/eui';
+import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
+import { FieldIcon } from '@kbn/react-field';
 
 import { ThreatMapping, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
+import { FilterLabel } from '@kbn/unified-search-plugin/public';
 import { MATCHES, AND, OR } from '../../../../common/components/threat_match/translations';
+import { EqlOptionsSelected } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
 import * as i18nRiskScore from '../risk_score_mapping/translations';
-import { Threshold } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { esFilters } from '../../../../../../../../src/plugins/data/public';
-
+import type {
+  RequiredFieldArray,
+  Threshold,
+} from '../../../../../common/detection_engine/schemas/common';
 import {
   subtechniquesOptions,
   tacticsOptions,
@@ -82,9 +89,10 @@ export const buildQueryBarDescription = ({
               <EuiFlexItem grow={false} key={`${field}-filter-${index}`}>
                 <EuiBadgeWrap color="hollow">
                   {indexPatterns != null ? (
-                    <esFilters.FilterLabel
+                    <FilterLabel
                       filter={filter}
-                      valueLabel={esFilters.getDisplayValueFromFilter(filter, [indexPatterns])}
+                      // @ts-ignore-next-line
+                      valueLabel={getDisplayValueFromFilter(filter, [indexPatterns])}
                     />
                   ) : (
                     <EuiLoadingSpinner size="m" />
@@ -112,6 +120,38 @@ export const buildQueryBarDescription = ({
       {
         title: <>{i18n.SAVED_ID_LABEL} </>,
         description: <>{savedId} </>,
+      },
+    ];
+  }
+  return items;
+};
+
+export const buildEqlOptionsDescription = (eqlOptions: EqlOptionsSelected): ListItems[] => {
+  let items: ListItems[] = [];
+  if (!isEmpty(eqlOptions.eventCategoryField)) {
+    items = [
+      ...items,
+      {
+        title: <>{i18n.EQL_EVENT_CATEGORY_FIELD_LABEL}</>,
+        description: <>{eqlOptions.eventCategoryField}</>,
+      },
+    ];
+  }
+  if (!isEmpty(eqlOptions.tiebreakerField)) {
+    items = [
+      ...items,
+      {
+        title: <>{i18n.EQL_TIEBREAKER_FIELD_LABEL}</>,
+        description: <>{eqlOptions.tiebreakerField}</>,
+      },
+    ];
+  }
+  if (!isEmpty(eqlOptions.timestampField)) {
+    items = [
+      ...items,
+      {
+        title: <>{i18n.EQL_TIMESTAMP_FIELD_LABEL}</>,
+        description: <>{eqlOptions.timestampField}</>,
       },
     ];
   }
@@ -350,7 +390,7 @@ export const buildRiskScoreDescription = (riskScore: AboutStepRiskScore): ListIt
                 <EuiFlexItem grow={false}>
                   <EuiIcon type={'sortRight'} />
                 </EuiFlexItem>
-                <EuiFlexItem>{'signal.rule.risk_score'}</EuiFlexItem>
+                <EuiFlexItem>{ALERT_RISK_SCORE}</EuiFlexItem>
               </EuiFlexGroup>
             ),
           };
@@ -502,6 +542,45 @@ export const buildThreatMappingDescription = (
     {
       title,
       description,
+    },
+  ];
+};
+
+const FieldTypeText = styled(EuiText)`
+  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
+  font-family: ${({ theme }) => theme.eui.euiCodeFontFamily};
+  display: inline;
+`;
+
+export const buildRequiredFieldsDescription = (
+  label: string,
+  requiredFields: RequiredFieldArray
+): ListItems[] => {
+  if (requiredFields == null) {
+    return [];
+  }
+
+  return [
+    {
+      title: label,
+      description: (
+        <EuiFlexGrid gutterSize={'s'}>
+          {requiredFields.map((rF, index) => (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize={'xs'}>
+                <EuiFlexItem grow={false}>
+                  <FieldIcon data-test-subj="field-type-icon" type={rF.type} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <FieldTypeText grow={false} size={'s'}>
+                    {` ${rF.name}${index + 1 !== requiredFields.length ? ', ' : ''}`}
+                  </FieldTypeText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGrid>
+      ),
     },
   ];
 };

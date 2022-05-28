@@ -6,32 +6,31 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { ElasticsearchClient, SavedObjectsClientContract, Logger } from 'kibana/server';
-import { User } from '../../common';
+import { SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import { LensServerPluginSetup } from '@kbn/lens-plugin/server';
+import { User } from '../../common/api';
 import { Authorization } from '../authorization/authorization';
 import {
-  AlertServiceContract,
   CaseConfigureService,
   CasesService,
   CaseUserActionService,
   ConnectorMappingsService,
   AttachmentService,
+  AlertService,
 } from '../services';
-import { ActionsClient } from '../../../actions/server';
-import { LensServerPluginSetup } from '../../../lens/server';
 
 /**
  * Parameters for initializing a cases client
  */
 export interface CasesClientArgs {
-  readonly scopedClusterClient: ElasticsearchClient;
   readonly caseConfigureService: CaseConfigureService;
   readonly caseService: CasesService;
   readonly connectorMappingsService: ConnectorMappingsService;
   readonly user: User;
   readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   readonly userActionService: CaseUserActionService;
-  readonly alertsService: AlertServiceContract;
+  readonly alertsService: AlertService;
   readonly attachmentService: AttachmentService;
   readonly logger: Logger;
   readonly lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  PluginInitializer,
-  PluginInitializerContext,
-} from '../../../../src/core/public';
+import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import { ApmPlugin, ApmPluginSetup, ApmPluginStart } from './plugin';
 
 export interface ConfigSchema {
@@ -23,4 +20,4 @@ export const plugin: PluginInitializer<ApmPluginSetup, ApmPluginStart> = (
   pluginInitializerContext: PluginInitializerContext<ConfigSchema>
 ) => new ApmPlugin(pluginInitializerContext);
 
-export { ApmPluginSetup, ApmPluginStart };
+export type { ApmPluginSetup, ApmPluginStart };

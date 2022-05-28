@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Filter, FilterMeta, FILTERS } from './types';
 import { getPhraseScript, PhraseFilterValue } from './phrase_filter';
-import type { IndexPatternFieldBase, IndexPatternBase } from '../../es_query';
+import type { DataViewFieldBase, DataViewBase } from '../../es_query';
 
 export type PhrasesFilterMeta = FilterMeta & {
   params: PhraseFilterValue[]; // The unformatted values
@@ -48,9 +48,9 @@ export const getPhrasesFilterField = (filter: PhrasesFilter) => {
  * @public
  */
 export const buildPhrasesFilter = (
-  field: IndexPatternFieldBase,
+  field: DataViewFieldBase,
   params: PhraseFilterValue[],
-  indexPattern: IndexPatternBase
+  indexPattern: DataViewBase
 ) => {
   const index = indexPattern.id;
   const type = FILTERS.PHRASES;

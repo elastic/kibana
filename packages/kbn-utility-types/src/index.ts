@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PromiseType } from 'utility-types';
-export { $Values, Assign, Class, Optional, Required } from 'utility-types';
+export type { $Values, Assign, Class, Optional, Required } from 'utility-types';
 
 export type {
   JsonArray,
@@ -28,14 +27,11 @@ export type MaybePromise<T> = T | Promise<T>;
 export type ShallowPromise<T> = T extends Promise<infer U> ? Promise<U> : Promise<T>;
 
 /**
- * Returns wrapped type of a `Promise`.
+ * Unwrap all promise attributes of the given type
  */
-export type UnwrapPromise<T extends Promise<any>> = PromiseType<T>;
-
-/**
- * Returns wrapped type of a promise, or returns type as is, if it is not a promise.
- */
-export type UnwrapPromiseOrReturn<T> = T extends Promise<infer U> ? U : T;
+export type AwaitedProperties<T> = {
+  [K in keyof T]: Awaited<T[K]>;
+};
 
 /**
  * Minimal interface for an object resembling an `Observable`.
@@ -114,3 +110,15 @@ export type PublicMethodsOf<T> = Pick<T, MethodKeysOf<T>>;
 export type Writable<T> = {
   -readonly [K in keyof T]: T[K];
 };
+
+/**
+ * XOR for some properties applied to a type
+ * (XOR is one of these but not both or neither)
+ *
+ * Usage: OneOf<typeToExtend, one | but | not | multiple | of | these | are | required>
+ *
+ * To require aria-label or aria-labelledby but not both
+ * Example: OneOf<Type, 'aria-label' | 'aria-labelledby'>
+ */
+export type OneOf<T, K extends keyof T> = Omit<T, K> &
+  { [k in K]: Pick<Required<T>, k> & { [k1 in Exclude<K, k>]?: never } }[K];

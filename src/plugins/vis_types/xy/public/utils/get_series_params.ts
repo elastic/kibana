@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import type { AggConfigs } from '@kbn/data-plugin/public';
 import { ValueAxis, SeriesParam, ChartMode, InterpolationMode } from '../types';
 import { ChartType } from '../../common';
-import type { AggConfigs } from '../../../../data/public';
 
 const makeSerie = (
   id: string,
@@ -22,7 +22,7 @@ const makeSerie = (
     type: ChartType.Line,
     drawLinesBetweenPoints: true,
     showCircles: true,
-    circlesRadius: 3,
+    circlesRadius: 1,
     interpolate: InterpolationMode.Linear,
     lineWidth: 2,
     valueAxis: defaultValueAxis,

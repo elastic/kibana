@@ -6,23 +6,19 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useCurrentUser, useHttp } from '../../../lib/kibana';
-import { appRoutesService, CheckPermissionsResponse } from '../../../../../../fleet/common';
+import { FleetAuthz } from '@kbn/fleet-plugin/common';
+import { useCurrentUser, useKibana } from '../../../lib/kibana';
 import { useLicense } from '../../../hooks/use_license';
-
-export interface EndpointPrivileges {
-  loading: boolean;
-  /** If user has permissions to access Fleet */
-  canAccessFleet: boolean;
-  /** If user has permissions to access Endpoint management (includes check to ensure they also have access to fleet) */
-  canAccessEndpointManagement: boolean;
-  /** if user has permissions to create Artifacts by Policy */
-  canCreateArtifactsByPolicy: boolean;
-  /** If user has permissions to use the Host isolation feature */
-  canIsolateHost: boolean;
-  /** @deprecated do not use. instead, use one of the other privileges defined */
-  isPlatinumPlus: boolean;
-}
+import {
+  EndpointPrivileges,
+  Immutable,
+  MaybeImmutable,
+} from '../../../../../common/endpoint/types';
+import {
+  calculateEndpointAuthz,
+  getEndpointAuthzInitialState,
+} from '../../../../../common/endpoint/service/authz';
+import { useSecuritySolutionStartDependencies } from './security_solution_start_dependencies';
 
 /**
  * Retrieve the endpoint privileges for the current user.
@@ -30,24 +26,48 @@ export interface EndpointPrivileges {
  * **NOTE:** Consider using `usePrivileges().endpointPrivileges` instead of this hook in order
  * to keep API calls to a minimum.
  */
-export const useEndpointPrivileges = (): EndpointPrivileges => {
-  const http = useHttp();
+export const useEndpointPrivileges = (): Immutable<EndpointPrivileges> => {
   const user = useCurrentUser();
+  const fleetServicesFromUseKibana = useKibana().services.fleet;
+  // The `fleetServicesFromPluginStart` will be defined when this hooks called from a component
+  // that is being rendered under the Fleet context (UI extensions). The `fleetServicesFromUseKibana`
+  // above will be `undefined` in this case.
+  const fleetServicesFromPluginStart = useSecuritySolutionStartDependencies()?.fleet;
   const isMounted = useRef<boolean>(true);
-  const isPlatinumPlusLicense = useLicense().isPlatinumPlus();
-  const [canAccessFleet, setCanAccessFleet] = useState<boolean>(false);
+  const licenseService = useLicense();
   const [fleetCheckDone, setFleetCheckDone] = useState<boolean>(false);
+  const [fleetAuthz, setFleetAuthz] = useState<FleetAuthz | null>(null);
+  const [userRolesCheckDone, setUserRolesCheckDone] = useState<boolean>(false);
+  const [userRoles, setUserRoles] = useState<MaybeImmutable<string[]>>([]);
+
+  const fleetServices = fleetServicesFromUseKibana ?? fleetServicesFromPluginStart;
+
+  const privileges = useMemo(() => {
+    const privilegeList: EndpointPrivileges = Object.freeze({
+      loading: !fleetCheckDone || !userRolesCheckDone || !user,
+      ...(fleetAuthz
+        ? calculateEndpointAuthz(licenseService, fleetAuthz, userRoles)
+        : getEndpointAuthzInitialState()),
+    });
+
+    return privilegeList;
+  }, [fleetCheckDone, userRolesCheckDone, user, fleetAuthz, licenseService, userRoles]);
 
   // Check if user can access fleet
   useEffect(() => {
+    if (!fleetServices) {
+      setFleetCheckDone(true);
+      return;
+    }
+
+    setFleetCheckDone(false);
+
     (async () => {
       try {
-        const fleetPermissionsResponse = await http.get<CheckPermissionsResponse>(
-          appRoutesService.getCheckPermissionsPath()
-        );
+        const fleetAuthzForCurrentUser = await fleetServices.authz;
 
         if (isMounted.current) {
-          setCanAccessFleet(fleetPermissionsResponse.success);
+          setFleetAuthz(fleetAuthzForCurrentUser);
         }
       } finally {
         if (isMounted.current) {
@@ -55,30 +75,17 @@ export const useEndpointPrivileges = (): EndpointPrivileges => {
         }
       }
     })();
-  }, [http]);
+  }, [fleetServices]);
 
-  // Check if user has `superuser` role
-  const isSuperUser = useMemo(() => {
-    if (user?.roles) {
-      return user.roles.includes('superuser');
-    }
-    return false;
-  }, [user?.roles]);
-
-  const privileges = useMemo(() => {
-    const privilegeList: EndpointPrivileges = {
-      loading: !fleetCheckDone || !user,
-      canAccessFleet,
-      canAccessEndpointManagement: canAccessFleet && isSuperUser,
-      canCreateArtifactsByPolicy: isPlatinumPlusLicense,
-      canIsolateHost: isPlatinumPlusLicense,
-      // FIXME: Remove usages of the property below
-      /** @deprecated */
-      isPlatinumPlus: isPlatinumPlusLicense,
-    };
-
-    return privilegeList;
-  }, [canAccessFleet, fleetCheckDone, isSuperUser, user, isPlatinumPlusLicense]);
+  // get user roles
+  useEffect(() => {
+    (async () => {
+      if (user && isMounted.current) {
+        setUserRoles(user?.roles);
+        setUserRolesCheckDone(true);
+      }
+    })();
+  }, [user]);
 
   // Capture if component is unmounted
   useEffect(

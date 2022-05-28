@@ -7,8 +7,8 @@
 
 import Boom from '@hapi/boom';
 
-import { kibanaResponseFactory } from 'src/core/server';
-import { coreMock, httpServerMock } from 'src/core/server/mocks';
+import { kibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
 import { routeDefinitionParamsMock } from '../index.mock';
 import { defineRoleMappingGetRoutes } from './get';
@@ -65,9 +65,9 @@ describe('GET role mappings', () => {
   it('returns all role mappings', async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     const mockContext = getMockContext();
-    mockContext.core.elasticsearch.client.asCurrentUser.security.getRoleMapping.mockResolvedValue({
-      body: mockRoleMappingResponse,
-    } as any);
+    mockContext.core.elasticsearch.client.asCurrentUser.security.getRoleMapping.mockResponse(
+      mockRoleMappingResponse as any
+    );
 
     defineRoleMappingGetRoutes(mockRouteDefinitionParams);
 
@@ -80,7 +80,11 @@ describe('GET role mappings', () => {
       headers,
     });
 
-    const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+    const response = await handler(
+      coreMock.createCustomRequestHandlerContext(mockContext),
+      mockRequest,
+      kibanaResponseFactory
+    );
     expect(response.status).toBe(200);
     expect(response.payload).toEqual([
       {
@@ -133,15 +137,13 @@ describe('GET role mappings', () => {
   it('returns role mapping by name', async () => {
     const mockRouteDefinitionParams = routeDefinitionParamsMock.create();
     const mockContext = getMockContext();
-    mockContext.core.elasticsearch.client.asCurrentUser.security.getRoleMapping.mockResolvedValue({
-      body: {
-        mapping1: {
-          enabled: true,
-          roles: ['foo', 'bar'],
-          rules: {
-            field: {
-              dn: 'CN=bob,OU=example,O=com',
-            },
+    mockContext.core.elasticsearch.client.asCurrentUser.security.getRoleMapping.mockResponse({
+      mapping1: {
+        enabled: true,
+        roles: ['foo', 'bar'],
+        rules: {
+          field: {
+            dn: 'CN=bob,OU=example,O=com',
           },
         },
       },
@@ -161,7 +163,11 @@ describe('GET role mappings', () => {
       headers,
     });
 
-    const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+    const response = await handler(
+      coreMock.createCustomRequestHandlerContext(mockContext),
+      mockRequest,
+      kibanaResponseFactory
+    );
     expect(response.status).toBe(200);
     expect(response.payload).toEqual({
       name: 'mapping1',
@@ -196,7 +202,11 @@ describe('GET role mappings', () => {
         headers,
       });
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
       expect(response.status).toBe(403);
       expect(response.payload).toEqual({ message: 'test forbidden message' });
       expect(
@@ -225,7 +235,11 @@ describe('GET role mappings', () => {
         headers,
       });
 
-      const response = await handler(mockContext, mockRequest, kibanaResponseFactory);
+      const response = await handler(
+        coreMock.createCustomRequestHandlerContext(mockContext),
+        mockRequest,
+        kibanaResponseFactory
+      );
       expect(response.status).toBe(404);
       expect(
         mockContext.core.elasticsearch.client.asCurrentUser.security.getRoleMapping

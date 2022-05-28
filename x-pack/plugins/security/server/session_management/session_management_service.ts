@@ -7,13 +7,14 @@
 
 import type { Observable, Subscription } from 'rxjs';
 
-import type { ElasticsearchClient, HttpServiceSetup, Logger } from 'src/core/server';
-
-import { SavedObjectsErrorHelpers } from '../../../../../src/core/server';
+import type { ElasticsearchClient, HttpServiceSetup, Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
+
+import type { AuditLogger } from '../audit';
 import type { ConfigType } from '../config';
 import type { OnlineStatusRetryScheduler } from '../elasticsearch';
 import { Session } from './session';
@@ -31,6 +32,7 @@ export interface SessionManagementServiceStartParams {
   readonly kibanaIndexName: string;
   readonly online$: Observable<OnlineStatusRetryScheduler>;
   readonly taskManager: TaskManagerStartContract;
+  readonly auditLogger: AuditLogger;
 }
 
 export interface SessionManagementServiceStart {
@@ -78,12 +80,14 @@ export class SessionManagementService {
     kibanaIndexName,
     online$,
     taskManager,
+    auditLogger,
   }: SessionManagementServiceStartParams): SessionManagementServiceStart {
     this.sessionIndex = new SessionIndex({
       config: this.config,
       elasticsearchClient,
       kibanaIndexName,
       logger: this.logger.get('index'),
+      auditLogger,
     });
 
     this.statusSubscription = online$.subscribe(async ({ scheduleRetry }) => {

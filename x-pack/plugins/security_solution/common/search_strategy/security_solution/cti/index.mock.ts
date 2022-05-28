@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IEsSearchResponse } from 'src/plugins/data/public';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { IEsSearchResponse } from '@kbn/data-plugin/public';
 
 import {
   CtiEnrichment,

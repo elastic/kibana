@@ -11,7 +11,7 @@ import { promisify } from 'util';
 import type { BinaryLike } from 'crypto';
 import { createHash } from 'crypto';
 
-import type { ElasticsearchClient } from 'kibana/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { ListResult } from '../../../common';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
@@ -48,7 +48,7 @@ export const getArtifact = async (
     });
 
     // @ts-expect-error @elastic/elasticsearch _source is optional
-    return esSearchHitToArtifact(esData.body);
+    return esSearchHitToArtifact(esData);
   } catch (e) {
     if (isElasticsearchItemNotFoundError(e)) {
       return;
@@ -103,20 +103,23 @@ export const listArtifacts = async (
   try {
     const searchResult = await esClient.search<ArtifactElasticsearchProperties>({
       index: FLEET_SERVER_ARTIFACTS_INDEX,
-      sort: `${sortField}:${sortOrder}`,
       q: kuery,
       from: (page - 1) * perPage,
       ignore_unavailable: true,
       size: perPage,
+      track_total_hits: true,
+      rest_total_hits_as_int: true,
+      body: {
+        sort: [{ [sortField]: { order: sortOrder } }],
+      },
     });
 
     return {
       // @ts-expect-error @elastic/elasticsearch _source is optional
-      items: searchResult.body.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
+      items: searchResult.hits.hits.map((hit) => esSearchHitToArtifact(hit)),
       page,
       perPage,
-      // @ts-expect-error doesn't handle total as number
-      total: searchResult.body.hits.total.value,
+      total: searchResult.hits.total as number,
     };
   } catch (e) {
     throw new ArtifactsElasticsearchError(e);

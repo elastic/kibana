@@ -5,33 +5,14 @@
  * 2.0.
  */
 
+import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import { TIME_RANGE_TYPE } from '@kbn/ml-plugin/public/application/jobs/components/custom_url_editor/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Job, Datafeed } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import {
-  TimeRangeType,
-  TIME_RANGE_TYPE,
-} from '../../../../../plugins/ml/public/application/jobs/components/custom_url_editor/constants';
-
-interface DiscoverUrlConfig {
-  label: string;
-  indexPattern: string;
-  queryEntityFieldNames: string[];
-  timeRange: TimeRangeType;
-  timeRangeInterval?: string;
-}
-
-interface DashboardUrlConfig {
-  label: string;
-  dashboardName: string;
-  queryEntityFieldNames: string[];
-  timeRange: TimeRangeType;
-  timeRangeInterval?: string;
-}
-
-interface OtherUrlConfig {
-  label: string;
-  url: string;
-}
+import type {
+  DiscoverUrlConfig,
+  DashboardUrlConfig,
+  OtherUrlConfig,
+} from '../../../services/ml/job_table';
 
 // @ts-expect-error doesn't implement the full interface
 const JOB_CONFIG: Job = {
@@ -81,9 +62,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const browser = getService('browser');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/106053
-  describe.skip('custom urls', function () {
-    this.tags(['mlqa']);
+  describe('custom urls', function () {
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
@@ -97,6 +77,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.testResources.deleteMLTestDashboard();
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     it('opens the custom URLs tab in the edit job flyout', async () => {

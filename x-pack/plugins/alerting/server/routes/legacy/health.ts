@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { UsageCounter } from 'src/plugins/usage_collection/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { AlertingRouter } from '../../types';
 import { ILicenseState } from '../../lib/license_state';
 import { verifyApiAccess } from '../../lib/license_api_access';
 import { AlertingFrameworkHealth } from '../../types';
-import { EncryptedSavedObjectsPluginSetup } from '../../../../encrypted_saved_objects/server';
 import { trackLegacyRouteUsage } from '../../lib/track_legacy_route_usage';
+import { getSecurityHealth } from '../../lib/get_security_health';
 
 export function healthRoute(
   router: AlertingRouter,
@@ -31,28 +32,39 @@ export function healthRoute(
       }
       trackLegacyRouteUsage('health', usageCounter);
       try {
-        const isEsSecurityEnabled: boolean | null = licenseState.getIsSecurityEnabled();
-        const alertingFrameworkHeath = await context.alerting.getFrameworkHealth();
-        const areApiKeysEnabled = await context.alerting.areApiKeysEnabled();
+        const alertingContext = await context.alerting;
+        // Verify that user has access to at least one rule type
+        const ruleTypes = Array.from(await alertingContext.getRulesClient().listAlertTypes());
+        if (ruleTypes.length > 0) {
+          const alertingFrameworkHealth = await alertingContext.getFrameworkHealth();
 
-        let isSufficientlySecure;
-        if (isEsSecurityEnabled === null) {
-          isSufficientlySecure = false;
+          const securityHealth = await getSecurityHealth(
+            async () => (licenseState ? licenseState.getIsSecurityEnabled() : null),
+            async () => encryptedSavedObjects.canEncrypt,
+            alertingContext.areApiKeysEnabled
+          );
+
+          const frameworkHealth: AlertingFrameworkHealth = {
+            ...securityHealth,
+            alertingFrameworkHealth,
+          };
+
+          return res.ok({
+            body: {
+              ...frameworkHealth,
+              alertingFrameworkHeath: {
+                // Legacy: pre-v8.0 typo
+                ...alertingFrameworkHealth,
+                _deprecated:
+                  'This state property has a typo, use "alertingFrameworkHealth" instead.',
+              },
+            },
+          });
         } else {
-          // if isEsSecurityEnabled = true, then areApiKeysEnabled must be true to enable alerting
-          // if isEsSecurityEnabled = false, then it does not matter what areApiKeysEnabled is
-          isSufficientlySecure = !isEsSecurityEnabled || (isEsSecurityEnabled && areApiKeysEnabled);
+          return res.forbidden({
+            body: { message: `Unauthorized to access alerting framework health` },
+          });
         }
-
-        const frameworkHealth: AlertingFrameworkHealth = {
-          isSufficientlySecure,
-          hasPermanentEncryptionKey: encryptedSavedObjects.canEncrypt,
-          alertingFrameworkHeath,
-        };
-
-        return res.ok({
-          body: frameworkHealth,
-        });
       } catch (error) {
         return res.badRequest({ body: error });
       }

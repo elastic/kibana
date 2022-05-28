@@ -8,6 +8,7 @@
 
 import { get } from 'lodash';
 import { deepFreeze } from '@kbn/std';
+import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { DiscoveredPlugin, PluginName } from '../../server';
 import {
   EnvironmentMode,
@@ -16,7 +17,7 @@ import {
   UiSettingsParams,
   UserProvidedValues,
 } from '../../server/types';
-import { AppCategory } from '../';
+import { AppCategory } from '..';
 
 export interface InjectedPluginMetadata {
   id: PluginName;
@@ -24,6 +25,12 @@ export interface InjectedPluginMetadata {
   config?: {
     [key: string]: unknown;
   };
+}
+
+export interface InjectedMetadataClusterInfo {
+  cluster_uuid?: string;
+  cluster_name?: string;
+  cluster_version?: string;
 }
 
 /** @internal */
@@ -35,6 +42,7 @@ export interface InjectedMetadataParams {
     basePath: string;
     serverBasePath: string;
     publicBaseUrl: string;
+    clusterInfo: InjectedMetadataClusterInfo;
     category?: AppCategory;
     csp: {
       warnLegacyBrowsers: boolean;
@@ -44,6 +52,10 @@ export interface InjectedMetadataParams {
     };
     vars: {
       [key: string]: unknown;
+    };
+    theme: {
+      darkMode: boolean;
+      version: ThemeVersion;
     };
     env: {
       mode: Readonly<EnvironmentMode>;
@@ -69,11 +81,13 @@ export interface InjectedMetadataParams {
  * @internal
  */
 export class InjectedMetadataService {
-  private state = deepFreeze(
-    this.params.injectedMetadata
-  ) as InjectedMetadataParams['injectedMetadata'];
+  private state: InjectedMetadataParams['injectedMetadata'];
 
-  constructor(private readonly params: InjectedMetadataParams) {}
+  constructor(private readonly params: InjectedMetadataParams) {
+    this.state = deepFreeze(
+      this.params.injectedMetadata
+    ) as InjectedMetadataParams['injectedMetadata'];
+  }
 
   public start(): InjectedMetadataStart {
     return this.setup();
@@ -132,6 +146,14 @@ export class InjectedMetadataService {
       getKibanaBranch: () => {
         return this.state.branch;
       },
+
+      getTheme: () => {
+        return this.state.theme;
+      },
+
+      getElasticsearchInfo: () => {
+        return this.state.clusterInfo;
+      },
     };
   }
 }
@@ -154,6 +176,11 @@ export interface InjectedMetadataSetup {
   getExternalUrlConfig: () => {
     policy: IExternalUrlPolicy[];
   };
+  getTheme: () => {
+    darkMode: boolean;
+    version: ThemeVersion;
+  };
+  getElasticsearchInfo: () => InjectedMetadataClusterInfo;
   /**
    * An array of frontend plugins in topological order.
    */

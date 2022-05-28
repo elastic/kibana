@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { notificationServiceMock } from '../../../../../../../../src/core/public/mocks';
+import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createTGridMocks } from '../../../../../../timelines/public/mock';
+import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
 
 import {
   createKibanaContextProviderMock,
@@ -17,13 +17,19 @@ import {
   createStartServicesMock,
   createWithKibanaMock,
 } from '../kibana_react.mock';
-import { APP_ID } from '../../../../../common/constants';
+import { APP_UI_ID } from '../../../../../common/constants';
+import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
 const mockStartServicesMock = createStartServicesMock();
 export const KibanaServices = { get: jest.fn(), getKibanaVersion: jest.fn(() => '8.0.0') };
 export const useKibana = jest.fn().mockReturnValue({
   services: {
     ...mockStartServicesMock,
+    uiSettings: {
+      get: jest.fn(),
+      set: jest.fn(),
+    },
+    cases: mockCasesContract(),
     data: {
       ...mockStartServicesMock.data,
       search: {
@@ -65,7 +71,16 @@ export const useGetUserCasesPermissions = jest.fn();
 export const useAppUrl = jest.fn().mockReturnValue({
   getAppUrl: jest
     .fn()
-    .mockImplementation(({ appId = APP_ID, ...options }) =>
+    .mockImplementation(({ appId = APP_UI_ID, ...options }) =>
       mockStartServicesMock.application.getUrlForApp(appId, options)
     ),
+});
+export const useNavigateTo = jest.fn().mockReturnValue({
+  navigateTo: jest.fn().mockImplementation(({ appId = APP_UI_ID, url, ...options }) => {
+    if (url) {
+      mockStartServicesMock.application.navigateToUrl(url);
+    } else {
+      mockStartServicesMock.application.navigateToApp(appId, options);
+    }
+  }),
 });

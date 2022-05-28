@@ -9,15 +9,15 @@
     "embeddable",
     "inspector",
     "fieldFormats",
-    "kibanaLegacy",
     "urlForwarding",
     "navigation",
     "uiActions",
     "savedObjects",
-    "indexPatternFieldEditor"
+    "dataViewFieldEditor",
+    "dataViewEditor"
   ],
-  "optionalPlugins": ["home", "share", "usageCollection", "spaces"],
-  "requiredBundles": ["kibanaUtils", "home", "kibanaReact", "dataViews"],
+  "optionalPlugins": ["home", "share", "usageCollection", "spaces", "triggersActionsUi"],
+  "requiredBundles": ["kibanaUtils", "kibanaReact", "dataViews", "unifiedSearch"],
   "extraPublicDirs": ["common"],
   "owner": {
     "name": "Data Discovery",

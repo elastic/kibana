@@ -7,13 +7,15 @@
 
 import { Observable, Subject, Subscription } from 'rxjs';
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { ILicense } from '../common/types';
 import { LicensingPluginSetup, LicensingPluginStart } from './types';
 import { createLicenseUpdate } from '../common/license_update';
 import { License } from '../common/license';
 import { mountExpiredBanner } from './expired_banner';
 import { FeatureUsageService } from './services';
+import type { PublicLicenseJSON } from '../common/types';
+import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
 
 export const licensingSessionStorageKey = 'xpack.licensing';
 
@@ -26,7 +28,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   /**
    * Used as a flag to halt all other plugin observables.
    */
-  private stop$ = new Subject();
+  private stop$ = new Subject<void>();
 
   /**
    * A function to execute once the plugin's HTTP interceptor needs to stop listening.
@@ -72,7 +74,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   }
 
   public setup(core: CoreSetup) {
-    const signatureUpdated$ = new Subject();
+    const signatureUpdated$ = new Subject<void>();
 
     const { license$, refreshManually } = createLicenseUpdate(
       signatureUpdated$,
@@ -80,6 +82,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       () => this.fetchLicense(core),
       this.getSaved()
     );
+
+    registerAnalyticsContextProvider(core.analytics, license$);
 
     this.internalSubscription = license$.subscribe((license) => {
       if (license.isAvailable) {
@@ -148,9 +152,9 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
     }
   }
 
-  private fetchLicense = async (core: CoreSetup): Promise<ILicense> => {
+  private fetchLicense = async (core: CoreSetup): Promise<License> => {
     try {
-      const response = await core.http.get({
+      const response = await core.http.get<PublicLicenseJSON>({
         path: this.infoEndpoint,
         asSystemRequest: true,
       });

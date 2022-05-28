@@ -5,5 +5,14 @@
  * 2.0.
  */
 
+export const enableNewSyntheticsView = 'observability:enableNewSyntheticsView';
 export const enableInspectEsQueries = 'observability:enableInspectEsQueries';
 export const maxSuggestions = 'observability:maxSuggestions';
+export const enableComparisonByDefault = 'observability:enableComparisonByDefault';
+export const enableInfrastructureView = 'observability:enableInfrastructureView';
+export const defaultApmServiceEnvironment = 'observability:apmDefaultServiceEnvironment';
+export const apmProgressiveLoading = 'observability:apmProgressiveLoading';
+export const enableServiceGroups = 'observability:enableServiceGroups';
+export const apmServiceInventoryOptimizedSorting =
+  'observability:apmServiceInventoryOptimizedSorting';
+export const apmTraceExplorerTab = 'observability:apmTraceExplorerTab';

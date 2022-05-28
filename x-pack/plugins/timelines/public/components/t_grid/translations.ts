@@ -22,7 +22,7 @@ export const EVENTS_TABLE_ARIA_LABEL = ({
 export const BULK_ACTION_OPEN_SELECTED = i18n.translate(
   'xpack.timelines.timeline.openSelectedTitle',
   {
-    defaultMessage: 'Open selected',
+    defaultMessage: 'Mark as open',
   }
 );
 
@@ -44,6 +44,20 @@ export const BULK_ACTION_FAILED_SINGLE_ALERT = i18n.translate(
   'xpack.timelines.timeline.updateAlertStatusFailedSingleAlert',
   {
     defaultMessage: 'Failed to update alert because it was already being modified.',
+  }
+);
+
+export const BULK_ACTION_ATTACH_NEW_CASE = i18n.translate(
+  'xpack.timelines.timeline.attachNewCase',
+  {
+    defaultMessage: 'Attach to new case',
+  }
+);
+
+export const BULK_ACTION_ATTACH_EXISTING_CASE = i18n.translate(
+  'xpack.timelines.timeline.attachExistingCase',
+  {
+    defaultMessage: 'Attach to existing case',
   }
 );
 

@@ -5,22 +5,5 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
-import React, { memo } from 'react';
-import { PackageCustomExtensionComponentProps } from '../../../../../../../../fleet/public';
-import { FleetTrustedAppsCardWrapper } from './components/fleet_trusted_apps_card_wrapper';
-import { FleetEventFiltersCard } from './components/fleet_event_filters_card';
-
-export const EndpointPackageCustomExtension = memo<PackageCustomExtensionComponentProps>(
-  (props) => {
-    return (
-      <div data-test-subj="fleetEndpointPackageCustomContent">
-        <FleetTrustedAppsCardWrapper {...props} />
-        <EuiSpacer />
-        <FleetEventFiltersCard {...props} />
-      </div>
-    );
-  }
-);
-
-EndpointPackageCustomExtension.displayName = 'EndpointPackageCustomExtension';
+export { EndpointPackageCustomExtension } from './endpoint_package_custom_extension';
+export * from './translations';

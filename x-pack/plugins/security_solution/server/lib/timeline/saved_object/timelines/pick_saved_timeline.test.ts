@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '../../../../../../security/common/model';
+import { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 
 import { TimelineStatus, TimelineType, SavedTimeline } from '../../../../../common/types/timeline';
 import { NoteSavedObject } from '../../../../../common/types/timeline/note';
@@ -38,6 +38,7 @@ describe('pickSavedTimeline', () => {
       { columnHeaderType: 'not-filtered', id: 'destination.ip' },
       { columnHeaderType: 'not-filtered', id: 'user.name' },
     ],
+    dataViewId: 'security-solution',
     indexNames: [
       'auditbeat-*',
       'endgame-*',

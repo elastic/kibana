@@ -8,9 +8,9 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { Render, waitFor } from '../../../../presentation_util/public/__stories__';
-import { imageRenderer } from '../image_renderer';
-import { getElasticLogo } from '../../../../../../src/plugins/presentation_util/common/lib';
+import { Render, waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
+import { getElasticLogo } from '@kbn/presentation-util-plugin/common/lib';
+import { getImageRenderer } from '../image_renderer';
 import { ImageMode } from '../../../common';
 
 const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
@@ -19,7 +19,7 @@ const Renderer = ({ elasticLogo }: { elasticLogo: string }) => {
     mode: ImageMode.COVER,
   };
 
-  return <Render renderer={imageRenderer} config={config} width="500px" height="500px" />;
+  return <Render renderer={getImageRenderer()} config={config} width="500px" height="500px" />;
 };
 
 storiesOf('renderers/image', module).add(

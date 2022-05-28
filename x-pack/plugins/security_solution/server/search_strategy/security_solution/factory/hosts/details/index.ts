@@ -7,7 +7,8 @@
 
 import { get } from 'lodash/fp';
 
-import { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import { IScopedClusterClient, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   HostAggEsData,
   HostDetailsStrategyResponse,
@@ -21,10 +22,6 @@ import { SecuritySolutionFactory } from '../../types';
 import { buildHostDetailsQuery } from './query.host_details.dsl';
 import { formatHostItem, getHostEndpoint } from './helpers';
 import { EndpointAppContext } from '../../../../../endpoint/types';
-import {
-  IScopedClusterClient,
-  SavedObjectsClientContract,
-} from '../../../../../../../../../src/core/server';
 
 export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
   buildDsl: (options: HostDetailsRequestOptions) => buildHostDetailsQuery(options),
@@ -35,6 +32,7 @@ export const hostDetails: SecuritySolutionFactory<HostsQueries.details> = {
       esClient: IScopedClusterClient;
       savedObjectsClient: SavedObjectsClientContract;
       endpointContext: EndpointAppContext;
+      request: KibanaRequest;
     }
   ): Promise<HostDetailsStrategyResponse> => {
     const aggregations = get('aggregations', response.rawResponse);

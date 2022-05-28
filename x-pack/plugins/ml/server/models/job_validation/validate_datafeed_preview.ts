@@ -30,14 +30,14 @@ export async function validateDatafeedPreview(
 ): Promise<DatafeedValidationResponse> {
   const { datafeed_config: datafeed, ...tempJob } = job;
   try {
-    const { body } = (await mlClient.previewDatafeed(
+    const body = (await mlClient.previewDatafeed(
       {
         body: {
           job_config: tempJob,
           datafeed_config: datafeed,
         },
       },
-      authHeader
+      { ...authHeader, maxRetries: 0 }
       // previewDatafeed response type is incorrect
     )) as unknown as { body: unknown[] };
 

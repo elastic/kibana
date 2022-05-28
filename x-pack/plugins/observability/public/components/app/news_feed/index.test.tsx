@@ -8,7 +8,7 @@
 import React from 'react';
 import { NewsItem } from '../../../services/get_news_feed';
 import { render } from '../../../utils/test_helper';
-import { NewsFeed } from './';
+import { NewsFeed } from '.';
 
 const newsFeedItems = [
   {
@@ -59,6 +59,6 @@ describe('News', () => {
     );
     expect(getByText("What's new")).toBeInTheDocument();
     expect(getAllByText('Read full story').length).toEqual(3);
-    expect(queryAllByTestId('news_image').length).toEqual(1);
+    expect(queryAllByTestId('newsImage').length).toEqual(1);
   });
 });

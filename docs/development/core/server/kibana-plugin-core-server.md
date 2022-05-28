@@ -8,7 +8,7 @@ The Kibana Core APIs for server-side plugins.
 
 A plugin requires a `kibana.json` file at it's root directory that follows [the manfiest schema](./kibana-plugin-core-server.pluginmanifest.md) to define static plugin information required to load the plugin.
 
-A plugin's `server/index` file must contain a named import, `plugin`<!-- -->, that implements [PluginInitializer](./kibana-plugin-core-server.plugininitializer.md) which returns an object that implements [Plugin](./kibana-plugin-core-server.plugin.md)<!-- -->.
+A plugin's `server/index` file must contain a named import, `plugin`<!-- -->, that implements [PluginInitializer](./kibana-plugin-core-server.plugininitializer.md) which returns an object that implements .
 
 The plugin integrates with the core system via lifecycle events: `setup`<!-- -->, `start`<!-- -->, and `stop`<!-- -->. In each lifecycle method, the plugin will receive the corresponding core services available (either [CoreSetup](./kibana-plugin-core-server.coresetup.md) or [CoreStart](./kibana-plugin-core-server.corestart.md)<!-- -->) and any interfaces returned by dependency plugins' lifecycle method. Anything returned by the plugin's lifecycle method will be exposed to downstream dependencies when their corresponding lifecycle methods are invoked.
 
@@ -24,9 +24,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [RouteValidationError](./kibana-plugin-core-server.routevalidationerror.md) | Error to return when the validation is not successful. |
 |  [SavedObjectsClient](./kibana-plugin-core-server.savedobjectsclient.md) |  |
 |  [SavedObjectsErrorHelpers](./kibana-plugin-core-server.savedobjectserrorhelpers.md) |  |
-|  [SavedObjectsExporter](./kibana-plugin-core-server.savedobjectsexporter.md) |  |
 |  [SavedObjectsExportError](./kibana-plugin-core-server.savedobjectsexporterror.md) |  |
-|  [SavedObjectsImporter](./kibana-plugin-core-server.savedobjectsimporter.md) |  |
 |  [SavedObjectsImportError](./kibana-plugin-core-server.savedobjectsimporterror.md) |  |
 |  [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |  |
 |  [SavedObjectsSerializer](./kibana-plugin-core-server.savedobjectsserializer.md) | A serializer that can be used to manually convert [raw](./kibana-plugin-core-server.savedobjectsrawdoc.md) or [sanitized](./kibana-plugin-core-server.savedobjectsanitizeddoc.md) documents to the other kind. |
@@ -60,6 +58,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ConfigDeprecationDetails](./kibana-plugin-core-server.configdeprecationdetails.md) |  |
 |  [ContextSetup](./kibana-plugin-core-server.contextsetup.md) | An object that handles registration of context providers and configuring handlers with context. |
 |  [CorePreboot](./kibana-plugin-core-server.corepreboot.md) | Context passed to the <code>setup</code> method of <code>preboot</code> plugins. |
+|  [CoreRequestHandlerContext](./kibana-plugin-core-server.corerequesthandlercontext.md) | The <code>core</code> context provided to route handler.<!-- -->Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.client](./kibana-plugin-core-server.iscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
 |  [CoreSetup](./kibana-plugin-core-server.coresetup.md) | Context passed to the <code>setup</code> method of <code>standard</code> plugins. |
 |  [CoreStart](./kibana-plugin-core-server.corestart.md) | Context passed to the plugins <code>start</code> method. |
 |  [CoreStatus](./kibana-plugin-core-server.corestatus.md) | Status of core services. |
@@ -70,7 +69,9 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DeprecationSettings](./kibana-plugin-core-server.deprecationsettings.md) | UiSettings deprecation field options. |
 |  [DeprecationsServiceSetup](./kibana-plugin-core-server.deprecationsservicesetup.md) | The deprecations service provides a way for the Kibana platform to communicate deprecated features and configs with its users. These deprecations are only communicated if the deployment is using these features. Allowing for a user tailored experience for upgrading the stack version.<!-- -->The Deprecation service is consumed by the upgrade assistant to assist with the upgrade experience.<!-- -->If a deprecated feature can be resolved without manual user intervention. Using correctiveActions.api allows the Upgrade Assistant to use this api to correct the deprecation upon a user trigger. |
 |  [DiscoveredPlugin](./kibana-plugin-core-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
+|  [DocLinksServiceSetup](./kibana-plugin-core-server.doclinksservicesetup.md) |  |
 |  [ElasticsearchConfigPreboot](./kibana-plugin-core-server.elasticsearchconfigpreboot.md) | A limited set of Elasticsearch configuration entries exposed to the <code>preboot</code> plugins at <code>setup</code>. |
+|  [ElasticsearchErrorDetails](./kibana-plugin-core-server.elasticsearcherrordetails.md) |  |
 |  [ElasticsearchServicePreboot](./kibana-plugin-core-server.elasticsearchservicepreboot.md) |  |
 |  [ElasticsearchServiceSetup](./kibana-plugin-core-server.elasticsearchservicesetup.md) |  |
 |  [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |  |
@@ -100,9 +101,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [IExternalUrlPolicy](./kibana-plugin-core-server.iexternalurlpolicy.md) | A policy describing whether access to an external destination is allowed. |
 |  [IKibanaResponse](./kibana-plugin-core-server.ikibanaresponse.md) | A response data object, expected to returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution |
 |  [IKibanaSocket](./kibana-plugin-core-server.ikibanasocket.md) | A tiny abstraction for TCP socket. |
-|  [IntervalHistogram](./kibana-plugin-core-server.intervalhistogram.md) | an IntervalHistogram object that samples and reports the event loop delay over time. The delays will be reported in nanoseconds. |
+|  [IntervalHistogram](./kibana-plugin-core-server.intervalhistogram.md) | an IntervalHistogram object that samples and reports the event loop delay over time. The delays will be reported in milliseconds. |
 |  [IRenderOptions](./kibana-plugin-core-server.irenderoptions.md) |  |
 |  [IRouter](./kibana-plugin-core-server.irouter.md) | Registers route handlers for specified resource path and method. See [RouteConfig](./kibana-plugin-core-server.routeconfig.md) and [RequestHandler](./kibana-plugin-core-server.requesthandler.md) for more information about arguments to route registrations. |
+|  [ISavedObjectsExporter](./kibana-plugin-core-server.isavedobjectsexporter.md) | Utility class used to export savedObjects. |
+|  [ISavedObjectsImporter](./kibana-plugin-core-server.isavedobjectsimporter.md) | Utility class used to import savedObjects. |
 |  [ISavedObjectsPointInTimeFinder](./kibana-plugin-core-server.isavedobjectspointintimefinder.md) |  |
 |  [IScopedClusterClient](./kibana-plugin-core-server.iscopedclusterclient.md) | Serves the same purpose as the normal [cluster client](./kibana-plugin-core-server.iclusterclient.md) but exposes an additional <code>asCurrentUser</code> method that doesn't use credentials of the Kibana internal user (as <code>asInternalUser</code> does) to request Elasticsearch API, but rather passes HTTP headers extracted from the current user request to the API instead. |
 |  [IUiSettingsClient](./kibana-plugin-core-server.iuisettingsclient.md) | Server-side client that provides access to the advanced settings stored in elasticsearch. The settings provide control over the behavior of the Kibana application. For example, a user can specify how to display numeric or date fields. Users can adjust the settings via Management UI. |
@@ -123,14 +126,16 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OpsOsMetrics](./kibana-plugin-core-server.opsosmetrics.md) | OS related metrics |
 |  [OpsProcessMetrics](./kibana-plugin-core-server.opsprocessmetrics.md) | Process related metrics |
 |  [OpsServerMetrics](./kibana-plugin-core-server.opsservermetrics.md) | server related metrics |
-|  [Plugin](./kibana-plugin-core-server.plugin.md) | The interface that should be returned by a <code>PluginInitializer</code> for a <code>standard</code> plugin. |
+|  [Plugin\_2](./kibana-plugin-core-server.plugin_2.md) | The interface that should be returned by a <code>PluginInitializer</code> for a <code>standard</code> plugin. |
 |  [PluginConfigDescriptor](./kibana-plugin-core-server.pluginconfigdescriptor.md) | Describes a plugin configuration properties. |
 |  [PluginInitializerContext](./kibana-plugin-core-server.plugininitializercontext.md) | Context that's available to plugins during initialization stage. |
 |  [PluginManifest](./kibana-plugin-core-server.pluginmanifest.md) | Describes the set of required and optional properties plugin can define in its mandatory JSON manifest file. |
+|  [PollEsNodesVersionOptions](./kibana-plugin-core-server.pollesnodesversionoptions.md) |  |
 |  [PrebootPlugin](./kibana-plugin-core-server.prebootplugin.md) | The interface that should be returned by a <code>PluginInitializer</code> for a <code>preboot</code> plugin. |
 |  [PrebootServicePreboot](./kibana-plugin-core-server.prebootservicepreboot.md) | Kibana Preboot Service allows to control the boot flow of Kibana. Preboot plugins can use it to hold the boot until certain condition is met. |
 |  [RegisterDeprecationsConfig](./kibana-plugin-core-server.registerdeprecationsconfig.md) |  |
-|  [RequestHandlerContext](./kibana-plugin-core-server.requesthandlercontext.md) | Plugin specific context passed to a route handler.<!-- -->Provides the following clients and services: - [savedObjects.client](./kibana-plugin-core-server.savedobjectsclient.md) - Saved Objects client which uses the credentials of the incoming request - [savedObjects.typeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) - Type registry containing all the registered types. - [elasticsearch.client](./kibana-plugin-core-server.iscopedclusterclient.md) - Elasticsearch data client which uses the credentials of the incoming request - [uiSettings.client](./kibana-plugin-core-server.iuisettingsclient.md) - uiSettings client which uses the credentials of the incoming request |
+|  [RequestHandlerContext](./kibana-plugin-core-server.requesthandlercontext.md) | Base context passed to a route handler. |
+|  [RequestHandlerContextBase](./kibana-plugin-core-server.requesthandlercontextbase.md) | \* |
 |  [ResolveCapabilitiesOptions](./kibana-plugin-core-server.resolvecapabilitiesoptions.md) | Defines a set of additional options for the <code>resolveCapabilities</code> method of [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md)<!-- -->. |
 |  [RouteConfig](./kibana-plugin-core-server.routeconfig.md) | Route specific configuration. |
 |  [RouteConfigOptions](./kibana-plugin-core-server.routeconfigoptions.md) | Additional route options. |
@@ -166,8 +171,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsCreatePointInTimeFinderDependencies](./kibana-plugin-core-server.savedobjectscreatepointintimefinderdependencies.md) |  |
 |  [SavedObjectsDeleteByNamespaceOptions](./kibana-plugin-core-server.savedobjectsdeletebynamespaceoptions.md) |  |
 |  [SavedObjectsDeleteOptions](./kibana-plugin-core-server.savedobjectsdeleteoptions.md) |  |
-|  [SavedObjectsExportByObjectOptions](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.md) | Options for the [export by objects API](./kibana-plugin-core-server.savedobjectsexporter.exportbyobjects.md) |
-|  [SavedObjectsExportByTypeOptions](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.md) | Options for the [export by type API](./kibana-plugin-core-server.savedobjectsexporter.exportbytypes.md) |
+|  [SavedObjectsExportByObjectOptions](./kibana-plugin-core-server.savedobjectsexportbyobjectoptions.md) | Options for the [export by objects API](./kibana-plugin-core-server.isavedobjectsexporter.exportbyobjects.md) |
+|  [SavedObjectsExportByTypeOptions](./kibana-plugin-core-server.savedobjectsexportbytypeoptions.md) | Options for the [export by type API](./kibana-plugin-core-server.isavedobjectsexporter.exportbytypes.md) |
 |  [SavedObjectsExportExcludedObject](./kibana-plugin-core-server.savedobjectsexportexcludedobject.md) |  |
 |  [SavedObjectsExportResultDetails](./kibana-plugin-core-server.savedobjectsexportresultdetails.md) | Structure of the export result details entry |
 |  [SavedObjectsExportTransformContext](./kibana-plugin-core-server.savedobjectsexporttransformcontext.md) | Context passed down to a [export transform function](./kibana-plugin-core-server.savedobjectsexporttransform.md) |
@@ -215,6 +220,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsUpdateObjectsSpacesResponseObject](./kibana-plugin-core-server.savedobjectsupdateobjectsspacesresponseobject.md) | Details about a specific object's update result. |
 |  [SavedObjectsUpdateOptions](./kibana-plugin-core-server.savedobjectsupdateoptions.md) |  |
 |  [SavedObjectsUpdateResponse](./kibana-plugin-core-server.savedobjectsupdateresponse.md) |  |
+|  [SavedObjectsValidationMap](./kibana-plugin-core-server.savedobjectsvalidationmap.md) | A map of [validation specs](./kibana-plugin-core-server.savedobjectsvalidationspec.md) to be used for a given type. The map's keys must be valid semver versions.<!-- -->Any time you change the schema of a [SavedObjectsType](./kibana-plugin-core-server.savedobjectstype.md)<!-- -->, you should add a new entry to this map for the Kibana version the change was introduced in. |
 |  [SearchResponse](./kibana-plugin-core-server.searchresponse.md) |  |
 |  [ServiceStatus](./kibana-plugin-core-server.servicestatus.md) | The current status of a service at a point in time. |
 |  [SessionCookieValidationResult](./kibana-plugin-core-server.sessioncookievalidationresult.md) | Return type from a function to validate cookie contents. |
@@ -227,6 +233,11 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [UiSettingsParams](./kibana-plugin-core-server.uisettingsparams.md) | UiSettings parameters defined by the plugins. |
 |  [UiSettingsServiceSetup](./kibana-plugin-core-server.uisettingsservicesetup.md) |  |
 |  [UiSettingsServiceStart](./kibana-plugin-core-server.uisettingsservicestart.md) |  |
+|  [UnauthorizedErrorHandlerNotHandledResult](./kibana-plugin-core-server.unauthorizederrorhandlernothandledresult.md) |  |
+|  [UnauthorizedErrorHandlerOptions](./kibana-plugin-core-server.unauthorizederrorhandleroptions.md) |  |
+|  [UnauthorizedErrorHandlerResultRetryParams](./kibana-plugin-core-server.unauthorizederrorhandlerresultretryparams.md) |  |
+|  [UnauthorizedErrorHandlerRetryResult](./kibana-plugin-core-server.unauthorizederrorhandlerretryresult.md) |  |
+|  [UnauthorizedErrorHandlerToolkit](./kibana-plugin-core-server.unauthorizederrorhandlertoolkit.md) | Toolkit passed to a [UnauthorizedErrorHandler](./kibana-plugin-core-server.unauthorizederrorhandler.md) used to generate responses from the handler |
 |  [UserProvidedValues](./kibana-plugin-core-server.userprovidedvalues.md) | Describes the values explicitly set by user. |
 
 ## Variables
@@ -235,6 +246,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [APP\_WRAPPER\_CLASS](./kibana-plugin-core-server.app_wrapper_class.md) | The class name for top level \*and\* nested application wrappers to ensure proper layout |
 |  [kibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) | Set of helpers used to create <code>KibanaResponse</code> to form HTTP response on an incoming request. Should be returned as a result of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) execution. |
+|  [mergeSavedObjectMigrationMaps](./kibana-plugin-core-server.mergesavedobjectmigrationmaps.md) | Merges two saved object migration maps.<!-- -->If there is a migration for a given version on only one of the maps, that migration function will be used:<!-- -->mergeSavedObjectMigrationMaps(<!-- -->{ '1.2.3': f }<!-- -->, { '4.5.6': g }<!-- -->) -<!-- -->&gt; { '1.2.3': f, '4.5.6': g }<!-- -->If there is a migration for a given version on both maps, the migrations will be composed:<!-- -->mergeSavedObjectMigrationMaps(<!-- -->{ '1.2.3': f }<!-- -->, { '1.2.3': g }<!-- -->) -<!-- -->&gt; { '1.2.3': (doc, context) =<!-- -->&gt; f(g(doc, context), context) } |
+|  [pollEsNodesVersion](./kibana-plugin-core-server.pollesnodesversion.md) |  |
 |  [ServiceStatusLevels](./kibana-plugin-core-server.servicestatuslevels.md) | The current "level" of availability of a service. |
 |  [validBodyOutput](./kibana-plugin-core-server.validbodyoutput.md) | The set of valid body.output |
 
@@ -242,31 +255,35 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Type Alias | Description |
 |  --- | --- |
+|  [AnalyticsServicePreboot](./kibana-plugin-core-server.analyticsservicepreboot.md) | Exposes the public APIs of the AnalyticsClient during the preboot phase  |
+|  [AnalyticsServiceSetup](./kibana-plugin-core-server.analyticsservicesetup.md) | Exposes the public APIs of the AnalyticsClient during the setup phase.  |
+|  [AnalyticsServiceStart](./kibana-plugin-core-server.analyticsservicestart.md) | Exposes the public APIs of the AnalyticsClient during the start phase  |
 |  [AppenderConfigType](./kibana-plugin-core-server.appenderconfigtype.md) |  |
 |  [AuthenticationHandler](./kibana-plugin-core-server.authenticationhandler.md) | See [AuthToolkit](./kibana-plugin-core-server.authtoolkit.md)<!-- -->. |
 |  [AuthHeaders](./kibana-plugin-core-server.authheaders.md) | Auth Headers map |
 |  [AuthResult](./kibana-plugin-core-server.authresult.md) |  |
 |  [CapabilitiesProvider](./kibana-plugin-core-server.capabilitiesprovider.md) | See [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
 |  [CapabilitiesSwitcher](./kibana-plugin-core-server.capabilitiesswitcher.md) | See [CapabilitiesSetup](./kibana-plugin-core-server.capabilitiessetup.md) |
+|  [CustomRequestHandlerContext](./kibana-plugin-core-server.customrequesthandlercontext.md) |  |
 |  [DeprecationsDetails](./kibana-plugin-core-server.deprecationsdetails.md) |  |
 |  [DestructiveRouteMethod](./kibana-plugin-core-server.destructiveroutemethod.md) | Set of HTTP methods changing the state of the server. |
+|  [DocLinksServiceStart](./kibana-plugin-core-server.doclinksservicestart.md) |  |
 |  [ElasticsearchClient](./kibana-plugin-core-server.elasticsearchclient.md) | Client used to query the elasticsearch cluster. |
 |  [ElasticsearchClientConfig](./kibana-plugin-core-server.elasticsearchclientconfig.md) | Configuration options to be used to create a [cluster client](./kibana-plugin-core-server.iclusterclient.md) using the [createClient API](./kibana-plugin-core-server.elasticsearchservicestart.createclient.md) |
 |  [ExecutionContextStart](./kibana-plugin-core-server.executioncontextstart.md) |  |
+|  [ExposedToBrowserDescriptor](./kibana-plugin-core-server.exposedtobrowserdescriptor.md) | Type defining the list of configuration properties that will be exposed on the client-side Object properties can either be fully exposed |
 |  [GetAuthHeaders](./kibana-plugin-core-server.getauthheaders.md) | Get headers to authenticate a user against Elasticsearch. |
 |  [GetAuthState](./kibana-plugin-core-server.getauthstate.md) | Gets authentication state for a request. Returned by <code>auth</code> interceptor. |
 |  [HandlerContextType](./kibana-plugin-core-server.handlercontexttype.md) | Extracts the type of the first argument of a [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md) to represent the type of the context. |
 |  [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md) | A function that accepts a context object and an optional number of additional arguments. Used for the generic types in [IContextContainer](./kibana-plugin-core-server.icontextcontainer.md) |
 |  [HandlerParameters](./kibana-plugin-core-server.handlerparameters.md) | Extracts the types of the additional arguments of a [HandlerFunction](./kibana-plugin-core-server.handlerfunction.md)<!-- -->, excluding the [HandlerContextType](./kibana-plugin-core-server.handlercontexttype.md)<!-- -->. |
-|  [Headers](./kibana-plugin-core-server.headers.md) | Http request headers to read. |
+|  [Headers\_2](./kibana-plugin-core-server.headers_2.md) | Http request headers to read. |
 |  [HttpResourcesRequestHandler](./kibana-plugin-core-server.httpresourcesrequesthandler.md) | Extended version of [RequestHandler](./kibana-plugin-core-server.requesthandler.md) having access to [HttpResourcesServiceToolkit](./kibana-plugin-core-server.httpresourcesservicetoolkit.md) to respond with HTML or JS resources. |
 |  [HttpResourcesResponseOptions](./kibana-plugin-core-server.httpresourcesresponseoptions.md) | HTTP Resources response parameters |
 |  [HttpResponsePayload](./kibana-plugin-core-server.httpresponsepayload.md) | Data send to the client as a response payload. |
 |  [IBasePath](./kibana-plugin-core-server.ibasepath.md) | Access or manipulate the Kibana base path[BasePath](./kibana-plugin-core-server.basepath.md) |
 |  [IContextProvider](./kibana-plugin-core-server.icontextprovider.md) | A function that returns a context value for a specific key of given context type. |
 |  [IsAuthenticated](./kibana-plugin-core-server.isauthenticated.md) | Returns authentication status for a request. |
-|  [ISavedObjectsExporter](./kibana-plugin-core-server.isavedobjectsexporter.md) |  |
-|  [ISavedObjectsImporter](./kibana-plugin-core-server.isavedobjectsimporter.md) |  |
 |  [ISavedObjectsRepository](./kibana-plugin-core-server.isavedobjectsrepository.md) | See [SavedObjectsRepository](./kibana-plugin-core-server.savedobjectsrepository.md) |
 |  [ISavedObjectTypeRegistry](./kibana-plugin-core-server.isavedobjecttyperegistry.md) | See [SavedObjectTypeRegistry](./kibana-plugin-core-server.savedobjecttyperegistry.md) for documentation. |
 |  [KibanaExecutionContext](./kibana-plugin-core-server.kibanaexecutioncontext.md) | Represents a meta-information about a Kibana entity initiating a search request. |
@@ -317,6 +334,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsImportHook](./kibana-plugin-core-server.savedobjectsimporthook.md) | A hook associated with a specific saved object type, that will be invoked during the import process. The hook will have access to the objects of the registered type.<!-- -->Currently, the only supported feature for import hooks is to return warnings to be displayed in the UI when the import succeeds. The only interactions the hook can have with the import process is via the hook's response. Mutating the objects inside the hook's code will have no effect. |
 |  [SavedObjectsImportWarning](./kibana-plugin-core-server.savedobjectsimportwarning.md) | Composite type of all the possible types of import warnings.<!-- -->See [SavedObjectsImportSimpleWarning](./kibana-plugin-core-server.savedobjectsimportsimplewarning.md) and [SavedObjectsImportActionRequiredWarning](./kibana-plugin-core-server.savedobjectsimportactionrequiredwarning.md) for more details. |
 |  [SavedObjectsNamespaceType](./kibana-plugin-core-server.savedobjectsnamespacetype.md) | The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive: \* single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces. \* multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be unique across all namespaces. This is intended to be an intermediate step when objects with a "single" namespace type are being converted to a "multiple" namespace type. In other words, objects with a "multiple-isolated" namespace type will be \*share-capable\*, but will not actually be shareable until the namespace type is changed to "multiple". \* agnostic: This type of saved object is global. |
+|  [SavedObjectsValidationSpec](./kibana-plugin-core-server.savedobjectsvalidationspec.md) | Allows for validating properties using @<!-- -->kbn/config-schema validations. |
 |  [SavedObjectTypeExcludeFromUpgradeFilterHook](./kibana-plugin-core-server.savedobjecttypeexcludefromupgradefilterhook.md) | If defined, allows a type to run a search query and return a query filter that may match any documents which may be excluded from the next migration upgrade process. Useful for cleaning up large numbers of old documents which are no longer needed and may slow the migration process.<!-- -->If this hook fails, the migration will proceed without these documents having been filtered out, so this should not be used as a guarantee that these documents have been deleted.<!-- -->Experimental and subject to change |
 |  [SavedObjectUnsanitizedDoc](./kibana-plugin-core-server.savedobjectunsanitizeddoc.md) | Describes Saved Object documents from Kibana &lt; 7.0.0 which don't have a <code>references</code> root property defined. This type should only be used in migrations. |
 |  [ScopeableRequest](./kibana-plugin-core-server.scopeablerequest.md) | A user credentials container. It accommodates the necessary auth credentials to impersonate the current user.<!-- -->See [KibanaRequest](./kibana-plugin-core-server.kibanarequest.md)<!-- -->. |
@@ -324,4 +342,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SharedGlobalConfig](./kibana-plugin-core-server.sharedglobalconfig.md) |  |
 |  [StartServicesAccessor](./kibana-plugin-core-server.startservicesaccessor.md) | Allows plugins to get access to APIs available in start inside async handlers. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. This should only be used inside handlers registered during <code>setup</code> that will only be executed after <code>start</code> lifecycle. |
 |  [UiSettingsType](./kibana-plugin-core-server.uisettingstype.md) | UI element type to represent the settings. |
+|  [UnauthorizedError](./kibana-plugin-core-server.unauthorizederror.md) |  |
+|  [UnauthorizedErrorHandler](./kibana-plugin-core-server.unauthorizederrorhandler.md) | A handler used to handle unauthorized error returned by elasticsearch |
+|  [UnauthorizedErrorHandlerResult](./kibana-plugin-core-server.unauthorizederrorhandlerresult.md) |  |
 

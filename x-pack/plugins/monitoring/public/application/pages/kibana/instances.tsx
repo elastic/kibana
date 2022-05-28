@@ -8,15 +8,15 @@
 import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { useTable } from '../../hooks/use_table';
 import { KibanaTemplate } from './kibana_template';
 // @ts-ignore
 import { KibanaInstances } from '../../../components/kibana/instances';
 // @ts-ignore
-import { SetupModeRenderer, SetupModeProps } from '../../setup_mode/setup_mode_renderer';
+import { SetupModeRenderer, SetupModeProps } from '../../../components/renderers/setup_mode';
 import { SetupModeContext } from '../../../components/setup_mode/setup_mode_context';
 import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 import { AlertsByName } from '../../../alerts/types';
@@ -54,7 +54,7 @@ export const KibanaInstancesPage: React.FC<ComponentProps> = ({ clusters }) => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/kibana/instances`;
     if (services.http?.fetch && clusterUuid) {
-      const response = await services.http?.fetch(url, {
+      const response = await services.http?.fetch<{ kibanas: { length: number } }>(url, {
         method: 'POST',
         body: JSON.stringify({
           ccs,

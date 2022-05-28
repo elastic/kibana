@@ -5,24 +5,21 @@
  * 2.0.
  */
 
-import type { Agent, AgentAction, NewAgentAction } from '../models';
+import type { Agent, AgentAction, CurrentUpgrade, NewAgentAction } from '../models';
+
+import type { ListResult, ListWithKuery } from './common';
 
 export interface GetAgentsRequest {
-  query: {
-    page: number;
-    perPage: number;
-    kuery?: string;
+  query: ListWithKuery & {
     showInactive: boolean;
     showUpgradeable?: boolean;
   };
 }
 
-export interface GetAgentsResponse {
-  list: Agent[];
-  total: number;
+export interface GetAgentsResponse extends ListResult<Agent> {
   totalInactive: number;
-  page: number;
-  perPage: number;
+  // deprecated in 8.x
+  list?: Agent[];
 }
 
 export interface GetOneAgentRequest {
@@ -37,7 +34,7 @@ export interface GetOneAgentResponse {
 
 export interface PostNewAgentActionRequest {
   body: {
-    action: NewAgentAction;
+    action: Omit<NewAgentAction, 'agents'>;
   };
   params: {
     agentId: string;
@@ -92,6 +89,8 @@ export interface PostBulkAgentUpgradeRequest {
     agents: string[] | string;
     source_uri?: string;
     version: string;
+    rollout_duration_seconds?: number;
+    start_time?: string;
   };
 }
 
@@ -163,4 +162,21 @@ export interface GetAgentStatusResponse {
     other: number;
     updating: number;
   };
+}
+
+export interface GetAgentIncomingDataRequest {
+  query: {
+    agentsIds: string[];
+  };
+}
+
+export interface IncomingDataList {
+  [key: string]: { data: boolean };
+}
+export interface GetAgentIncomingDataResponse {
+  items: IncomingDataList[];
+}
+
+export interface GetCurrentUpgradesResponse {
+  items: CurrentUpgrade[];
 }

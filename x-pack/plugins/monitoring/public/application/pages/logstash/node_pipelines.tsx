@@ -4,27 +4,23 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useContext, useState, useCallback } from 'react';
+import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-// @ts-ignore
 import { useRouteMatch } from 'react-router-dom';
-// @ts-ignore
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+// @ts-expect-error
 import { isPipelineMonitoringSupportedInVersion } from '../../../lib/logstash/pipelines';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { ComponentProps } from '../../route_init';
-// @ts-ignore
-import { Listing } from '../../../components/logstash/listing';
 import { LogstashTemplate } from './logstash_template';
-// @ts-ignore
+// @ts-expect-error
 import { DetailStatus } from '../../../components/logstash/detail_status';
-// @ts-ignore
-import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { useTable } from '../../hooks/use_table';
-// @ts-ignore
+// @ts-expect-error
 import { PipelineListing } from '../../../components/logstash/pipeline_listing/pipeline_listing';
 import { useCharts } from '../../hooks/use_charts';
+import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -35,7 +31,9 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
   const { onBrush, zoomInfo } = useCharts();
   const cluster = find(clusters, {
     cluster_uuid: clusterUuid,
-  });
+  }) as any;
+
+  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
 
   const { getPaginationTableProps, getPaginationRouteOptions, updateTotalItemCount } =
     useTable('logstash.pipelines');
@@ -59,7 +57,7 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
   const getPageData = useCallback(async () => {
     const bounds = services.data?.query.timefilter.timefilter.getBounds();
     const url = `../api/monitoring/v1/clusters/${clusterUuid}/logstash/node/${match.params.uuid}/pipelines`;
-    const response = await services.http?.fetch(url, {
+    const response = await services.http?.fetch<any>(url, {
       method: 'POST',
       body: JSON.stringify({
         ccs,
@@ -83,6 +81,16 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
     match.params.uuid,
   ]);
 
+  useEffect(() => {
+    if (cluster && data.nodeSummary) {
+      generateBreadcrumbs(cluster.cluster_name, {
+        inLogstash: true,
+        instance: data.nodeSummary.host,
+        name: 'nodes',
+      });
+    }
+  }, [cluster, data, generateBreadcrumbs]);
+
   return (
     <LogstashTemplate
       instance={data}
@@ -92,16 +100,18 @@ export const LogStashNodePipelinesPage: React.FC<ComponentProps> = ({ clusters }
       cluster={cluster}
     >
       {data.pipelines && (
-        <PipelineListing
-          className="monitoringLogstashPipelinesTable"
-          onBrush={onBrush}
-          zoomInfo={zoomInfo}
-          stats={data.nodeSummary}
-          data={data.pipelines}
-          statusComponent={DetailStatus}
-          {...getPaginationTableProps()}
-          upgradeMessage={makeUpgradeMessage(data.nodeSummary.version)}
-        />
+        <div data-test-subj="logstashPipelinesListing">
+          <PipelineListing
+            className="monitoringLogstashPipelinesTable"
+            onBrush={onBrush}
+            zoomInfo={zoomInfo}
+            stats={data.nodeSummary}
+            data={data.pipelines}
+            statusComponent={DetailStatus}
+            {...getPaginationTableProps()}
+            upgradeMessage={makeUpgradeMessage(data.nodeSummary.version)}
+          />
+        </div>
       )}
     </LogstashTemplate>
   );

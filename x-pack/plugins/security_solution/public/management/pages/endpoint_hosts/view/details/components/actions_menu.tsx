@@ -7,7 +7,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiContextMenuPanel, EuiButton, EuiPopover } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useEndpointActionItems, useEndpointSelector } from '../../hooks';
 import { detailsData } from '../../../store/selectors';
 import { ContextMenuItemNavByRouter } from '../../../../../components/context_menu_with_router_support/context_menu_item_nav_by_router';
@@ -23,7 +23,17 @@ export const ActionsMenu = React.memo<{}>(() => {
 
   const takeActionItems = useMemo(() => {
     return menuOptions.map((item) => {
-      return <ContextMenuItemNavByRouter {...item} onClick={closePopoverHandler} />;
+      return (
+        <ContextMenuItemNavByRouter
+          {...item}
+          onClick={(ev) => {
+            closePopoverHandler();
+            if (item.onClick) {
+              item.onClick(ev);
+            }
+          }}
+        />
+      );
     });
   }, [closePopoverHandler, menuOptions]);
 

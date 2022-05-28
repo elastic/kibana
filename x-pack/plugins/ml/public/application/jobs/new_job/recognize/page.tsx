@@ -6,14 +6,10 @@
  */
 
 import React, { FC, useState, Fragment, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiPage,
-  EuiPageBody,
   EuiTitle,
-  EuiPageHeaderSection,
-  EuiPageHeader,
   EuiFlexItem,
   EuiFlexGroup,
   EuiText,
@@ -46,6 +42,8 @@ import { TIME_FORMAT } from '../../../../../common/constants/time_format';
 import { JobsAwaitingNodeWarning } from '../../../components/jobs_awaiting_node_warning';
 import { isPopulatedObject } from '../../../../../common/util/object_utils';
 import { RuntimeMappings } from '../../../../../common/types/fields';
+import { addExcludeFrozenToQuery } from '../../../../../common/util/query_utils';
+import { MlPageHeader } from '../../../components/page_header';
 
 export interface ModuleJobUI extends ModuleJob {
   datafeedResult?: DatafeedResponse;
@@ -92,7 +90,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
 
   const {
     currentSavedSearch: savedSearch,
-    currentIndexPattern: indexPattern,
+    currentDataView: dataView,
     combinedQuery,
   } = useMlContext();
   const pageTitle =
@@ -101,9 +99,9 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
           defaultMessage: 'saved search {savedSearchTitle}',
           values: { savedSearchTitle: savedSearch.attributes.title as string },
         })
-      : i18n.translate('xpack.ml.newJob.recognize.indexPatternPageTitle', {
-          defaultMessage: 'index pattern {indexPatternTitle}',
-          values: { indexPatternTitle: indexPattern.title },
+      : i18n.translate('xpack.ml.newJob.recognize.dataViewPageTitle', {
+          defaultMessage: 'data view {dataViewName}',
+          values: { dataViewName: dataView.title },
         });
   const displayQueryWarning = savedSearch !== null;
   const tempQuery = savedSearch === null ? undefined : combinedQuery;
@@ -135,11 +133,12 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
     timeRange: TimeRange
   ): Promise<TimeRange> => {
     if (useFullIndexData) {
-      const runtimeMappings = indexPattern.getComputedFields().runtimeFields as RuntimeMappings;
+      const runtimeMappings = dataView.getComputedFields().runtimeFields as RuntimeMappings;
       const { start, end } = await ml.getTimeFieldRange({
-        index: indexPattern.title,
-        timeFieldName: indexPattern.timeFieldName,
-        query: combinedQuery,
+        index: dataView.title,
+        timeFieldName: dataView.timeFieldName,
+        // By default we want to use full non-frozen time range
+        query: addExcludeFrozenToQuery(combinedQuery),
         ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
       });
       return {
@@ -178,7 +177,7 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
         moduleId,
         prefix: resultJobPrefix,
         query: tempQuery,
-        indexPatternName: indexPattern.title,
+        indexPatternName: dataView.title,
         useDedicatedIndex,
         startDatafeed: startDatafeedAfterSave,
         ...(jobOverridesPayload !== null ? { jobOverrides: jobOverridesPayload } : {}),
@@ -269,111 +268,103 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const isFormVisible = [SAVE_STATE.NOT_SAVED, SAVE_STATE.SAVING].includes(saveState);
 
   return (
-    <EuiPage>
-      <EuiPageBody>
-        <EuiPageHeader>
-          <EuiPageHeaderSection>
-            <EuiTitle size="l">
-              <h3>
+    <>
+      <MlPageHeader>
+        <FormattedMessage
+          id="xpack.ml.newJob.recognize.newJobFromTitle"
+          defaultMessage="New job from {pageTitle}"
+          values={{ pageTitle }}
+        />
+      </MlPageHeader>
+
+      {displayQueryWarning && (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.ml.newJob.recognize.searchWillBeOverwrittenLabel"
+                defaultMessage="Search will be overwritten"
+              />
+            }
+            color="warning"
+            iconType="alert"
+          >
+            <EuiText size="s">
+              <FormattedMessage
+                id="xpack.ml.newJob.recognize.usingSavedSearchDescription"
+                defaultMessage="Using a saved search will mean the query used in the datafeeds will be different from the default ones we supply in the {moduleId} module."
+                values={{ moduleId }}
+              />
+            </EuiText>
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
+      )}
+
+      {jobsAwaitingNodeCount > 0 && <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />}
+
+      <EuiFlexGroup wrap={true} gutterSize="m">
+        <EuiFlexItem grow={1}>
+          <EuiPanel grow={false} hasShadow={false} hasBorder>
+            <EuiTitle size="s">
+              <h4>
                 <FormattedMessage
-                  id="xpack.ml.newJob.recognize.newJobFromTitle"
-                  defaultMessage="New job from {pageTitle}"
-                  values={{ pageTitle }}
+                  id="xpack.ml.newJob.recognize.jobSettingsTitle"
+                  defaultMessage="Job settings"
                 />
-              </h3>
+              </h4>
             </EuiTitle>
-          </EuiPageHeaderSection>
-        </EuiPageHeader>
 
-        {displayQueryWarning && (
-          <>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.ml.newJob.recognize.searchWillBeOverwrittenLabel"
-                  defaultMessage="Search will be overwritten"
-                />
-              }
-              color="warning"
-              iconType="alert"
-            >
-              <EuiText size="s">
-                <FormattedMessage
-                  id="xpack.ml.newJob.recognize.usingSavedSearchDescription"
-                  defaultMessage="Using a saved search will mean the query used in the datafeeds will be different from the default ones we supply in the {moduleId} module."
-                  values={{ moduleId }}
-                />
-              </EuiText>
-            </EuiCallOut>
-            <EuiSpacer size="l" />
-          </>
-        )}
+            <EuiSpacer size="m" />
 
-        {jobsAwaitingNodeCount > 0 && <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />}
-
-        <EuiFlexGroup wrap={true} gutterSize="m">
-          <EuiFlexItem grow={1}>
-            <EuiPanel grow={false}>
-              <EuiTitle size="s">
-                <h4>
-                  <FormattedMessage
-                    id="xpack.ml.newJob.recognize.jobSettingsTitle"
-                    defaultMessage="Job settings"
-                  />
-                </h4>
-              </EuiTitle>
-
-              <EuiSpacer size="m" />
-
-              {isFormVisible && (
-                <JobSettingsForm
-                  onSubmit={save}
-                  onChange={(formValues) => {
-                    setJobPrefix(formValues.jobPrefix);
-                  }}
-                  saveState={saveState}
-                  jobs={jobs}
-                />
-              )}
-              <CreateResultCallout
+            {isFormVisible && (
+              <JobSettingsForm
+                onSubmit={save}
+                onChange={(formValues) => {
+                  setJobPrefix(formValues.jobPrefix);
+                }}
                 saveState={saveState}
-                resultsUrl={resultsUrl}
-                onReset={loadModule}
-              />
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem grow={2}>
-            <EuiPanel grow={false}>
-              <ModuleJobs
                 jobs={jobs}
-                jobPrefix={jobPrefix}
-                saveState={saveState}
-                existingGroupIds={existingGroups}
-                jobOverrides={jobOverrides}
-                onJobOverridesChange={onJobOverridesChange}
               />
-            </EuiPanel>
-            {Object.keys(kibanaObjects).length > 0 && (
-              <>
-                <EuiSpacer size="m" />
-                <EuiPanel grow={false}>
-                  {Object.keys(kibanaObjects).map((objectType, i) => (
-                    <Fragment key={objectType}>
-                      <KibanaObjects
-                        objectType={objectType}
-                        kibanaObjects={kibanaObjects[objectType]}
-                        isSaving={saveState === SAVE_STATE.SAVING}
-                      />
-                      {i < Object.keys(kibanaObjects).length - 1 && <EuiSpacer size="s" />}
-                    </Fragment>
-                  ))}
-                </EuiPanel>
-              </>
             )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="l" />
-      </EuiPageBody>
-    </EuiPage>
+            <CreateResultCallout
+              saveState={saveState}
+              resultsUrl={resultsUrl}
+              onReset={loadModule}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={2}>
+          <EuiPanel grow={false} hasShadow={false} hasBorder>
+            <ModuleJobs
+              jobs={jobs}
+              jobPrefix={jobPrefix}
+              saveState={saveState}
+              existingGroupIds={existingGroups}
+              jobOverrides={jobOverrides}
+              onJobOverridesChange={onJobOverridesChange}
+            />
+          </EuiPanel>
+          {Object.keys(kibanaObjects).length > 0 && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiPanel grow={false} hasShadow={false} hasBorder>
+                {Object.keys(kibanaObjects).map((objectType, i) => (
+                  <Fragment key={objectType}>
+                    <KibanaObjects
+                      objectType={objectType}
+                      kibanaObjects={kibanaObjects[objectType]}
+                      isSaving={saveState === SAVE_STATE.SAVING}
+                    />
+                    {i < Object.keys(kibanaObjects).length - 1 && <EuiSpacer size="s" />}
+                  </Fragment>
+                ))}
+              </EuiPanel>
+            </>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="l" />
+    </>
   );
 };

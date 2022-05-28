@@ -6,13 +6,13 @@
  */
 
 import moment from 'moment';
-import type { Datatable } from 'src/plugins/expressions/public';
-import type { TimeRange } from 'src/plugins/data/public';
-import { functionWrapper } from 'src/plugins/expressions/common/expression_functions/specs/tests/utils';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
+import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 
 // mock the specific inner variable:
 // there are intra dependencies in the data plugin we might break trying to mock the whole thing
-jest.mock('../../../../../../src/plugins/data/common/query/timefilter/get_time', () => {
+jest.mock('@kbn/data-plugin/common/query/timefilter/get_time', () => {
   const localMoment = jest.requireActual('moment');
   return {
     calculateBounds: jest.fn(({ from, to }) => ({
@@ -387,5 +387,35 @@ describe('time_scale', () => {
     );
 
     expect(result.rows.map(({ scaledMetric }) => scaledMetric)).toEqual([1, 1, 1, 1, 1]);
+  });
+
+  it('should be sync except for timezone getter to prevent timezone leakage', async () => {
+    let resolveTimezonePromise: (value: string | PromiseLike<string>) => void;
+    const timezonePromise = new Promise<string>((res) => {
+      resolveTimezonePromise = res;
+    });
+    const timeScaleResolved = jest.fn((x) => x);
+    const delayedTimeScale = getTimeScale(() => timezonePromise);
+    const delayedTimeScaleWrapper = functionWrapper(delayedTimeScale);
+    const result = delayedTimeScaleWrapper(
+      {
+        ...emptyTable,
+      },
+      {
+        ...defaultArgs,
+      }
+    ).then(timeScaleResolved) as Promise<Datatable>;
+
+    expect(result instanceof Promise).toBe(true);
+    // wait a tick
+    await new Promise((r) => setTimeout(r, 0));
+    // time scale is not done yet because it's waiting for the timezone
+    expect(timeScaleResolved).not.toHaveBeenCalled();
+    // resolve timezone
+    resolveTimezonePromise!('UTC');
+    // wait a tick
+    await new Promise((r) => setTimeout(r, 0));
+    // should resolve now without another async dependency
+    expect(timeScaleResolved).toHaveBeenCalled();
   });
 });

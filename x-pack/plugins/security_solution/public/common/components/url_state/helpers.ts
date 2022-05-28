@@ -10,8 +10,9 @@ import { parse, stringify } from 'query-string';
 import { decode, encode } from 'rison-node';
 import * as H from 'history';
 
-import { Query, Filter } from '../../../../../../../src/plugins/data/public';
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+import type { Filter, Query } from '@kbn/es-query';
+
+import { url } from '@kbn/kibana-utils-plugin/public';
 
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
@@ -24,11 +25,12 @@ import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
 import { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
 import { sourcererSelectors } from '../../store/sourcerer';
-import { SourcererScopeName, SourcererScopePatterns } from '../../store/sourcerer/model';
+import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
 
 export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||
   pageName === SecurityPageName.rules ||
+  pageName === SecurityPageName.rulesCreate ||
   pageName === SecurityPageName.exceptions;
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
@@ -93,20 +95,23 @@ export const replaceQueryStringInLocation = (
 export const getUrlType = (pageName: string): UrlStateType => {
   if (pageName === SecurityPageName.overview) {
     return 'overview';
+  }
+  if (pageName === SecurityPageName.landing) {
+    return 'get_started';
   } else if (pageName === SecurityPageName.hosts) {
     return 'host';
   } else if (pageName === SecurityPageName.network) {
     return 'network';
   } else if (pageName === SecurityPageName.alerts) {
     return 'alerts';
-  } else if (pageName === SecurityPageName.rules) {
+  } else if (pageName === SecurityPageName.rules || pageName === SecurityPageName.rulesCreate) {
     return 'rules';
   } else if (pageName === SecurityPageName.exceptions) {
     return 'exceptions';
   } else if (pageName === SecurityPageName.timelines) {
     return 'timeline';
   } else if (pageName === SecurityPageName.case) {
-    return 'case';
+    return 'cases';
   } else if (pageName === SecurityPageName.administration) {
     return 'administration';
   }
@@ -156,9 +161,18 @@ export const makeMapStateToProps = () => {
     }
     const sourcerer = getSourcererScopes(state);
     const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
-    const selectedPatterns: SourcererScopePatterns = activeScopes
+    const selectedPatterns: SourcererUrlState = activeScopes
       .filter((scope) => scope === SourcererScopeName.default)
-      .reduce((acc, scope) => ({ ...acc, [scope]: sourcerer[scope]?.selectedPatterns }), {});
+      .reduce(
+        (acc, scope) => ({
+          ...acc,
+          [scope]: {
+            id: sourcerer[scope]?.selectedDataViewId,
+            selectedPatterns: sourcerer[scope]?.selectedPatterns,
+          },
+        }),
+        {}
+      );
 
     return {
       urlState: {

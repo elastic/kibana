@@ -10,8 +10,9 @@ import {
   INSTRUCTION_VARIANT,
   TutorialSchema,
   InstructionSetSchema,
-} from '../../../../../../src/plugins/home/server';
+} from '@kbn/home-plugin/server';
 
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   createNodeAgentInstructions,
   createDjangoAgentInstructions,
@@ -24,11 +25,18 @@ import {
   createDotNetAgentInstructions,
   createPhpAgentInstructions,
 } from '../../../common/tutorial/instructions/apm_agent_instructions';
-import { CloudSetup } from '../../../../cloud/server';
+import { APMConfig } from '../..';
+import { getOnPremApmServerInstructionSet } from './on_prem_apm_server_instruction_set';
 
-export function createElasticCloudInstructions(
-  cloudSetup?: CloudSetup
-): TutorialSchema['elasticCloud'] {
+export function createElasticCloudInstructions({
+  cloudSetup,
+  apmConfig,
+  isFleetPluginEnabled,
+}: {
+  cloudSetup?: CloudSetup;
+  apmConfig: APMConfig;
+  isFleetPluginEnabled: boolean;
+}): TutorialSchema['elasticCloud'] {
   const apmServerUrl = cloudSetup?.apm.url;
   const instructionSets = [];
 
@@ -36,6 +44,9 @@ export function createElasticCloudInstructions(
     instructionSets.push(getApmServerInstructionSet(cloudSetup));
   }
 
+  instructionSets.push(
+    getOnPremApmServerInstructionSet({ apmConfig, isFleetPluginEnabled })
+  );
   instructionSets.push(getApmAgentInstructionSet(cloudSetup));
 
   return {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
-import { SavedObjectReference } from 'src/core/server';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { SavedObjectReference } from '@kbn/core/server';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyInjectRuleIdReferences } from './legacy_inject_rule_id_references';
@@ -75,17 +75,6 @@ describe('legacy_inject_rule_id_references', () => {
       savedObjectReferences: mockSavedObjectReferences(),
     });
     expect(logger.error).not.toHaveBeenCalled();
-  });
-
-  test('logs an error if found with a different saved object reference id', () => {
-    legacyInjectRuleIdReferences({
-      logger,
-      ruleAlertId: '456',
-      savedObjectReferences: mockSavedObjectReferences(),
-    });
-    expect(logger.error).toBeCalledWith(
-      'The id of the "saved object reference id": 123 is not the same as the "saved object id": 456. Preferring and using the "saved object reference id" instead of the "saved object id"'
-    );
   });
 
   test('logs an error if the saved object references is empty', () => {

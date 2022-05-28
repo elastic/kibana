@@ -7,9 +7,9 @@
 
 import { JobsHealthService, jobsHealthServiceProvider } from './jobs_health_service';
 import type { DatafeedsService } from '../../models/job_service/datafeeds';
-import type { Logger } from 'kibana/server';
+import type { Logger } from '@kbn/core/server';
 import { MlClient } from '../ml_client';
-import { MlJob, MlJobStats } from '@elastic/elasticsearch/api/types';
+import { MlJob, MlJobStats } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AnnotationService } from '../../models/annotation_service/annotation';
 import { JobsHealthExecutorOptions } from './register_jobs_monitoring_rule_type';
 import { JobAuditMessagesService } from '../../models/job_audit_messages/job_audit_messages';
@@ -76,47 +76,39 @@ describe('JobsHealthService', () => {
         ];
       }
 
-      return Promise.resolve({
-        body: {
-          jobs,
-        },
-      });
+      return Promise.resolve({ jobs });
     }),
     getJobStats: jest.fn().mockImplementation(({ job_id: jobIdsStr }) => {
       const jobsIds = jobIdsStr.split(',');
       return Promise.resolve({
-        body: {
-          jobs: jobsIds.map((j: string) => {
-            return {
-              job_id: j,
-              state: j === 'test_job_02' || 'test_job_01' ? 'opened' : 'closed',
-              model_size_stats: {
-                memory_status: j === 'test_job_01' ? 'hard_limit' : 'ok',
-                log_time: 1626935914540,
-                model_bytes: 1000000,
-                model_bytes_memory_limit: 800000,
-                peak_model_bytes: 1000000,
-                model_bytes_exceeded: 200000,
-              },
-            };
-          }) as MlJobStats,
-        },
+        jobs: jobsIds.map((j: string) => {
+          return {
+            job_id: j,
+            state: j === 'test_job_02' || 'test_job_01' ? 'opened' : 'closed',
+            model_size_stats: {
+              memory_status: j === 'test_job_01' ? 'hard_limit' : 'ok',
+              log_time: 1626935914540,
+              model_bytes: 1000000,
+              model_bytes_memory_limit: 800000,
+              peak_model_bytes: 1000000,
+              model_bytes_exceeded: 200000,
+            },
+          };
+        }) as MlJobStats,
       });
     }),
     getDatafeedStats: jest.fn().mockImplementation(({ datafeed_id: datafeedIdsStr }) => {
       const datafeedIds = datafeedIdsStr.split(',');
       return Promise.resolve({
-        body: {
-          datafeeds: datafeedIds.map((d: string) => {
-            return {
-              datafeed_id: d,
-              state: d === 'test_datafeed_02' ? 'stopped' : 'started',
-              timing_stats: {
-                job_id: d.replace('datafeed', 'job'),
-              },
-            };
-          }) as MlJobStats,
-        },
+        datafeeds: datafeedIds.map((d: string) => {
+          return {
+            datafeed_id: d,
+            state: d === 'test_datafeed_02' ? 'stopped' : 'started',
+            timing_stats: {
+              job_id: d.replace('datafeed', 'job'),
+            },
+          };
+        }) as MlJobStats,
       });
     }),
   } as unknown as jest.Mocked<MlClient>;
@@ -256,7 +248,16 @@ describe('JobsHealthService', () => {
     expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.debug).toHaveBeenCalledWith(`Performing health checks for job IDs: test_job_01`);
     expect(datafeedsService.getDatafeedByJobId).not.toHaveBeenCalled();
-    expect(executionResult).toEqual([]);
+    expect(executionResult).toEqual([
+      {
+        context: {
+          message: 'No errors in the jobs messages.',
+          results: [],
+        },
+        isHealthy: true,
+        name: 'Errors in job messages',
+      },
+    ]);
   });
 
   test('takes into account delayed data params', async () => {
@@ -295,6 +296,7 @@ describe('JobsHealthService', () => {
 
     expect(executionResult).toEqual([
       {
+        isHealthy: false,
         name: 'Data delay has occurred',
         context: {
           results: [
@@ -350,6 +352,7 @@ describe('JobsHealthService', () => {
 
     expect(executionResult).toEqual([
       {
+        isHealthy: false,
         name: 'Datafeed is not started',
         context: {
           results: [
@@ -364,6 +367,7 @@ describe('JobsHealthService', () => {
         },
       },
       {
+        isHealthy: false,
         name: 'Model memory limit reached',
         context: {
           results: [
@@ -378,10 +382,11 @@ describe('JobsHealthService', () => {
             },
           ],
           message:
-            'Job test_job_01 reached the hard model memory limit. Assign the job more memory and restore from a snapshot from prior to reaching the hard limit.',
+            'Job test_job_01 reached the hard model memory limit. Assign more memory to the job and restore it from a snapshot taken prior to reaching the hard limit.',
         },
       },
       {
+        isHealthy: false,
         name: 'Data delay has occurred',
         context: {
           results: [
@@ -401,6 +406,14 @@ describe('JobsHealthService', () => {
             },
           ],
           message: 'Jobs test_job_01, test_job_02 are suffering from delayed data.',
+        },
+      },
+      {
+        isHealthy: true,
+        name: 'Errors in job messages',
+        context: {
+          message: 'No errors in the jobs messages.',
+          results: [],
         },
       },
     ]);

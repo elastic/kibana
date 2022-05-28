@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { ApplicationSetup, AppMountParameters, StartServicesAccessor } from 'src/core/public';
 
 interface CreateDeps {
   application: ApplicationSetup;
@@ -23,16 +23,20 @@ export const accessAgreementApp = Object.freeze({
       }),
       chromeless: true,
       appRoute: '/security/access_agreement',
-      async mount({ element }: AppMountParameters) {
+      async mount({ element, theme$ }: AppMountParameters) {
         const [[coreStart], { renderAccessAgreementPage }] = await Promise.all([
           getStartServices(),
           import('./access_agreement_page'),
         ]);
-        return renderAccessAgreementPage(coreStart.i18n, element, {
-          http: coreStart.http,
-          notifications: coreStart.notifications,
-          fatalErrors: coreStart.fatalErrors,
-        });
+        return renderAccessAgreementPage(
+          coreStart.i18n,
+          { element, theme$ },
+          {
+            http: coreStart.http,
+            notifications: coreStart.notifications,
+            fatalErrors: coreStart.fatalErrors,
+          }
+        );
       },
     });
   },

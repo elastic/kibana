@@ -8,12 +8,15 @@
 
 import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { IUiSettingsClient, ThemeServiceStart } from '@kbn/core/public';
 
-import { VisualizationContainer } from '../../../visualizations/public';
-import type { PersistedState } from '../../../visualizations/public';
-import type { ExpressionRenderDefinition } from '../../../expressions/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
+import type { PersistedState } from '@kbn/visualizations-plugin/public';
+import type { ExpressionRenderDefinition } from '@kbn/expressions-plugin/public';
 
+import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
 import type { XyVisType } from '../common';
 import type { VisComponentType } from './vis_component';
 import { RenderValue, visName } from './expression_functions/xy_vis_fn';
@@ -28,28 +31,35 @@ function shouldShowNoResultsMessage(visData: any, visType: XyVisType): boolean {
   return Boolean(isZeroHits);
 }
 
-export const xyVisRenderer: ExpressionRenderDefinition<RenderValue> = {
+export const getXYVisRenderer: (deps: {
+  uiSettings: IUiSettingsClient;
+  theme: ThemeServiceStart;
+}) => ExpressionRenderDefinition<RenderValue> = ({ uiSettings, theme }) => ({
   name: visName,
   displayName: 'XY visualization',
   reuseDomNode: true,
-  render: async (domNode, { visData, visConfig, visType, syncColors }, handlers) => {
+  render: async (domNode, { visData, visConfig, visType, syncColors, syncTooltips }, handlers) => {
     const showNoResult = shouldShowNoResultsMessage(visData, visType);
 
     handlers.onDestroy(() => unmountComponentAtNode(domNode));
     render(
-      <I18nProvider>
-        <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
-          <VisComponent
-            visParams={visConfig}
-            visData={visData}
-            renderComplete={handlers.done}
-            fireEvent={handlers.event}
-            uiState={handlers.uiState as PersistedState}
-            syncColors={syncColors}
-          />
-        </VisualizationContainer>
-      </I18nProvider>,
+      <KibanaThemeProvider theme$={theme.theme$}>
+        <I18nProvider>
+          <VisualizationContainer handlers={handlers} showNoResult={showNoResult}>
+            <VisComponent
+              visParams={visConfig}
+              visData={visData}
+              renderComplete={handlers.done}
+              fireEvent={handlers.event}
+              uiState={handlers.uiState as PersistedState}
+              syncColors={syncColors}
+              syncTooltips={syncTooltips}
+              useLegacyTimeAxis={uiSettings.get(LEGACY_TIME_AXIS, false)}
+            />
+          </VisualizationContainer>
+        </I18nProvider>
+      </KibanaThemeProvider>,
       domNode
     );
   },
-};
+});

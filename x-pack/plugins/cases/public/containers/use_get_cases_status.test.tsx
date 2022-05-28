@@ -9,11 +9,11 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
 import { useGetCasesStatus, UseGetCasesStatus } from './use_get_cases_status';
 import { casesStatus } from './mock';
-import * as api from './api';
+import * as api from '../api';
 import { TestProviders } from '../common/mock';
-import { SECURITY_SOLUTION_OWNER } from '../../common';
+import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 
-jest.mock('./api');
+jest.mock('../api');
 jest.mock('../common/lib/kibana');
 
 describe('useGetCasesStatus', () => {
@@ -24,18 +24,15 @@ describe('useGetCasesStatus', () => {
   });
 
   it('init', async () => {
+    const { result } = renderHook<string, UseGetCasesStatus>(() => useGetCasesStatus(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
     await act(async () => {
-      const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
-        () => useGetCasesStatus(),
-        {
-          wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-        }
-      );
-      await waitForNextUpdate();
       expect(result.current).toEqual({
-        countClosedCases: null,
-        countOpenCases: null,
-        countInProgressCases: null,
+        countClosedCases: 0,
+        countOpenCases: 0,
+        countInProgressCases: 0,
         isLoading: true,
         isError: false,
         fetchCasesStatus: result.current.fetchCasesStatus,
@@ -52,13 +49,17 @@ describe('useGetCasesStatus', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
+
       await waitForNextUpdate();
-      await waitForNextUpdate();
-      expect(spyOnGetCasesStatus).toBeCalledWith(abortCtrl.signal, [SECURITY_SOLUTION_OWNER]);
+      expect(spyOnGetCasesStatus).toBeCalledWith({
+        http: expect.anything(),
+        signal: abortCtrl.signal,
+        query: { owner: [SECURITY_SOLUTION_OWNER] },
+      });
     });
   });
 
-  it('fetch reporters', async () => {
+  it('fetch statuses', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseGetCasesStatus>(
         () => useGetCasesStatus(),
@@ -66,7 +67,7 @@ describe('useGetCasesStatus', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
+
       await waitForNextUpdate();
       expect(result.current).toEqual({
         countClosedCases: casesStatus.countClosedCases,
@@ -92,7 +93,6 @@ describe('useGetCasesStatus', () => {
           wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
         }
       );
-      await waitForNextUpdate();
       await waitForNextUpdate();
 
       expect(result.current).toEqual({

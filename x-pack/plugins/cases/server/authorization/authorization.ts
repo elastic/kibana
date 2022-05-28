@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { KibanaRequest, Logger } from 'kibana/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import Boom from '@hapi/boom';
-import { SecurityPluginStart } from '../../../security/server';
-import { PluginStartContract as FeaturesPluginStart } from '../../../features/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
 import { AuthFilterHelpers, GetSpaceFn, OwnerEntity } from './types';
 import { getOwnersFilter } from './utils';
 import { AuthorizationAuditLogger, OperationDetails } from '.';
-import { createCaseError } from '../common';
+import { createCaseError } from '../common/error';
 
 /**
  * This class handles ensuring that the user making a request has the correct permissions
@@ -231,8 +231,10 @@ export class Authorization {
           ? Array.from(featureCaseOwners)
           : privileges.kibana.reduce<string[]>((authorizedOwners, { authorized, privilege }) => {
               if (authorized && requiredPrivileges.has(privilege)) {
-                const owner = requiredPrivileges.get(privilege)!;
-                authorizedOwners.push(owner);
+                const owner = requiredPrivileges.get(privilege);
+                if (owner) {
+                  authorizedOwners.push(owner);
+                }
               }
 
               return authorizedOwners;

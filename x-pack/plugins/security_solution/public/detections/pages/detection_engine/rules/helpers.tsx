@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
@@ -19,12 +19,12 @@ import {
   Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
-import { ActionVariables } from '../../../../../../triggers_actions_ui/public';
+import type { Filter } from '@kbn/es-query';
+import { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { normalizeThresholdField } from '../../../../../common/detection_engine/utils';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
-import { Filter } from '../../../../../../../../src/plugins/data/public';
 import { Rule } from '../../../containers/detection_engine/rules';
 import {
   AboutStepRule,
@@ -95,6 +95,8 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
     filters: (rule.filters ?? []) as Filter[],
     saved_id: rule.saved_id,
   },
+  relatedIntegrations: rule.related_integrations ?? [],
+  requiredFields: rule.required_fields ?? [],
   timeline: {
     id: rule.timeline_id ?? null,
     title: rule.timeline_title ?? null,
@@ -110,6 +112,11 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
           },
         }
       : {}),
+  },
+  eqlOptions: {
+    timestampField: rule.timestamp_field,
+    eventCategoryField: rule.event_category_override,
+    tiebreakerField: rule.tiebreaker_field,
   },
 });
 
@@ -227,6 +234,7 @@ export const determineDetailsValue = (
 export const getModifiedAboutDetailsData = (rule: Rule): AboutStepRuleDetails => ({
   note: rule.note ?? '',
   description: rule.description,
+  setup: rule.setup ?? '',
 });
 
 export const useQuery = () => new URLSearchParams(useLocation().search);

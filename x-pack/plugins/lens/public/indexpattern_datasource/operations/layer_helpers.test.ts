@@ -15,20 +15,31 @@ import {
   deleteColumn,
   updateLayerIndexPattern,
   getErrorMessages,
+  hasTermsWithManyBuckets,
+  isReferenced,
+  getReferenceRoot,
 } from './layer_helpers';
-import { operationDefinitionMap, OperationType } from '../operations';
+import { operationDefinitionMap, OperationType } from '.';
 import { TermsIndexPatternColumn } from './definitions/terms';
 import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 import { AvgIndexPatternColumn } from './definitions/metrics';
-import type { IndexPattern, IndexPatternLayer } from '../types';
+import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from '../types';
 import { documentField } from '../document_field';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { generateId } from '../../id_generator';
 import { createMockedFullReference, createMockedManagedReference } from './mocks';
-import { IndexPatternColumn, OperationDefinition } from './definitions';
-import { TinymathAST } from 'packages/kbn-tinymath';
+import {
+  FiltersIndexPatternColumn,
+  FormulaIndexPatternColumn,
+  GenericIndexPatternColumn,
+  MathIndexPatternColumn,
+  MovingAverageIndexPatternColumn,
+  OperationDefinition,
+} from './definitions';
+import { TinymathAST } from '@kbn/tinymath';
+import { CoreStart } from '@kbn/core/public';
 
-jest.mock('../operations');
+jest.mock('.');
 jest.mock('../../id_generator');
 
 const indexPatternFields = [
@@ -291,7 +302,7 @@ describe('state_helpers', () => {
             params: {
               interval: 'h',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
         },
       };
       expect(
@@ -322,7 +333,7 @@ describe('state_helpers', () => {
             params: {
               interval: 'h',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
           col3: {
             label: 'Reference',
             dataType: 'number',
@@ -361,7 +372,7 @@ describe('state_helpers', () => {
             params: {
               interval: 'h',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
           col3: {
             label: 'Count of records',
             dataType: 'document',
@@ -369,7 +380,7 @@ describe('state_helpers', () => {
 
             // Private
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
         },
       };
@@ -405,7 +416,7 @@ describe('state_helpers', () => {
 
             // Private
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
         },
       };
@@ -457,7 +468,7 @@ describe('state_helpers', () => {
                 params: {
                   interval: 'h',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
           columnId: 'col2',
@@ -487,7 +498,7 @@ describe('state_helpers', () => {
                 params: {
                   interval: 'h',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
           columnId: 'col2',
@@ -519,7 +530,7 @@ describe('state_helpers', () => {
                   orderDirection: 'asc',
                   size: 5,
                 },
-              },
+              } as TermsIndexPatternColumn,
             },
           },
           columnId: 'col2',
@@ -566,7 +577,7 @@ describe('state_helpers', () => {
 
                 // Private
                 operationType: 'count',
-                sourceField: 'Records',
+                sourceField: '___records___',
               },
             },
           },
@@ -597,7 +608,7 @@ describe('state_helpers', () => {
                 params: {
                   interval: 'h',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
           columnId: 'col2',
@@ -679,8 +690,8 @@ describe('state_helpers', () => {
           layer,
           indexPattern,
           columnId: 'col1',
-          // @ts-expect-error invalid type
           op: 'testReference',
+          visualizationGroups: [],
         });
         expect(result.columnOrder).toEqual(['id1', 'col1']);
         expect(result.columns).toEqual(
@@ -699,8 +710,8 @@ describe('state_helpers', () => {
             col1: {
               dataType: 'number',
               isBucketed: false,
+              label: '',
 
-              // @ts-expect-error only in test
               operationType: 'testReference',
               references: ['ref1'],
             },
@@ -744,7 +755,7 @@ describe('state_helpers', () => {
                 params: {
                   interval: 'h',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
           columnId: 'col2',
@@ -756,7 +767,7 @@ describe('state_helpers', () => {
         }).columns.col2
       ).toEqual(
         expect.objectContaining({
-          label: 'Top values of bytes',
+          label: 'Top 3 values of bytes',
         })
       );
     });
@@ -847,7 +858,7 @@ describe('state_helpers', () => {
                 params: {
                   interval: 'h',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
           columnId: 'col1',
@@ -877,7 +888,7 @@ describe('state_helpers', () => {
                 params: {
                   interval: 'h',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
           columnId: 'col1',
@@ -890,6 +901,39 @@ describe('state_helpers', () => {
           columns: { col1: expect.objectContaining({ operationType: 'date_histogram' }) },
           incompleteColumns: {
             col1: { operationType: 'terms' },
+          },
+        })
+      );
+    });
+
+    it('should set incompleteColumns without crashing when switching to a field-based operation from managed reference column with custom label', () => {
+      expect(
+        replaceColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'My formula',
+                dataType: 'number',
+                isBucketed: false,
+                customLabel: true,
+
+                // Private
+                operationType: 'formula',
+              } as FormulaIndexPatternColumn,
+            },
+          },
+          columnId: 'col1',
+          indexPattern,
+          op: 'median',
+          visualizationGroups: [],
+        })
+      ).toEqual(
+        expect.objectContaining({
+          columns: { col1: expect.objectContaining({ operationType: 'formula' }) },
+          incompleteColumns: {
+            col1: { operationType: 'median' },
           },
         })
       );
@@ -913,7 +957,7 @@ describe('state_helpers', () => {
                 params: {
                   interval: 'h',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
           },
           columnId: 'col1',
@@ -947,7 +991,7 @@ describe('state_helpers', () => {
                 params: {
                   interval: 'h',
                 },
-              },
+              } as DateHistogramIndexPatternColumn,
             },
             incompleteColumns: {
               col1: { operationType: 'terms' },
@@ -985,7 +1029,7 @@ describe('state_helpers', () => {
                 params: {
                   filters: [],
                 },
-              },
+              } as FiltersIndexPatternColumn,
             },
           },
           indexPattern,
@@ -1021,7 +1065,7 @@ describe('state_helpers', () => {
                   params: {
                     interval: 'h',
                   },
-                },
+                } as DateHistogramIndexPatternColumn,
               },
             },
             indexPattern,
@@ -1057,7 +1101,7 @@ describe('state_helpers', () => {
                   params: {
                     interval: 'h',
                   },
-                },
+                } as DateHistogramIndexPatternColumn,
               },
             },
             indexPattern,
@@ -1068,7 +1112,7 @@ describe('state_helpers', () => {
           }).columns.col1
         ).toEqual(
           expect.objectContaining({
-            label: 'Top values of source',
+            label: 'Top 3 values of source',
           })
         );
       });
@@ -1092,7 +1136,7 @@ describe('state_helpers', () => {
                   params: {
                     interval: 'h',
                   },
-                },
+                } as DateHistogramIndexPatternColumn,
               },
             },
             indexPattern,
@@ -1127,7 +1171,7 @@ describe('state_helpers', () => {
                     orderDirection: 'asc',
                     size: 5,
                   },
-                },
+                } as TermsIndexPatternColumn,
               },
             },
             indexPattern,
@@ -1159,7 +1203,7 @@ describe('state_helpers', () => {
                     orderDirection: 'asc',
                     size: 5,
                   },
-                },
+                } as TermsIndexPatternColumn,
               },
             },
             indexPattern,
@@ -1214,7 +1258,7 @@ describe('state_helpers', () => {
                   scale: 'ratio',
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
-                },
+                } as FormulaIndexPatternColumn,
               },
             },
             indexPattern,
@@ -1243,7 +1287,7 @@ describe('state_helpers', () => {
                   scale: 'ratio',
                   params: { isFormulaBroken: false, formula: 'average(bytes)' },
                   references: [],
-                },
+                } as FormulaIndexPatternColumn,
               },
             },
             indexPattern,
@@ -1283,7 +1327,7 @@ describe('state_helpers', () => {
               label: 'Count',
               dataType: 'number',
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count',
             },
           },
@@ -1342,7 +1386,7 @@ describe('state_helpers', () => {
               label: 'Count of records',
               dataType: 'number',
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count',
             },
           },
@@ -1367,7 +1411,7 @@ describe('state_helpers', () => {
             id1: expect.objectContaining({
               dataType: 'number',
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count',
             }),
             willBeReference: expect.objectContaining({
@@ -1383,6 +1427,42 @@ describe('state_helpers', () => {
       );
     });
 
+    it('should combine multiple partial params if the column supports multiple fields', () => {
+      const termsColumn: TermsIndexPatternColumn = {
+        label: 'Top values of source',
+        dataType: 'string',
+        isBucketed: true,
+
+        // Private
+        operationType: 'terms',
+        sourceField: 'source',
+        params: {
+          orderBy: { type: 'alphabetical', fallback: true },
+          orderDirection: 'desc',
+          size: 5,
+        },
+      };
+
+      replaceColumn({
+        layer: {
+          indexPatternId: '1',
+          columnOrder: ['col1'],
+          columns: {
+            col1: termsColumn,
+          },
+        },
+        indexPattern,
+        columnId: 'col1',
+        op: 'cumulative_sum',
+        visualizationGroups: [],
+        field: indexPattern.getFieldByName(termsColumn.sourceField),
+        initialParams: {
+          params: { secondaryFields: ['dest'] },
+        },
+        shouldCombineField: true,
+      });
+    });
+
     describe('switching from non-reference to reference test cases', () => {
       it('should wrap around the previous operation as a reference if possible (case new1)', () => {
         const expectedColumn = {
@@ -1390,7 +1470,7 @@ describe('state_helpers', () => {
           customLabel: true,
           dataType: 'number' as const,
           isBucketed: false,
-          sourceField: 'Records',
+          sourceField: '___records___',
           operationType: 'count' as const,
         };
 
@@ -1427,7 +1507,7 @@ describe('state_helpers', () => {
           customLabel: true,
           dataType: 'number' as const,
           isBucketed: false,
-          sourceField: 'Records',
+          sourceField: '___records___',
           operationType: 'count' as const,
         };
 
@@ -1489,8 +1569,8 @@ describe('state_helpers', () => {
           layer,
           indexPattern,
           columnId: 'col1',
-          // @ts-expect-error
           op: 'testReference',
+          visualizationGroups: [],
         });
 
         expect(result.columnOrder).toEqual(['id1', 'col1']);
@@ -1530,8 +1610,8 @@ describe('state_helpers', () => {
           layer,
           indexPattern,
           columnId: 'col1',
-          // @ts-expect-error test only
           op: 'testReference',
+          visualizationGroups: [],
         });
 
         expect(result.columnOrder).toEqual(['col1', 'id1']);
@@ -1562,7 +1642,7 @@ describe('state_helpers', () => {
               label: 'Count',
               dataType: 'number' as const,
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count' as const,
             },
           },
@@ -1571,8 +1651,8 @@ describe('state_helpers', () => {
           layer,
           indexPattern,
           columnId: 'col1',
-          // @ts-expect-error
           op: 'testReference',
+          visualizationGroups: [],
         });
 
         expect(result.incompleteColumns).toEqual({
@@ -1602,7 +1682,7 @@ describe('state_helpers', () => {
               label: 'Count',
               dataType: 'number' as const,
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count' as const,
             },
           },
@@ -1611,8 +1691,8 @@ describe('state_helpers', () => {
           layer,
           indexPattern,
           columnId: 'col1',
-          // @ts-expect-error
           op: 'testReference',
+          visualizationGroups: [],
         });
 
         expect(result.incompleteColumns).toEqual({});
@@ -1630,8 +1710,8 @@ describe('state_helpers', () => {
         operationDefinitionMap.secondTest = {
           input: 'fullReference',
           displayName: 'Reference test 2',
-          // @ts-expect-error this type is not statically available
           type: 'secondTest',
+          selectionStyle: 'full',
           requiredReferences: [
             {
               // Any numeric metric that isn't also a reference
@@ -1640,7 +1720,6 @@ describe('state_helpers', () => {
                 meta.dataType === 'number' && !meta.isBucketed,
             },
           ],
-          // @ts-expect-error don't want to define valid arguments
           buildColumn: jest.fn((args) => {
             return {
               label: 'Test reference',
@@ -1676,14 +1755,13 @@ describe('state_helpers', () => {
               isBucketed: false,
 
               operationType: 'count' as const,
-              sourceField: 'Records',
+              sourceField: '___records___',
             },
             invalid: {
               label: 'Test reference',
               dataType: 'number',
               isBucketed: false,
 
-              // @ts-expect-error not a valid type
               operationType: 'testReference',
               references: [],
             },
@@ -1692,7 +1770,6 @@ describe('state_helpers', () => {
               dataType: 'number',
               isBucketed: false,
 
-              // @ts-expect-error not a valid type
               operationType: 'testReference',
               references: ['ref1', 'invalid'],
             },
@@ -1703,8 +1780,8 @@ describe('state_helpers', () => {
             layer,
             indexPattern,
             columnId: 'output',
-            // @ts-expect-error not statically available
             op: 'secondTest',
+            visualizationGroups: [],
           })
         ).toEqual(
           expect.objectContaining({
@@ -1730,14 +1807,13 @@ describe('state_helpers', () => {
               isBucketed: false,
 
               operationType: 'count' as const,
-              sourceField: 'Records',
+              sourceField: '___records___',
             },
             invalid: {
               label: 'Test reference',
               dataType: 'number',
               isBucketed: false,
 
-              // @ts-expect-error not a valid type
               operationType: 'testReference',
               references: [],
             },
@@ -1746,7 +1822,6 @@ describe('state_helpers', () => {
               dataType: 'number',
               isBucketed: false,
 
-              // @ts-expect-error not a valid type
               operationType: 'testReference',
               references: ['ref1', 'invalid'],
             },
@@ -1756,8 +1831,8 @@ describe('state_helpers', () => {
           layer,
           indexPattern,
           columnId: 'output',
-          // @ts-expect-error not statically available
           op: 'secondTest',
+          visualizationGroups: [],
         });
         expect(layer.columns.output).toEqual(
           expect.objectContaining({ references: ['ref1', 'invalid'] })
@@ -1786,7 +1861,7 @@ describe('state_helpers', () => {
                 isFormulaBroken: false,
               },
               references: ['formulaX3'],
-            },
+            } as FormulaIndexPatternColumn,
             formulaX0: {
               customLabel: true,
               dataType: 'number' as const,
@@ -1801,7 +1876,7 @@ describe('state_helpers', () => {
               label: 'formulaX1',
               references: ['formulaX0'],
               params: { tinymathAst: 'formulaX0' },
-            },
+            } as MathIndexPatternColumn,
             formulaX2: {
               customLabel: true,
               dataType: 'number' as const,
@@ -1810,13 +1885,13 @@ describe('state_helpers', () => {
               operationType: 'moving_average' as const,
               params: { window: 5 },
               references: ['formulaX1'],
-            },
+            } as MovingAverageIndexPatternColumn,
             formulaX3: {
               ...math,
               label: 'formulaX3',
               references: ['formulaX2'],
               params: { tinymathAst: 'formulaX2' },
-            },
+            } as MathIndexPatternColumn,
           },
         };
 
@@ -1825,8 +1900,8 @@ describe('state_helpers', () => {
             layer,
             indexPattern,
             columnId: 'source',
-            // @ts-expect-error not statically available
             op: 'secondTest',
+            visualizationGroups: [],
           })
         ).toEqual(
           expect.objectContaining({
@@ -1853,12 +1928,11 @@ describe('state_helpers', () => {
               operationType: 'date_histogram' as const,
               sourceField: 'timestamp',
               params: { interval: 'auto' },
-            },
+            } as DateHistogramIndexPatternColumn,
             output: {
               label: 'Test reference',
               dataType: 'number',
               isBucketed: false,
-              // @ts-expect-error not a valid type
               operationType: 'testReference',
               references: ['fieldReused'],
             },
@@ -1869,8 +1943,8 @@ describe('state_helpers', () => {
             layer,
             indexPattern,
             columnId: 'output',
-            // @ts-expect-error not statically available
             op: 'secondTest',
+            visualizationGroups: [],
           })
         ).toEqual(
           expect.objectContaining({
@@ -1921,7 +1995,6 @@ describe('state_helpers', () => {
               dataType: 'number',
               isBucketed: false,
 
-              // @ts-expect-error not a valid type
               operationType: 'testReference',
               references: ['col1'],
             },
@@ -1952,7 +2025,7 @@ describe('state_helpers', () => {
           isBucketed: false,
 
           operationType: 'count' as const,
-          sourceField: 'Records',
+          sourceField: '___records___',
           filter: { language: 'kuery', query: 'bytes > 4000' },
           timeShift: '3h',
         };
@@ -1966,7 +2039,6 @@ describe('state_helpers', () => {
               dataType: 'number',
               isBucketed: false,
 
-              // @ts-expect-error not a valid type
               operationType: 'testReference',
               references: ['col1'],
               filter: { language: 'kuery', query: 'bytes > 4000' },
@@ -2082,6 +2154,52 @@ describe('state_helpers', () => {
           },
         });
       });
+
+      it('should carry over a custom formatting when transitioning from a managed reference', () => {
+        const actual = replaceColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1', 'col2'],
+            columns: {
+              col1: {
+                label: 'MY CUSTOM LABEL',
+                customLabel: true,
+                dataType: 'number',
+                operationType: 'formula',
+                isBucketed: false,
+                scale: 'ratio',
+                params: {
+                  isFormulaBroken: false,
+                  formula: 'average(bytes)',
+                  format: {
+                    id: 'number',
+                    params: { decimals: 2 },
+                  },
+                },
+                references: [],
+              } as FormulaIndexPatternColumn,
+            },
+          },
+          indexPattern,
+          columnId: 'col1',
+          op: 'average',
+          field: indexPattern.fields[2], // bytes field
+          visualizationGroups: [],
+          shouldResetLabel: undefined,
+        });
+
+        expect(actual.columns.col1).toEqual(
+          expect.objectContaining({
+            params: {
+              format: {
+                id: 'number',
+                params: { decimals: 2 },
+              },
+              emptyAsNull: true,
+            },
+          })
+        );
+      });
     });
 
     it('should allow making a replacement on an operation that is being referenced, even if it ends up invalid', () => {
@@ -2112,7 +2230,6 @@ describe('state_helpers', () => {
             dataType: 'number',
             isBucketed: false,
 
-            // @ts-expect-error not a valid type
             operationType: 'testReference',
             references: ['col1'],
           },
@@ -2132,7 +2249,7 @@ describe('state_helpers', () => {
           columnOrder: ['col1', 'col2'],
           columns: {
             col1: expect.objectContaining({
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count',
             }),
             col2: expect.objectContaining({ references: ['col1'] }),
@@ -2167,7 +2284,7 @@ describe('state_helpers', () => {
 
     it('should remove column and any incomplete state', () => {
       const termsColumn: TermsIndexPatternColumn = {
-        label: 'Top values of source',
+        label: 'Top 5 values of source',
         dataType: 'string',
         isBucketed: true,
 
@@ -2192,7 +2309,7 @@ describe('state_helpers', () => {
                 label: 'Count of records',
                 dataType: 'number',
                 isBucketed: false,
-                sourceField: 'Records',
+                sourceField: '___records___',
                 operationType: 'count',
               },
             },
@@ -2246,7 +2363,7 @@ describe('state_helpers', () => {
               label: 'Count',
               dataType: 'number',
               isBucketed: false,
-              sourceField: 'Records',
+              sourceField: '___records___',
               operationType: 'count',
             },
           },
@@ -2273,14 +2390,13 @@ describe('state_helpers', () => {
             isBucketed: false,
 
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
           col2: {
             label: 'Test reference',
             dataType: 'number',
             isBucketed: false,
 
-            // @ts-expect-error not a valid type
             operationType: 'testReference',
             references: ['col1'],
           },
@@ -2302,14 +2418,13 @@ describe('state_helpers', () => {
             isBucketed: false,
 
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
           col2: {
             label: 'Changed label',
             dataType: 'number',
             isBucketed: false,
 
-            // @ts-expect-error not a valid type
             operationType: 'testReference',
             references: ['col1'],
           },
@@ -2348,14 +2463,13 @@ describe('state_helpers', () => {
             isBucketed: false,
 
             operationType: 'count',
-            sourceField: 'Records',
+            sourceField: '___records___',
           },
           col2: {
             label: 'Test reference',
             dataType: 'number',
             isBucketed: false,
 
-            // @ts-expect-error not a valid type
             operationType: 'testReference',
             references: ['col1'],
           },
@@ -2364,7 +2478,6 @@ describe('state_helpers', () => {
             dataType: 'number',
             isBucketed: false,
 
-            // @ts-expect-error not a valid type
             operationType: 'testReference',
             references: ['col2'],
           },
@@ -2468,7 +2581,7 @@ describe('state_helpers', () => {
               params: {
                 interval: 'h',
               },
-            },
+            } as DateHistogramIndexPatternColumn,
           },
         })
       ).toEqual(['col1']);
@@ -2495,7 +2608,7 @@ describe('state_helpers', () => {
                 },
                 orderDirection: 'asc',
               },
-            },
+            } as TermsIndexPatternColumn,
             col2: {
               label: 'Average of bytes',
               dataType: 'number',
@@ -2516,7 +2629,7 @@ describe('state_helpers', () => {
               params: {
                 interval: '1d',
               },
-            },
+            } as DateHistogramIndexPatternColumn,
           },
         })
       ).toEqual(['col1', 'col3', 'col2']);
@@ -2534,7 +2647,7 @@ describe('state_helpers', () => {
               operationType: 'count',
               isBucketed: false,
               scale: 'ratio',
-              sourceField: 'Records',
+              sourceField: '___records___',
               customLabel: true,
             },
             date: {
@@ -2547,7 +2660,7 @@ describe('state_helpers', () => {
               params: {
                 interval: 'auto',
               },
-            },
+            } as DateHistogramIndexPatternColumn,
             formula: {
               label: 'Formula',
               dataType: 'number',
@@ -2559,14 +2672,14 @@ describe('state_helpers', () => {
                 isFormulaBroken: false,
               },
               references: ['math'],
-            },
+            } as FormulaIndexPatternColumn,
             countX0: {
               label: 'countX0',
               dataType: 'number',
               operationType: 'count',
               isBucketed: false,
               scale: 'ratio',
-              sourceField: 'Records',
+              sourceField: '___records___',
               customLabel: true,
             },
             math: {
@@ -2579,8 +2692,7 @@ describe('state_helpers', () => {
                 tinymathAst: {
                   type: 'function',
                   name: 'add',
-                  // @ts-expect-error String args are not valid tinymath, but signals something unique to Lens
-                  args: ['countX0', 'count'],
+                  args: ['countX0', 'count'] as unknown as TinymathAST[],
                   location: {
                     min: 0,
                     max: 17,
@@ -2590,7 +2702,7 @@ describe('state_helpers', () => {
               },
               references: ['countX0', 'count'],
               customLabel: true,
-            },
+            } as MathIndexPatternColumn,
           },
         })
       ).toEqual(['date', 'count', 'formula', 'countX0', 'math']);
@@ -2678,7 +2790,7 @@ describe('state_helpers', () => {
               orderDirection: 'asc',
               size: 3,
             },
-          },
+          } as TermsIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
@@ -2712,7 +2824,7 @@ describe('state_helpers', () => {
             params: {
               window: 7,
             },
-          },
+          } as MovingAverageIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
@@ -2741,7 +2853,7 @@ describe('state_helpers', () => {
             params: {
               interval: 'd',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
@@ -2764,10 +2876,10 @@ describe('state_helpers', () => {
       operationDefinitionMap.date_histogram.transfer = ((oldColumn) => ({
         ...oldColumn,
         params: {
-          ...oldColumn.params,
+          ...(oldColumn as DateHistogramIndexPatternColumn).params,
           interval: 'w',
         },
-      })) as OperationDefinition<IndexPatternColumn, 'field'>['transfer'];
+      })) as OperationDefinition<GenericIndexPatternColumn, 'field'>['transfer'];
       const layer: IndexPatternLayer = {
         columnOrder: ['col1', 'col2'],
         columns: {
@@ -2780,7 +2892,7 @@ describe('state_helpers', () => {
             params: {
               interval: 'd',
             },
-          },
+          } as DateHistogramIndexPatternColumn,
         },
         indexPatternId: 'original',
       };
@@ -2812,7 +2924,7 @@ describe('state_helpers', () => {
               orderDirection: 'asc',
               size: 3,
             },
-          },
+          } as TermsIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
@@ -2845,7 +2957,7 @@ describe('state_helpers', () => {
               orderDirection: 'asc',
               size: 3,
             },
-          },
+          } as TermsIndexPatternColumn,
           col2: {
             dataType: 'number',
             isBucketed: false,
@@ -2894,15 +3006,19 @@ describe('state_helpers', () => {
           indexPatternId: '1',
           columnOrder: [],
           columns: {
-            col1:
-              // @ts-expect-error not statically analyzed
-              { operationType: 'testReference', references: [] },
+            col1: {
+              operationType: 'testReference',
+              references: [],
+              label: '',
+              dataType: 'number',
+              isBucketed: false,
+            },
           },
         },
         indexPattern,
-        {},
+        {} as IndexPatternPrivateState,
         '1',
-        {}
+        {} as CoreStart
       );
       expect(mock).toHaveBeenCalled();
       expect(errors).toHaveLength(1);
@@ -2918,20 +3034,26 @@ describe('state_helpers', () => {
           indexPatternId: '1',
           columnOrder: [],
           columns: {
-            col1:
-              // @ts-expect-error not statically analyzed
-              { operationType: 'managedReference', references: ['col2'] },
+            col1: {
+              operationType: 'managedReference',
+              references: ['col2'],
+              label: '',
+              dataType: 'number',
+              isBucketed: false,
+            },
             col2: {
-              // @ts-expect-error not statically analyzed
               operationType: 'testReference',
               references: [],
+              label: '',
+              dataType: 'number',
+              isBucketed: false,
             },
           },
         },
         indexPattern,
-        {},
+        {} as IndexPatternPrivateState,
         '1',
-        {}
+        {} as CoreStart
       );
       expect(notCalledMock).not.toHaveBeenCalled();
       expect(mock).toHaveBeenCalledTimes(1);
@@ -2952,19 +3074,22 @@ describe('state_helpers', () => {
           indexPatternId: '1',
           columnOrder: [],
           columns: {
-            col1:
-              // @ts-expect-error not statically analyzed
-              { operationType: 'testReference', references: [] },
+            col1: {
+              operationType: 'testReference',
+              references: [],
+              label: '',
+              dataType: 'number',
+              isBucketed: false,
+            },
           },
           incompleteColumns: {
-            // @ts-expect-error not statically analyzed
             col1: { operationType: 'testIncompleteReference' },
           },
         },
         indexPattern,
-        {},
+        {} as IndexPatternPrivateState,
         '1',
-        {}
+        {} as CoreStart
       );
       expect(savedRef).toHaveBeenCalled();
       expect(incompleteRef).not.toHaveBeenCalled();
@@ -2981,28 +3106,271 @@ describe('state_helpers', () => {
           indexPatternId: '1',
           columnOrder: [],
           columns: {
-            col1:
-              // @ts-expect-error not statically analyzed
-              { operationType: 'testReference', references: [] },
+            col1: {
+              operationType: 'testReference',
+              references: [],
+              label: '',
+              dataType: 'number',
+              isBucketed: false,
+            },
           },
         },
         indexPattern,
-        {},
+        {} as IndexPatternPrivateState,
         '1',
-        {}
+        {} as CoreStart
       );
       expect(mock).toHaveBeenCalledWith(
         {
           indexPatternId: '1',
           columnOrder: [],
           columns: {
-            col1: { operationType: 'testReference', references: [] },
+            col1: {
+              operationType: 'testReference',
+              references: [],
+              dataType: 'number',
+              isBucketed: false,
+              label: '',
+            },
           },
         },
         'col1',
         indexPattern,
         operationDefinitionMap
       );
+    });
+  });
+
+  describe('hasTermsWithManyBuckets', () => {
+    it('should return false for a bucketed non terms operation', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            dataType: 'date',
+            isBucketed: true,
+            label: '',
+            operationType: 'date_histogram',
+            sourceField: 'fieldD',
+            params: {
+              interval: 'd',
+            },
+          } as DateHistogramIndexPatternColumn,
+        },
+        indexPatternId: 'original',
+      };
+
+      expect(hasTermsWithManyBuckets(layer)).toBeFalsy();
+    });
+
+    it('should return false if all terms operation have a lower size', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'My Op',
+            customLabel: true,
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            sourceField: 'dest',
+            params: {
+              size: 5,
+              orderBy: { type: 'alphabetical' },
+              orderDirection: 'asc',
+            },
+          } as TermsIndexPatternColumn,
+        },
+        indexPatternId: 'original',
+      };
+
+      expect(hasTermsWithManyBuckets(layer)).toBeFalsy();
+    });
+
+    it('should return true if the size is high', () => {
+      const layer: IndexPatternLayer = {
+        columnOrder: ['col1'],
+        columns: {
+          col1: {
+            label: 'My Op',
+            customLabel: true,
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            sourceField: 'dest',
+            params: {
+              size: 15,
+              orderBy: { type: 'alphabetical' },
+              orderDirection: 'asc',
+            },
+          } as TermsIndexPatternColumn,
+        },
+        indexPatternId: 'original',
+      };
+
+      expect(hasTermsWithManyBuckets(layer)).toBeTruthy();
+    });
+  });
+
+  describe('isReferenced', () => {
+    it('should return false for top column which has references', () => {
+      const layer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: [],
+        columns: {
+          col1: {
+            operationType: 'managedReference',
+            references: ['col2'],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+          col2: {
+            operationType: 'testReference',
+            references: [],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        },
+      };
+      expect(isReferenced(layer, 'col1')).toBeFalsy();
+    });
+
+    it('should return true for referenced column', () => {
+      const layer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: [],
+        columns: {
+          col1: {
+            operationType: 'managedReference',
+            references: ['col2'],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+          col2: {
+            operationType: 'testReference',
+            references: [],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        },
+      };
+      expect(isReferenced(layer, 'col2')).toBeTruthy();
+    });
+  });
+
+  describe('getReferenceRoot', () => {
+    it("should just return the column id itself if it's not a referenced column", () => {
+      const layer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: [],
+        columns: {
+          col1: {
+            operationType: 'managedReference',
+            references: ['col2'],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+          col2: {
+            operationType: 'testReference',
+            references: [],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        },
+      };
+      expect(getReferenceRoot(layer, 'col1')).toEqual('col1');
+    });
+
+    it('should return the top column if a referenced column is passed', () => {
+      const layer: IndexPatternLayer = {
+        indexPatternId: '1',
+        columnOrder: [],
+        columns: {
+          col1: {
+            operationType: 'managedReference',
+            references: ['col2'],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+          col2: {
+            operationType: 'testReference',
+            references: [],
+            label: '',
+            dataType: 'number',
+            isBucketed: false,
+          },
+        },
+      };
+      expect(getReferenceRoot(layer, 'col2')).toEqual('col1');
+    });
+
+    it('should work for a formula chain', () => {
+      const math = {
+        customLabel: true,
+        dataType: 'number' as const,
+        isBucketed: false,
+        label: 'math',
+        operationType: 'math' as const,
+      };
+      const layer: IndexPatternLayer = {
+        indexPatternId: '',
+        columnOrder: [],
+        columns: {
+          source: {
+            dataType: 'number' as const,
+            isBucketed: false,
+            label: 'Formula',
+            operationType: 'formula' as const,
+            params: {
+              formula: 'moving_average(sum(bytes), window=5)',
+              isFormulaBroken: false,
+            },
+            references: ['formulaX3'],
+          } as FormulaIndexPatternColumn,
+          formulaX0: {
+            customLabel: true,
+            dataType: 'number' as const,
+            isBucketed: false,
+            label: 'formulaX0',
+            operationType: 'sum' as const,
+            scale: 'ratio' as const,
+            sourceField: 'bytes',
+          },
+          formulaX1: {
+            ...math,
+            label: 'formulaX1',
+            references: ['formulaX0'],
+            params: { tinymathAst: 'formulaX0' },
+          } as MathIndexPatternColumn,
+          formulaX2: {
+            customLabel: true,
+            dataType: 'number' as const,
+            isBucketed: false,
+            label: 'formulaX2',
+            operationType: 'moving_average' as const,
+            params: { window: 5 },
+            references: ['formulaX1'],
+          } as MovingAverageIndexPatternColumn,
+          formulaX3: {
+            ...math,
+            label: 'formulaX3',
+            references: ['formulaX2'],
+            params: { tinymathAst: 'formulaX2' },
+          } as MathIndexPatternColumn,
+        },
+      };
+      expect(getReferenceRoot(layer, 'formulaX0')).toEqual('source');
     });
   });
 });

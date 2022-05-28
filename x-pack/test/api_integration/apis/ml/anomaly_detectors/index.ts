@@ -12,9 +12,11 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./get'));
     loadTestFile(require.resolve('./get_with_spaces'));
+    loadTestFile(require.resolve('./get_stats_with_spaces'));
     loadTestFile(require.resolve('./open_with_spaces'));
     loadTestFile(require.resolve('./close_with_spaces'));
     loadTestFile(require.resolve('./delete_with_spaces'));
     loadTestFile(require.resolve('./create_with_spaces'));
+    loadTestFile(require.resolve('./forecast_with_spaces'));
   });
 }

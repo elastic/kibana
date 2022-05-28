@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
 import { Reducer, CombinedState } from 'redux';
 import { routes } from './routes';
 import { StartPlugins } from '../types';
@@ -53,7 +53,7 @@ export class Management {
          * Cast the ImmutableReducer to a regular reducer for compatibility with
          * the subplugin architecture (which expects plain redux reducers.)
          */
-        reducer: { management: managementReducer } as ManagementPluginReducer,
+        reducer: { management: managementReducer } as unknown as ManagementPluginReducer,
         middleware: managementMiddlewareFactory(core, plugins),
       },
     };

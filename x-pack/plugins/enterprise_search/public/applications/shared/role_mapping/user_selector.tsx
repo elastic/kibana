@@ -18,13 +18,13 @@ import {
 } from '@elastic/eui';
 
 import { RoleTypes as ASRole } from '../../app_search/types';
-import { ElasticsearchUser } from '../../shared/types';
 import { Role as WSRole } from '../../workplace_search/types';
 
 import { USERNAME_LABEL, EMAIL_LABEL } from '../constants';
 import { docLinks } from '../doc_links';
+import { ElasticsearchUser } from '../types';
 
-const SMTP_URL = `${docLinks.enterpriseSearchBase}/mailer-configuration.html`;
+const SMTP_URL = `${docLinks.enterpriseSearchMailService}`;
 
 import {
   NEW_USER_LABEL,

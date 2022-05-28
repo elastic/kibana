@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act } from '@testing-library/react';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { ActionConnectorFieldsSetCallbacks } from '../../../../types';
@@ -33,18 +33,20 @@ describe('ServiceNowActionConnectorFields renders', () => {
     id: 'test',
     actionTypeId: '.servicenow',
     isPreconfigured: false,
+    isDeprecated: true,
     name: 'SN',
     config: {
       apiUrl: 'https://test/',
-      isLegacy: true,
+      usesTableApi: true,
     },
   } as ServiceNowActionConnector;
 
   const usesImportSetApiConnector = {
     ...usesTableApiConnector,
+    isDeprecated: false,
     config: {
       ...usesTableApiConnector.config,
-      isLegacy: false,
+      usesTableApi: false,
     },
   } as ServiceNowActionConnector;
 
@@ -94,6 +96,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     const actionConnector = {
       actionTypeId: '.servicenow',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {},
       secrets: {},
     } as ServiceNowActionConnector;
@@ -117,6 +120,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
     const actionConnector = {
       actionTypeId: '.servicenow',
       isPreconfigured: false,
+      isDeprecated: false,
       isMissingSecrets: true,
       config: {},
       secrets: {},
@@ -350,7 +354,7 @@ describe('ServiceNowActionConnectorFields renders', () => {
           id: usesTableApiConnector.id,
           connector: {
             name: usesTableApiConnector.name,
-            config: { ...usesTableApiConnector.config, isLegacy: false },
+            config: { ...usesTableApiConnector.config, usesTableApi: false },
             secrets: usesTableApiConnector.secrets,
           },
         })
@@ -413,6 +417,44 @@ describe('ServiceNowActionConnectorFields renders', () => {
           .text()
           .includes(errorMessage)
       ).toBeTruthy();
+    });
+
+    test('should set the usesTableApi to false when creating a connector', async () => {
+      const newConnector = { ...usesTableApiConnector, config: {}, secrets: {} };
+      const editActionConfig = jest.fn();
+
+      mountWithIntl(
+        <ServiceNowConnectorFields
+          // @ts-expect-error
+          action={newConnector}
+          errors={{ apiUrl: [], username: [], password: [] }}
+          editActionConfig={editActionConfig}
+          editActionSecrets={() => {}}
+          readOnly={false}
+          setCallbacks={setCallbacks}
+          isEdit={false}
+        />
+      );
+
+      expect(editActionConfig).toHaveBeenCalledWith('usesTableApi', false);
+    });
+
+    test('it should set the legacy attribute if it is not undefined', async () => {
+      const editActionConfig = jest.fn();
+
+      mountWithIntl(
+        <ServiceNowConnectorFields
+          action={usesTableApiConnector}
+          errors={{ apiUrl: [], username: [], password: [] }}
+          editActionConfig={editActionConfig}
+          editActionSecrets={() => {}}
+          readOnly={false}
+          setCallbacks={setCallbacks}
+          isEdit={false}
+        />
+      );
+
+      expect(editActionConfig).not.toHaveBeenCalled();
     });
   });
 });

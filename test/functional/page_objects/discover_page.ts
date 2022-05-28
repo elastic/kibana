@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
 
 export class DiscoverPageObject extends FtrService {
@@ -21,6 +22,9 @@ export class DiscoverPageObject extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
+  private readonly queryBar = this.ctx.getService('queryBar');
+
+  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -47,7 +51,7 @@ export class DiscoverPageObject extends FtrService {
     await fieldSearch.clearValue();
   }
 
-  public async saveSearch(searchName: string) {
+  public async saveSearch(searchName: string, saveAsNew?: boolean) {
     await this.clickSaveSearchButton();
     // preventing an occasional flakiness when the saved object wasn't set and the form can't be submitted
     await this.retry.waitFor(
@@ -58,6 +62,14 @@ export class DiscoverPageObject extends FtrService {
         return (await saveButton.getAttribute('disabled')) !== 'true';
       }
     );
+
+    if (saveAsNew !== undefined) {
+      await this.retry.waitFor(`save as new switch is set`, async () => {
+        await this.testSubjects.setEuiSwitch('saveAsNewCheckbox', saveAsNew ? 'check' : 'uncheck');
+        return (await this.testSubjects.isEuiSwitchChecked('saveAsNewCheckbox')) === saveAsNew;
+      });
+    }
+
     await this.testSubjects.click('confirmSaveSavedObjectButton');
     await this.header.waitUntilLoadingHasFinished();
     // LeeDr - this additional checking for the saved search name was an attempt
@@ -79,6 +91,10 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async openAddFilterPanel() {
+    await this.testSubjects.click('addFilter');
+  }
+
+  public async closeAddFilterPanel() {
     await this.testSubjects.click('addFilter');
   }
 
@@ -183,6 +199,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async toggleChartVisibility() {
+    await this.testSubjects.moveMouseTo('discoverChartOptionsToggle');
     await this.testSubjects.click('discoverChartOptionsToggle');
     await this.testSubjects.exists('discoverChartToggle');
     await this.testSubjects.click('discoverChartToggle');
@@ -227,10 +244,10 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async useLegacyTable() {
-    return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) !== false;
+    return (await this.kibanaServer.uiSettings.get('doc_table:legacy')) === true;
   }
 
-  public async getDocTableIndex(index: number) {
+  public async getDocTableIndex(index: number, visibleText = false) {
     const isLegacyDefault = await this.useLegacyTable();
     if (isLegacyDefault) {
       const row = await this.find.byCssSelector(`tr.kbnDocTable__row:nth-child(${index})`);
@@ -238,7 +255,16 @@ export class DiscoverPageObject extends FtrService {
     }
 
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
-    const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+    const result = await Promise.all(
+      row.map(async (cell) => {
+        if (visibleText) {
+          return await cell.getVisibleText();
+        } else {
+          const textContent = await cell.getAttribute('textContent');
+          return textContent.trim();
+        }
+      })
+    );
     // Remove control columns
     return result.slice(2).join(' ');
   }
@@ -261,6 +287,11 @@ export class DiscoverPageObject extends FtrService {
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
     const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
     return result[usedCellIdx];
+  }
+
+  public async clickDocTableRowToggle(rowIndex: number = 0) {
+    const docTable = await this.getDocTable();
+    await docTable.clickRowToggle({ rowIndex });
   }
 
   public async skipToEndOfDocTable() {
@@ -307,6 +338,13 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.click('collapseSideBarButton');
   }
 
+  public async closeSidebar() {
+    await this.retry.tryForTime(2 * 1000, async () => {
+      await this.toggleSidebarCollapse();
+      await this.testSubjects.missingOrFail('discover-sidebar');
+    });
+  }
+
   public async getAllFieldNames() {
     const sidebar = await this.testSubjects.find('discover-sidebar');
     const $ = await sidebar.parseDomContent();
@@ -331,8 +369,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async clickIndexPatternActions() {
     await this.retry.try(async () => {
-      await this.testSubjects.click('discoverIndexPatternActions');
-      await this.testSubjects.existOrFail('discover-addRuntimeField-popover');
+      await this.testSubjects.click('discover-dataView-switch-link');
     });
   }
 
@@ -341,6 +378,21 @@ export class DiscoverPageObject extends FtrService {
       await this.testSubjects.click('indexPattern-add-field');
       await this.find.byClassName('indexPatternFieldEditor__form');
     });
+  }
+
+  public async clickCreateNewDataView() {
+    await this.retry.waitForWithTimeout('data create new to be visible', 15000, async () => {
+      return await this.testSubjects.isDisplayed('dataview-create-new');
+    });
+    await this.testSubjects.click('dataview-create-new');
+    await this.retry.waitForWithTimeout(
+      'index pattern editor form to be visible',
+      15000,
+      async () => {
+        return await (await this.find.byClassName('indexPatternEditor__form')).isDisplayed();
+      }
+    );
+    await (await this.find.byClassName('indexPatternEditor__form')).click();
   }
 
   public async hasNoResults() {
@@ -445,7 +497,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectIndexPattern(indexPattern: string) {
-    await this.testSubjects.click('indexPattern-switch-link');
+    await this.testSubjects.click('discover-dataView-switch-link');
     await this.find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
     await this.find.clickByCssSelector(
       `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
@@ -508,6 +560,7 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('Discover app on screen', async () => {
       return await this.isDiscoverAppOnScreen();
     });
+    await this.unifiedSearch.closeTourPopoverByLocalStorage();
   }
 
   public async showAllFilterActions() {
@@ -515,10 +568,13 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickSavedQueriesPopOver() {
-    await this.testSubjects.click('saved-query-management-popover-button');
+    await this.testSubjects.click('showQueryBarMenu');
   }
 
   public async clickCurrentSavedQuery() {
+    await this.queryBar.setQuery('Cancelled : true');
+    await this.queryBar.clickQuerySubmitButton();
+    await this.testSubjects.click('showQueryBarMenu');
     await this.testSubjects.click('saved-query-management-save-button');
   }
 
@@ -544,5 +600,44 @@ export class DiscoverPageObject extends FtrService {
 
   public async clearSavedQuery() {
     await this.testSubjects.click('saved-query-management-clear-button');
+  }
+
+  public async assertHitCount(expectedHitCount: string) {
+    await this.retry.tryForTime(2 * 1000, async () => {
+      // Close side bar to ensure Discover hit count shows
+      // edge case for when browser width is small
+      await this.closeSidebar();
+      const hitCount = await this.getHitCount();
+      expect(hitCount).to.eql(
+        expectedHitCount,
+        `Expected Discover hit count to be ${expectedHitCount} but got ${hitCount}.`
+      );
+    });
+  }
+
+  public async assertViewModeToggleNotExists() {
+    await this.testSubjects.missingOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+  }
+
+  public async assertViewModeToggleExists() {
+    await this.testSubjects.existOrFail('dscViewModeToggle', { timeout: 2 * 1000 });
+  }
+
+  public async assertFieldStatsTableNotExists() {
+    await this.testSubjects.missingOrFail('dscFieldStatsEmbeddedContent', { timeout: 2 * 1000 });
+  }
+
+  public async clickViewModeFieldStatsButton() {
+    await this.retry.tryForTime(2 * 1000, async () => {
+      await this.testSubjects.existOrFail('dscViewModeFieldStatsButton');
+      await this.testSubjects.clickWhenNotDisabled('dscViewModeFieldStatsButton');
+      await this.testSubjects.existOrFail('dscFieldStatsEmbeddedContent');
+    });
+  }
+
+  public async getCurrentlySelectedDataView() {
+    await this.testSubjects.existOrFail('discover-sidebar');
+    const button = await this.testSubjects.find('discover-dataView-switch-link');
+    return button.getAttribute('title');
   }
 }

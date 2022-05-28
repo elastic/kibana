@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DEFAULT_INDEX_PATTERN } from '../../../../common/constants';
 import { DocValueFields } from '../../../../common/search_strategy';
 import { BrowserFields } from '../../../../common/search_strategy/index_fields';
@@ -21,7 +22,33 @@ export const mocksSource = {
       name: '@timestamp',
       searchable: true,
       type: 'date',
+      esTypes: ['date'],
       aggregatable: true,
+      readFromDocValues: true,
+    },
+    {
+      category: 'base',
+      description: 'Each document has an _id that uniquely identifies it',
+      example: 'Y-6TfmcB0WOhS6qyMv3s',
+      name: '_id',
+      type: 'string',
+      esTypes: [],
+      searchable: true,
+      aggregatable: false,
+      indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+    },
+    {
+      category: 'base',
+      description:
+        'For log events the message field contains the log message, optimized for viewing in a log viewer. For structured logs without an original message field, other fields can be concatenated to form a human-readable summary of the event. If multiple messages exist, they can be combined into one message.',
+      example: 'Hello World',
+      name: 'message',
+      type: 'string',
+      esTypes: ['text'],
+      searchable: true,
+      aggregatable: false,
+      format: 'string',
+      indexes: ['auditbeat', 'filebeat', 'packetbeat'],
     },
     {
       category: 'agent',
@@ -33,6 +60,7 @@ export const mocksSource = {
       name: 'agent.ephemeral_id',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -44,6 +72,7 @@ export const mocksSource = {
       name: 'agent.hostname',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -56,6 +85,7 @@ export const mocksSource = {
       name: 'agent.id',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -68,6 +98,7 @@ export const mocksSource = {
       name: 'agent.name',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -79,6 +110,7 @@ export const mocksSource = {
       name: 'auditd.data.a0',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -90,6 +122,7 @@ export const mocksSource = {
       name: 'auditd.data.a1',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -101,6 +134,7 @@ export const mocksSource = {
       name: 'auditd.data.a2',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -113,6 +147,7 @@ export const mocksSource = {
       name: 'client.address',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -124,6 +159,7 @@ export const mocksSource = {
       name: 'client.bytes',
       searchable: true,
       type: 'number',
+      esTypes: ['long'],
       aggregatable: true,
     },
     {
@@ -135,6 +171,7 @@ export const mocksSource = {
       name: 'client.domain',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -146,6 +183,7 @@ export const mocksSource = {
       name: 'client.geo.country_iso_code',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -158,6 +196,7 @@ export const mocksSource = {
       name: 'cloud.account.id',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -169,6 +208,7 @@ export const mocksSource = {
       name: 'cloud.availability_zone',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -180,6 +220,7 @@ export const mocksSource = {
       name: 'container.id',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -191,6 +232,7 @@ export const mocksSource = {
       name: 'container.image.name',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -202,6 +244,7 @@ export const mocksSource = {
       name: 'container.image.tag',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -214,6 +257,7 @@ export const mocksSource = {
       name: 'destination.address',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -225,6 +269,7 @@ export const mocksSource = {
       name: 'destination.bytes',
       searchable: true,
       type: 'number',
+      esTypes: ['long'],
       aggregatable: true,
     },
     {
@@ -236,6 +281,7 @@ export const mocksSource = {
       name: 'destination.domain',
       searchable: true,
       type: 'string',
+      esTypes: ['keyword'],
       aggregatable: true,
     },
     {
@@ -248,6 +294,7 @@ export const mocksSource = {
       name: 'destination.ip',
       searchable: true,
       type: 'ip',
+      esTypes: ['ip'],
     },
     {
       aggregatable: true,
@@ -258,7 +305,8 @@ export const mocksSource = {
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
       name: 'destination.port',
       searchable: true,
-      type: 'long',
+      type: 'number',
+      esTypes: ['long'],
     },
     {
       aggregatable: true,
@@ -270,6 +318,7 @@ export const mocksSource = {
       name: 'source.ip',
       searchable: true,
       type: 'ip',
+      esTypes: ['ip'],
     },
     {
       aggregatable: true,
@@ -280,7 +329,8 @@ export const mocksSource = {
       indexes: ['auditbeat', 'filebeat', 'packetbeat'],
       name: 'source.port',
       searchable: true,
-      type: 'long',
+      type: 'number',
+      esTypes: ['long'],
     },
     {
       aggregatable: true,
@@ -293,6 +343,70 @@ export const mocksSource = {
       name: 'event.end',
       searchable: true,
       type: 'date',
+      esTypes: ['date'],
+    },
+    {
+      category: 'event',
+      description:
+        'The action captured by the event. This describes the information in the event. It is more specific than `event.category`. Examples are `group-add`, `process-started`, `file-created`. The value is normally defined by the implementer.',
+      example: 'user-password-change',
+      name: 'event.action',
+      type: 'string',
+      esTypes: ['keyword'],
+      searchable: true,
+      aggregatable: true,
+      format: 'string',
+      indexes: DEFAULT_INDEX_PATTERN,
+    },
+    {
+      category: 'event',
+      description:
+        'This is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy. `event.category` represents the "big buckets" of ECS categories. For example, filtering on `event.category:process` yields all events relating to process activity. This field is closely related to `event.type`, which is used as a subcategory. This field is an array. This will allow proper categorization of some events that fall in multiple categories.',
+      example: 'authentication',
+      name: 'event.category',
+      type: 'string',
+      esTypes: ['keyword'],
+      searchable: true,
+      aggregatable: true,
+      format: 'string',
+      indexes: DEFAULT_INDEX_PATTERN,
+    },
+    {
+      category: 'event',
+      description:
+        "The numeric severity of the event according to your event source. What the different severity values mean can be different between sources and use cases. It's up to the implementer to make sure severities are consistent across events from the same source. The Syslog severity belongs in `log.syslog.severity.code`. `event.severity` is meant to represent the severity according to the event source (e.g. firewall, IDS). If the event source does not publish its own severity, you may optionally copy the `log.syslog.severity.code` to `event.severity`.",
+      example: 7,
+      name: 'event.severity',
+      type: 'number',
+      esTypes: ['long'],
+      format: 'number',
+      searchable: true,
+      aggregatable: true,
+      indexes: DEFAULT_INDEX_PATTERN,
+    },
+    {
+      category: 'host',
+      description:
+        'Name of the host. It can contain what `hostname` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.',
+      name: 'host.name',
+      type: 'string',
+      esTypes: ['keyword'],
+      searchable: true,
+      aggregatable: true,
+      format: 'string',
+      indexes: DEFAULT_INDEX_PATTERN,
+    },
+    {
+      category: 'user',
+      description: 'Short name or login of the user.',
+      example: 'albert',
+      name: 'user.name',
+      type: 'string',
+      esTypes: ['keyword'],
+      searchable: true,
+      aggregatable: true,
+      format: 'string',
+      indexes: ['auditbeat', 'filebeat', 'packetbeat'],
     },
     {
       aggregatable: false,
@@ -330,7 +444,13 @@ export const mocksSource = {
 };
 
 export const mockIndexFields = [
-  { aggregatable: true, name: '@timestamp', searchable: true, type: 'date' },
+  {
+    aggregatable: true,
+    name: '@timestamp',
+    searchable: true,
+    type: 'date',
+    readFromDocValues: true,
+  },
   { aggregatable: true, name: 'agent.ephemeral_id', searchable: true, type: 'string' },
   { aggregatable: true, name: 'agent.hostname', searchable: true, type: 'string' },
   { aggregatable: true, name: 'agent.id', searchable: true, type: 'string' },
@@ -371,6 +491,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'agent.ephemeral_id',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'agent.hostname': {
         aggregatable: true,
@@ -382,6 +503,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'agent.hostname',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'agent.id': {
         aggregatable: true,
@@ -394,6 +516,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'agent.id',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'agent.name': {
         aggregatable: true,
@@ -406,6 +529,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'agent.name',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
     },
   },
@@ -421,6 +545,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'auditd.data.a0',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'auditd.data.a1': {
         aggregatable: true,
@@ -432,6 +557,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'auditd.data.a1',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'auditd.data.a2': {
         aggregatable: true,
@@ -443,6 +569,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'auditd.data.a2',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
     },
   },
@@ -459,6 +586,32 @@ export const mockBrowserFields: BrowserFields = {
         name: '@timestamp',
         searchable: true,
         type: 'date',
+        esTypes: ['date'],
+        readFromDocValues: true,
+      },
+      _id: {
+        category: 'base',
+        description: 'Each document has an _id that uniquely identifies it',
+        example: 'Y-6TfmcB0WOhS6qyMv3s',
+        name: '_id',
+        type: 'string',
+        esTypes: [],
+        searchable: true,
+        aggregatable: false,
+        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
+      },
+      message: {
+        category: 'base',
+        description:
+          'For log events the message field contains the log message, optimized for viewing in a log viewer. For structured logs without an original message field, other fields can be concatenated to form a human-readable summary of the event. If multiple messages exist, they can be combined into one message.',
+        example: 'Hello World',
+        name: 'message',
+        type: 'string',
+        esTypes: ['text'],
+        searchable: true,
+        aggregatable: false,
+        format: 'string',
+        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
       },
     },
   },
@@ -475,6 +628,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'client.address',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'client.bytes': {
         aggregatable: true,
@@ -486,6 +640,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'client.bytes',
         searchable: true,
         type: 'number',
+        esTypes: ['long'],
       },
       'client.domain': {
         aggregatable: true,
@@ -497,6 +652,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'client.domain',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'client.geo.country_iso_code': {
         aggregatable: true,
@@ -508,6 +664,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'client.geo.country_iso_code',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
     },
   },
@@ -524,6 +681,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'cloud.account.id',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'cloud.availability_zone': {
         aggregatable: true,
@@ -535,6 +693,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'cloud.availability_zone',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
     },
   },
@@ -550,6 +709,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'container.id',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'container.image.name': {
         aggregatable: true,
@@ -561,6 +721,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'container.image.name',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'container.image.tag': {
         aggregatable: true,
@@ -572,6 +733,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'container.image.tag',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
     },
   },
@@ -588,6 +750,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'destination.address',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'destination.bytes': {
         aggregatable: true,
@@ -599,6 +762,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'destination.bytes',
         searchable: true,
         type: 'number',
+        esTypes: ['long'],
       },
       'destination.domain': {
         aggregatable: true,
@@ -610,6 +774,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'destination.domain',
         searchable: true,
         type: 'string',
+        esTypes: ['keyword'],
       },
       'destination.ip': {
         aggregatable: true,
@@ -622,6 +787,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'destination.ip',
         searchable: true,
         type: 'ip',
+        esTypes: ['ip'],
       },
       'destination.port': {
         aggregatable: true,
@@ -632,7 +798,8 @@ export const mockBrowserFields: BrowserFields = {
         indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'destination.port',
         searchable: true,
-        type: 'long',
+        type: 'number',
+        esTypes: ['long'],
       },
     },
   },
@@ -648,7 +815,63 @@ export const mockBrowserFields: BrowserFields = {
         name: 'event.end',
         searchable: true,
         type: 'date',
+        esTypes: ['date'],
         aggregatable: true,
+      },
+      'event.action': {
+        category: 'event',
+        description:
+          'The action captured by the event. This describes the information in the event. It is more specific than `event.category`. Examples are `group-add`, `process-started`, `file-created`. The value is normally defined by the implementer.',
+        example: 'user-password-change',
+        name: 'event.action',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        format: 'string',
+        indexes: DEFAULT_INDEX_PATTERN,
+      },
+      'event.category': {
+        category: 'event',
+        description:
+          'This is one of four ECS Categorization Fields, and indicates the second level in the ECS category hierarchy. `event.category` represents the "big buckets" of ECS categories. For example, filtering on `event.category:process` yields all events relating to process activity. This field is closely related to `event.type`, which is used as a subcategory. This field is an array. This will allow proper categorization of some events that fall in multiple categories.',
+        example: 'authentication',
+        name: 'event.category',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        format: 'string',
+        indexes: DEFAULT_INDEX_PATTERN,
+      },
+      'event.severity': {
+        category: 'event',
+        description:
+          "The numeric severity of the event according to your event source. What the different severity values mean can be different between sources and use cases. It's up to the implementer to make sure severities are consistent across events from the same source. The Syslog severity belongs in `log.syslog.severity.code`. `event.severity` is meant to represent the severity according to the event source (e.g. firewall, IDS). If the event source does not publish its own severity, you may optionally copy the `log.syslog.severity.code` to `event.severity`.",
+        example: 7,
+        name: 'event.severity',
+        type: 'number',
+        esTypes: ['long'],
+        format: 'number',
+        searchable: true,
+        aggregatable: true,
+        indexes: DEFAULT_INDEX_PATTERN,
+      },
+    },
+  },
+  host: {
+    fields: {
+      'host.name': {
+        category: 'host',
+        description:
+          'Name of the host. It can contain what `hostname` returns on Unix systems, the fully qualified domain name, or a name specified by the user. The sender decides which value to use.',
+        name: 'host.name',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        format: 'string',
+        indexes: DEFAULT_INDEX_PATTERN,
       },
     },
   },
@@ -664,6 +887,7 @@ export const mockBrowserFields: BrowserFields = {
         name: 'source.ip',
         searchable: true,
         type: 'ip',
+        esTypes: ['ip'],
       },
       'source.port': {
         aggregatable: true,
@@ -674,7 +898,24 @@ export const mockBrowserFields: BrowserFields = {
         indexes: ['auditbeat', 'filebeat', 'packetbeat'],
         name: 'source.port',
         searchable: true,
-        type: 'long',
+        type: 'number',
+        esTypes: ['long'],
+      },
+    },
+  },
+  user: {
+    fields: {
+      'user.name': {
+        category: 'user',
+        description: 'Short name or login of the user.',
+        example: 'albert',
+        name: 'user.name',
+        type: 'string',
+        esTypes: ['keyword'],
+        searchable: true,
+        aggregatable: true,
+        format: 'string',
+        indexes: ['auditbeat', 'filebeat', 'packetbeat'],
       },
     },
   },
@@ -726,3 +967,12 @@ export const mockDocValueFields: DocValueFields[] = [
     format: 'date_time',
   },
 ];
+
+export const mockRuntimeMappings: MappingRuntimeFields = {
+  '@a.runtime.field': {
+    script: {
+      source: 'emit("Radical dude: " + doc[\'host.name\'].value)',
+    },
+    type: 'keyword',
+  },
+};

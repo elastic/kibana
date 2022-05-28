@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { Subject } from 'rxjs';
 import { none, some } from 'fp-ts/lib/Option';
 
@@ -35,6 +34,9 @@ jest.mock('uuid', () => ({
 
 jest.mock('elastic-apm-node', () => ({
   currentTraceparent: 'parent',
+  currentTransaction: {
+    type: 'taskManager run',
+  },
 }));
 
 describe('TaskScheduling', () => {

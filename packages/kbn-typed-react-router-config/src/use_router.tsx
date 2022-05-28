@@ -7,19 +7,19 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { Route, Router } from './types';
+import { RouteMap, Router } from './types';
 
-const RouterContext = createContext<Router<Route[]> | undefined>(undefined);
+const RouterContext = createContext<Router<RouteMap> | undefined>(undefined);
 
 export const RouterContextProvider = ({
   router,
   children,
 }: {
-  router: Router<Route[]>;
+  router: Router<RouteMap>;
   children: React.ReactNode;
 }) => <RouterContext.Provider value={router}>{children}</RouterContext.Provider>;
 
-export function useRouter(): Router<Route[]> {
+export function useRouter(): Router<RouteMap> {
   const router = useContext(RouterContext);
 
   if (!router) {

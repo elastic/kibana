@@ -1,27 +1,30 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`EditableTitle it renders 1`] = `
-<EuiFlexGroup
-  alignItems="center"
-  gutterSize="none"
-  responsive={false}
->
-  <EuiFlexItem
-    grow={false}
-  >
-    <Memo(TitleComponent)
-      title="Test title"
-    />
-  </EuiFlexItem>
-  <EuiFlexItem
-    grow={false}
-  >
-    <Styled(EuiButtonIcon)
-      aria-label="You can edit Test title by clicking"
-      data-test-subj="editable-title-edit-icon"
-      iconType="pencil"
-      onClick={[Function]}
-    />
-  </EuiFlexItem>
-</EuiFlexGroup>
+exports[`EditableTitle renders 1`] = `
+<I18nProvider>
+  <Component>
+    <ThemeProvider
+      theme={[Function]}
+    >
+      <CasesProvider
+        value={
+          Object {
+            "features": undefined,
+            "owner": Array [
+              "securitySolution",
+            ],
+            "userCanCrud": true,
+          }
+        }
+      >
+        <Memo(EditableTitle)
+          isLoading={false}
+          onSubmit={[MockFunction]}
+          title="Test title"
+          userCanCrud={true}
+        />
+      </CasesProvider>
+    </ThemeProvider>
+  </Component>
+</I18nProvider>
 `;

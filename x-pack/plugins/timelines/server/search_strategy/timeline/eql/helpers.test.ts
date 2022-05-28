@@ -5,36 +5,40 @@
  * 2.0.
  */
 
-import { Direction } from '../../../../common/search_strategy';
+import { Direction, TimelineEqlRequestOptions } from '../../../../common/search_strategy';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { eventsResponse, sequenceResponse } from './__mocks__';
-
+const defaultArgs = {
+  defaultIndex: ['logs-endpoint.events*'],
+  docValueFields: [],
+  runtimeMappings: {},
+  fieldRequested: [
+    '@timestamp',
+    'message',
+    'event.category',
+    'event.action',
+    'host.name',
+    'source.ip',
+    'destination.ip',
+  ],
+  fields: [],
+  filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
+  id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
+  language: 'eql' as TimelineEqlRequestOptions['language'],
+};
 describe('Search Strategy EQL helper', () => {
   describe('#buildEqlDsl', () => {
     it('happy path with no options', () => {
       expect(
         buildEqlDsl({
-          defaultIndex: ['logs-endpoint.events*'],
-          docValueFields: [],
-          fieldRequested: [
-            '@timestamp',
-            'message',
-            'event.category',
-            'event.action',
-            'host.name',
-            'source.ip',
-            'destination.ip',
-          ],
-          fields: [],
-          filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
-          id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
-          language: 'eql',
+          ...defaultArgs,
           pagination: { activePage: 0, querySize: 25 },
           sort: [
             {
-              field: '@timestamp',
               direction: Direction.desc,
-              type: 'number',
+              esTypes: ['date'],
+              field: '@timestamp',
+              type: 'date',
             },
           ],
           timerange: {
@@ -78,27 +82,14 @@ describe('Search Strategy EQL helper', () => {
     it('happy path with EQL options', () => {
       expect(
         buildEqlDsl({
-          defaultIndex: ['logs-endpoint.events*'],
-          docValueFields: [],
-          fieldRequested: [
-            '@timestamp',
-            'message',
-            'event.category',
-            'event.action',
-            'host.name',
-            'source.ip',
-            'destination.ip',
-          ],
-          fields: [],
-          filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
-          id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
-          language: 'eql',
+          ...defaultArgs,
           pagination: { activePage: 1, querySize: 2 },
           sort: [
             {
-              field: '@timestamp',
               direction: Direction.desc,
-              type: 'number',
+              esTypes: ['date'],
+              field: '@timestamp',
+              type: 'date',
             },
           ],
           timerange: {
@@ -148,27 +139,14 @@ describe('Search Strategy EQL helper', () => {
     it('format events', async () => {
       const result = await parseEqlResponse(
         {
-          defaultIndex: ['logs-endpoint.events*'],
-          docValueFields: [],
-          fieldRequested: [
-            '@timestamp',
-            'message',
-            'event.category',
-            'event.action',
-            'host.name',
-            'source.ip',
-            'destination.ip',
-          ],
-          fields: [],
-          filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
-          id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
-          language: 'eql',
+          ...defaultArgs,
           pagination: { activePage: 0, querySize: 2 },
           sort: [
             {
-              field: '@timestamp',
               direction: Direction.desc,
-              type: 'number',
+              field: '@timestamp',
+              esTypes: ['date'],
+              type: 'date',
             },
           ],
           timerange: {
@@ -230,6 +208,9 @@ describe('Search Strategy EQL helper', () => {
                 "_id": "qhymg3cBX5UUcOOYP3Ec",
                 "_index": ".ds-logs-endpoint.events.security-default-2021.02.05-000005",
                 "agent": Object {
+                  "id": Array [
+                    "1d15cf9e-3dc7-5b97-f586-743f7c2518b2",
+                  ],
                   "type": Array [
                     "endpoint",
                   ],
@@ -357,6 +338,9 @@ describe('Search Strategy EQL helper', () => {
                 "_id": "qxymg3cBX5UUcOOYP3Ec",
                 "_index": ".ds-logs-endpoint.events.security-default-2021.02.05-000005",
                 "agent": Object {
+                  "id": Array [
+                    "1d15cf9e-3dc7-5b97-f586-743f7c2518b2",
+                  ],
                   "type": Array [
                     "endpoint",
                   ],
@@ -439,27 +423,14 @@ describe('Search Strategy EQL helper', () => {
     it('sequence events', async () => {
       const result = await parseEqlResponse(
         {
-          defaultIndex: ['logs-endpoint.events*'],
-          docValueFields: [],
-          fieldRequested: [
-            '@timestamp',
-            'message',
-            'event.category',
-            'event.action',
-            'host.name',
-            'source.ip',
-            'destination.ip',
-          ],
-          fields: [],
-          filterQuery: 'sequence by host.name↵[any where true]↵[any where true]↵[any where true]',
-          id: 'FkgzdTM3YXEtUmN1cVI3VS1wZ1lrdkEgVW1GSWZEX2lRZmVwQmw2c1V5RWsyZzoyMzA1MjAzMDM=',
-          language: 'eql',
+          ...defaultArgs,
           pagination: { activePage: 3, querySize: 2 },
           sort: [
             {
-              field: '@timestamp',
               direction: Direction.desc,
-              type: 'number',
+              esTypes: ['date'],
+              field: '@timestamp',
+              type: 'date',
             },
           ],
           timerange: {
@@ -511,6 +482,9 @@ describe('Search Strategy EQL helper', () => {
                 "_id": "rBymg3cBX5UUcOOYP3Ec",
                 "_index": ".ds-logs-endpoint.events.security-default-2021.02.05-000005",
                 "agent": Object {
+                  "id": Array [
+                    "1d15cf9e-3dc7-5b97-f586-743f7c2518b2",
+                  ],
                   "type": Array [
                     "endpoint",
                   ],
@@ -627,6 +601,9 @@ describe('Search Strategy EQL helper', () => {
                 "_id": "pxymg3cBX5UUcOOYP3Ec",
                 "_index": ".ds-logs-endpoint.events.process-default-2021.02.02-000005",
                 "agent": Object {
+                  "id": Array [
+                    "1d15cf9e-3dc7-5b97-f586-743f7c2518b2",
+                  ],
                   "type": Array [
                     "endpoint",
                   ],

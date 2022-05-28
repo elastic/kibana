@@ -5,28 +5,29 @@
  * 2.0.
  */
 
-import type { Map as MbMap, GeoJSONSource as MbGeoJSONSource } from '@kbn/mapbox-gl';
-import { FeatureCollection } from 'geojson';
+import type { Map as MbMap, VectorTileSource } from '@kbn/mapbox-gl';
 import { AbstractLayer } from '../layer';
 import { HeatmapStyle } from '../../styles/heatmap/heatmap_style';
-import { EMPTY_FEATURE_COLLECTION, LAYER_TYPE } from '../../../../common/constants';
+import { LAYER_TYPE } from '../../../../common/constants';
 import { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
 import { ESGeoGridSource } from '../../sources/es_geo_grid_source';
-import { addGeoJsonMbSource, getVectorSourceBounds, syncVectorSource } from '../vector_layer';
+import {
+  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
+  syncBoundsData,
+  MvtSourceData,
+  syncMvtSourceData,
+} from '../vector_layer';
 import { DataRequestContext } from '../../../actions';
-import { DataRequestAbortError } from '../../util/data_request';
 import { buildVectorRequestMeta } from '../build_vector_request_meta';
-
-const SCALED_PROPERTY_NAME = '__kbn_heatmap_weight__'; // unique name to store scaled value for weighting
+import { IMvtVectorSource } from '../../sources/vector_source';
+import { getAggsMeta } from '../../util/tile_meta_feature_utils';
 
 export class HeatmapLayer extends AbstractLayer {
-  static type = LAYER_TYPE.HEATMAP;
-
   private readonly _style: HeatmapStyle;
 
   static createDescriptor(options: Partial<HeatmapLayerDescriptor>) {
     const heatmapLayerDescriptor = super.createDescriptor(options);
-    heatmapLayerDescriptor.type = HeatmapLayer.type;
+    heatmapLayerDescriptor.type = LAYER_TYPE.HEATMAP;
     heatmapLayerDescriptor.style = HeatmapStyle.createDescriptor();
     return heatmapLayerDescriptor;
   }
@@ -47,10 +48,9 @@ export class HeatmapLayer extends AbstractLayer {
     }
   }
 
-  destroy() {
-    if (this.getSource()) {
-      this.getSource().destroy();
-    }
+  getLayerIcon(isTocIcon: boolean) {
+    const { docCount } = getAggsMeta(this._getMetaFromTiles());
+    return docCount === 0 ? NO_RESULTS_ICON_AND_TOOLTIPCONTENT : super.getLayerIcon(isTocIcon);
   }
 
   getSource(): ESGeoGridSource {
@@ -67,11 +67,6 @@ export class HeatmapLayer extends AbstractLayer {
 
   getCurrentStyle() {
     return this._style;
-  }
-
-  _getPropKeyOfSelectedMetric() {
-    const metricfields = this.getSource().getMetricFields();
-    return metricfields[0].getName();
   }
 
   _getHeatmapLayerId() {
@@ -91,81 +86,99 @@ export class HeatmapLayer extends AbstractLayer {
   }
 
   async syncData(syncContext: DataRequestContext) {
-    if (this.isLoadingBounds()) {
-      return;
+    await syncMvtSourceData({
+      hasLabels: false,
+      layerId: this.getId(),
+      layerName: await this.getDisplayName(),
+      prevDataRequest: this.getSourceDataRequest(),
+      requestMeta: buildVectorRequestMeta(
+        this.getSource(),
+        this.getSource().getFieldNames(),
+        syncContext.dataFilters,
+        this.getQuery(),
+        syncContext.isForceRefresh,
+        syncContext.isFeatureEditorOpenForLayer
+      ),
+      source: this.getSource() as IMvtVectorSource,
+      syncContext,
+    });
+  }
+
+  _requiresPrevSourceCleanup(mbMap: MbMap): boolean {
+    const mbSource = mbMap.getSource(this.getMbSourceId()) as VectorTileSource;
+    if (!mbSource) {
+      return false;
     }
 
-    try {
-      await syncVectorSource({
-        layerId: this.getId(),
-        layerName: await this.getDisplayName(this.getSource()),
-        prevDataRequest: this.getSourceDataRequest(),
-        requestMeta: buildVectorRequestMeta(
-          this.getSource(),
-          this.getSource().getFieldNames(),
-          syncContext.dataFilters,
-          this.getQuery(),
-          syncContext.isForceRefresh
-        ),
-        syncContext,
-        source: this.getSource(),
-        getUpdateDueToTimeslice: () => {
-          return true;
-        },
-      });
-    } catch (error) {
-      if (!(error instanceof DataRequestAbortError)) {
-        throw error;
-      }
+    const sourceDataRequest = this.getSourceDataRequest();
+    if (!sourceDataRequest) {
+      return false;
     }
+    const sourceData = sourceDataRequest.getData() as MvtSourceData | undefined;
+    if (!sourceData) {
+      return false;
+    }
+
+    return mbSource.tiles?.[0] !== sourceData.tileUrl;
   }
 
   syncLayerWithMB(mbMap: MbMap) {
-    addGeoJsonMbSource(this._getMbSourceId(), this.getMbLayerIds(), mbMap);
+    this._removeStaleMbSourcesAndLayers(mbMap);
+
+    const sourceDataRequest = this.getSourceDataRequest();
+    const sourceData = sourceDataRequest
+      ? (sourceDataRequest.getData() as MvtSourceData)
+      : undefined;
+    if (!sourceData) {
+      return;
+    }
+
+    const mbSourceId = this.getMbSourceId();
+    const mbSource = mbMap.getSource(mbSourceId);
+    if (!mbSource) {
+      mbMap.addSource(mbSourceId, {
+        type: 'vector',
+        tiles: [sourceData.tileUrl],
+        minzoom: sourceData.tileMinZoom,
+        maxzoom: sourceData.tileMaxZoom,
+      });
+    }
 
     const heatmapLayerId = this._getHeatmapLayerId();
     if (!mbMap.getLayer(heatmapLayerId)) {
       mbMap.addLayer({
         id: heatmapLayerId,
         type: 'heatmap',
-        source: this.getId(),
+        source: mbSourceId,
+        ['source-layer']: sourceData.tileSourceLayer,
         paint: {},
       });
     }
 
-    const mbGeoJSONSource = mbMap.getSource(this.getId()) as MbGeoJSONSource;
-    const sourceDataRequest = this.getSourceDataRequest();
-    const featureCollection = sourceDataRequest
-      ? (sourceDataRequest.getData() as FeatureCollection)
-      : null;
-    if (!featureCollection) {
-      mbGeoJSONSource.setData(EMPTY_FEATURE_COLLECTION);
+    const metricFields = this.getSource().getMetricFields();
+    if (!metricFields.length) {
       return;
     }
+    const metricField = metricFields[0];
 
-    const propertyKey = this._getPropKeyOfSelectedMetric();
-    const dataBoundToMap = AbstractLayer.getBoundDataForSource(mbMap, this.getId());
-    if (featureCollection !== dataBoundToMap) {
-      let max = 1; // max will be at least one, since counts or sums will be at least one.
-      for (let i = 0; i < featureCollection.features.length; i++) {
-        max = Math.max(featureCollection.features[i].properties?.[propertyKey], max);
+    // do not use tile meta features from previous tile URL to avoid styling new tiles from previous tile meta features
+    const tileMetaFeatures = this._requiresPrevSourceCleanup(mbMap) ? [] : this._getMetaFromTiles();
+    let max = 0;
+    for (let i = 0; i < tileMetaFeatures.length; i++) {
+      const range = metricField.pluckRangeFromTileMetaFeature(tileMetaFeatures[i]);
+      if (range) {
+        max = Math.max(range.max, max);
       }
-      for (let i = 0; i < featureCollection.features.length; i++) {
-        if (featureCollection.features[i].properties) {
-          featureCollection.features[i].properties![SCALED_PROPERTY_NAME] =
-            featureCollection.features[i].properties![propertyKey] / max;
-        }
-      }
-      mbGeoJSONSource.setData(featureCollection);
     }
-
-    this.syncVisibilityWithMb(mbMap, heatmapLayerId);
     this.getCurrentStyle().setMBPaintProperties({
       mbMap,
       layerId: heatmapLayerId,
-      propertyName: SCALED_PROPERTY_NAME,
+      propertyName: metricField.getMbFieldName(),
+      max,
       resolution: this.getSource().getGridResolution(),
     });
+
+    this.syncVisibilityWithMb(mbMap, heatmapLayerId);
     mbMap.setPaintProperty(heatmapLayerId, 'heatmap-opacity', this.getAlpha());
     mbMap.setLayerZoomRange(heatmapLayerId, this.getMinZoom(), this.getMaxZoom());
   }
@@ -188,7 +201,7 @@ export class HeatmapLayer extends AbstractLayer {
   }
 
   async getBounds(syncContext: DataRequestContext) {
-    return await getVectorSourceBounds({
+    return await syncBoundsData({
       layerId: this.getId(),
       syncContext,
       source: this.getSource(),

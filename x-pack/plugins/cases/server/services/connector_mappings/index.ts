@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference, SavedObjectsClientContract } from 'kibana/server';
+import { Logger, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { ConnectorMappings, CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common';
-import { SavedObjectFindOptionsKueryNode } from '../../common';
+import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../../common/constants';
+import { ConnectorMappings } from '../../../common/api';
+import { SavedObjectFindOptionsKueryNode } from '../../common/types';
 
 interface ClientArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;

@@ -6,15 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { Logger, SavedObjectsClientContract, ElasticsearchClient } from 'kibana/server';
-import { ExpressionsServerSetup } from 'src/plugins/expressions/server';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
+import {
+  Logger,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+  KibanaRequest,
+} from '@kbn/core/server';
+import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DataViewsService } from '../common';
-import { FieldFormatsSetup, FieldFormatsStart } from '../../field_formats/server';
 
 type ServiceFactory = (
   savedObjectsClient: SavedObjectsClientContract,
-  elasticsearchClient: ElasticsearchClient
+  elasticsearchClient: ElasticsearchClient,
+  request?: KibanaRequest,
+  byPassCapabilities?: boolean
 ) => Promise<DataViewsService>;
 export interface DataViewsServerPluginStart {
   dataViewsServiceFactory: ServiceFactory;

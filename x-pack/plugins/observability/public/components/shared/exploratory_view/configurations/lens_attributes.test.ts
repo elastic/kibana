@@ -6,9 +6,10 @@
  */
 
 import { LayerConfig, LensAttributes } from './lens_attributes';
-import { mockAppIndexPattern, mockIndexPattern } from '../rtl_helpers';
+import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';
 import { sampleAttribute } from './test_data/sample_attribute';
+
 import {
   LCP_FIELD,
   TRANSACTION_DURATION,
@@ -17,18 +18,20 @@ import {
 import { buildExistsFilter, buildPhrasesFilter } from './utils';
 import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
 import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
+import { obsvReportConfigMap } from '../obsv_exploratory_view';
 import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
 
 describe('Lens Attribute', () => {
-  mockAppIndexPattern();
+  mockAppDataView();
 
   const reportViewConfig = getDefaultConfigs({
     reportType: 'data-distribution',
     dataType: 'ux',
-    indexPattern: mockIndexPattern,
+    dataView: mockDataView,
+    reportConfigMap: obsvReportConfigMap,
   });
 
-  reportViewConfig.baseFilters?.push(...buildExistsFilter('transaction.type', mockIndexPattern));
+  reportViewConfig.baseFilters?.push(...buildExistsFilter('transaction.type', mockDataView));
 
   let lnsAttr: LensAttributes;
 
@@ -36,7 +39,7 @@ describe('Lens Attribute', () => {
     seriesConfig: reportViewConfig,
     seriesType: 'line',
     operationType: 'count',
-    indexPattern: mockIndexPattern,
+    indexPattern: mockDataView,
     reportDefinitions: {},
     time: { from: 'now-15m', to: 'now' },
     color: 'green',
@@ -56,7 +59,8 @@ describe('Lens Attribute', () => {
     const seriesConfigKpi = getDefaultConfigs({
       reportType: ReportTypes.KPI,
       dataType: 'ux',
-      indexPattern: mockIndexPattern,
+      dataView: mockDataView,
+      reportConfigMap: obsvReportConfigMap,
     });
 
     const lnsAttrKpi = new LensAttributes([
@@ -64,7 +68,7 @@ describe('Lens Attribute', () => {
         seriesConfig: seriesConfigKpi,
         seriesType: 'line',
         operationType: 'count',
-        indexPattern: mockIndexPattern,
+        indexPattern: mockDataView,
         reportDefinitions: { 'service.name': ['elastic-co'] },
         time: { from: 'now-15m', to: 'now' },
         color: 'green',
@@ -80,7 +84,8 @@ describe('Lens Attribute', () => {
     const seriesConfigKpi = getDefaultConfigs({
       reportType: ReportTypes.KPI,
       dataType: 'ux',
-      indexPattern: mockIndexPattern,
+      dataView: mockDataView,
+      reportConfigMap: obsvReportConfigMap,
     });
 
     const lnsAttrKpi = new LensAttributes([
@@ -91,7 +96,7 @@ describe('Lens Attribute', () => {
           from: 'now-1h',
           to: 'now',
         },
-        indexPattern: mockIndexPattern,
+        indexPattern: mockDataView,
         name: 'ux-series-1',
         breakdown: 'percentile',
         reportDefinitions: {},
@@ -199,7 +204,7 @@ describe('Lens Attribute', () => {
       seriesConfig: reportViewConfig,
       seriesType: 'line',
       operationType: 'count',
-      indexPattern: mockIndexPattern,
+      indexPattern: mockDataView,
       reportDefinitions: { 'performance.metric': [LCP_FIELD] },
       time: { from: 'now-15m', to: 'now' },
       color: 'green',
@@ -344,7 +349,7 @@ describe('Lens Attribute', () => {
           palette: undefined,
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0' }],
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0', axisMode: 'left' }],
         },
         {
           accessors: [
@@ -408,13 +413,18 @@ describe('Lens Attribute', () => {
     });
   });
 
+  it('should not use global filters when there is more than one series', function () {
+    const multiSeriesLensAttr = new LensAttributes([layerConfig, layerConfig]).getJSON();
+    expect(multiSeriesLensAttr.state.query.query).toEqual('transaction.duration.us < 60000000');
+  });
+
   describe('Layer breakdowns', function () {
     it('should return breakdown column', function () {
       const layerConfig1: LayerConfig = {
         seriesConfig: reportViewConfig,
         seriesType: 'line',
         operationType: 'count',
-        indexPattern: mockIndexPattern,
+        indexPattern: mockDataView,
         reportDefinitions: { 'performance.metric': [LCP_FIELD] },
         breakdown: USER_AGENT_NAME,
         time: { from: 'now-15m', to: 'now' },
@@ -426,9 +436,10 @@ describe('Lens Attribute', () => {
       lnsAttr = new LensAttributes([layerConfig1]);
 
       lnsAttr.getBreakdownColumn({
+        layerConfig: layerConfig1,
         sourceField: USER_AGENT_NAME,
         layerId: 'layer0',
-        indexPattern: mockIndexPattern,
+        indexPattern: mockDataView,
         labels: layerConfig.seriesConfig.labels,
       });
 
@@ -441,14 +452,14 @@ describe('Lens Attribute', () => {
           seriesType: 'line',
           splitAccessor: 'breakdown-column-layer0',
           xAccessor: 'x-axis-column-layer0',
-          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0' }],
+          yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0', axisMode: 'left' }],
         },
       ]);
 
       expect(lnsAttr.layers.layer0).toEqual({
         columnOrder: [
-          'x-axis-column-layer0',
           'breakdown-column-layer0',
+          'x-axis-column-layer0',
           'y-axis-column-layer0',
           'y-axis-column-layer0X0',
           'y-axis-column-layer0X1',
@@ -464,8 +475,7 @@ describe('Lens Attribute', () => {
             params: {
               missingBucket: false,
               orderBy: {
-                columnId: 'y-axis-column-layer0',
-                type: 'column',
+                type: 'alphabetical',
               },
               orderDirection: 'desc',
               otherBucket: true,
@@ -530,7 +540,7 @@ describe('Lens Attribute', () => {
             label: 'Part of count() / overall_sum(count())',
             operationType: 'count',
             scale: 'ratio',
-            sourceField: 'Records',
+            sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X1': {
             customLabel: true,
@@ -544,7 +554,7 @@ describe('Lens Attribute', () => {
             label: 'Part of count() / overall_sum(count())',
             operationType: 'count',
             scale: 'ratio',
-            sourceField: 'Records',
+            sourceField: RECORDS_FIELD,
           },
           'y-axis-column-layer0X2': {
             customLabel: true,
@@ -585,14 +595,14 @@ describe('Lens Attribute', () => {
   describe('Layer Filters', function () {
     it('should return expected filters', function () {
       reportViewConfig.baseFilters?.push(
-        ...buildPhrasesFilter('service.name', ['elastic', 'kibana'], mockIndexPattern)
+        ...buildPhrasesFilter('service.name', ['elastic', 'kibana'], mockDataView)
       );
 
       const layerConfig1: LayerConfig = {
         seriesConfig: reportViewConfig,
         seriesType: 'line',
         operationType: 'count',
-        indexPattern: mockIndexPattern,
+        indexPattern: mockDataView,
         reportDefinitions: { 'performance.metric': [LCP_FIELD] },
         time: { from: 'now-15m', to: 'now' },
         color: 'green',

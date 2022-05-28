@@ -10,12 +10,13 @@ import React, { useCallback } from 'react';
 import { connect, ConnectedProps } from 'react-redux';
 import { Dispatch } from 'redux';
 import deepEqual from 'fast-deep-equal';
+import type { Filter } from '@kbn/es-query';
 
-import { Filter, FilterManager } from '../../../../../../../../src/plugins/data/public';
+import type { FilterManager } from '@kbn/data-plugin/public';
 import { State, inputsModel, inputsSelectors } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { KqlMode, TimelineModel } from '../../../../timelines/store/timeline/model';
-import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
+import { KqlMode, TimelineModel } from '../../../store/timeline/model';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
 import { SerializedFilterQuery } from '../../../../../common/types/timeline';

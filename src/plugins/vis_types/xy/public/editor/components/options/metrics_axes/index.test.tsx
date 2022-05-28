@@ -11,11 +11,11 @@ import { mount, shallow } from 'enzyme';
 
 import { Position } from '@elastic/charts';
 
-import { IAggConfig, IAggType } from 'src/plugins/data/public';
+import { IAggConfig, IAggType } from '@kbn/data-plugin/public';
 
 import { ChartType } from '../../../../../common';
 import { VisParams, SeriesParam, ValueAxis } from '../../../../types';
-import MetricsAxisOptions from './index';
+import MetricsAxisOptions from '.';
 import { ValidationVisOptionsProps } from '../../common';
 import { ValueAxesPanel } from './value_axes_panel';
 import { CategoryAxisPanel } from './category_axis_panel';
@@ -30,6 +30,11 @@ jest.mock('./category_axis_panel', () => ({
 }));
 jest.mock('./value_axes_panel', () => ({
   ValueAxesPanel: () => 'ValueAxesPanel',
+}));
+jest.mock('../../../../services', () => ({
+  getUISettings: jest.fn(() => ({
+    get: jest.fn((key: string, defaultOverride?: unknown) => defaultOverride),
+  })),
 }));
 
 const SERIES_PARAMS = 'seriesParams';

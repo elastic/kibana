@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { get } from 'lodash';
-import { PluginConfigDescriptor, PluginInitializerContext } from 'src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { AlertingBuiltinsPlugin } from './plugin';
 import { configSchema, Config } from '../common/config';
 export { ID as INDEX_THRESHOLD_ID } from './alert_types/index_threshold/alert_type';
@@ -18,6 +18,7 @@ export const config: PluginConfigDescriptor<Config> = {
       const stackAlerts = get(settings, fromPath);
       if (stackAlerts?.enabled === false || stackAlerts?.enabled === true) {
         addDeprecation({
+          level: 'critical',
           configPath: 'xpack.stack_alerts.enabled',
           message: `"xpack.stack_alerts.enabled" is deprecated. The ability to disable this plugin will be removed in 8.0.0.`,
           correctiveActions: {

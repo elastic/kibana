@@ -8,13 +8,18 @@
 
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
-import type { TimeRange, Filter, Query, QueryState, RefreshInterval } from '../../data/public';
-import type { LocatorDefinition, LocatorPublic } from '../../share/public';
+import { type Filter } from '@kbn/es-query';
+import type {
+  TimeRange,
+  Query,
+  GlobalQueryStateFromUrl,
+  RefreshInterval,
+} from '@kbn/data-plugin/public';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { SavedDashboardPanel } from '../common/types';
 import type { RawDashboardState } from './types';
-import { esFilters } from '../../data/public';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { ViewMode } from '../../embeddable/public';
 import { DashboardConstants } from './dashboard_constants';
 
 /**
@@ -22,7 +27,7 @@ import { DashboardConstants } from './dashboard_constants';
  */
 const getSerializableRecord: <O>(o: O) => O & SerializableRecord = flow(JSON.stringify, JSON.parse);
 
-const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
+export const cleanEmptyKeys = (stateObj: Record<string, unknown>) => {
   Object.keys(stateObj).forEach((key) => {
     if (stateObj[key] === undefined) {
       delete stateObj[key];
@@ -128,6 +133,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       ...restParams
     } = params;
     const useHash = paramsUseHash ?? this.deps.useHashedUrl;
+
     const hash = dashboardId ? `view/${dashboardId}` : `create`;
 
     const getSavedFiltersFromDestinationDashboardIfNeeded = async (): Promise<Filter[]> => {
@@ -151,12 +157,14 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
       ...params.filters,
     ];
 
+    const { isFilterPinned } = await import('@kbn/es-query');
+
     let path = `#/${hash}`;
-    path = setStateToKbnUrl<QueryState>(
+    path = setStateToKbnUrl<GlobalQueryStateFromUrl>(
       '_g',
       cleanEmptyKeys({
         time: params.timeRange,
-        filters: filters?.filter((f) => esFilters.isFilterPinned(f)),
+        filters: filters?.filter((f) => isFilterPinned(f)),
         refreshInterval: params.refreshInterval,
       }),
       { useHash },

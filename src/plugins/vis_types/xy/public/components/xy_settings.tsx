@@ -11,7 +11,7 @@ import React, { FC } from 'react';
 import {
   Direction,
   Settings,
-  SettingsSpecProps,
+  SettingsProps,
   DomainRange,
   Position,
   PartialTheme,
@@ -26,7 +26,7 @@ import {
   HorizontalAlignment,
 } from '@elastic/charts';
 
-import { renderEndzoneTooltip } from '../../../../charts/public';
+import { renderEndzoneTooltip } from '@kbn/charts-plugin/public';
 
 import { getThemeService } from '../services';
 import { VisConfig } from '../types';
@@ -50,7 +50,8 @@ type XYSettingsProps = Pick<
   | 'xAxis'
   | 'orderBucketsBySum'
 > & {
-  onPointerUpdate: SettingsSpecProps['onPointerUpdate'];
+  onPointerUpdate: SettingsProps['onPointerUpdate'];
+  externalPointerEvents: SettingsProps['externalPointerEvents'];
   xDomain?: DomainRange;
   adjustedXDomain?: DomainRange;
   showLegend: boolean;
@@ -62,6 +63,8 @@ type XYSettingsProps = Pick<
   legendPosition: Position;
   truncateLegend: boolean;
   maxLegendLines: number;
+  legendSize?: number;
+  ariaLabel?: string;
 };
 
 function getValueLabelsStyling() {
@@ -89,6 +92,7 @@ export const XYSettings: FC<XYSettingsProps> = ({
   showLegend,
   onElementClick,
   onPointerUpdate,
+  externalPointerEvents,
   onBrushEnd,
   onRenderChange,
   legendAction,
@@ -96,6 +100,8 @@ export const XYSettings: FC<XYSettingsProps> = ({
   legendPosition,
   maxLegendLines,
   truncateLegend,
+  legendSize,
+  ariaLabel,
 }) => {
   const themeService = getThemeService();
   const theme = themeService.useChartsTheme();
@@ -159,13 +165,15 @@ export const XYSettings: FC<XYSettingsProps> = ({
     <Settings
       debugState={window._echDebugStateFlag ?? false}
       onPointerUpdate={onPointerUpdate}
+      externalPointerEvents={externalPointerEvents}
       xDomain={adjustedXDomain}
       rotation={rotation}
       theme={[themeOverrides, theme]}
       baseTheme={baseTheme}
       showLegend={showLegend}
       legendPosition={legendPosition}
-      allowBrushingLastHistogramBucket={isTimeChart}
+      legendSize={legendSize}
+      allowBrushingLastHistogramBin={isTimeChart}
       roundHistogramBrushValues={enableHistogramMode && !isTimeChart}
       legendColorPicker={legendColorPicker}
       onElementClick={onElementClick}
@@ -173,6 +181,8 @@ export const XYSettings: FC<XYSettingsProps> = ({
       onRenderChange={onRenderChange}
       legendAction={legendAction}
       tooltip={tooltipProps}
+      ariaLabel={ariaLabel}
+      ariaUseDefaultSummary={!ariaLabel}
       orderOrdinalBinsBy={
         orderBucketsBySum
           ? {

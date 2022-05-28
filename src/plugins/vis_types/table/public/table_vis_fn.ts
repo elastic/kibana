@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition, Datatable, Render } from '../../../expressions/public';
-import { prepareLogTable, Dimension } from '../../../visualizations/public';
+import { ExpressionFunctionDefinition, Datatable, Render } from '@kbn/expressions-plugin/public';
+import { prepareLogTable, Dimension } from '@kbn/visualizations-plugin/public';
 import { TableVisData, TableVisConfig } from './types';
 import { VIS_TYPE_TABLE } from '../common';
 import { tableVisResponseHandler } from './utils';
@@ -126,6 +126,11 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
   },
   fn(input, args, handlers) {
     const convertedData = tableVisResponseHandler(input, args);
+    const inspectorData = {
+      rows: convertedData?.table?.rows ?? input.rows,
+      columns: convertedData?.table?.columns ?? input.columns,
+      type: 'datatable',
+    } as Datatable;
 
     if (handlers?.inspectorAdapters?.tables) {
       const argsTable: Dimension[] = [
@@ -158,7 +163,7 @@ export const createTableVisFn = (): TableExpressionFunctionDefinition => ({
           }),
         ]);
       }
-      const logTable = prepareLogTable(input, argsTable);
+      const logTable = prepareLogTable(inspectorData, argsTable);
       handlers.inspectorAdapters.tables.logDatatable('default', logTable);
     }
     return {

@@ -1,5 +1,47 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Table Helpers #RowItemOverflow it returns correctly against snapshot 1`] = `
+<Fragment>
+  <Popover
+    count={2}
+    idPrefix="idPrefix"
+  >
+    <EuiText
+      size="xs"
+    >
+      <MoreContainer
+        attrName="attrName"
+        idPrefix="idPrefix"
+        moreMaxHeight="none"
+        overflowIndexStart={1}
+        rowItems={
+          Array [
+            "item1",
+            "item2",
+            "item3",
+          ]
+        }
+      />
+      <p
+        data-test-subj="popover-additional-overflow"
+      >
+        <EuiTextColor
+          color="subdued"
+        >
+          1
+           
+          <FormattedMessage
+            defaultMessage="more not shown"
+            id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
+            values={Object {}}
+          />
+        </EuiTextColor>
+      </p>
+    </EuiText>
+  </Popover>
+</Fragment>
+`;
+
 exports[`Table Helpers #getRowItemDraggable it returns correctly against snapshot 1`] = `
 <DraggableWrapper
   dataProvider={
@@ -44,6 +86,8 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         },
       }
     }
+    fieldType="keyword"
+    isAggregatable={false}
     key="idPrefix-attrName-item1-0"
     render={[Function]}
   />
@@ -64,6 +108,8 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         },
       }
     }
+    fieldType="keyword"
+    isAggregatable={false}
     key="idPrefix-attrName-item2-1"
     render={[Function]}
   />
@@ -84,47 +130,28 @@ exports[`Table Helpers #getRowItemDraggables it returns correctly against snapsh
         },
       }
     }
+    fieldType="keyword"
+    isAggregatable={false}
     key="idPrefix-attrName-item3-2"
     render={[Function]}
   />
    
+  <Memo(RowItemOverflowComponent)
+    attrName="attrName"
+    fieldType="keyword"
+    idPrefix="idPrefix"
+    isAggregatable={false}
+    maxOverflowItems={5}
+    overflowIndexStart={5}
+    rowItems={
+      Array [
+        "item1",
+        "item2",
+        "item3",
+      ]
+    }
+  />
 </DragDropContext>
-`;
-
-exports[`Table Helpers #getRowItemOverflow it returns correctly against snapshot 1`] = `
-<div>
-  <Popover
-    count={2}
-    idPrefix="attrName"
-  >
-    <EuiText
-      size="xs"
-    >
-      <ul>
-        <li
-          key="attrName-item2"
-        >
-          item2
-        </li>
-      </ul>
-      <p
-        data-test-subj="popover-additional-overflow"
-      >
-        <EuiTextColor
-          color="subdued"
-        >
-          1
-           
-          <FormattedMessage
-            defaultMessage="more not shown"
-            id="xpack.securitySolution.tables.rowItemHelper.moreDescription"
-            values={Object {}}
-          />
-        </EuiTextColor>
-      </p>
-    </EuiText>
-  </Popover>
-</div>
 `;
 
 exports[`Table Helpers OverflowField it returns correctly against snapshot 1`] = `

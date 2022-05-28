@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext } from 'kibana/public';
+import { PluginInitializerContext } from '@kbn/core/public';
 
 export type {
   FeatureCatalogueSetup,
@@ -16,15 +16,18 @@ export type {
   HomePublicPluginStart,
 } from './plugin';
 
-export { FeatureCatalogueCategory } from './services';
-
 export type {
+  AddDataTab,
+  FeatureCatalogueCategory,
   FeatureCatalogueEntry,
+  FeatureCatalogueRegistry,
   FeatureCatalogueSolution,
   Environment,
   TutorialVariables,
   TutorialDirectoryHeaderLinkComponent,
   TutorialModuleNoticeComponent,
+  WelcomeRenderTelemetryNotice,
+  WelcomeServiceSetup,
 } from './services';
 
 export { INSTRUCTION_VARIANT, getDisplayText } from '../common/instruction_variant';

@@ -19,7 +19,7 @@ import {
   UPDATE_USER_DESCRIPTION,
 } from './constants';
 
-import { UserFlyout } from './';
+import { UserFlyout } from '.';
 
 describe('UserFlyout', () => {
   const closeUserFlyout = jest.fn();
@@ -54,7 +54,7 @@ describe('UserFlyout', () => {
     const wrapper = shallow(<UserFlyout {...props} isNew={false} isComplete />);
     const icon = (
       <EuiIcon
-        color="secondary"
+        color="success"
         size="l"
         type="checkInCircleFilled"
         style={{ marginLeft: 5, marginTop: -5 }}

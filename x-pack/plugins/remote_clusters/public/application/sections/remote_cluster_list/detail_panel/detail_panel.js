@@ -7,7 +7,7 @@
 
 import React, { Component, Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -31,7 +31,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
-import { reactRouterNavigate } from '../../../../../../../../src/plugins/kibana_react/public';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { PROXY_MODE } from '../../../../../common/constants';
 import { ConfiguredByNodeWarning } from '../../components';
 import { ConnectionStatus, RemoveClusterButtonProvider } from '../components';

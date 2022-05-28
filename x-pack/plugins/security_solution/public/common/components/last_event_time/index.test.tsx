@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import '../../../common/mock/formatted_relative';
+import '../../mock/formatted_relative';
 import { getEmptyValue } from '../empty_value';
 import { LastEventIndexKey } from '../../../../common/search_strategy';
 import { mockLastEventTimeQuery } from '../../containers/events/last_event_time/mock';
@@ -41,7 +41,7 @@ describe('Last Event Time Stat', () => {
         <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
-    expect(wrapper.html()).toBe(
+    expect(wrapper.find(LastEventTime).html()).toBe(
       '<span class="euiLoadingSpinner euiLoadingSpinner--medium"></span>'
     );
   });
@@ -58,7 +58,9 @@ describe('Last Event Time Stat', () => {
         <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
-    expect(wrapper.html()).toBe('Last event: <span class="euiToolTipAnchor">20 hours ago</span>');
+    expect(wrapper.find(LastEventTime).html()).toBe(
+      'Last event: <span class="euiToolTipAnchor">20 hours ago</span>'
+    );
   });
   test('Bad date time string', async () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([
@@ -74,7 +76,7 @@ describe('Last Event Time Stat', () => {
       </TestProviders>
     );
 
-    expect(wrapper.html()).toBe('something-invalid');
+    expect(wrapper.find(LastEventTime).html()).toBe('something-invalid');
   });
   test('Null time string', async () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([
@@ -89,6 +91,6 @@ describe('Last Event Time Stat', () => {
         <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
-    expect(wrapper.html()).toContain(getEmptyValue());
+    expect(wrapper.find(LastEventTime).html()).toContain(getEmptyValue());
   });
 });

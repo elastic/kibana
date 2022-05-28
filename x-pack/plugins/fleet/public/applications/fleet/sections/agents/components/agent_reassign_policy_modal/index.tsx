@@ -15,7 +15,7 @@ import {
   EuiSelect,
   EuiFormRow,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { Agent } from '../../../../types';
 import {
@@ -25,6 +25,7 @@ import {
   useGetAgentPolicies,
 } from '../../../../hooks';
 import { AgentPolicyPackageBadges } from '../../../../components';
+import { SO_SEARCH_LIMIT } from '../../../../constants';
 
 interface Props {
   onClose: () => void;
@@ -43,7 +44,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
   );
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
   });
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const agentPolicies = agentPoliciesRequest.data ? agentPoliciesRequest.data.items : [];
@@ -99,6 +100,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
 
   return (
     <EuiConfirmModal
+      data-test-subj="agentReassignPolicyModal"
       title={
         <FormattedMessage
           id="xpack.fleet.agentReassignPolicy.flyoutTitle"

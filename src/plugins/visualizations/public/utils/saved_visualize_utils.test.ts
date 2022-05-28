@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { ISearchSource } from '../../../data/common';
-import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
-import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
-import { coreMock } from '../../../../core/public/mocks';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { SavedObjectsClientContract } from '../../../../core/public';
+import type { ISearchSource } from '@kbn/data-plugin/common';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { SavedObjectsClientContract } from '@kbn/core/public';
 import {
   findListItems,
   getSavedVisualization,
@@ -36,17 +36,17 @@ const mockParseSearchSourceJSON = jest.fn();
 const mockInjectSearchSourceReferences = jest.fn();
 const mockExtractSearchSourceReferences = jest.fn((...args) => [{}, []]);
 
-jest.mock('../../../../plugins/data/public', () => ({
+jest.mock('@kbn/data-plugin/public', () => ({
   extractSearchSourceReferences: jest.fn((...args) => mockExtractSearchSourceReferences(...args)),
   injectSearchSourceReferences: jest.fn((...args) => mockInjectSearchSourceReferences(...args)),
   parseSearchSourceJSON: jest.fn((...args) => mockParseSearchSourceJSON(...args)),
 }));
 
 const mockInjectReferences = jest.fn();
-const mockExtractReferences = jest.fn(() => ({ references: [], attributes: {} }));
+const mockExtractReferences = jest.fn((arg) => arg);
 jest.mock('./saved_visualization_references', () => ({
   injectReferences: jest.fn((...args) => mockInjectReferences(...args)),
-  extractReferences: jest.fn(() => mockExtractReferences()),
+  extractReferences: jest.fn((arg) => mockExtractReferences(arg)),
 }));
 
 let isTitleDuplicateConfirmed = true;
@@ -56,10 +56,11 @@ const mockCheckForDuplicateTitle = jest.fn(() => {
   }
 });
 const mockSaveWithConfirmation = jest.fn(() => ({ id: 'test-after-confirm' }));
-jest.mock('../../../../plugins/saved_objects/public', () => ({
+jest.mock('./saved_objects_utils/check_for_duplicate_title', () => ({
   checkForDuplicateTitle: jest.fn(() => mockCheckForDuplicateTitle()),
+}));
+jest.mock('./saved_objects_utils/save_with_confirmation', () => ({
   saveWithConfirmation: jest.fn(() => mockSaveWithConfirmation()),
-  isErrorNonFatal: jest.fn(() => true),
 }));
 
 describe('saved_visualize_utils', () => {
@@ -184,6 +185,7 @@ describe('saved_visualize_utils', () => {
       vis = {
         visState: {
           type: 'area',
+          params: {},
         },
         title: 'test',
         uiStateJSON: '{}',
@@ -262,15 +264,19 @@ describe('saved_visualize_utils', () => {
     describe('isTitleDuplicateConfirmed', () => {
       it('as false we should not save vis with duplicated title', async () => {
         isTitleDuplicateConfirmed = false;
-        const savedVisId = await saveVisualization(
-          vis,
-          { isTitleDuplicateConfirmed },
-          { savedObjectsClient, overlays }
-        );
+        try {
+          const savedVisId = await saveVisualization(
+            vis,
+            { isTitleDuplicateConfirmed },
+            { savedObjectsClient, overlays }
+          );
+          expect(savedVisId).toBe('');
+        } catch {
+          // ignore
+        }
         expect(savedObjectsClient.create).not.toHaveBeenCalled();
         expect(mockSaveWithConfirmation).not.toHaveBeenCalled();
         expect(mockCheckForDuplicateTitle).toHaveBeenCalled();
-        expect(savedVisId).toBe('');
         expect(vis.id).toBeUndefined();
       });
 

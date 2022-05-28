@@ -7,7 +7,7 @@
 
 import React, { FC, useEffect, useState, useContext, useCallback } from 'react';
 import cytoscape from 'cytoscape';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import {
@@ -33,13 +33,13 @@ import { JOB_MAP_NODE_TYPES } from '../../../../../../common/constants/data_fram
 import { ML_PAGES } from '../../../../../../common/constants/locator';
 import { checkPermission } from '../../../../capabilities/check_capabilities';
 import { useMlLocator, useNotifications, useNavigateToPath } from '../../../../contexts/kibana';
-import { getIndexPatternIdFromName } from '../../../../util/index_utils';
+import { getDataViewIdFromName } from '../../../../util/index_utils';
 import { useNavigateToWizardWithClonedJob } from '../../analytics_management/components/action_clone/clone_action_name';
 import {
   useDeleteAction,
   DeleteActionModal,
 } from '../../analytics_management/components/action_delete';
-import { DeleteJobCheckModal } from '../../../../components/delete_job_check_modal';
+import { DeleteSpaceAwareItemCheckModal } from '../../../../components/delete_space_aware_item_check_modal';
 
 interface Props {
   details: any;
@@ -112,20 +112,20 @@ export const Controls: FC<Props> = React.memo(
     const nodeType = selectedNode?.data('type');
 
     const onCreateJobClick = useCallback(async () => {
-      const indexId = getIndexPatternIdFromName(nodeLabel);
+      const dataViewId = await getDataViewIdFromName(nodeLabel);
 
-      if (indexId) {
+      if (dataViewId !== null) {
         const path = await mlLocator.getUrl({
           page: ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB,
-          pageState: { index: indexId },
+          pageState: { index: dataViewId },
         });
 
         await navigateToPath(path);
       } else {
         toasts.addDanger(
-          i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.indexPatternMissingMessage', {
+          i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.dataViewMissingMessage', {
             defaultMessage:
-              'To create a job from this index please create an index pattern for {indexTitle}.',
+              'To create a job from this index please create a data view for {indexTitle}.',
             values: { indexTitle: nodeLabel },
           })
         );
@@ -309,9 +309,9 @@ export const Controls: FC<Props> = React.memo(
           </EuiFlyoutFooter>
         </EuiFlyout>
         {isDeleteJobCheckModalVisible && item && (
-          <DeleteJobCheckModal
-            jobType={jobType}
-            jobIds={[item.config.id]}
+          <DeleteSpaceAwareItemCheckModal
+            mlSavedObjectType={jobType}
+            ids={[item.config.id]}
             onCloseCallback={closeDeleteJobCheckModal}
             canDeleteCallback={() => {
               // Item will always be set by the time we open the delete modal

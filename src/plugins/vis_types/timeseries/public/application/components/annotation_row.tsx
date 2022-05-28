@@ -18,10 +18,10 @@ import {
   EuiSpacer,
   htmlIdGenerator,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
-import { getDataStart } from '../../services';
-import { KBN_FIELD_TYPES, Query } from '../../../../../../plugins/data/public';
+import { KBN_FIELD_TYPES, Query } from '@kbn/data-plugin/public';
+import { getDataViewsStart } from '../../services';
 
 import { AddDeleteButtons } from './add_delete_buttons';
 import { ColorPicker } from './color_picker';
@@ -29,7 +29,10 @@ import { FieldSelect } from './aggs/field_select';
 import { IndexPatternSelect, IndexPatternSelectProps } from './lib/index_pattern_select';
 import { QueryBarWrapper } from './query_bar_wrapper';
 import { YesNo } from './yes_no';
-import { fetchIndexPattern } from '../../../common/index_patterns_utils';
+import {
+  fetchIndexPattern,
+  isDataViewTypeIndexPattern,
+} from '../../../common/index_patterns_utils';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
 // @ts-expect-error not typed yet
@@ -72,7 +75,7 @@ export const AnnotationRow = ({
 
   useEffect(() => {
     const updateFetchedIndex = async (index: IndexPatternValue) => {
-      const { indexPatterns } = getDataStart();
+      const dataViews = getDataViewsStart();
       let fetchedIndexPattern: IndexPatternSelectProps['fetchedIndex'] = {
         indexPattern: undefined,
         indexPatternString: undefined,
@@ -80,13 +83,17 @@ export const AnnotationRow = ({
 
       try {
         fetchedIndexPattern = index
-          ? await fetchIndexPattern(index, indexPatterns)
+          ? await fetchIndexPattern(index, dataViews, {
+              fetchKibanaIndexForStringIndexes: true,
+            })
           : {
               ...fetchedIndexPattern,
-              defaultIndex: await indexPatterns.getDefault(),
+              defaultIndex: await dataViews.getDefault(),
             };
       } catch {
-        // nothing to be here
+        if (isDataViewTypeIndexPattern(index)) {
+          fetchedIndexPattern.missedIndex = index.id;
+        }
       }
 
       setFetchedIndex(fetchedIndexPattern);
@@ -146,8 +153,12 @@ export const AnnotationRow = ({
                   />
                 }
                 restrict={RESTRICT_FIELDS}
-                value={model.time_field}
-                onChange={handleChange(TIME_FIELD_KEY)}
+                value={model[TIME_FIELD_KEY]}
+                onChange={(value) =>
+                  onChange({
+                    [TIME_FIELD_KEY]: value?.[0] ?? undefined,
+                  })
+                }
                 indexPattern={model.index_pattern}
                 fields={fields}
               />

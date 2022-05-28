@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { KibanaRequest, SavedObjectsClientContract, SavedObjectsServiceStart } from 'kibana/server';
-import { EndpointError } from '../errors';
+import {
+  KibanaRequest,
+  SavedObjectsClientContract,
+  SavedObjectsServiceStart,
+} from '@kbn/core/server';
+import { EndpointError } from '../../../common/endpoint/errors';
 
 type SavedObjectsClientContractKeys = keyof SavedObjectsClientContract;
 

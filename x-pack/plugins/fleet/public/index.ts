@@ -8,11 +8,11 @@
 // TODO: https://github.com/elastic/kibana/issues/110901
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import type { PluginInitializerContext } from 'src/core/public';
+import type { PluginInitializerContext } from '@kbn/core/public';
 
 import { FleetPlugin } from './plugin';
 
-export { FleetSetup, FleetStart } from './plugin';
+export type { FleetSetup, FleetStart } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new FleetPlugin(initializerContext);
@@ -24,7 +24,5 @@ export * from './types/ui_extensions';
 
 export { pagePathGetters } from './constants';
 export { pkgKeyFromPackageInfo } from './services';
-export {
-  CustomAssetsAccordion,
-  CustomAssetsAccordionProps,
-} from './components/custom_assets_accordion';
+export type { CustomAssetsAccordionProps } from './components/custom_assets_accordion';
+export { CustomAssetsAccordion } from './components/custom_assets_accordion';

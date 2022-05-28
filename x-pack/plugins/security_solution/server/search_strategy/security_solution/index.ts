@@ -6,12 +6,9 @@
  */
 
 import { map, mergeMap } from 'rxjs/operators';
-import {
-  ISearchStrategy,
-  PluginStart,
-  shimHitsTotal,
-} from '../../../../../../src/plugins/data/server';
-import { ENHANCED_ES_SEARCH_STRATEGY } from '../../../../../../src/plugins/data/common';
+import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
+import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import { KibanaRequest } from '@kbn/core/server';
 import {
   FactoryQueryTypes,
   StrategyResponseType,
@@ -21,17 +18,28 @@ import { securitySolutionFactory } from './factory';
 import { SecuritySolutionFactory } from './factory/types';
 import { EndpointAppContext } from '../../endpoint/types';
 
+function isObj(req: unknown): req is Record<string, unknown> {
+  return typeof req === 'object' && req !== null;
+}
+function assertValidRequestType<T extends FactoryQueryTypes>(
+  req: unknown
+): asserts req is StrategyRequestType<T> & { factoryQueryType: FactoryQueryTypes } {
+  if (!isObj(req) || req.factoryQueryType == null) {
+    throw new Error('factoryQueryType is required');
+  }
+}
+
 export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTypes>(
   data: PluginStart,
-  endpointContext: EndpointAppContext
+  endpointContext: EndpointAppContext,
+  getSpaceId?: (request: KibanaRequest) => string
 ): ISearchStrategy<StrategyRequestType<T>, StrategyResponseType<T>> => {
   const es = data.search.getSearchStrategy(ENHANCED_ES_SEARCH_STRATEGY);
 
   return {
     search: (request, options, deps) => {
-      if (request.factoryQueryType == null) {
-        throw new Error('factoryQueryType is required');
-      }
+      assertValidRequestType<T>(request);
+
       const queryFactory: SecuritySolutionFactory<T> =
         securitySolutionFactory[request.factoryQueryType];
       const dsl = queryFactory.buildDsl(request);
@@ -49,6 +57,8 @@ export const securitySolutionSearchStrategyProvider = <T extends FactoryQueryTyp
             esClient: deps.esClient,
             savedObjectsClient: deps.savedObjectsClient,
             endpointContext,
+            request: deps.request,
+            spaceId: getSpaceId && getSpaceId(deps.request),
           })
         )
       );

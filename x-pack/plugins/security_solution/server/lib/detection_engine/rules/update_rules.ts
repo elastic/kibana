@@ -7,15 +7,13 @@
 
 /* eslint-disable complexity */
 import { validate } from '@kbn/securitysolution-io-ts-utils';
+import { PartialRule } from '@kbn/alerting-plugin/server';
 import { DEFAULT_MAX_SIGNALS } from '../../../../common/constants';
 import { transformRuleToAlertAction } from '../../../../common/detection_engine/transform_actions';
-import { PartialAlert } from '../../../../../alerting/server';
-import { readRules } from './read_rules';
+
 import { UpdateRulesOptions } from './types';
-import { addTags } from './add_tags';
 import { typeSpecificSnakeToCamel } from '../schemas/rule_converters';
 import { internalRuleUpdate, RuleParams } from '../schemas/rule_schemas';
-import { enableRule } from './enable_rule';
 import { maybeMute, transformToAlertThrottle, transformToNotifyWhen } from './utils';
 
 class UpdateError extends Error {
@@ -27,20 +25,11 @@ class UpdateError extends Error {
 }
 
 export const updateRules = async ({
-  isRuleRegistryEnabled,
-  spaceId,
   rulesClient,
-  ruleStatusClient,
   defaultOutputIndex,
+  existingRule,
   ruleUpdate,
-  savedObjectsClient,
-}: UpdateRulesOptions): Promise<PartialAlert<RuleParams> | null> => {
-  const existingRule = await readRules({
-    isRuleRegistryEnabled,
-    rulesClient,
-    ruleId: ruleUpdate.rule_id,
-    id: ruleUpdate.id,
-  });
+}: UpdateRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (existingRule == null) {
     return null;
   }
@@ -49,7 +38,7 @@ export const updateRules = async ({
   const enabled = ruleUpdate.enabled ?? true;
   const newInternalRule = {
     name: ruleUpdate.name,
-    tags: addTags(ruleUpdate.tags ?? [], existingRule.params.ruleId, existingRule.params.immutable),
+    tags: ruleUpdate.tags ?? [],
     params: {
       author: ruleUpdate.author ?? [],
       buildingBlockType: ruleUpdate.building_block_type,
@@ -65,9 +54,12 @@ export const updateRules = async ({
       timelineTitle: ruleUpdate.timeline_title,
       meta: ruleUpdate.meta,
       maxSignals: ruleUpdate.max_signals ?? DEFAULT_MAX_SIGNALS,
+      relatedIntegrations: existingRule.params.relatedIntegrations,
+      requiredFields: existingRule.params.requiredFields,
       riskScore: ruleUpdate.risk_score,
       riskScoreMapping: ruleUpdate.risk_score_mapping ?? [],
       ruleNameOverride: ruleUpdate.rule_name_override,
+      setup: existingRule.params.setup,
       severity: ruleUpdate.severity,
       severityMapping: ruleUpdate.severity_mapping ?? [],
       threat: ruleUpdate.threat ?? [],
@@ -111,7 +103,7 @@ export const updateRules = async ({
   if (existingRule.enabled && enabled === false) {
     await rulesClient.disable({ id: existingRule.id });
   } else if (!existingRule.enabled && enabled === true) {
-    await enableRule({ rule: existingRule, rulesClient, ruleStatusClient, spaceId });
+    await rulesClient.enable({ id: existingRule.id });
   }
   return { ...update, enabled };
 };

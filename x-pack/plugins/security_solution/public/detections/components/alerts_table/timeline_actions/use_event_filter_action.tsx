@@ -11,8 +11,12 @@ import { ACTION_ADD_EVENT_FILTER } from '../translations';
 
 export const useEventFilterAction = ({
   onAddEventFilterClick,
+  disabled = false,
+  tooltipMessage,
 }: {
   onAddEventFilterClick: () => void;
+  disabled?: boolean;
+  tooltipMessage?: string;
 }) => {
   const eventFilterActionItems = useMemo(
     () => [
@@ -20,11 +24,13 @@ export const useEventFilterAction = ({
         key="add-event-filter-menu-item"
         data-test-subj="add-event-filter-menu-item"
         onClick={onAddEventFilterClick}
+        disabled={disabled}
+        toolTipContent={tooltipMessage}
       >
         {ACTION_ADD_EVENT_FILTER}
       </EuiContextMenuItem>,
     ],
-    [onAddEventFilterClick]
+    [onAddEventFilterClick, disabled, tooltipMessage]
   );
   return { eventFilterActionItems };
 };

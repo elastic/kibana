@@ -13,6 +13,12 @@
 export const REPORT_INTERVAL_MS = 86400000;
 
 /**
+ * How often we poll for the opt-in status.
+ * Currently, 10 seconds.
+ */
+export const OPT_IN_POLL_INTERVAL_MS = 10000;
+
+/**
  * Key for the localStorage service
  */
 export const LOCALSTORAGE_KEY = 'telemetry.data';
@@ -23,9 +29,9 @@ export const LOCALSTORAGE_KEY = 'telemetry.data';
 export const PATH_TO_ADVANCED_SETTINGS = '/app/management/kibana/settings';
 
 /**
- * Link to the Elastic Telemetry privacy statement.
+ * The telemetry payload content encryption encoding
  */
-export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-statement`;
+export const PAYLOAD_CONTENT_ENCODING = 'aes256gcm';
 
 /**
  * The endpoint version when hitting the remote telemetry service
@@ -33,15 +39,21 @@ export const PRIVACY_STATEMENT_URL = `https://www.elastic.co/legal/privacy-state
 export const ENDPOINT_VERSION = 'v2';
 
 /**
- * The telemetry endpoints for the remote telemetry service.
+ * The staging telemetry endpoint for the remote telemetry service.
  */
-export const TELEMETRY_ENDPOINT = {
-  MAIN_CHANNEL: {
-    PROD: `https://telemetry.elastic.co/xpack/${ENDPOINT_VERSION}/send`,
-    STAGING: `https://telemetry-staging.elastic.co/xpack/${ENDPOINT_VERSION}/send`,
-  },
-  OPT_IN_STATUS_CHANNEL: {
-    PROD: `https://telemetry.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`,
-    STAGING: `https://telemetry-staging.elastic.co/opt_in_status/${ENDPOINT_VERSION}/send`,
-  },
+
+export const ENDPOINT_STAGING = 'https://telemetry-staging.elastic.co/';
+
+/**
+ * The production telemetry endpoint for the remote telemetry service.
+ */
+
+export const ENDPOINT_PROD = 'https://telemetry.elastic.co/';
+
+/**
+ * The telemetry channels for the remote telemetry service.
+ */
+export const TELEMETRY_CHANNELS = {
+  SNAPSHOT_CHANNEL: 'xpack',
+  OPT_IN_STATUS_CHANNEL: 'opt_in_status',
 };

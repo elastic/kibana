@@ -7,21 +7,21 @@
 
 import { EuiCheckbox, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
-import { useUiTracker } from '../../../../../observability/public';
-import { useUrlParams } from '../../../context/url_params_context/use_url_params';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
+import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import * as urlHelpers from '../../shared/Links/url_helpers';
-import { getComparisonTypes } from './get_comparison_types';
+import * as urlHelpers from '../links/url_helpers';
 import {
-  getTimeRangeComparison,
-  TimeRangeComparisonType,
-} from './get_time_range_comparison';
+  getComparisonOptions,
+  TimeRangeComparisonEnum,
+} from './get_comparison_options';
 
 const PrependContainer = euiStyled.div`
   display: flex;
@@ -32,135 +32,58 @@ const PrependContainer = euiStyled.div`
   padding: 0 ${({ theme }) => theme.eui.paddingSizes.m};
 `;
 
-function getDateFormat({
-  previousPeriodStart,
-  currentPeriodEnd,
-}: {
-  previousPeriodStart?: string;
-  currentPeriodEnd?: string;
-}) {
-  const momentPreviousPeriodStart = moment(previousPeriodStart);
-  const momentCurrentPeriodEnd = moment(currentPeriodEnd);
-  const isDifferentYears =
-    momentPreviousPeriodStart.get('year') !==
-    momentCurrentPeriodEnd.get('year');
-  return isDifferentYears ? 'DD/MM/YY HH:mm' : 'DD/MM HH:mm';
-}
-
-function formatDate({
-  dateFormat,
-  previousPeriodStart,
-  previousPeriodEnd,
-}: {
-  dateFormat: string;
-  previousPeriodStart?: string;
-  previousPeriodEnd?: string;
-}) {
-  const momentStart = moment(previousPeriodStart);
-  const momentEnd = moment(previousPeriodEnd);
-  return `${momentStart.format(dateFormat)} - ${momentEnd.format(dateFormat)}`;
-}
-
-export function getSelectOptions({
-  comparisonTypes,
-  start,
-  end,
-}: {
-  comparisonTypes: TimeRangeComparisonType[];
-  start?: string;
-  end?: string;
-}) {
-  return comparisonTypes.map((value) => {
-    switch (value) {
-      case TimeRangeComparisonType.DayBefore: {
-        return {
-          value,
-          text: i18n.translate('xpack.apm.timeComparison.select.dayBefore', {
-            defaultMessage: 'Day before',
-          }),
-        };
-      }
-      case TimeRangeComparisonType.WeekBefore: {
-        return {
-          value,
-          text: i18n.translate('xpack.apm.timeComparison.select.weekBefore', {
-            defaultMessage: 'Week before',
-          }),
-        };
-      }
-      case TimeRangeComparisonType.PeriodBefore: {
-        const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-          comparisonType: TimeRangeComparisonType.PeriodBefore,
-          start,
-          end,
-          comparisonEnabled: true,
-        });
-
-        const dateFormat = getDateFormat({
-          previousPeriodStart: comparisonStart,
-          currentPeriodEnd: end,
-        });
-
-        return {
-          value,
-          text: formatDate({
-            dateFormat,
-            previousPeriodStart: comparisonStart,
-            previousPeriodEnd: comparisonEnd,
-          }),
-        };
-      }
-    }
-  });
-}
-
 export function TimeComparison() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const history = useHistory();
   const { isSmall } = useBreakpoints();
   const {
-    query: { rangeFrom, rangeTo },
-  } = useApmParams('/services', '/backends/*', '/services/{serviceName}');
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
+  } = useAnyOfApmParams('/services', '/backends/*', '/services/{serviceName}');
 
-  const { exactStart, exactEnd } = useTimeRange({
-    rangeFrom,
-    rangeTo,
-  });
+  const { anomalyDetectionJobsStatus, anomalyDetectionJobsData } =
+    useAnomalyDetectionJobsContext();
+  const { core } = useApmPluginContext();
+  const { preferredEnvironment } = useEnvironmentsContext();
 
-  const {
-    urlParams: { comparisonEnabled, comparisonType },
-  } = useUrlParams();
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const comparisonTypes = getComparisonTypes({
-    start: exactStart,
-    end: exactEnd,
-  });
-
-  // Sets default values
-  if (comparisonEnabled === undefined || comparisonType === undefined) {
-    urlHelpers.replace(history, {
-      query: {
-        comparisonEnabled: comparisonEnabled === false ? 'false' : 'true',
-        comparisonType: comparisonType ? comparisonType : comparisonTypes[0],
-      },
+  const canGetJobs = !!core.application.capabilities.ml?.canGetJobs;
+  const comparisonOptions = useMemo(() => {
+    const timeComparisonOptions = getComparisonOptions({
+      start,
+      end,
+      canGetJobs,
+      anomalyDetectionJobsStatus,
+      anomalyDetectionJobsData,
+      preferredEnvironment,
     });
-    return null;
-  }
 
-  const selectOptions = getSelectOptions({
-    comparisonTypes,
-    start: exactStart,
-    end: exactEnd,
-  });
+    return timeComparisonOptions;
+  }, [
+    canGetJobs,
+    anomalyDetectionJobsStatus,
+    anomalyDetectionJobsData,
+    start,
+    end,
+    preferredEnvironment,
+  ]);
 
-  const isSelectedComparisonTypeAvailable = selectOptions.some(
-    ({ value }) => value === comparisonType
+  const isSelectedComparisonTypeAvailable = comparisonOptions.some(
+    ({ value }) => value === offset
   );
 
   // Replaces type when current one is no longer available in the select options
-  if (selectOptions.length !== 0 && !isSelectedComparisonTypeAvailable) {
+  if (
+    (comparisonOptions.length !== 0 && !isSelectedComparisonTypeAvailable) ||
+    // If user changes environment and there's no ML jobs that match the new environment
+    // then also default to first comparison option as well
+    (offset === TimeRangeComparisonEnum.ExpectedBounds &&
+      comparisonOptions.find(
+        (d) => d.value === TimeRangeComparisonEnum.ExpectedBounds
+      )?.disabled === true)
+  ) {
     urlHelpers.replace(history, {
-      query: { comparisonType: selectOptions[0].value },
+      query: { offset: comparisonOptions[0].value },
     });
     return null;
   }
@@ -169,9 +92,9 @@ export function TimeComparison() {
     <EuiSelect
       fullWidth={isSmall}
       data-test-subj="comparisonSelect"
-      disabled={!comparisonEnabled}
-      options={selectOptions}
-      value={comparisonType}
+      disabled={comparisonEnabled === false}
+      options={comparisonOptions}
+      value={offset}
       prepend={
         <PrependContainer>
           <EuiCheckbox
@@ -204,7 +127,7 @@ export function TimeComparison() {
         });
         urlHelpers.push(history, {
           query: {
-            comparisonType: e.target.value,
+            offset: e.target.value,
           },
         });
       }}

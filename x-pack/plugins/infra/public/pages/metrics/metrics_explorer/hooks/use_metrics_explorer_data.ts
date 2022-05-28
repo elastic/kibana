@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import DateMath from '@elastic/datemath';
-import { isEqual } from 'lodash';
+import DateMath from '@kbn/datemath';
 import { useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
+import { isEqual } from 'lodash';
+
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
   MetricsExplorerResponse,
@@ -16,7 +18,6 @@ import {
 } from '../../../../../common/http_api/metrics_explorer';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 
@@ -83,7 +84,6 @@ export function useMetricsExplorerData(
               void 0,
             timerange: {
               ...timerange,
-              field: source.fields.timestamp,
               from: from.valueOf(),
               to: to.valueOf(),
             },

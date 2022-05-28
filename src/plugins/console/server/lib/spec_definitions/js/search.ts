@@ -102,6 +102,13 @@ export const search = (specService: SpecDefinitionsService) => {
           },
         ],
       },
+      pit: {
+        __template: {
+          id: '',
+          keep_alive: '1m',
+        },
+      },
+      search_after: [],
       stored_fields: ['{field}'],
       suggest: {
         __template: {

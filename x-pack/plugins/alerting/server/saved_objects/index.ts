@@ -10,13 +10,13 @@ import type {
   SavedObject,
   SavedObjectsExportTransformContext,
   SavedObjectsServiceSetup,
-  SavedObjectsTypeMappingDefinition,
-} from 'kibana/server';
-import mappings from './mappings.json';
+} from '@kbn/core/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { alertMappings } from './mappings';
 import { getMigrations } from './migrations';
-import { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
 import { transformRulesForExport } from './transform_rule_for_export';
-import { RawAlert } from '../types';
+import { RawRule } from '../types';
 import { getImportWarnings } from './get_import_warnings';
 import { isRuleExportable } from './is_rule_exportable';
 import { RuleTypeRegistry } from '../rule_type_registry';
@@ -29,6 +29,9 @@ export const AlertAttributesExcludedFromAAD = [
   'updatedBy',
   'updatedAt',
   'executionStatus',
+  'monitoring',
+  'snoozeSchedule',
+  'isSnoozedUntil',
 ];
 
 // useful for Pick<RawAlert, AlertAttributesExcludedFromAADType> which is a
@@ -41,26 +44,30 @@ export type AlertAttributesExcludedFromAADType =
   | 'mutedInstanceIds'
   | 'updatedBy'
   | 'updatedAt'
-  | 'executionStatus';
+  | 'executionStatus'
+  | 'monitoring'
+  | 'snoozeSchedule'
+  | 'isSnoozedUntil';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
   ruleTypeRegistry: RuleTypeRegistry,
   logger: Logger,
-  isPreconfigured: (connectorId: string) => boolean
+  isPreconfigured: (connectorId: string) => boolean,
+  getSearchSourceMigrations: () => MigrateFunctionsObject
 ) {
   savedObjects.registerType({
     name: 'alert',
     hidden: true,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
-    migrations: getMigrations(encryptedSavedObjects, isPreconfigured),
-    mappings: mappings.alert as SavedObjectsTypeMappingDefinition,
+    migrations: getMigrations(encryptedSavedObjects, getSearchSourceMigrations(), isPreconfigured),
+    mappings: alertMappings,
     management: {
       displayName: 'rule',
       importableAndExportable: true,
-      getTitle(ruleSavedObject: SavedObject<RawAlert>) {
+      getTitle(ruleSavedObject: SavedObject<RawRule>) {
         return `Rule: [${ruleSavedObject.attributes.name}]`;
       },
       onImport(ruleSavedObjects) {
@@ -68,13 +75,13 @@ export function setupSavedObjects(
           warnings: getImportWarnings(ruleSavedObjects),
         };
       },
-      onExport<RawAlert>(
+      onExport<RawRule>(
         context: SavedObjectsExportTransformContext,
-        objects: Array<SavedObject<RawAlert>>
+        objects: Array<SavedObject<RawRule>>
       ) {
         return transformRulesForExport(objects);
       },
-      isExportable<RawAlert>(ruleSavedObject: SavedObject<RawAlert>) {
+      isExportable<RawRule>(ruleSavedObject: SavedObject<RawRule>) {
         return isRuleExportable(ruleSavedObject, ruleTypeRegistry, logger);
       },
     },

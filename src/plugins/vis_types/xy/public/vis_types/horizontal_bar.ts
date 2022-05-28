@@ -11,9 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Position } from '@elastic/charts';
 
-import { AggGroupNames } from '../../../../data/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../visualizations/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
+import { defaultCountLabel, LabelRotation } from '@kbn/charts-plugin/public';
 import {
   ChartMode,
   AxisType,
@@ -25,7 +26,7 @@ import {
 import { toExpressionAst } from '../to_ast';
 import { ChartType } from '../../common';
 import { optionTabs } from '../editor/common_config';
-import { defaultCountLabel, LabelRotation } from '../../../../charts/public';
+import { getVisTypeFromParams } from './get_vis_type_from_params';
 
 export const horizontalBarVisTypeDefinition = {
   name: 'horizontal_bar',
@@ -38,6 +39,7 @@ export const horizontalBarVisTypeDefinition = {
   }),
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
+  updateVisTypeOnParamsChange: getVisTypeFromParams,
   visConfig: {
     defaults: {
       type: ChartType.Histogram,
@@ -56,7 +58,7 @@ export const horizontalBarVisTypeDefinition = {
           labels: {
             show: true,
             rotate: LabelRotation.Horizontal,
-            filter: false,
+            filter: true,
             truncate: 200,
           },
           title: {},
@@ -100,7 +102,7 @@ export const horizontalBarVisTypeDefinition = {
           drawLinesBetweenPoints: true,
           lineWidth: 2,
           showCircles: true,
-          circlesRadius: 3,
+          circlesRadius: 1,
         },
       ],
       addTooltip: true,
@@ -127,6 +129,7 @@ export const horizontalBarVisTypeDefinition = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionTabs,
     schemas: [
       {
@@ -157,7 +160,16 @@ export const horizontalBarVisTypeDefinition = {
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
       {
         group: AggGroupNames.Buckets,
@@ -167,7 +179,16 @@ export const horizontalBarVisTypeDefinition = {
         }),
         min: 0,
         max: 3,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
       {
         group: AggGroupNames.Buckets,
@@ -177,7 +198,16 @@ export const horizontalBarVisTypeDefinition = {
         }),
         min: 0,
         max: 1,
-        aggFilter: ['!geohash_grid', '!geotile_grid', '!filter'],
+        aggFilter: [
+          '!geohash_grid',
+          '!geotile_grid',
+          '!filter',
+          '!sampler',
+          '!diversified_sampler',
+          '!rare_terms',
+          '!multi_terms',
+          '!significant_text',
+        ],
       },
     ],
   },

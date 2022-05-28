@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Observable } from 'rxjs';
-import type { HttpStart } from 'kibana/public';
+import type { HttpStart } from '@kbn/core/public';
 import { HttpService } from '../http_service';
 
 import { annotations } from './annotations';
@@ -17,6 +17,7 @@ import { resultsApiProvider } from './results';
 import { jobsApiProvider } from './jobs';
 import { fileDatavisualizer } from './datavisualizer';
 import { savedObjectsApiProvider } from './saved_objects';
+import { trainedModelsApiProvider } from './trained_models';
 import type {
   MlServerDefaults,
   MlServerLimits,
@@ -99,6 +100,9 @@ const proxyHttpStart = new Proxy<HttpStart>({} as unknown as HttpStart, {
     try {
       return getHttp()[prop];
     } catch (e) {
+      if (prop === 'getLoadingCount$') {
+        return () => {};
+      }
       // eslint-disable-next-line no-console
       console.error(e);
     }
@@ -484,13 +488,13 @@ export function mlApiServicesProvider(httpService: HttpService) {
     },
 
     getVisualizerFieldHistograms({
-      indexPatternTitle,
+      indexPattern,
       query,
       fields,
       samplerShardSize,
       runtimeMappings,
     }: {
-      indexPatternTitle: string;
+      indexPattern: string;
       query: any;
       fields: FieldHistogramRequestConfig[];
       samplerShardSize?: number;
@@ -504,7 +508,7 @@ export function mlApiServicesProvider(httpService: HttpService) {
       });
 
       return httpService.http<any>({
-        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPatternTitle}`,
+        path: `${basePath()}/data_visualizer/get_field_histograms/${indexPattern}`,
         method: 'POST',
         body,
       });
@@ -716,5 +720,6 @@ export function mlApiServicesProvider(httpService: HttpService) {
     jobs: jobsApiProvider(httpService),
     fileDatavisualizer,
     savedObjects: savedObjectsApiProvider(httpService),
+    trainedModels: trainedModelsApiProvider(httpService),
   };
 }

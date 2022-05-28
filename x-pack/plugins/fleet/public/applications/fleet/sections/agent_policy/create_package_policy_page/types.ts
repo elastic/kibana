@@ -5,13 +5,16 @@
  * 2.0.
  */
 
+import type React from 'react';
 export type EditPackagePolicyFrom =
   | 'package'
   | 'package-edit'
   | 'policy'
   | 'edit'
   | 'upgrade-from-fleet-policy-list'
-  | 'upgrade-from-integrations-policy-list';
+  | 'upgrade-from-integrations-policy-list'
+  | 'upgrade-from-extension';
+
 export type PackagePolicyFormState =
   | 'VALID'
   | 'INVALID'
@@ -19,3 +22,14 @@ export type PackagePolicyFormState =
   | 'LOADING'
   | 'SUBMITTED'
   | 'SUBMITTED_NO_AGENTS';
+
+export interface AddToPolicyParams {
+  pkgkey: string;
+  integration?: string;
+  policyId?: string;
+}
+
+export type CreatePackagePolicyParams = React.FunctionComponent<{
+  from: EditPackagePolicyFrom;
+  queryParamsPolicyId?: string;
+}>;

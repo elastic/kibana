@@ -13,77 +13,108 @@ import {
   EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useMemo, useCallback, SyntheticEvent } from 'react';
-import { isNil } from 'lodash/fp';
-
-import { IP_REPUTATION_LINKS_SETTING, APP_ID } from '../../../../common/constants';
-import {
-  DefaultFieldRendererOverflow,
-  DEFAULT_MORE_MAX_HEIGHT,
-} from '../../../timelines/components/field_renderers/field_renderers';
+import React, { useMemo, useCallback, SyntheticEvent, MouseEventHandler, MouseEvent } from 'react';
+import { isArray, isNil } from 'lodash/fp';
+import { IP_REPUTATION_LINKS_SETTING, APP_UI_ID } from '../../../../common/constants';
 import { encodeIpv6 } from '../../lib/helpers';
 import {
   getCaseDetailsUrl,
   getHostDetailsUrl,
+  getTabsOnHostDetailsUrl,
   getNetworkDetailsUrl,
   getCreateCaseUrl,
   useFormatUrl,
+  useGetSecuritySolutionUrl,
 } from '../link_to';
 import {
   FlowTarget,
   FlowTargetSourceDest,
 } from '../../../../common/search_strategy/security_solution/network';
-import { useUiSetting$, useKibana } from '../../lib/kibana';
+import { useUiSetting$, useKibana, useNavigateTo } from '../../lib/kibana';
 import { isUrlInvalid } from '../../utils/validators';
 
 import * as i18n from './translations';
 import { SecurityPageName } from '../../../app/types';
-import { getUebaDetailsUrl } from '../link_to/redirect_to_ueba';
-import { LinkButton, LinkAnchor, GenericLinkButton, PortContainer, Comma } from './helpers';
+import { getTabsOnUsersDetailsUrl, getUsersDetailsUrl } from '../link_to/redirect_to_users';
+import {
+  LinkAnchor,
+  GenericLinkButton,
+  PortContainer,
+  Comma,
+  LinkButton,
+  ReputationLinkSetting,
+  ReputationLinksOverflow,
+} from './helpers';
+import { HostsTableType } from '../../../hosts/store/model';
+import { UsersTableType } from '../../../users/store/model';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
 export const DEFAULT_NUMBER_OF_LINK = 5;
 
+/** The default max-height of the Reputation Links popover used to show "+n More" items (e.g. `+9 More`) */
+export const DEFAULT_MORE_MAX_HEIGHT = '200px';
+
 // Internal Links
-const UebaDetailsLinkComponent: React.FC<{
+const UserDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
-  hostName: string;
+  /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
+  Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
+  userName: string;
+  userTab?: UsersTableType;
+  title?: string;
   isButton?: boolean;
-}> = ({ children, hostName, isButton }) => {
-  const { formatUrl, search } = useFormatUrl(SecurityPageName.ueba);
+  onClick?: (e: SyntheticEvent) => void;
+}> = ({ children, Component, userName, isButton, onClick, title, userTab }) => {
+  const encodedUserName = encodeURIComponent(userName);
+
+  const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
   const { navigateToApp } = useKibana().services.application;
-  const goToUebaDetails = useCallback(
+  const goToUsersDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
-        deepLinkId: SecurityPageName.ueba,
-        path: getUebaDetailsUrl(encodeURIComponent(hostName), search),
+      navigateToApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.users,
+        path: userTab
+          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab, search)
+          : getUsersDetailsUrl(encodedUserName, search),
       });
     },
-    [hostName, navigateToApp, search]
+    [encodedUserName, navigateToApp, search, userTab]
+  );
+
+  const href = useMemo(
+    () =>
+      formatUrl(
+        userTab
+          ? getTabsOnUsersDetailsUrl(encodedUserName, userTab)
+          : getUsersDetailsUrl(encodedUserName)
+      ),
+    [formatUrl, encodedUserName, userTab]
   );
 
   return isButton ? (
-    <LinkButton
-      data-test-subj={'ueba-link-button'}
-      onClick={goToUebaDetails}
-      href={formatUrl(getUebaDetailsUrl(encodeURIComponent(hostName)))}
+    <GenericLinkButton
+      Component={Component}
+      dataTestSubj="data-grid-user-details"
+      href={href}
+      onClick={onClick ?? goToUsersDetails}
+      title={title ?? userName}
     >
-      {children ? children : hostName}
-    </LinkButton>
+      {children ? children : userName}
+    </GenericLinkButton>
   ) : (
     <LinkAnchor
-      data-test-subj={'ueba-link-anchor'}
-      onClick={goToUebaDetails}
-      href={formatUrl(getUebaDetailsUrl(encodeURIComponent(hostName)))}
+      data-test-subj="users-link-anchor"
+      onClick={onClick ?? goToUsersDetails}
+      href={href}
     >
-      {children ? children : hostName}
+      {children ? children : userName}
     </LinkAnchor>
   );
 };
 
-export const UebaDetailsLink = React.memo(UebaDetailsLinkComponent);
+export const UserDetailsLink = React.memo(UserDetailsLinkComponent);
 
 const HostDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
@@ -92,23 +123,34 @@ const HostDetailsLinkComponent: React.FC<{
   hostName: string;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
+  hostTab?: HostsTableType;
   title?: string;
-}> = ({ children, Component, hostName, isButton, onClick, title }) => {
+}> = ({ children, Component, hostName, isButton, onClick, title, hostTab }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const { navigateToApp } = useKibana().services.application;
+
+  const encodedHostName = encodeURIComponent(hostName);
+
   const goToHostDetails = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.hosts,
-        path: getHostDetailsUrl(encodeURIComponent(hostName), search),
+        path: hostTab
+          ? getTabsOnHostDetailsUrl(encodedHostName, hostTab, search)
+          : getHostDetailsUrl(encodedHostName, search),
       });
     },
-    [hostName, navigateToApp, search]
+    [encodedHostName, navigateToApp, search, hostTab]
   );
   const href = useMemo(
-    () => formatUrl(getHostDetailsUrl(encodeURIComponent(hostName))),
-    [formatUrl, hostName]
+    () =>
+      formatUrl(
+        hostTab
+          ? getTabsOnHostDetailsUrl(encodedHostName, hostTab)
+          : getHostDetailsUrl(encodedHostName)
+      ),
+    [formatUrl, encodedHostName, hostTab]
   );
   return isButton ? (
     <GenericLinkButton
@@ -172,7 +214,7 @@ const NetworkDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   /** `Component` is only used with `EuiDataGrid`; the grid keeps a reference to `Component` for show / hide functionality */
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
-  ip: string;
+  ip: string | string[];
   flowTarget?: FlowTarget | FlowTargetSourceDest;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void | undefined;
@@ -181,39 +223,46 @@ const NetworkDetailsLinkComponent: React.FC<{
   const { formatUrl, search } = useFormatUrl(SecurityPageName.network);
   const { navigateToApp } = useKibana().services.application;
   const goToNetworkDetails = useCallback(
-    (ev) => {
+    (ev, cIp: string) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.network,
-        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)), flowTarget, search),
+        path: getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)), flowTarget, search),
       });
     },
-    [flowTarget, ip, navigateToApp, search]
+    [flowTarget, navigateToApp, search]
   );
-  const href = useMemo(
-    () => formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(ip)))),
-    [formatUrl, ip]
+  const getHref = useCallback(
+    (cIp: string) => formatUrl(getNetworkDetailsUrl(encodeURIComponent(encodeIpv6(cIp)))),
+    [formatUrl]
   );
 
-  return isButton ? (
-    <GenericLinkButton
-      Component={Component}
-      dataTestSubj="data-grid-network-details"
-      onClick={onClick ?? goToNetworkDetails}
-      href={href}
-      title={title ?? ip}
-    >
-      {children}
-    </GenericLinkButton>
-  ) : (
-    <LinkAnchor
-      onClick={onClick ?? goToNetworkDetails}
-      href={href}
-      data-test-subj="network-details"
-    >
-      {children ? children : ip}
-    </LinkAnchor>
+  const getLink = useCallback(
+    (cIp: string, i: number) =>
+      isButton ? (
+        <GenericLinkButton
+          Component={Component}
+          key={`${cIp}-${i}`}
+          dataTestSubj="data-grid-network-details"
+          onClick={onClick ?? ((e: SyntheticEvent) => goToNetworkDetails(e, cIp))}
+          href={getHref(cIp)}
+          title={title ?? cIp}
+        >
+          {children}
+        </GenericLinkButton>
+      ) : (
+        <LinkAnchor
+          key={`${cIp}-${i}`}
+          onClick={onClick ?? ((e: SyntheticEvent) => goToNetworkDetails(e, cIp))}
+          href={getHref(cIp)}
+          data-test-subj="network-details"
+        >
+          {children ? children : cIp}
+        </LinkAnchor>
+      ),
+    [Component, children, getHref, goToNetworkDetails, isButton, onClick, title]
   );
+  return isArray(ip) ? <>{ip.map(getLink)}</> : getLink(ip, 0);
 };
 
 export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
@@ -221,26 +270,25 @@ export const NetworkDetailsLink = React.memo(NetworkDetailsLinkComponent);
 const CaseDetailsLinkComponent: React.FC<{
   children?: React.ReactNode;
   detailName: string;
-  subCaseId?: string;
   title?: string;
-}> = ({ children, detailName, subCaseId, title }) => {
+}> = ({ children, detailName, title }) => {
   const { formatUrl, search } = useFormatUrl(SecurityPageName.case);
   const { navigateToApp } = useKibana().services.application;
   const goToCaseDetails = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(APP_ID, {
+      return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
-        path: getCaseDetailsUrl({ id: detailName, search, subCaseId }),
+        path: getCaseDetailsUrl({ id: detailName, search }),
       });
     },
-    [detailName, navigateToApp, search, subCaseId]
+    [detailName, navigateToApp, search]
   );
 
   return (
     <LinkAnchor
       onClick={goToCaseDetails}
-      href={formatUrl(getCaseDetailsUrl({ id: detailName, subCaseId }))}
+      href={formatUrl(getCaseDetailsUrl({ id: detailName }))}
       data-test-subj="case-details-link"
       aria-label={i18n.CASE_DETAILS_LINK_ARIA(title ?? detailName)}
     >
@@ -257,7 +305,7 @@ export const CreateCaseLink = React.memo<{ children: React.ReactNode }>(({ child
   const goToCreateCase = useCallback(
     async (ev) => {
       ev.preventDefault();
-      return navigateToApp(APP_ID, {
+      return navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.case,
         path: getCreateCaseUrl(search),
       });
@@ -361,11 +409,6 @@ enum DefaultReputationLink {
   'talosIntelligence.com' = 'talosIntelligence.com',
 }
 
-export interface ReputationLinkSetting {
-  name: string;
-  url_template: string;
-}
-
 function isDefaultReputationLink(name: string): name is DefaultReputationLink {
   return (
     name === DefaultReputationLink['virustotal.com'] ||
@@ -459,9 +502,8 @@ const ReputationLinkComponent: React.FC<{
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <DefaultFieldRendererOverflow
+          <ReputationLinksOverflow
             rowItems={ipReputationLinks}
-            idPrefix="moreReputationLink"
             render={renderCallback}
             moreMaxHeight={DEFAULT_MORE_MAX_HEIGHT}
             overflowIndexStart={overflowIndexStart}
@@ -487,3 +529,81 @@ export const WhoIsLink = React.memo<{ children?: React.ReactNode; domain: string
 );
 
 WhoIsLink.displayName = 'WhoIsLink';
+
+interface SecuritySolutionLinkProps {
+  deepLinkId: SecurityPageName;
+  path?: string;
+}
+
+interface LinkProps {
+  onClick: MouseEventHandler;
+  href: string;
+}
+
+type GetSecuritySolutionProps = (
+  params: SecuritySolutionLinkProps & { onClick?: MouseEventHandler }
+) => LinkProps;
+
+/**
+ * It returns the `onClick` and `href` props to use in link components based on the` deepLinkId` and `path` parameters.
+ */
+export const useGetSecuritySolutionLinkProps = (): GetSecuritySolutionProps => {
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
+  const { navigateTo } = useNavigateTo();
+
+  const getSecuritySolutionProps = useCallback<GetSecuritySolutionProps>(
+    ({ deepLinkId, path, onClick: onClickProps }) => {
+      const url = getSecuritySolutionUrl({ deepLinkId, path });
+      return {
+        href: url,
+        onClick: (ev: MouseEvent) => {
+          ev.preventDefault();
+          navigateTo({ url });
+          if (onClickProps) {
+            onClickProps(ev);
+          }
+        },
+      };
+    },
+    [getSecuritySolutionUrl, navigateTo]
+  );
+
+  return getSecuritySolutionProps;
+};
+
+/**
+ * HOC that wraps any Link component and makes it a Security solutions internal navigation Link.
+ */
+export const withSecuritySolutionLink = <T extends Partial<LinkProps>>(
+  WrappedComponent: React.FC<T>
+) => {
+  const SecuritySolutionLink: React.FC<Omit<T & SecuritySolutionLinkProps, 'href'>> = ({
+    deepLinkId,
+    path,
+    onClick: onClickProps,
+    ...rest
+  }) => {
+    const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps();
+    const { onClick, href } = getSecuritySolutionLinkProps({
+      deepLinkId,
+      path,
+      onClick: onClickProps,
+    });
+    return <WrappedComponent onClick={onClick} href={href} {...(rest as unknown as T)} />;
+  };
+  return SecuritySolutionLink;
+};
+
+/**
+ * Security Solutions internal link button.
+ *
+ * `<SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} />;`
+ */
+export const SecuritySolutionLinkButton = withSecuritySolutionLink(LinkButton);
+
+/**
+ * Security Solutions internal link anchor.
+ *
+ * `<SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.hosts} />;`
+ */
+export const SecuritySolutionLinkAnchor = withSecuritySolutionLink(LinkAnchor);

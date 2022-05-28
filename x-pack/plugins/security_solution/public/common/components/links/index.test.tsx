@@ -8,7 +8,7 @@
 import { mount, shallow, ReactWrapper, ShallowWrapper } from 'enzyme';
 import React from 'react';
 import { removeExternalLinkText } from '@kbn/securitysolution-io-ts-utils';
-import { mountWithIntl } from '@kbn/test/jest';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { encodeIpv6 } from '../../lib/helpers';
 import { useUiSetting$ } from '../../lib/kibana';
@@ -24,12 +24,15 @@ import {
   PortOrServiceNameLink,
   DEFAULT_NUMBER_OF_LINK,
   ExternalLink,
+  SecuritySolutionLinkButton,
 } from '.';
+import { SecurityPageName } from '../../../app/types';
 
 jest.mock('../link_to');
 
 jest.mock('../../../overview/components/events_by_dataset');
 
+const mockNavigateTo = jest.fn();
 jest.mock('../../lib/kibana', () => {
   return {
     useUiSetting$: jest.fn(),
@@ -40,12 +43,16 @@ jest.mock('../../lib/kibana', () => {
         },
       },
     }),
+    useNavigateTo: () => ({
+      navigateTo: mockNavigateTo,
+    }),
   };
 });
 
 describe('Custom Links', () => {
   const hostName = 'Host Name';
   const ipv4 = '192.0.2.255';
+  const ipv4a = '192.0.2.266';
   const ipv6 = '2001:db8:ffff:ffff:ffff:ffff:ffff:ffff';
   const ipv6Encoded = encodeIpv6(ipv6);
 
@@ -64,6 +71,16 @@ describe('Custom Links', () => {
   });
 
   describe('NetworkDetailsLink', () => {
+    test('can handle array of ips', () => {
+      const wrapper = mount(<NetworkDetailsLink ip={[ipv4, ipv4a]} />);
+      expect(wrapper.find('EuiLink').first().prop('href')).toEqual(
+        `/ip/${encodeURIComponent(ipv4)}/source`
+      );
+      expect(wrapper.text()).toEqual(`${ipv4}${ipv4a}`);
+      expect(wrapper.find('EuiLink').last().prop('href')).toEqual(
+        `/ip/${encodeURIComponent(ipv4a)}/source`
+      );
+    });
     test('should render valid link to IP Details with ipv4 as the display text', () => {
       const wrapper = mount(<NetworkDetailsLink ip={ipv4} />);
       expect(wrapper.find('EuiLink').prop('href')).toEqual(
@@ -94,7 +111,7 @@ describe('Custom Links', () => {
       const wrapper = mountWithIntl(
         <GoogleLink link={'http://example.com/'}>{'Example Link'}</GoogleLink>
       );
-      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toContain('Example Link');
     });
 
     test('it renders props passed in as link', () => {
@@ -452,7 +469,7 @@ describe('Custom Links', () => {
   describe('WhoisLink', () => {
     test('it renders ip passed in as domain', () => {
       const wrapper = mountWithIntl(<WhoIsLink domain={'192.0.2.0'}>{'Example Link'}</WhoIsLink>);
-      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toContain('Example Link');
     });
 
     test('it renders correct href', () => {
@@ -477,7 +494,7 @@ describe('Custom Links', () => {
           {'Example Link'}
         </CertificateFingerprintLink>
       );
-      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toContain('Example Link');
     });
 
     test('it renders correct href', () => {
@@ -508,7 +525,7 @@ describe('Custom Links', () => {
       const wrapper = mountWithIntl(
         <Ja3FingerprintLink ja3Fingerprint={'abcd'}>{'Example Link'}</Ja3FingerprintLink>
       );
-      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toContain('Example Link');
     });
 
     test('it renders correct href', () => {
@@ -537,7 +554,7 @@ describe('Custom Links', () => {
       const wrapper = mountWithIntl(
         <PortOrServiceNameLink portOrServiceName={443}>{'Example Link'}</PortOrServiceNameLink>
       );
-      expect(removeExternalLinkText(wrapper.text())).toEqual('Example Link');
+      expect(removeExternalLinkText(wrapper.text())).toContain('Example Link');
     });
 
     test('it renders correct href when port is a number', () => {
@@ -567,6 +584,29 @@ describe('Custom Links', () => {
       expect(wrapper.find('a').prop('href')).toEqual(
         "https://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml?search=%3Cscript%3Ealert('XSS')%3C%2Fscript%3E"
       );
+    });
+  });
+
+  describe('SecuritySolutionLinkButton', () => {
+    it('injects href prop with hosts page path', () => {
+      const path = 'testTabPath';
+
+      const wrapper = mount(
+        <SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} path={path} />
+      );
+
+      expect(wrapper.find('LinkButton').prop('href')).toEqual(path);
+    });
+
+    it('injects onClick prop that calls navigateTo', () => {
+      const path = 'testTabPath';
+
+      const wrapper = mount(
+        <SecuritySolutionLinkButton deepLinkId={SecurityPageName.hosts} path={path} />
+      );
+      wrapper.find('LinkButton').simulate('click');
+
+      expect(mockNavigateTo).toHaveBeenLastCalledWith({ url: path });
     });
   });
 });

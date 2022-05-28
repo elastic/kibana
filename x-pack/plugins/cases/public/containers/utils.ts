@@ -5,22 +5,17 @@
  * 2.0.
  */
 
-import { set } from '@elastic/safer-lodash-set';
-import { camelCase, isArray, isObject } from 'lodash';
+import { isObject, transform, snakeCase } from 'lodash';
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import { ToastInputFields } from 'kibana/public';
+import { ToastInputFields } from '@kbn/core/public';
 import {
-  CasesFindResponse,
-  CasesFindResponseRt,
   CaseResponse,
   CaseResponseRt,
   CasesResponse,
   CasesResponseRt,
-  CasesStatusResponseRt,
-  CasesStatusResponse,
   throwErrors,
   CasesConfigurationsResponse,
   CaseConfigurationsResponseRt,
@@ -32,50 +27,19 @@ import {
   CasePatchRequest,
   CaseResolveResponse,
   CaseResolveResponseRt,
-} from '../../common';
-import { AllCases, Case, UpdateByKey } from './types';
+  SingleCaseMetricsResponse,
+  SingleCaseMetricsResponseRt,
+} from '../../common/api';
+import { Case, UpdateByKey } from './types';
 import * as i18n from './translations';
 
 export const getTypedPayload = <T>(a: unknown): T => a as T;
 
-export const convertArrayToCamelCase = (arrayOfSnakes: unknown[]): unknown[] =>
-  arrayOfSnakes.reduce((acc: unknown[], value) => {
-    if (isArray(value)) {
-      return [...acc, convertArrayToCamelCase(value)];
-    } else if (isObject(value)) {
-      return [...acc, convertToCamelCase(value)];
-    } else {
-      return [...acc, value];
-    }
-  }, []);
-
-export const convertToCamelCase = <T, U extends {}>(snakeCase: T): U =>
-  Object.entries(snakeCase).reduce((acc, [key, value]) => {
-    if (isArray(value)) {
-      set(acc, camelCase(key), convertArrayToCamelCase(value));
-    } else if (isObject(value)) {
-      set(acc, camelCase(key), convertToCamelCase(value));
-    } else {
-      set(acc, camelCase(key), value);
-    }
-    return acc;
-  }, {} as U);
-
-export const convertAllCasesToCamel = (snakeCases: CasesFindResponse): AllCases => ({
-  cases: snakeCases.cases.map((snakeCase) => convertToCamelCase<CaseResponse, Case>(snakeCase)),
-  countOpenCases: snakeCases.count_open_cases,
-  countInProgressCases: snakeCases.count_in_progress_cases,
-  countClosedCases: snakeCases.count_closed_cases,
-  page: snakeCases.page,
-  perPage: snakeCases.per_page,
-  total: snakeCases.total,
-});
-
-export const decodeCasesStatusResponse = (respCase?: CasesStatusResponse) =>
-  pipe(
-    CasesStatusResponseRt.decode(respCase),
-    fold(throwErrors(createToasterPlainError), identity)
-  );
+export const covertToSnakeCase = (obj: Record<string, unknown>) =>
+  transform(obj, (acc: Record<string, unknown>, value, key, target) => {
+    const camelKey = Array.isArray(target) ? key : snakeCase(key);
+    acc[camelKey] = isObject(value) ? covertToSnakeCase(value as Record<string, unknown>) : value;
+  });
 
 export const createToasterPlainError = (message: string) => new ToasterError([message]);
 
@@ -88,11 +52,14 @@ export const decodeCaseResolveResponse = (respCase?: CaseResolveResponse) =>
     fold(throwErrors(createToasterPlainError), identity)
   );
 
+export const decodeSingleCaseMetricsResponse = (respCase?: SingleCaseMetricsResponse) =>
+  pipe(
+    SingleCaseMetricsResponseRt.decode(respCase),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
 export const decodeCasesResponse = (respCase?: CasesResponse) =>
   pipe(CasesResponseRt.decode(respCase), fold(throwErrors(createToasterPlainError), identity));
-
-export const decodeCasesFindResponse = (respCases?: CasesFindResponse) =>
-  pipe(CasesFindResponseRt.decode(respCases), fold(throwErrors(createToasterPlainError), identity));
 
 export const decodeCaseConfigurationsResponse = (respCase?: CasesConfigurationsResponse) => {
   return pipe(

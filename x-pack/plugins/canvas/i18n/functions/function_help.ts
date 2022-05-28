@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin';
 import { UnionToIntersection } from '@kbn/utility-types';
 import { CanvasFunction, FunctionFactory } from '../../types';
 
@@ -27,9 +27,9 @@ import { help as demodata } from './dict/demodata';
 import { help as doFn } from './dict/do';
 import { help as dropdownControl } from './dict/dropdown_control';
 import { help as eq } from './dict/eq';
+import { help as embeddable } from './dict/embeddable';
 import { help as escount } from './dict/escount';
 import { help as esdocs } from './dict/esdocs';
-import { help as essql } from './dict/essql';
 import { help as exactly } from './dict/exactly';
 import { help as filterrows } from './dict/filterrows';
 import { help as filters } from './dict/filters';
@@ -182,9 +182,9 @@ export const getFunctionHelp = (): FunctionHelpDict => ({
   do: doFn,
   dropdownControl,
   eq,
+  embeddable,
   escount,
   esdocs,
-  essql,
   exactly,
   filterrows,
   filters,

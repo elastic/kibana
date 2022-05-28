@@ -5,14 +5,33 @@
  * 2.0.
  */
 
+import { chunk } from 'lodash';
 import { resolve } from 'path';
+import glob from 'glob';
+
 import Url from 'url';
 
-import { withProcRunner } from '@kbn/dev-utils';
+import { withProcRunner } from '@kbn/dev-proc-runner';
 
+import semver from 'semver';
 import { FtrProviderContext } from './ftr_provider_context';
 
-export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrProviderContext) {
+const retrieveIntegrations = (chunksTotal: number, chunkIndex: number) => {
+  const pattern = resolve(
+    __dirname,
+    '../../plugins/security_solution/cypress/integration/**/*.spec.ts'
+  );
+  const integrationsPaths = glob.sync(pattern);
+  const chunkSize = Math.ceil(integrationsPaths.length / chunksTotal);
+
+  return chunk(integrationsPaths, chunkSize)[chunkIndex - 1];
+};
+
+export async function SecuritySolutionConfigurableCypressTestRunner(
+  { getService }: FtrProviderContext,
+  command: string,
+  envVars?: Record<string, string>
+) {
   const log = getService('log');
   const config = getService('config');
   const esArchiver = getService('esArchiver');
@@ -22,7 +41,7 @@ export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrPr
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
-      args: ['cypress:run'],
+      args: [command],
       cwd: resolve(__dirname, '../../plugins/security_solution'),
       env: {
         FORCE_COLOR: '1',
@@ -31,37 +50,42 @@ export async function SecuritySolutionCypressCliTestRunner({ getService }: FtrPr
         CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
         CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
         ...process.env,
+        ...envVars,
       },
       wait: true,
     });
   });
 }
 
-export async function SecuritySolutionCypressCliFirefoxTestRunner({
-  getService,
-}: FtrProviderContext) {
-  const log = getService('log');
-  const config = getService('config');
-  const esArchiver = getService('esArchiver');
-
-  await esArchiver.load('x-pack/test/security_solution_cypress/es_archives/auditbeat');
-
-  await withProcRunner(log, async (procs) => {
-    await procs.run('cypress', {
-      cmd: 'yarn',
-      args: ['cypress:run:firefox'],
-      cwd: resolve(__dirname, '../../plugins/security_solution'),
-      env: {
-        FORCE_COLOR: '1',
-        CYPRESS_BASE_URL: Url.format(config.get('servers.kibana')),
-        CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-        CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-        CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
-        ...process.env,
-      },
-      wait: true,
-    });
+export async function SecuritySolutionCypressCliTestRunnerCI(
+  context: FtrProviderContext,
+  totalCiJobs: number,
+  ciJobNumber: number
+) {
+  const integrations = retrieveIntegrations(totalCiJobs, ciJobNumber);
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:spec', {
+    SPEC_LIST: integrations.join(','),
   });
+}
+
+export async function SecuritySolutionCypressCliResponseOpsTestRunner(context: FtrProviderContext) {
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:respops');
+}
+
+export async function SecuritySolutionCypressCliCasesTestRunner(context: FtrProviderContext) {
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:cases');
+}
+
+export async function SecuritySolutionCypressCliTestRunner(context: FtrProviderContext) {
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run');
+}
+
+export async function SecuritySolutionCypressCliFirefoxTestRunner(context: FtrProviderContext) {
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:run:firefox');
+}
+
+export async function SecuritySolutionCypressVisualTestRunner(context: FtrProviderContext) {
+  return SecuritySolutionConfigurableCypressTestRunner(context, 'cypress:open');
 }
 
 export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrProviderContext) {
@@ -88,48 +112,30 @@ export async function SecuritySolutionCypressCcsTestRunner({ getService }: FtrPr
   });
 }
 
-export async function SecuritySolutionCypressVisualTestRunner({ getService }: FtrProviderContext) {
-  const log = getService('log');
-  const config = getService('config');
-  const esArchiver = getService('esArchiver');
-
-  await esArchiver.load('x-pack/test/security_solution_cypress/es_archives/auditbeat');
-
-  await withProcRunner(log, async (procs) => {
-    await procs.run('cypress', {
-      cmd: 'yarn',
-      args: ['cypress:open'],
-      cwd: resolve(__dirname, '../../plugins/security_solution'),
-      env: {
-        FORCE_COLOR: '1',
-        CYPRESS_BASE_URL: Url.format(config.get('servers.kibana')),
-        CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-        CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-        CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
-        ...process.env,
-      },
-      wait: true,
-    });
-  });
-}
-
 export async function SecuritySolutionCypressUpgradeCliTestRunner({
   getService,
 }: FtrProviderContext) {
   const log = getService('log');
-  const config = getService('config');
+  let command = '';
+
+  if (semver.gt(process.env.ORIGINAL_VERSION!, '7.10.0')) {
+    command = 'cypress:run:upgrade';
+  } else {
+    command = 'cypress:run:upgrade:old';
+  }
 
   await withProcRunner(log, async (procs) => {
     await procs.run('cypress', {
       cmd: 'yarn',
-      args: ['cypress:run:upgrade'],
+      args: [command],
       cwd: resolve(__dirname, '../../plugins/security_solution'),
       env: {
         FORCE_COLOR: '1',
-        CYPRESS_BASE_URL: Url.format(config.get('servers.kibana')),
-        CYPRESS_ELASTICSEARCH_URL: Url.format(config.get('servers.elasticsearch')),
-        CYPRESS_ELASTICSEARCH_USERNAME: config.get('servers.elasticsearch.username'),
-        CYPRESS_ELASTICSEARCH_PASSWORD: config.get('servers.elasticsearch.password'),
+        CYPRESS_BASE_URL: process.env.TEST_KIBANA_URL,
+        CYPRESS_ELASTICSEARCH_URL: process.env.TEST_ES_URL,
+        CYPRESS_ELASTICSEARCH_USERNAME: process.env.TEST_ES_USER,
+        CYPRESS_ELASTICSEARCH_PASSWORD: process.env.TEST_ES_PASS,
+        CYPRESS_ORIGINAL_VERSION: process.env.ORIGINAL_VERSION,
         ...process.env,
       },
       wait: true,

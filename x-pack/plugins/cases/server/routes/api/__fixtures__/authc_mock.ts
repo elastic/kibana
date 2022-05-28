@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AuthenticatedUser } from '../../../../../security/server';
-import { securityMock } from '../../../../../security/server/mocks';
-import { nullUser } from '../../../common';
+import { AuthenticatedUser } from '@kbn/security-plugin/server';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { nullUser } from '../../../common/utils';
 
 function createAuthenticationMock({
   currentUser,

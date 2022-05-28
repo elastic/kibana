@@ -39,6 +39,7 @@ const connector = {
   actionTypeId: '.test',
   name: 'Test',
   isPreconfigured: false,
+  isDeprecated: false,
 };
 
 const editAction = jest.fn();
@@ -222,13 +223,6 @@ describe('ResilientParamsFields renders', () => {
       const comments = wrapper.find('textarea[data-test-subj="commentsTextArea"]');
       expect(comments.simulate('change', changeEvent));
       expect(editAction.mock.calls[0][1].comments.length).toEqual(1);
-    });
-    test('An empty comment does not trigger editAction', () => {
-      const wrapper = mount(<ResilientParamsFields {...defaultProps} />);
-      const emptyComment = { target: { value: '' } };
-      const comments = wrapper.find('[data-test-subj="commentsTextArea"] textarea');
-      expect(comments.simulate('change', emptyComment));
-      expect(editAction.mock.calls.length).toEqual(0);
     });
   });
 });

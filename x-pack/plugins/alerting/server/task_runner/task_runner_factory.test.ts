@@ -6,24 +6,36 @@
  */
 
 import sinon from 'sinon';
-import { ConcreteTaskInstance, TaskStatus } from '../../../task_manager/server';
+import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext, TaskRunnerFactory } from './task_runner_factory';
-import { encryptedSavedObjectsMock } from '../../../encrypted_saved_objects/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import {
   loggingSystemMock,
   savedObjectsRepositoryMock,
   httpServiceMock,
-} from '../../../../../src/core/server/mocks';
-import { actionsMock } from '../../../actions/server/mocks';
-import { alertsMock, rulesClientMock } from '../mocks';
-import { eventLoggerMock } from '../../../event_log/server/event_logger.mock';
-import { UntypedNormalizedAlertType } from '../rule_type_registry';
+  savedObjectsServiceMock,
+  elasticsearchServiceMock,
+  uiSettingsServiceMock,
+} from '@kbn/core/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { rulesClientMock } from '../mocks';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import { executionContextServiceMock } from '../../../../../src/core/server/mocks';
+import { executionContextServiceMock } from '@kbn/core/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 
+const inMemoryMetrics = inMemoryMetricsMock.create();
 const executionContext = executionContextServiceMock.createSetupContract();
-
-const alertType: UntypedNormalizedAlertType = {
+const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
+const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
+const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
+const uiSettingsService = uiSettingsServiceMock.createStartContract();
+const elasticsearchService = elasticsearchServiceMock.createInternalStart();
+const dataPlugin = dataPluginMock.createStartContract();
+const ruleType: UntypedNormalizedRuleType = {
   id: 'test',
   name: 'My test alert',
   actionGroups: [{ id: 'default', name: 'Default' }],
@@ -67,11 +79,13 @@ describe('Task Runner Factory', () => {
   afterAll(() => fakeTimer.restore());
 
   const encryptedSavedObjectsPlugin = encryptedSavedObjectsMock.createStart();
-  const services = alertsMock.createAlertServices();
   const rulesClient = rulesClientMock.create();
 
   const taskRunnerFactoryInitializerParams: jest.Mocked<TaskRunnerContext> = {
-    getServices: jest.fn().mockReturnValue(services),
+    data: dataPlugin,
+    savedObjects: savedObjectsService,
+    uiSettings: uiSettingsService,
+    elasticsearch: elasticsearchService,
     getRulesClientWithRequest: jest.fn().mockReturnValue(rulesClient),
     actionsPlugin: actionsMock.createStart(),
     encryptedSavedObjectsClient: encryptedSavedObjectsPlugin.getClient(),
@@ -83,19 +97,25 @@ describe('Task Runner Factory', () => {
     ruleTypeRegistry: ruleTypeRegistryMock.create(),
     kibanaBaseUrl: 'https://localhost:5601',
     supportsEphemeralTasks: true,
-    maxEphemeralActionsPerAlert: new Promise((resolve) => resolve(10)),
+    maxEphemeralActionsPerRule: 10,
+    cancelAlertsOnRuleTimeout: true,
     executionContext,
+    usageCounter: mockUsageCounter,
+    actionsConfigMap: {
+      default: {
+        max: 1000,
+      },
+    },
   };
 
   beforeEach(() => {
     jest.resetAllMocks();
-    taskRunnerFactoryInitializerParams.getServices.mockReturnValue(services);
   });
 
   test(`throws an error if factory isn't initialized`, () => {
     const factory = new TaskRunnerFactory();
     expect(() =>
-      factory.create(alertType, { taskInstance: mockedTaskInstance })
+      factory.create(ruleType, { taskInstance: mockedTaskInstance }, inMemoryMetrics)
     ).toThrowErrorMatchingInlineSnapshot(`"TaskRunnerFactory not initialized"`);
   });
 

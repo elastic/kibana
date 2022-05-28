@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 import { EuiSpacer, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import {
@@ -25,7 +25,7 @@ export const RadioFlexGroup = styled(EuiFlexGroup)`
     margin-right: 0;
   }
   .no-horizontal-margin-radio {
-    margin: ${(props) => props.theme.eui.ruleMargins.marginSmall} 0;
+    margin: ${(props) => props.theme.eui.euiSizeM} 0;
   }
 `;
 

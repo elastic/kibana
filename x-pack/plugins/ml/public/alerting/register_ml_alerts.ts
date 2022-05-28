@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
+import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/public';
 import { ML_ALERT_TYPES } from '../../common/constants/alerts';
 import type { MlAnomalyDetectionAlertParams } from '../../common/types/alerts';
-import type { TriggersAndActionsUIPublicPluginSetup } from '../../../triggers_actions_ui/public';
-import type { PluginSetupContract as AlertingSetup } from '../../../alerting/public';
 import { PLUGIN_ID } from '../../common/constants/app';
 import { formatExplorerUrl } from '../locator/formatters/anomaly_detection';
 import { validateLookbackInterval, validateTopNBucket } from './validators';
@@ -29,8 +29,8 @@ export function registerMlAlerts(
     documentationUrl(docLinks) {
       return docLinks.links.ml.alertingRules;
     },
-    alertParamsExpression: lazy(() => import('./ml_anomaly_alert_trigger')),
-    validate: (alertParams: MlAnomalyDetectionAlertParams) => {
+    ruleParamsExpression: lazy(() => import('./ml_anomaly_alert_trigger')),
+    validate: (ruleParams: MlAnomalyDetectionAlertParams) => {
       const validationResult = {
         errors: {
           jobSelection: new Array<string>(),
@@ -41,10 +41,7 @@ export function registerMlAlerts(
         } as Record<keyof MlAnomalyDetectionAlertParams, string[]>,
       };
 
-      if (
-        !alertParams.jobSelection?.jobIds?.length &&
-        !alertParams.jobSelection?.groupIds?.length
-      ) {
+      if (!ruleParams.jobSelection?.jobIds?.length && !ruleParams.jobSelection?.groupIds?.length) {
         validationResult.errors.jobSelection.push(
           i18n.translate('xpack.ml.alertTypes.anomalyDetection.jobSelection.errorMessage', {
             defaultMessage: 'Job selection is required',
@@ -54,10 +51,10 @@ export function registerMlAlerts(
 
       // Since 7.13 we support single job selection only
       if (
-        (Array.isArray(alertParams.jobSelection?.groupIds) &&
-          alertParams.jobSelection?.groupIds.length > 0) ||
-        (Array.isArray(alertParams.jobSelection?.jobIds) &&
-          alertParams.jobSelection?.jobIds.length > 1)
+        (Array.isArray(ruleParams.jobSelection?.groupIds) &&
+          ruleParams.jobSelection?.groupIds.length > 0) ||
+        (Array.isArray(ruleParams.jobSelection?.jobIds) &&
+          ruleParams.jobSelection?.jobIds.length > 1)
       ) {
         validationResult.errors.jobSelection.push(
           i18n.translate('xpack.ml.alertTypes.anomalyDetection.singleJobSelection.errorMessage', {
@@ -66,7 +63,7 @@ export function registerMlAlerts(
         );
       }
 
-      if (alertParams.severity === undefined) {
+      if (ruleParams.severity === undefined) {
         validationResult.errors.severity.push(
           i18n.translate('xpack.ml.alertTypes.anomalyDetection.severity.errorMessage', {
             defaultMessage: 'Anomaly severity is required',
@@ -74,7 +71,7 @@ export function registerMlAlerts(
         );
       }
 
-      if (alertParams.resultType === undefined) {
+      if (ruleParams.resultType === undefined) {
         validationResult.errors.resultType.push(
           i18n.translate('xpack.ml.alertTypes.anomalyDetection.resultType.errorMessage', {
             defaultMessage: 'Result type is required',
@@ -82,10 +79,7 @@ export function registerMlAlerts(
         );
       }
 
-      if (
-        !!alertParams.lookbackInterval &&
-        validateLookbackInterval(alertParams.lookbackInterval)
-      ) {
+      if (!!ruleParams.lookbackInterval && validateLookbackInterval(ruleParams.lookbackInterval)) {
         validationResult.errors.lookbackInterval.push(
           i18n.translate('xpack.ml.alertTypes.anomalyDetection.lookbackInterval.errorMessage', {
             defaultMessage: 'Lookback interval is invalid',
@@ -94,8 +88,8 @@ export function registerMlAlerts(
       }
 
       if (
-        typeof alertParams.topNBuckets === 'number' &&
-        validateTopNBucket(alertParams.topNBuckets)
+        typeof ruleParams.topNBuckets === 'number' &&
+        validateTopNBucket(ruleParams.topNBuckets)
       ) {
         validationResult.errors.topNBuckets.push(
           i18n.translate('xpack.ml.alertTypes.anomalyDetection.topNBuckets.errorMessage', {
@@ -110,7 +104,7 @@ export function registerMlAlerts(
     defaultActionMessage: i18n.translate(
       'xpack.ml.alertTypes.anomalyDetection.defaultActionMessage',
       {
-        defaultMessage: `Elastic Stack Machine Learning Alert:
+        defaultMessage: `[\\{\\{rule.name\\}\\}] Elastic Stack Machine Learning Alert:
 - Job IDs: \\{\\{context.jobIds\\}\\}
 - Time: \\{\\{context.timestampIso8601\\}\\}
 - Anomaly score: \\{\\{context.score\\}\\}
@@ -127,7 +121,7 @@ export function registerMlAlerts(
 \\{\\{#context.topRecords.length\\}\\}
   Top records:
   \\{\\{#context.topRecords\\}\\}
-    \\{\\{function\\}\\}(\\{\\{field_name\\}\\}) \\{\\{by_field_value\\}\\} \\{\\{over_field_value\\}\\} \\{\\{partition_field_value\\}\\} [\\{\\{score\\}\\}]
+    \\{\\{function\\}\\}(\\{\\{field_name\\}\\}) \\{\\{by_field_value\\}\\}\\{\\{over_field_value\\}\\}\\{\\{partition_field_value\\}\\} [\\{\\{score\\}\\}]. Typical: \\{\\{typical\\}\\}, Actual: \\{\\{actual\\}\\}
   \\{\\{/context.topRecords\\}\\}
 \\{\\{/context.topRecords.length\\}\\}
 

@@ -9,7 +9,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { cloneDeep } from 'lodash/fp';
 import { render, screen } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ThemeProvider } from 'styled-components';
 import { createStore, State } from '../../../common/store';
 import {
@@ -18,15 +18,16 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
-import { useRiskyHostsDashboardButtonHref } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href';
+
 import { useRiskyHostsDashboardLinks } from '../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links';
 import { mockTheme } from '../overview_cti_links/mock';
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
+import { useDashboardButtonHref } from '../../../common/hooks/use_dashboard_button_href';
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_button_href');
-const useRiskyHostsDashboardButtonHrefMock = useRiskyHostsDashboardButtonHref as jest.Mock;
+jest.mock('../../../common/hooks/use_dashboard_button_href');
+const useRiskyHostsDashboardButtonHrefMock = useDashboardButtonHref as jest.Mock;
 useRiskyHostsDashboardButtonHrefMock.mockReturnValue({ buttonHref: '/test' });
 
 jest.mock('../../containers/overview_risky_host_links/use_risky_hosts_dashboard_links');
@@ -52,19 +53,19 @@ describe('RiskyHostsEnabledModule', () => {
         <I18nProvider>
           <ThemeProvider theme={mockTheme}>
             <RiskyHostsEnabledModule
-              hostRiskScore={{
-                loading: false,
-                isModuleEnabled: true,
-                result: [
-                  {
-                    host: {
-                      name: 'a',
-                    },
-                    risk_score: 1,
-                    risk: '',
+              hostRiskScore={[
+                {
+                  '@timestamp': '1641902481',
+                  host: {
+                    name: 'a',
                   },
-                ],
-              }}
+                  risk_stats: {
+                    risk_score: 1,
+                    rule_risks: [],
+                  },
+                  risk: '',
+                },
+              ]}
               to={'now'}
               from={'now-30d'}
             />

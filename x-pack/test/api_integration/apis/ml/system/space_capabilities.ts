@@ -7,13 +7,15 @@
 
 import expect from '@kbn/expect';
 
+import { MlCapabilitiesResponse } from '@kbn/ml-plugin/common/types/capabilities';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { MlCapabilitiesResponse } from '../../../../../plugins/ml/common/types/capabilities';
 
 const idSpaceWithMl = 'space_with_ml';
 const idSpaceNoMl = 'space_no_ml';
+
+const NUMBER_OF_CAPABILITIES = 37;
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -21,11 +23,11 @@ export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
 
   async function runRequest(user: USER, space?: string): Promise<MlCapabilitiesResponse> {
-    const { body } = await supertest
+    const { body, status } = await supertest
       .get(`${space ? `/s/${space}` : ''}/api/ml/ml_capabilities`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
-      .expect(200);
+      .set(COMMON_REQUEST_HEADERS);
+    ml.api.assertResponseStatusCode(200, status, body);
 
     return body;
   }
@@ -71,11 +73,11 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should have the right number of capabilities - space with ML', async () => {
         const { capabilities } = await runRequest(USER.ML_POWERUSER, idSpaceWithMl);
-        expect(Object.keys(capabilities).length).to.eql(31);
+        expect(Object.keys(capabilities).length).to.eql(NUMBER_OF_CAPABILITIES);
       });
       it('should have the right number of capabilities - space without ML', async () => {
         const { capabilities } = await runRequest(USER.ML_POWERUSER, idSpaceNoMl);
-        expect(Object.keys(capabilities).length).to.eql(31);
+        expect(Object.keys(capabilities).length).to.eql(NUMBER_OF_CAPABILITIES);
       });
 
       it('should get viewer capabilities - space with ML', async () => {
@@ -112,6 +114,12 @@ export default ({ getService }: FtrProviderContext) => {
           canGetAnnotations: true,
           canCreateAnnotation: true,
           canDeleteAnnotation: true,
+          canViewMlNodes: false,
+          canGetTrainedModels: true,
+          canTestTrainedModels: true,
+          canCreateTrainedModels: false,
+          canDeleteTrainedModels: false,
+          canStartStopTrainedModels: false,
         });
       });
 
@@ -149,6 +157,12 @@ export default ({ getService }: FtrProviderContext) => {
           canGetAnnotations: false,
           canCreateAnnotation: false,
           canDeleteAnnotation: false,
+          canViewMlNodes: false,
+          canGetTrainedModels: false,
+          canTestTrainedModels: false,
+          canCreateTrainedModels: false,
+          canDeleteTrainedModels: false,
+          canStartStopTrainedModels: false,
         });
       });
 
@@ -186,6 +200,12 @@ export default ({ getService }: FtrProviderContext) => {
           canGetAnnotations: true,
           canCreateAnnotation: true,
           canDeleteAnnotation: true,
+          canViewMlNodes: true,
+          canGetTrainedModels: true,
+          canTestTrainedModels: true,
+          canCreateTrainedModels: true,
+          canDeleteTrainedModels: true,
+          canStartStopTrainedModels: true,
         });
       });
 
@@ -223,6 +243,12 @@ export default ({ getService }: FtrProviderContext) => {
           canGetAnnotations: false,
           canCreateAnnotation: false,
           canDeleteAnnotation: false,
+          canViewMlNodes: false,
+          canGetTrainedModels: false,
+          canTestTrainedModels: false,
+          canCreateTrainedModels: false,
+          canDeleteTrainedModels: false,
+          canStartStopTrainedModels: false,
         });
       });
     });

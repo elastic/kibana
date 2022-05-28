@@ -9,7 +9,7 @@ import { EuiSpacer, EuiPanel } from '@elastic/eui';
 import { isEqual } from 'lodash/fp';
 import React, { useMemo } from 'react';
 
-import { BrowserFields, ColumnHeaderOptions, RowRenderer } from '../../../../../../common';
+import { ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
 import { Ecs } from '../../../../../../common/ecs';
 import { eventRendererNames } from '../../../row_renderers_browser/catalog/constants';
 import { ColumnRenderer } from './column_renderer';
@@ -22,7 +22,6 @@ export const reasonColumnRenderer: ColumnRenderer = {
   isInstance: isEqual(REASON_FIELD_NAME),
 
   renderColumn: ({
-    browserFields,
     columnName,
     ecsData,
     eventId,
@@ -35,7 +34,6 @@ export const reasonColumnRenderer: ColumnRenderer = {
     truncate,
     values,
   }: {
-    browserFields?: BrowserFields;
     columnName: string;
     ecsData?: Ecs;
     eventId: string;
@@ -48,10 +46,9 @@ export const reasonColumnRenderer: ColumnRenderer = {
     truncate?: boolean;
     values: string[] | undefined | null;
   }) => {
-    if (isDetails && values && ecsData && rowRenderers && browserFields) {
+    if (isDetails && values && ecsData && rowRenderers) {
       return values.map((value, i) => (
         <ReasonCell
-          browserFields={browserFields}
           ecsData={ecsData}
           key={`reason-column-renderer-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
           rowRenderers={rowRenderers}
@@ -80,21 +77,19 @@ const ReasonCell: React.FC<{
   timelineId: string;
   ecsData: Ecs;
   rowRenderers: RowRenderer[];
-  browserFields: BrowserFields;
-}> = ({ ecsData, rowRenderers, browserFields, timelineId, value }) => {
+}> = ({ ecsData, rowRenderers, timelineId, value }) => {
   const rowRenderer = useMemo(() => getRowRenderer(ecsData, rowRenderers), [ecsData, rowRenderers]);
 
   const rowRender = useMemo(() => {
     return (
       rowRenderer &&
       rowRenderer.renderRow({
-        browserFields,
         data: ecsData,
         isDraggable: false,
         timelineId,
       })
     );
-  }, [rowRenderer, browserFields, ecsData, timelineId]);
+  }, [rowRenderer, ecsData, timelineId]);
 
   return (
     <>

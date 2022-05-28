@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { SearchSourceFields } from 'src/plugins/data/common';
-import { ReportApiJSON } from '../../../plugins/reporting/common/types';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -51,7 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
               ],
             },
           },
-        } as unknown as SearchSourceFields,
+        } as unknown as SerializedSearchSourceFields,
       });
       expect(status).to.be(200);
 

@@ -5,9 +5,11 @@
  * 2.0.
  */
 import url from 'url';
-import archives_metadata from '../../../fixtures/es_archiver/archives_metadata';
+import { synthtrace } from '../../../../synthtrace';
+import { opbeans } from '../../../fixtures/synthtrace/opbeans';
 
-const { start, end } = archives_metadata['apm_8.0.0'];
+const start = '2021-10-10T00:00:00.000Z';
+const end = '2021-10-10T00:15:00.000Z';
 
 const serviceOverviewHref = url.format({
   pathname: '/app/apm/services/opbeans-node/overview',
@@ -46,11 +48,6 @@ const apisToIntercept = [
   },
   {
     endpoint:
-      '/internal/apm/services/opbeans-node/error_groups/main_statistics?*',
-    name: 'errorGroupsMainStatisticsRequest',
-  },
-  {
-    endpoint:
       '/internal/apm/services/opbeans-node/transaction/charts/breakdown?*',
     name: 'transactonBreakdownRequest',
   },
@@ -62,11 +59,20 @@ const apisToIntercept = [
 ];
 
 describe('Service overview - header filters', () => {
-  beforeEach(() => {
-    cy.loginAsReadOnlyUser();
+  before(async () => {
+    await synthtrace.index(
+      opbeans({ from: new Date(start).getTime(), to: new Date(end).getTime() })
+    );
+  });
+
+  after(async () => {
+    await synthtrace.clean();
   });
 
   describe('Filtering by transaction type', () => {
+    beforeEach(() => {
+      cy.loginAsViewerUser();
+    });
     it('changes url when selecting different value', () => {
       cy.visit(serviceOverviewHref);
       cy.contains('opbeans-node');
@@ -88,7 +94,6 @@ describe('Service overview - header filters', () => {
         cy.intercept('GET', endpoint).as(name);
       });
       cy.visit(serviceOverviewHref);
-      cy.contains('opbeans-node');
       cy.get('[data-test-subj="headerFilterTransactionType"]').should(
         'have.value',
         'request'
@@ -113,6 +118,9 @@ describe('Service overview - header filters', () => {
   });
 
   describe('Filtering by kuerybar', () => {
+    beforeEach(() => {
+      cy.loginAsViewerUser();
+    });
     it('filters by transaction.name', () => {
       cy.visit(
         url.format({
@@ -132,7 +140,7 @@ describe('Service overview - header filters', () => {
         .find('li')
         .first()
         .click();
-      cy.get('[data-test-subj="suggestionContainer"]').realPress('{enter}');
+      cy.get('[data-test-subj="headerFilterKuerybar"]').type('{enter}');
       cy.url().should('include', '&kuery=transaction.name');
     });
   });

@@ -6,19 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
-import {
-  IFieldType,
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  IndexPatternAttributes,
-  SavedObject,
-} from '../common';
+import { SavedObjectsClientContract } from '@kbn/core/server';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, DataViewAttributes, SavedObject, FieldSpec } from '../common';
 
 export const getFieldByName = (
   fieldName: string,
-  indexPattern: SavedObject<IndexPatternAttributes>
-): IFieldType | undefined => {
-  const fields: IFieldType[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
+  indexPattern: SavedObject<DataViewAttributes>
+): FieldSpec | undefined => {
+  const fields: FieldSpec[] = indexPattern && JSON.parse(indexPattern.attributes.fields);
   const field = fields && fields.find((f) => f.name === fieldName);
 
   return field;
@@ -27,8 +22,8 @@ export const getFieldByName = (
 export const findIndexPatternById = async (
   savedObjectsClient: SavedObjectsClientContract,
   index: string
-): Promise<SavedObject<IndexPatternAttributes> | undefined> => {
-  const savedObjectsResponse = await savedObjectsClient.find<IndexPatternAttributes>({
+): Promise<SavedObject<DataViewAttributes> | undefined> => {
+  const savedObjectsResponse = await savedObjectsClient.find<DataViewAttributes>({
     type: DATA_VIEW_SAVED_OBJECT_TYPE,
     fields: ['fields'],
     search: `"${index}"`,

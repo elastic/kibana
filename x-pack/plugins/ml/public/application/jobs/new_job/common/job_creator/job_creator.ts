@@ -7,6 +7,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -15,7 +17,6 @@ import {
   aggregations,
   mlOnlyAggregations,
 } from '../../../../../../common/constants/aggregation_types';
-import { ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
 import {
   Job,
   Datafeed,
@@ -40,9 +41,9 @@ import { filterRuntimeMappings } from './util/filter_runtime_mappings';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
-import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
 import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
+import { ml } from '../../../../services/ml_api_service';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -83,7 +84,7 @@ export class JobCreator {
     this._calendars = [];
     this._datafeed_config = createEmptyDatafeed(this._indexPatternTitle);
     this._detectors = this._job_config.analysis_config.detectors;
-    this._influencers = this._job_config.analysis_config.influencers;
+    this._influencers = this._job_config.analysis_config.influencers!;
 
     if (typeof indexPattern.timeFieldName === 'string') {
       this._job_config.data_description.time_field = indexPattern.timeFieldName;
@@ -262,6 +263,7 @@ export class JobCreator {
     this._initModelPlotConfig();
     this._job_config.model_plot_config!.enabled = enable;
   }
+
   public get modelPlot() {
     return (
       this._job_config.model_plot_config !== undefined &&
@@ -370,7 +372,7 @@ export class JobCreator {
   }
 
   public get timeFieldName(): string {
-    return this._job_config.data_description.time_field;
+    return this._job_config.data_description.time_field!;
   }
 
   public set timeFieldName(fieldName: string) {
@@ -737,7 +739,7 @@ export class JobCreator {
           ({
             id,
             name: id,
-            type: runtimeField.type,
+            type: Array.isArray(runtimeField) ? runtimeField[0].type : runtimeField.type,
             aggregatable: true,
             aggs: [],
             runtimeField,
@@ -761,12 +763,26 @@ export class JobCreator {
     }
   }
 
+  // load the start and end times for the selected index
+  // and apply them to the job creator
+  public async autoSetTimeRange() {
+    const { start, end } = await ml.getTimeFieldRange({
+      index: this._indexPatternTitle,
+      timeFieldName: this.timeFieldName,
+      query: this.query,
+      runtimeMappings: this.datafeedConfig.runtime_mappings,
+      indicesOptions: this.datafeedConfig.indices_options,
+    });
+    this.setTimeRange(start.epoch, end.epoch);
+  }
+
   protected _overrideConfigs(job: Job, datafeed: Datafeed) {
     this._job_config = job;
     this._datafeed_config = datafeed;
 
     this._detectors = this._job_config.analysis_config.detectors;
-    this._influencers = this._job_config.analysis_config.influencers;
+    this._influencers = this._job_config.analysis_config.influencers!;
+
     if (this._job_config.groups === undefined) {
       this._job_config.groups = [];
     }

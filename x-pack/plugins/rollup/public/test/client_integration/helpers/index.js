@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+export { mockHttpRequest } from './setup_environment';
+
 import { setup as jobCreateSetup } from './job_create.helpers';
 import { setup as jobListSetup } from './job_list.helpers';
 import { setup as jobCloneSetup } from './job_clone.helpers';
 
-export { nextTick, getRandomString, findTestSubject } from '@kbn/test/jest';
-
-export { mockHttpRequest } from './setup_environment';
+export { getRandomString, findTestSubject } from '@kbn/test-jest-helpers';
 
 export { wrapComponent } from './setup_context';
 

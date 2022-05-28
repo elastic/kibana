@@ -9,14 +9,14 @@
 import { UrlConfig } from '../../../../../common/types/custom_urls';
 import { shallow } from 'enzyme';
 
-jest.mock('../../../services/job_service.js', () => 'mlJobService');
+jest.mock('../../../services/job_service', () => 'mlJobService');
 
 import React from 'react';
 
 import { CustomUrlEditor } from './editor';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { CustomUrlSettings } from './utils';
-import { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 function prepareTest(customUrl: CustomUrlSettings, setEditCustomUrlFn: (url: UrlConfig) => void) {
   const savedCustomUrls = [
@@ -47,10 +47,10 @@ function prepareTest(customUrl: CustomUrlSettings, setEditCustomUrlFn: (url: Url
     { id: 'dash2', title: 'Dashboard 2' },
   ];
 
-  const indexPatterns = [
-    { id: 'pattern1', title: 'Index Pattern 1' },
-    { id: 'pattern2', title: 'Index Pattern 2' },
-  ] as DataView[];
+  const dataViewListItems = [
+    { id: 'pattern1', title: 'Data view 1' },
+    { id: 'pattern2', title: 'Data view 2' },
+  ] as DataViewListItem[];
 
   const queryEntityFieldNames = ['airline'];
 
@@ -59,7 +59,7 @@ function prepareTest(customUrl: CustomUrlSettings, setEditCustomUrlFn: (url: Url
     setEditCustomUrl: setEditCustomUrlFn,
     savedCustomUrls,
     dashboards,
-    indexPatterns,
+    dataViewListItems,
     queryEntityFieldNames,
   };
 

@@ -15,7 +15,7 @@ import {
   TimelineType,
   TimelineStatus,
 } from '../../../../../common/types/timeline';
-import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
+import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 
 import * as i18n from './translations';
@@ -116,6 +116,7 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
         data-test-subj="timeline-notes-button-small"
         iconType="editorComment"
         onClick={toggleShowNotes}
+        size="s"
         isDisabled={isTemplate}
       />
     );

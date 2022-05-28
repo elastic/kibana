@@ -10,20 +10,42 @@
  */
 export const MAJOR_VERSION = '8.0.0';
 
-/*
- * Map of 7.0 --> 8.0 index setting deprecation log messages and associated settings
- * We currently only support one setting deprecation (translog retention), but the code is written
- * in a way to be able to support any number of deprecated index settings defined here
- */
-export const indexSettingDeprecations = {
-  translog: {
-    deprecationMessage: 'translog retention settings are ignored', // expected message from ES deprecation info API
-    settings: ['translog.retention.size', 'translog.retention.age'],
-  },
-};
-
 export const API_BASE_PATH = '/api/upgrade_assistant';
+
+// Telemetry constants
+export const UPGRADE_ASSISTANT_TELEMETRY = 'upgrade-assistant-telemetry';
+
+/**
+ * This is the repository where Cloud stores its backup snapshots.
+ */
+export const CLOUD_SNAPSHOT_REPOSITORY = 'found-snapshots';
 
 export const DEPRECATION_WARNING_UPPER_LIMIT = 999999;
 export const DEPRECATION_LOGS_SOURCE_ID = 'deprecation_logs';
+export const DEPRECATION_LOGS_INDEX = '.logs-deprecation.elasticsearch-default';
 export const DEPRECATION_LOGS_INDEX_PATTERN = '.logs-deprecation.elasticsearch-default';
+
+export const CLUSTER_UPGRADE_STATUS_POLL_INTERVAL_MS = 45000;
+export const CLOUD_BACKUP_STATUS_POLL_INTERVAL_MS = 60000;
+export const DEPRECATION_LOGS_COUNT_POLL_INTERVAL_MS = 15000;
+export const SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS = 15000;
+
+/**
+ * List of Elastic apps that potentially can generate deprecation logs.
+ * We want to filter those out for our users so they only see deprecation logs
+ * that _they_ are generating.
+ */
+export const APPS_WITH_DEPRECATION_LOGS = [
+  'kibana',
+  'cloud',
+  'logstash',
+  'beats',
+  'fleet',
+  'ml',
+  'security',
+  'observability',
+  'enterprise-search',
+];
+
+// The field that will indicate which elastic product generated the deprecation log
+export const DEPRECATION_LOGS_ORIGIN_FIELD = 'elasticsearch.elastic_product_origin';

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { CoreSetup } from '../../../../src/core/public';
-import { serializeProvider } from '../../../../src/plugins/expressions/common';
+import { CoreSetup } from '@kbn/core/public';
+import { serializeProvider } from '@kbn/expressions-plugin/common';
 import { API_ROUTE_FUNCTIONS } from '../common/lib/constants';
 
 import { CanvasSetupDeps } from './plugin';
@@ -26,7 +26,7 @@ export const setupExpressions = async ({
   const loadServerFunctionWrappers = async () => {
     if (!cached) {
       cached = (async () => {
-        const serverFunctionList = await coreSetup.http.get(API_ROUTE_FUNCTIONS);
+        const serverFunctionList = await coreSetup.http.get<any>(API_ROUTE_FUNCTIONS);
         const batchedFunction = bfetch.batchedFunction({ url: API_ROUTE_FUNCTIONS });
         const { serialize } = serializeProvider(expressions.getTypes());
 

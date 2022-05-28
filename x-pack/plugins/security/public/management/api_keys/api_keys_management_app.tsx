@@ -10,13 +10,14 @@ import type { FunctionComponent } from 'react';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router } from 'react-router-dom';
+import type { Observable } from 'rxjs';
 
+import type { CoreStart, CoreTheme, StartServicesAccessor } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 
-import type { CoreStart, StartServicesAccessor } from '../../../../../../src/core/public';
-import { KibanaContextProvider } from '../../../../../../src/plugins/kibana_react/public';
-import type { RegisterManagementAppArgs } from '../../../../../../src/plugins/management/public';
 import type { AuthenticationServiceSetup } from '../../authentication';
 import type { BreadcrumbsChangeHandler } from '../../components/breadcrumb';
 import {
@@ -41,7 +42,7 @@ export const apiKeysManagementApp = Object.freeze({
       title: i18n.translate('xpack.security.management.apiKeysTitle', {
         defaultMessage: 'API keys',
       }),
-      async mount({ element, setBreadcrumbs, history }) {
+      async mount({ element, theme$, setBreadcrumbs, history }) {
         const [[coreStart], { APIKeysGridPage }, { APIKeysAPIClient }] = await Promise.all([
           getStartServices(),
           import('./api_keys_grid'),
@@ -51,6 +52,7 @@ export const apiKeysManagementApp = Object.freeze({
         render(
           <Providers
             services={coreStart}
+            theme$={theme$}
             history={history}
             authc={authc}
             onChange={createBreadcrumbsChangeHandler(coreStart.chrome, setBreadcrumbs)}
@@ -81,6 +83,7 @@ export const apiKeysManagementApp = Object.freeze({
 
 export interface ProvidersProps {
   services: CoreStart;
+  theme$: Observable<CoreTheme>;
   history: History;
   authc: AuthenticationServiceSetup;
   onChange?: BreadcrumbsChangeHandler;
@@ -88,6 +91,7 @@ export interface ProvidersProps {
 
 export const Providers: FunctionComponent<ProvidersProps> = ({
   services,
+  theme$,
   history,
   authc,
   onChange,
@@ -96,9 +100,11 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
   <KibanaContextProvider services={services}>
     <AuthenticationProvider authc={authc}>
       <I18nProvider>
-        <Router history={history}>
-          <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
-        </Router>
+        <KibanaThemeProvider theme$={theme$}>
+          <Router history={history}>
+            <BreadcrumbsProvider onChange={onChange}>{children}</BreadcrumbsProvider>
+          </Router>
+        </KibanaThemeProvider>
       </I18nProvider>
     </AuthenticationProvider>
   </KibanaContextProvider>

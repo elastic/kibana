@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { DocLinks } from '@kbn/doc-links';
 import { applyDeprecations } from './apply_deprecations';
 import { ConfigDeprecation, ConfigDeprecationContext, ConfigDeprecationWithContext } from './types';
 import { configDeprecationFactory as deprecations } from './deprecation_factory';
@@ -14,6 +15,7 @@ describe('applyDeprecations', () => {
   const context: ConfigDeprecationContext = {
     version: '7.16.2',
     branch: '7.16',
+    docLinks: {} as DocLinks,
   };
 
   const wrapHandler = (
@@ -109,18 +111,50 @@ describe('applyDeprecations', () => {
     const initialConfig = { foo: 'bar', deprecated: 'deprecated', renamed: 'renamed' };
 
     const { config: migrated } = applyDeprecations(initialConfig, [
-      wrapHandler(deprecations.unused('deprecated')),
-      wrapHandler(deprecations.rename('renamed', 'newname')),
+      wrapHandler(deprecations.unused('deprecated', { level: 'critical' })),
+      wrapHandler(deprecations.rename('renamed', 'newname', { level: 'critical' })),
     ]);
 
     expect(migrated).toEqual({ foo: 'bar', newname: 'renamed' });
+  });
+
+  it('nested properties take into account if their parents are empty objects, and remove them if so', () => {
+    const initialConfig = {
+      foo: 'bar',
+      deprecated: { nested: 'deprecated' },
+      nested: {
+        from: {
+          rename: 'renamed',
+        },
+        to: {
+          keep: 'keep',
+        },
+      },
+    };
+
+    const { config: migrated } = applyDeprecations(initialConfig, [
+      wrapHandler(deprecations.unused('deprecated.nested', { level: 'critical' })),
+      wrapHandler(
+        deprecations.rename('nested.from.rename', 'nested.to.renamed', { level: 'critical' })
+      ),
+    ]);
+
+    expect(migrated).toStrictEqual({
+      foo: 'bar',
+      nested: {
+        to: {
+          keep: 'keep',
+          renamed: 'renamed',
+        },
+      },
+    });
   });
 
   it('does not alter the initial config', () => {
     const initialConfig = { foo: 'bar', deprecated: 'deprecated' };
 
     const { config: migrated } = applyDeprecations(initialConfig, [
-      wrapHandler(deprecations.unused('deprecated')),
+      wrapHandler(deprecations.unused('deprecated', { level: 'critical' })),
     ]);
 
     expect(initialConfig).toEqual({ foo: 'bar', deprecated: 'deprecated' });

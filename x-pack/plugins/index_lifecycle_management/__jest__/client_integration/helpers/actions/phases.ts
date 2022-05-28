@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TestBed } from '@kbn/test/jest';
+import { TestBed } from '@kbn/test-jest-helpers';
 import {
   createForceMergeActions,
   createShrinkActions,
@@ -15,9 +15,8 @@ import {
   createMinAgeActions,
   createNodeAllocationActions,
   createReplicasAction,
-  createFreezeActions,
   createSnapshotPolicyActions,
-} from './';
+} from '.';
 
 export const createHotPhaseActions = (testBed: TestBed) => {
   return {
@@ -49,7 +48,6 @@ export const createColdPhaseActions = (testBed: TestBed) => {
       ...createMinAgeActions(testBed, 'cold'),
       ...createReplicasAction(testBed, 'cold'),
       ...createReadonlyActions(testBed, 'cold'),
-      ...createFreezeActions(testBed, 'cold'),
       ...createIndexPriorityActions(testBed, 'cold'),
       ...createNodeAllocationActions(testBed, 'cold'),
       ...createSearchableSnapshotActions(testBed, 'cold'),

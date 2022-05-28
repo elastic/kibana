@@ -55,7 +55,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
     };
 
     return {
-      testFiles: testFiles ? testFiles : [require.resolve('../tests/common')],
+      testFiles,
       servers,
       services,
       junit: {
@@ -78,10 +78,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...xPackApiIntegrationTestsConfig.get('kbnTestServer.serverArgs'),
           `--xpack.actions.allowedHosts=${JSON.stringify(['localhost', 'some.non.existent.com'])}`,
           `--xpack.actions.enabledActionTypes=${JSON.stringify(enabledActionTypes)}`,
+          `--xpack.alerting.rules.minimumScheduleInterval.value="1s"`,
           '--xpack.eventLog.logEntries=true',
-          ...disabledPlugins.map((key) => `--xpack.${key}.enabled=false`),
-          // TO DO: Remove feature flags once we're good to go
-          '--xpack.securitySolution.enableExperimental=["ruleRegistryEnabled"]',
+          ...disabledPlugins
+            .filter((k) => k !== 'security')
+            .map((key) => `--xpack.${key}.enabled=false`),
           '--xpack.ruleRegistry.write.enabled=true',
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,
           ...(ssl

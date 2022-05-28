@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -20,7 +20,7 @@ import {
   EuiText,
   EuiSubSteps,
 } from '@elastic/eui';
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 
 interface Props {
   results: FindFileStructureResponse;

@@ -5,43 +5,48 @@
  * 2.0.
  */
 
-import { ApiResponse } from '@elastic/elasticsearch';
-import { BulkResponse } from '@elastic/elasticsearch/api/types';
 import { Logger } from '@kbn/logging';
 import {
-  AlertExecutorOptions,
+  RuleExecutorOptions,
   AlertInstanceContext,
   AlertInstanceState,
-  AlertType,
-  AlertTypeParams,
-  AlertTypeState,
-} from '../../../alerting/server';
-import { WithoutReservedActionGroups } from '../../../alerting/common';
+  RuleType,
+  RuleTypeParams,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/server';
+import { WithoutReservedActionGroups } from '@kbn/alerting-plugin/common';
 import { IRuleDataClient } from '../rule_data_client';
+import { BulkResponseErrorAggregation } from './utils';
+import { AlertWithCommonFieldsLatest } from '../../common/schemas';
 
-export type PersistenceAlertService = (
+export type PersistenceAlertService = <T>(
   alerts: Array<{
-    id: string;
-    fields: Record<string, unknown>;
+    _id: string;
+    _source: T;
   }>,
   refresh: boolean | 'wait_for'
-) => Promise<ApiResponse<BulkResponse, unknown> | undefined>;
+) => Promise<PersistenceAlertServiceResult<T>>;
+
+export interface PersistenceAlertServiceResult<T> {
+  createdAlerts: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>;
+  errors: BulkResponseErrorAggregation;
+}
 
 export interface PersistenceServices {
   alertWithPersistence: PersistenceAlertService;
 }
 
 export type PersistenceAlertType<
-  TParams extends AlertTypeParams,
-  TState extends AlertTypeState,
+  TParams extends RuleTypeParams,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 > = Omit<
-  AlertType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
+  RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>,
   'executor'
 > & {
   executor: (
-    options: AlertExecutorOptions<
+    options: RuleExecutorOptions<
       TParams,
       TState,
       AlertInstanceState,
@@ -57,10 +62,10 @@ export type CreatePersistenceRuleTypeWrapper = (options: {
   ruleDataClient: IRuleDataClient;
   logger: Logger;
 }) => <
-  TParams extends AlertTypeParams,
-  TState extends AlertTypeState,
+  TParams extends RuleTypeParams,
+  TState extends RuleTypeState,
   TInstanceContext extends AlertInstanceContext = {},
   TActionGroupIds extends string = never
 >(
   type: PersistenceAlertType<TParams, TState, TInstanceContext, TActionGroupIds>
-) => AlertType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>;
+) => RuleType<TParams, TParams, TState, AlertInstanceState, TInstanceContext, TActionGroupIds>;

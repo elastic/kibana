@@ -15,16 +15,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import React from 'react';
+import { enableInfrastructureView } from '@kbn/observability-plugin/public';
 import {
   isIosAgentName,
   isJavaAgentName,
   isJRubyAgent,
   isRumAgentName,
+  isServerlessAgent,
 } from '../../../../../common/agent_name';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { ApmServiceContextProvider } from '../../../../context/apm_service/apm_service_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useBreadcrumb } from '../../../../context/breadcrumbs/use_breadcrumb';
+import { ServiceAnomalyTimeseriesContextProvider } from '../../../../context/service_anomaly_timeseries/service_anomaly_timeseries_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -41,6 +44,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'errors'
     | 'metrics'
     | 'nodes'
+    | 'infrastructure'
     | 'service-map'
     | 'logs'
     | 'profiling';
@@ -49,7 +53,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
 
 interface Props {
   title: string;
-  children: React.ReactNode;
+  children: React.ReactChild;
   selectedTab: Tab['key'];
   searchBarOptions?: React.ComponentProps<typeof SearchBar>;
 }
@@ -121,8 +125,9 @@ function TemplateWithContext({
       }}
     >
       <SearchBar {...searchBarOptions} />
-
-      {children}
+      <ServiceAnomalyTimeseriesContextProvider>
+        {children}
+      </ServiceAnomalyTimeseriesContextProvider>
     </ApmMainTemplate>
   );
 }
@@ -139,7 +144,8 @@ export function isMetricsTabHidden({
     isRumAgentName(agentName) ||
     isJavaAgentName(agentName) ||
     isIosAgentName(agentName) ||
-    isJRubyAgent(agentName, runtimeName)
+    isJRubyAgent(agentName, runtimeName) ||
+    isServerlessAgent(runtimeName)
   );
 }
 
@@ -150,12 +156,16 @@ export function isJVMsTabHidden({
   agentName?: string;
   runtimeName?: string;
 }) {
-  return !(isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName));
+  return (
+    !(isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName)) ||
+    isServerlessAgent(runtimeName)
+  );
 }
 
 function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
   const { agentName, runtimeName } = useApmServiceContext();
-  const { config } = useApmPluginContext();
+  const { config, core } = useApmPluginContext();
+  const showInfraTab = core.uiSettings.get<boolean>(enableInfrastructureView);
 
   const router = useApmRouter();
 
@@ -238,6 +248,17 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
       hidden: isJVMsTabHidden({ agentName, runtimeName }),
     },
     {
+      key: 'infrastructure',
+      href: router.link('/services/{serviceName}/infrastructure', {
+        path: { serviceName },
+        query,
+      }),
+      label: i18n.translate('xpack.apm.home.infraTabLabel', {
+        defaultMessage: 'Infrastructure',
+      }),
+      hidden: !showInfraTab,
+    },
+    {
       key: 'service-map',
       href: router.link('/services/{serviceName}/service-map', {
         path: { serviceName },
@@ -280,14 +301,14 @@ function useTabs({ selectedTab }: { selectedTab: Tab['key'] }) {
               label={i18n.translate(
                 'xpack.apm.serviceDetails.profilingTabExperimentalLabel',
                 {
-                  defaultMessage: 'Experimental',
+                  defaultMessage: 'Technical preview',
                 }
               )}
               tooltipContent={i18n.translate(
                 'xpack.apm.serviceDetails.profilingTabExperimentalDescription',
                 {
                   defaultMessage:
-                    'Profiling is highly experimental and for internal use only.',
+                    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
                 }
               )}
             />

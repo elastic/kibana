@@ -9,12 +9,14 @@
 // TODO: https://github.com/elastic/kibana/issues/109904
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { ConfigSchema, configSchema } from '../config';
 import { DataServerPlugin, DataPluginSetup, DataPluginStart } from './plugin';
 
 export * from './deprecated';
-export { getEsQueryConfig } from '../common';
+export { getEsQueryConfig, DEFAULT_QUERY_LANGUAGE } from '../common';
+
+export { getRequestAbortedSignal } from './lib';
 
 /**
  * Exporters (CSV)
@@ -36,20 +38,18 @@ export { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
  * Index patterns:
  */
 
+export type { FieldDescriptor, IndexPatternsServiceStart } from './data_views';
 export {
   IndexPatternsFetcher,
-  shouldReadFieldFromDocValues, // used only in logstash_fields fixture
-  FieldDescriptor,
+  shouldReadFieldFromDocValues,
   getCapabilitiesForRollupIndices,
-  IndexPatternsServiceStart,
 } from './data_views';
 
+export type { IndexPatternAttributes } from '../common';
 export {
   IndexPatternField,
-  IFieldType,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
-  IndexPatternAttributes,
   UI_SETTINGS,
   IndexPattern,
   IndexPatternsService,
@@ -70,31 +70,26 @@ import {
   // tabify
   calcAutoIntervalLessThan,
 } from '../common';
-import { autocompleteConfigDeprecationProvider } from './config_deprecations';
+import { configDeprecationProvider } from './config_deprecations';
 
-export {
-  // aggs
-  METRIC_TYPES,
+export type {
   ParsedInterval,
-  // search
   ISearchOptions,
   IEsSearchRequest,
   IEsSearchResponse,
-  ES_SEARCH_STRATEGY,
 } from '../common';
+export { METRIC_TYPES, ES_SEARCH_STRATEGY } from '../common';
 
-export {
+export type {
   IScopedSearchClient,
   ISearchStrategy,
   SearchStrategyDependencies,
-  shimHitsTotal,
-  SearchSessionService,
   ISearchSessionService,
   SearchRequestHandlerContext,
   DataRequestHandlerContext,
   AsyncSearchStatusResponse,
-  NoSearchIdInSessionError,
 } from './search';
+export { shimHitsTotal, SearchSessionService, NoSearchIdInSessionError } from './search';
 
 // Search namespace
 export const search = {
@@ -112,14 +107,8 @@ export const search = {
  * @public
  */
 
-export {
-  castEsToKbnFieldTypeName,
-  getTime,
-  // timefilter
-  TimeRange,
-  // utils
-  parseInterval,
-} from '../common';
+export type { TimeRange } from '../common';
+export { getTime, parseInterval } from '../common';
 
 /**
  * Static code to be shared externally
@@ -130,16 +119,12 @@ export function plugin(initializerContext: PluginInitializerContext<ConfigSchema
   return new DataServerPlugin(initializerContext);
 }
 
-export {
-  DataServerPlugin as Plugin,
-  DataPluginSetup as PluginSetup,
-  DataPluginStart as PluginStart,
-};
+export type { DataPluginSetup as PluginSetup, DataPluginStart as PluginStart };
+export { DataServerPlugin as Plugin };
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
-  deprecations: autocompleteConfigDeprecationProvider,
+  deprecations: configDeprecationProvider,
   exposeToBrowser: {
-    autocomplete: true,
     search: true,
   },
   schema: configSchema,

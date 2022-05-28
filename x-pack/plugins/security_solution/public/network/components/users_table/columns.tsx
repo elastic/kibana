@@ -28,52 +28,60 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
     field: 'node.user.name',
     name: i18n.USER_NAME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: true,
     render: (userName) =>
       getRowItemDraggable({
         rowItem: userName,
         attrName: 'user.name',
         idPrefix: `${tableId}-table-${flowTarget}-user`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
     field: 'node.user.id',
     name: i18n.USER_ID,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (userIds) =>
       getRowItemDraggables({
         rowItems: userIds,
         attrName: 'user.id',
         idPrefix: `${tableId}-table-${flowTarget}`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
     field: 'node.user.groupName',
     name: i18n.GROUP_NAME,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (groupNames) =>
       getRowItemDraggables({
         rowItems: groupNames,
         attrName: 'user.group.name',
         idPrefix: `${tableId}-table-${flowTarget}`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
     field: 'node.user.groupId',
     name: i18n.GROUP_ID,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: false,
     render: (groupId) =>
       getRowItemDraggables({
         rowItems: groupId,
         attrName: 'user.group.id',
         idPrefix: `${tableId}-table-${flowTarget}`,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   {
@@ -81,7 +89,7 @@ export const getUsersColumns = (flowTarget: FlowTarget, tableId: string): UsersC
     field: 'node.user.count',
     name: i18n.DOCUMENT_COUNT,
     truncateText: false,
-    hideForMobile: false,
+    mobileOptions: { show: true },
     sortable: true,
     render: (docCount) => defaultToEmptyTag(docCount),
   },

@@ -6,13 +6,21 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import type { IRouter, KibanaRequest, RequestHandlerContext } from 'src/core/server';
+import type { IRouter, KibanaRequest, CustomRequestHandlerContext } from '@kbn/core/server';
 
-export { IEvent, IValidatedEvent, EventSchema, ECS_VERSION } from '../generated/schemas';
+export type { IEvent, IValidatedEvent } from '../generated/schemas';
+export { EventSchema, ECS_VERSION } from '../generated/schemas';
 import { IEvent } from '../generated/schemas';
-import { FindOptionsType } from './event_log_client';
-import { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
-export { QueryEventsBySavedObjectResult } from './es/cluster_client_adapter';
+import { AggregateOptionsType, FindOptionsType } from './event_log_client';
+import {
+  AggregateEventsBySavedObjectResult,
+  QueryEventsBySavedObjectResult,
+} from './es/cluster_client_adapter';
+
+export type {
+  QueryEventsBySavedObjectResult,
+  AggregateEventsBySavedObjectResult,
+} from './es/cluster_client_adapter';
 import { SavedObjectProvider } from './saved_object_provider_registry';
 
 export const SAVED_OBJECT_REL_PRIMARY = 'primary';
@@ -33,6 +41,8 @@ export interface IEventLogService {
   getProviderActions(): Map<string, Set<string>>;
   registerSavedObjectProvider(type: string, provider: SavedObjectProvider): void;
   getLogger(properties: IEvent): IEventLogger;
+  getIndexPattern(): string;
+  isEsContextReady(): Promise<boolean>;
 }
 
 export interface IEventLogClientService {
@@ -46,11 +56,17 @@ export interface IEventLogClient {
     options?: Partial<FindOptionsType>,
     legacyIds?: string[]
   ): Promise<QueryEventsBySavedObjectResult>;
+  aggregateEventsBySavedObjectIds(
+    type: string,
+    ids: string[],
+    options?: Partial<AggregateOptionsType>,
+    legacyIds?: string[]
+  ): Promise<AggregateEventsBySavedObjectResult>;
 }
 
 export interface IEventLogger {
   logEvent(properties: IEvent): void;
-  startTiming(event: IEvent): void;
+  startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
 }
 
@@ -64,9 +80,9 @@ export interface EventLogApiRequestHandlerContext {
 /**
  * @internal
  */
-export interface EventLogRequestHandlerContext extends RequestHandlerContext {
+export type EventLogRequestHandlerContext = CustomRequestHandlerContext<{
   eventLog: EventLogApiRequestHandlerContext;
-}
+}>;
 
 /**
  * @internal

@@ -15,10 +15,10 @@ import { InstructionSet } from './instruction_set';
 import { SavedObjectsInstaller } from './saved_objects_installer';
 import { EuiSpacer, EuiPanel, EuiButton, EuiButtonGroup, EuiFormRow } from '@elastic/eui';
 import * as StatusCheckStates from './status_check_states';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getServices } from '../../kibana_services';
-import { KibanaPageTemplate } from '../../../../../kibana_react/public';
+import { KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
 
 const INSTRUCTIONS_TYPE = {
   ELASTIC_CLOUD: 'elasticCloud',
@@ -414,6 +414,7 @@ class TutorialUi extends React.Component {
       content = (
         <div>
           <Introduction
+            category={this.state.tutorial.category}
             title={this.state.tutorial.name}
             description={this.props.replaceTemplateStrings(this.state.tutorial.longDescription)}
             previewUrl={previewUrl}
@@ -421,6 +422,7 @@ class TutorialUi extends React.Component {
             iconType={icon}
             isBeta={this.state.tutorial.isBeta}
             notices={this.renderModuleNotices()}
+            basePath={getServices().http.basePath}
           />
 
           {this.renderInstructionSetsToggle()}

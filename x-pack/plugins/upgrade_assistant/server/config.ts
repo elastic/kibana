@@ -8,7 +8,7 @@ import { SemVer } from 'semver';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'src/core/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 import { MAJOR_VERSION } from '../common/constants';
 
@@ -17,20 +17,17 @@ const kibanaVersion = new SemVer(MAJOR_VERSION);
 // -------------------------------
 // >= 8.x
 // -------------------------------
-const schemaLatest = schema.object(
-  {
-    ui: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-    }),
-    /*
-     * This will default to true up until the last minor before the next major.
-     * In readonly mode, the user will not be able to perform any actions in the UI
-     * and will be presented with a message indicating as such.
-     */
-    readonly: schema.boolean({ defaultValue: true }),
-  },
-  { defaultValue: undefined }
-);
+const schemaLatest = schema.object({
+  ui: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+  /*
+   * This will default to true up until the last minor before the next major.
+   * In readonly mode, the user will not be able to perform any actions in the UI
+   * and will be presented with a message indicating as such.
+   */
+  readonly: schema.boolean({ defaultValue: true }),
+});
 
 const configLatest: PluginConfigDescriptor<UpgradeAssistantConfig> = {
   exposeToBrowser: {
@@ -46,21 +43,18 @@ export type UpgradeAssistantConfig = TypeOf<typeof schemaLatest>;
 // -------------------------------
 // 7.x
 // -------------------------------
-const schema7x = schema.object(
-  {
+const schema7x = schema.object({
+  enabled: schema.boolean({ defaultValue: true }),
+  ui: schema.object({
     enabled: schema.boolean({ defaultValue: true }),
-    ui: schema.object({
-      enabled: schema.boolean({ defaultValue: true }),
-    }),
-    /*
-     * This will default to true up until the last minor before the next major.
-     * In readonly mode, the user will not be able to perform any actions in the UI
-     * and will be presented with a message indicating as such.
-     */
-    readonly: schema.boolean({ defaultValue: true }),
-  },
-  { defaultValue: undefined }
-);
+  }),
+  /*
+   * This will default to true up until the last minor before the next major.
+   * In readonly mode, the user will not be able to perform any actions in the UI
+   * and will be presented with a message indicating as such.
+   */
+  readonly: schema.boolean({ defaultValue: false }),
+});
 
 export type UpgradeAssistantConfig7x = TypeOf<typeof schema7x>;
 

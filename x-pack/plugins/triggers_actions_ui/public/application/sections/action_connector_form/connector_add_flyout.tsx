@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState, useReducer, useEffect } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiTitle,
   EuiFlyoutHeader,
@@ -22,7 +22,7 @@ import {
   EuiCallOut,
   EuiSpacer,
 } from '@elastic/eui';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeMenu } from './action_type_menu';
 import { ActionConnectorForm, getConnectorErrors } from './action_connector_form';
@@ -231,7 +231,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
         {onTestConnector && (
           <EuiFlexItem grow={false}>
             <EuiButton
-              color="secondary"
+              color="success"
               data-test-subj="saveAndTestNewActionButton"
               type="submit"
               isLoading={isSaving}
@@ -252,7 +252,7 @@ const ConnectorAddFlyout: React.FunctionComponent<ConnectorAddFlyoutProps> = ({
         <EuiFlexItem grow={false}>
           <EuiButton
             fill
-            color="secondary"
+            color="success"
             data-test-subj="saveNewActionButton"
             type="submit"
             isLoading={isSaving}

@@ -6,14 +6,11 @@
  */
 
 import sinon from 'sinon';
-import {
-  elasticsearchServiceMock,
-  savedObjectsRepositoryMock,
-} from '../../../../../src/core/server/mocks';
-import { SavedObjectsErrorHelpers, Logger } from '../../../../../src/core/server';
+import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers, Logger } from '@kbn/core/server';
 import { ADJUST_THROUGHPUT_INTERVAL } from '../lib/create_managed_configuration';
 import { TaskManagerPlugin, TaskManagerStartContract } from '../plugin';
-import { coreMock } from '../../../../../src/core/server/mocks';
+import { coreMock } from '@kbn/core/server/mocks';
 import { TaskManagerConfig } from '../config';
 
 describe('managed configuration', () => {
@@ -24,13 +21,25 @@ describe('managed configuration', () => {
   const savedObjectsClient = savedObjectsRepositoryMock.create();
   const esStart = elasticsearchServiceMock.createStart();
 
+  const inlineScriptError = new Error('cannot execute [inline] scripts" error') as Error & {
+    meta: unknown;
+  };
+  inlineScriptError.meta = {
+    body: {
+      error: {
+        caused_by: {
+          reason: 'cannot execute [inline] scripts',
+        },
+      },
+    },
+  };
+
   beforeEach(async () => {
     jest.resetAllMocks();
     clock = sinon.useFakeTimers();
 
     const context = coreMock.createPluginInitializerContext<TaskManagerConfig>({
       max_workers: 10,
-      index: 'foo',
       max_attempts: 9,
       poll_interval: 3000,
       version_conflict_threshold: 80,
@@ -56,6 +65,10 @@ describe('managed configuration', () => {
       },
       unsafe: {
         exclude_task_types: [],
+      },
+      event_loop_delay: {
+        monitor: true,
+        warn_threshold: 5000,
       },
     });
     logger = context.logger.get('taskManager');
@@ -131,16 +144,12 @@ describe('managed configuration', () => {
   });
 
   test('should lower max workers when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
-    esStart
-      .createClient('taskManager')
-      .asInternalUser.search.mockRejectedValueOnce(
-        elasticsearchServiceMock.createErrorTransportRequestPromise(
-          new Error('cannot execute [inline] scripts" error')
-        )
-      );
+    esStart.client.asInternalUser.search.mockImplementationOnce(async () => {
+      throw inlineScriptError;
+    });
 
     await expect(taskManagerStart.fetch({})).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"cannot execute [inline] scripts" error"`
+      `"cannot execute [inline] scripts\\" error"`
     );
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
@@ -154,16 +163,12 @@ describe('managed configuration', () => {
   });
 
   test('should increase poll interval when Elasticsearch returns "cannot execute [inline] scripts" error', async () => {
-    esStart
-      .createClient('taskManager')
-      .asInternalUser.search.mockRejectedValueOnce(
-        elasticsearchServiceMock.createErrorTransportRequestPromise(
-          new Error('cannot execute [inline] scripts" error')
-        )
-      );
+    esStart.client.asInternalUser.search.mockImplementationOnce(async () => {
+      throw inlineScriptError;
+    });
 
     await expect(taskManagerStart.fetch({})).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"cannot execute [inline] scripts" error"`
+      `"cannot execute [inline] scripts\\" error"`
     );
 
     clock.tick(ADJUST_THROUGHPUT_INTERVAL);

@@ -8,22 +8,23 @@
 import { of } from 'rxjs';
 import { v4 } from 'uuid';
 
-import { Logger, SavedObject } from 'kibana/server';
-import { elasticsearchServiceMock, savedObjectsClientMock } from 'src/core/server/mocks';
-import { mlPluginServerMock } from '../../../../../../ml/server/mocks';
+import { Logger, SavedObject } from '@kbn/core/server';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 
-import type { IRuleDataClient } from '../../../../../../rule_registry/server';
-import { ruleRegistryMocks } from '../../../../../../rule_registry/server/mocks';
-import { eventLogServiceMock } from '../../../../../../event_log/server/mocks';
-import { PluginSetupContract as AlertingPluginSetupContract } from '../../../../../../alerting/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
+import { eventLogServiceMock } from '@kbn/event-log-plugin/server/mocks';
+import { PluginSetupContract as AlertingPluginSetupContract } from '@kbn/alerting-plugin/server';
 import { ConfigType } from '../../../../config';
 import { AlertAttributes } from '../../signals/types';
 import { createRuleMock } from './rule';
-import { listMock } from '../../../../../../lists/server/mocks';
-import { RuleParams } from '../../schemas/rule_schemas';
+import { listMock } from '@kbn/lists-plugin/server/mocks';
+import { QueryRuleParams, RuleParams } from '../../schemas/rule_schemas';
 // this is only used in tests
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { createDefaultAlertExecutorOptions } from '../../../../../../rule_registry/server/utils/rule_executor_test_utils';
+import { createDefaultAlertExecutorOptions } from '@kbn/rule-registry-plugin/server/utils/rule_executor_test_utils';
+import { getCompleteRuleMock } from '../../schemas/rule_schemas.mock';
 
 export const createRuleTypeMocks = (
   ruleType: string = 'query',
@@ -74,10 +75,14 @@ export const createRuleTypeMocks = (
   const services = {
     savedObjectsClient: mockSavedObjectsClient,
     scopedClusterClient: elasticsearchServiceMock.createScopedClusterClient(),
-    alertInstanceFactory: jest.fn(() => ({ scheduleActions })),
+    alertFactory: {
+      create: jest.fn(() => ({ scheduleActions })),
+      done: jest.fn().mockResolvedValue({}),
+    },
     findAlerts: jest.fn(), // TODO: does this stay?
     alertWithPersistence: jest.fn(),
     logger: loggerMock,
+    shouldWriteAlerts: () => true,
   };
 
   return {
@@ -88,9 +93,15 @@ export const createRuleTypeMocks = (
       lists: listMock.createSetup(),
       logger: loggerMock,
       ml: mlPluginServerMock.createSetupContract(),
-      ruleDataClient: ruleRegistryMocks.createRuleDataClient(
-        '.alerts-security.alerts'
-      ) as IRuleDataClient,
+      ruleDataClient: {
+        ...(ruleRegistryMocks.createRuleDataClient('.alerts-security.alerts') as IRuleDataClient),
+        getReader: jest.fn((_options?: { namespace?: string }) => ({
+          search: jest.fn().mockResolvedValue({
+            aggregations: undefined,
+          }),
+          getDynamicIndexPattern: jest.fn(),
+        })),
+      },
       eventLogService: eventLogServiceMock.create(),
     },
     services,
@@ -102,6 +113,9 @@ export const createRuleTypeMocks = (
           alertId: v4(),
           state: {},
         }),
+        runOpts: {
+          completeRule: getCompleteRuleMock(params as QueryRuleParams),
+        },
         services,
       });
     },

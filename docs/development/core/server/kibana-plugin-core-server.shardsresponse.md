@@ -15,8 +15,8 @@ export interface ShardsResponse
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [failed](./kibana-plugin-core-server.shardsresponse.failed.md) | <code>number</code> |  |
-|  [skipped](./kibana-plugin-core-server.shardsresponse.skipped.md) | <code>number</code> |  |
-|  [successful](./kibana-plugin-core-server.shardsresponse.successful.md) | <code>number</code> |  |
-|  [total](./kibana-plugin-core-server.shardsresponse.total.md) | <code>number</code> |  |
+|  [failed](./kibana-plugin-core-server.shardsresponse.failed.md) | number |  |
+|  [skipped](./kibana-plugin-core-server.shardsresponse.skipped.md) | number |  |
+|  [successful](./kibana-plugin-core-server.shardsresponse.successful.md) | number |  |
+|  [total](./kibana-plugin-core-server.shardsresponse.total.md) | number |  |
 

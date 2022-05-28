@@ -7,9 +7,8 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import semverLt from 'semver/functions/lt';
-import { uniq } from 'lodash';
 
 import {
   EuiCallOut,
@@ -23,6 +22,9 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
+import type { Observable } from 'rxjs';
+import type { CoreTheme } from '@kbn/core/public';
+
 import type { PackageInfo, UpgradePackagePolicyDryRunResponse } from '../../../../../types';
 import { InstallStatus } from '../../../../../types';
 import {
@@ -35,8 +37,9 @@ import {
 } from '../../../../../hooks';
 import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  AUTO_UPDATE_PACKAGES,
-  DEFAULT_PACKAGES,
+  KEEP_POLICIES_UP_TO_DATE_PACKAGES,
+  AUTO_UPGRADE_POLICIES_PACKAGES,
+  SO_SEARCH_LIMIT,
 } from '../../../../../constants';
 
 import { KeepPoliciesUpToDateSwitch } from '../components';
@@ -46,8 +49,8 @@ import { UpdateButton } from './update_button';
 import { UninstallButton } from './uninstall_button';
 
 const SettingsTitleCell = styled.td`
-  padding-right: ${(props) => props.theme.eui.spacerSizes.xl};
-  padding-bottom: ${(props) => props.theme.eui.spacerSizes.m};
+  padding-right: ${(props) => props.theme.eui.euiSizeXL};
+  padding-bottom: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 const NoteLabel = () => (
@@ -91,15 +94,16 @@ const LatestVersionLink = ({ name, version }: { name: string; version: string })
 
 interface Props {
   packageInfo: PackageInfo;
+  theme$: Observable<CoreTheme>;
 }
 
-export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
-  const { name, title, removable, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
+export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Props) => {
+  const { name, title, latestVersion, version, keepPoliciesUpToDate } = packageInfo;
   const [dryRunData, setDryRunData] = useState<UpgradePackagePolicyDryRunResponse | null>();
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { data: packagePoliciesData } = useGetPackagePolicies({
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
     page: 1,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${name}`,
   });
@@ -107,11 +111,11 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
   const { notifications } = useStartServices();
 
   const shouldShowKeepPoliciesUpToDateSwitch = useMemo(() => {
-    const packages = [...DEFAULT_PACKAGES, ...AUTO_UPDATE_PACKAGES];
+    return KEEP_POLICIES_UP_TO_DATE_PACKAGES.some((pkg) => pkg.name === name);
+  }, [name]);
 
-    const packageNames = uniq(packages.map((pkg) => pkg.name));
-
-    return packageNames.includes(name);
+  const isShowKeepPoliciesUpToDateSwitchDisabled = useMemo(() => {
+    return AUTO_UPGRADE_POLICIES_PACKAGES.some((pkg) => pkg.name === name);
   }, [name]);
 
   const [keepPoliciesUpToDateSwitchValue, setKeepPoliciesUpToDateSwitchValue] = useState<boolean>(
@@ -123,7 +127,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
       try {
         setKeepPoliciesUpToDateSwitchValue((prev) => !prev);
 
-        await sendUpdatePackage(`${packageInfo.name}-${packageInfo.version}`, {
+        await sendUpdatePackage(packageInfo.name, packageInfo.version, {
           keepPoliciesUpToDate: !keepPoliciesUpToDateSwitchValue,
         });
 
@@ -249,7 +253,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       />
                     </SettingsTitleCell>
                     <td>
-                      <EuiTitle size="xs">
+                      <EuiTitle size="xs" data-test-subj="installedVersion">
                         <span>{installedVersion}</span>
                       </EuiTitle>
                     </td>
@@ -262,7 +266,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       />
                     </SettingsTitleCell>
                     <td>
-                      <EuiTitle size="xs">
+                      <EuiTitle size="xs" data-test-subj="latestVersion">
                         <span>{latestVersion}</span>
                       </EuiTitle>
                     </td>
@@ -274,6 +278,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   <KeepPoliciesUpToDateSwitch
                     checked={keepPoliciesUpToDateSwitchValue}
                     onChange={handleKeepPoliciesUpToDateSwitchChange}
+                    disabled={isShowKeepPoliciesUpToDateSwitchDisabled}
                   />
                   <EuiSpacer size="l" />
                 </>
@@ -291,6 +296,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                       dryRunData={dryRunData}
                       isUpgradingPackagePolicies={isUpgradingPackagePolicies}
                       setIsUpgradingPackagePolicies={setIsUpgradingPackagePolicies}
+                      theme$={theme$}
                     />
                   </p>
                 </>
@@ -337,60 +343,44 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo }: Props) => {
                   </EuiFlexGroup>
                 </div>
               ) : (
-                removable && (
-                  <>
-                    <div>
-                      <EuiTitle>
-                        <h4>
-                          <FormattedMessage
-                            id="xpack.fleet.integrations.settings.packageUninstallTitle"
-                            defaultMessage="Uninstall"
-                          />
-                        </h4>
-                      </EuiTitle>
-                      <EuiSpacer size="s" />
-                      <p>
+                <>
+                  <div>
+                    <EuiTitle>
+                      <h4>
                         <FormattedMessage
-                          id="xpack.fleet.integrations.settings.packageUninstallDescription"
-                          defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
+                          id="xpack.fleet.integrations.settings.packageUninstallTitle"
+                          defaultMessage="Uninstall"
+                        />
+                      </h4>
+                    </EuiTitle>
+                    <EuiSpacer size="s" />
+                    <p>
+                      <FormattedMessage
+                        id="xpack.fleet.integrations.settings.packageUninstallDescription"
+                        defaultMessage="Remove Kibana and Elasticsearch assets that were installed by this integration."
+                      />
+                    </p>
+                  </div>
+                  <EuiFlexGroup>
+                    <EuiFlexItem grow={false}>
+                      <p>
+                        <UninstallButton
+                          {...packageInfo}
+                          numOfAssets={numOfAssets}
+                          latestVersion={latestVersion}
+                          disabled={!packagePoliciesData || packageHasUsages}
                         />
                       </p>
-                    </div>
-                    <EuiFlexGroup>
-                      <EuiFlexItem grow={false}>
-                        <p>
-                          <UninstallButton
-                            {...packageInfo}
-                            numOfAssets={numOfAssets}
-                            latestVersion={latestVersion}
-                            disabled={!packagePoliciesData || packageHasUsages}
-                          />
-                        </p>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </>
-                )
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </>
               )}
-              {packageHasUsages && removable === true && (
+              {packageHasUsages && (
                 <p>
                   <EuiText color="subdued">
                     <FormattedMessage
                       id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallNoteDetail"
                       defaultMessage="{strongNote} {title} cannot be uninstalled because there are active agents that use this integration. To uninstall, remove all {title} integrations from your agent policies."
-                      values={{
-                        title,
-                        strongNote: <NoteLabel />,
-                      }}
-                    />
-                  </EuiText>
-                </p>
-              )}
-              {removable === false && (
-                <p>
-                  <EuiText color="subdued">
-                    <FormattedMessage
-                      id="xpack.fleet.integrations.settings.packageUninstallNoteDescription.packageUninstallUninstallableNoteDetail"
-                      defaultMessage="{strongNote} The {title} integration is a system integration and cannot be removed."
                       values={{
                         title,
                         strongNote: <NoteLabel />,

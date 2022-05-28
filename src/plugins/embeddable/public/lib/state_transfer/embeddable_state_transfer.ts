@@ -7,8 +7,8 @@
  */
 
 import { cloneDeep } from 'lodash';
-import { Storage } from '../../../../kibana_utils/public';
-import { ApplicationStart, PublicAppInfo } from '../../../../../core/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
 import {
   EmbeddableEditorState,
   isEmbeddableEditorState,
@@ -29,15 +29,17 @@ export const EMBEDDABLE_STATE_TRANSFER_STORAGE_KEY = 'EMBEDDABLE_STATE_TRANSFER'
 export class EmbeddableStateTransfer {
   public isTransferInProgress: boolean;
   private storage: Storage;
+  private appList: ReadonlyMap<string, PublicAppInfo> | undefined;
 
   constructor(
     private navigateToApp: ApplicationStart['navigateToApp'],
     currentAppId$: ApplicationStart['currentAppId$'],
-    private appList?: ReadonlyMap<string, PublicAppInfo> | undefined,
+    appList?: ReadonlyMap<string, PublicAppInfo> | undefined,
     customStorage?: Storage
   ) {
     this.storage = customStorage ? customStorage : new Storage(sessionStorage);
     this.isTransferInProgress = false;
+    this.appList = appList;
     currentAppId$.subscribe(() => {
       this.isTransferInProgress = false;
     });

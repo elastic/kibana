@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-// eslint-disable-next-line
 const webpackConfig = require('./target_node/webpack.config');
 
 module.exports = {
   managerEntries: (entry = []) => {
-    return [...entry, require.resolve('./target_node/lib/register')];
+    return [require.resolve('./target_node/lib/register'), ...entry];
   },
   webpackFinal: (config) => {
     return webpackConfig({ config });
+  },
+  config: (entry) => {
+    return [...entry, require.resolve('./target_node/lib/decorators')];
   },
 };

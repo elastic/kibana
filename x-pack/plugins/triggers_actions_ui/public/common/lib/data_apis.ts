@@ -5,9 +5,21 @@
  * 2.0.
  */
 
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
+import { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
 
 const DATA_API_ROOT = '/api/triggers_actions_ui/data';
+
+const formatPattern = (pattern: string) => {
+  let formattedPattern = pattern;
+  if (!formattedPattern.startsWith('*')) {
+    formattedPattern = `*${formattedPattern}`;
+  }
+  if (!formattedPattern.endsWith('*')) {
+    formattedPattern = `${formattedPattern}*`;
+  }
+  return formattedPattern;
+};
 
 export async function getMatchingIndices({
   pattern,
@@ -16,16 +28,17 @@ export async function getMatchingIndices({
   pattern: string;
   http: HttpSetup;
 }): Promise<Record<string, any>> {
-  if (!pattern.startsWith('*')) {
-    pattern = `*${pattern}`;
+  try {
+    const formattedPattern = formatPattern(pattern);
+
+    const { indices } = await http.post<ReturnType<typeof getMatchingIndices>>(
+      `${DATA_API_ROOT}/_indices`,
+      { body: JSON.stringify({ pattern: formattedPattern }) }
+    );
+    return indices;
+  } catch (e) {
+    return [];
   }
-  if (!pattern.endsWith('*')) {
-    pattern = `${pattern}*`;
-  }
-  const { indices } = await http.post(`${DATA_API_ROOT}/_indices`, {
-    body: JSON.stringify({ pattern }),
-  });
-  return indices;
 }
 
 export async function getESIndexFields({
@@ -43,27 +56,33 @@ export async function getESIndexFields({
     aggregatable: boolean;
   }>
 > {
-  const { fields } = await http.post(`${DATA_API_ROOT}/_fields`, {
-    body: JSON.stringify({ indexPatterns: indexes }),
-  });
+  const { fields } = await http.post<{ fields: ReturnType<typeof getESIndexFields> }>(
+    `${DATA_API_ROOT}/_fields`,
+    { body: JSON.stringify({ indexPatterns: indexes }) }
+  );
   return fields;
 }
 
-let savedObjectsClient: any;
+type DataViewsService = Pick<DataViewsContract, 'find'>;
+let dataViewsService: DataViewsService;
 
-export const setSavedObjectsClient = (aSavedObjectsClient: any) => {
-  savedObjectsClient = aSavedObjectsClient;
+export const setDataViewsService = (aDataViewsService: DataViewsService) => {
+  dataViewsService = aDataViewsService;
 };
 
-export const getSavedObjectsClient = () => {
-  return savedObjectsClient;
+export const getDataViewsService = () => {
+  return dataViewsService;
 };
 
-export const loadIndexPatterns = async () => {
-  const { savedObjects } = await getSavedObjectsClient().find({
-    type: 'index-pattern',
-    fields: ['title'],
-    perPage: 10000,
-  });
-  return savedObjects;
+export const loadIndexPatterns = async (pattern: string) => {
+  const formattedPattern = formatPattern(pattern);
+  const perPage = 1000;
+
+  try {
+    const dataViews: DataView[] = await getDataViewsService().find(formattedPattern, perPage);
+
+    return dataViews.map((dataView: DataView) => dataView.title);
+  } catch (e) {
+    return [];
+  }
 };

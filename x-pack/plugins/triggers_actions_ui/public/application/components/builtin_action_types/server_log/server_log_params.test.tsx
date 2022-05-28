@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { ServerLogLevelOptions } from '.././types';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { ServerLogLevelOptions } from '../types';
 import ServerLogParamsFields from './server_log_params';
 
 describe('ServerLogParamsFields renders', () => {

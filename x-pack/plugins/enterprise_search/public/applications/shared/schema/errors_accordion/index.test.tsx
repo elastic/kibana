@@ -15,18 +15,18 @@ import { EuiLinkTo } from '../../react_router_helpers';
 
 import { SchemaType } from '../types';
 
-import { SchemaErrorsAccordion } from './';
+import { SchemaErrorsAccordion } from '.';
 
 describe('SchemaErrorsAccordion', () => {
   const props = {
     fieldCoercionErrors: {
       id: [
         {
-          external_id: 'foo',
+          id: 'foo',
           error: 'this is an error',
         },
         {
-          external_id: 'bar',
+          id: 'bar',
           error: 'this is another error',
         },
       ],

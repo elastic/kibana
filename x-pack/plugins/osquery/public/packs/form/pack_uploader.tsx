@@ -9,7 +9,7 @@ import { kebabCase } from 'lodash';
 import { EuiLink, EuiFormRow, EuiFilePicker, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 const SUPPORTED_PACK_EXTENSIONS = ['application/json', 'text/plain'];
 
@@ -47,6 +47,12 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
           // remove any multiple spaces from the query
           return value.replaceAll(/\s(?=\s)/gm, '');
         }
+
+        if (key === 'interval') {
+          // convert interval int to string
+          return `${value}`;
+        }
+
         return value;
       });
 
@@ -78,6 +84,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
     (inputFiles) => {
       if (!inputFiles.length) {
         packName.current = '';
+
         return;
       }
 
@@ -99,6 +106,7 @@ const OsqueryPackUploaderComponent: React.FC<OsqueryPackUploaderProps> = ({ onCh
         );
         // @ts-expect-error update types
         filePickerRef.current?.removeFiles(new Event('fake'));
+
         return;
       }
 

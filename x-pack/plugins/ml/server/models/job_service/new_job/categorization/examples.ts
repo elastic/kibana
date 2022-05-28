@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { chunk } from 'lodash';
 import { CATEGORY_EXAMPLES_SAMPLE_SIZE } from '../../../../../common/constants/categorization_job';
 import {
@@ -62,18 +62,21 @@ export function categorizationExamplesProvider({
         }
       }
     }
-    const { body } = await asCurrentUser.search<estypes.SearchResponse<{ [id: string]: string }>>({
-      index: indexPatternTitle,
-      size,
-      body: {
-        fields: [categorizationFieldName],
-        _source: false,
-        query,
-        sort: ['_doc'],
-        ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+    const body = await asCurrentUser.search<estypes.SearchResponse<{ [id: string]: string }>>(
+      {
+        index: indexPatternTitle,
+        size,
+        body: {
+          fields: [categorizationFieldName],
+          _source: false,
+          query,
+          sort: ['_doc'],
+          ...(runtimeMappings !== undefined ? { runtime_mappings: runtimeMappings } : {}),
+        },
+        ...(indicesOptions ?? {}),
       },
-      ...(indicesOptions ?? {}),
-    });
+      { maxRetries: 0 }
+    );
 
     // hit.fields can be undefined if value is originally null
     const tempExamples = body.hits.hits.map(({ fields }) =>
@@ -126,14 +129,15 @@ export function categorizationExamplesProvider({
   }
 
   async function loadTokens(examples: string[], analyzer: CategorizationAnalyzer) {
-    const {
-      body: { tokens },
-    } = await asInternalUser.indices.analyze({
-      body: {
-        ...getAnalyzer(analyzer),
-        text: examples,
+    const { tokens } = await asInternalUser.indices.analyze(
+      {
+        body: {
+          ...getAnalyzer(analyzer),
+          text: examples,
+        },
       },
-    });
+      { maxRetries: 0 }
+    );
 
     const lengths = examples.map((e) => e.length);
     const sumLengths = lengths.map(

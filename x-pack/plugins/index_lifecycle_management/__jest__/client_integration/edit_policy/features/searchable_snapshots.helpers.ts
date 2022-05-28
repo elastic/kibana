@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   createForceMergeActions,
-  createFreezeActions,
   createMinAgeActions,
   createReadonlyActions,
   createRolloverActions,
@@ -23,10 +23,13 @@ type SetupReturn = ReturnType<typeof setupSearchableSnapshotsTestBed>;
 
 export type SearchableSnapshotsTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setupSearchableSnapshotsTestBed = async (args?: {
-  appServicesContext?: Partial<AppServicesContext>;
-}) => {
-  const testBed = await initTestBed(args);
+export const setupSearchableSnapshotsTestBed = async (
+  httpSetup: HttpSetup,
+  args?: {
+    appServicesContext?: Partial<AppServicesContext>;
+  }
+) => {
+  const testBed = await initTestBed(httpSetup, args);
 
   return {
     ...testBed,
@@ -47,7 +50,6 @@ export const setupSearchableSnapshotsTestBed = async (args?: {
       cold: {
         ...createMinAgeActions(testBed, 'cold'),
         ...createSearchableSnapshotActions(testBed, 'cold'),
-        ...createFreezeActions(testBed, 'cold'),
         ...createReadonlyActions(testBed, 'cold'),
       },
       frozen: {

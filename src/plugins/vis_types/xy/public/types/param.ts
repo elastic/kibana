@@ -7,14 +7,16 @@
  */
 
 import type { Fit, Position } from '@elastic/charts';
-import type { Style, Labels, PaletteOutput } from '../../../../charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { Style, Labels } from '@kbn/charts-plugin/public';
 import type {
   SchemaConfig,
   ExpressionValueXYDimension,
   FakeParams,
   HistogramParams,
   DateHistogramParams,
-} from '../../../../visualizations/public';
+  LegendSize,
+} from '@kbn/visualizations-plugin/public';
 import type { ChartType, XyVisType } from '../../common';
 import type {
   ExpressionValueCategoryAxis,
@@ -123,6 +125,7 @@ export interface VisParams {
   addTimeMarker: boolean;
   truncateLegend: boolean;
   maxLegendLines: number;
+  legendSize?: LegendSize;
   categoryAxes: CategoryAxis[];
   orderBucketsBySum?: boolean;
   labels: Labels;
@@ -145,6 +148,7 @@ export interface VisParams {
   palette: PaletteOutput;
   fillOpacity?: number;
   fittingFunction?: Exclude<Fit, 'explicit'>;
+  ariaLabel?: string;
 }
 
 export interface XYVisConfig {
@@ -162,6 +166,7 @@ export interface XYVisConfig {
   addTimeMarker: boolean;
   truncateLegend: boolean;
   maxLegendLines: number;
+  legendSize?: LegendSize;
   orderBucketsBySum?: boolean;
   labels: ExpressionValueLabel;
   thresholdLine: ExpressionValueThresholdLine;
@@ -185,4 +190,5 @@ export interface XYVisConfig {
   seriesDimension?: ExpressionValueXYDimension[];
   splitRowDimension?: ExpressionValueXYDimension[];
   splitColumnDimension?: ExpressionValueXYDimension[];
+  ariaLabel?: string;
 }

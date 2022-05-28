@@ -136,13 +136,6 @@ export const ALERTS_HEADERS_THRESHOLD_CARDINALITY = i18n.translate(
   }
 );
 
-export const ALERTS_HEADERS_TARGET_IMPORT_HASH = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.overviewTable.targetImportHash',
-  {
-    defaultMessage: 'Import Hash',
-  }
-);
-
 export const ACTION_OPEN_ALERT = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.openAlertTitle',
   {
@@ -189,6 +182,14 @@ export const ACTION_ADD_EVENT_FILTER = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter',
   {
     defaultMessage: 'Add Endpoint event filter',
+  }
+);
+
+export const ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addEventFilter.disabled.tooltip',
+  {
+    defaultMessage:
+      'Endpoint event filters can be created from the Events section of the Hosts page.',
   }
 );
 
@@ -265,6 +266,20 @@ export const STATUS = i18n.translate(
   }
 );
 
+export const CHANGE_ALERT_STATUS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overview.changeAlertStatus',
+  {
+    defaultMessage: 'Change alert status',
+  }
+);
+
+export const CLICK_TO_CHANGE_ALERT_STATUS = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.overview.clickToChangeAlertStatus',
+  {
+    defaultMessage: 'Click to change alert status',
+  }
+);
+
 export const SIGNAL_STATUS = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.overviewTable.signalStatusTitle',
   {
@@ -279,9 +294,23 @@ export const TRIGGERED = i18n.translate(
   }
 );
 
-export const TIMESTAMP = i18n.translate(
-  'xpack.securitySolution.eventsViewer.alerts.overviewTable.timestampTitle',
+export const ADD_TO_EXISTING_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToCase',
   {
-    defaultMessage: 'Timestamp',
+    defaultMessage: 'Add to existing case',
+  }
+);
+
+export const ADD_TO_NEW_CASE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToNewCase',
+  {
+    defaultMessage: 'Add to new case',
+  }
+);
+
+export const ADD_TO_CASE_DISABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.addToCaseDisabled',
+  {
+    defaultMessage: 'Add to case is not supported for this selection',
   }
 );

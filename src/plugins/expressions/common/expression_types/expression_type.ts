@@ -12,7 +12,7 @@ import { getType } from './get_type';
 
 export class ExpressionType {
   name: string;
-
+  namespace?: string;
   /**
    * A short help text.
    */
@@ -30,11 +30,13 @@ export class ExpressionType {
    */
   serialize?: (value: Serializable) => unknown;
   deserialize?: (serialized: unknown[]) => Serializable;
+  private readonly definition: AnyExpressionTypeDefinition;
 
-  constructor(private readonly definition: AnyExpressionTypeDefinition) {
-    const { name, help, deserialize, serialize, validate } = definition;
+  constructor(definition: AnyExpressionTypeDefinition) {
+    const { name, help, deserialize, serialize, validate, namespace } = definition;
 
     this.name = name;
+    this.namespace = namespace;
     this.help = help || '';
     this.validate = validate || (() => {});
 
@@ -43,6 +45,7 @@ export class ExpressionType {
 
     this.serialize = serialize;
     this.deserialize = deserialize;
+    this.definition = definition;
   }
 
   getToFn = (

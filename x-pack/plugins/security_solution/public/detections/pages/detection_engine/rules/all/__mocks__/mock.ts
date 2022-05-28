@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { esFilters } from '../../../../../../../../../../src/plugins/data/public';
+import { FilterStateStore } from '@kbn/es-query';
 import { Rule, RuleError } from '../../../../../containers/detection_engine/rules';
 import { AboutStepRule, ActionsStepRule, DefineStepRule, ScheduleStepRule } from '../../types';
 import { FieldValueQueryBar } from '../../../../../components/rules/query_bar';
@@ -20,7 +20,7 @@ export const mockQueryBar: FieldValueQueryBar = {
   filters: [
     {
       $state: {
-        store: esFilters.FilterStateStore.GLOBAL_STATE,
+        store: FilterStateStore.GLOBAL_STATE,
       },
       meta: {
         alias: null,
@@ -70,6 +70,9 @@ export const mockRule = (id: string): Rule => ({
   timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
   timeline_title: 'Untitled timeline',
   meta: { from: '0m' },
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
   severity: 'low',
   severity_mapping: [],
   updated_by: 'elastic',
@@ -94,7 +97,7 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   filters: [
     {
       $state: {
-        store: esFilters.FilterStateStore.GLOBAL_STATE,
+        store: FilterStateStore.GLOBAL_STATE,
       },
       meta: {
         alias: null,
@@ -133,6 +136,9 @@ export const mockRuleWithEverything = (id: string): Rule => ({
   timeline_id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
   timeline_title: 'Titled timeline',
   meta: { from: '0m' },
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
   severity: 'low',
   severity_mapping: [],
   updated_by: 'elastic',
@@ -189,6 +195,8 @@ export const mockDefineStepRule = (): DefineStepRule => ({
   index: ['filebeat-'],
   queryBar: mockQueryBar,
   threatQueryBar: mockQueryBar,
+  requiredFields: [],
+  relatedIntegrations: [],
   threatMapping: [],
   timeline: {
     id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
@@ -203,6 +211,7 @@ export const mockDefineStepRule = (): DefineStepRule => ({
       value: '2',
     },
   },
+  eqlOptions: {},
 });
 
 export const mockScheduleStepRule = (): ScheduleStepRule => ({

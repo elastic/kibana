@@ -6,10 +6,10 @@
  */
 import { EuiCodeBlock, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpStart } from 'kibana/public';
+import { HttpStart } from '@kbn/core/public';
 import React, { useEffect, useMemo, useState } from 'react';
 import styled from 'styled-components';
-import { APIReturnType } from '../..//services/rest/createCallApmApi';
+import { APIReturnType } from '../../services/rest/create_call_apm_api';
 import { getCommands } from './commands/get_commands';
 import { getPolicyOptions, PolicyOption } from './get_policy_options';
 import { PolicySelector } from './policy_selector';
@@ -37,6 +37,7 @@ interface Props {
   http: HttpStart;
   basePath: string;
   isCloudEnabled: boolean;
+  kibanaVersion: string;
 }
 
 const INITIAL_STATE = {
@@ -49,10 +50,12 @@ function getFleetLink({
   isFleetEnabled,
   hasFleetAgents,
   basePath,
+  kibanaVersion,
 }: {
   isFleetEnabled: boolean;
   hasFleetAgents: boolean;
   basePath: string;
+  kibanaVersion: string;
 }) {
   if (!isFleetEnabled) {
     return;
@@ -65,7 +68,7 @@ function getFleetLink({
       }
     : {
         label: GET_STARTED_WITH_FLEET_LABEL,
-        href: `${basePath}/app/integrations#/detail/apm-0.4.0/overview`,
+        href: `${basePath}/app/integrations#/detail/apm/overview`,
       };
 }
 
@@ -74,6 +77,7 @@ function TutorialConfigAgent({
   http,
   basePath,
   isCloudEnabled,
+  kibanaVersion,
 }: Props) {
   const [data, setData] = useState<APIResponseType>(INITIAL_STATE);
   const [isLoading, setIsLoading] = useState(true);
@@ -137,6 +141,7 @@ function TutorialConfigAgent({
           isFleetEnabled: data.isFleetEnabled,
           hasFleetAgents,
           basePath,
+          kibanaVersion,
         })}
       />
 

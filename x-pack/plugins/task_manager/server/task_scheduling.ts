@@ -14,7 +14,7 @@ import uuid from 'uuid';
 import { pick } from 'lodash';
 import { merge, Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
-import { Logger } from '../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import { asOk, either, map, mapErr, promiseResult, isErr } from './lib/result_type';
 import {
   isTaskRunEvent,
@@ -99,9 +99,15 @@ export class TaskScheduling {
       ...options,
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
+
+    const traceparent =
+      agent.currentTransaction && agent.currentTransaction.type !== 'request'
+        ? agent.currentTraceparent
+        : '';
+
     return await this.store.schedule({
       ...modifiedTask,
-      traceparent: agent.currentTraceparent ?? '',
+      traceparent: traceparent || '',
     });
   }
 

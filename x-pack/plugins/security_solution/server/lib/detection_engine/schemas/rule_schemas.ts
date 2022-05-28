@@ -28,6 +28,17 @@ import {
 import { listArray } from '@kbn/securitysolution-io-ts-list-types';
 import { version } from '@kbn/securitysolution-io-ts-types';
 import {
+  SIGNALS_ID,
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
+
+import { SanitizedRuleConfig } from '@kbn/alerting-plugin/common';
+import {
   author,
   buildingBlockTypeOrUndefined,
   description,
@@ -52,7 +63,9 @@ import {
   timestampOverrideOrUndefined,
   to,
   references,
+  timestampFieldOrUndefined,
   eventCategoryOverrideOrUndefined,
+  tiebreakerFieldOrUndefined,
   savedIdOrUndefined,
   saved_id,
   thresholdNormalized,
@@ -61,17 +74,11 @@ import {
   updatedByOrNull,
   created_at,
   updated_at,
-} from '../../../../common/detection_engine/schemas/common/schemas';
-
-import {
-  SIGNALS_ID,
-  SERVER_APP_ID,
-  INDICATOR_RULE_TYPE_ID,
-  ML_RULE_TYPE_ID,
-  QUERY_RULE_TYPE_ID,
-  EQL_RULE_TYPE_ID,
-  THRESHOLD_RULE_TYPE_ID,
-} from '../../../../common/constants';
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
+} from '../../../../common/detection_engine/schemas/common';
+import { SERVER_APP_ID } from '../../../../common/constants';
 
 const nonEqlLanguages = t.keyof({ kuery: null, lucene: null });
 export const baseRuleParams = t.exact(
@@ -103,6 +110,9 @@ export const baseRuleParams = t.exact(
     references,
     version,
     exceptionsList: listArray,
+    relatedIntegrations: t.union([RelatedIntegrationArray, t.undefined]),
+    requiredFields: t.union([RequiredFieldArray, t.undefined]),
+    setup: t.union([SetupGuide, t.undefined]),
   })
 );
 export type BaseRuleParams = t.TypeOf<typeof baseRuleParams>;
@@ -113,7 +123,9 @@ const eqlSpecificRuleParams = t.type({
   index: indexOrUndefined,
   query,
   filters: filtersOrUndefined,
+  timestampField: timestampFieldOrUndefined,
   eventCategoryOverride: eventCategoryOverrideOrUndefined,
+  tiebreakerField: tiebreakerFieldOrUndefined,
 });
 export const eqlRuleParams = t.intersection([baseRuleParams, eqlSpecificRuleParams]);
 export type EqlRuleParams = t.TypeOf<typeof eqlRuleParams>;
@@ -199,6 +211,12 @@ export type TypeSpecificRuleParams = t.TypeOf<typeof typeSpecificRuleParams>;
 export const ruleParams = t.intersection([baseRuleParams, typeSpecificRuleParams]);
 export type RuleParams = t.TypeOf<typeof ruleParams>;
 
+export interface CompleteRule<T extends RuleParams> {
+  alertId: string;
+  ruleParams: T;
+  ruleConfig: SanitizedRuleConfig;
+}
+
 export const notifyWhen = t.union([
   t.literal('onActionGroupChange'),
   t.literal('onActiveAlert'),
@@ -209,9 +227,10 @@ export const notifyWhen = t.union([
 export const allRuleTypes = t.union([
   t.literal(SIGNALS_ID),
   t.literal(EQL_RULE_TYPE_ID),
+  t.literal(INDICATOR_RULE_TYPE_ID),
   t.literal(ML_RULE_TYPE_ID),
   t.literal(QUERY_RULE_TYPE_ID),
-  t.literal(INDICATOR_RULE_TYPE_ID),
+  t.literal(SAVED_QUERY_RULE_TYPE_ID),
   t.literal(THRESHOLD_RULE_TYPE_ID),
 ]);
 export type AllRuleTypes = t.TypeOf<typeof allRuleTypes>;

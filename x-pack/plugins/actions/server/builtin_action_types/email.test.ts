@@ -9,10 +9,10 @@ jest.mock('./lib/send_email', () => ({
   sendEmail: jest.fn(),
 }));
 
-import { Logger } from '../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 
 import { actionsConfigMock } from '../actions_config.mock';
-import { validateConfig, validateSecrets, validateParams } from '../lib';
+import { validateConfig, validateConnector, validateParams, validateSecrets } from '../lib';
 import { createActionTypeRegistry } from './index.test';
 import { sendEmail } from './lib/send_email';
 import { actionsMock } from '../mocks';
@@ -24,6 +24,7 @@ import {
   EmailActionType,
   EmailActionTypeExecutorOptions,
 } from './email';
+import { ValidateEmailAddressesOptions } from '../../common';
 
 const sendEmailMock = sendEmail as jest.Mock;
 
@@ -269,6 +270,26 @@ describe('config validation', () => {
       `"error validating action type config: [host] value 'smtp.gmail.com' is not in the allowedHosts configuration"`
     );
   });
+
+  test('config validation for emails calls validateEmailAddresses', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const basicActionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities,
+    });
+
+    expect(() => {
+      validateConfig(basicActionType, {
+        from: 'badmail',
+        service: 'gmail',
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [from]: stub for actual message"`
+    );
+    expect(configurationUtilities.validateEmailAddresses).toHaveBeenNthCalledWith(1, ['badmail']);
+  });
 });
 
 describe('secrets validation', () => {
@@ -303,6 +324,75 @@ describe('secrets validation', () => {
   });
 });
 
+describe('connector validation: secrets with config', () => {
+  test('connector validation succeeds when username/password was populated for hasAuth true', () => {
+    const secrets: Record<string, unknown> = {
+      user: 'bob',
+      password: 'supersecret',
+    };
+    const config: Record<string, unknown> = {
+      hasAuth: true,
+    };
+    expect(validateConnector(actionType, { config, secrets })).toBeNull();
+  });
+
+  test('connector validation succeeds when username/password not filled for hasAuth false', () => {
+    const secrets: Record<string, unknown> = {
+      user: null,
+      password: null,
+      clientSecret: null,
+    };
+    const config: Record<string, unknown> = {
+      hasAuth: false,
+    };
+    expect(validateConnector(actionType, { config, secrets })).toBeNull();
+    expect(validateConnector(actionType, { config, secrets: {} })).toBeNull();
+    expect(validateConnector(actionType, { config, secrets: { user: null } })).toBeNull();
+    expect(validateConnector(actionType, { config, secrets: { password: null } })).toBeNull();
+  });
+
+  test('connector validation fails when username/password was populated for hasAuth true', () => {
+    const secrets: Record<string, unknown> = {
+      password: null,
+      user: null,
+    };
+    const config: Record<string, unknown> = {
+      hasAuth: true,
+    };
+    // invalid user
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: [user] is required"`
+    );
+  });
+
+  test('connector validation succeeds when service is exchange_server and clientSecret is populated', () => {
+    const secrets: Record<string, unknown> = {
+      clientSecret: '12345678',
+    };
+    const config: Record<string, unknown> = {
+      service: 'exchange_server',
+    };
+    expect(validateConnector(actionType, { config, secrets })).toBeNull();
+  });
+
+  test('connector validation fails when service is exchange_server and clientSecret is not populated', () => {
+    const secrets: Record<string, unknown> = {
+      clientSecret: null,
+    };
+    const config: Record<string, unknown> = {
+      service: 'exchange_server',
+    };
+    // invalid user
+    expect(() => {
+      validateConnector(actionType, { config, secrets });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type connector: [clientSecret] is required"`
+    );
+  });
+});
+
 describe('params validation', () => {
   test('params validation succeeds when params is valid', () => {
     const params: Record<string, unknown> = {
@@ -334,6 +424,33 @@ describe('params validation', () => {
     }).toThrowErrorMatchingInlineSnapshot(
       `"error validating action params: [subject]: expected value of type [string] but got [undefined]"`
     );
+  });
+
+  test('params validation for emails calls validateEmailAddresses', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const basicActionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities,
+    });
+
+    expect(() => {
+      validateParams(basicActionType, {
+        to: ['to@example.com'],
+        cc: ['cc@example.com'],
+        bcc: ['bcc@example.com'],
+        subject: 'this is a test',
+        message: 'this is the message',
+      });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action params: [to/cc/bcc]: stub for actual message"`
+    );
+
+    const allEmails = ['to@example.com', 'cc@example.com', 'bcc@example.com'];
+    expect(configurationUtilities.validateEmailAddresses).toHaveBeenNthCalledWith(1, allEmails, {
+      treatMustacheTemplatesAsValid: true,
+    });
   });
 });
 
@@ -385,21 +502,10 @@ describe('execute()', () => {
         "status": "ok",
       }
     `);
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
-        "configurationUtilities": Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction],
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
+        "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
 
@@ -447,21 +553,10 @@ describe('execute()', () => {
 
     sendEmailMock.mockReset();
     await actionType.executor(customExecutorOptions);
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
-        "configurationUtilities": Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction],
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
+        "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
 
@@ -509,21 +604,10 @@ describe('execute()', () => {
 
     sendEmailMock.mockReset();
     await actionType.executor(customExecutorOptions);
+    delete sendEmailMock.mock.calls[0][1].configurationUtilities;
     expect(sendEmailMock.mock.calls[0][1]).toMatchInlineSnapshot(`
       Object {
-        "configurationUtilities": Object {
-          "ensureActionTypeEnabled": [MockFunction],
-          "ensureHostnameAllowed": [MockFunction],
-          "ensureUriAllowed": [MockFunction],
-          "getCustomHostSettings": [MockFunction],
-          "getMicrosoftGraphApiUrl": [MockFunction],
-          "getProxySettings": [MockFunction],
-          "getResponseSettings": [MockFunction],
-          "getSSLSettings": [MockFunction],
-          "isActionTypeEnabled": [MockFunction],
-          "isHostnameAllowed": [MockFunction],
-          "isUriAllowed": [MockFunction],
-        },
+        "connectorId": "some-id",
         "content": Object {
           "message": "a message to you
 
@@ -673,4 +757,48 @@ describe('execute()', () => {
       This message was sent by Kibana. [View this in Kibana](https://localhost:1234/foo/bar/my/app)."
     `);
   });
+
+  test('ensure execution runs validator with allowMustache false', async () => {
+    const configurationUtilities = actionsConfigMock.create();
+    configurationUtilities.validateEmailAddresses.mockImplementation(validateEmailAddressesImpl);
+
+    const testActionType = getActionType({
+      logger: mockedLogger,
+      configurationUtilities,
+    });
+
+    const customExecutorOptions: EmailActionTypeExecutorOptions = {
+      ...executorOptions,
+      params: {
+        ...params,
+      },
+    };
+
+    const result = await testActionType.executor(customExecutorOptions);
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "actionId": "some-id",
+        "message": "[to/cc/bcc]: stub for actual message",
+        "status": "error",
+      }
+    `);
+    expect(configurationUtilities.validateEmailAddresses.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          Array [
+            "jim@example.com",
+            "james@example.com",
+            "jimmy@example.com",
+          ],
+        ],
+      ]
+    `);
+  });
 });
+
+function validateEmailAddressesImpl(
+  addresses: string[],
+  options?: ValidateEmailAddressesOptions
+): string | undefined {
+  return 'stub for actual message';
+}

@@ -257,10 +257,10 @@ export const createJsAgentInstructions = (apmServerUrl = '') => [
       {
         defaultMessage:
           'APM Server disables RUM support by default. See the [documentation]({documentationLink}) \
-for details on how to enable RUM support.',
+for details on how to enable RUM support. When using the APM integration with Fleet, RUM support is automatically enabled.',
         values: {
           documentationLink:
-            '{config.docs.base_url}guide/en/apm/server/{config.docs.version}/configuration-rum.html',
+            '{config.docs.base_url}guide/en/apm/guide/{config.docs.version}/configuration-rum.html',
         },
       }
     ),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, IconSize } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { noop } from 'lodash/fp';
 import React from 'react';
 
@@ -20,26 +20,48 @@ export const getPinIcon = (pinned: boolean): PinIcon => (pinned ? 'pinFilled' : 
 interface Props {
   ariaLabel?: string;
   allowUnpinning: boolean;
-  iconSize?: IconSize;
+  isAlert: boolean;
   timelineType?: TimelineTypeLiteral;
   onClick?: () => void;
   pinned: boolean;
 }
 
+export const getDefaultAriaLabel = ({
+  isAlert,
+  isTemplate,
+  isPinned,
+}: {
+  isAlert: boolean;
+  isTemplate: boolean;
+  isPinned: boolean;
+}): string => {
+  if (isTemplate) {
+    return i18n.DISABLE_PIN(isAlert);
+  } else if (isPinned) {
+    return i18n.PINNED(isAlert);
+  } else {
+    return i18n.UNPINNED(isAlert);
+  }
+};
+
 export const Pin = React.memo<Props>(
-  ({ ariaLabel, allowUnpinning, iconSize = 'm', onClick = noop, pinned, timelineType }) => {
+  ({ ariaLabel, allowUnpinning, isAlert, onClick = noop, pinned, timelineType }) => {
     const isTemplate = timelineType === TimelineType.template;
-    const defaultAriaLabel = isTemplate ? i18n.DISABLE_PIN : pinned ? i18n.PINNED : i18n.UNPINNED;
+    const defaultAriaLabel = getDefaultAriaLabel({
+      isAlert,
+      isTemplate,
+      isPinned: pinned,
+    });
     const pinAriaLabel = ariaLabel != null ? ariaLabel : defaultAriaLabel;
 
     return (
       <EuiButtonIcon
         aria-label={pinAriaLabel}
         data-test-subj="pin"
-        iconSize={iconSize}
         iconType={getPinIcon(pinned)}
         onClick={onClick}
         isDisabled={isTemplate || !allowUnpinning}
+        size="s"
       />
     );
   }

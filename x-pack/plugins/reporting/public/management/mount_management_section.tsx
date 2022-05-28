@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
-import { CoreSetup, CoreStart } from 'src/core/public';
-import { ILicense } from '../../../licensing/public';
+import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { ILicense } from '@kbn/licensing-plugin/public';
 import { ReportingAPIClient, InternalApiClientProvider } from '../lib/reporting_api_client';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { ClientConfigType } from '../plugin';
@@ -30,7 +30,12 @@ export async function mountManagementSection(
   render(
     <I18nProvider>
       <KibanaContextProvider
-        services={{ http: coreSetup.http, application: coreStart.application }}
+        services={{
+          http: coreSetup.http,
+          application: coreStart.application,
+          uiSettings: coreStart.uiSettings,
+          docLinks: coreStart.docLinks,
+        }}
       >
         <InternalApiClientProvider apiClient={apiClient}>
           <IlmPolicyStatusContextProvider>

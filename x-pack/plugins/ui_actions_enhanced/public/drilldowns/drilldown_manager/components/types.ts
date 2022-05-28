@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ActionFactoryPlaceContext } from '../types';
+export type { ActionFactoryPlaceContext } from '../types';

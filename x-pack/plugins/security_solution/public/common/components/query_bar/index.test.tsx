@@ -7,12 +7,15 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { waitFor } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
-import { FilterManager, SearchBar } from '../../../../../../../src/plugins/data/public';
+import { FilterManager } from '@kbn/data-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
 import { QueryBar, QueryBarComponentProps } from '.';
+import { setAutocomplete } from '@kbn/unified-search-plugin/public/services';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 const mockUiSettingsForFilterManager = coreMock.createStart().uiSettings;
 
@@ -30,9 +33,9 @@ describe('QueryBar ', () => {
   // The data plugin's `SearchBar` is lazy loaded, so we need to ensure it is
   // available before we mount our component with Enzyme.
   const getWrapper = async (Component: ReturnType<typeof Proxy>) => {
-    const { getByTestId } = render(Component);
-    await waitFor(() => getByTestId('queryInput')); // check for presence of query input
-    return mount(Component);
+    const wrapper = mount(Component);
+    await waitFor(() => wrapper.find('[data-test-subj="queryInput"]').exists()); // check for presence of query input
+    return wrapper;
   };
   let abortSpy: jest.SpyInstance;
   beforeAll(() => {
@@ -84,6 +87,7 @@ describe('QueryBar ', () => {
       dataTestSubj: undefined,
       dateRangeFrom: 'now/d',
       dateRangeTo: 'now/d',
+      displayStyle: undefined,
       filters: [],
       indexPatterns: [
         {
@@ -202,6 +206,7 @@ describe('QueryBar ', () => {
       showQueryBar: true,
       showQueryInput: true,
       showSaveQuery: true,
+      showSubmitButton: false,
     });
   });
 
@@ -266,6 +271,11 @@ describe('QueryBar ', () => {
   });
 
   describe('#onSavedQueryUpdated', () => {
+    beforeEach(() => {
+      const autocompleteStart = unifiedSearchPluginMock.createStartContract();
+      setAutocomplete(autocompleteStart.autocomplete);
+    });
+
     test('is only reference that changed when dataProviders props get updated', async () => {
       const wrapper = await getWrapper(
         <Proxy
@@ -296,7 +306,7 @@ describe('QueryBar ', () => {
   });
 
   describe('SavedQueryManagementComponent state', () => {
-    test('popover should hidden when "Save current query" button was clicked', async () => {
+    test('popover should remain open when "Save current query" button was clicked', async () => {
       const wrapper = await getWrapper(
         <Proxy
           dateRangeFrom={DEFAULT_FROM}
@@ -316,13 +326,11 @@ describe('QueryBar ', () => {
         />
       );
       const isSavedQueryPopoverOpen = () =>
-        wrapper.find('EuiPopover[id="savedQueryPopover"]').prop('isOpen');
+        wrapper.find('EuiPopover[data-test-subj="queryBarMenuPopover"]').prop('isOpen');
 
       expect(isSavedQueryPopoverOpen()).toBeFalsy();
 
-      wrapper
-        .find('button[data-test-subj="saved-query-management-popover-button"]')
-        .simulate('click');
+      wrapper.find('button[data-test-subj="showQueryBarMenu"]').simulate('click');
 
       await waitFor(() => {
         expect(isSavedQueryPopoverOpen()).toBeTruthy();
@@ -330,7 +338,7 @@ describe('QueryBar ', () => {
       wrapper.find('button[data-test-subj="saved-query-management-save-button"]').simulate('click');
 
       await waitFor(() => {
-        expect(isSavedQueryPopoverOpen()).toBeFalsy();
+        expect(isSavedQueryPopoverOpen()).toBeTruthy();
       });
     });
   });

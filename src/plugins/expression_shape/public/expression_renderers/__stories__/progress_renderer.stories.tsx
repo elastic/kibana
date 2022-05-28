@@ -8,8 +8,8 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { Render } from '../../../../presentation_util/public/__stories__';
-import { progressRenderer } from '../progress_renderer';
+import { Render } from '@kbn/presentation-util-plugin/public/__stories__';
+import { getProgressRenderer } from '../progress_renderer';
 import { Progress } from '../../../common';
 
 storiesOf('renderers/progress', module).add('default', () => {
@@ -29,5 +29,5 @@ storiesOf('renderers/progress', module).add('default', () => {
     valueWeight: 15,
   };
 
-  return <Render renderer={progressRenderer} config={config} />;
+  return <Render renderer={getProgressRenderer()} config={config} />;
 });

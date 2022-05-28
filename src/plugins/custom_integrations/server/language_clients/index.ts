@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from 'kibana/server';
+import { CoreSetup } from '@kbn/core/server';
 import { CustomIntegrationRegistry } from '../custom_integration_registry';
 import { CustomIntegrationIcon, PLUGIN_ID } from '../../common';
 
@@ -151,7 +151,11 @@ export function registerLanguageClients(
       description: integration.description,
       type: 'ui_link',
       shipper: 'language_clients',
-      uiInternalPath: integration.docUrlTemplate.replace('{branch}', branch),
+      // Documentation for `main` branches is still published at a `master` URL.
+      uiInternalPath: integration.docUrlTemplate.replace(
+        '{branch}',
+        branch === 'main' ? 'master' : branch
+      ),
       isBeta: false,
       icons,
       categories: ['elastic_stack', 'custom', 'language_client'],

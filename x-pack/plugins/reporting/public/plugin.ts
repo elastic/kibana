@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
-import type { DataPublicPluginStart } from 'src/plugins/data/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   CoreSetup,
   CoreStart,
@@ -17,19 +17,16 @@ import {
   NotificationsSetup,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/public';
-import { CONTEXT_MENU_TRIGGER } from '../../../../src/plugins/embeddable/public';
-import {
-  FeatureCatalogueCategory,
-  HomePublicPluginSetup,
-  HomePublicPluginStart,
-} from '../../../../src/plugins/home/public';
-import { ManagementSetup, ManagementStart } from '../../../../src/plugins/management/public';
-import { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/public';
-import { constants } from '../common';
+  ThemeServiceStart,
+} from '@kbn/core/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
+import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { durationToNumber } from '../common/schema_utils';
 import { JobId, JobSummarySet } from '../common/types';
-import { ReportingSetup, ReportingStart } from './';
+import { ReportingSetup, ReportingStart } from '.';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { getGeneralErrorToast } from './notifier';
@@ -41,9 +38,10 @@ import type {
   UiActionsSetup,
   UiActionsStart,
 } from './shared_imports';
-import { ReportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
+import { AppNavLinkStatus } from './shared_imports';
+import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
 import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
-import { isRedirectAppPath } from './utils';
+import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
 
 export interface ClientConfigType {
   poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
@@ -51,17 +49,22 @@ export interface ClientConfigType {
 }
 
 function getStored(): JobId[] {
-  const sessionValue = sessionStorage.getItem(constants.JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
+  const sessionValue = sessionStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
   return sessionValue ? JSON.parse(sessionValue) : [];
 }
 
-function handleError(notifications: NotificationsSetup, err: Error): Rx.Observable<JobSummarySet> {
+function handleError(
+  notifications: NotificationsSetup,
+  err: Error,
+  theme: ThemeServiceStart
+): Rx.Observable<JobSummarySet> {
   notifications.toasts.addDanger(
     getGeneralErrorToast(
       i18n.translate('xpack.reporting.publicNotifier.pollingErrorMessage', {
         defaultMessage: 'Reporting notifier error!',
       }),
-      err
+      err,
+      theme
     )
   );
   window.console.error(err);
@@ -71,8 +74,8 @@ function handleError(notifications: NotificationsSetup, err: Error): Rx.Observab
 export interface ReportingPublicPluginSetupDendencies {
   home: HomePublicPluginSetup;
   management: ManagementSetup;
-  licensing: LicensingPluginSetup;
   uiActions: UiActionsSetup;
+  screenshotMode: ScreenshotModePluginSetup;
   share: SharePluginSetup;
 }
 
@@ -85,6 +88,10 @@ export interface ReportingPublicPluginStartDendencies {
   share: SharePluginStart;
 }
 
+/**
+ * @internal
+ * @implements Plugin
+ */
 export class ReportingPublicPlugin
   implements
     Plugin<
@@ -96,7 +103,7 @@ export class ReportingPublicPlugin
 {
   private kibanaVersion: string;
   private apiClient?: ReportingAPIClient;
-  private readonly stop$ = new Rx.ReplaySubject(1);
+  private readonly stop$ = new Rx.ReplaySubject<void>(1);
   private readonly title = i18n.translate('xpack.reporting.management.reportingTitle', {
     defaultMessage: 'Reporting',
   });
@@ -141,13 +148,7 @@ export class ReportingPublicPlugin
     setupDeps: ReportingPublicPluginSetupDendencies
   ) {
     const { getStartServices, uiSettings } = core;
-    const {
-      home,
-      management,
-      licensing: { license$ }, // FIXME: 'license$' is deprecated
-      share,
-      uiActions,
-    } = setupDeps;
+    const { home, management, screenshotMode, share, uiActions } = setupDeps;
 
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
@@ -165,7 +166,7 @@ export class ReportingPublicPlugin
       icon: 'reportingApp',
       path: '/app/management/insightsAndAlerting/reporting',
       showOnHomePage: false,
-      category: FeatureCatalogueCategory.ADMIN,
+      category: 'admin',
     });
 
     management.sections.section.insightsAndAlerting.registerApp({
@@ -173,24 +174,16 @@ export class ReportingPublicPlugin
       title: this.title,
       order: 1,
       mount: async (params) => {
-        // The redirect app will be mounted if reporting is opened on a specific path. The redirect app expects a
-        // specific environment to be present so that it can navigate to a specific application. This is used by
-        // report generation to navigate to the correct place with full app state.
-        if (isRedirectAppPath(params.history.location.pathname)) {
-          const { mountRedirectApp } = await import('./redirect');
-          return mountRedirectApp({ ...params, share, apiClient });
-        }
-
-        // Otherwise load the reporting management UI.
         params.setBreadcrumbs([{ text: this.breadcrumbText }]);
-        const [[start], { mountManagementSection }] = await Promise.all([
+        const [[start, startDeps], { mountManagementSection }] = await Promise.all([
           getStartServices(),
           import('./management/mount_management_section'),
         ]);
-        const {
-          chrome: { docTitle },
-        } = start;
+
+        const { docTitle } = start.chrome;
         docTitle.change(this.title);
+
+        const { license$ } = startDeps.licensing;
         const umountAppCallback = await mountManagementSection(
           core,
           start,
@@ -208,43 +201,62 @@ export class ReportingPublicPlugin
       },
     });
 
+    core.application.register({
+      id: 'reportingRedirect',
+      mount: async (params) => {
+        const { mountRedirectApp } = await import('./redirect');
+        return mountRedirectApp({ ...params, apiClient, screenshotMode, share });
+      },
+      title: 'Reporting redirect app',
+      searchable: false,
+      chromeless: true,
+      exactRoute: true,
+      navLinkStatus: AppNavLinkStatus.hidden,
+    });
+
     uiActions.addTriggerAction(
       CONTEXT_MENU_TRIGGER,
-      new ReportingCsvPanelAction({ core, apiClient, startServices$, license$, usesUiCapabilities })
+      new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
     );
 
     const reportingStart = this.getContract(core);
     const { toasts } = core.notifications;
 
-    share.register(
-      ReportingCsvShareProvider({
-        apiClient,
-        toasts,
-        license$,
-        startServices$,
-        uiSettings,
-        usesUiCapabilities,
-      })
-    );
+    startServices$.subscribe(([{ application }, { licensing }]) => {
+      licensing.license$.subscribe((license) => {
+        share.register(
+          reportingCsvShareProvider({
+            apiClient,
+            toasts,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+          })
+        );
 
-    share.register(
-      reportingScreenshotShareProvider({
-        apiClient,
-        toasts,
-        license$,
-        startServices$,
-        uiSettings,
-        usesUiCapabilities,
-      })
-    );
+        share.register(
+          reportingScreenshotShareProvider({
+            apiClient,
+            toasts,
+            uiSettings,
+            license,
+            application,
+            usesUiCapabilities,
+            theme: core.theme,
+          })
+        );
+      });
+    });
 
     return reportingStart;
   }
 
   public start(core: CoreStart) {
-    const { notifications } = core;
+    const { notifications, docLinks } = core;
     const apiClient = this.getApiClient(core.http, core.uiSettings);
-    const streamHandler = new StreamHandler(notifications, apiClient);
+    const streamHandler = new StreamHandler(notifications, apiClient, core.theme, docLinks);
     const interval = durationToNumber(this.config.poll.jobsRefresh.interval);
     Rx.timer(0, interval)
       .pipe(
@@ -253,7 +265,7 @@ export class ReportingPublicPlugin
         filter((storedJobs) => storedJobs.length > 0), // stop the pipeline here if there are none pending
         mergeMap((storedJobs) => streamHandler.findChangedStatusJobs(storedJobs)), // look up the latest status of all pending jobs on the server
         mergeMap(({ completed, failed }) => streamHandler.showNotifications({ completed, failed })),
-        catchError((err) => handleError(notifications, err))
+        catchError((err) => handleError(notifications, err, core.theme))
       )
       .subscribe();
 

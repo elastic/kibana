@@ -10,18 +10,17 @@ import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../o
 import { SERVICE_NOW_MAPPING, TOASTER } from '../../screens/configure_cases';
 
 import { goToEditExternalConnection } from '../../tasks/all_cases';
-import { cleanKibana } from '../../tasks/common';
+import { cleanKibana, deleteCases } from '../../tasks/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
   selectLastConnectorCreated,
 } from '../../tasks/configure_cases';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { CASES_URL } from '../../urls/navigation';
 
-// Skipping flakey test: https://github.com/elastic/kibana/issues/115438
-describe.skip('Cases connectors', () => {
+describe('Cases connectors', () => {
   const configureResult = {
     connector: {
       id: 'e271c3b8-f702-4fbc-98e0-db942b573bbd',
@@ -47,8 +46,12 @@ describe.skip('Cases connectors', () => {
 
   const snConnector = getServiceNowConnector();
 
-  beforeEach(() => {
+  before(() => {
     cleanKibana();
+    login();
+  });
+  beforeEach(() => {
+    deleteCases();
     cy.intercept('GET', `${snConnector.URL}/api/x_elas2_inc_int/elastic_api/health*`, {
       statusCode: 200,
       body: getServiceNowITSMHealthResponse(),
@@ -84,7 +87,7 @@ describe.skip('Cases connectors', () => {
   });
 
   it('Configures a new connector', () => {
-    loginAndWaitForPageWithoutDateRange(CASES_URL);
+    visitWithoutDateRange(CASES_URL);
     goToEditExternalConnection();
     openAddNewConnectorOption();
     addServiceNowConnector(snConnector);

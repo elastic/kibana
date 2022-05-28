@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { httpServerMock, loggingSystemMock } from 'src/core/server/mocks';
-import { createNewPackagePolicyMock, deletePackagePolicyMock } from '../../../fleet/common/mocks';
+import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+
+import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import {
+  createNewPackagePolicyMock,
+  deletePackagePolicyMock,
+} from '@kbn/fleet-plugin/common/mocks';
 import {
   policyFactory,
   policyFactoryWithoutPaidFeatures,
@@ -17,41 +22,35 @@ import {
   getPackagePolicyDeleteCallback,
   getPackagePolicyUpdateCallback,
 } from './fleet_integration';
-import { KibanaRequest } from 'kibana/server';
-import { createMockConfig, requestContextMock } from '../lib/detection_engine/routes/__mocks__';
+import { KibanaRequest } from '@kbn/core/server';
+import { requestContextMock } from '../lib/detection_engine/routes/__mocks__';
+import { requestContextFactoryMock } from '../request_context_factory.mock';
 import { EndpointAppContextServiceStartContract } from '../endpoint/endpoint_app_context_services';
 import { createMockEndpointAppContextServiceStartContract } from '../endpoint/mocks';
-import { licenseMock } from '../../../licensing/common/licensing.mock';
+import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { LicenseService } from '../../common/license';
 import { Subject } from 'rxjs';
-import { ILicense } from '../../../licensing/common/types';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import { ProtectionModes } from '../../common/endpoint/types';
-import type { SecuritySolutionRequestHandlerContext } from '../types';
-import { getExceptionListClientMock } from '../../../lists/server/services/exception_lists/exception_list_client.mock';
-import { getExceptionListSchemaMock } from '../../../lists/common/schemas/response/exception_list_schema.mock';
-import { ExceptionListClient } from '../../../lists/server';
+import { getExceptionListClientMock } from '@kbn/lists-plugin/server/services/exception_lists/exception_list_client.mock';
+import { getExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
+import { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { InternalArtifactCompleteSchema } from '../endpoint/schemas/artifacts';
 import { ManifestManager } from '../endpoint/services/artifacts/manifest_manager';
 import { getMockArtifacts, toArtifactRecords } from '../endpoint/lib/artifacts/mocks';
 import { Manifest } from '../endpoint/lib/artifacts';
-import { NewPackagePolicy } from '../../../fleet/common/types/models';
+import { NewPackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import { ManifestSchema } from '../../common/endpoint/schema/manifest';
-import {
-  allowedExperimentalValues,
-  ExperimentalFeatures,
-} from '../../common/experimental_features';
-import { DeletePackagePoliciesResponse } from '../../../fleet/common';
-import { ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { DeletePackagePoliciesResponse } from '@kbn/fleet-plugin/common';
+import { createMockPolicyData } from '../endpoint/services/feature_usage';
+import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 
 describe('ingest_integration tests ', () => {
   let endpointAppContextMock: EndpointAppContextServiceStartContract;
   let req: KibanaRequest;
-  let ctx: SecuritySolutionRequestHandlerContext;
+  let ctx: ReturnType<typeof requestContextMock.create>;
   const exceptionListClient: ExceptionListClient = getExceptionListClientMock();
-  const maxTimelineImportExportSize = createMockConfig().maxTimelineImportExportSize;
-  const prebuiltRulesFromFileSystem = createMockConfig().prebuiltRulesFromFileSystem;
-  const prebuiltRulesFromSavedObjects = createMockConfig().prebuiltRulesFromSavedObjects;
   let licenseEmitter: Subject<ILicense>;
   let licenseService: LicenseService;
   const Platinum = licenseMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
@@ -65,11 +64,16 @@ describe('ingest_integration tests ', () => {
     licenseEmitter = new Subject();
     licenseService = new LicenseService();
     licenseService.start(licenseEmitter);
+
+    jest
+      .spyOn(endpointAppContextMock.endpointMetadataService, 'getFleetEndpointPackagePolicy')
+      .mockResolvedValue(createMockPolicyData());
   });
 
   afterEach(() => {
     licenseService.stop();
     licenseEmitter.complete();
+    jest.clearAllMocks();
   });
 
   describe('package policy init callback (atifacts manifest initialisation tests)', () => {
@@ -88,17 +92,13 @@ describe('ingest_integration tests ', () => {
       const callback = getPackagePolicyCreateCallback(
         logger,
         manifestManager,
-        endpointAppContextMock.appClientFactory,
-        maxTimelineImportExportSize,
-        prebuiltRulesFromFileSystem,
-        prebuiltRulesFromSavedObjects,
-        endpointAppContextMock.security,
+        requestContextFactoryMock.create(),
         endpointAppContextMock.alerting,
         licenseService,
         exceptionListClient
       );
 
-      return callback(createNewPackagePolicyMock(), ctx, req);
+      return callback(createNewPackagePolicyMock(), requestContextMock.convertContext(ctx), req);
     };
 
     const TEST_POLICY_ID_1 = 'c6d16e42-c32d-4dce-8a88-113cfe276ad1';
@@ -256,21 +256,35 @@ describe('ingest_integration tests ', () => {
     it('returns an error if paid features are turned on in the policy', async () => {
       const mockPolicy = policyFactory(); // defaults with paid features on
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService
+      );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
-      await expect(() => callback(policyConfig, ctx, req)).rejects.toThrow(
-        'Requires Platinum license'
-      );
+      await expect(() =>
+        callback(policyConfig, requestContextMock.convertContext(ctx), req)
+      ).rejects.toThrow('Requires Platinum license');
     });
     it('updates successfully if no paid features are turned on in the policy', async () => {
       const mockPolicy = policyFactoryWithoutPaidFeatures();
       mockPolicy.windows.malware.mode = ProtectionModes.detect;
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService
+      );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
-      const updatedPolicyConfig = await callback(policyConfig, ctx, req);
+      const updatedPolicyConfig = await callback(
+        policyConfig,
+        requestContextMock.convertContext(ctx),
+        req
+      );
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
   });
@@ -283,52 +297,58 @@ describe('ingest_integration tests ', () => {
       const mockPolicy = policyFactory();
       mockPolicy.windows.popup.malware.message = 'paid feature';
       const logger = loggingSystemMock.create().get('ingest_integration.test');
-      const callback = getPackagePolicyUpdateCallback(logger, licenseService);
+      const callback = getPackagePolicyUpdateCallback(
+        logger,
+        licenseService,
+        endpointAppContextMock.featureUsageService,
+        endpointAppContextMock.endpointMetadataService
+      );
       const policyConfig = generator.generatePolicyPackagePolicy();
       policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
-      const updatedPolicyConfig = await callback(policyConfig, ctx, req);
+      const updatedPolicyConfig = await callback(
+        policyConfig,
+        requestContextMock.convertContext(ctx),
+        req
+      );
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value).toEqual(mockPolicy);
     });
   });
 
-  describe('package policy delete callback with trusted apps by policy enabled', () => {
-    const invokeDeleteCallback = async (
-      experimentalFeatures?: ExperimentalFeatures
-    ): Promise<void> => {
-      const callback = getPackagePolicyDeleteCallback(exceptionListClient, experimentalFeatures);
+  describe('package policy delete callback', () => {
+    const invokeDeleteCallback = async (): Promise<void> => {
+      const callback = getPackagePolicyDeleteCallback(exceptionListClient);
       await callback(deletePackagePolicyMock());
     };
 
     let removedPolicies: DeletePackagePoliciesResponse;
     let policyId: string;
-    let fakeTA: ExceptionListSchema;
+    let fakeArtifact: ExceptionListSchema;
 
     beforeEach(() => {
       removedPolicies = deletePackagePolicyMock();
       policyId = removedPolicies[0].id;
-      fakeTA = {
+      fakeArtifact = {
         ...getExceptionListSchemaMock(),
         tags: [`policy:${policyId}`],
       };
 
-      exceptionListClient.findExceptionListItem = jest
+      exceptionListClient.findExceptionListsItem = jest
         .fn()
-        .mockResolvedValueOnce({ data: [fakeTA], total: 1 });
+        .mockResolvedValueOnce({ data: [fakeArtifact], total: 1 });
       exceptionListClient.updateExceptionListItem = jest
         .fn()
-        .mockResolvedValueOnce({ ...fakeTA, tags: [] });
+        .mockResolvedValueOnce({ ...fakeArtifact, tags: [] });
     });
 
-    it('removes policy from trusted app FF enabled', async () => {
-      await invokeDeleteCallback({
-        ...allowedExperimentalValues,
-        trustedAppsByPolicyEnabled: true, // Needs to be enabled, it needs also a test with this disabled.
-      });
+    it('removes policy from artifact', async () => {
+      await invokeDeleteCallback();
 
-      expect(exceptionListClient.findExceptionListItem).toHaveBeenCalledWith({
-        filter: `exception-list-agnostic.attributes.tags:"policy:${policyId}"`,
-        listId: 'endpoint_trusted_apps',
-        namespaceType: 'agnostic',
+      expect(exceptionListClient.findExceptionListsItem).toHaveBeenCalledWith({
+        listId: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+        filter: ALL_ENDPOINT_ARTIFACT_LIST_IDS.map(
+          () => `exception-list-agnostic.attributes.tags:"policy:${policyId}"`
+        ),
+        namespaceType: ALL_ENDPOINT_ARTIFACT_LIST_IDS.map(() => 'agnostic'),
         page: 1,
         perPage: 50,
         sortField: undefined,
@@ -336,21 +356,11 @@ describe('ingest_integration tests ', () => {
       });
 
       expect(exceptionListClient.updateExceptionListItem).toHaveBeenCalledWith({
-        ...fakeTA,
-        namespaceType: fakeTA.namespace_type,
-        osTypes: fakeTA.os_types,
+        ...fakeArtifact,
+        namespaceType: fakeArtifact.namespace_type,
+        osTypes: fakeArtifact.os_types,
         tags: [],
       });
-    });
-
-    it("doesn't remove policy from trusted app if feature flag is disabled", async () => {
-      await invokeDeleteCallback({
-        ...allowedExperimentalValues,
-        trustedAppsByPolicyEnabled: false, // since it was changed to `true` by default
-      });
-
-      expect(exceptionListClient.findExceptionListItem).toHaveBeenCalledTimes(0);
-      expect(exceptionListClient.updateExceptionListItem).toHaveBeenCalledTimes(0);
     });
   });
 });

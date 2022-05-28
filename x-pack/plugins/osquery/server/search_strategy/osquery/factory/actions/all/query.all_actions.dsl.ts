@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import { ISearchRequestParams } from '../../../../../../../../../src/plugins/data/common';
+import { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AgentsRequestOptions } from '../../../../../../common/search_strategy';
 // import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
@@ -20,9 +20,9 @@ export const buildActionsQuery = ({
   // const filter = [...createQueryFilterClauses(filterQuery)];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: '.fleet-actions',
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       // query: { bool: { filter } },
       query: {

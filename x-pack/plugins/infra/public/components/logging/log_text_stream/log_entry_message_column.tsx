@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogColumn, LogMessagePart } from '../../../../common/log_entry';
 import {
   isConstantSegment,

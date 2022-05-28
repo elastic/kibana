@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from 'src/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { removeArchiveEntries } from '../archive/storage';
 
@@ -57,7 +57,7 @@ async function removeAssetsFromVersion(
   if (total > 0) {
     appContextService
       .getLogger()
-      .info(`Package "${pkgName}-${oldVersion}" still being used by policies`);
+      .debug(`Package "${pkgName}-${oldVersion}" still being used by policies`);
     return;
   }
 

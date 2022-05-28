@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { AGENT_POLICY_INDEX } from '../../../../plugins/fleet/common';
+import { AGENT_POLICY_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
@@ -130,7 +130,7 @@ export default function (providerContext: FtrProviderContext) {
         },
       });
 
-      expect(res.body.hits.hits.length).equal(beforeRes.body.hits.hits.length + 1);
+      expect(res.hits.hits.length).equal(beforeRes.hits.hits.length + 1);
     });
   });
 }

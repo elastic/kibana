@@ -10,6 +10,7 @@
 node_modules
 !/src/dev/npm/integration_tests/__fixtures__/fixture1/node_modules
 !/src/dev/notice/__fixtures__/node_modules
+!/packages/kbn-import-resolver/src/__fixtures__/node_modules
 trash
 /optimize
 /built_assets
@@ -19,6 +20,8 @@ target
 .idea
 *.iml
 *.log
+types.eslint.config.js
+__tmp__
 
 # Ignore example plugin builds
 /examples/*/build
@@ -54,6 +57,7 @@ selenium
 *.swo
 *.out
 package-lock.json
+!/.buildkite/package-lock.json
 .yo-rc.json
 .vscode
 *.sublime-*
@@ -65,6 +69,10 @@ npm-debug.log*
 .ci/bash_standard_lib.sh
 .gradle
 .vagrant
+.envrc
+
+## Snyk
+.dccache
 
 ## @cypress/snapshot from apm plugin
 /snapshots.js
@@ -86,3 +94,11 @@ report.asciidoc
 /bazel
 /bazel-*
 .bazelrc.user
+.bazelrc.cache
+
+elastic-agent-*
+fleet-server-*
+elastic-agent.yml
+fleet-server.yml
+/packages/kbn-synthetic-package-map/synthetic-packages.json
+

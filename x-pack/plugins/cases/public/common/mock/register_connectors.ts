@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TriggersAndActionsUIPublicPluginStart } from '../../../../triggers_actions_ui/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { actionTypeRegistryMock } from '../../../../triggers_actions_ui/public/application/action_type_registry.mock';
-import { CaseActionConnector } from '../../../common';
+import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import { CaseActionConnector } from '../../../common/ui/types';
 
 const getUniqueActionTypeIds = (connectors: CaseActionConnector[]) =>
   new Set(connectors.map((connector) => connector.actionTypeId));

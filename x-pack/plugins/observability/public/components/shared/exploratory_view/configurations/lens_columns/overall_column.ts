@@ -11,7 +11,8 @@ import {
   MathIndexPatternColumn,
   FormulaIndexPatternColumn,
   OverallSumIndexPatternColumn,
-} from '../../../../../../../lens/public';
+} from '@kbn/lens-plugin/public';
+import { RECORDS_FIELD } from '../constants';
 
 export function getDistributionInPercentageColumn({
   label,
@@ -51,7 +52,7 @@ export function getDistributionInPercentageColumn({
     operationType: 'count',
     isBucketed: false,
     scale: 'ratio',
-    sourceField: 'Records',
+    sourceField: RECORDS_FIELD,
     customLabel: true,
     filter: { query: columnFilter ?? '', language: 'kuery' },
   };

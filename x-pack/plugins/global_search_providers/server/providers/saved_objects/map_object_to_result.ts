@@ -11,8 +11,8 @@ import {
   ISavedObjectTypeRegistry,
   SavedObjectsFindResult,
   Capabilities,
-} from 'src/core/server';
-import { GlobalSearchProviderResult } from '../../../../global_search/server';
+} from '@kbn/core/server';
+import { GlobalSearchProviderResult } from '@kbn/global-search-plugin/server';
 
 export const mapToResults = (
   objects: Array<SavedObjectsFindResult<unknown>>,
@@ -56,6 +56,7 @@ export const mapToResult = (
     score: object.score,
     meta: {
       tagIds: object.references.filter((ref) => ref.type === 'tag').map(({ id }) => id),
+      displayName: type.management?.displayName ?? object.type,
     },
   };
 };

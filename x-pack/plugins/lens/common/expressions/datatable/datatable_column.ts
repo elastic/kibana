@@ -6,15 +6,10 @@
  */
 
 import type { Direction } from '@elastic/eui';
-import type {
-  CustomPaletteState,
-  PaletteOutput,
-} from '../../../../../../src/plugins/charts/common';
-import type {
-  ExpressionFunctionDefinition,
-  DatatableColumn,
-} from '../../../../../../src/plugins/expressions/common';
-import type { CustomPaletteParams } from '../../types';
+import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { ExpressionFunctionDefinition, DatatableColumn } from '@kbn/expressions-plugin/common';
+import { SortingHint } from '../..';
 
 export type LensGridDirection = 'none' | Direction;
 
@@ -28,6 +23,7 @@ export type ColumnConfigArg = Omit<ColumnState, 'palette'> & {
   type: 'lens_datatable_column';
   palette?: PaletteOutput<CustomPaletteState>;
   summaryRowValue?: unknown;
+  sortingHint?: SortingHint;
 };
 
 export interface ColumnState {
@@ -46,6 +42,7 @@ export interface ColumnState {
   colorMode?: 'none' | 'cell' | 'text';
   summaryRow?: 'none' | 'sum' | 'avg' | 'count' | 'min' | 'max';
   summaryLabel?: string;
+  collapseFn?: string;
 }
 
 export type DatatableColumnResult = ColumnState & { type: 'lens_datatable_column' };
@@ -53,7 +50,7 @@ export type DatatableColumnResult = ColumnState & { type: 'lens_datatable_column
 export const datatableColumn: ExpressionFunctionDefinition<
   'lens_datatable_column',
   null,
-  ColumnState,
+  ColumnState & { sortingHint?: SortingHint },
   DatatableColumnResult
 > = {
   name: 'lens_datatable_column',
@@ -64,6 +61,7 @@ export const datatableColumn: ExpressionFunctionDefinition<
   args: {
     columnId: { types: ['string'], help: '' },
     alignment: { types: ['string'], help: '' },
+    sortingHint: { types: ['string'], help: '' },
     hidden: { types: ['boolean'], help: '' },
     width: { types: ['number'], help: '' },
     isTransposed: { types: ['boolean'], help: '' },

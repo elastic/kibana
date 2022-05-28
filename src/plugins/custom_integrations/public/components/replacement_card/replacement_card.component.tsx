@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+/** @jsxRuntime classic */
 /** @jsx jsx */
 
 import { css, jsx } from '@emotion/react';
@@ -21,7 +22,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { CustomIntegration } from '../../../common';
 import { usePlatformService } from '../../services';

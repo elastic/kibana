@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-export {
+export type {
   SendRequestConfig,
   SendRequestResponse,
   UseRequestConfig,
+} from '@kbn/es-ui-shared-plugin/public';
+
+export {
   sendRequest,
   useRequest,
   XJson,
   PageError,
   EuiCodeEditor,
-} from '../../../../../src/plugins/es_ui_shared/public';
+} from '@kbn/es-ui-shared-plugin/public';
+
+export { KibanaThemeProvider, useExecutionContext } from '@kbn/kibana-react-plugin/public';

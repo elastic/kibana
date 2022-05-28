@@ -6,11 +6,14 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { THRESHOLD_RULE_TYPE_ID } from '../../../../../common/constants';
+import { THRESHOLD_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
+
 import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_schemas';
 import { thresholdExecutor } from '../../signals/executors/threshold';
 import { ThresholdAlertState } from '../../signals/types';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateImmutable, validateIndexPatterns } from '../utils';
 
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
@@ -31,6 +34,18 @@ export const createThresholdAlertType = (
           }
           return validated;
         },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
+        },
       },
     },
     actionGroups: [
@@ -45,10 +60,18 @@ export const createThresholdAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
-        runOpts: { buildRuleMessage, bulkCreate, exceptionItems, rule, tuple, wrapHits },
+        runOpts: {
+          buildRuleMessage,
+          bulkCreate,
+          exceptionItems,
+          completeRule,
+          tuple,
+          wrapHits,
+          ruleDataReader,
+        },
         services,
         startedAt,
         state,
@@ -60,13 +83,14 @@ export const createThresholdAlertType = (
         exceptionItems,
         experimentalFeatures,
         logger,
-        rule,
+        completeRule,
         services,
         startedAt,
         state,
         tuple,
         version,
         wrapHits,
+        ruleDataReader,
       });
 
       return result;

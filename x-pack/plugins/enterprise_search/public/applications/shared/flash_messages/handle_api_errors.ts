@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import { HttpResponse } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 
-import { HttpResponse } from 'src/core/public';
-
 import { FlashMessagesLogic } from './flash_messages_logic';
+import { flashErrorToast } from './set_message_helpers';
 import { IFlashMessage } from './types';
 
 /**
@@ -63,6 +63,19 @@ export const flashAPIErrors = (
     FlashMessagesLogic.actions.setFlashMessages(errorFlashMessages);
   }
 
+  // If this was a programming error or a failed request (such as a CORS) error,
+  // we rethrow the error so it shows up in the developer console
+  if (!response?.body?.message) {
+    throw response;
+  }
+};
+
+export const toastAPIErrors = (response: HttpResponse<ErrorResponse>) => {
+  const messages = getErrorsFromHttpResponse(response);
+
+  for (const message of messages) {
+    flashErrorToast(message);
+  }
   // If this was a programming error or a failed request (such as a CORS) error,
   // we rethrow the error so it shows up in the developer console
   if (!response?.body?.message) {

@@ -7,20 +7,20 @@
 
 import expect from '@kbn/expect';
 
+import { APP_ID } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
-} from '../../../case_api_integration/common/lib/authentication';
+} from '../../../cases_api_integration/common/lib/authentication';
 
-import { Role, User } from '../../../case_api_integration/common/lib/authentication/types';
+import { Role, User } from '../../../cases_api_integration/common/lib/authentication/types';
 import {
   createCase,
   deleteAllCaseItems,
   getCase,
-} from '../../../case_api_integration/common/lib/utils';
-import { getPostCaseRequest } from '../../../case_api_integration/common/lib/mock';
-import { APP_ID } from '../../../../plugins/security_solution/common/constants';
+} from '../../../cases_api_integration/common/lib/utils';
+import { getPostCaseRequest } from '../../../cases_api_integration/common/lib/mock';
 
 const secAll: Role = {
   name: 'sec_all_role',

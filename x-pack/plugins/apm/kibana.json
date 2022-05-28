@@ -12,34 +12,38 @@
     "embeddable",
     "features",
     "infra",
+    "inspector",
     "licensing",
     "observability",
     "ruleRegistry",
-    "triggersActionsUi"
+    "triggersActionsUi",
+    "unifiedSearch",
+    "dataViews"
   ],
   "optionalPlugins": [
     "actions",
     "alerting",
     "cloud",
+    "fleet",
     "home",
-    "maps",
     "ml",
     "security",
     "spaces",
     "taskManager",
-    "usageCollection",
-    "fleet"
+    "usageCollection"
   ],
   "server": true,
   "ui": true,
-  "configPath": ["xpack", "apm"],
+  "configPath": [
+    "xpack",
+    "apm"
+  ],
   "requiredBundles": [
     "fleet",
-    "home",
     "kibanaReact",
     "kibanaUtils",
-    "maps",
     "ml",
-    "observability"
+    "observability",
+    "esUiShared"
   ]
 }

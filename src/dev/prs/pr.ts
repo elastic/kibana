@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { createFlagError } from '@kbn/dev-utils';
+import { createFlagError } from '@kbn/dev-cli-errors';
 
 const isNum = (input: string) => {
   return /^\d+$/.test(input);
@@ -21,12 +21,14 @@ export class Pr {
     return parseInt(input, 10);
   }
 
-  public readonly remoteRef = `pull/${this.number}/head`;
+  public readonly remoteRef: string;
 
   constructor(
     public readonly number: number,
     public readonly targetRef: string,
     public readonly owner: string,
     public readonly sourceBranch: string
-  ) {}
+  ) {
+    this.remoteRef = `pull/${this.number}/head`;
+  }
 }

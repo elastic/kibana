@@ -11,12 +11,12 @@ import {
   mockHttpValues,
 } from '../../../../../../../__mocks__/kea_logic';
 import '../../../../../../__mocks__/engine_logic.mock';
+import { DEFAULT_META } from '../../../../../../../shared/constants';
+import { itShowsServerErrorAsFlashMessage } from '../../../../../../../test_helpers';
 
 // I don't know why eslint is saying this line is out of order
 // eslint-disable-next-line import/order
-import { nextTick } from '@kbn/test/jest';
-
-import { DEFAULT_META } from '../../../../../../../shared/constants';
+import { nextTick } from '@kbn/test-jest-helpers';
 
 import { IgnoredQueriesLogic } from './ignored_queries_logic';
 
@@ -95,6 +95,7 @@ describe('IgnoredQueriesLogic', () => {
   describe('listeners', () => {
     describe('loadIgnoredQueries', () => {
       it('should make an API call and set suggestions & meta state', async () => {
+        mount({ ...DEFAULT_VALUES, dataLoading: false });
         http.post.mockReturnValueOnce(
           Promise.resolve({
             results: [{ query: 'first query' }, { query: 'second query' }],
@@ -111,10 +112,12 @@ describe('IgnoredQueriesLogic', () => {
         jest.spyOn(IgnoredQueriesLogic.actions, 'onIgnoredQueriesLoad');
 
         IgnoredQueriesLogic.actions.loadIgnoredQueries();
+        expect(IgnoredQueriesLogic.values).toEqual({ ...DEFAULT_VALUES, dataLoading: true });
+
         await nextTick();
 
         expect(http.post).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify({
               page: {
@@ -142,13 +145,9 @@ describe('IgnoredQueriesLogic', () => {
         );
       });
 
-      it('handles errors', async () => {
-        http.post.mockReturnValueOnce(Promise.reject('error'));
-
+      itShowsServerErrorAsFlashMessage(http.post, () => {
+        mount();
         IgnoredQueriesLogic.actions.loadIgnoredQueries();
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
     });
 
@@ -170,7 +169,7 @@ describe('IgnoredQueriesLogic', () => {
         await nextTick();
 
         expect(http.put).toHaveBeenCalledWith(
-          '/internal/app_search/engines/some-engine/search_relevance_suggestions',
+          '/internal/app_search/engines/some-engine/adaptive_relevance/suggestions',
           {
             body: JSON.stringify([
               {
@@ -185,13 +184,9 @@ describe('IgnoredQueriesLogic', () => {
         expect(flashSuccessToast).toHaveBeenCalledWith(expect.any(String));
       });
 
-      it('handles errors', async () => {
-        http.put.mockReturnValueOnce(Promise.reject('error'));
-
+      itShowsServerErrorAsFlashMessage(http.put, () => {
+        mount();
         IgnoredQueriesLogic.actions.allowIgnoredQuery('test query');
-        await nextTick();
-
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
       });
 
       it('handles inline errors', async () => {

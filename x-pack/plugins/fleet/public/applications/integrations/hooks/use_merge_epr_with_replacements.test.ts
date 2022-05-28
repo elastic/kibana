@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { PackageListItem } from '../../../../common/types/models';
-import type { CustomIntegration } from '../../../../../../../src/plugins/custom_integrations/common';
+import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
-import type { IntegrationCategory } from '../../../../../../../src/plugins/custom_integrations/common';
+import type { IntegrationCategory } from '@kbn/custom-integrations-plugin/common';
+
+import type { PackageListItem } from '../../../../common/types/models';
 
 import { useMergeEprPackagesWithReplacements } from './use_merge_epr_with_replacements';
 
@@ -120,6 +121,17 @@ describe('useMergeEprWithReplacements', () => {
     ]);
   });
 
+  test('should filter out apm from package list', () => {
+    const eprPackages: PackageListItem[] = mockEprPackages([
+      {
+        name: 'apm',
+        release: 'beta',
+      },
+    ]);
+
+    expect(useMergeEprPackagesWithReplacements(eprPackages, [])).toEqual([]);
+  });
+
   test('should consists of all 3 types (ga eprs, replacements for non-ga eprs, replacements without epr equivalent', () => {
     const eprPackages: PackageListItem[] = mockEprPackages([
       {
@@ -135,6 +147,10 @@ describe('useMergeEprWithReplacements', () => {
       {
         name: 'activemq',
         release: 'beta',
+      },
+      {
+        name: 'apm',
+        release: 'ga',
       },
     ]);
     const replacements: CustomIntegration[] = mockIntegrations([

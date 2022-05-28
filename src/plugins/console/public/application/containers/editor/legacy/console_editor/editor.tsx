@@ -6,20 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLink,
+  EuiScreenReaderOnly,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { decompressFromEncodedURIComponent } from 'lz-string';
 import { parse } from 'query-string';
 import React, { CSSProperties, useCallback, useEffect, useRef, useState } from 'react';
-import { ace } from '../../../../../../../es_ui_shared/public';
-// @ts-ignore
-import { retrieveAutoCompleteInfo, clearSubscriptions } from '../../../../../lib/mappings/mappings';
+import { ace } from '@kbn/es-ui-shared-plugin/public';
 import { ConsoleMenu } from '../../../../components';
 import { useEditorReadContext, useServicesContext } from '../../../../contexts';
 import {
   useSaveCurrentTextObject,
-  useSendCurrentRequestToES,
+  useSendCurrentRequest,
   useSetInputEditor,
 } from '../../../../hooks';
 import * as senseEditor from '../../../../models/sense_editor';
@@ -27,11 +32,13 @@ import { autoIndent, getDocumentation } from '../console_menu_actions';
 import { subscribeResizeChecker } from '../subscribe_console_resize_checker';
 import { applyCurrentSettings } from './apply_editor_settings';
 import { registerCommands } from './keyboard_shortcuts';
+import type { SenseEditor } from '../../../../models/sense_editor';
 
 const { useUIAceKeyboardMode } = ace;
 
 export interface EditorProps {
   initialTextValue: string;
+  setEditorInstance: (instance: SenseEditor) => void;
 }
 
 interface QueryParams {
@@ -55,15 +62,22 @@ const DEFAULT_INPUT_VALUE = `GET _search
 
 const inputId = 'ConAppInputTextarea';
 
-function EditorUI({ initialTextValue }: EditorProps) {
+function EditorUI({ initialTextValue, setEditorInstance }: EditorProps) {
   const {
-    services: { history, notifications, settings: settingsService, esHostService },
+    services: {
+      history,
+      notifications,
+      settings: settingsService,
+      esHostService,
+      http,
+      autocompleteInfo,
+    },
     docLinkVersion,
   } = useServicesContext();
 
   const { settings } = useEditorReadContext();
   const setInputEditor = useSetInputEditor();
-  const sendCurrentRequestToES = useSendCurrentRequestToES();
+  const sendCurrentRequest = useSendCurrentRequest();
   const saveCurrentTextObject = useSaveCurrentTextObject();
 
   const editorRef = useRef<HTMLDivElement | null>(null);
@@ -98,7 +112,6 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
     const loadBufferFromRemote = (url: string) => {
       const coreEditor = editor.getCoreEditor();
-
       if (/^https?:\/\//.test(url)) {
         const loadFrom: Record<string, any> = {
           url,
@@ -114,7 +127,8 @@ function EditorUI({ initialTextValue }: EditorProps) {
 
         // Fire and forget.
         $.ajax(loadFrom).done(async (data) => {
-          await editor.update(data, true);
+          // when we load data from another Api we also must pass history
+          await editor.update(`${initialTextValue}\n ${data}`, true);
           editor.moveToNextRequestEdge(false);
           coreEditor.clearSelection();
           editor.highlightCurrentRequestsAndUpdateActionBar();
@@ -187,14 +201,14 @@ function EditorUI({ initialTextValue }: EditorProps) {
     setInputEditor(editor);
     setTextArea(editorRef.current!.querySelector('textarea'));
 
-    retrieveAutoCompleteInfo(settingsService, settingsService.getAutocomplete());
+    autocompleteInfo.retrieve(settingsService, settingsService.getAutocomplete());
 
     const unsubscribeResizer = subscribeResizeChecker(editorRef.current!, editor);
     setupAutosave();
 
     return () => {
       unsubscribeResizer();
-      clearSubscriptions();
+      autocompleteInfo.clearSubscriptions();
       window.removeEventListener('hashchange', onHashChange);
       if (editorInstanceRef.current) {
         editorInstanceRef.current.getCoreEditor().destroy();
@@ -207,6 +221,8 @@ function EditorUI({ initialTextValue }: EditorProps) {
     history,
     setInputEditor,
     settingsService,
+    http,
+    autocompleteInfo,
   ]);
 
   useEffect(() => {
@@ -217,12 +233,22 @@ function EditorUI({ initialTextValue }: EditorProps) {
   }, [settings]);
 
   useEffect(() => {
-    registerCommands({
-      senseEditor: editorInstanceRef.current!,
-      sendCurrentRequestToES,
-      openDocumentation,
-    });
-  }, [sendCurrentRequestToES, openDocumentation]);
+    const { isKeyboardShortcutsDisabled } = settings;
+    if (!isKeyboardShortcutsDisabled) {
+      registerCommands({
+        senseEditor: editorInstanceRef.current!,
+        sendCurrentRequest,
+        openDocumentation,
+      });
+    }
+  }, [openDocumentation, settings, sendCurrentRequest]);
+
+  useEffect(() => {
+    const { current: editor } = editorInstanceRef;
+    if (editor) {
+      setEditorInstance(editor);
+    }
+  }, [setEditorInstance]);
 
   return (
     <div style={abs} data-test-subj="console-application" className="conApp">
@@ -240,16 +266,16 @@ function EditorUI({ initialTextValue }: EditorProps) {
                 defaultMessage: 'Click to send request',
               })}
             >
-              <button
-                onClick={sendCurrentRequestToES}
+              <EuiLink
+                color="success"
+                onClick={sendCurrentRequest}
                 data-test-subj="sendRequestButton"
                 aria-label={i18n.translate('console.sendRequestButtonTooltip', {
                   defaultMessage: 'Click to send request',
                 })}
-                className="conApp__editorActionButton conApp__editorActionButton--success"
               >
-                <EuiIcon type="play" />
-              </button>
+                <EuiIcon type="playFilled" />
+              </EuiLink>
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem>

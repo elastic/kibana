@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { PluginInitializer } from 'kibana/server';
+import { PluginInitializer } from '@kbn/core/server';
 import {
   FeatureUsageTestPlugin,
   FeatureUsageTestPluginSetup,
   FeatureUsageTestPluginStart,
 } from './plugin';
 
-export const plugin: PluginInitializer<FeatureUsageTestPluginSetup, FeatureUsageTestPluginStart> =
-  () => new FeatureUsageTestPlugin();
+export const plugin: PluginInitializer<
+  FeatureUsageTestPluginSetup,
+  FeatureUsageTestPluginStart
+> = () => new FeatureUsageTestPlugin();

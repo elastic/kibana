@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
-import { ChartsPluginStart } from 'src/plugins/charts/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { CanvasSetup } from '../public';
-import { EmbeddableStart } from '../../../../src/plugins/embeddable/public';
-import { UiActionsStart } from '../../../../src/plugins/ui_actions/public';
-import { Start as InspectorStart } from '../../../../src/plugins/inspector/public';
 
 import { functions } from './functions/browser';
+import { initFunctions } from './functions/external';
 import { typeFunctions } from './expression_types';
 import { renderFunctions, renderFunctionFactories } from './renderers';
 
@@ -25,6 +27,7 @@ export interface StartDeps {
   uiActions: UiActionsStart;
   inspector: InspectorStart;
   charts: ChartsPluginStart;
+  presentationUtil: PresentationUtilPluginStart;
 }
 
 export type SetupInitializer<T> = (core: CoreSetup<StartDeps>, plugins: SetupDeps) => T;
@@ -39,6 +42,14 @@ export class CanvasSrcPlugin implements Plugin<void, void, SetupDeps, StartDeps>
     plugins.canvas.addRenderers(renderFunctions);
 
     core.getStartServices().then(([coreStart, depsStart]) => {
+      const externalFunctions = initFunctions({
+        embeddablePersistableStateService: {
+          extract: depsStart.embeddable.extract,
+          inject: depsStart.embeddable.inject,
+          getAllMigrations: depsStart.embeddable.getAllMigrations,
+        },
+      });
+      plugins.canvas.addFunctions(externalFunctions);
       plugins.canvas.addRenderers(
         renderFunctionFactories.map((factory: any) => factory(coreStart, depsStart))
       );

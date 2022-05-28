@@ -6,9 +6,9 @@
  */
 
 import { getNewThreatIndicatorRule } from '../../objects/rule';
-import { cleanKibana, reload } from '../../tasks/common';
+import { cleanKibana } from '../../tasks/common';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 import {
   JSON_TEXT,
   TABLE_CELL,
@@ -21,16 +21,11 @@ import {
 } from '../../screens/alerts_details';
 import { TIMELINE_FIELD } from '../../screens/rule_details';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import {
-  expandFirstAlert,
-  goToManageAlertsDetectionRules,
-  setEnrichmentDates,
-  viewThreatIntelTab,
-} from '../../tasks/alerts';
+import { expandFirstAlert, setEnrichmentDates, viewThreatIntelTab } from '../../tasks/alerts';
 import { createCustomIndicatorRule } from '../../tasks/api_calls/rules';
 import { openJsonView, openThreatIndicatorDetails } from '../../tasks/alerts_details';
 
-import { ALERTS_URL } from '../../urls/navigation';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import { addsFieldsToTimeline } from '../../tasks/rule_details';
 
 describe('CTI Enrichment', () => {
@@ -38,10 +33,8 @@ describe('CTI Enrichment', () => {
     cleanKibana();
     esArchiverLoad('threat_indicator');
     esArchiverLoad('suspicious_source_event');
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    goToManageAlertsDetectionRules();
+    login();
     createCustomIndicatorRule(getNewThreatIndicatorRule());
-    reload();
   });
 
   after(() => {
@@ -50,16 +43,17 @@ describe('CTI Enrichment', () => {
   });
 
   beforeEach(() => {
-    loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-    goToManageAlertsDetectionRules();
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     goToRuleDetails();
   });
 
   it('Displays enrichment matched.* fields on the timeline', () => {
     const expectedFields = {
       'threat.enrichments.matched.atomic': getNewThreatIndicatorRule().atomic,
-      'threat.enrichments.matched.type': 'indicator_match_rule',
+      'threat.enrichments.matched.type': getNewThreatIndicatorRule().matchedType,
       'threat.enrichments.matched.field': getNewThreatIndicatorRule().indicatorMappingField,
+      'threat.enrichments.matched.id': getNewThreatIndicatorRule().matchedId,
+      'threat.enrichments.matched.index': getNewThreatIndicatorRule().matchedIndex,
     };
     const fields = Object.keys(expectedFields) as Array<keyof typeof expectedFields>;
 
@@ -73,6 +67,9 @@ describe('CTI Enrichment', () => {
   it('Displays persisted enrichments on the JSON view', () => {
     const expectedEnrichment = [
       {
+        feed: {
+          name: 'AbuseCH malware',
+        },
         indicator: {
           first_seen: '2021-03-10T08:02:14.000Z',
           file: {
@@ -110,6 +107,7 @@ describe('CTI Enrichment', () => {
 
   it('Displays threat indicator details on the threat intel tab', () => {
     const expectedThreatIndicatorData = [
+      { field: 'feed.name', value: 'AbuseCH malware' },
       { field: 'indicator.file.hash.md5', value: '9b6c3518a91d23ed77504b5416bfb5b3' },
       {
         field: 'indicator.file.hash.sha256',
@@ -170,11 +168,12 @@ describe('CTI Enrichment', () => {
       const indicatorMatchRuleEnrichment = {
         field: 'myhash.mysha256',
         value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+        feedName: 'AbuseCH malware',
       };
       const investigationTimeEnrichment = {
         field: 'source.ip',
         value: '192.168.1.1',
-        provider: 'another_provider',
+        feedName: 'feed_name',
       };
 
       expandFirstAlert();
@@ -185,14 +184,14 @@ describe('CTI Enrichment', () => {
         .should('exist')
         .should(
           'have.text',
-          `${indicatorMatchRuleEnrichment.field} ${indicatorMatchRuleEnrichment.value}`
+          `${indicatorMatchRuleEnrichment.field} ${indicatorMatchRuleEnrichment.value} from ${indicatorMatchRuleEnrichment.feedName}`
         );
 
       cy.get(`${INVESTIGATION_TIME_ENRICHMENT_SECTION} ${THREAT_DETAILS_ACCORDION}`)
         .should('exist')
         .should(
           'have.text',
-          `${investigationTimeEnrichment.field} ${investigationTimeEnrichment.value} from ${investigationTimeEnrichment.provider}`
+          `${investigationTimeEnrichment.field} ${investigationTimeEnrichment.value} from ${investigationTimeEnrichment.feedName}`
         );
     });
   });

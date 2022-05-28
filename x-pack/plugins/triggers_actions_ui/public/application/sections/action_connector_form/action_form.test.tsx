@@ -6,15 +6,15 @@
  */
 
 import React, { lazy } from 'react';
-import { mountWithIntl, nextTick } from '@kbn/test/jest';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { EuiAccordion } from '@elastic/eui';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { act } from 'react-dom/test-utils';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   ValidationResult,
-  Alert,
-  AlertAction,
+  Rule,
+  RuleAction,
   ConnectorValidationResult,
   GenericValidationResult,
 } from '../../../types';
@@ -23,7 +23,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import {
   RecoveredActionGroup,
   isActionGroupDisabledForActionTypeId,
-} from '../../../../../alerting/common';
+} from '@kbn/alerting-plugin/common';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/action_connector_api', () => ({
@@ -133,6 +133,7 @@ describe('action_form', () => {
       name: 'Test connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -142,6 +143,7 @@ describe('action_form', () => {
       name: 'Test connector 2',
       config: {},
       isPreconfigured: true,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -151,6 +153,7 @@ describe('action_form', () => {
       name: 'Preconfigured Only',
       config: {},
       isPreconfigured: true,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -160,6 +163,7 @@ describe('action_form', () => {
       name: 'Regular connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -169,6 +173,7 @@ describe('action_form', () => {
       name: 'Non consumer connector',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: {},
@@ -178,6 +183,7 @@ describe('action_form', () => {
       name: 'Connector with disabled action group',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
     {
       secrets: null,
@@ -187,13 +193,14 @@ describe('action_form', () => {
       name: 'Connector with disabled action group',
       config: {},
       isPreconfigured: false,
+      isDeprecated: false,
     },
   ];
 
   const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
   describe('action_form in alert', () => {
-    async function setup(customActions?: AlertAction[], customRecoveredActionGroup?: string) {
+    async function setup(customActions?: RuleAction[], customRecoveredActionGroup?: string) {
       const actionTypeRegistry = actionTypeRegistryMock.create();
 
       const { loadAllActions } = jest.requireMock('../../lib/action_connector_api');
@@ -246,7 +253,7 @@ describe('action_form', () => {
         muteAll: false,
         enabled: false,
         mutedInstanceIds: [],
-      } as unknown as Alert;
+      } as unknown as Rule;
 
       const defaultActionMessage = 'Alert [{{context.metadata.name}}] has exceeded the threshold';
       const wrapper = mountWithIntl(
@@ -283,7 +290,7 @@ describe('action_form', () => {
           setActionGroupIdByIndex={(group: string, index: number) => {
             initialAlert.actions[index].group = group;
           }}
-          setActions={(_updatedActions: AlertAction[]) => {}}
+          setActions={(_updatedActions: RuleAction[]) => {}}
           setActionParamsProperty={(key: string, value: any, index: number) =>
             (initialAlert.actions[index] = { ...initialAlert.actions[index], [key]: value })
           }
@@ -483,7 +490,7 @@ describe('action_form', () => {
         `[data-test-subj="${actionType.id}-ActionTypeSelectOption"]`
       );
       actionOption.first().simulate('click');
-      const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}"]`);
+      const combobox = wrapper.find(`[data-test-subj="selectActionConnector-${actionType.id}-0"]`);
       const numConnectors = allActions.filter(
         (action) => action.actionTypeId === actionType.id
       ).length;
@@ -494,35 +501,50 @@ describe('action_form', () => {
         numConnectors - numConnectorsWithMissingSecrets
       );
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "id": "test",
-                  "key": "test",
-                  "label": "Test connector ",
-                },
-                Object {
-                  "id": "test2",
-                  "key": "test2",
-                  "label": "Test connector 2 (preconfigured)",
-                },
-              ]
-            `);
+        Array [
+          Object {
+            "data-test-subj": "dropdown-connector-test",
+            "key": "test",
+            "label": "Test connector",
+            "value": Object {
+              "id": "test",
+              "prependComponent": undefined,
+              "title": "Test connector",
+            },
+          },
+          Object {
+            "data-test-subj": "dropdown-connector-test2",
+            "key": "test2",
+            "label": "Test connector 2",
+            "value": Object {
+              "id": "test2",
+              "prependComponent": undefined,
+              "title": "Test connector 2",
+            },
+          },
+        ]
+      `);
     });
 
     it('renders only preconfigured connectors for the selected preconfigured action type', async () => {
       const wrapper = await setup();
       const actionOption = wrapper.find('[data-test-subj="preconfigured-ActionTypeSelectOption"]');
       actionOption.first().simulate('click');
-      const combobox = wrapper.find('[data-test-subj="selectActionConnector-preconfigured"]');
+      const combobox = wrapper.find('[data-test-subj="selectActionConnector-preconfigured-1"]');
       expect((combobox.first().props() as any).options).toMatchInlineSnapshot(`
-              Array [
-                Object {
-                  "id": "test3",
-                  "key": "test3",
-                  "label": "Preconfigured Only (preconfigured)",
-                },
-              ]
-            `);
+        Array [
+          Object {
+            "data-test-subj": "dropdown-connector-test3",
+            "key": "test3",
+            "label": "Preconfigured Only",
+            "value": Object {
+              "id": "test3",
+              "prependComponent": undefined,
+              "title": "Preconfigured Only",
+            },
+          },
+        ]
+      `);
     });
 
     it('does not render "Add connector" button for preconfigured only action type', async () => {

@@ -8,10 +8,10 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function upgradeCheckup({ loadTestFile }: FtrProviderContext) {
-  describe('Upgrade checkup ', function upgradeAssistantTestSuite() {
-    this.tags('ciGroup4');
-
+  describe('Upgrade Assistant', function upgradeAssistantTestSuite() {
     loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./upgrade_assistant'));
+    loadTestFile(require.resolve('./deprecation_pages'));
+    loadTestFile(require.resolve('./overview_page'));
+    loadTestFile(require.resolve('./es_deprecation_logs_page'));
   });
 }

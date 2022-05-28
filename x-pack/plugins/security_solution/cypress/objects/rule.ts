@@ -7,7 +7,7 @@
 
 import type { RulesSchema } from '../../common/detection_engine/schemas/response';
 /* eslint-disable @kbn/eslint/no-restricted-paths */
-import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules/index';
+import { rawRules } from '../../server/lib/detection_engine/rules/prepackaged_rules';
 import { getMockThreatData } from '../../public/detections/mitre/mitre_tactics_techniques';
 import { getTimeline, CompleteTimeline, getIndicatorMatchTimelineTemplate } from './timeline';
 
@@ -59,6 +59,7 @@ export interface CustomRule {
   timeline: CompleteTimeline;
   maxSignals: number;
   buildingBlockType?: string;
+  exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
 }
 
 export interface ThresholdRule extends CustomRule {
@@ -77,8 +78,12 @@ export interface ThreatIndicatorRule extends CustomRule {
   indicatorIndexPattern: string[];
   indicatorMappingField: string;
   indicatorIndexField: string;
+  threatIndicatorPath: string;
   type?: string;
   atomic?: string;
+  matchedType?: string;
+  matchedId?: string;
+  matchedIndex?: string;
 }
 
 export interface MachineLearningRule {
@@ -100,13 +105,14 @@ export interface MachineLearningRule {
 
 export const getIndexPatterns = (): string[] => [
   'apm-*-transaction*',
-  'traces-apm*',
   'auditbeat-*',
   'endgame-*',
   'filebeat-*',
   'logs-*',
   'packetbeat-*',
+  'traces-apm*',
   'winlogbeat-*',
+  '-*elastic-cloud-logs-*',
 ];
 
 export const getThreatIndexPatterns = (): string[] => ['logs-ti_*'];
@@ -159,6 +165,8 @@ const getSeverityOverride4 = (): SeverityOverride => ({
   sourceValue: 'auditbeat',
 });
 
+// Default interval is 1m, our tests config overwrite this to 1s
+// See https://github.com/elastic/kibana/pull/125396 for details
 const getRunsEvery = (): Interval => ({
   interval: '1',
   timeType: 'Seconds',
@@ -305,7 +313,7 @@ export const getNewThresholdRule = (): ThresholdRule => ({
   mitre: [getMitre1(), getMitre2()],
   note: '# test markdown',
   thresholdField: 'host.name',
-  threshold: '10',
+  threshold: '1',
   runsEvery: getRunsEvery(),
   lookBack: getLookBack(),
   timeline: getTimeline(),
@@ -329,7 +337,7 @@ export const getMachineLearningRule = (): MachineLearningRule => ({
 });
 
 export const getEqlRule = (): CustomRule => ({
-  customQuery: 'any where process.name == "which"',
+  customQuery: 'any where process.name == "zsh"',
   name: 'New EQL Rule',
   index: getIndexPatterns(),
   description: 'New EQL rule description.',
@@ -367,8 +375,8 @@ export const getCCSEqlRule = (): CustomRule => ({
 export const getEqlSequenceRule = (): CustomRule => ({
   customQuery:
     'sequence with maxspan=30s\
-     [any where process.name == "which"]\
-     [any where process.name == "xargs"]',
+     [any where agent.name == "test.local"]\
+     [any where host.name == "test.local"]',
   name: 'New EQL Sequence Rule',
   index: getIndexPatterns(),
   description: 'New EQL rule description.',
@@ -405,6 +413,10 @@ export const getNewThreatIndicatorRule = (): ThreatIndicatorRule => ({
   atomic: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
   timeline: getIndicatorMatchTimelineTemplate(),
   maxSignals: 100,
+  threatIndicatorPath: 'threat.indicator',
+  matchedType: 'indicator_match_rule',
+  matchedId: '84cf452c1e0375c3d4412cb550bd1783358468a3b3b777da4829d72c7d6fb74f',
+  matchedIndex: 'logs-ti_abusech.malware',
 });
 
 export const duplicatedRuleName = `${getNewThreatIndicatorRule().name} [Duplicate]`;
@@ -419,7 +431,70 @@ export const getEditedRule = (): CustomRule => ({
 });
 
 export const expectedExportedRule = (ruleResponse: Cypress.Response<RulesSchema>): string => {
-  const jsonrule = ruleResponse.body;
+  const {
+    id,
+    updated_at: updatedAt,
+    updated_by: updatedBy,
+    created_at: createdAt,
+    description,
+    name,
+    risk_score: riskScore,
+    severity,
+    query,
+  } = ruleResponse.body;
 
-  return `{"id":"${jsonrule.id}","updated_at":"${jsonrule.updated_at}","updated_by":"elastic","created_at":"${jsonrule.created_at}","created_by":"elastic","name":"${jsonrule.name}","tags":[],"interval":"100m","enabled":false,"description":"${jsonrule.description}","risk_score":${jsonrule.risk_score},"severity":"${jsonrule.severity}","output_index":".siem-signals-default","author":[],"false_positives":[],"from":"now-50000h","rule_id":"rule_testing","max_signals":100,"risk_score_mapping":[],"severity_mapping":[],"threat":[],"to":"now","references":[],"version":1,"exceptions_list":[],"immutable":false,"type":"query","language":"kuery","index":["exceptions-*"],"query":"${jsonrule.query}","throttle":"no_actions","actions":[]}\n{"exported_count":1,"missing_rules":[],"missing_rules_count":0}\n`;
+  // NOTE: Order of the properties in this object matters for the tests to work.
+  const rule: RulesSchema = {
+    id,
+    updated_at: updatedAt,
+    updated_by: updatedBy,
+    created_at: createdAt,
+    created_by: 'elastic',
+    name,
+    tags: [],
+    interval: '100m',
+    enabled: false,
+    description,
+    risk_score: riskScore,
+    severity,
+    output_index: '.siem-signals-default',
+    author: [],
+    false_positives: [],
+    from: 'now-50000h',
+    rule_id: 'rule_testing',
+    max_signals: 100,
+    risk_score_mapping: [],
+    severity_mapping: [],
+    threat: [],
+    to: 'now',
+    references: [],
+    version: 1,
+    exceptions_list: [],
+    immutable: false,
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
+    type: 'query',
+    language: 'kuery',
+    index: getIndexPatterns(),
+    query,
+    throttle: 'no_actions',
+    actions: [],
+  };
+
+  // NOTE: Order of the properties in this object matters for the tests to work.
+  const details = {
+    exported_count: 1,
+    exported_rules_count: 1,
+    missing_rules: [],
+    missing_rules_count: 0,
+    exported_exception_list_count: 0,
+    exported_exception_list_item_count: 0,
+    missing_exception_list_item_count: 0,
+    missing_exception_list_items: [],
+    missing_exception_lists: [],
+    missing_exception_lists_count: 0,
+  };
+
+  return `${JSON.stringify(rule)}\n${JSON.stringify(details)}\n`;
 };

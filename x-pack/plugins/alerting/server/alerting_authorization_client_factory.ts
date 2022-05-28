@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { KibanaRequest } from 'src/core/server';
-import { ALERTS_FEATURE_ID } from '../common';
-import { RuleTypeRegistry } from './types';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { PluginStartContract as FeaturesPluginStart } from '../../features/server';
+import { KibanaRequest } from '@kbn/core/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { PluginStartContract as FeaturesPluginStart } from '@kbn/features-plugin/server';
+import { Space } from '@kbn/spaces-plugin/server';
 import { AlertingAuthorization } from './authorization/alerting_authorization';
-import { AlertingAuthorizationAuditLogger } from './authorization/audit_logger';
-import { Space } from '../../spaces/server';
+import { RuleTypeRegistry } from './types';
 
 export interface AlertingAuthorizationClientFactoryOpts {
   ruleTypeRegistry: RuleTypeRegistry;
   securityPluginSetup?: SecurityPluginSetup;
   securityPluginStart?: SecurityPluginStart;
-  getSpace: (request: KibanaRequest) => Promise<Space | undefined>;
-  getSpaceId: (request: KibanaRequest) => string | undefined;
+  getSpace: (request: KibanaRequest) => Promise<Space>;
+  getSpaceId: (request: KibanaRequest) => string;
   features: FeaturesPluginStart;
 }
 
@@ -27,10 +25,9 @@ export class AlertingAuthorizationClientFactory {
   private isInitialized = false;
   private ruleTypeRegistry!: RuleTypeRegistry;
   private securityPluginStart?: SecurityPluginStart;
-  private securityPluginSetup?: SecurityPluginSetup;
   private features!: FeaturesPluginStart;
-  private getSpace!: (request: KibanaRequest) => Promise<Space | undefined>;
-  private getSpaceId!: (request: KibanaRequest) => string | undefined;
+  private getSpace!: (request: KibanaRequest) => Promise<Space>;
+  private getSpaceId!: (request: KibanaRequest) => string;
 
   public initialize(options: AlertingAuthorizationClientFactoryOpts) {
     if (this.isInitialized) {
@@ -39,14 +36,13 @@ export class AlertingAuthorizationClientFactory {
     this.isInitialized = true;
     this.getSpace = options.getSpace;
     this.ruleTypeRegistry = options.ruleTypeRegistry;
-    this.securityPluginSetup = options.securityPluginSetup;
     this.securityPluginStart = options.securityPluginStart;
     this.features = options.features;
     this.getSpaceId = options.getSpaceId;
   }
 
   public create(request: KibanaRequest): AlertingAuthorization {
-    const { securityPluginSetup, securityPluginStart, features } = this;
+    const { securityPluginStart, features } = this;
     return new AlertingAuthorization({
       authorization: securityPluginStart?.authz,
       request,
@@ -54,9 +50,6 @@ export class AlertingAuthorizationClientFactory {
       getSpaceId: this.getSpaceId,
       ruleTypeRegistry: this.ruleTypeRegistry,
       features: features!,
-      auditLogger: new AlertingAuthorizationAuditLogger(
-        securityPluginSetup?.audit.getLogger(ALERTS_FEATURE_ID)
-      ),
     });
   }
 }

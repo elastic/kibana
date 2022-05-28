@@ -7,12 +7,13 @@
  */
 
 import { PublicContract } from '@kbn/utility-types';
-import { HttpSetup, SavedObjectsFindOptions } from 'kibana/public';
+import { HttpSetup, SavedObjectsFindOptions } from '@kbn/core/public';
 import type {
   SavedObject,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
+  // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+} from '@kbn/core/server';
 import type { SearchSessionSavedObjectAttributes } from '../../../common';
 export type SearchSessionSavedObject = SavedObject<SearchSessionSavedObjectAttributes>;
 export type ISessionsClient = PublicContract<SessionsClient>;
@@ -37,26 +38,26 @@ export class SessionsClient {
   public create({
     name,
     appId,
-    urlGeneratorId,
+    locatorId,
     initialState,
     restoreState,
     sessionId,
   }: {
     name: string;
     appId: string;
+    locatorId: string;
     initialState: Record<string, unknown>;
     restoreState: Record<string, unknown>;
-    urlGeneratorId: string;
     sessionId: string;
   }): Promise<SearchSessionSavedObject> {
     return this.http.post(`/internal/session`, {
       body: JSON.stringify({
         name,
+        appId,
+        locatorId,
         initialState,
         restoreState,
         sessionId,
-        appId,
-        urlGeneratorId,
       }),
     });
   }

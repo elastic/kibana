@@ -19,26 +19,30 @@ import { ElasticsearchConfig } from './elasticsearch_config';
 import { ElasticsearchService } from './elasticsearch_service';
 import {
   InternalElasticsearchServiceSetup,
+  ElasticsearchServiceSetup,
   ElasticsearchStatusMeta,
   ElasticsearchServicePreboot,
 } from './types';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
+import type { ClusterInfo } from './get_cluster_info';
 
 type MockedElasticSearchServicePreboot = jest.Mocked<ElasticsearchServicePreboot>;
 
-export interface MockedElasticSearchServiceSetup {
+export type MockedElasticSearchServiceSetup = jest.Mocked<
+  Omit<ElasticsearchServiceSetup, 'legacy'>
+> & {
   legacy: {
     config$: BehaviorSubject<ElasticsearchConfig>;
   };
-}
+};
 
-type MockedElasticSearchServiceStart = MockedElasticSearchServiceSetup & {
+export interface MockedElasticSearchServiceStart {
   client: ClusterClientMock;
   createClient: jest.MockedFunction<
     (name: string, config?: Partial<ElasticsearchClientConfig>) => CustomClusterClientMock
   >;
-};
+}
 
 const createPrebootContractMock = () => {
   const prebootContract: MockedElasticSearchServicePreboot = {
@@ -53,6 +57,7 @@ const createPrebootContractMock = () => {
 
 const createSetupContractMock = () => {
   const setupContract: MockedElasticSearchServiceSetup = {
+    setUnauthorizedErrorHandler: jest.fn(),
     legacy: {
       config$: new BehaviorSubject({} as ElasticsearchConfig),
     },
@@ -64,9 +69,6 @@ const createStartContractMock = () => {
   const startContract: MockedElasticSearchServiceStart = {
     client: elasticsearchClientMock.createClusterClient(),
     createClient: jest.fn(),
-    legacy: {
-      config$: new BehaviorSubject({} as ElasticsearchConfig),
-    },
   };
 
   startContract.createClient.mockImplementation(() =>
@@ -79,22 +81,26 @@ const createInternalPrebootContractMock = createPrebootContractMock;
 
 type MockedInternalElasticSearchServiceSetup = jest.Mocked<InternalElasticsearchServiceSetup>;
 const createInternalSetupContractMock = () => {
-  const setupContract: MockedInternalElasticSearchServiceSetup = {
+  const setupContract = createSetupContractMock();
+  const internalSetupContract: MockedInternalElasticSearchServiceSetup = {
+    ...setupContract,
     esNodesCompatibility$: new BehaviorSubject<NodesVersionCompatibility>({
       isCompatible: true,
       incompatibleNodes: [],
       warningNodes: [],
       kibanaVersion: '8.0.0',
     }),
+    clusterInfo$: new BehaviorSubject<ClusterInfo>({
+      cluster_uuid: 'cluster-uuid',
+      cluster_name: 'cluster-name',
+      cluster_version: '8.0.0',
+    }),
     status$: new BehaviorSubject<ServiceStatus<ElasticsearchStatusMeta>>({
       level: ServiceStatusLevels.available,
       summary: 'Elasticsearch is available',
     }),
-    legacy: {
-      ...createSetupContractMock().legacy,
-    },
   };
-  return setupContract;
+  return internalSetupContract;
 };
 
 const createInternalStartContractMock = createStartContractMock;

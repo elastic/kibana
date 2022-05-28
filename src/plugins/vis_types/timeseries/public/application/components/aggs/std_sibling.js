@@ -26,7 +26,7 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
 const StandardSiblingAggUi = (props) => {
@@ -130,7 +130,6 @@ const StandardSiblingAggUi = (props) => {
             panelType={props.panel.type}
             siblings={props.siblings}
             value={model.type}
-            uiRestrictions={props.uiRestrictions}
             onChange={handleSelectChange('type')}
           />
         </EuiFlexItem>

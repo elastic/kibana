@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from 'src/core/server';
+import { Logger, SavedObjectReference } from '@kbn/core/server';
 // eslint-disable-next-line no-restricted-imports
 import { LegacyRulesNotificationParams } from '../legacy_types';
 
@@ -32,19 +32,6 @@ export const legacyInjectRuleIdReferences = ({
     return reference.name === 'alert_0';
   });
   if (referenceFound) {
-    if (referenceFound.id !== ruleAlertId) {
-      // This condition should not be reached but we log an error if we encounter it to help if we migrations
-      // did not run correctly or we create a regression in the future.
-      logger.error(
-        [
-          'The id of the "saved object reference id": ',
-          referenceFound.id,
-          ' is not the same as the "saved object id": ',
-          ruleAlertId,
-          '. Preferring and using the "saved object reference id" instead of the "saved object id"',
-        ].join('')
-      );
-    }
     return referenceFound.id;
   } else {
     logger.error(

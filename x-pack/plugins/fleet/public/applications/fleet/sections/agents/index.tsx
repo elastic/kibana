@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Router, Route, Switch, useHistory } from 'react-router-dom';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPortal } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FLEET_ROUTING_PATHS } from '../../constants';
-import { Loading, Error, AgentEnrollmentFlyout } from '../../components';
+import { Loading, Error } from '../../components';
 import {
   useConfig,
   useFleetStatus,
   useBreadcrumbs,
-  useCapabilities,
+  useAuthz,
   useGetSettings,
-  useGetAgentPolicies,
+  useFlyoutContext,
 } from '../../hooks';
 import { DefaultLayout, WithoutHeaderLayout } from '../../layouts';
 
@@ -32,23 +32,12 @@ export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
   const history = useHistory();
   const { agents } = useConfig();
-  const capabilities = useCapabilities();
-
-  const agentPoliciesRequest = useGetAgentPolicies({
-    page: 1,
-    perPage: 1000,
-  });
-
-  const agentPolicies = useMemo(
-    () => agentPoliciesRequest.data?.items || [],
-    [agentPoliciesRequest.data]
-  );
-
+  const hasFleetAllPrivileges = useAuthz().fleet.all;
   const fleetStatus = useFleetStatus();
+  const flyoutContext = useFlyoutContext();
 
   const settings = useGetSettings();
 
-  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const [fleetServerModalVisible, setFleetServerModalVisible] = useState(false);
   const onCloseFleetServerModal = useCallback(() => {
     setFleetServerModalVisible(false);
@@ -93,24 +82,20 @@ export const AgentsApp: React.FunctionComponent = () => {
   ) {
     return <MissingESRequirementsPage missingRequirements={fleetStatus.missingRequirements} />;
   }
-  if (!capabilities.read) {
+  if (!hasFleetAllPrivileges) {
     return <NoAccessPage />;
   }
 
   const rightColumn = hasOnlyFleetServerMissingRequirement ? (
     <>
-      {isEnrollmentFlyoutOpen && (
-        <EuiPortal>
-          <AgentEnrollmentFlyout
-            defaultMode="standalone"
-            agentPolicies={agentPolicies}
-            onClose={() => setIsEnrollmentFlyoutOpen(false)}
-          />
-        </EuiPortal>
-      )}
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton fill iconType="plusInCircle" onClick={() => setIsEnrollmentFlyoutOpen(true)}>
+          <EuiButton
+            fill
+            iconType="plusInCircle"
+            onClick={() => flyoutContext.openEnrollmentFlyout()}
+            data-test-subj="addAgentBtnTop"
+          >
             <FormattedMessage id="xpack.fleet.addAgentButton" defaultMessage="Add Agent" />
           </EuiButton>
         </EuiFlexItem>
@@ -130,7 +115,7 @@ export const AgentsApp: React.FunctionComponent = () => {
               <FleetServerUpgradeModal onClose={onCloseFleetServerModal} />
             )}
             {hasOnlyFleetServerMissingRequirement ? (
-              <FleetServerRequirementPage />
+              <FleetServerRequirementPage showEnrollmentRecommendation={false} />
             ) : (
               <AgentListPage />
             )}

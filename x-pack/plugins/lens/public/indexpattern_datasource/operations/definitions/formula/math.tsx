@@ -6,8 +6,8 @@
  */
 
 import type { TinymathAST } from '@kbn/tinymath';
-import { OperationDefinition } from '../index';
-import { ReferenceBasedIndexPatternColumn } from '../column_types';
+import { OperationDefinition } from '..';
+import { ValueFormatConfig, ReferenceBasedIndexPatternColumn } from '../column_types';
 import { IndexPattern } from '../../../types';
 
 export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn {
@@ -15,12 +15,7 @@ export interface MathIndexPatternColumn extends ReferenceBasedIndexPatternColumn
   params: {
     tinymathAst: TinymathAST | string;
     // last value on numeric fields can be formatted
-    format?: {
-      id: string;
-      params?: {
-        decimals: number;
-      };
-    };
+    format?: ValueFormatConfig;
   };
 }
 
@@ -94,5 +89,17 @@ function astToString(ast: TinymathAST | string): string | number {
     }
     return `${ast.name}=${ast.value}`;
   }
-  return `${ast.name}(${ast.args.map(astToString).join(',')})`;
+  return `${getUnprefixedName(ast.name)}(${ast.args.map(astToString).join(',')})`;
+}
+
+// Some function names have ES overlaps, hence a prefix has been added
+// for the tinymath version. This list of prefixes will be used to cleanup
+// the function name before passing it over to the tinymath expression
+const renamePrefixToRemove = ['pick_'];
+
+function getUnprefixedName(name: string) {
+  return renamePrefixToRemove.reduce(
+    (newName, wrapperPrefix) => newName.replace(wrapperPrefix, ''),
+    name
+  );
 }

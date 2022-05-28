@@ -11,7 +11,9 @@ import { shallow } from 'enzyme';
 
 import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
 
-import { EmptyState, SynonymModal } from './';
+import { docLinks } from '../../../../shared/doc_links';
+
+import { EmptyState, SynonymModal } from '.';
 
 describe('EmptyState', () => {
   it('renders', () => {
@@ -21,7 +23,7 @@ describe('EmptyState', () => {
 
     expect(wrapper.find('h2').text()).toEqual('Create your first synonym set');
     expect(wrapper.find(EuiButton).prop('href')).toEqual(
-      expect.stringContaining('/synonyms-guide.html')
+      expect.stringContaining(docLinks.appSearchSynonyms)
     );
   });
 

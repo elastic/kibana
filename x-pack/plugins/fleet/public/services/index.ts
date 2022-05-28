@@ -7,6 +7,12 @@
 
 export { getFlattenedObject } from '@kbn/std';
 
+export type {
+  PackagePolicyValidationResults,
+  PackagePolicyConfigValidationResults,
+  PackagePolicyInputValidationResults,
+} from '../../common';
+export { ExperimentalFeaturesService } from './experimental_features';
 export {
   AgentStatusKueryHelper,
   agentPolicyRouteService,
@@ -22,7 +28,6 @@ export {
   appRoutesService,
   packageToPackagePolicy,
   packageToPackagePolicyInputs,
-  storedPackagePoliciesToAgentInputs,
   fullAgentPolicyToYaml,
   isPackageLimited,
   doesAgentPolicyAlreadyIncludePackage,
@@ -30,9 +35,6 @@ export {
   LicenseService,
   isAgentUpgradeable,
   doesPackageHaveIntegrations,
-  PackagePolicyValidationResults,
-  PackagePolicyConfigValidationResults,
-  PackagePolicyInputValidationResults,
   validatePackagePolicy,
   validatePackagePolicyConfig,
   validationHasErrors,
@@ -42,3 +44,5 @@ export {
 
 export * from './pkg_key_from_package_info';
 export * from './ui_extensions';
+export * from './increment_policy_name';
+export * from './has_fleet_server';

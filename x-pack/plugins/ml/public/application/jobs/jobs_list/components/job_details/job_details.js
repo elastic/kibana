@@ -7,7 +7,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component, Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonIcon, EuiTabbedContent, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 
@@ -21,7 +21,7 @@ import { ModelSnapshotTable } from '../../../../components/model_snapshots';
 import { ForecastsTable } from './forecasts_table';
 import { JobDetailsPane } from './job_details_pane';
 import { JobMessagesPane } from './job_messages_pane';
-import { withKibana } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 
 export class JobDetailsUI extends Component {
   constructor(props) {

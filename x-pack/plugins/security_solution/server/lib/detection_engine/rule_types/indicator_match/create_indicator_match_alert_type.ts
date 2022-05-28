@@ -6,18 +6,21 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { INDICATOR_RULE_TYPE_ID } from '../../../../../common/constants';
-import { ThreatRuleParams, threatRuleParams } from '../../schemas/rule_schemas';
+import { INDICATOR_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+import { SERVER_APP_ID } from '../../../../../common/constants';
+
+import { threatRuleParams, ThreatRuleParams } from '../../schemas/rule_schemas';
 import { threatMatchExecutor } from '../../signals/executors/threat_match';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
-
+import { validateImmutable, validateIndexPatterns } from '../utils';
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
-  const { experimentalFeatures, logger, version } = createOptions;
+  const { eventsTelemetry, experimentalFeatures, logger, version } = createOptions;
   return {
     id: INDICATOR_RULE_TYPE_ID,
     name: 'Indicator Match Rule',
+    ruleTaskTimeout: '1h',
     validate: {
       params: {
         validate: (object: unknown) => {
@@ -29,6 +32,18 @@ export const createIndicatorMatchAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
         },
       },
     },
@@ -44,7 +59,7 @@ export const createIndicatorMatchAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
         runOpts: {
@@ -52,7 +67,7 @@ export const createIndicatorMatchAlertType = (
           bulkCreate,
           exceptionItems,
           listClient,
-          rule,
+          completeRule,
           searchAfterSize,
           tuple,
           wrapHits,
@@ -66,10 +81,10 @@ export const createIndicatorMatchAlertType = (
         bulkCreate,
         exceptionItems,
         experimentalFeatures,
-        eventsTelemetry: undefined,
+        eventsTelemetry,
         listClient,
         logger,
-        rule,
+        completeRule,
         searchAfterSize,
         services,
         tuple,

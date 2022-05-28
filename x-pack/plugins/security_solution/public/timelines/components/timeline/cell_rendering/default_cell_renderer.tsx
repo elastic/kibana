@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
-import { getMappedNonEcsValue } from '../body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../body/data_driven_columns';
 import { columnRenderers } from '../body/renderers';
 import { getColumnRenderer } from '../body/renderers/get_column_renderer';
-
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { CellValueElementProps } from '.';
-import { getLink } from '../../../../common/lib/cell_actions/helpers';
+import { getLinkColumnDefinition } from '../../../../common/lib/cell_actions/helpers';
+import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../../../common/lib/cell_actions/constants';
 import {
   ExpandedCellValueActions,
   StyledContent,
 } from '../../../../common/lib/cell_actions/expanded_cell_value_actions';
 
-const FIELDS_WITHOUT_CELL_ACTIONS = ['@timestamp', 'signal.rule.risk_score', 'signal.reason'];
 const hasCellActions = (columnId?: string) => {
-  return columnId && FIELDS_WITHOUT_CELL_ACTIONS.indexOf(columnId) < 0;
+  return columnId && !FIELDS_WITHOUT_CELL_ACTIONS.includes(columnId);
 };
 
 export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
-  browserFields,
   data,
   ecsData,
   eventId,
@@ -32,13 +31,23 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
   header,
   isDetails,
   isDraggable,
+  isTimeline,
   linkValues,
   rowRenderers,
   setCellProps,
   timelineId,
   truncate,
 }) => {
-  const values = getMappedNonEcsValue({
+  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
+
+  const asPlainText = useMemo(() => {
+    return (
+      getLinkColumnDefinition(header.id, header.type, undefined, usersEnabled) !== undefined &&
+      !isTimeline
+    );
+  }, [header.id, header.type, isTimeline, usersEnabled]);
+
+  const values = useGetMappedNonEcsValue({
     data,
     fieldName: header.id,
   });
@@ -49,8 +58,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     <>
       <StyledContent className={styledContentClassName} $isDetails={isDetails}>
         {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
-          asPlainText: !!getLink(header.id, header.type), // we want to render value with links as plain text but keep other formatters like badge.
-          browserFields,
+          asPlainText, // we want to render value with links as plain text but keep other formatters like badge.
           columnName: header.id,
           ecsData,
           eventId,
@@ -61,16 +69,12 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
           rowRenderers,
           timelineId,
           truncate,
-          values: getMappedNonEcsValue({
-            data,
-            fieldName: header.id,
-          }),
+          values,
         })}
       </StyledContent>
-      {isDetails && browserFields && hasCellActions(header.id) && (
+      {isDetails && hasCellActions(header.id) && (
         <ExpandedCellValueActions
-          browserFields={browserFields}
-          field={header.id}
+          field={header}
           globalFilters={globalFilters}
           timelineId={timelineId}
           value={values}

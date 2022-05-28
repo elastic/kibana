@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Story, StoryContext } from '@storybook/react';
-import React, { ComponentType } from 'react';
+import type { Story, DecoratorFn } from '@storybook/react';
+import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
-import { CoreStart } from '../../../../../../../../src/core/public';
-import { createKibanaReactContext } from '../../../../../../../../src/plugins/kibana_react/public';
+import { CoreStart } from '@kbn/core/public';
+import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock_apm_plugin_context';
 import { APMServiceContext } from '../../../../context/apm_service/apm_service_context';
@@ -26,7 +26,7 @@ export default {
   title: 'routing/templates/ApmServiceTemplate/AnalyzeDataButton',
   component: AnalyzeDataButton,
   decorators: [
-    (StoryComponent: ComponentType, { args }: StoryContext) => {
+    (StoryComponent, { args }) => {
       const { agentName, canShowDashboard, environment, serviceName } = args;
 
       const KibanaContext = createKibanaReactContext({
@@ -48,9 +48,9 @@ export default {
             <APMServiceContext.Provider
               value={{
                 agentName,
-                alerts: [],
                 transactionTypes: [],
                 serviceName,
+                fallbackToTransactions: false,
               }}
             >
               <KibanaContext.Provider>
@@ -61,7 +61,7 @@ export default {
         </MemoryRouter>
       );
     },
-  ],
+  ] as DecoratorFn[],
 };
 
 export const Example: Story<Args> = () => {

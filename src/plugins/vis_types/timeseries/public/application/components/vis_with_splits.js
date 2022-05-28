@@ -9,10 +9,10 @@
 import React, { useCallback } from 'react';
 import classNames from 'classnames';
 import { getDisplayName } from './lib/get_display_name';
-import { labelDateFormatter } from './lib/label_date_formatter';
 import { findIndex, first } from 'lodash';
 import { getValueOrEmpty } from '../../../common/empty_label';
 import { getSplitByTermsColor } from '../lib/get_split_by_terms_color';
+import { SERIES_SEPARATOR } from '../../../common/constants';
 
 export function visWithSplits(WrappedComponent) {
   function SplitVisComponent(props) {
@@ -43,12 +43,12 @@ export function visWithSplits(WrappedComponent) {
     );
 
     if (!model || !visData || !visData[model.id]) return <WrappedComponent {...props} />;
-    if (visData[model.id].series.every((s) => s.id.split(':').length === 1)) {
+    if (visData[model.id].series.every((s) => s.id.split(SERIES_SEPARATOR).length === 1)) {
       return <WrappedComponent {...props} />;
     }
 
     const splitsVisData = visData[model.id].series.reduce((acc, series) => {
-      const [seriesId, splitId] = series.id.split(':');
+      const [seriesId, splitId] = series.id.split(SERIES_SEPARATOR);
       const seriesModel = model.series.find((s) => s.id === seriesId);
       if (!seriesModel) return acc;
 
@@ -58,7 +58,6 @@ export function visWithSplits(WrappedComponent) {
         acc[splitId] = {
           series: [],
           label: series.label.toString(),
-          labelFormatted: series.labelFormatted,
         };
       }
 
@@ -90,11 +89,9 @@ export function visWithSplits(WrappedComponent) {
 
     const rows = Object.keys(splitsVisData).map((key) => {
       const splitData = splitsVisData[key];
-      const { series, label, labelFormatted } = splitData;
-      let additionalLabel = label;
-      if (labelFormatted) {
-        additionalLabel = labelDateFormatter(labelFormatted);
-      }
+      const { series, label } = splitData;
+      const additionalLabel = label;
+
       const newSeries =
         indexOfNonSplit != null && indexOfNonSplit > 0
           ? [...series, nonSplitSeries]

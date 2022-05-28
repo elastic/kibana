@@ -9,7 +9,7 @@
 import React from 'react';
 import { mount, ReactWrapper } from 'enzyme';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButtonGroup } from '@elastic/eui';
 
 import { VisLegend, VisLegendProps } from './legend';
@@ -201,7 +201,7 @@ describe('VisLegend Component', () => {
       });
 
       expect(fireEvent).toHaveBeenCalledWith({
-        name: 'filterBucket',
+        name: 'filter',
         data: { data: ['valuesA'], negate: false },
       });
       expect(fireEvent).toHaveBeenCalledTimes(1);
@@ -216,7 +216,7 @@ describe('VisLegend Component', () => {
       });
 
       expect(fireEvent).toHaveBeenCalledWith({
-        name: 'filterBucket',
+        name: 'filter',
         data: { data: ['valuesA'], negate: true },
       });
       expect(fireEvent).toHaveBeenCalledTimes(1);

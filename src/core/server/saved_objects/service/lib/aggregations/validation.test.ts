@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { validateAndConvertAggregations } from './validation';
 
 type AggsMap = Record<string, estypes.AggregationsAggregationContainer>;
@@ -89,6 +89,28 @@ describe('validateAndConvertAggregations', () => {
       aggName: {
         max: {
           field: 'foo.bytes',
+        },
+      },
+    });
+  });
+
+  it('validates multi_terms aggregations', () => {
+    expect(
+      validateAndConvertAggregations(
+        ['foo'],
+        {
+          aggName: {
+            multi_terms: {
+              terms: [{ field: 'foo.attributes.description' }, { field: 'foo.attributes.bytes' }],
+            },
+          },
+        },
+        mockMappings
+      )
+    ).toEqual({
+      aggName: {
+        multi_terms: {
+          terms: [{ field: 'foo.description' }, { field: 'foo.bytes' }],
         },
       },
     });

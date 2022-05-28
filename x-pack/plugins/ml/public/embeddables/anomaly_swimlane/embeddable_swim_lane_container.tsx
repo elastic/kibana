@@ -6,11 +6,12 @@
  */
 
 import React, { FC, useCallback, useState, useEffect } from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiEmptyPrompt } from '@elastic/eui';
 import { Observable } from 'rxjs';
 
-import { CoreStart } from 'kibana/public';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { CoreStart } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
 import { IAnomalySwimlaneEmbeddable } from './anomaly_swimlane_embeddable';
 import { useSwimlaneInputResolver } from './swimlane_input_resolver';
 import { SwimlaneType } from '../../application/explorer/explorer_constants';
@@ -22,6 +23,7 @@ import { AppStateSelectedCells } from '../../application/explorer/explorer_utils
 import { MlDependencies } from '../../application/app';
 import { SWIM_LANE_SELECTION_TRIGGER } from '../../ui_actions';
 import {
+  ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
   AnomalySwimlaneServices,
@@ -35,6 +37,9 @@ export interface ExplorerSwimlaneContainerProps {
   refresh: Observable<any>;
   onInputChange: (input: Partial<AnomalySwimlaneEmbeddableInput>) => void;
   onOutputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void;
+  onRenderComplete: () => void;
+  onLoading: () => void;
+  onError: (error: Error) => void;
 }
 
 export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = ({
@@ -45,7 +50,17 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
   refresh,
   onInputChange,
   onOutputChange,
+  onRenderComplete,
+  onLoading,
+  onError,
 }) => {
+  useEmbeddableExecutionContext<AnomalySwimlaneEmbeddableInput>(
+    services[0].executionContext,
+    embeddableInput,
+    ANOMALY_SWIMLANE_EMBEDDABLE_TYPE,
+    id
+  );
+
   const [chartWidth, setChartWidth] = useState<number>(0);
 
   const [fromPage, setFromPage] = useState<number>(1);
@@ -61,7 +76,8 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
       refresh,
       services,
       chartWidth,
-      fromPage
+      fromPage,
+      { onRenderComplete, onError, onLoading }
     );
 
   useEffect(() => {
@@ -133,9 +149,17 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
         }}
         isLoading={isLoading}
         noDataWarning={
-          <FormattedMessage
-            id="xpack.ml.swimlaneEmbeddable.noDataFound"
-            defaultMessage="No anomalies found"
+          <EuiEmptyPrompt
+            titleSize="xxs"
+            style={{ padding: 0 }}
+            title={
+              <h2>
+                <FormattedMessage
+                  id="xpack.ml.swimlaneEmbeddable.noDataFound"
+                  defaultMessage="No anomalies found"
+                />
+              </h2>
+            }
           />
         }
       />

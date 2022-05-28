@@ -5,16 +5,29 @@
  * 2.0.
  */
 
-import { CoreStart, HttpSetup, IUiSettingsClient, AppMountParameters } from 'kibana/public';
+import {
+  CoreStart,
+  HttpSetup,
+  IUiSettingsClient,
+  AppMountParameters,
+  NotificationsStart,
+  ApplicationStart,
+  DocLinksStart,
+  ChromeStart,
+  I18nStart,
+} from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import { HttpRequestInit } from '../../../../src/core/public';
-import { MonitoringStartPluginDependencies } from './types';
-import { TriggersAndActionsUIPublicPluginStart } from '../../triggers_actions_ui/public';
+import { HttpRequestInit } from '@kbn/core/public';
+import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { TypeRegistry } from '../../triggers_actions_ui/public/application/type_registry';
+import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { ActionTypeModel, AlertTypeModel } from '../../triggers_actions_ui/public/types';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/public';
+import { ActionTypeModel, RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import {
+  MonitoringStartPluginDependencies,
+  LegacyMonitoringStartPluginDependencies,
+} from './types';
 
 interface BreadcrumbItem {
   ['data-test-subj']?: string;
@@ -37,26 +50,21 @@ export interface KFetchKibanaOptions {
   prependBasePath?: boolean;
 }
 
-const angularNoop = () => {
-  throw new Error('Angular has been removed.');
-};
-
 export interface IShims {
-  toastNotifications: CoreStart['notifications']['toasts'];
-  capabilities: CoreStart['application']['capabilities'];
-  getAngularInjector: typeof angularNoop;
+  toastNotifications: NotificationsStart['toasts'];
+  capabilities: ApplicationStart['capabilities'];
   getBasePath: () => string;
   getInjected: (name: string, defaultValue?: unknown) => unknown;
   breadcrumbs: {
     set: (breadcrumbs: BreadcrumbItem[]) => void;
     update: (breadcrumbs?: BreadcrumbItem[]) => void;
   };
-  I18nContext: CoreStart['i18n']['Context'];
-  docLinks: CoreStart['docLinks'];
-  docTitle: CoreStart['chrome']['docTitle'];
+  I18nContext: I18nStart['Context'];
+  docLinks: DocLinksStart;
+  docTitle: ChromeStart['docTitle'];
   timefilter: MonitoringStartPluginDependencies['data']['query']['timefilter']['timefilter'];
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
-  ruleTypeRegistry: TypeRegistry<AlertTypeModel>;
+  ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
   uiSettings: IUiSettingsClient;
   http: HttpSetup;
   kfetch: (
@@ -80,11 +88,10 @@ export class Legacy {
     triggersActionsUi,
     usageCollection,
     appMountParameters,
-  }: MonitoringStartPluginDependencies) {
+  }: LegacyMonitoringStartPluginDependencies) {
     this._shims = {
       toastNotifications: core.notifications.toasts,
       capabilities: core.application.capabilities,
-      getAngularInjector: angularNoop,
       getBasePath: (): string => core.http.basePath.get(),
       getInjected: (name: string, defaultValue?: unknown): string | unknown =>
         core.injectedMetadata.getInjectedVar(name, defaultValue),
@@ -92,9 +99,11 @@ export class Legacy {
         set: (breadcrumbs: BreadcrumbItem[]) => this._shims.breadcrumbs.update(breadcrumbs),
         update: (breadcrumbs?: BreadcrumbItem[]) => {
           if (!breadcrumbs) {
-            const currentBreadcrumbs: Observable<any> & {
-              value?: BreadcrumbItem[];
-            } = core.chrome.getBreadcrumbs$()?.source;
+            const currentBreadcrumbs:
+              | (Observable<any> & {
+                  value?: BreadcrumbItem[];
+                })
+              | undefined = core.chrome.getBreadcrumbs$()?.source;
             breadcrumbs = currentBreadcrumbs?.value;
           }
           const globalStateStr = location.hash.split('?')[1];

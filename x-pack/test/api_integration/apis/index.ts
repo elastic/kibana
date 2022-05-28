@@ -9,8 +9,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('apis', function () {
-    this.tags('ciGroup6');
-
     loadTestFile(require.resolve('./search'));
     loadTestFile(require.resolve('./es'));
     loadTestFile(require.resolve('./security'));
@@ -27,12 +25,16 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./security_solution'));
     loadTestFile(require.resolve('./lens'));
-    loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./transform'));
     loadTestFile(require.resolve('./lists'));
     loadTestFile(require.resolve('./upgrade_assistant'));
     loadTestFile(require.resolve('./searchprofiler'));
     loadTestFile(require.resolve('./painless_lab'));
     loadTestFile(require.resolve('./file_upload'));
+    loadTestFile(require.resolve('./aiops'));
+    loadTestFile(require.resolve('./ml'));
+    loadTestFile(require.resolve('./watcher'));
+    loadTestFile(require.resolve('./logs_ui'));
+    loadTestFile(require.resolve('./osquery'));
   });
 }

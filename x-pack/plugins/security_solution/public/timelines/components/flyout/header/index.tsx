@@ -19,8 +19,9 @@ import React, { MouseEventHandler, MouseEvent, useCallback, useMemo } from 'reac
 import { isEmpty, get, pick } from 'lodash/fp';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
-import { FormattedRelative } from '@kbn/i18n/react';
+import { FormattedRelative } from '@kbn/i18n-react';
 
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import {
   TimelineStatus,
@@ -30,7 +31,7 @@ import {
 } from '../../../../../common/types/timeline';
 import { State } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
-import { timelineDefaults } from '../../../../timelines/store/timeline/defaults';
+import { timelineDefaults } from '../../../store/timeline/defaults';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
 import { TimerangeInput } from '../../../../../common/search_strategy';
 import { AddToCaseButton } from '../add_to_case_button';
@@ -39,9 +40,8 @@ import { SaveTimelineButton } from '../../timeline/header/save_timeline_button';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
-import { esQuery } from '../../../../../../../../src/plugins/data/public';
-import { useSourcererScope } from '../../../../common/containers/sourcerer';
-import { TimelineModel } from '../../../../timelines/store/timeline/model';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
+import { TimelineModel } from '../../../store/timeline/model';
 import {
   startSelector,
   endSelector,
@@ -76,9 +76,9 @@ const ActiveTimelinesContainer = styled(EuiFlexItem)`
 
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
   const dispatch = useDispatch();
-  const { indexPattern, browserFields } = useSourcererScope(SourcererScopeName.timeline);
+  const { browserFields, indexPattern } = useSourcererDataView(SourcererScopeName.timeline);
   const { uiSettings } = useKibana().services;
-  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const {
     activeTab,
@@ -180,9 +180,9 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
                 </EuiFlexItem>
               )}
               <EuiFlexItem grow={false}>
-                <EuiToolTip content={i18n.CLOSE_TIMELINE}>
+                <EuiToolTip content={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}>
                   <EuiButtonIcon
-                    aria-label={i18n.CLOSE_TIMELINE}
+                    aria-label={i18n.CLOSE_TIMELINE_OR_TEMPLATE(timelineType === 'default')}
                     data-test-subj="close-timeline"
                     iconType="cross"
                     onClick={handleClose}
@@ -345,7 +345,7 @@ const TimelineStatusInfoComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }
 const TimelineStatusInfo = React.memo(TimelineStatusInfoComponent);
 
 const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
-  const { selectedPatterns, indexPattern, docValueFields, browserFields } = useSourcererScope(
+  const { selectedPatterns, indexPattern, docValueFields, browserFields } = useSourcererDataView(
     SourcererScopeName.timeline
   );
   const getStartSelector = useMemo(() => startSelector(), []);
@@ -367,7 +367,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     }
   });
   const { uiSettings } = useKibana().services;
-  const esQueryConfig = useMemo(() => esQuery.getEsQueryConfig(uiSettings), [uiSettings]);
+  const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timeline: TimelineModel = useSelector(
     (state: State) => getTimeline(state, timelineId) ?? timelineDefaults

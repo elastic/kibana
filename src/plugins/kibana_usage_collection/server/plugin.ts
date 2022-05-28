@@ -6,22 +6,23 @@
  * Side Public License, v 1.
  */
 
-import type { UsageCollectionSetup, UsageCounter } from 'src/plugins/usage_collection/server';
-import { Subject, Observable } from 'rxjs';
+import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
+import { Subject } from 'rxjs';
 import type {
   PluginInitializerContext,
   CoreSetup,
   Plugin,
   ISavedObjectsRepository,
   IUiSettingsClient,
-  SharedGlobalConfig,
   CoreStart,
   SavedObjectsServiceSetup,
   OpsMetrics,
   Logger,
   CoreUsageDataStart,
-} from 'src/core/server';
-import { SavedObjectsClient, EventLoopDelaysMonitor } from '../../../core/server';
+} from '@kbn/core/server';
+import { SavedObjectsClient, EventLoopDelaysMonitor } from '@kbn/core/server';
+import { registerEbtCounters } from './ebt_counters';
 import {
   startTrackingEventLoopDelaysUsage,
   startTrackingEventLoopDelaysThreshold,
@@ -38,8 +39,6 @@ import {
   registerCoreUsageCollector,
   registerLocalizationUsageCollector,
   registerUiCountersUsageCollector,
-  registerUiCounterSavedObjectType,
-  registerUiCountersRollups,
   registerConfigUsageCollector,
   registerUsageCountersRollups,
   registerUsageCountersUsageCollector,
@@ -49,13 +48,13 @@ import {
 
 interface KibanaUsageCollectionPluginsDepsSetup {
   usageCollection: UsageCollectionSetup;
+  telemetry?: TelemetryPluginSetup;
 }
 
 type SavedObjectsRegisterType = SavedObjectsServiceSetup['registerType'];
 
 export class KibanaUsageCollectionPlugin implements Plugin {
   private readonly logger: Logger;
-  private readonly legacyConfig$: Observable<SharedGlobalConfig>;
   private readonly instanceUuid: string;
   private savedObjectsClient?: ISavedObjectsRepository;
   private uiSettingsClient?: IUiSettingsClient;
@@ -66,13 +65,20 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.legacyConfig$ = initializerContext.config.legacy.globalConfig$;
     this.metric$ = new Subject<OpsMetrics>();
     this.pluginStop$ = new Subject();
     this.instanceUuid = initializerContext.env.instanceUuid;
   }
 
-  public setup(coreSetup: CoreSetup, { usageCollection }: KibanaUsageCollectionPluginsDepsSetup) {
+  public setup(
+    coreSetup: CoreSetup,
+    { usageCollection, telemetry }: KibanaUsageCollectionPluginsDepsSetup
+  ) {
+    if (!telemetry) {
+      // If the telemetry plugin is disabled, let's set optIn false to flush the queues.
+      coreSetup.analytics.optIn({ global: { enabled: false } });
+    }
+    registerEbtCounters(coreSetup.analytics, usageCollection);
     usageCollection.createUsageCounter('uiCounters');
     this.eventLoopUsageCounter = usageCollection.createUsageCounter('eventLoop');
     coreSetup.coreUsageData.registerUsageCounter(usageCollection.createUsageCounter('core'));
@@ -111,6 +117,8 @@ export class KibanaUsageCollectionPlugin implements Plugin {
 
   public stop() {
     this.metric$.complete();
+
+    this.pluginStop$.next();
     this.pluginStop$.complete();
   }
 
@@ -121,20 +129,19 @@ export class KibanaUsageCollectionPlugin implements Plugin {
     pluginStop$: Subject<void>,
     registerType: SavedObjectsRegisterType
   ) {
+    const kibanaIndex = coreSetup.savedObjects.getKibanaIndex();
     const getSavedObjectsClient = () => this.savedObjectsClient;
     const getUiSettingsClient = () => this.uiSettingsClient;
     const getCoreUsageDataService = () => this.coreUsageData!;
 
-    registerUiCounterSavedObjectType(coreSetup.savedObjects);
-    registerUiCountersRollups(this.logger.get('ui-counters'), pluginStop$, getSavedObjectsClient);
-    registerUiCountersUsageCollector(usageCollection, pluginStop$);
+    registerUiCountersUsageCollector(usageCollection);
 
     registerUsageCountersRollups(this.logger.get('usage-counters-rollup'), getSavedObjectsClient);
     registerUsageCountersUsageCollector(usageCollection);
 
     registerOpsStatsCollector(usageCollection, metric$);
-    registerKibanaUsageCollector(usageCollection, this.legacyConfig$);
-    registerSavedObjectsCountUsageCollector(usageCollection, this.legacyConfig$);
+    registerKibanaUsageCollector(usageCollection, kibanaIndex);
+    registerSavedObjectsCountUsageCollector(usageCollection, kibanaIndex);
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(

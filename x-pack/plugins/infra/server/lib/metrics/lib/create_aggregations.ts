@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
 import { calculateDateHistogramOffset } from './calculate_date_histogram_offset';
 import { createMetricsAggregations } from './create_metrics_aggregations';
@@ -15,7 +16,7 @@ export const createAggregations = (options: MetricsAPIRequest) => {
   const histogramAggregation = {
     histogram: {
       date_histogram: {
-        field: options.timerange.field,
+        field: TIMESTAMP_FIELD,
         fixed_interval: intervalString,
         offset: options.alignDataToEnd ? calculateDateHistogramOffset(options.timerange) : '0s',
         extended_bounds: {

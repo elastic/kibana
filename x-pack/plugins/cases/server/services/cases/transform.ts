@@ -14,11 +14,14 @@ import {
   SavedObjectsBulkUpdateResponse,
   SavedObjectsFindResponse,
   SavedObjectsUpdateResponse,
-} from 'kibana/server';
-import { ACTION_SAVED_OBJECT_TYPE } from '../../../../actions/server';
+} from '@kbn/core/server';
+import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import { ESCaseAttributes, ExternalServicesWithoutConnectorId } from './types';
-import { CONNECTOR_ID_REFERENCE_NAME, PUSH_CONNECTOR_ID_REFERENCE_NAME } from '../../common';
-import { CaseAttributes, CaseFullExternalService } from '../../../common';
+import {
+  CONNECTOR_ID_REFERENCE_NAME,
+  PUSH_CONNECTOR_ID_REFERENCE_NAME,
+} from '../../common/constants';
+import { CaseAttributes, CaseFullExternalService, NONE_CONNECTOR_ID } from '../../../common/api';
 import {
   findConnectorIdReference,
   transformFieldsToESModel,
@@ -197,6 +200,6 @@ function transformESExternalService(
 
   return {
     ...externalService,
-    connector_id: connectorIdRef?.id ?? null,
+    connector_id: connectorIdRef?.id ?? NONE_CONNECTOR_ID,
   };
 }

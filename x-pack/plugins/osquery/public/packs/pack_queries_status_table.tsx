@@ -21,15 +21,19 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n/react';
+import { FormattedDate, FormattedTime, FormattedRelative } from '@kbn/i18n-react';
+import moment from 'moment-timezone';
 
-import {
+import type {
   TypedLensByValueInput,
   PersistedIndexPatternLayer,
   PieVisualizationState,
-} from '../../../lens/public';
-import { FilterStateStore, IndexPattern } from '../../../../../src/plugins/data/common';
-import { useKibana, isModifiedEvent, isLeftClickEvent } from '../common/lib/kibana';
+  TermsIndexPatternColumn,
+} from '@kbn/lens-plugin/public';
+import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
+import { FilterStateStore, DataView } from '@kbn/data-plugin/common';
+import { removeMultilines } from '../../common/utils/build_query/remove_multilines';
+import { useKibana } from '../common/lib/kibana';
 import { OsqueryManagerPackagePolicyInputStream } from '../../common/types';
 import { ScheduledQueryErrorsTable } from './scheduled_query_errors_table';
 import { usePackQueryLastResults } from './use_pack_query_last_results';
@@ -87,9 +91,9 @@ function getLensAttributes(
           },
           orderDirection: 'desc',
         },
-      },
+      } as TermsIndexPatternColumn,
       'ed999e9d-204c-465b-897f-fe1a125b39ed': {
-        sourceField: 'Records',
+        sourceField: RECORDS_FIELD,
         isBucketed: false,
         dataType: 'number',
         scale: 'ratio',
@@ -155,7 +159,7 @@ function getLensAttributes(
         {
           $state: { store: FilterStateStore.APP_STATE },
           meta: {
-            indexRefName: 'filter-index-pattern-0',
+            index: 'filter-index-pattern-0',
             negate: false,
             alias: null,
             disabled: false,
@@ -178,7 +182,7 @@ function getLensAttributes(
                 meta: {
                   alias: 'agent IDs',
                   disabled: false,
-                  indexRefName: 'filter-index-pattern-0',
+                  index: 'filter-index-pattern-0',
                   key: 'query',
                   negate: false,
                   type: 'custom',
@@ -204,11 +208,10 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   mode,
 }) => {
   const lensService = useKibana().services.lens;
+  const isLensAvailable = lensService?.canUseEditor();
 
   const handleClick = useCallback(
     (event) => {
-      const openInNewTab = !(!isModifiedEvent(event) && isLeftClickEvent(event));
-
       event.preventDefault();
 
       lensService?.navigateToPrefilledEditor(
@@ -222,21 +225,20 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
           attributes: getLensAttributes(actionId, agentIds),
         },
         {
-          openInNewTab,
+          openInNewTab: true,
         }
       );
     },
     [actionId, agentIds, endDate, lensService, mode, startDate]
   );
 
+  if (!isLensAvailable) {
+    return null;
+  }
+
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
-      <EuiButtonEmpty
-        size="xs"
-        iconType="lensApp"
-        onClick={handleClick}
-        disabled={!lensService?.canUseEditor()}
-      >
+      <EuiButtonEmpty size="xs" iconType="lensApp" onClick={handleClick} disabled={false}>
         {VIEW_IN_LENS}
       </EuiButtonEmpty>
     );
@@ -246,7 +248,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
     <EuiToolTip content={VIEW_IN_LENS}>
       <EuiButtonIcon
         iconType="lensApp"
-        disabled={!lensService?.canUseEditor()}
+        disabled={false}
         onClick={handleClick}
         aria-label={VIEW_IN_LENS}
       />
@@ -263,12 +265,15 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   endDate,
   startDate,
 }) => {
-  const urlGenerator = useKibana().services.discover?.urlGenerator;
+  const { discover, application } = useKibana().services;
+  const locator = discover?.locator;
+  const discoverPermissions = application.capabilities.discover;
+
   const [discoverUrl, setDiscoverUrl] = useState<string>('');
 
   useEffect(() => {
     const getDiscoverUrl = async () => {
-      if (!urlGenerator?.createUrl) return;
+      if (!locator) return;
 
       const agentIdsQuery = agentIds?.length
         ? {
@@ -279,7 +284,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
           }
         : null;
 
-      const newUrl = await urlGenerator.createUrl({
+      const newUrl = await locator.getUrl({
         indexPatternId: 'logs-*',
         filters: [
           {
@@ -332,12 +337,17 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
       });
       setDiscoverUrl(newUrl);
     };
+
     getDiscoverUrl();
-  }, [actionId, agentIds, endDate, startDate, urlGenerator]);
+  }, [actionId, agentIds, endDate, startDate, locator]);
+
+  if (!discoverPermissions.show) {
+    return null;
+  }
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
-      <EuiButtonEmpty size="xs" iconType="discoverApp" href={discoverUrl}>
+      <EuiButtonEmpty size="xs" iconType="discoverApp" href={discoverUrl} target="_blank">
         {VIEW_IN_DISCOVER}
       </EuiButtonEmpty>
     );
@@ -345,7 +355,12 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 
   return (
     <EuiToolTip content={VIEW_IN_DISCOVER}>
-      <EuiButtonIcon iconType="discoverApp" href={discoverUrl} aria-label={VIEW_IN_DISCOVER} />
+      <EuiButtonIcon
+        iconType="discoverApp"
+        aria-label={VIEW_IN_DISCOVER}
+        href={discoverUrl}
+        target="_blank"
+      />
     </EuiToolTip>
   );
 };
@@ -376,53 +391,36 @@ ScheduledQueryExpandedContent.displayName = 'ScheduledQueryExpandedContent';
 
 interface ScheduledQueryLastResultsProps {
   actionId: string;
+  queryId?: string;
+  interval: number;
+  logsDataView: DataView | undefined;
+}
+
+interface ScheduledQueryErrorsProps {
+  actionId: string;
   queryId: string;
   interval: number;
+  logsDataView: DataView | undefined;
   toggleErrors: (payload: { queryId: string; interval: number }) => void;
   expanded: boolean;
 }
 
 const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
   actionId,
-  queryId,
   interval,
-  toggleErrors,
-  expanded,
+  logsDataView,
 }) => {
-  const data = useKibana().services.data;
-  const [logsIndexPattern, setLogsIndexPattern] = useState<IndexPattern | undefined>(undefined);
-
-  const { data: lastResultsData, isFetched } = usePackQueryLastResults({
+  const { data: lastResultsData, isLoading } = usePackQueryLastResults({
     actionId,
     interval,
-    logsIndexPattern,
+    logsDataView,
   });
 
-  const { data: errorsData, isFetched: errorsFetched } = usePackQueryErrors({
-    actionId,
-    interval,
-    logsIndexPattern,
-  });
-
-  const handleErrorsToggle = useCallback(
-    () => toggleErrors({ queryId, interval }),
-    [queryId, interval, toggleErrors]
-  );
-
-  useEffect(() => {
-    const fetchLogsIndexPattern = async () => {
-      const indexPattern = await data.indexPatterns.find('logs-*');
-
-      setLogsIndexPattern(indexPattern[0]);
-    };
-    fetchLogsIndexPattern();
-  }, [data.indexPatterns]);
-
-  if (!isFetched || !errorsFetched) {
+  if (isLoading) {
     return <EuiLoadingSpinner />;
   }
 
-  if (!lastResultsData && !errorsData?.total) {
+  if (!lastResultsData) {
     return <>{'-'}</>;
   }
 
@@ -449,74 +447,196 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
           '-'
         )}
       </EuiFlexItem>
-      <EuiFlexItem grow={4}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiNotificationBadge color="subdued">
-              {lastResultsData?.docCount ?? 0}
-            </EuiNotificationBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.osquery.queriesStatusTable.documentLabelText"
-              defaultMessage="{count, plural, one {Document} other {Documents}}"
-              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-              values={{ count: lastResultsData?.docCount as number }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
-      <EuiFlexItem grow={4}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiNotificationBadge color="subdued">
-              {lastResultsData?.uniqueAgentsCount ?? 0}
-            </EuiNotificationBadge>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <FormattedMessage
-              id="xpack.osquery.queriesStatusTable.agentsLabelText"
-              defaultMessage="{count, plural, one {Agent} other {Agents}}"
-              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-              values={{ count: lastResultsData?.uniqueAgentsCount ?? 0 }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({
+  actionId,
+  interval,
+  logsDataView,
+}) => {
+  const { data: lastResultsData, isLoading } = usePackQueryLastResults({
+    actionId,
+    interval,
+    logsDataView,
+  });
+  if (isLoading) {
+    return <EuiLoadingSpinner />;
+  }
 
-      <EuiFlexItem grow={5}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
-          <EuiFlexItem grow={false}>
-            <EuiNotificationBadge color={errorsData?.total ? 'accent' : 'subdued'}>
-              {errorsData?.total ?? 0}
-            </EuiNotificationBadge>
-          </EuiFlexItem>
+  if (!lastResultsData) {
+    return <>{'-'}</>;
+  }
 
-          <EuiFlexItem grow={false}>
-            {' '}
-            <FormattedMessage
-              id="xpack.osquery.queriesStatusTable.errorsLabelText"
-              defaultMessage="{count, plural, one {Error} other {Errors}}"
-              // eslint-disable-next-line react-perf/jsx-no-new-object-as-prop
-              values={{ count: errorsData?.total as number }}
-            />
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              isDisabled={!errorsData?.total}
-              onClick={handleErrorsToggle}
-              iconType={expanded ? 'arrowUp' : 'arrowDown'}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiNotificationBadge color="subdued">
+          {lastResultsData?.docCount ?? 0}
+        </EuiNotificationBadge>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
 
+const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({
+  actionId,
+  interval,
+  logsDataView,
+}) => {
+  const { data: lastResultsData, isLoading } = usePackQueryLastResults({
+    actionId,
+    interval,
+    logsDataView,
+  });
+  if (isLoading) {
+    return <EuiLoadingSpinner />;
+  }
+
+  if (!lastResultsData) {
+    return <>{'-'}</>;
+  }
+
+  return (
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <EuiFlexItem grow={false}>
+        <EuiNotificationBadge color="subdued">
+          {lastResultsData?.uniqueAgentsCount ?? 0}
+        </EuiNotificationBadge>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+const ErrorsColumnResults: React.FC<ScheduledQueryErrorsProps> = ({
+  actionId,
+  interval,
+  queryId,
+  toggleErrors,
+  expanded,
+  logsDataView,
+}) => {
+  const handleErrorsToggle = useCallback(
+    () => toggleErrors({ queryId, interval }),
+    [toggleErrors, queryId, interval]
+  );
+
+  const { data: errorsData, isLoading: errorsLoading } = usePackQueryErrors({
+    actionId,
+    interval,
+    logsDataView,
+  });
+  if (errorsLoading) {
+    return <EuiLoadingSpinner />;
+  }
+
+  if (!errorsData?.total) {
+    return <>{'-'}</>;
+  }
+
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <EuiNotificationBadge color={errorsData?.total ? 'accent' : 'subdued'}>
+            {errorsData?.total ?? 0}
+          </EuiNotificationBadge>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            isDisabled={!errorsData?.total}
+            onClick={handleErrorsToggle}
+            iconType={expanded ? 'arrowUp' : 'arrowDown'}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFlexItem>
+  );
+};
+
 const getPackActionId = (actionId: string, packName: string) => `pack_${packName}_${actionId}`;
+
+interface PackViewInActionProps {
+  item: {
+    id: string;
+    interval: number;
+  };
+  logsDataView: DataView | undefined;
+  packName: string;
+  agentIds?: string[];
+}
+
+const PackViewInDiscoverActionComponent: React.FC<PackViewInActionProps> = ({
+  item,
+  logsDataView,
+  packName,
+  agentIds,
+}) => {
+  const { id, interval } = item;
+  const actionId = getPackActionId(id, packName);
+  const { data: lastResultsData } = usePackQueryLastResults({
+    actionId,
+    interval,
+    logsDataView,
+  });
+
+  const startDate = lastResultsData?.['@timestamp']
+    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
+    : `now-${interval}s`;
+  const endDate = lastResultsData?.['@timestamp']
+    ? moment(lastResultsData?.['@timestamp'][0]).toISOString()
+    : 'now';
+
+  return (
+    <ViewResultsInDiscoverAction
+      actionId={actionId}
+      agentIds={agentIds}
+      buttonType={ViewResultsActionButtonType.icon}
+      startDate={startDate}
+      endDate={endDate}
+      mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+    />
+  );
+};
+
+const PackViewInDiscoverAction = React.memo(PackViewInDiscoverActionComponent);
+
+const PackViewInLensActionComponent: React.FC<PackViewInActionProps> = ({
+  item,
+  logsDataView,
+  packName,
+  agentIds,
+}) => {
+  const { id, interval } = item;
+  const actionId = getPackActionId(id, packName);
+  const { data: lastResultsData } = usePackQueryLastResults({
+    actionId,
+    interval,
+    logsDataView,
+  });
+
+  const startDate = lastResultsData?.['@timestamp']
+    ? moment(lastResultsData?.['@timestamp'][0]).subtract(interval, 'seconds').toISOString()
+    : `now-${interval}s`;
+  const endDate = lastResultsData?.['@timestamp']
+    ? moment(lastResultsData?.['@timestamp'][0]).toISOString()
+    : 'now';
+
+  return (
+    <ViewResultsInLensAction
+      actionId={actionId}
+      agentIds={agentIds}
+      buttonType={ViewResultsActionButtonType.icon}
+      startDate={startDate}
+      endDate={endDate}
+      mode={lastResultsData?.['@timestamp'][0] ? 'absolute' : 'relative'}
+    />
+  );
+};
+
+const PackViewInLensAction = React.memo(PackViewInLensActionComponent);
 
 interface PackQueriesStatusTableProps {
   agentIds?: string[];
@@ -533,14 +653,31 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     Record<string, ReturnType<typeof ScheduledQueryExpandedContent>>
   >({});
 
-  const renderQueryColumn = useCallback(
-    (query: string) => (
-      <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
-        {query}
-      </EuiCodeBlock>
-    ),
-    []
-  );
+  const dataViews = useKibana().services.data.dataViews;
+  const [logsDataView, setLogsDataView] = useState<DataView | undefined>(undefined);
+
+  useEffect(() => {
+    const fetchLogsDataView = async () => {
+      const dataView = await dataViews.find('logs-*');
+
+      setLogsDataView(dataView[0]);
+    };
+
+    fetchLogsDataView();
+  }, [dataViews]);
+
+  const renderQueryColumn = useCallback((query: string, item) => {
+    const singleLine = removeMultilines(query);
+    const content = singleLine.length > 55 ? `${singleLine.substring(0, 55)}...` : singleLine;
+
+    return (
+      <EuiToolTip title={item.id} content={<EuiFlexItem>{query}</EuiFlexItem>}>
+        <EuiCodeBlock language="sql" fontSize="s" paddingSize="none" transparentBackground>
+          {content}
+        </EuiCodeBlock>
+      </EuiToolTip>
+    );
+  }, []);
 
   const toggleErrors = useCallback(
     ({ queryId, interval }: { queryId: string; interval: number }) => {
@@ -556,6 +693,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           />
         );
       }
+
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
     [agentIds, itemIdToExpandedRowMap, packName]
@@ -564,42 +702,69 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
   const renderLastResultsColumn = useCallback(
     (item) => (
       <ScheduledQueryLastResults
-        queryId={item.id}
+        logsDataView={logsDataView}
         actionId={getPackActionId(item.id, packName)}
         interval={item.interval}
+      />
+    ),
+    [packName, logsDataView]
+  );
+  const renderDocsColumn = useCallback(
+    (item) => (
+      <DocsColumnResults
+        logsDataView={logsDataView}
+        actionId={getPackActionId(item.id, packName)}
+        interval={item.interval}
+      />
+    ),
+    [logsDataView, packName]
+  );
+  const renderAgentsColumn = useCallback(
+    (item) => (
+      <AgentsColumnResults
+        logsDataView={logsDataView}
+        actionId={getPackActionId(item.id, packName)}
+        interval={item.interval}
+      />
+    ),
+    [logsDataView, packName]
+  );
+  const renderErrorsColumn = useCallback(
+    (item) => (
+      <ErrorsColumnResults
+        queryId={item.id}
+        interval={item.interval}
+        actionId={getPackActionId(item.id, packName)}
         toggleErrors={toggleErrors}
+        logsDataView={logsDataView}
         expanded={!!itemIdToExpandedRowMap[item.id]}
       />
     ),
-    [itemIdToExpandedRowMap, packName, toggleErrors]
+    [itemIdToExpandedRowMap, logsDataView, packName, toggleErrors]
   );
 
   const renderDiscoverResultsAction = useCallback(
     (item) => (
-      <ViewResultsInDiscoverAction
-        actionId={getPackActionId(item.id, packName)}
+      <PackViewInDiscoverAction
+        item={item}
         agentIds={agentIds}
-        buttonType={ViewResultsActionButtonType.icon}
-        startDate={`now-${item.interval * 2}s`}
-        endDate="now"
-        mode="relative"
+        logsDataView={logsDataView}
+        packName={packName}
       />
     ),
-    [agentIds, packName]
+    [agentIds, logsDataView, packName]
   );
 
   const renderLensResultsAction = useCallback(
     (item) => (
-      <ViewResultsInLensAction
-        actionId={getPackActionId(item.id, packName)}
+      <PackViewInLensAction
+        item={item}
         agentIds={agentIds}
-        buttonType={ViewResultsActionButtonType.icon}
-        startDate={`now-${item.interval * 2}s`}
-        endDate="now"
-        mode="relative"
+        logsDataView={logsDataView}
+        packName={packName}
       />
     ),
-    [agentIds, packName]
+    [agentIds, logsDataView, packName]
   );
 
   const getItemId = useCallback(
@@ -615,6 +780,7 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           defaultMessage: 'ID',
         }),
         width: '15%',
+        truncateText: true,
       },
       {
         field: 'interval',
@@ -629,13 +795,32 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
           defaultMessage: 'Query',
         }),
         render: renderQueryColumn,
-        width: '20%',
+        width: '40%',
       },
       {
         name: i18n.translate('xpack.osquery.pack.queriesTable.lastResultsColumnTitle', {
           defaultMessage: 'Last results',
         }),
         render: renderLastResultsColumn,
+        width: '12%',
+      },
+      {
+        name: i18n.translate('xpack.osquery.pack.queriesTable.docsResultsColumnTitle', {
+          defaultMessage: 'Docs',
+        }),
+        render: renderDocsColumn,
+      },
+      {
+        name: i18n.translate('xpack.osquery.pack.queriesTable.agentsResultsColumnTitle', {
+          defaultMessage: 'Agents',
+        }),
+        render: renderAgentsColumn,
+      },
+      {
+        name: i18n.translate('xpack.osquery.pack.queriesTable.errorsResultsColumnTitle', {
+          defaultMessage: 'Errors',
+        }),
+        render: renderErrorsColumn,
       },
       {
         name: i18n.translate('xpack.osquery.pack.queriesTable.viewResultsColumnTitle', {
@@ -655,6 +840,9 @@ const PackQueriesStatusTableComponent: React.FC<PackQueriesStatusTableProps> = (
     [
       renderQueryColumn,
       renderLastResultsColumn,
+      renderDocsColumn,
+      renderAgentsColumn,
+      renderErrorsColumn,
       renderDiscoverResultsAction,
       renderLensResultsAction,
     ]

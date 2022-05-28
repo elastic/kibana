@@ -13,10 +13,9 @@ import styled from 'styled-components';
 import { IconWithCount } from './icon_with_count';
 import * as i18n from './translations';
 import { useGetCases } from '../../containers/use_get_cases';
-import { CaseDetailsHrefSchema, CaseDetailsLink, CasesNavigation } from '../links';
+import { CaseDetailsLink } from '../links';
 import { LoadingPlaceholders } from './loading_placeholders';
 import { NoCases } from './no_cases';
-import { isSubCase } from '../all_cases/helpers';
 import { MarkdownRenderer } from '../markdown_editor';
 import { FilterOptions } from '../../containers/types';
 import { TruncatedText } from '../truncated_text';
@@ -29,10 +28,7 @@ const MarkdownContainer = styled.div`
 
 export interface RecentCasesProps {
   filterOptions: Partial<FilterOptions>;
-  caseDetailsNavigation: CasesNavigation<CaseDetailsHrefSchema, 'configurable'>;
-  createCaseNavigation: CasesNavigation;
   maxCasesToShow: number;
-  hasWritePermissions: boolean;
 }
 
 const usePrevious = (value: Partial<FilterOptions>) => {
@@ -43,13 +39,7 @@ const usePrevious = (value: Partial<FilterOptions>) => {
   return ref.current;
 };
 
-export const RecentCasesComp = ({
-  caseDetailsNavigation,
-  createCaseNavigation,
-  filterOptions,
-  maxCasesToShow,
-  hasWritePermissions,
-}: RecentCasesProps) => {
+export const RecentCasesComp = ({ filterOptions, maxCasesToShow }: RecentCasesProps) => {
   const previousFilterOptions = usePrevious(filterOptions);
   const { data, loading, setFilters } = useGetCases({
     initialQueryParams: { perPage: maxCasesToShow },
@@ -69,19 +59,14 @@ export const RecentCasesComp = ({
   return isLoadingCases ? (
     <LoadingPlaceholders lines={2} placeholders={3} />
   ) : !isLoadingCases && data.cases.length === 0 ? (
-    <NoCases createCaseHref={createCaseNavigation.href} hasWritePermissions={hasWritePermissions} />
+    <NoCases />
   ) : (
     <>
       {data.cases.map((c, i) => (
         <EuiFlexGroup key={c.id} gutterSize="none" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiText size="s">
-              <CaseDetailsLink
-                caseDetailsNavigation={caseDetailsNavigation}
-                detailName={isSubCase(c) ? c.caseParentId : c.id}
-                title={c.title}
-                subCaseId={isSubCase(c) ? c.id : undefined}
-              >
+              <CaseDetailsLink detailName={c.id} title={c.title}>
                 <TruncatedText text={c.title} />
               </CaseDetailsLink>
             </EuiText>
@@ -101,3 +86,4 @@ export const RecentCasesComp = ({
     </>
   );
 };
+RecentCasesComp.displayName = 'RecentCasesComp';

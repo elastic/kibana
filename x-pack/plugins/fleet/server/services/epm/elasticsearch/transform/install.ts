@@ -5,35 +5,40 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'kibana/server';
-import { ResponseError } from '@elastic/elasticsearch/lib/errors';
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { errors } from '@elastic/elasticsearch';
 
-import { saveInstalledEsRefs } from '../../packages/install';
+import { updateEsAssetReferences } from '../../packages/install';
 import { getPathParts } from '../../archive';
 import { ElasticsearchAssetType } from '../../../../../common/types/models';
 import type { EsAssetReference, InstallablePackage } from '../../../../../common/types/models';
 import { getInstallation } from '../../packages';
-import { appContextService } from '../../../app_context';
 
-import { deleteTransforms, deleteTransformRefs } from './remove';
+import { getESAssetMetadata } from '../meta';
+
+import { retryTransientEsErrors } from '../retry';
+
+import { deleteTransforms } from './remove';
 import { getAsset } from './common';
 
 interface TransformInstallation {
   installationName: string;
-  content: string;
+  content: any;
 }
 
 export const installTransform = async (
   installablePackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
-  savedObjectsClient: SavedObjectsClientContract
+  savedObjectsClient: SavedObjectsClientContract,
+  logger: Logger,
+  esReferences?: EsAssetReference[]
 ) => {
-  const logger = appContextService.getLogger();
   const installation = await getInstallation({
     savedObjectsClient,
     pkgName: installablePackage.name,
   });
+  esReferences = esReferences ?? installation?.installed_es ?? [];
   let previousInstalledTransformEsAssets: EsAssetReference[] = [];
   if (installation) {
     previousInstalledTransformEsAssets = installation.installed_es.filter(
@@ -68,68 +73,79 @@ export const installTransform = async (
     }, []);
 
     // get and save transform refs before installing transforms
-    await saveInstalledEsRefs(savedObjectsClient, installablePackage.name, transformRefs);
+    esReferences = await updateEsAssetReferences(
+      savedObjectsClient,
+      installablePackage.name,
+      esReferences,
+      {
+        assetsToAdd: transformRefs,
+      }
+    );
 
     const transforms: TransformInstallation[] = transformPaths.map((path: string) => {
+      const content = JSON.parse(getAsset(path).toString('utf-8'));
+      content._meta = getESAssetMetadata({ packageName: installablePackage.name });
+
       return {
         installationName: getTransformNameForInstallation(
           installablePackage,
           path,
           installNameSuffix
         ),
-        content: getAsset(path).toString('utf-8'),
+        content,
       };
     });
 
     const installationPromises = transforms.map(async (transform) => {
-      return handleTransformInstall({ esClient, transform });
+      return handleTransformInstall({ esClient, logger, transform });
     });
 
     installedTransforms = await Promise.all(installationPromises).then((results) => results.flat());
   }
 
   if (previousInstalledTransformEsAssets.length > 0) {
-    const currentInstallation = await getInstallation({
+    esReferences = await updateEsAssetReferences(
       savedObjectsClient,
-      pkgName: installablePackage.name,
-    });
-
-    // remove the saved object reference
-    await deleteTransformRefs(
-      savedObjectsClient,
-      currentInstallation?.installed_es || [],
       installablePackage.name,
-      previousInstalledTransformEsAssets.map((asset) => asset.id),
-      installedTransforms.map((installed) => installed.id)
+      esReferences,
+      {
+        assetsToRemove: previousInstalledTransformEsAssets,
+      }
     );
   }
-  return installedTransforms;
+
+  return { installedTransforms, esReferences };
 };
 
-const isTransform = (path: string) => {
+export const isTransform = (path: string) => {
   const pathParts = getPathParts(path);
   return !path.endsWith('/') && pathParts.type === ElasticsearchAssetType.transform;
 };
 
 async function handleTransformInstall({
   esClient,
+  logger,
   transform,
 }: {
   esClient: ElasticsearchClient;
+  logger: Logger;
   transform: TransformInstallation;
 }): Promise<EsAssetReference> {
   try {
-    // defer validation on put if the source index is not available
-    await esClient.transform.putTransform({
-      transform_id: transform.installationName,
-      defer_validation: true,
-      // @ts-expect-error expect object, but given a string
-      body: transform.content,
-    });
+    await retryTransientEsErrors(
+      () =>
+        // defer validation on put if the source index is not available
+        esClient.transform.putTransform({
+          transform_id: transform.installationName,
+          defer_validation: true,
+          body: transform.content,
+        }),
+      { logger }
+    );
   } catch (err) {
     // swallow the error if the transform already exists.
     const isAlreadyExistError =
-      err instanceof ResponseError &&
+      err instanceof errors.ResponseError &&
       err?.body?.error?.type === 'resource_already_exists_exception';
     if (!isAlreadyExistError) {
       throw err;

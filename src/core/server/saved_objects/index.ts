@@ -84,6 +84,7 @@ export type {
   SavedObjectMigrationFn,
   SavedObjectMigrationContext,
 } from './migrations';
+export { mergeSavedObjectMigrationMaps } from './migrations';
 
 export type {
   SavedObjectsNamespaceType,
@@ -92,6 +93,8 @@ export type {
   SavedObjectsTypeManagementDefinition,
   SavedObjectTypeExcludeFromUpgradeFilterHook,
 } from './types';
+
+export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './validation';
 
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';
 export { SavedObjectTypeRegistry } from './saved_objects_type_registry';

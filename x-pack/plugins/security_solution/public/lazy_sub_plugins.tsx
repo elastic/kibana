@@ -15,13 +15,14 @@ import { Detections } from './detections';
 import { Exceptions } from './exceptions';
 
 import { Hosts } from './hosts';
+import { Users } from './users';
 import { Network } from './network';
-import { Ueba } from './ueba';
 import { Overview } from './overview';
 import { Rules } from './rules';
 
 import { Timelines } from './timelines';
 import { Management } from './management';
+import { LandingPages } from './landing_pages';
 
 /**
  * The classes used to instantiate the sub plugins. These are grouped into a single object for the sake of bundling them in a single dynamic import.
@@ -31,11 +32,13 @@ const subPluginClasses = {
   Cases,
   Exceptions,
   Hosts,
+  Users,
   Network,
-  Ueba,
+
   Overview,
   Rules,
   Timelines,
   Management,
+  LandingPages,
 };
 export { subPluginClasses };

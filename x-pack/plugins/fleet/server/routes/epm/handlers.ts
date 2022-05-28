@@ -9,7 +9,8 @@ import path from 'path';
 
 import type { TypeOf } from '@kbn/config-schema';
 import mime from 'mime-types';
-import type { ResponseHeaders, KnownHeaders } from 'src/core/server';
+import semverValid from 'semver/functions/valid';
+import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
 import type {
   GetInfoResponse,
@@ -50,13 +51,20 @@ import {
   getInstallation,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
-import { defaultIngestErrorHandler, ingestErrorToResponseOptions } from '../../errors';
-import { splitPkgKey } from '../../services/epm/registry';
+import {
+  defaultIngestErrorHandler,
+  ingestErrorToResponseOptions,
+  IngestManagerError,
+} from '../../errors';
 import { licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
+
+const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
+  'cache-control': 'max-age=600',
+};
 
 export const getCategoriesHandler: FleetRequestHandler<
   undefined,
@@ -65,9 +73,10 @@ export const getCategoriesHandler: FleetRequestHandler<
   try {
     const res = await getCategories(request.query);
     const body: GetCategoriesResponse = {
+      items: res,
       response: res,
     };
-    return response.ok({ body });
+    return response.ok({ body, headers: { ...CACHE_CONTROL_10_MINUTES_HEADER } });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
   }
@@ -78,16 +87,20 @@ export const getListHandler: FleetRequestHandler<
   TypeOf<typeof GetPackagesRequestSchema.query>
 > = async (context, request, response) => {
   try {
-    const savedObjectsClient = context.fleet.epm.internalSoClient;
+    const savedObjectsClient = (await context.fleet).epm.internalSoClient;
     const res = await getPackages({
       savedObjectsClient,
       ...request.query,
     });
     const body: GetPackagesResponse = {
+      items: res,
       response: res,
     };
     return response.ok({
       body,
+      // Only cache responses where the installation status is excluded, otherwise the request
+      // needs up-to-date information on whether the package is installed so we can't cache it
+      headers: request.query.excludeInstallStatus ? { ...CACHE_CONTROL_10_MINUTES_HEADER } : {},
     });
   } catch (error) {
     return defaultIngestErrorHandler({ error, response });
@@ -96,9 +109,10 @@ export const getListHandler: FleetRequestHandler<
 
 export const getLimitedListHandler: FleetRequestHandler = async (context, request, response) => {
   try {
-    const savedObjectsClient = context.fleet.epm.internalSoClient;
+    const savedObjectsClient = (await context.fleet).epm.internalSoClient;
     const res = await getLimitedPackages({ savedObjectsClient });
     const body: GetLimitedPackagesResponse = {
+      items: res,
       response: res,
     };
     return response.ok({
@@ -109,96 +123,103 @@ export const getLimitedListHandler: FleetRequestHandler = async (context, reques
   }
 };
 
-export const getFileHandler: FleetRequestHandler<TypeOf<typeof GetFileRequestSchema.params>> =
-  async (context, request, response) => {
-    try {
-      const { pkgName, pkgVersion, filePath } = request.params;
-      const savedObjectsClient = context.fleet.epm.internalSoClient;
-      const installation = await getInstallation({ savedObjectsClient, pkgName });
-      const useLocalFile = pkgVersion === installation?.version;
+export const getFileHandler: FleetRequestHandler<
+  TypeOf<typeof GetFileRequestSchema.params>
+> = async (context, request, response) => {
+  try {
+    const { pkgName, pkgVersion, filePath } = request.params;
+    const savedObjectsClient = (await context.fleet).epm.internalSoClient;
+    const installation = await getInstallation({ savedObjectsClient, pkgName });
+    const useLocalFile = pkgVersion === installation?.version;
 
-      if (useLocalFile) {
-        const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
-        const fileBuffer = getArchiveEntry(assetPath);
-        // only pull local installation if we don't have it cached
-        const storedAsset =
-          !fileBuffer && (await getAsset({ savedObjectsClient, path: assetPath }));
+    if (useLocalFile) {
+      const assetPath = `${pkgName}-${pkgVersion}/${filePath}`;
+      const fileBuffer = getArchiveEntry(assetPath);
+      // only pull local installation if we don't have it cached
+      const storedAsset = !fileBuffer && (await getAsset({ savedObjectsClient, path: assetPath }));
 
-        // error, if neither is available
-        if (!fileBuffer && !storedAsset) {
-          return response.custom({
-            body: `installed package file not found: ${filePath}`,
-            statusCode: 404,
-          });
-        }
-
-        // if storedAsset is not available, fileBuffer *must* be
-        // b/c we error if we don't have at least one, and storedAsset is the least likely
-        const { buffer, contentType } = storedAsset
-          ? {
-              contentType: storedAsset.media_type,
-              buffer: storedAsset.data_utf8
-                ? Buffer.from(storedAsset.data_utf8, 'utf8')
-                : Buffer.from(storedAsset.data_base64, 'base64'),
-            }
-          : {
-              contentType: mime.contentType(path.extname(assetPath)),
-              buffer: fileBuffer,
-            };
-
-        if (!contentType) {
-          return response.custom({
-            body: `unknown content type for file: ${filePath}`,
-            statusCode: 400,
-          });
-        }
-
+      // error, if neither is available
+      if (!fileBuffer && !storedAsset) {
         return response.custom({
-          body: buffer,
-          statusCode: 200,
-          headers: {
-            'cache-control': 'max-age=10, public',
-            'content-type': contentType,
-          },
-        });
-      } else {
-        const registryResponse = await getFile(pkgName, pkgVersion, filePath);
-        const headersToProxy: KnownHeaders[] = ['content-type', 'cache-control'];
-        const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
-          const value = registryResponse.headers.get(knownHeader);
-          if (value !== null) {
-            headers[knownHeader] = value;
-          }
-          return headers;
-        }, {} as ResponseHeaders);
-
-        return response.custom({
-          body: registryResponse.body,
-          statusCode: registryResponse.status,
-          headers: proxiedHeaders,
+          body: `installed package file not found: ${filePath}`,
+          statusCode: 404,
         });
       }
-    } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
-    }
-  };
 
-export const getInfoHandler: FleetRequestHandler<TypeOf<typeof GetInfoRequestSchema.params>> =
-  async (context, request, response) => {
-    try {
-      const { pkgkey } = request.params;
-      const savedObjectsClient = context.fleet.epm.internalSoClient;
-      // TODO: change epm API to /packageName/version so we don't need to do this
-      const { pkgName, pkgVersion } = splitPkgKey(pkgkey);
-      const res = await getPackageInfo({ savedObjectsClient, pkgName, pkgVersion });
-      const body: GetInfoResponse = {
-        response: res,
-      };
-      return response.ok({ body });
-    } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
+      // if storedAsset is not available, fileBuffer *must* be
+      // b/c we error if we don't have at least one, and storedAsset is the least likely
+      const { buffer, contentType } = storedAsset
+        ? {
+            contentType: storedAsset.media_type,
+            buffer: storedAsset.data_utf8
+              ? Buffer.from(storedAsset.data_utf8, 'utf8')
+              : Buffer.from(storedAsset.data_base64, 'base64'),
+          }
+        : {
+            contentType: mime.contentType(path.extname(assetPath)),
+            buffer: fileBuffer,
+          };
+
+      if (!contentType) {
+        return response.custom({
+          body: `unknown content type for file: ${filePath}`,
+          statusCode: 400,
+        });
+      }
+
+      return response.custom({
+        body: buffer,
+        statusCode: 200,
+        headers: {
+          ...CACHE_CONTROL_10_MINUTES_HEADER,
+          'content-type': contentType,
+        },
+      });
+    } else {
+      const registryResponse = await getFile(pkgName, pkgVersion, filePath);
+      const headersToProxy: KnownHeaders[] = ['content-type'];
+      const proxiedHeaders = headersToProxy.reduce((headers, knownHeader) => {
+        const value = registryResponse.headers.get(knownHeader);
+        if (value !== null) {
+          headers[knownHeader] = value;
+        }
+        return headers;
+      }, {} as ResponseHeaders);
+
+      return response.custom({
+        body: registryResponse.body,
+        statusCode: registryResponse.status,
+        headers: { ...CACHE_CONTROL_10_MINUTES_HEADER, ...proxiedHeaders },
+      });
     }
-  };
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
+
+export const getInfoHandler: FleetRequestHandler<
+  TypeOf<typeof GetInfoRequestSchema.params>
+> = async (context, request, response) => {
+  try {
+    const savedObjectsClient = (await context.fleet).epm.internalSoClient;
+    const { pkgName, pkgVersion } = request.params;
+    if (pkgVersion && !semverValid(pkgVersion)) {
+      throw new IngestManagerError('Package version is not a valid semver');
+    }
+    const res = await getPackageInfo({
+      savedObjectsClient,
+      pkgName,
+      pkgVersion: pkgVersion || '',
+      skipArchive: true,
+    });
+    const body: GetInfoResponse = {
+      item: res,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
 
 export const updatePackageHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackageRequestSchema.params>,
@@ -206,14 +227,12 @@ export const updatePackageHandler: FleetRequestHandler<
   TypeOf<typeof UpdatePackageRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const { pkgkey } = request.params;
-    const savedObjectsClient = context.fleet.epm.internalSoClient;
-
-    const { pkgName } = splitPkgKey(pkgkey);
+    const savedObjectsClient = (await context.fleet).epm.internalSoClient;
+    const { pkgName } = request.params;
 
     const res = await updatePackage({ savedObjectsClient, pkgName, ...request.body });
     const body: UpdatePackageResponse = {
-      response: res,
+      item: res,
     };
 
     return response.ok({ body });
@@ -222,39 +241,49 @@ export const updatePackageHandler: FleetRequestHandler<
   }
 };
 
-export const getStatsHandler: FleetRequestHandler<TypeOf<typeof GetStatsRequestSchema.params>> =
-  async (context, request, response) => {
-    try {
-      const { pkgName } = request.params;
-      const savedObjectsClient = context.fleet.epm.internalSoClient;
-      const body: GetStatsResponse = {
-        response: await getPackageUsageStats({ savedObjectsClient, pkgName }),
-      };
-      return response.ok({ body });
-    } catch (error) {
-      return defaultIngestErrorHandler({ error, response });
-    }
-  };
+export const getStatsHandler: FleetRequestHandler<
+  TypeOf<typeof GetStatsRequestSchema.params>
+> = async (context, request, response) => {
+  try {
+    const { pkgName } = request.params;
+    const savedObjectsClient = (await context.fleet).epm.internalSoClient;
+    const body: GetStatsResponse = {
+      response: await getPackageUsageStats({ savedObjectsClient, pkgName }),
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultIngestErrorHandler({ error, response });
+  }
+};
 
 export const installPackageFromRegistryHandler: FleetRequestHandler<
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
   undefined,
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
-  const savedObjectsClient = context.fleet.epm.internalSoClient;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
-  const { pkgkey } = request.params;
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.epm.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const { pkgName, pkgVersion } = request.params;
 
+  const spaceId = fleetContext.spaceId;
   const res = await installPackage({
     installSource: 'registry',
     savedObjectsClient,
-    pkgkey,
+    pkgkey: pkgVersion ? `${pkgName}-${pkgVersion}` : pkgName,
     esClient,
+    spaceId,
     force: request.body?.force,
+    ignoreConstraints: request.body?.ignore_constraints,
   });
+
   if (!res.error) {
     const body: InstallPackageResponse = {
-      response: res.assets || [],
+      items: res.assets || [],
+      _meta: {
+        install_source: res.installSource,
+      },
     };
     return response.ok({ body });
   } else {
@@ -282,15 +311,20 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
-  const savedObjectsClient = context.fleet.epm.internalSoClient;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.epm.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const spaceId = fleetContext.spaceId;
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
     esClient,
     packagesToInstall: request.body.packages,
+    spaceId,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
+    items: payload,
     response: payload,
   };
   return response.ok({ body });
@@ -307,21 +341,28 @@ export const installPackageByUploadHandler: FleetRequestHandler<
       body: { message: 'Requires Enterprise license' },
     });
   }
-  const savedObjectsClient = context.fleet.epm.internalSoClient;
-  const esClient = context.core.elasticsearch.client.asInternalUser;
+  const coreContext = await context.core;
+  const fleetContext = await context.fleet;
+  const savedObjectsClient = fleetContext.epm.internalSoClient;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const contentType = request.headers['content-type'] as string; // from types it could also be string[] or undefined but this is checked later
   const archiveBuffer = Buffer.from(request.body);
-
+  const spaceId = fleetContext.spaceId;
   const res = await installPackage({
     installSource: 'upload',
     savedObjectsClient,
     esClient,
     archiveBuffer,
+    spaceId,
     contentType,
   });
   if (!res.error) {
     const body: InstallPackageResponse = {
+      items: res.assets || [],
       response: res.assets || [],
+      _meta: {
+        install_source: res.installSource,
+      },
     };
     return response.ok({ body });
   } else {
@@ -335,17 +376,20 @@ export const deletePackageHandler: FleetRequestHandler<
   TypeOf<typeof DeletePackageRequestSchema.body>
 > = async (context, request, response) => {
   try {
-    const { pkgkey } = request.params;
-    const savedObjectsClient = context.fleet.epm.internalSoClient;
-    const esClient = context.core.elasticsearch.client.asInternalUser;
+    const { pkgName, pkgVersion } = request.params;
+    const coreContext = await context.core;
+    const fleetContext = await context.fleet;
+    const savedObjectsClient = fleetContext.epm.internalSoClient;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
     const res = await removeInstallation({
       savedObjectsClient,
-      pkgkey,
+      pkgName,
+      pkgVersion,
       esClient,
       force: request.body?.force,
     });
     const body: DeletePackageResponse = {
-      response: res,
+      items: res,
     };
     return response.ok({ body });
   } catch (error) {

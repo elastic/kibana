@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from 'src/core/server';
-import { RuleParamsAndRefs } from '../../../../../../alerting/server';
+import { Logger } from '@kbn/core/server';
+import { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { extractExceptionsList } from './extract_exceptions_list';
 
@@ -31,13 +31,13 @@ import { extractExceptionsList } from './extract_exceptions_list';
  * @param params The params of the base rule(s).
  * @returns The rule parameters and the saved object references to store.
  */
-export const extractReferences = ({
+export const extractReferences = <TParams extends RuleParams>({
   logger,
   params,
 }: {
   logger: Logger;
-  params: RuleParams;
-}): RuleParamsAndRefs<RuleParams> => {
+  params: TParams;
+}): RuleParamsAndRefs<TParams> => {
   const exceptionReferences = extractExceptionsList({
     logger,
     exceptionsList: params.exceptionsList,

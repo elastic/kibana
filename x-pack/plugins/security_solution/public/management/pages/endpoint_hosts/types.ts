@@ -6,6 +6,8 @@
  */
 
 import { EuiSuperDatePickerRecentRange } from '@elastic/eui';
+import type { DataViewBase } from '@kbn/es-query';
+import { GetPackagesResponse } from '@kbn/fleet-plugin/common';
 import {
   ActivityLog,
   HostInfo,
@@ -19,8 +21,6 @@ import {
   EndpointPendingActions,
 } from '../../../../common/endpoint/types';
 import { ServerApiError } from '../../../common/types';
-import { GetPackagesResponse } from '../../../../../fleet/common';
-import { IIndexPattern } from '../../../../../../../src/plugins/data/public';
 import { AsyncResourceState } from '../../state';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 
@@ -78,7 +78,7 @@ export interface EndpointState {
   /** the selected policy ID in the onboarding flow */
   selectedPolicyId?: string;
   /** Endpoint package info */
-  endpointPackageInfo: AsyncResourceState<GetPackagesResponse['response'][0]>;
+  endpointPackageInfo: AsyncResourceState<GetPackagesResponse['items'][0]>;
   /** Tracks the list of policies IDs used in Host metadata that may no longer exist */
   nonExistingPolicies: PolicyIds['packagePolicy'];
   /** List of Package Policy Ids mapped to an associated Fleet Parent Agent Policy Id*/
@@ -86,7 +86,7 @@ export interface EndpointState {
   /** Tracks whether hosts exist and helps control if onboarding should be visible */
   endpointsExist: boolean;
   /** index patterns for query bar */
-  patterns: IIndexPattern[];
+  patterns: DataViewBase[];
   /** api error from retrieving index patters for query bar */
   patternsError?: ServerApiError;
   /** Is auto-refresh enabled */

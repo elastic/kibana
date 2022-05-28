@@ -9,7 +9,7 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { cloneDeep } from 'lodash/fp';
 import { render, screen } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { CtiEnabledModule } from './cti_enabled_module';
 import { ThemeProvider } from 'styled-components';
 import { createStore, State } from '../../../common/store';
@@ -19,20 +19,15 @@ import {
   mockGlobalState,
   SUB_PLUGINS_REDUCER,
 } from '../../../common/mock';
-import { mockTheme, mockProps, mockCtiEventCountsResponse, mockCtiLinksResponse } from './mock';
-import { useCtiEventCounts } from '../../containers/overview_cti_links/use_cti_event_counts';
+import { mockTheme, mockProps, mockTiDataSources, mockCtiLinksResponse } from './mock';
 import { useCtiDashboardLinks } from '../../containers/overview_cti_links';
-import { useRequestEventCounts } from '../../containers/overview_cti_links/use_request_event_counts';
+import { useTiDataSources } from '../../containers/overview_cti_links/use_ti_data_sources';
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../containers/overview_cti_links/use_cti_event_counts');
-const useCTIEventCountsMock = useCtiEventCounts as jest.Mock;
-useCTIEventCountsMock.mockReturnValue(mockCtiEventCountsResponse);
-
-jest.mock('../../containers/overview_cti_links/use_request_event_counts');
-const useRequestEventCountsMock = useRequestEventCounts as jest.Mock;
-useRequestEventCountsMock.mockReturnValue([true, {}]);
+jest.mock('../../containers/overview_cti_links/use_ti_data_sources');
+const useTiDataSourcesMock = useTiDataSources as jest.Mock;
+useTiDataSourcesMock.mockReturnValue(mockTiDataSources);
 
 jest.mock('../../containers/overview_cti_links');
 const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
@@ -60,36 +55,6 @@ describe('CtiEnabledModule', () => {
       </Provider>
     );
 
-    expect(screen.getByTestId('cti-with-events')).toBeInTheDocument();
-  });
-
-  it('renders CtiWithNoEvents when there are no events', () => {
-    useCTIEventCountsMock.mockReturnValueOnce({ totalCount: 0 });
-    render(
-      <Provider store={store}>
-        <I18nProvider>
-          <ThemeProvider theme={mockTheme}>
-            <CtiEnabledModule {...mockProps} />
-          </ThemeProvider>
-        </I18nProvider>
-      </Provider>
-    );
-
-    expect(screen.getByTestId('cti-with-no-events')).toBeInTheDocument();
-  });
-
-  it('renders null while event counts are loading', () => {
-    useCTIEventCountsMock.mockReturnValueOnce({ totalCount: -1 });
-    const { container } = render(
-      <Provider store={store}>
-        <I18nProvider>
-          <ThemeProvider theme={mockTheme}>
-            <CtiEnabledModule {...mockProps} />
-          </ThemeProvider>
-        </I18nProvider>
-      </Provider>
-    );
-
-    expect(container.firstChild).toBeNull();
+    expect(screen.getByText('Showing: 5 indicators')).toBeInTheDocument();
   });
 });

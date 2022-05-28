@@ -19,10 +19,10 @@ import {
   Plugin,
   PluginInitializerContext,
   ResponseError,
-  SharedGlobalConfig,
-} from 'kibana/server';
-import { get, has } from 'lodash';
-import { DEFAULT_APP_CATEGORIES } from '../../../../src/core/server';
+} from '@kbn/core/server';
+import { get } from 'lodash';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { RouteMethod } from '@kbn/core/server';
 import {
   KIBANA_MONITORING_LOGGING_TAG,
   KIBANA_STATS_TYPE_MONITORING,
@@ -44,12 +44,14 @@ import {
   IBulkUploader,
   LegacyRequest,
   LegacyShimDependencies,
+  MonitoringConfigSchema,
   MonitoringCore,
   MonitoringLicenseService,
   MonitoringPluginSetup,
   PluginsSetup,
   PluginsStart,
   RequestHandlerContextMonitoringPlugin,
+  MonitoringRouteConfig,
 } from './types';
 
 // This is used to test the version of kibana
@@ -78,7 +80,6 @@ export class MonitoringPlugin
   private bulkUploader?: IBulkUploader;
 
   private readonly config: MonitoringConfig;
-  private readonly legacyConfig: SharedGlobalConfig;
   private coreSetup?: CoreSetup;
   private setupPlugins?: PluginsSetup;
 
@@ -86,8 +87,7 @@ export class MonitoringPlugin
     this.initializerContext = initializerContext;
     this.log = initializerContext.logger.get(LOGGING_TAG);
     this.getLogger = (...scopes: string[]) => initializerContext.logger.get(LOGGING_TAG, ...scopes);
-    this.config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
-    this.legacyConfig = this.initializerContext.config.legacy.get();
+    this.config = createConfig(this.initializerContext.config.get<MonitoringConfigSchema>());
   }
 
   setup(coreSetup: CoreSetup, plugins: PluginsSetup) {
@@ -104,7 +104,7 @@ export class MonitoringPlugin
       kibanaStats: {
         uuid: this.initializerContext.env.instanceUuid,
         name: serverInfo.name,
-        index: this.legacyConfig.kibana.index,
+        index: coreSetup.savedObjects.getKibanaIndex(),
         host: serverInfo.hostname,
         locale: i18n.getLocale(),
         port: serverInfo.port.toString(),
@@ -119,7 +119,6 @@ export class MonitoringPlugin
       config: this.config!,
       getLogger: this.getLogger,
       log: this.log,
-      legacyConfig: this.legacyConfig,
       coreSetup: this.coreSetup!,
       setupPlugins: this.setupPlugins!,
     });
@@ -165,8 +164,7 @@ export class MonitoringPlugin
   }
 
   init(cluster: ICustomClusterClient, coreStart: CoreStart) {
-    const config = createConfig(this.initializerContext.config.get<TypeOf<typeof configSchema>>());
-    const legacyConfig = this.initializerContext.config.legacy.get();
+    const config = createConfig(this.initializerContext.config.get<MonitoringConfigSchema>());
     const coreSetup = this.coreSetup!;
     const plugins = this.setupPlugins!;
 
@@ -181,13 +179,12 @@ export class MonitoringPlugin
       ),
     };
 
-    // If the UI is enabled, then we want to register it so it shows up
+    // If the UI is enabled, then we want to register it, so it shows up
     // and start any other UI-related setup tasks
     if (config.ui.enabled) {
       // Create our shim which is currently used to power our routing
       this.monitoringCore = this.getLegacyShim(
         config,
-        legacyConfig,
         coreSetup.getStartServices as () => Promise<[CoreStart, PluginsStart, {}]>,
         cluster,
         plugins
@@ -202,6 +199,7 @@ export class MonitoringPlugin
         router,
         licenseService: this.licenseService,
         encryptedSavedObjects: plugins.encryptedSavedObjects,
+        alerting: plugins.alerting,
         logger: this.log,
       });
       initInfraSource(config, plugins.infra);
@@ -310,48 +308,34 @@ export class MonitoringPlugin
 
   getLegacyShim(
     config: MonitoringConfig,
-    legacyConfig: any,
     getCoreServices: () => Promise<[CoreStart, PluginsStart, {}]>,
     cluster: ICustomClusterClient,
     setupPlugins: PluginsSetup
   ): MonitoringCore {
     const router = this.legacyShimDependencies.router;
-    const legacyConfigWrapper = () => ({
-      get: (_key: string): string | undefined => {
-        const key = _key.includes('monitoring.') ? _key.split('monitoring.')[1] : _key;
-        if (has(config, key)) {
-          return get(config, key);
-        }
-        if (has(legacyConfig, key)) {
-          return get(legacyConfig, key);
-        }
-
-        if (key === 'server.uuid') {
-          return this.legacyShimDependencies.instanceUuid;
-        }
-
-        throw new Error(`Unknown key '${_key}'`);
-      },
-    });
     return {
-      config: legacyConfigWrapper,
+      config,
       log: this.log,
-      route: (options: any) => {
+      route: <Params = any, Query = any, Body = any, Method extends RouteMethod = any>(
+        options: MonitoringRouteConfig<Params, Query, Body, Method>
+      ) => {
         const method = options.method;
         const handler = async (
           context: RequestHandlerContextMonitoringPlugin,
-          req: KibanaRequest<any, any, any, any>,
+          req: KibanaRequest<any, any, any>,
           res: KibanaResponseFactory
         ) => {
           const plugins = (await getCoreServices())[1];
-          const legacyRequest: LegacyRequest = {
+          const coreContext = await context.core;
+          const actionContext = await context.actions;
+          const legacyRequest: LegacyRequest<Params, Query, Body> = {
             ...req,
             logger: this.log,
             getLogger: this.getLogger,
             payload: req.body,
             getKibanaStatsCollector: () => this.legacyShimDependencies.kibanaStatsCollector,
-            getUiSettingsService: () => context.core.uiSettings.client,
-            getActionTypeRegistry: () => context.actions?.listTypes(),
+            getUiSettingsService: () => coreContext.uiSettings.client,
+            getActionTypeRegistry: () => actionContext?.listTypes(),
             getRulesClient: () => {
               try {
                 return plugins.alerting.getRulesClientWithRequest(req);
@@ -369,9 +353,10 @@ export class MonitoringPlugin
               }
             },
             server: {
+              instanceUuid: this.legacyShimDependencies.instanceUuid,
               log: this.log,
               route: () => {},
-              config: legacyConfigWrapper,
+              config,
               newPlatform: {
                 setup: {
                   plugins: setupPlugins,
@@ -389,7 +374,7 @@ export class MonitoringPlugin
                       const client =
                         name === 'monitoring'
                           ? cluster.asScoped(req).asCurrentUser
-                          : context.core.elasticsearch.client.asCurrentUser;
+                          : coreContext.elasticsearch.client.asCurrentUser;
                       return await Globals.app.getLegacyClusterShim(client, endpoint, params);
                     },
                   }),
@@ -410,20 +395,25 @@ export class MonitoringPlugin
           }
         };
 
-        const validate: any = get(options, 'config.validate', false);
-        if (validate && validate.payload) {
-          validate.body = validate.payload;
-        }
+        const validate: MonitoringRouteConfig<Params, Query, Body, Method>['validate'] =
+          // NOTE / TODO: "config.validate" is a legacy convention and should be converted over during the TS conversion work
+          get(options, 'validate', false) || get(options, 'config.validate', false);
+
         options.validate = validate;
 
-        if (method === 'POST') {
-          router.post(options, handler);
-        } else if (method === 'GET') {
-          router.get(options, handler);
-        } else if (method === 'PUT') {
-          router.put(options, handler);
+        const routeConfig = {
+          path: options.path,
+          validate: options.validate,
+        };
+
+        if (method.toLowerCase() === 'post') {
+          router.post(routeConfig, handler);
+        } else if (method.toLowerCase() === 'get') {
+          router.get(routeConfig, handler);
+        } else if (method.toLowerCase() === 'put') {
+          router.put(routeConfig, handler);
         } else {
-          throw new Error('Unsupport API method: ' + method);
+          throw new Error('Unsupported API method: ' + method);
         }
       },
     };

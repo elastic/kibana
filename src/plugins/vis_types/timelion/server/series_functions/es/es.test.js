@@ -7,7 +7,7 @@
  */
 
 import { of } from 'rxjs';
-import es from './index';
+import es from '.';
 import tlConfigFn from '../fixtures/tl_config';
 import * as aggResponse from './lib/agg_response_to_series_list';
 import buildRequest from './lib/build_request';
@@ -16,8 +16,8 @@ import esResponse from '../fixtures/es_response';
 
 import _ from 'lodash';
 import sinon from 'sinon';
-import invoke from '../helpers/invoke_series_fn.js';
-import { UI_SETTINGS } from '../../../../../data/server';
+import invoke from '../helpers/invoke_series_fn';
+import { UI_SETTINGS } from '@kbn/data-plugin/server';
 
 describe('es', () => {
   let tlConfig;
@@ -28,6 +28,12 @@ describe('es', () => {
       getIndexPatternsService: () => ({
         find: async () => [],
       }),
+      request: {
+        events: {
+          aborted$: of(),
+        },
+        body: {},
+      },
     };
   }
 
@@ -46,9 +52,11 @@ describe('es', () => {
     });
 
     test('should call data search with sessionId, isRestore and isStored', async () => {
+      const baseTlConfig = stubRequestAndServer({ rawResponse: esResponse });
       tlConfig = {
-        ...stubRequestAndServer({ rawResponse: esResponse }),
+        ...baseTlConfig,
         request: {
+          ...baseTlConfig.request,
           body: {
             searchSession: {
               sessionId: '1',
@@ -256,12 +264,20 @@ describe('es', () => {
         sandbox.restore();
       });
 
-      test('sets ignore_throttled=true on the request', () => {
+      test('sets ignore_throttled=false on the request', () => {
+        config.index = 'beer';
+        tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = true;
+        const request = fn(config, tlConfig, emptyScriptFields);
+
+        expect(request.params.ignore_throttled).toEqual(false);
+      });
+
+      test('sets no ignore_throttled if SEARCH_INCLUDE_FROZEN is false', () => {
         config.index = 'beer';
         tlConfig.settings[UI_SETTINGS.SEARCH_INCLUDE_FROZEN] = false;
         const request = fn(config, tlConfig, emptyScriptFields);
 
-        expect(request.params.ignore_throttled).toEqual(true);
+        expect(request.params).not.toHaveProperty('ignore_throttled');
       });
 
       test('sets no timeout if elasticsearch.shardTimeout is set to 0', () => {

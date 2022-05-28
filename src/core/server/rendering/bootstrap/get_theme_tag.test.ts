@@ -9,22 +9,6 @@
 import { getThemeTag } from './get_theme_tag';
 
 describe('getThemeTag', () => {
-  it('returns the correct value for version:v7 and darkMode:false', () => {
-    expect(
-      getThemeTag({
-        themeVersion: 'v7',
-        darkMode: false,
-      })
-    ).toEqual('v7light');
-  });
-  it('returns the correct value for version:v7 and darkMode:true', () => {
-    expect(
-      getThemeTag({
-        themeVersion: 'v7',
-        darkMode: true,
-      })
-    ).toEqual('v7dark');
-  });
   it('returns the correct value for version:v8 and darkMode:false', () => {
     expect(
       getThemeTag({

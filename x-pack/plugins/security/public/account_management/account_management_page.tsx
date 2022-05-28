@@ -9,9 +9,10 @@ import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import type { AppMountParameters, CoreStart, NotificationsStart } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { CoreStart, NotificationsStart } from 'src/core/public';
 
 import type { AuthenticatedUser } from '../../common/model';
 import { getUserDisplayName } from '../../common/model';
@@ -67,12 +68,14 @@ export const AccountManagementPage = ({ userAPIClient, authc, notifications }: P
 
 export function renderAccountManagementPage(
   i18nStart: CoreStart['i18n'],
-  element: Element,
+  { element, theme$ }: Pick<AppMountParameters, 'element' | 'theme$'>,
   props: Props
 ) {
   ReactDOM.render(
     <i18nStart.Context>
-      <AccountManagementPage {...props} />
+      <KibanaThemeProvider theme$={theme$}>
+        <AccountManagementPage {...props} />
+      </KibanaThemeProvider>
     </i18nStart.Context>,
     element
   );

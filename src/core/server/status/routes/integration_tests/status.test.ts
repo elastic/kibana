@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import supertest from 'supertest';
 import { omit } from 'lodash';
 
@@ -144,7 +143,7 @@ describe('GET /api/status', () => {
       build_number: 1234,
       build_snapshot: true,
     });
-    const metricsMockValue = await metrics.getOpsMetrics$().pipe(first()).toPromise();
+    const metricsMockValue = await firstValueFrom(metrics.getOpsMetrics$());
     expect(result.body.metrics).toEqual({
       last_updated: expect.any(String),
       collection_interval_in_millis: metrics.collectionInterval,
@@ -164,7 +163,7 @@ describe('GET /api/status', () => {
         since: expect.any(String),
         state: 'green',
         title: 'Green',
-        uiColor: 'secondary',
+        uiColor: 'success',
       },
       statuses: [
         {
@@ -173,7 +172,7 @@ describe('GET /api/status', () => {
           message: 'Service is working',
           since: expect.any(String),
           state: 'green',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
         {
           icon: 'success',
@@ -181,7 +180,7 @@ describe('GET /api/status', () => {
           message: 'Service is working',
           since: expect.any(String),
           state: 'green',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
         {
           icon: 'success',
@@ -189,7 +188,7 @@ describe('GET /api/status', () => {
           message: 'a is available',
           since: expect.any(String),
           state: 'green',
-          uiColor: 'secondary',
+          uiColor: 'success',
         },
         {
           icon: 'warning',

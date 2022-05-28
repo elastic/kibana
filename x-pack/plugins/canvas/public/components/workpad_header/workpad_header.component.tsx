@@ -11,14 +11,15 @@ import PropTypes from 'prop-types';
 import { Shortcuts } from 'react-shortcuts';
 import { EuiFlexItem, EuiFlexGroup, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import {
   AddFromLibraryButton,
   QuickButtonGroup,
   SolutionToolbar,
-} from '../../../../../../src/plugins/presentation_util/public';
+} from '@kbn/presentation-util-plugin/public';
 import { getElementStrings } from '../../../i18n';
 import { CommitFn, ElementSpec } from '../../../types';
-import { ToolTipShortcut } from '../tool_tip_shortcut/';
+import { ToolTipShortcut } from '../tool_tip_shortcut';
 import { RefreshControl } from './refresh_control';
 // @ts-expect-error untyped local
 import { FullscreenControl } from './fullscreen_control';
@@ -27,6 +28,7 @@ import { ElementMenu } from './element_menu';
 import { ShareMenu } from './share_menu';
 import { ViewMenu } from './view_menu';
 import { LabsControl } from './labs_control';
+import { EditorMenu } from './editor_menu';
 
 const strings = {
   getFullScreenButtonAriaLabel: () =>
@@ -160,30 +162,35 @@ export const WorkpadHeader: FC<Props> = ({
       <EuiFlexGroup
         gutterSize="none"
         alignItems="center"
-        justifyContent="spaceBetween"
         className="canvasLayout__stageHeaderInner"
       >
+        {isWriteable && (
+          <EuiFlexItem grow={false}>
+            <SolutionToolbar>
+              {{
+                primaryActionButton: <ElementMenu addElement={addElement} elements={elements} />,
+                quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
+                extraButtons: [
+                  <AddFromLibraryButton
+                    onClick={showEmbedPanel}
+                    data-test-subj="canvas-add-from-library-button"
+                  />,
+                  <EditorMenu addElement={addElement} />,
+                ],
+              }}
+            </SolutionToolbar>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="none">
-            {isWriteable && (
-              <EuiFlexItem>
-                <SolutionToolbar>
-                  {{
-                    primaryActionButton: (
-                      <ElementMenu addElement={addElement} elements={elements} />
-                    ),
-                    quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
-                    addFromLibraryButton: <AddFromLibraryButton onClick={showEmbedPanel} />,
-                  }}
-                </SolutionToolbar>
-              </EuiFlexItem>
-            )}
             <EuiFlexItem grow={false}>
               <ViewMenu />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EditMenu commit={commit} />
-            </EuiFlexItem>
+            {isWriteable && (
+              <EuiFlexItem grow={false}>
+                <EditMenu commit={commit} />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
               <ShareMenu />
             </EuiFlexItem>
@@ -192,6 +199,7 @@ export const WorkpadHeader: FC<Props> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
+        <EuiFlexItem />
         <EuiFlexItem grow={false}>
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>

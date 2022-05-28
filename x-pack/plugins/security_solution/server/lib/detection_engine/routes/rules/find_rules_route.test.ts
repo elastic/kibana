@@ -5,23 +5,20 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from 'src/core/server/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { DETECTION_ENGINE_RULES_URL } from '../../../../../common/constants';
 import { getQueryRuleParams } from '../../schemas/rule_schemas.mock';
 import { requestContextMock, requestMock, serverMock } from '../__mocks__';
 import {
-  getAlertMock,
-  getFindBulkResultStatus,
+  getRuleMock,
   getFindRequest,
-  getEmptySavedObjectsResponse,
   getFindResultWithSingleHit,
+  getEmptySavedObjectsResponse,
+  getRuleExecutionSummaries,
 } from '../__mocks__/request_responses';
 import { findRulesRoute } from './find_rules_route';
 
-describe.each([
-  ['Legacy', false],
-  ['RAC', true],
-])('find_rules - %s', (_, isRuleRegistryEnabled) => {
+describe('find_rules', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -31,34 +28,33 @@ describe.each([
     logger = loggingSystemMock.createLogger();
     ({ clients, context } = requestContextMock.createTools());
 
-    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit(isRuleRegistryEnabled));
-    clients.rulesClient.get.mockResolvedValue(
-      getAlertMock(isRuleRegistryEnabled, getQueryRuleParams())
-    );
+    clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
+    clients.rulesClient.get.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     clients.savedObjectsClient.find.mockResolvedValue(getEmptySavedObjectsResponse());
-    clients.ruleExecutionLogClient.findBulk.mockResolvedValue(getFindBulkResultStatus());
+    clients.ruleExecutionLog.getExecutionSummariesBulk.mockResolvedValue(
+      getRuleExecutionSummaries()
+    );
 
-    findRulesRoute(server.router, logger, isRuleRegistryEnabled);
+    findRulesRoute(server.router, logger);
   });
 
-  describe('status codes with actionClient and alertClient', () => {
-    test('returns 200 when finding a single rule with a valid actionClient and alertClient', async () => {
-      const response = await server.inject(getFindRequest(), context);
+  describe('status codes', () => {
+    test('returns 200', async () => {
+      const response = await server.inject(
+        getFindRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(200);
-    });
-
-    test('returns 404 if alertClient is not available on the route', async () => {
-      context.alerting.getRulesClient = jest.fn();
-      const response = await server.inject(getFindRequest(), context);
-      expect(response.status).toEqual(404);
-      expect(response.body).toEqual({ message: 'Not Found', status_code: 404 });
     });
 
     test('catches error if search throws error', async () => {
       clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      const response = await server.inject(getFindRequest(), context);
+      const response = await server.inject(
+        getFindRequest(),
+        requestContextMock.convertContext(context)
+      );
       expect(response.status).toEqual(500);
       expect(response.body).toEqual({
         message: 'Test error',

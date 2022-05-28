@@ -5,160 +5,103 @@
  * 2.0.
  */
 
-import { act } from '@testing-library/react';
+import { act, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../common/constants';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../../common/mock/endpoint';
-import { isFailedResourceState, isLoadedResourceState } from '../../../state';
-import { getHostIsolationExceptionItems } from '../service';
 import { HostIsolationExceptionsList } from './host_isolation_exceptions_list';
-import { useLicense } from '../../../../common/hooks/use_license';
+import { exceptionsListAllHttpMocks } from '../../../mocks/exceptions_list_http_mocks';
+import { SEARCHABLE_FIELDS } from '../constants';
+import { parseQueryFilterToKQL } from '../../../common/utils';
+import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
+import { getUserPrivilegesMockDefaultValue } from '../../../../common/components/user_privileges/__mocks__';
+import { getFirstCard } from '../../../components/artifact_list_page/mocks';
 
-jest.mock('../../../../common/components/user_privileges/endpoint/use_endpoint_privileges');
-jest.mock('../service');
-jest.mock('../../../../common/hooks/use_license');
-
-const getHostIsolationExceptionItemsMock = getHostIsolationExceptionItems as jest.Mock;
+jest.mock('../../../../common/components/user_privileges');
+const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
 describe('When on the host isolation exceptions page', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let history: AppContextTestRender['history'];
-  let waitForAction: AppContextTestRender['middlewareSpy']['waitForAction'];
   let mockedContext: AppContextTestRender;
-
-  const isPlatinumPlusMock = useLicense().isPlatinumPlus as jest.Mock;
+  let apiMocks: ReturnType<typeof exceptionsListAllHttpMocks>;
 
   beforeEach(() => {
-    getHostIsolationExceptionItemsMock.mockReset();
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = () => (renderResult = mockedContext.render(<HostIsolationExceptionsList />));
-    waitForAction = mockedContext.middlewareSpy.waitForAction;
+
+    apiMocks = exceptionsListAllHttpMocks(mockedContext.coreStart.http);
 
     act(() => {
       history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
     });
   });
-  describe('When on the host isolation list page', () => {
-    const dataReceived = () =>
-      act(async () => {
-        await waitForAction('hostIsolationExceptionsPageDataChanged', {
-          validate(action) {
-            return isLoadedResourceState(action.payload);
-          },
-        });
-      });
-    describe('And no data exists', () => {
-      beforeEach(async () => {
-        getHostIsolationExceptionItemsMock.mockReturnValue({
-          data: [],
-          page: 1,
-          per_page: 10,
-          total: 0,
-        });
-      });
 
-      it('should show the Empty message', async () => {
-        render();
-        await dataReceived();
-        expect(renderResult.getByTestId('hostIsolationExceptionsEmpty')).toBeTruthy();
-      });
+  afterEach(() => {
+    useUserPrivilegesMock.mockImplementation(getUserPrivilegesMockDefaultValue);
+  });
 
-      it('should not display the search bar', async () => {
-        render();
-        await dataReceived();
-        expect(renderResult.queryByTestId('searchExceptions')).toBeFalsy();
-      });
-    });
-    describe('And data exists', () => {
-      beforeEach(async () => {
-        getHostIsolationExceptionItemsMock.mockImplementation(getFoundExceptionListItemSchemaMock);
-      });
+  it('should search using expected exception item fields', async () => {
+    const expectedFilterString = parseQueryFilterToKQL('fooFooFoo', SEARCHABLE_FIELDS);
+    const { findAllByTestId } = render();
 
-      it('should show loading indicator while retrieving data', async () => {
-        let releaseApiResponse: (value?: unknown) => void;
-
-        getHostIsolationExceptionItemsMock.mockReturnValue(
-          new Promise((resolve) => (releaseApiResponse = resolve))
-        );
-        render();
-
-        expect(renderResult.getByTestId('hostIsolationExceptionsContent-loader')).toBeTruthy();
-
-        const wasReceived = dataReceived();
-        releaseApiResponse!();
-        await wasReceived;
-        expect(renderResult.container.querySelector('.euiProgress')).toBeNull();
-      });
-
-      it('should display the search bar', async () => {
-        render();
-        await dataReceived();
-        expect(renderResult.getByTestId('searchExceptions')).toBeTruthy();
-      });
-
-      it('should show items on the list', async () => {
-        render();
-        await dataReceived();
-
-        expect(renderResult.getByTestId('hostIsolationExceptionsCard')).toBeTruthy();
-      });
-
-      it('should show API error if one is encountered', async () => {
-        getHostIsolationExceptionItemsMock.mockImplementation(() => {
-          throw new Error('Server is too far away');
-        });
-        const errorDispatched = act(async () => {
-          await waitForAction('hostIsolationExceptionsPageDataChanged', {
-            validate(action) {
-              return isFailedResourceState(action.payload);
-            },
-          });
-        });
-        render();
-        await errorDispatched;
-        expect(
-          renderResult.getByTestId('hostIsolationExceptionsContent-error').textContent
-        ).toEqual(' Server is too far away');
-      });
+    await waitFor(async () => {
+      await expect(findAllByTestId('hostIsolationExceptionsListPage-card')).resolves.toHaveLength(
+        10
+      );
     });
 
-    describe('is license platinum plus', () => {
-      beforeEach(() => {
-        isPlatinumPlusMock.mockReturnValue(true);
-      });
-      it('should show the create flyout when the add button is pressed', () => {
-        render();
-        act(() => {
-          userEvent.click(renderResult.getByTestId('hostIsolationExceptionsListAddButton'));
-        });
-        expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
-      });
-      it('should show the create flyout when the show location is create', () => {
-        history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
-        render();
-        expect(renderResult.getByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
-        expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeTruthy();
-      });
+    apiMocks.responseProvider.exceptionsFind.mockClear();
+
+    act(() => {
+      userEvent.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
+    });
+    act(() => {
+      fireEvent.click(renderResult.getByTestId('searchButton'));
     });
 
-    describe('is not license platinum plus', () => {
-      beforeEach(() => {
-        isPlatinumPlusMock.mockReturnValue(false);
-      });
-      it('should not show the create flyout if the user navigates to the create url', () => {
-        history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=create`);
-        render();
-        expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeFalsy();
-      });
-      it('should not show the create flyout if the user navigates to the edit url', () => {
-        history.push(`${HOST_ISOLATION_EXCEPTIONS_PATH}?show=edit`);
-        render();
-        expect(renderResult.queryByTestId('hostIsolationExceptionsCreateEditFlyout')).toBeFalsy();
-      });
+    await waitFor(() => {
+      expect(apiMocks.responseProvider.exceptionsFind).toHaveBeenCalled();
     });
+
+    expect(apiMocks.responseProvider.exceptionsFind).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        query: expect.objectContaining({
+          filter: expectedFilterString,
+        }),
+      })
+    );
+  });
+
+  it('should hide the Create and Edit actions when host isolation authz is not allowed', async () => {
+    // Use case: license downgrade scenario, where user still has entries defined, but no longer
+    // able to create or edit them (only Delete them)
+    const existingPrivileges = useUserPrivilegesMock();
+    useUserPrivilegesMock.mockReturnValue({
+      ...existingPrivileges,
+      endpointPrivileges: {
+        ...existingPrivileges.endpointPrivileges,
+        canIsolateHost: false,
+      },
+    });
+
+    const { findAllByTestId, queryByTestId, getByTestId } = await render();
+
+    await waitFor(async () => {
+      await expect(findAllByTestId('hostIsolationExceptionsListPage-card')).resolves.toHaveLength(
+        10
+      );
+    });
+    await getFirstCard(renderResult, {
+      showActions: true,
+      testId: 'hostIsolationExceptionsListPage',
+    });
+
+    expect(queryByTestId('hostIsolationExceptionsListPage-pageAddButton')).toBeNull();
+    expect(getByTestId('hostIsolationExceptionsListPage-card-cardDeleteAction')).toBeTruthy();
+    expect(queryByTestId('hostIsolationExceptionsListPage-card-cardEditAction')).toBeNull();
   });
 });

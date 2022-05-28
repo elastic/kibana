@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup } from 'src/core/public';
+import { CoreSetup } from '@kbn/core/public';
 
-import type { DataView } from '../../../../../../../../src/plugins/data_views/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { SavedSearchQuery } from '../../../contexts/ml';
 import { OMIT_FIELDS } from '../../../../../common/constants/field_types';
@@ -40,7 +40,7 @@ export class DataLoader {
     editorRuntimeMappings?: RuntimeMappings
   ): Promise<any[]> {
     const stats = await ml.getVisualizerFieldHistograms({
-      indexPatternTitle: this._indexPatternTitle,
+      indexPattern: this._indexPatternTitle,
       query,
       fields,
       samplerShardSize,

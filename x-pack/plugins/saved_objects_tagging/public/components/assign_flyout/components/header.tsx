@@ -7,7 +7,7 @@
 
 import React, { FC, useMemo } from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ITagsCache } from '../../../services/tags';
 import { TagList } from '../../base';
 

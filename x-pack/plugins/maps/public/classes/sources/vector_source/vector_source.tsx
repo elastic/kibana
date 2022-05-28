@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { Query } from 'src/plugins/data/common';
+import type { Query } from '@kbn/data-plugin/common';
 import { FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
-import { Filter, TimeRange } from 'src/plugins/data/public';
+import { Filter } from '@kbn/es-query';
+import { TimeRange } from '@kbn/data-plugin/public';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
-import { TooltipProperty, ITooltipProperty } from '../../tooltips/tooltip_property';
+import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { AbstractSource, ISource } from '../source';
 import { IField } from '../../fields/field';
 import {
@@ -20,7 +22,7 @@ import {
 } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 
-export interface SourceTooltipConfig {
+export interface SourceStatus {
   tooltipContent: string | null;
   areResultsTrimmed: boolean;
   isDeprecated?: boolean;
@@ -41,9 +43,12 @@ export interface BoundsRequestMeta {
   sourceQuery?: Query;
   timeFilters: TimeRange;
   timeslice?: Timeslice;
+  isFeatureEditorOpenForLayer: boolean;
+  joinKeyFilter?: Filter;
 }
 
 export interface IVectorSource extends ISource {
+  isMvt(): boolean;
   getTooltipProperties(properties: GeoJsonProperties): Promise<ITooltipProperty[]>;
   getBoundsForFilters(
     layerDataFilters: BoundsRequestMeta,
@@ -53,7 +58,8 @@ export interface IVectorSource extends ISource {
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
-    isRequestStillActive: () => boolean
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta>;
 
   getFields(): Promise<IField[]>;
@@ -73,7 +79,7 @@ export interface IVectorSource extends ISource {
   hasTooltipProperties(): boolean;
   getSupportedShapeTypes(): Promise<VECTOR_SHAPE_TYPE[]>;
   isBoundsAware(): boolean;
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig;
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus;
   getTimesliceMaskFieldName(): Promise<string | null>;
   supportsFeatureEditing(): Promise<boolean>;
   getDefaultFields(): Promise<Record<string, Record<string, string>>>;
@@ -87,6 +93,10 @@ export interface IVectorSource extends ISource {
 export class AbstractVectorSource extends AbstractSource implements IVectorSource {
   getFieldNames(): string[] {
     return [];
+  }
+
+  isMvt() {
+    return false;
   }
 
   createField({ fieldName }: { fieldName: string }): IField {
@@ -132,7 +142,8 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
-    isRequestStillActive: () => boolean
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     throw new Error('Should implement VectorSource#getGeoJson');
   }
@@ -166,7 +177,7 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
     return [VECTOR_SHAPE_TYPE.POINT, VECTOR_SHAPE_TYPE.LINE, VECTOR_SHAPE_TYPE.POLYGON];
   }
 
-  getSourceTooltipContent(sourceDataRequest?: DataRequest): SourceTooltipConfig {
+  getSourceStatus(sourceDataRequest?: DataRequest): SourceStatus {
     return { tooltipContent: null, areResultsTrimmed: false };
   }
 

@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import type { VisEditorOptionsProps } from 'src/plugins/visualizations/public';
-import { Vis } from '../../../../../../src/plugins/visualizations/public';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 import { getData, getShareService } from '../../kibana_services';
 import { ViewInMaps } from '../view_in_maps';
 import { extractLayerDescriptorParams } from './utils';
 import { TileMapVisParams } from './types';
 import { title } from './tile_map_vis_type';
 
-export function TileMapEditor(props: VisEditorOptionsProps) {
+function TileMapEditor(props: VisEditorOptionsProps) {
   const onClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
 
@@ -32,3 +32,7 @@ export function TileMapEditor(props: VisEditorOptionsProps) {
 
   return <ViewInMaps onClick={onClick} visualizationLabel={title} />;
 }
+
+// default export required for React.Lazy
+// eslint-disable-next-line import/no-default-export
+export default TileMapEditor;

@@ -27,7 +27,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 
@@ -46,7 +46,7 @@ import {
   ANNOTATION_EVENT_USER,
   ANNOTATION_EVENT_DELAYED_DATA,
 } from '../../../../../common/constants/annotations';
-import { withKibana } from '../../../../../../../../src/plugins/kibana_react/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../common/constants/locator';
 import { timeFormatter } from '../../../../../common/util/date_utils';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
@@ -81,7 +81,6 @@ class AnnotationsTableUI extends Component {
     super(props);
     this.state = {
       annotations: [],
-      aggregations: null,
       isLoading: false,
       queryText: `event:(${ANNOTATION_EVENT_USER} or ${ANNOTATION_EVENT_DELAYED_DATA})`,
       searchError: undefined,
@@ -115,18 +114,11 @@ class AnnotationsTableUI extends Component {
           earliestMs: null,
           latestMs: null,
           maxAnnotations: ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE,
-          fields: [
-            {
-              field: 'event',
-              missing: ANNOTATION_EVENT_USER,
-            },
-          ],
         })
         .toPromise()
         .then((resp) => {
           this.setState((prevState, props) => ({
             annotations: resp.annotations[props.jobs[0].job_id] || [],
-            aggregations: resp.aggregations,
             errorMessage: undefined,
             isLoading: false,
             jobId: props.jobs[0].job_id,
@@ -570,41 +562,35 @@ class AnnotationsTableUI extends Component {
         onMouseLeave: () => this.onMouseLeaveRow(),
       };
     };
-    let filterOptions = [];
-    const aggregations = this.props.aggregations ?? this.state.aggregations;
-    if (aggregations) {
-      const buckets = aggregations.event.buckets;
-      let foundUser = false;
-      let foundDelayedData = false;
 
-      buckets.forEach((bucket) => {
-        if (bucket.key === ANNOTATION_EVENT_USER) {
-          foundUser = true;
-        }
-        if (bucket.key === ANNOTATION_EVENT_DELAYED_DATA) {
-          foundDelayedData = true;
-        }
-      });
-      const adjustedBuckets = [];
-      if (!foundUser) {
-        adjustedBuckets.push({ key: ANNOTATION_EVENT_USER, doc_count: 0 });
-      }
-      if (!foundDelayedData) {
-        adjustedBuckets.push({ key: ANNOTATION_EVENT_DELAYED_DATA, doc_count: 0 });
-      }
+    // Build the options to show in the Event type filter.
+    // Do not try and run a search using a terms agg on the event field
+    // because in 7.9 this field was incorrectly mapped as a text rather than keyword.
 
-      filterOptions = [...adjustedBuckets, ...buckets];
-    }
+    // Always display options for user and delayed data types.
+    const countsByEvent = {
+      [ANNOTATION_EVENT_USER]: 0,
+      [ANNOTATION_EVENT_DELAYED_DATA]: 0,
+    };
+    annotations.forEach((annotation) => {
+      // Default to user type for annotations created in early releases which didn't have an event field
+      const event = annotation.event ?? ANNOTATION_EVENT_USER;
+      if (countsByEvent[event] === undefined) {
+        countsByEvent[event] = 0;
+      }
+      countsByEvent[event]++;
+    });
+
     const filters = [
       {
         type: 'field_value_selection',
         field: 'event',
         name: 'Event',
         multiSelect: 'or',
-        options: filterOptions.map((field) => ({
-          value: field.key,
-          name: field.key,
-          view: `${field.key} (${field.doc_count})`,
+        options: Object.entries(countsByEvent).map(([key, docCount]) => ({
+          value: key,
+          name: key,
+          view: `${key} (${docCount})`,
         })),
         'data-test-subj': 'mlAnnotationTableEventFilter',
       },

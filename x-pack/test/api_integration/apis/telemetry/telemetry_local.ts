@@ -7,15 +7,15 @@
 
 import expect from '@kbn/expect';
 import deepmerge from 'deepmerge';
-import type { FtrProviderContext } from '../../ftr_provider_context';
+import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
+import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
+import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
+import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
 import {
   assertTelemetryPayload,
   flatKeys,
 } from '../../../../../test/api_integration/apis/telemetry/utils';
-import ossRootTelemetrySchema from '../../../../../src/plugins/telemetry/schema/oss_root.json';
-import ossPluginsTelemetrySchema from '../../../../../src/plugins/telemetry/schema/oss_plugins.json';
-import xpackRootTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_root.json';
-import xpackPluginsTelemetrySchema from '../../../../plugins/telemetry_collection_xpack/schema/xpack_plugins.json';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const disableCollection = {
   persistent: {
@@ -43,11 +43,11 @@ export default function ({ getService }: FtrProviderContext) {
       const { body } = await supertest
         .post('/api/telemetry/v2/clusters/_stats')
         .set('kbn-xsrf', 'xxx')
-        .send({ unencrypted: true })
+        .send({ unencrypted: true, refreshCache: true })
         .expect(200);
 
       expect(body.length).to.be(1);
-      stats = body[0];
+      stats = body[0].stats;
     });
 
     it('should pass the schema validation', () => {

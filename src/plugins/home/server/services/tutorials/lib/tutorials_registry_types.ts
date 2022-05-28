@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-import type { KibanaRequest } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { TutorialSchema } from './tutorial_schema';
+export { TutorialsCategory } from '../../../../common/constants';
+
 export type {
   TutorialSchema,
   ArtifactsSchema,
@@ -19,16 +21,10 @@ export type {
   Instruction,
 } from './tutorial_schema';
 
-/** @public */
-export enum TutorialsCategory {
-  LOGGING = 'logging',
-  SECURITY_SOLUTION = 'security',
-  METRICS = 'metrics',
-  OTHER = 'other',
-}
 export type Platform = 'WINDOWS' | 'OSX' | 'DEB' | 'RPM';
 
 export interface TutorialContext {
+  kibanaBranch: string;
   [key: string]: unknown;
 }
 export type TutorialProvider = (context: TutorialContext) => TutorialSchema;

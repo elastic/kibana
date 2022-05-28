@@ -5,16 +5,19 @@
  * 2.0.
  */
 
+import { IEvent } from '@kbn/event-log-plugin/server';
 import { AlertInstanceState } from '../types';
-import { IEvent } from '../../../event_log/server';
-import { UntypedNormalizedAlertType } from '../rule_type_registry';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 
 export type Event = Exclude<IEvent, undefined>;
 
 interface CreateAlertEventLogRecordParams {
+  executionId?: string;
   ruleId: string;
-  ruleType: UntypedNormalizedAlertType;
+  ruleType: UntypedNormalizedRuleType;
   action: string;
+  spaceId?: string;
+  consumer?: string;
   ruleName?: string;
   instanceId?: string;
   message?: string;
@@ -36,7 +39,20 @@ interface CreateAlertEventLogRecordParams {
 }
 
 export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecordParams): Event {
-  const { ruleType, action, state, message, task, ruleId, group, subgroup, namespace } = params;
+  const {
+    executionId,
+    ruleType,
+    action,
+    state,
+    message,
+    task,
+    ruleId,
+    group,
+    subgroup,
+    namespace,
+    consumer,
+    spaceId,
+  } = params;
   const alerting =
     params.instanceId || group || subgroup
       ? {
@@ -55,9 +71,22 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
       category: [ruleType.producer],
       ...(state?.start ? { start: state.start as string } : {}),
       ...(state?.end ? { end: state.end as string } : {}),
-      ...(state?.duration !== undefined ? { duration: state.duration as number } : {}),
+      ...(state?.duration !== undefined ? { duration: state.duration as string } : {}),
     },
     kibana: {
+      alert: {
+        rule: {
+          rule_type_id: ruleType.id,
+          ...(consumer ? { consumer } : {}),
+          ...(executionId
+            ? {
+                execution: {
+                  uuid: executionId,
+                },
+              }
+            : {}),
+        },
+      },
       ...(alerting ? alerting : {}),
       saved_objects: params.savedObjects.map((so) => ({
         ...(so.relation ? { rel: so.relation } : {}),
@@ -66,6 +95,7 @@ export function createAlertEventLogRecordObject(params: CreateAlertEventLogRecor
         type_id: so.typeId,
         namespace,
       })),
+      ...(spaceId ? { space_ids: [spaceId] } : {}),
       ...(task ? { task: { scheduled: task.scheduled, schedule_delay: task.scheduleDelay } } : {}),
     },
     ...(message ? { message } : {}),

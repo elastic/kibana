@@ -7,7 +7,7 @@
 
 import { schema, TypeOf } from '@kbn/config-schema';
 
-import type { ES_FIELD_TYPES } from '../../../../../src/plugins/data/common';
+import type { ES_FIELD_TYPES } from '@kbn/data-plugin/common';
 
 import type { Dictionary } from '../types/common';
 import type { PivotAggDict } from '../types/pivot_aggs';
@@ -34,6 +34,7 @@ export type GetTransformsRequestSchema = TypeOf<typeof getTransformsRequestSchem
 export interface GetTransformsResponseSchema {
   count: number;
   transforms: TransformConfigUnion[];
+  errors?: Array<{ reason: string; type: string }>;
 }
 
 // schemas shared by parts of the preview, create and update endpoint
@@ -65,7 +66,8 @@ export const retentionPolicySchema = schema.object({
 });
 
 export const settingsSchema = schema.object({
-  max_page_search_size: schema.maybe(schema.number()),
+  // null can be used to reset to default value.
+  max_page_search_size: schema.maybe(schema.nullable(schema.number())),
   // The default value is null, which disables throttling.
   docs_per_second: schema.maybe(schema.nullable(schema.number())),
 });
@@ -94,6 +96,13 @@ function transformConfigPayloadValidator<
   }
 }
 
+export const _metaSchema = schema.object(
+  {},
+  {
+    unknowns: 'allow',
+  }
+);
+
 // PUT transforms/{transformId}
 export const putTransformsRequestSchema = schema.object(
   {
@@ -112,6 +121,11 @@ export const putTransformsRequestSchema = schema.object(
     settings: schema.maybe(settingsSchema),
     source: sourceSchema,
     sync: schema.maybe(syncSchema),
+    /**
+     * This _meta field stores an arbitrary key-value map
+     * where keys are strings and values are arbitrary objects (possibly also maps).
+     */
+    _meta: schema.maybe(_metaSchema),
   },
   {
     validate: transformConfigPayloadValidator,

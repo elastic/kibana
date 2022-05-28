@@ -10,7 +10,7 @@ import moment from 'moment';
 import { createHash } from 'crypto';
 import stringify from 'json-stable-stringify';
 
-import { estypes } from '@elastic/elasticsearch';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MaybePromise } from '@kbn/utility-types';
 import { isPromise } from '@kbn/std';
 import {
@@ -19,8 +19,9 @@ import {
   Plugin,
   PluginInitializerContext,
   IClusterClient,
-} from 'src/core/server';
+} from '@kbn/core/server';
 
+import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
 import {
   ILicense,
   PublicLicense,
@@ -120,6 +121,8 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
       pollingFrequency.asMilliseconds()
     );
 
+    registerAnalyticsContextProvider(core.analytics, license$);
+
     core.status.set(getPluginStatus$(license$, this.stop$.asObservable()));
 
     core.http.registerRouteHandlerContext(
@@ -177,10 +180,7 @@ export class LicensingPlugin implements Plugin<LicensingPluginSetup, LicensingPl
   private fetchLicense = async (clusterClient: MaybePromise<IClusterClient>): Promise<ILicense> => {
     const client = isPromise(clusterClient) ? await clusterClient : clusterClient;
     try {
-      const { body: response } = await client.asInternalUser.xpack.info({
-        // @ts-expect-error `accept_enterprise` is not present in the client definition
-        accept_enterprise: true,
-      });
+      const response = await client.asInternalUser.xpack.info();
       const normalizedLicense =
         response.license && response.license.type !== 'missing'
           ? normalizeServerLicense(response.license)

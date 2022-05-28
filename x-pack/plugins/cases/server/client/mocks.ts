@@ -12,8 +12,7 @@ import { AttachmentsSubClient } from './attachments/client';
 import { CasesSubClient } from './cases/client';
 import { ConfigureSubClient } from './configure/client';
 import { CasesClientFactory } from './factory';
-import { StatsSubClient } from './stats/client';
-import { SubCasesClient } from './sub_cases/client';
+import { MetricsSubClient } from './metrics/client';
 import { UserActionsSubClient } from './user_actions/client';
 
 type CasesSubClientMock = jest.Mocked<CasesSubClient>;
@@ -33,11 +32,22 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
   };
 };
 
+type MetricsSubClientMock = jest.Mocked<MetricsSubClient>;
+
+const createMetricsSubClientMock = (): MetricsSubClientMock => {
+  return {
+    getCaseMetrics: jest.fn(),
+    getCasesMetrics: jest.fn(),
+    getStatusTotalsByType: jest.fn(),
+  };
+};
+
 type AttachmentsSubClientMock = jest.Mocked<AttachmentsSubClient>;
 
 const createAttachmentsSubClientMock = (): AttachmentsSubClientMock => {
   return {
     add: jest.fn(),
+    bulkCreate: jest.fn(),
     deleteAll: jest.fn(),
     delete: jest.fn(),
     find: jest.fn(),
@@ -56,17 +66,6 @@ const createUserActionsSubClientMock = (): UserActionsSubClientMock => {
   };
 };
 
-type SubCasesClientMock = jest.Mocked<SubCasesClient>;
-
-const createSubCasesClientMock = (): SubCasesClientMock => {
-  return {
-    delete: jest.fn(),
-    find: jest.fn(),
-    get: jest.fn(),
-    update: jest.fn(),
-  };
-};
-
 type ConfigureSubClientMock = jest.Mocked<ConfigureSubClient>;
 
 const createConfigureSubClientMock = (): ConfigureSubClientMock => {
@@ -78,19 +77,10 @@ const createConfigureSubClientMock = (): ConfigureSubClientMock => {
   };
 };
 
-type StatsSubClientMock = jest.Mocked<StatsSubClient>;
-
-const createStatsSubClientMock = (): StatsSubClientMock => {
-  return {
-    getStatusTotalsByType: jest.fn(),
-  };
-};
-
 export interface CasesClientMock extends CasesClient {
   cases: CasesSubClientMock;
   attachments: AttachmentsSubClientMock;
   userActions: UserActionsSubClientMock;
-  subCases: SubCasesClientMock;
 }
 
 export const createCasesClientMock = (): CasesClientMock => {
@@ -98,9 +88,8 @@ export const createCasesClientMock = (): CasesClientMock => {
     cases: createCasesSubClientMock(),
     attachments: createAttachmentsSubClientMock(),
     userActions: createUserActionsSubClientMock(),
-    subCases: createSubCasesClientMock(),
     configure: createConfigureSubClientMock(),
-    stats: createStatsSubClientMock(),
+    metrics: createMetricsSubClientMock(),
   };
   return client as unknown as CasesClientMock;
 };

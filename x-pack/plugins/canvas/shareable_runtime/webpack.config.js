@@ -18,6 +18,14 @@ const {
 
 const isProd = process.env.NODE_ENV === 'production';
 
+const nodeModulesButNotKbnPackages = (_path) => {
+  if (!_path.includes('node_modules')) {
+    return false;
+  }
+
+  return !_path.includes(`node_modules${path.sep}@kbn${path.sep}`);
+};
+
 module.exports = {
   context: KIBANA_ROOT,
   entry: {
@@ -30,15 +38,8 @@ module.exports = {
     filename: '[name].js',
     library: LIBRARY_NAME,
   },
-  // Include a require alias for legacy UI code and styles
   resolve: {
     alias: {
-      'data/interpreter': path.resolve(
-        KIBANA_ROOT,
-        'src/plugins/data/public/expressions/interpreter'
-      ),
-      'kbn/interpreter': path.resolve(KIBANA_ROOT, 'packages/kbn-interpreter/target/common'),
-      tinymath: path.resolve(KIBANA_ROOT, 'node_modules/tinymath/lib/tinymath.min.js'),
       core_app_image_assets: path.resolve(KIBANA_ROOT, 'src/core/public/core_app/images'),
     },
     extensions: ['.js', '.json', '.ts', '.tsx', '.scss'],
@@ -124,7 +125,7 @@ module.exports = {
       },
       {
         test: /\.scss$/,
-        exclude: [/node_modules/, /\.module\.s(a|c)ss$/],
+        exclude: [nodeModulesButNotKbnPackages, /\.module\.s(a|c)ss$/],
         use: [
           {
             loader: 'style-loader',
@@ -150,7 +151,7 @@ module.exports = {
               additionalData(content, loaderContext) {
                 return `@import ${stringifyRequest(
                   loaderContext,
-                  path.resolve(KIBANA_ROOT, 'src/core/public/core_app/styles/_globals_v7light.scss')
+                  path.resolve(KIBANA_ROOT, 'src/core/public/core_app/styles/_globals_v8light.scss')
                 )};\n${content}`;
               },
               implementation: require('node-sass'),
@@ -179,9 +180,7 @@ module.exports = {
       },
       {
         test: [
-          require.resolve('@elastic/eui/es/components/code_editor'),
           require.resolve('@elastic/eui/es/components/drag_and_drop'),
-          require.resolve('@elastic/eui/packages/react-datepicker'),
           require.resolve('highlight.js'),
         ],
         use: require.resolve('null-loader'),

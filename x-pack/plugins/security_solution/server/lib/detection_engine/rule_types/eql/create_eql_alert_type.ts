@@ -6,11 +6,13 @@
  */
 
 import { validateNonExact } from '@kbn/securitysolution-io-ts-utils';
-import { EQL_RULE_TYPE_ID } from '../../../../../common/constants';
-import { EqlRuleParams, eqlRuleParams } from '../../schemas/rule_schemas';
+import { EQL_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
+
+import { SERVER_APP_ID } from '../../../../../common/constants';
+import { eqlRuleParams, EqlRuleParams } from '../../schemas/rule_schemas';
 import { eqlExecutor } from '../../signals/executors/eql';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
-
+import { validateImmutable, validateIndexPatterns } from '../utils';
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
@@ -30,6 +32,18 @@ export const createEqlAlertType = (
           }
           return validated;
         },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
+        },
       },
     },
     actionGroups: [
@@ -44,18 +58,10 @@ export const createEqlAlertType = (
     },
     minimumLicenseRequired: 'basic',
     isExportable: false,
-    producer: 'security-solution',
+    producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
-        runOpts: {
-          bulkCreate,
-          exceptionItems,
-          rule,
-          searchAfterSize,
-          tuple,
-          wrapHits,
-          wrapSequences,
-        },
+        runOpts: { bulkCreate, exceptionItems, completeRule, tuple, wrapHits, wrapSequences },
         services,
         state,
       } = execOptions;
@@ -65,8 +71,7 @@ export const createEqlAlertType = (
         exceptionItems,
         experimentalFeatures,
         logger,
-        rule,
-        searchAfterSize,
+        completeRule,
         services,
         tuple,
         version,

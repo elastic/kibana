@@ -4,19 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  Field,
-  Aggregation,
-  AggId,
-  FieldId,
-  EVENT_RATE_FIELD_ID,
-} from '../../../../common/types/fields';
-import { ES_FIELD_TYPES } from '../../../../../../../src/plugins/data/public';
-import { DataView } from '../../../../../../../src/plugins/data_views/public';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { Field, Aggregation, AggId, FieldId } from '../../../../common/types/fields';
+import { EVENT_RATE_FIELD_ID } from '../../../../common/types/fields';
+import { filterCategoryFields } from '../../../../common/util/fields_utils';
 import { ml } from '../ml_api_service';
 import { processTextAndKeywordFields, NewJobCapabilitiesServiceBase } from './new_job_capabilities';
-
-const categoryFieldTypes = [ES_FIELD_TYPES.TEXT, ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP];
 
 class NewJobCapsService extends NewJobCapabilitiesServiceBase {
   private _catFields: Field[] = [];
@@ -36,8 +30,8 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
     return filterCategoryFields(this._fields);
   }
 
-  public async initializeFromIndexPattern(
-    indexPattern: DataView,
+  public async initializeFromDataVIew(
+    dataView: DataView,
     includeEventRateField = true,
     removeTextFields = true
   ) {
@@ -45,8 +39,8 @@ class NewJobCapsService extends NewJobCapabilitiesServiceBase {
       this._includeEventRateField = includeEventRateField;
       this._removeTextFields = removeTextFields;
 
-      const resp = await ml.jobs.newJobCaps(indexPattern.title, indexPattern.type === 'rollup');
-      const { fields: allFields, aggs } = createObjects(resp, indexPattern.title);
+      const resp = await ml.jobs.newJobCaps(dataView.title, dataView.type === 'rollup');
+      const { fields: allFields, aggs } = createObjects(resp, dataView.title);
 
       if (this._includeEventRateField === true) {
         addEventRateField(aggs, allFields);
@@ -165,10 +159,6 @@ function addEventRateField(aggs: Aggregation[], fields: Field[]) {
     }
   });
   fields.splice(0, 0, eventRateField);
-}
-
-export function filterCategoryFields(fields: Field[]) {
-  return fields.filter((f) => categoryFieldTypes.includes(f.type));
 }
 
 export const newJobCapsService = new NewJobCapsService();

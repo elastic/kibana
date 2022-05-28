@@ -6,6 +6,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
+  "clusterInfo": Object {},
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
@@ -45,6 +46,10 @@ Object {
   },
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,
@@ -57,6 +62,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
+  "clusterInfo": Object {},
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
@@ -100,6 +106,10 @@ Object {
   },
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,
@@ -112,6 +122,7 @@ Object {
   "basePath": "",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
+  "clusterInfo": Object {},
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
@@ -151,6 +162,66 @@ Object {
   },
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService preboot() render() renders "core" page for unauthenticated requests 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "clusterInfo": Object {},
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
+  "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,
@@ -163,6 +234,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
+  "clusterInfo": Object {},
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
@@ -202,6 +274,10 @@ Object {
   },
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,
@@ -214,6 +290,7 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
+  "clusterInfo": Object {},
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
@@ -253,6 +330,10 @@ Object {
   },
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,
@@ -265,6 +346,11 @@ Object {
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
+  "clusterInfo": Object {
+    "cluster_name": "cluster-name",
+    "cluster_uuid": "cluster-uuid",
+    "cluster_version": "8.0.0",
+  },
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
@@ -308,6 +394,10 @@ Object {
   },
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,
@@ -320,6 +410,11 @@ Object {
   "basePath": "",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
+  "clusterInfo": Object {
+    "cluster_name": "cluster-name",
+    "cluster_uuid": "cluster-uuid",
+    "cluster_version": "8.0.0",
+  },
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
@@ -359,18 +454,23 @@ Object {
   },
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,
 }
 `;
 
-exports[`RenderingService setup() render() renders "core" with excluded user settings 1`] = `
+exports[`RenderingService setup() render() renders "core" page for unauthenticated requests 1`] = `
 Object {
   "anonymousStatusPage": false,
   "basePath": "/mock-server-basepath",
   "branch": Any<String>,
   "buildNumber": Any<Number>,
+  "clusterInfo": Object {},
   "csp": Object {
     "warnLegacyBrowsers": true,
   },
@@ -410,6 +510,70 @@ Object {
   },
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
+  "uiPlugins": Array [],
+  "vars": Object {},
+  "version": Any<String>,
+}
+`;
+
+exports[`RenderingService setup() render() renders "core" with excluded user settings 1`] = `
+Object {
+  "anonymousStatusPage": false,
+  "basePath": "/mock-server-basepath",
+  "branch": Any<String>,
+  "buildNumber": Any<Number>,
+  "clusterInfo": Object {
+    "cluster_name": "cluster-name",
+    "cluster_uuid": "cluster-uuid",
+    "cluster_version": "8.0.0",
+  },
+  "csp": Object {
+    "warnLegacyBrowsers": true,
+  },
+  "env": Object {
+    "mode": Object {
+      "dev": Any<Boolean>,
+      "name": Any<String>,
+      "prod": Any<Boolean>,
+    },
+    "packageInfo": Object {
+      "branch": Any<String>,
+      "buildNum": Any<Number>,
+      "buildSha": Any<String>,
+      "dist": Any<Boolean>,
+      "version": Any<String>,
+    },
+  },
+  "externalUrl": Object {
+    "policy": Array [
+      Object {
+        "allow": true,
+      },
+    ],
+  },
+  "i18n": Object {
+    "translationsUrl": "/mock-server-basepath/translations/en.json",
+  },
+  "legacyMetadata": Object {
+    "uiSettings": Object {
+      "defaults": Object {
+        "registered": Object {
+          "name": "title",
+        },
+      },
+      "user": Object {},
+    },
+  },
+  "publicBaseUrl": "http://myhost.com/mock-server-basepath",
+  "serverBasePath": "/mock-server-basepath",
+  "theme": Object {
+    "darkMode": "theme:darkMode",
+    "version": "v8",
+  },
   "uiPlugins": Array [],
   "vars": Object {},
   "version": Any<String>,

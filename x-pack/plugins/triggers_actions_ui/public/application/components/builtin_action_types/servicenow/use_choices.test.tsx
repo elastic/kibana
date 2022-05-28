@@ -27,6 +27,7 @@ const actionConnector = {
   actionTypeId: '.servicenow',
   name: 'ServiceNow ITSM',
   isPreconfigured: false,
+  isDeprecated: false,
   config: {
     apiUrl: 'https://dev94428.service-now.com/',
   },
@@ -122,7 +123,7 @@ describe('UseChoices', () => {
   it('it displays an error when service fails', async () => {
     getChoicesMock.mockResolvedValue({
       status: 'error',
-      service_message: 'An error occurred',
+      serviceMessage: 'An error occurred',
     });
 
     const { waitForNextUpdate } = renderHook<UseChoicesProps, UseChoices>(() =>

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
+import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ObjectType } from '@kbn/config-schema';
-import { isPlainObject } from 'lodash';
+import { isPlainObject, isArray } from 'lodash';
 
 import { IndexMapping } from '../../../mappings';
 import {
@@ -181,11 +181,17 @@ const recursiveRewrite = (
 
     const nestedContext = childContext(context, key);
     const newKey = rewriteKey ? validateAndRewriteAttributePath(key, nestedContext) : key;
-    const newValue = rewriteValue
-      ? validateAndRewriteAttributePath(value, nestedContext)
-      : isPlainObject(value)
-      ? recursiveRewrite(value, nestedContext, [...parents, key])
-      : value;
+
+    let newValue = value;
+    if (rewriteValue) {
+      newValue = validateAndRewriteAttributePath(value, nestedContext);
+    } else if (isArray(value)) {
+      newValue = value.map((v) =>
+        isPlainObject(v) ? recursiveRewrite(v, nestedContext, parents) : v
+      );
+    } else if (isPlainObject(value)) {
+      newValue = recursiveRewrite(value, nestedContext, [...parents, key]);
+    }
 
     return {
       ...memo,

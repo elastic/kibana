@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger, SavedObjectReference } from 'src/core/server';
+import { Logger, SavedObjectReference } from '@kbn/core/server';
 import { RuleParams } from '../../schemas/rule_schemas';
 import { injectExceptionsReferences } from './inject_exceptions_list';
 
@@ -28,21 +28,21 @@ import { injectExceptionsReferences } from './inject_exceptions_list';
  * @param savedObjectReferences The saved object references to merge with the rule params
  * @returns The rule parameters with the saved object references.
  */
-export const injectReferences = ({
+export const injectReferences = <TParams extends RuleParams>({
   logger,
   params,
   savedObjectReferences,
 }: {
   logger: Logger;
-  params: RuleParams;
+  params: TParams;
   savedObjectReferences: SavedObjectReference[];
-}): RuleParams => {
+}): TParams => {
   const exceptionsList = injectExceptionsReferences({
     logger,
     exceptionsList: params.exceptionsList,
     savedObjectReferences,
   });
-  const ruleParamsWithSavedObjectReferences: RuleParams = {
+  const ruleParamsWithSavedObjectReferences: TParams = {
     ...params,
     exceptionsList,
   };

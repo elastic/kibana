@@ -23,7 +23,7 @@ import {
 } from './types';
 import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
-import { FORMATS_UI_SETTINGS } from '../common/constants/ui_settings';
+import { FORMATS_UI_SETTINGS } from './constants/ui_settings';
 import { FieldFormatNotFoundError } from './errors';
 
 export class FieldFormatsRegistry {
@@ -177,7 +177,7 @@ export class FieldFormatsRegistry {
 
       return new ConcreteFieldFormat(params, this.getConfig);
     },
-    (formatId: FieldFormatId, params: FieldFormatParams) =>
+    (formatId: FieldFormatId, params?: FieldFormatParams) =>
       JSON.stringify({
         formatId,
         ...params,
@@ -212,10 +212,10 @@ export class FieldFormatsRegistry {
    * https://lodash.com/docs#memoize
    *
    * @param  {KBN_FIELD_TYPES} fieldType
-   * @param  {ES_FIELD_TYPES[]} esTypes
+   * @param  {ES_FIELD_TYPES[] | undefined} esTypes
    * @return {String}
    */
-  getDefaultInstanceCacheResolver(fieldType: KBN_FIELD_TYPES, esTypes: ES_FIELD_TYPES[]): string {
+  getDefaultInstanceCacheResolver(fieldType: KBN_FIELD_TYPES, esTypes?: ES_FIELD_TYPES[]): string {
     // @ts-ignore
     return Array.isArray(esTypes) && esTypes.indexOf(fieldType) === -1
       ? [fieldType, ...esTypes].join('-')

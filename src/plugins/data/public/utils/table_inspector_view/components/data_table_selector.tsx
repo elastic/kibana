@@ -7,7 +7,7 @@
  */
 
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import PropTypes from 'prop-types';
 import {
   EuiButtonEmpty,
@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiPopover,
 } from '@elastic/eui';
-import { Datatable } from '../../../../../expressions/public';
+import { Datatable } from '@kbn/expressions-plugin/public';
 
 interface TableSelectorState {
   isPopoverOpen: boolean;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { BrowserField } from '../../../containers/source';
 import { OverflowField } from '../../tables/helpers';
@@ -21,6 +21,7 @@ export interface FieldValueCellProps {
   getLinkValue?: (field: string) => string | null;
   isDraggable?: boolean;
   linkValue?: string | null | undefined;
+  style?: CSSProperties | undefined;
   values: string[] | null | undefined;
 }
 
@@ -33,13 +34,16 @@ export const FieldValueCell = React.memo(
     getLinkValue,
     isDraggable = false,
     linkValue,
+    style,
     values,
   }: FieldValueCellProps) => {
     return (
       <EuiFlexGroup
+        alignItems="flexStart"
         data-test-subj={`event-field-${data.field}`}
         direction="column"
         gutterSize="none"
+        style={style}
       >
         {values != null &&
           values.map((value, i) => {
@@ -67,10 +71,12 @@ export const FieldValueCell = React.memo(
                     fieldFormat={data.format}
                     fieldName={data.field}
                     fieldType={data.type}
+                    isAggregatable={fieldFromBrowserField.aggregatable}
                     isDraggable={isDraggable}
                     isObjectArray={data.isObjectArray}
                     value={value}
                     linkValue={(getLinkValue && getLinkValue(data.field)) ?? linkValue}
+                    truncate={false}
                   />
                 )}
               </EuiFlexItem>

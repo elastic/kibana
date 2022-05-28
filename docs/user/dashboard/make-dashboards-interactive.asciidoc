@@ -44,11 +44,11 @@ image::images/dashboard-controls.png[]
 
 To create *Controls* panels:
 
-. On the dashboard, click *All types*, then select *Controls*.
+. On the dashboard, click *Select type*, then select *Controls*.
 
 . Select the control panel type from the dropdown, then click *Add*.
 
-. Enter the *Control Label*, then select the *{Data-Source}* and *Field*.
+. Enter the *Control Label*, then select the *{data-source-caps}* and *Field*.
 
 . If you are adding a *Range slider*, enter the *Step Size* and *Decimal Places*.
 
@@ -94,19 +94,25 @@ To save the panel to the dashboard:
 [[explore-the-underlying-documents]]
 === Open panel data in Discover
 
-You can add interactions to panels that allow you to open *Discover* and explore the panel data. To use the *Discover* interactions, the panel must use only one index pattern, and you must enable <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.`>> and <<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>> in kibana.yml. 
+You can add interactions to panels that allow you to open and explore the data in *Discover*. To use the interactions, the panel must use only one {data-view}. 
 
-If you are using 7.13.0 and earlier, panel interactions are enabled by default.
+There are three types of *Discover* interactions you can add to dashboards:
 
-There are two types of *Discover* interactions that you can add to dashboards:
-
-* *Panel interactions* &mdash; Opens the panel data in *Discover*, including the dashboard-level filters, but not the panel-level filters.
+* *Panel interactions* &mdash; Opens panel data in *Discover*, including the dashboard-level filters, but not the panel-level filters.
++
+To enable panel interactions, configure <<settings-explore-data-in-context,`xpack.discoverEnhanced.actions.`>> in kibana.yml. If you are using 7.13.0 and earlier, panel interactions are enabled by default.
 +
 To use panel interactions, open the panel menu, then click *Explore underlying data*.
 
 * *Series data interactions* &mdash; Opens the series data in *Discover*.
 +
+To enable series data interactions, configure <<settings-explore-data-in-chart,`xpack.discoverEnhanced.actions.exploreDataInChart.enabled`>> in kibana.yml. If you are using 7.13.0 and earlier, data series interactions are enabled by default.
++
 To use series data interactions, click a data series in the panel.
+
+* *Saved search interactions* &mdash; Opens <<save-your-search,saved search>> data in *Discover*.
++
+To use saved search interactions, open the panel menu, then click *More > View saved search*.
 
 [float]
 [[create-drilldowns]]
@@ -190,7 +196,7 @@ image::images/drilldown_on_panel.png[Drilldown on data table that navigates to a
 [[url-drilldowns]]
 ==== Create URL drilldowns
 
-URL drilldowns enable you to navigate from a dashboard to external websites. Destination URLs can be dynamic, depending on the dashboard context or user interaction with a panel. To create URL drilldowns, you add <<variables,variables>> to a URL template, which configures the behavior of the drilldown.
+URL drilldowns enable you to navigate from a dashboard to external websites. Destination URLs can be dynamic, depending on the dashboard context or user interaction with a panel. To create URL drilldowns, you add <<variables,variables>> to a URL template, which configures the behavior of the drilldown. All panels that you create with the visualization editors support dashboard drilldowns.
 
 [role="screenshot"]
 image:images/url_drilldown_go_to_github.gif[Drilldown on pie chart that navigates to Github]
@@ -203,13 +209,6 @@ The <<url-template-variables,variables>> you use to create a <<url_templating-la
 * *Range selection* &mdash; A range of values in a panel.
 
 For example, *Single click* has `{{event.value}}` and *Range selection* has `{{event.from}}` and `{{event.to}}`.
-
-The panels you create using the following editors support dashboard drilldowns:
-
-* *Lens*
-* *Maps*
-* *TSVB*
-* *Aggregation-based* area chart, data table, heat map, horitizontal bar chart, line chart, pie chart, tag cloud, and vertical bar chart
 
 [float]
 ===== Create a URL drilldown

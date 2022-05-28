@@ -6,7 +6,7 @@
  */
 
 import React, { MutableRefObject, useContext } from 'react';
-import { CaseViewRefreshPropInterface } from '../../../../../../cases/common';
+import { CaseViewRefreshPropInterface } from '@kbn/cases-plugin/common';
 
 /**
  * React Context that can hold the `Ref` that is created an passed to `CaseViewProps['refreshRef`]`, enabling
@@ -27,7 +27,7 @@ export const CaseDetailsRefreshContext =
  * const caseDetailsRefresh = useWithCaseDetailsRefresh();
  * ...
  * if (caseDetailsRefresh) {
- *   caseDetailsRefresh.refreshUserActionsAndComments();
+ *   caseDetailsRefresh.refreshCase();
  * }
  */
 export const useWithCaseDetailsRefresh = (): Readonly<CaseViewRefreshPropInterface> | undefined => {

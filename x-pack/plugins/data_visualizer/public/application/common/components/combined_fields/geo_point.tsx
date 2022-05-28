@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { ChangeEvent, Component, Fragment } from 'react';
 
 import {
@@ -21,6 +21,7 @@ import {
   EuiFormErrorText,
 } from '@elastic/eui';
 
+import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { CombinedField } from './types';
 import {
   createGeoPointCombinedField,
@@ -29,7 +30,6 @@ import {
   getFieldNames,
   getNameCollisionMsg,
 } from './utils';
-import { FindFileStructureResponse } from '../../../../../../file_upload/common';
 
 interface Props {
   addCombinedField: (combinedField: CombinedField) => void;

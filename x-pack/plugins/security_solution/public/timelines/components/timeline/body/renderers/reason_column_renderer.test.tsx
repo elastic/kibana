@@ -13,15 +13,11 @@ import { REASON_FIELD_NAME } from './constants';
 import { reasonColumnRenderer } from './reason_column_renderer';
 import { plainColumnRenderer } from './plain_column_renderer';
 
-import {
-  BrowserFields,
-  ColumnHeaderOptions,
-  RowRenderer,
-  RowRendererId,
-} from '../../../../../../common';
+import { RowRendererId, ColumnHeaderOptions, RowRenderer } from '../../../../../../common/types';
+
 import { render } from '@testing-library/react';
-import { TestProviders } from '../../../../../../../timelines/public/mock';
-import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '../../../../../../../timelines/public/components';
+import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import { useDraggableKeyboardWrapper as mockUseDraggableKeyboardWrapper } from '@kbn/timelines-plugin/public/components';
 import { cloneDeep } from 'lodash';
 jest.mock('./plain_column_renderer');
 
@@ -64,7 +60,6 @@ const rowRenderers: RowRenderer[] = [
     renderRow: () => <span data-test-subj="test-row-render" />,
   },
 ];
-const browserFields: BrowserFields = {};
 
 const defaultProps = {
   columnName: REASON_FIELD_NAME,
@@ -86,19 +81,18 @@ describe('reasonColumnRenderer', () => {
   });
 
   describe('renderColumn', () => {
-    it('calls `plainColumnRenderer.renderColumn` when ecsData, rowRenderers or browserFields is empty', () => {
+    it('calls `plainColumnRenderer.renderColumn` when ecsData, or rowRenderers is empty', () => {
       reasonColumnRenderer.renderColumn(defaultProps);
 
       expect(plainColumnRenderer.renderColumn).toBeCalledTimes(1);
     });
 
-    it("doesn't call `plainColumnRenderer.renderColumn` in expanded value when ecsData, rowRenderers or browserFields fields are not empty", () => {
+    it("doesn't call `plainColumnRenderer.renderColumn` in expanded value when ecsData, or rowRenderers fields are not empty", () => {
       reasonColumnRenderer.renderColumn({
         ...defaultProps,
         isDetails: true,
         ecsData: invalidEcs,
         rowRenderers,
-        browserFields,
       });
 
       expect(plainColumnRenderer.renderColumn).toBeCalledTimes(0);
@@ -110,7 +104,6 @@ describe('reasonColumnRenderer', () => {
         isDetails: false,
         ecsData: invalidEcs,
         rowRenderers,
-        browserFields,
       });
 
       expect(plainColumnRenderer.renderColumn).toBeCalledTimes(1);
@@ -122,7 +115,6 @@ describe('reasonColumnRenderer', () => {
         isDetails: true,
         ecsData: invalidEcs,
         rowRenderers,
-        browserFields,
       });
 
       const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);
@@ -136,7 +128,6 @@ describe('reasonColumnRenderer', () => {
         isDetails: true,
         ecsData: validEcs,
         rowRenderers,
-        browserFields,
       });
 
       const wrapper = render(<TestProviders>{renderedColumn}</TestProviders>);

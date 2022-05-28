@@ -13,18 +13,21 @@
     "alerting",
     "cases",
     "data",
-    "dataEnhanced",
     "embeddable",
     "eventLog",
     "features",
     "inspector",
+    "lens",
     "licensing",
     "maps",
     "ruleRegistry",
+    "sessionView",
     "taskManager",
     "timelines",
     "triggersActionsUi",
-    "uiActions"
+    "uiActions",
+    "unifiedSearch",
+    "sessionView"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
@@ -35,10 +38,11 @@
     "security",
     "spaces",
     "usageCollection",
-    "lens",
     "lists",
     "home",
-    "telemetry"
+    "telemetry",
+    "dataViewFieldEditor",
+    "osquery"
   ],
   "server": true,
   "ui": true,
@@ -49,6 +53,7 @@
     "kibanaReact",
     "usageCollection",
     "lists",
-    "ml"
+    "ml",
+    "unifiedSearch"
   ]
 }

@@ -4,173 +4,107 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ValuesType } from 'utility-types';
+
 import { Observable } from 'rxjs';
-import { CoreSetup, CoreStart, KibanaRequest } from 'kibana/server';
+import { KibanaRequest } from '@kbn/core/server';
 import {
   RuleRegistryPluginSetupContract,
   RuleRegistryPluginStartContract,
-} from '../../rule_registry/server';
+} from '@kbn/rule-registry-plugin/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../src/plugins/data/server';
-import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
+} from '@kbn/data-plugin/server';
+import {
+  SpacesPluginSetup,
+  SpacesPluginStart,
+} from '@kbn/spaces-plugin/server';
 import {
   HomeServerPluginSetup,
   HomeServerPluginStart,
-} from '../../../../src/plugins/home/server';
-import { UsageCollectionSetup } from '../../../../src/plugins/usage_collection/server';
-import { ActionsPlugin } from '../../actions/server';
-import { AlertingPlugin } from '../../alerting/server';
-import { CloudSetup } from '../../cloud/server';
+} from '@kbn/home-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import { ActionsPlugin } from '@kbn/actions-plugin/server';
+import { AlertingPlugin } from '@kbn/alerting-plugin/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
+} from '@kbn/features-plugin/server';
 import {
   LicensingPluginSetup,
   LicensingPluginStart,
-} from '../../licensing/server';
-import { MlPluginSetup, MlPluginStart } from '../../ml/server';
-import { ObservabilityPluginSetup } from '../../observability/server';
+} from '@kbn/licensing-plugin/server';
+import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
+import { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import {
   SecurityPluginSetup,
   SecurityPluginStart,
-} from '../../security/server';
+} from '@kbn/security-plugin/server';
 import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
-} from '../../task_manager/server';
+} from '@kbn/task-manager-plugin/server';
 import {
   FleetSetupContract as FleetPluginSetup,
   FleetStartContract as FleetPluginStart,
-} from '../../fleet/server';
+} from '@kbn/fleet-plugin/server';
+import { InfraPluginStart, InfraPluginSetup } from '@kbn/infra-plugin/server';
 import { APMConfig } from '.';
-import { getApmIndices } from './lib/settings/apm_indices/get_apm_indices';
-import { createApmEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
+import { ApmIndicesConfig } from './routes/settings/apm_indices/get_apm_indices';
+import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
 import { ApmPluginRequestHandlerContext } from './routes/typings';
 
 export interface APMPluginSetup {
   config$: Observable<APMConfig>;
-  getApmIndices: () => ReturnType<typeof getApmIndices>;
+  getApmIndices: () => Promise<ApmIndicesConfig>;
   createApmEventClient: (params: {
     debug?: boolean;
     request: KibanaRequest;
     context: ApmPluginRequestHandlerContext;
-  }) => Promise<ReturnType<typeof createApmEventClient>>;
+  }) => Promise<APMEventClient>;
 }
 
-interface DependencyMap {
-  core: {
-    setup: CoreSetup;
-    start: CoreStart;
-  };
-  spaces: {
-    setup: SpacesPluginSetup;
-    start: SpacesPluginStart;
-  };
-  home: {
-    setup: HomeServerPluginSetup;
-    start: HomeServerPluginStart;
-  };
-  licensing: {
-    setup: LicensingPluginSetup;
-    start: LicensingPluginStart;
-  };
-  cloud: {
-    setup: CloudSetup;
-    start: undefined;
-  };
-  usageCollection: {
-    setup: UsageCollectionSetup;
-    start: undefined;
-  };
-  taskManager: {
-    setup: TaskManagerSetupContract;
-    start: TaskManagerStartContract;
-  };
-  alerting: {
-    setup: AlertingPlugin['setup'];
-    start: AlertingPlugin['start'];
-  };
-  actions: {
-    setup: ActionsPlugin['setup'];
-    start: ActionsPlugin['start'];
-  };
-  observability: {
-    setup: ObservabilityPluginSetup;
-    start: undefined;
-  };
-  features: {
-    setup: FeaturesPluginSetup;
-    start: FeaturesPluginStart;
-  };
-  security: {
-    setup: SecurityPluginSetup;
-    start: SecurityPluginStart;
-  };
-  ml: {
-    setup: MlPluginSetup;
-    start: MlPluginStart;
-  };
-  data: {
-    setup: DataPluginSetup;
-    start: DataPluginStart;
-  };
-  ruleRegistry: {
-    setup: RuleRegistryPluginSetupContract;
-    start: RuleRegistryPluginStartContract;
-  };
-  fleet: {
-    setup: FleetPluginSetup;
-    start: FleetPluginStart;
-  };
+export interface APMPluginSetupDependencies {
+  // required dependencies
+  data: DataPluginSetup;
+  features: FeaturesPluginSetup;
+  licensing: LicensingPluginSetup;
+  observability: ObservabilityPluginSetup;
+  ruleRegistry: RuleRegistryPluginSetupContract;
+  infra: InfraPluginSetup;
+
+  // optional dependencies
+  actions?: ActionsPlugin['setup'];
+  alerting?: AlertingPlugin['setup'];
+  cloud?: CloudSetup;
+  fleet?: FleetPluginSetup;
+  home?: HomeServerPluginSetup;
+  ml?: MlPluginSetup;
+  security?: SecurityPluginSetup;
+  spaces?: SpacesPluginSetup;
+  taskManager?: TaskManagerSetupContract;
+  usageCollection?: UsageCollectionSetup;
 }
 
-const requiredDependencies = [
-  'features',
-  'data',
-  'licensing',
-  'triggersActionsUi',
-  'embeddable',
-  'infra',
-  'observability',
-  'ruleRegistry',
-] as const;
+export interface APMPluginStartDependencies {
+  // required dependencies
+  data: DataPluginStart;
+  features: FeaturesPluginStart;
+  licensing: LicensingPluginStart;
+  observability: undefined;
+  ruleRegistry: RuleRegistryPluginStartContract;
+  infra: InfraPluginStart;
 
-const optionalDependencies = [
-  'spaces',
-  'cloud',
-  'usageCollection',
-  'taskManager',
-  'actions',
-  'alerting',
-  'security',
-  'ml',
-  'home',
-  'maps',
-  'fleet',
-] as const;
-
-type RequiredDependencies = Pick<
-  DependencyMap,
-  ValuesType<typeof requiredDependencies> & keyof DependencyMap
->;
-
-type OptionalDependencies = Partial<
-  Pick<
-    DependencyMap,
-    ValuesType<typeof optionalDependencies> & keyof DependencyMap
-  >
->;
-
-export type APMPluginDependencies = RequiredDependencies & OptionalDependencies;
-
-export type APMPluginSetupDependencies = {
-  [key in keyof APMPluginDependencies]: Required<APMPluginDependencies>[key]['setup'];
-};
-
-export type APMPluginStartDependencies = {
-  [key in keyof APMPluginDependencies]: Required<APMPluginDependencies>[key]['start'];
-};
+  // optional dependencies
+  actions?: ActionsPlugin['start'];
+  alerting?: AlertingPlugin['start'];
+  cloud?: undefined;
+  fleet?: FleetPluginStart;
+  home?: HomeServerPluginStart;
+  ml?: MlPluginStart;
+  security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
+  taskManager?: TaskManagerStartContract;
+  usageCollection?: undefined;
+}

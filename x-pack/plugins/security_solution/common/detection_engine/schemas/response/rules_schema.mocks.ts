@@ -6,7 +6,6 @@
  */
 
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../constants';
-import { RuleExecutionStatus } from '../common/schemas';
 import { getListArrayMock } from '../types/lists.mock';
 
 import { RulesSchema } from './rules_schema';
@@ -61,10 +60,6 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   type: 'query',
   threat: [],
   version: 1,
-  status: RuleExecutionStatus.succeeded,
-  status_date: '2020-02-22T16:47:50.047Z',
-  last_success_at: '2020-02-22T16:47:50.047Z',
-  last_success_message: 'succeeded',
   output_index: '.siem-signals-default',
   max_signals: 100,
   risk_score: 55,
@@ -73,6 +68,9 @@ export const getRulesSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchem
   rule_id: 'query-rule-id',
   interval: '5m',
   exceptions_list: getListArrayMock(),
+  related_integrations: [],
+  required_fields: [],
+  setup: '',
 });
 
 export const getRulesMlSchemaMock = (anchorDate: string = ANCHOR_DATE): RulesSchema => {
@@ -137,6 +135,9 @@ export const getThreatMatchingSchemaPartialMock = (enabled = false): Partial<Rul
     risk_score_mapping: [],
     name: 'Query with a rule id',
     references: [],
+    related_integrations: [],
+    required_fields: [],
+    setup: '',
     severity: 'high',
     severity_mapping: [],
     updated_by: 'elastic',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SwimlaneConnectorType } from '../../../../common';
+import { SwimlaneConnectorType } from '../../../../common/api';
 import { swimlaneConnector as connector } from '../mock';
 import { isAnyRequiredFieldNotSet, connectorValidator } from './validator';
 
@@ -56,5 +56,26 @@ describe('Swimlane validator', () => {
         expect(connectorValidator(invalidConnector)).toBe(undefined);
       }
     );
+
+    test('it does not return an error message if the config is undefined', () => {
+      const invalidConnector = {
+        ...connector,
+        config: undefined,
+      };
+
+      expect(connectorValidator(invalidConnector)).toBe(undefined);
+    });
+
+    test('it returns an error message if the mappings are undefined', () => {
+      const invalidConnector = {
+        ...connector,
+        config: {
+          ...connector.config,
+          mappings: undefined,
+        },
+      };
+
+      expect(connectorValidator(invalidConnector)).toEqual({ message: 'Invalid connector' });
+    });
   });
 });

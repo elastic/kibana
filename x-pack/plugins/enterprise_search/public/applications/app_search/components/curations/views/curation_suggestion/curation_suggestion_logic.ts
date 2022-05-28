@@ -6,12 +6,14 @@
  */
 
 import { kea, MakeLogicType } from 'kea';
-import { HttpSetup } from 'kibana/public';
+
+import { HttpSetup } from '@kbn/core/public';
 
 import { i18n } from '@kbn/i18n';
 
 import {
   flashAPIErrors,
+  setErrorMessage,
   setQueuedErrorMessage,
   setQueuedSuccessMessage,
 } from '../../../../../shared/flash_messages';
@@ -21,7 +23,7 @@ import { ENGINE_CURATIONS_PATH, ENGINE_CURATION_PATH } from '../../../../routes'
 import { EngineLogic, generateEnginePath } from '../../../engine';
 import { CurationSuggestion, HydratedCurationSuggestion } from '../../types';
 
-interface Error {
+interface APIResponseError {
   error: string;
 }
 interface CurationSuggestionValues {
@@ -79,8 +81,9 @@ export const CurationSuggestionLogic = kea<
       const { engineName } = EngineLogic.values;
 
       try {
-        const suggestionResponse = await http.get(
-          `/internal/app_search/engines/${engineName}/search_relevance_suggestions/${props.query}`,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const suggestionResponse = await http.get<any>(
+          `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions/${props.query}`,
           {
             query: {
               type: 'curation',
@@ -137,7 +140,7 @@ export const CurationSuggestionLogic = kea<
         setQueuedSuccessMessage(
           i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyAppliedMessage',
-            { defaultMessage: 'Suggestion was succefully applied.' }
+            { defaultMessage: 'Suggestion was successfully applied.' }
           )
         );
         if (suggestion!.operation === 'delete') {
@@ -151,7 +154,11 @@ export const CurationSuggestionLogic = kea<
           );
         }
       } catch (e) {
-        flashAPIErrors(e);
+        if (e.message) {
+          setErrorMessage(e.message);
+        } else {
+          flashAPIErrors(e);
+        }
       }
     },
     acceptAndAutomateSuggestion: async () => {
@@ -177,7 +184,7 @@ export const CurationSuggestionLogic = kea<
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyAutomatedMessage',
             {
               defaultMessage:
-                'Suggestion was succefully applied and all future suggestions for the query "{query}" will be automatically applied.',
+                'Suggestion was successfully applied and all future suggestions for the query "{query}" will be automatically applied.',
               values: { query: suggestion!.query },
             }
           )
@@ -193,7 +200,11 @@ export const CurationSuggestionLogic = kea<
           );
         }
       } catch (e) {
-        flashAPIErrors(e);
+        if (e.message) {
+          setErrorMessage(e.message);
+        } else {
+          flashAPIErrors(e);
+        }
       }
     },
     rejectSuggestion: async () => {
@@ -208,13 +219,17 @@ export const CurationSuggestionLogic = kea<
           i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyRejectedMessage',
             {
-              defaultMessage: 'Suggestion was succefully rejected.',
+              defaultMessage: 'Suggestion was successfully rejected.',
             }
           )
         );
         KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
       } catch (e) {
-        flashAPIErrors(e);
+        if (e.message) {
+          setErrorMessage(e.message);
+        } else {
+          flashAPIErrors(e);
+        }
       }
     },
     rejectAndDisableSuggestion: async () => {
@@ -230,14 +245,18 @@ export const CurationSuggestionLogic = kea<
             'xpack.enterpriseSearch.appSearch.engine.curations.suggestedCuration.successfullyDisabledMessage',
             {
               defaultMessage:
-                'Suggestion was succefully rejected and you will no longer receive suggestions for the query "{query}".',
+                'Suggestion was successfully rejected and you will no longer receive suggestions for the query "{query}".',
               values: { query: suggestion!.query },
             }
           )
         );
         KibanaLogic.values.navigateToUrl(generateEnginePath(ENGINE_CURATIONS_PATH));
       } catch (e) {
-        flashAPIErrors(e);
+        if (e.message) {
+          setErrorMessage(e.message);
+        } else {
+          flashAPIErrors(e);
+        }
       }
     },
   }),
@@ -249,8 +268,8 @@ const updateSuggestion = async (
   query: string,
   status: string
 ) => {
-  const response = await http.put<{ results: Array<CurationSuggestion | Error> }>(
-    `/internal/app_search/engines/${engineName}/search_relevance_suggestions`,
+  const response = await http.put<{ results: Array<CurationSuggestion | APIResponseError> }>(
+    `/internal/app_search/engines/${engineName}/adaptive_relevance/suggestions`,
     {
       body: JSON.stringify([
         {
@@ -263,7 +282,7 @@ const updateSuggestion = async (
   );
 
   if (response.results[0].hasOwnProperty('error')) {
-    throw (response.results[0] as Error).error;
+    throw new Error((response.results[0] as APIResponseError).error);
   }
 
   return response.results[0] as CurationSuggestion;

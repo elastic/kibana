@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import createContainer from 'constate';
 import { History } from 'history';
 import { Observable } from 'rxjs';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 interface Crumb {
   url?: string | null;
@@ -186,6 +186,16 @@ function getApmBreadcrumbs(mainInstance: any) {
   return breadcrumbs;
 }
 
+// generate Enterprise Search breadcrumbs
+function getEnterpriseSearchBreadcrumbs(mainInstance: any) {
+  const entSearchLabel = i18n.translate('xpack.monitoring.breadcrumbs.entSearchLabel', {
+    defaultMessage: 'Enterprise Search',
+  });
+  const breadcrumbs = [];
+  breadcrumbs.push(createCrumb('#/enterprise_search', entSearchLabel));
+  return breadcrumbs;
+}
+
 function buildBreadcrumbs(clusterName: string, mainInstance?: any | null) {
   const homeCrumb = i18n.translate('xpack.monitoring.breadcrumbs.clustersLabel', {
     defaultMessage: 'Clusters',
@@ -212,6 +222,9 @@ function buildBreadcrumbs(clusterName: string, mainInstance?: any | null) {
   if (mainInstance?.inApm) {
     breadcrumbs = breadcrumbs.concat(getApmBreadcrumbs(mainInstance));
   }
+  if (mainInstance?.inEnterpriseSearch) {
+    breadcrumbs = breadcrumbs.concat(getEnterpriseSearchBreadcrumbs(mainInstance));
+  }
 
   return breadcrumbs;
 }
@@ -230,9 +243,11 @@ export const useBreadcrumbs = ({ history }: { history: History }) => {
     (bcrumbs?: BreadcrumbItem[]) => {
       if (!chrome) return;
       if (!bcrumbs) {
-        const currentBreadcrumbs: Observable<any> & {
-          value?: BreadcrumbItem[];
-        } = chrome.getBreadcrumbs$()?.source;
+        const currentBreadcrumbs:
+          | (Observable<any> & {
+              value?: BreadcrumbItem[];
+            })
+          | undefined = chrome.getBreadcrumbs$()?.source;
         if (currentBreadcrumbs && currentBreadcrumbs.value) {
           bcrumbs = currentBreadcrumbs.value;
         }

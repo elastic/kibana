@@ -12,7 +12,14 @@ import {
   ConfigDeprecation,
   DeprecationsDetails,
   GetDeprecationsContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import {
+  TIMESTAMP_FIELD,
+  TIEBREAKER_FIELD,
+  CONTAINER_FIELD,
+  HOST_FIELD,
+  POD_FIELD,
+} from '../common/constants';
 import { InfraSources } from './lib/sources';
 
 const deprecatedFieldMessage = (fieldName: string, defaultValue: string, configNames: string[]) =>
@@ -28,11 +35,11 @@ const deprecatedFieldMessage = (fieldName: string, defaultValue: string, configN
   });
 
 const DEFAULT_VALUES = {
-  timestamp: '@timestamp',
-  tiebreaker: '_doc',
-  container: 'container.id',
-  host: 'host.name',
-  pod: 'kubernetes.pod.uid',
+  timestamp: TIMESTAMP_FIELD,
+  tiebreaker: TIEBREAKER_FIELD,
+  container: CONTAINER_FIELD,
+  host: HOST_FIELD,
+  pod: POD_FIELD,
 };
 
 const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => DeprecationsDetails> =
@@ -142,7 +149,7 @@ const FIELD_DEPRECATION_FACTORIES: Record<string, (configNames: string[]) => Dep
     }),
   };
 
-export const configDeprecations: ConfigDeprecationProvider = () => [
+export const configDeprecations: ConfigDeprecationProvider = ({ deprecate }) => [
   ...Object.keys(FIELD_DEPRECATION_FACTORIES).map(
     (key): ConfigDeprecation =>
       (completeConfig, rootPath, addDeprecation) => {

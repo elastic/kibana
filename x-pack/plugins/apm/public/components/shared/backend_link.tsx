@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
-import { euiStyled } from '../../../../../../src/plugins/kibana_react/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useApmRouter } from '../../hooks/use_apm_router';
 import { truncate } from '../../utils/style';
 import { ApmRoutes } from '../routing/apm_route_config';
@@ -17,15 +17,13 @@ import { SpanIcon } from './span_icon';
 const StyledLink = euiStyled(EuiLink)`${truncate('100%')};`;
 
 interface BackendLinkProps {
-  backendName: string;
-  query: TypeOf<ApmRoutes, '/backends/{backendName}/overview'>['query'];
+  query: TypeOf<ApmRoutes, '/backends/overview'>['query'];
   subtype?: string;
   type?: string;
   onClick?: React.ComponentProps<typeof EuiLink>['onClick'];
 }
 
 export function BackendLink({
-  backendName,
   query,
   subtype,
   type,
@@ -35,8 +33,7 @@ export function BackendLink({
 
   return (
     <StyledLink
-      href={link('/backends/{backendName}/overview', {
-        path: { backendName },
+      href={link('/backends/overview', {
         query,
       })}
       onClick={onClick}
@@ -45,7 +42,9 @@ export function BackendLink({
         <EuiFlexItem grow={false}>
           <SpanIcon type={type} subtype={subtype} />
         </EuiFlexItem>
-        <EuiFlexItem>{backendName}</EuiFlexItem>
+        <EuiFlexItem className="eui-textTruncate">
+          <span className="eui-textTruncate">{query.backendName}</span>
+        </EuiFlexItem>
       </EuiFlexGroup>
     </StyledLink>
   );

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../../../../common';
-import { ISearchRequestParams } from '../../../../../../../../src/plugins/data/common';
 import { ResultsRequestOptions } from '../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../common/utils/build_query';
 
@@ -36,9 +36,9 @@ export const buildResultsQuery = ({
   ];
 
   const dslQuery = {
-    allowNoIndices: true,
+    allow_no_indices: true,
     index: `logs-${OSQUERY_INTEGRATION_NAME}.result*`,
-    ignoreUnavailable: true,
+    ignore_unavailable: true,
     body: {
       aggs: {
         count_by_agent_id: {

@@ -14,15 +14,9 @@ import {
   MANAGEMENT_STORE_ENDPOINTS_NAMESPACE,
   MANAGEMENT_STORE_GLOBAL_NAMESPACE,
   MANAGEMENT_STORE_POLICY_DETAILS_NAMESPACE,
-  MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE,
-  MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE,
-  MANAGEMENT_STORE_HOST_ISOLATION_EXCEPTIONS_NAMESPACE,
 } from '../common/constants';
 import { policyDetailsMiddlewareFactory } from '../pages/policy/store/policy_details';
 import { endpointMiddlewareFactory } from '../pages/endpoint_hosts/store/middleware';
-import { trustedAppsPageMiddlewareFactory } from '../pages/trusted_apps/store/middleware';
-import { eventFiltersPageMiddlewareFactory } from '../pages/event_filters/store/middleware';
-import { hostIsolationExceptionsMiddlewareFactory } from '../pages/host_isolation_exceptions/store/middleware';
 
 type ManagementSubStateKey = keyof State[typeof MANAGEMENT_STORE_GLOBAL_NAMESPACE];
 
@@ -43,18 +37,6 @@ export const managementMiddlewareFactory: SecuritySubPluginMiddlewareFactory = (
     substateMiddlewareFactory(
       createSubStateSelector(MANAGEMENT_STORE_ENDPOINTS_NAMESPACE),
       endpointMiddlewareFactory(coreStart, depsStart)
-    ),
-    substateMiddlewareFactory(
-      createSubStateSelector(MANAGEMENT_STORE_TRUSTED_APPS_NAMESPACE),
-      trustedAppsPageMiddlewareFactory(coreStart, depsStart)
-    ),
-    substateMiddlewareFactory(
-      createSubStateSelector(MANAGEMENT_STORE_EVENT_FILTERS_NAMESPACE),
-      eventFiltersPageMiddlewareFactory(coreStart, depsStart)
-    ),
-    substateMiddlewareFactory(
-      createSubStateSelector(MANAGEMENT_STORE_HOST_ISOLATION_EXCEPTIONS_NAMESPACE),
-      hostIsolationExceptionsMiddlewareFactory(coreStart)
     ),
   ];
 };

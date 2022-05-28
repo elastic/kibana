@@ -18,10 +18,10 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-import { IndexPattern } from 'src/plugins/data/public';
-import { CoreStart } from 'kibana/public';
+import { IndexPattern } from '@kbn/data-plugin/public';
+import { CoreStart } from '@kbn/core/public';
+import { AllSeries } from '@kbn/observability-plugin/public';
 import { StartDependencies } from './plugin';
-import { AllSeries } from '../../../plugins/observability/public';
 
 export const App = (props: {
   core: CoreStart;
@@ -40,7 +40,7 @@ export const App = (props: {
       reportDefinitions: {
         'monitor.id': ['ALL_VALUES'],
       },
-      breakdown: 'observer.geo.name',
+      breakdown: 'monitor.type',
       operationType: 'average',
       dataType: 'synthetics',
       seriesType: 'line',
@@ -80,6 +80,7 @@ export const App = (props: {
               attributes={seriesList}
               reportType="kpi-over-time"
               title={'Monitor response duration'}
+              withActions={['save', 'explore']}
             />
           </EuiPageContentBody>
         </EuiPageContent>

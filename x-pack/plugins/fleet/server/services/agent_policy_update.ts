@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from 'src/core/server';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { generateEnrollmentAPIKey, deleteEnrollmentApiKeyForAgentPolicyId } from './api_keys';
 import { unenrollForAgentPolicyId } from './agents';
@@ -42,12 +42,13 @@ export async function agentPolicyUpdateEventHandler(
     await generateEnrollmentAPIKey(soClient, esClient, {
       name: 'Default',
       agentPolicyId,
+      forceRecreate: true,
     });
-    await agentPolicyService.createFleetServerPolicy(internalSoClient, agentPolicyId);
+    await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId);
   }
 
   if (action === 'updated') {
-    await agentPolicyService.createFleetServerPolicy(internalSoClient, agentPolicyId);
+    await agentPolicyService.deployPolicy(internalSoClient, agentPolicyId);
   }
 
   if (action === 'deleted') {

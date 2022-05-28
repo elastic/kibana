@@ -7,8 +7,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaContext } from '../../../data/public';
-import { ExpressionFunctionDefinition, Render } from '../../../expressions/public';
+import { KibanaContext } from '@kbn/data-plugin/public';
+import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
 
 import type { TimeseriesVisData } from '../common/types';
 import { metricsRequestHandler } from './request_handler';
@@ -26,6 +26,7 @@ export interface TimeseriesRenderValue {
   visData: TimeseriesVisData | {};
   visParams: TimeseriesVisParams;
   syncColors: boolean;
+  syncTooltips: boolean;
 }
 
 export type TimeseriesExpressionFunctionDefinition = ExpressionFunctionDefinition<
@@ -54,10 +55,22 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       help: '',
     },
   },
-  async fn(input, args, { getSearchSessionId, isSyncColorsEnabled, getExecutionContext }) {
+  async fn(
+    input,
+    args,
+    {
+      getSearchSessionId,
+      isSyncColorsEnabled,
+      isSyncTooltipsEnabled,
+      getExecutionContext,
+      inspectorAdapters,
+      abortSignal: expressionAbortSignal,
+    }
+  ) {
     const visParams: TimeseriesVisParams = JSON.parse(args.params);
     const uiState = JSON.parse(args.uiState);
     const syncColors = isSyncColorsEnabled?.() ?? false;
+    const syncTooltips = isSyncTooltipsEnabled?.() ?? false;
 
     const response = await metricsRequestHandler({
       input,
@@ -65,6 +78,8 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
       uiState,
       searchSessionId: getSearchSessionId(),
       executionContext: getExecutionContext(),
+      inspectorAdapters,
+      expressionAbortSignal,
     });
 
     return {
@@ -74,6 +89,7 @@ export const createMetricsFn = (): TimeseriesExpressionFunctionDefinition => ({
         visParams,
         visData: response,
         syncColors,
+        syncTooltips,
       },
     };
   },

@@ -86,13 +86,12 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               title: 'saved_objects*',
               icon: 'indexPatternApp',
-              editUrl:
-                '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+              editUrl: '/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                path: '/app/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple',
               hiddenType: false,
             },
           },
@@ -128,13 +127,12 @@ export default function ({ getService }: FtrProviderContext) {
             meta: {
               icon: 'indexPatternApp',
               title: 'saved_objects*',
-              editUrl:
-                '/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+              editUrl: '/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
               inAppUrl: {
-                path: '/app/management/kibana/indexPatterns/patterns/8963ca30-3224-11e8-a572-ffca06da1357',
+                path: '/app/management/kibana/dataViews/dataView/8963ca30-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'management.kibana.indexPatterns',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple',
               hiddenType: false,
             },
             relationship: 'child',
@@ -303,7 +301,7 @@ export default function ({ getService }: FtrProviderContext) {
                 path: '/app/dashboards#/view/b70c7ae0-3224-11e8-a572-ffca06da1357',
                 uiCapabilitiesPath: 'dashboard.show',
               },
-              namespaceType: 'single',
+              namespaceType: 'multiple-isolated',
               hiddenType: false,
             },
           },

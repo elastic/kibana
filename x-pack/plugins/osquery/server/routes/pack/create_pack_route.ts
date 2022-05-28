@@ -13,13 +13,14 @@ import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   PackagePolicy,
-} from '../../../../fleet/common';
-import { IRouter } from '../../../../../../src/core/server';
+} from '@kbn/fleet-plugin/common';
+import { IRouter } from '@kbn/core/server';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { OSQUERY_INTEGRATION_NAME } from '../../../common';
 import { PLUGIN_ID } from '../../../common';
 import { packSavedObjectType } from '../../../common/types';
-import { convertPackQueriesToSO } from './utils';
+import { convertPackQueriesToSO, convertSOQueriesToPack } from './utils';
+import { getInternalSavedObjectsClient } from '../../usage/collector';
 
 export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppContext) => {
   router.post(
@@ -43,7 +44,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   schema.recordOf(
                     schema.string(),
                     schema.object({
-                      field: schema.string(),
+                      field: schema.maybe(schema.string()),
+                      value: schema.maybe(
+                        schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+                      ),
                     })
                   )
                 ),
@@ -56,8 +60,12 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
       options: { tags: [`access:${PLUGIN_ID}-writePacks`] },
     },
     async (context, request, response) => {
-      const esClient = context.core.elasticsearch.client.asCurrentUser;
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const esClient = coreContext.elasticsearch.client.asCurrentUser;
+      const savedObjectsClient = coreContext.savedObjects.client;
+      const internalSavedObjectsClient = await getInternalSavedObjectsClient(
+        osqueryContext.getStartServices
+      );
       const agentPolicyService = osqueryContext.service.getAgentPolicyService();
 
       const packagePolicyService = osqueryContext.service.getPackagePolicyService();
@@ -68,22 +76,24 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
 
       const conflictingEntries = await savedObjectsClient.find({
         type: packSavedObjectType,
-        search: name,
-        searchFields: ['name'],
+        filter: `${packSavedObjectType}.attributes.name: "${name}"`,
       });
 
       if (conflictingEntries.saved_objects.length) {
         return response.conflict({ body: `Pack with name "${name}" already exists.` });
       }
 
-      const { items: packagePolicies } = (await packagePolicyService?.list(savedObjectsClient, {
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-        perPage: 1000,
-        page: 1,
-      })) ?? { items: [] };
+      const { items: packagePolicies } = (await packagePolicyService?.list(
+        internalSavedObjectsClient,
+        {
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+          perPage: 1000,
+          page: 1,
+        }
+      )) ?? { items: [] };
 
       const agentPolicies = policy_ids
-        ? mapKeys(await agentPolicyService?.getByIds(savedObjectsClient, policy_ids), 'id')
+        ? mapKeys(await agentPolicyService?.getByIds(internalSavedObjectsClient, policy_ids), 'id')
         : {};
 
       const references = policy_ids
@@ -118,7 +128,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             const packagePolicy = find(packagePolicies, ['policy_id', agentPolicyId]);
             if (packagePolicy) {
               return packagePolicyService?.update(
-                savedObjectsClient,
+                internalSavedObjectsClient,
                 esClient,
                 packagePolicy.id,
                 produce<PackagePolicy>(packagePolicy, (draft) => {
@@ -126,9 +136,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                   if (!has(draft, 'inputs[0].streams')) {
                     set(draft, 'inputs[0].streams', []);
                   }
+
                   set(draft, `inputs[0].config.osquery.value.packs.${packSO.attributes.name}`, {
-                    queries,
+                    queries: convertSOQueriesToPack(queries, { removeMultiLines: true }),
                   });
+
                   return draft;
                 })
               );

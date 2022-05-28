@@ -8,9 +8,9 @@
 import { EuiAccordion } from '@elastic/eui';
 import React from 'react';
 
-import { findTestSubject, mountWithIntl } from '@kbn/test/jest';
+import type { KibanaFeature, SubFeatureConfig } from '@kbn/features-plugin/public';
+import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { KibanaFeature, SubFeatureConfig } from '../../../../../../../../features/public';
 import type { Role } from '../../../../../../../common/model';
 import { createFeature, kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
@@ -49,6 +49,7 @@ const setup = (config: TestConfig) => {
       onChangeAll={onChangeAll}
       canCustomizeSubFeaturePrivileges={config.canCustomizeSubFeaturePrivileges}
       privilegeIndex={config.privilegeIndex}
+      allSpacesSelected={true}
     />
   );
 
@@ -678,7 +679,7 @@ describe('FeatureTable', () => {
     });
   });
 
-  it('renders with no privileges granted when minimal feature privileges are assigned, and sub-feature privileges are disallowed', () => {
+  it('renders with privileges granted when minimal feature privileges are assigned, and sub-feature privileges are disallowed', () => {
     const role = createRole([
       {
         spaces: ['foo'],
@@ -710,13 +711,13 @@ describe('FeatureTable', () => {
         subFeaturePrivileges: [],
       },
       with_sub_features: {
-        primaryFeaturePrivilege: 'none',
+        primaryFeaturePrivilege: 'all',
         subFeaturePrivileges: [],
       },
     });
   });
 
-  it('renders with no privileges granted when sub feature privileges are assigned, and sub-feature privileges are disallowed', () => {
+  it('renders with privileges granted when sub feature privileges are assigned, and sub-feature privileges are disallowed', () => {
     const role = createRole([
       {
         spaces: ['foo'],
@@ -748,7 +749,7 @@ describe('FeatureTable', () => {
         subFeaturePrivileges: [],
       },
       with_sub_features: {
-        primaryFeaturePrivilege: 'none',
+        primaryFeaturePrivilege: 'read',
         subFeaturePrivileges: [],
       },
     });

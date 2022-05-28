@@ -21,17 +21,30 @@ type MarkdownEditorFormProps = EuiMarkdownEditorProps & {
   bottomRightContent?: React.ReactNode;
   caseTitle?: string;
   caseTags?: string[];
+  disabledUiPlugins?: string[];
 };
 
 const BottomContentWrapper = styled(EuiFlexGroup)`
   ${({ theme }) => `
-    padding: ${theme.eui.ruleMargins.marginSmall} 0;
+    padding: ${theme.eui.euiSizeM} 0;
   `}
 `;
 
 export const MarkdownEditorForm = React.memo(
   forwardRef<MarkdownEditorRef, MarkdownEditorFormProps>(
-    ({ id, field, dataTestSubj, idAria, bottomRightContent, caseTitle, caseTags }, ref) => {
+    (
+      {
+        id,
+        field,
+        dataTestSubj,
+        idAria,
+        bottomRightContent,
+        caseTitle,
+        caseTags,
+        disabledUiPlugins,
+      },
+      ref
+    ) => {
       const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 
       const commentEditorContextValue = useMemo(
@@ -62,6 +75,7 @@ export const MarkdownEditorForm = React.memo(
               editorId={id}
               onChange={field.setValue}
               value={field.value}
+              disabledUiPlugins={disabledUiPlugins}
               data-test-subj={`${dataTestSubj}-markdown-editor`}
             />
           </EuiFormRow>
@@ -75,3 +89,5 @@ export const MarkdownEditorForm = React.memo(
     }
   )
 );
+
+MarkdownEditorForm.displayName = 'MarkdownEditorForm';

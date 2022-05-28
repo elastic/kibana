@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { expectFixtureEql } from './helper/expect_fixture_eql';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -17,9 +18,11 @@ export default function ({ getService }: FtrProviderContext) {
     const supertest = getService('supertest');
 
     it('returns the status for only the given monitor', async () => {
-      const apiResponse = await supertest.get(
-        `/api/uptime/monitor/status?monitorId=${monitorId}&dateStart=${dateStart}&dateEnd=${dateEnd}`
-      );
+      const apiResponse = await supertest.get(API_URLS.MONITOR_STATUS).query({
+        monitorId,
+        dateStart,
+        dateEnd,
+      });
       expectFixtureEql(apiResponse.body, 'monitor_latest_status');
     });
   });

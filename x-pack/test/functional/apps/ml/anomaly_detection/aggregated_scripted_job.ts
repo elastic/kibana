@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { Datafeed, Job } from '../../../../../plugins/ml/common/types/anomaly_detection_jobs';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -16,7 +16,6 @@ export default function ({ getService }: FtrProviderContext) {
   const supportedTestSuites = [
     {
       suiteTitle: 'supported job with aggregation field',
-      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_supported_aggs_${ts}`,
         job_type: 'anomaly_detector',
@@ -103,7 +102,6 @@ export default function ({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'supported job with scripted field',
-      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_supported_script_${ts}`,
         job_type: 'anomaly_detector',
@@ -178,7 +176,6 @@ export default function ({ getService }: FtrProviderContext) {
   const unsupportedTestSuites = [
     {
       suiteTitle: 'unsupported job with bucket_script aggregation field',
-      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_unsupported_aggs_${ts}`,
         job_type: 'anomaly_detector',
@@ -283,7 +280,6 @@ export default function ({ getService }: FtrProviderContext) {
     },
     {
       suiteTitle: 'unsupported job with partition by of a scripted field',
-      // @ts-expect-error not convertable to Job type
       jobConfig: {
         job_id: `fq_unsupported_script_${ts}`,
         job_type: 'anomaly_detector',
@@ -364,7 +360,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('aggregated or scripted job', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
@@ -376,6 +372,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
     for (const testData of supportedTestSuites) {
       describe(testData.suiteTitle, function () {
@@ -394,7 +392,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'check that the single metric viewer button is enabled'
           );
-          await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
 
           await ml.jobTable.assertJobActionSingleMetricViewerButtonEnabled(
@@ -440,7 +437,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep(
             'check that the single metric viewer button is disabled'
           );
-          await ml.jobTable.waitForJobsToLoad();
           await ml.jobTable.filterWithSearchString(testData.jobConfig.job_id, 1);
 
           await ml.jobTable.assertJobActionSingleMetricViewerButtonEnabled(
@@ -468,10 +464,10 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToSingleMetricViewerViaAnomalyExplorer();
 
           await ml.testExecution.logTestStep(
-            'should show warning message and redirect single metric viewer to another job'
+            'should show warning message and ask to select another job'
           );
           await ml.singleMetricViewer.assertDisabledJobReasonWarningToastExist();
-          await ml.jobSelection.assertJobSelectionNotContains(testData.jobConfig.job_id);
+          await ml.jobSelection.assertJobSelectionFlyoutOpen();
         });
       });
     }

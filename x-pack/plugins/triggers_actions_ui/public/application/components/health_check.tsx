@@ -8,19 +8,19 @@
 import React from 'react';
 import { Option, none, some, fold } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { DocLinksStart } from 'kibana/public';
+import { DocLinksStart } from '@kbn/core/public';
 import './health_check.scss';
 import { useHealthContext } from '../context/health_context';
 import { useKibana } from '../../common/lib/kibana';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
 import { triggersActionsUiHealth } from '../../common/lib/health_api';
-import { alertingFrameworkHealth } from '../lib/alert_api';
+import { alertingFrameworkHealth } from '../lib/rule_api';
 
 interface Props {
   inFlyout?: boolean;
@@ -28,7 +28,7 @@ interface Props {
 }
 
 interface HealthStatus {
-  isAlertsAvailable: boolean;
+  isRulesAvailable: boolean;
   isSufficientlySecure: boolean;
   hasPermanentEncryptionKey: boolean;
 }
@@ -51,7 +51,7 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
         isSufficientlySecure: false,
         hasPermanentEncryptionKey: false,
       };
-      if (healthStatus.isAlertsAvailable) {
+      if (healthStatus.isRulesAvailable) {
         const alertingHealthResult = await alertingFrameworkHealth({ http });
         healthStatus.isSufficientlySecure = alertingHealthResult.isSufficientlySecure;
         healthStatus.hasPermanentEncryptionKey = alertingHealthResult.hasPermanentEncryptionKey;
@@ -79,7 +79,7 @@ export const HealthCheck: React.FunctionComponent<Props> = ({
       (healthCheck) => {
         return healthCheck?.isSufficientlySecure && healthCheck?.hasPermanentEncryptionKey ? (
           <>{children}</>
-        ) : !healthCheck.isAlertsAvailable ? (
+        ) : !healthCheck.isRulesAvailable ? (
           <AlertsError docLinks={docLinks} className={className} />
         ) : !healthCheck.isSufficientlySecure && !healthCheck.hasPermanentEncryptionKey ? (
           <ApiKeysAndEncryptionError docLinks={docLinks} className={className} />

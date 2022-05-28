@@ -10,6 +10,9 @@ All the arguments to expression functions need to be serializable, as well as in
 Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
 make it possible to serialize the whole chain as well as output at every step of execution.
 
+It is possible to add comments to expressions by starting them with a `//` sequence
+or by using `/*` and `*/` to enclose multi-line comments.
+
 Expressions power visualizations in Dashboard and Lens, as well as, every
 *element* in Canvas is backed by an expression.
 
@@ -30,7 +33,8 @@ filters
   query="SELECT COUNT(timestamp) as total_errors
     FROM kibana_sample_data_logs
     WHERE tags LIKE '%warning%' OR tags LIKE '%error%'"
-| math "total_errors"
+| math "total_errors" // take "total_errors" column
+/* Represent as a number over a label */
 | metric "TOTAL ISSUES"
   metricFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=48 align="left" color="#FFFFFF" weight="normal" underline=false italic=false}
   labelFont={font family="'Open Sans', Helvetica, Arial, sans-serif" size=30 align="left" color="#FFFFFF" weight="lighter" underline=false italic=false}
@@ -43,12 +47,12 @@ image::https://user-images.githubusercontent.com/9773803/74162514-3250a880-4c21-
 === API documentation
 
 ==== Server API
-https://github.com/elastic/kibana/blob/master/docs/development/plugins/expressions/server/kibana-plugin-plugins-expressions-server.expressionsserversetup.md[Server Setup contract]
-https://github.com/elastic/kibana/blob/master/docs/development/plugins/expressions/server/kibana-plugin-plugins-expressions-server.expressionsserverstart.md[Server Start contract]
+https://github.com/elastic/kibana/blob/main/docs/development/plugins/expressions/server/kibana-plugin-plugins-expressions-server.expressionsserversetup.md[Server Setup contract]
+https://github.com/elastic/kibana/blob/main/docs/development/plugins/expressions/server/kibana-plugin-plugins-expressions-server.expressionsserverstart.md[Server Start contract]
 
 ==== Browser API
-https://github.com/elastic/kibana/blob/master/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.expressionsservicesetup.md[Browser Setup contract]
-https://github.com/elastic/kibana/blob/master/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.expressionsstart.md[Browser Start contract]
+https://github.com/elastic/kibana/blob/main/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.expressionsservicesetup.md[Browser Setup contract]
+https://github.com/elastic/kibana/blob/main/docs/development/plugins/expressions/public/kibana-plugin-plugins-expressions-public.expressionsstart.md[Browser Start contract]
 
 
 ==== Other documentation

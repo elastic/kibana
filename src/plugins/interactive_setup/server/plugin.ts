@@ -10,7 +10,13 @@ import chalk from 'chalk';
 import type { Subscription } from 'rxjs';
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { CorePreboot, Logger, PluginInitializerContext, PrebootPlugin } from 'src/core/server';
+import type {
+  CorePreboot,
+  Logger,
+  PluginInitializerContext,
+  PrebootPlugin,
+} from '@kbn/core/server';
+import { getDataPath } from '@kbn/utils';
 
 import { ElasticsearchConnectionStatus } from '../common';
 import type { ConfigSchema, ConfigType } from './config';
@@ -45,7 +51,8 @@ export class InteractiveSetupPlugin implements PrebootPlugin {
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.#logger = this.initializerContext.logger.get();
     this.#elasticsearch = new ElasticsearchService(
-      this.initializerContext.logger.get('elasticsearch')
+      this.initializerContext.logger.get('elasticsearch'),
+      initializerContext.env.packageInfo.version
     );
     this.#verification = new VerificationService(
       this.initializerContext.logger.get('verification')
@@ -146,7 +153,11 @@ Go to ${chalk.cyanBright.underline(url)} to get started.
         basePath: core.http.basePath,
         logger: this.#logger.get('routes'),
         preboot: { ...core.preboot, completeSetup },
-        kibanaConfigWriter: new KibanaConfigWriter(configPath, this.#logger.get('kibana-config')),
+        kibanaConfigWriter: new KibanaConfigWriter(
+          configPath,
+          getDataPath(),
+          this.#logger.get('kibana-config')
+        ),
         elasticsearch,
         verificationCode,
         getConfig: this.#getConfig.bind(this),

@@ -10,15 +10,15 @@ import { Router } from 'react-router-dom';
 import { render } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 
-import { I18nProvider } from '@kbn/i18n/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
-import { AnomalyResultsViewSelector } from './index';
+import { AnomalyResultsViewSelector } from '.';
 
 jest.mock('../../contexts/kibana', () => {
   return {
     useMlLocator: () =>
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../../../../../../../src/plugins/share/public/mocks').sharePluginMock.createLocator(),
+      require('@kbn/share-plugin/public/mocks').sharePluginMock.createLocator(),
     useNavigateToPath: () => jest.fn(),
   };
 });

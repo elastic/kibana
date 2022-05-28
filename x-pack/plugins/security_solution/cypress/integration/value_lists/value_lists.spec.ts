@@ -6,15 +6,10 @@
  */
 
 import { ROLES } from '../../../common/test';
-import { deleteRoleAndUser, loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
-import { ALERTS_URL } from '../../urls/navigation';
+import { deleteRoleAndUser, login, visitWithoutDateRange } from '../../tasks/login';
+import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 import {
-  waitForAlertsPanelToBeLoaded,
-  waitForAlertsIndexToBeCreated,
-  goToManageAlertsDetectionRules,
-} from '../../tasks/alerts';
-import {
-  waitForListsIndexToBeCreated,
+  createListsIndex,
   waitForValueListsModalToBeLoaded,
   openValueListsModal,
   selectValueListsFile,
@@ -25,6 +20,7 @@ import {
   importValueList,
   deleteValueListsFile,
   exportValueList,
+  waitForListsIndex,
 } from '../../tasks/lists';
 import {
   VALUE_LISTS_TABLE,
@@ -34,12 +30,13 @@ import {
 
 describe('value lists', () => {
   describe('management modal', () => {
+    before(() => {
+      login();
+    });
     beforeEach(() => {
-      loginAndWaitForPageWithoutDateRange(ALERTS_URL);
-      waitForAlertsPanelToBeLoaded();
-      waitForAlertsIndexToBeCreated();
-      waitForListsIndexToBeCreated();
-      goToManageAlertsDetectionRules();
+      createListsIndex();
+      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      waitForListsIndex();
       waitForValueListsModalToBeLoaded();
     });
 
@@ -227,12 +224,12 @@ describe('value lists', () => {
   });
 
   describe('user with restricted access role', () => {
-    beforeEach(() => {
-      loginAndWaitForPageWithoutDateRange(ALERTS_URL, ROLES.t1_analyst);
-      goToManageAlertsDetectionRules();
+    before(() => {
+      login(ROLES.t1_analyst);
+      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL, ROLES.t1_analyst);
     });
 
-    afterEach(() => {
+    after(() => {
       deleteRoleAndUser(ROLES.t1_analyst);
     });
 

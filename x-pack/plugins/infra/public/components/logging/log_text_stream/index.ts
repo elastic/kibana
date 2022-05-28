@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-export {
-  LogEntryColumn,
-  LogEntryColumnWidths,
-  useColumnWidths,
-  iconColumnId,
-} from './log_entry_column';
+export type { LogEntryColumnWidths } from './log_entry_column';
+export { LogEntryColumn, useColumnWidths, iconColumnId } from './log_entry_column';
 export { LogEntryFieldColumn } from './log_entry_field_column';
 export { LogEntryMessageColumn } from './log_entry_message_column';
 export { LogEntryRowWrapper } from './log_entry_row';

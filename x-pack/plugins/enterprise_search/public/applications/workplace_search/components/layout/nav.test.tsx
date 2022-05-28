@@ -18,7 +18,7 @@ jest.mock('../../views/settings/components/settings_sub_nav', () => ({
   useSettingsSubNav: () => [],
 }));
 
-import { useWorkplaceSearchNav } from './';
+import { useWorkplaceSearchNav } from '.';
 
 describe('useWorkplaceSearchNav', () => {
   it('returns an array of top-level Workplace Search nav items', () => {
@@ -48,6 +48,11 @@ describe('useWorkplaceSearchNav', () => {
             id: 'usersRoles',
             name: 'Users and roles',
             href: '/users_and_roles',
+          },
+          {
+            id: 'apiKeys',
+            name: 'API keys',
+            href: '/api_keys',
           },
           {
             id: 'security',

@@ -9,13 +9,13 @@ import ReactDOM from 'react-dom';
 import { Redirect, Route } from 'react-router-dom';
 import type { RouteProps } from 'react-router-dom';
 
-import type { CoreStart, AppMountParameters } from 'src/core/public';
+import type { CoreStart, AppMountParameters } from '@kbn/core/public';
 
 import type { FleetConfigType, FleetStartServices } from '../../plugin';
 import { licenseService } from '../../hooks';
 import type { UIExtensionsStorage } from '../../types';
 
-import { AppRoutes, IntegrationsAppContext, WithPermissionsAndSetup } from './app';
+import { AppRoutes, IntegrationsAppContext } from './app';
 
 export interface ProtectedRouteProps extends RouteProps {
   isAllowed?: boolean;
@@ -38,6 +38,7 @@ interface IntegrationsAppProps {
   kibanaVersion: string;
   extensions: UIExtensionsStorage;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
+  theme$: AppMountParameters['theme$'];
 }
 const IntegrationsApp = ({
   basepath,
@@ -47,6 +48,7 @@ const IntegrationsApp = ({
   kibanaVersion,
   extensions,
   setHeaderActionMenu,
+  theme$,
 }: IntegrationsAppProps) => {
   return (
     <IntegrationsAppContext
@@ -57,17 +59,16 @@ const IntegrationsApp = ({
       kibanaVersion={kibanaVersion}
       extensions={extensions}
       setHeaderActionMenu={setHeaderActionMenu}
+      theme$={theme$}
     >
-      <WithPermissionsAndSetup>
-        <AppRoutes />
-      </WithPermissionsAndSetup>
+      <AppRoutes />
     </IntegrationsAppContext>
   );
 };
 
 export function renderApp(
   startServices: FleetStartServices,
-  { element, appBasePath, history, setHeaderActionMenu }: AppMountParameters,
+  { element, appBasePath, history, setHeaderActionMenu, theme$ }: AppMountParameters,
   config: FleetConfigType,
   kibanaVersion: string,
   extensions: UIExtensionsStorage,
@@ -83,6 +84,7 @@ export function renderApp(
         kibanaVersion={kibanaVersion}
         extensions={extensions}
         setHeaderActionMenu={setHeaderActionMenu}
+        theme$={theme$}
       />
     </UsageTracker>,
     element

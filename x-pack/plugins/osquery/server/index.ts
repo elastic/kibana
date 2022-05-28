@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginConfigDescriptor, PluginInitializerContext } from '../../../../src/core/server';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { OsqueryPlugin } from './plugin';
 import { ConfigSchema, ConfigType } from './config';
 
@@ -21,4 +21,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
   return new OsqueryPlugin(initializerContext);
 }
 
-export { OsqueryPluginSetup, OsqueryPluginStart } from './types';
+export type { OsqueryPluginSetup, OsqueryPluginStart } from './types';

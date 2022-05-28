@@ -18,7 +18,7 @@ INSTALLED_APPS = (
 # ...
 )
 
-ELASTIC_APM = {curlyOpen}
+ELASTIC_APM = {
 # ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.setRequiredServiceNameComment',
   {
@@ -31,7 +31,7 @@ ELASTIC_APM = {curlyOpen}
     defaultMessage: 'a-z, A-Z, 0-9, -, _, and space',
   }
 )}
-'SERVICE_NAME': '',
+#'SERVICE_NAME': 'unknown-python-service',
 
 # ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.useIfApmServerRequiresTokenComment',
@@ -58,7 +58,7 @@ ELASTIC_APM = {curlyOpen}
   }
 )}
 'ENVIRONMENT': 'production',
-{curlyClose}
+}
 
 # ${i18n.translate(
   'xpack.apm.tutorial.djangoClient.configure.commands.addTracingMiddlewareComment',

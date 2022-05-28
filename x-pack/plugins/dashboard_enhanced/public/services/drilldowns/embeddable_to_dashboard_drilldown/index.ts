@@ -6,7 +6,5 @@
  */
 
 export { EMBEDDABLE_TO_DASHBOARD_DRILLDOWN } from './constants';
-export {
-  EmbeddableToDashboardDrilldown,
-  Params as EmbeddableToDashboardDrilldownParams,
-} from './embeddable_to_dashboard_drilldown';
+export type { Params as EmbeddableToDashboardDrilldownParams } from './embeddable_to_dashboard_drilldown';
+export { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';

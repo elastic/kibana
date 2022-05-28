@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { getIndexPatternLoad } from './expressions';
 import {
   DataViewsPublicPluginSetup,
@@ -16,12 +16,16 @@ import {
 } from './types';
 
 import {
-  DataViewsService,
   onRedirectNoIndexPattern,
   DataViewsApiClient,
   UiSettingsPublicToCommon,
   SavedObjectsClientPublicToCommon,
 } from '.';
+
+import { DataViewsServicePublic } from './data_views_service_public';
+import { HasData } from './services';
+
+import { debounceByKey } from './debounce_by_key';
 
 export class DataViewsPublicPlugin
   implements
@@ -32,6 +36,8 @@ export class DataViewsPublicPlugin
       DataViewsPublicStartDependencies
     >
 {
+  private readonly hasData = new HasData();
+
   public setup(
     core: CoreSetup<DataViewsPublicStartDependencies, DataViewsPublicPluginStart>,
     { expressions }: DataViewsPublicSetupDependencies
@@ -45,22 +51,37 @@ export class DataViewsPublicPlugin
     core: CoreStart,
     { fieldFormats }: DataViewsPublicStartDependencies
   ): DataViewsPublicPluginStart {
-    const { uiSettings, http, notifications, savedObjects, overlays, application } = core;
+    const { uiSettings, http, notifications, savedObjects, theme, overlays, application } = core;
 
-    return new DataViewsService({
+    const onNotifDebounced = debounceByKey(
+      notifications.toasts.add.bind(notifications.toasts),
+      10000
+    );
+    const onErrorDebounced = debounceByKey(
+      notifications.toasts.addError.bind(notifications.toasts),
+      10000
+    );
+
+    return new DataViewsServicePublic({
+      hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new SavedObjectsClientPublicToCommon(savedObjects.client),
       apiClient: new DataViewsApiClient(http),
       fieldFormats,
-      onNotification: (toastInputFields) => {
-        notifications.toasts.add(toastInputFields);
+      onNotification: (toastInputFields, key) => {
+        onNotifDebounced(key)(toastInputFields);
       },
-      onError: notifications.toasts.addError.bind(notifications.toasts),
+      onError: (error, toastInputFields, key) => {
+        onErrorDebounced(key)(error, toastInputFields);
+      },
       onRedirectNoIndexPattern: onRedirectNoIndexPattern(
         application.capabilities,
         application.navigateToApp,
-        overlays
+        overlays,
+        theme
       ),
+      getCanSave: () => Promise.resolve(application.capabilities.indexPatterns.save === true),
+      getCanSaveSync: () => application.capabilities.indexPatterns.save === true,
     });
   }
 

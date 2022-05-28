@@ -6,24 +6,32 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger, KibanaRequest } from 'src/core/server';
+import { Logger, KibanaRequest } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
-import { validateParams, validateConfig, validateSecrets } from './validate_with_schema';
+import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import {
+  validateParams,
+  validateConfig,
+  validateSecrets,
+  validateConnector,
+} from './validate_with_schema';
+import {
+  ActionType,
   ActionTypeExecutorResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
-  RawAction,
   PreConfiguredAction,
+  RawAction,
 } from '../types';
-import { EncryptedSavedObjectsClient } from '../../../encrypted_saved_objects/server';
-import { SpacesServiceStart } from '../../../spaces/server';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { IEvent, IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '../../../event_log/server';
 import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
+import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
+import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -54,6 +62,8 @@ export interface ExecuteOptions<Source = unknown> {
   params: Record<string, unknown>;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
+  executionId?: string;
+  consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
 }
 
@@ -63,6 +73,8 @@ export class ActionExecutor {
   private isInitialized = false;
   private actionExecutorContext?: ActionExecutorContext;
   private readonly isESOCanEncrypt: boolean;
+
+  private actionInfo: ActionInfo | undefined;
 
   constructor({ isESOCanEncrypt }: { isESOCanEncrypt: boolean }) {
     this.isESOCanEncrypt = isESOCanEncrypt;
@@ -83,6 +95,8 @@ export class ActionExecutor {
     source,
     isEphemeral,
     taskInfo,
+    executionId,
+    consumer,
     relatedSavedObjects,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
@@ -100,7 +114,7 @@ export class ActionExecutor {
         name: `execute_action`,
         type: 'actions',
         labels: {
-          actionId,
+          actions_connector_id: actionId,
         },
       },
       async (span) => {
@@ -119,7 +133,7 @@ export class ActionExecutor {
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
-        const { actionTypeId, name, config, secrets } = await getActionInfo(
+        const actionInfo = await getActionInfoInternal(
           await getActionsClientWithRequest(request, source),
           encryptedSavedObjectsClient,
           preconfiguredActions,
@@ -127,10 +141,16 @@ export class ActionExecutor {
           namespace.namespace
         );
 
+        const { actionTypeId, name, config, secrets } = actionInfo;
+
+        if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
+          this.actionInfo = actionInfo;
+        }
+
         if (span) {
           span.name = `execute_action ${actionTypeId}`;
           span.addLabels({
-            actionTypeId,
+            actions_connector_type_id: actionTypeId,
           });
         }
 
@@ -139,19 +159,6 @@ export class ActionExecutor {
         }
         const actionType = actionTypeRegistry.get(actionTypeId);
 
-        let validatedParams: Record<string, unknown>;
-        let validatedConfig: Record<string, unknown>;
-        let validatedSecrets: Record<string, unknown>;
-
-        try {
-          validatedParams = validateParams(actionType, params);
-          validatedConfig = validateConfig(actionType, config);
-          validatedSecrets = validateSecrets(actionType, secrets);
-        } catch (err) {
-          span?.setOutcome('failure');
-          return { status: 'error', actionId, message: err.message, retry: false };
-        }
-
         const actionLabel = `${actionTypeId}:${actionId}: ${name}`;
         logger.debug(`executing action ${actionLabel}`);
 
@@ -159,36 +166,29 @@ export class ActionExecutor {
           ? {
               task: {
                 scheduled: taskInfo.scheduled.toISOString(),
-                schedule_delay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
+                scheduleDelay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
               },
             }
           : {};
 
-        const event: IEvent = {
-          event: { action: EVENT_LOG_ACTIONS.execute },
-          kibana: {
-            ...task,
-            saved_objects: [
-              {
-                rel: SAVED_OBJECT_REL_PRIMARY,
-                type: 'action',
-                id: actionId,
-                type_id: actionTypeId,
-                ...namespace,
-              },
-            ],
-          },
-        };
-
-        for (const relatedSavedObject of relatedSavedObjects || []) {
-          event.kibana?.saved_objects?.push({
-            rel: SAVED_OBJECT_REL_PRIMARY,
-            type: relatedSavedObject.type,
-            id: relatedSavedObject.id,
-            type_id: relatedSavedObject.typeId,
-            namespace: relatedSavedObject.namespace,
-          });
-        }
+        const event = createActionEventLogRecordObject({
+          actionId,
+          action: EVENT_LOG_ACTIONS.execute,
+          consumer,
+          ...namespace,
+          ...task,
+          executionId,
+          spaceId,
+          savedObjects: [
+            {
+              type: 'action',
+              id: actionId,
+              typeId: actionTypeId,
+              relation: SAVED_OBJECT_REL_PRIMARY,
+            },
+          ],
+          relatedSavedObjects,
+        });
 
         eventLogger.startTiming(event);
 
@@ -200,10 +200,19 @@ export class ActionExecutor {
           },
           message: `action started: ${actionLabel}`,
         });
+
         eventLogger.logEvent(startEvent);
 
         let rawResult: ActionTypeExecutorResult<unknown>;
         try {
+          const { validatedParams, validatedConfig, validatedSecrets } = validateAction({
+            actionId,
+            actionType,
+            params,
+            config,
+            secrets,
+          });
+
           rawResult = await actionType.executor({
             actionId,
             services,
@@ -214,14 +223,19 @@ export class ActionExecutor {
             taskInfo,
           });
         } catch (err) {
-          rawResult = {
-            actionId,
-            status: 'error',
-            message: 'an error occurred while running the action executor',
-            serviceMessage: err.message,
-            retry: false,
-          };
+          if (err.reason === ActionExecutionErrorReason.Validation) {
+            rawResult = err.result;
+          } else {
+            rawResult = {
+              actionId,
+              status: 'error',
+              message: 'an error occurred while running the action',
+              serviceMessage: err.message,
+              retry: false,
+            };
+          }
         }
+
         eventLogger.stopTiming(event);
 
         // allow null-ish return to indicate success
@@ -259,22 +273,76 @@ export class ActionExecutor {
       }
     );
   }
-}
 
-function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string {
-  let message = result.message || 'unknown error running action';
+  public async logCancellation<Source = unknown>({
+    actionId,
+    request,
+    relatedSavedObjects,
+    source,
+    executionId,
+    taskInfo,
+    consumer,
+  }: {
+    actionId: string;
+    request: KibanaRequest;
+    taskInfo?: TaskInfo;
+    executionId?: string;
+    relatedSavedObjects: RelatedSavedObjects;
+    source?: ActionExecutionSource<Source>;
+    consumer?: string;
+  }) {
+    const {
+      spaces,
+      encryptedSavedObjectsClient,
+      preconfiguredActions,
+      eventLogger,
+      getActionsClientWithRequest,
+    } = this.actionExecutorContext!;
 
-  if (result.serviceMessage) {
-    message = `${message}: ${result.serviceMessage}`;
+    const spaceId = spaces && spaces.getSpaceId(request);
+    const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+    if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
+      this.actionInfo = await getActionInfoInternal(
+        await getActionsClientWithRequest(request, source),
+        encryptedSavedObjectsClient,
+        preconfiguredActions,
+        actionId,
+        namespace.namespace
+      );
+    }
+    const task = taskInfo
+      ? {
+          task: {
+            scheduled: taskInfo.scheduled.toISOString(),
+            scheduleDelay: Millis2Nanos * (Date.now() - taskInfo.scheduled.getTime()),
+          },
+        }
+      : {};
+    // Write event log entry
+    const event = createActionEventLogRecordObject({
+      actionId,
+      consumer,
+      action: EVENT_LOG_ACTIONS.executeTimeout,
+      message: `action: ${this.actionInfo.actionTypeId}:${actionId}: '${
+        this.actionInfo.name ?? ''
+      }' execution cancelled due to timeout - exceeded default timeout of "5m"`,
+      ...namespace,
+      ...task,
+      executionId,
+      spaceId,
+      savedObjects: [
+        {
+          type: 'action',
+          id: actionId,
+          typeId: this.actionInfo.actionTypeId,
+          relation: SAVED_OBJECT_REL_PRIMARY,
+        },
+      ],
+      relatedSavedObjects,
+    });
+
+    eventLogger.logEvent(event);
   }
-
-  if (result.retry instanceof Date) {
-    message = `${message}; retry at ${result.retry.toISOString()}`;
-  } else if (result.retry) {
-    message = `${message}; retry: ${JSON.stringify(result.retry)}`;
-  }
-
-  return message;
 }
 
 interface ActionInfo {
@@ -282,9 +350,10 @@ interface ActionInfo {
   name: string;
   config: unknown;
   secrets: unknown;
+  actionId: string;
 }
 
-async function getActionInfo(
+async function getActionInfoInternal(
   actionsClient: PublicMethodsOf<ActionsClient>,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
@@ -301,6 +370,7 @@ async function getActionInfo(
       name: pcAction.name,
       config: pcAction.config,
       secrets: pcAction.secrets,
+      actionId,
     };
   }
 
@@ -319,5 +389,57 @@ async function getActionInfo(
     name,
     config,
     secrets,
+    actionId,
   };
+}
+
+function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string {
+  let message = result.message || 'unknown error running action';
+
+  if (result.serviceMessage) {
+    message = `${message}: ${result.serviceMessage}`;
+  }
+
+  if (result.retry instanceof Date) {
+    message = `${message}; retry at ${result.retry.toISOString()}`;
+  } else if (result.retry) {
+    message = `${message}; retry: ${JSON.stringify(result.retry)}`;
+  }
+
+  return message;
+}
+
+interface ValidateActionOpts {
+  actionId: string;
+  actionType: ActionType;
+  params: Record<string, unknown>;
+  config: unknown;
+  secrets: unknown;
+}
+
+function validateAction({ actionId, actionType, params, config, secrets }: ValidateActionOpts) {
+  let validatedParams: Record<string, unknown>;
+  let validatedConfig: Record<string, unknown>;
+  let validatedSecrets: Record<string, unknown>;
+
+  try {
+    validatedParams = validateParams(actionType, params);
+    validatedConfig = validateConfig(actionType, config);
+    validatedSecrets = validateSecrets(actionType, secrets);
+    if (actionType.validate?.connector) {
+      validateConnector(actionType, {
+        config,
+        secrets,
+      });
+    }
+
+    return { validatedParams, validatedConfig, validatedSecrets };
+  } catch (err) {
+    throw new ActionExecutionError(err.message, ActionExecutionErrorReason.Validation, {
+      actionId,
+      status: 'error',
+      message: err.message,
+      retry: false,
+    });
+  }
 }

@@ -8,7 +8,7 @@
 import React, { FC, useMemo } from 'react';
 import { EuiSpacer, EuiText, htmlIdGenerator } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,
@@ -16,8 +16,8 @@ import {
   STYLE_TYPE,
   COLOR_MAP_TYPE,
   VectorLayerDescriptor,
-} from '../../../../../../../../maps/common';
-import { EMSTermJoinConfig } from '../../../../../../../../maps/public';
+} from '@kbn/maps-plugin/common';
+import { EMSTermJoinConfig } from '@kbn/maps-plugin/public';
 import { EmbeddedMapComponent } from '../../../embedded_map';
 import { FieldVisStats } from '../../../../../../../common/types';
 import { ExpandedRowPanel } from './expanded_row_panel';
@@ -87,7 +87,7 @@ export const getChoroplethTopValuesLayer = (
       },
       isTimeAware: true,
     },
-    type: LAYER_TYPE.VECTOR,
+    type: LAYER_TYPE.GEOJSON_VECTOR,
   };
 };
 

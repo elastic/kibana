@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import {
-  CasePostRequest,
-  CaseType,
-  ConnectorTypes,
-  SECURITY_SOLUTION_OWNER,
-} from '../../../common';
+import { CasePostRequest, CaseSeverity, ConnectorTypes } from '../../../common/api';
+import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { choices } from '../connectors/mock';
 
 export const sampleTags = ['coke', 'pepsi'];
 export const sampleData: CasePostRequest = {
   description: 'what a great description',
   tags: sampleTags,
+  severity: CaseSeverity.LOW,
   title: 'what a cool title',
-  type: CaseType.individual,
   connector: {
     fields: null,
     id: 'none',

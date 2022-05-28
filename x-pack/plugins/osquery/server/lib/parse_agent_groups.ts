@@ -6,8 +6,8 @@
  */
 
 import { uniq } from 'lodash';
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '../../../fleet/common';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import { OsqueryAppContext } from './osquery_app_context_services';
 
@@ -30,11 +30,11 @@ const aggregateResults = async (
     const { results: additionalResults } = await generator(currPage++, PER_PAGE);
     results.push(...additionalResults);
   }
+
   return uniq<string>(results);
 };
 
 export const parseAgentSelection = async (
-  esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   context: OsqueryAppContext,
   agentSelection: AgentSelection
@@ -42,7 +42,7 @@ export const parseAgentSelection = async (
   const selectedAgents: Set<string> = new Set();
   const addAgent = selectedAgents.add.bind(selectedAgents);
   const { allAgentsSelected, platformsSelected, policiesSelected, agents } = agentSelection;
-  const agentService = context.service.getAgentService();
+  const agentService = context.service.getAgentService()?.asInternalUser;
   const packagePolicyService = context.service.getPackagePolicyService();
   const kueryFragments = [];
 
@@ -53,18 +53,20 @@ export const parseAgentSelection = async (
         perPage,
         page,
       });
+
       return { results: items.map((it) => it.policy_id), total };
     });
     kueryFragments.push(`policy_id:(${uniq(osqueryPolicies).join(' or ')})`);
     if (allAgentsSelected) {
       const kuery = kueryFragments.join(' and ');
       const fetchedAgents = await aggregateResults(async (page, perPage) => {
-        const res = await agentService.listAgents(esClient, {
+        const res = await agentService.listAgents({
           perPage,
           page,
           kuery,
           showInactive: false,
         });
+
         return { results: res.agents.map((agent) => agent.id), total: res.total };
       });
       fetchedAgents.forEach(addAgent);
@@ -74,18 +76,21 @@ export const parseAgentSelection = async (
         if (platformsSelected.length) {
           groupFragments.push(`local_metadata.os.platform:(${platformsSelected.join(' or ')})`);
         }
+
         if (policiesSelected.length) {
           groupFragments.push(`policy_id:(${policiesSelected.join(' or ')})`);
         }
+
         kueryFragments.push(`(${groupFragments.join(' or ')})`);
         const kuery = kueryFragments.join(' and ');
         const fetchedAgents = await aggregateResults(async (page, perPage) => {
-          const res = await agentService.listAgents(esClient, {
+          const res = await agentService.listAgents({
             perPage,
             page,
             kuery,
             showInactive: false,
           });
+
           return { results: res.agents.map((agent) => agent.id), total: res.total };
         });
         fetchedAgents.forEach(addAgent);

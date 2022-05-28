@@ -28,11 +28,15 @@ export enum CONSTANTS {
 export type UrlStateType =
   | 'administration'
   | 'alerts'
-  | 'case'
+  | 'cases'
+  | 'detection_response'
   | 'exceptions'
+  | 'get_started'
   | 'host'
+  | 'users'
   | 'network'
   | 'overview'
   | 'rules'
   | 'timeline'
-  | 'ueba';
+  | 'explore'
+  | 'dashboards';

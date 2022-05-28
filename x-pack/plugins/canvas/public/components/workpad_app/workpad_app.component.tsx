@@ -7,8 +7,8 @@
 
 import React, { FC, MouseEventHandler, useRef, useCallback } from 'react';
 import PropTypes from 'prop-types';
-import { Sidebar } from '../../components/sidebar';
-import { Toolbar } from '../../components/toolbar';
+import { Sidebar } from '../sidebar';
+import { Toolbar } from '../toolbar';
 import { Workpad } from '../workpad';
 import { WorkpadHeader } from '../workpad_header';
 import { CANVAS_LAYOUT_STAGE_CONTENT_SELECTOR } from '../../../common/lib/constants';
@@ -16,7 +16,7 @@ import { CommitFn } from '../../../types';
 
 export const WORKPAD_CONTAINER_ID = 'canvasWorkpadContainer';
 
-interface Props {
+export interface Props {
   deselectElement?: MouseEventHandler;
   isWriteable: boolean;
 }

@@ -7,20 +7,23 @@
 
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
-import { Query } from 'src/plugins/data/public';
+import { Query } from '@kbn/data-plugin/public';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
 import {
   createLayerInstance,
   getEditState,
   getLayerById,
+  getLayerDescriptor,
   getLayerList,
   getLayerListRaw,
   getMapColors,
   getMapReady,
+  getMapSettings,
   getSelectedLayerId,
 } from '../selectors/map_selectors';
 import { FLYOUT_STATE } from '../reducers/ui';
-import { cancelRequest } from '../reducers/non_serializable_instances';
+import { cancelRequest, getInspectorAdapters } from '../reducers/non_serializable_instances';
 import { setDrawMode, updateFlyout } from './ui_actions';
 import {
   ADD_LAYER,
@@ -35,27 +38,36 @@ import {
   SET_SELECTED_LAYER,
   SET_WAITING_FOR_READY_HIDDEN_LAYERS,
   TRACK_CURRENT_LAYER_STATE,
+  UPDATE_LAYER,
   UPDATE_LAYER_ORDER,
   UPDATE_LAYER_PROP,
   UPDATE_LAYER_STYLE,
   UPDATE_SOURCE_PROP,
 } from './map_action_constants';
-import { clearDataRequests, syncDataForLayerId, updateStyleMeta } from './data_request_actions';
-import { cleanTooltipStateForLayer } from './tooltip_actions';
+import {
+  autoFitToBounds,
+  clearDataRequests,
+  syncDataForLayerId,
+  updateStyleMeta,
+} from './data_request_actions';
+import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   Attribution,
   JoinDescriptor,
   LayerDescriptor,
   StyleDescriptor,
   TileMetaFeature,
+  VectorLayerDescriptor,
 } from '../../common/descriptor_types';
 import { ILayer } from '../classes/layers/layer';
 import { IVectorLayer } from '../classes/layers/vector_layer';
-import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE } from '../../common/constants';
+import { OnSourceChangeArgs } from '../classes/sources/source';
+import { DRAW_MODE, LAYER_STYLE_TYPE, LAYER_TYPE, SCALING_TYPES } from '../../common/constants';
 import { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import { IESAggField } from '../classes/fields/agg';
 import { IField } from '../classes/fields/field';
+import type { IESSource } from '../classes/sources/es_source';
 import { getDrawMode } from '../selectors/ui_selectors';
 
 export function trackCurrentLayerState(layerId: string) {
@@ -116,6 +128,22 @@ export function replaceLayerList(newLayerList: LayerDescriptor[]) {
   };
 }
 
+export function updateLayerById(layerDescriptor: LayerDescriptor) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    dispatch({
+      type: UPDATE_LAYER,
+      layer: layerDescriptor,
+    });
+    await dispatch(syncDataForLayerId(layerDescriptor.id, false));
+    if (getMapSettings(getState()).autoFitToDataBounds) {
+      dispatch(autoFitToBounds());
+    }
+  };
+}
+
 export function cloneLayer(layerId: string) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
@@ -150,8 +178,7 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
       layer: layerDescriptor,
     });
     dispatch(syncDataForLayerId(layerDescriptor.id, false));
-
-    const layer = createLayerInstance(layerDescriptor);
+    const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get licensed features
     const features = await layer.getLicensedFeatures();
     features.forEach(notifyLicensedFeatureUsage);
   };
@@ -217,7 +244,7 @@ export function setLayerVisibility(layerId: string, makeVisible: boolean) {
     }
 
     if (!makeVisible) {
-      dispatch(cleanTooltipStateForLayer(layerId));
+      dispatch(updateTooltipStateForLayer(layer));
     }
 
     dispatch({
@@ -323,14 +350,73 @@ function updateMetricsProp(layerId: string, value: unknown) {
   ) => {
     const layer = getLayerById(layerId, getState());
     const previousFields = await (layer as IVectorLayer).getFields();
-    await dispatch({
+    dispatch({
       type: UPDATE_SOURCE_PROP,
       layerId,
       propName: 'metrics',
       value,
     });
     await dispatch(updateStyleProperties(layerId, previousFields as IESAggField[]));
-    dispatch(syncDataForLayerId(layerId, false));
+  };
+}
+
+function updateSourcePropWithoutSync(
+  layerId: string,
+  propName: string,
+  value: unknown,
+  newLayerType?: LAYER_TYPE
+) {
+  return async (
+    dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
+    getState: () => MapStoreState
+  ) => {
+    if (propName === 'metrics') {
+      if (newLayerType) {
+        throw new Error('May not change layer-type when modifying metrics source-property');
+      }
+      return await dispatch(updateMetricsProp(layerId, value));
+    }
+
+    dispatch({
+      type: UPDATE_SOURCE_PROP,
+      layerId,
+      propName,
+      value,
+    });
+    if (newLayerType) {
+      dispatch(updateLayerType(layerId, newLayerType));
+    }
+
+    if (propName === 'scalingType') {
+      // get joins from layer descriptor instead of layer.getJoins()
+      // 1) IVectorLayer implementations may return empty array when descriptor has joins
+      // 2) getJoins returns instances and descriptors are needed.
+      const layerDescriptor = getLayerDescriptor(getState(), layerId) as VectorLayerDescriptor;
+      const joins = layerDescriptor.joins ? layerDescriptor.joins : [];
+      if (value === SCALING_TYPES.CLUSTERS && joins.length) {
+        // Blended scaling type does not support joins
+        // It is not possible to display join metrics when showing clusters
+        dispatch({
+          type: SET_JOINS,
+          layerId,
+          joins: [],
+        });
+        await dispatch(updateStyleProperties(layerId));
+      } else if (value === SCALING_TYPES.MVT) {
+        if (joins.length > 1) {
+          // Maplibre feature-state join uses promoteId and there is a limit to one promoteId
+          // Therefore, Vector tile scaling supports only one join
+          dispatch({
+            type: SET_JOINS,
+            layerId,
+            joins: [joins[0]],
+          });
+        }
+        // update style props regardless of updating joins
+        // Allow style to clean-up data driven style properties with join fields that do not support feature-state.
+        await dispatch(updateStyleProperties(layerId));
+      }
+    }
   };
 }
 
@@ -341,20 +427,17 @@ export function updateSourceProp(
   newLayerType?: LAYER_TYPE
 ) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
-    if (propName === 'metrics') {
-      if (newLayerType) {
-        throw new Error('May not change layer-type when modifying metrics source-property');
-      }
-      return await dispatch(updateMetricsProp(layerId, value));
-    }
-    dispatch({
-      type: UPDATE_SOURCE_PROP,
-      layerId,
-      propName,
-      value,
-    });
-    if (newLayerType) {
-      dispatch(updateLayerType(layerId, newLayerType));
+    await dispatch(updateSourcePropWithoutSync(layerId, propName, value, newLayerType));
+    dispatch(syncDataForLayerId(layerId, false));
+  };
+}
+
+export function updateSourceProps(layerId: string, sourcePropChanges: OnSourceChangeArgs[]) {
+  return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
+    // Using for loop to ensure update completes before starting next update
+    for (let i = 0; i < sourcePropChanges.length; i++) {
+      const { propName, value, newLayerType } = sourcePropChanges[i];
+      await dispatch(updateSourcePropWithoutSync(layerId, propName, value, newLayerType));
     }
     dispatch(syncDataForLayerId(layerId, false));
   };
@@ -370,6 +453,7 @@ function updateLayerType(layerId: string, newLayerType: string) {
       return;
     }
     dispatch(clearDataRequests(layer));
+    clearInspectorAdapters(layer, getInspectorAdapters(getState()));
     dispatch({
       type: UPDATE_LAYER_PROP,
       id: layerId,
@@ -385,6 +469,15 @@ export function updateLayerLabel(id: string, newLabel: string) {
     id,
     propName: 'label',
     newValue: newLabel,
+  };
+}
+
+export function updateLayerLocale(id: string, locale: string) {
+  return {
+    type: UPDATE_LAYER_PROP,
+    id,
+    propName: 'locale',
+    newValue: locale,
   };
 }
 
@@ -504,8 +597,8 @@ function removeLayerFromLayerList(layerId: string) {
     layerGettingRemoved.getInFlightRequestTokens().forEach((requestToken) => {
       dispatch(cancelRequest(requestToken));
     });
-    dispatch(cleanTooltipStateForLayer(layerId));
-    layerGettingRemoved.destroy();
+    dispatch(updateTooltipStateForLayer(layerGettingRemoved));
+    clearInspectorAdapters(layerGettingRemoved, getInspectorAdapters(getState()));
     dispatch({
       type: REMOVE_LAYER,
       id: layerId,
@@ -518,13 +611,13 @@ function removeLayerFromLayerList(layerId: string) {
   };
 }
 
-function updateStyleProperties(layerId: string, previousFields: IField[]) {
+function updateStyleProperties(layerId: string, previousFields?: IField[]) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
-    const targetLayer = getLayerById(layerId, getState());
-    if (!targetLayer || !('getFields' in targetLayer)) {
+    const targetLayer: ILayer | undefined = getLayerById(layerId, getState());
+    if (!targetLayer) {
       return;
     }
 
@@ -533,10 +626,14 @@ function updateStyleProperties(layerId: string, previousFields: IField[]) {
       return;
     }
 
+    if (!('getFields' in targetLayer)) {
+      return;
+    }
+
     const nextFields = await (targetLayer as IVectorLayer).getFields(); // take into account all fields, since labels can be driven by any field (source or join)
     const { hasChanges, nextStyleDescriptor } = await (
       style as IVectorStyle
-    ).getDescriptorWithUpdatedStyleProps(nextFields, previousFields, getMapColors(getState()));
+    ).getDescriptorWithUpdatedStyleProps(nextFields, getMapColors(getState()), previousFields);
     if (hasChanges && nextStyleDescriptor) {
       dispatch(updateLayerStyle(layerId, nextStyleDescriptor));
     }
@@ -578,9 +675,9 @@ export function updateLayerStyleForSelectedLayer(styleDescriptor: StyleDescripto
 export function setJoinsForLayer(layer: ILayer, joins: JoinDescriptor[]) {
   return async (dispatch: ThunkDispatch<MapStoreState, void, AnyAction>) => {
     const previousFields = await (layer as IVectorLayer).getFields();
-    await dispatch({
+    dispatch({
       type: SET_JOINS,
-      layer,
+      layerId: layer.getId(),
       joins,
     });
     await dispatch(updateStyleProperties(layer.getId(), previousFields));
@@ -632,4 +729,22 @@ export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFea
     });
     await dispatch(updateStyleMeta(layerId));
   };
+}
+
+function clearInspectorAdapters(layer: ILayer, adapters: Adapters) {
+  if (!layer.getSource().isESSource()) {
+    return;
+  }
+
+  if (adapters.vectorTiles) {
+    adapters.vectorTiles.removeLayer(layer.getId());
+  }
+
+  if (adapters.requests && 'getValidJoins' in layer) {
+    const vectorLayer = layer as IVectorLayer;
+    adapters.requests!.resetRequest((layer.getSource() as IESSource).getId());
+    vectorLayer.getValidJoins().forEach((join) => {
+      adapters.requests!.resetRequest(join.getRightJoinSource().getId());
+    });
+  }
 }

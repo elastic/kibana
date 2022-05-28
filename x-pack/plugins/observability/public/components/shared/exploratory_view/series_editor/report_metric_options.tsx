@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   EuiToolTip,
   EuiPopover,
@@ -13,12 +13,14 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiBadge,
+  EuiText,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useSeriesStorage } from '../hooks/use_series_storage';
 import { SeriesConfig, SeriesUrl } from '../types';
-import { useAppIndexPatternContext } from '../hooks/use_app_index_pattern';
+import { useAppDataViewContext } from '../hooks/use_app_data_view';
 import { RECORDS_FIELD, RECORDS_PERCENTAGE_FIELD } from '../configurations/constants';
 
 interface Props {
@@ -33,7 +35,7 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
   const [showOptions, setShowOptions] = useState(false);
   const metricOptions = seriesConfig?.metricOptions;
 
-  const { indexPatterns } = useAppIndexPatternContext();
+  const { dataViews, dataViewErrors, loading } = useAppDataViewContext();
 
   const onChange = (value?: string) => {
     setSeries(seriesId, {
@@ -42,17 +44,22 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
     });
   };
 
+  const focusButton = useCallback((ref: HTMLButtonElement) => {
+    ref?.focus();
+  }, []);
+
   if (!series.dataType) {
     return null;
   }
 
-  const indexPattern = indexPatterns?.[series.dataType];
+  const dataView = dataViews?.[series.dataType];
+  const dataViewError = dataViewErrors?.[series.dataType];
 
   const options = (metricOptions ?? []).map(({ label, field, id }) => {
     let disabled = false;
 
     if (field !== RECORDS_FIELD && field !== RECORDS_PERCENTAGE_FIELD && field) {
-      disabled = !Boolean(indexPattern?.getFieldByName(field));
+      disabled = !Boolean(dataView?.getFieldByName(field));
     }
     return {
       disabled,
@@ -78,6 +85,22 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
     };
   });
 
+  if (dataViewError && !dataView && !loading) {
+    // TODO: Add a link to docs to explain how to add index patterns
+    return (
+      <EuiText color="danger" className="eui-textNoWrap">
+        {dataViewError.body?.error === 'Forbidden' ||
+        dataViewError.name === 'DataViewInsufficientAccessError'
+          ? NO_PERMISSIONS
+          : dataViewError.body.message}
+      </EuiText>
+    );
+  }
+
+  if (!dataView && !loading) {
+    return <EuiText>{NO_DATA_AVAILABLE}</EuiText>;
+  }
+
   return (
     <>
       {!series.selectedMetricField && (
@@ -88,6 +111,8 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
               onClick={() => setShowOptions((prevState) => !prevState)}
               fill
               size="s"
+              isLoading={!dataView && loading}
+              buttonRef={focusButton}
             >
               {SELECT_REPORT_METRIC_LABEL}
             </EuiButton>
@@ -107,19 +132,25 @@ export function ReportMetricOptions({ seriesId, series, seriesConfig }: Props) {
           </EuiListGroup>
         </EuiPopover>
       )}
-      {series.selectedMetricField && (
-        <EuiBadge
-          iconType="cross"
-          iconSide="right"
-          iconOnClick={() => onChange(undefined)}
-          iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
-        >
-          {
-            seriesConfig?.metricOptions?.find((option) => option.id === series.selectedMetricField)
-              ?.label
-          }
-        </EuiBadge>
-      )}
+      {series.selectedMetricField &&
+        (dataView ? (
+          <EuiToolTip position="top" content={REPORT_METRIC_TOOLTIP}>
+            <EuiBadge
+              iconType="cross"
+              iconSide="right"
+              iconOnClick={() => onChange(undefined)}
+              iconOnClickAriaLabel={REMOVE_REPORT_METRIC_LABEL}
+            >
+              {
+                seriesConfig?.metricOptions?.find(
+                  (option) => option.id === series.selectedMetricField
+                )?.label
+              }
+            </EuiBadge>
+          </EuiToolTip>
+        ) : (
+          <EuiLoadingSpinner />
+        ))}
     </>
   );
 }
@@ -135,5 +166,21 @@ const REMOVE_REPORT_METRIC_LABEL = i18n.translate(
   'xpack.observability.expView.seriesEditor.removeReportMetric',
   {
     defaultMessage: 'Remove report metric',
+  }
+);
+
+const NO_DATA_AVAILABLE = i18n.translate('xpack.observability.expView.seriesEditor.noData', {
+  defaultMessage: 'No data available',
+});
+
+const NO_PERMISSIONS = i18n.translate('xpack.observability.expView.seriesEditor.noPermissions', {
+  defaultMessage:
+    "Unable to create Data View. You don't have the required permission, please contact your admin.",
+});
+
+const REPORT_METRIC_TOOLTIP = i18n.translate(
+  'xpack.observability.expView.seriesEditor.reportMetricTooltip',
+  {
+    defaultMessage: 'Report metric',
   }
 );

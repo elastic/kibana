@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaPluginServiceFactory } from '../../../../../../src/plugins/presentation_util/public';
+import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
 import { CanvasStartDeps } from '../../plugin';
 import { CanvasEmbeddablesService } from '../embeddables';
 
@@ -16,4 +16,5 @@ export type EmbeddablesServiceFactory = KibanaPluginServiceFactory<
 
 export const embeddablesServiceFactory: EmbeddablesServiceFactory = ({ startPlugins }) => ({
   getEmbeddableFactories: startPlugins.embeddable.getEmbeddableFactories,
+  getStateTransfer: startPlugins.embeddable.getStateTransfer,
 });

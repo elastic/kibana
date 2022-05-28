@@ -12,11 +12,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import { EuiSwitch } from '@elastic/eui';
-
 import { staticSourceData } from '../../source_data';
 
 import { ConnectInstance } from './connect_instance';
+import { DocumentPermissionsCallout } from './document_permissions_callout';
 
 describe('ConnectInstance', () => {
   // Needed to mock redirect window.location.replace(oauthUrl)
@@ -34,17 +33,16 @@ describe('ConnectInstance', () => {
   const setSourcePasswordValue = jest.fn();
   const setSourceSubdomainValue = jest.fn();
   const setSourceIndexPermissionsValue = jest.fn();
-  const getSourceConnectData = jest.fn((_, redirectOauth) => {
+  const getSourceConnectData = jest.fn((redirectOauth) => {
     redirectOauth();
   });
-  const createContentSource = jest.fn((_, redirectFormCreated, handleFormSubmitError) => {
+  const createContentSource = jest.fn((redirectFormCreated) => {
     redirectFormCreated();
-    handleFormSubmitError();
   });
 
-  const credentialsSourceData = staticSourceData[13];
-  const oauthSourceData = staticSourceData[0];
-  const subdomainSourceData = staticSourceData[16];
+  const credentialsSourceData = staticSourceData[16]; // service_now
+  const oauthSourceData = staticSourceData[0]; // box
+  const subdomainSourceData = staticSourceData[22]; // zendesk
 
   const props = {
     ...credentialsSourceData,
@@ -67,6 +65,7 @@ describe('ConnectInstance', () => {
     subdomainValue: 'foo',
     isOrganization: true,
     hasPlatinumLicense: true,
+    sourceConfigData: {},
   };
 
   beforeEach(() => {
@@ -87,7 +86,7 @@ describe('ConnectInstance', () => {
     expect(wrapper.find('form')).toHaveLength(1);
   });
 
-  it('handles form submission with credentials source', () => {
+  it('handles form submission with no redirect', () => {
     const wrapper = shallow(<ConnectInstance {...props} />);
 
     const preventDefault = jest.fn();
@@ -126,13 +125,6 @@ describe('ConnectInstance', () => {
     expect(setSourceSubdomainValue).toHaveBeenCalledWith(TEXT);
   });
 
-  it('calls handler on click', () => {
-    const wrapper = shallow(<ConnectInstance {...props} />);
-    wrapper.find(EuiSwitch).simulate('change', { target: { checked: true } });
-
-    expect(setSourceIndexPermissionsValue).toHaveBeenCalledWith(true);
-  });
-
   it('handles form submission with oauth source', () => {
     jest.spyOn(window.location, 'replace').mockImplementationOnce(mockReplace);
     const wrapper = shallow(<ConnectInstance {...oauthProps} />);
@@ -145,23 +137,17 @@ describe('ConnectInstance', () => {
     expect(mockReplace).toHaveBeenCalled();
   });
 
-  it('renders doc-level permissions message when not available', () => {
-    const wrapper = shallow(<ConnectInstance {...props} needsPermissions={false} />);
-
-    expect(wrapper.find('FormattedMessage')).toHaveLength(1);
-  });
-
-  it('renders callout when not synced', () => {
-    setMockValues({ ...values, indexPermissionsValue: false });
+  it('displays credentials fields for connectors that need them', () => {
     const wrapper = shallow(<ConnectInstance {...props} />);
 
-    expect(wrapper.find('EuiCallOut')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="LoginField"]')).toHaveLength(1);
+    expect(wrapper.find('[data-test-subj="PasswordField"]')).toHaveLength(1);
   });
 
   it('renders documentLevelPermissionsCallout', () => {
     setMockValues({ ...values, hasPlatinumLicense: false });
     const wrapper = shallow(<ConnectInstance {...oauthProps} />);
 
-    expect(wrapper.find('[data-test-subj="DocumentLevelPermissionsCallout"]')).toHaveLength(1);
+    expect(wrapper.find(DocumentPermissionsCallout)).toHaveLength(1);
   });
 });

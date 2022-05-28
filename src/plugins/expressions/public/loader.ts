@@ -7,10 +7,10 @@
  */
 
 import { BehaviorSubject, Observable, Subject, Subscription, asyncScheduler, identity } from 'rxjs';
-import { filter, map, delay, throttleTime } from 'rxjs/operators';
+import { filter, map, delay, shareReplay, throttleTime } from 'rxjs/operators';
 import { defaults } from 'lodash';
 import { SerializableRecord, UnwrapObservable } from '@kbn/utility-types';
-import { Adapters } from '../../inspector/public';
+import { Adapters } from '@kbn/inspector-plugin/public';
 import { IExpressionLoaderParams } from './types';
 import { ExpressionAstExpression } from '../common';
 import { ExecutionContract } from '../common/execution/execution_contract';
@@ -48,6 +48,7 @@ export class ExpressionLoader {
     // as loading$ could emit straight away in the constructor
     // and we want to notify subscribers about it, but all subscriptions will happen later
     this.loading$ = this.loadingSubject.asObservable().pipe(
+      shareReplay(1),
       filter((_) => _ === true),
       map(() => void 0)
     );
@@ -57,6 +58,7 @@ export class ExpressionLoader {
       onRenderError: params && params.onRenderError,
       renderMode: params?.renderMode,
       syncColors: params?.syncColors,
+      syncTooltips: params?.syncTooltips,
       hasCompatibleActions: params?.hasCompatibleActions,
     });
     this.render$ = this.renderHandler.render$;
@@ -141,6 +143,7 @@ export class ExpressionLoader {
       searchSessionId: params.searchSessionId,
       debug: params.debug,
       syncColors: params.syncColors,
+      syncTooltips: params.syncTooltips,
       executionContext: params.executionContext,
     });
     this.subscription = this.execution
@@ -181,6 +184,7 @@ export class ExpressionLoader {
       this.params.searchSessionId = params.searchSessionId;
     }
     this.params.syncColors = params.syncColors;
+    this.params.syncTooltips = params.syncTooltips;
     this.params.debug = Boolean(params.debug);
     this.params.partial = Boolean(params.partial);
     this.params.throttle = Number(params.throttle ?? 1000);
@@ -194,10 +198,10 @@ export class ExpressionLoader {
 
 export type IExpressionLoader = (
   element: HTMLElement,
-  expression: string | ExpressionAstExpression,
-  params: IExpressionLoaderParams
-) => ExpressionLoader;
+  expression?: string | ExpressionAstExpression,
+  params?: IExpressionLoaderParams
+) => Promise<ExpressionLoader>;
 
-export const loader: IExpressionLoader = (element, expression, params) => {
+export const loader: IExpressionLoader = async (element, expression?, params?) => {
   return new ExpressionLoader(element, expression, params);
 };

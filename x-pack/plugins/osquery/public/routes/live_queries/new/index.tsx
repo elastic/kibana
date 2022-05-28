@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import qs from 'query-string';
@@ -15,12 +15,15 @@ import { WithHeaderLayout } from '../../../components/layouts';
 import { useRouterNavigate } from '../../../common/lib/kibana';
 import { LiveQuery } from '../../../live_queries';
 import { useBreadcrumbs } from '../../../common/hooks/use_breadcrumbs';
-import { BetaBadge, BetaBadgeRowWrapper } from '../../../components/beta_badge';
+
+interface LocationState {
+  form: Record<string, unknown>;
+}
 
 const NewLiveQueryPageComponent = () => {
   useBreadcrumbs('live_query_new');
   const { replace } = useHistory();
-  const location = useLocation();
+  const location = useLocation<LocationState>();
   const liveQueryListProps = useRouterNavigate('live_queries');
   const [initialFormData, setInitialFormData] = useState<Record<string, unknown> | undefined>({});
 
@@ -49,15 +52,14 @@ const NewLiveQueryPageComponent = () => {
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem>
-          <BetaBadgeRowWrapper>
+          <EuiText>
             <h1>
               <FormattedMessage
                 id="xpack.osquery.newLiveQuery.pageTitle"
                 defaultMessage="New live query"
               />
             </h1>
-            <BetaBadge />
-          </BetaBadgeRowWrapper>
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     ),

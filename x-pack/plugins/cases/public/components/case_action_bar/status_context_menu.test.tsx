@@ -8,7 +8,7 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { CaseStatuses } from '../../../common';
+import { CaseStatuses } from '../../../common/api';
 import { StatusContextMenu } from './status_context_menu';
 
 describe('SyncAlertsSwitch', () => {
@@ -59,5 +59,16 @@ describe('SyncAlertsSwitch', () => {
       .simulate('click');
 
     expect(onStatusChanged).toHaveBeenCalledWith('in-progress');
+  });
+
+  it('it does not call onStatusChanged if selection is same as current status', async () => {
+    const wrapper = mount(
+      <StatusContextMenu currentStatus={CaseStatuses.open} onStatusChanged={onStatusChanged} />
+    );
+
+    wrapper.find(`[data-test-subj="case-view-status-dropdown"] button`).simulate('click');
+    wrapper.find(`[data-test-subj="case-view-status-dropdown-open"] button`).simulate('click');
+
+    expect(onStatusChanged).not.toHaveBeenCalled();
   });
 });

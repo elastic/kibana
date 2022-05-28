@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import {
   EuiSuperDatePicker,
   OnRefreshChangeProps,

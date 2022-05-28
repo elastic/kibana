@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from 'src/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 /**
  * Updates aliases for the old and new concrete indexes specified, respectively
@@ -37,6 +37,15 @@ export const replaceSignalsIndexAlias = async ({
       actions: [
         { remove: { index: oldIndex, alias } },
         { add: { index: newIndex, alias, is_write_index: false } },
+      ],
+    },
+  });
+  // TODO: space-aware?
+  await esClient.indices.updateAliases({
+    body: {
+      actions: [
+        { remove: { index: oldIndex, alias: '.siem-signals-default' } },
+        { add: { index: newIndex, alias: '.siem-signals-default', is_write_index: false } },
       ],
     },
   });

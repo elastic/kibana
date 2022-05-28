@@ -9,7 +9,7 @@
 import { chain } from 'lodash';
 import moment from 'moment';
 
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 
 import { timePatternToWildcard } from './time_pattern_to_wildcard';
 import { callIndexAliasApi } from './es_api';
@@ -28,7 +28,7 @@ import { callIndexAliasApi } from './es_api';
 export async function resolveTimePattern(callCluster: ElasticsearchClient, timePattern: string) {
   const aliases = await callIndexAliasApi(callCluster, timePatternToWildcard(timePattern));
 
-  const allIndexDetails = chain(aliases.body)
+  const allIndexDetails = chain(aliases)
     .reduce(
       (acc: string[], index: any, indexName: string) =>
         acc.concat(indexName, Object.keys(index.aliases || {})),

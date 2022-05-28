@@ -5,18 +5,19 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { PackagePolicyConfigRecordEntry } from '../../../../../fleet/common';
+import { ReactNode } from 'react';
+import { PackagePolicyConfigRecordEntry } from '@kbn/fleet-plugin/common';
 
-export {
+export type {
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
-} from '../../../../../fleet/public';
+} from '@kbn/fleet-plugin/public';
 
-export {
+export type {
   NewPackagePolicy,
   PackagePolicy,
   PackagePolicyConfigRecordEntry,
-} from '../../../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
 
 export type PackagePolicyVars = Record<string, PackagePolicyConfigRecordEntry>;
 
@@ -35,18 +36,21 @@ export interface BasicSettingRow {
     | 'boolean'
     | 'integer'
     | 'bytes'
-    | 'duration';
+    | 'duration'
+    | 'yaml';
   key: string;
   rowTitle?: string;
   rowDescription?: string;
   label?: string;
-  helpText?: string;
+  helpText?: ReactNode;
   placeholder?: string;
   labelAppend?: string;
+  labelAppendLink?: string;
+  labelAppendLinkText?: string;
+  dataTestSubj?: string;
   settings?: SettingsRow[];
   validation?: SettingValidation;
   required?: boolean;
-  readOnly?: boolean;
 }
 
 export type SettingsRow = BasicSettingRow | AdvancedSettingRow;

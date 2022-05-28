@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import path from 'path';
-
+import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { JobType } from '../../../../../plugins/ml/common/types/saved_objects';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const testDataListPositive = [
     {
-      filePath: path.join(__dirname, 'files_to_import', 'anomaly_detection_jobs_7.16.json'),
+      filePath: require.resolve('./files_to_import/anomaly_detection_jobs_7.16.json'),
       expected: {
         jobType: 'anomaly-detector' as JobType,
         jobIds: ['ad-test1', 'ad-test3'],
@@ -23,7 +21,7 @@ export default function ({ getService }: FtrProviderContext) {
       },
     },
     {
-      filePath: path.join(__dirname, 'files_to_import', 'data_frame_analytics_jobs_7.16.json'),
+      filePath: require.resolve('./files_to_import/data_frame_analytics_jobs_7.16.json'),
       expected: {
         jobType: 'data-frame-analytics' as JobType,
         jobIds: ['dfa-test1'],
@@ -33,7 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
   ];
 
   describe('import jobs', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await ml.api.cleanMlIndices();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -49,6 +47,8 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
+      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteIndexPatternByTitle('ft_bank_marketing');
     });
 
     for (const testData of testDataListPositive) {
@@ -73,21 +73,28 @@ export default function ({ getService }: FtrProviderContext) {
       it('ensures jobs have been imported', async () => {
         if (testData.expected.jobType === 'anomaly-detector') {
           await ml.navigation.navigateToStackManagementJobsListPageAnomalyDetectionTab();
-          await ml.jobTable.refreshJobList();
           for (const id of testData.expected.jobIds) {
-            await ml.jobTable.filterWithSearchString(id);
+            await ml.jobTable.filterWithSearchString(id, 1, 'stackMgmtJobList');
           }
           for (const id of testData.expected.skippedJobIds) {
-            await ml.jobTable.filterWithSearchString(id, 0);
+            await ml.jobTable.filterWithSearchString(id, 0, 'stackMgmtJobList');
           }
         } else {
           await ml.navigation.navigateToStackManagementJobsListPageAnalyticsTab();
-          await ml.dataFrameAnalyticsTable.refreshAnalyticsTable();
+          await ml.dataFrameAnalyticsTable.refreshAnalyticsTable('stackMgmtJobList');
           for (const id of testData.expected.jobIds) {
-            await ml.dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(id, true);
+            await ml.dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(
+              id,
+              true,
+              'mlAnalyticsRefreshListButton'
+            );
           }
           for (const id of testData.expected.skippedJobIds) {
-            await ml.dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(id, false);
+            await ml.dataFrameAnalyticsTable.assertAnalyticsJobDisplayedInTable(
+              id,
+              false,
+              'mlAnalyticsRefreshListButton'
+            );
           }
         }
       });
@@ -98,7 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('selects job import');
         await ml.stackManagementJobs.openImportFlyout();
         await ml.stackManagementJobs.selectFileToImport(
-          path.join(__dirname, 'files_to_import', 'bad_data.json'),
+          require.resolve('./files_to_import/bad_data.json'),
           true
         );
       });

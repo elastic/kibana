@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import moment from 'moment';
+import pMap from 'p-map';
 
-import type { ElasticsearchClient, SavedObjectsClientContract } from 'src/core/server';
-
-import type { Agent, AgentAction, AgentActionSOAttributes, BulkActionResult } from '../../types';
-import { AGENT_ACTION_SAVED_OBJECT_TYPE } from '../../constants';
-import { agentPolicyService } from '../../services';
+import type { Agent, BulkActionResult, FleetServerAgentAction, CurrentUpgrade } from '../../types';
+import { agentPolicyService } from '..';
 import {
   AgentReassignmentError,
   HostedAgentPolicyRestrictionRelatedError,
@@ -17,8 +18,9 @@ import {
 } from '../../errors';
 import { isAgentUpgradeable } from '../../../common/services';
 import { appContextService } from '../app_context';
+import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
-import { bulkCreateAgentActions, createAgentAction } from './actions';
+import { createAgentAction } from './actions';
 import type { GetAgentsOptions } from './crud';
 import {
   getAgentDocuments,
@@ -28,6 +30,12 @@ import {
   getAgentPolicyForAgent,
 } from './crud';
 import { searchHitToAgent } from './helpers';
+
+const MINIMUM_EXECUTION_DURATION_SECONDS = 1800; // 30m
+
+function isMgetDoc(doc?: estypes.MgetResponseItem<unknown>): doc is estypes.GetGetResult {
+  return Boolean(doc && 'found' in doc);
+}
 
 export async function sendUpgradeAgentAction({
   soClient,
@@ -56,7 +64,7 @@ export async function sendUpgradeAgentAction({
   }
 
   await createAgentAction(esClient, {
-    agent_id: agentId,
+    agents: [agentId],
     created_at: now,
     data,
     ack_data: data,
@@ -68,30 +76,15 @@ export async function sendUpgradeAgentAction({
   });
 }
 
-export async function ackAgentUpgraded(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  agentAction: AgentAction
-) {
-  const {
-    attributes: { ack_data: ackData },
-  } = await soClient.get<AgentActionSOAttributes>(AGENT_ACTION_SAVED_OBJECT_TYPE, agentAction.id);
-  if (!ackData) throw new Error('data missing from UPGRADE action');
-  const { version } = JSON.parse(ackData);
-  if (!version) throw new Error('version missing from UPGRADE action');
-  await updateAgent(esClient, agentAction.agent_id, {
-    upgraded_at: new Date().toISOString(),
-    upgrade_started_at: null,
-  });
-}
-
 export async function sendUpgradeAgentsActions(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient,
   options: ({ agents: Agent[] } | GetAgentsOptions) & {
-    sourceUri: string | undefined;
     version: string;
+    sourceUri?: string | undefined;
     force?: boolean;
+    upgradeDurationSeconds?: number;
+    startTime?: string;
   }
 ) {
   // Full set of agents
@@ -102,7 +95,7 @@ export async function sendUpgradeAgentsActions(
   } else if ('agentIds' in options) {
     const givenAgentsResults = await getAgentDocuments(esClient, options.agentIds);
     for (const agentResult of givenAgentsResults) {
-      if (agentResult.found === false) {
+      if (!isMgetDoc(agentResult) || agentResult.found === false) {
         outgoingErrors[agentResult._id] = new AgentReassignmentError(
           `Cannot find agent ${agentResult._id}`
         );
@@ -172,16 +165,24 @@ export async function sendUpgradeAgentsActions(
     source_uri: options.sourceUri,
   };
 
-  await bulkCreateAgentActions(
-    esClient,
-    agentsToUpdate.map((agent) => ({
-      agent_id: agent.id,
-      created_at: now,
-      data,
-      ack_data: data,
-      type: 'UPGRADE',
-    }))
-  );
+  const rollingUpgradeOptions = options?.upgradeDurationSeconds
+    ? {
+        start_time: options.startTime ?? now,
+        minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
+        expiration: moment(options.startTime ?? now)
+          .add(options?.upgradeDurationSeconds, 'seconds')
+          .toISOString(),
+      }
+    : {};
+
+  await createAgentAction(esClient, {
+    created_at: now,
+    data,
+    ack_data: data,
+    type: 'UPGRADE',
+    agents: agentsToUpdate.map((agent) => agent.id),
+    ...rollingUpgradeOptions,
+  });
 
   await bulkUpdateAgents(
     esClient,
@@ -210,4 +211,144 @@ export async function sendUpgradeAgentsActions(
   });
 
   return { items: orderedOut };
+}
+
+/**
+ * Return current bulk upgrades (non completed or cancelled)
+ */
+export async function getCurrentBulkUpgrades(
+  esClient: ElasticsearchClient,
+  now = new Date().toISOString()
+): Promise<CurrentUpgrade[]> {
+  // Fetch all non expired actions
+  const [_upgradeActions, cancelledActionIds] = await Promise.all([
+    _getUpgradeActions(esClient, now),
+    _getCancelledActionId(esClient, now),
+  ]);
+
+  let upgradeActions = _upgradeActions.filter(
+    (action) => cancelledActionIds.indexOf(action.actionId) < 0
+  );
+
+  // Fetch acknowledged result for every upgrade action
+  upgradeActions = await pMap(
+    upgradeActions,
+    async (upgradeAction) => {
+      const { count } = await esClient.count({
+        index: AGENT_ACTIONS_RESULTS_INDEX,
+        ignore_unavailable: true,
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  action_id: upgradeAction.actionId,
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      return {
+        ...upgradeAction,
+        nbAgentsAck: count,
+        complete: upgradeAction.nbAgents <= count,
+      };
+    },
+    { concurrency: 20 }
+  );
+
+  upgradeActions = upgradeActions.filter((action) => !action.complete);
+
+  return upgradeActions;
+}
+
+async function _getCancelledActionId(
+  esClient: ElasticsearchClient,
+  now = new Date().toISOString()
+) {
+  const res = await esClient.search<FleetServerAgentAction>({
+    index: AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              type: 'CANCEL',
+            },
+          },
+          {
+            exists: {
+              field: 'agents',
+            },
+          },
+          {
+            range: {
+              expiration: { gte: now },
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  return res.hits.hits.map((hit) => hit._source?.data?.target_id as string);
+}
+
+async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date().toISOString()) {
+  const res = await esClient.search<FleetServerAgentAction>({
+    index: AGENT_ACTIONS_INDEX,
+    ignore_unavailable: true,
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              type: 'UPGRADE',
+            },
+          },
+          {
+            exists: {
+              field: 'agents',
+            },
+          },
+          {
+            exists: {
+              field: 'start_time',
+            },
+          },
+          {
+            range: {
+              expiration: { gte: now },
+            },
+          },
+        ],
+      },
+    },
+  });
+
+  return Object.values(
+    res.hits.hits.reduce((acc, hit) => {
+      if (!hit._source || !hit._source.action_id) {
+        return acc;
+      }
+
+      if (!acc[hit._source.action_id]) {
+        acc[hit._source.action_id] = {
+          actionId: hit._source.action_id,
+          nbAgents: 0,
+          complete: false,
+          nbAgentsAck: 0,
+          version: hit._source.data?.version as string,
+          startTime: hit._source.start_time as string,
+        };
+      }
+
+      acc[hit._source.action_id].nbAgents += hit._source.agents?.length ?? 0;
+
+      return acc;
+    }, {} as { [k: string]: CurrentUpgrade })
+  );
 }

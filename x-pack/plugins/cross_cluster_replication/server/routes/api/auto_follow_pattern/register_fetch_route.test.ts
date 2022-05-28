@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { httpServiceMock, httpServerMock } from 'src/core/server/mocks';
-import { kibanaResponseFactory, RequestHandler } from 'src/core/server';
+import { httpServiceMock, httpServerMock } from '@kbn/core/server/mocks';
+import { kibanaResponseFactory, RequestHandler } from '@kbn/core/server';
 
 import { handleEsError } from '../../../shared_imports';
 import { mockRouteContext, mockLicense } from '../test_lib';
@@ -33,19 +33,17 @@ describe('[CCR API] Fetch all auto-follow patterns', () => {
 
   it('deserializes the response from Elasticsearch', async () => {
     const ccrAutoFollowPatternResponseMock = {
-      body: {
-        patterns: [
-          {
-            name: 'autoFollowPattern',
-            pattern: {
-              active: true,
-              remote_cluster: 'remoteCluster',
-              leader_index_patterns: ['leader*'],
-              follow_index_pattern: 'follow',
-            },
+      patterns: [
+        {
+          name: 'autoFollowPattern',
+          pattern: {
+            active: true,
+            remote_cluster: 'remoteCluster',
+            leader_index_patterns: ['leader*'],
+            follow_index_pattern: 'follow',
           },
-        ],
-      },
+        },
+      ],
     };
 
     const routeContextMock = mockRouteContext({

@@ -5,16 +5,26 @@
  * 2.0.
  */
 
-import { EuiInMemoryTable, EuiBasicTableColumn, EuiLink, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiText,
+  EuiPopover,
+  EuiInMemoryTable,
+  EuiBasicTableColumn,
+  EuiLink,
+  EuiToolTip,
+  EuiLoadingContent,
+} from '@elastic/eui';
 import moment from 'moment-timezone';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
-import { PackagePolicy } from '../../../fleet/common';
 import { useRouterNavigate } from '../common/lib/kibana';
 import { usePacks } from './use_packs';
 import { ActiveStateSwitch } from './active_state_switch';
+import { AgentsPolicyLink } from '../agent_policies/agents_policy_link';
+import { PackSavedObject } from './types';
 
 const UpdatedBy = styled.span`
   white-space: nowrap;
@@ -32,10 +42,53 @@ const renderName = (_: unknown, item: { id: string; attributes: { name: string }
   <ScheduledQueryName id={item.id} name={item.attributes.name} />
 );
 
-const PacksTableComponent = () => {
-  const { data } = usePacks({});
+export const AgentPoliciesPopover = ({ agentPolicyIds }: { agentPolicyIds: string[] }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
-  const renderAgentPolicy = useCallback((policyIds) => <>{policyIds?.length ?? 0}</>, []);
+  const onButtonClick = useCallback(
+    () => setIsPopoverOpen((currentIsPopoverOpen) => !currentIsPopoverOpen),
+    []
+  );
+  const closePopover = useCallback(() => setIsPopoverOpen(false), []);
+
+  const button = useMemo(
+    () => (
+      <EuiButtonEmpty size="s" flush="both" onClick={onButtonClick}>
+        <>{agentPolicyIds?.length ?? 0}</>
+      </EuiButtonEmpty>
+    ),
+    [agentPolicyIds?.length, onButtonClick]
+  );
+
+  if (!agentPolicyIds?.length) {
+    return <>{agentPolicyIds?.length ?? 0}</>;
+  }
+
+  return (
+    <EuiPopover
+      button={button}
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      initialFocus={false}
+    >
+      <EuiText size="s">
+        {agentPolicyIds?.map((policyId) => (
+          <div key={policyId}>
+            <AgentsPolicyLink policyId={policyId} />
+          </div>
+        ))}
+      </EuiText>
+    </EuiPopover>
+  );
+};
+
+const PacksTableComponent = () => {
+  const { data, isLoading } = usePacks({});
+
+  const renderAgentPolicy = useCallback(
+    (agentPolicyIds) => <AgentPoliciesPopover agentPolicyIds={agentPolicyIds} />,
+    []
+  );
 
   const renderQueries = useCallback(
     (queries) => <>{(queries && Object.keys(queries).length) ?? 0}</>,
@@ -51,6 +104,7 @@ const PacksTableComponent = () => {
       item.attributes.updated_by !== item.attributes.created_by
         ? ` @ ${item.attributes.updated_by}`
         : '';
+
     return updatedAt ? (
       <EuiToolTip content={`${moment(updatedAt).fromNow()}${updatedBy}`}>
         <UpdatedBy>{`${moment(updatedAt).fromNow()}${updatedBy}`}</UpdatedBy>
@@ -60,21 +114,20 @@ const PacksTableComponent = () => {
     );
   }, []);
 
-  // @ts-expect-error update types
-  const columns: Array<EuiBasicTableColumn<PackagePolicy>> = useMemo(
+  const columns: Array<EuiBasicTableColumn<PackSavedObject>> = useMemo(
     () => [
       {
         field: 'attributes.name',
         name: i18n.translate('xpack.osquery.packs.table.nameColumnTitle', {
           defaultMessage: 'Name',
         }),
-        sortable: true,
+        sortable: (item) => item.attributes.name.toLowerCase(),
         render: renderName,
       },
       {
         field: 'policy_ids',
         name: i18n.translate('xpack.osquery.packs.table.policyColumnTitle', {
-          defaultMessage: 'Policies',
+          defaultMessage: 'Scheduled policies',
         }),
         truncateText: true,
         render: renderAgentPolicy,
@@ -126,8 +179,12 @@ const PacksTableComponent = () => {
     []
   );
 
+  if (isLoading) {
+    return <EuiLoadingContent lines={10} />;
+  }
+
   return (
-    <EuiInMemoryTable<PackagePolicy>
+    <EuiInMemoryTable<PackSavedObject>
       // eslint-disable-next-line react-perf/jsx-no-new-array-as-prop
       items={data?.saved_objects ?? []}
       columns={columns}

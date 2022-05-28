@@ -58,6 +58,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       after(async () => {
+        // NOTE: Logout needs to happen before anything else to avoid flaky behavior
         await PageObjects.security.forceLogout();
         await Promise.all([
           security.role.delete('global_canvas_all_role'),
@@ -67,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows canvas navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Canvas']);
+        expect(navLinks).to.eql(['Canvas']);
       });
 
       it(`landing page shows "Create new workpad" button`, async () => {
@@ -93,7 +94,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`allows a workpad to be edited`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'canvas',
-          'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
+          '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
           {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,
@@ -142,7 +143,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it('shows canvas navlink', async () => {
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.eql(['Overview', 'Canvas']);
+        expect(navLinks).to.eql(['Canvas']);
       });
 
       it(`landing page shows disabled "Create new workpad" button`, async () => {
@@ -170,7 +171,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`does not allow a workpad to be edited`, async () => {
         await PageObjects.common.navigateToActualUrl(
           'canvas',
-          'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
+          '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
           {
             ensureCurrentUrl: true,
             shouldLoginIfPrompted: false,

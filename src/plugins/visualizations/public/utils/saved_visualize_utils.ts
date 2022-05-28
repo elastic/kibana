@@ -13,22 +13,18 @@ import type {
   SavedObjectsClientContract,
   SavedObjectAttributes,
   SavedObjectReference,
-} from 'kibana/public';
-import type { OverlayStart } from '../../../../core/public';
-import { SavedObjectNotFound } from '../../../kibana_utils/public';
+} from '@kbn/core/public';
+import type { OverlayStart } from '@kbn/core/public';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
   parseSearchSourceJSON,
   DataPublicPluginStart,
-} from '../../../../plugins/data/public';
-import {
-  checkForDuplicateTitle,
-  saveWithConfirmation,
-  isErrorNonFatal,
-} from '../../../../plugins/saved_objects/public';
-import type { SavedObjectsTaggingApi } from '../../../saved_objects_tagging_oss/public';
-import type { SpacesPluginStart } from '../../../../../x-pack/plugins/spaces/public';
+} from '@kbn/data-plugin/public';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { saveWithConfirmation, checkForDuplicateTitle } from './saved_objects_utils';
 import { VisualizationsAppExtension } from '../vis_types/vis_type_alias_registry';
 import type {
   VisSavedObject,
@@ -41,6 +37,7 @@ import type { TypesStart, BaseVisType } from '../vis_types';
 // @ts-ignore
 import { updateOldState } from '../legacy/vis_update_state';
 import { injectReferences, extractReferences } from './saved_visualization_references';
+import { OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED } from './saved_objects_utils/constants';
 
 export const SAVED_VIS_TYPE = 'visualization';
 
@@ -67,10 +64,12 @@ export function mapHitSource(
     attributes,
     id,
     references,
+    updatedAt,
   }: {
     attributes: SavedObjectAttributes;
     id: string;
     references: SavedObjectReference[];
+    updatedAt?: string;
   }
 ) {
   const newAttributes: {
@@ -79,6 +78,7 @@ export function mapHitSource(
     url: string;
     savedObjectType?: string;
     editUrl?: string;
+    updatedAt?: string;
     type?: BaseVisType;
     icon?: BaseVisType['icon'];
     image?: BaseVisType['image'];
@@ -88,6 +88,7 @@ export function mapHitSource(
     id,
     references,
     url: urlFor(id),
+    updatedAt,
     ...attributes,
   };
 
@@ -236,6 +237,7 @@ export async function getSavedVisualization(
     saved_object: resp,
     outcome,
     alias_target_id: aliasTargetId,
+    alias_purpose: aliasPurpose,
   } = await services.savedObjectsClient.resolve<SavedObjectAttributes>(SAVED_VIS_TYPE, id);
 
   if (!resp._version) {
@@ -257,6 +259,7 @@ export async function getSavedVisualization(
   savedObject.sharingSavedObjectProps = {
     aliasTargetId,
     outcome,
+    aliasPurpose,
     errorJSON:
       outcome === 'conflict' && services.spaces
         ? JSON.stringify({
@@ -296,9 +299,6 @@ export async function getSavedVisualization(
   }
 
   savedObject.visState = await updateOldState(savedObject.visState);
-  if (savedObject.searchSourceFields?.index) {
-    await services.dataViews.get(savedObject.searchSourceFields.index as any);
-  }
 
   return savedObject;
 }
@@ -395,9 +395,12 @@ export async function saveVisualization(
     return savedObject.id;
   } catch (err: any) {
     savedObject.id = originalId;
-    if (isErrorNonFatal(err)) {
+    if (err && [OVERWRITE_REJECTED, SAVE_DUPLICATE_REJECTED].includes(err.message)) {
       return '';
     }
     return Promise.reject(err);
   }
 }
+
+export const shouldShowMissedDataViewError = (error: Error): error is SavedObjectNotFound =>
+  error instanceof SavedObjectNotFound && error.savedObjectType === 'data view';

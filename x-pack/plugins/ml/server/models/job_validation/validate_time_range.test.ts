@@ -7,7 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 
 import { CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
@@ -24,8 +24,8 @@ const mockSearchResponse = {
 
 const mlClusterClientFactory = (response: any): IScopedClusterClient => {
   const callAs = {
-    fieldCaps: () => Promise.resolve({ body: response.fieldCaps }),
-    search: () => Promise.resolve({ body: response.search }),
+    fieldCaps: () => Promise.resolve(response.fieldCaps),
+    search: () => Promise.resolve(response.search),
   };
   return {
     asCurrentUser: callAs,

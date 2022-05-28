@@ -6,15 +6,16 @@
  */
 
 import { EuiIcon } from '@elastic/eui';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { getPlatformIconModule } from './helpers';
 
-interface PlatformIconProps {
+export interface PlatformIconProps {
   platform: string;
 }
 
 const PlatformIconComponent: React.FC<PlatformIconProps> = ({ platform }) => {
-  const platformIconModule = getPlatformIconModule(platform);
+  const platformIconModule = useMemo(() => getPlatformIconModule(platform), [platform]);
+
   return <EuiIcon type={platformIconModule} title={platform} size="l" />;
 };
 

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IExternalUrl, IUiSettingsClient } from 'src/core/public';
+import { IExternalUrl, IUiSettingsClient } from '@kbn/core/public';
 import {
   ChartActionContext,
   CONTEXT_MENU_TRIGGER,
@@ -14,15 +14,15 @@ import {
   EmbeddableInput,
   SELECT_RANGE_TRIGGER,
   VALUE_CLICK_TRIGGER,
-} from '../../../../../../src/plugins/embeddable/public';
-import { ROW_CLICK_TRIGGER } from '../../../../../../src/plugins/ui_actions/public';
-import { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/public';
-import { CollectConfigProps as CollectConfigPropsBase } from '../../../../../../src/plugins/kibana_utils/public';
+} from '@kbn/embeddable-plugin/public';
+import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { Query, Filter, TimeRange } from '@kbn/data-plugin/public';
+import { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
 import {
   reactToUiComponent,
   UrlTemplateEditorVariable,
   KibanaContextProvider,
-} from '../../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 import {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UrlDrilldownGlobalScope,
@@ -31,7 +31,7 @@ import {
   urlDrilldownValidateUrlTemplate,
   urlDrilldownCompileUrl,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
-} from '../../../../ui_actions_enhanced/public';
+} from '@kbn/ui-actions-enhanced-plugin/public';
 import { txtUrlDrilldownDisplayName } from './i18n';
 import { getEventVariableList, getEventScopeValues } from './variables/event_variables';
 import { getContextVariableList, getContextScopeValues } from './variables/context_variables';
@@ -93,8 +93,10 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     onConfig,
     context,
   }) => {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
-    const variables = React.useMemo(() => this.getVariableList(context), [context]);
+    const [variables, exampleUrl] = React.useMemo(
+      () => [this.getVariableList(context), this.getExampleUrl(context)],
+      [context]
+    );
 
     return (
       <KibanaContextProvider
@@ -104,6 +106,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
       >
         <UrlDrilldownCollectConfig
           variables={variables}
+          exampleUrl={exampleUrl}
           config={config}
           onConfig={onConfig}
           syntaxHelpDocsLink={this.deps.getSyntaxHelpDocsLink()}
@@ -117,7 +120,7 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
 
   public readonly createConfig = () => ({
     url: {
-      template: 'https://example.com/?{{event.key}}={{event.value}}',
+      template: '',
     },
     openInNewTab: true,
     encodeUrl: true,
@@ -196,5 +199,19 @@ export class UrlDrilldown implements Drilldown<Config, ActionContext, ActionFact
     const globalVariables = getGlobalVariableList(globalScopeValues);
 
     return [...eventVariables, ...contextVariables, ...globalVariables];
+  };
+
+  public readonly getExampleUrl = (context: ActionFactoryContext): string => {
+    switch (context.triggers[0]) {
+      case SELECT_RANGE_TRIGGER:
+        return 'https://www.example.com/?from={{event.from}}&to={{event.to}}';
+      case CONTEXT_MENU_TRIGGER:
+        return 'https://www.example.com/?panel={{context.panel.title}}';
+      case ROW_CLICK_TRIGGER:
+        return 'https://www.example.com/keys={{event.keys}}&values={{event.values}}';
+      case VALUE_CLICK_TRIGGER:
+      default:
+        return 'https://www.example.com/?{{event.key}}={{event.value}}';
+    }
   };
 }

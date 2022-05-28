@@ -21,25 +21,23 @@ import {
 } from '@elastic/eui';
 import { i18n as i18nTranslate } from '@kbn/i18n';
 
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { noop } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
 import styled from 'styled-components';
-import deepEqual from 'fast-deep-equal';
 import {
   ExceptionListTypeEnum,
   ExceptionListIdentifiers,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { Dispatch } from 'redux';
-import { isTab } from '../../../../../../../timelines/public';
+import { isTab } from '@kbn/timelines-plugin/public';
 import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../common/hooks/use_selector';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../../common/types/timeline';
 import { UpdateDateRange } from '../../../../../common/components/charts/common';
@@ -52,23 +50,19 @@ import {
 } from '../../../../../common/components/link_to/redirect_to_detection_engine';
 import { SiemSearchBar } from '../../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../../common/components/page_wrapper';
-import { Rule, useRuleStatus, RuleInfoStatus } from '../../../../containers/detection_engine/rules';
+import { Rule } from '../../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../../containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../components/rules/step_about_rule_details';
-import { DetectionEngineHeaderPage } from '../../../../components/detection_engine_header_page';
 import { AlertsHistogramPanel } from '../../../../components/alerts_kpis/alerts_histogram_panel';
 import { AlertsTable } from '../../../../components/alerts_table';
 import { useUserData } from '../../../../components/user_info';
-import { OverviewEmpty } from '../../../../../overview/components/overview_empty';
 import { StepDefineRule } from '../../../../components/rules/step_define_rule';
 import { StepScheduleRule } from '../../../../components/rules/step_schedule_rule';
 import {
-  buildAlertsRuleIdFilter,
+  buildAlertsFilter,
   buildAlertStatusFilter,
-  buildAlertStatusFilterRuleRegistry,
   buildShowBuildingBlockFilter,
-  buildShowBuildingBlockFilterRuleRegistry,
   buildThreatMatchFilter,
 } from '../../../../components/alerts_table/default_config';
 import { RuleSwitch } from '../../../../components/rules/rule_switch';
@@ -78,9 +72,6 @@ import { useGlobalTime } from '../../../../../common/containers/use_global_time'
 import { inputsSelectors } from '../../../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../../../common/store/inputs/actions';
 import { RuleActionsOverflow } from '../../../../components/rules/rule_actions_overflow';
-import { RuleStatusFailedCallOut } from './status_failed_callout';
-import { FailureHistory } from './failure_history';
-import { RuleStatus } from '../../../../components/rules//rule_status';
 import { useMlCapabilities } from '../../../../../common/components/ml/hooks/use_ml_capabilities';
 import { hasMlAdminPermissions } from '../../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlLicense } from '../../../../../../common/machine_learning/has_ml_license';
@@ -88,11 +79,7 @@ import { SecurityPageName } from '../../../../../app/types';
 import { LinkButton } from '../../../../../common/components/links';
 import { useFormatUrl } from '../../../../../common/components/link_to';
 import { ExceptionsViewer } from '../../../../../common/components/exceptions/viewer';
-import {
-  APP_ID,
-  DEFAULT_INDEX_PATTERN,
-  DEFAULT_INDEX_PATTERN_EXPERIMENTAL,
-} from '../../../../../../common/constants';
+import { APP_UI_ID, DEFAULT_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useGlobalFullScreen } from '../../../../../common/containers/use_full_screen';
 import { Display } from '../../../../../hosts/pages/display';
 
@@ -104,7 +91,7 @@ import {
 } from '../../../../../timelines/components/timeline/helpers';
 import { timelineActions, timelineSelectors } from '../../../../../timelines/store/timeline';
 import { timelineDefaults } from '../../../../../timelines/store/timeline/defaults';
-import { useSourcererScope } from '../../../../../common/containers/sourcerer';
+import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
 import {
   getToolTipContent,
@@ -112,12 +99,18 @@ import {
   isBoolean,
 } from '../../../../../common/utils/privileges';
 
+import {
+  RuleStatus,
+  RuleStatusFailedCallOut,
+  ruleStatusI18n,
+} from '../../../../components/rules/rule_execution_status';
+
 import * as detectionI18n from '../../translations';
 import * as ruleI18n from '../translations';
-import * as statusI18n from '../../../../components/rules/rule_status/translations';
+import { ExecutionLogTable } from './execution_log_table/execution_log_table';
+import { RuleDetailsContextProvider } from './rule_details_context';
 import * as i18n from './translations';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../components/callouts/need_admin_for_update_callout';
-import { getRuleStatusText } from '../../../../../../common/detection_engine/utils';
 import { MissingPrivilegesCallOut } from '../../../../components/callouts/missing_privileges_callout';
 import { useRuleWithFallback } from '../../../../containers/detection_engine/rules/use_rule_with_fallback';
 import { BadgeOptions } from '../../../../../common/components/header_page/types';
@@ -127,6 +120,8 @@ import {
   AlertsTableFilterGroup,
   FILTER_OPEN,
 } from '../../../../components/alerts_table/alerts_filter_group';
+import { useSignalHelpers } from '../../../../../common/containers/sourcerer/use_signal_helpers';
+import { HeaderPage } from '../../../../../common/components/header_page';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -137,9 +132,16 @@ const StyledFullHeightContainer = styled.div`
   flex: 1 1 auto;
 `;
 
-enum RuleDetailTabs {
+/**
+ * Sets min-height on tab container to minimize page hop when switching to tabs with less content
+ */
+const StyledMinHeightTabContainer = styled.div`
+  min-height: 800px;
+`;
+
+export enum RuleDetailTabs {
   alerts = 'alerts',
-  failures = 'failures',
+  executionLogs = 'executionLogs',
   exceptions = 'exceptions',
 }
 
@@ -157,10 +159,10 @@ const ruleDetailTabs = [
     dataTestSubj: 'exceptionsTab',
   },
   {
-    id: RuleDetailTabs.failures,
-    name: i18n.FAILURE_HISTORY_TAB,
+    id: RuleDetailTabs.executionLogs,
+    name: i18n.RULE_EXECUTION_LOGS,
     disabled: false,
-    dataTestSubj: 'failureHistoryTab',
+    dataTestSubj: 'executionLogsTab',
   },
 ];
 
@@ -210,6 +212,13 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
     useListsConfig();
+
+  const {
+    indexPattern,
+    runtimeMappings,
+    loading: isLoadingIndexPattern,
+  } = useSourcererDataView(SourcererScopeName.detections);
+
   const loading = userInfoLoading || listsConfigLoading;
   const { detailName: ruleId } = useParams<{ detailName: string }>();
   const {
@@ -218,19 +227,9 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     loading: ruleLoading,
     isExistingRule,
   } = useRuleWithFallback(ruleId);
-  const [loadingStatus, ruleStatus, fetchRuleStatus] = useRuleStatus(ruleId);
-  const [currentStatus, setCurrentStatus] = useState<RuleInfoStatus | null>(
-    ruleStatus?.current_status ?? null
-  );
-  useEffect(() => {
-    if (!deepEqual(currentStatus, ruleStatus?.current_status)) {
-      setCurrentStatus(ruleStatus?.current_status ?? null);
-    }
-  }, [currentStatus, ruleStatus, setCurrentStatus]);
+  const { pollForSignalIndex } = useSignalHelpers();
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
-  // This is used to re-trigger api rule status when user de/activate rule
-  const [ruleEnabled, setRuleEnabled] = useState<boolean | null>(null);
   const [ruleDetailTab, setRuleDetailTab] = useState(RuleDetailTabs.alerts);
   const [pageTabs, setTabs] = useState(ruleDetailTabs);
   const { aboutRuleData, modifiedAboutRuleDetailsData, defineRuleData, scheduleRuleData } =
@@ -248,12 +247,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-
-  // TODO: Once we are past experimental phase this code should be removed
-  const ruleRegistryEnabled = useIsExperimentalFeatureEnabled('ruleRegistryEnabled');
-
-  // TODO: Steph/ueba remove when past experimental
-  const uebaEnabled = useIsExperimentalFeatureEnabled('uebaEnabled');
 
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
@@ -286,15 +279,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       if (spacesApi && outcome === 'aliasMatch') {
         // This rule has been resolved from a legacy URL - redirect the user to the new URL and display a toast.
         const path = `rules/id/${rule.id}${window.location.search}${window.location.hash}`;
-        spacesApi.ui.redirectLegacyUrl(
+        spacesApi.ui.redirectLegacyUrl({
           path,
-          i18nTranslate.translate(
-            'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
-            {
-              defaultMessage: 'rule',
-            }
-          )
-        );
+          aliasPurpose: rule.alias_purpose,
+          objectNoun: i18nTranslate.translate(
+            'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
+            { defaultMessage: 'rule' }
+          ),
+        });
       }
     }
   }, [rule, spacesApi]);
@@ -310,7 +302,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <EuiSpacer />
           {spacesApi.ui.components.getLegacyUrlConflict({
             objectNoun: i18nTranslate.translate(
-              'xpack.triggersActionsUI.sections.alertDetails.redirectObjectNoun',
+              'xpack.triggersActionsUI.sections.ruleDetails.redirectObjectNoun',
               {
                 defaultMessage: 'rule',
               }
@@ -335,7 +327,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     }
   }, [hasIndexRead]);
 
-  const showUpdating = useMemo(() => isAlertsLoading || loading, [isAlertsLoading, loading]);
+  const showUpdating = useMemo(
+    () => isLoadingIndexPattern || isAlertsLoading || loading,
+    [isLoadingIndexPattern, isAlertsLoading, loading]
+  );
 
   const title = useMemo(
     () => (
@@ -415,39 +410,21 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const alertDefaultFilters = useMemo(
     () => [
-      ...buildAlertsRuleIdFilter(ruleId),
-      ...(ruleRegistryEnabled
-        ? [
-            ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts), // TODO: Once we are past experimental phase this code should be removed
-            ...buildAlertStatusFilterRuleRegistry(filterGroup),
-          ]
-        : [
-            ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
-            ...buildAlertStatusFilter(filterGroup),
-          ]),
+      ...buildAlertsFilter(rule?.rule_id ?? ''),
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
+      ...buildAlertStatusFilter(filterGroup),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [
-      ruleId,
-      ruleRegistryEnabled,
-      showBuildingBlockAlerts,
-      showOnlyThreatIndicatorAlerts,
-      filterGroup,
-    ]
+    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, filterGroup]
   );
 
   const alertsTableDefaultFilters = useMemo(
     () => [
-      ...buildAlertsRuleIdFilter(ruleId),
-      ...(ruleRegistryEnabled
-        ? [
-            // TODO: Once we are past experimental phase this code should be removed
-            ...buildShowBuildingBlockFilterRuleRegistry(showBuildingBlockAlerts),
-          ]
-        : [...buildShowBuildingBlockFilter(showBuildingBlockAlerts)]),
+      ...buildAlertsFilter(rule?.rule_id ?? ''),
+      ...buildShowBuildingBlockFilter(showBuildingBlockAlerts),
       ...buildThreatMatchFilter(showOnlyThreatIndicatorAlerts),
     ],
-    [ruleId, ruleRegistryEnabled, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
+    [rule, showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts]
   );
 
   const alertMergedFilters = useMemo(
@@ -462,7 +439,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
           <EuiTab
             onClick={() => setRuleDetailTab(tab.id)}
             isSelected={tab.id === ruleDetailTab}
-            disabled={tab.disabled}
+            disabled={tab.disabled || (tab.id === RuleDetailTabs.executionLogs && !isExistingRule)}
             key={tab.id}
             data-test-subj={tab.dataTestSubj}
           >
@@ -471,79 +448,47 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
         ))}
       </EuiTabs>
     ),
-    [ruleDetailTab, setRuleDetailTab, pageTabs]
+    [isExistingRule, ruleDetailTab, setRuleDetailTab, pageTabs]
   );
-  const ruleIndices = useMemo(
-    () =>
-      rule?.index ??
-      (uebaEnabled
-        ? [...DEFAULT_INDEX_PATTERN, ...DEFAULT_INDEX_PATTERN_EXPERIMENTAL]
-        : DEFAULT_INDEX_PATTERN),
-    [rule?.index, uebaEnabled]
-  );
-  const handleRefresh = useCallback(() => {
-    if (fetchRuleStatus != null && ruleId != null) {
-      fetchRuleStatus(ruleId);
-    }
-  }, [fetchRuleStatus, ruleId]);
+  const ruleIndices = useMemo(() => rule?.index ?? DEFAULT_INDEX_PATTERN, [rule?.index]);
+
+  const lastExecution = rule?.execution_summary?.last_execution;
+  const lastExecutionStatus = lastExecution?.status;
+  const lastExecutionDate = lastExecution?.date ?? '';
+  const lastExecutionMessage = lastExecution?.message ?? '';
 
   const ruleStatusInfo = useMemo(() => {
-    return loadingStatus ? (
+    return ruleLoading ? (
       <EuiFlexItem>
         <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
       </EuiFlexItem>
     ) : (
-      <>
-        <RuleStatus
-          status={getRuleStatusText(currentStatus?.status)}
-          statusDate={currentStatus?.status_date}
-        >
-          <EuiButtonIcon
-            data-test-subj="refreshButton"
-            color="primary"
-            onClick={handleRefresh}
-            iconType="refresh"
-            aria-label={ruleI18n.REFRESH}
-            isDisabled={!isExistingRule}
-          />
-        </RuleStatus>
-      </>
+      <RuleStatus status={lastExecutionStatus} date={lastExecutionDate}>
+        <EuiButtonIcon
+          data-test-subj="refreshButton"
+          color="primary"
+          onClick={refreshRule}
+          iconType="refresh"
+          aria-label={ruleI18n.REFRESH}
+          isDisabled={!isExistingRule}
+        />
+      </RuleStatus>
     );
-  }, [isExistingRule, currentStatus, loadingStatus, handleRefresh]);
+  }, [lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
 
   const ruleError = useMemo(() => {
-    if (loadingStatus) {
-      return (
-        <EuiFlexItem>
-          <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
-        </EuiFlexItem>
-      );
-    } else if (
-      currentStatus?.status === 'failed' &&
-      (ruleDetailTab === RuleDetailTabs.alerts || ruleDetailTab === RuleDetailTabs.failures) &&
-      currentStatus?.last_failure_at != null
-    ) {
-      return (
-        <RuleStatusFailedCallOut
-          message={currentStatus?.last_failure_message ?? ''}
-          date={currentStatus?.last_failure_at}
-        />
-      );
-    } else if (
-      (currentStatus?.status === 'warning' || currentStatus?.status === 'partial failure') &&
-      (ruleDetailTab === RuleDetailTabs.alerts || ruleDetailTab === RuleDetailTabs.failures) &&
-      currentStatus?.last_success_at != null
-    ) {
-      return (
-        <RuleStatusFailedCallOut
-          message={currentStatus?.last_success_message ?? ''}
-          date={currentStatus?.last_success_at}
-          color="warning"
-        />
-      );
-    }
-    return null;
-  }, [ruleDetailTab, currentStatus, loadingStatus]);
+    return ruleLoading ? (
+      <EuiFlexItem>
+        <EuiLoadingSpinner size="m" data-test-subj="rule-status-loader" />
+      </EuiFlexItem>
+    ) : (
+      <RuleStatusFailedCallOut
+        status={lastExecutionStatus}
+        date={lastExecutionDate}
+        message={lastExecutionMessage}
+      />
+    );
+  }, [lastExecutionStatus, lastExecutionDate, lastExecutionMessage, ruleLoading]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
@@ -562,19 +507,14 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [dispatch]
   );
 
-  const handleOnChangeEnabledRule = useCallback(
-    (enabled: boolean) => {
-      if (ruleEnabled == null || enabled !== ruleEnabled) {
-        setRuleEnabled(enabled);
-      }
-    },
-    [ruleEnabled, setRuleEnabled]
-  );
+  const handleOnChangeEnabledRule = useCallback((enabled: boolean) => {
+    setRule((currentRule) => (currentRule ? { ...currentRule, enabled } : currentRule));
+  }, []);
 
   const goToEditRule = useCallback(
     (ev) => {
       ev.preventDefault();
-      navigateToApp(APP_ID, {
+      navigateToApp(APP_UI_ID, {
         deepLinkId: SecurityPageName.rules,
         path: getEditRuleUrl(ruleId ?? ''),
       });
@@ -622,8 +562,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     },
     [setShowOnlyThreatIndicatorAlerts]
   );
-
-  const { indicesExist, indexPattern } = useSourcererScope(SourcererScopeName.detections);
 
   const exceptionLists = useMemo((): {
     lists: ExceptionListIdentifiers[];
@@ -675,6 +613,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [containerElement, onSkipFocusBeforeEventsTable, onSkipFocusAfterEventsTable]
   );
 
+  const selectAlertsTabCallback = useCallback(() => {
+    setRuleDetailTab(RuleDetailTabs.alerts);
+  }, []);
+
   if (
     redirectToDetections(
       isSignalIndexExists,
@@ -683,7 +625,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       needsListsConfiguration
     )
   ) {
-    navigateToApp(APP_ID, {
+    navigateToApp(APP_UI_ID, {
       deepLinkId: SecurityPageName.alerts,
       path: getDetectionEngineUrl(),
     });
@@ -696,16 +638,19 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     <>
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
-      {indicesExist ? (
-        <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
-          <EuiWindowEvent event="resize" handler={noop} />
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-            <SiemSearchBar id="global" indexPattern={indexPattern} />
-          </FiltersGlobal>
-
+      <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
+        <EuiWindowEvent event="resize" handler={noop} />
+        <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
+          <SiemSearchBar
+            id="global"
+            pollForSignalIndex={pollForSignalIndex}
+            indexPattern={indexPattern}
+          />
+        </FiltersGlobal>
+        <RuleDetailsContextProvider>
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
             <Display show={!globalFullScreen}>
-              <DetectionEngineHeaderPage
+              <HeaderPage
                 backOptions={{
                   path: getRulesUrl(),
                   text: i18n.BACK_TO_RULES,
@@ -718,7 +663,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                   <>
                     <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexStart">
                       <EuiFlexItem grow={false}>
-                        {statusI18n.STATUS}
+                        {ruleStatusI18n.STATUS}
                         {':'}
                       </EuiFlexItem>
                       {ruleStatusInfo}
@@ -746,7 +691,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                           enabled={isExistingRule && (rule?.enabled ?? false)}
                           onChange={handleOnChangeEnabledRule}
                         />
-                        <EuiFlexItem>{i18n.ACTIVATE_RULE}</EuiFlexItem>
+                        <EuiFlexItem>{i18n.ENABLE_RULE}</EuiFlexItem>
                       </EuiFlexGroup>
                     </EuiToolTip>
                   </EuiFlexItem>
@@ -767,7 +712,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </EuiFlexGroup>
                   </EuiFlexItem>
                 </EuiFlexGroup>
-              </DetectionEngineHeaderPage>
+              </HeaderPage>
               {ruleError}
               {getLegacyUrlConflictCallout}
               <EuiSpacer />
@@ -814,74 +759,75 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
               {tabs}
               <EuiSpacer />
             </Display>
-            {ruleDetailTab === RuleDetailTabs.alerts && hasIndexRead && (
-              <>
-                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-                  <EuiFlexItem grow={false}>
-                    <AlertsTableFilterGroup
-                      status={filterGroup}
-                      onFilterGroupChanged={onFilterGroupChangedCallback}
+            <StyledMinHeightTabContainer>
+              {ruleDetailTab === RuleDetailTabs.alerts && hasIndexRead && (
+                <>
+                  <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                    <EuiFlexItem grow={false}>
+                      <AlertsTableFilterGroup
+                        status={filterGroup}
+                        onFilterGroupChanged={onFilterGroupChangedCallback}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      {updatedAt &&
+                        timelinesUi.getLastUpdated({
+                          updatedAt: updatedAt || Date.now(),
+                          showUpdating,
+                        })}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiSpacer size="l" />
+                  <Display show={!globalFullScreen}>
+                    <AlertsHistogramPanel
+                      filters={alertMergedFilters}
+                      query={query}
+                      signalIndexName={signalIndexName}
+                      defaultStackByOption={defaultRuleStackByOption}
+                      updateDateRange={updateDateRangeCallback}
+                      runtimeMappings={runtimeMappings}
                     />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    {updatedAt &&
-                      timelinesUi.getLastUpdated({
-                        updatedAt: updatedAt || Date.now(),
-                        showUpdating,
-                      })}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiSpacer size="l" />
-                <Display show={!globalFullScreen}>
-                  <AlertsHistogramPanel
-                    filters={alertMergedFilters}
-                    query={query}
-                    signalIndexName={signalIndexName}
-                    defaultStackByOption={defaultRuleStackByOption}
-                    updateDateRange={updateDateRangeCallback}
-                  />
-                  <EuiSpacer />
-                </Display>
-                {ruleId != null && (
-                  <AlertsTable
-                    filterGroup={filterGroup}
-                    timelineId={TimelineId.detectionsRulesDetailsPage}
-                    defaultFilters={alertsTableDefaultFilters}
-                    hasIndexWrite={hasIndexWrite ?? false}
-                    hasIndexMaintenance={hasIndexMaintenance ?? false}
-                    from={from}
-                    loading={loading}
-                    showBuildingBlockAlerts={showBuildingBlockAlerts}
-                    showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-                    onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-                    onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
-                    onRuleChange={refreshRule}
-                    to={to}
-                  />
-                )}
-              </>
-            )}
-            {ruleDetailTab === RuleDetailTabs.exceptions && (
-              <ExceptionsViewer
-                ruleId={ruleId ?? ''}
-                ruleName={rule?.name ?? ''}
-                ruleIndices={ruleIndices}
-                availableListTypes={exceptionLists.allowedExceptionListTypes}
-                commentsAccordionId={'ruleDetailsTabExceptions'}
-                exceptionListsMeta={exceptionLists.lists}
-                onRuleChange={refreshRule}
-              />
-            )}
-            {ruleDetailTab === RuleDetailTabs.failures && <FailureHistory id={rule?.id} />}
+                    <EuiSpacer />
+                  </Display>
+                  {ruleId != null && (
+                    <AlertsTable
+                      filterGroup={filterGroup}
+                      timelineId={TimelineId.detectionsRulesDetailsPage}
+                      defaultFilters={alertsTableDefaultFilters}
+                      hasIndexWrite={hasIndexWrite ?? false}
+                      hasIndexMaintenance={hasIndexMaintenance ?? false}
+                      from={from}
+                      loading={loading}
+                      showBuildingBlockAlerts={showBuildingBlockAlerts}
+                      showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
+                      onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
+                      onShowOnlyThreatIndicatorAlertsChanged={
+                        onShowOnlyThreatIndicatorAlertsCallback
+                      }
+                      onRuleChange={refreshRule}
+                      to={to}
+                    />
+                  )}
+                </>
+              )}
+              {ruleDetailTab === RuleDetailTabs.exceptions && (
+                <ExceptionsViewer
+                  ruleId={ruleId ?? ''}
+                  ruleName={rule?.name ?? ''}
+                  ruleIndices={ruleIndices}
+                  availableListTypes={exceptionLists.allowedExceptionListTypes}
+                  commentsAccordionId={'ruleDetailsTabExceptions'}
+                  exceptionListsMeta={exceptionLists.lists}
+                  onRuleChange={refreshRule}
+                />
+              )}
+              {ruleDetailTab === RuleDetailTabs.executionLogs && (
+                <ExecutionLogTable ruleId={ruleId} selectAlertsTab={selectAlertsTabCallback} />
+              )}
+            </StyledMinHeightTabContainer>
           </SecuritySolutionPageWrapper>
-        </StyledFullHeightContainer>
-      ) : (
-        <SecuritySolutionPageWrapper>
-          <DetectionEngineHeaderPage border title={i18n.PAGE_TITLE} />
-
-          <OverviewEmpty />
-        </SecuritySolutionPageWrapper>
-      )}
+        </RuleDetailsContextProvider>
+      </StyledFullHeightContainer>
 
       <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />
     </>

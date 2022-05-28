@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from 'kibana/server';
+import { SavedObjectsClientContract } from '@kbn/core/server';
 import type {
   DescriptionOrUndefined,
   ExceptionListSchema,
@@ -15,7 +15,6 @@ import type {
   MetaOrUndefined,
   NameOrUndefined,
   NamespaceType,
-  OsTypeArray,
   TagsOrUndefined,
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -34,7 +33,6 @@ interface UpdateExceptionListOptions {
   description: DescriptionOrUndefined;
   savedObjectsClient: SavedObjectsClientContract;
   namespaceType: NamespaceType;
-  osTypes: OsTypeArray;
   listId: ListIdOrUndefined;
   meta: MetaOrUndefined;
   user: string;

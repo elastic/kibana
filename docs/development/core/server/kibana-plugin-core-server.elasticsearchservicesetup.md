@@ -15,5 +15,6 @@ export interface ElasticsearchServiceSetup
 
 |  Property | Type | Description |
 |  --- | --- | --- |
-|  [legacy](./kibana-plugin-core-server.elasticsearchservicesetup.legacy.md) | <code>{</code><br/><code>        readonly config$: Observable&lt;ElasticsearchConfig&gt;;</code><br/><code>    }</code> |  |
+|  [legacy](./kibana-plugin-core-server.elasticsearchservicesetup.legacy.md) | { readonly config$: Observable&lt;ElasticsearchConfig&gt;; } |  |
+|  [setUnauthorizedErrorHandler](./kibana-plugin-core-server.elasticsearchservicesetup.setunauthorizederrorhandler.md) | (handler: UnauthorizedErrorHandler) =&gt; void | Register a handler that will be called when unauthorized (401) errors are returned from any API call to elasticsearch performed on behalf of a user via a [scoped cluster client](./kibana-plugin-core-server.iscopedclusterclient.md)<!-- -->. |
 

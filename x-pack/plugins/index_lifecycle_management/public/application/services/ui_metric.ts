@@ -11,13 +11,12 @@
  * in future. The pattern in this file is legacy and should be updated to conform to the plugin lifecycle.
  */
 
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { UiCounterMetricType } from '@kbn/analytics';
 
 import {
   UIM_APP_NAME,
   UIM_CONFIG_COLD_PHASE,
-  UIM_CONFIG_FREEZE_INDEX,
   UIM_CONFIG_SET_PRIORITY,
   UIM_CONFIG_WARM_PHASE,
   defaultIndexPriority,
@@ -67,10 +66,6 @@ export function getUiMetricsForPhases(phases: Phases): string[] {
           isHotPhasePriorityChanged || isWarmPhasePriorityChanged || isColdPhasePriorityChanged
         );
       },
-    },
-    {
-      metric: UIM_CONFIG_FREEZE_INDEX,
-      isTracked: () => phases.cold && phases.cold.actions.freeze,
     },
   ];
 

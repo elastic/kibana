@@ -11,7 +11,7 @@ import { shallow } from 'enzyme';
 import '../../mock/match_media';
 import {
   getRowItemDraggables,
-  getRowItemOverflow,
+  RowItemOverflowComponent,
   getRowItemDraggable,
   OverflowFieldComponent,
 } from './helpers';
@@ -56,7 +56,7 @@ describe('Table Helpers', () => {
       });
       const wrapper = mount(<TestProviders>{rowItem}</TestProviders>);
       expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
-        '(Empty String)'
+        '(Empty string)'
       );
     });
 
@@ -117,7 +117,7 @@ describe('Table Helpers', () => {
       });
       const wrapper = mount(<TestProviders>{rowItems}</TestProviders>);
       expect(wrapper.find('[data-test-subj="render-content-attrName"]').first().text()).toBe(
-        '(Empty String)'
+        '(Empty string)'
       );
     });
 
@@ -181,22 +181,63 @@ describe('Table Helpers', () => {
     });
   });
 
-  describe('#getRowItemOverflow', () => {
+  describe('#RowItemOverflow', () => {
     test('it returns correctly against snapshot', () => {
-      const rowItemOverflow = getRowItemOverflow(items, 'attrName', 1, 1);
-      const wrapper = shallow(<div>{rowItemOverflow}</div>);
+      const wrapper = shallow(
+        <RowItemOverflowComponent
+          rowItems={items}
+          attrName="attrName"
+          idPrefix="idPrefix"
+          maxOverflowItems={1}
+          overflowIndexStart={1}
+        />
+      );
       expect(wrapper).toMatchSnapshot();
     });
 
     test('it does not show "more not shown" when maxOverflowItems are not exceeded', () => {
-      const rowItemOverflow = getRowItemOverflow(items, 'attrName', 1, 5);
-      const wrapper = shallow(<div>{rowItemOverflow}</div>);
+      const wrapper = shallow(
+        <RowItemOverflowComponent
+          rowItems={items}
+          attrName="attrName"
+          idPrefix="idPrefix"
+          maxOverflowItems={5}
+          overflowIndexStart={1}
+        />
+      );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(0);
     });
 
+    test('it shows correct number of overflow items when maxOverflowItems are not exceeded', () => {
+      const wrapper = mount(
+        <TestProviders>
+          <RowItemOverflowComponent
+            rowItems={items}
+            attrName="attrName"
+            idPrefix="idPrefix"
+            maxOverflowItems={5}
+            overflowIndexStart={1}
+          />
+        </TestProviders>
+      );
+      wrapper.find('[data-test-subj="overflow-button"]').first().simulate('click');
+
+      expect(
+        wrapper.find('[data-test-subj="overflow-items"]').last().prop<JSX.Element[]>('children')
+          ?.length
+      ).toEqual(2);
+    });
+
     test('it shows "more not shown" when maxOverflowItems are exceeded', () => {
-      const rowItemOverflow = getRowItemOverflow(items, 'attrName', 1, 1);
-      const wrapper = shallow(<div>{rowItemOverflow}</div>);
+      const wrapper = shallow(
+        <RowItemOverflowComponent
+          rowItems={items}
+          attrName="attrName"
+          idPrefix="idPrefix"
+          maxOverflowItems={1}
+          overflowIndexStart={1}
+        />
+      );
       expect(wrapper.find('[data-test-subj="popover-additional-overflow"]').length).toBe(1);
     });
   });

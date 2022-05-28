@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { NavigationPublicPluginStart } from 'src/plugins/navigation/public';
-import { ScreenshotModePluginSetup } from 'src/plugins/screenshot_mode/public';
-import { SharePluginSetup } from 'src/plugins/share/public';
-import { DeveloperExamplesSetup } from '../../../../examples/developer_examples/public';
-import { ReportingStart } from '../../../plugins/reporting/public';
+import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
+import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import { ReportingStart } from '@kbn/reporting-plugin/public';
+import type { MyForwardableState } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PluginSetup {}
@@ -26,4 +27,4 @@ export interface StartDeps {
   reporting: ReportingStart;
 }
 
-export type MyForwardableState = Record<string, unknown>;
+export type { MyForwardableState };

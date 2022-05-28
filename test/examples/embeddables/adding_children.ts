@@ -7,7 +7,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from 'test/plugin_functional/services';
+import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: PluginFunctionalProviderContext) {
@@ -23,6 +23,8 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
       await testSubjects.click('embeddablePanelToggleMenuIcon');
       await testSubjects.click('embeddablePanelAction-ACTION_ADD_PANEL');
       await testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
+      await testSubjects.click('savedObjectFinderFilterButton');
+      await testSubjects.click('savedObjectFinderFilter-todo');
       await testSubjects.click('savedObjectTitleGarbage');
       await testSubjects.moveMouseTo('euiFlyoutCloseButton');
       await flyout.ensureClosed('dashboardAddPanel');

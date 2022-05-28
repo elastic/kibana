@@ -7,13 +7,12 @@
  */
 
 import _ from 'lodash';
-import { Datatable } from '../../../../../plugins/expressions/public';
-import { esFilters, Filter } from '../../../public';
-import { getIndexPatterns, getSearchService } from '../../../public/services';
+import { Datatable } from '@kbn/expressions-plugin/public';
+import { esFilters, Filter } from '../..';
+import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 
-/** @internal */
-export interface ValueClickDataContext {
+interface ValueClickDataContext {
   data: Array<{
     table: Pick<Datatable, 'rows' | 'columns'>;
     column: number;
@@ -53,8 +52,8 @@ const getOtherBucketFilterTerms = (
   return [
     ...new Set(
       terms.filter((term) => {
-        const notOther = term !== '__other__';
-        const notMissing = term !== '__missing__';
+        const notOther = String(term) !== '__other__';
+        const notMissing = String(term) !== '__missing__';
         return notOther && notMissing;
       })
     ),
@@ -99,7 +98,10 @@ const createFilter = async (
   if (value === null || value === undefined || !aggConfig.isFilterable()) {
     return;
   }
-  if (aggConfig.type.name === 'terms' && aggConfig.params.otherBucket) {
+  if (
+    (aggConfig.type.name === 'terms' || aggConfig.type.name === 'multi_terms') &&
+    aggConfig.params.otherBucket
+  ) {
     const terms = getOtherBucketFilterTerms(table, columnIndex, rowIndex);
     filter = aggConfig.createFilter(value, { terms });
   } else {

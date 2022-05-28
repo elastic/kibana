@@ -8,20 +8,20 @@
 import {
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../../../../src/core/server/mocks';
+  elasticsearchServiceMock,
+} from '@kbn/core/server/mocks';
 import {
   Logger,
   SavedObjectsClient,
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
-} from 'kibana/server';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+} from '@kbn/core/server';
 import { migrateArtifactsToFleet } from './migrate_artifacts_to_fleet';
 import { createEndpointArtifactClientMock } from '../../services/artifacts/mocks';
 import { InternalArtifactCompleteSchema } from '../../schemas';
-import { generateArtifactEsGetSingleHitMock } from '../../../../../fleet/server/services/artifacts/mocks';
-import { NewArtifact } from '../../../../../fleet/server/services';
-import { CreateRequest } from '@elastic/elasticsearch/api/types';
+import { generateArtifactEsGetSingleHitMock } from '@kbn/fleet-plugin/server/services/artifacts/mocks';
+import { NewArtifact } from '@kbn/fleet-plugin/server/services';
+import { CreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 describe('When migrating artifacts to fleet', () => {
   let soClient: jest.Mocked<SavedObjectsClient>;
@@ -68,7 +68,7 @@ describe('When migrating artifacts to fleet', () => {
         }),
         _index: '.fleet-artifacts-7',
         _id: `endpoint:endpoint-exceptionlist-macos-v1-${
-          // @ts-ignore
+          // @ts-expect-error TS2339
           props?.body?.decodedSha256 ?? 'UNKNOWN?'
         }`,
         _version: 1,

@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { filter, pickBy } from 'lodash';
+import { filter } from 'lodash';
 import { schema } from '@kbn/config-schema';
 
+import { IRouter } from '@kbn/core/server';
+import { isSavedQueryPrebuilt } from './utils';
 import { PLUGIN_ID } from '../../../common';
-import { IRouter } from '../../../../../../src/core/server';
 import { savedQuerySavedObjectType } from '../../../common/types';
 import { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { convertECSMappingToArray, convertECSMappingToObject } from '../utils';
@@ -34,7 +35,10 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
               schema.recordOf(
                 schema.string(),
                 schema.object({
-                  field: schema.string(),
+                  field: schema.maybe(schema.string()),
+                  value: schema.maybe(
+                    schema.oneOf([schema.string(), schema.arrayOf(schema.string())])
+                  ),
                 })
               )
             ),
@@ -45,7 +49,8 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       options: { tags: [`access:${PLUGIN_ID}-writeSavedQueries`] },
     },
     async (context, request, response) => {
-      const savedObjectsClient = context.core.savedObjects.client;
+      const coreContext = await context.core;
+      const savedObjectsClient = coreContext.savedObjects.client;
       const currentUser = await osqueryContext.security.authc.getCurrentUser(request)?.username;
 
       const {
@@ -59,10 +64,15 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         ecs_mapping,
       } = request.body;
 
+      const isPrebuilt = await isSavedQueryPrebuilt(osqueryContext, request.params.id);
+
+      if (isPrebuilt) {
+        return response.conflict({ body: `Elastic prebuilt Saved query cannot be updated.` });
+      }
+
       const conflictingEntries = await savedObjectsClient.find<{ id: string }>({
         type: savedQuerySavedObjectType,
-        search: id,
-        searchFields: ['id'],
+        filter: `${savedQuerySavedObjectType}.attributes.id: "${id}"`,
       });
 
       if (
@@ -75,9 +85,9 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
       const updatedSavedQuerySO = await savedObjectsClient.update(
         savedQuerySavedObjectType,
         request.params.id,
-        pickBy({
+        {
           id,
-          description,
+          description: description || '',
           platform,
           query,
           version,
@@ -85,7 +95,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           ecs_mapping: convertECSMappingToArray(ecs_mapping),
           updated_by: currentUser,
           updated_at: new Date().toISOString(),
-        }),
+        },
         {
           refresh: 'wait_for',
         }

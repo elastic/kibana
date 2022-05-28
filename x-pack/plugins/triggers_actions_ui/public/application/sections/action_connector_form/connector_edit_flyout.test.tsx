@@ -6,8 +6,8 @@
  */
 
 import * as React from 'react';
-import { mountWithIntl } from '@kbn/test/jest';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import { ConnectorValidationResult, GenericValidationResult } from '../../../types';
 import ConnectorEditFlyout from './connector_edit_flyout';
@@ -43,6 +43,7 @@ describe('connector_edit_flyout', () => {
       actionType: 'test-action-type-name',
       name: 'action-connector',
       isPreconfigured: false,
+      isDeprecated: false,
       referencedByCount: 0,
       config: {},
     };
@@ -87,6 +88,7 @@ describe('connector_edit_flyout', () => {
       actionType: 'test-action-type-name',
       name: 'preconfigured-connector',
       isPreconfigured: true,
+      isDeprecated: false,
       referencedByCount: 0,
       config: {},
     };

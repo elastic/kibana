@@ -6,44 +6,51 @@
  */
 
 import type {
+  EqlSearchRequest,
   TermsEnumRequest,
   TermsEnumResponse,
-} from '@elastic/elasticsearch/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ValuesType } from 'utility-types';
-import { withApmSpan } from '../../../../utils/with_apm_span';
-import { Profile } from '../../../../../typings/es_schemas/ui/profile';
-import {
-  ElasticsearchClient,
-  KibanaRequest,
-} from '../../../../../../../../src/core/server';
+import { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import {
   ESSearchRequest,
   InferSearchResponseOf,
-} from '../../../../../../../../src/core/types/elasticsearch';
-import { unwrapEsResponse } from '../../../../../../observability/server';
+} from '@kbn/core/types/elasticsearch';
+import { unwrapEsResponse } from '@kbn/observability-plugin/server';
+import { Profile } from '../../../../../typings/es_schemas/ui/profile';
+import { withApmSpan } from '../../../../utils/with_apm_span';
 import { ProcessorEvent } from '../../../../../common/processor_event';
 import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { Metric } from '../../../../../typings/es_schemas/ui/metric';
 import { Span } from '../../../../../typings/es_schemas/ui/span';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
-import { ApmIndicesConfig } from '../../../settings/apm_indices/get_apm_indices';
+import { ApmIndicesConfig } from '../../../../routes/settings/apm_indices/get_apm_indices';
 import {
   callAsyncWithDebug,
   getDebugBody,
   getDebugTitle,
 } from '../call_async_with_debug';
 import { cancelEsRequestOnAbort } from '../cancel_es_request_on_abort';
-import { addFilterToExcludeLegacyData } from './add_filter_to_exclude_legacy_data';
-import { unpackProcessorEvents } from './unpack_processor_events';
+import {
+  unpackProcessorEvents,
+  processorEventsToIndex,
+} from './unpack_processor_events';
 
 export type APMEventESSearchRequest = Omit<ESSearchRequest, 'index'> & {
   apm: {
     events: ProcessorEvent[];
     includeLegacyData?: boolean;
   };
+  body: {
+    size: number;
+  };
 };
 
 export type APMEventESTermsEnumRequest = Omit<TermsEnumRequest, 'index'> & {
+  apm: { events: ProcessorEvent[] };
+};
+
+export type APMEventEqlSearchRequest = Omit<EqlSearchRequest, 'index'> & {
   apm: { events: ProcessorEvent[] };
 };
 
@@ -57,26 +64,13 @@ type TypeOfProcessorEvent<T extends ProcessorEvent> = {
   profile: Profile;
 }[T];
 
-type ESSearchRequestOf<TParams extends APMEventESSearchRequest> = Omit<
-  TParams,
-  'apm'
-> & { index: string[] | string };
-
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
   InferSearchResponseOf<
     TypeOfProcessorEvent<ValuesType<TParams['apm']['events']>>,
-    ESSearchRequestOf<TParams>
+    TParams
   >;
 
-export type APMEventClient = ReturnType<typeof createApmEventClient>;
-
-export function createApmEventClient({
-  esClient,
-  debug,
-  request,
-  indices,
-  options: { includeFrozen } = { includeFrozen: false },
-}: {
+export interface APMEventClientConfig {
   esClient: ElasticsearchClient;
   debug: boolean;
   request: KibanaRequest;
@@ -84,92 +78,158 @@ export function createApmEventClient({
   options: {
     includeFrozen: boolean;
   };
-}) {
-  return {
-    async search<TParams extends APMEventESSearchRequest>(
-      operationName: string,
-      params: TParams
-    ): Promise<TypedSearchResponse<TParams>> {
-      const withProcessorEventFilter = unpackProcessorEvents(params, indices);
+}
 
-      const { includeLegacyData = false } = params.apm;
+export class APMEventClient {
+  private readonly esClient: ElasticsearchClient;
+  private readonly debug: boolean;
+  private readonly request: KibanaRequest;
+  private readonly indices: ApmIndicesConfig;
+  private readonly includeFrozen: boolean;
 
-      const withPossibleLegacyDataFilter = !includeLegacyData
-        ? addFilterToExcludeLegacyData(withProcessorEventFilter)
-        : withProcessorEventFilter;
+  constructor(config: APMEventClientConfig) {
+    this.esClient = config.esClient;
+    this.debug = config.debug;
+    this.request = config.request;
+    this.indices = config.indices;
+    this.includeFrozen = config.options.includeFrozen;
+  }
 
-      const searchParams = {
-        ...withPossibleLegacyDataFilter,
-        ignore_throttled: !includeFrozen,
-        ignore_unavailable: true,
-        preference: 'any',
-      };
+  async search<TParams extends APMEventESSearchRequest>(
+    operationName: string,
+    params: TParams
+  ): Promise<TypedSearchResponse<TParams>> {
+    const withProcessorEventFilter = unpackProcessorEvents(
+      params,
+      this.indices
+    );
 
-      // only "search" operation is currently supported
-      const requestType = 'search';
+    const searchParams = {
+      ...withProcessorEventFilter,
+      ...(this.includeFrozen ? { ignore_throttled: false } : {}),
+      ignore_unavailable: true,
+      preference: 'any',
+    };
 
-      return callAsyncWithDebug({
-        cb: () => {
-          const searchPromise = withApmSpan(operationName, () =>
-            cancelEsRequestOnAbort(esClient.search(searchParams), request)
+    // only "search" operation is currently supported
+    const requestType = 'search';
+
+    return callAsyncWithDebug({
+      cb: () => {
+        const searchPromise = withApmSpan(operationName, () => {
+          const controller = new AbortController();
+          return cancelEsRequestOnAbort(
+            this.esClient.search(searchParams, {
+              signal: controller.signal,
+              meta: true,
+            }) as Promise<any>,
+            this.request,
+            controller
           );
+        });
 
-          return unwrapEsResponse(searchPromise);
-        },
-        getDebugMessage: () => ({
-          body: getDebugBody({
-            params: searchParams,
-            requestType,
-            operationName,
-          }),
-          title: getDebugTitle(request),
+        return unwrapEsResponse(searchPromise);
+      },
+      getDebugMessage: () => ({
+        body: getDebugBody({
+          params: searchParams,
+          requestType,
+          operationName,
         }),
-        isCalledWithInternalUser: false,
-        debug,
-        request,
-        requestType,
-        operationName,
-        requestParams: searchParams,
-      });
-    },
+        title: getDebugTitle(this.request),
+      }),
+      isCalledWithInternalUser: false,
+      debug: this.debug,
+      request: this.request,
+      requestType,
+      operationName,
+      requestParams: searchParams,
+    });
+  }
 
-    async termsEnum(
-      operationName: string,
-      params: APMEventESTermsEnumRequest
-    ): Promise<TermsEnumResponse> {
-      const requestType = 'terms_enum';
-      const { index } = unpackProcessorEvents(params, indices);
+  async eqlSearch(operationName: string, params: APMEventEqlSearchRequest) {
+    const requestType = 'eql_search';
+    const index = processorEventsToIndex(params.apm.events, this.indices);
 
-      return callAsyncWithDebug({
-        cb: () => {
-          const { apm, ...rest } = params;
-          const termsEnumPromise = withApmSpan(operationName, () =>
-            cancelEsRequestOnAbort(
-              esClient.termsEnum({
+    return callAsyncWithDebug({
+      cb: () => {
+        const { apm, ...rest } = params;
+
+        const eqlSearchPromise = withApmSpan(operationName, () => {
+          const controller = new AbortController();
+          return cancelEsRequestOnAbort(
+            this.esClient.eql.search(
+              {
+                index,
+                ...rest,
+              },
+              { signal: controller.signal, meta: true }
+            ),
+            this.request,
+            controller
+          );
+        });
+
+        return unwrapEsResponse(eqlSearchPromise);
+      },
+      getDebugMessage: () => ({
+        body: getDebugBody({
+          params,
+          requestType,
+          operationName,
+        }),
+        title: getDebugTitle(this.request),
+      }),
+      isCalledWithInternalUser: false,
+      debug: this.debug,
+      request: this.request,
+      requestType,
+      operationName,
+      requestParams: params,
+    });
+  }
+
+  async termsEnum(
+    operationName: string,
+    params: APMEventESTermsEnumRequest
+  ): Promise<TermsEnumResponse> {
+    const requestType = 'terms_enum';
+    const { index } = unpackProcessorEvents(params, this.indices);
+
+    return callAsyncWithDebug({
+      cb: () => {
+        const { apm, ...rest } = params;
+        const termsEnumPromise = withApmSpan(operationName, () => {
+          const controller = new AbortController();
+          return cancelEsRequestOnAbort(
+            this.esClient.termsEnum(
+              {
                 index: Array.isArray(index) ? index.join(',') : index,
                 ...rest,
-              }),
-              request
-            )
+              },
+              { signal: controller.signal, meta: true }
+            ),
+            this.request,
+            controller
           );
+        });
 
-          return unwrapEsResponse(termsEnumPromise);
-        },
-        getDebugMessage: () => ({
-          body: getDebugBody({
-            params,
-            requestType,
-            operationName,
-          }),
-          title: getDebugTitle(request),
+        return unwrapEsResponse(termsEnumPromise);
+      },
+      getDebugMessage: () => ({
+        body: getDebugBody({
+          params,
+          requestType,
+          operationName,
         }),
-        isCalledWithInternalUser: false,
-        debug,
-        request,
-        requestType,
-        operationName,
-        requestParams: params,
-      });
-    },
-  };
+        title: getDebugTitle(this.request),
+      }),
+      isCalledWithInternalUser: false,
+      debug: this.debug,
+      request: this.request,
+      requestType,
+      operationName,
+      requestParams: params,
+    });
+  }
 }

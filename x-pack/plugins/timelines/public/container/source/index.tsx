@@ -7,9 +7,16 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { isEmpty, isEqual, pick } from 'lodash/fp';
-import { Subscription } from 'rxjs/internal/Subscription';
+import { Subscription } from 'rxjs';
 
 import memoizeOne from 'memoize-one';
+import { DataViewBase } from '@kbn/es-query';
+
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
+
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import * as i18n from './translations';
 import {
   BrowserField,
   BrowserFields,
@@ -17,16 +24,7 @@ import {
   IndexField,
   IndexFieldsStrategyRequest,
   IndexFieldsStrategyResponse,
-} from '../../../common';
-import * as i18n from './translations';
-
-import {
-  IIndexPattern,
-  DataPublicPluginStart,
-  isCompleteResponse,
-  isErrorResponse,
-} from '../../../../../../src/plugins/data/public';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
+} from '../../../common/search_strategy';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
 const DEFAULT_BROWSER_FIELDS = {};
@@ -37,7 +35,7 @@ interface FetchIndexReturn {
   docValueFields: DocValueFields[];
   indexes: string[];
   indexExists: boolean;
-  indexPatterns: IIndexPattern;
+  indexPatterns: DataViewBase;
 }
 
 /**
@@ -90,7 +88,7 @@ export const getDocValueFields = memoizeOne(
 );
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): IIndexPattern =>
+  (title: string, fields: IndexField[]): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -127,7 +125,7 @@ export const useFetchIndex = (
         abortCtrl.current = new AbortController();
         setLoading(true);
         searchSubscription$.current = data.search
-          .search<IndexFieldsStrategyRequest, IndexFieldsStrategyResponse>(
+          .search<IndexFieldsStrategyRequest<'indices'>, IndexFieldsStrategyResponse>(
             { indices: iNames, onlyCheckIfIndicesExist },
             {
               abortSignal: abortCtrl.current.signal,

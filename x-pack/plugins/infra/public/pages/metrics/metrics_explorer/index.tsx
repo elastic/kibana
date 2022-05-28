@@ -8,9 +8,8 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useContext } from 'react';
-import { DataViewBase } from '@kbn/es-query';
+import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
-import { useTrackPageview } from '../../../../../observability/public';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { DocumentTitle } from '../../../components/document_title';
 import { NoData } from '../../../components/empty_states';
@@ -22,10 +21,10 @@ import { useSavedViewContext } from '../../../containers/saved_view/saved_view';
 import { MetricsPageTemplate } from '../page_template';
 import { metricsExplorerTitle } from '../../../translations';
 import { SavedViewsToolbarControls } from '../../../components/saved_views/toolbar_control';
-
+import { DerivedIndexPattern } from '../../../containers/metrics_source';
 interface MetricsExplorerPageProps {
   source: MetricsSourceConfigurationProperties;
-  derivedIndexPattern: DataViewBase;
+  derivedIndexPattern: DerivedIndexPattern;
 }
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {

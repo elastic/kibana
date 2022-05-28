@@ -5,183 +5,128 @@
  * 2.0.
  */
 
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { i18n } from '@kbn/i18n';
-import React, { Dispatch, useCallback, useEffect } from 'react';
-import { EuiButton, EuiSpacer } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
-import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
-import { ExceptionItem } from '../../../../common/components/exceptions/viewer/exception_item';
-import { useLicense } from '../../../../common/hooks/use_license';
-import {
-  getCurrentLocation,
-  getItemToDelete,
-  getListFetchError,
-  getListIsLoading,
-  getListItems,
-  getListPagination,
-} from '../store/selector';
-import {
-  useHostIsolationExceptionsNavigateCallback,
-  useHostIsolationExceptionsSelector,
-} from './hooks';
-import { PaginatedContent, PaginatedContentProps } from '../../../components/paginated_content';
-import { Immutable } from '../../../../../common/endpoint/types';
-import { AdministrationListPage } from '../../../components/administration_list_page';
-import { SearchExceptions } from '../../../components/search_exceptions';
-import { ArtifactEntryCard, ArtifactEntryCardProps } from '../../../components/artifact_entry_card';
-import { HostIsolationExceptionsEmptyState } from './components/empty';
-import { HostIsolationExceptionsPageAction } from '../store/action';
-import { HostIsolationExceptionDeleteModal } from './components/delete_modal';
-import { HostIsolationExceptionsFormFlyout } from './components/form_flyout';
-import {
-  DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
-  EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
-} from './components/translations';
-import { getEndpointListPath } from '../../../common/routing';
+import React, { memo } from 'react';
+import { useHttp } from '../../../../common/lib/kibana';
+import { ArtifactListPage } from '../../../components/artifact_list_page';
+import type { ArtifactListPageProps } from '../../../components/artifact_list_page';
+import { HostIsolationExceptionsApiClient } from '../host_isolation_exceptions_api_client';
+import { SEARCHABLE_FIELDS } from '../constants';
+import { HostIsolationExceptionsForm } from './components/form';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
-type HostIsolationExceptionPaginatedContent = PaginatedContentProps<
-  Immutable<ExceptionListItemSchema>,
-  typeof ExceptionItem
->;
-
-export const HostIsolationExceptionsList = () => {
-  const listItems = useHostIsolationExceptionsSelector(getListItems);
-  const pagination = useHostIsolationExceptionsSelector(getListPagination);
-  const isLoading = useHostIsolationExceptionsSelector(getListIsLoading);
-  const fetchError = useHostIsolationExceptionsSelector(getListFetchError);
-  const location = useHostIsolationExceptionsSelector(getCurrentLocation);
-  const dispatch = useDispatch<Dispatch<HostIsolationExceptionsPageAction>>();
-  const itemToDelete = useHostIsolationExceptionsSelector(getItemToDelete);
-  const navigateCallback = useHostIsolationExceptionsNavigateCallback();
-  const history = useHistory();
-  const license = useLicense();
-  const showFlyout = license.isPlatinumPlus() && !!location.show;
-
-  useEffect(() => {
-    if (!isLoading && listItems.length === 0 && !license.isPlatinumPlus()) {
-      history.replace(getEndpointListPath({ name: 'endpointList' }));
+const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object.freeze({
+  pageTitle: i18n.translate('xpack.securitySolution.hostIsolationExceptions.pageTitle', {
+    defaultMessage: 'Host isolation exceptions',
+  }),
+  pageAboutInfo: i18n.translate('xpack.securitySolution.hostIsolationExceptions.pageAboutInfo', {
+    defaultMessage:
+      'Add a host isolation exception to allow isolated hosts to communicate with specific IPs.',
+  }),
+  pageAddButtonTitle: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.pageAddButtonTitle',
+    {
+      defaultMessage: 'Add host isolation exception',
     }
-  }, [history, isLoading, license, listItems.length]);
+  ),
+  getShowingCountLabel: (total) =>
+    i18n.translate('xpack.securitySolution.hostIsolationExceptions.showingTotal', {
+      defaultMessage:
+        'Showing {total} {total, plural, one {host isolation exception} other {host isolation exceptions}}',
+      values: { total },
+    }),
+  cardActionEditLabel: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.cardActionEditLabel',
+    {
+      defaultMessage: 'Edit exception',
+    }
+  ),
+  cardActionDeleteLabel: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.cardActionDeleteLabel',
+    {
+      defaultMessage: 'Delete exception',
+    }
+  ),
+  flyoutCreateTitle: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.flyoutCreateTitle',
+    {
+      defaultMessage: 'Add host isolation exception',
+    }
+  ),
+  flyoutEditTitle: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.flyoutEditTitle',
+    {
+      defaultMessage: 'Edit host isolation exception',
+    }
+  ),
+  flyoutCreateSubmitButtonLabel: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.flyoutCreateSubmitButtonLabel',
+    { defaultMessage: 'Add host isolation exception' }
+  ),
+  flyoutCreateSubmitSuccess: ({ name }) =>
+    i18n.translate('xpack.securitySolution.hostIsolationExceptions.flyoutCreateSubmitSuccess', {
+      defaultMessage: '"{name}" has been added to your host isolation exception list.',
+      values: { name },
+    }),
+  flyoutEditSubmitSuccess: ({ name }) =>
+    i18n.translate('xpack.securitySolution.hostIsolationExceptions.flyoutEditSubmitSuccess', {
+      defaultMessage: '"{name}" has been updated.',
+      values: { name },
+    }),
+  flyoutDowngradedLicenseDocsInfo: () => {
+    // Host Isolation Exceptions does not need to show a downgrade license message because
+    // this feature is only available for license levels that also includes per-policy functionality.
+    return null;
+  },
+  deleteModalTitle: () =>
+    i18n.translate('xpack.securitySolution.hostIsolationExceptions.deleteModtalTitle', {
+      defaultMessage: 'Delete host isolation exception',
+    }),
+  deleteActionSuccess: (itemName) =>
+    i18n.translate('xpack.securitySolution.hostIsolationExceptions.deleteSuccess', {
+      defaultMessage: '"{itemName}" has been removed from host isolation exception list.',
+      values: { itemName },
+    }),
+  emptyStateTitle: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.emptyStateTitle',
+    {
+      defaultMessage: 'Add your first host isolation exception',
+    }
+  ),
+  emptyStateInfo: i18n.translate('xpack.securitySolution.hostIsolationExceptions.emptyStateInfo', {
+    defaultMessage:
+      'Add a host isolation exception to allow isolated hosts to communicate with specific IPs.',
+  }),
+  emptyStatePrimaryButtonLabel: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.emptyStatePrimaryButtonLabel',
+    { defaultMessage: 'Add host isolation exception' }
+  ),
+  searchPlaceholderInfo: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.searchPlaceholderInfo',
+    {
+      defaultMessage: 'Search on the fields below: name, description, IP',
+    }
+  ),
+});
 
-  const handleOnSearch = useCallback(
-    (query: string) => {
-      navigateCallback({ filter: query });
-    },
-    [navigateCallback]
-  );
-
-  function handleItemComponentProps(element: ExceptionListItemSchema): ArtifactEntryCardProps {
-    const editAction = {
-      icon: 'trash',
-      onClick: () => {
-        navigateCallback({
-          show: 'edit',
-          id: element.id,
-        });
-      },
-      'data-test-subj': 'editHostIsolationException',
-      children: EDIT_HOST_ISOLATION_EXCEPTION_LABEL,
-    };
-    const deleteAction = {
-      icon: 'trash',
-      onClick: () => {
-        dispatch({
-          type: 'hostIsolationExceptionsMarkToDelete',
-          payload: element,
-        });
-      },
-      'data-test-subj': 'deleteHostIsolationException',
-      children: DELETE_HOST_ISOLATION_EXCEPTION_LABEL,
-    };
-    return {
-      item: element,
-      'data-test-subj': `hostIsolationExceptionsCard`,
-      actions: license.isPlatinumPlus() ? [editAction, deleteAction] : [deleteAction],
-    };
-  }
-
-  const handlePaginatedContentChange: HostIsolationExceptionPaginatedContent['onChange'] =
-    useCallback(
-      ({ pageIndex, pageSize }) => {
-        navigateCallback({
-          page_index: pageIndex,
-          page_size: pageSize,
-        });
-      },
-      [navigateCallback]
-    );
-
-  const handleAddButtonClick = useCallback(
-    () =>
-      navigateCallback({
-        show: 'create',
-        id: undefined,
-      }),
-    [navigateCallback]
-  );
+export const HostIsolationExceptionsList = memo(() => {
+  const http = useHttp();
+  const apiClient = HostIsolationExceptionsApiClient.getInstance(http);
+  // There is a flow when the Host Isolation Exceptions page is accessible to the user, even
+  // though they might not have authz to isolate hosts - in a downgrade scenario when entries
+  // still exist. The only thing the user can do is view and delete entries.
+  const canIsolate = useUserPrivileges().endpointPrivileges.canIsolateHost;
 
   return (
-    <AdministrationListPage
-      title={
-        <FormattedMessage
-          id="xpack.securitySolution.hostIsolationExceptions.list.pageTitle"
-          defaultMessage="Host isolation exceptions"
-        />
-      }
-      actions={
-        license.isPlatinumPlus() ? (
-          <EuiButton
-            fill
-            iconType="plusInCircle"
-            isDisabled={showFlyout}
-            onClick={handleAddButtonClick}
-            data-test-subj="hostIsolationExceptionsListAddButton"
-          >
-            <FormattedMessage
-              id="xpack.securitySolution.hostIsolationExceptions.list.addButton"
-              defaultMessage="Add Host isolation exception"
-            />
-          </EuiButton>
-        ) : (
-          []
-        )
-      }
-    >
-      {showFlyout && <HostIsolationExceptionsFormFlyout />}
-
-      {itemToDelete ? <HostIsolationExceptionDeleteModal /> : null}
-
-      {listItems.length ? (
-        <SearchExceptions
-          defaultValue={location.filter}
-          onSearch={handleOnSearch}
-          placeholder={i18n.translate(
-            'xpack.securitySolution.hostIsolationExceptions.search.placeholder',
-            {
-              defaultMessage: 'Search on the fields below: name, description, ip',
-            }
-          )}
-        />
-      ) : null}
-
-      <EuiSpacer size="l" />
-
-      <PaginatedContent<ExceptionListItemSchema, typeof ArtifactEntryCard>
-        items={listItems}
-        ItemComponent={ArtifactEntryCard}
-        itemComponentProps={handleItemComponentProps}
-        onChange={handlePaginatedContentChange}
-        error={fetchError?.message}
-        loading={isLoading}
-        pagination={pagination}
-        contentClassName="host-isolation-exceptions-container"
-        data-test-subj="hostIsolationExceptionsContent"
-        noItemsMessage={<HostIsolationExceptionsEmptyState onAdd={handleAddButtonClick} />}
-      />
-    </AdministrationListPage>
+    <ArtifactListPage
+      apiClient={apiClient}
+      ArtifactFormComponent={HostIsolationExceptionsForm}
+      labels={HOST_ISOLATION_EXCEPTIONS_LABELS}
+      data-test-subj="hostIsolationExceptionsListPage"
+      searchableFields={SEARCHABLE_FIELDS}
+      allowCardCreateAction={canIsolate}
+      allowCardEditAction={canIsolate}
+    />
   );
-};
-
+});
 HostIsolationExceptionsList.displayName = 'HostIsolationExceptionsList';

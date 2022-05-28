@@ -6,12 +6,12 @@
  */
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useLink } from '../../../hooks';
 import type { Section } from '../sections';
 
-import { WithHeaderLayout } from './';
+import { WithHeaderLayout } from '.';
 
 interface Props {
   section?: Section;

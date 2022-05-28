@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsType } from 'kibana/server';
+import { SavedObjectsType } from '@kbn/core/server';
 import {
   createDashboardSavedObjectTypeMigrations,
   DashboardSavedObjectTypeMigrationsDeps,
@@ -19,7 +19,8 @@ export const createDashboardSavedObjectType = ({
 }): SavedObjectsType => ({
   name: 'dashboard',
   hidden: false,
-  namespaceType: 'single',
+  namespaceType: 'multiple-isolated',
+  convertToMultiNamespaceTypeVersion: '8.0.0',
   management: {
     icon: 'dashboardApp',
     defaultSearchField: 'title',
@@ -49,6 +50,14 @@ export const createDashboardSavedObjectType = ({
           pause: { type: 'boolean', index: false, doc_values: false },
           section: { type: 'integer', index: false, doc_values: false },
           value: { type: 'integer', index: false, doc_values: false },
+        },
+      },
+      controlGroupInput: {
+        properties: {
+          controlStyle: { type: 'keyword', index: false, doc_values: false },
+          chainingSystem: { type: 'keyword', index: false, doc_values: false },
+          panelsJSON: { type: 'text', index: false },
+          ignoreParentSettingsJSON: { type: 'text', index: false },
         },
       },
       timeFrom: { type: 'keyword', index: false, doc_values: false },

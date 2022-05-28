@@ -85,6 +85,10 @@ export const ProviderContentWrapper = styled.span`
   > span.euiToolTipAnchor {
     display: block; /* allow EuiTooltip content to be truncatable */
   }
+
+  > span.euiToolTipAnchor.eui-textTruncate {
+    display: inline-block; /* do not override display when a tooltip is truncated via eui-textTruncate */
+  }
 `;
 
 type RenderFunctionProp = (
@@ -98,6 +102,8 @@ interface Props {
   hideTopN?: boolean;
   isDraggable?: boolean;
   render: RenderFunctionProp;
+  isAggregatable?: boolean;
+  fieldType?: string;
   timelineId?: string;
   truncate?: boolean;
   onFilterAdded?: () => void;
@@ -127,6 +133,8 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
   hideTopN = false,
   onFilterAdded,
   render,
+  fieldType = '',
+  isAggregatable = false,
   timelineId,
   truncate,
 }) => {
@@ -150,6 +158,8 @@ const DraggableOnWrapperComponent: React.FC<Props> = ({
     hideTopN,
     onFilterAdded,
     render,
+    fieldType,
+    isAggregatable,
     timelineId,
     truncate,
   });
@@ -309,6 +319,8 @@ const DraggableWrapperComponent: React.FC<Props> = ({
   isDraggable = false,
   onFilterAdded,
   render,
+  isAggregatable = false,
+  fieldType = '',
   timelineId,
   truncate,
 }) => {
@@ -323,6 +335,8 @@ const DraggableWrapperComponent: React.FC<Props> = ({
     dataProvider,
     hideTopN,
     isDraggable,
+    isAggregatable,
+    fieldType,
     onFilterAdded,
     render,
     timelineId,
@@ -368,6 +382,8 @@ const DraggableWrapperComponent: React.FC<Props> = ({
       dataProvider={dataProvider}
       hideTopN={hideTopN}
       onFilterAdded={onFilterAdded}
+      fieldType={fieldType}
+      isAggregatable={isAggregatable}
       render={render}
       timelineId={timelineId}
       truncate={truncate}

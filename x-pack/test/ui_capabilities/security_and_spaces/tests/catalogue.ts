@@ -46,36 +46,53 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
           case 'dual_privileges_all at everything_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything except ml, monitoring, and ES features are enabled
+            // everything except monitoring, and ES features are enabled
             const expected = mapValues(
               uiCapabilities.value!.catalogue,
               (enabled, catalogueId) =>
-                catalogueId !== 'ml' &&
-                catalogueId !== 'ml_file_data_visualizer' &&
-                catalogueId !== 'monitoring' &&
-                catalogueId !== 'osquery' &&
-                !esFeatureExceptions.includes(catalogueId)
+                catalogueId !== 'monitoring' && !esFeatureExceptions.includes(catalogueId)
             );
             expect(uiCapabilities.value!.catalogue).to.eql(expected);
             break;
           }
-          case 'everything_space_all at everything_space':
+          case 'everything_space_all at everything_space': {
+            expect(uiCapabilities.success).to.be(true);
+            expect(uiCapabilities.value).to.have.property('catalogue');
+            // everything except spaces, monitoring, the enterprise search suite, and ES features are enabled
+            // (easier to say: all "proper" Kibana features are enabled)
+            const exceptions = [
+              'monitoring',
+              'enterpriseSearch',
+              'enterpriseSearchContent',
+              'elasticsearch',
+              'appSearch',
+              'workplaceSearch',
+              'spaces',
+              ...esFeatureExceptions,
+            ];
+            const expected = mapValues(
+              uiCapabilities.value!.catalogue,
+              (enabled, catalogueId) => !exceptions.includes(catalogueId)
+            );
+            expect(uiCapabilities.value!.catalogue).to.eql(expected);
+            break;
+          }
           case 'global_read at everything_space':
           case 'dual_privileges_read at everything_space':
           case 'everything_space_read at everything_space': {
             expect(uiCapabilities.success).to.be(true);
             expect(uiCapabilities.value).to.have.property('catalogue');
-            // everything except spaces, ml, monitoring, the enterprise search suite, and ES features are enabled
+            // everything except spaces, ml_file_data_visualizer, monitoring, the enterprise search suite, and ES features are enabled
             // (easier to say: all "proper" Kibana features are enabled)
             const exceptions = [
-              'ml',
               'ml_file_data_visualizer',
               'monitoring',
               'enterpriseSearch',
+              'enterpriseSearchContent',
+              'elasticsearch',
               'appSearch',
               'workplaceSearch',
               'spaces',
-              'osquery',
               ...esFeatureExceptions,
             ];
             const expected = mapValues(

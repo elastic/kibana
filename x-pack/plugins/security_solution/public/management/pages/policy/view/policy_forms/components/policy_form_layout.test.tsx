@@ -9,7 +9,7 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 import { PolicyFormLayout } from './policy_form_layout';
-import '../../../../../../common/mock/match_media.ts';
+import '../../../../../../common/mock/match_media';
 import { EndpointDocGenerator } from '../../../../../../../common/endpoint/generate_data';
 import {
   AppContextTestRender,
@@ -18,6 +18,7 @@ import {
 import { getPolicyDetailPath, getEndpointListPath } from '../../../../../common/routing';
 import { policyListApiPathHandlers } from '../../../store/test_mock_utils';
 import { licenseService } from '../../../../../../common/hooks/use_license';
+import { PACKAGE_POLICY_API_ROOT, AGENT_API_ROUTES } from '@kbn/fleet-plugin/common';
 
 jest.mock('../../../../../../common/hooks/use_license');
 
@@ -64,7 +65,7 @@ describe('Policy Form Layout', () => {
         const [path] = args;
         if (typeof path === 'string') {
           // GET datasouce
-          if (path === '/api/fleet/package_policies/1') {
+          if (path === `${PACKAGE_POLICY_API_ROOT}/1`) {
             asyncActions = asyncActions.then<unknown>(async (): Promise<unknown> => sleep());
             return Promise.resolve({
               item: policyPackagePolicy,
@@ -73,7 +74,7 @@ describe('Policy Form Layout', () => {
           }
 
           // GET Agent status for agent policy
-          if (path === '/api/fleet/agent-status') {
+          if (path === `${AGENT_API_ROUTES.STATUS_PATTERN}`) {
             asyncActions = asyncActions.then(async () => sleep());
             return Promise.resolve({
               results: { events: 0, total: 5, online: 3, error: 1, offline: 1 },
@@ -118,7 +119,7 @@ describe('Policy Form Layout', () => {
       cancelbutton.simulate('click', { button: 0 });
       const navigateToAppMockedCalls = coreStart.application.navigateToApp.mock.calls;
       expect(navigateToAppMockedCalls[navigateToAppMockedCalls.length - 1]).toEqual([
-        'securitySolution',
+        'securitySolutionUI',
         { path: endpointListPath },
       ]);
     });
@@ -156,7 +157,7 @@ describe('Policy Form Layout', () => {
           asyncActions = asyncActions.then(async () => sleep());
           const [path] = args;
           if (typeof path === 'string') {
-            if (path === '/api/fleet/package_policies/1') {
+            if (path === `${PACKAGE_POLICY_API_ROOT}/1`) {
               return Promise.resolve({
                 item: policyPackagePolicy,
                 success: true,
@@ -182,7 +183,7 @@ describe('Policy Form Layout', () => {
         );
         expect(warningCallout).toHaveLength(1);
         expect(warningCallout.text()).toEqual(
-          'This action will update 5 hostsSaving these changes will apply updates to all endpoints assigned to this agent policy.'
+          'This action will update 5 endpointsSaving these changes will apply updates to all endpoints assigned to this agent policy.'
         );
       });
       it('should close dialog if cancel button is clicked', () => {
@@ -201,7 +202,7 @@ describe('Policy Form Layout', () => {
 
         // API should be called
         await asyncActions;
-        expect(http.put.mock.calls[0][0]).toEqual(`/api/fleet/package_policies/1`);
+        expect(http.put.mock.calls[0][0]).toEqual(`${PACKAGE_POLICY_API_ROOT}/1`);
         policyFormLayoutView.update();
 
         // Toast notification should be shown

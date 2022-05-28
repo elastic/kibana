@@ -10,6 +10,6 @@
   "extraPublicDirs": ["common"],
   "server": true,
   "ui": true,
-  "requiredPlugins": ["alerting", "cases", "data", "dataEnhanced", "kibanaReact", "kibanaUtils"],
-  "optionalPlugins": []
+  "requiredPlugins": ["alerting", "cases", "data", "kibanaReact", "kibanaUtils"],
+  "optionalPlugins": ["security"]
 }

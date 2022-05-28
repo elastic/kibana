@@ -16,7 +16,7 @@ import {
   EuiScreenReaderOnly,
   EuiPanel,
 } from '@elastic/eui';
-import { Stats } from '../../beats';
+import { Stats } from '..';
 import { formatMetric } from '../../../lib/format_number';
 import { EuiMonitoringTable } from '../../table';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +24,7 @@ import { BEATS_SYSTEM_ID } from '../../../../common/constants';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { ListingCallOut } from '../../setup_mode/listing_callout';
 import { SetupModeBadge } from '../../setup_mode/badge';
-import { FormattedMessage } from '@kbn/i18n/react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
 import { SetupModeFeature } from '../../../../common/enums';
 
