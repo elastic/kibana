@@ -14,6 +14,10 @@ import { DataView } from '../data_views';
 
 type FieldMap = Map<DataViewField['name'], DataViewField>;
 
+interface ToSpecOptions {
+  getFormatterForField?: DataView['getFormatterForField'];
+}
+
 /**
  * Interface for data view field list which _extends_ the array class
  */
@@ -64,7 +68,7 @@ export interface IIndexPatternFieldList extends Array<DataViewField> {
    * @param options optionally provide a function to get field formatter for fields
    * @return map of field specs by name
    */
-  toSpec(options?: { getFormatterForField?: DataView['getFormatterForField'] }): DataViewFieldMap;
+  toSpec(options?: ToSpecOptions): DataViewFieldMap;
 }
 
 // extending the array class and using a constructor doesn't work well

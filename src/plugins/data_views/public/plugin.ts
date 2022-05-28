@@ -15,7 +15,8 @@ import {
   DataViewsPublicStartDependencies,
 } from './types';
 
-import { onRedirectNoIndexPattern, DataViewsApiClient } from '.';
+import { DataViewsApiClient } from '.';
+import { onRedirectNoIndexPattern } from './data_views';
 import { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
 
 import { UiSettingsPublicToCommon } from './ui_settings_wrapper';

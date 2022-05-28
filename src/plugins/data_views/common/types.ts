@@ -190,20 +190,51 @@ export interface SavedObjectsClientCommonFindArgs {
   searchFields?: string[];
 }
 
+/**
+ * Common interface for the saved objects client
+ * @public
+ */
 export interface SavedObjectsClientCommon {
+  /**
+   * Search for saved objects
+   * @param options - options for search
+   */
   find: <T = unknown>(options: SavedObjectsClientCommonFindArgs) => Promise<Array<SavedObject<T>>>;
+  /**
+   * Get a single saved object by id
+   * @param type - type of saved object
+   * @param id - id of saved object
+   */
   get: <T = unknown>(type: string, id: string) => Promise<SavedObject<T>>;
+  /**
+   * Update a saved object by id
+   * @param type - type of saved object
+   * @param id - id of saved object
+   * @param attributes - attributes to update
+   * @param options - client options
+   */
   update: (
     type: string,
     id: string,
     attributes: Record<string, any>,
     options: Record<string, any>
   ) => Promise<SavedObject>;
+  /**
+   * Create a saved object
+   * @param type - type of saved object
+   * @param attributes - attributes to set
+   * @param options - client options
+   */
   create: (
     type: string,
     attributes: Record<string, any>,
     options: Record<string, any>
   ) => Promise<SavedObject>;
+  /**
+   * Delete a saved object by id
+   * @param type - type of saved object
+   * @param id - id of saved object
+   */
   delete: (type: string, id: string) => Promise<{}>;
 }
 
@@ -298,8 +329,8 @@ export interface FieldSpecExportFmt {
 }
 
 /**
- * @public
  * Serialized version of DataViewField
+ * @public
  */
 export interface FieldSpec extends DataViewFieldBase {
   /**
