@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
   const find = getService('find');
+  const security = getService('security');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'header']);
 
   const USERS_PATH = 'security/users';
@@ -22,14 +23,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ROLES_PATH = 'security/roles';
   const EDIT_ROLES_PATH = `${ROLES_PATH}/edit`;
   const CLONE_ROLES_PATH = `${ROLES_PATH}/clone`;
-  const security = getService('security');
 
   describe('Management', function () {
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await PageObjects.security.initTests();
       await security.testUser.setRoles(['manage_security']);
+      await PageObjects.security.initTests();
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });

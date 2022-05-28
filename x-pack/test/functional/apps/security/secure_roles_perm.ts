@@ -24,12 +24,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const security = getService('security');
 
   describe('secure roles and permissions', function () {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('users');
-      await security.testUser.setRoles(['manage_security']);
+      await security.testUser.setRoles(['manage_security', 'kibana_admin']);
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(
