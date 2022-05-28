@@ -61,23 +61,27 @@ export function createGenerateDocRecordsStream({
 
           for (const hit of resp.body.hits.hits) {
             remainingHits -= 1;
-            stats.archivedDoc(hit._index);
 
             if (hasDatastreams && !indexToDatastream.has(hit._index)) {
               const {
                 [hit._index]: { data_stream },
-              } = await client.indices.get({ index: hit._index });
+              } = await client.indices.get({ index: hit._index, filter_path: ['*.data_stream'] });
               indexToDatastream.set(hit._index, data_stream);
             }
+
+            // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
+            // when it is loaded it can skip migration, if possible
+            const index =
+              hit._index.startsWith('.kibana') && !keepIndexNames
+                ? '.kibana_1'
+                : indexToDatastream.get(hit._index) || hit._index;
+
+            stats.archivedDoc(index);
 
             this.push({
               type: 'doc',
               value: {
-                // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
-                // when it is loaded it can skip migration, if possible
-                index:
-                  hit._index.startsWith('.kibana') && !keepIndexNames ? '.kibana_1' : hit._index,
-                data_stream: indexToDatastream.get(hit._index),
+                index,
                 id: hit._id,
                 source: hit._source,
               },
