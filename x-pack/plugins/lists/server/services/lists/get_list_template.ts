@@ -24,5 +24,5 @@ export const getListTemplate = (index: string): Record<string, unknown> => ({
       },
     },
     mappings: listMappings,
-  },  
+  },
 });
