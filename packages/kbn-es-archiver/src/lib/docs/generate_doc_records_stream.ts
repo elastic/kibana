@@ -69,19 +69,17 @@ export function createGenerateDocRecordsStream({
               indexToDatastream.set(hit._index, dataStream);
             }
 
-            // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
-            // when it is loaded it can skip migration, if possible
-            const indexOrDataStream =
-              hit._index.startsWith('.kibana') && !keepIndexNames
-                ? '.kibana_1'
-                : indexToDatastream.get(hit._index) || hit._index;
-
-            stats.archivedDoc(indexOrDataStream);
+            const dataStream = indexToDatastream.get(hit._index);
+            stats.archivedDoc(dataStream || hit._index);
 
             this.push({
               type: 'doc',
               value: {
-                index: indexOrDataStream,
+                // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
+                // when it is loaded it can skip migration, if possible
+                index:
+                  hit._index.startsWith('.kibana') && !keepIndexNames ? '.kibana_1' : hit._index,
+                data_stream: dataStream,
                 id: hit._id,
                 source: hit._source,
               },

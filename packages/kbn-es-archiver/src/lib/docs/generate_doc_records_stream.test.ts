@@ -251,7 +251,7 @@ describe('esArchiver: createGenerateDocRecordsStream()', () => {
         progress,
       }),
       createMapStream((record: any) => {
-        return `${record.value.index}:${record.value.id}`;
+        return `${record.value.data_stream}:${record.value.id}`;
       }),
       createConcatStream([]),
     ]);
