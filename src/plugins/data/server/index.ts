@@ -39,11 +39,7 @@ export { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
  */
 
 export type { FieldDescriptor, IndexPatternsServiceStart } from './data_views';
-export {
-  IndexPatternsFetcher,
-  shouldReadFieldFromDocValues,
-  getCapabilitiesForRollupIndices,
-} from './data_views';
+export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './data_views';
 
 export type { IndexPatternAttributes } from '../common';
 export {

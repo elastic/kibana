@@ -10,7 +10,6 @@ export { getFieldByName, findIndexPatternById } from './utils';
 export type { FieldDescriptor } from './fetcher';
 export {
   IndexPatternsFetcher,
-  shouldReadFieldFromDocValues,
   mergeCapabilitiesWithFields,
   getCapabilitiesForRollupIndices,
 } from './fetcher';
