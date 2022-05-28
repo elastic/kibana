@@ -35,12 +35,12 @@ export function createDeleteIndexStream(client: Client, stats: Stats, log: Tooli
           }
         } else if (record.type === 'data_stream') {
           const {
-            data_stream,
+            data_stream: dataStream,
             template: { name },
           } = record.value;
 
-          await deleteDataStream(client, data_stream, name);
-          stats.deletedDataStream(data_stream, name);
+          await deleteDataStream(client, dataStream, name);
+          stats.deletedDataStream(dataStream, name);
         } else {
           this.push(record);
         }

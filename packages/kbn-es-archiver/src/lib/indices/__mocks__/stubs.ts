@@ -49,9 +49,9 @@ export const createStubIndexRecord = (index: string, aliases = {}) => ({
   value: { index, aliases },
 });
 
-export const createStubDataStreamRecord = (data_stream: string, template: string) => ({
+export const createStubDataStreamRecord = (dataStream: string, template: string) => ({
   type: 'data_stream',
-  value: { data_stream, template: { name: template } },
+  value: { data_stream: dataStream, template: { name: template } },
 });
 
 export const createStubDocRecord = (index: string, id: number) => ({

@@ -16,20 +16,23 @@ const headers = {
   headers: ES_CLIENT_HEADERS,
 };
 
-const getDsIndexTemplate = async (client: Client, data_stream: string) => {
-  const { data_streams } = await client.indices.getDataStream({ name: data_stream }, headers);
-  const templateName = data_streams[0].template;
-  const { index_templates } = await client.indices.getIndexTemplate(
+const getDsIndexTemplate = async (client: Client, dataStream: string) => {
+  const { data_streams: dataStreams } = await client.indices.getDataStream(
+    { name: dataStream },
+    headers
+  );
+  const templateName = dataStreams[0].template;
+  const { index_templates: indexTemplates } = await client.indices.getIndexTemplate(
     { name: templateName },
     headers
   );
   const {
-    index_template: { index_patterns, template },
-  } = index_templates[0];
+    index_template: { index_patterns: indexPatterns, template },
+  } = indexTemplates[0];
 
   return {
     name: templateName,
-    index_patterns,
+    index_patterns: indexPatterns,
     template,
     data_stream: {},
   };
@@ -79,23 +82,25 @@ export function createGenerateIndexRecordsStream({
 
         const seenDatastreams = new Set();
 
-        for (const [index, { data_stream, settings, mappings }] of Object.entries(resp)) {
-          if (data_stream) {
-            log.info(`${index} will be saved as data_stream ${data_stream}`);
+        for (const [index, { data_stream: dataStream, settings, mappings }] of Object.entries(
+          resp
+        )) {
+          if (dataStream) {
+            log.info(`${index} will be saved as data_stream ${dataStream}`);
 
-            if (seenDatastreams.has(data_stream)) {
-              log.info(`${data_stream} is already archived`);
+            if (seenDatastreams.has(dataStream)) {
+              log.info(`${dataStream} is already archived`);
               continue;
             }
 
-            const template = await getDsIndexTemplate(client, data_stream);
+            const template = await getDsIndexTemplate(client, dataStream);
 
-            seenDatastreams.add(data_stream);
-            stats.archivedIndex(data_stream, { template });
+            seenDatastreams.add(dataStream);
+            stats.archivedIndex(dataStream, { template });
             this.push({
               type: 'data_stream',
               value: {
-                data_stream,
+                data_stream: dataStream,
                 template,
               },
             });

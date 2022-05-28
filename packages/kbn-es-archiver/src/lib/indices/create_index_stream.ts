@@ -60,7 +60,7 @@ export function createCreateIndexStream({
   async function handleDataStream(record: DocRecord, attempts = 1) {
     if (docsOnly) return;
 
-    const { data_stream, template } = record.value as {
+    const { data_stream: dataStream, template } = record.value as {
       data_stream: string;
       template: IndicesPutIndexTemplateRequest;
     };
@@ -71,25 +71,25 @@ export function createCreateIndexStream({
       });
 
       await client.indices.createDataStream(
-        { name: data_stream },
+        { name: dataStream },
         {
           headers: ES_CLIENT_HEADERS,
         }
       );
-      stats.createdDataStream(data_stream, template.name, { template });
+      stats.createdDataStream(dataStream, template.name, { template });
     } catch (err) {
       if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception' || attempts >= 3) {
         throw err;
       }
 
       if (skipExisting) {
-        skipDocsFromIndices.add(data_stream);
-        stats.skippedIndex(data_stream);
+        skipDocsFromIndices.add(dataStream);
+        stats.skippedIndex(dataStream);
         return;
       }
 
-      await deleteDataStream(client, data_stream, template.name);
-      stats.deletedDataStream(data_stream, template.name);
+      await deleteDataStream(client, dataStream, template.name);
+      stats.deletedDataStream(dataStream, template.name);
       await handleDataStream(record, attempts + 1);
     }
   }

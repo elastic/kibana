@@ -64,24 +64,24 @@ export function createGenerateDocRecordsStream({
 
             if (hasDatastreams && !indexToDatastream.has(hit._index)) {
               const {
-                [hit._index]: { data_stream },
+                [hit._index]: { data_stream: dataStream },
               } = await client.indices.get({ index: hit._index, filter_path: ['*.data_stream'] });
-              indexToDatastream.set(hit._index, data_stream);
+              indexToDatastream.set(hit._index, dataStream);
             }
 
             // if keepIndexNames is false, rewrite the .kibana_* index to .kibana_1 so that
             // when it is loaded it can skip migration, if possible
-            const index =
+            const indexOrDataStream =
               hit._index.startsWith('.kibana') && !keepIndexNames
                 ? '.kibana_1'
                 : indexToDatastream.get(hit._index) || hit._index;
 
-            stats.archivedDoc(index);
+            stats.archivedDoc(indexOrDataStream);
 
             this.push({
               type: 'doc',
               value: {
-                index,
+                index: indexOrDataStream,
                 id: hit._id,
                 source: hit._source,
               },
