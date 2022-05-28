@@ -150,6 +150,7 @@ export const createStubClient = (
 
       createDataStream: sinon.spy(async ({ name }) => {}),
       deleteDataStream: sinon.spy(async ({ name }) => {}),
+      putIndexTemplate: sinon.spy(async ({ name }) => {}),
       deleteIndexTemplate: sinon.spy(async ({ name }) => {}),
     },
   } as any);
