@@ -28,7 +28,6 @@ export {
   getFieldSubtypeNested,
 } from '../common';
 
-export type { IndexPatternsContract } from './data_views';
 export type { DataViewListItem } from './data_views';
 export {
   IndexPatternsService,
