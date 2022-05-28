@@ -43,33 +43,33 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
           }
         }
 
+        const policyExists = await lists.getListPolicyExists();
+        const policyListItemExists = await lists.getListItemPolicyExists();
+
+        if (!policyExists) {
+          await lists.setListPolicy();
+        }
+        if (!policyListItemExists) {
+          await lists.setListItemPolicy();
+        }
+
+        const templateExists = await lists.getListTemplateExists();
+        const templateListItemsExists = await lists.getListItemTemplateExists();
+
+        if (!templateExists) {
+          await lists.setListTemplate();
+        }
+
+        if (!templateListItemsExists) {
+          await lists.setListItemTemplate();
+        }
+
         if (listIndexExists && listItemIndexExists) {
           return siemResponse.error({
             body: `index: "${lists.getListIndex()}" and "${lists.getListItemIndex()}" already exists`,
             statusCode: 409,
           });
         } else {
-          const policyExists = await lists.getListPolicyExists();
-          const policyListItemExists = await lists.getListItemPolicyExists();
-
-          if (!policyExists) {
-            await lists.setListPolicy();
-          }
-          if (!policyListItemExists) {
-            await lists.setListItemPolicy();
-          }
-
-          const templateExists = await lists.getListTemplateExists();
-          const templateListItemsExists = await lists.getListItemTemplateExists();
-
-          if (!templateExists) {
-            await lists.setListTemplate();
-          }
-
-          if (!templateListItemsExists) {
-            await lists.setListItemTemplate();
-          }
-
           if (!listIndexExists) {
             await lists.createListBootStrapIndex();
           }
