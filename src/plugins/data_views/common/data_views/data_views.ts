@@ -40,7 +40,7 @@ import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../erro
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
-export type IndexPatternSavedObjectAttrs = Pick<DataViewAttributes, 'title' | 'type' | 'typeMeta'>;
+export type DataViewSavedObjectAttrs = Pick<DataViewAttributes, 'title' | 'type' | 'typeMeta'>;
 
 export type IndexPatternListSavedObjectAttrs = Pick<
   DataViewAttributes,
@@ -146,7 +146,7 @@ export interface DataViewsServicePublicMethods {
   /**
    * Get populated data view saved object cache
    */
-  getCache: () => Promise<Array<SavedObject<IndexPatternSavedObjectAttrs>> | null | undefined>;
+  getCache: () => Promise<Array<SavedObject<DataViewSavedObjectAttrs>> | null | undefined>;
   /**
    * If user can save data view, return true.
    */
@@ -212,7 +212,7 @@ export interface DataViewsServicePublicMethods {
 export class DataViewsService {
   private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientCommon;
-  private savedObjectsCache?: Array<SavedObject<IndexPatternSavedObjectAttrs>> | null;
+  private savedObjectsCache?: Array<SavedObject<DataViewSavedObjectAttrs>> | null;
   private apiClient: IDataViewsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
   /**
@@ -257,7 +257,7 @@ export class DataViewsService {
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
-    this.ensureDefaultDataView = createEnsureDefaultDataView(uiSettings, onRedirectNoIndexPattern);
+    this.ensureDefaultDataView = createEnsureDefaultDataView(onRedirectNoIndexPattern);
     this.getCanSave = getCanSave;
 
     this.dataViewCache = createDataViewCache();
@@ -267,7 +267,7 @@ export class DataViewsService {
    * Refresh cache of index pattern ids and titles
    */
   private async refreshSavedObjectsCache() {
-    const so = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+    const so = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
       fields: ['title', 'type', 'typeMeta'],
       perPage: 10000,
@@ -310,7 +310,7 @@ export class DataViewsService {
    * @returns DataView[]
    */
   find = async (search: string, size: number = 10): Promise<DataView[]> => {
-    const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+    const savedObjects = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
       fields: ['title'],
       search,

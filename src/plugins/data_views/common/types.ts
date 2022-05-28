@@ -35,9 +35,22 @@ export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
 
 export type RuntimeTypeExceptComposite = Exclude<RuntimeType, 'composite'>;
 
+/**
+ * Runtime field definition
+ * @public
+ */
 export interface RuntimeFieldBase {
+  /**
+   * Type of runtime field
+   */
   type: RuntimeType;
+  /**
+   * Runtime field script
+   */
   script?: {
+    /**
+     * Script source
+     */
     source: string;
   };
 }
