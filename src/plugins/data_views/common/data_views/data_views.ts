@@ -939,6 +939,11 @@ export class DataViewsService {
  */
 export class IndexPatternsService extends DataViewsService {}
 
+/**
+ * Data views service interface
+ * @public
+ */
+
 export type DataViewsContract = PublicMethodsOf<DataViewsService>;
 
 /**

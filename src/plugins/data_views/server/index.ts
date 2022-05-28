@@ -9,7 +9,11 @@
 export { getFieldByName, findIndexPatternById } from './utils';
 export type { FieldDescriptor } from './fetcher';
 export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './fetcher';
-export type { IndexPatternsServiceStart } from './types';
+export type {
+  IndexPatternsServiceStart,
+  DataViewsServerPluginSetupDependencies,
+  DataViewsServerPluginStartDependencies,
+} from './types';
 
 import { PluginInitializerContext } from '@kbn/core/server';
 import { DataViewsServerPlugin } from './plugin';

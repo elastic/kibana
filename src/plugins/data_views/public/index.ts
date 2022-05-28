@@ -32,6 +32,8 @@ export {
   getFieldSubtypeNested,
 } from '../common';
 
+export { DataViewsPublicSetupDependencies, DataViewsPublicStartDependencies } from './types';
+
 export type { IndexPatternsContract } from './data_views';
 export type { DataViewListItem } from './data_views';
 export {

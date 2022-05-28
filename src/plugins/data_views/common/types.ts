@@ -23,9 +23,15 @@ export type FieldFormatMap = Record<string, SerializedFieldFormat>;
 
 /**
  * Runtime field - type of value returned
+ * @public
  */
 
 export type RuntimeType = typeof RUNTIME_FIELD_TYPES[number];
+
+/**
+ * Primitive runtime field types
+ * @public
+ */
 
 export type RuntimeTypeExceptComposite = Exclude<RuntimeType, 'composite'>;
 
@@ -295,6 +301,9 @@ export interface TypeMeta {
   };
 }
 
+/**
+ * Data View type. Default or rollup
+ */
 export enum DataViewType {
   DEFAULT = 'default',
   ROLLUP = 'rollup',

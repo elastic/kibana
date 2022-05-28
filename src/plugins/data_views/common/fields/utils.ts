@@ -57,6 +57,7 @@ export function isDataViewFieldSubtypeMulti(field: HasSubtype) {
 
 /**
  * Returns subtype data for multi field
+ * @public
  * @param field field to get subtype data from
  */
 

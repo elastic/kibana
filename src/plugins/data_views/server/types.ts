@@ -46,13 +46,36 @@ export interface DataViewsServerPluginSetup {}
 
 export type IndexPatternsServiceStart = DataViewsServerPluginStart;
 
+/**
+ * Data Views server setup dependencies
+ * @public
+ */
 export interface DataViewsServerPluginSetupDependencies {
+  /**
+   * Fie formats
+   */
   fieldFormats: FieldFormatsSetup;
+  /**
+   * Expressions
+   */
   expressions: ExpressionsServerSetup;
+  /**
+   * Usage collection
+   */
   usageCollection?: UsageCollectionSetup;
 }
 
+/**
+ * Data Views server start dependencies
+ * @public
+ */
 export interface DataViewsServerPluginStartDependencies {
+  /**
+   * Field formats
+   */
   fieldFormats: FieldFormatsStart;
+  /**
+   * Logger
+   */
   logger: Logger;
 }

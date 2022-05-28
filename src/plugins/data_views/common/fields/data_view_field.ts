@@ -22,6 +22,16 @@ import {
 } from './utils';
 
 /**
+ * Optional format getter when serializing a field
+ */
+export interface ToSpecConfig {
+  /**
+   * Field format getter
+   */
+  getFormatterForField?: DataView['getFormatterForField'];
+}
+
+/**
  *  @public
  * Data view field class
  * */
@@ -30,6 +40,10 @@ export class DataViewField implements IFieldType {
   // not writable or serialized
   private readonly kbnFieldType: KbnFieldType;
 
+  /**
+   * DataView constructor
+   * @param spec Configuration for the field
+   */
   constructor(spec: FieldSpec) {
     this.spec = { ...spec, type: spec.name === '_source' ? '_source' : spec.type };
 
@@ -45,7 +59,8 @@ export class DataViewField implements IFieldType {
   }
 
   /**
-   * set count, which is used for field popularity in discover
+   * Set count, which is used for field popularity in discover
+   * @param count count number
    */
   public set count(count: number) {
     this.spec.count = count;
@@ -61,6 +76,7 @@ export class DataViewField implements IFieldType {
 
   /**
    * Sets runtime field definition or unsets if undefined is provided
+   * @param runtimeField runtime field definition
    */
   public set runtimeField(runtimeField: RuntimeFieldSpec | undefined) {
     this.spec.runtimeField = runtimeField;
@@ -75,6 +91,7 @@ export class DataViewField implements IFieldType {
 
   /**
    * Sets scripted field painless code
+   * @param script Painless code
    */
   public set script(script) {
     this.spec.script = script;
@@ -89,6 +106,7 @@ export class DataViewField implements IFieldType {
 
   /**
    * Sets scripted field langauge
+   * @param lang Scripted field language
    */
   public set lang(lang) {
     this.spec.lang = lang;
@@ -104,6 +122,7 @@ export class DataViewField implements IFieldType {
 
   /**
    * Sets custom label for field, or unsets if passed undefined
+   * @param customLabel custom label value
    */
   public set customLabel(customLabel) {
     this.spec.customLabel = customLabel;
@@ -117,7 +136,8 @@ export class DataViewField implements IFieldType {
   }
 
   /**
-   * sSts conflict descriptions for field
+   * Sets conflict descriptions for field
+   * @param conflictDescriptions conflict descriptions
    */
 
   public set conflictDescriptions(conflictDescriptions) {
@@ -288,8 +308,7 @@ export class DataViewField implements IFieldType {
   }
 
   /**
-   *
-   * @returns JSON version of field
+   * JSON version of field
    */
   public toJSON() {
     return {
@@ -314,11 +333,9 @@ export class DataViewField implements IFieldType {
    * @param param0 provide a method to get a field formatter
    * @returns field in serialized form - field spec
    */
-  public toSpec({
-    getFormatterForField,
-  }: {
-    getFormatterForField?: DataView['getFormatterForField'];
-  } = {}): FieldSpec {
+  public toSpec(config: ToSpecConfig = {}): FieldSpec {
+    const { getFormatterForField } = config;
+
     return {
       count: this.count,
       script: this.script,

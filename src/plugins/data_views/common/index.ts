@@ -22,6 +22,7 @@ export {
   isMultiField,
   getFieldSubtypeMulti,
   getFieldSubtypeNested,
+  ToSpecConfig,
 } from './fields';
 export type {
   FieldFormatMap,
@@ -51,6 +52,7 @@ export type {
   DataViewSpec,
   SourceFilter,
   HasDataService,
+  RuntimeTypeExceptComposite,
 } from './types';
 export { DataViewType } from './types';
 export type { IndexPatternsContract, DataViewsContract } from './data_views';
