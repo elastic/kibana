@@ -33,10 +33,10 @@ const getDsIndexTemplate = async (client: Client, dataStream: string) => {
 
   const components = await Promise.all(
     composedOf.map(async (component) => {
-      const { component_templates } = await client.cluster.getComponentTemplate({
-        name: component,
-      });
-      return component_templates[0].component_template.template;
+      const { component_templates: componentTemplates } = await client.cluster.getComponentTemplate(
+        { name: component }
+      );
+      return componentTemplates[0].component_template.template;
     })
   );
 
