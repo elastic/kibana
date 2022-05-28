@@ -63,8 +63,8 @@ export type {
   DataViewsPublicPluginStart,
   DataViewsContract,
   HasDataViewsResponse,
-  IndicesResponse,
-  IndicesResponseModified,
+  // IndicesResponse,
+  // IndicesResponseModified,
   IndicesViaSearchResponse,
 } from './types';
 

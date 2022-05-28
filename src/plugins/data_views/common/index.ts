@@ -54,9 +54,10 @@ export type {
   HasDataService,
   RuntimeTypeExceptComposite,
   RuntimeFieldBase,
+  FieldConfiguration,
 } from './types';
 export { DataViewType } from './types';
-export type { IndexPatternsContract, DataViewsContract } from './data_views';
+export type { IndexPatternsContract, DataViewsContract, DataViewsServiceDeps } from './data_views';
 export type { EnsureDefaultDataView } from './data_views/ensure_default_data_view';
 export { IndexPatternsService, DataViewsService } from './data_views';
 export type {

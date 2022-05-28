@@ -68,9 +68,22 @@ export interface RuntimeFieldSpec extends RuntimeFieldBase {
   >;
 }
 
+/**
+ * Field attributes that are user configurable
+ * @public
+ */
 export interface FieldConfiguration {
+  /**
+   * Field format in serialized form
+   */
   format?: SerializedFieldFormat | null;
+  /**
+   * Custom label
+   */
   customLabel?: string;
+  /**
+   * Popularity - used for discover
+   */
   popularity?: number;
 }
 
