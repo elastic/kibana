@@ -16,17 +16,15 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { Stats } from '../stats';
 import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
+import { deleteDataStream } from './delete_data_stream';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
+import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 interface DocRecord {
   value: estypes.IndicesIndexState & {
     index: string;
     type: string;
-    dataStream: {
-      name: string;
-      template: string;
-      index_patterns: string[];
-    };
+    template?: IndicesPutIndexTemplateRequest;
   };
 }
 
@@ -59,8 +57,45 @@ export function createCreateIndexStream({
     stream.push(record);
   }
 
+  async function handleDataStream(record: DocRecord, attempts = 1) {
+    if (docsOnly) return;
+
+    const { data_stream, template } = record.value as {
+      data_stream: string;
+      template: IndicesPutIndexTemplateRequest;
+    };
+
+    try {
+      await client.indices.putIndexTemplate(template, {
+        headers: ES_CLIENT_HEADERS,
+      });
+
+      await client.indices.createDataStream(
+        { name: data_stream },
+        {
+          headers: ES_CLIENT_HEADERS,
+        }
+      );
+      stats.createdDataStream(data_stream, template.name, { template });
+    } catch (err) {
+      if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception' || attempts >= 3) {
+        throw err;
+      }
+
+      if (skipExisting) {
+        skipDocsFromIndices.add(data_stream);
+        stats.skippedIndex(data_stream);
+        return;
+      }
+
+      await deleteDataStream(client, data_stream, template.name);
+      stats.deletedDataStream(data_stream, template.name);
+      await handleDataStream(record, attempts + 1);
+    }
+  }
+
   async function handleIndex(record: DocRecord) {
-    const { index, settings, mappings, aliases, dataStream } = record.value;
+    const { index, settings, mappings, aliases } = record.value;
     const isKibanaTaskManager = index.startsWith('.kibana_task_manager');
     const isKibana = index.startsWith('.kibana') && !isKibanaTaskManager;
 
@@ -78,36 +113,19 @@ export function createCreateIndexStream({
           kibanaTaskManagerIndexAlreadyDeleted = true;
         }
 
-        if (dataStream) {
-          await client.indices.putIndexTemplate(
-            {
-              name: dataStream.template,
-              index_patterns: dataStream.index_patterns,
-              template: { settings, mappings, aliases },
-              data_stream: {},
+        await client.indices.create(
+          {
+            index,
+            body: {
+              settings,
+              mappings,
+              aliases,
             },
-            { headers: ES_CLIENT_HEADERS }
-          );
-
-          await client.indices.createDataStream(
-            { name: dataStream.name },
-            { headers: ES_CLIENT_HEADERS }
-          );
-        } else {
-          await client.indices.create(
-            {
-              index,
-              body: {
-                settings,
-                mappings,
-                aliases,
-              },
-            },
-            {
-              headers: ES_CLIENT_HEADERS,
-            }
-          );
-        }
+          },
+          {
+            headers: ES_CLIENT_HEADERS,
+          }
+        );
 
         stats.createdIndex(index, { settings });
       } catch (err) {
@@ -153,8 +171,11 @@ export function createCreateIndexStream({
       try {
         switch (record && record.type) {
           case 'index':
-          case 'data_stream':
             await handleIndex(record);
+            break;
+
+          case 'data_stream':
+            await handleDataStream(record);
             break;
 
           case 'doc':
