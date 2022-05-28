@@ -11,7 +11,7 @@ export CODE_COVERAGE=1 # Kibana is bootstrapped differently for code coverage
 echo "--- KIBANA_DIR: $KIBANA_DIR"
 .buildkite/scripts/bootstrap.sh
 buildPlatformPlugins
-is_test_execution_step
+#is_test_execution_step
 
 export JOB_NUM=$BUILDKITE_PARALLEL_JOB
 export JOB=ftr-configs-${JOB_NUM}
