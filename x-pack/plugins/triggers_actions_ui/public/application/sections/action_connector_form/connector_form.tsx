@@ -12,6 +12,7 @@ import {
   useForm,
   useFormIsModified,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { EuiSpacer } from '@elastic/eui';
 import { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
 import { ConnectorFormSchema } from './types';
@@ -69,6 +70,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
     }
   }, [isFormModified, onFormModifiedChange]);
 
+  // console.log(form.getFields());
   return (
     <Form form={form}>
       <ConnectorFormFields
@@ -76,6 +78,7 @@ const ConnectorFormComponent: React.FC<Props> = ({
         isEdit={isEdit}
         registerPreSubmitValidator={registerPreSubmitValidator}
       />
+      <EuiSpacer size="m" />
       <EncryptedFieldsCallout isEdit={isEdit} isMissingSecrets={connector.isMissingSecrets} />
     </Form>
   );

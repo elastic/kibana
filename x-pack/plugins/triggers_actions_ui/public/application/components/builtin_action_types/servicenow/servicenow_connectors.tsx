@@ -48,6 +48,7 @@ const ServiceNowConnectorFields: React.FC<ActionConnectorFieldsProps> = ({
       'actionTypeId',
       'name',
       'config.apiUrl',
+      'config.isOAuth',
       'secrets.username',
       'secrets.password',
     ],
