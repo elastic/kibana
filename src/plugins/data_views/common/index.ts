@@ -37,7 +37,6 @@ export type {
   OnNotification,
   OnError,
   UiSettingsCommon,
-  SavedObjectsClientCommonFindArgs,
   SavedObjectsClientCommon,
   GetFieldsOptions,
   GetFieldsOptionsTimePattern,

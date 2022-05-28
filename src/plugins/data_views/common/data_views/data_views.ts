@@ -236,16 +236,21 @@ export class DataViewsService {
    */
   ensureDefaultDataView: EnsureDefaultDataView;
 
-  constructor({
-    uiSettings,
-    savedObjectsClient,
-    apiClient,
-    fieldFormats,
-    onNotification,
-    onError,
-    onRedirectNoIndexPattern = () => {},
-    getCanSave = () => Promise.resolve(false),
-  }: DataViewsServiceDeps) {
+  /**
+   * DataViewsService constructor
+   * @param deps Service dependencies
+   */
+  constructor(deps: DataViewsServiceDeps) {
+    const {
+      uiSettings,
+      savedObjectsClient,
+      apiClient,
+      fieldFormats,
+      onNotification,
+      onError,
+      onRedirectNoIndexPattern = () => {},
+      getCanSave = () => Promise.resolve(false),
+    } = deps;
     this.apiClient = apiClient;
     this.config = uiSettings;
     this.savedObjectsClient = savedObjectsClient;

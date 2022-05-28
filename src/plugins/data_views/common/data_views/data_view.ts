@@ -136,7 +136,14 @@ export class DataView implements IIndexPattern {
    */
   public readonly allowNoIndex: boolean = false;
 
-  constructor({ spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] }: DataViewDeps) {
+  /**
+   * constructor
+   * @param config - config data and dependencies
+   */
+
+  constructor(config: DataViewDeps) {
+    const { spec = {}, fieldFormats, shortDotsEnable = false, metaFields = [] } = config;
+
     // set dependencies
     this.fieldFormats = fieldFormats;
     // set config

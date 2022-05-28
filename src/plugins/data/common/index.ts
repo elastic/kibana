@@ -113,7 +113,6 @@ export type {
   OnNotification,
   OnError,
   UiSettingsCommon,
-  SavedObjectsClientCommonFindArgs,
   GetFieldsOptions,
   GetFieldsOptionsTimePattern,
   IDataViewsApiClient,

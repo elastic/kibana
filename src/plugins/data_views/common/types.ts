@@ -157,10 +157,28 @@ export interface FieldAttrSet {
 export type OnNotification = (toastInputFields: ToastInputFields, key: string) => void;
 export type OnError = (error: Error, toastInputFields: ErrorToastOptions, key: string) => void;
 
+/**
+ * interface for UiSettings common interface
+ */
 export interface UiSettingsCommon {
+  /**
+   * Get a setting value
+   * @param key name of value
+   */
   get: <T = any>(key: string) => Promise<T>;
+  /**
+   * Get all settings values
+   */
   getAll: () => Promise<Record<string, unknown>>;
-  set: (key: string, value: any) => Promise<void>;
+  /**
+   * Set a setting value
+   * @param key name of value
+   * @param value value to set
+   */
+  set: <T = any>(key: string, value: T) => Promise<void>;
+  /**
+   * Remove a setting value
+   */
   remove: (key: string) => Promise<void>;
 }
 

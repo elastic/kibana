@@ -57,6 +57,9 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
     return await indexPatterns.getFieldsForTimePattern(options);
   }
 
+  /**
+   * Is there a user created data view?
+   */
   async hasUserIndexPattern() {
     return hasUserIndexPattern({
       esClient: this.esClient,
