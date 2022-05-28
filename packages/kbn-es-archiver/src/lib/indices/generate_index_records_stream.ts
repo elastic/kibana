@@ -11,6 +11,7 @@ import { Transform } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
+import { merge } from 'lodash';
 
 const headers = {
   headers: ES_CLIENT_HEADERS,
@@ -27,14 +28,22 @@ const getDsIndexTemplate = async (client: Client, dataStream: string) => {
     headers
   );
   const {
-    index_template: { index_patterns: indexPatterns, template },
+    index_template: { template, composed_of: composedOf, ...indexTemplate },
   } = indexTemplates[0];
 
+  const components = await Promise.all(
+    composedOf.map(async (component) => {
+      const { component_templates } = await client.cluster.getComponentTemplate({
+        name: component,
+      });
+      return component_templates[0].component_template.template;
+    })
+  );
+
   return {
+    ...indexTemplate,
     name: templateName,
-    index_patterns: indexPatterns,
-    template,
-    data_stream: {},
+    template: merge(template, ...components),
   };
 };
 
