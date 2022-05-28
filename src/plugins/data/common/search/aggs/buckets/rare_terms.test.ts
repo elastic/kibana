@@ -9,8 +9,8 @@
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import type { IndexPatternField } from '../../..';
-import { IndexPattern } from '../../..';
+import type { DataViewField } from '../../..';
+import { DataView } from '../../..';
 
 describe('rare terms Agg', () => {
   const getAggConfigs = (params: Record<string, any> = {}) => {
@@ -51,9 +51,9 @@ describe('rare terms Agg', () => {
           searchable: true,
         },
       ],
-    } as IndexPattern;
+    } as DataView;
 
-    indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
+    indexPattern.fields.getByName = (name) => ({ name } as unknown as DataViewField);
     indexPattern.fields.filter = () => indexPattern.fields;
 
     return new AggConfigs(
