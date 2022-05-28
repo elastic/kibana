@@ -32,10 +32,14 @@ export {
   getFieldSubtypeNested,
 } from '../common';
 
-export { DataViewsPublicSetupDependencies, DataViewsPublicStartDependencies } from './types';
+export type { DataViewsPublicSetupDependencies, DataViewsPublicStartDependencies } from './types';
 
 export type { IndexPatternsContract } from './data_views';
 export type { DataViewListItem } from './data_views';
+export type {
+  DataViewsServicePublic,
+  DataViewsServicePublicDeps,
+} from './data_views_service_public';
 export {
   IndexPatternsService,
   IndexPattern,
