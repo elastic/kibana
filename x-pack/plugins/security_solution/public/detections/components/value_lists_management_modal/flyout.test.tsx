@@ -15,7 +15,7 @@ import { exportList } from '@kbn/securitysolution-list-api';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { TestProviders } from '../../../common/mock';
-import { ValueListsModal } from './modal';
+import { ValueListsModal } from './flyout';
 
 jest.mock('@kbn/securitysolution-list-hooks', () => {
   const actual = jest.requireActual('@kbn/securitysolution-list-hooks');
