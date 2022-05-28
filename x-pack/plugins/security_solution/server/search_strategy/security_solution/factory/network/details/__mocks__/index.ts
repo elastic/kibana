@@ -231,6 +231,13 @@ export const formattedSearchStrategyResponse = {
                         top_hits: {
                           size: 1,
                           _source: false,
+                          fields: [
+                            'source.as*',
+                            {
+                              field: '@timestamp',
+                              format: 'strict_date_optional_time',
+                            },
+                          ],
                           sort: [{ '@timestamp': 'desc' }],
                         },
                       },
@@ -243,6 +250,13 @@ export const formattedSearchStrategyResponse = {
                         top_hits: {
                           size: 1,
                           _source: false,
+                          fields: [
+                            'source.geo*',
+                            {
+                              field: '@timestamp',
+                              format: 'strict_date_optional_time',
+                            },
+                          ],
                           sort: [{ '@timestamp': 'desc' }],
                         },
                       },
@@ -262,6 +276,13 @@ export const formattedSearchStrategyResponse = {
                         top_hits: {
                           size: 1,
                           _source: false,
+                          fields: [
+                            'destination.as*',
+                            {
+                              field: '@timestamp',
+                              format: 'strict_date_optional_time',
+                            },
+                          ],
                           sort: [{ '@timestamp': 'desc' }],
                         },
                       },
@@ -274,6 +295,13 @@ export const formattedSearchStrategyResponse = {
                         top_hits: {
                           size: 1,
                           _source: false,
+                          fields: [
+                            'destination.geo*',
+                            {
+                              field: '@timestamp',
+                              format: 'strict_date_optional_time',
+                            },
+                          ],
                           sort: [{ '@timestamp': 'desc' }],
                         },
                       },
@@ -285,7 +313,18 @@ export const formattedSearchStrategyResponse = {
                 filter: { term: { 'host.ip': '35.196.65.164' } },
                 aggs: {
                   results: {
-                    top_hits: { size: 1, _source: false, sort: [{ '@timestamp': 'desc' }] },
+                    top_hits: {
+                      size: 1,
+                      _source: false,
+                      fields: [
+                        'host*',
+                        {
+                          field: '@timestamp',
+                          format: 'strict_date_optional_time',
+                        },
+                      ],
+                      sort: [{ '@timestamp': 'desc' }],
+                    },
                   },
                 },
               },
@@ -293,17 +332,6 @@ export const formattedSearchStrategyResponse = {
             query: { bool: { should: [] } },
             size: 0,
             _source: false,
-            fields: [
-              'source.as*',
-              'source.geo*',
-              'destination.as*',
-              'destination.geo*',
-              'host*',
-              {
-                field: '@timestamp',
-                format: 'strict_date_optional_time',
-              },
-            ],
           },
         },
         null,
@@ -381,7 +409,18 @@ export const expectedDsl = {
             filter: { exists: { field: 'source.as' } },
             aggs: {
               results: {
-                top_hits: { size: 1, _source: false, sort: [{ '@timestamp': 'desc' }] },
+                top_hits: {
+                  size: 1,
+                  _source: false,
+                  fields: [
+                    'source.as*',
+                    {
+                      field: '@timestamp',
+                      format: 'strict_date_optional_time',
+                    },
+                  ],
+                  sort: [{ '@timestamp': 'desc' }],
+                },
               },
             },
           },
@@ -389,7 +428,18 @@ export const expectedDsl = {
             filter: { exists: { field: 'source.geo' } },
             aggs: {
               results: {
-                top_hits: { size: 1, _source: false, sort: [{ '@timestamp': 'desc' }] },
+                top_hits: {
+                  size: 1,
+                  _source: false,
+                  fields: [
+                    'source.geo*',
+                    {
+                      field: '@timestamp',
+                      format: 'strict_date_optional_time',
+                    },
+                  ],
+                  sort: [{ '@timestamp': 'desc' }],
+                },
               },
             },
           },
@@ -407,6 +457,13 @@ export const expectedDsl = {
                 top_hits: {
                   size: 1,
                   _source: false,
+                  fields: [
+                    'destination.as*',
+                    {
+                      field: '@timestamp',
+                      format: 'strict_date_optional_time',
+                    },
+                  ],
                   sort: [{ '@timestamp': 'desc' }],
                 },
               },
@@ -419,6 +476,13 @@ export const expectedDsl = {
                 top_hits: {
                   size: 1,
                   _source: false,
+                  fields: [
+                    'destination.geo*',
+                    {
+                      field: '@timestamp',
+                      format: 'strict_date_optional_time',
+                    },
+                  ],
                   sort: [{ '@timestamp': 'desc' }],
                 },
               },
@@ -429,23 +493,25 @@ export const expectedDsl = {
       host: {
         filter: { term: { 'host.ip': '35.196.65.164' } },
         aggs: {
-          results: { top_hits: { size: 1, _source: false, sort: [{ '@timestamp': 'desc' }] } },
+          results: {
+            top_hits: {
+              size: 1,
+              _source: false,
+              fields: [
+                'host*',
+                {
+                  field: '@timestamp',
+                  format: 'strict_date_optional_time',
+                },
+              ],
+              sort: [{ '@timestamp': 'desc' }],
+            },
+          },
         },
       },
     },
     query: { bool: { should: [] } },
     size: 0,
     _source: false,
-    fields: [
-      'source.as*',
-      'source.geo*',
-      'destination.as*',
-      'destination.geo*',
-      'host*',
-      {
-        field: '@timestamp',
-        format: 'strict_date_optional_time',
-      },
-    ],
   },
 };

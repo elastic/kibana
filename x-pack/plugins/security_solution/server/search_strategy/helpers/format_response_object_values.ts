@@ -38,7 +38,7 @@ export const unflattenObject = <T extends object = GenericObject>(object: object
     return acc;
   }, {} as T);
 
-export const formatGeoLocation = (item: unknown[]) => {
+export const formatLocationAsGeoEcs = (item: unknown[]) => {
   const itemGeo = item.length > 0 ? (item[0] as { coordinates: number[] }) : null;
   if (itemGeo != null && !isEmpty(itemGeo.coordinates)) {
     try {
@@ -57,7 +57,7 @@ export const transformLocationFields = (locationFields: Record<string, unknown>)
   const transformed = { ...locationFields };
   Object.entries(transformed).forEach(([key, item]) => {
     if (isGeoField(key)) {
-      transformed[key] = formatGeoLocation(item as unknown[]);
+      transformed[key] = formatLocationAsGeoEcs(item as unknown[]);
     }
   });
   return transformed;

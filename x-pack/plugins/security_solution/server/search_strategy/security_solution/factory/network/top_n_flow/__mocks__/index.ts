@@ -848,11 +848,39 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
                   },
                   location: {
                     filter: { exists: { field: 'source.geo' } },
-                    aggs: { top_geo: { top_hits: { _source: false, size: 1 } } },
+                    aggs: {
+                      top_geo: {
+                        top_hits: {
+                          _source: false,
+                          fields: [
+                            'source.geo.*',
+                            {
+                              field: '@timestamp',
+                              format: 'strict_date_optional_time',
+                            },
+                          ],
+                          size: 1,
+                        },
+                      },
+                    },
                   },
                   autonomous_system: {
                     filter: { exists: { field: 'source.as' } },
-                    aggs: { top_as: { top_hits: { _source: false, size: 1 } } },
+                    aggs: {
+                      top_as: {
+                        top_hits: {
+                          _source: false,
+                          fields: [
+                            'source.as.*',
+                            {
+                              field: '@timestamp',
+                              format: 'strict_date_optional_time',
+                            },
+                          ],
+                          size: 1,
+                        },
+                      },
+                    },
                   },
                   flows: { cardinality: { field: 'network.community_id' } },
                   destination_ips: { cardinality: { field: 'destination.ip' } },
@@ -877,8 +905,6 @@ export const formattedSearchStrategyResponse: NetworkTopNFlowStrategyResponse = 
             },
             _source: false,
             fields: [
-              'source.geo.*',
-              'source.as.*',
               {
                 field: '@timestamp',
                 format: 'strict_date_optional_time',
@@ -925,11 +951,39 @@ export const expectedDsl = {
           },
           location: {
             filter: { exists: { field: 'source.geo' } },
-            aggs: { top_geo: { top_hits: { _source: false, size: 1 } } },
+            aggs: {
+              top_geo: {
+                top_hits: {
+                  _source: false,
+                  fields: [
+                    'source.geo.*',
+                    {
+                      field: '@timestamp',
+                      format: 'strict_date_optional_time',
+                    },
+                  ],
+                  size: 1,
+                },
+              },
+            },
           },
           autonomous_system: {
             filter: { exists: { field: 'source.as' } },
-            aggs: { top_as: { top_hits: { _source: false, size: 1 } } },
+            aggs: {
+              top_as: {
+                top_hits: {
+                  _source: false,
+                  fields: [
+                    'source.as.*',
+                    {
+                      field: '@timestamp',
+                      format: 'strict_date_optional_time',
+                    },
+                  ],
+                  size: 1,
+                },
+              },
+            },
           },
           flows: { cardinality: { field: 'network.community_id' } },
           destination_ips: { cardinality: { field: 'destination.ip' } },
@@ -954,8 +1008,6 @@ export const expectedDsl = {
     },
     _source: false,
     fields: [
-      'source.geo.*',
-      'source.as.*',
       {
         field: '@timestamp',
         format: 'strict_date_optional_time',

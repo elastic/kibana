@@ -20,14 +20,14 @@ export const getNetworkDetailsAgg = (type: string, networkHit: NetworkHit | {}) 
   const firstSeen = getOr(null, `firstSeen.value_as_string`, networkHit);
   const lastSeen = getOr(null, `lastSeen.value_as_string`, networkHit);
 
-  const autonomousSystem: AutonomousSystem | null = getOr(
-    null,
+  const autonomousSystem: AutonomousSystem | {} = getOr(
+    {},
     `${type}.as`,
     unflattenObject(getOr({}, 'as.results.hits.hits[0].fields', networkHit))
   );
 
-  const geoFields: GeoEcs | null = getOr(
-    null,
+  const geoFields: GeoEcs | {} = getOr(
+    {},
     `${type}.geo`,
     unflattenObject(
       transformLocationFields(getOr({}, 'geo.results.hits.hits[0].fields', networkHit))

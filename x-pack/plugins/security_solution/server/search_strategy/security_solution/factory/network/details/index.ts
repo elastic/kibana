@@ -34,7 +34,7 @@ export const networkDetails: SecuritySolutionFactory<NetworkQueries.details> = {
 
     const hostDetailsHit = getOr({}, 'aggregations.host', response.rawResponse);
     const hostFields = unflattenObject(
-      getOr(null, `results.hits.hits[0].fields`, { ...hostDetailsHit })
+      getOr({}, `results.hits.hits[0].fields`, { ...hostDetailsHit })
     );
 
     return {

@@ -69,8 +69,6 @@ export const buildTopNFlowQuery = ({
       },
       _source: false,
       fields: [
-        `${flowTarget}.geo.*`,
-        `${flowTarget}.as.*`,
         {
           field: '@timestamp',
           format: 'strict_date_optional_time',
@@ -132,6 +130,13 @@ const getFlowTargetAggs = (
           top_geo: {
             top_hits: {
               _source: false,
+              fields: [
+                `${flowTarget}.geo.*`,
+                {
+                  field: '@timestamp',
+                  format: 'strict_date_optional_time',
+                },
+              ],
               size: 1,
             },
           },
@@ -147,6 +152,13 @@ const getFlowTargetAggs = (
           top_as: {
             top_hits: {
               _source: false,
+              fields: [
+                `${flowTarget}.as.*`,
+                {
+                  field: '@timestamp',
+                  format: 'strict_date_optional_time',
+                },
+              ],
               size: 1,
             },
           },
