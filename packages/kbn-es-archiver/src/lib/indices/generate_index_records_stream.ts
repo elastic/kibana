@@ -8,9 +8,9 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { Transform } from 'stream';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
-import { ToolingLog } from '@kbn/tooling-log';
 
 const headers = {
   headers: ES_CLIENT_HEADERS,
@@ -101,7 +101,9 @@ export function createGenerateIndexRecordsStream({
             });
           } else {
             const {
-              body: { [index]: { aliases } },
+              body: {
+                [index]: { aliases },
+              },
             } = await client.indices.getAlias({ index }, { ...headers, meta: true });
 
             stats.archivedIndex(index, { settings, mappings });

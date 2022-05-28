@@ -13,12 +13,12 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
 
+import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { Stats } from '../stats';
 import { deleteKibanaIndices } from './kibana_index';
 import { deleteIndex } from './delete_index';
 import { deleteDataStream } from './delete_data_stream';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
-import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 
 interface DocRecord {
   value: estypes.IndicesIndexState & {
