@@ -9,9 +9,9 @@
 import type { Client } from '@elastic/elasticsearch';
 import { Transform } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
+import { merge } from 'lodash';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
-import { merge } from 'lodash';
 
 const headers = {
   headers: ES_CLIENT_HEADERS,
