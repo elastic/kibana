@@ -32,13 +32,14 @@ const ConnectorFormFieldsComponent: React.FC<ConnectorFormFieldsProps> = ({
   } = useKibana().services;
   const canSave = hasSaveActionsCapability(capabilities);
   const FieldsComponent = actionTypeModel?.actionConnectorFields ?? null;
+
   return (
     <>
       <ConnectorFormFieldsGlobal canSave={canSave} />
       <EuiSpacer size="m" />
       {FieldsComponent !== null ? (
         <>
-          <EuiTitle size="xxs">
+          <EuiTitle size="xxs" data-test-subj="connector-settings-label">
             <h4>
               <FormattedMessage
                 id="xpack.triggersActionsUI.sections.actionConnectorForm.connectorSettingsLabel"

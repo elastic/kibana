@@ -15,7 +15,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { updateActionConnector } from '../../../lib/action_connector_api';
 import ServiceNowConnectorFields from './servicenow_connectors';
 import { getAppInfo } from './api';
-import { FormTestProvider } from '../test_utils';
+import { ConnectorFormTestProvider } from '../test_utils';
 import { mount } from 'enzyme';
 import userEvent from '@testing-library/user-event';
 
@@ -55,13 +55,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
   test('alerting servicenow connector fields are rendered', () => {
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={usesTableApiConnector}>
+      <ConnectorFormTestProvider connector={usesTableApiConnector}>
         <ServiceNowConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
     expect(
       wrapper.find('[data-test-subj="connector-servicenow-username-form-input"]').length > 0
@@ -75,13 +75,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
   test('case specific servicenow connector fields is rendered', () => {
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={usesImportSetApiConnector}>
+      <ConnectorFormTestProvider connector={usesImportSetApiConnector}>
         <ServiceNowConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     expect(wrapper.find('[data-test-subj="credentialsApiUrlFromInput"]').length > 0).toBeTruthy();
@@ -110,13 +110,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
     test('should render the correct callouts when the connectors needs the application', () => {
       const wrapper = mountWithIntl(
-        <FormTestProvider connector={usesImportSetApiConnector}>
+        <ConnectorFormTestProvider connector={usesImportSetApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={registerPreSubmitValidator}
           />
-        </FormTestProvider>
+        </ConnectorFormTestProvider>
       );
 
       expect(wrapper.find('[data-test-subj="snInstallationCallout"]').exists()).toBeTruthy();
@@ -126,13 +126,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
     test('should render the correct callouts if the connector uses the table API', () => {
       const wrapper = mountWithIntl(
-        <FormTestProvider connector={usesTableApiConnector}>
+        <ConnectorFormTestProvider connector={usesTableApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={registerPreSubmitValidator}
           />
-        </FormTestProvider>
+        </ConnectorFormTestProvider>
       );
 
       expect(wrapper.find('[data-test-subj="snInstallationCallout"]').exists()).toBeFalsy();
@@ -144,13 +144,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
       getAppInfoMock.mockResolvedValue(applicationInfoData);
 
       const wrapper = mountWithIntl(
-        <FormTestProvider connector={usesImportSetApiConnector}>
+        <ConnectorFormTestProvider connector={usesImportSetApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={registerPreSubmitValidator}
           />
-        </FormTestProvider>
+        </ConnectorFormTestProvider>
       );
 
       await act(async () => {
@@ -163,13 +163,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
 
     test('should NOT get application information when the connector uses the old API', async () => {
       const wrapper = mountWithIntl(
-        <FormTestProvider connector={usesTableApiConnector}>
+        <ConnectorFormTestProvider connector={usesTableApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={registerPreSubmitValidator}
           />
-        </FormTestProvider>
+        </ConnectorFormTestProvider>
       );
 
       await act(async () => {
@@ -185,13 +185,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
       getAppInfoMock.mockRejectedValueOnce(new Error(errorMessage));
 
       mountWithIntl(
-        <FormTestProvider connector={usesImportSetApiConnector}>
+        <ConnectorFormTestProvider connector={usesImportSetApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={registerPreSubmitValidator}
           />
-        </FormTestProvider>
+        </ConnectorFormTestProvider>
       );
 
       await act(async () => {
@@ -218,13 +218,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
       getAppInfoMock.mockResolvedValue({ error: { message: errorMessage }, status: 'failure' });
 
       mountWithIntl(
-        <FormTestProvider connector={usesImportSetApiConnector}>
+        <ConnectorFormTestProvider connector={usesImportSetApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={registerPreSubmitValidator}
           />
-        </FormTestProvider>
+        </ConnectorFormTestProvider>
       );
 
       await act(async () => {
@@ -251,13 +251,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
       updateActionConnectorMock.mockResolvedValue({ isDeprecated: false });
 
       const { getByTestId, queryByTestId } = render(
-        <FormTestProvider connector={usesTableApiConnector}>
+        <ConnectorFormTestProvider connector={usesTableApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={registerPreSubmitValidator}
           />
-        </FormTestProvider>
+        </ConnectorFormTestProvider>
       );
 
       await reactAct(async () => {
@@ -308,13 +308,13 @@ describe('ServiceNowActionConnectorFields renders', () => {
       updateActionConnectorMock.mockResolvedValue({ isDeprecated: false });
 
       const { getByTestId } = render(
-        <FormTestProvider connector={usesTableApiConnector}>
+        <ConnectorFormTestProvider connector={usesTableApiConnector}>
           <ServiceNowConnectorFields
             readOnly={false}
             isEdit={false}
             registerPreSubmitValidator={registerPreSubmitValidator}
           />
-        </FormTestProvider>
+        </ConnectorFormTestProvider>
       );
 
       await reactAct(async () => {

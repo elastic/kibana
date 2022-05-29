@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import ResilientConnectorFields from './resilient_connectors';
-import { FormTestProvider } from '../test_utils';
+import { ConnectorFormTestProvider } from '../test_utils';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -29,13 +29,13 @@ describe('ResilientActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <ResilientConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     expect(wrapper.find('[data-test-subj="config.apiUrl-input"]').length > 0).toBeTruthy();

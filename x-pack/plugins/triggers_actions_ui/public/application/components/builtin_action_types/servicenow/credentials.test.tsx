@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { Credentials } from './credentials';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { FormTestProvider } from '../test_utils';
+import { ConnectorFormTestProvider } from '../test_utils';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -26,11 +26,11 @@ describe('Credentials', () => {
 
   it('renders basic auth form', async () => {
     render(
-      <FormTestProvider connector={connector}>
+      <ConnectorFormTestProvider connector={connector}>
         <IntlProvider locale="en">
           <Credentials isOAuth={false} readOnly={false} isLoading={false} />
         </IntlProvider>
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
     expect(screen.getByRole('switch')).toBeInTheDocument();
     expect((await screen.findByRole('switch')).getAttribute('aria-checked')).toEqual('false');
@@ -48,11 +48,11 @@ describe('Credentials', () => {
 
   it('switches to oauth form', async () => {
     render(
-      <FormTestProvider connector={connector}>
+      <ConnectorFormTestProvider connector={connector}>
         <IntlProvider locale="en">
           <Credentials isOAuth={true} readOnly={false} isLoading={false} />
         </IntlProvider>
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     fireEvent.click(screen.getByRole('switch'));

@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import XmattersActionConnectorFields from './xmatters_connectors';
-import { FormTestProvider, waitForComponentToUpdate } from '../test_utils';
+import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../test_utils';
 
 describe('XmattersActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
@@ -27,13 +27,13 @@ describe('XmattersActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <XmattersActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await waitForComponentToUpdate();
@@ -60,13 +60,13 @@ describe('XmattersActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <XmattersActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     expect(wrapper.find('[data-test-subj="config.configUrl"]').length > 0).toBeTruthy();
@@ -90,13 +90,13 @@ describe('XmattersActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <XmattersActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     expect(wrapper.find('[data-test-subj="secrets.secretsUrl"]').length > 0).toBeTruthy();

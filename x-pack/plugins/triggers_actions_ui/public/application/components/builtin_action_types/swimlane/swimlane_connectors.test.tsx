@@ -11,7 +11,7 @@ import { act } from 'react-dom/test-utils';
 import SwimlaneActionConnectorFields from './swimlane_connectors';
 import { useGetApplication } from './use_get_application';
 import { applicationFields, mappings } from './mocks';
-import { FormTestProvider } from '../test_utils';
+import { ConnectorFormTestProvider } from '../test_utils';
 import { waitFor } from '@testing-library/dom';
 
 jest.mock('../../../../common/lib/kibana');
@@ -45,13 +45,13 @@ describe('SwimlaneActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <SwimlaneActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await act(async () => {
@@ -85,13 +85,13 @@ describe('SwimlaneActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <SwimlaneActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await act(async () => {
@@ -132,13 +132,13 @@ describe('SwimlaneActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <SwimlaneActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await act(async () => {
@@ -178,13 +178,13 @@ describe('SwimlaneActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <SwimlaneActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await act(async () => {
@@ -236,13 +236,13 @@ describe('SwimlaneActionConnectorFields renders', () => {
     const commentOptions = [{ label: 'Comments (notes)', value: 'a6fdf' }];
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <SwimlaneActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await waitFor(async () => {

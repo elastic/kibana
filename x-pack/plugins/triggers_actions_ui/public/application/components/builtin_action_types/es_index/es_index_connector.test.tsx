@@ -11,7 +11,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { screen, fireEvent, waitFor, render } from '@testing-library/react';
 import IndexActionConnectorFields from './es_index_connector';
 import { EuiComboBox, EuiSwitch, EuiSwitchEvent, EuiSelect } from '@elastic/eui';
-import { FormTestProvider } from '../test_utils';
+import { ConnectorFormTestProvider } from '../test_utils';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -48,13 +48,13 @@ const { getFields } = jest.requireMock('../../../../common/index_controls');
 
 async function setup(actionConnector: any) {
   const wrapper = mountWithIntl(
-    <FormTestProvider connector={actionConnector}>
+    <ConnectorFormTestProvider connector={actionConnector}>
       <IndexActionConnectorFields
         readOnly={false}
         isEdit={false}
         registerPreSubmitValidator={() => {}}
       />
-    </FormTestProvider>
+    </ConnectorFormTestProvider>
   );
 
   await act(async () => {
@@ -301,13 +301,13 @@ describe('IndexActionConnectorFields renders', () => {
     };
 
     render(
-      <FormTestProvider connector={connector}>
+      <ConnectorFormTestProvider connector={connector}>
         <IndexActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     const indexComboBox = await screen.findByTestId('connectorIndexesComboBox');

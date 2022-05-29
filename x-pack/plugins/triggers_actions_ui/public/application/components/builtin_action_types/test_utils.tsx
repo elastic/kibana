@@ -5,28 +5,71 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { ComponentType, useCallback } from 'react';
 import { ReactWrapper } from 'enzyme';
+import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { EuiButton } from '@elastic/eui';
+import { Form, useForm, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { act } from 'react-dom/test-utils';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+
+import { TriggersAndActionsUiServices } from '../../..';
+import { ActionConnectorFieldsProps, GenericValidationResult } from '../../../types';
+import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { ConnectorFormSchema } from '../../sections/action_connector_form/types';
 import { ConnectorFormFieldsGlobal } from '../../sections/action_connector_form/connector_form_fields_global';
+import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 
 interface FormTestProviderProps {
   children: React.ReactNode;
-  connector: ConnectorFormSchema;
+  defaultValue?: Record<string, unknown>;
+  onSubmit?: ({ data, isValid }: { data: FormData; isValid: boolean }) => Promise<void>;
 }
 
-const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({ children, connector }) => {
-  const { form } = useForm({ defaultValue: connector });
+type ConnectorFormTestProviderProps = Omit<FormTestProviderProps, 'defaultValue'> & {
+  connector: ConnectorFormSchema;
+};
+
+const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProps> = ({
+  children,
+  connector,
+  onSubmit,
+}) => {
+  return (
+    <FormTestProviderComponent defaultValue={connector} onSubmit={onSubmit}>
+      <ConnectorFormFieldsGlobal canSave={true} />
+      {children}
+    </FormTestProviderComponent>
+  );
+};
+
+ConnectorFormTestProviderComponent.displayName = 'ConnectorFormTestProvider';
+export const ConnectorFormTestProvider = React.memo(ConnectorFormTestProviderComponent);
+
+const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
+  children,
+  defaultValue,
+  onSubmit,
+}) => {
+  const { form } = useForm({ defaultValue });
+  const { submit } = form;
+
+  const onClick = useCallback(async () => {
+    const res = await submit();
+    if (onSubmit) {
+      onSubmit(res);
+    }
+  }, [onSubmit, submit]);
 
   return (
     <I18nProvider>
-      <Form form={form}>
-        <ConnectorFormFieldsGlobal canSave={true} />
-        {children}
-      </Form>
+      <>
+        <Form form={form}>{children}</Form>
+        <EuiButton data-test-subj="form-test-provide-submit" onClick={onClick} />
+      </>
     </I18nProvider>
   );
 };
@@ -45,3 +88,56 @@ export const waitForComponentToUpdate = async () =>
   await act(async () => {
     return Promise.resolve();
   });
+
+export const createActionType = ({
+  id,
+  actionTypeRegistry,
+  actionConnectorFields,
+}: {
+  id: string;
+  actionTypeRegistry: typeof actionTypeRegistryMock;
+  actionConnectorFields: React.LazyExoticComponent<
+    ComponentType<ActionConnectorFieldsProps>
+  > | null;
+}) => {
+  return actionTypeRegistry.createMockActionTypeModel({
+    id,
+    iconClass: 'test',
+    selectMessage: 'test',
+    validateParams: (): Promise<GenericValidationResult<unknown>> => {
+      const validationResult = { errors: {} };
+      return Promise.resolve(validationResult);
+    },
+    actionConnectorFields,
+  });
+};
+
+type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
+export interface AppMockRenderer {
+  render: UiRender;
+  coreStart: TriggersAndActionsUiServices;
+}
+
+export const createAppMockRenderer = (): AppMockRenderer => {
+  const services = createStartServicesMock();
+  const theme$ = of({ darkMode: false });
+
+  const AppWrapper: React.FC<{ children: React.ReactElement }> = ({ children }) => (
+    <I18nProvider>
+      <KibanaContextProvider services={services}>
+        <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
+      </KibanaContextProvider>
+    </I18nProvider>
+  );
+  AppWrapper.displayName = 'AppWrapper';
+  const render: UiRender = (ui, options) => {
+    return reactRender(ui, {
+      wrapper: AppWrapper,
+      ...options,
+    });
+  };
+  return {
+    coreStart: services,
+    render,
+  };
+};

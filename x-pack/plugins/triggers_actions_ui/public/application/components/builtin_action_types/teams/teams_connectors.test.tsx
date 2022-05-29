@@ -9,7 +9,7 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import TeamsActionFields from './teams_connectors';
-import { FormTestProvider } from '../test_utils';
+import { ConnectorFormTestProvider } from '../test_utils';
 jest.mock('../../../../common/lib/kibana');
 
 describe('TeamsActionFields renders', () => {
@@ -26,9 +26,9 @@ describe('TeamsActionFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <TeamsActionFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await act(async () => {

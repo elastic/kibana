@@ -9,7 +9,7 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import EmailActionConnectorFields from './email_connector';
 import * as hooks from './use_email_config';
-import { FormTestProvider, waitForComponentToUpdate } from '../test_utils';
+import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../test_utils';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -31,13 +31,13 @@ describe('EmailActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <EmailActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await waitForComponentToUpdate();
@@ -67,13 +67,13 @@ describe('EmailActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <EmailActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await waitForComponentToUpdate();
@@ -105,13 +105,13 @@ describe('EmailActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <EmailActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await waitForComponentToUpdate();
@@ -143,13 +143,13 @@ describe('EmailActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <EmailActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await waitForComponentToUpdate();
@@ -185,13 +185,13 @@ describe('EmailActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <EmailActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await waitForComponentToUpdate();
@@ -229,13 +229,13 @@ describe('EmailActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <EmailActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await waitForComponentToUpdate();

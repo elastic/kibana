@@ -70,7 +70,6 @@ const ConnectorFormComponent: React.FC<Props> = ({
     }
   }, [isFormModified, onFormModifiedChange]);
 
-  // console.log(form.getFields());
   return (
     <Form form={form}>
       <ConnectorFormFields

@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import ExchangeFormFields from './exchange_form';
-import { FormTestProvider } from '../test_utils';
+import { ConnectorFormTestProvider } from '../test_utils';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -31,9 +31,9 @@ describe('ExchangeFormFields renders', () => {
 
   test('should display exchange form fields', () => {
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <ExchangeFormFields readOnly={false} />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
     expect(wrapper.find('[data-test-subj="emailClientSecret"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="emailClientId"]').length > 0).toBeTruthy();
@@ -42,9 +42,9 @@ describe('ExchangeFormFields renders', () => {
 
   test('exchange field defaults to empty when not defined', () => {
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <ExchangeFormFields readOnly={false} />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
     expect(wrapper.find('[data-test-subj="emailClientSecret"]').length > 0).toBeTruthy();
     expect(wrapper.find('input[data-test-subj="emailClientSecret"]').prop('value')).toEqual('');

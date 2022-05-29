@@ -14,21 +14,16 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-interface Props {
+export interface EncryptedFieldsCalloutProps {
   isEdit: boolean;
   isMissingSecrets?: boolean | undefined;
 }
 
-const Callout: React.FC<{ title: string }> = ({ title }) => {
+const Callout: React.FC<{ title: string; dataTestSubj: string }> = ({ title, dataTestSubj }) => {
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiCallOut
-        size="s"
-        iconType="iInCircle"
-        data-test-subj="reenterValuesMessage"
-        title={title}
-      />
+      <EuiCallOut size="s" iconType="iInCircle" data-test-subj={dataTestSubj} title={title} />
       <EuiSpacer size="m" />
     </>
   );
@@ -56,16 +51,19 @@ const getCommaSeparatedLabel = (labels: string[]) => {
   }
 
   if (labels.length === 2) {
-    return `${labels[0]} and ${labels[1]}`;
+    return labels.join(' and ');
   }
 
-  const latestLabel = labels[labels.length - 1];
-  const commaSeparatedLabels = labels.slice(0, -1).join(', ');
+  const lastLabel = labels[labels.length - 1];
+  const commaSeparatedLabelsWithoutLastItem = labels.slice(0, -1).join(', ');
 
-  return `${commaSeparatedLabels}, and ${latestLabel}`;
+  return `${commaSeparatedLabelsWithoutLastItem}, and ${lastLabel}`;
 };
 
-const EncryptedFieldsCalloutComponent: React.FC<Props> = ({ isEdit, isMissingSecrets }) => {
+const EncryptedFieldsCalloutComponent: React.FC<EncryptedFieldsCalloutProps> = ({
+  isEdit,
+  isMissingSecrets,
+}) => {
   /**
    * This is needed to rerender on any form change
    * and listen to any form field changes.
@@ -90,9 +88,10 @@ const EncryptedFieldsCalloutComponent: React.FC<Props> = ({ isEdit, isMissingSec
           {
             values: { secretFieldsLabel, encryptedFieldsLength: totalSecretFields },
             defaultMessage:
-              'Sensitive information is not imported. Please enter value{encryptedFieldsLength, plural, one {} other {s}} for the following field{encryptedFieldsLength, plural, one {} other {s}} {secretFieldsLabel}',
+              'Sensitive information is not imported. Please enter value{encryptedFieldsLength, plural, one {} other {s}} for the following field{encryptedFieldsLength, plural, one {} other {s}} {secretFieldsLabel}.',
           }
         )}
+        dataTestSubj="missing-secrets-callout"
       />
     );
   }
@@ -108,6 +107,7 @@ const EncryptedFieldsCalloutComponent: React.FC<Props> = ({ isEdit, isMissingSec
               'Remember value{encryptedFieldsLength, plural, one {} other {s}} {secretFieldsLabel}. You must reenter {encryptedFieldsLength, plural, one {it} other {them}} each time you edit the connector.',
           }
         )}
+        dataTestSubj="create-connector-secrets-callout"
       />
     );
   }
@@ -120,9 +120,10 @@ const EncryptedFieldsCalloutComponent: React.FC<Props> = ({ isEdit, isMissingSec
           {
             values: { secretFieldsLabel, encryptedFieldsLength: totalSecretFields },
             defaultMessage:
-              'Value{encryptedFieldsLength, plural, one {} other {s}} {secretFieldsLabel} {encryptedFieldsLength, plural, one {s} other {are}} encrypted. Please reenter value{encryptedFieldsLength, plural, one {} other {s}} for {encryptedFieldsLength, plural, one {this} other {these}} field{encryptedFieldsLength, plural, one {} other {s}}.',
+              'Value{encryptedFieldsLength, plural, one {} other {s}} {secretFieldsLabel} {encryptedFieldsLength, plural, one {is} other {are}} encrypted. Please reenter value{encryptedFieldsLength, plural, one {} other {s}} for {encryptedFieldsLength, plural, one {this} other {these}} field{encryptedFieldsLength, plural, one {} other {s}}.',
           }
         )}
+        dataTestSubj="edit-connector-secrets-callout"
       />
     );
   }

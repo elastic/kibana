@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import WebhookActionConnectorFields from './webhook_connectors';
-import { FormTestProvider, waitForComponentToUpdate } from '../test_utils';
+import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../test_utils';
 
 describe('WebhookActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
@@ -29,13 +29,13 @@ describe('WebhookActionConnectorFields renders', () => {
     };
 
     const wrapper = mountWithIntl(
-      <FormTestProvider connector={actionConnector}>
+      <ConnectorFormTestProvider connector={actionConnector}>
         <WebhookActionConnectorFields
           readOnly={false}
           isEdit={false}
           registerPreSubmitValidator={() => {}}
         />
-      </FormTestProvider>
+      </ConnectorFormTestProvider>
     );
 
     await waitForComponentToUpdate();
