@@ -11,7 +11,7 @@ import { METRIC_TYPES } from '../metrics';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import type { IndexPatternField } from '../../..';
-import { IndexPattern } from '../../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 describe('Terms Agg', () => {
   describe('order agg editor UI', () => {
@@ -53,7 +53,7 @@ describe('Terms Agg', () => {
             searchable: true,
           },
         ],
-      } as IndexPattern;
+      } as DataView;
 
       indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
       indexPattern.fields.filter = () => indexPattern.fields;
@@ -258,7 +258,7 @@ describe('Terms Agg', () => {
             searchable: true,
           },
         ],
-      } as IndexPattern;
+      } as DataView;
 
       indexPattern.fields.getByName = (name) => ({ name } as unknown as IndexPatternField);
       indexPattern.fields.filter = () => indexPattern.fields;

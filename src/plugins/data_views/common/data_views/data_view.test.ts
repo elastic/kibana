@@ -8,7 +8,7 @@
 
 import { map, last } from 'lodash';
 
-import { IndexPattern } from './data_view';
+import { DataView } from './data_view';
 
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 
@@ -51,7 +51,7 @@ function create(id: string) {
     attributes: { timeFieldName, fields, title },
   } = stubbedSavedObjectIndexPattern(id);
 
-  return new IndexPattern({
+  return new DataView({
     spec: {
       id,
       type,
@@ -68,7 +68,7 @@ function create(id: string) {
 }
 
 describe('IndexPattern', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: DataView;
 
   // create an indexPattern instance for each test
   beforeEach(() => {
@@ -394,7 +394,7 @@ describe('IndexPattern', () => {
       } as unknown as FieldFormat;
       indexPattern.getFormatterForField = () => formatter;
       const spec = indexPattern.toSpec();
-      const restoredPattern = new IndexPattern({
+      const restoredPattern = new DataView({
         spec,
         fieldFormats: fieldFormatsMock,
         shortDotsEnable: false,

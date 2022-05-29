@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { IndexPatternField, IndexPattern } from '@kbn/data-plugin/public';
+import type { IndexPatternField } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { TooltipProperty } from './tooltip_property';
 import { AbstractField } from '../fields/field';
@@ -62,7 +63,7 @@ const indexPattern = {
     },
   },
   title: 'my index pattern',
-} as IndexPattern;
+} as DataView;
 
 describe('getESFilters', () => {
   test('Should return empty array when field does not exist in index pattern', async () => {

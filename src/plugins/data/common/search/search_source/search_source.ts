@@ -75,14 +75,9 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { normalizeSortRequest } from './normalize_sort_request';
-import {
-  AggConfigSerialized,
-  IIndexPattern,
-  IndexPattern,
-  IndexPatternField,
-  SerializedSearchSourceFields,
-} from '../..';
+import { AggConfigSerialized, IndexPatternField, SerializedSearchSourceFields } from '../..';
 import {
   AggConfigs,
   EsQuerySortValue,
@@ -625,7 +620,7 @@ export class SearchSource {
     return searchRequest;
   }
 
-  private getIndexType(index?: IIndexPattern) {
+  private getIndexType(index?: DataView) {
     return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
   }
 
@@ -633,7 +628,7 @@ export class SearchSource {
     typeof fld === 'string' ? fld : fld.field;
 
   private getFieldsWithoutSourceFilters(
-    index: IndexPattern | undefined,
+    index: DataView | undefined,
     bodyFields: SearchFieldValue[]
   ) {
     if (!index) {
@@ -668,7 +663,7 @@ export class SearchSource {
   private getFieldFromDocValueFieldsOrIndexPattern(
     docvaluesIndex: Record<string, object>,
     fld: SearchFieldValue,
-    index?: IndexPattern
+    index?: DataView
   ) {
     if (typeof fld === 'string') {
       return fld;

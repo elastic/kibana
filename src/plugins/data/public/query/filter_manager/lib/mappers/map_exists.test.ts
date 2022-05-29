@@ -8,21 +8,17 @@
 
 import { mapExists } from './map_exists';
 import { mapQueryString } from './map_query_string';
-import {
-  IIndexPattern,
-  IFieldType,
-  buildExistsFilter,
-  buildEmptyFilter,
-} from '../../../../../common';
+import { IFieldType, buildExistsFilter, buildEmptyFilter } from '../../../../../common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 describe('filter manager utilities', () => {
   describe('mapExists()', () => {
-    let indexPattern: IIndexPattern;
+    let indexPattern: DataView;
 
     beforeEach(() => {
       indexPattern = {
         id: 'index',
-      } as IIndexPattern;
+      } as DataView;
     });
 
     test('should return the key and value for matching filters', async () => {

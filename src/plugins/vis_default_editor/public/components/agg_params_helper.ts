@@ -13,10 +13,10 @@ import {
   AggParam,
   IFieldParamType,
   IAggType,
-  IndexPattern,
   IndexPatternField,
 } from '@kbn/data-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
 import { groupAndSortBy, ComboBoxGroupedOptions } from '../utils';
@@ -135,7 +135,7 @@ function getAggParamsToRender({
 function getAggTypeOptions(
   aggTypes: any,
   agg: IAggConfig,
-  indexPattern: IndexPattern,
+  indexPattern: DataView,
   groupName: string,
   allowedAggs: string[]
 ): ComboBoxGroupedOptions<IAggType> {

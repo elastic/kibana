@@ -29,7 +29,6 @@ export type {
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeFieldSubField,
-  IIndexPattern,
   DataViewAttributes,
   IndexPatternAttributes,
   FieldAttrs,
@@ -61,7 +60,7 @@ export type {
   DataViewsServicePublicMethods,
   TimeBasedDataView,
 } from './data_views';
-export { IndexPattern, DataView } from './data_views';
+export { DataView } from './data_views';
 export {
   DuplicateDataViewError,
   DataViewSavedObjectConflictError,

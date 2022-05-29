@@ -9,20 +9,20 @@
 import { extractTimeFilter } from './extract_time_filter';
 import {
   Filter,
-  IIndexPattern,
   IFieldType,
   buildQueryFilter,
   buildRangeFilter,
   buildPhraseFilter,
 } from '../../../../common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 describe('filter manager utilities', () => {
-  let indexPattern: IIndexPattern;
+  let indexPattern: DataView;
 
   beforeEach(() => {
     indexPattern = {
       id: 'logstash-*',
-    } as IIndexPattern;
+    } as DataView;
   });
 
   describe('extractTimeFilter()', () => {

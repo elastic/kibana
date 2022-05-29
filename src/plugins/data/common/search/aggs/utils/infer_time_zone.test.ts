@@ -18,7 +18,8 @@ jest.mock('moment', () => {
   return moment;
 });
 
-import { IndexPattern, IndexPatternField } from '../../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { IndexPatternField } from '../../..';
 import { AggParamsDateHistogram } from '../buckets';
 import { inferTimeZone } from './infer_time_zone';
 
@@ -27,7 +28,7 @@ describe('inferTimeZone', () => {
     const params: AggParamsDateHistogram = {
       time_zone: 'CEST',
     };
-    expect(inferTimeZone(params, {} as IndexPattern, () => false, jest.fn())).toEqual('CEST');
+    expect(inferTimeZone(params, {} as DataView, () => false, jest.fn())).toEqual('CEST');
   });
 
   it('reads time zone from index pattern type meta if available', () => {
@@ -44,7 +45,7 @@ describe('inferTimeZone', () => {
               },
             },
           },
-        } as unknown as IndexPattern,
+        } as unknown as DataView,
         () => false,
         jest.fn()
       )
@@ -69,7 +70,7 @@ describe('inferTimeZone', () => {
               },
             },
           },
-        } as unknown as IndexPattern,
+        } as unknown as DataView,
         () => false,
         jest.fn()
       )
@@ -77,14 +78,14 @@ describe('inferTimeZone', () => {
   });
 
   it('reads time zone from moment if set to default', () => {
-    expect(inferTimeZone({}, {} as IndexPattern, () => true, jest.fn())).toEqual('CET');
+    expect(inferTimeZone({}, {} as DataView, () => true, jest.fn())).toEqual('CET');
   });
 
   it('reads time zone from config if not set to default', () => {
     expect(
       inferTimeZone(
         {},
-        {} as IndexPattern,
+        {} as DataView,
         () => false,
         () => 'CET' as any
       )
