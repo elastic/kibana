@@ -5,12 +5,11 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataViewFieldBase, IFieldSubType, DataViewBase } from '@kbn/es-query';
+
+import type { DataViewFieldBase, DataViewBase } from '@kbn/es-query';
 import { ToastInputFields, ErrorToastOptions } from '@kbn/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { IFieldType } from './fields';
@@ -183,15 +182,25 @@ export interface DataViewAttributes {
 export type IndexPatternAttributes = DataViewAttributes;
 
 /**
- * @intenal
- * Storage of field attributes. Necessary since the field list isn't saved.
+ * Set of field attributes
+ * @public
  */
 export interface FieldAttrs {
   [key: string]: FieldAttrSet;
 }
 
+/**
+ * Field attributes that are stored on the data view
+ * @public
+ */
 export interface FieldAttrSet {
+  /**
+   * Custom field label
+   */
   customLabel?: string;
+  /**
+   * Popularity count - used for discover
+   */
   count?: number;
 }
 
@@ -387,24 +396,6 @@ export enum IndexPatternType {
 }
 
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
-
-// This should become FieldSpec once types are cleaned up
-export interface FieldSpecExportFmt {
-  count?: number;
-  script?: string;
-  lang?: estypes.ScriptLanguage;
-  conflictDescriptions?: FieldSpecConflictDescriptions;
-  name: string;
-  type: KBN_FIELD_TYPES;
-  esTypes?: string[];
-  scripted: boolean;
-  searchable: boolean;
-  aggregatable: boolean;
-  readFromDocValues?: boolean;
-  subType?: IFieldSubType;
-  format?: SerializedFieldFormat;
-  indexed?: boolean;
-}
 
 /**
  * Serialized version of DataViewField

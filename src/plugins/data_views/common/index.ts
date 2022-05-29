@@ -44,7 +44,6 @@ export type {
   AggregationRestrictions,
   TypeMeta,
   FieldSpecConflictDescriptions,
-  FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
   DataViewSpec,
@@ -54,6 +53,8 @@ export type {
   RuntimeFieldBase,
   FieldConfiguration,
   SavedObjectsClientCommonFindArgs,
+  FieldAttrs,
+  FieldAttrSet,
 } from './types';
 export { DataViewType } from './types';
 export type { IndexPatternsContract, DataViewsContract, DataViewsServiceDeps } from './data_views';

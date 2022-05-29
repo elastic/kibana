@@ -10,7 +10,7 @@ export { getFieldByName, findIndexPatternById } from './utils';
 export type { FieldDescriptor } from './fetcher';
 export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './fetcher';
 export type {
-  IndexPatternsServiceStart,
+  DataViewsServerPluginStart,
   DataViewsServerPluginSetupDependencies,
   DataViewsServerPluginStartDependencies,
 } from './types';

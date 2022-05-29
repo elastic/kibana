@@ -47,11 +47,29 @@ export type IndexPatternListSavedObjectAttrs = Pick<
   'title' | 'type' | 'typeMeta'
 >;
 
+/**
+ * Result from data view search - summary data
+ */
 export interface DataViewListItem {
+  /**
+   * Saved object id
+   */
   id: string;
+  /**
+   * Namespace ids
+   */
   namespaces?: string[];
+  /**
+   * Data view title
+   */
   title: string;
+  /**
+   * Data view type
+   */
   type?: string;
+  /**
+   * Data view type meta
+   */
   typeMeta?: TypeMeta;
 }
 
@@ -93,9 +111,14 @@ export interface DataViewsServiceDeps {
   getCanSave: () => Promise<boolean>;
 }
 
+/**
+ * Data views API service methods
+ * @public
+ */
 export interface DataViewsServicePublicMethods {
   /**
    * Clear the cache of data views.
+   * @param id
    */
   clearCache: (id?: string | undefined) => void;
   /**
@@ -131,6 +154,12 @@ export interface DataViewsServicePublicMethods {
    *             'no data view' case in api consumer code - no more auto redirect
    */
   ensureDefaultDataView: EnsureDefaultDataView;
+  /**
+   * Takes field array and field attributes and returns field map by name
+   * @param fields - Array of fieldspecs
+   * @params fieldAttrs - Field attributes, map by name
+   * @returns Field map by name
+   */
   fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => DataViewFieldMap;
   /**
    * Search for data views based on title
@@ -190,15 +219,35 @@ export interface DataViewsServicePublicMethods {
   getIdsWithTitle: (refresh?: boolean) => Promise<DataViewListItem[]>;
   /**
    * Get list of data view ids and title (and more) for each data view.
+   * @param refresh - clear cache and fetch from server
    */
   getTitles: (refresh?: boolean) => Promise<string[]>;
   /**
    * Returns true if user has access to view a data view.
    */
   hasUserDataView: () => Promise<boolean>;
+  /**
+   * Refresh fields for data view instance
+   * @params dataView - Data view instance
+   */
   refreshFields: (indexPattern: DataView) => Promise<void>;
+  /**
+   * Converts data view saved object to spec
+   * @params savedObject - Data view saved object
+   */
   savedObjectToSpec: (savedObject: SavedObject<DataViewAttributes>) => DataViewSpec;
+  /**
+   * Set default data view.
+   * @param id - Id of the data view to set as default.
+   * @param force - Overwrite if true
+   */
   setDefault: (id: string | null, force?: boolean) => Promise<void>;
+  /**
+   * Save saved object
+   * @param indexPattern - data view instance
+   * @param saveAttempts - number of times to try saving
+   * @oaram ignoreErrors - if true, do not throw error on failure
+   */
   updateSavedObject: (
     indexPattern: DataView,
     saveAttempts?: number,
@@ -208,6 +257,7 @@ export interface DataViewsServicePublicMethods {
 
 /**
  * Data views service, providing CRUD operations for data views.
+ * @public
  */
 export class DataViewsService {
   private config: UiSettingsCommon;
@@ -228,6 +278,9 @@ export class DataViewsService {
    */
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
+  /**
+   * Can the user save data views?
+   */
   public getCanSave: () => Promise<boolean>;
 
   /**
@@ -714,10 +767,10 @@ export class DataViewsService {
   };
 
   /**
-   * Create a new index pattern instance
-   * @param spec
-   * @param skipFetchFields
-   * @returns IndexPattern
+   * Create a new data view instance
+   * @param spec data view spec
+   * @param skipFetchFields if true, will not fetch fields
+   * @returns DataView
    */
   async create(spec: DataViewSpec, skipFetchFields = false): Promise<DataView> {
     const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
@@ -739,7 +792,7 @@ export class DataViewsService {
 
   /**
    * Create a new index pattern and save it right away
-   * @param spec
+   * @param spec data view spec
    * @param override Overwrite if existing index pattern exists.
    * @param skipFetchFields Whether to skip field refresh step.
    */
@@ -753,29 +806,29 @@ export class DataViewsService {
 
   /**
    * Save a new index pattern
-   * @param indexPattern
+   * @param dataView data view instance
    * @param override Overwrite if existing index pattern exists
    */
 
-  async createSavedObject(indexPattern: DataView, override = false) {
+  async createSavedObject(dataView: DataView, override = false) {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
-    const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
+    const dupe = await findByTitle(this.savedObjectsClient, dataView.title);
     if (dupe) {
       if (override) {
         await this.delete(dupe.id);
       } else {
-        throw new DuplicateDataViewError(`Duplicate index pattern: ${indexPattern.title}`);
+        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
       }
     }
 
-    const body = indexPattern.getAsSavedObjectBody();
+    const body = dataView.getAsSavedObjectBody();
     const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(
       DATA_VIEW_SAVED_OBJECT_TYPE,
       body,
       {
-        id: indexPattern.id,
+        id: dataView.id,
       }
     )) as SavedObject<DataViewAttributes>;
 

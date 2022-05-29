@@ -118,7 +118,6 @@ export type {
   AggregationRestrictions,
   TypeMeta,
   FieldSpecConflictDescriptions,
-  FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
   DataViewSpec,
