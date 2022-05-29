@@ -9,42 +9,12 @@
 import type { Client } from '@elastic/elasticsearch';
 import { Transform } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
-import { merge } from 'lodash';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
+import { getIndexTemplate } from '../../lib';
 
 const headers = {
   headers: ES_CLIENT_HEADERS,
-};
-
-const getDsIndexTemplate = async (client: Client, dataStream: string) => {
-  const { data_streams: dataStreams } = await client.indices.getDataStream(
-    { name: dataStream },
-    headers
-  );
-  const templateName = dataStreams[0].template;
-  const { index_templates: indexTemplates } = await client.indices.getIndexTemplate(
-    { name: templateName },
-    headers
-  );
-  const {
-    index_template: { template, composed_of: composedOf, ...indexTemplate },
-  } = indexTemplates[0];
-
-  const components = await Promise.all(
-    composedOf.map(async (component) => {
-      const { component_templates: componentTemplates } = await client.cluster.getComponentTemplate(
-        { name: component }
-      );
-      return componentTemplates[0].component_template.template;
-    })
-  );
-
-  return {
-    ...indexTemplate,
-    name: templateName,
-    template: merge(template, ...components),
-  };
 };
 
 export function createGenerateIndexRecordsStream({
@@ -102,7 +72,11 @@ export function createGenerateIndexRecordsStream({
               continue;
             }
 
-            const template = await getDsIndexTemplate(client, dataStream);
+            const { data_streams: dataStreams } = await client.indices.getDataStream(
+              { name: dataStream },
+              headers
+            );
+            const template = await getIndexTemplate(client, dataStreams[0].template);
 
             seenDatastreams.add(dataStream);
             stats.archivedIndex(dataStream, { template });

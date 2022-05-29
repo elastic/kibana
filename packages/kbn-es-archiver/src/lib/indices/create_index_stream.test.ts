@@ -174,7 +174,7 @@ describe('esArchiver: createCreateIndexStream()', () => {
     });
 
     it('creates data streams', async () => {
-      const client = createStubClient(['actual-index'], { 'existing-index': 'actual-index' });
+      const client = createStubClient();
       const stats = createStubStats();
 
       await createPromiseFromStreams([
