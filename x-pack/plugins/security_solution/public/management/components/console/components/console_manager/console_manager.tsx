@@ -256,8 +256,12 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     }
   }, [consoleManagerClient, visibleConsole]);
 
-  const runningConsoles = useMemo(() => {
-    return Object.values(consoleStorage).map((managedConsole) => managedConsole.console);
+  const runningConsoles = useMemo<JSX.Element[]>(() => {
+    return Object.values(consoleStorage).map((managedConsole) => {
+      return (
+        <React.Fragment key={managedConsole.client.id}>{managedConsole.console}</React.Fragment>
+      );
+    });
   }, [consoleStorage]);
 
   return (
