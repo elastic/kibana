@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('settings');
       await PageObjects.settings.createIndexPattern('dlstest', null);
 
-      await security.testUser.setRoles(['manage_security', 'kibana_admin']);
+      await security.testUser.setRoles(['security_user', 'kibana_admin']);
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchRoles();
     });

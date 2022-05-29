@@ -16,9 +16,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
   const PageObjects = getPageObjects(['security', 'settings', 'common', 'discover', 'header']);
   const kibanaServer = getService('kibanaServer');
+  const security = getService('security');
 
   describe('field_level_security', () => {
     before('initialize tests', async () => {
+      await security.testUser.setRoles(['security_user', 'kibana_admin']);
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/security/flstest/data'); // ( data)
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'
@@ -123,6 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async function () {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
+      await security.testUser.restoreDefaults();
       await PageObjects.security.forceLogout();
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'

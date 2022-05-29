@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await browser.setWindowSize(1600, 1000);
       log.debug('users');
-      await security.testUser.setRoles(['manage_security', 'kibana_admin']);
+      await security.testUser.setRoles(['security_user', 'kibana_admin']);
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load(

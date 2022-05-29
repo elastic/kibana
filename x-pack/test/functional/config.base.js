@@ -478,6 +478,12 @@ export default async function ({ readConfigFile }) {
           elasticsearch: {
             cluster: ['manage_security'],
           },
+        },
+
+        security_user: {
+          elasticsearch: {
+            cluster: ['manage_security'],
+          },
           kibana: [
             {
               feature: {
