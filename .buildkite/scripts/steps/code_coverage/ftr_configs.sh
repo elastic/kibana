@@ -118,5 +118,7 @@ echo ""
 # So the last step "knows" this config ran
 uploadRanFile "ftr_configs"
 
+buildkite-agent artifact upload 'target/kibana-coverage/functional/**/*'
+
 # Force exit 0 to ensure the next build step starts.
 exit 0
