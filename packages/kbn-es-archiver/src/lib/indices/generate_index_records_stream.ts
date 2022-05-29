@@ -28,6 +28,8 @@ export function createGenerateIndexRecordsStream({
   keepIndexNames?: boolean;
   log: ToolingLog;
 }) {
+  const seenDatastreams = new Set();
+
   return new Transform({
     writableObjectMode: true,
     readableObjectMode: true,
@@ -58,8 +60,6 @@ export function createGenerateIndexRecordsStream({
             }
           )
         ).body;
-
-        const seenDatastreams = new Set();
 
         for (const [index, { data_stream: dataStream, settings, mappings }] of Object.entries(
           resp
