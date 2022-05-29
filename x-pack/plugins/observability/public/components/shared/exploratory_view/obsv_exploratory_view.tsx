@@ -17,7 +17,6 @@ import {
   DEVICE_DISTRIBUTION_LABEL,
   KPI_OVER_TIME_LABEL,
   PERF_DIST_LABEL,
-  SINGLE_METRIC_LABEL,
 } from './configurations/constants/labels';
 import { SELECT_REPORT_TYPE } from './series_editor/series_editor';
 import { DataTypes } from './configurations/constants';
@@ -86,7 +85,6 @@ export const reportTypesList: Array<{
   { reportType: 'kpi-over-time', label: KPI_OVER_TIME_LABEL },
   { reportType: 'data-distribution', label: PERF_DIST_LABEL },
   { reportType: 'core-web-vitals', label: CORE_WEB_VITALS_LABEL },
-  { reportType: 'single-metric', label: SINGLE_METRIC_LABEL },
   { reportType: 'device-data-distribution', label: DEVICE_DISTRIBUTION_LABEL },
 ];
 
