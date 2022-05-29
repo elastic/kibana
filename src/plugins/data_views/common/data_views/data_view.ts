@@ -17,8 +17,15 @@ import {
   FieldFormat,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
-import type { RuntimeField, RuntimeFieldSpec, RuntimeType, FieldConfiguration } from '../types';
+import { DataViewAttributes } from '..';
+import type {
+  FieldAttrs,
+  FieldAttrSet,
+  RuntimeField,
+  RuntimeFieldSpec,
+  RuntimeType,
+  FieldConfiguration,
+} from '../types';
 
 import { IIndexPattern, IFieldType } from '..';
 import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';

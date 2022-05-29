@@ -33,8 +33,6 @@ export type {
   IIndexPattern,
   DataViewAttributes,
   IndexPatternAttributes,
-  FieldAttrs,
-  FieldAttrSet,
   OnNotification,
   OnError,
   UiSettingsCommon,
@@ -55,6 +53,7 @@ export type {
   RuntimeTypeExceptComposite,
   RuntimeFieldBase,
   FieldConfiguration,
+  SavedObjectsClientCommonFindArgs,
 } from './types';
 export { DataViewType } from './types';
 export type { IndexPatternsContract, DataViewsContract, DataViewsServiceDeps } from './data_views';

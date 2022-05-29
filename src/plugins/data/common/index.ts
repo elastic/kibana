@@ -108,8 +108,6 @@ export type {
   IIndexPattern,
   DataViewAttributes,
   IndexPatternAttributes,
-  FieldAttrs,
-  FieldAttrSet,
   OnNotification,
   OnError,
   UiSettingsCommon,

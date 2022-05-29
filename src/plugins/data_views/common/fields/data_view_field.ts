@@ -32,16 +32,23 @@ export interface ToSpecConfig {
 }
 
 /**
- *  @public
  * Data view field class
+ * @public
  * */
 export class DataViewField implements IFieldType {
+  /**
+   * Field data
+   */
   readonly spec: FieldSpec;
   // not writable or serialized
+  /**
+   * Kbn field type - Type used mainly for formattering
+   */
   private readonly kbnFieldType: KbnFieldType;
 
   /**
    * DataView constructor
+   * @constructor
    * @param spec Configuration for the field
    */
   constructor(spec: FieldSpec) {

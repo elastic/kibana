@@ -90,14 +90,23 @@ export interface FieldConfiguration {
 /**
  * This is the RuntimeField interface enhanced with Data view field
  * configuration: field format definition, customLabel or popularity.
- *
- * @see {@link RuntimeField}
+ * @public
  */
 export interface RuntimeField extends RuntimeFieldBase, FieldConfiguration {
+  /**
+   * Subfields of composite field
+   */
   fields?: Record<string, RuntimeFieldSubField>;
 }
 
+/**
+ * Runtime field composite subfield
+ * @public
+ */
 export interface RuntimeFieldSubField extends FieldConfiguration {
+  /**
+   * Type of runtime field, can only be primitive type
+   */
   type: RuntimeTypeExceptComposite;
 }
 
@@ -186,7 +195,21 @@ export interface FieldAttrSet {
   count?: number;
 }
 
+/**
+ * Handler for data view notifications
+ * @public
+ * @param toastInputFields Toast notif config
+ * @param key Used to dedupe notifs
+ */
 export type OnNotification = (toastInputFields: ToastInputFields, key: string) => void;
+
+/**
+ * Handler for data view errors
+ * @public
+ * @param error Error object
+ * @param toastInputFields Toast notif config
+ * @param key Used to dedupe notifs
+ */
 export type OnError = (error: Error, toastInputFields: ErrorToastOptions, key: string) => void;
 
 /**
@@ -210,15 +233,35 @@ export interface UiSettingsCommon {
   set: <T = any>(key: string, value: T) => Promise<void>;
   /**
    * Remove a setting value
+   * @param key name of value
    */
   remove: (key: string) => Promise<void>;
 }
 
+/**
+ * Saved objects common find args
+ * @public
+ */
 export interface SavedObjectsClientCommonFindArgs {
+  /**
+   * Saved object type
+   */
   type: string | string[];
+  /**
+   * Saved object fields
+   */
   fields?: string[];
+  /**
+   * Results per page
+   */
   perPage?: number;
+  /**
+   * Query string
+   */
   search?: string;
+  /**
+   * Fields to search
+   */
   searchFields?: string[];
 }
 

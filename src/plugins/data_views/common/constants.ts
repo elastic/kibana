@@ -6,6 +6,10 @@
  * Side Public License, v 1.
  */
 
+/**
+ * All runtime field types
+ * @public
+ */
 export const RUNTIME_FIELD_TYPES = [
   'keyword',
   'long',
@@ -33,8 +37,8 @@ export const DEFAULT_ASSETS_TO_IGNORE = {
 };
 
 /**
- * @public
  * UiSettings key to get metaFields list
+ * @public
  */
 export const META_FIELDS = 'metaFields';
 
