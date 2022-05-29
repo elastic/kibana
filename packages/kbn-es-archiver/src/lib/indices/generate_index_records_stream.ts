@@ -11,7 +11,7 @@ import { Transform } from 'stream';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Stats } from '../stats';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
-import { getIndexTemplate } from '../../lib';
+import { getIndexTemplate } from '..';
 
 const headers = {
   headers: ES_CLIENT_HEADERS,

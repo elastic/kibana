@@ -34,4 +34,4 @@ export { readDirectory } from './directory';
 
 export { Progress } from './progress';
 
-export { getIndexTemplate } from './index_template';
+export { getIndexTemplate } from './index_template';
