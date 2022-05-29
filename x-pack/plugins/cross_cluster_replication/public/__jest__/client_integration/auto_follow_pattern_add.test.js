@@ -8,6 +8,7 @@
 import { indexPatterns } from '@kbn/data-plugin/public';
 import './mocks';
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
+import { last } from 'lodash';
 
 const { setup } = pageHelpers.autoFollowPatternAdd;
 
@@ -157,7 +158,7 @@ describe('Create Auto-follow pattern', () => {
           const errorCallOut = find('notConnectedError');
 
           expect(errorCallOut.length).toBe(1);
-          expect(errorCallOut.find('.euiCallOutHeader__title').text()).toBe(
+          expect(errorCallOut.find('.euiCallOutHeader__title').last().text()).toBe(
             `Remote cluster '${clusterName}' is not connected`
           );
           expect(exists('notConnectedError.editButton')).toBe(true);
