@@ -761,12 +761,12 @@ export default function (providerContext: FtrProviderContext) {
             version: '5.0.0',
           })
           .expect(200);
-          const [agent1data, agent2data, ] = await Promise.all([
-            supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx'),
-            supertest.get(`/api/fleet/agents/agent2`).set('kbn-xsrf', 'xxx'),
-          ]);
-          expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
-          expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
+        const [agent1data, agent2data] = await Promise.all([
+          supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx'),
+          supertest.get(`/api/fleet/agents/agent2`).set('kbn-xsrf', 'xxx'),
+        ]);
+        expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
+        expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
       });
 
       it('should throw an error if source_uri parameter is passed', async () => {
