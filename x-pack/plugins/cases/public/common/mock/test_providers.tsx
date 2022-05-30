@@ -71,6 +71,7 @@ export const TestProviders = React.memo(TestProvidersComponent);
 export interface AppMockRenderer {
   render: UiRender;
   coreStart: StartServices;
+  queryClient: QueryClient;
 }
 export const testQueryClient = new QueryClient({
   defaultOptions: {
@@ -117,6 +118,7 @@ export const createAppMockRenderer = ({
   };
   return {
     coreStart: services,
+    queryClient,
     render,
   };
 };
