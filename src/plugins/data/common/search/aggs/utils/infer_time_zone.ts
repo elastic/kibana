@@ -7,16 +7,41 @@
  */
 
 import moment from 'moment';
-import { AggTypesDependencies, IndexPattern } from '../../..';
-import { AggParamsDateHistogram } from '../buckets';
+import { AggTypesDependencies, DataViewField, DataView } from '../../..';
+
+const DEFAULT_TIME_ZONE = 'UTC';
+
+export const getConfigTimeZone = (
+  getExecutionContext: AggTypesDependencies['getExecutionContext'],
+  getConfig: AggTypesDependencies['getConfig']
+) => {
+  const configTimezone = getConfig<string>('dateFormat:tz');
+  const isDefaultTimezone = configTimezone === 'Browser';
+
+  if (isDefaultTimezone) {
+    const { performedOn } = getExecutionContext();
+
+    if (performedOn === 'server') {
+      return DEFAULT_TIME_ZONE;
+    }
+
+    // If the typeMeta data index template does not have a timezone assigned to the selected field, use the configured tz
+    const detectedTimezone = moment.tz.guess();
+    const tzOffset = moment().format('Z');
+
+    return detectedTimezone || tzOffset;
+  }
+
+  return configTimezone;
+};
 
 export function inferTimeZone(
-  params: AggParamsDateHistogram,
-  indexPattern: IndexPattern,
+  params: { field?: DataViewField | string; time_zone?: string },
+  dataView: DataView,
   aggName: 'date_histogram' | 'date_range',
   getExecutionContext: AggTypesDependencies['getExecutionContext'],
   getConfig: AggTypesDependencies['getConfig']
-): string {
+) {
   let tz = params.time_zone;
 
   if (!tz && params.field) {
@@ -24,7 +49,7 @@ export function inferTimeZone(
     // field requires a specific time_zone
     const fieldName = typeof params.field === 'string' ? params.field : params.field.name;
 
-    tz = indexPattern.typeMeta?.aggs?.[aggName]?.[fieldName]?.time_zone;
+    tz = dataView.typeMeta?.aggs?.[aggName]?.[fieldName]?.time_zone;
   }
 
   if (!tz) {
@@ -32,21 +57,9 @@ export function inferTimeZone(
     const isDefaultTimezone = configTimezone === 'Browser';
 
     if (isDefaultTimezone) {
-      const { performedOn } = getExecutionContext();
-
-      if (performedOn === 'server') {
-        return 'UTC';
-      }
-
-      // If the typeMeta data index template does not have a timezone assigned to the selected field, use the configured tz
-      const detectedTimezone = moment.tz.guess();
-      const tzOffset = moment().format('Z');
-
-      return detectedTimezone || tzOffset;
+      return getConfigTimeZone(getExecutionContext, getConfig);
     }
-
-    return configTimezone;
   }
 
-  return tz;
+  return tz || DEFAULT_TIME_ZONE;
 }

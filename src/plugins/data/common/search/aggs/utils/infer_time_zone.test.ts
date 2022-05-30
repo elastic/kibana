@@ -18,19 +18,18 @@ jest.mock('moment', () => {
   return moment;
 });
 
-import { IndexPattern, IndexPatternField } from '../../..';
-import { AggParamsDateHistogram } from '../buckets';
+import { DataView, DataViewField } from '../../..';
 import { inferTimeZone } from './infer_time_zone';
 
 describe('inferTimeZone', () => {
   it('reads time zone from agg params', () => {
-    const params: AggParamsDateHistogram = {
+    const params = {
       time_zone: 'CEST',
     };
     expect(
       inferTimeZone(
         params,
-        {} as IndexPattern,
+        {} as DataView,
         'date_histogram',
         () => ({ performedOn: 'client' }),
         jest.fn()
@@ -52,7 +51,7 @@ describe('inferTimeZone', () => {
               },
             },
           },
-        } as unknown as IndexPattern,
+        } as unknown as DataView,
         'date_histogram',
         () => ({ performedOn: 'client' }),
         jest.fn()
@@ -66,7 +65,7 @@ describe('inferTimeZone', () => {
         {
           field: {
             name: 'mydatefield',
-          } as IndexPatternField,
+          } as DataViewField,
         },
         {
           typeMeta: {
@@ -78,7 +77,7 @@ describe('inferTimeZone', () => {
               },
             },
           },
-        } as unknown as IndexPattern,
+        } as unknown as DataView,
         'date_histogram',
         () => ({ performedOn: 'client' }),
         jest.fn()
@@ -90,7 +89,7 @@ describe('inferTimeZone', () => {
     expect(
       inferTimeZone(
         {},
-        {} as IndexPattern,
+        {} as DataView,
         'date_histogram',
         () => ({ performedOn: 'client' }),
         jest.fn()
@@ -102,7 +101,7 @@ describe('inferTimeZone', () => {
     expect(
       inferTimeZone(
         {},
-        {} as IndexPattern,
+        {} as DataView,
         'date_histogram',
         () => ({ performedOn: 'client' }),
         () => 'CET' as any
@@ -110,14 +109,14 @@ describe('inferTimeZone', () => {
     ).toEqual('CET');
   });
 
-  it('should set UTC isf  ', () => {
+  it('should set UTC if config value is Browser and expression performed on "server"', () => {
     expect(
       inferTimeZone(
         {},
-        {} as IndexPattern,
+        {} as DataView,
         'date_histogram',
         () => ({ performedOn: 'server' }),
-        () => 'CET' as any
+        () => 'Browser' as any
       )
     ).toEqual('CET');
   });
