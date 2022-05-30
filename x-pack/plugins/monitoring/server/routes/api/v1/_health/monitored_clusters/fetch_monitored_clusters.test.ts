@@ -10,7 +10,7 @@ import { fetchMonitoredClusters } from './fetch_monitored_clusters';
 
 describe(__filename, () => {
   describe('fetchMonitoringClusters', () => {
-    test('it should send two search queries', async () => {
+    test('it should send multiple search queries', async () => {
       const searchFn = jest.fn().mockResolvedValue({
         aggregations: {
           clusters: {
