@@ -17,7 +17,6 @@ jest.mock('react-redux', () => {
   };
 });
 jest.mock('../../../../common/lib/kibana');
-jest.mock('./title_and_description');
 describe('SaveTimelineButton', () => {
   const props = {
     initialFocus: 'title' as const,

@@ -36,7 +36,9 @@ jest.mock('../../containers', () => ({
   useTimelineEvents: jest.fn(),
 }));
 
-jest.mock('./tabs_content');
+jest.mock('./tabs_content', () => ({
+  TabsContent: () => <div data-test-subj="tabs-content" />,
+}));
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/components/url_state/normalize_time_range');

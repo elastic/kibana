@@ -35,7 +35,9 @@ jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
-jest.mock('../user_actions/timestamp');
+jest.mock('../user_actions/timestamp', () => ({
+  UserActionTimestamp: () => <></>,
+}));
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
 

@@ -82,7 +82,9 @@ describe('roleMappingsManagementApp', () => {
       </div>
     `);
 
-    unmount();
+    act(() => {
+      unmount();
+    });
 
     expect(docTitle.reset).toHaveBeenCalledTimes(1);
 
@@ -105,7 +107,9 @@ describe('roleMappingsManagementApp', () => {
       </div>
     `);
 
-    unmount();
+    act(() => {
+      unmount();
+    });
 
     expect(docTitle.reset).toHaveBeenCalledTimes(1);
 
@@ -133,7 +137,9 @@ describe('roleMappingsManagementApp', () => {
       </div>
     `);
 
-    unmount();
+    act(() => {
+      unmount();
+    });
 
     expect(docTitle.reset).toHaveBeenCalledTimes(1);
 
