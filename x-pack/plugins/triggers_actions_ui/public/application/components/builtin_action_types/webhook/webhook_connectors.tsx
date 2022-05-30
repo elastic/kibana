@@ -141,6 +141,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               path="secrets.password"
               label={i18n.PASSWORD_LABEL}
               readOnly={readOnly}
+              data-test-subj="webhookPasswordInput"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -159,7 +160,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
       />
       <EuiSpacer size="m" />
       {hasHeaders ? (
-        <UseArray path="config.headers">
+        <UseArray path="config.headers" initialNumberOfItems={1}>
           {({ items, addItem, removeItem }) => {
             return (
               <>
@@ -172,7 +173,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                           label: i18n.HEADER_KEY_LABEL,
                         }}
                         component={TextField}
-                        // Make sure to add this prop otherwise when you delete
+                        // This is needed because when you delete
                         // a row and add a new one, the stale values will appear
                         readDefaultValueOnForm={!item.isNew}
                       />

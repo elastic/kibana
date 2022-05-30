@@ -38,10 +38,21 @@ const shouldDisableEmailConfiguration = (service: string | null | undefined) =>
   isEmpty(service) ||
   (service !== AdditionalEmailServices.EXCHANGE && service !== AdditionalEmailServices.OTHER);
 
+// const emailValidator = ({ value }) => {
+//   const validatedEmail = validateEmailAddresses(value);
+//   // const validatedEmail = services.validateEmailAddresses([action.config.from])[0];
+//   //       if (!validatedEmail.valid) {
+//   //         const message =
+//   //           validatedEmail.reason === InvalidEmailReason.notAllowed
+//   //             ? translations.getNotAllowedEmailAddress(action.config.from)
+//   //             : translations.getInvalidEmailAddress(action.config.from)
+// };
+
 export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
 }) => {
   const {
+    actions: { validateEmailAddresses },
     docLinks,
     http,
     isCloud,

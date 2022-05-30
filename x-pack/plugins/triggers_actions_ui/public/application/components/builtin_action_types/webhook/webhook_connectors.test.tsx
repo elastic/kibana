@@ -18,7 +18,7 @@ describe('WebhookActionConnectorFields renders', () => {
       config: {
         method: 'PUT',
         url: 'http:\\test',
-        headers: { 'content-type': 'text' },
+        headers: [{ key: 'content-type', value: 'text' }],
         hasAuth: true,
       },
       secrets: {
@@ -41,7 +41,6 @@ describe('WebhookActionConnectorFields renders', () => {
     await waitForComponentToUpdate();
 
     expect(wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').length > 0).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="webhookHeaderText"]').length > 0).toBeTruthy();
     wrapper.find('[data-test-subj="webhookViewHeadersSwitch"]').first().simulate('click');
     expect(wrapper.find('[data-test-subj="webhookMethodSelect"]').length > 0).toBeTruthy();
     expect(wrapper.find('[data-test-subj="webhookUrlText"]').length > 0).toBeTruthy();

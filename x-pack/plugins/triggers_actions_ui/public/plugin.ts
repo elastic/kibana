@@ -190,6 +190,7 @@ export class Plugin
 
         return renderApp({
           ...coreStart,
+          actions: plugins.actions,
           data: pluginsStart.data,
           dataViews: pluginsStart.dataViews,
           charts: pluginsStart.charts,

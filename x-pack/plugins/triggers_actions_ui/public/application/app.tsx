@@ -23,6 +23,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { suspendedComponentWithProps } from './lib/suspended_component_with_props';
 import {
   ActionTypeRegistryContract,
@@ -40,6 +41,7 @@ const RuleDetailsRoute = lazy(
 );
 
 export interface TriggersAndActionsUiServices extends CoreStart {
+  actions: ActionsPublicPluginSetup;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   charts: ChartsPluginStart;

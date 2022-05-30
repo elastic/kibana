@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { isEmpty } from 'lodash';
 import {
   Form,
   FormHook,
@@ -35,6 +36,64 @@ interface Props {
   /** Handler to receive update on the form "isModified" state */
   onFormModifiedChange?: (isModified: boolean) => void;
 }
+/**
+ * The serializer and deserializer are needed to transform the headers of
+ * the webhook connectors. The webhook connector uses the UseArray component
+ * to add dynamic headers to the form. The UseArray component formats the fields
+ * as an array of objects. The schema for the headers of the webhook connector
+ * is Record<string, string>. We need to transform the UseArray format to the one
+ * accepted by the backend. At the moment, the UseArray does not accepts
+ * a serializer and deserializer so it has to be done on the form level. When issue #133107
+ * is resolved we should move the serializer and deserializer functions to the
+ * webhook connector.
+ */
+
+// TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
+const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
+  if (data.actionTypeId !== '.webhook') {
+    return data;
+  }
+
+  const webhookData = data as { config: { headers?: Record<string, string> } };
+  const headers = Object.entries(webhookData?.config?.headers ?? {}).map(([key, value]) => ({
+    key,
+    value,
+  }));
+
+  return {
+    ...data,
+    config: {
+      ...data.config,
+      headers: isEmpty(headers) ? undefined : headers,
+    },
+  };
+};
+
+// TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
+const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
+  if (formData.actionTypeId !== '.webhook') {
+    return formData;
+  }
+
+  const webhookFormData = formData as {
+    config: { headers?: Array<{ key: string; value: string }> };
+  };
+  const headers = (webhookFormData?.config?.headers ?? []).reduce(
+    (acc, header) => ({
+      ...acc,
+      [header.key]: header.value,
+    }),
+    {}
+  );
+
+  return {
+    ...formData,
+    config: {
+      ...formData.config,
+      headers: isEmpty(headers) ? null : headers,
+    },
+  };
+};
 
 const ConnectorFormComponent: React.FC<Props> = ({
   actionTypeModel,
@@ -43,7 +102,11 @@ const ConnectorFormComponent: React.FC<Props> = ({
   onChange,
   onFormModifiedChange,
 }) => {
-  const { form } = useForm({ defaultValue: connector });
+  const { form } = useForm({
+    defaultValue: connector,
+    serializer: formSerializer,
+    deserializer: formDeserializer,
+  });
   const { submit, isValid: isFormValid, isSubmitted, isSubmitting } = form;
   const [preSubmitValidator, setPreSubmitValidator] = useState<ConnectorValidationFunc | null>(
     null
