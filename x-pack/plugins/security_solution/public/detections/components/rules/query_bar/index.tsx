@@ -29,7 +29,7 @@ import * as i18n from './translations';
 export interface FieldValueQueryBar {
   filters: Filter[];
   query: Query;
-  saved_id?: string;
+  saved_id: string | null;
 }
 interface QueryBarDefineRuleProps {
   browserFields: BrowserFields;
@@ -176,7 +176,7 @@ export const QueryBarDefineRule = ({
               query: '',
               language: 'kuery',
             },
-            saved_id: undefined,
+            saved_id: null,
           });
         }
       }
@@ -210,7 +210,7 @@ export const QueryBarDefineRule = ({
             ? [...newFilters, getDataProviderFilter(dataProvidersDsl)]
             : newFilters,
         query: newQuery,
-        saved_id: undefined,
+        saved_id: null,
       });
     },
     [browserFields, indexPattern, setFieldValue]
