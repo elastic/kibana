@@ -25,7 +25,7 @@ import { AdministrationListPage } from '../../../components/administration_list_
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
 import { PolicyData, PolicyDetailsRouteState } from '../../../../../common/endpoint/types';
-import { useUrlPagination } from '../../../components/hooks/use_url_pagination';
+import { useUrlPagination } from '../../../hooks/use_url_pagination';
 import {
   useGetAgentCountForPolicy,
   useGetEndpointSecurityPackage,

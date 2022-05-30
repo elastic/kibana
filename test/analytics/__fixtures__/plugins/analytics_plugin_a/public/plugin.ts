@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
-import { take, toArray } from 'rxjs/operators';
-import type { Plugin, CoreSetup, TelemetryCounter, CoreStart } from '@kbn/core/public';
+import { BehaviorSubject, filter, firstValueFrom, ReplaySubject } from 'rxjs';
+import { takeWhile, tap, toArray } from 'rxjs/operators';
+import type { Plugin, CoreSetup, CoreStart, TelemetryCounter, Event } from '@kbn/core/server';
 import type { Action } from './custom_shipper';
 import { CustomShipper } from './custom_shipper';
 import './types';
@@ -52,10 +52,24 @@ export class AnalyticsPluginA implements Plugin {
       plugin: 'analyticsPluginA',
       step: 'setup',
     });
-
+    let found = false;
     window.__analyticsPluginA__ = {
-      getLastActions: async (takeNumberOfActions: number) =>
-        firstValueFrom(this.actions$.pipe(take(takeNumberOfActions), toArray())),
+      getActionsUntilReportTestPluginLifecycleEvent: async () =>
+        firstValueFrom(
+          this.actions$.pipe(
+            takeWhile(() => !found),
+            tap((action) => {
+              found = isTestPluginLifecycleReportEventAction(action);
+            }),
+            // Filter only the actions that are relevant to this plugin
+            filter(
+              ({ action, meta }) =>
+                ['optIn', 'extendContext'].includes(action) ||
+                isTestPluginLifecycleReportEventAction({ action, meta })
+            ),
+            toArray()
+          )
+        ),
       stats,
       setOptIn(optIn: boolean) {
         analytics.optIn({ global: { enabled: optIn } });
@@ -82,4 +96,11 @@ export class AnalyticsPluginA implements Plugin {
     });
   }
   public stop() {}
+}
+
+function isTestPluginLifecycleReportEventAction({ action, meta }: Action): boolean {
+  return (
+    action === 'reportEvents' &&
+    meta.find((event: Event) => event.event_type === 'test-plugin-lifecycle')
+  );
 }

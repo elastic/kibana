@@ -1,7 +1,7 @@
 {
   "id": "security_linux_v3",
   "title": "Security: Linux",
-  "description": "Anomaly detection jobs for Linux host based threat hunting and detection.",
+  "description": "Anomaly detection jobs for Linux host-based threat hunting and detection.",
   "type": "linux data",
   "logoFile": "logo.json",
   "defaultIndexPattern": "auditbeat-*,logs-*",
