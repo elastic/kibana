@@ -22,7 +22,7 @@ import {
 import type { AgentPolicy } from '../../types';
 import { AgentPolicyPackageBadges } from '../agent_policy_package_badges';
 
-import { useAuthz } from '../../hooks';
+import { useAuthz, useStartServices } from '../../hooks';
 
 import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentication_settings';
 
@@ -51,6 +51,8 @@ type Props = {
 );
 
 export const AgentPolicySelection: React.FC<Props> = (props) => {
+  const { docLinks } = useStartServices();
+
   const {
     agentPolicies,
     selectedPolicyId,
@@ -81,10 +83,7 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
             defaultMessage="Type of hosts are controlled by an {agentPolicy}. Choose an agent policy or create a new one."
             values={{
               agentPolicy: (
-                <EuiLink
-                  href={'https://www.elastic.co/guide/en/fleet/current/agent-policy.html'}
-                  target="_blank"
-                >
+                <EuiLink href={docLinks.links.fleet.agentPolicy} target="_blank">
                   <FormattedMessage
                     id="xpack.fleet.agentPolicyForm.createAgentPolicyDocLink"
                     defaultMessage="agent policy"

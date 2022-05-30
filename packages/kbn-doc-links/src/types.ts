@@ -372,6 +372,7 @@ export interface DocLinks {
     apiKeysLearnMore: string;
     onPremRegistry: string;
     secureLogstash: string;
+    agentPolicy: string;
   }>;
   readonly ecs: {
     readonly guide: string;
