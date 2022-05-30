@@ -698,7 +698,7 @@ describe('Discover grid cell rendering', function () {
   it('renders a functional close button when CodeEditor is rendered', () => {
     const closePopoverMockFn = jest.fn();
     const DiscoverGridCellValue = getRenderCellValueFn(
-      indexPatternMock,
+      dataViewMock,
       rowsFieldsWithTopLevelObject,
       rowsFieldsWithTopLevelObject.map(flatten),
       true,
