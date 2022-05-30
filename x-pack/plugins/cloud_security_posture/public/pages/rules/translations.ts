@@ -84,3 +84,7 @@ export const OVERVIEW = i18n.translate('xpack.csp.rules.ruleFlyout.tabs.overview
 export const REMEDIATION = i18n.translate('xpack.csp.rules.ruleFlyout.tabs.remediationTabLabel', {
   defaultMessage: 'Remediation',
 });
+
+export const RULES = i18n.translate('xpack.csp.rules.rulesPageHeader.pageTitleLabel', {
+  defaultMessage: 'Rules',
+});

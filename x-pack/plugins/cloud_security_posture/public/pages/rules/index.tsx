@@ -6,10 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { EuiTextColor, EuiEmptyPrompt } from '@elastic/eui';
+import { generatePath, Link, RouteComponentProps } from 'react-router-dom';
+import { EuiTextColor, EuiEmptyPrompt, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import * as t from 'io-ts';
 import type { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { RulesContainer, type PageUrlParams } from './rules_container';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
@@ -17,6 +18,7 @@ import { CspNavigationItem } from '../../common/navigation/types';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { useCspIntegration } from './use_csp_integration';
 import { CspPageTemplate } from '../../components/csp_page_template';
+import * as TEXT from './translations';
 
 const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
   [allNavigationItems.benchmarks, { ...allNavigationItems.rules, name }].filter(
@@ -36,8 +38,19 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
   const pageProps: KibanaPageTemplateProps = useMemo(
     () => ({
       pageHeader: {
-        bottomBorder: false, // TODO: border still shows.
-        pageTitle: 'Rules',
+        pageTitle: (
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <Link to={generatePath(allNavigationItems.benchmarks.path)}>
+              <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
+                <FormattedMessage
+                  id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
+                  defaultMessage="Benchmark Integrations"
+                />
+              </EuiButtonEmpty>
+            </Link>
+            {TEXT.RULES}
+          </EuiFlexGroup>
+        ),
         description: integrationInfo.data && integrationInfo.data.package && (
           <PageDescription
             text={`${integrationInfo.data.package.title}, ${integrationInfo.data.name}`}
@@ -49,13 +62,15 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
   );
 
   return (
-    <CspPageTemplate
-      {...pageProps}
-      query={integrationInfo}
-      errorRender={(error) => <RulesErrorPrompt error={extractErrorBodyMessage(error)} />}
-    >
-      {integrationInfo.status === 'success' && <RulesContainer />}
-    </CspPageTemplate>
+    <>
+      <CspPageTemplate
+        {...pageProps}
+        query={integrationInfo}
+        errorRender={(error) => <RulesErrorPrompt error={extractErrorBodyMessage(error)} />}
+      >
+        {integrationInfo.status === 'success' && <RulesContainer />}
+      </CspPageTemplate>
+    </>
   );
 };
 
