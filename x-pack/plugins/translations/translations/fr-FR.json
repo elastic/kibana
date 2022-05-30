@@ -23838,7 +23838,6 @@
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsComboboxLabel": "Ajouter des balises pour les règles sélectionnées",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsOverwriteCheckboxLabel": "Écraser toutes les balises pour les règles sélectionnées",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsTitle": "Ajouter des balises",
-    "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.closeButtonLabel": "Fermer",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxHelpText": "Supprimez de la liste déroulante les modèles d'indexation par défaut des index Elasticsearch. Vous pouvez ajouter des modèles d'indexation personnalisés, puis appuyer sur Entrée pour en ajouter un nouveau.",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxLabel": "Supprimer les modèles d'indexation pour les règles sélectionnées",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsTitle": "Supprimer les modèles d'indexation",
