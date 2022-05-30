@@ -124,7 +124,6 @@ export const Console = memo<ConsoleProps>(
               className="layout"
               gutterSize="none"
               responsive={false}
-              wrap={false}
               data-test-subj={getTestId('mainPanel')}
             >
               <EuiFlexItem grow={false} className="layout-container layout-header">
@@ -132,18 +131,12 @@ export const Console = memo<ConsoleProps>(
               </EuiFlexItem>
 
               <EuiFlexItem grow className="layout-hideOverflow">
-                <EuiFlexGroup
-                  wrap={false}
-                  gutterSize="none"
-                  responsive={false}
-                  className="layout-hideOverflow"
-                >
+                <EuiFlexGroup gutterSize="none" responsive={false} className="layout-hideOverflow">
                   <EuiFlexItem className="eui-fullHeight layout-hideOverflow">
                     <EuiFlexGroup
                       direction="column"
                       gutterSize="none"
                       responsive={false}
-                      wrap={false}
                       className="layout-hideOverflow"
                     >
                       <EuiFlexItem grow className="layout-historyOutput">

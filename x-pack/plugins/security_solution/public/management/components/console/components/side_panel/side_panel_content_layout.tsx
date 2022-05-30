@@ -22,7 +22,6 @@ export const SidePanelContentLayout = memo<SidePanelContentLayoutProps>(
       <EuiFlexGroup
         direction="column"
         responsive={false}
-        wrap={false}
         className="eui-fullHeight"
         gutterSize="none"
       >

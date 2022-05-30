@@ -12,7 +12,6 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
 const StyledEuiFlexItemHistoryItem = styled(EuiFlexItem)`
-  flex-basis: 99% !important;
   border-bottom: ${({ theme: { eui } }) => eui.euiBorderWidthThin} dashed
     ${({ theme: { eui } }) => eui.euiBorderColor};
   padding: ${({ theme: { eui } }) => eui.paddingSizes.xl} 0;

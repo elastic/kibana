@@ -42,8 +42,8 @@ export const HistoryOutput = memo<OutputHistoryProps>((commonProps) => {
       data-test-subj={getTestId('historyOutput')}
       {...commonProps}
       wrap={true}
-      direction="row"
-      alignItems="flexEnd"
+      direction="column"
+      alignItems="stretch"
       responsive={false}
       gutterSize="none"
     >
