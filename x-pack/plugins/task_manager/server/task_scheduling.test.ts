@@ -7,6 +7,7 @@
 
 import { Subject } from 'rxjs';
 import { none, some } from 'fp-ts/lib/Option';
+import moment from 'moment';
 
 import {
   asTaskMarkRunningEvent,
@@ -28,8 +29,6 @@ import { mockLogger } from './test_utils';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
 import { mustBeAllOf } from './queries/query_clauses';
-
-const ONE_HOUR_IN_MS = 60 * 60 * 1000;
 
 jest.mock('uuid', () => ({
   v4: () => 'v4uuid',
@@ -139,8 +138,11 @@ describe('TaskScheduling', () => {
 
   describe('bulkUpdateSchedules', () => {
     const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
-
-    beforeEach(() => {});
+    beforeEach(() => {
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: mockTask() }])
+      );
+    });
 
     test('should search for tasks by ids and idle status', async () => {
       mockTaskStore.fetch.mockResolvedValue({ docs: [] });
@@ -175,9 +177,31 @@ describe('TaskScheduling', () => {
       expect(mockTaskStore.fetch).toHaveBeenCalledTimes(13);
     });
 
+    test('should transform response into correct format', async () => {
+      const successfulTask = mockTask({ id: 'task-1', schedule: { interval: '1h' } });
+      const failedTask = mockTask({ id: 'task-2', schedule: { interval: '1h' } });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([
+          { tag: 'ok', value: successfulTask },
+          { tag: 'err', error: { entity: failedTask, error: new Error('fail') } },
+        ])
+      );
+      mockTaskStore.fetch.mockResolvedValue({ docs: [successfulTask, failedTask] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const result = await taskScheduling.bulkUpdateSchedules([successfulTask.id, failedTask.id], {
+        interval: '1h',
+      });
+
+      expect(result).toEqual({
+        tasks: [successfulTask],
+        errors: [{ task: failedTask, error: new Error('fail') }],
+      });
+    });
+
     test('should postpone task run if new interval is greater than previous', async () => {
-      // task set to be run in one 1hr from now
-      const runInTwoHrs = new Date(Date.now() + 2 * ONE_HOUR_IN_MS);
+      // task set to be run in 2 hrs from now
+      const runInTwoHrs = new Date(Date.now() + moment.duration(2, 'hours').asMilliseconds());
       const task = mockTask({ id, schedule: { interval: '3h' }, runAt: runInTwoHrs });
 
       mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
@@ -190,12 +214,14 @@ describe('TaskScheduling', () => {
       expect(bulkUpdatePayload).toHaveLength(1);
       expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '5h' });
       // if we update rule with schedule of '5h' and prev interval was 3h, task will be run in 2 hours later
-      expect(bulkUpdatePayload[0].runAt.getTime() - runInTwoHrs.getTime()).toBe(2 * ONE_HOUR_IN_MS);
+      expect(bulkUpdatePayload[0].runAt.getTime() - runInTwoHrs.getTime()).toBe(
+        moment.duration(2, 'hours').asMilliseconds()
+      );
     });
 
     test('should set task run sooner if new interval is lesser than previous', async () => {
       // task set to be run in one 2hrs from now
-      const runInTwoHrs = new Date(Date.now() + 2 * ONE_HOUR_IN_MS);
+      const runInTwoHrs = new Date(Date.now() + moment.duration(2, 'hours').asMilliseconds());
       const task = mockTask({ id, schedule: { interval: '3h' }, runAt: runInTwoHrs });
 
       mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
@@ -207,12 +233,14 @@ describe('TaskScheduling', () => {
 
       expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '2h' });
       // if we update rule with schedule of '2h' and prev interval was 3h, task will be run in 1 hour sooner
-      expect(runInTwoHrs.getTime() - bulkUpdatePayload[0].runAt.getTime()).toBe(ONE_HOUR_IN_MS);
+      expect(runInTwoHrs.getTime() - bulkUpdatePayload[0].runAt.getTime()).toBe(
+        moment.duration(1, 'hour').asMilliseconds()
+      );
     });
 
     test('should set task run to now if time that passed from last run is greater than new interval', async () => {
       // task set to be run in one 1hr from now
-      const runInOneHr = new Date(Date.now() + ONE_HOUR_IN_MS);
+      const runInOneHr = new Date(Date.now() + moment.duration(1, 'hour').asMilliseconds());
       const task = mockTask({ id, schedule: { interval: '2h' }, runAt: runInOneHr });
 
       mockTaskStore.fetch.mockResolvedValue({ docs: [task] });

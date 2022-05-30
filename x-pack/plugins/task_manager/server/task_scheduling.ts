@@ -40,7 +40,7 @@ import {
   EphemeralTask,
   IntervalSchedule,
 } from './task';
-import { TaskStore, BulkUpdateResult } from './task_store';
+import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { TaskLifecycleEvent, TaskPollingLifecycle } from './polling_lifecycle';
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -59,6 +59,10 @@ export interface TaskSchedulingOpts {
   taskManagerId: string;
 }
 
+export interface BulkUpdateSchedulesResult {
+  tasks: ConcreteTaskInstance[];
+  errors: Array<{ task: ConcreteTaskInstance; error: Error }>;
+}
 export interface RunNowResult {
   id: ConcreteTaskInstance['id'];
   state?: ConcreteTaskInstance['state'];
@@ -117,14 +121,14 @@ export class TaskScheduling {
   /**
    * Bulk updates schedules for tasks by ids.
    *
-   * @param taskIss string[] - list of task ids
+   * @param taskIds string[] - list of task ids
    * @param schedule IntervalSchedule - new schedule
    * @returns {Promise<ConcreteTaskInstance[]>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
     schedule: IntervalSchedule
-  ): Promise<BulkUpdateResult[]> {
+  ): Promise<BulkUpdateSchedulesResult> {
     const tasks = await pMap(
       chunk(taskIds, 100),
       async (taskIdsChunk) =>
@@ -159,7 +163,20 @@ export class TaskScheduling {
         return { ...task, schedule, runAt: new Date(newRunAtInMs) };
       });
 
-    return this.store.bulkUpdate(updatedTasks);
+    const result: BulkUpdateSchedulesResult = {
+      tasks: [],
+      errors: [],
+    };
+
+    (await this.store.bulkUpdate(updatedTasks)).forEach((task) => {
+      if (task.tag === 'ok') {
+        result.tasks.push(task.value);
+      } else {
+        result.errors.push({ error: task.error.error, task: task.error.entity });
+      }
+    });
+
+    return result;
   }
 
   /**
