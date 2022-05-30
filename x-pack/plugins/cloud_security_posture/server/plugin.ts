@@ -15,7 +15,11 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { DeepReadonly } from 'utility-types';
-import { DeletePackagePoliciesResponse, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  DeletePackagePoliciesResponse,
+  NewPackagePolicy,
+  PackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
@@ -95,6 +99,29 @@ export class CspPlugin
       }
 
       plugins.fleet.registerExternalCallback(
+        'packagePolicyCreate',
+        async (
+          newPackagePolicy: NewPackagePolicy,
+          context: RequestHandlerContext,
+          _: KibanaRequest
+        ): Promise<NewPackagePolicy> => {
+          if (newPackagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
+            await this.initialize(core);
+            const soClient = (await context.core).savedObjects.client;
+            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+            await setRulesOnPackage(
+              plugins.fleet.packagePolicyService,
+              newPackagePolicy,
+              esClient,
+              soClient
+            );
+          }
+
+          return newPackagePolicy;
+        }
+      );
+
+      plugins.fleet.registerExternalCallback(
         'packagePolicyPostCreate',
         async (
           packagePolicy: PackagePolicy,
@@ -104,14 +131,14 @@ export class CspPlugin
           if (packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
             await this.initialize(core);
             const soClient = (await context.core).savedObjects.client;
-            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+            // const esClient = (await context.core).elasticsearch.client.asCurrentUser;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
-            await setRulesOnPackage(
-              plugins.fleet.packagePolicyService,
-              packagePolicy,
-              esClient,
-              soClient
-            );
+            // await setRulesOnPackage(
+            //   plugins.fleet.packagePolicyService,
+            //   packagePolicy,
+            //   esClient,
+            //   soClient
+            // );
           }
 
           return packagePolicy;

@@ -8,15 +8,19 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
+  Logger,
 } from '@kbn/core/server';
 import { schema as rt } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
 import { produce } from 'immer';
 import { unset } from 'lodash';
 import yaml from 'js-yaml';
 
-import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
+import {
+  NewPackagePolicy,
+  PackagePolicy,
+  PackagePolicyConfigRecord,
+} from '@kbn/fleet-plugin/common';
 import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import { CspAppContext } from '../../plugin';
 import { CspRulesConfigSchema } from '../../../common/schemas/csp_configuration';
@@ -27,6 +31,7 @@ import {
   cspRuleAssetSavedObjectType,
 } from '../../../common/constants';
 import { CspRouter } from '../../types';
+import { string } from 'joi';
 
 export const getPackagePolicy = async (
   soClient: SavedObjectsClientContract,
@@ -50,7 +55,7 @@ export const getPackagePolicy = async (
 
 export const getCspRules = (
   soClient: SavedObjectsClientContract,
-  packagePolicy: PackagePolicy
+  packagePolicy: PackagePolicy | NewPackagePolicy
 ): Promise<SavedObjectsFindResponse<CspRuleSchema, unknown>> => {
   return soClient.find<CspRuleSchema>({
     type: cspRuleAssetSavedObjectType,
@@ -80,9 +85,9 @@ export const convertRulesConfigToYaml = (config: CspRulesConfigSchema): string =
 };
 
 export const setVarToPackagePolicy = (
-  packagePolicy: PackagePolicy,
+  packagePolicy: PackagePolicy | NewPackagePolicy,
   dataYaml: string
-): PackagePolicy => {
+): PackagePolicy | NewPackagePolicy => {
   const configFile: PackagePolicyConfigRecord = {
     dataYaml: { type: 'config', value: dataYaml },
   };
@@ -97,21 +102,39 @@ export const setVarToPackagePolicy = (
 
 export const updatePackagePolicy = (
   packagePolicyService: PackagePolicyServiceInterface,
-  packagePolicy: PackagePolicy,
+  packagePolicy: PackagePolicy | NewPackagePolicy,
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  dataYaml: string
-): Promise<PackagePolicy> => {
+  dataYaml: string,
+  logger: Logger
+): Promise<PackagePolicy> | boolean => {
   const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
-  return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy);
+  if (typeof packagePolicy.id === 'string') {
+    try {
+      return packagePolicyService.update(
+        soClient,
+        esClient,
+        packagePolicy.id,
+        updatedPackagePolicy
+      );
+    } catch (err) {
+      const exitError = transformError(err);
+      logger.error(`Failed to set rules configuration on package, ${exitError}`);
+    }
+  }
+  return false;
 };
 
 export const setRulesOnPackage = async (
   packagePolicyService: PackagePolicyServiceInterface,
-  packagePolicy: PackagePolicy,
+  packagePolicy: PackagePolicy | NewPackagePolicy,
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract
-) => {
+  soClient: SavedObjectsClientContract,
+  logger: Logger
+): Promise<PackagePolicy | boolean> => {
+  console.log('*******************');
+  console.log({ packagePolicy });
+  console.log('*******************');
   const cspRules = await getCspRules(soClient, packagePolicy);
   const rulesConfig = createRulesConfig(cspRules);
   const dataYaml = convertRulesConfigToYaml(rulesConfig);
@@ -121,7 +144,8 @@ export const setRulesOnPackage = async (
     packagePolicy,
     esClient,
     soClient,
-    dataYaml
+    dataYaml,
+    logger
   );
 };
 
@@ -152,14 +176,24 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
           packagePolicyId
         );
 
-        const updatedPackagePolicies = setRulesOnPackage(
+        await setRulesOnPackage(
           packagePolicyService,
           packagePolicy,
           esClient,
-          soClient
+          soClient,
+          cspContext.logger
         );
-
-        return response.ok({ body: updatedPackagePolicies });
+        const updatedPackagePolicy = await setRulesOnPackage(
+          packagePolicyService,
+          packagePolicy,
+          esClient,
+          soClient,
+          cspContext.logger
+        );
+        // if (updatedPackagePolicy) {
+        //   return response.ok({ body: { status: true } });
+        // }
+        return response.ok({ body: { status: true } });
       } catch (err) {
         const error = transformError(err);
         cspContext.logger.error(
