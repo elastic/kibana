@@ -5,16 +5,14 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { EndpointResponderExtensionComponentProps } from '../../components/endpoint_responder/types';
-import { ActionLogButton } from '../../components/endpoint_responder';
-import { getEndpointResponseActionsConsoleCommands } from '../../components/endpoint_responder/endpoint_response_actions_console_commands';
+import React, { useCallback } from 'react';
+import { getEndpointResponseActionsConsoleCommands } from '../../components/endpoint_responder';
 import { useConsoleManager } from '../../components/console';
 import type { HostMetadata } from '../../../../common/endpoint/types';
 
-type ShowEndpointResponder = (endpointMetadata: HostMetadata) => void;
+type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
 
-export const useWithShowEndpointResponder = (): ShowEndpointResponder => {
+export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConsole => {
   const consoleManager = useConsoleManager();
 
   return useCallback(
@@ -26,15 +24,15 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponder => {
         endpointRunningConsole.show();
       } else {
         consoleManager
-          .register<EndpointResponderExtensionComponentProps['meta']>({
+          .register({
             id: endpointAgentId,
             title: `${endpointMetadata.host.name} - Endpoint v${endpointMetadata.agent.version}`,
             consoleProps: {
               commands: getEndpointResponseActionsConsoleCommands(endpointAgentId),
               'data-test-subj': 'endpointResponseActionsConsole',
               prompt: `endpoint-${endpointMetadata.agent.version}`,
+              TitleComponent: () => <>{endpointMetadata.host.name}</>,
             },
-            ActionComponents: [ActionLogButton],
           })
           .show();
       }
