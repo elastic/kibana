@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { merge } from 'lodash';
 import expect from '@kbn/expect';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { ReportApiJSON } from '@kbn/reporting-plugin/common/types';
@@ -92,23 +91,20 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      async function generateCsvReport(searchSourceFields?: Partial<SerializedSearchSourceFields>) {
+      async function generateCsvReport(fields: string[]) {
         const { text } = await reportingAPI.generateCsv({
           title: 'CSV Report',
           browserTimezone: 'UTC',
           objectType: 'search',
           version: '7.15.0',
-          searchSource: merge(
-            {
-              version: true,
-              query: { query: '', language: 'kuery' },
-              index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
-              sort: [{ order_date: 'desc' }],
-              fields: ['*'],
-              filter: [],
-            },
-            searchSourceFields
-          ) as unknown as SerializedSearchSourceFields,
+          searchSource: {
+            version: true,
+            query: { query: '', language: 'kuery' },
+            index: '5c620ea0-dc4f-11ec-972a-bf98ce1eebd7',
+            sort: [{ order_date: 'desc' }],
+            fields: fields.map((field) => ({ field, include_unmapped: 'true' })),
+            filter: [],
+          } as SerializedSearchSourceFields,
         });
 
         const { path } = JSON.parse(text) as { path: string };
@@ -118,19 +114,19 @@ export default function ({ getService }: FtrProviderContext) {
       }
 
       it('includes an unmapped field to the report', async () => {
-        const csvFile = await generateCsvReport({ fields: ['text', 'unmapped'] });
+        const csvFile = await generateCsvReport(['text', 'unmapped']);
 
         expectSnapshot(csvFile).toMatch();
       });
 
       it('includes an unmapped nested field to the report', async () => {
-        const csvFile = await generateCsvReport({ fields: ['text', 'nested.unmapped'] });
+        const csvFile = await generateCsvReport(['text', 'nested.unmapped']);
 
         expectSnapshot(csvFile).toMatch();
       });
 
       it('includes all unmapped fields to the report', async () => {
-        const csvFile = await generateCsvReport({ fields: ['*'] });
+        const csvFile = await generateCsvReport(['*']);
 
         expectSnapshot(csvFile).toMatch();
       });
