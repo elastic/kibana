@@ -80,28 +80,17 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('after setting opt-in', () => {
       let actions: Action[];
-      let context: Action['meta'];
 
       before(async () => {
         actions = await getActions();
-        context = actions[1].meta;
-      });
-
-      it('it should extend the contexts with pid injected by "analytics_plugin_a"', async () => {
-        // Validating the remote PID because that's the only field that it's added by the FTR plugin.
-        expect(context).to.have.property('pid');
-        expect(context.pid).to.be.a('number');
       });
 
       it('it calls optIn first, then extendContext, followed by reportEvents', async () => {
         const [optInAction, extendContextAction, ...reportEventsAction] = actions;
         expect(optInAction).to.eql({ action: 'optIn', meta: true });
-        expect(extendContextAction).to.eql({ action: 'extendContext', meta: context });
-        while (reportEventsAction[0].action === 'extendContext') {
-          // it could happen that a context provider emits a bit delayed
-          reportEventsAction.shift();
-        }
-        reportEventsAction.forEach((entry) => expect(entry.action).to.eql('reportEvents'));
+        expect(extendContextAction).to.have.property('action', 'extendContext');
+        // Checking `some` because there could be more `extendContext` actions for late context providers
+        expect(reportEventsAction.some((entry) => entry.action === 'reportEvents')).to.be(true);
       });
 
       it('Initial calls to reportEvents from cached events group the requests by event_type', async () => {
@@ -165,6 +154,13 @@ export default function ({ getService }: FtrProviderContext) {
             properties: { plugin: 'analyticsPluginA', step: 'start' },
           },
         ]);
+      });
+
+      it('it should extend the contexts with pid injected by "analytics_plugin_a"', async () => {
+        const [event] = await ebtServerHelper.getLastEvents(1, ['test-plugin-lifecycle']);
+        // Validating the remote PID because that's the only field that it's added by the FTR plugin.
+        expect(event.context).to.have.property('pid');
+        expect(event.context.pid).to.be.a('number');
       });
     });
   });
