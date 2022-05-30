@@ -7,6 +7,7 @@
  */
 
 import _ from 'lodash';
+import { parse, stringify } from 'hjson';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 const { collapseLiteralStrings, expandLiteralStrings } = XJson;
@@ -20,7 +21,14 @@ export function textFromRequest(request: { method: string; url: string; data: st
 }
 
 export function jsonToString(data: object, indent: boolean) {
-  return JSON.stringify(data, null, indent ? 2 : 0);
+  return stringify(data, {
+    keepWsc: true,
+    quotes: 'all',
+    bracesSameLine: true,
+    space: indent ? 2 : 0,
+    emitRootBraces: false,
+    separator: true,
+  });
 }
 
 export function formatRequestBodyDoc(data: string[], indent: boolean) {
@@ -29,7 +37,10 @@ export function formatRequestBodyDoc(data: string[], indent: boolean) {
   for (let i = 0; i < data.length; i++) {
     const curDoc = data[i];
     try {
-      let newDoc = jsonToString(JSON.parse(collapseLiteralStrings(curDoc)), indent);
+      let newDoc = jsonToString(
+        parse(collapseLiteralStrings(curDoc), { keepWsc: true, legacyRoot: false }),
+        indent
+      );
       if (indent) {
         newDoc = expandLiteralStrings(newDoc);
       }
