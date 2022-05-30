@@ -84,7 +84,6 @@ export const ProcessTree = ({
   onShowAlertDetails,
   showTimestamp = true,
   verboseMode = false,
-  refreshClicked = false,
 }: ProcessTreeDeps) => {
   const [isInvestigatedEventVisible, setIsInvestigatedEventVisible] = useState<boolean>(true);
   const [isInvestigatedEventAbove, setIsInvestigatedEventAbove] = useState<boolean>(false);
