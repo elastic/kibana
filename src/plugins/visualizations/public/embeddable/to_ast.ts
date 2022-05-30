@@ -34,18 +34,15 @@ export const toExpressionAst: VisToExpressionAst = async (
   }
 
   const visExpressionAst = await vis.type.toExpressionAst(vis, params);
-  const searchSourceExpressionAst = searchSource?.toExpressionAst();
+  const searchSourceExpressionAst = searchSource?.toExpressionAst({
+    asDatatable: vis.type.fetchDatatable,
+  });
 
   const expression = {
     ...visExpressionAst,
     chain: [
       buildExpressionFunction<ExpressionFunctionKibana>('kibana', {}).toAst(),
-      /**
-       * @workaround Non-aggregating visualizations only accept the `kibana_context` on input.
-       */
-      ...(searchSourceExpressionAst?.chain.filter(
-        ({ function: name }) => vis.type.fetchDatatable || !['esdsl', 'esaggs'].includes(name)
-      ) ?? []),
+      ...(searchSourceExpressionAst?.chain ?? []),
       ...visExpressionAst.chain,
     ],
   };

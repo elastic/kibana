@@ -1441,5 +1441,21 @@ describe('SearchSource', () => {
         | esaggs index={indexPatternLoad id=\\"logstash-*\\"} aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
       `);
     });
+
+    test('should not include the `esdsl` function to the chain if the `asDatatable` option is false', () => {
+      expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toMatchInlineSnapshot(
+        `"kibana_context"`
+      );
+    });
+
+    test('should not include the `esaggs` function to the chain if the `asDatatable` option is false', () => {
+      searchSource.setField('aggs', [
+        { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+      ]);
+
+      expect(toString(searchSource.toExpressionAst({ asDatatable: false }))).toMatchInlineSnapshot(
+        `"kibana_context"`
+      );
+    });
   });
 });

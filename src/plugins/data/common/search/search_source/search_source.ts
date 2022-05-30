@@ -138,6 +138,15 @@ export interface SearchSourceDependencies extends FetchHandlers {
   search: ISearchGeneric;
 }
 
+interface ExpressionAstOptions {
+  /**
+   * When truthy, it will include either `esaggs` or `esdsl` function to the expression chain.
+   * In this case, the expression will perform a search and return the `datatable` structure.
+   * @default true
+   */
+  asDatatable?: boolean;
+}
+
 /** @public **/
 export class SearchSource {
   private id: string = uniqueId('data_source');
@@ -939,17 +948,27 @@ export class SearchSource {
   /**
    * Generates an expression abstract syntax tree using the fields set in the current search source and its ancestors.
    * The produced expression from the returned AST will return the `datatable` structure.
-   * The generator will use the `esdsl` function to perform the search.
+   * If the `asDatatable` option is truthy or omitted, the generator will use the `esdsl` function to perform the search.
    * When the `aggs` field is present, it will use the `esaggs` function instead.
    * @returns The expression AST.
    */
-  toExpressionAst(): ExpressionAstExpression {
+  toExpressionAst({ asDatatable = true }: ExpressionAstOptions = {}): ExpressionAstExpression {
     const searchRequest = this.mergeProps();
     const { body, index, query } = searchRequest;
 
     const filters = (
       typeof searchRequest.filters === 'function' ? searchRequest.filters() : searchRequest.filters
     ) as Filter[] | Filter | undefined;
+    const ast = buildExpression([
+      buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
+        q: query?.map(queryToAst),
+        filters: filters && filtersToAst(filters),
+      }),
+    ]).toAst();
+
+    if (!asDatatable) {
+      return ast;
+    }
 
     const aggsField = this.getField('aggs');
     const aggs = (typeof aggsField === 'function' ? aggsField() : aggsField) as
@@ -960,13 +979,6 @@ export class SearchSource {
       aggs instanceof AggConfigs
         ? aggs
         : index && aggs && this.dependencies.aggs.createAggConfigs(index, aggs);
-
-    const ast = buildExpression([
-      buildExpressionFunction<ExpressionFunctionKibanaContext>('kibana_context', {
-        q: query?.map(queryToAst),
-        filters: filters && filtersToAst(filters),
-      }),
-    ]).toAst();
 
     if (aggConfigs) {
       ast.chain.push(...aggConfigs.toExpressionAst().chain);
