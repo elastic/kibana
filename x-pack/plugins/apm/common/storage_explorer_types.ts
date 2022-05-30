@@ -7,17 +7,6 @@
 
 import * as t from 'io-ts';
 
-export interface StorageExplorerItem {
-  serviceName: string;
-  environments: string[];
-  transactionDocs: number;
-  spanDocs: number;
-  errorDocs: number;
-  metricDocs: number;
-  size?: number;
-  sampling: number;
-}
-
 export enum IndexLifecyclePhase {
   Hot = 'hot',
   Warm = 'warm',

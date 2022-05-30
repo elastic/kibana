@@ -28,14 +28,15 @@ import { useChartTheme } from '@kbn/observability-plugin/public';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useProgressiveFetcher } from '../../../../hooks/use_progressive_fetcher';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
-import {
-  StorageExplorerItem,
-  IndexLifecyclePhase,
-} from '../../../../../common/storage_explorer_types';
+import { IndexLifecyclePhase } from '../../../../../common/storage_explorer_types';
 import { asDynamicBytes } from '../../../../../common/utils/formatters';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { IndexLifecyclePhaseSelect } from './index_lifecycle_phase_select';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+
+type StorageExplorerItem =
+  APIReturnType<'GET /internal/apm/storage_explorer'>['serviceStatistics'][0];
 
 export function StorageExplorer() {
   const [indexLifecyclePhase, setIndexLifecyclePhase] = useState(
@@ -61,7 +62,7 @@ export function StorageExplorer() {
     [indexLifecyclePhase]
   );
 
-  const items: StorageExplorerItem[] = data?.serviceStatistics ?? [];
+  const items = data?.serviceStatistics ?? [];
 
   const columns: Array<EuiBasicTableColumn<StorageExplorerItem>> = [
     {

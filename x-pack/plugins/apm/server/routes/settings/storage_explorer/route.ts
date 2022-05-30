@@ -11,10 +11,7 @@ import { getIndicesStats } from './get_indices_stats';
 import { getSearchAggregatedTransactions } from '../../../lib/helpers/transactions';
 import { setupRequest } from '../../../lib/helpers/setup_request';
 import { getDocCountPerProcessorEvent } from './get_doc_count_per_processor_event';
-import {
-  StorageExplorerItem,
-  indexLifecyclePhaseRt,
-} from '../../../../common/storage_explorer_types';
+import { indexLifecyclePhaseRt } from '../../../../common/storage_explorer_types';
 import { getServiceStatistics } from './get_service_statistics';
 import { getTotalTransactionsPerService } from './get_total_transactions_per_service';
 import { probabilityRt } from '../../default_api_types';
@@ -29,7 +26,16 @@ const storageExplorerRoute = createApmServerRoute({
     resources
   ): Promise<{
     totalSizeInBytes?: number;
-    serviceStatistics: StorageExplorerItem[];
+    serviceStatistics: Array<{
+      serviceName: string;
+      environments: string[];
+      transactionDocs: number;
+      spanDocs: number;
+      errorDocs: number;
+      metricDocs: number;
+      size?: number;
+      sampling: number;
+    }>;
   }> => {
     const setup = await setupRequest(resources);
     const { params, context } = resources;
