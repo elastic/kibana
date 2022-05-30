@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { HelpMenu } from './help_menu';
-export { HelpMenu as HelpMenuComponent } from './help_menu.component';
+import { State } from '../../../types';
+
+export const getKeyboardShortcutsDocVisibility = (state: State): boolean => {
+  return state.transient.flyouts.keyboardShortcutsDoc.isVisible;
+};

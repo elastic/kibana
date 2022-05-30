@@ -5,5 +5,11 @@
  * 2.0.
  */
 
-export { HelpMenu } from './help_menu';
-export { HelpMenu as HelpMenuComponent } from './help_menu.component';
+import React from 'react';
+import { KeyboardShortcutsDocPanel } from '../keyboard_shortcuts_doc_panel';
+
+export const Flyouts = () => (
+  <>
+    <KeyboardShortcutsDocPanel />
+  </>
+);

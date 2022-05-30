@@ -150,13 +150,16 @@ export const initializeCanvas = async (
         href: docLinks.links.canvas.guide,
       },
     ],
-    content: (domNode) => {
+    content: (domNode, { hideHelpMenu }) => {
       ReactDOM.render(
         <KibanaThemeProvider theme$={coreStart.theme.theme$}>
-          <HelpMenu
-            functionRegistry={expressions.getFunctions()}
-            notifyService={canvasServices.getServices().notify}
-          />
+          <Provider store={canvasStore}>
+            <HelpMenu
+              functionRegistry={expressions.getFunctions()}
+              notifyService={canvasServices.getServices().notify}
+              hideHelpMenu={hideHelpMenu}
+            />
+          </Provider>
         </KibanaThemeProvider>,
         domNode
       );
