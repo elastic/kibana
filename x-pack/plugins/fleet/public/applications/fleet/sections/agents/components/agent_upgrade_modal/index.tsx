@@ -25,7 +25,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
 import semverGt from 'semver/functions/gt';
 
 import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
@@ -199,7 +198,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
     const agentVersionNumber = semverCoerce(searchValue);
     if (
       agentVersionNumber?.version &&
-      semverLt(agentVersionNumber?.version, kibanaVersion) &&
+      semverGt(kibanaVersion, agentVersionNumber?.version) &&
       minVersion &&
       semverGt(agentVersionNumber?.version, minVersion)
     ) {
