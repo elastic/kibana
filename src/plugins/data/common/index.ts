@@ -73,6 +73,7 @@ export {
   getTime,
   isQuery,
   isTimeRange,
+  queryStateToExpressionAst,
 } from './query';
 export type { QueryState } from './query';
 export * from './search';
@@ -115,7 +116,6 @@ export type {
   SavedObjectsClientCommonFindArgs,
   SavedObjectsClientCommon,
   GetFieldsOptions,
-  GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
   SavedObject,
   AggregationRestrictions,

@@ -8,7 +8,8 @@
 import { KibanaFeature } from '@kbn/features-plugin/common';
 
 import { ALL_SPACES_ID } from '../../../../../common/constants';
-import { getPutPayloadSchema, validateKibanaPrivileges } from './put_payload';
+import { validateKibanaPrivileges } from '../../../../lib';
+import { getPutPayloadSchema } from './put_payload';
 
 const basePrivilegeNamesMap = {
   global: ['all', 'read'],
