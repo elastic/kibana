@@ -6,9 +6,10 @@
  */
 
 import * as rt from 'io-ts';
-import { timestampFromStringRT } from '../shared';
+import { numberFromStringRT, timestampFromStringRT } from '../shared';
 
 export const getHealthRequestQueryRT = rt.partial({
   min: timestampFromStringRT,
   max: timestampFromStringRT,
+  timeout: numberFromStringRT,
 });
