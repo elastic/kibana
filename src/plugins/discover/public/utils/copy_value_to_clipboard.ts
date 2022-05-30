@@ -8,8 +8,17 @@
 
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { cellHasFormulas } from '@kbn/data-plugin/common';
 import type { ValueToStringConverter } from '../types';
 import { DiscoverServices } from '../build_services';
+import { escapeFormattedValue } from './convert_value_to_string';
+
+const WARNING_FOR_FORMULAS = i18n.translate(
+  'discover.grid.copyEscapedValueWithFormulasToClipboardWarningText',
+  {
+    defaultMessage: 'It may contain formulas whose values have been escaped.',
+  }
+);
 
 export const copyValueToClipboard = ({
   rowIndex,
@@ -24,15 +33,25 @@ export const copyValueToClipboard = ({
 }): string => {
   const { toastNotifications } = services;
 
-  const valueFormatted = valueToStringConverter(rowIndex, columnId);
+  const result = valueToStringConverter(rowIndex, columnId);
+  const valueFormatted = result.formattedString;
 
   copyToClipboard(valueFormatted);
 
-  toastNotifications.addInfo({
-    title: i18n.translate('discover.grid.copyValueToClipboardToastTitle', {
-      defaultMessage: 'Copied to clipboard.',
-    }),
+  const toastTitle = i18n.translate('discover.grid.copyValueToClipboard.toastTitle', {
+    defaultMessage: 'Copied to clipboard',
   });
+
+  if (result.withFormula) {
+    toastNotifications.addWarning({
+      title: toastTitle,
+      text: WARNING_FOR_FORMULAS,
+    });
+  } else {
+    toastNotifications.addInfo({
+      title: toastTitle,
+    });
+  }
 
   return valueFormatted;
 };
@@ -49,12 +68,15 @@ export const copyColumnValuesToClipboard = async ({
   rowsCount: number;
 }): Promise<string> => {
   const { toastNotifications } = services;
+  let withFormula = cellHasFormulas(columnId);
 
   const valuesFormatted = [...Array(rowsCount)].map((_, rowIndex) => {
-    return valueToStringConverter(rowIndex, columnId, { disableMultiline: true });
+    const result = valueToStringConverter(rowIndex, columnId, { disableMultiline: true });
+    withFormula = withFormula || result.withFormula;
+    return result.formattedString;
   });
 
-  const textToCopy = `${columnId}\n${valuesFormatted.join('\n')}`;
+  const textToCopy = `${escapeFormattedValue(columnId)}\n${valuesFormatted.join('\n')}`;
 
   let copiedWithoutBrowserStyles = false;
   try {
@@ -65,12 +87,21 @@ export const copyColumnValuesToClipboard = async ({
     }
   }
 
-  toastNotifications.addInfo({
-    title: i18n.translate('discover.grid.copyColumnValuesToClipboardToastTitle', {
-      defaultMessage: 'Copied values of "{column}" column to clipboard.',
-      values: { column: columnId },
-    }),
+  const messageTitle = i18n.translate('discover.grid.copyColumnValuesToClipboard.toastTitle', {
+    defaultMessage: 'Copied values of "{column}" column to clipboard',
+    values: { column: columnId },
   });
+
+  if (withFormula) {
+    toastNotifications.addWarning({
+      title: messageTitle,
+      text: WARNING_FOR_FORMULAS,
+    });
+  } else {
+    toastNotifications.addInfo({
+      title: messageTitle,
+    });
+  }
 
   return textToCopy;
 };
@@ -88,8 +119,8 @@ export const copyColumnNameToClipboard = ({
   copyToClipboard(textToCopy);
 
   toastNotifications.addInfo({
-    title: i18n.translate('discover.grid.copyColumnNameToClipboardToastTitle', {
-      defaultMessage: 'Copied to clipboard.',
+    title: i18n.translate('discover.grid.copyColumnNameToClipboard.toastTitle', {
+      defaultMessage: 'Copied to clipboard',
     }),
   });
 

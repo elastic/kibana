@@ -16,4 +16,4 @@ export type ValueToStringConverter = (
   rowIndex: number,
   columnId: string,
   options?: { disableMultiline?: boolean }
-) => string;
+) => { formattedString: string; withFormula: boolean };

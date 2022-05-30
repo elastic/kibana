@@ -41,7 +41,7 @@ describe('copyValueToClipboard', () => {
     expect(result).toBe('"abcd1"');
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(discoverServiceMock.toastNotifications.addInfo).toHaveBeenCalledWith({
-      title: 'Copied to clipboard.',
+      title: 'Copied to clipboard',
     });
   });
 
@@ -54,7 +54,7 @@ describe('copyValueToClipboard', () => {
     expect(result).toBe('text_message');
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(discoverServiceMock.toastNotifications.addInfo).toHaveBeenCalledWith({
-      title: 'Copied to clipboard.',
+      title: 'Copied to clipboard',
     });
   });
 
@@ -75,9 +75,9 @@ describe('copyValueToClipboard', () => {
       valueToStringConverter,
     });
 
-    expect(result).toBe('bool_enabled\nfalse\ntrue');
+    expect(result).toBe('"bool_enabled"\nfalse\ntrue');
     expect(discoverServiceMock.toastNotifications.addInfo).toHaveBeenCalledWith({
-      title: 'Copied values of "bool_enabled" column to clipboard.',
+      title: 'Copied values of "bool_enabled" column to clipboard',
     });
 
     Object.defineProperty(navigator, 'clipboard', {

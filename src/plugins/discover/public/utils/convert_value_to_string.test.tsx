@@ -24,7 +24,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('"abcd1"');
+    expect(result.formattedString).toBe('"abcd1"');
   });
 
   it('should convert a text value to text', () => {
@@ -40,7 +40,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('"Hi there! I am a sample string."');
+    expect(result.formattedString).toBe('"Hi there! I am a sample string."');
   });
 
   it('should convert a multiline text value to text', () => {
@@ -56,7 +56,8 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('"I\'m multiline\\n*&%$#@"');
+    expect(result.formattedString).toBe('"I\'m multiline\\n*&%$#@"');
+    expect(result.withFormula).toBe(false);
   });
 
   it('should convert a number value to text', () => {
@@ -72,7 +73,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('10.99');
+    expect(result.formattedString).toBe('10.99');
   });
 
   it('should convert a date value to text', () => {
@@ -88,7 +89,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('"2015-01-01T12:10:30.000Z"');
+    expect(result.formattedString).toBe('"2022-05-30T12:10:30.000Z"');
   });
 
   it('should convert a boolean value to text', () => {
@@ -104,7 +105,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('false');
+    expect(result.formattedString).toBe('false');
   });
 
   it('should convert a binary value to text', () => {
@@ -120,7 +121,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('"U29tZSBiaW5hcnkgYmxvYg=="');
+    expect(result.formattedString).toBe('"U29tZSBiaW5hcnkgYmxvYg=="');
   });
 
   it('should convert an object value to text', () => {
@@ -136,7 +137,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('"John"');
+    expect(result.formattedString).toBe('"John"');
   });
 
   it('should convert a nested value to text', () => {
@@ -152,7 +153,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe(
+    expect(result.formattedString).toBe(
       '{"last":["Smith"],"last.keyword":["Smith"],"first":["John"],"first.keyword":["John"]}, {"last":["White"],"last.keyword":["White"],"first":["Alice"],"first.keyword":["Alice"]}'
     );
   });
@@ -170,7 +171,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('{"release":["v1.2.5","v1.3.0"],"priority":"urgent"}');
+    expect(result.formattedString).toBe('{"release":["v1.2.5","v1.3.0"],"priority":"urgent"}');
   });
 
   it('should convert a range value to text', () => {
@@ -186,7 +187,9 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('{"gte":"2015-10-31 12:00:00","lte":"2015-11-01 00:00:00"}');
+    expect(result.formattedString).toBe(
+      '{"gte":"2015-10-31 12:00:00","lte":"2015-11-01 00:00:00"}'
+    );
   });
 
   it('should convert a IP value to text', () => {
@@ -202,7 +205,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('"192.168.1.1"');
+    expect(result.formattedString).toBe('"192.168.1.1"');
   });
 
   it('should convert a version value to text', () => {
@@ -218,7 +221,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('"1.2.3"');
+    expect(result.formattedString).toBe('"1.2.3"');
   });
 
   it('should convert a vector value to text', () => {
@@ -234,7 +237,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('0.5, 10, 6');
+    expect(result.formattedString).toBe('0.5, 10, 6');
   });
 
   it('should convert a geo point value to text', () => {
@@ -250,7 +253,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('{"coordinates":[-71.34,41.12],"type":"Point"}');
+    expect(result.formattedString).toBe('{"coordinates":[-71.34,41.12],"type":"Point"}');
   });
 
   it('should convert a geo point object value to text', () => {
@@ -266,7 +269,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('{"coordinates":[-71.34,41.12],"type":"Point"}');
+    expect(result.formattedString).toBe('{"coordinates":[-71.34,41.12],"type":"Point"}');
   });
 
   it('should convert an array value to text', () => {
@@ -282,7 +285,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('"elasticsearch", "wow"');
+    expect(result.formattedString).toBe('"elasticsearch", "wow"');
   });
 
   it('should convert a runtime value to text', () => {
@@ -298,7 +301,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('5.5');
+    expect(result.formattedString).toBe('5.5');
   });
 
   it('should convert a scripted value to text', () => {
@@ -314,7 +317,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('"hi there"');
+    expect(result.formattedString).toBe('"hi there"');
   });
 
   it('should return an empty string and not fail', () => {
@@ -330,7 +333,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe('');
+    expect(result.formattedString).toBe('');
   });
 
   it('should return _source value', () => {
@@ -343,7 +346,7 @@ describe('convertValueToString', () => {
       rowIndex: 0,
     });
 
-    expect(result).toBe(
+    expect(result.formattedString).toBe(
       '{\n' +
         '  "bytes": 20,\n' +
         '  "date": "2020-20-01T12:12:12.123",\n' +
@@ -367,8 +370,40 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result).toBe(
+    expect(result.formattedString).toBe(
       '{"bytes":20,"date":"2020-20-01T12:12:12.123","message":"test1","_index":"i","_score":1}'
     );
+  });
+
+  it('should escape formula', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      rowsFlattened: discoverGridContextComplexMock.rowsFlattened,
+      dataView: discoverGridContextComplexMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'array_tags',
+      rowIndex: 2,
+      options: {
+        disableMultiline: true,
+      },
+    });
+
+    expect(result.formattedString).toBe('"\'=1+2"";=1+2"');
+    expect(result.withFormula).toBe(true);
+
+    const result2 = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      rowsFlattened: discoverGridContextComplexMock.rowsFlattened,
+      dataView: discoverGridContextComplexMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'scripted_string',
+      rowIndex: 2,
+      options: {
+        disableMultiline: true,
+      },
+    });
+
+    expect(result2.formattedString).toBe('"\'=1+2\'"" ;,=1+2"');
+    expect(result2.withFormula).toBe(true);
   });
 });

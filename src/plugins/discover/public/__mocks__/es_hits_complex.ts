@@ -14,7 +14,7 @@ export const esHitsComplex = [
     _score: null,
     fields: {
       'array_objects.description.keyword': ['programming list', 'cool stuff list'],
-      date: ['2015-01-01T12:10:30.000Z'],
+      date: ['2022-05-30T12:10:30.000Z'],
       nested_user: [
         {
           last: ['Smith'],
@@ -75,7 +75,7 @@ export const esHitsComplex = [
     _score: null,
     fields: {
       'array_objects.description.keyword': ['elastic list'],
-      date: ['2015-01-02T00:00:00.000Z'],
+      date: ['2022-05-31T00:00:00.000Z'],
       nested_user: [
         {
           last: ['Smith'],
@@ -120,6 +120,61 @@ export const esHitsComplex = [
       vector: [0.5, 12, 6],
       ip_addr: ['192.168.1.0'],
       scripted_string: ['hi there'],
+    },
+    sort: [1420156800000],
+  },
+  {
+    _index: 'sample',
+    _id: '3',
+    _version: 1,
+    _score: null,
+    fields: {
+      'array_objects.description.keyword': ['elastic list'],
+      date: ['2022-05-31T00:00:00.000Z'],
+      nested_user: [
+        {
+          last: ['Smith'],
+          'last.keyword': ['Smith'],
+          first: ['Jane'],
+          'first.keyword': ['Jane'],
+        },
+      ],
+      array_tags: ['=1+2";=1+2'],
+      number_amount: [10],
+      'array_objects.name.keyword': ['elastic_list'],
+      'array_tags.keyword': ['=1+2";=1+2'],
+      bool_enabled: [true],
+      version: ['1.3.3'],
+      flattened_labels: [
+        {
+          release: ['v1.4.5'],
+          priority: 'minor',
+        },
+      ],
+      runtime_number: [5.5],
+      geo_point: [
+        {
+          coordinates: [-71.34, 41.12],
+          type: 'Point',
+        },
+      ],
+      'array_objects.description': ['elastic list'],
+      range_time_frame: [
+        {
+          gte: '2015-10-31 12:00:00',
+          lte: '2016-11-01 00:00:00',
+        },
+      ],
+      binary_blob: ['U29tZSBiaW5hcnkgYmxvYg=='],
+      text_message: ["I'm multiline\n*&%$#@"],
+      keyword_key: ['abcd2'],
+      'object_user.first': ['Jane'],
+      'array_objects.name': ['elastic_list'],
+      number_price: [105.99],
+      'object_user.last': ['Smith'],
+      vector: [0.5, 12, 6],
+      ip_addr: ['192.168.1.0'],
+      scripted_string: ['=1+2\'" ;,=1+2'],
     },
     sort: [1420156800000],
   },

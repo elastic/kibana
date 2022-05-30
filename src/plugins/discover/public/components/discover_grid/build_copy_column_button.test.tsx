@@ -86,7 +86,7 @@ describe('Build a column button to copy to clipboard', () => {
     // first row out of 3 rows does not have a value
     expect(navigator.clipboard.writeText).toHaveBeenNthCalledWith(
       2,
-      '_source\n{"bytes":20,"date":"2020-20-01T12:12:12.123","message":"test1","_index":"i","_score":1}\n' +
+      '"_source"\n{"bytes":20,"date":"2020-20-01T12:12:12.123","message":"test1","_index":"i","_score":1}\n' +
         '{"date":"2020-20-01T12:12:12.124","extension":"jpg","name":"test2","_index":"i","_score":1}\n' +
         '{"bytes":50,"date":"2020-20-01T12:12:12.124","extension":"gif","name":"test3","_index":"i","_score":1}'
     );

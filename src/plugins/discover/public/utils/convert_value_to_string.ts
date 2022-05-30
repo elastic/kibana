@@ -7,6 +7,7 @@
  */
 
 import { DataView } from '@kbn/data-views-plugin/public';
+import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import { formatFieldValue } from './format_value';
 import { ElasticSearchHit, HitsFlattened } from '../types';
 import { DiscoverServices } from '../build_services';
@@ -29,7 +30,7 @@ export const convertValueToString = ({
   options?: {
     disableMultiline?: boolean;
   };
-}): string => {
+}): { formattedString: string; withFormula: boolean } => {
   const { fieldFormats } = services;
   const rowFlattened = rowsFlattened[rowIndex];
   const field = dataView.fields.getByName(columnId);
@@ -38,8 +39,13 @@ export const convertValueToString = ({
   const disableMultiline = options?.disableMultiline ?? false;
 
   if (field?.type === '_source') {
-    return stringify(rowFlattened, disableMultiline);
+    return {
+      formattedString: stringify(rowFlattened, disableMultiline),
+      withFormula: false,
+    };
   }
+
+  let withFormula = false;
 
   const formatted = valuesArray
     .map((subValue) => {
@@ -55,18 +61,28 @@ export const convertValueToString = ({
         }
       );
 
-      if (typeof formattedValue !== 'string' || typeof subValue === 'string') {
-        return stringify(formattedValue, disableMultiline) || '';
+      if (typeof formattedValue === 'string' && cellHasFormulas(formattedValue)) {
+        withFormula = true;
+        return escapeFormattedValue(formattedValue);
       }
 
-      return formattedValue;
+      return stringify(formattedValue, disableMultiline) || '';
     })
     .join(', ');
 
-  return formatted;
+  return {
+    formattedString: formatted,
+    withFormula,
+  };
 };
 
 const stringify = (val: object | string, disableMultiline: boolean) => {
   // it will wrap "strings" with quotes
   return disableMultiline ? JSON.stringify(val) : JSON.stringify(val, null, 2);
+};
+
+const escapeValueFn = createEscapeValue(true, true);
+
+export const escapeFormattedValue = (formattedValue: string): string => {
+  return escapeValueFn(formattedValue);
 };
