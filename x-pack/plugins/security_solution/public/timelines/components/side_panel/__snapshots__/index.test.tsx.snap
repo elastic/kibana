@@ -1,5 +1,27 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if an expanded detail with a panelView, but not params have been set: 
+        <DetailsPanel
+          browserFields={Object {}}
+          docValueFields={Array []}
+          handleOnPanelClosed={[MockFunction]}
+          isFlyoutView={false}
+          runtimeMappings={Object {}}
+          tabType="query"
+          timelineId="test"
+        />
+       1`] = `
+<DetailsPanel
+  browserFields={Object {}}
+  docValueFields={Array []}
+  handleOnPanelClosed={[MockFunction]}
+  isFlyoutView={false}
+  runtimeMappings={Object {}}
+  tabType="query"
+  timelineId="test"
+/>
+`;
+
 exports[`Details Panel Component DetailsPanel: rendering it should not render the DetailsPanel if no expanded detail has been set in the reducer 1`] = `
 <DetailsPanel
   browserFields={Object {}}
@@ -731,6 +753,33 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
   color: #535966;
 }
 
+.c2 dt {
+  font-size: 12px !important;
+}
+
+.c2 dd {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c2 dd > div {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c1 .euiButtonIcon {
+  position: absolute;
+  right: 12px;
+  top: 6px;
+  z-index: 2;
+}
+
 .c0 {
   width: 100%;
   display: -webkit-box;
@@ -757,33 +806,6 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
 .c0:hover .inspectButtonComponent {
   pointer-events: auto;
   opacity: 1;
-}
-
-.c2 dt {
-  font-size: 12px !important;
-}
-
-.c2 dd {
-  width: -webkit-fit-content;
-  width: -moz-fit-content;
-  width: fit-content;
-}
-
-.c2 dd > div {
-  width: -webkit-fit-content;
-  width: -moz-fit-content;
-  width: fit-content;
-}
-
-.c1 {
-  position: relative;
-}
-
-.c1 .euiButtonIcon {
-  position: absolute;
-  right: 12px;
-  top: 6px;
-  z-index: 2;
 }
 
 .c4 {
@@ -1872,6 +1894,33 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
   color: #535966;
 }
 
+.c2 dt {
+  font-size: 12px !important;
+}
+
+.c2 dd {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c2 dd > div {
+  width: -webkit-fit-content;
+  width: -moz-fit-content;
+  width: fit-content;
+}
+
+.c1 {
+  position: relative;
+}
+
+.c1 .euiButtonIcon {
+  position: absolute;
+  right: 12px;
+  top: 6px;
+  z-index: 2;
+}
+
 .c0 {
   width: 100%;
   display: -webkit-box;
@@ -1898,33 +1947,6 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
 .c0:hover .inspectButtonComponent {
   pointer-events: auto;
   opacity: 1;
-}
-
-.c2 dt {
-  font-size: 12px !important;
-}
-
-.c2 dd {
-  width: -webkit-fit-content;
-  width: -moz-fit-content;
-  width: fit-content;
-}
-
-.c2 dd > div {
-  width: -webkit-fit-content;
-  width: -moz-fit-content;
-  width: fit-content;
-}
-
-.c1 {
-  position: relative;
-}
-
-.c1 .euiButtonIcon {
-  position: absolute;
-  right: 12px;
-  top: 6px;
-  z-index: 2;
 }
 
 .c4 {
