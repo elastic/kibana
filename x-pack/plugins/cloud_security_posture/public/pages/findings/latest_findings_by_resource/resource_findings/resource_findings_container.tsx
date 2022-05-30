@@ -39,7 +39,7 @@ const BackToResourcesButton = () => (
   </Link>
 );
 
-export const ResourceFindings = ({ dataView, pitIdRef, setPitId }: FindingsBaseProps) => {
+export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_default]);
   const { euiTheme } = useEuiTheme();
   const params = useParams<{ resourceId: string }>();
@@ -51,8 +51,6 @@ export const ResourceFindings = ({ dataView, pitIdRef, setPitId }: FindingsBaseP
       dataView,
       filters: urlQuery.filters,
       query: urlQuery.query,
-      pitIdRef,
-      setPitId,
     }),
     ...getPaginationQuery({
       pageSize: urlQuery.pageSize,

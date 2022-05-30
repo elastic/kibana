@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useContext } from 'react';
 import { useQuery } from 'react-query';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Pagination } from '@elastic/eui';
+import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
@@ -48,7 +50,6 @@ interface FindingsByResourcePage {
 interface UseFindingsByResourceData {
   page: FindingsByResourcePage[];
   total: number;
-  newPitId: string;
 }
 
 export type CspFindingsByResourceResult = FindingsQueryResult<
@@ -73,8 +74,8 @@ export const getFindingsByResourceAggQuery = ({
   query,
   from,
   size,
-  pitIdRef,
-}: Omit<UseResourceFindingsOptions, 'setPitId'>): estypes.SearchRequest => ({
+  pitId,
+}: UseResourceFindingsOptions & { pitId: string }): estypes.SearchRequest => ({
   body: {
     query,
     size: 0,
@@ -114,29 +115,26 @@ export const getFindingsByResourceAggQuery = ({
         },
       },
     },
-    pit: { id: pitIdRef.current },
+    pit: { id: pitId },
   },
   ignore_unavailable: false,
 });
 
-export const useFindingsByResource = ({
-  query,
-  from,
-  size,
-  pitIdRef,
-  setPitId,
-}: UseResourceFindingsOptions) => {
+export const useFindingsByResource = ({ query, from, size }: UseResourceFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
-  return useQuery<UseFindingsByResourceData>(
-    ['csp_findings_resource', { query, size, from, pitId: pitIdRef.current }],
+  const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
+  const pitId = pitIdRef.current;
+
+  return useQuery<UseFindingsByResourceData & { newPitId: string }>(
+    ['csp_findings_resource', { query, size, from, pitId }],
     () =>
       lastValueFrom(
         data.search.search<FindingsAggRequest, FindingsAggResponse>({
-          params: getFindingsByResourceAggQuery({ query, from, size, pitIdRef }),
+          params: getFindingsByResourceAggQuery({ query, from, size, pitId }),
         })
       ).then(({ rawResponse: { aggregations, pit_id: newPitId } }) => {
         if (!aggregations) throw new Error('expected aggregations to be defined');

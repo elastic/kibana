@@ -8,9 +8,11 @@ import { useQuery } from 'react-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/public';
+import { useContext } from 'react';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { showErrorToast } from './latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery } from './types';
+import { FindingsEsPitContext } from './es_pit/findings_es_pit_context';
 
 type FindingsAggRequest = IKibanaSearchRequest<estypes.SearchRequest>;
 type FindingsAggResponse = IKibanaSearchResponse<estypes.SearchResponse<{}, FindingsAggs>>;
@@ -26,35 +28,37 @@ interface FindingsAggs extends estypes.AggregationsMultiBucketAggregateBase {
 interface UseFindingsCounterData {
   passed: number;
   failed: number;
-  newPitId: string;
 }
 
 export const getFindingsCountAggQuery = ({
   query,
-  pitIdRef,
-}: Omit<FindingsBaseEsQuery, 'setPitId'>) => ({
+  pitId,
+}: FindingsBaseEsQuery & { pitId: string }) => ({
   size: 0,
   track_total_hits: true,
   body: {
     query,
     aggs: { count: { terms: { field: 'result.evaluation.keyword' } } },
-    pit: { id: pitIdRef.current },
+    pit: { id: pitId },
   },
   ignore_unavailable: false,
 });
 
-export const useFindingsCounter = ({ query, pitIdRef, setPitId }: FindingsBaseEsQuery) => {
+export const useFindingsCounter = ({ query }: FindingsBaseEsQuery) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
-  return useQuery<FindingsAggResponse, unknown, UseFindingsCounterData>(
-    ['csp_findings_counts', { query, pitId: pitIdRef.current }],
+  const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
+  const pitId = pitIdRef.current;
+
+  return useQuery<FindingsAggResponse, unknown, UseFindingsCounterData & { newPitId: string }>(
+    ['csp_findings_counts', { query, pitId }],
     () =>
       lastValueFrom(
         data.search.search<FindingsAggRequest, FindingsAggResponse>({
-          params: getFindingsCountAggQuery({ query, pitIdRef }),
+          params: getFindingsCountAggQuery({ query, pitId }),
         })
       ),
     {

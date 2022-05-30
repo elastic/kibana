@@ -9,6 +9,8 @@ import { lastValueFrom } from 'rxjs';
 import { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Pagination } from '@elastic/eui';
+import { useContext } from 'react';
+import { FindingsEsPitContext } from '../../es_pit/findings_es_pit_context';
 import { FINDINGS_REFETCH_INTERVAL_MS } from '../../constants';
 import { useKibana } from '../../../../common/hooks/use_kibana';
 import { showErrorToast } from '../../latest_findings/use_latest_findings';
@@ -33,8 +35,8 @@ const getResourceFindingsQuery = ({
   resourceId,
   from,
   size,
-  pitIdRef,
-}: Omit<UseResourceFindingsOptions, 'setPitId'>): estypes.SearchRequest => ({
+  pitId,
+}: UseResourceFindingsOptions & { pitId: string }): estypes.SearchRequest => ({
   from,
   size,
   body: {
@@ -45,7 +47,7 @@ const getResourceFindingsQuery = ({
         filter: [...(query?.bool?.filter || []), { term: { 'resource_id.keyword': resourceId } }],
       },
     },
-    pit: { id: pitIdRef.current },
+    pit: { id: pitId },
   },
   ignore_unavailable: false,
 });
@@ -55,20 +57,25 @@ export const useResourceFindings = ({
   resourceId,
   from,
   size,
-  pitIdRef,
-  setPitId,
 }: UseResourceFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
-  return useQuery<IEsSearchResponse<CspFinding>, unknown, CspFindingsQueryData>(
-    ['csp_resource_findings', { query, resourceId, from, size, pitId: pitIdRef.current }],
+  const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
+  const pitId = pitIdRef.current;
+
+  return useQuery<
+    IEsSearchResponse<CspFinding>,
+    unknown,
+    CspFindingsQueryData & { newPitId: string }
+  >(
+    ['csp_resource_findings', { query, resourceId, from, size, pitId }],
     () =>
       lastValueFrom<IEsSearchResponse<CspFinding>>(
         data.search.search({
-          params: getResourceFindingsQuery({ query, resourceId, from, size, pitIdRef }),
+          params: getResourceFindingsQuery({ query, resourceId, from, size, pitId }),
         })
       ),
     {

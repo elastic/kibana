@@ -14,15 +14,11 @@ export const getBaseQuery = ({
   dataView,
   query,
   filters,
-  pitIdRef,
-  setPitId,
 }: FindingsBaseURLQuery & FindingsBaseProps): FindingsBaseEsQuery => ({
   // TODO: this will throw for malformed query
   // page will display an error boundary with the JS error
   // will be accounted for before releasing the feature
   query: buildEsQuery(dataView, query, filters),
-  pitIdRef,
-  setPitId,
 });
 
 type TablePagination = NonNullable<EuiBasicTableProps<unknown>['pagination']>;

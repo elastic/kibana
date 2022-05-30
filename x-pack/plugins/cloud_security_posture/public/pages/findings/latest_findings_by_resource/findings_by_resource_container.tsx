@@ -27,29 +27,21 @@ const getDefaultQuery = (): FindingsBaseURLQuery & FindingsByResourceQuery => ({
   pageSize: 10,
 });
 
-export const FindingsByResourceContainer = ({
-  dataView,
-  pitIdRef,
-  setPitId,
-}: FindingsBaseProps) => (
+export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
   <Switch>
     <Route
       exact
       path={findingsNavigation.findings_by_resource.path}
-      render={() => (
-        <LatestFindingsByResource dataView={dataView} pitIdRef={pitIdRef} setPitId={setPitId} />
-      )}
+      render={() => <LatestFindingsByResource dataView={dataView} />}
     />
     <Route
       path={findingsNavigation.resource_findings.path}
-      render={() => (
-        <ResourceFindings dataView={dataView} pitIdRef={pitIdRef} setPitId={setPitId} />
-      )}
+      render={() => <ResourceFindings dataView={dataView} />}
     />
   </Switch>
 );
 
-const LatestFindingsByResource = ({ dataView, pitIdRef, setPitId }: FindingsBaseProps) => {
+const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_by_resource]);
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
   const findingsGroupByResource = useFindingsByResource({
@@ -57,8 +49,6 @@ const LatestFindingsByResource = ({ dataView, pitIdRef, setPitId }: FindingsBase
       dataView,
       filters: urlQuery.filters,
       query: urlQuery.query,
-      pitIdRef,
-      setPitId,
     }),
     ...getPaginationQuery(urlQuery),
   });

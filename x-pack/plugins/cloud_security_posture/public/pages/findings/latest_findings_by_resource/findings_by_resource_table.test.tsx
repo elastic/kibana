@@ -46,7 +46,7 @@ describe('<FindingsByResourceTable />', () => {
   it('renders the zero state when status success and data has a length of zero ', async () => {
     const props: TableProps = {
       loading: false,
-      data: { page: [], total: 0, newPitId: '' },
+      data: { page: [], total: 0 },
       error: null,
       pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },
       setTableOptions: jest.fn(),
@@ -66,7 +66,7 @@ describe('<FindingsByResourceTable />', () => {
 
     const props: TableProps = {
       loading: false,
-      data: { page: data, total: data.length, newPitId: '' },
+      data: { page: data, total: data.length },
       error: null,
       pagination: { pageIndex: 0, pageSize: 10, totalItemCount: 0 },
       setTableOptions: jest.fn(),

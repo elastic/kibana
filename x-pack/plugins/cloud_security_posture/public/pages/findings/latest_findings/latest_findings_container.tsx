@@ -32,7 +32,7 @@ export const getDefaultQuery = (): FindingsBaseURLQuery & FindingsGroupByNoneQue
   pageSize: 10,
 });
 
-export const LatestFindingsContainer = ({ dataView, pitIdRef, setPitId }: FindingsBaseProps) => {
+export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_default]);
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
 
@@ -42,10 +42,8 @@ export const LatestFindingsContainer = ({ dataView, pitIdRef, setPitId }: Findin
         dataView,
         filters: urlQuery.filters,
         query: urlQuery.query,
-        pitIdRef,
-        setPitId,
       }),
-    [dataView, urlQuery.filters, urlQuery.query, pitIdRef, setPitId]
+    [dataView, urlQuery.filters, urlQuery.query]
   );
 
   const findingsCount = useFindingsCounter(baseEsQuery);
@@ -53,8 +51,6 @@ export const LatestFindingsContainer = ({ dataView, pitIdRef, setPitId }: Findin
     ...baseEsQuery,
     ...getPaginationQuery({ pageIndex: urlQuery.pageIndex, pageSize: urlQuery.pageSize }),
     sort: urlQuery.sort,
-    pitIdRef,
-    setPitId,
   });
 
   const findingsDistribution = getFindingsDistribution({

@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { MutableRefObject } from 'react';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { UseQueryResult } from 'react-query';
 
@@ -18,16 +17,12 @@ export interface FindingsBaseURLQuery {
 
 export interface FindingsBaseProps {
   dataView: DataView;
-  pitIdRef: MutableRefObject<string>;
-  setPitId(newPitId: string): void;
 }
 
 export interface FindingsBaseEsQuery {
   query?: {
     bool: BoolQuery;
   };
-  pitIdRef: MutableRefObject<string>;
-  setPitId(newPit: string): void;
 }
 
 export interface FindingsQueryResult<TData = unknown, TError = unknown> {
@@ -111,5 +106,4 @@ interface CspFindingAgent {
 export interface CspFindingsQueryData {
   page: CspFinding[];
   total: number;
-  newPitId: string;
 }
