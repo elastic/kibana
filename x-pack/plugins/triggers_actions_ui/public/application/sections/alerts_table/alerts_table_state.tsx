@@ -5,14 +5,8 @@
  * 2.0.
  */
 import React, { useState, useCallback, useRef, useMemo } from 'react';
-import { get, isEmpty } from 'lodash';
-import {
-  EuiDataGridColumn,
-  EuiDataGridControlColumn,
-  EuiProgress,
-  EuiDataGridSorting,
-  EuiEmptyPrompt,
-} from '@elastic/eui';
+import { isEmpty } from 'lodash';
+import { EuiDataGridColumn, EuiProgress, EuiDataGridSorting, EuiEmptyPrompt } from '@elastic/eui';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -22,9 +16,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
-import { AlertsTableConfigurationRegistry, RenderCellValueProps } from '../../../types';
-import { TypeRegistry } from '../../type_registry';
+import { AlertsTableConfigurationRegistry, AlertsTableFlyoutState } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
+import { TypeRegistry } from '../../type_registry';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -36,11 +30,15 @@ export interface AlertsTableStateProps {
   configurationId: string;
   id: string;
   featureIds: ValidFeatureId[];
+  flyoutState: AlertsTableFlyoutState;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
+  pageSize?: number;
+  showExpandToDetails: boolean;
 }
 
 interface AlertsTableStorage {
   columns: EuiDataGridColumn[];
+  visibleColumns?: string[];
   sort: SortCombinations[];
 }
 
@@ -48,6 +46,17 @@ const EmptyConfiguration = {
   id: '',
   columns: [],
   sort: [],
+  externalFlyout: {
+    header: () => null,
+    body: () => null,
+    footer: () => null,
+  },
+  internalFlyout: {
+    header: () => null,
+    body: () => null,
+    footer: () => null,
+  },
+  getRenderCellValue: () => () => null,
 };
 
 const AlertsTableState = ({
@@ -55,7 +64,10 @@ const AlertsTableState = ({
   configurationId,
   id,
   featureIds,
+  flyoutState,
   query,
+  pageSize,
+  showExpandToDetails,
 }: AlertsTableStateProps) => {
   const hasAlertsTableConfiguration =
     alertsTableConfigurationRegistry?.has(configurationId) ?? false;
@@ -66,24 +78,35 @@ const AlertsTableState = ({
   const storage = useRef(new Storage(window.localStorage));
   const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
 
+  const columnsLocal =
+    localAlertsTableConfig &&
+    localAlertsTableConfig.columns &&
+    !isEmpty(localAlertsTableConfig?.columns)
+      ? localAlertsTableConfig?.columns ?? []
+      : alertsTableConfiguration?.columns ?? [];
+
   const storageAlertsTable = useRef<AlertsTableStorage>({
-    columns:
-      localAlertsTableConfig &&
-      localAlertsTableConfig.columns &&
-      !isEmpty(localAlertsTableConfig?.columns)
-        ? localAlertsTableConfig?.columns ?? []
-        : alertsTableConfiguration?.columns ?? [],
+    columns: columnsLocal,
     sort:
       localAlertsTableConfig &&
       localAlertsTableConfig.sort &&
       !isEmpty(localAlertsTableConfig?.sort)
         ? localAlertsTableConfig?.sort ?? []
         : alertsTableConfiguration?.sort ?? [],
+    visibleColumns:
+      localAlertsTableConfig &&
+      localAlertsTableConfig.visibleColumns &&
+      !isEmpty(localAlertsTableConfig?.visibleColumns)
+        ? localAlertsTableConfig?.visibleColumns ?? []
+        : columnsLocal.map((c) => c.id),
   });
 
   const [showCheckboxes] = useState(false);
   const [sort, setSort] = useState<SortCombinations[]>(storageAlertsTable.current.sort);
-  const [pagination, setPagination] = useState(DefaultPagination);
+  const [pagination, setPagination] = useState({
+    ...DefaultPagination,
+    pageSize: pageSize ?? DefaultPagination.pageSize,
+  });
   const [columns, setColumns] = useState<EuiDataGridColumn[]>(storageAlertsTable.current.columns);
 
   const [
@@ -121,11 +144,12 @@ const AlertsTableState = ({
     [id]
   );
   const onColumnsChange = useCallback(
-    (newColumns: EuiDataGridControlColumn[]) => {
+    (newColumns: EuiDataGridColumn[], visibleColumns: string[]) => {
       setColumns(newColumns);
       storageAlertsTable.current = {
         ...storageAlertsTable.current,
         columns: newColumns,
+        visibleColumns,
       };
       storage.current.set(id, storageAlertsTable.current);
     },
@@ -162,24 +186,31 @@ const AlertsTableState = ({
 
   const tableProps = useMemo(
     () => ({
+      alertsTableConfiguration,
       columns,
       bulkActions: [],
       deletedEventIds: [],
       disabledCellActions: [],
+      flyoutState,
       pageSize: pagination.pageSize,
       pageSizeOptions: [1, 2, 5, 10, 20, 50, 100],
       leadingControlColumns: [],
-      renderCellValue: ({ alert, field }: RenderCellValueProps) => {
-        // any is required here to improve typescript performance
-        const value = get(alert as any, field, [])[0] as string;
-        return value ?? 'N/A';
-      },
       showCheckboxes,
+      showExpandToDetails,
       trailingControlColumns: [],
       useFetchAlertsData,
+      visibleColumns: storageAlertsTable.current.visibleColumns ?? [],
       'data-test-subj': 'internalAlertsState',
     }),
-    [columns, pagination.pageSize, showCheckboxes, useFetchAlertsData]
+    [
+      alertsTableConfiguration,
+      columns,
+      flyoutState,
+      pagination.pageSize,
+      showCheckboxes,
+      showExpandToDetails,
+      useFetchAlertsData,
+    ]
   );
 
   return hasAlertsTableConfiguration ? (
