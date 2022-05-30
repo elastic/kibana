@@ -25,6 +25,8 @@ import React from 'react';
 import { QueryClientProvider } from 'react-query';
 import { testQueryClient } from '../common/mock';
 import { waitFor } from '@testing-library/dom';
+import * as api from './api';
+import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -68,6 +70,21 @@ describe('useGetCaseUserActions', () => {
         );
       });
     });
+  });
+
+  it('shows a toast error when the API returns an error', async () => {
+    const spy = jest.spyOn(api, 'getCaseUserActions').mockRejectedValue(new Error("C'est la vie"));
+
+    const addError = jest.fn();
+    (useToasts as jest.Mock).mockReturnValue({ addError });
+
+    const { waitForNextUpdate } = renderHook<string, UseGetCaseUserActions>(
+      () => useGetCaseUserActions(basicCase.id, basicCase.connector.id),
+      { wrapper }
+    );
+    await waitForNextUpdate();
+    expect(spy).toHaveBeenCalledWith(basicCase.id, expect.any(AbortSignal));
+    expect(addError).toHaveBeenCalled();
   });
 
   describe('getPushedInfo', () => {
