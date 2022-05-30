@@ -88,10 +88,11 @@ beforeEach(() => {
   pollEsNodesVersionMocked.mockImplementation(pollEsNodesVersionActual);
 });
 
-afterEach(() => {
+afterEach(async () => {
   jest.clearAllMocks();
   MockClusterClient.mockClear();
   isScriptingEnabledMock.mockReset();
+  await elasticsearchService?.stop();
 });
 
 describe('#preboot', () => {
@@ -221,8 +222,6 @@ describe('#setup', () => {
 });
 
 describe('#start', () => {
-  afterEach(async () => await elasticsearchService?.stop());
-
   it('throws if called before `setup`', async () => {
     await expect(() => elasticsearchService.start()).rejects.toMatchInlineSnapshot(
       `[Error: ElasticsearchService needs to be setup before calling start]`
