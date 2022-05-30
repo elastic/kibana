@@ -18,6 +18,7 @@ import {
   EuiSelectableTemplateSitewide,
   EuiSelectableTemplateSitewideOption,
   euiSelectableTemplateSitewideRenderOptions,
+  EuiPopover,
 } from '@elastic/eui';
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
@@ -77,6 +78,7 @@ export const SearchBar: FC<SearchBarProps> = ({
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [searchRef, setSearchRef] = useState<HTMLInputElement | null>(null);
   const [buttonRef, setButtonRef] = useState<HTMLDivElement | null>(null);
+  const [popoverRef, setPopoverRef] = useState<EuiPopover | null>(null);
   const searchSubscription = useRef<Subscription | null>(null);
   const [options, _setOptions] = useState<EuiSelectableTemplateSitewideOption[]>([]);
   const [searchableTypes, setSearchableTypes] = useState<string[]>([]);
@@ -248,8 +250,11 @@ export const SearchBar: FC<SearchBarProps> = ({
         clearField();
         searchRef.dispatchEvent(blurEvent);
       }
+      if (popoverRef) {
+        popoverRef.closePopover();
+      }
     },
-    [trackUiMetric, navigateToUrl, searchRef]
+    [trackUiMetric, navigateToUrl, searchRef, popoverRef]
   );
 
   const clearField = () => setSearchValue('');
@@ -320,6 +325,8 @@ export const SearchBar: FC<SearchBarProps> = ({
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
         buttonRef: setButtonRef,
+        // @ts-expect-error EuiPopover doesn't export `ref`
+        ref: setPopoverRef,
       }}
       popoverButton={
         <EuiHeaderSectionItemButton
