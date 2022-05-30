@@ -85,6 +85,7 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
         data-test-subj={getTestId('pageOverlay')}
         onHide={onHide}
         paddingSize="xl"
+        enableScrolling={false}
       >
         <PageLayout {...layoutProps}>
           {body}

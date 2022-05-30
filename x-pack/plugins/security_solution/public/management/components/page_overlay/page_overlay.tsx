@@ -97,7 +97,7 @@ export interface PageOverlayProps {
   isHidden?: boolean;
 
   /**
-   * Setting this to `true` will enable scrolling inside of the overlay
+   * Setting this to `true` (defualt) will enable scrolling inside of the overlay
    */
   enableScrolling?: boolean;
 
@@ -119,9 +119,10 @@ export interface PageOverlayProps {
   paddingSize?: 'xs' | 's' | 'm' | 'l' | 'xl';
 
   /**
-   * If set to `true` (default), whenever the page overlay is displayed, it will be moved so that
-   * it is the last child of inside of the `<body>`. This happens only when the page overlay is
-   * displayed (ie. it does NOT attempt to track nodes added/removed from `<body>` in order to ensure
+   * If set to `true` (default), whenever the page overlay is displayed (either mounted or when
+   * `isHidden` goes form `false` to `true`), it will be moved so that  it is the last child of
+   * inside of the `<body>`. This happens only when the page overlay is displayed
+   * (ie. it does NOT attempt to track nodes added/removed from `<body>` in order to ensure
    * it is always the last one).
    */
   appendAsBodyLastNode?: boolean;
@@ -142,8 +143,8 @@ export const PageOverlay = memo<PageOverlayProps>(
   ({
     children,
     onHide,
-    enableScrolling = false,
     isHidden = false,
+    enableScrolling = true,
     hideOnUrlPathnameChange = true,
     lockDocumentBody = true,
     appendAsBodyLastNode = true,
