@@ -106,6 +106,25 @@ export const updatePackagePolicy = (
   return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy);
 };
 
+export const setRulesOnPackage = async (
+  packagePolicyService: PackagePolicyServiceInterface,
+  packagePolicy: PackagePolicy,
+  esClient: ElasticsearchClient,
+  soClient: SavedObjectsClientContract
+) => {
+  const cspRules = await getCspRules(soClient, packagePolicy);
+  const rulesConfig = createRulesConfig(cspRules);
+  const dataYaml = convertRulesConfigToYaml(rulesConfig);
+
+  return await updatePackagePolicy(
+    packagePolicyService!,
+    packagePolicy,
+    esClient,
+    soClient,
+    dataYaml
+  );
+};
+
 export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspAppContext): void =>
   router.post(
     {
@@ -133,16 +152,11 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
           packagePolicyId
         );
 
-        const cspRules = await getCspRules(soClient, packagePolicy);
-        const rulesConfig = createRulesConfig(cspRules);
-        const dataYaml = convertRulesConfigToYaml(rulesConfig);
-
-        const updatedPackagePolicies = await updatePackagePolicy(
-          packagePolicyService!,
+        const updatedPackagePolicies = setRulesOnPackage(
+          packagePolicyService,
           packagePolicy,
           esClient,
-          soClient,
-          dataYaml
+          soClient
         );
 
         return response.ok({ body: updatedPackagePolicies });
