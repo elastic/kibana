@@ -18,10 +18,7 @@ import { CaseViewActivity } from './case_view_activity';
 import { ConnectorTypes } from '../../../../common/api/connectors';
 import { Case } from '../../../../common';
 import { CaseViewProps } from '../types';
-import {
-  UseGetCaseUserActions,
-  useGetCaseUserActions,
-} from '../../../containers/use_get_case_user_actions';
+import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { useConnectors } from '../../../containers/configure/use_connectors';
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
 import { useGetActionLicense } from '../../../containers/use_get_action_license';
@@ -77,33 +74,22 @@ const fetchCaseUserActions = jest.fn();
 const pushCaseToExternalService = jest.fn();
 
 const defaultUseGetCaseUserActions = {
-  caseUserActions: [...caseUserActions, getAlertUserAction()],
-  caseServices: {},
-  fetchCaseUserActions,
-  firstIndexPushToService: -1,
-  hasDataToPush: false,
+  data: {
+    caseUserActions: [...caseUserActions, getAlertUserAction()],
+    caseServices: {},
+    hasDataToPush: false,
+    participants: [caseData.createdBy],
+  },
+  refetch: fetchCaseUserActions,
   isLoading: false,
   isError: false,
-  lastIndexPushToService: -1,
-  participants: [caseData.createdBy],
 };
 
 export const caseProps = {
   ...caseViewProps,
-  initLoadingData: false,
-  caseId: caseData.id,
   caseData,
   updateCase: jest.fn(),
   fetchCaseMetrics: jest.fn(),
-  getCaseUserActions: {
-    caseServices: {},
-    caseUserActions: [],
-    hasDataToPush: false,
-    isError: false,
-    isLoading: true,
-    participants: [],
-    fetchCaseUserActions: jest.fn(),
-  } as UseGetCaseUserActions,
 };
 
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
@@ -117,9 +103,11 @@ describe('Case View Page activity tab', () => {
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
   });
   let appMockRender: AppMockRenderer;
+
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
   });
+
   it('should render the activity content and main components', () => {
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(result.getByTestId('case-view-activity')).toBeTruthy();
@@ -127,12 +115,18 @@ describe('Case View Page activity tab', () => {
     expect(result.getByTestId('case-tags')).toBeTruthy();
     expect(result.getByTestId('connector-edit-header')).toBeTruthy();
     expect(result.getByTestId('case-view-status-action-button')).toBeTruthy();
+    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
   });
 
-  it('should show a loading when initLoadingData is true and hide the user actions activity', () => {
-    const props = { ...caseProps, initLoadingData: true };
-    const result = appMockRender.render(<CaseViewActivity {...props} />);
+  it('should show a loading when is fetching data is true and hide the user actions activity', () => {
+    useGetCaseUserActionsMock.mockReturnValue({
+      ...defaultUseGetCaseUserActions,
+      isFetching: true,
+      isLoading: true,
+    });
+    const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(result.getByTestId('case-view-loading-content')).toBeTruthy();
     expect(result.queryByTestId('case-view-activity')).toBeFalsy();
+    expect(useGetCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, caseData.connector.id);
   });
 });
