@@ -37,9 +37,8 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('analytics service: server side', () => {
-    // this test should run first because it depends on optInConfig being undefined
-    it('should have internally enqueued the "lifecycle" events but not handed over to the shipper yet', async () => {
-      const telemetryCounters = await getTelemetryCounters(2);
+    it('should see both events enqueued and sent to the shipper', async () => {
+      const telemetryCounters = await getTelemetryCounters(5);
       expect(telemetryCounters).to.eql([
         {
           type: 'enqueued',
@@ -55,37 +54,49 @@ export default function ({ getService }: FtrProviderContext) {
           code: 'enqueued',
           count: 1,
         },
+        {
+          type: 'succeeded',
+          event_type: 'test-plugin-lifecycle',
+          source: 'FTR-shipper',
+          code: '200',
+          count: 1,
+        },
+        {
+          type: 'succeeded',
+          event_type: 'test-plugin-lifecycle',
+          source: 'FTR-shipper',
+          code: '200',
+          count: 1,
+        },
+        {
+          type: 'sent_to_shipper',
+          event_type: 'test-plugin-lifecycle',
+          source: 'client',
+          code: 'OK',
+          count: 2,
+        },
       ]);
     });
 
     describe('after setting opt-in', () => {
       let actions: Action[];
-      let context: Action['meta'];
 
       before(async () => {
-        await ebtServerHelper.setOptIn(true);
         actions = await getActions();
-        context = actions[1].meta;
-      });
-
-      it('it should extend the contexts with pid injected by "analytics_plugin_a"', async () => {
-        // Validating the remote PID because that's the only field that it's added by the FTR plugin.
-        expect(context).to.have.property('pid');
-        expect(context.pid).to.be.a('number');
       });
 
       it('it calls optIn first, then extendContext, followed by reportEvents', async () => {
         const [optInAction, extendContextAction, ...reportEventsAction] = actions;
         expect(optInAction).to.eql({ action: 'optIn', meta: true });
-        expect(extendContextAction).to.eql({ action: 'extendContext', meta: context });
-        reportEventsAction.forEach((entry) => expect(entry.action).to.eql('reportEvents'));
+        expect(extendContextAction).to.have.property('action', 'extendContext');
+        // Checking `some` because there could be more `extendContext` actions for late context providers
+        expect(reportEventsAction.some((entry) => entry.action === 'reportEvents')).to.be(true);
       });
 
       it('Initial calls to reportEvents from cached events group the requests by event_type', async () => {
         // We know that after opting-in, the client will send the events in batches, grouped by event-type.
-        const [, , ...reportEventsActions] = actions;
+        const reportEventsActions = actions.filter(({ action }) => action === 'reportEvents');
         reportEventsActions.forEach((reportEventAction) => {
-          expect(reportEventAction.action).to.eql('reportEvents');
           // Get the first event type
           const initiallyBatchedEventType = reportEventAction.meta[0].event_type;
           // Check that all event types in this batch are the same.
@@ -97,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('"test-plugin-lifecycle" is received in the expected order of "setup" first, then "start"', async () => {
         // We know that after opting-in, the client will send the events in batches, grouped by event-type.
-        const [, , ...reportEventsActions] = actions;
+        const reportEventsActions = actions.filter(({ action }) => action === 'reportEvents');
         // Find the action calling to report test-plugin-lifecycle events.
         const reportTestPluginLifecycleEventsAction = reportEventsActions.find(
           (reportEventAction) => {
@@ -145,31 +156,11 @@ export default function ({ getService }: FtrProviderContext) {
         ]);
       });
 
-      it('should report the plugin lifecycle events as telemetry counters', async () => {
-        const telemetryCounters = await getTelemetryCounters(3);
-        expect(telemetryCounters).to.eql([
-          {
-            type: 'succeeded',
-            event_type: 'test-plugin-lifecycle',
-            source: 'FTR-shipper',
-            code: '200',
-            count: 1,
-          },
-          {
-            type: 'succeeded',
-            event_type: 'test-plugin-lifecycle',
-            source: 'FTR-shipper',
-            code: '200',
-            count: 1,
-          },
-          {
-            type: 'sent_to_shipper',
-            event_type: 'test-plugin-lifecycle',
-            source: 'client',
-            code: 'OK',
-            count: 2,
-          },
-        ]);
+      it('it should extend the contexts with pid injected by "analytics_plugin_a"', async () => {
+        const [event] = await ebtServerHelper.getLastEvents(1, ['test-plugin-lifecycle']);
+        // Validating the remote PID because that's the only field that it's added by the FTR plugin.
+        expect(event.context).to.have.property('pid');
+        expect(event.context.pid).to.be.a('number');
       });
     });
   });
