@@ -35,7 +35,7 @@ describe('Ping Timestamp component', () => {
     (fetchStatus) => {
       jest
         .spyOn(observabilityPublic, 'useFetcher')
-        .mockReturnValue({ status: fetchStatus, data: null, refetch: () => null });
+        .mockReturnValue({ status: fetchStatus, data: null, refetch: () => null, loading: true });
       const { getByTestId } = render(
         <PingTimestamp checkGroup={checkGroup} label={getShortTimeStamp(moment(timestamp))} />
       );
