@@ -70,7 +70,7 @@ describe('Source Viewer component', () => {
         />
       </KibanaContextProvider>
     );
-    expect(comp.children()).toMatchSnapshot();
+    expect(comp.children().render()).toMatchSnapshot();
     const errorPrompt = comp.find(EuiEmptyPrompt);
     expect(errorPrompt.length).toBe(1);
     const refreshButton = comp.find(EuiButton);

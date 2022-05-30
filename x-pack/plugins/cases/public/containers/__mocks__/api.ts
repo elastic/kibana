@@ -29,7 +29,7 @@ import {
   respReporters,
   tags,
 } from '../mock';
-import { ResolvedCase } from '../../../common/ui/types';
+import { ResolvedCase, SeverityAll } from '../../../common/ui/types';
 import {
   CasePatchRequest,
   CasePostRequest,
@@ -38,6 +38,7 @@ import {
   CaseStatuses,
   SingleCaseMetricsResponse,
 } from '../../../common/api';
+import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 export const getCase = async (
   caseId: string,
@@ -71,6 +72,7 @@ export const getCaseUserActions = async (
 
 export const getCases = async ({
   filterOptions = {
+    severity: SeverityAll,
     search: '',
     reporters: [],
     status: CaseStatuses.open,
@@ -132,3 +134,8 @@ export const pushCase = async (
 
 export const getActionLicense = async (signal: AbortSignal): Promise<ActionLicense[]> =>
   Promise.resolve(actionLicenses);
+
+export const getFeatureIds = async (
+  _query: { registrationContext: string[] },
+  _signal: AbortSignal
+): Promise<ValidFeatureId[]> => Promise.resolve(['siem', 'observability']);

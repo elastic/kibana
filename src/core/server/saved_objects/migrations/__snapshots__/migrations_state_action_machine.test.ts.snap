@@ -33,6 +33,7 @@ Object {
               ],
               "maxBatchSizeBytes": 100000000,
               "migrationDocLinks": Object {
+                "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
@@ -137,6 +138,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
                       },
                     },
                     Object {
@@ -199,6 +205,7 @@ Object {
               ],
               "maxBatchSizeBytes": 100000000,
               "migrationDocLinks": Object {
+                "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
@@ -303,6 +310,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
                       },
                     },
                     Object {
@@ -369,6 +381,7 @@ Object {
               ],
               "maxBatchSizeBytes": 100000000,
               "migrationDocLinks": Object {
+                "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
@@ -473,6 +486,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
                       },
                     },
                     Object {
@@ -543,6 +561,7 @@ Object {
               ],
               "maxBatchSizeBytes": 100000000,
               "migrationDocLinks": Object {
+                "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
@@ -647,6 +666,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
                       },
                     },
                     Object {
@@ -743,6 +767,7 @@ Object {
               ],
               "maxBatchSizeBytes": 100000000,
               "migrationDocLinks": Object {
+                "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
@@ -858,6 +883,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
                       },
                     },
                     Object {
@@ -920,6 +950,7 @@ Object {
               ],
               "maxBatchSizeBytes": 100000000,
               "migrationDocLinks": Object {
+                "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
                 "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
                 "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
                 "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
@@ -1035,6 +1066,11 @@ Object {
                     Object {
                       "term": Object {
                         "type": "tsvb-validation-telemetry",
+                      },
+                    },
+                    Object {
+                      "term": Object {
+                        "type": "ui-counter",
                       },
                     },
                     Object {

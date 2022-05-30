@@ -12,7 +12,7 @@ import { InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { IFieldType } from '@kbn/data-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { ValueInputType } from './value_input_type';
 
 interface RangeParams {
@@ -23,7 +23,7 @@ interface RangeParams {
 type RangeParamsPartial = Partial<RangeParams>;
 
 interface Props {
-  field: IFieldType;
+  field: DataViewField;
   value?: RangeParams;
   onChange: (params: RangeParamsPartial) => void;
   intl: InjectedIntl;

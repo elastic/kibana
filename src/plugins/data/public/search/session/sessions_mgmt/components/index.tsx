@@ -15,7 +15,7 @@ export { PopoverActionsMenu } from './actions';
 
 export const TableText = ({ children, ...props }: EuiTextProps) => {
   return (
-    <EuiText size="m" {...props}>
+    <EuiText size="s" {...props}>
       {children}
     </EuiText>
   );

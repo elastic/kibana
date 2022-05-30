@@ -24,7 +24,7 @@ const PrevalenceCell = React.memo<AlertSummaryRow['description']>(
     if (loading) {
       return <EuiLoadingSpinner />;
     } else {
-      return defaultToEmptyTag(count);
+      return <span data-test-subj="alert-prevalence">{defaultToEmptyTag(count)}</span>;
     }
   }
 );

@@ -18,6 +18,7 @@ const defaultOptions: VisTypeOptions = {
   showQueryBar: true,
   showFilterBar: true,
   showIndexSelection: true,
+  showQueryInput: true,
   hierarchicalData: false, // we should get rid of this i guess ?
 };
 
@@ -31,6 +32,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly icon;
   public readonly image;
   public readonly stage;
+  public readonly isDeprecated;
   public readonly group;
   public readonly titleInWizard;
   public readonly options: VisTypeOptions;
@@ -64,6 +66,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.editorConfig = defaultsDeep({}, opts.editorConfig, { collections: {} });
     this.options = defaultsDeep({}, opts.options, defaultOptions);
     this.stage = opts.stage ?? 'production';
+    this.isDeprecated = opts.isDeprecated ?? false;
     this.group = opts.group ?? VisGroups.AGGBASED;
     this.titleInWizard = opts.titleInWizard ?? '';
     this.hidden = opts.hidden ?? false;

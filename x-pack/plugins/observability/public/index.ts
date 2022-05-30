@@ -28,6 +28,7 @@ export {
   enableComparisonByDefault,
   enableInfrastructureView,
   enableServiceGroups,
+  enableNewSyntheticsView,
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 

@@ -27,6 +27,7 @@ interface JsonCodeEditorCommonProps {
   width?: string | number;
   height?: string | number;
   hasLineNumbers?: boolean;
+  hideCopyButton?: boolean;
 }
 
 export const JsonCodeEditorCommon = ({
@@ -35,9 +36,39 @@ export const JsonCodeEditorCommon = ({
   height,
   hasLineNumbers,
   onEditorDidMount,
+  hideCopyButton,
 }: JsonCodeEditorCommonProps) => {
   if (jsonValue === '') {
     return null;
+  }
+  const codeEditor = (
+    <CodeEditor
+      languageId={XJsonLang.ID}
+      width={width}
+      height={height}
+      value={jsonValue || ''}
+      editorDidMount={onEditorDidMount}
+      aria-label={codeEditorAriaLabel}
+      options={{
+        automaticLayout: true,
+        fontSize: 12,
+        lineNumbers: hasLineNumbers ? 'on' : 'off',
+        minimap: {
+          enabled: false,
+        },
+        overviewRulerBorder: false,
+        readOnly: true,
+        scrollbar: {
+          alwaysConsumeMouseWheel: false,
+        },
+        scrollBeyondLastLine: false,
+        wordWrap: 'on',
+        wrappingIndent: 'indent',
+      }}
+    />
+  );
+  if (hideCopyButton) {
+    return codeEditor;
   }
   return (
     <EuiFlexGroup className="dscJsonCodeEditor" direction="column" gutterSize="s">
@@ -53,32 +84,7 @@ export const JsonCodeEditorCommon = ({
           </EuiCopy>
         </div>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <CodeEditor
-          languageId={XJsonLang.ID}
-          width={width}
-          height={height}
-          value={jsonValue || ''}
-          editorDidMount={onEditorDidMount}
-          aria-label={codeEditorAriaLabel}
-          options={{
-            automaticLayout: true,
-            fontSize: 12,
-            lineNumbers: hasLineNumbers ? 'on' : 'off',
-            minimap: {
-              enabled: false,
-            },
-            overviewRulerBorder: false,
-            readOnly: true,
-            scrollbar: {
-              alwaysConsumeMouseWheel: false,
-            },
-            scrollBeyondLastLine: false,
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-          }}
-        />
-      </EuiFlexItem>
+      <EuiFlexItem>{codeEditor}</EuiFlexItem>
     </EuiFlexGroup>
   );
 };

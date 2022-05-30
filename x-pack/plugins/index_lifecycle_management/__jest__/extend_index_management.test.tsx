@@ -252,14 +252,14 @@ describe('extend index management', () => {
       const extension = ilmSummaryExtension(indexWithLifecyclePolicy, getUrlForApp);
       expect(extension).toBeDefined();
       const rendered = mountWithIntl(extension);
-      expect(rendered).toMatchSnapshot();
+      expect(rendered.render()).toMatchSnapshot();
     });
 
     test('should return extension when index has lifecycle error', () => {
       const extension = ilmSummaryExtension(indexWithLifecycleError, getUrlForApp);
       expect(extension).toBeDefined();
       const rendered = mountWithIntl(extension);
-      expect(rendered).toMatchSnapshot();
+      expect(rendered.render()).toMatchSnapshot();
     });
   });
 

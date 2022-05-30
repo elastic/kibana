@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usageFromCommandDefinition } from '../service/usage_from_command_definition';
 import { CommandDefinition } from '../types';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 
 export const CommandInputUsage = memo<Pick<CommandUsageProps, 'commandDef'>>(({ commandDef }) => {
@@ -79,22 +79,20 @@ export const CommandUsage = memo<CommandUsageProps>(({ commandDef }) => {
       {hasArgs && (
         <>
           <EuiSpacer />
-          <p>
-            <EuiText>
-              <FormattedMessage
-                id="xpack.securitySolution.console.commandUsage.optionsLabel"
-                defaultMessage="Options:"
-              />
-              {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
-                <EuiText size="s" color="subdued">
-                  <FormattedMessage
-                    id="xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage"
-                    defaultMessage="Note: at least one option must be used"
-                  />
-                </EuiText>
-              )}
-            </EuiText>
-          </p>
+          <EuiText>
+            <FormattedMessage
+              id="xpack.securitySolution.console.commandUsage.optionsLabel"
+              defaultMessage="Options:"
+            />
+            {commandDef.mustHaveArgs && commandDef.args && hasArgs && (
+              <EuiText size="s" color="subdued">
+                <FormattedMessage
+                  id="xpack.securitySolution.console.commandUsage.atLeastOneOptionRequiredMessage"
+                  defaultMessage="Note: at least one option must be used"
+                />
+              </EuiText>
+            )}
+          </EuiText>
           {commandDef.args && (
             <EuiDescriptionList
               compressed

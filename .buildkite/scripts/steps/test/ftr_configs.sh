@@ -3,12 +3,11 @@
 set -euo pipefail
 
 source .buildkite/scripts/steps/functional/common.sh
-source .buildkite/scripts/steps/test/test_group_env.sh
 
-export JOB_NUM=$BUILDKITE_PARALLEL_JOB
+export JOB_NUM=${BUILDKITE_PARALLEL_JOB:-0}
 export JOB=ftr-configs-${JOB_NUM}
 
-FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${BUILDKITE_PARALLEL_JOB:-0}"
+FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${JOB_NUM}"
 
 # a FTR failure will result in the script returning an exit code of 10
 exitCode=0

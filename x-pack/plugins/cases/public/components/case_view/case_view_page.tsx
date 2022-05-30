@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingLogo,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-} from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import styled from 'styled-components';
 import { Case, UpdateKey } from '../../../common/ui';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
@@ -24,19 +17,20 @@ import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { CaseActionBar } from '../case_action_bar';
 import { HeaderPage } from '../header_page';
 import { EditableTitle } from '../header_page/editable_title';
+import { EXPERIMENTAL_DESC, EXPERIMENTAL_LABEL } from '../header_page/translations';
 import { useTimelineContext } from '../timeline_context/use_timeline_context';
 import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { WhitePageWrapperNoBorder } from '../wrappers';
 import { CaseViewActivity } from './components/case_view_activity';
+import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewMetrics } from './metrics';
 import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
 import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
 import { useOnUpdateField } from './use_on_update_field';
 
-// This hardcoded constant is left here intentionally
-// as a way to hide a wip functionality
-// that will be merge in the 8.3 release.
-const ENABLE_ALERTS_TAB = false;
+const ExperimentalBadge = styled(EuiBetaBadge)`
+  margin-left: 5px;
+`;
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
@@ -117,7 +111,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             if (isStale || isLoading || isLoadingMetrics || isLoadingUserActions) {
               return;
             }
-            await Promise.all([fetchCase(true), fetchCaseMetrics(true), refetchCaseUserActions()]);
+            await Promise.all([fetchCase(), fetchCaseMetrics(true), refetchCaseUserActions()]);
           },
         };
         return () => {
@@ -189,17 +183,23 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             />
           ),
         },
-        ...(features.alerts.enabled && ENABLE_ALERTS_TAB
+        ...(features.alerts.enabled
           ? [
               {
                 id: CASE_VIEW_PAGE_TABS.ALERTS,
-                name: ALERTS_TAB,
-                content: (
-                  <EuiEmptyPrompt
-                    icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
-                    title={<h2>{'Alerts table placeholder'}</h2>}
-                  />
+                name: (
+                  <>
+                    {ALERTS_TAB}
+                    <ExperimentalBadge
+                      label={EXPERIMENTAL_LABEL}
+                      size="s"
+                      iconType="beaker"
+                      tooltipContent={EXPERIMENTAL_DESC}
+                      tooltipPosition="bottom"
+                    />
+                  </>
                 ),
+                content: <CaseViewAlerts caseData={caseData} />,
               },
             ]
           : []),

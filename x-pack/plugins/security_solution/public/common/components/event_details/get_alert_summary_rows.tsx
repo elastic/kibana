@@ -38,6 +38,7 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'user.name' },
   { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
   { id: 'kibana.alert.original_event.id', label: i18n.SOURCE_EVENT_ID },
+  { id: 'process.entry_leader.entity_id', label: i18n.SESSION_ID },
 ];
 
 /**
@@ -136,7 +137,11 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
     case 'threshold':
       return [
         { id: THRESHOLD_COUNT, label: ALERTS_HEADERS_THRESHOLD_COUNT },
-        { id: THRESHOLD_TERMS_FIELD, label: ALERTS_HEADERS_THRESHOLD_TERMS },
+        {
+          id: THRESHOLD_TERMS_FIELD,
+          overrideField: THRESHOLD_TERMS_VALUE,
+          label: ALERTS_HEADERS_THRESHOLD_TERMS,
+        },
         {
           id: THRESHOLD_CARDINALITY_FIELD,
           label: ALERTS_HEADERS_THRESHOLD_CARDINALITY,

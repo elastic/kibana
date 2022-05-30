@@ -11,13 +11,13 @@ import { SecuritySolutionPageWrapper } from '../../common/components/page_wrappe
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../app/types';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
+import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
+import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
 import { useKibana, useGetUserCasesPermissions } from '../../common/lib/kibana';
 
 import { EmptyPage } from '../../common/components/empty_page';
 import { LandingPageComponent } from '../../common/components/landing_page';
-import { useSignalIndex } from '../../detections/containers/detection_engine/alerts/use_signal_index';
-import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { AlertsByStatus } from '../components/detection_response/alerts_by_status';
 import { HostAlertsTable } from '../components/detection_response/host_alerts_table';
 import { RuleAlertsTable } from '../components/detection_response/rule_alerts_table';

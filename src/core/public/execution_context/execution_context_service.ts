@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { isEqual, isUndefined, omitBy } from 'lodash';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { compact, isEqual, isUndefined, omitBy } from 'lodash';
+import { BehaviorSubject, Observable, Subscription, map } from 'rxjs';
+import { AnalyticsServiceSetup } from '../analytics';
 import { CoreService, KibanaExecutionContext } from '../../types';
 
 // Should be exported from elastic/apm-rum
@@ -55,6 +56,10 @@ export interface ExecutionContextSetup {
  */
 export type ExecutionContextStart = ExecutionContextSetup;
 
+export interface SetupDeps {
+  analytics: AnalyticsServiceSetup;
+}
+
 export interface StartDeps {
   curApp$: Observable<string | undefined>;
 }
@@ -68,7 +73,9 @@ export class ExecutionContextService
   private subscription: Subscription = new Subscription();
   private contract?: ExecutionContextSetup;
 
-  public setup() {
+  public setup({ analytics }: SetupDeps) {
+    this.enrichAnalyticsContext(analytics);
+
     this.contract = {
       context$: this.context$.asObservable(),
       clear: () => {
@@ -133,5 +140,46 @@ export class ExecutionContextService
       ...this.context$.value,
       ...context,
     };
+  }
+
+  /**
+   * Sets the analytics context provider based on the execution context details.
+   * @param analytics The analytics service
+   * @private
+   */
+  private enrichAnalyticsContext(analytics: AnalyticsServiceSetup) {
+    analytics.registerContextProvider({
+      name: 'execution_context',
+      context$: this.context$.pipe(
+        map(({ type, name, page, id }) => ({
+          pageName: `${compact([type, name, page]).join(':')}`,
+          applicationId: name ?? type ?? 'unknown',
+          page,
+          entityId: id,
+        }))
+      ),
+      schema: {
+        pageName: {
+          type: 'keyword',
+          _meta: { description: 'The name of the current page' },
+        },
+        page: {
+          type: 'keyword',
+          _meta: { description: 'The current page', optional: true },
+        },
+        applicationId: {
+          type: 'keyword',
+          _meta: { description: 'The id of the current application' },
+        },
+        entityId: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'The id of the current entity (dashboard, visualization, canvas, lens, etc)',
+            optional: true,
+          },
+        },
+      },
+    });
   }
 }

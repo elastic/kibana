@@ -57,7 +57,8 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    describe('uninstalls all assets when uninstalling a package', async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/132333
+    describe.skip('uninstalls all assets when uninstalling a package', async () => {
       before(async () => {
         if (!server.enabled) return;
         // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
@@ -251,6 +252,16 @@ export default function (providerContext: FtrProviderContext) {
           resOsqueryPackAsset = err;
         }
         expect(resOsqueryPackAsset.response.data.statusCode).equal(404);
+        let resOsquerySavedQuery;
+        try {
+          resOsquerySavedQuery = await kibanaServer.savedObjects.get({
+            type: 'osquery-saved-query',
+            id: 'sample_osquery_saved_query',
+          });
+        } catch (err) {
+          resOsquerySavedQuery = err;
+        }
+        expect(resOsquerySavedQuery.response.data.statusCode).equal(404);
       });
       it('should have removed the saved object', async function () {
         let res;
@@ -443,6 +454,11 @@ const expectAssetsInstalled = ({
       id: 'sample_osquery_pack_asset',
     });
     expect(resOsqueryPackAsset.id).equal('sample_osquery_pack_asset');
+    const resOsquerySavedObject = await kibanaServer.savedObjects.get({
+      type: 'osquery-saved-query',
+      id: 'sample_osquery_saved_query',
+    });
+    expect(resOsquerySavedObject.id).equal('sample_osquery_saved_query');
     const resCloudSecurityPostureRuleTemplate = await kibanaServer.savedObjects.get({
       type: 'csp-rule-template',
       id: 'sample_csp_rule_template',
@@ -527,6 +543,10 @@ const expectAssetsInstalled = ({
           type: 'osquery-pack-asset',
         },
         {
+          id: 'sample_osquery_saved_query',
+          type: 'osquery-saved-query',
+        },
+        {
           id: 'sample_search',
           type: 'search',
         },
@@ -568,6 +588,10 @@ const expectAssetsInstalled = ({
         {
           id: 'metrics-all_assets.test_metrics-all_assets',
           type: 'data_stream_ilm_policy',
+        },
+        {
+          id: 'all_assets',
+          type: 'ilm_policy',
         },
         {
           id: 'logs-all_assets.test_logs',
@@ -684,6 +708,10 @@ const expectAssetsInstalled = ({
           type: 'epm-packages-assets',
         },
         {
+          id: '24a74223-5fdb-52ca-9cb5-b2cdd2a42b07',
+          type: 'epm-packages-assets',
+        },
+        {
           id: 'e786cbd9-0f3b-5a0b-82a6-db25145ebf58',
           type: 'epm-packages-assets',
         },
@@ -710,7 +738,6 @@ const expectAssetsInstalled = ({
       },
       name: 'all_assets',
       version: '0.1.0',
-      removable: true,
       install_version: '0.1.0',
       install_status: 'installed',
       install_started_at: res.attributes.install_started_at,

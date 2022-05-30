@@ -7,8 +7,6 @@
 
 import moment from 'moment';
 // @ts-ignore
-import { checkParam } from '../error_missing_required';
-// @ts-ignore
 import { createQuery } from '../create_query';
 // @ts-ignore
 import { calculateAvailability } from '../calculate_availability';

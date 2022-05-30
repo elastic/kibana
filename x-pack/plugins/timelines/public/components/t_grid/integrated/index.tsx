@@ -226,10 +226,11 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
 
   const sortField = useMemo(
     () =>
-      sort.map(({ columnId, columnType, sortDirection }) => ({
+      sort.map(({ columnId, columnType, esTypes, sortDirection }) => ({
         field: columnId,
         type: columnType,
         direction: sortDirection as Direction,
+        esTypes: esTypes ?? [],
       })),
     [sort]
   );
@@ -352,7 +353,7 @@ const TGridIntegratedComponent: React.FC<TGridIntegratedProps> = ({
                   )}
               </UpdatedFlexGroup>
               <>
-                {!hasAlerts && !loading && <TGridEmpty height="short" />}
+                {!hasAlerts && !loading && !graphOverlay && <TGridEmpty height="short" />}
                 {hasAlerts && (
                   <FullWidthFlexGroup
                     $visible={!graphEventId && graphOverlay == null}

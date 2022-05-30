@@ -50,7 +50,9 @@ export type ApmFields = Fields &
     'error.grouping_name': string;
     'error.grouping_key': string;
     'host.name': string;
+    'host.hostname': string;
     'kubernetes.pod.uid': string;
+    'kubernetes.pod.name': string;
     'metricset.name': string;
     observer: Observer;
     'parent.id': string;
@@ -85,6 +87,10 @@ export type ApmFields = Fields &
     'span.destination.service.response_time.count': number;
     'span.self_time.count': number;
     'span.self_time.sum.us': number;
+    'span.links': Array<{
+      trace: { id: string };
+      span: { id: string };
+    }>;
     'cloud.provider': string;
     'cloud.project.name': string;
     'cloud.service.name': string;

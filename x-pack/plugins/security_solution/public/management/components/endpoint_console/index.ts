@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { EndpointConsole } from './endpoint_console';
+export { getEndpointResponseActionsConsoleCommands } from './endpoint_response_actions_console_commands';

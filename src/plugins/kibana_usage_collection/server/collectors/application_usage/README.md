@@ -120,10 +120,9 @@ This collection occurs by default for every application registered via the menti
 
 In order to keep the count of the events, this collector uses 3 Saved Objects:
 
-1. `application_usage_transactional`: It stores each individually reported event. Grouped by `timestamp` and `appId`. The reason for having these documents instead of editing `application_usage_daily` documents on very report is to provide faster response to the requests to `/api/ui_counters/_report` (creating new documents instead of finding and editing existing ones) and to avoid conflicts when multiple users reach to the API concurrently.
-2. `application_usage_daily`: Periodically, documents from `application_usage_transactional` are aggregated to daily summaries and deleted. Also grouped by `timestamp` and `appId` for the main view concatenated with `viewId` for other views.
-3. `application_usage_totals`: It stores the sum of all the events older than 90 days old, grouped by `appId` for the main view concatenated with `viewId` for other views.
+1. `application_usage_transactional`: It stores each individually reported event. Grouped by `timestamp` and `appId`.
+2. `application_usage_totals`: It stores the sum of all the events older than 90 days old, grouped by `appId` for the main view concatenated with `viewId` for other views.
 
-All the types use the shared fields `appId: 'keyword'`, `viewId: 'keyword'`, `numberOfClicks: 'long'` and `minutesOnScreen: 'float'`, but they are currently not added in the mappings because we don't use them for search purposes, and we need to be thoughtful with the number of mapped fields in the SavedObjects index ([#43673](https://github.com/elastic/kibana/issues/43673)). `application_usage_transactional` and `application_usage_daily` also store `timestamp: { type: 'date' }`.
+All the types use the shared fields `appId: 'keyword'`, `viewId: 'keyword'`, `numberOfClicks: 'long'` and `minutesOnScreen: 'float'`, but they are currently not added in the mappings because we don't use them for search purposes, and we need to be thoughtful with the number of mapped fields in the SavedObjects index ([#43673](https://github.com/elastic/kibana/issues/43673)). The SO type `application_usage_transactional` also stores `timestamp: { type: 'date' }`.
 
 Rollups uses `appId` in the savedObject id for the default view. For other views `viewId` is concatenated. This keeps backwards compatiblity with previously stored documents on the clusters without requiring any form of migration.

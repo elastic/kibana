@@ -63,6 +63,7 @@ export const getHeatmapVisTypeDefinition = ({
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: getHeatmapOptions({
       showElasticChartsOptions,
       palettes,

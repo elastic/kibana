@@ -17,14 +17,11 @@ export const useMonitorManagementBreadcrumbs = () => {
   useBreadcrumbs([
     {
       text: MONITOR_MANAGEMENT_CRUMB,
-      href: `${appPath}/${MONITOR_MANAGEMENT_ROUTE}/all`,
+      href: `${appPath}/${MONITOR_MANAGEMENT_ROUTE}`,
     },
   ]);
 };
 
-const MONITOR_MANAGEMENT_CRUMB = i18n.translate(
-  'xpack.synthetics.monitorManagementPage.monitorManagementCrumb',
-  {
-    defaultMessage: 'Monitor Management',
-  }
-);
+const MONITOR_MANAGEMENT_CRUMB = i18n.translate('xpack.synthetics.monitorsPage.monitorCrumb', {
+  defaultMessage: 'Monitors',
+});

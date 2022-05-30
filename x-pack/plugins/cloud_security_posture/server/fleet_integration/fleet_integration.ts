@@ -17,8 +17,11 @@ import {
   cloudSecurityPostureRuleTemplateSavedObjectType,
   CloudSecurityPostureRuleTemplateSchema,
 } from '../../common/schemas/csp_rule_template';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../common/constants';
-import { CspRuleSchema, cspRuleAssetSavedObjectType } from '../../common/schemas/csp_rule';
+import {
+  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
+  cspRuleAssetSavedObjectType,
+} from '../../common/constants';
+import { CspRuleSchema } from '../../common/schemas/csp_rule';
 
 type ArrayElement<ArrayType extends readonly unknown[]> = ArrayType extends ReadonlyArray<
   infer ElementType
@@ -83,6 +86,7 @@ export const onPackagePolicyDeleteCallback = async (
       await soClient.find({
         type: cspRuleAssetSavedObjectType,
         filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${deletedPackagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${deletedPackagePolicy.policy_id}`,
+        perPage: 10000,
       });
     await Promise.all(
       cspRules.map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id))

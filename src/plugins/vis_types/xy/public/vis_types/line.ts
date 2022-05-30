@@ -127,6 +127,7 @@ export const lineVisTypeDefinition = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionTabs,
     schemas: [
       {
