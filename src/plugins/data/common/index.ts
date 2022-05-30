@@ -116,7 +116,6 @@ export type {
   SavedObjectsClientCommonFindArgs,
   SavedObjectsClientCommon,
   GetFieldsOptions,
-  GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
   SavedObject,
   AggregationRestrictions,

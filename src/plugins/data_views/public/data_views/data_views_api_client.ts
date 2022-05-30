@@ -8,7 +8,7 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
-import { GetFieldsOptions, IDataViewsApiClient, GetFieldsOptionsTimePattern } from '../../common';
+import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 
@@ -35,18 +35,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
 
   private _getUrl(path: string[]) {
     return API_BASE_URL + path.filter(Boolean).map(encodeURIComponent).join('/');
-  }
-
-  getFieldsForTimePattern(options: GetFieldsOptionsTimePattern) {
-    const { pattern, lookBack, metaFields } = options;
-
-    const url = this._getUrl(['_fields_for_time_pattern']);
-
-    return this._request(url, {
-      pattern,
-      look_back: lookBack,
-      meta_fields: metaFields,
-    }).then((resp: any) => resp.fields);
   }
 
   getFieldsForWildcard({
