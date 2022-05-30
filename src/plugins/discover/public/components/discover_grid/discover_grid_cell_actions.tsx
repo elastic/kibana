@@ -86,7 +86,7 @@ export const FilterOutBtn = ({
 };
 
 export const CopyBtn = ({ Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps) => {
-  const { indexPattern: dataView, rowsFlattened, rows } = useContext(DiscoverGridContext);
+  const { dataView, rowsFlattened, rows } = useContext(DiscoverGridContext);
   const { fieldFormats, toastNotifications } = useDiscoverServices();
 
   const buttonTitle = i18n.translate('discover.grid.copyClipboardButtonTitle', {
