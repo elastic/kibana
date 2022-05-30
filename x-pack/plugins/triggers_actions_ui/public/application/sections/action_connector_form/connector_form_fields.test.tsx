@@ -9,7 +9,6 @@ import React, { lazy } from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
   AppMockRenderer,
-  createActionType,
   createAppMockRenderer,
   FormTestProvider,
 } from '../../components/builtin_action_types/test_utils';
@@ -34,9 +33,7 @@ describe('ConnectorFormFields', () => {
   });
 
   it('does not show the fields component if it is null', async () => {
-    const actionTypeModel = createActionType({
-      id: '.test',
-      actionTypeRegistry: actionTypeRegistryMock,
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: null,
     });
 
@@ -54,9 +51,7 @@ describe('ConnectorFormFields', () => {
   });
 
   it('shows the connector fields', async () => {
-    const actionTypeModel = createActionType({
-      id: '.test',
-      actionTypeRegistry: actionTypeRegistryMock,
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: lazy(() => import('./connector_mock')),
     });
 

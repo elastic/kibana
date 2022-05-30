@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { ComponentType, useCallback } from 'react';
+import React, { useCallback } from 'react';
 import { ReactWrapper } from 'enzyme';
 import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -17,11 +17,9 @@ import { render as reactRender, RenderOptions, RenderResult } from '@testing-lib
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { TriggersAndActionsUiServices } from '../../..';
-import { ActionConnectorFieldsProps, GenericValidationResult } from '../../../types';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { ConnectorFormSchema } from '../../sections/action_connector_form/types';
 import { ConnectorFormFieldsGlobal } from '../../sections/action_connector_form/connector_form_fields_global';
-import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 
 interface FormTestProviderProps {
   children: React.ReactNode;
@@ -88,29 +86,6 @@ export const waitForComponentToUpdate = async () =>
   await act(async () => {
     return Promise.resolve();
   });
-
-export const createActionType = ({
-  id,
-  actionTypeRegistry,
-  actionConnectorFields,
-}: {
-  id: string;
-  actionTypeRegistry: typeof actionTypeRegistryMock;
-  actionConnectorFields: React.LazyExoticComponent<
-    ComponentType<ActionConnectorFieldsProps>
-  > | null;
-}) => {
-  return actionTypeRegistry.createMockActionTypeModel({
-    id,
-    iconClass: 'test',
-    selectMessage: 'test',
-    validateParams: (): Promise<GenericValidationResult<unknown>> => {
-      const validationResult = { errors: {} };
-      return Promise.resolve(validationResult);
-    },
-    actionConnectorFields,
-  });
-};
 
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 export interface AppMockRenderer {

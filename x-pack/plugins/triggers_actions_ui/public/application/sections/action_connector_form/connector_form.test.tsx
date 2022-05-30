@@ -6,10 +6,8 @@
  */
 
 import React, { lazy } from 'react';
-import { coreMock } from '@kbn/core/public/mocks';
 import {
   AppMockRenderer,
-  createActionType,
   createAppMockRenderer,
 } from '../../components/builtin_action_types/test_utils';
 import { ConnectorForm } from './connector_form';
@@ -33,14 +31,11 @@ describe('ConnectorForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    coreMock.createSetup();
     appMockRenderer = createAppMockRenderer();
   });
 
   it('calls on change with correct init state', async () => {
-    const actionTypeModel = createActionType({
-      id: '.test',
-      actionTypeRegistry: actionTypeRegistryMock,
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: lazy(() => import('./connector_mock')),
     });
 
@@ -71,9 +66,7 @@ describe('ConnectorForm', () => {
       actions: { save: true, show: true },
     };
 
-    const actionTypeModel = createActionType({
-      id: '.test',
-      actionTypeRegistry: actionTypeRegistryMock,
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: lazy(() => import('./connector_mock')),
     });
 
@@ -98,9 +91,7 @@ describe('ConnectorForm', () => {
   });
 
   it('calls onChange when the form is invalid', async () => {
-    const actionTypeModel = createActionType({
-      id: '.test',
-      actionTypeRegistry: actionTypeRegistryMock,
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: lazy(() => import('./connector_mock')),
     });
 
@@ -132,9 +123,7 @@ describe('ConnectorForm', () => {
   });
 
   it('registers the pre submit validator correctly', async () => {
-    const actionTypeModel = createActionType({
-      id: '.test',
-      actionTypeRegistry: actionTypeRegistryMock,
+    const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
       actionConnectorFields: lazy(() => import('./connector_mock')),
     });
 

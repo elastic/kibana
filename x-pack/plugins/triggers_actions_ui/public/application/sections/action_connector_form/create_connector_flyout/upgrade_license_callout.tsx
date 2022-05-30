@@ -14,9 +14,9 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { VIEW_LICENSE_OPTIONS_LINK } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { VIEW_LICENSE_OPTIONS_LINK } from '../../../../common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 const UpgradeLicenseCallOutComponent: React.FC = () => {
@@ -28,6 +28,7 @@ const UpgradeLicenseCallOutComponent: React.FC = () => {
         'xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerTitle',
         { defaultMessage: 'Upgrade your license to access all connectors' }
       )}
+      data-test-subj="upgrade-your-license-callout"
     >
       <FormattedMessage
         id="xpack.triggersActionsUI.sections.actionConnectorAdd.upgradeYourPlanBannerMessage"

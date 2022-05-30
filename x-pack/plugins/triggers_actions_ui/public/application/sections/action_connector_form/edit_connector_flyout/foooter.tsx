@@ -34,10 +34,10 @@ const FlyoutFooterComponent: React.FC<Props> = ({
   onSubmitAndClose,
 }) => {
   return (
-    <EuiFlyoutFooter>
+    <EuiFlyoutFooter data-test-subj="edit-connector-flyout-footer">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} data-test-subj="cancelSaveEditedConnectorButton">
+          <EuiButtonEmpty onClick={onCancel} data-test-subj="edit-connector-flyout-cancel-btn">
             {i18n.translate(
               'xpack.triggersActionsUI.sections.editConnectorForm.cancelButtonLabel',
               {
@@ -53,7 +53,7 @@ const FlyoutFooterComponent: React.FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     color="success"
-                    data-test-subj="saveEditedActionButton"
+                    data-test-subj="edit-connector-flyout-save-btn"
                     isLoading={isSaving}
                     onClick={onSubmit}
                     disabled={disabled}
@@ -68,7 +68,7 @@ const FlyoutFooterComponent: React.FC<Props> = ({
                   <EuiButton
                     fill
                     color="success"
-                    data-test-subj="saveAndCloseEditedActionButton"
+                    data-test-subj="edit-connector-flyout-save-close-btn"
                     type="submit"
                     isLoading={isSaving}
                     onClick={onSubmitAndClose}

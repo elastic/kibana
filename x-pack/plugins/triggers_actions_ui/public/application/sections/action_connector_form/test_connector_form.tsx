@@ -161,7 +161,7 @@ export const TestConnectorForm = ({
     },
   ];
 
-  return <EuiSteps steps={steps} />;
+  return <EuiSteps steps={steps} data-test-subj="test-connector-form" />;
 };
 
 const AwaitingExecution = () => (

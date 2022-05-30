@@ -23,10 +23,10 @@ const FlyoutHeaderComponent: React.FC<{
   actionTypeMessage?: string | null;
 }> = ({ icon, actionTypeName, actionTypeMessage }) => {
   return (
-    <EuiFlyoutHeader hasBorder>
+    <EuiFlyoutHeader hasBorder data-test-subj="create-connector-flyout-header">
       <EuiFlexGroup gutterSize="m" alignItems="center">
         {icon ? (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="create-connector-flyout-header-icon">
             <EuiIcon type={icon} size="xl" />
           </EuiFlexItem>
         ) : null}
@@ -39,7 +39,7 @@ const FlyoutHeaderComponent: React.FC<{
                     defaultMessage="{actionTypeName} connector"
                     id="xpack.triggersActionsUI.sections.addConnectorForm.flyoutTitle"
                     values={{
-                      actionTypeName: actionTypeName,
+                      actionTypeName,
                     }}
                   />
                 </h3>

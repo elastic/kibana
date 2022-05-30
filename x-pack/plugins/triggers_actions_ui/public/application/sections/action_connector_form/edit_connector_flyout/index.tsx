@@ -182,7 +182,12 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
          */
 
         const { name, config, secrets } = data;
-        const validConnector = { id: connector.id, name: name ?? '', config, secrets };
+        const validConnector = {
+          id: connector.id,
+          name: name ?? '',
+          config: config ?? {},
+          secrets: secrets ?? {},
+        };
 
         const updatedConnector = await updateConnector(validConnector);
 
@@ -237,7 +242,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
       <FlyoutHeader
         isPreconfigured={connector.isPreconfigured}
         connectorName={connector.name}
-        connectorTypeDesc={actionTypeModel.selectMessage}
+        connectorTypeDesc={actionTypeModel?.selectMessage}
         setTab={handleSetTab}
         selectedTab={selectedTab}
         icon={actionTypeModel?.iconClass}

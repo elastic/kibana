@@ -35,11 +35,11 @@ const FlyoutHeaderComponent: React.FC<{
   const { euiTheme } = useEuiTheme();
 
   return (
-    <EuiFlyoutHeader hasBorder>
+    <EuiFlyoutHeader hasBorder data-test-subj="edit-connector-flyout-header">
       <EuiFlexGroup gutterSize="s" alignItems="center">
         {icon ? (
           <EuiFlexItem grow={false}>
-            <EuiIcon type={icon} size="m" />
+            <EuiIcon type={icon} size="m" data-test-subj="edit-connector-flyout-header-icon" />
           </EuiFlexItem>
         ) : null}
         <EuiFlexItem>

@@ -101,7 +101,12 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
        */
 
       const { actionTypeId, name, config, secrets } = data;
-      const validConnector = { actionTypeId, name: name ?? '', config, secrets };
+      const validConnector = {
+        actionTypeId,
+        name: name ?? '',
+        config: config ?? {},
+        secrets: secrets ?? {},
+      };
 
       const createdConnector = await createConnector(validConnector);
       return createdConnector;
@@ -114,8 +119,6 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     const createdConnector = await validateAndCreateConnector();
 
     if (createdConnector) {
-      onClose();
-
       if (onConnectorCreated) {
         onConnectorCreated(createdConnector);
       }
@@ -123,17 +126,19 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
       if (onTestConnector) {
         onTestConnector(createdConnector);
       }
+
+      onClose();
     }
   }, [validateAndCreateConnector, onClose, onConnectorCreated, onTestConnector]);
 
   const onSubmit = useCallback(async () => {
     const createdConnector = await validateAndCreateConnector();
     if (createdConnector) {
-      onClose();
-
       if (onConnectorCreated) {
         onConnectorCreated(createdConnector);
       }
+
+      onClose();
     }
   }, [validateAndCreateConnector, onClose, onConnectorCreated]);
 
@@ -182,7 +187,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         disabled={hasErrors || !canSave}
         isSaving={isSaving}
         onSubmit={onSubmit}
-        onTestConnector={testConnector}
+        onTestConnector={onTestConnector != null ? testConnector : undefined}
       />
     </EuiFlyout>
   );

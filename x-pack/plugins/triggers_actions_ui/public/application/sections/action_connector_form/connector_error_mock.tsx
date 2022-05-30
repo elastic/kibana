@@ -10,12 +10,16 @@ import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ActionConnectorFieldsProps } from '../../../types';
 
-const TestConnector: React.FunctionComponent<ActionConnectorFieldsProps> = ({
+const TestConnectorError: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
   isEdit,
   registerPreSubmitValidator,
 }) => {
-  const preSubmitValidator = useCallback(async () => {}, []);
+  const preSubmitValidator = useCallback(async () => {
+    return {
+      message: <>{'Error on pre submit validator'}</>,
+    };
+  }, []);
 
   useEffect(
     () => registerPreSubmitValidator(preSubmitValidator),
@@ -23,32 +27,19 @@ const TestConnector: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   );
 
   return (
-    <>
-      <UseField
-        path="config.testTextField"
-        component={TextField}
-        componentProps={{
-          euiFieldProps: {
-            readOnly,
-            'data-test-subj': 'test-connector-text-field',
-            fullWidth: true,
-          },
-        }}
-      />
-      <UseField
-        path="secrets.secretTextField"
-        component={TextField}
-        componentProps={{
-          euiFieldProps: {
-            readOnly,
-            'data-test-subj': 'test-connector-secret-text-field',
-            fullWidth: true,
-          },
-        }}
-      />
-    </>
+    <UseField
+      path="config.testTextField"
+      component={TextField}
+      componentProps={{
+        euiFieldProps: {
+          readOnly,
+          'data-test-subj': 'test-connector-error-text-field',
+          fullWidth: true,
+        },
+      }}
+    />
   );
 };
 
 // eslint-disable-next-line import/no-default-export
-export { TestConnector as default };
+export { TestConnectorError as default };

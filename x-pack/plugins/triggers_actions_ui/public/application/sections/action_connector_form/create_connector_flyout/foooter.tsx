@@ -36,11 +36,11 @@ const FlyoutFooterComponent: React.FC<Props> = ({
   onSubmit,
 }) => {
   return (
-    <EuiFlyoutFooter>
+    <EuiFlyoutFooter data-test-subj="create-connector-flyout-footer">
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           {buttonType === 'back' ? (
-            <EuiButtonEmpty data-test-subj="backButton" onClick={onBack}>
+            <EuiButtonEmpty onClick={onBack} data-test-subj="create-connector-flyout-back-btn">
               {i18n.translate(
                 'xpack.triggersActionsUI.sections.actionConnectorAdd.backButtonLabel',
                 {
@@ -49,7 +49,7 @@ const FlyoutFooterComponent: React.FC<Props> = ({
               )}
             </EuiButtonEmpty>
           ) : (
-            <EuiButtonEmpty data-test-subj="cancelButton" onClick={onCancel}>
+            <EuiButtonEmpty data-test-subj="create-connector-flyout-cancel-btn" onClick={onCancel}>
               {i18n.translate(
                 'xpack.triggersActionsUI.sections.actionConnectorAdd.cancelButtonLabel',
                 {
@@ -66,7 +66,7 @@ const FlyoutFooterComponent: React.FC<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiButton
                     color="success"
-                    data-test-subj="saveAndTestNewActionButton"
+                    data-test-subj="create-connector-flyout-save-test-btn"
                     type="submit"
                     isLoading={isSaving}
                     disabled={disabled}
@@ -83,7 +83,7 @@ const FlyoutFooterComponent: React.FC<Props> = ({
                 <EuiButton
                   fill
                   color="success"
-                  data-test-subj="saveNewActionButton"
+                  data-test-subj="create-connector-flyout-save-btn"
                   type="submit"
                   isLoading={isSaving}
                   disabled={disabled}
