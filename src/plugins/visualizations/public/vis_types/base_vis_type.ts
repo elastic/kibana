@@ -44,6 +44,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly setup;
   public readonly getUsedIndexPattern;
   public readonly inspectorAdapters;
+  public readonly fetchDatatable: boolean;
   public readonly toExpressionAst;
   public readonly getInfoMessage;
   public readonly updateVisTypeOnParamsChange;
@@ -75,6 +76,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.hierarchicalData = opts.hierarchicalData ?? false;
     this.getUsedIndexPattern = opts.getUsedIndexPattern;
     this.inspectorAdapters = opts.inspectorAdapters;
+    this.fetchDatatable = opts.fetchDatatable ?? true;
     this.toExpressionAst = opts.toExpressionAst;
     this.getInfoMessage = opts.getInfoMessage;
     this.updateVisTypeOnParamsChange = opts.updateVisTypeOnParamsChange;

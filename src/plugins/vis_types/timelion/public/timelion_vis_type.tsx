@@ -44,6 +44,7 @@ export function getTimelionVisDefinition(dependencies: TimelionVisDependencies) 
       ),
       defaultSize: DefaultEditorSize.MEDIUM,
     },
+    fetchDatatable: false,
     toExpressionAst,
     inspectorAdapters: {},
     getSupportedTriggers: () => {

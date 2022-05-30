@@ -225,6 +225,12 @@ export interface VisTypeDefinition<TVisParams> {
    * of this type.
    */
   readonly getInfoMessage?: (vis: Vis) => React.ReactNode;
+
+  /**
+   * When truthy, it will perform a search and pass the results to the visualization as a `datatable`.
+   * @default true
+   */
+  readonly fetchDatatable?: boolean;
   /**
    * Should be provided to expand base visualization expression with
    * custom exprsesion chain, including render expression.
