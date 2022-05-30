@@ -8,9 +8,10 @@
 import React, { createContext, FC, useCallback, useMemo, useReducer } from 'react';
 import { EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Route } from 'react-router-dom';
+import { Route, Switch } from 'react-router-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { NotFoundPage } from '../not_found_page';
 import { useSideNavItems } from './side_nav';
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
@@ -137,25 +138,28 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(
           value={{ setPageTitle, setHeaderActionMenu: pageDeps.setHeaderActionMenu }}
         >
           <EuiPageContentBody restrictWidth={false}>
-            {routeList.map((route) => {
-              return (
-                <Route
-                  key={route.id}
-                  path={route.path}
-                  exact
-                  render={(props) => {
-                    window.setTimeout(() => {
-                      pageDeps.setBreadcrumbs(route.breadcrumbs);
-                    });
-                    return (
-                      <MlPageWrapper path={route.path}>
-                        {route.render(props, pageDeps)}
-                      </MlPageWrapper>
-                    );
-                  }}
-                />
-              );
-            })}
+            <Switch>
+              {routeList.map((route) => {
+                return (
+                  <Route
+                    key={route.id}
+                    path={route.path}
+                    exact
+                    render={(props) => {
+                      window.setTimeout(() => {
+                        pageDeps.setBreadcrumbs(route.breadcrumbs);
+                      });
+                      return (
+                        <MlPageWrapper path={route.path}>
+                          {route.render(props, pageDeps)}
+                        </MlPageWrapper>
+                      );
+                    }}
+                  />
+                );
+              })}
+              <Route component={NotFoundPage} />
+            </Switch>
           </EuiPageContentBody>
         </MlPageControlsContext.Provider>
       </RedirectAppLinks>
