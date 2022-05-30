@@ -165,18 +165,5 @@ describe('deepLinks', () => {
       });
       expect(findDeepLink(SecurityPageName.hostsAuthentications, deepLinks)).toBeFalsy();
     });
-
-    it('should return NO detection & Response link when enableExperimental.detectionResponseEnabled === false', () => {
-      const deepLinks = getDeepLinks(mockGlobalState.app.enableExperimental);
-      expect(findDeepLink(SecurityPageName.detectionAndResponse, deepLinks)).toBeFalsy();
-    });
-
-    it('should return detection & Response link when enableExperimental.detectionResponseEnabled === true', () => {
-      const deepLinks = getDeepLinks({
-        ...mockGlobalState.app.enableExperimental,
-        detectionResponseEnabled: true,
-      });
-      expect(findDeepLink(SecurityPageName.detectionAndResponse, deepLinks)).toBeTruthy();
-    });
   });
 });
