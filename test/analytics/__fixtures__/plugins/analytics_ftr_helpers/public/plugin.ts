@@ -21,7 +21,7 @@ export class AnalyticsFTRHelpers implements Plugin {
       setOptIn(optIn: boolean) {
         analytics.optIn({ global: { enabled: optIn } });
       },
-      getLastEvents: async (takeNumberOfEvents, eventTypes = []) =>
+      getEvents: async (takeNumberOfEvents, eventTypes = []) =>
         firstValueFrom(
           this.events$.pipe(
             filter((event) => {

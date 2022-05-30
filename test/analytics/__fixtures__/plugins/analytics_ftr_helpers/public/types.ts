@@ -12,7 +12,7 @@ declare global {
   interface Window {
     __analytics_ftr_helpers__: {
       setOptIn: (optIn: boolean) => void;
-      getLastEvents: (takeNumberOfEvents: number, eventTypes?: EventType[]) => Promise<Event[]>;
+      getEvents: (takeNumberOfEvents: number, eventTypes?: EventType[]) => Promise<Event[]>;
     };
   }
 }

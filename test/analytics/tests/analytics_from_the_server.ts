@@ -139,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(startEvent).to.be.greaterThan(setupEvent);
 
         // This helps us to also test the helpers
-        const events = await ebtServerHelper.getLastEvents(2, ['test-plugin-lifecycle']);
+        const events = await ebtServerHelper.getEvents(2, ['test-plugin-lifecycle']);
         expect(events).to.eql([
           {
             timestamp: reportTestPluginLifecycleEventsAction!.meta[setupEvent].timestamp,
@@ -157,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('it should extend the contexts with pid injected by "analytics_plugin_a"', async () => {
-        const [event] = await ebtServerHelper.getLastEvents(1, ['test-plugin-lifecycle']);
+        const [event] = await ebtServerHelper.getEvents(1, ['test-plugin-lifecycle']);
         // Validating the remote PID because that's the only field that it's added by the FTR plugin.
         expect(event.context).to.have.property('pid');
         expect(event.context.pid).to.be.a('number');
