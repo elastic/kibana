@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
+/**
+ * Returns the headers to send to the Remote Telemetry Service.
+ * @param clusterUuid The UUID of the ES cluster.
+ * @param version The version of the ES cluster.
+ * @param licenseId The ID of the license (if available).
+ */
 export function buildHeaders(clusterUuid: string, version: string, licenseId?: string) {
   return {
     'content-type': 'application/x-ndjson',
