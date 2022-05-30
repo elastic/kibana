@@ -15,6 +15,11 @@ import { useCasesFeatures } from '../../cases_context/use_cases_features';
 export const CaseViewMetrics = React.memo(({ caseId }: { caseId: string }) => {
   const { metricsFeatures } = useCasesFeatures();
   const { data, isLoading } = useGetCaseMetrics(caseId, metricsFeatures);
+
+  if (!isLoading && metricsFeatures.length === 0) {
+    return null;
+  }
+
   return (
     <EuiPanel data-test-subj="case-view-metrics-panel" hasShadow={false} hasBorder={true}>
       <EuiFlexGroup gutterSize="xl" wrap={true} responsive={false} alignItems="center">

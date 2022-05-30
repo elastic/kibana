@@ -133,6 +133,11 @@ describe('CaseViewMetrics', () => {
     expect(getAllByText('\u2014')).toHaveLength(3);
   });
 
+  it('should not render if no features are returned', () => {
+    const result = renderCaseMetrics({ features: [] });
+    expect(result.container.innerHTML).toEqual('');
+  });
+
   it('should render open to close duration with the icon when it is reopened', () => {
     const { getByText, getByTestId } = renderCaseMetrics({
       metrics: {
