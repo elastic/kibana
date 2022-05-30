@@ -89,12 +89,12 @@ export class AggsService {
   }
 
   public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
-    const isDefaultTimezone = () => uiSettings.isDefault('dateFormat:tz');
-
     const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
       getIndexPattern: indexPatterns.get,
-      isDefaultTimezone,
+      getExecutionContext: () => ({
+        performedOn: 'client',
+      }),
     });
 
     const aggTypesDependencies: AggTypesDependencies = {
@@ -104,7 +104,9 @@ export class AggsService {
         deserialize: fieldFormats.deserialize,
         getDefaultInstance: fieldFormats.getDefaultInstance,
       }),
-      isDefaultTimezone,
+      getExecutionContext: () => ({
+        performedOn: 'client',
+      }),
     };
 
     // initialize each agg type and store in memory

@@ -23,7 +23,9 @@ describe('Aggs service', () => {
     calculateBounds: jest.fn(),
     getFieldFormatsStart: jest.fn(),
     getConfig: jest.fn(),
-    isDefaultTimezone: () => true,
+    getExecutionContext: () => ({
+      performedOn: 'client',
+    }),
   };
 
   beforeEach(() => {
@@ -34,7 +36,9 @@ describe('Aggs service', () => {
     startDeps = {
       getConfig: jest.fn(),
       getIndexPattern: jest.fn(),
-      isDefaultTimezone: jest.fn(),
+      getExecutionContext: () => ({
+        performedOn: 'client',
+      }),
     };
   });
 

@@ -7,30 +7,46 @@
  */
 
 import moment from 'moment';
-import { IndexPattern } from '../../..';
+import { AggTypesDependencies, IndexPattern } from '../../..';
 import { AggParamsDateHistogram } from '../buckets';
 
 export function inferTimeZone(
   params: AggParamsDateHistogram,
   indexPattern: IndexPattern,
-  isDefaultTimezone: () => boolean,
-  getConfig: <T = any>(key: string) => T
-) {
+  aggName: 'date_histogram' | 'date_range',
+  getExecutionContext: AggTypesDependencies['getExecutionContext'],
+  getConfig: AggTypesDependencies['getConfig']
+): string {
   let tz = params.time_zone;
+
   if (!tz && params.field) {
     // If a field has been configured check the index pattern's typeMeta if a date_histogram on that
     // field requires a specific time_zone
     const fieldName = typeof params.field === 'string' ? params.field : params.field.name;
-    tz = indexPattern.typeMeta?.aggs?.date_histogram?.[fieldName]?.time_zone;
+
+    tz = indexPattern.typeMeta?.aggs?.[aggName]?.[fieldName]?.time_zone;
   }
+
   if (!tz) {
-    // If the index pattern typeMeta data, didn't had a time zone assigned for the selected field use the configured tz
-    const detectedTimezone = moment.tz.guess();
-    const tzOffset = moment().format('Z');
-    tz = isDefaultTimezone()
-      ? detectedTimezone || tzOffset
-      : // if timezone is not the default, this will always return a string
-        (getConfig('dateFormat:tz') as string);
+    const configTimezone = getConfig<string>('dateFormat:tz');
+    const isDefaultTimezone = configTimezone === 'Browser';
+
+    if (isDefaultTimezone) {
+      const { performedOn } = getExecutionContext();
+
+      if (performedOn === 'server') {
+        return 'UTC';
+      }
+
+      // If the typeMeta data index template does not have a timezone assigned to the selected field, use the configured tz
+      const detectedTimezone = moment.tz.guess();
+      const tzOffset = moment().format('Z');
+
+      return detectedTimezone || tzOffset;
+    }
+
+    return configTimezone;
   }
+
   return tz;
 }

@@ -38,7 +38,9 @@ export interface AggsCommonSetupDependencies {
 export interface AggsCommonStartDependencies {
   getConfig: GetConfigFn;
   getIndexPattern(id: string): Promise<IndexPattern>;
-  isDefaultTimezone: () => boolean;
+  getExecutionContext: () => {
+    performedOn: 'server' | 'client';
+  };
 }
 
 /**

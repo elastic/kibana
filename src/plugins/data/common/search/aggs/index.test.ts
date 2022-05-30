@@ -19,7 +19,9 @@ describe('AggTypesComponent', () => {
     calculateBounds: jest.fn(),
     getConfig: jest.fn(),
     getFieldFormatsStart: mockGetFieldFormatsStart,
-    isDefaultTimezone: jest.fn().mockReturnValue(true),
+    getExecutionContext: jest.fn().mockReturnValue({
+      performedOn: 'client',
+    }),
   };
 
   describe('bucket aggs', () => {

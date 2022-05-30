@@ -27,7 +27,15 @@ describe('inferTimeZone', () => {
     const params: AggParamsDateHistogram = {
       time_zone: 'CEST',
     };
-    expect(inferTimeZone(params, {} as IndexPattern, () => false, jest.fn())).toEqual('CEST');
+    expect(
+      inferTimeZone(
+        params,
+        {} as IndexPattern,
+        'date_histogram',
+        () => ({ performedOn: 'client' }),
+        jest.fn()
+      )
+    ).toEqual('CEST');
   });
 
   it('reads time zone from index pattern type meta if available', () => {
@@ -45,7 +53,8 @@ describe('inferTimeZone', () => {
             },
           },
         } as unknown as IndexPattern,
-        () => false,
+        'date_histogram',
+        () => ({ performedOn: 'client' }),
         jest.fn()
       )
     ).toEqual('UTC');
@@ -70,14 +79,23 @@ describe('inferTimeZone', () => {
             },
           },
         } as unknown as IndexPattern,
-        () => false,
+        'date_histogram',
+        () => ({ performedOn: 'client' }),
         jest.fn()
       )
     ).toEqual('UTC');
   });
 
   it('reads time zone from moment if set to default', () => {
-    expect(inferTimeZone({}, {} as IndexPattern, () => true, jest.fn())).toEqual('CET');
+    expect(
+      inferTimeZone(
+        {},
+        {} as IndexPattern,
+        'date_histogram',
+        () => ({ performedOn: 'client' }),
+        jest.fn()
+      )
+    ).toEqual('CET');
   });
 
   it('reads time zone from config if not set to default', () => {
@@ -85,7 +103,20 @@ describe('inferTimeZone', () => {
       inferTimeZone(
         {},
         {} as IndexPattern,
-        () => false,
+        'date_histogram',
+        () => ({ performedOn: 'client' }),
+        () => 'CET' as any
+      )
+    ).toEqual('CET');
+  });
+
+  it('should set UTC isf  ', () => {
+    expect(
+      inferTimeZone(
+        {},
+        {} as IndexPattern,
+        'date_histogram',
+        () => ({ performedOn: 'server' }),
         () => 'CET' as any
       )
     ).toEqual('CET');
