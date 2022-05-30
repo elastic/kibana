@@ -57,6 +57,7 @@ import {
   STEP_DURATION_LABEL,
   EVENT_DATASET_LABEL,
   MESSAGE_LABEL,
+  SINGLE_METRIC_LABEL,
 } from './labels';
 import {
   MONITOR_DURATION_US,
@@ -131,6 +132,7 @@ export const DataViewLabels: Record<ReportViewType, string> = {
   'kpi-over-time': KPI_OVER_TIME_LABEL,
   'core-web-vitals': CORE_WEB_VITALS_LABEL,
   'device-data-distribution': DEVICE_DISTRIBUTION_LABEL,
+  'single-metric': SINGLE_METRIC_LABEL,
 };
 
 export enum ReportTypes {
@@ -138,6 +140,7 @@ export enum ReportTypes {
   DISTRIBUTION = 'data-distribution',
   CORE_WEB_VITAL = 'core-web-vitals',
   DEVICE_DISTRIBUTION = 'device-data-distribution',
+  SINGLE_METRIC = 'single-metric',
 }
 
 export enum DataTypes {
