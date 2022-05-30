@@ -17,7 +17,7 @@ import { canUserWrite } from '../../../state/selectors/app';
 import { getAssetIds } from '../../../state/selectors/assets';
 import { useWorkpadService, useNotifyService } from '../../../services';
 
-type UpdateRequest = () => Promise<unknown> | Observable<unknown>;
+export type UpdateRequest = () => Promise<unknown> | Observable<unknown>;
 
 const strings = {
   getSaveFailureTitle: () =>

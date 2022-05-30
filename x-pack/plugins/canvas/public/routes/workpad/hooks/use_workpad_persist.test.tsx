@@ -8,7 +8,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import React, { useRef } from 'react';
 import { Subject, Observable, of, delay, map } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { syncUpdatesStream, useWorkpadPersist } from './use_workpad_persist';
+import { syncUpdatesStream, useWorkpadPersist, UpdateRequest } from './use_workpad_persist';
 
 const UPDATE_WORKPAD = 'update-workpad';
 const UPDATE = 'update';
@@ -21,7 +21,7 @@ const mockUpdate = jest.fn();
 
 const mockNotifyError = jest.fn();
 
-let updateRequests$: Subject<() => Observable<string>>;
+let updateRequests$: Subject<UpdateRequest>;
 
 // Mock the hooks and actions used by the UseWorkpad hook
 jest.mock('react-redux', () => ({
