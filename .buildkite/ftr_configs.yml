@@ -58,7 +58,7 @@ disabled:
 enabled:
   - test/accessibility/config.ts
   - test/analytics/config.ts
-  - test/api_integration/config.jsol-9
+  - test/api_integration/config.js
   - test/examples/config.js
   - test/functional/apps/bundles/config.ts
   - test/functional/apps/console/config.ts
