@@ -8,17 +8,13 @@
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { MemoryRouterProps } from 'react-router';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { TestProviders } from '../../common/mock';
 import { CasesRoutes } from './routes';
 
 jest.mock('../all_cases', () => ({
   AllCases: () => <div>{'All cases'}</div>,
-}));
-
-jest.mock('../case_view', () => ({
-  CaseView: () => <div>{'Case view'}</div>,
 }));
 
 jest.mock('../create', () => ({
@@ -59,17 +55,25 @@ describe('Cases routes', () => {
   });
 
   describe('Case view', () => {
-    it.each(getCaseViewPaths())('navigates to the cases view page for path: %s', (path: string) => {
-      renderWithRouter([path]);
-      expect(screen.getByText('Case view')).toBeInTheDocument();
-      // User has read only privileges
-    });
+    it.each(getCaseViewPaths())(
+      'navigates to the cases view page for path: %s',
+      async (path: string) => {
+        renderWithRouter([path]);
+        await waitFor(() => {
+          expect(screen.getByTestId('case-view-loading')).toBeInTheDocument();
+        });
+
+        // User has read only privileges
+      }
+    );
 
     it.each(getCaseViewPaths())(
       'user can navigate to the cases view page with userCanCrud = false and path: %s',
-      (path: string) => {
+      async (path: string) => {
         renderWithRouter([path], false);
-        expect(screen.getByText('Case view')).toBeInTheDocument();
+        await waitFor(() => {
+          expect(screen.getByTestId('case-view-loading')).toBeInTheDocument();
+        });
       }
     );
   });
