@@ -83,7 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should show correct time range string in chart', async function () {
         const actualTimeString = await PageObjects.discover.getChartTimespan();
-        const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime}`;
+        const expectedTimeString = `${PageObjects.timePicker.defaultStartTime} - ${PageObjects.timePicker.defaultEndTime} (interval: Auto - 3 hours)`;
         expect(actualTimeString).to.be(expectedTimeString);
       });
 
