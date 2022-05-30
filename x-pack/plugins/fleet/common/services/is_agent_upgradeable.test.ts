@@ -170,12 +170,20 @@ describe('Fleet - isAgentUpgradeable', () => {
   });
   it('returns false if agent reports upgradeable, with target version < current agent version ', () => {
     expect(
-      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0-SNAPSHOT', '7.8.0')
+      isAgentUpgradeable(
+        getAgent({ version: '7.9.0', upgradeable: true }),
+        '8.0.0-SNAPSHOT',
+        '7.8.0'
+      )
     ).toBe(false);
   });
   it('returns false if agent reports upgradeable, with target version == current agent version ', () => {
     expect(
-      isAgentUpgradeable(getAgent({ version: '7.9.0', upgradeable: true }), '8.0.0-SNAPSHOT', '7.9.0')
+      isAgentUpgradeable(
+        getAgent({ version: '7.9.0', upgradeable: true }),
+        '8.0.0-SNAPSHOT',
+        '7.9.0'
+      )
     ).toBe(false);
   });
 });

@@ -133,7 +133,8 @@ export async function sendUpgradeAgentsActions(
   const upgradeableResults = await Promise.allSettled(
     agentsToCheckUpgradeable.map(async (agent) => {
       // Filter out agents currently unenrolling, unenrolled, or not upgradeable b/c of version check
-      const isNotAllowed = !options.force && !isAgentUpgradeable(agent, kibanaVersion, options.version);
+      const isNotAllowed =
+        !options.force && !isAgentUpgradeable(agent, kibanaVersion, options.version);
       if (isNotAllowed) {
         throw new IngestManagerError(`${agent.id} is not upgradeable`);
       }

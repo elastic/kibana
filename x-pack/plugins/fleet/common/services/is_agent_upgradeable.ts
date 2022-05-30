@@ -25,7 +25,10 @@ export function isAgentUpgradeable(agent: Agent, kibanaVersion: string, versionT
     return false;
   }
   if (versionToUpgrade !== undefined) {
-    return isNotDowngrade(agentVersion, versionToUpgrade) && isAgentVersionLessThanKibana(agentVersion, kibanaVersion);
+    return (
+      isNotDowngrade(agentVersion, versionToUpgrade) &&
+      isAgentVersionLessThanKibana(agentVersion, kibanaVersion)
+    );
   }
   return isAgentVersionLessThanKibana(agentVersion, kibanaVersion);
 }
@@ -40,10 +43,7 @@ export const isAgentVersionLessThanKibana = (agentVersion: string, kibanaVersion
   return semverLt(agentVersionNumber, kibanaVersionNumber);
 };
 
-export const isNotDowngrade = (
-  agentVersion: string,
-  versionToUpgrade: string
-) => {
+export const isNotDowngrade = (agentVersion: string, versionToUpgrade: string) => {
   const agentVersionNumber = semverCoerce(agentVersion);
   if (!agentVersionNumber) throw new Error('agent version is not valid');
   const versionToUpgradeNumber = semverCoerce(versionToUpgrade);
