@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useRef } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import './discover_grid.scss';
 import {
   EuiDataGridSorting,
-  EuiDataGridProps,
   EuiDataGrid,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -19,6 +18,7 @@ import {
   htmlIdGenerator,
   EuiLoadingSpinner,
   EuiIcon,
+  EuiDataGridRefProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { flattenHit } from '@kbn/data-plugin/public';
@@ -165,9 +165,7 @@ export interface DiscoverGridProps {
   onUpdateRowHeight?: (rowHeight: number) => void;
 }
 
-export const EuiDataGridMemoized = React.memo((props: EuiDataGridProps) => {
-  return <EuiDataGrid {...props} />;
-});
+export const EuiDataGridMemoized = React.memo(EuiDataGrid);
 
 const CONTROL_COLUMN_IDS_DEFAULT = ['openDetails', 'select'];
 
@@ -199,6 +197,7 @@ export const DiscoverGrid = ({
   rowHeightState,
   onUpdateRowHeight,
 }: DiscoverGridProps) => {
+  const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const services = useDiscoverServices();
   const [selectedDocs, setSelectedDocs] = useState<string[]>([]);
   const [isFilterActive, setIsFilterActive] = useState(false);
@@ -231,6 +230,12 @@ export const DiscoverGrid = ({
     }
     return rowsFiltered;
   }, [rows, usedSelectedDocs, isFilterActive]);
+
+  const displayedRowsFlattened = useMemo(() => {
+    return displayedRows.map((hit) => {
+      return flattenHit(hit, dataView, { includeIgnoredValues: true });
+    });
+  }, [displayedRows, dataView]);
 
   /**
    * Pagination
@@ -290,14 +295,20 @@ export const DiscoverGrid = ({
       getRenderCellValueFn(
         dataView,
         displayedRows,
-        displayedRows
-          ? displayedRows.map((hit) => flattenHit(hit, dataView, { includeIgnoredValues: true }))
-          : [],
+        displayedRowsFlattened,
         useNewFieldsApi,
         fieldsToShow,
-        services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED)
+        services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
+        () => dataGridRef.current?.closeCellPopover()
       ),
-    [dataView, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
+    [
+      dataView,
+      displayedRowsFlattened,
+      displayedRows,
+      useNewFieldsApi,
+      fieldsToShow,
+      services.uiSettings,
+    ]
   );
 
   /**
@@ -430,6 +441,7 @@ export const DiscoverGrid = ({
         expanded: expandedDoc,
         setExpanded: setExpandedDoc,
         rows: displayedRows,
+        rowsFlattened: displayedRowsFlattened,
         onFilter,
         dataView,
         isDarkMode: services.uiSettings.get('theme:darkMode'),
@@ -461,6 +473,7 @@ export const DiscoverGrid = ({
           onColumnResize={onResize}
           pagination={paginationObj}
           renderCellValue={renderCellValue}
+          ref={dataGridRef}
           rowCount={rowCount}
           schemaDetectors={schemaDetectors}
           sorting={sorting as EuiDataGridSorting}

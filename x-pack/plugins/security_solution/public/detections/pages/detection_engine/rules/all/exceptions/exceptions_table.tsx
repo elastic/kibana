@@ -96,7 +96,7 @@ export const ExceptionListsTable = React.memo(() => {
   const [exportingListIds, setExportingListIds] = useState<string[]>([]);
   const [exportDownload, setExportDownload] = useState<{ name?: string; blob?: Blob }>({});
   const { navigateToUrl } = application;
-  const { addError } = useAppToasts();
+  const { addError, addSuccess } = useAppToasts();
 
   const handleDeleteSuccess = useCallback(
     (listId?: string) => () => {
@@ -165,9 +165,10 @@ export const ExceptionListsTable = React.memo(() => {
   const handleExportSuccess = useCallback(
     (listId: string) =>
       (blob: Blob): void => {
+        addSuccess(i18n.EXCEPTION_EXPORT_SUCCESS);
         setExportDownload({ name: listId, blob });
       },
-    []
+    [addSuccess]
   );
 
   const handleExportError = useCallback(

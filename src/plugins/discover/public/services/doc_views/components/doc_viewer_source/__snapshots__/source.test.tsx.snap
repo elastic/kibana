@@ -1,179 +1,71 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`Source Viewer component renders error state 1`] = `
-<DocViewerSource
-  dataView={
-    Object {
-      "getComputedFields": [Function],
-    }
-  }
-  hasLineNumbers={true}
-  id="1"
-  index="index1"
-  width={123}
+<div
+  class="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
 >
-  <EuiEmptyPrompt
-    body={
-      <div>
-        Could not fetch data at this time. Refresh the tab to try again.
-        <EuiSpacer
-          size="s"
-        />
-        <EuiButton
-          iconType="refresh"
-          onClick={[Function]}
-        >
-          Refresh
-        </EuiButton>
-      </div>
-    }
-    iconType="alert"
-    title={
-      <h2>
-        An Error Occurred
-      </h2>
-    }
+  <div
+    class="euiEmptyPrompt__main"
   >
-    <EuiPanel
-      className="euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
-      color="transparent"
-      paddingSize="none"
+    <div
+      class="euiEmptyPrompt__icon"
+    >
+      <span
+        color="subdued"
+        data-euiicon-type="alert"
+      />
+    </div>
+    <div
+      class="euiEmptyPrompt__content"
     >
       <div
-        className="euiPanel euiPanel--borderRadiusMedium euiPanel--transparent euiPanel--noShadow euiEmptyPrompt euiEmptyPrompt--vertical euiEmptyPrompt--paddingLarge"
+        class="euiEmptyPrompt__contentInner"
       >
-        <div
-          className="euiEmptyPrompt__main"
+        <h2
+          class="euiTitle euiTitle--medium"
+        >
+          An Error Occurred
+        </h2>
+        <span
+          class="euiTextColor euiTextColor--subdued"
         >
           <div
-            className="euiEmptyPrompt__icon"
-          >
-            <EuiIcon
-              color="subdued"
-              size="xxl"
-              type="alert"
-            >
-              <span
-                color="subdued"
-                data-euiicon-type="alert"
-                size="xxl"
-              />
-            </EuiIcon>
-          </div>
+            class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+          />
           <div
-            className="euiEmptyPrompt__content"
+            class="euiText euiText--medium"
           >
-            <div
-              className="euiEmptyPrompt__contentInner"
-            >
-              <EuiTitle
-                size="m"
-              >
-                <h2
-                  className="euiTitle euiTitle--medium"
-                >
-                  An Error Occurred
-                </h2>
-              </EuiTitle>
-              <EuiTextColor
-                color="subdued"
+            <div>
+              Could not fetch data at this time. Refresh the tab to try again.
+              <div
+                class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+              />
+              <button
+                class="euiButton euiButton--primary"
+                type="button"
               >
                 <span
-                  className="euiTextColor euiTextColor--subdued"
-                  style={Object {}}
+                  class="euiButtonContent euiButton__content"
                 >
-                  <EuiSpacer
-                    size="m"
+                  <span
+                    class="euiButtonContent__icon"
+                    color="inherit"
+                    data-euiicon-type="refresh"
+                  />
+                  <span
+                    class="euiButton__text"
                   >
-                    <div
-                      className="euiSpacer euiSpacer--m"
-                    />
-                  </EuiSpacer>
-                  <EuiText>
-                    <div
-                      className="euiText euiText--medium"
-                    >
-                      <div>
-                        Could not fetch data at this time. Refresh the tab to try again.
-                        <EuiSpacer
-                          size="s"
-                        >
-                          <div
-                            className="euiSpacer euiSpacer--s"
-                          />
-                        </EuiSpacer>
-                        <EuiButton
-                          iconType="refresh"
-                          onClick={[Function]}
-                        >
-                          <EuiButtonDisplay
-                            baseClassName="euiButton"
-                            disabled={false}
-                            element="button"
-                            iconType="refresh"
-                            isDisabled={false}
-                            onClick={[Function]}
-                            type="button"
-                          >
-                            <button
-                              className="euiButton euiButton--primary"
-                              disabled={false}
-                              onClick={[Function]}
-                              style={
-                                Object {
-                                  "minWidth": undefined,
-                                }
-                              }
-                              type="button"
-                            >
-                              <EuiButtonContent
-                                className="euiButton__content"
-                                iconSide="left"
-                                iconType="refresh"
-                                textProps={
-                                  Object {
-                                    "className": "euiButton__text",
-                                  }
-                                }
-                              >
-                                <span
-                                  className="euiButtonContent euiButton__content"
-                                >
-                                  <EuiIcon
-                                    className="euiButtonContent__icon"
-                                    color="inherit"
-                                    size="m"
-                                    type="refresh"
-                                  >
-                                    <span
-                                      className="euiButtonContent__icon"
-                                      color="inherit"
-                                      data-euiicon-type="refresh"
-                                      size="m"
-                                    />
-                                  </EuiIcon>
-                                  <span
-                                    className="euiButton__text"
-                                  >
-                                    Refresh
-                                  </span>
-                                </span>
-                              </EuiButtonContent>
-                            </button>
-                          </EuiButtonDisplay>
-                        </EuiButton>
-                      </div>
-                    </div>
-                  </EuiText>
+                    Refresh
+                  </span>
                 </span>
-              </EuiTextColor>
+              </button>
             </div>
           </div>
-        </div>
+        </span>
       </div>
-    </EuiPanel>
-  </EuiEmptyPrompt>
-</DocViewerSource>
+    </div>
+  </div>
+</div>
 `;
 
 exports[`Source Viewer component renders json code editor 1`] = `
@@ -258,8 +150,91 @@ exports[`Source Viewer component renders json code editor 1`] = `
                 size="s"
               >
                 <div
-                  className="euiSpacer euiSpacer--s"
-                />
+                  css="unknown styles"
+                >
+                  <Insertion
+                    cache={
+                      Object {
+                        "insert": [Function],
+                        "inserted": Object {
+                          "hg1jdf-euiSpacer-m": true,
+                          "i2qclb-euiSpacer-s": true,
+                        },
+                        "key": "css",
+                        "nonce": undefined,
+                        "registered": Object {},
+                        "sheet": StyleSheet {
+                          "_alreadyInsertedOrderInsensitiveRule": true,
+                          "_insertTag": [Function],
+                          "before": null,
+                          "container": <head>
+                            <style
+                              data-styled="active"
+                              data-styled-version="5.1.0"
+                            />
+                            <style
+                              data-styled="active"
+                              data-styled-version="5.1.0"
+                            />
+                            <style
+                              data-styled="active"
+                              data-styled-version="5.1.0"
+                            />
+                            <style
+                              data-emotion="css"
+                              data-s=""
+                            >
+
+                              .css-hg1jdf-euiSpacer-m{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;height:16px;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQXVCUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */
+                            </style>
+                            <style
+                              data-emotion="css"
+                              data-s=""
+                            >
+
+                              .css-i2qclb-euiSpacer-s{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;height:8px;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQW9CUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */
+                            </style>
+                          </head>,
+                          "ctr": 2,
+                          "insertionPoint": undefined,
+                          "isSpeedy": false,
+                          "key": "css",
+                          "nonce": undefined,
+                          "prepend": undefined,
+                          "tags": Array [
+                            <style
+                              data-emotion="css"
+                              data-s=""
+                            >
+
+                              .css-hg1jdf-euiSpacer-m{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;height:16px;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQXVCUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */
+                            </style>,
+                            <style
+                              data-emotion="css"
+                              data-s=""
+                            >
+
+                              .css-i2qclb-euiSpacer-s{-webkit-flex-shrink:0;-ms-flex-negative:0;flex-shrink:0;height:8px;}/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQW9CUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */
+                            </style>,
+                          ],
+                        },
+                      }
+                    }
+                    isStringTag={true}
+                    serialized={
+                      Object {
+                        "map": "/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIi4uLy4uLy4uL3NyYy9jb21wb25lbnRzL3NwYWNlci9zcGFjZXIuc3R5bGVzLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQW9CUSIsImZpbGUiOiIuLi8uLi8uLi9zcmMvY29tcG9uZW50cy9zcGFjZXIvc3BhY2VyLnN0eWxlcy50cyIsInNvdXJjZXNDb250ZW50IjpbIi8qXG4gKiBDb3B5cmlnaHQgRWxhc3RpY3NlYXJjaCBCLlYuIGFuZC9vciBsaWNlbnNlZCB0byBFbGFzdGljc2VhcmNoIEIuVi4gdW5kZXIgb25lXG4gKiBvciBtb3JlIGNvbnRyaWJ1dG9yIGxpY2Vuc2UgYWdyZWVtZW50cy4gTGljZW5zZWQgdW5kZXIgdGhlIEVsYXN0aWMgTGljZW5zZVxuICogMi4wIGFuZCB0aGUgU2VydmVyIFNpZGUgUHVibGljIExpY2Vuc2UsIHYgMTsgeW91IG1heSBub3QgdXNlIHRoaXMgZmlsZSBleGNlcHRcbiAqIGluIGNvbXBsaWFuY2Ugd2l0aCwgYXQgeW91ciBlbGVjdGlvbiwgdGhlIEVsYXN0aWMgTGljZW5zZSAyLjAgb3IgdGhlIFNlcnZlclxuICogU2lkZSBQdWJsaWMgTGljZW5zZSwgdiAxLlxuICovXG5cbmltcG9ydCB7IGNzcyB9IGZyb20gJ0BlbW90aW9uL3JlYWN0JztcbmltcG9ydCB7IFVzZUV1aVRoZW1lIH0gZnJvbSAnLi4vLi4vc2VydmljZXMnO1xuXG5leHBvcnQgY29uc3QgZXVpU3BhY2VyU3R5bGVzID0gKHsgZXVpVGhlbWUgfTogVXNlRXVpVGhlbWUpID0+ICh7XG4gIC8vIGJhc2VcbiAgZXVpU3BhY2VyOiBjc3NgXG4gICAgZmxleC1zaHJpbms6IDA7IC8vIGRvbid0IGV2ZXIgbGV0IHRoaXMgc2hyaW5rIGluIGhlaWdodCBpZiBkaXJlY3QgZGVzY2VuZGVudCBvZiBmbGV4O1xuICBgLFxuICAvLyB2YXJpYW50c1xuICB4czogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnhzfTtcbiAgYCxcbiAgczogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnN9O1xuICBgLFxuICBtOiBjc3NgXG4gICAgaGVpZ2h0OiAke2V1aVRoZW1lLnNpemUuYmFzZX07XG4gIGAsXG4gIGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS5sfTtcbiAgYCxcbiAgeGw6IGNzc2BcbiAgICBoZWlnaHQ6ICR7ZXVpVGhlbWUuc2l6ZS54bH07XG4gIGAsXG4gIHh4bDogY3NzYFxuICAgIGhlaWdodDogJHtldWlUaGVtZS5zaXplLnh4bH07XG4gIGAsXG59KTtcbiJdfQ== */",
+                        "name": "i2qclb-euiSpacer-s",
+                        "next": undefined,
+                        "styles": "flex-shrink:0;label:euiSpacer;;;height:8px;;label:s;;;",
+                        "toString": [Function],
+                      }
+                    }
+                  />
+                  <div
+                    className="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+                  />
+                </div>
               </EuiSpacer>
               <div
                 className="eui-textRight"

@@ -73,6 +73,7 @@ const findTestUtils = (
                 params: {},
                 created_by: 'elastic',
                 scheduled_task_id: match.scheduled_task_id,
+                snooze_schedule: match.snooze_schedule,
                 created_at: match.created_at,
                 updated_at: match.updated_at,
                 throttle: '1m',
@@ -82,9 +83,7 @@ const findTestUtils = (
                 mute_all: false,
                 muted_alert_ids: [],
                 execution_status: match.execution_status,
-                ...(describeType === 'internal'
-                  ? { monitoring: match.monitoring, snooze_end_time: match.snooze_end_time }
-                  : {}),
+                ...(describeType === 'internal' ? { monitoring: match.monitoring } : {}),
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);
@@ -283,9 +282,8 @@ const findTestUtils = (
                 created_at: match.created_at,
                 updated_at: match.updated_at,
                 execution_status: match.execution_status,
-                ...(describeType === 'internal'
-                  ? { monitoring: match.monitoring, snooze_end_time: match.snooze_end_time }
-                  : {}),
+                snooze_schedule: match.snooze_schedule,
+                ...(describeType === 'internal' ? { monitoring: match.monitoring } : {}),
               });
               expect(Date.parse(match.created_at)).to.be.greaterThan(0);
               expect(Date.parse(match.updated_at)).to.be.greaterThan(0);

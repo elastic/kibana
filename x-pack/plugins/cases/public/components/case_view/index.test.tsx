@@ -43,7 +43,7 @@ jest.mock('../user_actions/timestamp');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
 
-const useGetCaseMock = useGetCase as jest.Mock;
+const useFetchCaseMock = useGetCase as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
@@ -119,18 +119,18 @@ export const caseData: Case = {
 describe('CaseView', () => {
   const updateCaseProperty = jest.fn();
   const fetchCaseUserActions = jest.fn();
-  const fetchCase = jest.fn();
+  const refetchCase = jest.fn();
   const fetchCaseMetrics = jest.fn();
-  const updateCase = jest.fn();
   const pushCaseToExternalService = jest.fn();
 
   const defaultGetCase = {
     isLoading: false,
     isError: false,
-    data: caseData,
-    resolveOutcome: 'exactMatch',
-    updateCase,
-    fetchCase,
+    data: {
+      case: caseData,
+      outcome: 'exactMatch',
+    },
+    refetch: refetchCase,
   };
 
   const defaultGetCaseMetrics = {
@@ -160,7 +160,15 @@ describe('CaseView', () => {
   };
 
   const mockGetCase = (props: Partial<UseGetCase> = {}) => {
-    useGetCaseMock.mockReturnValue({ ...defaultGetCase, ...props });
+    const data = {
+      ...defaultGetCase.data,
+      ...props.data,
+    };
+    useFetchCaseMock.mockReturnValue({
+      ...defaultGetCase,
+      ...props,
+      data,
+    });
   };
 
   beforeAll(() => {
@@ -202,7 +210,7 @@ describe('CaseView', () => {
   });
 
   it('should return case view when data is there', async () => {
-    mockGetCase({ resolveOutcome: 'exactMatch' });
+    mockGetCase({ data: { ...defaultGetCase.data, outcome: 'exactMatch' } });
     const wrapper = mount(
       <TestProviders>
         <CaseView {...caseViewProps} />
@@ -216,9 +224,16 @@ describe('CaseView', () => {
   });
 
   it('should redirect case view when resolves to alias match', async () => {
-    const resolveAliasId = `${defaultGetCase.data.id}_2`;
+    const resolveAliasId = `${defaultGetCase.data.case.id}_2`;
     const resolveAliasPurpose = 'savedObjectConversion' as const;
-    mockGetCase({ resolveOutcome: 'aliasMatch', resolveAliasId, resolveAliasPurpose });
+    mockGetCase({
+      data: {
+        ...defaultGetCase.data,
+        outcome: 'aliasMatch',
+        aliasTargetId: resolveAliasId,
+        aliasPurpose: resolveAliasPurpose,
+      },
+    });
     const wrapper = mount(
       <TestProviders>
         <CaseView {...caseViewProps} />
@@ -236,8 +251,10 @@ describe('CaseView', () => {
   });
 
   it('should redirect case view when resolves to conflict', async () => {
-    const resolveAliasId = `${defaultGetCase.data.id}_2`;
-    mockGetCase({ resolveOutcome: 'conflict', resolveAliasId });
+    const resolveAliasId = `${defaultGetCase.data.case.id}_2`;
+    mockGetCase({
+      data: { ...defaultGetCase.data, outcome: 'conflict', aliasTargetId: resolveAliasId },
+    });
     const wrapper = mount(
       <TestProviders>
         <CaseView {...caseViewProps} />
@@ -249,7 +266,7 @@ describe('CaseView', () => {
       expect(spacesUiApiMock.redirectLegacyUrl).not.toHaveBeenCalled();
       expect(spacesUiApiMock.components.getLegacyUrlConflict).toHaveBeenCalledWith({
         objectNoun: 'case',
-        currentObjectId: defaultGetCase.data.id,
+        currentObjectId: defaultGetCase.data.case.id,
         otherObjectId: resolveAliasId,
         otherObjectPath: `/cases/${resolveAliasId}`,
       });
@@ -257,7 +274,6 @@ describe('CaseView', () => {
   });
 
   it('should refresh data on refresh', async () => {
-    (useGetCase as jest.Mock).mockImplementation(() => defaultGetCase);
     const wrapper = mount(
       <TestProviders>
         <CaseView {...caseViewProps} />
@@ -267,7 +283,7 @@ describe('CaseView', () => {
     await waitFor(() => {
       expect(fetchCaseUserActions).toBeCalledWith(caseData.id, 'resilient-2');
       expect(fetchCaseMetrics).toBeCalled();
-      expect(fetchCase).toBeCalled();
+      expect(refetchCase).toBeCalled();
     });
   });
 
@@ -275,7 +291,6 @@ describe('CaseView', () => {
     let refreshRef: CaseViewProps['refreshRef'];
 
     beforeEach(async () => {
-      (useGetCase as jest.Mock).mockImplementation(() => defaultGetCase);
       refreshRef = React.createRef();
 
       await act(async () => {
@@ -307,7 +322,7 @@ describe('CaseView', () => {
       await waitFor(() => {
         expect(fetchCaseUserActions).toBeCalledWith('basic-case-id', 'resilient-2');
         expect(fetchCaseMetrics).toBeCalledWith(true);
-        expect(fetchCase).toBeCalledWith(true);
+        expect(refetchCase).toHaveBeenCalled();
       });
     });
   });

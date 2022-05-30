@@ -10,11 +10,11 @@ import { kea, MakeLogicType } from 'kea';
 import { flashAPIErrors, clearFlashMessages } from '../../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../../shared/http';
 import { AppLogic } from '../../../../../app_logic';
-import { CustomSource, SourceDataItem } from '../../../../../types';
+import { CustomSource } from '../../../../../types';
 
 export interface AddCustomSourceProps {
-  sourceData: SourceDataItem;
-  initialValue: string;
+  baseServiceType?: string;
+  initialValue?: string;
 }
 
 export enum AddCustomSourceSteps {
@@ -34,7 +34,6 @@ interface AddCustomSourceValues {
   currentStep: AddCustomSourceSteps;
   customSourceNameValue: string;
   newCustomSource: CustomSource;
-  sourceData: SourceDataItem;
 }
 
 /**
@@ -67,7 +66,7 @@ export const AddCustomSourceLogic = kea<
       },
     ],
     customSourceNameValue: [
-      props.initialValue,
+      props.initialValue || '',
       {
         setCustomSourceNameValue: (_, customSourceNameValue) => customSourceNameValue,
       },
@@ -78,7 +77,6 @@ export const AddCustomSourceLogic = kea<
         setNewCustomSource: (_, newCustomSource) => newCustomSource,
       },
     ],
-    sourceData: [props.sourceData],
   }),
   listeners: ({ actions, values, props }) => ({
     createContentSource: async () => {
@@ -90,20 +88,11 @@ export const AddCustomSourceLogic = kea<
 
       const { customSourceNameValue } = values;
 
-      const baseParams = {
+      const params = {
         service_type: 'custom',
         name: customSourceNameValue,
+        base_service_type: props.baseServiceType,
       };
-
-      // pre-configured custom sources have a serviceType reflecting their target service
-      // we submit this as `base_service_type` to keep track of
-      const params =
-        props.sourceData.serviceType === 'custom'
-          ? baseParams
-          : {
-              ...baseParams,
-              base_service_type: props.sourceData.serviceType,
-            };
 
       try {
         const response = await HttpLogic.values.http.post<CustomSource>(route, {

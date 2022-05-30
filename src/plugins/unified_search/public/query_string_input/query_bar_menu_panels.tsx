@@ -36,8 +36,18 @@ import type {
 } from '@kbn/data-plugin/public';
 import { fromUser } from './from_user';
 import { QueryLanguageSwitcher } from './language_switcher';
+import { FilterPanelOption } from '../types';
 
-interface QueryBarMenuPanelProps {
+const MAP_ITEMS_TO_FILTER_OPTION: Record<string, FilterPanelOption> = {
+  'filter-sets-pinAllFilters': 'pinFilter',
+  'filter-sets-unpinAllFilters': 'pinFilter',
+  'filter-sets-enableAllFilters': 'disableFilter',
+  'filter-sets-disableAllFilters': 'disableFilter',
+  'filter-sets-invertAllFilters': 'negateFilter',
+  'filter-sets-removeAllFilters': 'deleteFilter',
+};
+
+export interface QueryBarMenuPanelsProps {
   filters?: Filter[];
   savedQuery?: SavedQuery;
   language: string;
@@ -50,6 +60,7 @@ interface QueryBarMenuPanelProps {
   savedQueryService: SavedQueryService;
   saveAsNewQueryFormComponent?: JSX.Element;
   manageFilterSetComponent?: JSX.Element;
+  hiddenPanelOptions?: FilterPanelOption[];
   nonKqlMode?: 'lucene' | 'text';
   closePopover: () => void;
   onQueryBarSubmit: (payload: { dateRange: TimeRange; query?: Query }) => void;
@@ -72,6 +83,7 @@ export function QueryBarMenuPanels({
   savedQueryService,
   saveAsNewQueryFormComponent,
   manageFilterSetComponent,
+  hiddenPanelOptions,
   nonKqlMode,
   closePopover,
   onQueryBarSubmit,
@@ -79,7 +91,7 @@ export function QueryBarMenuPanels({
   onClearSavedQuery,
   onQueryChange,
   setRenderedComponent,
-}: QueryBarMenuPanelProps) {
+}: QueryBarMenuPanelsProps) {
   const kibana = useKibana<IDataPluginServices>();
   const { appName, usageCollection, uiSettings, http, storage } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
@@ -319,7 +331,7 @@ export function QueryBarMenuPanels({
     });
   }
 
-  const panels = [
+  let panels = [
     {
       id: 0,
       title: (
@@ -495,6 +507,22 @@ export function QueryBarMenuPanels({
       content: <div>{manageFilterSetComponent}</div>,
     },
   ] as EuiContextMenuPanelDescriptor[];
+
+  if (hiddenPanelOptions && hiddenPanelOptions.length > 0) {
+    panels = panels.map((panel) => ({
+      ...panel,
+      items: panel.items?.filter((panelItem) => {
+        if (!panelItem['data-test-subj']) {
+          return true;
+        }
+        const panelFilterOption = MAP_ITEMS_TO_FILTER_OPTION[panelItem['data-test-subj']];
+        if (!panelFilterOption) {
+          return true;
+        }
+        return !hiddenPanelOptions.includes(panelFilterOption);
+      }),
+    }));
+  }
 
   return panels;
 }

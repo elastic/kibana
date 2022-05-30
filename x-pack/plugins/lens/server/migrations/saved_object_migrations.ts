@@ -49,6 +49,7 @@ import {
   commonSetIncludeEmptyRowsDateHistogram,
   commonFixValueLabelsInXY,
   commonLockOldMetricVisSettings,
+  commonPreserveOldLegendSizeDefault,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -197,7 +198,7 @@ const removeLensAutoDate: SavedObjectMigrationFn<LensDocShapePre710, LensDocShap
       },
     };
   } catch (e) {
-    context.log.warning(e.message);
+    context.log.warn(e.message);
     return { ...doc };
   }
 };
@@ -264,7 +265,7 @@ const addTimeFieldToEsaggs: SavedObjectMigrationFn<LensDocShapePre710, LensDocSh
       },
     };
   } catch (e) {
-    context.log.warning(e.message);
+    context.log.warn(e.message);
     return { ...doc };
   }
 };
@@ -505,6 +506,10 @@ const lockOldMetricVisSettings: SavedObjectMigrationFn<LensDocShape810, LensDocS
   doc
 ) => ({ ...doc, attributes: commonLockOldMetricVisSettings(doc.attributes) });
 
+const preserveOldLegendSizeDefault: SavedObjectMigrationFn<LensDocShape810, LensDocShape810> = (
+  doc
+) => ({ ...doc, attributes: commonPreserveOldLegendSizeDefault(doc.attributes) });
+
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -524,7 +529,7 @@ const lensMigrations: SavedObjectMigrationMap = {
     setIncludeEmptyRowsDateHistogram,
     enhanceTableRowHeight
   ),
-  '8.3.0': flow(lockOldMetricVisSettings, fixValueLabelsInXY),
+  '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
 };
 
 export const getAllMigrations = (

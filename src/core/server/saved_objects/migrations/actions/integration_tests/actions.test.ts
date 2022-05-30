@@ -167,8 +167,7 @@ describe('migration actions', () => {
         Object {
           "_tag": "Left",
           "left": Object {
-            "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
-            "type": "unsupported_cluster_routing_allocation",
+            "type": "incompatible_cluster_routing_allocation",
           },
         }
       `);
@@ -188,8 +187,7 @@ describe('migration actions', () => {
         Object {
           "_tag": "Left",
           "left": Object {
-            "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
-            "type": "unsupported_cluster_routing_allocation",
+            "type": "incompatible_cluster_routing_allocation",
           },
         }
       `);
@@ -209,8 +207,7 @@ describe('migration actions', () => {
         Object {
           "_tag": "Left",
           "left": Object {
-            "message": "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue.",
-            "type": "unsupported_cluster_routing_allocation",
+            "type": "incompatible_cluster_routing_allocation",
           },
         }
       `);
@@ -428,6 +425,10 @@ describe('migration actions', () => {
   describe('cloneIndex', () => {
     afterAll(async () => {
       try {
+        // Restore the default setting of 1000 shards per node
+        await client.cluster.putSettings({
+          persistent: { cluster: { max_shards_per_node: null } },
+        });
         await client.indices.delete({ index: 'clone_*' });
       } catch (e) {
         /** ignore */
@@ -578,6 +579,23 @@ describe('migration actions', () => {
               "shardsAcknowledged": true,
             },
           }
+      `);
+    });
+    it('resolves left cluster_shard_limit_exceeded when the action would exceed the maximum normal open shards', async () => {
+      // Set the max shards per node really low so that any new index that's created would exceed the maximum open shards for this cluster
+      await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: 1 } } });
+      const cloneIndexPromise = cloneIndex({
+        client,
+        source: 'existing_index_with_write_block',
+        target: 'clone_target_4',
+      })();
+      await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "cluster_shard_limit_exceeded",
+          },
+        }
       `);
     });
   });
@@ -1568,6 +1586,10 @@ describe('migration actions', () => {
   });
 
   describe('createIndex', () => {
+    afterEach(async () => {
+      // Restore the default setting of 1000 shards per node
+      await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: null } } });
+    });
     afterAll(async () => {
       await client.indices.delete({ index: 'red_then_yellow_index' });
     });
@@ -1618,12 +1640,29 @@ describe('migration actions', () => {
         // Assert that the promise didn't resolve before the index became green
         expect(indexYellow).toBe(true);
         expect(res).toMatchInlineSnapshot(`
-                Object {
-                  "_tag": "Right",
-                  "right": "create_index_succeeded",
-                }
-              `);
+          Object {
+            "_tag": "Right",
+            "right": "create_index_succeeded",
+          }
+        `);
       });
+    });
+    it('resolves left cluster_shard_limit_exceeded when the action would exceed the maximum normal open shards', async () => {
+      // Set the max shards per node really low so that any new index that's created would exceed the maximum open shards for this cluster
+      await client.cluster.putSettings({ persistent: { cluster: { max_shards_per_node: 1 } } });
+      const createIndexPromise = createIndex({
+        client,
+        indexName: 'red_then_yellow_index_1',
+        mappings: undefined as any,
+      })();
+      await expect(createIndexPromise).resolves.toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "cluster_shard_limit_exceeded",
+          },
+        }
+      `);
     });
     it('rejects when there is an unexpected error creating the index', async () => {
       // Creating an index with the same name as an existing alias to induce
@@ -1649,11 +1688,11 @@ describe('migration actions', () => {
       });
 
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Right",
-                        "right": "bulk_index_succeeded",
-                      }
-                  `);
+          Object {
+            "_tag": "Right",
+            "right": "bulk_index_succeeded",
+          }
+      `);
     });
     it('resolves right even if there were some version_conflict_engine_exception', async () => {
       const existingDocs = (
@@ -1674,11 +1713,11 @@ describe('migration actions', () => {
         refresh: 'wait_for',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                Object {
-                  "_tag": "Right",
-                  "right": "bulk_index_succeeded",
-                }
-              `);
+        Object {
+          "_tag": "Right",
+          "right": "bulk_index_succeeded",
+        }
+      `);
     });
     it('resolves left target_index_had_write_block if there are write_block errors', async () => {
       const newDocs = [
@@ -1694,13 +1733,13 @@ describe('migration actions', () => {
           refresh: 'wait_for',
         })()
       ).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Left",
-                        "left": Object {
-                          "type": "target_index_had_write_block",
-                        },
-                      }
-                  `);
+          Object {
+            "_tag": "Left",
+            "left": Object {
+              "type": "target_index_had_write_block",
+            },
+          }
+      `);
     });
 
     it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
@@ -1716,13 +1755,13 @@ describe('migration actions', () => {
         transformedDocs: newDocs,
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
-                      Object {
-                        "_tag": "Left",
-                        "left": Object {
-                          "type": "request_entity_too_large_exception",
-                        },
-                      }
-                  `);
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "request_entity_too_large_exception",
+          },
+        }
+      `);
     });
   });
 });

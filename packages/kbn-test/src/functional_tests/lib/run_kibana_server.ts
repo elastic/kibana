@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { ProcRunner } from '@kbn/dev-utils';
+import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { resolve, relative } from 'path';
 import { KIBANA_ROOT, KIBANA_EXEC, KIBANA_EXEC_PATH } from './paths';
 import type { Config } from '../../functional_test_runner';

@@ -31,10 +31,10 @@ import { useVisible } from '../../hooks/use_visible';
 import { ProcessTreeAlerts } from '../process_tree_alerts';
 import { AlertButton, ChildrenProcessesButton } from './buttons';
 import { useButtonStyles } from './use_button_styles';
-import { KIBANA_DATE_FORMAT } from '../../../common/constants';
 import { useStyles } from './styles';
 import { SplitText } from './split_text';
 import { Nbsp } from './nbsp';
+import { useDateFormat } from '../../hooks';
 
 export interface ProcessDeps {
   process: Process;
@@ -79,6 +79,8 @@ export function ProcessTreeNode({
   const [childrenExpanded, setChildrenExpanded] = useState(isSessionLeader || process.autoExpand);
   const [alertsExpanded, setAlertsExpanded] = useState(false);
   const { searchMatched } = process;
+
+  const dateFormat = useDateFormat();
 
   // forces nodes to expand if the selected process is a descendant
   useEffect(() => {
@@ -144,7 +146,7 @@ export function ProcessTreeNode({
         });
 
         // eslint-disable-next-line no-unsanitized/property
-        textRef.current.innerHTML = html;
+        textRef.current.innerHTML = '<span>' + html + '</span>';
       }
     }
   }, [searchMatched, styles.searchHighlight]);
@@ -202,17 +204,7 @@ export function ProcessTreeNode({
     }
   }, [hasExec, process.parent]);
 
-  const children = useMemo(() => {
-    if (searchResults) {
-      // noop
-      // Only used to break cache on this memo when search changes. We need this ref
-      // to avoid complaints from the useEffect dependency eslint rule.
-      // This fixes an issue when verbose mode is OFF and there are matching results on
-      // hidden processes.
-    }
-
-    return process.getChildren(verboseMode);
-  }, [process, verboseMode, searchResults]);
+  const children = process.getChildren(verboseMode);
 
   if (!processDetails?.process) {
     return null;
@@ -229,7 +221,7 @@ export function ProcessTreeNode({
     user,
   } = processDetails.process;
 
-  const shouldRenderChildren = childrenExpanded && children?.length > 0;
+  const shouldRenderChildren = isSessionLeader || (childrenExpanded && children?.length > 0);
   const childrenTreeDepth = depth + 1;
 
   const showUserEscalation = !isSessionLeader && !!user?.name && user.name !== parent?.user?.name;
@@ -239,7 +231,7 @@ export function ProcessTreeNode({
     ? 'sessionView:processTreeNodeExecIcon'
     : 'sessionView:processTreeNodeForkIcon';
 
-  const timeStampsNormal = formatDate(start, KIBANA_DATE_FORMAT);
+  const timeStampsNormal = formatDate(start, dateFormat);
 
   return (
     <div>

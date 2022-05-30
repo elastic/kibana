@@ -21,6 +21,7 @@ const baseContextMock = {
   expanded: undefined,
   setExpanded: jest.fn(),
   rows: esHits,
+  rowsFlattened: esHits,
   onFilter: jest.fn(),
   dataView: dataViewMock,
   isDarkMode: false,

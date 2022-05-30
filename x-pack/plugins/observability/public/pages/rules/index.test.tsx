@@ -9,6 +9,8 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
+import { CoreStart } from '@kbn/core/public';
+import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { RulesPage } from '.';
 import { RulesTable } from './components/rules_table';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
@@ -52,6 +54,8 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,
   kibanaFeatures: [],
+  core: {} as CoreStart,
+  plugins: {} as ObservabilityPublicPluginsStart,
 }));
 
 const { useFetchRules } = jest.requireMock('../../hooks/use_fetch_rules');
@@ -86,7 +90,11 @@ describe('empty RulesPage', () => {
         },
       ],
     });
-    useFetchRules.mockReturnValue({ rulesState, noData: true });
+    useFetchRules.mockReturnValue({
+      rulesState,
+      noData: true,
+      tagsState: { data: [], error: null },
+    });
     wrapper = mountWithIntl(<RulesPage />);
   }
   it('renders empty screen', async () => {
@@ -138,7 +146,11 @@ describe('empty RulesPage with show only capability', () => {
         ruleTaskTimeout: '1m',
       },
     ];
-    useFetchRules.mockReturnValue({ rulesState, noData: true });
+    useFetchRules.mockReturnValue({
+      rulesState,
+      noData: true,
+      tagsState: { data: [], error: null },
+    });
     useLoadRuleTypes.mockReturnValue({ ruleTypes });
 
     wrapper = mountWithIntl(<RulesPage />);
@@ -352,7 +364,7 @@ describe('RulesPage with items', () => {
       ruleTypes,
       ruleTypeIndex: mockedRuleTypeIndex,
     });
-    useFetchRules.mockReturnValue({ rulesState });
+    useFetchRules.mockReturnValue({ rulesState, tagsState: { data: [], error: null } });
     wrapper = mountWithIntl(<RulesPage />);
     await act(async () => {
       await nextTick();
@@ -509,7 +521,7 @@ describe('RulesPage with items and show only capability', () => {
       error: null,
       totalItemCount: 3,
     };
-    useFetchRules.mockReturnValue({ rulesState });
+    useFetchRules.mockReturnValue({ rulesState, tagsState: { data: [], error: null } });
 
     const mockedRuleTypeIndex = new Map(
       Object.entries({

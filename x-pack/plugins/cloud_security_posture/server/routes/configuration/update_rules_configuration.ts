@@ -66,8 +66,10 @@ export const createRulesConfig = (
 ): CspRulesConfigSchema => {
   const activatedRules = cspRules.saved_objects.filter((cspRule) => cspRule.attributes.enabled);
   const config = {
-    activated_rules: {
-      cis_k8s: activatedRules.map((activatedRule) => activatedRule.attributes.rego_rule_id),
+    data_yaml: {
+      activated_rules: {
+        cis_k8s: activatedRules.map((activatedRule) => activatedRule.attributes.rego_rule_id),
+      },
     },
   };
   return config;

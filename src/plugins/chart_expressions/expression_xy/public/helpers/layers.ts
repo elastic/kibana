@@ -7,29 +7,35 @@
  */
 
 import { Datatable } from '@kbn/expressions-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
 import {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,
-  CommonXYReferenceLineLayerConfig,
+  ReferenceLineLayerConfig,
 } from '../../common/types';
 import { isDataLayer, isReferenceLayer } from './visualization';
 
 export function getFilteredLayers(layers: CommonXYLayerConfig[]) {
-  return layers.filter<CommonXYReferenceLineLayerConfig | CommonXYDataLayerConfig>(
-    (layer): layer is CommonXYReferenceLineLayerConfig | CommonXYDataLayerConfig => {
+  return layers.filter<ReferenceLineLayerConfig | CommonXYDataLayerConfig>(
+    (layer): layer is ReferenceLineLayerConfig | CommonXYDataLayerConfig => {
       let table: Datatable | undefined;
-      let accessors: string[] = [];
+      let accessors: Array<ExpressionValueVisDimension | string> = [];
       let xAccessor: undefined | string | number;
       let splitAccessor: undefined | string | number;
-
-      if (isDataLayer(layer)) {
-        xAccessor = layer.xAccessor;
-        splitAccessor = layer.splitAccessor;
-      }
 
       if (isDataLayer(layer) || isReferenceLayer(layer)) {
         table = layer.table;
         accessors = layer.accessors;
+      }
+
+      if (isDataLayer(layer)) {
+        xAccessor =
+          layer.xAccessor && table && getAccessorByDimension(layer.xAccessor, table.columns);
+        splitAccessor =
+          layer.splitAccessor &&
+          table &&
+          getAccessorByDimension(layer.splitAccessor, table.columns);
       }
 
       return !(

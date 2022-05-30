@@ -32,6 +32,7 @@ import { AvailableFields$, DataDocuments$ } from '../../utils/use_saved_search';
 import { calcFieldCounts } from '../../utils/calc_field_counts';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { FetchStatus } from '../../../types';
+import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 
 export interface DiscoverSidebarResponsiveProps {
   /**
@@ -275,7 +276,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       <EuiShowFor sizes={['xs', 's']}>
         <div className="dscSidebar__mobile">
           <EuiButton
-            contentProps={{ className: 'dscSidebar__mobileButton' }}
+            contentProps={{
+              className: 'dscSidebar__mobileButton',
+              id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,
+            }}
             fullWidth
             onClick={() => setIsFlyoutVisible(true)}
           >

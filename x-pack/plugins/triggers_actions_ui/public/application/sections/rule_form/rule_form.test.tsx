@@ -213,7 +213,10 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: { value: '1m', enforce: enforceMinimum } }}
+          config={{
+            isUsingSecurity: true,
+            minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
+          }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
           operation="create"
@@ -332,7 +335,10 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: { value: '1m', enforce: enforceMinimum } }}
+          config={{
+            isUsingSecurity: true,
+            minimumScheduleInterval: { value: '1m', enforce: enforceMinimum },
+          }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"
@@ -527,7 +533,10 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: { value: '1m', enforce: false } }}
+          config={{
+            isUsingSecurity: true,
+            minimumScheduleInterval: { value: '1m', enforce: false },
+          }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
           operation="create"
@@ -590,7 +599,10 @@ describe('rule_form', () => {
       wrapper = mountWithIntl(
         <RuleForm
           rule={initialRule}
-          config={{ minimumScheduleInterval: { value: '1m', enforce: false } }}
+          config={{
+            isUsingSecurity: true,
+            minimumScheduleInterval: { value: '1m', enforce: false },
+          }}
           dispatch={() => {}}
           errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
           operation="create"

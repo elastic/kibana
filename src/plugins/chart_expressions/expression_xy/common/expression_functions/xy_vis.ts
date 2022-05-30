@@ -7,9 +7,10 @@
  */
 
 import { XyVisFn } from '../types';
-import { XY_VIS, DATA_LAYER, REFERENCE_LINE_LAYER, ANNOTATION_LAYER } from '../constants';
+import { XY_VIS, REFERENCE_LINE, ANNOTATION_LAYER } from '../constants';
 import { strings } from '../i18n';
 import { commonXYArgs } from './common_xy_args';
+import { commonDataLayerArgs } from './common_data_layer_args';
 
 export const xyVisFunction: XyVisFn = {
   name: XY_VIS,
@@ -18,20 +19,41 @@ export const xyVisFunction: XyVisFn = {
   help: strings.getXYHelp(),
   args: {
     ...commonXYArgs,
-    dataLayers: {
-      types: [DATA_LAYER],
-      help: strings.getDataLayerHelp(),
+    ...commonDataLayerArgs,
+    xAccessor: {
+      types: ['string', 'vis_dimension'],
+      help: strings.getXAccessorHelp(),
+    },
+    splitAccessor: {
+      types: ['string', 'vis_dimension'],
+      help: strings.getSplitAccessorHelp(),
+    },
+    accessors: {
+      types: ['string', 'vis_dimension'],
+      help: strings.getAccessorsHelp(),
       multi: true,
     },
-    referenceLineLayers: {
-      types: [REFERENCE_LINE_LAYER],
-      help: strings.getReferenceLineLayerHelp(),
+    referenceLines: {
+      types: [REFERENCE_LINE],
+      help: strings.getReferenceLinesHelp(),
       multi: true,
     },
     annotationLayers: {
       types: [ANNOTATION_LAYER],
       help: strings.getAnnotationLayerHelp(),
       multi: true,
+    },
+    splitColumnAccessor: {
+      types: ['vis_dimension', 'string'],
+      help: strings.getSplitColumnAccessorHelp(),
+    },
+    splitRowAccessor: {
+      types: ['vis_dimension', 'string'],
+      help: strings.getSplitRowAccessorHelp(),
+    },
+    markSizeAccessor: {
+      types: ['vis_dimension', 'string'],
+      help: strings.getMarkSizeAccessorHelp(),
     },
   },
   async fn(data, args, handlers) {

@@ -8,8 +8,6 @@
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import expect from '@kbn/expect';
-// @ts-ignore
-import fetch from 'node-fetch';
 import { getUrl } from '@kbn/test';
 import moment from 'moment';
 import { FtrService } from '../ftr_provider_context';

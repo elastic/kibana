@@ -28,28 +28,19 @@ export { ServiceNowConnectorFields as default };
 
 const ServiceNowConnectorFields: React.FC<
   ActionConnectorFieldsProps<ServiceNowActionConnector>
-> = ({
-  action,
-  editActionSecrets,
-  editActionConfig,
-  errors,
-  consumer,
-  readOnly,
-  setCallbacks,
-  isEdit,
-}) => {
+> = ({ action, editActionSecrets, editActionConfig, errors, readOnly, setCallbacks }) => {
   const {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const { apiUrl, usesTableApi } = action.config;
-  const { username, password } = action.secrets;
+  const { config, secrets } = action;
   const requiresNewApplication = !action.isDeprecated;
 
   const [showUpdateConnector, setShowUpdateConnector] = useState(false);
 
   const { fetchAppInfo, isLoading } = useGetAppInfo({
     actionTypeId: action.actionTypeId,
+    http,
   });
 
   const [showApplicationRequiredCallout, setShowApplicationRequiredCallout] =
@@ -97,8 +88,8 @@ const ServiceNowConnectorFields: React.FC<
         http,
         connector: {
           name: action.name,
-          config: { apiUrl, usesTableApi: false },
-          secrets: { username, password },
+          config: { ...config, usesTableApi: false },
+          secrets: { ...secrets },
         },
         id: action.id,
       });
@@ -118,17 +109,7 @@ const ServiceNowConnectorFields: React.FC<
        * We silent the errors as a callout will show and inform the user
        */
     }
-  }, [
-    getApplicationInfo,
-    http,
-    action.name,
-    action.id,
-    apiUrl,
-    username,
-    password,
-    editActionConfig,
-    toasts,
-  ]);
+  }, [getApplicationInfo, http, action.name, action.id, secrets, config, editActionConfig, toasts]);
 
   /**
    * Defaults the usesTableApi attribute to false
@@ -137,7 +118,7 @@ const ServiceNowConnectorFields: React.FC<
    * the connector.
    */
   useEffect(() => {
-    if (usesTableApi == null) {
+    if (config.usesTableApi == null) {
       editActionConfig('usesTableApi', false);
     }
   });

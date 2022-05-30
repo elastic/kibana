@@ -35,6 +35,7 @@ import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import { PLUGIN_ID } from '../common';
 import { DocViewInput, DocViewInputFn } from './services/doc_views/doc_views_types';
 import { DocViewsRegistry } from './services/doc_views/doc_views_registry';
 import {
@@ -252,7 +253,7 @@ export class DiscoverPlugin
     };
 
     core.application.register({
-      id: 'discover',
+      id: PLUGIN_ID,
       title: 'Discover',
       updater$: this.appStateUpdater.asObservable(),
       order: 1000,
