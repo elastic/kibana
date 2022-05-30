@@ -50,7 +50,7 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
       return {
         pageTitle: RESPONDER_PAGE_TITLE,
         headerHasBottomBorder: false,
-        scrollableBody: true, // FIXME:PT remove once pending PR with console's new UI is merged
+        'data-test-subj': getTestId('layout'),
         headerBackComponent: (
           <EuiButtonEmpty
             flush="left"

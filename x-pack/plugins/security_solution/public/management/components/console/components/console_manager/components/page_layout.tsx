@@ -9,7 +9,6 @@ import React, { memo, PropsWithChildren, ReactNode, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageContent,
   EuiPageHeader,
   EuiPanel,
   EuiPanelProps,
@@ -25,6 +24,10 @@ const EuiPanelStyled = styled(EuiPanel)`
   &.full-height,
   .full-height {
     height: 100%;
+  }
+
+  .is-not-scrollable {
+    overflow: hidden;
   }
 
   .is-scrollable {
@@ -73,14 +76,9 @@ export const PageLayout = memo<PageLayoutProps>(
 
     const bodyClassname = useMemo(() => {
       return classnames({
-        'eui-scrollBar is-scrollable': scrollableBody,
+        'is-scrollable': scrollableBody,
+        'is-not-scrollable': !scrollableBody,
         'full-height': true,
-      });
-    }, [scrollableBody]);
-
-    const layoutClassname = useMemo(() => {
-      return classnames({
-        'full-height': scrollableBody,
       });
     }, [scrollableBody]);
 
@@ -111,10 +109,11 @@ export const PageLayout = memo<PageLayoutProps>(
           wrap={false}
           responsive={false}
           gutterSize="none"
-          className={layoutClassname}
+          className="full-height"
+          data-test-subj={getTestId('root')}
         >
           {!hideHeader && (
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj={getTestId('headerContainer')}>
               <EuiPageHeader
                 pageTitle={headerTitleContainer}
                 description={pageDescription}
@@ -128,16 +127,10 @@ export const PageLayout = memo<PageLayoutProps>(
             </EuiFlexItem>
           )}
 
-          <EuiFlexItem grow className={bodyClassname}>
-            <EuiPageContent
-              hasBorder={false}
-              hasShadow={false}
-              paddingSize="none"
-              color="transparent"
-              borderRadius="none"
-            >
+          <EuiFlexItem grow className={bodyClassname} data-test-subj={getTestId('body')}>
+            <div role="main" className="full-height">
               {children}
-            </EuiPageContent>
+            </div>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanelStyled>
