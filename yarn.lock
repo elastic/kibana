@@ -1503,10 +1503,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@55.1.2":
-  version "55.1.2"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-55.1.2.tgz#dd0b42f5b26c5800d6a9cb2d4c2fe1afce9d3f07"
-  integrity sha512-wwZz5KxMIMFlqEsoCRiQBJDc4CrluS1d0sCOmQ5lhIzKhYc91MdxnqCk2i6YkhL4sSDf2Y9KAEuMXa+uweOWUA==
+"@elastic/eui@55.1.4":
+  version "55.1.4"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-55.1.4.tgz#c056aea2467d3ad4bbc2b9ad3156957d7e84a2e6"
+  integrity sha512-K8KBQa+esI+pILsUxUvKdQZ/ruB7SV/IXN3nE4TTyZ7sfzuIV0rkxg2g3+dmXmUP73PkQOI/THpFuUiiippmvQ==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -2892,6 +2892,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/aiops-utils@link:bazel-bin/packages/kbn-aiops-utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/alerts@link:bazel-bin/packages/kbn-alerts":
   version "0.0.0"
   uid ""
@@ -3056,6 +3060,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/handlebars@link:bazel-bin/packages/kbn-handlebars":
+  version "0.0.0"
+  uid ""
+
 "@kbn/i18n-react@link:bazel-bin/packages/kbn-i18n-react":
   version "0.0.0"
   uid ""
@@ -3215,7 +3223,6 @@
 "@kbn/shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data":
   version "0.0.0"
   uid ""
-
 
 "@kbn/shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views":
   version "0.0.0"
@@ -4018,6 +4025,11 @@
   integrity sha512-s1zLBjWhdEI2zwaoSgyOFoKSl109CUcVBCc7biPJ3aAf6LGLU6szDvi31JPU7bxfla2lqfhjbbg/5DdFNxOwHw==
   dependencies:
     "@octokit/openapi-types" "^11.2.0"
+
+"@opentelemetry/api@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.1.0.tgz#563539048255bbe1a5f4f586a4a10a1bb737f44a"
+  integrity sha512-hf+3bwuBwtXsugA2ULBc95qxrOqP2pOekLz34BJhcAKawt94vfeNyUKpYc0lZQ/3sCP6LqRa7UAdHA7i5UODzQ==
 
 "@percy/agent@^0.28.6":
   version "0.28.6"
@@ -6142,6 +6154,10 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__aiops-utils@link:bazel-bin/packages/kbn-aiops-utils/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__alerts@link:bazel-bin/packages/kbn-alerts/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6267,6 +6283,10 @@
   uid ""
 
 "@types/kbn__generate@link:bazel-bin/packages/kbn-generate/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__handlebars@link:bazel-bin/packages/kbn-handlebars/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6425,7 +6445,6 @@
 "@types/kbn__shared-ux-page-analytics-no-data@link:bazel-bin/packages/shared-ux/page/analytics_no_data/npm_module_types":
   version "0.0.0"
   uid ""
-
 
 "@types/kbn__shared-ux-prompt-no-data-views@link:bazel-bin/packages/shared-ux/prompt/no_data_views/npm_module_types":
   version "0.0.0"
@@ -12999,12 +13018,13 @@ elastic-apm-http-client@11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.33.0:
-  version "3.33.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.33.0.tgz#ad2850b005355299c3a9fdc631875162480ceb15"
-  integrity sha512-ZJKcRbYdEU87MWyB9CczGTLEERA595OWd0nqpxrDBkogogpxwpzCOialKZA+bekpNA0Oa4Sv18zRCdyqpV25Pw==
+elastic-apm-node@^3.34.0:
+  version "3.34.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.34.0.tgz#dfe5a08735b0cc46980dc75238444dd4a2390aea"
+  integrity sha512-LzVSXDmA3HzyOr3RvpRaOB34I0gXCfpaEEZ/OLFvVodS/1MCDM5ywEulWko6cveSdn/gklcT0vCHv1cHg8vLSg==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
+    "@opentelemetry/api" "^1.1.0"
     after-all-results "^2.0.0"
     async-cache "^1.1.0"
     async-value-promise "^1.1.1"
@@ -13026,7 +13046,6 @@ elastic-apm-node@^3.33.0:
     object-identity-map "^1.0.2"
     original-url "^1.2.3"
     pino "^6.11.2"
-    read-pkg-up "^7.0.1"
     relative-microtime "^2.0.0"
     require-in-the-middle "^5.0.3"
     semver "^6.3.0"
@@ -23694,6 +23713,11 @@ react-helmet-async@^1.0.7:
     react-fast-compare "^3.2.0"
     shallowequal "^1.1.0"
 
+react-hook-form@^7.30.0:
+  version "7.30.0"
+  resolved "https://registry.yarnpkg.com/react-hook-form/-/react-hook-form-7.30.0.tgz#c9e2fd54d3627e43bd94bf38ef549df2e80c1371"
+  integrity sha512-DzjiM6o2vtDGNMB9I4yCqW8J21P314SboNG1O0obROkbg7KVS0I7bMtwSdKyapnCPjHgnxc3L7E5PEdISeEUcQ==
+
 react-input-autosize@^2.2.1:
   version "2.2.2"
   resolved "https://registry.yarnpkg.com/react-input-autosize/-/react-input-autosize-2.2.2.tgz#fcaa7020568ec206bc04be36f4eb68e647c4d8c2"
@@ -24178,7 +24202,7 @@ react@^16.14.0:
     object-assign "^4.1.1"
     prop-types "^15.6.2"
 
-reactcss@1.2.3, reactcss@^1.2.0:
+reactcss@^1.2.0:
   version "1.2.3"
   resolved "https://registry.yarnpkg.com/reactcss/-/reactcss-1.2.3.tgz#c00013875e557b1cf0dfd9a368a1c3dab3b548dd"
   integrity sha512-KiwVUcFu1RErkI97ywr8nvx8dNOpT03rbnma0SSalTYjkrPYaEajR4a/MRt6DZ46K6arDRbWMNHF+xH7G7n/8A==

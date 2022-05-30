@@ -157,6 +157,7 @@ const sampleLayer: DataLayerConfig = {
   type: 'dataLayer',
   layerType: LayerTypes.DATA,
   seriesType: 'line',
+  showLines: true,
   xAccessor: 'c',
   accessors: ['a', 'b'],
   splitAccessor: 'splitAccessorId',
