@@ -58,6 +58,10 @@ export type KibanaPageTemplateSolutionNavProps = Omit<
    */
   isOpenOnDesktop?: boolean;
   onCollapse?: () => void;
+  /*
+   * Force the open state on desktop
+   */
+  isForceOpenOnDesktop?: boolean;
 };
 
 const FLYOUT_SIZE = 248;
@@ -88,6 +92,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
   closeFlyoutButtonPosition = 'outside',
   name,
   onCollapse,
+  isForceOpenOnDesktop,
   ...rest
 }) => {
   const isSmallerBreakpoint = useIsWithinBreakpoints(mobileBreakpoints);
@@ -100,7 +105,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
     setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
   };
 
-  const isHidden = isLargerBreakpoint && !isOpenOnDesktop;
+  const isHidden = isLargerBreakpoint && !isOpenOnDesktop && !isForceOpenOnDesktop;
   const isCustomSideNav = !!children;
 
   const sideNavClasses = classNames('kbnPageTemplateSolutionNav', {
@@ -208,10 +213,12 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
             <EuiSpacer size="l" />
             {sideNavContent}
           </div>
-          <KibanaPageTemplateSolutionNavCollapseButton
-            isCollapsed={!isOpenOnDesktop}
-            onClick={onCollapse}
-          />
+          {!isForceOpenOnDesktop && (
+            <KibanaPageTemplateSolutionNavCollapseButton
+              isCollapsed={!isOpenOnDesktop}
+              onClick={onCollapse}
+            />
+          )}
         </>
       )}
     </>
