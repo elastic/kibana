@@ -17,6 +17,7 @@
     "observability",
     "ruleRegistry",
     "triggersActionsUi",
+    "share",
     "unifiedSearch",
     "dataViews"
   ],

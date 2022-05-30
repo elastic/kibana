@@ -8,3 +8,4 @@
 export * from '../../../hooks';
 
 export * from './use_breadcrumbs';
+export * from './use_apm_service_href';
