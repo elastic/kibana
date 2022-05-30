@@ -23,9 +23,11 @@ const NOOP = () => undefined;
 
 const KeyCaptureContainer = styled.span`
   display: inline-block;
-  position: relative;
+  position: absolute;
   width: 1px;
   height: 1em;
+  left: -5px;
+  top: -5px;
   overflow: hidden;
 
   .invisible-input {

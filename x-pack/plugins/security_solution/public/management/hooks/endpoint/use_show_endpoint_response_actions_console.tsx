@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useCallback } from 'react';
-import { getEndpointResponseActionsConsoleCommands } from '../../components/endpoint_console/endpoint_response_actions_console_commands';
+import React, { useCallback } from 'react';
+import { getEndpointResponseActionsConsoleCommands } from '../../components/endpoint_console';
 import { useConsoleManager } from '../../components/console';
 import type { HostMetadata } from '../../../../common/endpoint/types';
 
@@ -31,6 +31,7 @@ export const useShowEndpointResponseActionsConsole = (): ShowEndpointResponseAct
               commands: getEndpointResponseActionsConsoleCommands(endpointAgentId),
               'data-test-subj': 'endpointResponseActionsConsole',
               prompt: `endpoint-${endpointMetadata.agent.version}`,
+              TitleComponent: () => <>{endpointMetadata.host.name}</>,
             },
           })
           .show();
