@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { catchError, concatMap, EMPTY, from, ObservableInput, Subject } from 'rxjs';
+import { catchError, concatMap, EMPTY, from, Observable, ObservableInput, Subject } from 'rxjs';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { CanvasWorkpad, State } from '../../../../types';
 import { getWorkpad, getFullWorkpadPersisted } from '../../../state/selectors/workpad';
@@ -33,10 +33,26 @@ const strings = {
     }),
 };
 
+export const syncUpdatesStream = (
+  updateRequests$: Observable<() => Promise<unknown> | Observable<unknown>>,
+  onError: (err: string | Error) => void
+) =>
+  updateRequests$.pipe(
+    concatMap<() => Promise<unknown> | Observable<unknown>, ObservableInput<unknown>>(
+      (updateRequest) =>
+        from(updateRequest()).pipe(
+          catchError((err) => {
+            onError(err);
+            return EMPTY;
+          })
+        )
+    )
+  );
+
 export const useWorkpadPersist = () => {
+  const { current: updateRequests$ } = useRef(new Subject<() => Promise<unknown>>());
   const service = useWorkpadService();
   const notifyService = useNotifyService();
-  const { current: updateRequests$ } = useRef(new Subject<() => Promise<void>>());
 
   const notifyError = useCallback(
     (err: any) => {
@@ -60,20 +76,10 @@ export const useWorkpadPersist = () => {
   );
 
   useEffectOnce(() => {
-    const subscription = updateRequests$
-      .pipe(
-        concatMap<() => Promise<void>, ObservableInput<unknown>>((updateRequest) =>
-          from(updateRequest()).pipe(
-            catchError((err) => {
-              notifyService.error(err);
-              return EMPTY;
-            })
-          )
-        )
-      )
-      .subscribe();
-
+    const stream$ = syncUpdatesStream(updateRequests$.asObservable(), notifyService.error);
+    const subscription = stream$.subscribe();
     return () => {
+      updateRequests$.complete();
       subscription.unsubscribe();
     };
   });
@@ -101,8 +107,7 @@ export const useWorkpadPersist = () => {
     if (canWrite) {
       if (workpadChanged && assetsChanged) {
         updateRequests$.next(() => service.update(workpad.id, fullWorkpad));
-      }
-      if (workpadChanged) {
+      } else if (workpadChanged) {
         updateRequests$.next(() => service.updateWorkpad(workpad.id, workpad));
       } else if (assetsChanged) {
         updateRequests$.next(() => service.updateAssets(workpad.id, fullWorkpad.assets));
