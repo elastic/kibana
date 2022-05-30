@@ -238,7 +238,6 @@ export default function (providerContext: FtrProviderContext) {
             version: kibanaVersion,
           })
           .expect(400);
-          console.log(res.body);
         expect(res.body.message).to.equal('agent agent1 is not upgradeable');
       });
 
