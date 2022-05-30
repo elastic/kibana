@@ -30,8 +30,6 @@ import { IconType } from '@elastic/eui';
 import { IShipper } from '@kbn/analytics-client';
 import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
-import type { Logger } from '@kbn/logging';
-import type { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
 import { Observable } from 'rxjs';
 import { OptInConfig } from '@kbn/analytics-client';
