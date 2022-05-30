@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { LoggerFactory } from '@kbn/logging';
 import { IConfigService, Env } from './config';
-import { LoggerFactory } from './logging';
 
 /** @internal */
 export type CoreId = symbol;
