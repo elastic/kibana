@@ -45,11 +45,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_by_resource]);
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
   const findingsGroupByResource = useFindingsByResource({
-    ...getBaseQuery({
-      dataView,
-      filters: urlQuery.filters,
-      query: urlQuery.query,
-    }),
+    ...getBaseQuery({ dataView, filters: urlQuery.filters, query: urlQuery.query }),
     ...getPaginationQuery(urlQuery),
   });
 

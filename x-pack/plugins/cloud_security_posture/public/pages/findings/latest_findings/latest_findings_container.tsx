@@ -37,12 +37,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
 
   const baseEsQuery = useMemo(
-    () =>
-      getBaseQuery({
-        dataView,
-        filters: urlQuery.filters,
-        query: urlQuery.query,
-      }),
+    () => getBaseQuery({ dataView, filters: urlQuery.filters, query: urlQuery.query }),
     [dataView, urlQuery.filters, urlQuery.query]
   );
 

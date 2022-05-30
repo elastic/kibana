@@ -18,6 +18,7 @@ import { LatestFindingsContainer } from './latest_findings/latest_findings_conta
 export const Findings = () => {
   const location = useLocation();
   const dataViewQuery = useLatestFindingsDataView();
+  // TODO: Consider splitting the PIT window so that each "group by" view has its own PIT
   const { pitQuery, pitIdRef, setPitId } = useFindingsEsPit('findings');
 
   let queryForPageTemplate: UseQueryResult = dataViewQuery;

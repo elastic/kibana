@@ -14,6 +14,7 @@ interface FindingsEsPitContextValue {
   pitQuery: UseQueryResult<string>;
 }
 
+// Default value should never be used, it can not be instantiated statically. Always wrap in a provider with a value
 export const FindingsEsPitContext = createContext<FindingsEsPitContextValue>(
   {} as FindingsEsPitContextValue
 );
