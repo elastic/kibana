@@ -24,6 +24,7 @@ export const ReportViewTypes = {
   kpi: 'kpi-over-time',
   cwv: 'core-web-vitals',
   mdd: 'device-data-distribution',
+  smt: 'single-metric',
 } as const;
 
 type ValueOf<T> = T[keyof T];
@@ -37,6 +38,11 @@ export interface ColumnFilter {
   query: string;
 }
 
+export interface ParamFilter {
+  label: string;
+  input: ColumnFilter;
+}
+
 export interface MetricOption {
   id: string;
   field?: string;
@@ -44,12 +50,14 @@ export interface MetricOption {
   description?: string;
   columnType?: 'range' | 'operation' | 'FILTER_RECORDS' | 'TERMS_COLUMN' | 'unique_count';
   columnFilters?: ColumnFilter[];
+  columnFilter?: ColumnFilter;
+  paramFilters?: ParamFilter[];
   timeScale?: string;
   showPercentileAnnotations?: boolean;
 }
 
 export interface SeriesConfig {
-  reportType: ReportViewType;
+  reportType: ReportViewType | string;
   xAxisColumn: Partial<LastValueIndexPatternColumn> | Partial<DateHistogramIndexPatternColumn>;
   yAxisColumns: Array<Partial<FieldBasedIndexPatternColumn>>;
   breakdownFields: string[];
@@ -106,7 +114,7 @@ export interface UrlFilter {
 }
 
 export interface ConfigProps {
-  dataView: DataView;
+  dataView?: DataView;
   series?: SeriesUrl;
 }
 
