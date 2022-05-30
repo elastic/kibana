@@ -29,11 +29,11 @@ const OverlayRootContainer = styled.div`
   position: fixed;
   overflow: hidden;
 
-  top: 96px; // FIXME:PT calculate from eui theme vars
+  top: calc((${({ theme: { eui } }) => eui.euiHeaderHeightCompensation} * 2));
   bottom: 0;
   right: 0;
 
-  height: calc(100% - 96px); // FIXME:PT calculate from eui theme vars
+  height: calc(100% - calc(${({ theme: { eui } }) => eui.euiHeaderHeightCompensation} * 2));
   width: 100%;
 
   z-index: ${({ theme: { eui } }) => eui.euiZFlyout};
