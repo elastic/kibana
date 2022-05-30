@@ -25,13 +25,15 @@ import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { UseGetCase, useGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { ConnectorTypes } from '../../../common/api';
 import { Case } from '../../../common/ui';
 import { useKibana } from '../../common/lib/kibana';
+import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
 
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_user_actions');
@@ -42,6 +44,7 @@ jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../user_actions/timestamp');
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/navigation/hooks');
+jest.mock('../../containers/api');
 
 const useFetchCaseMock = useGetCase as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
@@ -136,8 +139,10 @@ describe('CaseView', () => {
   const defaultGetCaseMetrics = {
     isLoading: false,
     isError: false,
-    metrics: basicCaseMetrics,
-    fetchCaseMetrics,
+    data: {
+      metrics: basicCaseMetrics,
+    },
+    refetch: fetchCaseMetrics,
   };
 
   const defaultUpdateCaseState = {
@@ -148,15 +153,16 @@ describe('CaseView', () => {
   };
 
   const defaultUseGetCaseUserActions = {
-    caseUserActions: [...caseUserActions, getAlertUserAction()],
-    caseServices: {},
-    fetchCaseUserActions,
-    firstIndexPushToService: -1,
-    hasDataToPush: false,
+    data: {
+      caseUserActions: [...caseUserActions, getAlertUserAction()],
+      caseServices: {},
+      hasDataToPush: false,
+      participants: [caseData.createdBy],
+    },
+    refetch: fetchCaseUserActions,
     isLoading: false,
+    isFetching: false,
     isError: false,
-    lastIndexPushToService: -1,
-    participants: [caseData.createdBy],
   };
 
   const mockGetCase = (props: Partial<UseGetCase> = {}) => {
@@ -274,21 +280,25 @@ describe('CaseView', () => {
   });
 
   it('should refresh data on refresh', async () => {
+    const queryClient = new QueryClient();
+    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
     const wrapper = mount(
       <TestProviders>
-        <CaseView {...caseViewProps} />
+        <QueryClientProvider client={queryClient}>
+          <CaseView {...caseViewProps} />
+        </QueryClientProvider>
       </TestProviders>
     );
     wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
     await waitFor(() => {
-      expect(fetchCaseUserActions).toBeCalledWith(caseData.id, 'resilient-2');
-      expect(fetchCaseMetrics).toBeCalled();
-      expect(refetchCase).toBeCalled();
+      expect(queryClientSpy).toHaveBeenCalledWith('case');
     });
   });
 
   describe('when a `refreshRef` prop is provided', () => {
     let refreshRef: CaseViewProps['refreshRef'];
+    const queryClient = new QueryClient();
+    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
     beforeEach(async () => {
       refreshRef = React.createRef();
@@ -296,16 +306,18 @@ describe('CaseView', () => {
       await act(async () => {
         mount(
           <TestProviders>
-            <CaseView
-              {...{
-                refreshRef,
-                caseId: '1234',
-                onComponentInitialized: jest.fn(),
-                showAlertDetails: jest.fn(),
-                useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-                userCanCrud: true,
-              }}
-            />
+            <QueryClientProvider client={queryClient}>
+              <CaseView
+                {...{
+                  refreshRef,
+                  caseId: '1234',
+                  onComponentInitialized: jest.fn(),
+                  showAlertDetails: jest.fn(),
+                  useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
+                  userCanCrud: true,
+                }}
+              />
+            </QueryClientProvider>
           </TestProviders>
         );
       });
@@ -320,9 +332,7 @@ describe('CaseView', () => {
     it('should refresh actions and comments', async () => {
       refreshRef!.current!.refreshCase();
       await waitFor(() => {
-        expect(fetchCaseUserActions).toBeCalledWith('basic-case-id', 'resilient-2');
-        expect(fetchCaseMetrics).toBeCalledWith(true);
-        expect(refetchCase).toHaveBeenCalled();
+        expect(queryClientSpy).toHaveBeenCalledWith(CASE_VIEW_CACHE_KEY);
       });
     });
   });

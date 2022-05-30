@@ -11,11 +11,12 @@ import * as i18n from './translations';
 import { useToasts } from '../common/lib/kibana';
 import { resolveCase } from './api';
 import { ServerError } from '../types';
+import { CASE_VIEW_CACHE_KEY } from './constants';
 
 export const useGetCase = (caseId: string) => {
   const toasts = useToasts();
   return useQuery<ResolvedCase, ServerError>(
-    ['case', caseId],
+    [CASE_VIEW_CACHE_KEY, caseId],
     () => {
       const abortCtrlRef = new AbortController();
       return resolveCase(caseId, true, abortCtrlRef.signal);

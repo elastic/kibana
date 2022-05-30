@@ -9,9 +9,24 @@ import React from 'react';
 import { mount } from 'enzyme';
 import { render } from '@testing-library/react';
 
-import { basicCase } from '../../containers/mock';
+import { basicCase, caseUserActions, getAlertUserAction } from '../../containers/mock';
 import { CaseActionBar, CaseActionBarProps } from '.';
 import { TestProviders } from '../../common/mock';
+import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+
+jest.mock('../../containers/use_get_case_user_actions');
+
+const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
+const defaultUseGetCaseUserActions = {
+  data: {
+    caseUserActions: [...caseUserActions, getAlertUserAction()],
+    caseServices: {},
+    hasDataToPush: false,
+    participants: [basicCase.createdBy],
+  },
+  isLoading: false,
+  isError: false,
+};
 
 describe('CaseActionBar', () => {
   const onRefresh = jest.fn();
@@ -33,6 +48,7 @@ describe('CaseActionBar', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
   });
 
   it('it renders', () => {
@@ -48,6 +64,21 @@ describe('CaseActionBar', () => {
     expect(wrapper.find(`[data-test-subj="sync-alerts-switch"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="case-refresh"]`).exists()).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="case-view-actions"]`).exists()).toBeTruthy();
+    // no loading bar
+    expect(wrapper.find(`[data-test-subj="case-view-action-bar-spinner"]`).exists()).toBeFalsy();
+  });
+
+  it('shows a loading bar when user actions are loaded', async () => {
+    useGetCaseUserActionsMock.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    });
+    const wrapper = mount(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
+    expect(wrapper.find(`[data-test-subj="case-view-action-bar-spinner"]`).exists()).toBeTruthy();
   });
 
   it('it should show correct status', () => {
