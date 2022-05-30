@@ -35,7 +35,7 @@ import {
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE } from '../../../constants';
+import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentHealth,
@@ -244,13 +244,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           inactive: agentsRequest.data.totalInactive,
         });
 
-        // Only set tags on the first request - we don't want the list of tags to update based
-        // on the returned set of agents from the API
-        if (allTags === undefined) {
-          const newAllTags = Array.from(
-            new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
-          );
+        const newAllTags = Array.from(
+          new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
+        );
 
+        // We only want to update the list of available tags if we've either received
+        // more tags than we currently have from the API (e.g. new agents have been enrolled)
+        // or we haven't set our list of tags yet. TODO: Would it be possible to remove a tag
+        // from the filterable list if an agent is unenrolled and no agents remain with that tag?
+        if (!allTags || newAllTags.length > allTags.length) {
           setAllTags(newAllTags);
         }
 
@@ -289,7 +291,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
     full: true,
   });
 
