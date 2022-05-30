@@ -5,15 +5,12 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import {
   EuiBadge,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiListGroup,
-  EuiListGroupItem,
   EuiLoadingContent,
   EuiSpacer,
   EuiTextColor,
@@ -21,8 +18,6 @@ import {
 import { CSSObject } from '@emotion/react';
 import { KUBERNETES_PATH } from '../../../common/constants';
 import { KubernetesWidget } from '../kubernetes_widget';
-import { AlertsList } from '../alerts_list';
-import { SearchFields, SearchGroup } from '../search_group';
 import { KubernetesSecurityDeps } from '../../types';
 
 const widgetBadge: CSSObject = {
@@ -36,12 +31,6 @@ const widgetBadge: CSSObject = {
   display: 'flex',
 };
 
-const alertsListItem: CSSObject = {
-  fontSize: '12px',
-  lineHeight: '18px',
-  fontWeight: 400,
-};
-
 const treeViewContainer: CSSObject = {
   position: 'relative',
   border: '1px solid #D3DAE6',
@@ -50,64 +39,13 @@ const treeViewContainer: CSSObject = {
   height: '500px',
 };
 
-const MOCK_CLUSTERS = [
-  'test-us-east1-cluster-1',
-  'test-us-east1-cluster-2',
-  'test-us-east1-cluster-3',
-  'test-us-east1-cluster-4',
-  'test-us-east1-cluster-5',
-  'test-us-east1-cluster-6',
-  'test-us-east1-cluster-7',
-  'test-us-east1-cluster-8',
-];
-
-const GROUP_BY_OPTIONS: Array<EuiComboBoxOptionOption<string>> = [
-  {
-    label: 'None',
-    value: 'none',
-  },
-  {
-    label: 'Namespace',
-    value: 'namespace',
-  },
-  {
-    label: 'Node',
-    value: 'node',
-  },
-];
-
-const SORT_BY_OPTIONS: Array<EuiComboBoxOptionOption<string>> = [
-  {
-    label: 'Name',
-    value: 'name',
-  },
-  {
-    label: 'Date',
-    value: 'date',
-  },
-];
-
 const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) => {
-  const clusterOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(
-    () =>
-      MOCK_CLUSTERS.map((cluster) => ({
-        label: cluster,
-        value: cluster,
-      })),
-    []
-  );
-  const [searchFields, setSearchFields] = useState<SearchFields>({
-    cluster: clusterOptions[0],
-    groupBy: GROUP_BY_OPTIONS.find((groupByOption) => groupByOption.value === 'none'),
-    sortBy: SORT_BY_OPTIONS[0],
-  });
-
   return (
     <Switch>
       <Route strict exact path={KUBERNETES_PATH}>
         {filter}
         <EuiFlexGroup>
-          <EuiFlexItem grow={3}>
+          <EuiFlexItem>
             <KubernetesWidget
               title="Clusters"
               icon="heatmap"
@@ -134,10 +72,10 @@ const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) =
               </EuiBadge>
             </KubernetesWidget>
           </EuiFlexItem>
-          <EuiFlexItem grow={3}>
+          <EuiFlexItem>
             <KubernetesWidget title="Nodes" icon="node" iconColor="#9170B8" data={16} />
           </EuiFlexItem>
-          <EuiFlexItem grow={3}>
+          <EuiFlexItem>
             <KubernetesWidget title="Pods" icon="package" iconColor="warning" data={775}>
               <EuiBadge css={{ ...widgetBadge, justifyContent: 'center' }}>
                 <EuiTextColor css={{ marginRight: '16px' }} color="success">
@@ -149,37 +87,11 @@ const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) =
               </EuiBadge>
             </KubernetesWidget>
           </EuiFlexItem>
-          <EuiFlexItem grow={5}>
-            <AlertsList onInspect={() => {}}>
-              <EuiListGroup flush gutterSize="none">
-                <EuiListGroupItem css={alertsListItem} onClick={() => {}} label="First item" />
-                <EuiListGroupItem css={alertsListItem} onClick={() => {}} label="Second item" />
-                <EuiListGroupItem css={alertsListItem} onClick={() => {}} label="Third item" />
-                <EuiListGroupItem css={alertsListItem} onClick={() => {}} label="Fourth item" />
-              </EuiListGroup>
-            </AlertsList>
-          </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiSpacer size="xl" />
-        <SearchGroup
-          searchFields={searchFields}
-          onChange={(updatedSearchFields: SearchFields) => setSearchFields(updatedSearchFields)}
-          clusterOptions={clusterOptions}
-          groupByOptions={GROUP_BY_OPTIONS}
-          sortByOptions={SORT_BY_OPTIONS}
-        />
         <EuiSpacer size="m" />
         <div css={treeViewContainer}>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiLoadingContent css={{ width: '300px' }} lines={3} />
-              <EuiLoadingContent lines={3} />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiLoadingContent lines={3} />
-              <EuiLoadingContent lines={3} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <EuiLoadingContent lines={3} />
+          <EuiLoadingContent lines={3} />
         </div>
       </Route>
     </Switch>

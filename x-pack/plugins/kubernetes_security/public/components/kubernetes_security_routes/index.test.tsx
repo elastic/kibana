@@ -12,16 +12,8 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { KubernetesSecurityRoutes } from '.';
 
-jest.mock('../alerts_list', () => ({
-  AlertsList: () => <div>{'Mock alerts list'}</div>,
-}));
-
 jest.mock('../kubernetes_widget', () => ({
   KubernetesWidget: () => <div>{'Mock kubernetes widget'}</div>,
-}));
-
-jest.mock('../search_group', () => ({
-  SearchGroup: () => <div>{'Mock search group'}</div>,
 }));
 
 const renderWithRouter = (
@@ -50,7 +42,7 @@ const renderWithRouter = (
   });
   return render(
     <MemoryRouter initialEntries={initialEntries}>
-      <KubernetesSecurityRoutes filter={() => <div>{'Mock filters'}</div>} />
+      <KubernetesSecurityRoutes filter={<div>{'Mock filters'}</div>} />
     </MemoryRouter>
   );
 };
@@ -58,8 +50,6 @@ const renderWithRouter = (
 describe('Kubernetes security routes', () => {
   it('navigates to the kubernetes page', () => {
     renderWithRouter();
-    expect(screen.getByText('Mock alerts list')).toBeInTheDocument();
     expect(screen.getAllByText('Mock kubernetes widget')).toHaveLength(3);
-    expect(screen.getByText('Mock search group')).toBeInTheDocument();
   });
 });
