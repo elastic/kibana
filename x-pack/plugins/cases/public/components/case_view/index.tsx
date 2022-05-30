@@ -18,7 +18,6 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { generateCaseViewPath, useCaseViewParams } from '../../common/navigation';
 import { CaseViewPage } from './case_view_page';
 import type { CaseViewProps } from './types';
-import { Case } from '../../containers/types';
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
