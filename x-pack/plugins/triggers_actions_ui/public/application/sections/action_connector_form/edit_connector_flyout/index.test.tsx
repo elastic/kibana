@@ -14,10 +14,9 @@ import { act } from '@testing-library/react';
 import {
   AppMockRenderer,
   createAppMockRenderer,
-  waitForComponentToUpdate,
 } from '../../../components/builtin_action_types/test_utils';
 import EditConnectorFlyout from '.';
-import { ActionConnector, GenericValidationResult } from '../../../../types';
+import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
 
 const updateConnectorResponse = {
   connector_type_id: 'test',
@@ -44,7 +43,6 @@ describe('EditConnectorFlyout', () => {
   let appMockRenderer: AppMockRenderer;
   const onClose = jest.fn();
   const onConnectorUpdated = jest.fn();
-  const onTestConnector = jest.fn();
 
   const actionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
     actionConnectorFields: lazy(() => import('../connector_mock')),
@@ -221,9 +219,27 @@ describe('EditConnectorFlyout', () => {
         userEvent.click(getByTestId('testConnectorTab'));
       });
 
-      await waitForComponentToUpdate();
+      await waitFor(() => {
+        expect(getByTestId('test-connector-form')).toBeInTheDocument();
+      });
+    });
 
-      expect(getByTestId('test-connector-form')).toBeInTheDocument();
+    it('opens the provided tab', async () => {
+      const { getByTestId } = appMockRenderer.render(
+        <EditConnectorFlyout
+          actionTypeRegistry={actionTypeRegistry}
+          onClose={onClose}
+          connector={connector}
+          onConnectorUpdated={onConnectorUpdated}
+          tab={EditConnectorTabs.Test}
+        />
+      );
+
+      await waitFor(() => {
+        expect(getByTestId('test-connector-form')).toBeInTheDocument();
+      });
+
+      // await waitForComponentToUpdate();
     });
   });
 
