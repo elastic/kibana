@@ -160,7 +160,6 @@ export const metricsVisDefinition: VisTypeDefinition<
     showFilterBar: true,
     showIndexSelection: false,
   },
-  fetchDatatable: false,
   toExpressionAst,
   getSupportedTriggers: (params?: VisParams) => {
     if (params?.type === PANEL_TYPES.TIMESERIES) {

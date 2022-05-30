@@ -48,7 +48,6 @@ export const createVegaTypeDefinition = (): VisTypeDefinition<VisParams> => {
       enableAutoApply: true,
       defaultSize: DefaultEditorSize.MEDIUM,
     },
-    fetchDatatable: false,
     toExpressionAst,
     options: {
       showIndexSelection: false,

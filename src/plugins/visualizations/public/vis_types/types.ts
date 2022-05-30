@@ -228,7 +228,7 @@ export interface VisTypeDefinition<TVisParams> {
 
   /**
    * When truthy, it will perform a search and pass the results to the visualization as a `datatable`.
-   * @default true
+   * @default false
    */
   readonly fetchDatatable?: boolean;
   /**

@@ -57,7 +57,6 @@ export class CustomVisualizationsPublicPlugin
           },
         ],
       },
-      fetchDatatable: false,
       toExpressionAst,
     });
   }
