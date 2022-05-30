@@ -16,7 +16,7 @@ export const CaseViewMetrics = React.memo(({ caseId }: { caseId: string }) => {
   const { metricsFeatures } = useCasesFeatures();
   const { data, isLoading } = useGetCaseMetrics(caseId, metricsFeatures);
 
-  if (!isLoading && metricsFeatures.length === 0) {
+  if (metricsFeatures.length === 0) {
     return null;
   }
 
