@@ -123,7 +123,6 @@ const handleMouseDown = (
     return;
   }
 
-  e.stopPropagation();
   if (buttons !== 1 || !commit) {
     resetHandler();
     return; // left-click only

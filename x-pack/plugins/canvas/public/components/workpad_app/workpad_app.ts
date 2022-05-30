@@ -22,7 +22,6 @@ const WorkpadAppComponent = withElementsLoadedTelemetry(Component);
 
 const mapDispatchToProps = (dispatch: Dispatch): { deselectElement: MouseEventHandler } => ({
   deselectElement: (ev) => {
-    ev.stopPropagation();
     dispatch(selectToplevelNodes([]));
   },
 });
