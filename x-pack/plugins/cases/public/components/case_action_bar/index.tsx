@@ -95,12 +95,10 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
     <EuiFlexGroup gutterSize="l" justifyContent="flexEnd" data-test-subj="case-action-bar-wrapper">
       {isLoadingUserActions ? (
         <EuiFlexItem grow={false}>
-          {' '}
-          <EuiLoadingSpinner data-test-subj="case-view-action-bar-spinner" size="l" />{' '}
+          <EuiLoadingSpinner data-test-subj="case-view-action-bar-spinner" size="l" />
         </EuiFlexItem>
       ) : (
         <>
-          {' '}
           <EuiFlexItem grow={false}>
             <MyDescriptionList compressed>
               <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
