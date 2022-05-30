@@ -61,7 +61,6 @@ export const detectionResponseLinks: LinkItem = {
   }),
   path: DETECTION_RESPONSE_PATH,
   globalNavEnabled: false,
-  experimentalKey: 'detectionResponseEnabled',
   capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.detectionAndResponse', {
