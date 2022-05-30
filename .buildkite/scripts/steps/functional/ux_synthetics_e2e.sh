@@ -7,7 +7,7 @@ source .buildkite/scripts/common/util.sh
 .buildkite/scripts/bootstrap.sh
 .buildkite/scripts/download_build_artifacts.sh
 
-export JOB=kibana-ux-pluging-synthetics
+export JOB=kibana-ux-plugin-synthetics
 
 echo "--- User Experience @elastic/synthetics Tests"
 
