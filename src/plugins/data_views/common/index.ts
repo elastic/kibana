@@ -38,7 +38,6 @@ export type {
   UiSettingsCommon,
   SavedObjectsClientCommon,
   GetFieldsOptions,
-  GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
   SavedObject,
   AggregationRestrictions,

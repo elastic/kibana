@@ -112,7 +112,6 @@ export type {
   OnError,
   UiSettingsCommon,
   GetFieldsOptions,
-  GetFieldsOptionsTimePattern,
   IDataViewsApiClient,
   SavedObject,
   AggregationRestrictions,
