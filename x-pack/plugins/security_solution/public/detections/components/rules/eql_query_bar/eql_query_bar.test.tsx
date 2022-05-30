@@ -48,6 +48,7 @@ describe('EqlQueryBar', () => {
         query: 'newQuery',
         language: 'eql',
       },
+      saved_id: null,
     };
 
     expect(mockField.setValue).toHaveBeenCalledWith(expected);

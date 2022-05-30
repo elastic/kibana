@@ -37,7 +37,7 @@ const defaultValues = {
   eqlQueryBar: {
     query: { query: '', language: 'eql' },
     filters: [],
-    saved_id: undefined,
+    saved_id: null,
   },
 };
 

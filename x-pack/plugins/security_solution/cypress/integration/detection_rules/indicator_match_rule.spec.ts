@@ -178,13 +178,11 @@ describe('indicator match', () => {
           selectIndicatorMatchType();
         });
 
-        // Unskip once https://github.com/elastic/kibana/issues/130770 is fixed
-        it.skip('Has a default set of *:*', () => {
+        it('Has a default set of *:*', () => {
           getCustomQueryInput().should('have.text', '*:*');
         });
 
-        // Unskip once https://github.com/elastic/kibana/issues/1307707 is fixed
-        it.skip('Shows invalidation text if text is removed', () => {
+        it('Shows invalidation text if text is removed', () => {
           getCustomQueryInput().type('{selectall}{del}');
           getCustomQueryInvalidationText().should('exist');
         });
@@ -401,8 +399,7 @@ describe('indicator match', () => {
       });
 
       describe('Schedule', () => {
-        // Unskip once https://github.com/elastic/kibana/issues/1307707 is fixed
-        it.skip('IM rule has 1h time interval and lookback by default', () => {
+        it('IM rule has 1h time interval and lookback by default', () => {
           visitWithoutDateRange(RULE_CREATION);
           selectIndicatorMatchType();
           fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
@@ -421,8 +418,7 @@ describe('indicator match', () => {
         deleteAlertsAndRules();
       });
 
-      // Unskip once https://github.com/elastic/kibana/issues/1307707 is fixed
-      it.skip('Creates and enables a new Indicator Match rule', () => {
+      it('Creates and enables a new Indicator Match rule', () => {
         visitWithoutDateRange(RULE_CREATION);
         selectIndicatorMatchType();
         fillDefineIndicatorMatchRuleAndContinue(getNewThreatIndicatorRule());
