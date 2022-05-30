@@ -9,9 +9,9 @@
 import { firstValueFrom, Observable } from 'rxjs';
 import { mapToObject } from '@kbn/std';
 
+import type { Logger } from '@kbn/logging';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { InternalHttpServiceSetup } from '../http';
