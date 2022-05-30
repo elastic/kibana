@@ -25,7 +25,7 @@ const { argv } = yargs(process.argv.slice(2))
   .option('open', {
     default: false,
     type: 'boolean',
-    description: 'Opens the Playwright Test Runner',
+    description: 'Opens the Synthetics Test Runner',
   })
   .option('kibana-install-dir', {
     default: '',
@@ -53,7 +53,7 @@ if (server) {
   ftrScript = 'functional_test_runner';
 }
 
-const config = './playwright_run.ts';
+const config = './synthetics_run.ts';
 
 function executeSyntheticsRunner(dirPath) {
   console.log(`Running ${ftrScript} in ${dirPath}`);
