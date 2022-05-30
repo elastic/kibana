@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');
-
       for (const columnName of TEST_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItemAdd(columnName);
       }
@@ -51,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
       }
     });
+
     after(async () => {
       await kibanaServer.uiSettings.replace({});
     });
@@ -105,12 +105,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(disabledFilterCounter).to.be(TEST_FILTER_COLUMN_NAMES.length);
     });
 
-    // bugfix: https://github.com/elastic/kibana/issues/92099
     it('should navigate to the first document and then back to discover', async () => {
       await PageObjects.context.waitUntilContextLoadingHasFinished();
-
-      // navigate to the doc view
-      await dataGrid.clickRowToggle({ rowIndex: 0 });
+      await dataGrid.clickRowToggle({ isAnchorRow: true });
 
       // click the open action
       await retry.try(async () => {

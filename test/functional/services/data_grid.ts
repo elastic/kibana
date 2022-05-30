@@ -120,7 +120,7 @@ export class DataGridService extends FtrService {
     return await this.testSubjects.find(selector);
   }
 
-  public async getBodyRows(options: SelectOptions): Promise<WebElementWrapper[][]> {
+  public async getBodyRows(options?: SelectOptions): Promise<WebElementWrapper[][]> {
     return this.getDocTableRows(options);
   }
 
@@ -138,7 +138,7 @@ export class DataGridService extends FtrService {
   /**
    * Returns an array of rows (which are array of cells)
    */
-  public async getDocTableRows(options: SelectOptions) {
+  public async getDocTableRows(options?: SelectOptions) {
     const table = await this.getTable();
     if (!table) {
       return [];

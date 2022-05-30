@@ -27,13 +27,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
 
   describe('discover - context - back navigation', function contextSize() {
-    before(async function () {
+    before(async () => {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      await PageObjects.common.navigateToApp('discover');
       await kibanaServer.uiSettings.update({
         'doc_table:legacy': false,
         defaultIndex: 'logstash-*',
       });
+      await PageObjects.common.navigateToApp('discover');
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItem(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);

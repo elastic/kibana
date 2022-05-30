@@ -29,12 +29,13 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       );
     });
 
-    loadTestFile(require.resolve('./classic/_context_navigation'));
-    loadTestFile(require.resolve('./classic/_discover_navigation'));
-    loadTestFile(require.resolve('./classic/_filters'));
-    loadTestFile(require.resolve('./classic/_size'));
-    loadTestFile(require.resolve('./classic/_date_nanos'));
-    loadTestFile(require.resolve('./classic/_date_nanos_custom_timestamp'));
+    // loadTestFile(require.resolve('./classic/_context_navigation'));
+    // loadTestFile(require.resolve('./classic/_discover_navigation'));
+    // loadTestFile(require.resolve('./classic/_filters'));
+    // loadTestFile(require.resolve('./classic/_size'));
+    // loadTestFile(require.resolve('./classic/_date_nanos'));
+    // loadTestFile(require.resolve('./classic/_date_nanos_custom_timestamp'));
+
     loadTestFile(require.resolve('./_context_navigation'));
     loadTestFile(require.resolve('./_discover_navigation'));
     loadTestFile(require.resolve('./_filters'));
