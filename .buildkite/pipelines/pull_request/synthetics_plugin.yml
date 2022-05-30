@@ -1,5 +1,5 @@
 steps:
-  - command: .buildkite/scripts/steps/functional/uptime.sh
+  - command: .buildkite/scripts/steps/functional/synthetics_plugin.sh
     label: 'Synthetics @elastic/synthetics Tests'
     agents:
       queue: ci-group-6
