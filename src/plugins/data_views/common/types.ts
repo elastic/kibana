@@ -164,15 +164,7 @@ export interface GetFieldsOptions {
   filter?: QueryDslQueryContainer;
 }
 
-export interface GetFieldsOptionsTimePattern {
-  pattern: string;
-  metaFields: string[];
-  lookBack: number;
-  interval: string;
-}
-
 export interface IDataViewsApiClient {
-  getFieldsForTimePattern: (options: GetFieldsOptionsTimePattern) => Promise<any>;
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<any>;
   hasUserIndexPattern: () => Promise<boolean>;
 }
