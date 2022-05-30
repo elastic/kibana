@@ -125,8 +125,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       layerIndex = 0
     ) {
       await retry.try(async () => {
-        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
-        await testSubjects.exists(`lns-indexPatternDimension-${opts.operation}`);
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+          await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
+        }
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
       });
 
       if (opts.operation === 'formula') {
@@ -841,18 +843,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Changes the index pattern in the data panel
      */
-    async switchDataPanelIndexPattern(name: string) {
-      await testSubjects.click('lns-dataView-switch-link');
-      await find.clickByCssSelector(`[title="${name}"]`);
+    async switchDataPanelIndexPattern(dataViewTitle: string) {
+      await PageObjects.unifiedSearch.switchDataView('lns-dataView-switch-link', dataViewTitle);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     /**
      * Changes the index pattern for the first layer
      */
-    async switchFirstLayerIndexPattern(name: string) {
-      await testSubjects.click('lns_layerIndexPatternLabel');
-      await find.clickByCssSelector(`.lnsChangeIndexPatternPopover [title="${name}"]`);
+    async switchFirstLayerIndexPattern(dataViewTitle: string) {
+      await PageObjects.unifiedSearch.switchDataView('lns_layerIndexPatternLabel', dataViewTitle);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 

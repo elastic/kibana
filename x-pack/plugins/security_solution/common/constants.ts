@@ -257,6 +257,8 @@ export const DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/{ruleId}/execution/events` as const;
 export const detectionEngineRuleExecutionEventsUrl = (ruleId: string) =>
   `${INTERNAL_DETECTION_ENGINE_URL}/rules/${ruleId}/execution/events` as const;
+export const DETECTION_ENGINE_INSTALLED_INTEGRATIONS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/fleet/integrations/installed` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
