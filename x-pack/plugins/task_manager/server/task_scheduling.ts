@@ -163,20 +163,18 @@ export class TaskScheduling {
         return { ...task, schedule, runAt: new Date(newRunAtInMs) };
       });
 
-    const result: BulkUpdateSchedulesResult = {
-      tasks: [],
-      errors: [],
-    };
+    return (await this.store.bulkUpdate(updatedTasks)).reduce<BulkUpdateSchedulesResult>(
+      (acc, task) => {
+        if (task.tag === 'ok') {
+          acc.tasks.push(task.value);
+        } else {
+          acc.errors.push({ error: task.error.error, task: task.error.entity });
+        }
 
-    (await this.store.bulkUpdate(updatedTasks)).forEach((task) => {
-      if (task.tag === 'ok') {
-        result.tasks.push(task.value);
-      } else {
-        result.errors.push({ error: task.error.error, task: task.error.entity });
-      }
-    });
-
-    return result;
+        return acc;
+      },
+      { tasks: [], errors: [] }
+    );
   }
 
   /**
