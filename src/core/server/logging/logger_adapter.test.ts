@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Logger } from '.';
+import type { Logger } from '@kbn/logging';
 import { LoggerAdapter } from './logger_adapter';
 
 test('proxies all method calls to the internal logger.', () => {

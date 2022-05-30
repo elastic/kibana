@@ -7,8 +7,8 @@
  */
 
 import { PathConfigType } from '@kbn/utils';
+import type { Logger } from '@kbn/logging';
 import { mkdir } from './fs';
-import { Logger } from '../logging';
 
 export async function createDataFolder({
   pathConfig,

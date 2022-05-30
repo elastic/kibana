@@ -8,8 +8,7 @@
 jest.mock('axios', () => jest.fn());
 
 import { SyntheticsService, SyntheticsConfig } from './synthetics_service';
-// eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { loggerMock } from '@kbn/core/server/logging/logger.mock';
+import { loggerMock } from '@kbn/logging-mocks';
 import { UptimeServerSetup } from '../legacy_uptime/lib/adapters';
 import axios, { AxiosResponse } from 'axios';
 import times from 'lodash/times';

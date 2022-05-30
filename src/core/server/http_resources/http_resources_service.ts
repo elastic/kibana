@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import { RequestHandlerContext } from '..';
 
 import { CoreContext } from '../core_context';
@@ -18,7 +19,6 @@ import {
   InternalHttpServicePreboot,
 } from '../http';
 
-import { Logger } from '../logging';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
 import { CoreService } from '../../types';
 

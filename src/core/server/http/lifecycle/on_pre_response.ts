@@ -13,7 +13,7 @@ import {
   ResponseToolkit as HapiResponseToolkit,
 } from '@hapi/hapi';
 import Boom from '@hapi/boom';
-import { Logger } from '../../logging';
+import type { Logger } from '@kbn/logging';
 
 import { HapiResponseAdapter, KibanaRequest, ResponseHeaders } from '../router';
 

@@ -19,11 +19,11 @@ import { map, distinctUntilChanged, shareReplay, debounceTime, takeUntil } from 
 import { isDeepStrictEqual } from 'util';
 
 import type { RootSchema } from '@kbn/analytics-client';
+import type { Logger, LogMeta } from '@kbn/logging';
 
 import { AnalyticsServiceSetup } from '../analytics';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-import { Logger, LogMeta } from '../logging';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { InternalHttpServiceSetup } from '../http';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';

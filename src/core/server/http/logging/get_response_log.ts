@@ -10,8 +10,7 @@ import querystring from 'querystring';
 import { isBoom } from '@hapi/boom';
 import type { Request } from '@hapi/hapi';
 import numeral from '@elastic/numeral';
-import { LogMeta } from '@kbn/logging';
-import { Logger } from '../../logging';
+import type { LogMeta, Logger } from '@kbn/logging';
 import { getResponsePayloadBytes } from './get_payload_size';
 import type { KibanaRequestState } from '../router';
 

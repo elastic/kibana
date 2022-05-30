@@ -8,8 +8,8 @@
 
 import { from, merge } from 'rxjs';
 import { catchError, filter, map, mergeMap, concatMap, shareReplay, toArray } from 'rxjs/operators';
+import type { Logger } from '@kbn/logging';
 import { CoreContext } from '../../core_context';
-import { Logger } from '../../logging';
 import { PluginWrapper } from '../plugin';
 import { createPluginInitializerContext, InstanceInfo } from '../plugin_context';
 import { PluginsConfig } from '../plugins_config';

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { SavedObject } from '../../../types';
 import type { KibanaRequest } from '../../http';
-import type { Logger } from '../../logging';
 import { SavedObjectsClientContract, SavedObjectsExportablePredicate } from '../types';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import type { SavedObjectsExportTransform } from './types';

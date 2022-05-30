@@ -11,8 +11,8 @@ import typeDetect from 'type-detect';
 import { firstValueFrom, Subject } from 'rxjs';
 import { isPromise } from '@kbn/std';
 import { isConfigSchema } from '@kbn/config-schema';
+import type { Logger } from '@kbn/logging';
 
-import { Logger } from '../logging';
 import {
   AsyncPlugin,
   Plugin,
