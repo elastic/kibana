@@ -121,6 +121,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getShowTooltipHelp: () =>
+    i18n.translate('expressionXY.xyVis.showTooltip.help', {
+      defaultMessage: 'Show tooltip',
+    }),
   getOrderBucketsBySum: () =>
     i18n.translate('expressionXY.xyVis.orderBucketsBySum.help', {
       defaultMessage: 'Order buckets by sum',
