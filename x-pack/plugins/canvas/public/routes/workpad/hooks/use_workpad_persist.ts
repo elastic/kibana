@@ -17,6 +17,8 @@ import { canUserWrite } from '../../../state/selectors/app';
 import { getAssetIds } from '../../../state/selectors/assets';
 import { useWorkpadService, useNotifyService } from '../../../services';
 
+type UpdateRequest = () => Promise<unknown> | Observable<unknown>;
+
 const strings = {
   getSaveFailureTitle: () =>
     i18n.translate('xpack.canvas.error.esPersist.saveFailureTitle', {
@@ -34,23 +36,22 @@ const strings = {
 };
 
 export const syncUpdatesStream = (
-  updateRequests$: Observable<() => Promise<unknown> | Observable<unknown>>,
+  updateRequests$: Observable<UpdateRequest>,
   onError: (err: string | Error) => void
 ) =>
   updateRequests$.pipe(
-    concatMap<() => Promise<unknown> | Observable<unknown>, ObservableInput<unknown>>(
-      (updateRequest) =>
-        from(updateRequest()).pipe(
-          catchError((err) => {
-            onError(err);
-            return EMPTY;
-          })
-        )
+    concatMap<UpdateRequest, ObservableInput<unknown>>((updateRequest) =>
+      from(updateRequest()).pipe(
+        catchError((err) => {
+          onError(err);
+          return EMPTY;
+        })
+      )
     )
   );
 
 export const useWorkpadPersist = () => {
-  const { current: updateRequests$ } = useRef(new Subject<() => Promise<unknown>>());
+  const { current: updateRequests$ } = useRef(new Subject<UpdateRequest>());
   const service = useWorkpadService();
   const notifyService = useNotifyService();
 
