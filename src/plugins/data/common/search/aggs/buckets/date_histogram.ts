@@ -76,7 +76,7 @@ export interface AggParamsDateHistogram extends BaseAggParams {
 
 export const getDateHistogramBucketAgg = ({
   calculateBounds,
-  getExecutionContext,
+  aggExecutionContext,
   getConfig,
 }: AggTypesDependencies) =>
   new BucketAggType<IBucketDateHistogramAggConfig>({
@@ -141,7 +141,7 @@ export const getDateHistogramBucketAgg = ({
         agg.params,
         agg.getIndexPattern(),
         'date_histogram',
-        getExecutionContext,
+        aggExecutionContext,
         getConfig
       );
 
@@ -275,7 +275,7 @@ export const getDateHistogramBucketAgg = ({
             agg.params,
             agg.getIndexPattern(),
             'date_histogram',
-            getExecutionContext,
+            aggExecutionContext,
             getConfig
           );
           output.params.time_zone = tz;
@@ -293,7 +293,7 @@ export const getDateHistogramBucketAgg = ({
             agg.params,
             agg.getIndexPattern(),
             'date_histogram',
-            getExecutionContext,
+            aggExecutionContext,
             getConfig
           );
         },
@@ -324,7 +324,7 @@ export const getDateHistogramBucketAgg = ({
             agg.params,
             agg.getIndexPattern(),
             'date_histogram',
-            getExecutionContext,
+            aggExecutionContext,
             getConfig
           );
 

@@ -27,13 +27,7 @@ describe('inferTimeZone', () => {
       time_zone: 'CEST',
     };
     expect(
-      inferTimeZone(
-        params,
-        {} as DataView,
-        'date_histogram',
-        () => ({ performedOn: 'client' }),
-        jest.fn()
-      )
+      inferTimeZone(params, {} as DataView, 'date_histogram', { performedOn: 'client' }, jest.fn())
     ).toEqual('CEST');
   });
 
@@ -53,7 +47,7 @@ describe('inferTimeZone', () => {
           },
         } as unknown as DataView,
         'date_histogram',
-        () => ({ performedOn: 'client' }),
+        { performedOn: 'client' },
         jest.fn()
       )
     ).toEqual('UTC');
@@ -79,7 +73,7 @@ describe('inferTimeZone', () => {
           },
         } as unknown as DataView,
         'date_histogram',
-        () => ({ performedOn: 'client' }),
+        { performedOn: 'client' },
         jest.fn()
       )
     ).toEqual('UTC');
@@ -87,13 +81,7 @@ describe('inferTimeZone', () => {
 
   it('reads time zone from moment if set to default', () => {
     expect(
-      inferTimeZone(
-        {},
-        {} as DataView,
-        'date_histogram',
-        () => ({ performedOn: 'client' }),
-        jest.fn()
-      )
+      inferTimeZone({}, {} as DataView, 'date_histogram', { performedOn: 'client' }, jest.fn())
     ).toEqual('CET');
   });
 
@@ -103,7 +91,9 @@ describe('inferTimeZone', () => {
         {},
         {} as DataView,
         'date_histogram',
-        () => ({ performedOn: 'client' }),
+        {
+          performedOn: 'client',
+        },
         () => 'CET' as any
       )
     ).toEqual('CET');
@@ -115,7 +105,7 @@ describe('inferTimeZone', () => {
         {},
         {} as DataView,
         'date_histogram',
-        () => ({ performedOn: 'server' }),
+        { performedOn: 'server' },
         () => 'Browser' as any
       )
     ).toEqual('CET');

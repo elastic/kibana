@@ -76,9 +76,9 @@ export class AggsService {
           getIndexPattern: (
             await indexPatterns.indexPatternsServiceFactory(savedObjectsClient, elasticsearchClient)
           ).get,
-          getExecutionContext: () => ({
+          aggExecutionContext: {
             performedOn: 'server',
-          }),
+          },
         });
 
         const aggTypesDependencies: AggTypesDependencies = {
@@ -88,9 +88,9 @@ export class AggsService {
             deserialize: formats.deserialize,
             getDefaultInstance: formats.getDefaultInstance,
           }),
-          getExecutionContext: () => ({
+          aggExecutionContext: {
             performedOn: 'server',
-          }),
+          },
         };
 
         const typesRegistry = {

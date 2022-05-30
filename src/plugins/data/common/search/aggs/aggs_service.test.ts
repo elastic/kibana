@@ -23,9 +23,9 @@ describe('Aggs service', () => {
     calculateBounds: jest.fn(),
     getFieldFormatsStart: jest.fn(),
     getConfig: jest.fn(),
-    getExecutionContext: () => ({
+    aggExecutionContext: {
       performedOn: 'client',
-    }),
+    },
   };
 
   beforeEach(() => {
@@ -36,9 +36,9 @@ describe('Aggs service', () => {
     startDeps = {
       getConfig: jest.fn(),
       getIndexPattern: jest.fn(),
-      getExecutionContext: () => ({
+      aggExecutionContext: {
         performedOn: 'client',
-      }),
+      },
     };
   });
 

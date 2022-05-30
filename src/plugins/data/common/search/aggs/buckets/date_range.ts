@@ -29,7 +29,7 @@ export interface AggParamsDateRange extends BaseAggParams {
   time_zone?: string;
 }
 
-export const getDateRangeBucketAgg = ({ getExecutionContext, getConfig }: AggTypesDependencies) =>
+export const getDateRangeBucketAgg = ({ aggExecutionContext, getConfig }: AggTypesDependencies) =>
   new BucketAggType({
     name: BUCKET_TYPES.DATE_RANGE,
     expressionName: aggDateRangeFnName,
@@ -78,7 +78,7 @@ export const getDateRangeBucketAgg = ({ getExecutionContext, getConfig }: AggTyp
             agg.params,
             agg.getIndexPattern(),
             'date_range',
-            getExecutionContext,
+            aggExecutionContext,
             getConfig
           );
           output.params.time_zone = tz;

@@ -24,7 +24,7 @@ import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import { IndexPattern } from '../..';
+import { AggTypesDependencies, IndexPattern } from '../..';
 import { TimeRange, getTime, calculateBounds } from '../..';
 import { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
@@ -55,6 +55,7 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
 export interface AggConfigsOptions {
   typesRegistry: AggTypesRegistryStart;
   hierarchical?: boolean;
+  aggExecutionContext?: AggTypesDependencies['aggExecutionContext'];
 }
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
@@ -78,29 +79,17 @@ export type GenericBucket = estypes.AggregationsBuckets<any> & {
 export type IAggConfigs = AggConfigs;
 
 export class AggConfigs {
-  public indexPattern: IndexPattern;
   public timeRange?: TimeRange;
   public timeFields?: string[];
   public forceNow?: Date;
-  public hierarchical?: boolean = false;
-
-  private readonly typesRegistry: AggTypesRegistryStart;
-
-  aggs: IAggConfig[];
+  public aggs: IAggConfig[] = [];
 
   constructor(
-    indexPattern: IndexPattern,
+    public indexPattern: IndexPattern,
     configStates: CreateAggConfigParams[] = [],
-    opts: AggConfigsOptions
+    private opts: AggConfigsOptions
   ) {
-    this.typesRegistry = opts.typesRegistry;
-
     configStates = AggConfig.ensureIds(configStates);
-
-    this.aggs = [];
-    this.indexPattern = indexPattern;
-    this.hierarchical = opts.hierarchical;
-
     configStates.forEach((params: any) => this.createAggConfig(params));
   }
 
@@ -148,10 +137,7 @@ export class AggConfigs {
       if (!enabledOnly) return true;
       return agg.enabled;
     };
-
-    const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), {
-      typesRegistry: this.typesRegistry,
-    });
+    const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), this.opts);
 
     return aggConfigs;
   }
@@ -162,7 +148,7 @@ export class AggConfigs {
   ) => {
     const { type } = params;
     const getType = (t: string) => {
-      const typeFromRegistry = this.typesRegistry.get(t);
+      const typeFromRegistry = this.opts.typesRegistry.get(t);
 
       if (!typeFromRegistry) {
         throw new Error(
@@ -219,7 +205,7 @@ export class AggConfigs {
     const timeShifts = this.getTimeShifts();
     const hasMultipleTimeShifts = Object.keys(timeShifts).length > 1;
 
-    if (this.hierarchical) {
+    if (this.opts.hierarchical) {
       if (hasMultipleTimeShifts) {
         throw new Error('Multiple time shifts not supported for hierarchical metrics');
       }

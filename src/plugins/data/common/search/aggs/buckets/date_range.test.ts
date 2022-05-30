@@ -18,9 +18,9 @@ describe('date_range params', () => {
     aggTypesDependencies = {
       ...mockAggTypesDependencies,
       getConfig: jest.fn(),
-      getExecutionContext: jest.fn().mockReturnValue({
+      aggExecutionContext: {
         performedOn: 'client',
-      }),
+      },
     };
   });
 

@@ -12,15 +12,13 @@ import { AggTypesDependencies, DataViewField, DataView } from '../../..';
 const DEFAULT_TIME_ZONE = 'UTC';
 
 export const getConfigTimeZone = (
-  getExecutionContext: AggTypesDependencies['getExecutionContext'],
+  { performedOn }: AggTypesDependencies['aggExecutionContext'],
   getConfig: AggTypesDependencies['getConfig']
 ) => {
   const configTimezone = getConfig<string>('dateFormat:tz');
   const isDefaultTimezone = configTimezone === 'Browser';
 
   if (isDefaultTimezone) {
-    const { performedOn } = getExecutionContext();
-
     if (performedOn === 'server') {
       return DEFAULT_TIME_ZONE;
     }
@@ -39,7 +37,7 @@ export function inferTimeZone(
   params: { field?: DataViewField | string; time_zone?: string },
   dataView: DataView,
   aggName: 'date_histogram' | 'date_range',
-  getExecutionContext: AggTypesDependencies['getExecutionContext'],
+  aggExecutionContext: AggTypesDependencies['aggExecutionContext'],
   getConfig: AggTypesDependencies['getConfig']
 ) {
   let tz = params.time_zone;
@@ -57,7 +55,7 @@ export function inferTimeZone(
     const isDefaultTimezone = configTimezone === 'Browser';
 
     if (isDefaultTimezone) {
-      return getConfigTimeZone(getExecutionContext, getConfig);
+      return getConfigTimeZone(aggExecutionContext, getConfig);
     }
   }
 

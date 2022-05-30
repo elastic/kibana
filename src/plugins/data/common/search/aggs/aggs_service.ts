@@ -7,7 +7,7 @@
  */
 
 import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
-import { CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../..';
+import { AggTypesDependencies, CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../..';
 import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
@@ -38,9 +38,7 @@ export interface AggsCommonSetupDependencies {
 export interface AggsCommonStartDependencies {
   getConfig: GetConfigFn;
   getIndexPattern(id: string): Promise<IndexPattern>;
-  getExecutionContext: () => {
-    performedOn: 'server' | 'client';
-  };
+  aggExecutionContext: AggTypesDependencies['aggExecutionContext'];
 }
 
 /**

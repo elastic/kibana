@@ -88,13 +88,13 @@ export class AggsService {
     return this.aggsCommonService.setup({ registerFunction });
   }
 
-  public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
+  public start({ fieldFormats, indexPatterns }: AggsStartDependencies): AggsStart {
     const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
       getIndexPattern: indexPatterns.get,
-      getExecutionContext: () => ({
+      aggExecutionContext: {
         performedOn: 'client',
-      }),
+      },
     });
 
     const aggTypesDependencies: AggTypesDependencies = {
@@ -104,9 +104,9 @@ export class AggsService {
         deserialize: fieldFormats.deserialize,
         getDefaultInstance: fieldFormats.getDefaultInstance,
       }),
-      getExecutionContext: () => ({
+      aggExecutionContext: {
         performedOn: 'client',
-      }),
+      },
     };
 
     // initialize each agg type and store in memory

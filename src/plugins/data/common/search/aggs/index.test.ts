@@ -19,9 +19,9 @@ describe('AggTypesComponent', () => {
     calculateBounds: jest.fn(),
     getConfig: jest.fn(),
     getFieldFormatsStart: mockGetFieldFormatsStart,
-    getExecutionContext: jest.fn().mockReturnValue({
+    aggExecutionContext: {
       performedOn: 'client',
-    }),
+    },
   };
 
   describe('bucket aggs', () => {
