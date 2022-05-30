@@ -17,7 +17,7 @@ import type {
   UrlFilter,
   URLReportDefinition,
 } from '../types';
-import { convertToShortUrl } from '../configurations/utils';
+import { convertToShortUrl } from '../configurations/exploratory_view_url';
 import { URL_KEYS } from '../configurations/constants/url_constants';
 import { trackTelemetryOnApply } from '../utils/telemetry';
 

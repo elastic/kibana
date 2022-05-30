@@ -43,7 +43,7 @@ import { createCallObservabilityApi } from './services/call_observability_api';
 import { createNavigationRegistry, NavigationEntry } from './services/navigation_registry';
 import { updateGlobalNavigation } from './update_global_navigation';
 import { getExploratoryViewEmbeddable } from './components/shared/exploratory_view/embeddable';
-import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
+import { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import getAppDataView from './utils/observability_data_views/get_app_data_view';
 

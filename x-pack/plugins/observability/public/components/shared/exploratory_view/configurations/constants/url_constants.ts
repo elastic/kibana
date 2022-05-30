@@ -17,3 +17,5 @@ export enum URL_KEYS {
   NAME = 'n',
   COLOR = 'c',
 }
+
+export const ALL_VALUES_SELECTED = 'ALL_VALUES';
