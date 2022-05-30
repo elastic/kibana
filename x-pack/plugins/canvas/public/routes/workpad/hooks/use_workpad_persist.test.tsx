@@ -6,7 +6,7 @@
  */
 import { renderHook } from '@testing-library/react-hooks';
 import React, { useRef } from 'react';
-import { Subject, Observable, of, delay, map } from 'rxjs';
+import { Subject, of, delay, map } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { syncUpdatesStream, useWorkpadPersist, UpdateRequest } from './use_workpad_persist';
 
@@ -48,7 +48,7 @@ jest.mock('../../../services', () => ({
 describe('useWorkpadPersist', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    updateRequests$ = new Subject<() => Observable<string>>();
+    updateRequests$ = new Subject<UpdateRequest>();
   });
 
   afterAll(() => {
