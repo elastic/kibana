@@ -149,7 +149,7 @@ export const getRecordRangeLabel = ({
 
 export const getFrequencyLabel = (schedule: SyntheticsMonitorSchedule) => {
   return schedule.unit === ScheduleUnit.SECONDS ? (
-    <EuiText>
+    <EuiText size="s">
       {i18n.translate('xpack.synthetics.management.monitorList.frequencyInSeconds', {
         description: 'Monitor frequency in seconds',
         defaultMessage:
@@ -160,7 +160,7 @@ export const getFrequencyLabel = (schedule: SyntheticsMonitorSchedule) => {
       })}
     </EuiText>
   ) : (
-    <EuiText>
+    <EuiText size="s">
       {i18n.translate('xpack.synthetics.management.monitorList.frequencyInMinutes', {
         description: 'Monitor frequency in minutes',
         defaultMessage:

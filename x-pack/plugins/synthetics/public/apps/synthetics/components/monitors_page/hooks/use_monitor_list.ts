@@ -7,7 +7,6 @@
 
 import { useEffect, useCallback, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
 import {
   fetchMonitorListAction,
   MonitorListPageState,
@@ -21,8 +20,6 @@ export function useMonitorList() {
 
   const { pageState, loading, error } = useSelector(selectMonitorListState);
   const syntheticsMonitors = useSelector(selectEncryptedSyntheticsSavedMonitors);
-
-  const { type: viewType } = useParams<{ type: 'all' | 'invalid' }>();
 
   const loadPage = useCallback(
     (state: MonitorListPageState) => dispatch(fetchMonitorListAction.get(state)),
@@ -47,7 +44,6 @@ export function useMonitorList() {
     error,
     pageState,
     syntheticsMonitors,
-    viewType,
     loadPage,
     reloadPage,
     isDataQueried,
