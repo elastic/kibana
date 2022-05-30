@@ -12,3 +12,5 @@ import { UserContentPlugin } from './plugin';
 export const plugin = (context: PluginInitializerContext) => new UserContentPlugin(context);
 
 export type { UserContentPluginSetup, UserContentPluginStart } from './types';
+
+export { defaultUserContentAttributes } from '../common';

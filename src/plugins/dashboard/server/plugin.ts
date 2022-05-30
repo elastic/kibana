@@ -58,7 +58,7 @@ export class DashboardPlugin
         migrationDeps: {
           embeddable: plugins.embeddable,
         },
-      })
+      }),
     });
 
     if (plugins.taskManager) {
@@ -72,8 +72,6 @@ export class DashboardPlugin
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
     }
-
-    plugins.userContent.registerContent('dashboard');
 
     plugins.embeddable.registerEmbeddableFactory(
       dashboardPersistableStateServiceFactory(plugins.embeddable)
