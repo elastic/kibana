@@ -31,8 +31,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await testSubjects.click('rulesTab');
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/132704
-  describe.skip('rules list', function () {
+  describe('rules list', function () {
     const assertRulesLength = async (length: number) => {
       return await retry.try(async () => {
         const rules = await pageObjects.triggersActionsUI.getAlertsList();
@@ -513,13 +512,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         ).to.equal(' Error found in 1 rule. Show rule with error');
       });
 
-      await refreshAlertsList();
-      expect(await testSubjects.getVisibleText('totalRulesCount')).to.be('Showing: 2 of 2 rules.');
-      expect(await testSubjects.getVisibleText('totalActiveRulesCount')).to.be('Active: 0');
-      expect(await testSubjects.getVisibleText('totalOkRulesCount')).to.be('Ok: 1');
-      expect(await testSubjects.getVisibleText('totalErrorRulesCount')).to.be('Error: 1');
-      expect(await testSubjects.getVisibleText('totalPendingRulesCount')).to.be('Pending: 0');
-      expect(await testSubjects.getVisibleText('totalUnknownRulesCount')).to.be('Unknown: 0');
+      await retry.try(async () => {
+        await refreshAlertsList();
+        expect(await testSubjects.getVisibleText('totalRulesCount')).to.be(
+          'Showing: 2 of 2 rules.'
+        );
+        expect(await testSubjects.getVisibleText('totalActiveRulesCount')).to.be('Active: 0');
+        expect(await testSubjects.getVisibleText('totalOkRulesCount')).to.be('Ok: 1');
+        expect(await testSubjects.getVisibleText('totalErrorRulesCount')).to.be('Error: 1');
+        expect(await testSubjects.getVisibleText('totalPendingRulesCount')).to.be('Pending: 0');
+        expect(await testSubjects.getVisibleText('totalUnknownRulesCount')).to.be('Unknown: 0');
+      });
     });
 
     it('Expand error in rules table when there is rule with an error associated', async () => {
