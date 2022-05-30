@@ -9,6 +9,9 @@
 import Path from 'path';
 import fs from 'fs/promises';
 import JSON5 from 'json5';
+import { REPO_ROOT } from '@kbn/utils';
+import { Env } from '@kbn/config';
+import { getEnvOptions } from '../../../config/mocks';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import { ElasticsearchClient } from '../../../elasticsearch';
@@ -16,6 +19,8 @@ import { LogRecord } from '@kbn/logging';
 import { retryAsync } from '../test_helpers/retry_async';
 
 const logFilePath = Path.join(__dirname, 'incompatible_cluster_routing_allocation.log');
+const env = Env.createDefault(REPO_ROOT, getEnvOptions());
+const currentBranch = env.packageInfo.branch;
 
 async function removeLogFile() {
   // ignore errors if it doesn't exist
@@ -66,6 +71,7 @@ function createKbnRoot() {
     }
   );
 }
+
 const getClusterRoutingAllocations = (settings: Record<string, any>) => {
   const routingAllocations =
     settings?.transient?.['cluster.routing.allocation.enable'] ??
@@ -132,7 +138,7 @@ describe('incompatible_cluster_routing_allocation', () => {
         expect(
           records.find((rec) =>
             rec.message.includes(
-              `Action failed with '[incompatible_cluster_routing_allocation] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to https://www.elastic.co/guide/en/kibana/master/resolve-migrations-failures.html#routing-allocation-disabled for more information on how to resolve the issue.'. Retrying attempt 2 in 4 seconds.`
+              `Action failed with '[incompatible_cluster_routing_allocation] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to https://www.elastic.co/guide/en/kibana/${currentBranch}/resolve-migrations-failures.html#routing-allocation-disabled for more information on how to resolve the issue.'. Retrying attempt 2 in 4 seconds.`
             )
           )
         ).toBeDefined();
