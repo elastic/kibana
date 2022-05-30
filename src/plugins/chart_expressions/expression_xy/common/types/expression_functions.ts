@@ -220,6 +220,8 @@ export interface XYArgs extends DataLayerArgs {
   minTimeBarInterval?: string;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
+  orderBucketsBySum?: boolean;
+  showTooltip: boolean;
 }
 
 export interface LayeredXYArgs {
@@ -248,6 +250,8 @@ export interface LayeredXYArgs {
   addTimeMarker?: boolean;
   markSizeRatio?: number;
   minTimeBarInterval?: string;
+  orderBucketsBySum?: boolean;
+  showTooltip: boolean;
 }
 
 export interface XYProps {
@@ -278,6 +282,8 @@ export interface XYProps {
   minTimeBarInterval?: string;
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
+  orderBucketsBySum?: boolean;
+  showTooltip: boolean;
 }
 
 export interface AnnotationLayerArgs {
