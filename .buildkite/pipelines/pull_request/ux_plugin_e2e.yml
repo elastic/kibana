@@ -1,6 +1,6 @@
 steps:
-  - command: .buildkite/scripts/steps/functional/uptime.sh
-    label: 'Synthetics @elastic/synthetics Tests'
+  - command: .buildkite/scripts/steps/functional/ux_synthetics_e2e.sh
+    label: 'UX Plugin @elastic/synthetics Tests'
     agents:
       queue: ci-group-6
     depends_on: build
