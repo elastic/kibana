@@ -6,31 +6,36 @@
  */
 import { uniq } from 'lodash';
 import semverGt from 'semver/functions/gt';
-import semverLt from 'semver/functions/gt';
 import semverCoerce from 'semver/functions/coerce';
+
+// Sort array in ascending order
+export function sortVersions(versions: string[]) {
+  // remove duplicates and filter out invalid versions
+  const uniqVersions = uniq(versions).filter((v) => semverCoerce(v)?.version !== undefined);
+
+  if (uniqVersions.length > 1) {
+    return uniqVersions.sort((a, b) => (semverGt(a, b) ? 1 : -1));
+  }
+  return uniqVersions;
+}
 
 // Find max version from an array of string versions
 export function getMaxVersion(versions: string[]) {
-  const uniqVersions = uniq(versions).map((v) => semverCoerce(v)?.version);
-
-  if (uniqVersions.length === 1) {
-    return uniqVersions[0];
-  } else if (uniqVersions.length > 1) {
-    const sorted = uniqVersions.sort((a, b) => (semverGt(a as string, b as string) ? 1 : -1));
+  const sorted = sortVersions(versions);
+  if (sorted.length === 1) {
+    return sorted[0];
+  } else if (sorted.length > 1) {
     return sorted[sorted.length - 1];
   }
-  return undefined;
+  return '';
 }
 
 // Find min version from an array of string versions
 export function getMinVersion(versions: string[]) {
-  const uniqVersions = uniq(versions).map((v) => semverCoerce(v)?.version);
-
-  if (uniqVersions.length === 1) {
-    return uniqVersions[0];
-  } else if (uniqVersions.length > 1) {
-    const sorted = uniqVersions.sort((a, b) => (semverLt(a as string, b as string) ? 1 : -1));
+  const sorted = sortVersions(versions);
+  if (sorted.length >= 1) {
     return sorted[0];
   }
-  return undefined;
+  return '';
 }
+

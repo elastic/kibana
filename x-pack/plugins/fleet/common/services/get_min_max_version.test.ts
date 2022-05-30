@@ -5,7 +5,45 @@
  * 2.0.
  */
 
-import { getMaxVersion, getMinVersion } from './get_min_max_version';
+import { getMaxVersion, getMinVersion, sortVersions } from './get_min_max_version';
+
+
+describe('Fleet - sortVersions', () => {
+  it('returns the array ordered in ascending order', () => {
+    const versions = ['8.1.0', '8.3.0', '8.2.1', '7.16.0', '8.2.0', '7.16.1', '8.3.1'];
+    expect(sortVersions(versions)).toEqual([
+      '7.16.0',
+      '7.16.1',
+      '8.1.0',
+      '8.2.0',
+      '8.2.1',
+      '8.3.0',
+      '8.3.1',
+    ]);
+  });
+  it('returns the array ordered in ascending order and removes duplicates', () => {
+    const versions = ['8.1.0', '8.3.0', '8.2.0', '7.16.0', '8.2.0', '7.16.0', '8.3.1'];
+    expect(sortVersions(versions)).toEqual([
+      '7.16.0',
+      '8.1.0',
+      '8.2.0',
+      '8.3.0',
+      '8.3.1',
+    ]);
+  });
+  it('returns the array ordered in ascending order when there are snapshot versions', () => {
+    const versions = ['8.1.0', '8.2.0-SNAPSHOT', '8.2.0', '7.16.0', '7.16.1'];
+    expect(sortVersions(versions)).toEqual([
+      '7.16.0',
+      '7.16.1',
+      '8.1.0',
+      '8.2.0-SNAPSHOT',
+      '8.2.0'
+    ]);
+  });
+});
+
+
 
 describe('Fleet - getMaxVersion', () => {
   it('returns the maximum version', () => {
@@ -15,11 +53,6 @@ describe('Fleet - getMaxVersion', () => {
 
   it('returns the maximum version if the array has a single element', () => {
     const versions = ['8.1.0'];
-    expect(getMaxVersion(versions)).toEqual('8.1.0');
-  });
-
-  it('returns the major version if the array has a single element and is a snapshot', () => {
-    const versions = ['8.1.0-SNAPSHOT'];
     expect(getMaxVersion(versions)).toEqual('8.1.0');
   });
 
@@ -40,15 +73,15 @@ describe('Fleet - getMaxVersion', () => {
 
   it('returns an empty string when the passed array is empty', () => {
     const versions: string[] = [];
-    expect(getMaxVersion(versions)).toEqual(undefined);
+    expect(getMaxVersion(versions)).toEqual('');
   });
 
   it('returns empty string if the passed array is empty', () => {
-    expect(getMaxVersion([])).toEqual(undefined);
+    expect(getMaxVersion([])).toEqual('');
   });
 
-  it('returns undefined if the array contains invalid strings', () => {
-    expect(getMaxVersion(['bla', 'not-a-version'])).toEqual(undefined);
+  it('returns empty string if the array contains invalid strings', () => {
+    expect(getMaxVersion(['bla', 'not-a-version'])).toEqual('');
   });
 });
 
@@ -63,19 +96,9 @@ describe('Fleet - getMinVersion', () => {
     expect(getMaxVersion(versions)).toEqual('8.1.0');
   });
 
-  it('returns the major version if the array has a single element and is a snapshot', () => {
-    const versions = ['8.1.0-SNAPSHOT'];
-    expect(getMaxVersion(versions)).toEqual('8.1.0');
-  });
-
   it('returns the minimum version when there are duplicates', () => {
     const versions = ['8.1.0', '8.3.0', '8.2.1', '7.16.0', '8.2.0', '7.16.1', '8.2.0', '7.15.1'];
     expect(getMinVersion(versions)).toEqual('7.15.1');
-  });
-
-  it('returns the minimum version and prefers the major version to the snapshot', () => {
-    const versions = ['8.4.0', '8.2.0-SNAPSHOT', '8.2.0', '8.3.0'];
-    expect(getMinVersion(versions)).toEqual('8.2.0');
   });
 
   it('when there is only a version returns it', () => {
@@ -85,14 +108,14 @@ describe('Fleet - getMinVersion', () => {
 
   it('returns an empty string when the passed array is empty', () => {
     const versions: string[] = [];
-    expect(getMinVersion(versions)).toEqual(undefined);
+    expect(getMinVersion(versions)).toEqual('');
   });
 
   it('returns empty string if the passed array is empty', () => {
-    expect(getMaxVersion([])).toEqual(undefined);
+    expect(getMaxVersion([])).toEqual('');
   });
 
-  it('returns undefined if the array contains invalid strings', () => {
-    expect(getMaxVersion(['bla', 'not-a-version'])).toEqual(undefined);
+  it('returns empty string if the array contains invalid strings', () => {
+    expect(getMaxVersion(['bla', 'not-a-version'])).toEqual('');
   });
 });
