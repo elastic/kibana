@@ -38,4 +38,3 @@ export function getMinVersion(versions: string[]) {
   }
   return '';
 }
-

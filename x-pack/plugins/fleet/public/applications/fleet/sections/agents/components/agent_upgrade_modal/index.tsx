@@ -200,7 +200,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
     if (
       agentVersionNumber?.version &&
       semverLt(agentVersionNumber?.version, kibanaVersion) &&
-      minVersion && semverGt(agentVersionNumber?.version, minVersion)
+      minVersion &&
+      semverGt(agentVersionNumber?.version, minVersion)
     ) {
       const newOption = {
         label: searchValue,

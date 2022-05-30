@@ -7,7 +7,6 @@
 
 import { getMaxVersion, getMinVersion, sortVersions } from './get_min_max_version';
 
-
 describe('Fleet - sortVersions', () => {
   it('returns the array ordered in ascending order', () => {
     const versions = ['8.1.0', '8.3.0', '8.2.1', '7.16.0', '8.2.0', '7.16.1', '8.3.1'];
@@ -23,13 +22,7 @@ describe('Fleet - sortVersions', () => {
   });
   it('returns the array ordered in ascending order and removes duplicates', () => {
     const versions = ['8.1.0', '8.3.0', '8.2.0', '7.16.0', '8.2.0', '7.16.0', '8.3.1'];
-    expect(sortVersions(versions)).toEqual([
-      '7.16.0',
-      '8.1.0',
-      '8.2.0',
-      '8.3.0',
-      '8.3.1',
-    ]);
+    expect(sortVersions(versions)).toEqual(['7.16.0', '8.1.0', '8.2.0', '8.3.0', '8.3.1']);
   });
   it('returns the array ordered in ascending order when there are snapshot versions', () => {
     const versions = ['8.1.0', '8.2.0-SNAPSHOT', '8.2.0', '7.16.0', '7.16.1'];
@@ -38,12 +31,10 @@ describe('Fleet - sortVersions', () => {
       '7.16.1',
       '8.1.0',
       '8.2.0-SNAPSHOT',
-      '8.2.0'
+      '8.2.0',
     ]);
   });
 });
-
-
 
 describe('Fleet - getMaxVersion', () => {
   it('returns the maximum version', () => {
