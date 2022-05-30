@@ -213,7 +213,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
               <UseField
                 path="config.hasAuth"
                 component={ToggleField}
-                config={{ defaultValue: false }}
+                config={{ defaultValue: true }}
                 componentProps={{
                   euiFieldProps: {
                     label: i18n.HAS_AUTH_LABEL,
