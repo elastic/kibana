@@ -124,7 +124,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                         },
                       });
                     }}
-                    errors={inputVarsValidationResults.vars![varName]}
+                    errors={inputVarsValidationResults.vars?.[varName]}
                     forceShowErrors={forceShowErrors}
                   />
                 </EuiFlexItem>
@@ -181,7 +181,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                                 },
                               });
                             }}
-                            errors={inputVarsValidationResults.vars![varName]}
+                            errors={inputVarsValidationResults.vars?.[varName]}
                             forceShowErrors={forceShowErrors}
                           />
                         </EuiFlexItem>
