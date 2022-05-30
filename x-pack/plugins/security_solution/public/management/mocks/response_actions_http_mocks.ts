@@ -6,22 +6,22 @@
  */
 
 import { HttpFetchOptionsWithPath } from '@kbn/core/public';
-import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
+import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
   ISOLATE_HOST_ROUTE,
   UNISOLATE_HOST_ROUTE,
-} from '../../../../common/endpoint/constants';
+} from '../../../common/endpoint/constants';
 import {
   httpHandlerMockFactory,
   ResponseProvidersInterface,
-} from '../../../common/mock/endpoint/http_handler_mock_factory';
+} from '../../common/mock/endpoint/http_handler_mock_factory';
 import {
   ActionDetailsApiResponse,
   HostIsolationResponse,
   PendingActionsResponse,
-} from '../../../../common/endpoint/types';
+} from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   isolateHost: () => HostIsolationResponse;

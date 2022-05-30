@@ -35,7 +35,10 @@ async function upToDate(settingsPath: string) {
 
 export async function setupRemoteCache(repoRootPath: string) {
   // The remote cache is only for Elastic employees working locally (CI cache settings are handled elsewhere)
-  if (process.env.CI || !(await isElasticCommitter())) {
+  if (
+    process.env.FORCE_BOOTSTRAP_REMOTE_CACHE !== 'true' &&
+    (process.env.CI || !(await isElasticCommitter()))
+  ) {
     return;
   }
 
