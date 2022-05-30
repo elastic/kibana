@@ -150,9 +150,12 @@ export const getTopNavConfig = (
     stateContainer.transitions.setVis({
       title: savedVis.title,
     });
+
+    savedVis.savedSearchId = vis.data.savedSearchId;
     savedVis.searchSourceFields = vis.data.searchSource?.getSerializedFields();
     savedVis.visState = stateContainer.getState().vis;
     savedVis.uiStateJSON = vis.uiState.toString();
+
     setHasUnsavedChanges(false);
 
     try {
