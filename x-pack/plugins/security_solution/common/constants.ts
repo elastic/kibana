@@ -334,6 +334,7 @@ export const NOTIFICATION_SUPPORTED_ACTION_TYPES_IDS = [
   '.swimlane',
   '.teams',
   '.webhook',
+  '.osquery',
 ];
 
 export const NOTIFICATION_THROTTLE_NO_ACTIONS = 'no_actions' as const;
