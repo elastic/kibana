@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 
 import type { AgentPolicy } from '../types';
+import { SO_SEARCH_LIMIT } from '../constants';
 
 import { useGetAgentPolicies } from './use_request';
 
@@ -26,7 +27,7 @@ export function useAgentEnrollmentFlyoutData(): AgentEnrollmentFlyoutData {
     resendRequest: refreshAgentPolicies,
   } = useGetAgentPolicies({
     page: 1,
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
     full: true,
   });
 

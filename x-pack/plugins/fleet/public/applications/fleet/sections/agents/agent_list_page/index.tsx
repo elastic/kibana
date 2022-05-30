@@ -35,7 +35,7 @@ import {
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE } from '../../../constants';
+import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentHealth,
@@ -291,7 +291,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
     full: true,
   });
 
