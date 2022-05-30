@@ -31,7 +31,6 @@ import {
   cspRuleAssetSavedObjectType,
 } from '../../../common/constants';
 import { CspRouter } from '../../types';
-import { string } from 'joi';
 
 export const getPackagePolicy = async (
   soClient: SavedObjectsClientContract,
@@ -100,18 +99,18 @@ export const setVarToPackagePolicy = (
   return updatedPackagePolicy;
 };
 
-export const updatePackagePolicy = (
+export const updatePackagePolicy = async (
   packagePolicyService: PackagePolicyServiceInterface,
   packagePolicy: PackagePolicy | NewPackagePolicy,
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   dataYaml: string,
   logger: Logger
-): Promise<PackagePolicy> | boolean => {
+): Promise<PackagePolicy | NewPackagePolicy> => {
   const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
   if (typeof packagePolicy.id === 'string') {
     try {
-      return packagePolicyService.update(
+      return await packagePolicyService.update(
         soClient,
         esClient,
         packagePolicy.id,
@@ -122,7 +121,7 @@ export const updatePackagePolicy = (
       logger.error(`Failed to set rules configuration on package, ${exitError}`);
     }
   }
-  return false;
+  return packagePolicy;
 };
 
 export const setRulesOnPackage = async (
@@ -131,10 +130,7 @@ export const setRulesOnPackage = async (
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
   logger: Logger
-): Promise<PackagePolicy | boolean> => {
-  console.log('*******************');
-  console.log({ packagePolicy });
-  console.log('*******************');
+): Promise<PackagePolicy | NewPackagePolicy> => {
   const cspRules = await getCspRules(soClient, packagePolicy);
   const rulesConfig = createRulesConfig(cspRules);
   const dataYaml = convertRulesConfigToYaml(rulesConfig);
@@ -190,10 +186,8 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
           soClient,
           cspContext.logger
         );
-        // if (updatedPackagePolicy) {
-        //   return response.ok({ body: { status: true } });
-        // }
-        return response.ok({ body: { status: true } });
+
+        return response.ok({ body: updatedPackagePolicy });
       } catch (err) {
         const error = transformError(err);
         cspContext.logger.error(
