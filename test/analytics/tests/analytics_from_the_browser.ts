@@ -146,7 +146,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(startEvent).to.be.greaterThan(setupEvent);
 
         // This helps us to also test the helpers
-        const events = await ebtUIHelper.getLastEvents(2, ['test-plugin-lifecycle']);
+        const events = await ebtUIHelper.getEvents(2, ['test-plugin-lifecycle']);
         expect(events).to.eql([
           {
             timestamp: reportTestPluginLifecycleEventsAction!.meta[setupEvent].timestamp,
@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('it should extend the contexts with pid injected by "analytics_plugin_a"', async () => {
-        const [event] = await ebtUIHelper.getLastEvents(1, ['test-plugin-lifecycle']);
+        const [event] = await ebtUIHelper.getEvents(1, ['test-plugin-lifecycle']);
         // Validating the remote user_agent because that's the only field that it's added by the FTR plugin.
         expect(event.context).to.have.property('user_agent');
         expect(event.context.user_agent).to.be.a('string');
