@@ -10,6 +10,7 @@ import React, { FC, memo, useCallback, useMemo, useState, useEffect } from 'reac
 import styled from 'styled-components';
 import { isEqual, isEmpty } from 'lodash';
 import { FieldSpec } from '@kbn/data-views-plugin/common';
+import usePrevious from 'react-use/lib/usePrevious';
 
 import {
   DEFAULT_INDEX_KEY,
@@ -75,12 +76,12 @@ export const stepDefineDefaultValue: DefineStepRule = {
   queryBar: {
     query: { query: '', language: 'kuery' },
     filters: [],
-    saved_id: undefined,
+    saved_id: null,
   },
   threatQueryBar: {
     query: { query: DEFAULT_THREAT_MATCH_QUERY, language: 'kuery' },
     filters: [],
-    saved_id: undefined,
+    saved_id: null,
   },
   requiredFields: [],
   relatedIntegrations: [],
@@ -109,6 +110,11 @@ export const stepDefineDefaultValue: DefineStepRule = {
 const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
   ...stepDefineDefaultValue.queryBar,
   query: { ...stepDefineDefaultValue.queryBar.query, query: '*:*' },
+};
+
+const defaultCustomQuery = {
+  forNormalRules: stepDefineDefaultValue.queryBar,
+  forThreatMatchRules: threatQueryBarDefaultValue,
 };
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
@@ -195,6 +201,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const ruleType = formRuleType || initialState.ruleType;
+  const previousRuleType = usePrevious(ruleType);
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
   const fields: Readonly<BrowserFields> = aggregatableFields(browserFields);
   const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
@@ -220,36 +227,55 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [threatIndex, threatIndicesConfig]);
 
   /**
-   * When a rule type is changed to or from a threat match this will modify the
-   * default query string to either:
-   *   * from the empty string '' to '*:*' if the rule type is "threatMatchRule"
-   *   * from '*:*' back to the empty string '' if the rule type is not "threatMatchRule"
-   * This calls queryBar.reset() in both cases to not trigger validation errors as
-   * the user has not entered data into those areas yet.
-   * If the user has entered data then through reference compares we can detect reliably if
-   * the user has changed data.
-   *   * queryBar.value === defaultQueryBar (Has the user changed the input of '' yet?)
-   *   * queryBar.value === threatQueryBarDefaultValue (Has the user changed the input of '*:*' yet?)
-   * This is a stronger guarantee than "isPristine" off of the forms as that value can be reset
-   * if you go to step 2) and then back to step 1) or the form is reset in another way. Using
-   * the reference compare we know factually if the data is changed as the references must change
-   * in the form libraries form the initial defaults.
+   * When the user changes rule type to or from "threat_match" this will modify the
+   * default "Custom query" string to either:
+   *   * from '' to '*:*' if the type is switched to "threat_match"
+   *   * from '*:*' back to '' if the type is switched back from "threat_match" to another one
    */
   useEffect(() => {
     const { queryBar } = getFields();
-    if (queryBar != null) {
-      const { queryBar: defaultQueryBar } = stepDefineDefaultValue;
-      if (isThreatMatchRule(ruleType) && queryBar.value === defaultQueryBar) {
+    if (queryBar == null) {
+      return;
+    }
+
+    // NOTE: Below this code does two things that are worth commenting.
+
+    // 1. If the user enters some text in the "Custom query" form field, we want
+    // to keep it even if the user switched to another rule type. So we want to
+    // be able to figure out if the field has been modified.
+    // - The forms library provides properties (isPristine, isModified, isDirty)
+    //   for that but they can't be used in our case: their values can be reset
+    //   if you go to step 2 and then back to step 1 or the form is reset in another way.
+    // - That's why we compare the actual value of the field with default ones.
+    //   NOTE: It's important to do a deep object comparison by value.
+    //   Don't do it by reference because the forms lib can change it internally.
+
+    // 2. We call queryBar.reset() in both cases to not trigger validation errors
+    // as the user has not entered data into those areas yet.
+
+    // If the user switched rule type to "threat_match" from any other one,
+    // but hasn't changed the custom query used for normal rules (''),
+    // we reset the custom query to the default used for "threat_match" rules ('*:*').
+    if (isThreatMatchRule(ruleType) && !isThreatMatchRule(previousRuleType)) {
+      if (isEqual(queryBar.value, defaultCustomQuery.forNormalRules)) {
         queryBar.reset({
-          defaultValue: threatQueryBarDefaultValue,
+          defaultValue: defaultCustomQuery.forThreatMatchRules,
         });
-      } else if (queryBar.value === threatQueryBarDefaultValue) {
+        return;
+      }
+    }
+
+    // If the user switched rule type from "threat_match" to any other one,
+    // but hasn't changed the custom query used for "threat_match" rules ('*:*'),
+    // we reset the custom query to another default value ('').
+    if (!isThreatMatchRule(ruleType) && isThreatMatchRule(previousRuleType)) {
+      if (isEqual(queryBar.value, defaultCustomQuery.forThreatMatchRules)) {
         queryBar.reset({
-          defaultValue: defaultQueryBar,
+          defaultValue: defaultCustomQuery.forNormalRules,
         });
       }
     }
-  }, [ruleType, getFields]);
+  }, [ruleType, previousRuleType, getFields]);
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
