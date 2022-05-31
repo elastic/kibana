@@ -88,6 +88,7 @@ export const getHeatmapVisTypeDefinition = ({
           'top_hits',
           '!filtered_metric',
           '!single_percentile',
+          '!single_percentile_rank',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

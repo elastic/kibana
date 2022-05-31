@@ -11,6 +11,7 @@ differences(count())
 differences(sum(bytes), normalize_unit='1s')
 last_value(bytes, sort=timestamp)
 percentile(bytes, percent=95)
+percentile_rank(bytes, value=1024)
 
 Adding features beyond what we already support. New features are:
 

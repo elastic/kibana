@@ -98,6 +98,7 @@ export const getGaugeVisTypeDefinition = (
           '!geo_bounds',
           '!filtered_metric',
           '!single_percentile',
+          '!single_percentile_rank',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

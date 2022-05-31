@@ -93,6 +93,7 @@ describe('getOperationTypesForField', () => {
         'max',
         'unique_count',
         'percentile',
+        'percentile_rank',
         'last_value',
       ]);
     });
@@ -117,6 +118,7 @@ describe('getOperationTypesForField', () => {
         'max',
         'unique_count',
         'percentile',
+        'percentile_rank',
         'last_value',
       ]);
     });
@@ -367,6 +369,11 @@ describe('getOperationTypesForField', () => {
               Object {
                 "field": "bytes",
                 "operationType": "percentile",
+                "type": "field",
+              },
+              Object {
+                "field": "bytes",
+                "operationType": "percentile_rank",
                 "type": "field",
               },
               Object {

@@ -7,7 +7,11 @@
  */
 import { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Metric, MetricType } from '../../common/types';
-import { getPercentilesSeries, getParentPipelineSeries } from './metrics_helpers';
+import {
+  getPercentilesSeries,
+  getPercentileRankSeries,
+  getParentPipelineSeries,
+} from './metrics_helpers';
 
 describe('getPercentilesSeries', () => {
   test('should return correct config for multiple percentiles', () => {
@@ -78,6 +82,37 @@ describe('getPercentilesSeries', () => {
   });
 });
 
+describe('getPercentileRankSeries', () => {
+  test('should return correct config for multiple percentile ranks', () => {
+    const values = ['1', '5', '7'] as Metric['values'];
+    const colors = ['#68BC00', 'rgba(0,63,188,1)', 'rgba(188,38,0,1)'] as Metric['colors'];
+    const config = getPercentileRankSeries(values, colors, 'day_of_week_i');
+    expect(config).toStrictEqual([
+      {
+        agg: 'percentile_rank',
+        color: '#68BC00',
+        fieldName: 'day_of_week_i',
+        isFullReference: false,
+        params: { value: '1' },
+      },
+      {
+        agg: 'percentile_rank',
+        color: 'rgba(0,63,188,1)',
+        fieldName: 'day_of_week_i',
+        isFullReference: false,
+        params: { value: '5' },
+      },
+      {
+        agg: 'percentile_rank',
+        color: 'rgba(188,38,0,1)',
+        fieldName: 'day_of_week_i',
+        isFullReference: false,
+        params: { value: '7' },
+      },
+    ]);
+  });
+});
+
 describe('getParentPipelineSeries', () => {
   test('should return correct config for pipeline agg on percentiles', () => {
     const metrics = [
@@ -120,6 +155,36 @@ describe('getParentPipelineSeries', () => {
           percentile: 70,
         },
         pipelineAggType: 'percentile',
+      },
+    ]);
+  });
+
+  test('should return correct config for pipeline agg on percentile ranks', () => {
+    const metrics = [
+      {
+        field: 'AvgTicketPrice',
+        id: '04558549-f19f-4a87-9923-27df8b81af3e',
+        values: ['400', '500', '700'],
+        colors: ['rgba(211,96,134,1)', 'rgba(155,33,230,1)', '#68BC00'],
+        type: 'percentile_rank',
+      },
+      {
+        field: '04558549-f19f-4a87-9923-27df8b81af3e[400.0]',
+        id: '764f4110-7db9-11ec-9fdf-91a8881dd06b',
+        type: 'derivative',
+        unit: '',
+      },
+    ] as Metric[];
+    const config = getParentPipelineSeries(METRIC_TYPES.DERIVATIVE, 1, metrics);
+    expect(config).toStrictEqual([
+      {
+        agg: 'differences',
+        fieldName: 'AvgTicketPrice',
+        isFullReference: true,
+        params: {
+          value: 400,
+        },
+        pipelineAggType: 'percentile_rank',
       },
     ]);
   });
