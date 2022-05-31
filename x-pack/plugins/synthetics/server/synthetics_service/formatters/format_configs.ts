@@ -6,16 +6,36 @@
  */
 
 import { isNil, omitBy } from 'lodash';
-import { ConfigKey, MonitorFields } from '../../../common/runtime_types';
+import {
+  BrowserFields,
+  ConfigKey,
+  MonitorFields,
+  SyntheticsMonitor,
+  SyntheticsMonitorWithId,
+} from '../../../common/runtime_types';
 import { formatters } from '.';
 
+export type SyntheticsConfig = SyntheticsMonitorWithId & {
+  fields_under_root: boolean;
+  fields: {
+    config_id: string;
+    run_once?: boolean;
+    test_run_id?: string;
+    'monitor.project.name'?: string;
+    'monitor.project.id'?: string;
+  };
+};
+
 const UI_KEYS_TO_SKIP = [
+  ConfigKey.JOURNEY_ID,
+  ConfigKey.PROJECT_ID,
   ConfigKey.METADATA,
   ConfigKey.UPLOAD_SPEED,
   ConfigKey.DOWNLOAD_SPEED,
   ConfigKey.LATENCY,
   ConfigKey.IS_THROTTLING_ENABLED,
   ConfigKey.REVISION,
+  ConfigKey.CUSTOM_HEARTBEAT_ID,
   'secrets',
 ];
 
@@ -49,3 +69,28 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
 
   return omitBy(formattedMonitor, isNil) as Partial<MonitorFields>;
 };
+
+export const formatHeartbeatRequest = ({
+  monitor,
+  monitorId,
+  customHeartbeatId,
+  runOnce,
+  testRunId,
+}: {
+  monitor: SyntheticsMonitor;
+  monitorId: string;
+  customHeartbeatId?: string;
+  runOnce?: boolean;
+  testRunId?: string;
+}): SyntheticsConfig => ({
+  ...monitor,
+  id: customHeartbeatId || monitorId,
+  fields: {
+    config_id: monitorId,
+    'monitor.project.name': (monitor as BrowserFields)[ConfigKey.PROJECT_ID],
+    'monitor.project.id': (monitor as BrowserFields)[ConfigKey.PROJECT_ID],
+    run_once: runOnce,
+    test_run_id: testRunId,
+  },
+  fields_under_root: true,
+});

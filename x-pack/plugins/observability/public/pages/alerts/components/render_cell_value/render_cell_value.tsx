@@ -50,6 +50,7 @@ export const getRenderCellValue = ({
   setFlyoutAlert: (data: TopAlert) => void;
 }) => {
   return ({ columnId, data }: CellValueElementProps) => {
+    if (!data) return null;
     const { observabilityRuleTypeRegistry } = usePluginContext();
     const value = getMappedNonEcsValue({
       data,
