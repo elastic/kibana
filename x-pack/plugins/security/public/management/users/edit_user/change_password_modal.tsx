@@ -112,7 +112,7 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
         );
         services.notifications!.toasts.addSuccess(
           i18n.translate('xpack.security.management.users.changePasswordForm.successMessage', {
-            defaultMessage: 'Password successfully changed.',
+            defaultMessage: 'Password successfully changed',
           })
         );
         onSuccess?.();
