@@ -14,6 +14,7 @@ import {
 import type { CspRuleSchema } from '../../../common/schemas/csp_rule';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { UPDATE_FAILED } from './translations';
+import { useCurrentUser } from '@kbn/cases-plugin/public/common/lib/kibana';
 
 export type RuleSavedObject = Omit<
   SimpleSavedObject<CspRuleSchema>,
@@ -48,6 +49,7 @@ export const useFindCspRules = ({ search, page, perPage, filter }: RulesQuery) =
 export const useBulkUpdateCspRules = () => {
   const { savedObjects, notifications, http } = useKibana().services;
   const queryClient = useQueryClient();
+  const user = useCurrentUser();
 
   return useMutation(
     async ({
@@ -67,6 +69,7 @@ export const useBulkUpdateCspRules = () => {
       await http.post(UPDATE_RULES_CONFIG_ROUTE_PATH, {
         body: JSON.stringify({
           package_policy_id: packagePolicyId,
+          user,
         }),
       });
     },

@@ -27,6 +27,8 @@ import {
   cspRuleAssetSavedObjectType,
 } from '../../../common/constants';
 import { CspRouter } from '../../types';
+import { AuthenticatedElasticUser } from '@kbn/cases-plugin/public/common/lib/kibana';
+import { options } from 'joi';
 
 export const getPackagePolicy = async (
   soClient: SavedObjectsClientContract,
@@ -100,10 +102,19 @@ export const updatePackagePolicy = (
   packagePolicy: PackagePolicy,
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  dataYaml: string
+  dataYaml: string,
+  user: AuthenticatedElasticUser
 ): Promise<PackagePolicy> => {
   const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
-  return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy);
+  return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy, {
+    user: {
+      authentication_realm: user.authenticationRealm,
+      lookup_realm: user.lookupRealm,
+      authentication_provider: user.lookupRealm,
+      authentication_type: 'realm',
+      ...user,
+    },
+  });
 };
 
 export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspAppContext): void =>
@@ -123,6 +134,7 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
         const soClient = coreContext.savedObjects.client;
         const packagePolicyService = cspContext.service.packagePolicyService;
         const packagePolicyId = request.body.package_policy_id;
+        const user = request.body.user;
 
         if (!packagePolicyService) {
           throw new Error(`Failed to get Fleet services`);
@@ -142,7 +154,8 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
           packagePolicy,
           esClient,
           soClient,
-          dataYaml
+          dataYaml,
+          user
         );
 
         return response.ok({ body: updatedPackagePolicies });
@@ -164,4 +177,5 @@ export const configurationUpdateInputSchema = rt.object({
    * CSP integration instance ID
    */
   package_policy_id: rt.string(),
+  user: rt.any(),
 });
