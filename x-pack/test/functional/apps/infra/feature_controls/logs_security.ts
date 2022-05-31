@@ -70,7 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           });
           await testSubjects.existOrFail('~infraLogsPage');
-          await testSubjects.existOrFail('~noDataPage');
+          await testSubjects.existOrFail('kbnNoDataPage');
         });
 
         it(`doesn't show read-only badge`, async () => {
@@ -133,7 +133,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           });
           await testSubjects.existOrFail('~infraLogsPage');
-          await testSubjects.existOrFail('~noDataPage');
+          await testSubjects.existOrFail('kbnNoDataPage');
         });
 
         it(`shows read-only badge`, async () => {
