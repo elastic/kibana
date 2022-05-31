@@ -35,7 +35,7 @@ import { searchBarStyles } from './search_bar.styles';
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IDataPluginServices>;
   intl: InjectedIntl;
-  timeHistory: TimeHistoryContract;
+  timeHistory?: TimeHistoryContract;
   // Filter bar
   onFiltersUpdated?: (filters: Filter[]) => void;
   // Autorefresh
