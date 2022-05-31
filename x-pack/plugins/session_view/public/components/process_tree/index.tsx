@@ -62,8 +62,6 @@ export interface ProcessTreeDeps {
   onShowAlertDetails: (alertUuid: string) => void;
   showTimestamp?: boolean;
   verboseMode?: boolean;
-
-  refreshClicked?: boolean;
 }
 
 export const ProcessTree = ({
