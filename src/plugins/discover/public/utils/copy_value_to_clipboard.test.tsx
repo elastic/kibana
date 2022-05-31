@@ -98,11 +98,11 @@ describe('copyValueToClipboard', () => {
     const result = await copyColumnValuesToClipboard({
       services: discoverServiceMock,
       columnId: 'scripted_string',
-      rowsCount: 3,
+      rowsCount: 2,
       valueToStringConverter,
     });
 
-    expect(result).toBe('"scripted_string"\n"hi there"\n"hi there"\n"\'=1+2\'"" ;,=1+2"');
+    expect(result).toBe('"scripted_string"\n"hi there"\n"\'=1+2"";=1+2"');
     expect(discoverServiceMock.toastNotifications.addWarning).toHaveBeenCalledWith({
       title: 'Copied values of "scripted_string" column to clipboard',
       text: 'It may contain formulas whose values have been escaped.',

@@ -89,7 +89,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result.formattedString).toBe('"2022-05-30T12:10:30.000Z"');
+    expect(result.formattedString).toBe('"2022-05-22T12:10:30.000Z"');
   });
 
   it('should convert a boolean value to text', () => {
@@ -382,13 +382,13 @@ describe('convertValueToString', () => {
       dataView: discoverGridContextComplexMock.indexPattern,
       services: discoverServiceMock,
       columnId: 'array_tags',
-      rowIndex: 2,
+      rowIndex: 1,
       options: {
         disableMultiline: true,
       },
     });
 
-    expect(result.formattedString).toBe('"\'=1+2"";=1+2"');
+    expect(result.formattedString).toBe('"\'=1+2\'"" ;,=1+2"');
     expect(result.withFormula).toBe(true);
 
     const result2 = convertValueToString({
@@ -397,13 +397,13 @@ describe('convertValueToString', () => {
       dataView: discoverGridContextComplexMock.indexPattern,
       services: discoverServiceMock,
       columnId: 'scripted_string',
-      rowIndex: 2,
+      rowIndex: 1,
       options: {
         disableMultiline: true,
       },
     });
 
-    expect(result2.formattedString).toBe('"\'=1+2\'"" ;,=1+2"');
+    expect(result2.formattedString).toBe('"\'=1+2"";=1+2"');
     expect(result2.withFormula).toBe(true);
   });
 

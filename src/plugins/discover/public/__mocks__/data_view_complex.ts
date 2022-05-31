@@ -11,7 +11,7 @@ import { buildDataViewMock } from './index_pattern';
 
 const fields = [
   {
-    count: 1,
+    count: 0,
     name: '_id',
     type: 'string',
     esTypes: ['_id'],
@@ -21,7 +21,7 @@ const fields = [
     readFromDocValues: false,
   },
   {
-    count: 1,
+    count: 0,
     name: '_index',
     type: 'string',
     esTypes: ['_index'],
@@ -31,7 +31,7 @@ const fields = [
     readFromDocValues: false,
   },
   {
-    count: 1,
+    count: 0,
     name: '_score',
     type: 'number',
     scripted: false,
@@ -59,7 +59,7 @@ const fields = [
     readFromDocValues: false,
   },
   {
-    count: 1,
+    count: 2,
     name: 'array_objects.description',
     type: 'string',
     esTypes: ['text'],
@@ -84,7 +84,7 @@ const fields = [
     },
   },
   {
-    count: 1,
+    count: 0,
     name: 'array_objects.name',
     type: 'string',
     esTypes: ['text'],
@@ -109,7 +109,7 @@ const fields = [
     },
   },
   {
-    count: 2,
+    count: 0,
     name: 'array_tags',
     type: 'string',
     esTypes: ['text'],
@@ -134,7 +134,7 @@ const fields = [
     },
   },
   {
-    count: 1,
+    count: 0,
     name: 'binary_blob',
     type: 'unknown',
     esTypes: ['binary'],
@@ -144,7 +144,7 @@ const fields = [
     readFromDocValues: false,
   },
   {
-    count: 1,
+    count: 0,
     name: 'bool_enabled',
     type: 'boolean',
     esTypes: ['boolean'],
@@ -154,7 +154,7 @@ const fields = [
     readFromDocValues: true,
   },
   {
-    count: 1,
+    count: 0,
     name: 'date',
     type: 'date',
     esTypes: ['date'],
@@ -164,7 +164,17 @@ const fields = [
     readFromDocValues: true,
   },
   {
-    count: 2,
+    count: 1,
+    name: 'date_nanos',
+    type: 'date',
+    esTypes: ['date_nanos'],
+    scripted: false,
+    searchable: true,
+    aggregatable: true,
+    readFromDocValues: true,
+  },
+  {
+    count: 0,
     name: 'flattened_labels',
     type: 'unknown',
     esTypes: ['flattened'],
@@ -174,7 +184,7 @@ const fields = [
     readFromDocValues: true,
   },
   {
-    count: 1,
+    count: 0,
     name: 'geo_point',
     type: 'geo_point',
     esTypes: ['geo_point'],
@@ -185,6 +195,26 @@ const fields = [
   },
   {
     count: 1,
+    name: 'geometry',
+    type: 'unknown',
+    esTypes: ['shape'],
+    scripted: false,
+    searchable: true,
+    aggregatable: false,
+    readFromDocValues: false,
+  },
+  {
+    count: 1,
+    name: 'histogram',
+    type: 'histogram',
+    esTypes: ['histogram'],
+    scripted: false,
+    searchable: false,
+    aggregatable: true,
+    readFromDocValues: true,
+  },
+  {
+    count: 0,
     name: 'ip_addr',
     type: 'ip',
     esTypes: ['ip'],
@@ -194,7 +224,7 @@ const fields = [
     readFromDocValues: true,
   },
   {
-    count: 1,
+    count: 4,
     name: 'keyword_key',
     type: 'string',
     esTypes: ['keyword'],
@@ -270,7 +300,7 @@ const fields = [
     },
   },
   {
-    count: 1,
+    count: 3,
     name: 'number_amount',
     type: 'number',
     esTypes: ['long'],
@@ -280,7 +310,7 @@ const fields = [
     readFromDocValues: true,
   },
   {
-    count: 2,
+    count: 3,
     name: 'number_price',
     type: 'number',
     esTypes: ['float'],
@@ -290,7 +320,7 @@ const fields = [
     readFromDocValues: true,
   },
   {
-    count: 1,
+    count: 0,
     name: 'object_user.first',
     type: 'string',
     esTypes: ['text'],
@@ -300,7 +330,7 @@ const fields = [
     readFromDocValues: false,
   },
   {
-    count: 1,
+    count: 0,
     name: 'object_user.last',
     type: 'string',
     esTypes: ['text'],
@@ -310,7 +340,7 @@ const fields = [
     readFromDocValues: false,
   },
   {
-    count: 1,
+    count: 0,
     name: 'range_time_frame',
     type: 'date_range',
     esTypes: ['date_range'],
@@ -321,6 +351,16 @@ const fields = [
   },
   {
     count: 1,
+    name: 'rank_features',
+    type: 'unknown',
+    esTypes: ['rank_features'],
+    scripted: false,
+    searchable: false,
+    aggregatable: false,
+    readFromDocValues: false,
+  },
+  {
+    count: 5,
     name: 'text_message',
     type: 'string',
     esTypes: ['text'],
@@ -330,7 +370,7 @@ const fields = [
     readFromDocValues: false,
   },
   {
-    count: 1,
+    count: 0,
     name: 'vector',
     type: 'unknown',
     esTypes: ['dense_vector'],
@@ -340,7 +380,7 @@ const fields = [
     readFromDocValues: false,
   },
   {
-    count: 1,
+    count: 0,
     name: 'version',
     type: 'string',
     esTypes: ['version'],
