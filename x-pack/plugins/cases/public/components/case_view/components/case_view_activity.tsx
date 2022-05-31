@@ -25,7 +25,6 @@ import { getNoneConnector, normalizeActionConnector } from '../../configure_case
 import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
-import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -57,12 +56,9 @@ export const CaseViewActivity = ({
     [showAlertDetails]
   );
 
-  const refreshCaseViewPage = useRefreshCaseViewPage();
-
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
     caseId: caseData.id,
     caseData,
-    handleUpdateField: refreshCaseViewPage,
   });
 
   const changeStatus = useCallback(
