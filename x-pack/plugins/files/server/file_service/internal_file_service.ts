@@ -14,8 +14,10 @@ import {
   File as IFile,
   FileSavedObject,
   UpdatableFileAttributes,
+  FileKind,
 } from '../../common';
 import { File } from '../file';
+import { FileKindsRegistry } from '../file_kinds_registry';
 
 export interface CreateFileArgs<Meta = unknown> {
   name: string;
@@ -57,12 +59,12 @@ export class InternalFileService {
     private readonly soClient: SavedObjectsClientContract | ISavedObjectsRepository,
     private readonly blobStorageService: BlobStorageService,
     private readonly auditLogger: undefined | AuditLogger,
+    private readonly fileKindRegistry: FileKindsRegistry,
     private readonly logger: Logger
   ) {}
 
-  // TODO: Enforce that file kind exists based on registry
   public async createFile(args: CreateFileArgs): Promise<IFile> {
-    return await File.create(args, this);
+    return await File.create({ ...args, fileKind: this.getFileKind(args.fileKind) }, this);
   }
 
   public createAuditLog(event: AuditEvent) {
@@ -94,24 +96,30 @@ export class InternalFileService {
       if (status === 'DELETED') {
         throw new Error('File has been deleted');
       }
-      return this.toFile(result);
+      return this.toFile(result, this.getFileKind(fileKind));
     } catch (e) {
       this.logger.error(`Could not retrieve file: ${e}`);
       throw e;
     }
   }
 
-  public async list({ fileKind }: ListFilesArgs): Promise<IFile[]> {
+  public async list({ fileKind: fileKindId }: ListFilesArgs): Promise<IFile[]> {
+    const fileKind = this.getFileKind(fileKindId);
     const result = await this.soClient.find<FileSavedObjectAttributes>({
       type: this.savedObjectType,
-      filter: `${this.savedObjectType}.attributes.file_kind: ${fileKind} AND NOT ${this.savedObjectType}.attributes.status: DELETED`,
+      filter: `${this.savedObjectType}.attributes.file_kind: ${fileKindId} AND NOT ${this.savedObjectType}.attributes.status: DELETED`,
     });
-
-    return result.saved_objects.map(this.toFile.bind(this));
+    return result.saved_objects.map((file) => this.toFile(file, fileKind));
   }
 
-  public toFile(fileSO: FileSavedObject): IFile {
-    return new File(fileSO, this, this.blobStorageService, this.logger.get(`file-${fileSO.id}`));
+  public toFile(fileSO: FileSavedObject, fileKind: FileKind): IFile {
+    return new File(
+      fileSO,
+      fileKind,
+      this,
+      this.blobStorageService,
+      this.logger.get(`file-${fileSO.id}`)
+    );
   }
 
   public async createSO(attributes: FileSavedObjectAttributes): Promise<FileSavedObject<unknown>> {
@@ -120,6 +128,10 @@ export class InternalFileService {
 
   public async deleteSO(id: string): Promise<void> {
     await this.soClient.delete(this.savedObjectType, id);
+  }
+
+  public getFileKind(id: string): FileKind {
+    return this.fileKindRegistry.get(id);
   }
 
   public async updateSO(
