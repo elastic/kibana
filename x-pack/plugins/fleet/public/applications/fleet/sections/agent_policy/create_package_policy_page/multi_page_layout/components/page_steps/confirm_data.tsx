@@ -27,7 +27,7 @@ export const ConfirmDataPageStep: React.FC<MultiPageStepLayoutProps> = (props) =
     <>
       <ConfirmIncomingDataWithPreview
         agentIds={enrolledAgentIds}
-        installedPolicy={packageInfo}
+        packageInfo={packageInfo}
         agentDataConfirmed={agentDataConfirmed}
         setAgentDataConfirmed={setAgentDataConfirmed}
         troubleshootLink={troubleshootLink}

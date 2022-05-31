@@ -11,6 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiBottomBar, EuiFlexGroup, EuiFlexItem, EuiButton, EuiButtonEmpty } from '@elastic/eui';
 
 import { useLink } from '../../../../../../../hooks';
+import { useGetDiscoverLogsLinkForAgents } from '../hooks';
 
 const CenteredRoundedBottomBar = styled(EuiBottomBar)`
   max-width: 820px;
@@ -112,6 +113,46 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
             <FormattedMessage
               id="xpack.fleet.confirmIncomingData.viewDataAssetsButtonText'"
               defaultMessage="View assets"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </CenteredRoundedBottomBar>
+  );
+};
+
+export const AgentDataTimedOutBottomBar: React.FC<{
+  troubleshootLink: string;
+  agentIds: string[];
+  integration?: string;
+}> = ({ troubleshootLink, agentIds, integration }) => {
+  const discoverLogsLink = useGetDiscoverLogsLinkForAgents(agentIds);
+
+  return (
+    <CenteredRoundedBottomBar>
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty
+            color="ghost"
+            size="s"
+            href={troubleshootLink}
+            iconType="popout"
+            target="_blank"
+          >
+            <FormattedMessage
+              id="xpack.fleet.confirmIncomingData.timeout.troubleshootLinkBottomBar"
+              defaultMessage="Troubleshooting guide"
+            />
+          </EuiButtonEmpty>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton color="success" fill href={discoverLogsLink ?? ''}>
+            <FormattedMessage
+              id="xpack.fleet.confirmIncomingData.timeout.discoverLogsLink"
+              defaultMessage="View incoming {integration} logs"
+              values={{
+                integration: integration ?? '',
+              }}
             />
           </EuiButton>
         </EuiFlexItem>

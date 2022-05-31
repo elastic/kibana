@@ -27,7 +27,8 @@ import type { SearchHit } from '@kbn/core/types/elasticsearch';
 
 import styled from 'styled-components';
 
-import type { InstalledIntegrationPolicy } from '../../../../../../../components/agent_enrollment_flyout/use_get_agent_incoming_data';
+import type { PackageInfo } from '../../../../../../../../common';
+
 import {
   useGetAgentIncomingData,
   usePollingIncomingData,
@@ -37,7 +38,7 @@ import { ConfirmIncomingDataTimeout } from './confirm_incoming_data_timeout';
 
 interface Props {
   agentIds: string[];
-  installedPolicy?: InstalledIntegrationPolicy;
+  packageInfo?: PackageInfo;
   agentDataConfirmed: boolean;
   setAgentDataConfirmed: (v: boolean) => void;
   troubleshootLink: string;
@@ -122,7 +123,7 @@ const AgentDataPreview: React.FC<{ dataPreview: SearchHit[] }> = ({ dataPreview 
 
 export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
   agentIds,
-  installedPolicy,
+  packageInfo,
   agentDataConfirmed,
   setAgentDataConfirmed,
   troubleshootLink,
@@ -132,10 +133,7 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
     true,
     MAX_AGENT_DATA_PREVIEW_COUNT
   );
-  const { enrolledAgents, numAgentsWithData } = useGetAgentIncomingData(
-    incomingData,
-    installedPolicy
-  );
+  const { enrolledAgents, numAgentsWithData } = useGetAgentIncomingData(incomingData, packageInfo);
 
   if (!isLoading && enrolledAgents > 0 && numAgentsWithData > 0) {
     setAgentDataConfirmed(true);
@@ -157,7 +155,11 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
           />
           <EuiSpacer size="m" />
           {hasReachedTimeout ? (
-            <ConfirmIncomingDataTimeout troubleshootLink={troubleshootLink} />
+            <ConfirmIncomingDataTimeout
+              agentIds={agentIds}
+              troubleshootLink={troubleshootLink}
+              packageInfo={packageInfo}
+            />
           ) : (
             <FormattedMessage
               id="xpack.fleet.confirmIncomingDataWithPreview.loading"
