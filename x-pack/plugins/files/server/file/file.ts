@@ -9,6 +9,7 @@ import { Logger } from '@kbn/core/server';
 import { Readable } from 'stream';
 import {
   File as IFile,
+  FileKind,
   FileSavedObject,
   FileSavedObjectAttributes,
   FileStatus,
@@ -22,21 +23,29 @@ import {
 } from './file_attributes_reducer';
 import { createAuditEvent } from '../audit_events';
 import { InternalFileService } from '../file_service/internal_file_service';
+import { BlobStorage } from '../blob_storage_service/types';
 
 /**
  * Public class that provides all data and functionality consumers will need at the
  * individual file level
+ *
+ * @note Instantiation should not happen outside of this plugin
  */
 export class File<M = unknown> implements IFile {
   private readonly logAuditEvent: InternalFileService['createAuditLog'];
+  private readonly blobStorage: BlobStorage;
 
   constructor(
     private fileSO: FileSavedObject,
+    private readonly fileKindDescriptor: FileKind,
     private readonly internalFileService: InternalFileService,
     private readonly blobStorageService: BlobStorageService,
     private readonly logger: Logger
   ) {
     this.logAuditEvent = this.internalFileService.createAuditLog.bind(this.internalFileService);
+    this.blobStorage = this.blobStorageService.createBlobStore(
+      fileKindDescriptor.blobStoreSettings
+    );
   }
 
   private async updateFileState(action: Action) {
@@ -53,7 +62,7 @@ export class File<M = unknown> implements IFile {
     );
   }
 
-  public async update(attrs: UpdatableFileAttributes): Promise<IFile> {
+  public async update(attrs: Partial<UpdatableFileAttributes>): Promise<IFile> {
     await this.updateFileState({
       action: 'updateFile',
       payload: attrs,
@@ -71,14 +80,14 @@ export class File<M = unknown> implements IFile {
     });
 
     try {
-      const { id: contentRef, size } = await this.blobStorageService.upload(content);
+      const { id: contentRef, size } = await this.blobStorage.upload(content);
       await this.updateFileState({
         action: 'uploaded',
         payload: { content_ref: contentRef, size },
       });
     } catch (e) {
       await this.updateFileState({ action: 'uploadError' });
-      this.blobStorageService.delete(this.id).catch(() => {}); // Best effort to remove any uploaded content
+      this.blobStorage.delete(this.id).catch(() => {}); // Best effort to remove any uploaded content
       throw e;
     }
   }
@@ -88,7 +97,7 @@ export class File<M = unknown> implements IFile {
     if (!id) {
       throw new Error('No content to download');
     }
-    return this.blobStorageService.download(id, size);
+    return this.blobStorage.download({ id, size });
   }
 
   public async delete(): Promise<void> {
@@ -97,7 +106,7 @@ export class File<M = unknown> implements IFile {
       action: 'delete',
     });
     if (attributes.content_ref) {
-      await this.blobStorageService.delete(attributes.content_ref);
+      await this.blobStorage.delete(attributes.content_ref);
     }
     await this.internalFileService.deleteSO(id);
     this.logAuditEvent(
@@ -114,23 +123,31 @@ export class File<M = unknown> implements IFile {
    * in the same place.
    */
   public static async create(
-    { name, fileKind, alt, meta }: { name: string; fileKind: string; alt?: string; meta?: unknown },
+    {
+      name,
+      fileKind,
+      alt,
+      meta,
+    }: { name: string; fileKind: FileKind; alt?: string; meta?: unknown },
     internalFileService: InternalFileService
   ) {
     const fileSO = await internalFileService.createSO({
       ...createDefaultFileAttributes(),
-      file_kind: fileKind,
+      file_kind: fileKind.id,
       name,
       alt,
       meta,
     });
-    const file = internalFileService.toFile(fileSO);
+
+    const file = internalFileService.toFile(fileSO, fileKind);
+
     internalFileService.createAuditLog(
       createAuditEvent({
         action: 'create',
         message: `Created file "${file.name}" of kind "${file.fileKind}" and id "${file.id}"`,
       })
     );
+
     return file;
   }
 
@@ -143,7 +160,7 @@ export class File<M = unknown> implements IFile {
   }
 
   public get fileKind(): string {
-    return this.attributes.file_kind;
+    return this.fileKindDescriptor.id;
   }
 
   public get name(): string {
