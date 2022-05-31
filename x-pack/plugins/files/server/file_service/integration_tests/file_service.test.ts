@@ -15,6 +15,7 @@ import { Readable } from 'stream';
 
 import type { FileStatus, File } from '../../../common';
 
+import { fileKindsRegistry } from '../../file_kinds_registry';
 import { BlobStorageService } from '../../blob_storage_service';
 import { FileServiceFactory } from '..';
 import { FileServiceStart } from '../file_service';
@@ -22,6 +23,8 @@ import { CreateFileArgs } from '../internal_file_service';
 
 describe('FileService', () => {
   const fileKind: string = 'test';
+  const fileKindNonDefault: string = 'test-non-default';
+  const nonDefaultIndex = '.kibana-test-files';
 
   let manageES: TestElasticsearchUtils;
   let kbnRoot: ReturnType<typeof createRootWithCorePlugins>;
@@ -39,6 +42,15 @@ describe('FileService', () => {
     await kbnRoot.preboot();
     coreSetup = await kbnRoot.setup();
     FileServiceFactory.setup(coreSetup.savedObjects);
+    fileKindsRegistry.register({
+      id: fileKind,
+      http: {},
+    });
+    fileKindsRegistry.register({
+      id: fileKindNonDefault,
+      http: {},
+      blobStoreSettings: { esSingleIndex: { index: nonDefaultIndex } },
+    });
     coreStart = await kbnRoot.start();
     esClient = coreStart.elasticsearch.client.asInternalUser;
   });
@@ -54,6 +66,7 @@ describe('FileService', () => {
       coreStart.savedObjects,
       blobStorageService,
       undefined, // skip security for these tests
+      fileKindsRegistry,
       kbnRoot.logger.get('test-file-service')
     );
     fileService = fileServiceFactory.asInternal();
@@ -139,5 +152,14 @@ describe('FileService', () => {
     expect(updatedFile2.meta.some).toBe(updatableFields.meta.some);
     expect(updatedFile2.name).toBe(updatableFields.name);
     expect(updatedFile2.alt).toBe(updatableFields.alt);
+  });
+
+  describe('ES blob integration and file kinds', () => {
+    it('passes blob store settings', async () => {
+      const file = await createDisposableFile({ fileKind: fileKindNonDefault, name: 'test' });
+      expect(await esClient.indices.exists({ index: nonDefaultIndex })).toBe(false);
+      await file.uploadContent(Readable.from(['test']));
+      expect(await esClient.indices.exists({ index: nonDefaultIndex })).toBe(true);
+    });
   });
 });
