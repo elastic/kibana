@@ -75,4 +75,5 @@ export const useMonitoringTime = () => {
   };
 };
 
-export const [MonitoringTimeContainer, useMonitoringTimeContainerContext] = createContainer(useMonitoringTime);
+export const [MonitoringTimeContainer, useMonitoringTimeContainerContext] =
+  createContainer(useMonitoringTime);
