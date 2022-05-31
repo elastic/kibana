@@ -11,6 +11,7 @@ export const getListItemTemplate = (index: string): Record<string, unknown> => {
   const template = {
     index_patterns: [`${index}-*`],
     template: {
+      mappings: listsItemsMappings,
       settings: {
         index: {
           lifecycle: {
@@ -24,7 +25,6 @@ export const getListItemTemplate = (index: string): Record<string, unknown> => {
           },
         },
       },
-      mappings: listsItemsMappings,
     },
   };
   return template;
