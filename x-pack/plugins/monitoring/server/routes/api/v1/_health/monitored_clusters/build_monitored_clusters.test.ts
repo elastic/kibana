@@ -43,7 +43,7 @@ describe(__filename, () => {
           elasticsearch: {
             node_one: {
               shard: {
-                'Metricbeat 8': {
+                'metricbeat-8': {
                   index: '.ds-.monitoring-es-8-mb.2022',
                   lastSeen: '2022-01-01',
                 },

@@ -7,14 +7,15 @@
 
 import { isEmpty, mapValues, merge, omitBy, reduce } from 'lodash';
 
-const reInternalMonitoring = /^\.monitoring-(es|kibana|beats|logstash)-7-[0-9]{4}\..*/;
-const reMetricbeatMonitoring7 = /^\.monitoring-(es|kibana|beats|logstash|ent-search)-7.*-mb.*/;
-const reMetricbeatMonitoring8 = /^\.ds-\.monitoring-(es|kibana|beats|logstash|ent-search)-8-mb.*/;
+const internalMonitoringPattern = /^\.monitoring-(es|kibana|beats|logstash)-7-[0-9]{4}\..*/;
+const metricbeatMonitoring7Pattern = /^\.monitoring-(es|kibana|beats|logstash|ent-search)-7.*-mb.*/;
+const metricbeatMonitoring8Pattern =
+  /^\.ds-\.monitoring-(es|kibana|beats|logstash|ent-search)-8-mb.*/;
 
 const getCollectionMode = (index: string) => {
-  if (reInternalMonitoring.test(index)) return 'Internal monitoring';
-  if (reMetricbeatMonitoring7.test(index)) return 'Metricbeat 7';
-  if (reMetricbeatMonitoring8.test(index)) return 'Metricbeat 8';
+  if (internalMonitoringPattern.test(index)) return 'internal-monitoring';
+  if (metricbeatMonitoring7Pattern.test(index)) return 'metricbeat-7';
+  if (metricbeatMonitoring8Pattern.test(index)) return 'metricbeat-8';
 
   return 'Unknown collection mode';
 };

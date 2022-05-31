@@ -273,13 +273,13 @@ describe(__filename, () => {
             elasticsearch: {
               'es-node-id.1': {
                 enrich: {
-                  'Metricbeat 8': {
+                  'metricbeat-8': {
                     index: '.ds-.monitoring-es-8-mb-2022.05.19-000001',
                     lastSeen: '2022-05-19T15:51:51.716Z',
                   },
                 },
                 shard: {
-                  'Metricbeat 8': {
+                  'metricbeat-8': {
                     index: '.ds-.monitoring-es-8-mb-2022.05.19-000001',
                     lastSeen: '2022-05-19T15:51:51.716Z',
                   },
@@ -290,7 +290,7 @@ describe(__filename, () => {
             kibana: {
               'kibana-node-id.1': {
                 stats: {
-                  'Metricbeat 8': {
+                  'metricbeat-8': {
                     index: '.ds-.monitoring-kibana-8-mb-2022.05.19-000001',
                     lastSeen: '2022-05-19T15:51:53.680Z',
                   },
@@ -301,7 +301,7 @@ describe(__filename, () => {
             enterpriseSearch: {
               'ent-search-node-id.1': {
                 health: {
-                  'Metricbeat 8': {
+                  'metricbeat-8': {
                     index: '.ds-.monitoring-ent-search-8-mb-2022.05.19-000001',
                     lastSeen: '2022-05-19T15:51:51.716Z',
                   },
