@@ -47,7 +47,7 @@ describe('check_capabilities', () => {
       );
       const { capabilities } = await getCapabilities();
       const count = Object.keys(capabilities).length;
-      expect(count).toBe(36);
+      expect(count).toBe(37);
     });
   });
 
@@ -76,6 +76,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(true);
       expect(capabilities.canUseMlAlerts).toBe(true);
       expect(capabilities.canGetTrainedModels).toBe(true);
+      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -128,6 +129,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(true);
       expect(capabilities.canUseMlAlerts).toBe(true);
       expect(capabilities.canGetTrainedModels).toBe(true);
+      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(true);
       expect(capabilities.canDeleteJob).toBe(true);
@@ -180,6 +182,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(false);
       expect(capabilities.canUseMlAlerts).toBe(false);
       expect(capabilities.canGetTrainedModels).toBe(true);
+      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -232,6 +235,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(false);
       expect(capabilities.canUseMlAlerts).toBe(false);
       expect(capabilities.canGetTrainedModels).toBe(true);
+      expect(capabilities.canTestTrainedModels).toBe(true);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -284,6 +288,7 @@ describe('check_capabilities', () => {
       expect(capabilities.canDeleteAnnotation).toBe(false);
       expect(capabilities.canUseMlAlerts).toBe(false);
       expect(capabilities.canGetTrainedModels).toBe(false);
+      expect(capabilities.canTestTrainedModels).toBe(false);
 
       expect(capabilities.canCreateJob).toBe(false);
       expect(capabilities.canDeleteJob).toBe(false);
@@ -338,6 +343,7 @@ describe('check_capabilities', () => {
     expect(capabilities.canDeleteAnnotation).toBe(false);
     expect(capabilities.canUseMlAlerts).toBe(false);
     expect(capabilities.canGetTrainedModels).toBe(false);
+    expect(capabilities.canTestTrainedModels).toBe(false);
 
     expect(capabilities.canCreateJob).toBe(false);
     expect(capabilities.canDeleteJob).toBe(false);
