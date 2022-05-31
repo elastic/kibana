@@ -20,6 +20,7 @@ interface ExploratoryViewContextValue {
   }>;
   dataViews: Record<string, string>;
   reportConfigMap: ReportConfigMap;
+  asPanel?: boolean;
   setHeaderActionMenu: AppMountParameters['setHeaderActionMenu'];
   theme$: AppMountParameters['theme$'];
   isEditMode?: boolean;
@@ -37,11 +38,13 @@ export function ExploratoryViewContextProvider({
   dataViews,
   reportConfigMap,
   setHeaderActionMenu,
+  asPanel = true,
   theme$,
 }: { children: JSX.Element } & ExploratoryViewContextValue) {
   const [isEditMode, setIsEditMode] = useState(false);
 
   const value = {
+    asPanel,
     reportTypes,
     dataTypes,
     dataViews,

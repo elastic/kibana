@@ -29,6 +29,7 @@ export type {
   VisualizationSuggestion,
 } from './types';
 export type {
+  MetricState,
   ValueLabelConfig,
   PieVisualizationState,
   PieLayerState,
