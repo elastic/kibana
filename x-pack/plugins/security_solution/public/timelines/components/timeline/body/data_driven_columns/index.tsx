@@ -441,7 +441,7 @@ export const getMappedNonEcsValue = ({
   data,
   fieldName,
 }: {
-  data: TimelineNonEcsData[];
+  data?: TimelineNonEcsData[];
   fieldName: string;
 }): string[] | undefined => {
   /*
@@ -462,7 +462,7 @@ export const useGetMappedNonEcsValue = ({
   data,
   fieldName,
 }: {
-  data: TimelineNonEcsData[];
+  data?: TimelineNonEcsData[];
   fieldName: string;
 }): string[] | undefined => {
   return useMemo(() => getMappedNonEcsValue({ data, fieldName }), [data, fieldName]);
