@@ -326,4 +326,13 @@ export const testCases: Array<
     /* pageName */ SecurityPageName.timelines,
     /* detailName */ undefined,
   ],
+  [
+    /* page */ CONSTANTS.kubernetesPage,
+    /* namespaceLower */ 'kubernetes',
+    /* namespaceUpper */ 'Kubernetes',
+    /* pathName */ '/kubernetes',
+    /* type */ null,
+    /* pageName */ SecurityPageName.kubernetes,
+    /* detailName */ undefined,
+  ],
 ];

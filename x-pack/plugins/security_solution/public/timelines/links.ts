@@ -21,7 +21,7 @@ export const links: LinkItem = {
       defaultMessage: 'Timelines',
     }),
   ],
-  globalNavOrder: 9005,
+  globalNavOrder: 9006,
   links: [
     {
       id: SecurityPageName.timelinesTemplates,

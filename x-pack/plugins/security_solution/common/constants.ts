@@ -119,6 +119,7 @@ export enum SecurityPageName {
   sessions = 'sessions',
   usersEvents = 'users-events',
   usersExternalAlerts = 'users-external_alerts',
+  kubernetes = 'kubernetes',
   exploreLanding = 'explore',
   dashboardsLanding = 'dashboards',
 }
@@ -138,6 +139,7 @@ export const RULES_CREATE_PATH = `${RULES_PATH}/create` as const;
 export const EXCEPTIONS_PATH = '/exceptions' as const;
 export const HOSTS_PATH = '/hosts' as const;
 export const USERS_PATH = '/users' as const;
+export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
 export const MANAGEMENT_PATH = '/administration' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
@@ -162,6 +164,7 @@ export const APP_EXCEPTIONS_PATH = `${APP_PATH}${EXCEPTIONS_PATH}` as const;
 export const APP_HOSTS_PATH = `${APP_PATH}${HOSTS_PATH}` as const;
 export const APP_USERS_PATH = `${APP_PATH}${USERS_PATH}` as const;
 export const APP_NETWORK_PATH = `${APP_PATH}${NETWORK_PATH}` as const;
+export const APP_KUBERNETES_PATH = `${APP_PATH}${KUBERNETES_PATH}` as const;
 export const APP_TIMELINES_PATH = `${APP_PATH}${TIMELINES_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;

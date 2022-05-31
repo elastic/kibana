@@ -61,6 +61,7 @@ export const securityNavKeys = [
   SecurityPageName.timelines,
   SecurityPageName.trustedApps,
   SecurityPageName.users,
+  SecurityPageName.kubernetes,
 ] as const;
 export type SecurityNavKey = typeof securityNavKeys[number];
 

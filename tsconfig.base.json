@@ -337,6 +337,8 @@
       "@kbn/infra-plugin/*": ["x-pack/plugins/infra/*"],
       "@kbn/ingest-pipelines-plugin": ["x-pack/plugins/ingest_pipelines"],
       "@kbn/ingest-pipelines-plugin/*": ["x-pack/plugins/ingest_pipelines/*"],
+      "@kbn/kubernetes-security-plugin": ["x-pack/plugins/kubernetes_security"],
+      "@kbn/kubernetes-security-plugin/*": ["x-pack/plugins/kubernetes_security/*"],
       "@kbn/lens-plugin": ["x-pack/plugins/lens"],
       "@kbn/lens-plugin/*": ["x-pack/plugins/lens/*"],
       "@kbn/license-api-guard-plugin": ["x-pack/plugins/license_api_guard"],
