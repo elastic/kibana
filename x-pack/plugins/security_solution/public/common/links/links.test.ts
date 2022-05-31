@@ -169,7 +169,7 @@ describe('Security app links', () => {
       expect(result.current).toBe(true);
     });
 
-    it('should return false if the link exists', () => {
+    it('should return false if the link does not exists', () => {
       const { result } = renderUseLinkExists(SecurityPageName.rules);
       expect(result.current).toBe(false);
     });
