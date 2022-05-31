@@ -12,6 +12,7 @@ import type { TimefilterSetup } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { setupValueSuggestionProvider } from './value_suggestion_provider';
 import type { ValueSuggestionsGetFn } from './value_suggestion_provider';
+import type { DataView } from '@kbn/data-views-plugin/public';
 
 describe('FieldSuggestions', () => {
   let getValueSuggestions: ValueSuggestionsGetFn;
@@ -186,31 +187,27 @@ describe('FieldSuggestions', () => {
         ...stubIndexPattern,
         title: 'customIndexPattern',
         useTimeRange: false,
-      };
+      } as unknown as DataView;
 
       await getValueSuggestions({
-        // @ts-ignore
         indexPattern: customIndexPattern,
         field: fields[0],
         query: '',
         useTimeRange: false,
       });
       await getValueSuggestions({
-        // @ts-ignore
-        indexPattern: customIndexPattern,
+        indexPattern: customIndexPattern as unknown as DataView,
         field: fields[0],
         query: 'query',
         useTimeRange: false,
       });
       await getValueSuggestions({
-        // @ts-ignore
         indexPattern: customIndexPattern,
         field: fields[1],
         query: '',
         useTimeRange: false,
       });
       await getValueSuggestions({
-        // @ts-ignore
         indexPattern: customIndexPattern,
         field: fields[1],
         query: 'query',

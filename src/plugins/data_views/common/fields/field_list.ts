@@ -43,7 +43,7 @@ export const fieldList = (
       this.groups.get(field.type)!.set(field.name, field);
     };
     private removeByGroup = (field: DataViewField) =>
-      this.groups.get(field.type)!.delete(field.name);
+      this.groups.get(field.type)?.delete(field.name);
 
     constructor() {
       super();

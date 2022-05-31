@@ -21,7 +21,7 @@ import type {
   QuerySuggestion,
 } from '@kbn/unified-search-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { IndexPattern } from '../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
 import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';

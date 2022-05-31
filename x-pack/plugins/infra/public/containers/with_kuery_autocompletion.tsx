@@ -13,7 +13,7 @@ import {
   KibanaServices,
 } from '@kbn/kibana-react-plugin/public';
 import { QuerySuggestion, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { RendererFunction } from '../utils/typed_react';
 
 interface WithKueryAutocompletionLifecycleProps {

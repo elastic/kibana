@@ -7,7 +7,7 @@
  */
 
 import { isFilterable } from '.';
-import { DataViewField } from './fields';
+import type { DataViewField } from './fields';
 
 const mockField = {
   name: 'foo',

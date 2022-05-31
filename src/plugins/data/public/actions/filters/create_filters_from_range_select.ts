@@ -10,7 +10,7 @@ import { last } from 'lodash';
 import moment from 'moment';
 import { Datatable } from '@kbn/expressions-plugin';
 import { esFilters, RangeFilterParams } from '../..';
-import { IFieldType } from '../../../common';
+import type { IFieldType } from '../../../common';
 import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 
