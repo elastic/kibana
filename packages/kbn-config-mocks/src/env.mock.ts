@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-// Test helpers to simplify mocking environment options.
-
-import { EnvOptions } from '../env';
+import type { EnvOptions } from '@kbn/config';
 
 type DeepPartial<T> = {
   [P in keyof T]?: T[P] extends Array<infer R> ? Array<DeepPartial<R>> : DeepPartial<T[P]>;

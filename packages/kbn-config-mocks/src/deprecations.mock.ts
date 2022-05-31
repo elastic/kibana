@@ -7,7 +7,9 @@
  */
 
 import type { DocLinks } from '@kbn/doc-links';
-import type { ConfigDeprecationContext } from './types';
+import type { ConfigDeprecationContext } from '@kbn/config';
+
+export type ConfigDeprecationContextMock = ConfigDeprecationContext;
 
 const createMockedContext = (): ConfigDeprecationContext => {
   return {

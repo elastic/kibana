@@ -7,15 +7,15 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ObjectToConfigAdapter } from './object_to_config_adapter';
+import { ObjectToConfigAdapter, IConfigService } from '@kbn/config';
 
-import { IConfigService } from './config_service';
+export type IConfigServiceMock = jest.Mocked<IConfigService>;
 
 const createConfigServiceMock = ({
   atPath = {},
   getConfig$ = {},
 }: { atPath?: Record<string, any>; getConfig$?: Record<string, any> } = {}) => {
-  const mocked: jest.Mocked<IConfigService> = {
+  const mocked: IConfigServiceMock = {
     atPath: jest.fn(),
     atPathSync: jest.fn(),
     getConfig$: jest.fn(),
@@ -37,6 +37,7 @@ const createConfigServiceMock = ({
   mocked.getUnusedPaths.mockResolvedValue([]);
   mocked.isEnabledAtPath.mockResolvedValue(true);
   mocked.getHandledDeprecatedConfigs.mockReturnValue([]);
+
   return mocked;
 };
 
