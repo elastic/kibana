@@ -139,6 +139,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         dataTestSubj="serviceEnviromentComboBox"
       />
       <EuiSpacer />
+
       <EuiFlexGroup justifyContent="flexEnd">
         {/* Cancel button */}
         <EuiFlexItem grow={false}>
