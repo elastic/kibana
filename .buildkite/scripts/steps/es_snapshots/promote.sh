@@ -13,5 +13,7 @@ EOF
 
 node "$(dirname "${0}")/promote_manifest.js" "$ES_SNAPSHOT_MANIFEST"
 
-echo "--- Trigger agent packer cache pipeline"
-node .buildkite/scripts/steps/trigger_packer_cache.js
+if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
+  echo "--- Trigger agent packer cache pipeline"
+  node .buildkite/scripts/steps/trigger_packer_cache.js
+fi
