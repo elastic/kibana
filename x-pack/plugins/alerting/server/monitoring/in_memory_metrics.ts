@@ -6,6 +6,9 @@
  */
 
 import { Logger } from '@kbn/logging';
+import { MeterProvider } from '@opentelemetry/sdk-metrics-base';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
+import { Attributes, Counter } from '@opentelemetry/api-metrics';
 
 export enum IN_MEMORY_METRICS {
   RULE_EXECUTIONS = 'ruleExecutions',
@@ -21,11 +24,29 @@ export class InMemoryMetrics {
     [IN_MEMORY_METRICS.RULE_TIMEOUTS]: 0,
   };
 
+  private otelMetrics: {
+    [IN_MEMORY_METRICS.RULE_EXECUTIONS]: Counter;
+    [IN_MEMORY_METRICS.RULE_FAILURES]: Counter;
+    [IN_MEMORY_METRICS.RULE_TIMEOUTS]: Counter;
+  };
+
   constructor(logger: Logger) {
     this.logger = logger;
+
+    this.logger.debug('MATSCHAFFER: CREATING meter provider');
+    const provider = new MeterProvider({
+      exporter: new OTLPMetricExporter(),
+      interval: 1000,
+    });
+    const meter = provider.getMeter('example-meter');
+    this.otelMetrics = {
+      [IN_MEMORY_METRICS.RULE_EXECUTIONS]: meter.createCounter(IN_MEMORY_METRICS.RULE_EXECUTIONS),
+      [IN_MEMORY_METRICS.RULE_FAILURES]: meter.createCounter(IN_MEMORY_METRICS.RULE_FAILURES),
+      [IN_MEMORY_METRICS.RULE_TIMEOUTS]: meter.createCounter(IN_MEMORY_METRICS.RULE_TIMEOUTS),
+    };
   }
 
-  public increment(metric: IN_MEMORY_METRICS) {
+  public increment(metric: IN_MEMORY_METRICS, attributes?: Attributes) {
     if (this.inMemoryMetrics[metric] === null) {
       this.logger.info(
         `Metric ${metric} is null because the counter ran over the max safe integer value, skipping increment.`
@@ -41,6 +62,8 @@ export class InMemoryMetrics {
     } else {
       (this.inMemoryMetrics[metric] as number)++;
     }
+
+    this.otelMetrics[metric].add(1, attributes);
   }
 
   public getInMemoryMetric(metric: IN_MEMORY_METRICS) {
