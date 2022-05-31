@@ -22,9 +22,15 @@ export interface ConsoleDataState {
    * List of commands entered by the user and being shown in the UI
    */
   commandHistory: CommandHistoryItem[];
+
   /** Component defined on input to the Console that will handle the `help` command */
   HelpComponent?: CommandExecutionComponent;
+
   dataTestSubj?: string;
+
+  sidePanel: {
+    show: null | 'help'; // will have other values in the future
+  };
 }
 
 export interface CommandHistoryItem {
@@ -42,6 +48,10 @@ export type ConsoleDataAction =
   | { type: 'scrollDown' }
   | { type: 'executeCommand'; payload: { input: string } }
   | { type: 'clear' }
+  | {
+      type: 'showSidePanel';
+      payload: { show: ConsoleDataState['sidePanel']['show'] };
+    }
   | {
       type: 'updateCommandStoreState';
       payload: {
