@@ -569,7 +569,7 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
-  it('should render metrics when isSelectorView=true', async () => {
+  it('should render metrics when isSelectorView=false', async () => {
     const wrapper = mount(
       <TestProviders>
         <AllCasesList isSelectorView={false} />
