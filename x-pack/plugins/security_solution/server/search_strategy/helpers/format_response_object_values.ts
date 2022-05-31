@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mapValues, isObject, isArray, isEmpty } from 'lodash/fp';
+import { mapValues, isObject, isArray } from 'lodash/fp';
 import { set } from '@elastic/safer-lodash-set';
 
 import { toArray } from '../../../common/utils/to_array';
