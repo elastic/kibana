@@ -59,7 +59,6 @@ export const usePrimaryNavigation = ({
   });
 
   return {
-    isForceOpen: true,
     name: translatedNavTitle,
     icon: 'logoSecurity',
     ...(isGroupedNavigationEnabled
