@@ -253,6 +253,27 @@ export async function mountApp(
         })();
       }, [initCallback, initialInput, props.history, redirectCallback]);
       trackUiEvent('loaded');
+<<<<<<< HEAD
+=======
+      const initialInput = getInitialInput(props.id, props.editByValue);
+
+      // Clear app-specific filters when navigating to Lens. Necessary because Lens
+      // can be loaded without a full page refresh. If the user navigates to Lens from Discover
+      // we keep the filters
+      if (!initialContext) {
+        data.query.filterManager.setAppFilters([]);
+      }
+
+      useEffect(() => {
+        if (editorState === 'data') {
+          lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
+          lensStore.dispatch(
+            loadInitial({ redirectCallback, initialInput, history: props.history })
+          );
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+      }, [props.id, props.editByValue, editorState]);
+>>>>>>> upstream/main
 
       if (editorState === 'loading') {
         return <EuiLoadingSpinner />;
