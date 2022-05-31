@@ -480,7 +480,7 @@ export default async function ({ readConfigFile }) {
           },
         },
 
-        security_user: {
+        cluster_security_manager: {
           elasticsearch: {
             cluster: ['manage_security'],
           },

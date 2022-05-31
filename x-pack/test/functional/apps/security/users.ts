@@ -37,7 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       log.debug('users');
-      await security.testUser.setRoles(['security_user']);
+      await security.testUser.setRoles(['cluster_security_manager']);
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });

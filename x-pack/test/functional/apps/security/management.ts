@@ -28,7 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     this.tags(['skipFirefox']);
 
     before(async () => {
-      await security.testUser.setRoles(['security_user']);
+      await security.testUser.setRoles(['cluster_security_manager']);
       await PageObjects.security.initTests();
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
