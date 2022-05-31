@@ -49,7 +49,7 @@ interface ResultHit<T> {
       total: TotalValue | number;
       max_score: number | null;
       hits: Array<{
-        _source: T;
+        fields: T;
         sort?: [number];
         _index?: string;
         _type?: string;

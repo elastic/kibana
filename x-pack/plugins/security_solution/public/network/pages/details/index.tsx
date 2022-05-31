@@ -104,7 +104,6 @@ const NetworkDetailsComponent: React.FC = () => {
   useInvalidFilterQuery({ id: ID, filterQuery, kqlError, query, startDate: from, endDate: to });
 
   const [loading, { id, inspect, networkDetails, refetch }] = useNetworkDetails({
-    docValueFields,
     skip: isInitializing,
     filterQuery,
     indexNames: selectedPatterns,
