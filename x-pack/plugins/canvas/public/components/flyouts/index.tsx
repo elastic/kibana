@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
+import React from 'react';
+import { KeyboardShortcutsDocPanel } from '../keyboard_shortcuts_doc_panel';
 
-export interface CaseViewMetricsProps {
-  metrics: SingleCaseMetrics | null;
-  features: SingleCaseMetricsFeature[];
-  isLoading: boolean;
-}
+export const Flyouts = () => (
+  <>
+    <KeyboardShortcutsDocPanel />
+  </>
+);
