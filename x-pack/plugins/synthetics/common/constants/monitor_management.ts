@@ -12,7 +12,7 @@ export enum ConfigKey {
   ENABLED = 'enabled',
   HOSTS = 'hosts',
   IGNORE_HTTPS_ERRORS = 'ignore_https_errors',
-  MONITOR_SOURCE_TYPE = 'monitor.origin',
+  MONITOR_SOURCE_TYPE = 'origin',
   JOURNEY_FILTERS_MATCH = 'filter_journeys.match',
   JOURNEY_FILTERS_TAGS = 'filter_journeys.tags',
   JOURNEY_ID = 'journey_id',

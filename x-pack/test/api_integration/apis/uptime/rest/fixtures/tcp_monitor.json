@@ -29,5 +29,5 @@
   ],
   "name": "Test HTTP Monitor 04",
   "namespace": "testnamespace",
-  "monitor.origin": "ui"
+  "origin": "ui"
 }
