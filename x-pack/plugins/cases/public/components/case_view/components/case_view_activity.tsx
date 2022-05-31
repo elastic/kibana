@@ -25,7 +25,7 @@ import { getNoneConnector, normalizeActionConnector } from '../../configure_case
 import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
-import { useRefreshCaseViewPage } from '../case_view_page';
+import { useRefreshCaseViewPage } from '../use_on_refresh_case_view_page';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -43,11 +43,10 @@ export const CaseViewActivity = ({
   const { userCanCrud } = useCasesContext();
   const { getCaseViewUrl } = useCaseViewNavigation();
 
-  const {
-    data: userActionsData,
-    refetch: fetchCaseUserActions,
-    isLoading: isLoadingUserActions,
-  } = useGetCaseUserActions(caseData.id, caseData.connector.id);
+  const { data: userActionsData, isLoading: isLoadingUserActions } = useGetCaseUserActions(
+    caseData.id,
+    caseData.connector.id
+  );
 
   const onShowAlertDetails = useCallback(
     (alertId: string, index: string) => {
@@ -133,7 +132,6 @@ export const CaseViewActivity = ({
                 caseUserActions={userActionsData.caseUserActions}
                 data={caseData}
                 actionsNavigation={actionsNavigation}
-                fetchUserActions={fetchCaseUserActions}
                 isLoadingDescription={isLoading && loadingKey === 'description'}
                 isLoadingUserActions={isLoadingUserActions}
                 onShowAlertDetails={onShowAlertDetails}
@@ -147,7 +145,6 @@ export const CaseViewActivity = ({
                     />
                   ) : null
                 }
-                updateCase={refreshCaseViewPage}
                 useFetchAlertData={useFetchAlertData}
                 userCanCrud={userCanCrud}
               />
