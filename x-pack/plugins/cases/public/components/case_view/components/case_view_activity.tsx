@@ -194,7 +194,6 @@ export const CaseViewActivity = ({
             isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
             isValidConnector={isLoadingConnectors ? true : isValidConnector}
             onSubmit={onSubmitConnector}
-            updateCase={refreshCaseViewPage}
             userActions={userActionsData.caseUserActions}
             userCanCrud={userCanCrud}
           />
