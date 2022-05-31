@@ -12,7 +12,6 @@ import { FormatFactory } from '../types';
 import {
   AxisExtentConfig,
   CommonXYDataLayerConfig,
-  CommonXYReferenceLineLayerConfig,
   ExtendedYConfig,
   YConfig,
   YScaleType,
@@ -44,7 +43,7 @@ export function isFormatterCompatible(
 }
 
 export function groupAxesByType(
-  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
+  layers: CommonXYDataLayerConfig[],
   fieldFormats: LayersFieldFormats
 ) {
   const series: {

@@ -60,7 +60,6 @@ import {
   getFormattedTablesByLayers,
   getLayersFormats,
   getLayersTitles,
-  validateExtent,
   isReferenceLineYConfig,
   getFilteredLayers,
   getReferenceLayers,
