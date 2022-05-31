@@ -720,7 +720,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                   iconType: 'cross',
                   label: REMOVE_COLUMN,
                   onClick: () => {
-                    console.log('remove column 2', header.id);
                     dispatch(tGridActions.removeColumn({ id, columnId: header.id }));
                   },
                   size: 'xs',
