@@ -569,6 +569,31 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
+  it('should render metrics when isSelectorView=false', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={false} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="cases-metrics-stats"]').exists()).toBe(true);
+    });
+  });
+
+  it('should not render metrics when isSelectorView=true', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={true} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="case-table-selected-case-count"]').exists()).toBe(
+        false
+      );
+      expect(wrapper.find('[data-test-subj="cases-metrics-stats"]').exists()).toBe(false);
+    });
+  });
+
   it('case table should not be selectable when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>

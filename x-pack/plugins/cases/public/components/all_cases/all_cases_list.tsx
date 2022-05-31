@@ -213,7 +213,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           className="essentialAnimation"
           $isShow={(isCasesLoading || isLoading) && !isDataEmpty}
         />
-        <CasesMetrics refresh={refresh} />
+        {!isSelectorView ? <CasesMetrics refresh={refresh} /> : null}
         <CasesTableFilters
           countClosedCases={data.countClosedCases}
           countOpenCases={data.countOpenCases}
