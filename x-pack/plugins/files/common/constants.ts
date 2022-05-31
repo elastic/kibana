@@ -12,3 +12,5 @@ export const PLUGIN_NAME = 'files';
  * Unique type name of the file saved object
  */
 export const FILE_SO_TYPE = 'file';
+
+export const ES_SINGLE_INDEX_BLOB_STORE = 'esSingleIndex' as const;
