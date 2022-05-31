@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect } from 'react';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -39,9 +39,14 @@ export const Instructions = (props: InstructionProps) => {
     mode,
     setMode,
     isIntegrationFlow,
+    refreshAgentPolicies,
   } = props;
   const fleetStatus = useFleetStatus();
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
+
+  useEffect(() => {
+    refreshAgentPolicies();
+  }, [refreshAgentPolicies]);
 
   const { data: agents, isLoading: isLoadingAgents } = useGetAgents({
     page: 1,
