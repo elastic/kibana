@@ -23975,7 +23975,6 @@
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsComboboxLabel": "選択したルールのタグを追加",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsOverwriteCheckboxLabel": "すべての選択したルールタグを上書き",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.addTagsTitle": "タグを追加",
-    "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.closeButtonLabel": "閉じる",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxHelpText": "Elasticsearchインデックスのデフォルトインデックスパターンをドロップダウンから削除します。カスタムインデックスパターンを追加し、Enterを押すと、新しいインデックスパターンを開始できます。",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsComboboxLabel": "選択したルールのインデックスパターンを削除",
     "xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.deleteIndexPatternsTitle": "インデックスパターンを削除",

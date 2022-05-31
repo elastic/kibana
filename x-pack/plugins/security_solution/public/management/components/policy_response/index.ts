@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export const RULE_PASSED = `passed`;
-export const RULE_FAILED = `failed`;
+export { PolicyResponseWrapper } from './policy_response_wrapper';

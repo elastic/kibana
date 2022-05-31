@@ -6,15 +6,17 @@
  * Side Public License, v 1.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
-import { RawConfigService } from './raw_config_service';
 import { Observable, of } from 'rxjs';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { RawConfigService } from '@kbn/config';
+
+export type RawConfigServiceMock = jest.Mocked<PublicMethodsOf<RawConfigService>>;
 
 const createRawConfigServiceMock = ({
   rawConfig = {},
   rawConfig$ = undefined,
 }: { rawConfig?: Record<string, any>; rawConfig$?: Observable<Record<string, any>> } = {}) => {
-  const mocked: jest.Mocked<PublicMethodsOf<RawConfigService>> = {
+  const mocked: RawConfigServiceMock = {
     loadConfig: jest.fn(),
     stop: jest.fn(),
     reloadConfig: jest.fn(),
