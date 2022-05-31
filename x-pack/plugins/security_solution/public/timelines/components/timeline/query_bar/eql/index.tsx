@@ -187,6 +187,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
           idAria: 'timelineEqlQueryBar',
           isDisabled: indexPatternsLoading,
           isLoading: indexPatternsLoading,
+          indexPattern,
           dataTestSubj: 'timelineEqlQueryBar',
         }}
         config={{

@@ -749,6 +749,54 @@ export default ({ getService }: FtrProviderContext) => {
           const signals = await getSignalsByIds(supertest, log, [id]);
           expect(signals.hits.hits.length).eql(1);
         });
+
+        it('uses the provided filters', async () => {
+          const rule: EqlCreateSchema = {
+            ...getEqlRuleForSignalTesting(['auditbeat-*']),
+            query: 'any where true',
+            filters: [
+              {
+                meta: {
+                  alias: null,
+                  negate: false,
+                  disabled: false,
+                  type: 'phrase',
+                  key: 'source.ip',
+                  params: {
+                    query: '46.148.18.163',
+                  },
+                },
+                query: {
+                  match_phrase: {
+                    'source.ip': '46.148.18.163',
+                  },
+                },
+              },
+              {
+                meta: {
+                  alias: null,
+                  negate: false,
+                  disabled: false,
+                  type: 'phrase',
+                  key: 'event.action',
+                  params: {
+                    query: 'error',
+                  },
+                },
+                query: {
+                  match_phrase: {
+                    'event.action': 'error',
+                  },
+                },
+              },
+            ],
+          };
+          const { id } = await createRule(supertest, log, rule);
+          await waitForRuleSuccessOrStatus(supertest, log, id);
+          await waitForSignalsToBePresent(supertest, log, 1, [id]);
+          const signals = await getSignalsByIds(supertest, log, [id]);
+          expect(signals.hits.hits.length).eql(2);
+        });
       });
 
       describe('Threshold Rules', () => {
