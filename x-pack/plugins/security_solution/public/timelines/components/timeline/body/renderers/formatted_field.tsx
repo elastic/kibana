@@ -52,6 +52,7 @@ const FormattedFieldValueComponent: React.FC<{
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
   eventId: string;
+  isAggregatable?: boolean;
   isObjectArray?: boolean;
   fieldFormat?: string;
   fieldName: string;
@@ -70,8 +71,9 @@ const FormattedFieldValueComponent: React.FC<{
   contextId,
   eventId,
   fieldFormat,
+  isAggregatable = false,
   fieldName,
-  fieldType,
+  fieldType = '',
   isButton,
   isObjectArray = false,
   isDraggable = true,
@@ -92,6 +94,8 @@ const FormattedFieldValueComponent: React.FC<{
         eventId={eventId}
         contextId={contextId}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         isButton={isButton}
         isDraggable={isDraggable}
         value={!isNumber(value) ? value : String(value)}
@@ -107,6 +111,8 @@ const FormattedFieldValueComponent: React.FC<{
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
         isDraggable={isDraggable}
         tooltipContent={null}
@@ -124,6 +130,8 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         isDraggable={isDraggable}
         title={title}
         value={`${value}`}
@@ -135,6 +143,8 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         isDraggable={isDraggable}
         value={`${value}`}
       />
@@ -145,6 +155,8 @@ const FormattedFieldValueComponent: React.FC<{
         Component={Component}
         contextId={contextId}
         eventId={eventId}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         fieldName={fieldName}
         isDraggable={isDraggable}
         isButton={isButton}
@@ -160,6 +172,8 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         isDraggable={isDraggable}
         isButton={isButton}
         onClick={onClick}
@@ -173,6 +187,8 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         isDraggable={isDraggable}
         value={`${value}`}
       />
@@ -184,6 +200,8 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         isDraggable={isDraggable}
         isButton={isButton}
         onClick={onClick}
@@ -198,6 +216,8 @@ const FormattedFieldValueComponent: React.FC<{
       contextId,
       eventId,
       fieldName,
+      fieldType,
+      isAggregatable,
       isDraggable,
       linkValue,
       truncate,
@@ -209,6 +229,8 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         isDraggable={isDraggable}
         value={value}
         onClick={onClick}
@@ -223,6 +245,8 @@ const FormattedFieldValueComponent: React.FC<{
         contextId={contextId}
         eventId={eventId}
         fieldName={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         isDraggable={isDraggable}
         value={typeof value === 'string' ? value : ''}
       />
@@ -240,6 +264,8 @@ const FormattedFieldValueComponent: React.FC<{
       Component,
       eventId,
       fieldName,
+      fieldType,
+      isAggregatable,
       isDraggable,
       truncate,
       title,
@@ -274,6 +300,8 @@ const FormattedFieldValueComponent: React.FC<{
       <DefaultDraggable
         field={fieldName}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
+        fieldType={fieldType ?? ''}
+        isAggregatable={isAggregatable}
         isDraggable={isDraggable}
         value={`${value}`}
         tooltipContent={

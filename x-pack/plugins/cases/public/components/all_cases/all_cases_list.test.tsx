@@ -205,7 +205,7 @@ describe('AllCasesListGeneric', () => {
         wrapper.find(`span[data-test-subj="case-table-column-tags-coke"]`).first().prop('title')
       ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
       expect(wrapper.find(`[data-test-subj="case-table-column-createdBy"]`).first().text()).toEqual(
-        useGetCasesMockState.data.cases[0].createdBy.username
+        'LK'
       );
       expect(
         wrapper
@@ -221,6 +221,27 @@ describe('AllCasesListGeneric', () => {
 
       expect(wrapper.find(`[data-test-subj="case-table-case-count"]`).first().text()).toEqual(
         'Showing 10 cases'
+      );
+    });
+  });
+
+  it('should show a tooltip with the reporter username when hover over the reporter avatar', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
+    });
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    userEvent.hover(result.queryAllByTestId('case-table-column-createdBy')[0]);
+
+    await waitFor(() => {
+      expect(result.getByTestId('case-table-column-createdBy-tooltip')).toBeTruthy();
+      expect(result.getByTestId('case-table-column-createdBy-tooltip').textContent).toEqual(
+        'lknope'
       );
     });
   });
@@ -545,6 +566,31 @@ describe('AllCasesListGeneric', () => {
         false
       );
       expect(wrapper.find('[data-test-subj="case-table-bulk-actions"]').exists()).toBe(false);
+    });
+  });
+
+  it('should render metrics when isSelectorView=false', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={false} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="cases-metrics-stats"]').exists()).toBe(true);
+    });
+  });
+
+  it('should not render metrics when isSelectorView=true', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={true} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="case-table-selected-case-count"]').exists()).toBe(
+        false
+      );
+      expect(wrapper.find('[data-test-subj="cases-metrics-stats"]').exists()).toBe(false);
     });
   });
 

@@ -9,6 +9,7 @@ import { IRouter } from '@kbn/core/server';
 import * as t from 'io-ts';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { PositiveInteger } from '@kbn/securitysolution-io-ts-types';
+import { SortOptions } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
@@ -30,6 +31,8 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
                 t.record(t.string, metricsAggsSchemas),
                 t.undefined,
               ]),
+              sort: t.union([t.array(t.object), t.undefined]),
+              search_after: t.union([t.array(t.number), t.array(t.string), t.undefined]),
               size: t.union([PositiveInteger, t.undefined]),
               track_total_hits: t.union([t.boolean, t.undefined]),
               _source: t.union([t.array(t.string), t.undefined]),
@@ -44,11 +47,11 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
     async (context, request, response) => {
       try {
         // eslint-disable-next-line @typescript-eslint/naming-convention
-        const { query, aggs, _source, track_total_hits, size, index } = request.body;
+        const { query, aggs, _source, track_total_hits, size, index, sort, search_after } =
+          request.body;
 
         const racContext = await context.rac;
         const alertsClient = await racContext.getAlertsClient();
-
         const alerts = await alertsClient.find({
           query,
           aggs,
@@ -56,6 +59,8 @@ export const findAlertsByQueryRoute = (router: IRouter<RacRequestHandlerContext>
           track_total_hits,
           size,
           index,
+          sort: sort as SortOptions[],
+          search_after,
         });
         if (alerts == null) {
           return response.notFound({

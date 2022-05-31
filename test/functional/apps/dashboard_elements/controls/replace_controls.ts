@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import expect from '@kbn/expect';
-
 import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
@@ -28,24 +26,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
 
-  const changeFieldType = async (newField: string) => {
-    const saveButton = await testSubjects.find('control-editor-save');
-    expect(await saveButton.isEnabled()).to.be(false);
-    await dashboardControls.controlsEditorSetfield(newField);
-    expect(await saveButton.isEnabled()).to.be(true);
+  const DASHBOARD_NAME = 'Test Replace Controls';
+
+  const changeFieldType = async (controlId: string, newField: string, expectedType?: string) => {
+    await dashboardControls.editExistingControl(controlId);
+    await dashboardControls.controlsEditorSetfield(newField, expectedType);
     await dashboardControls.controlEditorSave();
   };
 
   const replaceWithOptionsList = async (controlId: string) => {
-    await dashboardControls.controlEditorSetType(OPTIONS_LIST_CONTROL);
-    await changeFieldType('sound.keyword');
+    await changeFieldType(controlId, 'sound.keyword', OPTIONS_LIST_CONTROL);
     await testSubjects.waitForEnabled(`optionsList-control-${controlId}`);
     await dashboardControls.verifyControlType(controlId, 'optionsList-control');
   };
 
   const replaceWithRangeSlider = async (controlId: string) => {
-    await dashboardControls.controlEditorSetType(RANGE_SLIDER_CONTROL);
-    await changeFieldType('weightLbs');
+    await changeFieldType(controlId, 'weightLbs', RANGE_SLIDER_CONTROL);
     await retry.try(async () => {
       await dashboardControls.rangeSliderWaitForLoading();
       await dashboardControls.verifyControlType(controlId, 'range-slider-control');
@@ -53,8 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const replaceWithTimeSlider = async (controlId: string) => {
-    await dashboardControls.controlEditorSetType(TIME_SLIDER_CONTROL);
-    await changeFieldType('@timestamp');
+    await changeFieldType(controlId, '@timestamp', TIME_SLIDER_CONTROL);
     await testSubjects.waitForDeleted('timeSlider-loading-spinner');
     await dashboardControls.verifyControlType(controlId, 'timeSlider');
   };
@@ -67,6 +62,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
       await timePicker.setDefaultDataRange();
+      await dashboard.saveDashboard(DASHBOARD_NAME, { exitFromEditMode: false });
     });
 
     describe('Replace options list', async () => {
@@ -78,7 +74,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           fieldName: 'sound.keyword',
         });
         controlId = (await dashboardControls.getAllControlIds())[0];
-        await dashboardControls.editExistingControl(controlId);
+      });
+
+      afterEach(async () => {
+        await dashboard.clearUnsavedChanges();
       });
 
       it('with range slider', async () => {
@@ -102,7 +101,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await dashboardControls.rangeSliderWaitForLoading();
         controlId = (await dashboardControls.getAllControlIds())[0];
-        await dashboardControls.editExistingControl(controlId);
+      });
+
+      afterEach(async () => {
+        await dashboard.clearUnsavedChanges();
       });
 
       it('with options list', async () => {
@@ -124,7 +126,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
         await testSubjects.waitForDeleted('timeSlider-loading-spinner');
         controlId = (await dashboardControls.getAllControlIds())[0];
-        await dashboardControls.editExistingControl(controlId);
+      });
+
+      afterEach(async () => {
+        await dashboard.clearUnsavedChanges();
       });
 
       it('with options list', async () => {

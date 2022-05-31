@@ -5,29 +5,22 @@
  * 2.0.
  */
 
-import {
-  EuiAccordion,
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiAccordion, EuiDescriptionList, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import moment from 'moment';
 import type { EuiDescriptionListProps, EuiAccordionProps } from '@elastic/eui';
-import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
-import k8sLogoIcon from '../../../assets/icons/k8s_logo.svg';
 import * as TEXT from '../translations';
 import { CspFinding } from '../types';
-import { CodeBlock, Markdown } from './findings_flyout';
+import { CisKubernetesIcons, Markdown, CodeBlock } from './findings_flyout';
 
 type Accordion = Pick<EuiAccordionProps, 'title' | 'id' | 'initialIsOpen'> &
   Pick<EuiDescriptionListProps, 'listItems'>;
 
 const getDetailsList = (data: CspFinding) => [
+  {
+    title: TEXT.RULE_NAME,
+    description: data.rule.name,
+  },
   {
     title: TEXT.EVALUATED_AT,
     description: moment(data['@timestamp']).format('MMMM D, YYYY @ HH:mm:ss.SSS'),
@@ -37,21 +30,8 @@ const getDetailsList = (data: CspFinding) => [
     description: data.resource.name,
   },
   {
-    title: TEXT.RULE_NAME,
-    description: data.rule.name,
-  },
-  {
     title: TEXT.FRAMEWORK_SOURCES,
-    description: (
-      <EuiFlexGroup gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={cisLogoIcon} size="xxl" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={k8sLogoIcon} size="xxl" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    ),
+    description: <CisKubernetesIcons />,
   },
   {
     title: TEXT.CIS_SECTION,
@@ -59,7 +39,7 @@ const getDetailsList = (data: CspFinding) => [
   },
 ];
 
-const getRemediationList = ({ rule }: CspFinding) => [
+export const getRemediationList = (rule: CspFinding['rule']) => [
   {
     title: '',
     description: <Markdown>{rule.remediation}</Markdown>,
@@ -103,7 +83,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
         initialIsOpen: true,
         title: TEXT.REMEDIATION,
         id: 'remediationAccordion',
-        listItems: getRemediationList(data),
+        listItems: getRemediationList(data.rule),
       },
       {
         initialIsOpen: false,
@@ -127,7 +107,7 @@ export const OverviewTab = ({ data }: { data: CspFinding }) => {
                   <strong>{accordion.title}</strong>
                 </EuiText>
               }
-              arrowDisplay="right"
+              arrowDisplay="left"
               initialIsOpen={accordion.initialIsOpen}
             >
               <EuiSpacer size="m" />

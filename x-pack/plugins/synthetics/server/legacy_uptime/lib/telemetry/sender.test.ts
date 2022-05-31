@@ -18,12 +18,30 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MONITOR_UPDATE_CHANNEL } from './constants';
 
 import { TelemetryEventsSender } from './sender';
+import { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 jest.mock('axios', () => {
   return {
     post: jest.fn(),
   };
 });
+
+const licenseMock: LicenseGetResponse = {
+  license: {
+    status: 'active',
+    uid: '1d34eb9f-e66f-47d1-8d24-cd60d187587a',
+    type: 'trial',
+    issue_date: '2022-05-05T14:25:00.732Z',
+    issue_date_in_millis: 165176070074432,
+    expiry_date: '2022-06-04T14:25:00.732Z',
+    expiry_date_in_millis: 165435270073332,
+    max_nodes: 1000,
+    max_resource_units: null,
+    issued_to: '2c515bd215ce444441f83ffd36a9d3d2546',
+    issuer: 'elasticsearch',
+    start_date_in_millis: -1,
+  },
+};
 
 describe('TelemetryEventsSender', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -42,6 +60,10 @@ describe('TelemetryEventsSender', () => {
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     sender = new TelemetryEventsSender(logger);
+    sender['fetchLicenseInfo'] = jest.fn(async () => {
+      return licenseMock as LicenseGetResponse;
+    });
+
     sender['fetchClusterInfo'] = jest.fn(async () => {
       return {
         cluster_uuid: '1',
@@ -79,7 +101,6 @@ describe('TelemetryEventsSender', () => {
 
       expect(sender['sendEvents']).toHaveBeenCalledWith(
         `https://telemetry-staging.elastic.co/v3-dev/send/${MONITOR_UPDATE_CHANNEL}`,
-        { cluster_name: 'name', cluster_uuid: '1', version: { number: '8.0.0' } },
         expect.anything()
       );
     });
@@ -134,14 +155,17 @@ describe('TelemetryEventsSender', () => {
           'X-Elastic-Stack-Version': '8.0.0',
         },
       };
+      const event1 = { 'event.kind': '1', ...licenseMock };
+      const event2 = { 'event.kind': '2', ...licenseMock };
+      const event3 = { 'event.kind': '3', ...licenseMock };
       expect(axios.post).toHaveBeenCalledWith(
         'https://telemetry.elastic.co/v3/send/my-channel',
-        '{"event.kind":"1"}\n{"event.kind":"2"}\n',
+        `${JSON.stringify(event1)}\n${JSON.stringify(event2)}\n`,
         headers
       );
       expect(axios.post).toHaveBeenCalledWith(
         'https://telemetry.elastic.co/v3/send/my-channel2',
-        '{"event.kind":"3"}\n',
+        `${JSON.stringify(event3)}\n`,
         headers
       );
     });

@@ -48,6 +48,7 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: MetricVisOptions,
     schemas: [
       {
@@ -65,6 +66,7 @@ export const createMetricVisTypeDefinition = (): VisTypeDefinition<VisParams> =>
           '!geo_bounds',
           '!filtered_metric',
           '!single_percentile',
+          '!single_percentile_rank',
         ],
         aggSettings: {
           top_hits: {

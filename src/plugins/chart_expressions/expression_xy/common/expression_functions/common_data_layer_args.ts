@@ -7,7 +7,7 @@
  */
 
 import { ArgumentType } from '@kbn/expressions-plugin/common';
-import { SeriesTypes, XScaleTypes, YScaleTypes, Y_CONFIG } from '../constants';
+import { SeriesTypes, XScaleTypes, Y_CONFIG } from '../constants';
 import { strings } from '../i18n';
 import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 
@@ -36,7 +36,6 @@ export const commonDataLayerArgs: Omit<
   xScaleType: {
     options: [...Object.values(XScaleTypes)],
     help: strings.getXScaleTypeHelp(),
-    default: XScaleTypes.ORDINAL,
     strict: true,
   },
   isHistogram: {
@@ -44,11 +43,21 @@ export const commonDataLayerArgs: Omit<
     default: false,
     help: strings.getIsHistogramHelp(),
   },
-  yScaleType: {
-    options: [...Object.values(YScaleTypes)],
-    help: strings.getYScaleTypeHelp(),
-    default: YScaleTypes.LINEAR,
-    strict: true,
+  lineWidth: {
+    types: ['number'],
+    help: strings.getLineWidthHelp(),
+  },
+  showPoints: {
+    types: ['boolean'],
+    help: strings.getShowPointsHelp(),
+  },
+  pointsRadius: {
+    types: ['number'],
+    help: strings.getPointsRadiusHelp(),
+  },
+  showLines: {
+    types: ['boolean'],
+    help: strings.getShowLinesHelp(),
   },
   yConfig: {
     types: [Y_CONFIG],

@@ -12,6 +12,7 @@ import { renameColumns } from '../common/expressions/rename_columns/rename_colum
 import { formatColumn } from '../common/expressions/format_column';
 import { counterRate } from '../common/expressions/counter_rate';
 import { getTimeScale } from '../common/expressions/time_scale/time_scale';
+import { collapse } from '../common/expressions';
 
 export const setupExpressions = (
   expressions: ExpressionsSetup,
@@ -19,6 +20,7 @@ export const setupExpressions = (
   getTimeZone: Parameters<typeof getTimeScale>[0]
 ) => {
   [
+    collapse,
     counterRate,
     formatColumn,
     renameColumns,

@@ -30,7 +30,7 @@ export interface SearchIndicesActions {
 }
 
 export const SearchIndicesLogic = kea<MakeLogicType<SearchIndicesValues, SearchIndicesActions>>({
-  path: ['enterprise_search', 'content', 'search_indices', 'search_indices_logic'],
+  path: ['enterprise_search', 'content', 'search_indices'],
   actions: {
     initPage: true,
     loadSearchIndices: true,
