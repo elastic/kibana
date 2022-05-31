@@ -104,8 +104,8 @@ const uploadPipeline = (pipelineContent) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/osquery_cypress.yml'));
     }
 
-    if (await doAnyChangesMatch([/^x-pack\/plugins\/uptime/])) {
-      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/uptime.yml'));
+    if (await doAnyChangesMatch([/^x-pack\/plugins\/synthetics/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
     }
 
     if (process.env.GITHUB_PR_LABELS.includes('ci:deploy-cloud')) {
