@@ -18,6 +18,7 @@ interface Props {
   installCommand: CommandsByPlatform;
   isK8s: K8sMode | undefined;
   fullCopyButton?: boolean;
+  isManaged?: boolean;
   onCopy?: () => void;
 }
 
@@ -25,11 +26,12 @@ export const InstallSection: React.FunctionComponent<Props> = ({
   installCommand,
   isK8s,
   fullCopyButton = false,
+  isManaged = true,
   onCopy,
 }) => {
   return (
     <>
-      <InstallationMessage isK8s={isK8s} />
+      <InstallationMessage isK8s={isK8s} isManaged={isManaged} />
       <PlatformSelector
         fullCopyButton={fullCopyButton}
         onCopy={onCopy}

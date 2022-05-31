@@ -39,6 +39,7 @@ export const InstallStandaloneAgentStep = ({
         isK8s={isK8s}
         onCopy={onCopy}
         fullCopyButton={fullCopyButton}
+        isManaged={false}
       />
     ),
     status: isComplete ? 'complete' : undefined,
