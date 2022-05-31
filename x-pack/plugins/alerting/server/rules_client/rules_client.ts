@@ -230,12 +230,7 @@ export type BulkEditOperation =
       value: Rule['schedule'];
     };
 
-// schedule, throttle, notifyWhen is commented out before https://github.com/elastic/kibana/issues/124850 will be implemented
-// | {
-//     operation: 'set';
-//     field: Extract<BulkEditFields, 'schedule'>;
-//     value: Rule['schedule'];
-//   }
+// throttle, notifyWhen is commented out before https://github.com/elastic/kibana/issues/124850 will be implemented
 // | {
 //     operation: 'set';
 //     field: Extract<BulkEditFields, 'throttle'>;
@@ -1501,8 +1496,10 @@ export class RulesClient {
 
     // update schedules only if schedule operation is present
     const scheduleOperation = options.operations.find(
-      (op): op is Extract<BulkEditOperation, { field: Extract<BulkEditFields, 'schedule'> }> =>
-        op.field === 'schedule'
+      (
+        operation
+      ): operation is Extract<BulkEditOperation, { field: Extract<BulkEditFields, 'schedule'> }> =>
+        operation.field === 'schedule'
     );
 
     if (scheduleOperation?.value) {
