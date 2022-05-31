@@ -222,7 +222,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
       )}
       <NotObscuredByBottomBar />
       <CreatePackagePolicyBottomBar
-        cancelClickHandler={onBack}
+        cancelClickHandler={isManaged ? onBack : () => setIsManaged(true)}
         onNext={onSubmit}
         isLoading={formState === 'LOADING'}
         isDisabled={formState === 'INVALID'}
