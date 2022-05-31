@@ -42,7 +42,7 @@ import { prebootServiceMock } from './preboot/preboot_service.mock';
 import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { analyticsServiceMock } from './analytics/analytics_service.mock';
 
-export { configServiceMock, configDeprecationsMock } from './config/mocks';
+export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
 export { httpServerMock } from './http/http_server.mocks';
 export { httpResourcesMock } from './http_resources/http_resources_service.mock';
 export { sessionStorageMock } from './http/cookie_session_storage.mocks';

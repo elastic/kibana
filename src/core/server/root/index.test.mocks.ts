@@ -14,7 +14,7 @@ jest.doMock('../logging/logging_system', () => ({
 
 const realKbnConfig = jest.requireActual('@kbn/config');
 
-import { configServiceMock, rawConfigServiceMock } from '../config/mocks';
+import { configServiceMock, rawConfigServiceMock } from '@kbn/config-mocks';
 export const configService = configServiceMock.create();
 export const rawConfigService = rawConfigServiceMock.create();
 jest.doMock('@kbn/config', () => ({

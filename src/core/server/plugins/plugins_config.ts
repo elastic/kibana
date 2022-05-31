@@ -7,8 +7,8 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
+import { Env } from '@kbn/config';
 import { ServiceConfigDescriptor } from '../internal_types';
-import { Env } from '../config';
 
 const configSchema = schema.object({
   initialize: schema.boolean({ defaultValue: true }),

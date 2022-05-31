@@ -28,8 +28,8 @@ import {
 
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/utils';
-import { rawConfigServiceMock, getEnvOptions } from './config/mocks';
-import { Env } from './config';
+import { Env } from '@kbn/config';
+import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { Server } from './server';
 
 import { loggingSystemMock } from './logging/logging_system.mock';

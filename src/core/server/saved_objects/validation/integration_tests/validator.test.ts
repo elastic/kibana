@@ -14,7 +14,7 @@ import { schema } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/utils';
 import { SavedObjectsType } from '../../types';
 import { ISavedObjectsRepository } from '../../service/lib';
-import { getEnvOptions } from '../../../config/mocks';
+import { getEnvOptions } from '@kbn/config-mocks';
 import { InternalCoreSetup, InternalCoreStart } from '../../../internal_types';
 import { Root } from '../../../root';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';

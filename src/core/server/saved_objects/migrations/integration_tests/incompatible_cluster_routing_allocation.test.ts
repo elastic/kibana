@@ -12,7 +12,7 @@ import JSON5 from 'json5';
 import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '@kbn/config';
 import { getDocLinksMeta } from '@kbn/doc-links';
-import { getEnvOptions } from '../../../config/mocks';
+import { getEnvOptions } from '@kbn/config-mocks';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
 import { ElasticsearchClient } from '../../../elasticsearch';

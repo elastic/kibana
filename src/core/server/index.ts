@@ -109,7 +109,7 @@ export type {
   AddConfigDeprecation,
   EnvironmentMode,
   PackageInfo,
-} from './config';
+} from '@kbn/config';
 export type {
   IContextContainer,
   IContextProvider,
