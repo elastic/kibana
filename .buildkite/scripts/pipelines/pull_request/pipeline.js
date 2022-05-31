@@ -108,6 +108,10 @@ const uploadPipeline = (pipelineContent) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/synthetics_plugin.yml'));
     }
 
+    if (await doAnyChangesMatch([/^x-pack\/plugins\/ux/])) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
+    }
+
     if (process.env.GITHUB_PR_LABELS.includes('ci:deploy-cloud')) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
     }
