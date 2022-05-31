@@ -12,7 +12,7 @@ $tvbValueColorReversed: transparentize($euiColorEmptyShade, .2);
   flex-direction: column;
 
   tr:hover td {
-    background-color: transparentize($euiColorFullShade, .9);;
+    background-color: transparentize($euiColorFullShade, .9);
   }
 }
 
