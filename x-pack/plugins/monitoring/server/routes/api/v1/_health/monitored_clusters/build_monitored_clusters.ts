@@ -23,26 +23,26 @@ enum MonitoredProduct {
   EnterpriseSearch = 'enterpriseSearch',
 }
 
-type MonitoredMetricsets = {
+interface MonitoredMetricsets {
   [metricset: string]: {
     [collectionMode in CollectionMode]: {
       index: string;
       lastSeen: string;
     };
   };
-};
+}
 
-type MonitoredEntities = {
+interface MonitoredEntities {
   [entityId: string]: MonitoredMetricsets;
-};
+}
 
 type MonitoredProducts = {
   [product in MonitoredProduct]: MonitoredEntities;
 };
 
-export type MonitoredClusters = {
+export interface MonitoredClusters {
   [clusterUuid: string]: MonitoredProducts;
-};
+}
 
 const internalMonitoringPattern = /^\.monitoring-(es|kibana|beats|logstash)-7-[0-9]{4}\..*/;
 const metricbeatMonitoring7Pattern = /^\.monitoring-(es|kibana|beats|logstash|ent-search)-7.*-mb.*/;
