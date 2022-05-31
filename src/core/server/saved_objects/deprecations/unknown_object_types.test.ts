@@ -52,31 +52,29 @@ describe('unknown saved object types deprecation', () => {
       expect(esClient.asInternalUser.search).toHaveBeenCalledTimes(1);
       expect(esClient.asInternalUser.search).toHaveBeenCalledWith({
         index: ['foo-index', 'bar-index'],
-        body: {
-          size: 0,
-          aggs: {
-            typesAggregation: {
-              terms: {
-                missing: '__UNKNOWN__',
-                field: 'type',
-                size: 1000,
-              },
-              aggs: {
-                docs: {
-                  top_hits: {
-                    size: 100,
-                    _source: {
-                      excludes: ['*'],
-                    },
+        size: 0,
+        aggs: {
+          typesAggregation: {
+            terms: {
+              missing: '__UNKNOWN__',
+              field: 'type',
+              size: 1000,
+            },
+            aggs: {
+              docs: {
+                top_hits: {
+                  size: 100,
+                  _source: {
+                    excludes: ['*'],
                   },
                 },
               },
             },
           },
-          query: {
-            bool: {
-              must_not: [{ term: { type: 'foo' } }, { term: { type: 'bar' } }],
-            },
+        },
+        query: {
+          bool: {
+            must_not: [{ term: { type: 'foo' } }, { term: { type: 'bar' } }],
           },
         },
       });

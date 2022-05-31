@@ -69,37 +69,35 @@ describe('checkForUnknownDocs', () => {
     expect(client.search).toHaveBeenCalledTimes(1);
     expect(client.search).toHaveBeenCalledWith({
       index: '.kibana_8.0.0',
-      body: {
-        size: 0,
-        aggs: {
-          typesAggregation: {
-            terms: {
-              // assign type __UNKNOWN__ to those documents that don't define one
-              missing: '__UNKNOWN__',
-              field: 'type',
-              size: 1000, // collect up to 1000 non-registered types
-            },
-            aggs: {
-              docs: {
-                top_hits: {
-                  size: 100, // collect up to 100 docs for each non-registered type
-                  _source: {
-                    excludes: ['*'],
-                  },
+      size: 0,
+      aggs: {
+        typesAggregation: {
+          terms: {
+            // assign type __UNKNOWN__ to those documents that don't define one
+            missing: '__UNKNOWN__',
+            field: 'type',
+            size: 1000, // collect up to 1000 non-registered types
+          },
+          aggs: {
+            docs: {
+              top_hits: {
+                size: 100, // collect up to 100 docs for each non-registered type
+                _source: {
+                  excludes: ['*'],
                 },
               },
             },
           },
         },
-        query: {
-          bool: {
-            ...excludeOnUpgradeQuery.bool,
-            must_not: knownTypes.map((type) => ({
-              term: {
-                type,
-              },
-            })),
-          },
+      },
+      query: {
+        bool: {
+          ...excludeOnUpgradeQuery.bool,
+          must_not: knownTypes.map((type) => ({
+            term: {
+              type,
+            },
+          })),
         },
       },
     });
