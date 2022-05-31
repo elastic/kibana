@@ -5,34 +5,28 @@
  * 2.0.
  */
 
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { SetupUX } from './route';
-import { getRumPageLoadTransactionsProjection } from '../../projections/rum_page_load_transactions';
 import {
   TRANSACTION_DURATION,
   TRANSACTION_URL,
 } from '../../../common/elasticsearch_fieldnames';
+import { SetupUX } from '../../../typings/ui_filters';
+import { getRumPageLoadTransactionsProjection } from './projections';
+import { callDateMath } from './call_date_math';
+import { mergeProjection } from '../../../common/utils/merge_projection';
 
-export async function getUrlSearch({
-  setup,
-  urlQuery,
-  percentile,
-  start,
-  end,
-}: {
-  setup: SetupUX;
-  urlQuery?: string;
-  percentile: number;
-  start: number;
-  end: number;
-}) {
+export function urlSearchQuery(
+  restFilters: any,
+  uxQuery: any,
+  searchValue: string
+) {
+  const setup: SetupUX = { uiFilters: restFilters ? restFilters : {} };
   const projection = getRumPageLoadTransactionsProjection({
     setup,
-    urlQuery,
-    start,
-    end,
+    urlQuery: searchValue,
+    ...uxQuery,
+    start: callDateMath(uxQuery?.start),
+    end: callDateMath(uxQuery?.end),
   });
-
   const params = mergeProjection(projection, {
     body: {
       size: 0,
@@ -51,7 +45,7 @@ export async function getUrlSearch({
             medianPLD: {
               percentiles: {
                 field: TRANSACTION_DURATION,
-                percents: [percentile],
+                percents: [Number(uxQuery?.percentile)],
               },
             },
           },
@@ -59,20 +53,6 @@ export async function getUrlSearch({
       },
     },
   });
-
-  const { apmEventClient } = setup;
-
-  const response = await apmEventClient.search('get_url_search', params);
-  const { urls, totalUrls } = response.aggregations ?? {};
-
-  const pkey = percentile.toFixed(1);
-
-  return {
-    total: totalUrls?.value || 0,
-    items: (urls?.buckets ?? []).map((bucket) => ({
-      url: bucket.key as string,
-      count: bucket.doc_count,
-      pld: bucket.medianPLD.values[pkey] ?? 0,
-    })),
-  };
+  const { apm: _apm, ...rest } = params;
+  return rest;
 }
