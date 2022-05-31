@@ -26,12 +26,12 @@ import {
   SHOWING_RULES_TEXT,
 } from '../../screens/alerts_detection_rules';
 import {
-  // ABOUT_CONTINUE_BTN,
-  // ABOUT_EDIT_BUTTON,
+  ABOUT_CONTINUE_BTN,
+  ABOUT_EDIT_BUTTON,
   ACTIONS_THROTTLE_INPUT,
   CUSTOM_QUERY_INPUT,
-  // DEFINE_CONTINUE_BUTTON,
-  // DEFINE_EDIT_BUTTON,
+  DEFINE_CONTINUE_BUTTON,
+  DEFINE_EDIT_BUTTON,
   DEFINE_INDEX_INPUT,
   DEFAULT_RISK_SCORE_INPUT,
   RULE_DESCRIPTION_INPUT,
@@ -134,7 +134,6 @@ describe('Custom query rules', () => {
       fillAboutRuleAndContinue(this.rule);
       fillScheduleRuleAndContinue(this.rule);
 
-      /* Commenting this piece of code due to the following issue: https://github.com/elastic/kibana/issues/130767
       // expect define step to repopulate
       cy.get(DEFINE_EDIT_BUTTON).click();
       cy.get(CUSTOM_QUERY_INPUT).should('have.value', this.rule.customQuery);
@@ -145,7 +144,7 @@ describe('Custom query rules', () => {
       cy.get(ABOUT_EDIT_BUTTON).click();
       cy.get(RULE_NAME_INPUT).invoke('val').should('eql', this.rule.name);
       cy.get(ABOUT_CONTINUE_BTN).should('exist').click({ force: true });
-      cy.get(ABOUT_CONTINUE_BTN).should('not.exist');  */
+      cy.get(ABOUT_CONTINUE_BTN).should('not.exist');
 
       createAndEnableRule();
 
