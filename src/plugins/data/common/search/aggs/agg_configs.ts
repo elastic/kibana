@@ -83,18 +83,17 @@ export class AggConfigs {
   public timeFields?: string[];
   public forceNow?: Date;
   public aggs: IAggConfig[] = [];
+  public hierarchical: boolean;
 
   constructor(
     public indexPattern: IndexPattern,
     configStates: CreateAggConfigParams[] = [],
     private opts: AggConfigsOptions
   ) {
+    this.hierarchical = opts.hierarchical ?? false;
+
     configStates = AggConfig.ensureIds(configStates);
     configStates.forEach((params: any) => this.createAggConfig(params));
-  }
-
-  public get hierarchical() {
-    return this.opts.hierarchical;
   }
 
   setTimeFields(timeFields: string[] | undefined) {
@@ -141,9 +140,11 @@ export class AggConfigs {
       if (!enabledOnly) return true;
       return agg.enabled;
     };
-    const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), this.opts);
 
-    return aggConfigs;
+    return new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), {
+      ...this.opts,
+      hierarchical: this.hierarchical,
+    });
   }
 
   createAggConfig = <T extends AggConfig = AggConfig>(

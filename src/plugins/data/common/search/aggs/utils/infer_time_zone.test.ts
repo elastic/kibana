@@ -6,18 +6,6 @@
  * Side Public License, v 1.
  */
 
-jest.mock('moment', () => {
-  const moment: any = jest.fn(() => {
-    return {
-      format: jest.fn(() => '-1;00'),
-    };
-  });
-  moment.tz = {
-    guess: jest.fn(() => 'CET'),
-  };
-  return moment;
-});
-
 import { DataView, DataViewField } from '../../..';
 import { inferTimeZone } from './infer_time_zone';
 
@@ -27,7 +15,7 @@ describe('inferTimeZone', () => {
       time_zone: 'CEST',
     };
     expect(
-      inferTimeZone(params, {} as DataView, 'date_histogram', { performedOn: 'client' }, jest.fn())
+      inferTimeZone(params, {} as DataView, 'date_histogram', { getDefaultTimeZone: () => 'UTC' })
     ).toEqual('CEST');
   });
 
@@ -47,8 +35,7 @@ describe('inferTimeZone', () => {
           },
         } as unknown as DataView,
         'date_histogram',
-        { performedOn: 'client' },
-        jest.fn()
+        { getDefaultTimeZone: () => 'CET' }
       )
     ).toEqual('UTC');
   });
@@ -73,41 +60,14 @@ describe('inferTimeZone', () => {
           },
         } as unknown as DataView,
         'date_histogram',
-        { performedOn: 'client' },
-        jest.fn()
+        { getDefaultTimeZone: () => 'CET' }
       )
     ).toEqual('UTC');
   });
 
-  it('reads time zone from moment if set to default', () => {
-    expect(
-      inferTimeZone({}, {} as DataView, 'date_histogram', { performedOn: 'client' }, jest.fn())
-    ).toEqual('CET');
-  });
-
   it('reads time zone from config if not set to default', () => {
     expect(
-      inferTimeZone(
-        {},
-        {} as DataView,
-        'date_histogram',
-        {
-          performedOn: 'client',
-        },
-        () => 'CET' as any
-      )
-    ).toEqual('CET');
-  });
-
-  it('should set UTC if config value is Browser and expression performed on "server"', () => {
-    expect(
-      inferTimeZone(
-        {},
-        {} as DataView,
-        'date_histogram',
-        { performedOn: 'server' },
-        () => 'Browser' as any
-      )
+      inferTimeZone({}, {} as DataView, 'date_histogram', { getDefaultTimeZone: () => 'CET' })
     ).toEqual('CET');
   });
 });

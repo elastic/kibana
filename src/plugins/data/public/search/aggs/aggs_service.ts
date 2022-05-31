@@ -11,12 +11,11 @@ import { Subscription } from 'rxjs';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { calculateBounds, TimeRange } from '../../../common';
+import { calculateBounds, getUserTimeZone, TimeRange } from '../../../common';
 import {
   aggsRequiredUiSettings,
   AggsCommonStartDependencies,
   AggsCommonService,
-  AggConfigs,
   AggTypesDependencies,
 } from '../../../common/search/aggs';
 import { AggsSetup, AggsStart } from './types';
@@ -89,12 +88,14 @@ export class AggsService {
   }
 
   public start({ fieldFormats, indexPatterns }: AggsStartDependencies): AggsStart {
-    const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
+    const aggExecutionContext: AggTypesDependencies['aggExecutionContext'] = {
+      getDefaultTimeZone: () => getUserTimeZone(true, this.getConfig!),
+    };
+
+    const { calculateAutoTimeExpression, types, createAggConfigs } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
       getIndexPattern: indexPatterns.get,
-      aggExecutionContext: {
-        performedOn: 'client',
-      },
+      aggExecutionContext,
     });
 
     const aggTypesDependencies: AggTypesDependencies = {
@@ -104,9 +105,7 @@ export class AggsService {
         deserialize: fieldFormats.deserialize,
         getDefaultInstance: fieldFormats.getDefaultInstance,
       }),
-      aggExecutionContext: {
-        performedOn: 'client',
-      },
+      aggExecutionContext,
     };
 
     // initialize each agg type and store in memory
@@ -137,9 +136,7 @@ export class AggsService {
 
     return {
       calculateAutoTimeExpression,
-      createAggConfigs: (indexPattern, configStates = []) => {
-        return new AggConfigs(indexPattern, configStates, { typesRegistry });
-      },
+      createAggConfigs,
       types: typesRegistry,
     };
   }

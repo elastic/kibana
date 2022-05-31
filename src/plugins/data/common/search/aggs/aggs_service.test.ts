@@ -24,7 +24,7 @@ describe('Aggs service', () => {
     getFieldFormatsStart: jest.fn(),
     getConfig: jest.fn(),
     aggExecutionContext: {
-      performedOn: 'client',
+      browserTimezone: 'UTC',
     },
   };
 
@@ -36,9 +36,6 @@ describe('Aggs service', () => {
     startDeps = {
       getConfig: jest.fn(),
       getIndexPattern: jest.fn(),
-      aggExecutionContext: {
-        performedOn: 'client',
-      },
     };
   });
 

@@ -18,9 +18,7 @@ describe('date_range params', () => {
     aggTypesDependencies = {
       ...mockAggTypesDependencies,
       getConfig: jest.fn(),
-      aggExecutionContext: {
-        performedOn: 'client',
-      },
+      aggExecutionContext: { getDefaultTimeZone: () => 'UTC' },
     };
   });
 
@@ -146,7 +144,7 @@ describe('date_range params', () => {
     test('should use the Kibana time_zone if no parameter specified', () => {
       aggTypesDependencies = {
         ...aggTypesDependencies,
-        getConfig: () => 'kibanaTimeZone' as any,
+        aggExecutionContext: { getDefaultTimeZone: () => 'kibanaTimeZone' },
       };
 
       const aggConfigs = getAggConfigs(

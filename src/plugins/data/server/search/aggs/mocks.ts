@@ -61,6 +61,9 @@ const commonStartMock = (): AggsCommonStart => ({
   createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
     return new AggConfigs(indexPattern, configStates, {
       typesRegistry: mockAggTypesRegistry(),
+      aggExecutionContext: {
+        getDefaultTimeZone: () => 'UTC',
+      },
     });
   }),
   types: mockAggTypesRegistry(),

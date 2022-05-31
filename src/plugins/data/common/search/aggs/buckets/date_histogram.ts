@@ -141,8 +141,7 @@ export const getDateHistogramBucketAgg = ({
         agg.params,
         agg.getIndexPattern(),
         'date_histogram',
-        aggExecutionContext,
-        getConfig
+        aggExecutionContext
       );
 
       return moment.tz(key, tz).add(timeShift).valueOf();
@@ -275,8 +274,7 @@ export const getDateHistogramBucketAgg = ({
             agg.params,
             agg.getIndexPattern(),
             'date_histogram',
-            aggExecutionContext,
-            getConfig
+            aggExecutionContext
           );
           output.params.time_zone = tz;
         },
@@ -293,8 +291,7 @@ export const getDateHistogramBucketAgg = ({
             agg.params,
             agg.getIndexPattern(),
             'date_histogram',
-            aggExecutionContext,
-            getConfig
+            aggExecutionContext
           );
         },
         toExpressionAst: () => undefined,
@@ -324,8 +321,7 @@ export const getDateHistogramBucketAgg = ({
             agg.params,
             agg.getIndexPattern(),
             'date_histogram',
-            aggExecutionContext,
-            getConfig
+            aggExecutionContext
           );
 
           if (val.min != null || val.max != null) {

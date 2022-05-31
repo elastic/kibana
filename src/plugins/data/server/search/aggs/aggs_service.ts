@@ -17,11 +17,11 @@ import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import {
   AggsCommonService,
-  AggConfigs,
   AggTypesDependencies,
   aggsRequiredUiSettings,
   calculateBounds,
   TimeRange,
+  getUserTimeZone,
 } from '../../../common';
 import { IndexPatternsServiceStart } from '../../data_views';
 import { AggsSetup, AggsStart } from './types';
@@ -71,26 +71,30 @@ export class AggsService {
           return uiSettingsCache[key];
         };
 
-        const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
-          getConfig,
-          getIndexPattern: (
-            await indexPatterns.indexPatternsServiceFactory(savedObjectsClient, elasticsearchClient)
-          ).get,
-          aggExecutionContext: {
-            performedOn: 'server',
-          },
-        });
+        const aggExecutionContext: AggTypesDependencies['aggExecutionContext'] = {
+          getDefaultTimeZone: () => getUserTimeZone(false, getConfig),
+        };
+
+        const { calculateAutoTimeExpression, types, createAggConfigs } =
+          this.aggsCommonService.start({
+            getConfig,
+            aggExecutionContext,
+            getIndexPattern: (
+              await indexPatterns.indexPatternsServiceFactory(
+                savedObjectsClient,
+                elasticsearchClient
+              )
+            ).get,
+          });
 
         const aggTypesDependencies: AggTypesDependencies = {
           calculateBounds: this.calculateBounds,
+          aggExecutionContext,
           getConfig,
           getFieldFormatsStart: () => ({
             deserialize: formats.deserialize,
             getDefaultInstance: formats.getDefaultInstance,
           }),
-          aggExecutionContext: {
-            performedOn: 'server',
-          },
         };
 
         const typesRegistry = {
@@ -112,9 +116,7 @@ export class AggsService {
 
         return {
           calculateAutoTimeExpression,
-          createAggConfigs: (indexPattern, configStates = []) => {
-            return new AggConfigs(indexPattern, configStates, { typesRegistry });
-          },
+          createAggConfigs,
           types: typesRegistry,
         };
       },

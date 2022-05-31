@@ -38,7 +38,7 @@ export interface AggsCommonSetupDependencies {
 export interface AggsCommonStartDependencies {
   getConfig: GetConfigFn;
   getIndexPattern(id: string): Promise<IndexPattern>;
-  aggExecutionContext: AggTypesDependencies['aggExecutionContext'];
+  aggExecutionContext?: AggTypesDependencies['aggExecutionContext'];
 }
 
 /**
@@ -66,7 +66,7 @@ export class AggsCommonService {
     };
   }
 
-  public start({ getConfig }: AggsCommonStartDependencies): AggsCommonStart {
+  public start({ getConfig, aggExecutionContext }: AggsCommonStartDependencies): AggsCommonStart {
     const aggTypesStart = this.aggTypesRegistry.start();
     const calculateAutoTimeExpression = getCalculateAutoTimeExpression(getConfig);
 
@@ -76,6 +76,7 @@ export class AggsCommonService {
     ) => {
       return new AggConfigs(indexPattern, configStates, {
         typesRegistry: aggTypesStart,
+        aggExecutionContext,
       });
     };
 

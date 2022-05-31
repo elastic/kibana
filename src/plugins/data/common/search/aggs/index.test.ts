@@ -20,7 +20,7 @@ describe('AggTypesComponent', () => {
     getConfig: jest.fn(),
     getFieldFormatsStart: mockGetFieldFormatsStart,
     aggExecutionContext: {
-      performedOn: 'client',
+      getDefaultTimeZone: () => 'UTC',
     },
   };
 

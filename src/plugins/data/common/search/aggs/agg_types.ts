@@ -19,7 +19,7 @@ export interface AggTypesDependencies {
   getConfig: <T = any>(key: string) => T;
   getFieldFormatsStart: () => Pick<FieldFormatsStartCommon, 'deserialize' | 'getDefaultInstance'>;
   aggExecutionContext: {
-    performedOn: 'server' | 'client';
+    getDefaultTimeZone: () => string;
   };
 }
 
