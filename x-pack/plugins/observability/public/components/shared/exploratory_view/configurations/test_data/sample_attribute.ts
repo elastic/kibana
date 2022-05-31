@@ -263,7 +263,6 @@ export const sampleAttribute = {
           ],
           layerId: 'layer0-reference-lines',
           layerType: 'referenceLine',
-          seriesType: 'line',
           yConfig: [
             {
               axisMode: 'bottom',

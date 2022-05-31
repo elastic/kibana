@@ -373,7 +373,6 @@ describe('Lens Attribute', () => {
           ],
           layerId: 'layer0-reference-lines',
           layerType: 'referenceLine',
-          seriesType: 'line',
           yConfig: [
             {
               axisMode: 'bottom',
@@ -638,7 +637,7 @@ describe('Lens Attribute', () => {
       const layerConfig1: LayerConfig = {
         seriesConfig: reportViewConfig,
         seriesType: 'line',
-        indexPattern: mockIndexPattern,
+        indexPattern: mockDataView,
         reportDefinitions: {},
         time: { from: 'now-15m', to: 'now' },
         color: 'green',
@@ -646,7 +645,7 @@ describe('Lens Attribute', () => {
         selectedMetricField: TRANSACTION_DURATION,
       };
 
-      lnsAttr = new LensAttributes([layerConfig1]);
+      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType);
 
       const attributes = lnsAttr.getJSON();
 

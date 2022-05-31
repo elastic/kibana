@@ -960,7 +960,6 @@ export class LensAttributes {
         layerId: referenceLineLayerId,
         accessors: Object.keys(columns),
         layerType: 'referenceLine',
-        seriesType: 'line' as SeriesType,
         yConfig: Object.keys(columns).map((columnId) => ({
           axisMode: 'bottom',
           color: '#6092C0',

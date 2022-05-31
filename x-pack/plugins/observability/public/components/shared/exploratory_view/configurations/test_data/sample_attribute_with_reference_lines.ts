@@ -4,8 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RECORDS_FIELD } from '../constants';
+
 export const sampleAttributeWithReferenceLines = {
-  description: 'undefined',
+  description: '',
   references: [
     {
       id: 'apm-*',
@@ -93,7 +95,7 @@ export const sampleAttributeWithReferenceLines = {
                 label: 'Part of count() / overall_sum(count())',
                 operationType: 'count',
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
               'y-axis-column-layer0X1': {
                 customLabel: true,
@@ -107,7 +109,7 @@ export const sampleAttributeWithReferenceLines = {
                 label: 'Part of count() / overall_sum(count())',
                 operationType: 'count',
                 scale: 'ratio',
-                sourceField: 'Records',
+                sourceField: RECORDS_FIELD,
               },
               'y-axis-column-layer0X2': {
                 customLabel: true,
@@ -220,7 +222,8 @@ export const sampleAttributeWithReferenceLines = {
     filters: [],
     query: {
       language: 'kuery',
-      query: 'transaction.duration.us < 60000000',
+      query:
+        'transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana) and transaction.duration.us < 60000000',
     },
     visualization: {
       axisTitlesVisibilitySettings: {
@@ -244,6 +247,7 @@ export const sampleAttributeWithReferenceLines = {
           xAccessor: 'x-axis-column-layer0',
           yConfig: [
             {
+              axisMode: 'left',
               color: 'green',
               forAccessor: 'y-axis-column-layer0',
             },
@@ -259,7 +263,6 @@ export const sampleAttributeWithReferenceLines = {
           ],
           layerId: 'layer0-reference-lines',
           layerType: 'referenceLine',
-          seriesType: 'line',
           yConfig: [
             {
               axisMode: 'bottom',
