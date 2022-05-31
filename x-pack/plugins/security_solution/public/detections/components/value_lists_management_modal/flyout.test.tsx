@@ -15,7 +15,7 @@ import { exportList } from '@kbn/securitysolution-list-api';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { TestProviders } from '../../../common/mock';
-import { ValueListsModal } from './flyout';
+import { ValueListsFlyout } from './flyout';
 
 jest.mock('@kbn/securitysolution-list-hooks', () => {
   const actual = jest.requireActual('@kbn/securitysolution-list-hooks');
@@ -36,7 +36,7 @@ jest.mock('@kbn/securitysolution-list-api', () => {
   };
 });
 
-describe('ValueListsModal', () => {
+describe('ValueListsFlyout', () => {
   beforeEach(() => {
     // Do not resolve the export in tests as it causes unexpected state updates
     (exportList as jest.Mock).mockImplementation(() => new Promise(() => {}));
@@ -53,7 +53,7 @@ describe('ValueListsModal', () => {
   it('renders nothing if showModal is false', () => {
     const container = mount(
       <TestProviders>
-        <ValueListsModal showModal={false} onClose={jest.fn()} />
+        <ValueListsFlyout showModal={false} onClose={jest.fn()} />
       </TestProviders>
     );
 
@@ -63,7 +63,7 @@ describe('ValueListsModal', () => {
   it('renders modal if showModal is true', () => {
     const container = mount(
       <TestProviders>
-        <ValueListsModal showModal={true} onClose={jest.fn()} />
+        <ValueListsFlyout showModal={true} onClose={jest.fn()} />
       </TestProviders>
     );
 
@@ -74,7 +74,7 @@ describe('ValueListsModal', () => {
     const onClose = jest.fn();
     const container = mount(
       <TestProviders>
-        <ValueListsModal showModal={true} onClose={onClose} />
+        <ValueListsFlyout showModal={true} onClose={onClose} />
       </TestProviders>
     );
 
@@ -86,7 +86,7 @@ describe('ValueListsModal', () => {
   it('renders ValueListsForm and an EuiTable', () => {
     const container = mount(
       <TestProviders>
-        <ValueListsModal showModal={true} onClose={jest.fn()} />
+        <ValueListsFlyout showModal={true} onClose={jest.fn()} />
       </TestProviders>
     );
 
@@ -98,7 +98,7 @@ describe('ValueListsModal', () => {
     it('calls exportList when export is clicked', async () => {
       const container = mount(
         <TestProviders>
-          <ValueListsModal showModal={true} onClose={jest.fn()} />
+          <ValueListsFlyout showModal={true} onClose={jest.fn()} />
         </TestProviders>
       );
 
@@ -120,7 +120,7 @@ describe('ValueListsModal', () => {
       });
       const container = mount(
         <TestProviders>
-          <ValueListsModal showModal={true} onClose={jest.fn()} />
+          <ValueListsFlyout showModal={true} onClose={jest.fn()} />
         </TestProviders>
       );
 
