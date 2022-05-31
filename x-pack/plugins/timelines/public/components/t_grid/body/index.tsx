@@ -18,7 +18,7 @@ import {
   EuiFlexItem,
   EuiProgress,
 } from '@elastic/eui';
-import { getOr, isEmpty } from 'lodash/fp';
+import { getOr } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, {
   ComponentType,
@@ -397,20 +397,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       }
     }, [isSelectAllChecked, onSelectPage, selectAll]);
 
-    // Clean any removed custom field that may still be present in stored columnHeaders
-    useEffect(() => {
-      if (!isEmpty(browserFields) && !isEmpty(columnHeaders)) {
-        columnHeaders.forEach(({ id: columnId }) => {
-          if (browserFields.base?.fields?.[columnId] == null) {
-            const [category] = columnId.split('.');
-            if (browserFields[category]?.fields?.[columnId] == null) {
-              dispatch(tGridActions.removeColumn({ id, columnId }));
-            }
-          }
-        });
-      }
-    }, [browserFields, columnHeaders, dispatch, id]);
-
     const onAlertStatusActionSuccess = useMemo(() => {
       if (bulkActions && bulkActions !== true) {
         return bulkActions.onAlertStatusActionSuccess;
@@ -734,6 +720,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
                   iconType: 'cross',
                   label: REMOVE_COLUMN,
                   onClick: () => {
+                    console.log('remove column 2', header.id);
                     dispatch(tGridActions.removeColumn({ id, columnId: header.id }));
                   },
                   size: 'xs',
