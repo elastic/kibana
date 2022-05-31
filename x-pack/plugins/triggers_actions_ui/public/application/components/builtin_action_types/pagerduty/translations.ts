@@ -35,6 +35,13 @@ export const API_URL_LABEL = i18n.translate(
   }
 );
 
+export const API_URL_INVALID = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.apiUrlInvalid',
+  {
+    defaultMessage: 'Invalid API URL',
+  }
+);
+
 export const INTEGRATION_KEY_LABEL = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.pagerDutyAction.routingKeyTextFieldLabel',
   {

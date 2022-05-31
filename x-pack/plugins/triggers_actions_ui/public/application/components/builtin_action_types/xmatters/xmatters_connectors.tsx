@@ -59,9 +59,6 @@ const XmattersUrlField: React.FC<{ path: string }> = ({ path }) => {
         ),
         validations: [
           {
-            validator: emptyField(i18n.URL_INVALID),
-          },
-          {
             validator: urlField(i18n.URL_INVALID),
           },
         ],

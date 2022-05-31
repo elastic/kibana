@@ -34,7 +34,7 @@ import * as i18n from './translations';
 import { PasswordField } from '../../password_field';
 
 const HTTP_VERBS = ['post', 'put'];
-const { emptyField } = fieldValidators;
+const { emptyField, urlField } = fieldValidators;
 
 const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
@@ -81,7 +81,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
               label: i18n.URL_LABEL,
               validations: [
                 {
-                  validator: emptyField(i18n.URL_REQUIRED),
+                  validator: urlField(i18n.URL_INVALID),
                 },
               ],
             }}

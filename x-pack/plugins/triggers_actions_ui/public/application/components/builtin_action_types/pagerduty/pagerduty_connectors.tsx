@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FieldConfig, UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
@@ -16,10 +17,26 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 
-const { emptyField } = fieldValidators;
+const { emptyField, urlField } = fieldValidators;
 
 const getApiURLConfig = (): FieldConfig => ({
   label: i18n.API_URL_LABEL,
+  validations: [
+    {
+      validator: (args) => {
+        const { value } = args;
+        /**
+         * The field is optional so if it is empty
+         * we do not validate
+         */
+        if (isEmpty(value)) {
+          return;
+        }
+
+        return urlField(i18n.API_URL_INVALID)(args);
+      },
+    },
+  ],
 });
 
 const getRoutingKeyConfig = (docLinks: DocLinksStart): FieldConfig => ({

@@ -16,7 +16,7 @@ import { ActionConnectorFieldsProps } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from './translations';
 
-const { emptyField } = fieldValidators;
+const { urlField } = fieldValidators;
 
 const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
   label: i18n.WEBHOOK_URL_LABEL,
@@ -30,7 +30,7 @@ const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
   ),
   validations: [
     {
-      validator: emptyField(i18n.WEBHOOK_URL_REQUIRED),
+      validator: urlField(i18n.WEBHOOK_URL_INVALID),
     },
   ],
 });
