@@ -7,11 +7,11 @@
 
 import * as rt from 'io-ts';
 
-export const numberFromStringRT = new rt.Type<number, string, string>(
+export const numberFromStringRT = new rt.Type<number, string, unknown>(
   'NumberFromString',
   rt.number.is,
   (value, context) => {
-    const nb = parseInt(value, 10);
+    const nb = parseInt(value as string, 10);
     return isNaN(nb) ? rt.failure(value, context) : rt.success(nb);
   },
   String
