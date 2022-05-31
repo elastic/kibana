@@ -47,6 +47,12 @@ export async function getInstanceRuleDataForClusters(
             metric,
           }),
           aggs: {
+            indices: {
+              terms: {
+                field: '_index',
+                size: 1,
+              },
+            },
             executions: {
               max: {
                 field: 'kibana.node_rules.executions',
@@ -68,6 +74,11 @@ export async function getInstanceRuleDataForClusters(
 
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
       const response = await callWithRequest(req, 'search', params);
+      const indices = response.aggregations?.indices?.buckets;
+      if (indices.length === 0) {
+        // This means they are only using internal monitoring and rule monitoring data is not available
+        return null;
+      }
       return {
         failures: response.aggregations?.failures?.value,
         executions: response.aggregations?.executions?.value,

@@ -109,6 +109,7 @@
           "hasCalculation": false,
           "isDerivative": false
         },
+        "indices_found": { "internal": true, "metricbeat": false },
         "data": [
           [1504027460000, null],
           [1504027470000, null],
@@ -132,11 +133,12 @@
           "metricAgg": "max",
           "label": "Average Rule Overdue Delay",
           "description": "Average delay of all overdue rules across the entire cluster.",
-          "units": "",
+          "units": "ms",
           "format": "0.[00]",
           "hasCalculation": false,
           "isDerivative": false
         },
+        "indices_found": { "internal": true, "metricbeat": false },
         "data": [
           [1504027460000, null],
           [1504027470000, null],
@@ -158,11 +160,12 @@
           "metricAgg": "max",
           "label": "Worst Rule Overdue Delay",
           "description": "Worst delay of all overdue rules across the entire cluster.",
-          "units": "",
+          "units": "ms",
           "format": "0.[00]",
           "hasCalculation": false,
           "isDerivative": false
         },
+        "indices_found": { "internal": true, "metricbeat": false },
         "data": [
           [1504027460000, null],
           [1504027470000, null],
@@ -191,6 +194,7 @@
           "hasCalculation": false,
           "isDerivative": false
         },
+        "indices_found": { "internal": true, "metricbeat": false },
         "data": [
           [1504027460000, null],
           [1504027470000, null],
@@ -214,11 +218,12 @@
           "metricAgg": "max",
           "label": "Average Action Overdue Delay",
           "description": "Average delay of all overdue actions across the entire cluster.",
-          "units": "",
+          "units": "ms",
           "format": "0.[00]",
           "hasCalculation": false,
           "isDerivative": false
         },
+        "indices_found": { "internal": true, "metricbeat": false },
         "data": [
           [1504027460000, null],
           [1504027470000, null],
@@ -240,11 +245,12 @@
           "metricAgg": "max",
           "label": "Worst Action Overdue Delay",
           "description": "Worst delay of all overdue actions across the entire cluster.",
-          "units": "",
+          "units": "ms",
           "format": "0.[00]",
           "hasCalculation": false,
           "isDerivative": false
         },
+        "indices_found": { "internal": true, "metricbeat": false },
         "data": [
           [1504027460000, null],
           [1504027470000, null],

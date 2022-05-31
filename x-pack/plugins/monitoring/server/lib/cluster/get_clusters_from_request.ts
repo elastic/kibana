@@ -185,21 +185,23 @@ export async function getClustersFromRequest(
     );
     set(clusters[clusterIndex], 'kibana', kibana.stats);
 
-    const clusterKibanaRules = kibanaClusterRules?.find(
-      (rule) => rule.clusterUuid === kibana.clusterUuid
-    );
-    const instanceKibanaRules = kibanaInstanceRules?.find(
-      (rule) => rule.clusterUuid === kibana.clusterUuid
-    );
+    const clusterKibanaRules =
+      kibanaClusterRules === null
+        ? null
+        : kibanaClusterRules?.find((rule) => rule?.clusterUuid === kibana.clusterUuid);
+    const instanceKibanaRules =
+      kibanaInstanceRules === null
+        ? null
+        : kibanaInstanceRules?.find((rule) => rule?.clusterUuid === kibana.clusterUuid);
     set(
       clusters[clusterIndex],
       'kibana.rules.cluster',
-      omit(clusterKibanaRules ?? {}, 'clusterUuid')
+      clusterKibanaRules ? omit(clusterKibanaRules, 'clusterUuid') : null
     );
     set(
       clusters[clusterIndex],
       'kibana.rules.instance',
-      omit(instanceKibanaRules ?? {}, 'clusterUuid')
+      instanceKibanaRules ? omit(instanceKibanaRules, 'clusterUuid') : null
     );
   });
 

@@ -275,7 +275,7 @@ export const metrics = {
     ),
     format: SMALL_FLOAT,
     metricAgg: 'max',
-    units: '',
+    units: msTimeUnitLabel,
     isNotSupportedInInternalCollection: true,
   }),
   kibana_instance_rule_executions: new KibanaInstanceRuleMetric({
@@ -326,7 +326,7 @@ export const metrics = {
     ),
     format: SMALL_FLOAT,
     metricAgg: 'max',
-    units: '',
+    units: msTimeUnitLabel,
     isNotSupportedInInternalCollection: true,
   }),
 
@@ -359,7 +359,7 @@ export const metrics = {
     ),
     format: SMALL_FLOAT,
     metricAgg: 'max',
-    units: '',
+    units: msTimeUnitLabel,
     isNotSupportedInInternalCollection: true,
   }),
   kibana_cluster_rule_overdue_p99: new KibanaClusterRuleMetric({
@@ -375,7 +375,7 @@ export const metrics = {
     ),
     format: SMALL_FLOAT,
     metricAgg: 'max',
-    units: '',
+    units: msTimeUnitLabel,
     isNotSupportedInInternalCollection: true,
   }),
   kibana_cluster_action_overdue_count: new KibanaClusterActionMetric({
@@ -410,7 +410,7 @@ export const metrics = {
     ),
     format: SMALL_FLOAT,
     metricAgg: 'max',
-    units: '',
+    units: msTimeUnitLabel,
     isNotSupportedInInternalCollection: true,
   }),
   kibana_cluster_action_overdue_p99: new KibanaClusterActionMetric({
@@ -426,7 +426,7 @@ export const metrics = {
     ),
     format: SMALL_FLOAT,
     metricAgg: 'max',
-    units: '',
+    units: msTimeUnitLabel,
     isNotSupportedInInternalCollection: true,
   }),
 };

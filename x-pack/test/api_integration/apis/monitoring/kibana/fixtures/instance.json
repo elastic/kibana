@@ -315,11 +315,12 @@
           "metricAgg": "max",
           "label": "Rule Failures Rate",
           "description": "Rate of rule executions for the Kibana instance.",
-          "units": "",
+          "units": "ms",
           "format": "0.[00]",
           "hasCalculation": false,
           "isDerivative": true
         },
+        "indices_found": { "internal": true, "metricbeat": false },
         "data": [
           [1504027460000, null],
           [1504027470000, null],
@@ -348,6 +349,7 @@
           "hasCalculation": false,
           "isDerivative": true
         },
+        "indices_found": { "internal": true, "metricbeat": false },
         "data": [
           [1504027460000, null],
           [1504027470000, null],
@@ -376,6 +378,7 @@
           "hasCalculation": false,
           "isDerivative": true
         },
+        "indices_found": { "internal": true, "metricbeat": false },
         "data": [
           [1504027460000, null],
           [1504027470000, null],
@@ -399,11 +402,12 @@
           "metricAgg": "max",
           "label": "Action Executions Rate",
           "description": "Rate of action executions for the Kibana instance.",
-          "units": "",
+          "units": "ms",
           "format": "0.[00]",
           "hasCalculation": false,
           "isDerivative": true
         },
+        "indices_found": { "internal": true, "metricbeat": false },
         "data": [
           [1504027460000, null],
           [1504027470000, null],

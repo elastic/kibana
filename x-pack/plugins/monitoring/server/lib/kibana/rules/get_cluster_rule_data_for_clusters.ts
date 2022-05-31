@@ -47,6 +47,12 @@ export async function getClusterRuleDataForClusters(
             metric,
           }),
           aggs: {
+            indices: {
+              terms: {
+                field: '_index',
+                size: 1,
+              },
+            },
             overdue_count: {
               max: {
                 field: 'kibana.cluster_rules.overdue.count',
@@ -67,6 +73,11 @@ export async function getClusterRuleDataForClusters(
       };
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
       const response = await callWithRequest(req, 'search', params);
+      const indices = response.aggregations?.indices?.buckets;
+      if (indices.length === 0) {
+        // This means they are only using internal monitoring and rule monitoring data is not available
+        return null;
+      }
       return {
         overdue: {
           count: response.aggregations?.overdue_count?.value,

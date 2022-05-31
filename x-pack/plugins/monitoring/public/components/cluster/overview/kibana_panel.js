@@ -136,27 +136,31 @@ export function KibanaPanel(props) {
                   values={{ maxTime: props.response_time_max }}
                 />
               </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle className="eui-textBreakWord">
-                <FormattedMessage
-                  id="xpack.monitoring.cluster.overview.kibanaPanel.ruleFailuresLabel"
-                  defaultMessage="Rule Success Ratio"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="kbnRuleFailures">
-                {formatPercentageUsage(
-                  props.rules.instance.executions - props.rules.instance.failures,
-                  props.rules.instance.executions
-                )}
-              </EuiDescriptionListDescription>
-              <EuiDescriptionListTitle className="eui-textBreakWord">
-                <FormattedMessage
-                  id="xpack.monitoring.cluster.overview.kibanaPanel.overdueTaskCountLabel"
-                  defaultMessage="Overdue Rules"
-                />
-              </EuiDescriptionListTitle>
-              <EuiDescriptionListDescription data-test-subj="kbnOverdueRules">
-                {props.rules.cluster.overdue.count}
-              </EuiDescriptionListDescription>
+              {props.rules.instance && props.rules.cluster && (
+                <>
+                  <EuiDescriptionListTitle className="eui-textBreakWord">
+                    <FormattedMessage
+                      id="xpack.monitoring.cluster.overview.kibanaPanel.ruleFailuresLabel"
+                      defaultMessage="Rule Success Ratio"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription data-test-subj="kbnRuleFailures">
+                    {formatPercentageUsage(
+                      props.rules.instance.executions - props.rules.instance.failures,
+                      props.rules.instance.executions
+                    )}
+                  </EuiDescriptionListDescription>
+                  <EuiDescriptionListTitle className="eui-textBreakWord">
+                    <FormattedMessage
+                      id="xpack.monitoring.cluster.overview.kibanaPanel.overdueTaskCountLabel"
+                      defaultMessage="Overdue Rules"
+                    />
+                  </EuiDescriptionListTitle>
+                  <EuiDescriptionListDescription data-test-subj="kbnOverdueRules">
+                    {props.rules.cluster.overdue.count}
+                  </EuiDescriptionListDescription>
+                </>
+              )}
             </EuiDescriptionList>
           </EuiPanel>
         </EuiFlexItem>

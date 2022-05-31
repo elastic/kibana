@@ -62,22 +62,7 @@
       "requests_total": 42,
       "concurrent_connections": 0,
       "response_time_max": 864,
-      "rules": {
-        "cluster": {
-          "overdue": {
-            "count": null,
-            "delay": {
-              "p50": null,
-              "p99": null
-            }
-          }
-        },
-        "instance": {
-          "executions": null,
-          "failures": null,
-          "timeouts": null
-        }
-      },
+      "rules": { "cluster": null, "instance": null },
       "memory_size": 127283200,
       "memory_limit": 8564343808,
       "count": 1
@@ -167,22 +152,7 @@
       "requests_total": 0,
       "concurrent_connections": 0,
       "response_time_max": 0,
-      "rules": {
-        "cluster": {
-          "overdue": {
-            "count": null,
-            "delay": {
-              "p50": null,
-              "p99": null
-            }
-          }
-        },
-        "instance": {
-          "executions": null,
-          "failures": null,
-          "timeouts": null
-        }
-      },
+      "rules": { "cluster": null, "instance": null },
       "memory_size": 0,
       "memory_limit": 0,
       "count": 0
