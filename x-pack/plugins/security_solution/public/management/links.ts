@@ -132,7 +132,7 @@ const links: LinkItem = {
       landingIcon: IconEndpoints,
       globalNavEnabled: true,
       title: ENDPOINTS,
-      globalNavOrder: 9006,
+      globalNavOrder: 9008,
       path: ENDPOINTS_PATH,
       skipUrlState: true,
       hideTimeline: true,

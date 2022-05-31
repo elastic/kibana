@@ -5,22 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { LogLevel } from '@kbn/logging';
-export type {
-  DisposableAppender,
-  Appender,
-  Ecs,
-  EcsEventCategory,
-  EcsEventKind,
-  EcsEventOutcome,
-  EcsEventType,
-  LogRecord,
-  Layout,
-  LoggerFactory,
-  LogMeta,
-  Logger,
-  LogLevelId,
-} from '@kbn/logging';
+
 export { config } from './logging_config';
 export type {
   LoggingConfigType,
