@@ -102,6 +102,7 @@ export interface SeriesUrl {
   textReportDefinitions?: URLTextReportDefinition;
   selectedMetricField?: string;
   hidden?: boolean;
+  showPercentileAnnotations?: boolean;
   color?: string;
 }
 

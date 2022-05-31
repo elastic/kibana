@@ -120,6 +120,7 @@ export interface LayerConfig {
   selectedMetricField: string;
   color: string;
   name: string;
+  showPercentileAnnotations?: boolean;
 }
 
 export class LensAttributes {
@@ -600,7 +601,8 @@ export class LensAttributes {
         columnFilters,
         timeScale,
         paramFilters,
-        showPercentileAnnotations,
+        showPercentileAnnotations:
+          layerConfig.showPercentileAnnotations ?? showPercentileAnnotations,
       };
     } else {
       const fieldMeta = layerConfig.indexPattern.getFieldByName(sourceField);
