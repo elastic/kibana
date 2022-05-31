@@ -8,7 +8,6 @@
 import { indexPatterns } from '@kbn/data-plugin/public';
 import './mocks';
 import { setupEnvironment, pageHelpers, nextTick, getRandomString } from './helpers';
-import { last } from 'lodash';
 
 const { setup } = pageHelpers.autoFollowPatternAdd;
 
