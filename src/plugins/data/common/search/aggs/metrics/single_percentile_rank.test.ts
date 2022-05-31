@@ -145,6 +145,9 @@ describe('AggTypeMetricSinglePercentileRankProvider class', () => {
       }
     );
 
-    expect(aggConfigs.toDsl()).toMatchSnapshot();
+    expect(aggConfigs.toDsl().single_percentile_rank.percentile_ranks.script.source).toEqual(
+      'return 456'
+    );
+    expect(aggConfigs.toDsl().single_percentile_rank.percentile_ranks.values).toEqual([1024]);
   });
 });
