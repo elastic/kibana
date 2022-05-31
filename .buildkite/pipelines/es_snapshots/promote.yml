@@ -12,7 +12,3 @@ steps:
     command: .buildkite/scripts/steps/es_snapshots/promote.sh
     agents:
       queue: kibana-default
-  - wait
-  - trigger: kibana-agent-packer-cache
-    async: true
-    branches: main
