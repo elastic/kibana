@@ -296,11 +296,11 @@ export interface FindListItemOptions {
   /** The current page number for the current find */
   page: Page;
   /** array of search_after terms, otherwise "undefined" if there is no search_after */
-  searchAfter: string[] | undefined;
+  searchAfter?: string[];
   /** Which field to sort on, "undefined" for no sort field */
-  sortField: SortFieldOrUndefined;
+  sortField?: SortFieldOrUndefined;
   /** "asc" or "desc" to sort, otherwise "undefined" if there is no sort order */
-  sortOrder: SortOrderOrUndefined;
+  sortOrder?: SortOrderOrUndefined;
 }
 
 /**

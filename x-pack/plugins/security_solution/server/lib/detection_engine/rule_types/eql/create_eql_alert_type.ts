@@ -74,6 +74,7 @@ export const createEqlAlertType = (
           wrapSequences,
           primaryTimestamp,
           secondaryTimestamp,
+          listClient,
         },
         services,
         state,
@@ -93,6 +94,7 @@ export const createEqlAlertType = (
         wrapSequences,
         primaryTimestamp,
         secondaryTimestamp,
+        listClient,
       });
       return { ...result, state };
     },

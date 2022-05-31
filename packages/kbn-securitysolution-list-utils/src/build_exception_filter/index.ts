@@ -22,10 +22,14 @@ import {
   OsTypeArray,
   entriesMatchWildcard,
   EntryMatchWildcard,
+  EntryList,
+  entriesList,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Filter } from '@kbn/es-query';
+import { ListClient } from '@kbn/lists-plugin/server';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { partition } from 'lodash';
 import { hasLargeValueList } from '../has_large_value_list';
 
 type NonListEntry = EntryMatch | EntryMatchAny | EntryNested | EntryExists | EntryMatchWildcard;
@@ -139,22 +143,63 @@ export const createOrClauses = (
   return exceptionItems.flatMap((exceptionItem) => buildExceptionItemFilter(exceptionItem));
 };
 
+export const filterOutLargeValueLists = async (
+  exceptionItems: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>,
+  listClient: ListClient
+) => {
+  return exceptionItems.map(async (exceptionItem) => {
+    const listEntries = exceptionItem.entries.filter((entry): entry is EntryList =>
+      entriesList.is(entry)
+    );
+    exceptionItem.entries = await Promise.all(
+      listEntries.filter(async (entry) => {
+        const {
+          list: { id },
+        } = entry;
+        const valueList = await listClient.findListItem({
+          listId: id,
+          perPage: 0,
+          page: 0,
+          filter: '',
+          currentIndexPosition: 0,
+        });
+        // Limit for value list size to be put into the initial ES request
+        if (valueList && valueList.total <= 500) {
+          return entry;
+        }
+      })
+    );
+    return exceptionItem;
+  });
+};
+
 export const buildExceptionFilter = ({
   lists,
   excludeExceptions,
   chunkSize,
   alias = null,
+  listClient,
 }: {
   lists: Array<ExceptionListItemSchema | CreateExceptionListItemSchema>;
   excludeExceptions: boolean;
   chunkSize: number;
   alias: string | null;
+  listClient?: ListClient;
 }): Filter | undefined => {
   // Remove exception items with large value lists. These are evaluated
   // elsewhere for the moment being.
-  const exceptionsWithoutLargeValueLists = lists.filter(
+
+  const [exceptionsWithoutValueLists, valueListExceptions] = partition(
+    lists,
     (item): item is ExceptionItemSansLargeValueLists => !hasLargeValueList(item.entries)
   );
+
+  const smallValueListExceptions: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
+    [];
+  if (listClient) {
+    const filteredExceptions = filterOutLargeValueLists(valueListExceptions, listClient);
+    smallValueListExceptions.push(filteredExceptions);
+  }
 
   const exceptionFilter: Filter = {
     meta: {
@@ -169,14 +214,14 @@ export const buildExceptionFilter = ({
     },
   };
 
-  if (exceptionsWithoutLargeValueLists.length === 0) {
+  if (exceptionsWithoutValueLists.length === 0) {
     return undefined;
-  } else if (exceptionsWithoutLargeValueLists.length <= chunkSize) {
-    const clause = createOrClauses(exceptionsWithoutLargeValueLists);
+  } else if (exceptionsWithoutValueLists.length <= chunkSize) {
+    const clause = createOrClauses(exceptionsWithoutValueLists);
     exceptionFilter.query!.bool!.should = clause;
     return exceptionFilter;
   } else {
-    const chunks = chunkExceptions(exceptionsWithoutLargeValueLists, chunkSize);
+    const chunks = chunkExceptions(exceptionsWithoutValueLists, chunkSize);
 
     const filters = chunks.map((exceptionsChunk) => {
       const orClauses = createOrClauses(exceptionsChunk);

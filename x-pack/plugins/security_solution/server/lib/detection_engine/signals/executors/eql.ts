@@ -13,7 +13,7 @@ import type {
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-
+import type { ListClient } from '@kbn/lists-plugin/server';
 import { buildEqlSearchRequest } from '../build_events_query';
 import { hasLargeValueItem } from '../../../../../common/detection_engine/utils';
 
@@ -49,6 +49,7 @@ export const eqlExecutor = async ({
   wrapSequences,
   primaryTimestamp,
   secondaryTimestamp,
+  listClient,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -63,6 +64,7 @@ export const eqlExecutor = async ({
   wrapSequences: WrapSequences;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
+  listClient: ListClient;
 }): Promise<SearchAfterAndBulkCreateReturnType> => {
   const ruleParams = completeRule.ruleParams;
 
