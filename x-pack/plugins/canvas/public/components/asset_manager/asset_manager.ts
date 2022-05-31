@@ -54,10 +54,10 @@ export const AssetManager = connect(
     return {
       ...ownProps,
       assets: assetValues,
-      onAddAsset: (file: File) => {
+      onAddAsset: async (file: File) => {
         const [type, subtype] = get(file, 'type', '').split('/');
         if (type === 'image' && VALID_IMAGE_TYPES.indexOf(subtype) >= 0) {
-          return encode(file).then((dataurl) => {
+          return await encode(file).then((dataurl) => {
             const dataurlType = 'dataurl';
             const existingId = findExistingAsset(dataurlType, dataurl, assetValues);
 
@@ -68,8 +68,6 @@ export const AssetManager = connect(
             return onAddAsset(workpad, dataurlType, dataurl);
           });
         }
-
-        return false;
       },
     };
   }
