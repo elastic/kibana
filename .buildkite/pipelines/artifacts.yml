@@ -53,6 +53,7 @@ steps:
 
   - command: KIBANA_DOCKER_CONTEXT=cloud .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
+    soft_fail: true
     agents:
       queue: n2-2
     timeout_in_minutes: 30
@@ -62,8 +63,19 @@ steps:
         - exit_status: '*'
           limit: 1
 
+  - command: KIBANA_DOCKER_CONTEXT=ubi .buildkite/scripts/steps/artifacts/docker_context.sh
+    label: 'Docker Context Verification'
+    agents:
+      queue: n2-2
+    timeout_in_minutes: 30
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
   - command: .buildkite/scripts/steps/artifacts/cloud.sh
     label: 'Cloud Deployment'
+    soft_fail: true
     agents:
       queue: n2-2
     timeout_in_minutes: 30

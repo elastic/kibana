@@ -8,7 +8,7 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiTextColor } from '@elastic/eui';
+import { EuiImage, EuiTextColor } from '@elastic/eui';
 import { ElasticAgentCardProps } from './types';
 import { NoDataCard } from './no_data_card';
 import ElasticAgentCardIllustration from './assets/elastic_agent_card.svg';
@@ -64,5 +64,19 @@ export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardCompon
         isDisabled: true,
       };
 
-  return <NoDataCard image={ElasticAgentCardIllustration} {...props} {...cardRest} />;
+  const image = (
+    <EuiImage
+      size="fullWidth"
+      style={{
+        width: 'max(100%, 360px)',
+        height: 240,
+        objectFit: 'cover',
+        background: 'aliceblue',
+      }}
+      url={ElasticAgentCardIllustration}
+      alt=""
+    />
+  );
+
+  return <NoDataCard image={image} {...props} {...cardRest} />;
 };

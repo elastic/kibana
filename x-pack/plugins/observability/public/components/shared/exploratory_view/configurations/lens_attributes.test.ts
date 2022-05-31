@@ -47,7 +47,7 @@ describe('Lens Attribute', () => {
   };
 
   beforeEach(() => {
-    lnsAttr = new LensAttributes([layerConfig]);
+    lnsAttr = new LensAttributes([layerConfig], reportViewConfig.reportType);
   });
 
   it('should return expected json', function () {
@@ -62,19 +62,22 @@ describe('Lens Attribute', () => {
       reportConfigMap: obsvReportConfigMap,
     });
 
-    const lnsAttrKpi = new LensAttributes([
-      {
-        seriesConfig: seriesConfigKpi,
-        seriesType: 'line',
-        operationType: 'count',
-        indexPattern: mockDataView,
-        reportDefinitions: { 'service.name': ['elastic-co'] },
-        time: { from: 'now-15m', to: 'now' },
-        color: 'green',
-        name: 'test-series',
-        selectedMetricField: RECORDS_FIELD,
-      },
-    ]);
+    const lnsAttrKpi = new LensAttributes(
+      [
+        {
+          seriesConfig: seriesConfigKpi,
+          seriesType: 'line',
+          operationType: 'count',
+          indexPattern: mockDataView,
+          reportDefinitions: { 'service.name': ['elastic-co'] },
+          time: { from: 'now-15m', to: 'now' },
+          color: 'green',
+          name: 'test-series',
+          selectedMetricField: RECORDS_FIELD,
+        },
+      ],
+      ReportTypes.KPI
+    );
 
     expect(lnsAttrKpi.getJSON()).toEqual(sampleAttributeKpi);
   });
@@ -87,22 +90,25 @@ describe('Lens Attribute', () => {
       reportConfigMap: obsvReportConfigMap,
     });
 
-    const lnsAttrKpi = new LensAttributes([
-      {
-        filters: [],
-        seriesConfig: seriesConfigKpi,
-        time: {
-          from: 'now-1h',
-          to: 'now',
+    const lnsAttrKpi = new LensAttributes(
+      [
+        {
+          filters: [],
+          seriesConfig: seriesConfigKpi,
+          time: {
+            from: 'now-1h',
+            to: 'now',
+          },
+          indexPattern: mockDataView,
+          name: 'ux-series-1',
+          breakdown: 'percentile',
+          reportDefinitions: {},
+          selectedMetricField: 'transaction.duration.us',
+          color: '#54b399',
         },
-        indexPattern: mockDataView,
-        name: 'ux-series-1',
-        breakdown: 'percentile',
-        reportDefinitions: {},
-        selectedMetricField: 'transaction.duration.us',
-        color: '#54b399',
-      },
-    ]);
+      ],
+      ReportTypes.KPI
+    );
 
     expect(lnsAttrKpi.getJSON().state.datasourceStates.indexpattern.layers.layer0.columns).toEqual({
       'x-axis-column-layer0': {
@@ -208,7 +214,7 @@ describe('Lens Attribute', () => {
       selectedMetricField: TRANSACTION_DURATION,
     };
 
-    lnsAttr = new LensAttributes([layerConfig1]);
+    lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType);
 
     expect(JSON.stringify(lnsAttr.getFieldMeta(REPORT_METRIC_FIELD, layerConfig1))).toEqual(
       JSON.stringify({
@@ -309,7 +315,10 @@ describe('Lens Attribute', () => {
   });
 
   it('should hide y axis when there are multiple series', function () {
-    const lensAttrWithMultiSeries = new LensAttributes([layerConfig, layerConfig]).getJSON() as any;
+    const lensAttrWithMultiSeries = new LensAttributes(
+      [layerConfig, layerConfig],
+      reportViewConfig.reportType
+    ).getJSON() as any;
     expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
       x: true,
       yLeft: false,
@@ -318,7 +327,10 @@ describe('Lens Attribute', () => {
   });
 
   it('should show y axis when there is a single series', function () {
-    const lensAttrWithMultiSeries = new LensAttributes([layerConfig]).getJSON() as any;
+    const lensAttrWithMultiSeries = new LensAttributes(
+      [layerConfig],
+      reportViewConfig.reportType
+    ).getJSON() as any;
     expect(lensAttrWithMultiSeries.state.visualization.axisTitlesVisibilitySettings).toEqual({
       x: true,
       yLeft: true,
@@ -483,7 +495,10 @@ describe('Lens Attribute', () => {
   });
 
   it('should not use global filters when there is more than one series', function () {
-    const multiSeriesLensAttr = new LensAttributes([layerConfig, layerConfig]).getJSON();
+    const multiSeriesLensAttr = new LensAttributes(
+      [layerConfig, layerConfig],
+      reportViewConfig.reportType
+    ).getJSON();
     expect(multiSeriesLensAttr.state.query.query).toEqual('transaction.duration.us < 60000000');
   });
 
@@ -502,16 +517,17 @@ describe('Lens Attribute', () => {
         selectedMetricField: TRANSACTION_DURATION,
       };
 
-      lnsAttr = new LensAttributes([layerConfig1]);
+      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType);
 
       lnsAttr.getBreakdownColumn({
+        layerConfig: layerConfig1,
         sourceField: USER_AGENT_NAME,
         layerId: 'layer0',
         indexPattern: mockDataView,
         labels: layerConfig.seriesConfig.labels,
       });
 
-      expect(lnsAttr.visualization.layers).toEqual([
+      expect(lnsAttr.visualization?.layers).toEqual([
         {
           accessors: ['y-axis-column-layer0'],
           layerId: 'layer0',
@@ -544,8 +560,7 @@ describe('Lens Attribute', () => {
             params: {
               missingBucket: false,
               orderBy: {
-                columnId: 'y-axis-column-layer0',
-                type: 'column',
+                type: 'alphabetical',
               },
               orderDirection: 'desc',
               otherBucket: true,

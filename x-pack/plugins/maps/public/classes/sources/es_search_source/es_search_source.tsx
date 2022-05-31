@@ -131,9 +131,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     };
   }
 
-  constructor(descriptor: Partial<ESSearchSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<ESSearchSourceDescriptor>) {
     const sourceDescriptor = ESSearchSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters);
+    super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
     this._tooltipFields = this._descriptor.tooltipProperties
       ? this._descriptor.tooltipProperties.map((property) => {
@@ -267,7 +267,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   async _getTopHits(
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
-    registerCancelCallback: (callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void,
+    inspectorAdapters: Adapters
   ) {
     const { topHitsSplitField: topHitsSplitFieldName, topHitsSize } = this._descriptor;
 
@@ -350,6 +351,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       requestDescription: 'Elasticsearch document top hits request',
       searchSessionId: searchFilters.searchSessionId,
       executionContext: makePublicExecutionContext('es_search_source:top_hits'),
+      requestsAdapter: inspectorAdapters.requests,
     });
 
     const allHits: any[] = [];
@@ -383,7 +385,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   async _getSearchHits(
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
-    registerCancelCallback: (callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void,
+    inspectorAdapters: Adapters
   ) {
     const indexPattern = await this.getIndexPattern();
 
@@ -432,6 +435,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       requestDescription: 'Elasticsearch document request',
       searchSessionId: searchFilters.searchSessionId,
       executionContext: makePublicExecutionContext('es_search_source:doc_search'),
+      requestsAdapter: inspectorAdapters.requests,
     });
 
     const isTimeExtentForTimeslice =
@@ -512,13 +516,19 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
-    isRequestStillActive: () => boolean
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     const indexPattern = await this.getIndexPattern();
 
     const { hits, meta } = this._isTopHits()
-      ? await this._getTopHits(layerName, searchFilters, registerCancelCallback)
-      : await this._getSearchHits(layerName, searchFilters, registerCancelCallback);
+      ? await this._getTopHits(layerName, searchFilters, registerCancelCallback, inspectorAdapters)
+      : await this._getSearchHits(
+          layerName,
+          searchFilters,
+          registerCancelCallback,
+          inspectorAdapters
+        );
 
     const unusedMetaFields = indexPattern.metaFields.filter((metaField) => {
       return !['_id', '_index'].includes(metaField);
@@ -800,7 +810,11 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return 'hits';
   }
 
-  async getTileUrl(searchFilters: VectorSourceRequestMeta, refreshToken: string): Promise<string> {
+  async getTileUrl(
+    searchFilters: VectorSourceRequestMeta,
+    refreshToken: string,
+    hasLabels: boolean
+  ): Promise<string> {
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
@@ -837,6 +851,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
+&hasLabels=${hasLabels}\
 &requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
 &token=${refreshToken}`;
   }

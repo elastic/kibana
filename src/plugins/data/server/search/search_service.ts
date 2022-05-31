@@ -86,7 +86,7 @@ import {
   eqlRawResponse,
   SQL_SEARCH_STRATEGY,
 } from '../../common/search';
-import { getEsaggs, getEsdsl, getEql } from './expressions';
+import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
 import {
   getShardDelayBucketAgg,
   SHARD_DELAY_AGG_NAME,
@@ -232,6 +232,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
 
     expressions.registerFunction(getEsaggs({ getStartServices: core.getStartServices }));
     expressions.registerFunction(getEsdsl({ getStartServices: core.getStartServices }));
+    expressions.registerFunction(getEssql({ getStartServices: core.getStartServices }));
     expressions.registerFunction(getEql({ getStartServices: core.getStartServices }));
     expressions.registerFunction(cidrFunction);
     expressions.registerFunction(dateRangeFunction);

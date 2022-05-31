@@ -70,11 +70,16 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
 
       expect(response.statusCode).to.eql(204);
       expect(response.body).to.eql('');
+      const now = Date.now();
       const { body: updatedAlert } = await supertestWithoutAuth
         .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
-      expect(updatedAlert.snooze_end_time).to.eql(FUTURE_SNOOZE_TIME);
+      expect(updatedAlert.snooze_schedule.length).to.eql(1);
+      // Due to latency, test to make sure the returned rRule.dtstart is within 10 seconds of the current time
+      const { rRule, duration } = updatedAlert.snooze_schedule[0];
+      expect(Math.abs(Date.parse(rRule.dtstart) - now) < 10000).to.be(true);
+      expect(Math.abs(duration - (Date.parse(FUTURE_SNOOZE_TIME) - now)) < 10000).to.be(true);
       expect(updatedAlert.mute_all).to.eql(false);
       // Ensure AAD isn't broken
       await checkAAD({
@@ -126,7 +131,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
         .get(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rule/${createdRule.id}`)
         .set('kbn-xsrf', 'foo')
         .expect(200);
-      expect(updatedAlert.snooze_end_time).to.eql(null);
+      expect(updatedAlert.snooze_schedule).to.eql([]);
       expect(updatedAlert.mute_all).to.eql(true);
       // Ensure AAD isn't broken
       await checkAAD({
