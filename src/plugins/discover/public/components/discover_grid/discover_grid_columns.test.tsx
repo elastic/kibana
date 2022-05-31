@@ -31,6 +31,7 @@ describe('Discover grid columns', function () {
           "actions": Object {
             "additional": Array [
               Object {
+                "data-test-subj": "gridCopyColumnNameToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -44,6 +45,7 @@ describe('Discover grid columns', function () {
                 "size": "xs",
               },
               Object {
+                "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -77,6 +79,7 @@ describe('Discover grid columns', function () {
           "actions": Object {
             "additional": Array [
               Object {
+                "data-test-subj": "gridCopyColumnNameToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -90,6 +93,7 @@ describe('Discover grid columns', function () {
                 "size": "xs",
               },
               Object {
+                "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -137,6 +141,7 @@ describe('Discover grid columns', function () {
           "actions": Object {
             "additional": Array [
               Object {
+                "data-test-subj": "gridCopyColumnNameToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -150,6 +155,7 @@ describe('Discover grid columns', function () {
                 "size": "xs",
               },
               Object {
+                "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -180,6 +186,7 @@ describe('Discover grid columns', function () {
           "actions": Object {
             "additional": Array [
               Object {
+                "data-test-subj": "gridCopyColumnNameToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -193,6 +200,7 @@ describe('Discover grid columns', function () {
                 "size": "xs",
               },
               Object {
+                "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -237,6 +245,7 @@ describe('Discover grid columns', function () {
           "actions": Object {
             "additional": Array [
               Object {
+                "data-test-subj": "gridCopyColumnNameToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -250,6 +259,7 @@ describe('Discover grid columns', function () {
                 "size": "xs",
               },
               Object {
+                "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -294,6 +304,7 @@ describe('Discover grid columns', function () {
           "actions": Object {
             "additional": Array [
               Object {
+                "data-test-subj": "gridCopyColumnNameToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -307,6 +318,7 @@ describe('Discover grid columns', function () {
                 "size": "xs",
               },
               Object {
+                "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -340,6 +352,7 @@ describe('Discover grid columns', function () {
           "actions": Object {
             "additional": Array [
               Object {
+                "data-test-subj": "gridCopyColumnNameToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },
@@ -353,6 +366,7 @@ describe('Discover grid columns', function () {
                 "size": "xs",
               },
               Object {
+                "data-test-subj": "gridCopyColumnValuesToClipBoardButton",
                 "iconProps": Object {
                   "size": "m",
                 },

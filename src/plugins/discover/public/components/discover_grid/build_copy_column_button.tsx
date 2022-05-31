@@ -19,9 +19,11 @@ import type { ValueToStringConverter } from '../../types';
 function buildCopyColumnButton({
   label,
   onCopy,
+  dataTestSubj,
 }: {
   label: EuiListGroupItemProps['label'];
   onCopy: () => unknown;
+  dataTestSubj: string;
 }) {
   const copyToClipBoardButton: EuiListGroupItemProps = {
     size: 'xs',
@@ -29,6 +31,7 @@ function buildCopyColumnButton({
     iconType: 'copyClipboard',
     iconProps: { size: 'm' },
     onClick: onCopy,
+    'data-test-subj': dataTestSubj,
   };
 
   return copyToClipBoardButton;
@@ -49,6 +52,7 @@ export function buildCopyColumnNameButton({
       />
     ),
     onCopy: () => copyColumnNameToClipboard({ columnId, services }),
+    dataTestSubj: 'gridCopyColumnNameToClipBoardButton',
   });
 }
 
@@ -77,5 +81,6 @@ export function buildCopyColumnValuesButton({
         rowsCount,
         valueToStringConverter,
       }),
+    dataTestSubj: 'gridCopyColumnValuesToClipBoardButton',
   });
 }
