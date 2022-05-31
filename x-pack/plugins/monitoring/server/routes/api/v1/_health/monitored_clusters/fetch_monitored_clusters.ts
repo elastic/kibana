@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { merge } from 'lodash';
 
 import { ElasticsearchResponse } from '../../../../../../common/types/es';
 import { TimeRange } from '../../../../../../common/http_api/shared';
 
-import { buildMonitoredClusters } from './build_monitored_clusters';
+import { buildMonitoredClusters, MonitoredClusters } from './build_monitored_clusters';
 import {
   monitoredClustersQuery,
   persistentMetricsetsQuery,
@@ -20,7 +21,7 @@ import {
 type SearchFn = (params: any) => Promise<ElasticsearchResponse>;
 
 interface MonitoredClustersResponse {
-  clusters?: any;
+  clusters?: MonitoredClusters;
   execution: {
     timedOut?: boolean;
     errors?: string[];
@@ -38,12 +39,14 @@ export const fetchMonitoredClusters = async ({
   entSearchIndex,
   timeRange,
   search,
+  logger,
 }: {
   timeout: number;
   timeRange: TimeRange;
   monitoringIndex: string;
   entSearchIndex: string;
   search: SearchFn;
+  logger: Logger;
 }): Promise<MonitoredClustersResponse> => {
   const getMonitoredClusters = async (
     index: string,
@@ -59,10 +62,11 @@ export const fetchMonitoredClusters = async ({
 
       const buckets = aggregations?.clusters?.buckets ?? [];
       return {
-        clusters: buildMonitoredClusters(buckets),
+        clusters: buildMonitoredClusters(buckets, logger),
         execution: { timedOut },
       };
     } catch (err) {
+      logger.error(`fetchMonitoredClusters: failed to fetch:\n${err.stack}`);
       return { execution: { errors: [err.message] } };
     }
   };

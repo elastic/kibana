@@ -50,6 +50,7 @@ export function registerV1HealthRoute(server: MonitoringCore) {
         monitoringIndex: withCCS(INDEX_PATTERN),
         entSearchIndex: withCCS(INDEX_PATTERN_ENTERPRISE_SEARCH),
         search: (params: any) => callWithRequest(req, 'search', params),
+        logger,
       }).catch((err: Error) => {
         logger.error(`_health: failed to retrieve monitored clusters:\n${err.stack}`);
         return { error: err.message };

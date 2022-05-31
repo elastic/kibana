@@ -5,19 +5,56 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { isEmpty, mapValues, merge, omitBy, reduce } from 'lodash';
+
+enum CollectionMode {
+  Internal = 'internal-monitoring',
+  Metricbeat7 = 'metricbeat-7',
+  Metricbeat8 = 'metricbeat-8',
+  Unknown = 'unknowna',
+}
+
+enum MonitoredProduct {
+  Elasticsearch = 'elasticsearch',
+  Kibana = 'kibana',
+  Beats = 'beats',
+  Logstash = 'logstash',
+  EnterpriseSearch = 'enterpriseSearch',
+}
+
+type MonitoredMetricsets = {
+  [metricset: string]: {
+    [collectionMode in CollectionMode]: {
+      index: string;
+      lastSeen: string;
+    };
+  };
+};
+
+type MonitoredEntities = {
+  [entityId: string]: MonitoredMetricsets;
+};
+
+type MonitoredProducts = {
+  [product in MonitoredProduct]: MonitoredEntities;
+};
+
+export type MonitoredClusters = {
+  [clusterUuid: string]: MonitoredProducts;
+};
 
 const internalMonitoringPattern = /^\.monitoring-(es|kibana|beats|logstash)-7-[0-9]{4}\..*/;
 const metricbeatMonitoring7Pattern = /^\.monitoring-(es|kibana|beats|logstash|ent-search)-7.*-mb.*/;
 const metricbeatMonitoring8Pattern =
   /^\.ds-\.monitoring-(es|kibana|beats|logstash|ent-search)-8-mb.*/;
 
-const getCollectionMode = (index: string) => {
-  if (internalMonitoringPattern.test(index)) return 'internal-monitoring';
-  if (metricbeatMonitoring7Pattern.test(index)) return 'metricbeat-7';
-  if (metricbeatMonitoring8Pattern.test(index)) return 'metricbeat-8';
+const getCollectionMode = (index: string): CollectionMode => {
+  if (internalMonitoringPattern.test(index)) return CollectionMode.Internal;
+  if (metricbeatMonitoring7Pattern.test(index)) return CollectionMode.Metricbeat7;
+  if (metricbeatMonitoring8Pattern.test(index)) return CollectionMode.Metricbeat8;
 
-  return 'Unknown collection mode';
+  return CollectionMode.Unknown;
 };
 
 /**
@@ -44,9 +81,12 @@ const getCollectionMode = (index: string) => {
  *   }
  * }
  */
-export const buildMonitoredClusters = (clustersBuckets: any[]) => {
+export const buildMonitoredClusters = (
+  clustersBuckets: any[],
+  logger: Logger
+): MonitoredClusters => {
   return clustersBuckets.reduce((clusters, { key, doc_count: _, ...products }) => {
-    clusters[key] = buildMonitoredProducts(products);
+    clusters[key] = buildMonitoredProducts(products, logger);
     return clusters;
   }, {});
 };
@@ -57,9 +97,15 @@ export const buildMonitoredClusters = (clustersBuckets: any[]) => {
  * so the output only includes a single product entry
  * we assume each aggregation is named as /productname(_aggsuffix)?/
  */
-const buildMonitoredProducts = (rawProducts: any) => {
-  const products = mapValues(rawProducts, ({ buckets }) => {
-    return buildMonitoredEntities(buckets);
+const buildMonitoredProducts = (rawProducts: any, logger: Logger): MonitoredProducts => {
+  const validProducts = Object.values(MonitoredProduct);
+  const products = mapValues(rawProducts, (value, key) => {
+    if (!validProducts.some((product) => key.startsWith(product))) {
+      logger.warn(`buildMonitoredProducts: ignoring unknown product aggregation key (${key})`);
+      return {};
+    }
+
+    return buildMonitoredEntities(value.buckets);
   });
 
   return reduce(
@@ -75,7 +121,7 @@ const buildMonitoredProducts = (rawProducts: any) => {
   );
 };
 
-const buildMonitoredEntities = (entitiesBuckets: any[]) => {
+const buildMonitoredEntities = (entitiesBuckets: any[]): MonitoredEntities => {
   return entitiesBuckets.reduce(
     (entities, { key, key_as_string: keyAsString, doc_count: _, ...metricsets }) => {
       entities[keyAsString || key] = buildMonitoredMetricsets(metricsets);
@@ -85,7 +131,7 @@ const buildMonitoredEntities = (entitiesBuckets: any[]) => {
   );
 };
 
-const buildMonitoredMetricsets = (rawMetricsets: any) => {
+const buildMonitoredMetricsets = (rawMetricsets: any): MonitoredMetricsets => {
   const monitoredMetricsets = mapValues(
     rawMetricsets,
     ({ by_index: byIndex }: { by_index: { buckets: any[] } }) => {
@@ -99,5 +145,5 @@ const buildMonitoredMetricsets = (rawMetricsets: any) => {
     }
   );
 
-  return omitBy(monitoredMetricsets, isEmpty);
+  return omitBy(monitoredMetricsets, isEmpty) as unknown as MonitoredMetricsets;
 };

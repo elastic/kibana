@@ -6,7 +6,15 @@
  */
 
 import assert from 'assert';
+import sinon from 'sinon';
+import type { Logger } from '@kbn/core/server';
 import { fetchMonitoredClusters } from './fetch_monitored_clusters';
+
+const getMockLogger = () =>
+  ({
+    warn: sinon.spy(),
+    error: sinon.spy(),
+  } as unknown as Logger);
 
 describe(__filename, () => {
   describe('fetchMonitoringClusters', () => {
@@ -25,6 +33,7 @@ describe(__filename, () => {
         entSearchIndex: 'foo',
         timeRange: { min: 1652979091217, max: 11652979091217 },
         search: searchFn,
+        logger: getMockLogger(),
       });
 
       assert.equal(searchFn.mock.calls.length, 3);
@@ -52,6 +61,7 @@ describe(__filename, () => {
         entSearchIndex: 'foo',
         timeRange: { min: 1652979091217, max: 11652979091217 },
         search: searchFn,
+        logger: getMockLogger(),
       });
 
       assert.equal(result.execution.timedOut, true);
@@ -76,6 +86,7 @@ describe(__filename, () => {
         entSearchIndex: 'foo',
         timeRange: { min: 1652979091217, max: 11652979091217 },
         search: searchFn,
+        logger: getMockLogger(),
       });
 
       assert.equal(result.execution.timedOut, false);
@@ -260,6 +271,7 @@ describe(__filename, () => {
         entSearchIndex: 'foo',
         timeRange: { min: 1652979091217, max: 11652979091217 },
         search: searchFn,
+        logger: getMockLogger(),
       });
 
       assert.deepEqual(monitoredClusters, {
