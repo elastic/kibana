@@ -53,6 +53,7 @@ export interface MetricOption {
   columnFilter?: ColumnFilter;
   paramFilters?: ParamFilter[];
   timeScale?: string;
+  showPercentileAnnotations?: boolean;
 }
 
 export interface SeriesConfig {
@@ -101,6 +102,7 @@ export interface SeriesUrl {
   textReportDefinitions?: URLTextReportDefinition;
   selectedMetricField?: string;
   hidden?: boolean;
+  showPercentileAnnotations?: boolean;
   color?: string;
 }
 

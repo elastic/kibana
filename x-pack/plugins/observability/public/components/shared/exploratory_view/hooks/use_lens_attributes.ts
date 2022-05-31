@@ -84,6 +84,7 @@ export function getLayerConfigs(
         reportDefinitions: series.reportDefinitions ?? {},
         selectedMetricField: series.selectedMetricField,
         color: series.color ?? (theme.eui as unknown as Record<string, string>)[color],
+        showPercentileAnnotations: series.showPercentileAnnotations,
       });
     }
   });

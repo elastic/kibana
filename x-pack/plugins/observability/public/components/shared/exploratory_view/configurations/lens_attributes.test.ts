@@ -19,6 +19,7 @@ import { buildExistsFilter, buildPhrasesFilter } from './utils';
 import { sampleAttributeKpi } from './test_data/sample_attribute_kpi';
 import { RECORDS_FIELD, REPORT_METRIC_FIELD, PERCENTILE_RANKS, ReportTypes } from './constants';
 import { obsvReportConfigMap } from '../obsv_exploratory_view';
+import { sampleAttributeWithReferenceLines } from './test_data/sample_attribute_with_reference_lines';
 
 describe('Lens Attribute', () => {
   mockAppDataView();
@@ -124,6 +125,7 @@ describe('Lens Attribute', () => {
       },
       ...PERCENTILE_RANKS.reduce((acc: Record<string, any>, rank, index) => {
         acc[`y-axis-column-${index === 0 ? 'layer' + index : index}`] = {
+          customLabel: true,
           dataType: 'number',
           filter: {
             language: 'kuery',
@@ -145,6 +147,7 @@ describe('Lens Attribute', () => {
 
   it('should return main y axis', function () {
     expect(lnsAttr.getMainYAxis(layerConfig, 'layer0', '')).toEqual({
+      customLabel: true,
       dataType: 'number',
       isBucketed: false,
       label: 'Pages loaded',
@@ -159,7 +162,7 @@ describe('Lens Attribute', () => {
         formula: 'count() / overall_sum(count())',
         isFormulaBroken: false,
       },
-      references: ['y-axis-column-layer0X4'],
+      references: ['y-axis-column-layer0X3'],
       scale: 'ratio',
     });
   });
@@ -197,6 +200,7 @@ describe('Lens Attribute', () => {
         },
         fieldName: 'transaction.duration.us',
         columnLabel: 'Page load time',
+        showPercentileAnnotations: true,
       })
     );
   });
@@ -230,6 +234,7 @@ describe('Lens Attribute', () => {
         },
         fieldName: TRANSACTION_DURATION,
         columnLabel: 'Page load time',
+        showPercentileAnnotations: true,
       })
     );
   });
@@ -339,135 +344,7 @@ describe('Lens Attribute', () => {
   });
 
   it('should return first layer', function () {
-    expect(lnsAttr.getLayers()).toEqual({
-      layer0: {
-        columnOrder: [
-          'x-axis-column-layer0',
-          'y-axis-column-layer0',
-          'y-axis-column-layer0X0',
-          'y-axis-column-layer0X1',
-          'y-axis-column-layer0X2',
-          'y-axis-column-layer0X3',
-          'y-axis-column-layer0X4',
-        ],
-        columns: {
-          'x-axis-column-layer0': {
-            dataType: 'number',
-            isBucketed: true,
-            label: 'Page load time',
-            operationType: 'range',
-            params: {
-              maxBars: 'auto',
-              ranges: [
-                {
-                  from: 0,
-                  label: '',
-                  to: 1000,
-                },
-              ],
-              type: 'histogram',
-            },
-            scale: 'interval',
-            sourceField: 'transaction.duration.us',
-          },
-          'y-axis-column-layer0': {
-            dataType: 'number',
-            filter: {
-              language: 'kuery',
-              query:
-                'transaction.type: page-load and processor.event: transaction and transaction.type : *',
-            },
-            isBucketed: false,
-            label: 'Pages loaded',
-            operationType: 'formula',
-            params: {
-              format: {
-                id: 'percent',
-                params: {
-                  decimals: 0,
-                },
-              },
-              formula:
-                "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
-              isFormulaBroken: false,
-            },
-            references: ['y-axis-column-layer0X4'],
-            scale: 'ratio',
-          },
-          'y-axis-column-layer0X0': {
-            customLabel: true,
-            dataType: 'number',
-            filter: {
-              language: 'kuery',
-              query:
-                'transaction.type: page-load and processor.event: transaction and transaction.type : *',
-            },
-            isBucketed: false,
-            label: 'Part of count() / overall_sum(count())',
-            operationType: 'count',
-            scale: 'ratio',
-            sourceField: RECORDS_FIELD,
-          },
-          'y-axis-column-layer0X1': {
-            customLabel: true,
-            dataType: 'number',
-            filter: {
-              language: 'kuery',
-              query:
-                'transaction.type: page-load and processor.event: transaction and transaction.type : *',
-            },
-            isBucketed: false,
-            label: 'Part of count() / overall_sum(count())',
-            operationType: 'count',
-            scale: 'ratio',
-            sourceField: RECORDS_FIELD,
-          },
-          'y-axis-column-layer0X2': {
-            customLabel: true,
-            dataType: 'number',
-            isBucketed: false,
-            label: 'Part of count() / overall_sum(count())',
-            operationType: 'math',
-            params: {
-              tinymathAst: 'y-axis-column-layer0X1',
-            },
-            references: ['y-axis-column-layer0X1'],
-            scale: 'ratio',
-          },
-          'y-axis-column-layer0X3': {
-            customLabel: true,
-            dataType: 'number',
-            isBucketed: false,
-            label: 'Part of count() / overall_sum(count())',
-            operationType: 'overall_sum',
-            references: ['y-axis-column-layer0X2'],
-            scale: 'ratio',
-          },
-          'y-axis-column-layer0X4': {
-            customLabel: true,
-            dataType: 'number',
-            isBucketed: false,
-            label: 'Part of count() / overall_sum(count())',
-            operationType: 'math',
-            params: {
-              tinymathAst: {
-                args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X3'],
-                location: {
-                  max: 30,
-                  min: 0,
-                },
-                name: 'divide',
-                text: "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
-                type: 'function',
-              },
-            },
-            references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X3'],
-            scale: 'ratio',
-          },
-        },
-        incompleteColumns: {},
-      },
-    });
+    expect(lnsAttr.getLayers()).toEqual(sampleAttribute.state.datasourceStates.indexpattern.layers);
   });
 
   it('should return expected XYState', function () {
@@ -485,6 +362,59 @@ describe('Lens Attribute', () => {
           seriesType: 'line',
           xAccessor: 'x-axis-column-layer0',
           yConfig: [{ color: 'green', forAccessor: 'y-axis-column-layer0', axisMode: 'left' }],
+        },
+        {
+          accessors: [
+            '50th-percentile-reference-line-layer0-reference-lines',
+            '75th-percentile-reference-line-layer0-reference-lines',
+            '90th-percentile-reference-line-layer0-reference-lines',
+            '95th-percentile-reference-line-layer0-reference-lines',
+            '99th-percentile-reference-line-layer0-reference-lines',
+          ],
+          layerId: 'layer0-reference-lines',
+          layerType: 'referenceLine',
+          yConfig: [
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '50th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '75th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '90th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '95th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+            {
+              axisMode: 'bottom',
+              color: '#6092C0',
+              forAccessor: '99th-percentile-reference-line-layer0-reference-lines',
+              lineStyle: 'solid',
+              lineWidth: 2,
+              textVisibility: true,
+            },
+          ],
         },
       ],
       legend: { isVisible: true, showSingleSeries: true, position: 'right' },
@@ -514,7 +444,7 @@ describe('Lens Attribute', () => {
         time: { from: 'now-15m', to: 'now' },
         color: 'green',
         name: 'test-series',
-        selectedMetricField: TRANSACTION_DURATION,
+        selectedMetricField: LCP_FIELD,
       };
 
       lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType);
@@ -549,7 +479,6 @@ describe('Lens Attribute', () => {
           'y-axis-column-layer0X1',
           'y-axis-column-layer0X2',
           'y-axis-column-layer0X3',
-          'y-axis-column-layer0X4',
         ],
         columns: {
           'breakdown-column-layer0': {
@@ -572,7 +501,7 @@ describe('Lens Attribute', () => {
           'x-axis-column-layer0': {
             dataType: 'number',
             isBucketed: true,
-            label: 'Page load time',
+            label: 'Largest contentful paint',
             operationType: 'range',
             params: {
               maxBars: 'auto',
@@ -586,9 +515,10 @@ describe('Lens Attribute', () => {
               type: 'histogram',
             },
             scale: 'interval',
-            sourceField: 'transaction.duration.us',
+            sourceField: LCP_FIELD,
           },
           'y-axis-column-layer0': {
+            customLabel: true,
             dataType: 'number',
             filter: {
               language: 'kuery',
@@ -609,7 +539,7 @@ describe('Lens Attribute', () => {
                 "count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *') / overall_sum(count(kql='transaction.type: page-load and processor.event: transaction and transaction.type : *'))",
               isFormulaBroken: false,
             },
-            references: ['y-axis-column-layer0X4'],
+            references: ['y-axis-column-layer0X3'],
             scale: 'ratio',
           },
           'y-axis-column-layer0X0': {
@@ -645,10 +575,7 @@ describe('Lens Attribute', () => {
             dataType: 'number',
             isBucketed: false,
             label: 'Part of count() / overall_sum(count())',
-            operationType: 'math',
-            params: {
-              tinymathAst: 'y-axis-column-layer0X1',
-            },
+            operationType: 'overall_sum',
             references: ['y-axis-column-layer0X1'],
             scale: 'ratio',
           },
@@ -657,19 +584,10 @@ describe('Lens Attribute', () => {
             dataType: 'number',
             isBucketed: false,
             label: 'Part of count() / overall_sum(count())',
-            operationType: 'overall_sum',
-            references: ['y-axis-column-layer0X2'],
-            scale: 'ratio',
-          },
-          'y-axis-column-layer0X4': {
-            customLabel: true,
-            dataType: 'number',
-            isBucketed: false,
-            label: 'Part of count() / overall_sum(count())',
             operationType: 'math',
             params: {
               tinymathAst: {
-                args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X3'],
+                args: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
                 location: {
                   max: 30,
                   min: 0,
@@ -679,7 +597,7 @@ describe('Lens Attribute', () => {
                 type: 'function',
               },
             },
-            references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X3'],
+            references: ['y-axis-column-layer0X0', 'y-axis-column-layer0X2'],
             scale: 'ratio',
           },
         },
@@ -711,6 +629,27 @@ describe('Lens Attribute', () => {
       expect(filters).toEqual(
         '@timestamp >= now-15m and @timestamp <= now and transaction.type: page-load and processor.event: transaction and transaction.type : * and service.name: (elastic or kibana)'
       );
+    });
+  });
+
+  describe('Reference line layers', function () {
+    it('should return expected reference lines', function () {
+      const layerConfig1: LayerConfig = {
+        seriesConfig: reportViewConfig,
+        seriesType: 'line',
+        indexPattern: mockDataView,
+        reportDefinitions: {},
+        time: { from: 'now-15m', to: 'now' },
+        color: 'green',
+        name: 'test-series',
+        selectedMetricField: TRANSACTION_DURATION,
+      };
+
+      lnsAttr = new LensAttributes([layerConfig1], reportViewConfig.reportType);
+
+      const attributes = lnsAttr.getJSON();
+
+      expect(attributes).toEqual(sampleAttributeWithReferenceLines);
     });
   });
 });

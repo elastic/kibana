@@ -32,6 +32,7 @@ export function getDistributionInPercentageColumn({
   }
 
   const main: FormulaIndexPatternColumn = {
+    customLabel: true,
     label: label || 'Percentage of records',
     dataType: 'number' as DataType,
     operationType: 'formula',
@@ -42,7 +43,7 @@ export function getDistributionInPercentageColumn({
       isFormulaBroken: false,
       format: { id: 'percent', params: { decimals: 0 } },
     },
-    references: [`${yAxisColId}X4`],
+    references: [`${yAxisColId}X3`],
   };
 
   const countColumn: CountIndexPatternColumn = {
@@ -56,24 +57,13 @@ export function getDistributionInPercentageColumn({
     filter: { query: columnFilter ?? '', language: 'kuery' },
   };
 
-  const mathColumn: MathIndexPatternColumn = {
-    label: 'Part of count() / overall_sum(count())',
-    dataType: 'number',
-    operationType: 'math',
-    isBucketed: false,
-    scale: 'ratio',
-    params: { tinymathAst: `${yAxisColId}X1` },
-    references: [`${yAxisColId}X1`],
-    customLabel: true,
-  };
-
   const overAllSumColumn: OverallSumIndexPatternColumn = {
     label: 'Part of count() / overall_sum(count())',
     dataType: 'number',
     operationType: 'overall_sum',
     isBucketed: false,
     scale: 'ratio',
-    references: [`${yAxisColId}X2`],
+    references: [`${yAxisColId}X1`],
     customLabel: true,
   };
 
@@ -87,12 +77,12 @@ export function getDistributionInPercentageColumn({
       tinymathAst: {
         type: 'function',
         name: 'divide',
-        args: [`${yAxisColId}X0`, `${yAxisColId}X3`],
+        args: [`${yAxisColId}X0`, `${yAxisColId}X2`],
         location: { min: 0, max: 30 },
         text: lensFormula,
       } as unknown as TinymathAST,
     },
-    references: [`${yAxisColId}X0`, `${yAxisColId}X3`],
+    references: [`${yAxisColId}X0`, `${yAxisColId}X2`],
     customLabel: true,
   };
 
@@ -102,9 +92,8 @@ export function getDistributionInPercentageColumn({
   > = {
     [`${yAxisColId}X0`]: countColumn,
     [`${yAxisColId}X1`]: countColumn,
-    [`${yAxisColId}X2`]: mathColumn,
-    [`${yAxisColId}X3`]: overAllSumColumn,
-    [`${yAxisColId}X4`]: tinyMathColumn,
+    [`${yAxisColId}X2`]: overAllSumColumn,
+    [`${yAxisColId}X3`]: tinyMathColumn,
   };
 
   return { main, supportingColumns };

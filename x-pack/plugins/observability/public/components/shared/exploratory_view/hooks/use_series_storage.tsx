@@ -152,7 +152,7 @@ export function useSeriesStorage() {
 }
 
 function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
-  const { dt, op, st, bd, ft, time, rdf, mt, h, n, c, ...restSeries } = newValue;
+  const { dt, op, st, bd, ft, time, rdf, mt, h, n, c, spa, ...restSeries } = newValue;
   return {
     operationType: op,
     seriesType: st,
@@ -165,6 +165,7 @@ function convertFromShortUrl(newValue: ShortUrlSeries): SeriesUrl {
     hidden: h,
     name: n,
     color: c,
+    showPercentileAnnotations: spa,
     ...restSeries,
   };
 }
@@ -180,6 +181,7 @@ interface ShortUrlSeries {
   [URL_KEYS.HIDDEN]?: boolean;
   [URL_KEYS.NAME]: string;
   [URL_KEYS.COLOR]?: string;
+  [URL_KEYS.SHOW_PERCENTILE_ANNOTATIONS]?: boolean;
   time?: {
     to: string;
     from: string;
