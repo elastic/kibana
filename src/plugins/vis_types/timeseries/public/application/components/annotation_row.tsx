@@ -17,8 +17,10 @@ import {
   EuiFormRow,
   EuiSpacer,
   htmlIdGenerator,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 
 import { KBN_FIELD_TYPES, Query } from '@kbn/data-plugin/public';
 import { getDataViewsStart } from '../../services';
@@ -72,6 +74,11 @@ export const AnnotationRow = ({
   const htmlId = htmlIdGenerator(model.id);
 
   const [fetchedIndex, setFetchedIndex] = useState<IndexPatternSelectProps['fetchedIndex']>(null);
+
+  const { euiTheme } = useEuiTheme();
+  const aggRowChildrenCss = css`
+    padding-top: calc(${euiTheme.size.s} - 2px);
+  `;
 
   useEffect(() => {
     const updateFetchedIndex = async (index: IndexPatternValue) => {
@@ -134,7 +141,7 @@ export const AnnotationRow = ({
           <ColorPicker disableTrash={true} onChange={onChange} name="color" value={model.color} />
         </EuiFlexItem>
 
-        <EuiFlexItem className="tvbAggRow__children">
+        <EuiFlexItem css={aggRowChildrenCss}>
           <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
             <EuiFlexItem>
               <IndexPatternSelect

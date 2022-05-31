@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import PropTypes from 'prop-types';
 import { last } from 'lodash';
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useState, useEffect, useCallback, useEuiTheme } from 'react';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
@@ -34,6 +34,7 @@ import { getCharts } from '../../../../services';
 import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
+import { tsvbEditorRowStyle } from '../../../styles/common.styles';
 
 export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -48,6 +49,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
   };
   const model = { ...defaults, ...props.model };
   const htmlId = htmlIdGenerator();
+  const { euiTheme } = useEuiTheme();
   const { intl } = props;
   const stackedOptions = [
     {
@@ -367,7 +369,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
   };
 
   return (
-    <div className="tvbAggRow">
+    <div css={tsvbEditorRowStyle(euiTheme)}>
       <EuiFlexGroup gutterSize="s">
         <DataFormatPicker
           formatterValue={model.formatter}
@@ -496,7 +498,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               It accepts a null value, but is passed a empty string.
             */}
             <input
-              className="tvbAgg__input"
+              className="euiFieldNumber"
               type="number"
               disabled={disableSeparateYaxis}
               onChange={handleTextChange('axis_min')}
@@ -519,7 +521,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
               It accepts a null value, but is passed a empty string.
             */}
             <input
-              className="tvbAgg__input"
+              className="euiFieldNumber"
               disabled={disableSeparateYaxis}
               onChange={handleTextChange('axis_max')}
               value={model.axis_max}

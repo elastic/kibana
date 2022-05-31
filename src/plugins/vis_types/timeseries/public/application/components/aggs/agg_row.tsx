@@ -8,10 +8,12 @@
 
 import React from 'react';
 import { last } from 'lodash';
-import { EuiIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { SeriesDragHandler } from '../series_drag_handler';
+import { tsvbEditorRowStyle } from '../../styles/common.styles';
 import type { Metric } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
 
@@ -30,13 +32,18 @@ export function AggRow(props: AggRowProps) {
   let iconColor = 'subdued';
   const lastSibling = last(props.siblings) as Metric;
 
+  const { euiTheme } = useEuiTheme();
+  const aggRowChildrenCss = css`
+    padding-top: calc(${euiTheme.size.s} - 2px);
+  `;
+
   if (lastSibling.id === props.model.id) {
     iconType = 'eye';
     iconColor = 'text';
   }
 
   return (
-    <div className="tvbAggRow">
+    <div css={tsvbEditorRowStyle(euiTheme)}>
       <EuiFlexGroup
         data-test-subj="aggRow"
         gutterSize="s"
@@ -44,9 +51,9 @@ export function AggRow(props: AggRowProps) {
         responsive={false}
       >
         <EuiFlexItem grow={false}>
-          <EuiIcon className="tvbAggRow__visibilityIcon" type={iconType} color={iconColor} />
+          <EuiIcon type={iconType} color={iconColor} style={{ marginTop: euiTheme.size.xs }} />
         </EuiFlexItem>
-        <EuiFlexItem className="tvbAggRow__children">{props.children}</EuiFlexItem>
+        <EuiFlexItem css={aggRowChildrenCss}>{props.children}</EuiFlexItem>
 
         <SeriesDragHandler
           dragHandleProps={props.dragHandleProps}

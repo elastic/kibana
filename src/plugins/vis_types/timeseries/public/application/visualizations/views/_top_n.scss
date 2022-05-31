@@ -1,4 +1,10 @@
 
+$tvbTextColor: transparentize($euiColorFullShade, .4);
+$tvbTextColorReversed: transparentize($euiColorEmptyShade, .4);
+
+$tvbValueColor: transparentize($euiColorFullShade, .3);
+$tvbValueColorReversed: transparentize($euiColorEmptyShade, .2);
+
 .tvbVisTopN {
   position: relative;
   overflow: auto;
@@ -6,7 +12,7 @@
   flex-direction: column;
 
   tr:hover td {
-    background-color: $tvbHoverBackgroundColor;
+    background-color: transparentize($euiColorFullShade, .9);;
   }
 }
 
@@ -44,7 +50,7 @@
 
 .tvbVisTopN--reversed {
   tr:hover td {
-    background-color: $tvbHoverBackgroundColorReversed;
+    background-color: transparentize($euiColorEmptyShade, .9);
   }
 
   .tvbVisTopN__label {
