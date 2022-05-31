@@ -729,5 +729,28 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
       await assertRulesLength(2);
     });
+
+    it('should not prevent rules with action execution capabilities from being edited', async () => {
+      const action = await createAction({ supertest, objectRemover });
+      await createAlert({
+        supertest,
+        objectRemover,
+        overwrites: {
+          actions: [
+            {
+              id: action.id,
+              group: 'default',
+              params: { level: 'info', message: 'gfghfhg' },
+            },
+          ],
+        },
+      });
+      await refreshAlertsList();
+      await retry.try(async () => {
+        const actionButton = await testSubjects.find('selectActionButton');
+        const disabled = await actionButton.getAttribute('disabled');
+        expect(disabled).to.equal(null);
+      });
+    });
   });
 };

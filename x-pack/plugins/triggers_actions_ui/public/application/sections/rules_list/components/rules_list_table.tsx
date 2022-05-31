@@ -99,7 +99,7 @@ export interface RulesListTableProps {
   sort: EuiTableSortingType<RuleTableItem>['sort'];
   page: Pagination;
   percentileOptions: EuiSelectableOption[];
-  canExecuteActions?: boolean;
+  canExecuteActions: boolean;
   itemIdToExpandedRowMap?: Record<string, React.ReactNode>;
   config: TriggersActionsUiConfig;
   onSort?: (sort: EuiTableSortingType<RuleTableItem>['sort']) => void;
