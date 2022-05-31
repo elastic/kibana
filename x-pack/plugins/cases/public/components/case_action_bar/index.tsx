@@ -28,7 +28,7 @@ import type { OnUpdateFields } from '../case_view/types';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { getStatusDate, getStatusTitle } from './helpers';
-import { useRefreshCaseViewPage } from '../case_view/case_view_page';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`

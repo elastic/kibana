@@ -11,12 +11,12 @@ import { render } from '@testing-library/react';
 
 import { basicCase, caseUserActions, getAlertUserAction } from '../../containers/mock';
 import { CaseActionBar, CaseActionBarProps } from '.';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import { TestProviders } from '../../common/mock';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-import userEvent from '@testing-library/user-event';
-import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 
 jest.mock('../../containers/use_get_case_user_actions');
+jest.mock('../case_view/use_on_refresh_case_view_page');
 
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const defaultUseGetCaseUserActions = {
@@ -106,13 +106,15 @@ describe('CaseActionBar', () => {
   });
 
   it('invalidates the queryClient cache onRefresh', () => {
-    const app = createAppMockRenderer();
-    const spy = jest.spyOn(app.queryClient, 'invalidateQueries');
-    const result = app.render(<CaseActionBar {...defaultProps} />);
+    const wrapper = mount(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} />
+      </TestProviders>
+    );
 
-    userEvent.click(result.getByTestId('case-refresh'));
+    wrapper.find(`[data-test-subj="case-refresh"]`).first().simulate('click');
 
-    expect(spy).toHaveBeenCalledWith(CASE_VIEW_CACHE_KEY);
+    expect(useRefreshCaseViewPage()).toHaveBeenCalled();
   });
 
   it('should call onUpdateField when changing status', () => {
