@@ -92,6 +92,22 @@ describe('convertValueToString', () => {
     expect(result.formattedString).toBe('"2022-05-22T12:10:30.000Z"');
   });
 
+  it('should convert a date nanos value to text', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      rowsFlattened: discoverGridContextComplexMock.rowsFlattened,
+      dataView: discoverGridContextComplexMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'date_nanos',
+      rowIndex: 0,
+      options: {
+        disableMultiline: true,
+      },
+    });
+
+    expect(result.formattedString).toBe('"2022-01-01T12:10:30.123456789Z"');
+  });
+
   it('should convert a boolean value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
@@ -192,6 +208,38 @@ describe('convertValueToString', () => {
     );
   });
 
+  it('should convert a rank features value to text', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      rowsFlattened: discoverGridContextComplexMock.rowsFlattened,
+      dataView: discoverGridContextComplexMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'rank_features',
+      rowIndex: 0,
+      options: {
+        disableMultiline: true,
+      },
+    });
+
+    expect(result.formattedString).toBe('{"2star":100,"1star":10}');
+  });
+
+  it('should convert a histogram value to text', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      rowsFlattened: discoverGridContextComplexMock.rowsFlattened,
+      dataView: discoverGridContextComplexMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'histogram',
+      rowIndex: 0,
+      options: {
+        disableMultiline: true,
+      },
+    });
+
+    expect(result.formattedString).toBe('{"counts":[3,7,23,12,6],"values":[0.1,0.2,0.3,0.4,0.5]}');
+  });
+
   it('should convert a IP value to text', () => {
     const result = convertValueToString({
       rows: discoverGridContextComplexMock.rows,
@@ -286,6 +334,24 @@ describe('convertValueToString', () => {
     });
 
     expect(result.formattedString).toBe('elasticsearch, wow');
+  });
+
+  it('should convert a shape value to text', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      rowsFlattened: discoverGridContextComplexMock.rowsFlattened,
+      dataView: discoverGridContextComplexMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'geometry',
+      rowIndex: 0,
+      options: {
+        disableMultiline: true,
+      },
+    });
+
+    expect(result.formattedString).toBe(
+      '{"coordinates":[[[1000,-1001],[1001,-1001],[1001,-1000],[1000,-1000],[1000,-1001]]],"type":"Polygon"}'
+    );
   });
 
   it('should convert a runtime value to text', () => {
