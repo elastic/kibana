@@ -16,6 +16,7 @@ import type {
 import { BlobStorageService } from './blob_storage_service';
 import { FileServiceFactory } from './file_service';
 import { FilesPluginSetupDependencies, FilesPluginSetup, FilesPluginStart } from './types';
+import { fileKindsRegistry } from './file_kinds_registry';
 
 export class FilesPlugin
   implements Plugin<FilesPluginSetup, FilesPluginStart, FilesPluginSetupDependencies>
@@ -28,16 +29,17 @@ export class FilesPlugin
     this.logger = initializerContext.logger.get();
   }
 
-  public setup(core: CoreSetup, deps: FilesPluginSetupDependencies) {
+  public setup(core: CoreSetup, deps: FilesPluginSetupDependencies): FilesPluginSetup {
     FileServiceFactory.setup(core.savedObjects);
     this.securitySetup = deps.security;
     return {
-      // TODO: Finish building file kind registry
-      registerFileKind() {},
+      registerFileKind(fileKind) {
+        fileKindsRegistry.register(fileKind);
+      },
     };
   }
 
-  public start(coreStart: CoreStart) {
+  public start(coreStart: CoreStart): FilesPluginStart {
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     const blobStorageService = new BlobStorageService(
       esClient,
@@ -47,6 +49,7 @@ export class FilesPlugin
       coreStart.savedObjects,
       blobStorageService,
       this.securitySetup,
+      fileKindsRegistry,
       this.logger.get('files-service')
     );
     return {
