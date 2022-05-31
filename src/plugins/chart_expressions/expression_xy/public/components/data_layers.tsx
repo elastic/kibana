@@ -36,7 +36,7 @@ import {
 } from '../helpers';
 
 interface Props {
-  titles: LayersAccessorsTitles;
+  titles?: LayersAccessorsTitles;
   layers: CommonXYDataLayerConfig[];
   formatFactory: FormatFactory;
   chartHasMoreThanOneBarSeries?: boolean;
@@ -56,7 +56,7 @@ interface Props {
 }
 
 export const DataLayers: FC<Props> = ({
-  titles,
+  titles = {},
   layers,
   endValue,
   timeZone,

@@ -49,11 +49,11 @@ export type LayersFieldFormats = Record<string, LayerFieldFormats>;
 export type AccessorsTitles = Record<string, string>;
 
 export interface LayerAccessorsTitles {
-  xTitles: AccessorsTitles;
-  yTitles: AccessorsTitles;
-  splitSeriesTitles: AccessorsTitles;
-  splitColumnTitles: AccessorsTitles;
-  splitRowTitles: AccessorsTitles;
+  xTitles?: AccessorsTitles;
+  yTitles?: AccessorsTitles;
+  splitSeriesTitles?: AccessorsTitles;
+  splitColumnTitles?: AccessorsTitles;
+  splitRowTitles?: AccessorsTitles;
 }
 
 export type LayersAccessorsTitles = Record<string, LayerAccessorsTitles>;

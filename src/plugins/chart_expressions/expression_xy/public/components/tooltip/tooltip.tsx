@@ -25,7 +25,7 @@ import './tooltip.scss';
 type Props = TooltipInfo & {
   xDomain?: XDomain;
   fieldFormats: LayersFieldFormats;
-  titles: LayersAccessorsTitles;
+  titles?: LayersAccessorsTitles;
   formatFactory: FormatFactory;
   formattedDatatables: DatatablesWithFormatInfo;
   splitAccessors?: {
@@ -38,7 +38,7 @@ export const Tooltip: FC<Props> = ({
   header,
   values,
   fieldFormats,
-  titles,
+  titles = {},
   formatFactory,
   formattedDatatables,
   splitAccessors,
@@ -62,7 +62,7 @@ export const Tooltip: FC<Props> = ({
       ? null
       : formatFactory(layerFormats.xAccessors[xAccessor]);
     data.push({
-      label: layerTitles.xTitles[xAccessor],
+      label: layerTitles?.xTitles?.[xAccessor],
       value: headerFormatter ? headerFormatter.convert(header.value) : `${header.value}`,
     });
   }
@@ -71,7 +71,7 @@ export const Tooltip: FC<Props> = ({
   if (tooltipYAccessor) {
     const yFormatter = formatFactory(layerFormats.yAccessors[tooltipYAccessor]);
     data.push({
-      label: layerTitles.yTitles[tooltipYAccessor],
+      label: layerTitles?.yTitles?.[tooltipYAccessor],
       value: yFormatter ? yFormatter.convert(pickedValue.value) : `${pickedValue.value}`,
     });
   }
@@ -80,7 +80,7 @@ export const Tooltip: FC<Props> = ({
       ? null
       : formatFactory(layerFormats.splitSeriesAccessors[key]);
 
-    const label = layerTitles.splitSeriesTitles[key];
+    const label = layerTitles?.splitSeriesTitles?.[key];
     const value = splitSeriesFormatter ? splitSeriesFormatter.convert(splitValue) : `${splitValue}`;
     data.push({ label, value });
   });
@@ -90,7 +90,7 @@ export const Tooltip: FC<Props> = ({
     seriesIdentifier.smVerticalAccessorValue !== undefined
   ) {
     data.push({
-      label: layerTitles.splitColumnTitles[splitAccessors?.splitColumnAccessor],
+      label: layerTitles?.splitColumnTitles?.[splitAccessors?.splitColumnAccessor],
       value: `${seriesIdentifier.smVerticalAccessorValue}`,
     });
   }
@@ -100,7 +100,7 @@ export const Tooltip: FC<Props> = ({
     seriesIdentifier.smHorizontalAccessorValue !== undefined
   ) {
     data.push({
-      label: layerTitles.splitRowTitles[splitAccessors?.splitRowAccessor],
+      label: layerTitles?.splitRowTitles?.[splitAccessors?.splitRowAccessor],
       value: `${seriesIdentifier.smHorizontalAccessorValue}`,
     });
   }

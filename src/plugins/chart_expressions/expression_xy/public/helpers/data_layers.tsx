@@ -43,7 +43,7 @@ type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
 type GetSeriesPropsFn = (config: {
   layer: CommonXYDataLayerConfig;
-  titles: LayerAccessorsTitles;
+  titles?: LayerAccessorsTitles;
   accessor: string;
   chartHasMoreThanOneBarSeries?: boolean;
   formatFactory: FormatFactory;
@@ -228,7 +228,10 @@ const getSeriesName: GetSeriesNameFn = (
         }
         return splitColumnId && i === 0
           ? key
-          : columnToLabelMap[key] ?? titles.yTitles[key] ?? titles.splitSeriesTitles[key] ?? null;
+          : columnToLabelMap[key] ??
+              titles?.yTitles?.[key] ??
+              titles?.splitSeriesTitles?.[key] ??
+              null;
       })
       .join(' - ');
 
@@ -249,7 +252,7 @@ const getSeriesName: GetSeriesNameFn = (
   // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
   return splitColumnId
     ? data.seriesKeys[0]
-    : columnToLabelMap[data.seriesKeys[0]] ?? titles.yTitles[data.seriesKeys[0]] ?? null;
+    : columnToLabelMap[data.seriesKeys[0]] ?? titles?.yTitles?.[data.seriesKeys[0]] ?? null;
 };
 
 const getPointConfig: GetPointConfigFn = ({
@@ -291,7 +294,7 @@ const getColor: GetColorFn = (
     {
       name: layer.splitAccessor
         ? String(seriesKeys[0])
-        : columnToLabelMap[seriesKeys[0]] ?? titles.yTitles[seriesKeys[0]] ?? null,
+        : columnToLabelMap[seriesKeys[0]] ?? titles?.yTitles?.[seriesKeys[0]] ?? null,
       totalSeriesAtDepth: colorAssignment.totalSeriesCount,
       rankAtDepth: colorAssignment.getRank(layer, String(seriesKeys[0]), String(yAccessor)),
     },
@@ -338,7 +341,7 @@ export const getMetaFromSeriesId = (seriesId: string) => {
 
 export const getSeriesProps: GetSeriesPropsFn = ({
   layer,
-  titles,
+  titles = {},
   accessor,
   chartHasMoreThanOneBarSeries,
   colorAssignments,

@@ -57,7 +57,7 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
     const groupId = getGroupId(axisMode);
 
     const formatter = formatters[groupId || 'bottom'];
-    const name = columnToLabelMap[yConfig.forAccessor] ?? titles?.yTitles[yConfig.forAccessor];
+    const name = columnToLabelMap[yConfig.forAccessor] ?? titles?.yTitles?.[yConfig.forAccessor];
     const value = row[yConfig.forAccessor];
     const yConfigsWithSameDirection = groupedByDirection[yConfig.fill!];
     const indexFromSameType = yConfigsWithSameDirection.findIndex(
