@@ -192,7 +192,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             caseData={caseData}
             userCanCrud={userCanCrud}
             isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
-            onRefresh={refreshCaseViewPage}
             onUpdateField={onUpdateField}
           />
         </HeaderPage>

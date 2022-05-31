@@ -7,12 +7,10 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { useQueryClient } from 'react-query';
-import { CASE_VIEW_CACHE_KEY } from '../../../containers/constants';
 import { CaseSeverity } from '../../../../common/api';
 import { useConnectors } from '../../../containers/configure/use_connectors';
 import { useCaseViewNavigation } from '../../../common/navigation';
-import { UpdateKey, UseFetchAlertData } from '../../../../common/ui/types';
+import { UseFetchAlertData } from '../../../../common/ui/types';
 import { Case, CaseStatuses } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import { CasesNavigation } from '../../links';
@@ -27,6 +25,7 @@ import { getNoneConnector, normalizeActionConnector } from '../../configure_case
 import { getConnectorById } from '../../utils';
 import { SeveritySidebarSelector } from '../../severity/sidebar_selector';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
+import { useRefreshCaseViewPage } from '../case_view_page';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -43,7 +42,6 @@ export const CaseViewActivity = ({
 }) => {
   const { userCanCrud } = useCasesContext();
   const { getCaseViewUrl } = useCaseViewNavigation();
-  const queryClient = useQueryClient();
 
   const {
     data: userActionsData,
@@ -60,17 +58,12 @@ export const CaseViewActivity = ({
     [showAlertDetails]
   );
 
-  const handleUpdateField = useCallback(
-    (_newCase: Case, _updateKey: UpdateKey) => {
-      queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
-    },
-    [queryClient]
-  );
+  const refreshCaseViewPage = useRefreshCaseViewPage();
 
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
     caseId: caseData.id,
     caseData,
-    handleUpdateField,
+    handleUpdateField: refreshCaseViewPage,
   });
 
   const changeStatus = useCallback(
@@ -106,13 +99,6 @@ export const CaseViewActivity = ({
     const connector = connectors.find((c) => c.id === caseData.connector.id);
     return [connector?.name ?? '', !!connector];
   }, [connectors, caseData.connector]);
-
-  const handleUpdateCase = useCallback(
-    (_newCase: Case) => {
-      queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
-    },
-    [queryClient]
-  );
 
   const onSubmitConnector = useCallback(
     (connectorId, connectorFields, onError, onSuccess) => {
@@ -161,7 +147,7 @@ export const CaseViewActivity = ({
                     />
                   ) : null
                 }
-                updateCase={handleUpdateCase}
+                updateCase={refreshCaseViewPage}
                 useFetchAlertData={useFetchAlertData}
                 userCanCrud={userCanCrud}
               />
@@ -208,7 +194,7 @@ export const CaseViewActivity = ({
             isLoading={isLoadingConnectors || (isLoading && loadingKey === 'connector')}
             isValidConnector={isLoadingConnectors ? true : isValidConnector}
             onSubmit={onSubmitConnector}
-            updateCase={handleUpdateCase}
+            updateCase={refreshCaseViewPage}
             userActions={userActionsData.caseUserActions}
             userCanCrud={userCanCrud}
           />
