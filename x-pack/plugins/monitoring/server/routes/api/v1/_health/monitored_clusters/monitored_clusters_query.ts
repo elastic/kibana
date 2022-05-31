@@ -7,6 +7,8 @@
 
 import { TimeRange } from '../../../../../../common/http_api/shared';
 
+const MAX_BUCKET_SIZE = 100;
+
 interface QueryOptions {
   timeRange?: TimeRange;
   timeout: number; // in seconds
@@ -63,7 +65,7 @@ export const persistentMetricsetsQuery = ({ timeout }: QueryOptions) => {
     elasticsearch: {
       terms: {
         field: 'source_node.uuid',
-        size: 1000,
+        size: MAX_BUCKET_SIZE,
       },
       aggs: {
         shard: lastSeenByIndex({
@@ -90,7 +92,7 @@ export const persistentMetricsetsQuery = ({ timeout }: QueryOptions) => {
     logstash: {
       terms: {
         field: 'logstash_state.pipeline.id',
-        size: 1000,
+        size: MAX_BUCKET_SIZE,
       },
       aggs: {
         node: lastSeenByIndex({
@@ -150,6 +152,7 @@ export const enterpriseSearchQuery = ({ timeRange, timeout }: QueryOptions) => {
       clusters: {
         terms: {
           field: 'enterprisesearch.cluster_uuid',
+          size: MAX_BUCKET_SIZE,
         },
         aggs: {
           enterpriseSearch: {
@@ -207,6 +210,7 @@ const lastSeenByIndex = (aggregation: { filter: any }, timestampField = 'timesta
       by_index: {
         terms: {
           field: '_index',
+          size: MAX_BUCKET_SIZE,
         },
         aggs: {
           last_seen: {
@@ -223,7 +227,7 @@ const lastSeenByIndex = (aggregation: { filter: any }, timestampField = 'timesta
 const clusterAggregation = {
   terms: {
     field: 'cluster_uuid',
-    size: 100,
+    size: MAX_BUCKET_SIZE,
   },
   aggs: {
     cluster_stats: lastSeenByIndex({
@@ -327,7 +331,7 @@ const clusterAggregation = {
 const esAggregation = {
   terms: {
     field: 'node_stats.node_id',
-    size: 10000,
+    size: MAX_BUCKET_SIZE,
   },
   aggs: {
     node_stats: lastSeenByIndex({
@@ -354,7 +358,7 @@ const esAggregation = {
 const kibanaAggregation = {
   terms: {
     field: 'kibana_stats.kibana.uuid',
-    size: 10000,
+    size: MAX_BUCKET_SIZE,
   },
   aggs: {
     stats: lastSeenByIndex({
@@ -381,7 +385,7 @@ const kibanaAggregation = {
 const logstashAggregation = {
   terms: {
     field: 'logstash_stats.logstash.uuid',
-    size: 10000,
+    size: MAX_BUCKET_SIZE,
   },
   aggs: {
     node_stats: lastSeenByIndex({
@@ -408,6 +412,7 @@ const logstashAggregation = {
 const beatsAggregations = {
   beats_stats: {
     multi_terms: {
+      size: MAX_BUCKET_SIZE,
       terms: [
         {
           field: 'beats_stats.beat.type',
@@ -441,6 +446,7 @@ const beatsAggregations = {
 
   beats_state: {
     multi_terms: {
+      size: MAX_BUCKET_SIZE,
       terms: [
         {
           field: 'beats_state.beat.type',
