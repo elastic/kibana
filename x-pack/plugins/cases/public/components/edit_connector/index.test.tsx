@@ -16,7 +16,6 @@ import { basicCase, basicPush, caseUserActions, connectorsMock } from '../../con
 import { CaseConnector } from '../../containers/configure/types';
 
 const onSubmit = jest.fn();
-const updateCase = jest.fn();
 const caseServices = {
   '123': {
     ...basicPush,
@@ -36,7 +35,6 @@ const getDefaultProps = (): EditConnectorProps => {
     isLoading: false,
     isValidConnector: true,
     onSubmit,
-    updateCase,
     userActions: caseUserActions,
     userCanCrud: true,
   };

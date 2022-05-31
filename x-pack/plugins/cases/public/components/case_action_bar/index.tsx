@@ -28,6 +28,7 @@ import type { OnUpdateFields } from '../case_view/types';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { getStatusDate, getStatusTitle } from './helpers';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 
 const MyDescriptionList = styled(EuiDescriptionList)`
   ${({ theme }) => css`
@@ -46,19 +47,18 @@ export interface CaseActionBarProps {
   caseData: Case;
   userCanCrud: boolean;
   isLoading: boolean;
-  onRefresh: () => void;
   onUpdateField: (args: OnUpdateFields) => void;
 }
 const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
   caseData,
   userCanCrud,
   isLoading,
-  onRefresh,
   onUpdateField,
 }) => {
   const { isSyncAlertsEnabled, metricsFeatures } = useCasesFeatures();
   const date = useMemo(() => getStatusDate(caseData), [caseData]);
   const title = useMemo(() => getStatusTitle(caseData.status), [caseData.status]);
+  const refreshCaseViewPage = useRefreshCaseViewPage();
   const onStatusChanged = useCallback(
     (status: CaseStatuses) =>
       onUpdateField({
@@ -166,7 +166,7 @@ const CaseActionBarComponent: React.FC<CaseActionBarProps> = ({
                       data-test-subj="case-refresh"
                       flush="left"
                       iconType="refresh"
-                      onClick={onRefresh}
+                      onClick={refreshCaseViewPage}
                     >
                       {i18n.CASE_REFRESH}
                     </EuiButtonEmpty>

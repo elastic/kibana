@@ -26,7 +26,6 @@ jest.mock('../../common/navigation/hooks');
 
 describe('usePushToService', () => {
   const caseId = '12345';
-  const updateCase = jest.fn();
   const onEditClick = jest.fn();
   const pushCaseToExternalService = jest.fn();
   const mockPostPush = {
@@ -65,7 +64,6 @@ describe('usePushToService', () => {
     hasDataToPush: true,
     onEditClick,
     isValidConnector: true,
-    updateCase,
     userCanCrud: true,
   };
 

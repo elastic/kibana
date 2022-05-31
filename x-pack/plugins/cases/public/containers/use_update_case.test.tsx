@@ -10,23 +10,21 @@ import { useUpdateCase, UseUpdateCase } from './use_update_case';
 import { basicCase } from './mock';
 import * as api from './api';
 import { UpdateKey } from './types';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
+jest.mock('../components/case_view/use_on_refresh_case_view_page');
 
 describe('useUpdateCase', () => {
   const abortCtrl = new AbortController();
-  const fetchCaseUserActions = jest.fn();
-  const updateCase = jest.fn();
   const updateKey: UpdateKey = 'description';
   const onSuccess = jest.fn();
   const onError = jest.fn();
 
   const sampleUpdate = {
-    fetchCaseUserActions,
     updateKey,
     updateValue: 'updated description',
-    updateCase,
     caseData: basicCase,
     onSuccess,
     onError,
@@ -71,7 +69,7 @@ describe('useUpdateCase', () => {
     });
   });
 
-  it('patch case', async () => {
+  it('patch case and refresh the case page', async () => {
     await act(async () => {
       const { result, waitForNextUpdate } = renderHook<string, UseUpdateCase>(() =>
         useUpdateCase({ caseId: basicCase.id })
@@ -85,8 +83,7 @@ describe('useUpdateCase', () => {
         isError: false,
         updateCaseProperty: result.current.updateCaseProperty,
       });
-      expect(fetchCaseUserActions).toBeCalledWith(basicCase.id, 'none');
-      expect(updateCase).toBeCalledWith(basicCase);
+      expect(useRefreshCaseViewPage()).toHaveBeenCalled();
       expect(onSuccess).toHaveBeenCalled();
     });
   });
