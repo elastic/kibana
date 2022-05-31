@@ -8,10 +8,9 @@
 import React, { createContext, FC, useCallback, useMemo, useReducer } from 'react';
 import { EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Route, Switch } from 'react-router-dom';
+import { Redirect, Route, Switch } from 'react-router-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
-import { NotFoundPage } from '../not_found_page';
 import { useSideNavItems } from './side_nav';
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
@@ -158,7 +157,7 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(
                   />
                 );
               })}
-              <Route component={NotFoundPage} />
+              <Redirect to="/overview" />
             </Switch>
           </EuiPageContentBody>
         </MlPageControlsContext.Provider>
