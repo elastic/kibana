@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import {
   createPackagePolicyServiceMock,
   createArtifactsClientMock,
@@ -18,7 +18,12 @@ import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CspPlugin } from './plugin';
 import { CspServerPluginStartDeps } from './types';
-import { createFleetAuthzMock, Installation } from '@kbn/fleet-plugin/common';
+import {
+  createFleetAuthzMock,
+  Installation,
+  PackagePolicy,
+  UpdatePackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import {
   ExternalCallback,
   FleetStartContract,
@@ -28,16 +33,16 @@ import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { RequestHandlerContext } from '@kbn/core/server';
+import {
+  ElasticsearchClient,
+  RequestHandlerContext,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 const chance = new Chance();
 
 const mockRouteContext = {
-  core: {
-    savedObjects: {
-      client: savedObjectsClientMock.create(),
-    },
-  },
+  core: coreMock.createRequestHandlerContext(),
 } as unknown as AwaitedProperties<RequestHandlerContext>;
 
 const createMockFleetStartContract = (): DeeplyMockedKeys<FleetStartContract> => {
@@ -197,6 +202,63 @@ describe('Cloud Security Posture Plugin', () => {
       }
 
       expect(spy).toHaveBeenCalledTimes(0);
+    });
+
+    it('packagePolicyPostCreate should return the updated packagePolicy', async () => {
+      fleetMock.packageService.asInternalUser.getInstallation.mockImplementationOnce(
+        async (): Promise<Installation | undefined> => {
+          return;
+        }
+      );
+
+      fleetMock.packagePolicyService.update.mockImplementation(
+        (
+          soClient: SavedObjectsClientContract,
+          esClient: ElasticsearchClient,
+          id: string,
+          packagePolicyUpdate: UpdatePackagePolicy
+        ): Promise<PackagePolicy> => {
+          // @ts-expect-error 2322
+          return packagePolicyUpdate;
+        }
+      );
+
+      const packageMock = createPackagePolicyMock();
+      packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+
+      const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
+      fleetMock.registerExternalCallback.mockImplementation((...args) => {
+        if (args[0] === 'packagePolicyPostCreate') {
+          packagePolicyPostCreateCallbacks.push(args[1]);
+        }
+      });
+
+      const context = coreMock.createPluginInitializerContext<unknown>();
+      plugin = new CspPlugin(context);
+      const spy = jest.spyOn(plugin, 'initialize').mockImplementation();
+
+      // Act
+      await plugin.start(coreMock.createStart(), mockPlugins);
+      await mockPlugins.fleet.fleetSetupCompleted();
+
+      // Assert
+      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
+      expect(spy).toHaveBeenCalledTimes(0);
+
+      expect(packagePolicyPostCreateCallbacks.length).toBeGreaterThan(0);
+
+      for (const cb of packagePolicyPostCreateCallbacks) {
+        const updatedPackagePolicy = await cb(
+          packageMock,
+          contextMock,
+          httpServerMock.createKibanaRequest()
+        );
+        if (fleetMock.packagePolicyService.update.mock.calls.length) {
+          expect(updatedPackagePolicy).toHaveProperty('vars');
+          expect(updatedPackagePolicy.vars).toHaveProperty('dataYaml');
+        }
+      }
+      expect(fleetMock.packagePolicyService.update).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -84,45 +84,29 @@ export const setVarToPackagePolicy = (
   dataYaml: string
 ): PackagePolicy => {
   const configFile: PackagePolicyConfigRecord = {
-    dataYaml: { type: 'config', value: dataYaml },
+    dataYaml: { type: 'yaml', value: dataYaml },
   };
   const updatedPackagePolicy = produce(packagePolicy, (draft) => {
     unset(draft, 'id');
-    draft.vars = configFile;
-    // TODO: disable comments after adding base config to integration
-    // draft.inputs[0].vars = configFile;
+    if (draft.vars?.dataYaml) {
+      draft.vars.dataYaml = configFile.dataYaml;
+    }
   });
   return updatedPackagePolicy;
 };
 
-export const updatePackagePolicy = (
-  packagePolicyService: PackagePolicyServiceInterface,
-  packagePolicy: PackagePolicy,
-  esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract,
-  dataYaml: string
-): Promise<PackagePolicy> => {
-  const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
-  return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy);
-};
-
-export const setRulesOnPackage = async (
+export const updateAgentConfiguration = async (
   packagePolicyService: PackagePolicyServiceInterface,
   packagePolicy: PackagePolicy,
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract
-) => {
+): Promise<PackagePolicy> => {
   const cspRules = await getCspRules(soClient, packagePolicy);
   const rulesConfig = createRulesConfig(cspRules);
   const dataYaml = convertRulesConfigToYaml(rulesConfig);
+  const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
 
-  return await updatePackagePolicy(
-    packagePolicyService!,
-    packagePolicy,
-    esClient,
-    soClient,
-    dataYaml
-  );
+  return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy);
 };
 
 export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspAppContext): void =>
@@ -152,14 +136,14 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
           packagePolicyId
         );
 
-        const updatedPackagePolicies = setRulesOnPackage(
+        const updatedPackagePolicy = updateAgentConfiguration(
           packagePolicyService,
           packagePolicy,
           esClient,
           soClient
         );
 
-        return response.ok({ body: updatedPackagePolicies });
+        return response.ok({ body: updatedPackagePolicy });
       } catch (err) {
         const error = transformError(err);
         cspContext.logger.error(

@@ -34,7 +34,7 @@ import {
   onPackagePolicyDeleteCallback,
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
-import { setRulesOnPackage } from './routes/configuration/update_rules_configuration';
+import { updateAgentConfiguration } from './routes/configuration/update_rules_configuration';
 
 export interface CspAppContext {
   logger: Logger;
@@ -106,12 +106,14 @@ export class CspPlugin
             const soClient = (await context.core).savedObjects.client;
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
-            await setRulesOnPackage(
+
+            const updatedPackagePolicy = await updateAgentConfiguration(
               plugins.fleet.packagePolicyService,
               packagePolicy,
               esClient,
               soClient
             );
+            return updatedPackagePolicy;
           }
 
           return packagePolicy;
