@@ -133,25 +133,6 @@ export function getAxesConfiguration(
   return axisGroups;
 }
 
-type LayerGroups = Series & {
-  groupId: 'left' | 'right';
-};
-
-export const getGroupsAndAccessorsByLayers = (
-  groups: GroupsConfiguration
-): Record<string, LayerGroups[]> => {
-  return groups.reduce<Record<string, LayerGroups[]>>((groupsByLayers, group) => {
-    return group.series.reduce<Record<string, LayerGroups[]>>((layers, series) => {
-      const layer = layers[series.layer] ?? [];
-      const prevLayer = groupsByLayers[series.layer] ?? [];
-      return {
-        ...layers,
-        [series.layer]: [...prevLayer, ...layer, { ...series, groupId: group.groupId }],
-      };
-    }, {});
-  }, {});
-};
-
 export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig) {
   const inclusiveZeroError =
     extent &&
