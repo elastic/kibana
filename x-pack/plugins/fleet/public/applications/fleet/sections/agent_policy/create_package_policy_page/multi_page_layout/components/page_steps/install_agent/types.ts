@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { IntegrationBreadcrumb } from './integration_breadcrumb';
-export * from './steps';
+import type { MultiPageStepLayoutProps } from '../../../types';
+
+export type InstallAgentPageProps = MultiPageStepLayoutProps & {
+  enrolledAgentIds: string[];
+};
