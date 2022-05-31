@@ -14,21 +14,11 @@ import { INDEX_PATTERN, INDEX_PATTERN_ENTERPRISE_SEARCH } from '../../../../../c
 
 import { fetchMonitoredClusters } from './monitored_clusters';
 
-const extractSettings = (config: MonitoringConfig) => {
-  return {
-    ccs: config.ui.ccs.enabled,
-    logsIndex: config.ui.logs.index,
-    metricbeatIndex: config.ui.metricbeat.index,
-    hasRemoteClusterConfigured: (config.ui.elasticsearch.hosts || []).some(Boolean),
-  };
-};
-
 const DEFAULT_QUERY_TIMERANGE = { min: 'now-15m', max: 'now' };
 const DEFAULT_QUERY_TIMEOUT_SECONDS = 15;
 
 export function registerV1HealthRoute(server: MonitoringCore) {
   const validateQuery = createValidationFunction(getHealthRequestQueryRT);
-  const settings = extractSettings(server.config);
 
   const withCCS = (indexPattern: string) => {
     if (server.config.ui.ccs.enabled) {
@@ -52,6 +42,8 @@ export function registerV1HealthRoute(server: MonitoringCore) {
       const timeout = req.query.timeout || DEFAULT_QUERY_TIMEOUT_SECONDS;
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
 
+      const settings = extractSettings(server.config);
+
       const monitoredClusters = await fetchMonitoredClusters({
         timeout,
         timeRange,
@@ -66,4 +58,13 @@ export function registerV1HealthRoute(server: MonitoringCore) {
       return { monitoredClusters, settings };
     },
   });
+}
+
+function extractSettings(config: MonitoringConfig) {
+  return {
+    ccs: config.ui.ccs.enabled,
+    logsIndex: config.ui.logs.index,
+    metricbeatIndex: config.ui.metricbeat.index,
+    hasRemoteClusterConfigured: (config.ui.elasticsearch.hosts || []).some(Boolean),
+  };
 }
