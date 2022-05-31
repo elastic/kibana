@@ -5,3 +5,5 @@
  * 2.0.
  */
 export const TYPE_ALLOWLIST = ['node_rules', 'cluster_rules', 'node_actions', 'cluster_actions'];
+
+export const PROMETHEUS_ROUTE = '/api/monitoring_collection/v1/prometheus';

@@ -43,6 +43,7 @@ import { omit } from 'lodash';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { ExecuteOptions } from '@kbn/actions-plugin/server/create_execute_function';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
+import { metricsMock } from '../monitoring/metrics.mock';
 import moment from 'moment';
 import {
   generateAlertOpts,
@@ -123,6 +124,7 @@ describe('Task Runner', () => {
   const dataPlugin = dataPluginMock.createStartContract();
   const uiSettingsService = uiSettingsServiceMock.createStartContract();
   const inMemoryMetrics = inMemoryMetricsMock.create();
+  const metrics = metricsMock.create();
 
   type TaskRunnerFactoryInitializerParamsType = jest.Mocked<TaskRunnerContext> & {
     actionsPlugin: jest.Mocked<ActionsPluginStart>;
@@ -220,7 +222,8 @@ describe('Task Runner', () => {
         },
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -321,7 +324,8 @@ describe('Task Runner', () => {
         ruleType,
         mockedTaskInstance,
         customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics
+        inMemoryMetrics,
+        metrics
       );
       expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -402,7 +406,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -523,7 +528,8 @@ describe('Task Runner', () => {
         ruleType,
         mockedTaskInstance,
         taskRunnerFactoryInitializerParams,
-        inMemoryMetrics
+        inMemoryMetrics,
+        metrics
       );
       expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -576,7 +582,8 @@ describe('Task Runner', () => {
         ruleType,
         mockedTaskInstance,
         customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics
+        inMemoryMetrics,
+        metrics
       );
       expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -655,7 +662,8 @@ describe('Task Runner', () => {
           },
         },
         taskRunnerFactoryInitializerParams,
-        inMemoryMetrics
+        inMemoryMetrics,
+        metrics
       );
       expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -699,7 +707,8 @@ describe('Task Runner', () => {
         ruleType,
         mockedTaskInstance,
         customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics
+        inMemoryMetrics,
+        metrics
       );
       expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -756,7 +765,8 @@ describe('Task Runner', () => {
         },
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -824,7 +834,8 @@ describe('Task Runner', () => {
           },
         },
         customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics
+        inMemoryMetrics,
+        metrics
       );
       expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
 
@@ -905,7 +916,8 @@ describe('Task Runner', () => {
           },
         },
         customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics
+        inMemoryMetrics,
+        metrics
       );
       expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -970,7 +982,8 @@ describe('Task Runner', () => {
         ruleType,
         mockedTaskInstance,
         customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics
+        inMemoryMetrics,
+        metrics
       );
       expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1082,7 +1095,8 @@ describe('Task Runner', () => {
           },
         },
         customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics
+        inMemoryMetrics,
+        metrics
       );
       expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1194,7 +1208,8 @@ describe('Task Runner', () => {
           },
         },
         customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics
+        inMemoryMetrics,
+        metrics
       );
       expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1285,7 +1300,8 @@ describe('Task Runner', () => {
           },
         },
         customTaskRunnerFactoryInitializerParams,
-        inMemoryMetrics
+        inMemoryMetrics,
+        metrics
       );
       expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1376,7 +1392,8 @@ describe('Task Runner', () => {
         },
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1439,7 +1456,8 @@ describe('Task Runner', () => {
         },
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1462,7 +1480,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1492,7 +1511,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1524,7 +1544,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1561,7 +1582,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1596,7 +1618,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1625,7 +1648,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1654,7 +1678,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1684,7 +1709,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1717,7 +1743,8 @@ describe('Task Runner', () => {
       ruleType,
       legacyTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1755,7 +1782,8 @@ describe('Task Runner', () => {
         state: originalAlertSate,
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1785,7 +1813,8 @@ describe('Task Runner', () => {
         },
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1817,7 +1846,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1841,7 +1871,8 @@ describe('Task Runner', () => {
         },
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1867,7 +1898,8 @@ describe('Task Runner', () => {
         },
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -1916,7 +1948,8 @@ describe('Task Runner', () => {
         },
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2022,7 +2055,8 @@ describe('Task Runner', () => {
         },
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2096,7 +2130,8 @@ describe('Task Runner', () => {
         },
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2165,7 +2200,8 @@ describe('Task Runner', () => {
         },
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2239,7 +2275,8 @@ describe('Task Runner', () => {
         },
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2291,7 +2328,8 @@ describe('Task Runner', () => {
         ...taskRunnerFactoryInitializerParams,
         supportsEphemeralTasks: true,
       },
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2362,7 +2400,8 @@ describe('Task Runner', () => {
         state,
       },
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2391,7 +2430,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2406,7 +2446,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2434,7 +2475,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2469,7 +2511,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2554,7 +2597,8 @@ describe('Task Runner', () => {
         ...taskRunnerFactoryInitializerParams,
         actionsConfigMap,
       },
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2706,7 +2750,8 @@ describe('Task Runner', () => {
         ...taskRunnerFactoryInitializerParams,
         actionsConfigMap,
       },
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
@@ -2776,7 +2821,8 @@ describe('Task Runner', () => {
       ruleType,
       mockedTaskInstance,
       taskRunnerFactoryInitializerParams,
-      inMemoryMetrics
+      inMemoryMetrics,
+      metrics
     );
     expect(AlertingEventLogger).toHaveBeenCalled();
 
