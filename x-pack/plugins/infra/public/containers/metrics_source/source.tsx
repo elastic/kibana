@@ -156,5 +156,4 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
   };
 };
 
-export const Source = createContainer(useSource);
-export const [SourceProvider, useSourceContext] = Source;
+export const [SourceProvider, useSourceContext] = createContainer(useSource);

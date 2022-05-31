@@ -13,7 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
 import { useCharts } from '../../hooks/use_charts';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 import { PageTemplate } from '../page_template';
 // @ts-ignore
 import { ApmServerInstance } from '../../../components/apm/instance';
@@ -23,7 +23,7 @@ export const ApmInstancePage: React.FC<ComponentProps> = ({ clusters }) => {
 
   const globalState = useContext(GlobalStateContext);
   const { services } = useKibana<{ data: any }>();
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
   const { zoomInfo, onBrush } = useCharts();
   const clusterUuid = globalState.cluster_uuid;
   const ccs = globalState.ccs;

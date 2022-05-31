@@ -6,12 +6,12 @@
  */
 
 import { set } from '@elastic/safer-lodash-set';
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { UrlStateContainer } from '../../utils/url_state';
 import {
   MetricsExplorerOptions,
-  MetricsExplorerOptionsContainer,
+  useMetricsExplorerOptionsContainerContext,
   MetricsExplorerTimeOptions,
   MetricsExplorerChartOptions,
   metricExplorerOptionsRT,
@@ -33,7 +33,7 @@ export const WithMetricsExplorerOptionsUrlState = () => {
     currentTimerange,
     setOptions: setRawOptions,
     setTimeRange,
-  } = useContext(MetricsExplorerOptionsContainer.Context);
+  } = useMetricsExplorerOptionsContainerContext();
 
   const setOptions = (value: MetricsExplorerOptions) => {
     setRawOptions(value);

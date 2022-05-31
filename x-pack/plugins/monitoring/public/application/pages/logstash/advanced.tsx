@@ -30,7 +30,7 @@ import { useCharts } from '../../hooks/use_charts';
 import { AlertsByName } from '../../../alerts/types';
 import { fetchAlerts } from '../../../lib/fetch_alerts';
 import { RULE_LOGSTASH_VERSION_MISMATCH } from '../../../../common/constants';
-import { BreadcrumbContainer } from '../../hooks/use_breadcrumbs';
+import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';
 
 export const LogStashNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters }) => {
   const globalState = useContext(GlobalStateContext);
@@ -43,7 +43,7 @@ export const LogStashNodeAdvancedPage: React.FC<ComponentProps> = ({ clusters })
     cluster_uuid: clusterUuid,
   }) as any;
 
-  const { generate: generateBreadcrumbs } = useContext(BreadcrumbContainer.Context);
+  const { generate: generateBreadcrumbs } = useBreadcrumbContainerContext();
 
   const [data, setData] = useState({} as any);
   const [alerts, setAlerts] = useState<AlertsByName>({});

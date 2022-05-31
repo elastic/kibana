@@ -76,6 +76,7 @@ const setupHandler = (commit: CommitFn, canvasOrigin: CanvasOriginFn, zoomScale?
       return;
     }
 
+    // @ts-expect-error update types
     if (target.id !== 'canvasInteractionBoundary') {
       e.stopPropagation();
     }
@@ -126,6 +127,7 @@ const handleMouseDown = (
     return;
   }
 
+  // @ts-expect-error update types
   if (e.target.id !== 'canvasInteractionBoundary') {
     e.stopPropagation();
   }
