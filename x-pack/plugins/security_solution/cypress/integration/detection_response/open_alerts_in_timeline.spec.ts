@@ -20,12 +20,18 @@ import { DETECTIONS_RESPONSE_URL } from '../../urls/navigation';
 
 const ALERT_COUNT = 1;
 
-describe.skip('Detection response view', () => {
+const customRule = {
+  ...getNewRule(),
+  index: ['auditbeat-2022'],
+};
+
+describe('Detection response view', () => {
   context('Open in timeline', () => {
     before(() => {
       cleanKibana();
       login();
-      createCustomRuleEnabled(getNewRule());
+
+      createCustomRuleEnabled(customRule);
       visit(DETECTIONS_RESPONSE_URL);
     });
 
