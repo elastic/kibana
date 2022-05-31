@@ -12,7 +12,6 @@ import { Observable } from 'rxjs';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
-import { sharedUXPluginMock } from '@kbn/shared-ux-plugin/public/mocks';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
 import { renderApp } from '.';
@@ -90,7 +89,6 @@ describe('renderApp', () => {
           },
           reportUiCounter: jest.fn(),
         },
-        sharedUX: sharedUXPluginMock.createStartContract(),
       });
       unmount();
     }).not.toThrowError();

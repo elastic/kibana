@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { useContext } from 'react';
 import { useSelector } from 'react-redux';
-import { KibanaPageTemplateProps, useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import { UptimeSettingsContext } from '../contexts';
 import { ClientPluginsStart } from '../../plugin';
 import { indexStatusSelector } from '../state/selectors';
@@ -28,14 +29,10 @@ export function useNoDataConfig(): KibanaPageTemplateProps['noDataConfig'] {
       solution: i18n.translate('xpack.synthetics.noDataConfig.solutionName', {
         defaultMessage: 'Observability',
       }),
-      actions: {
+      action: {
         beats: {
           title: i18n.translate('xpack.synthetics.noDataConfig.beatsCard.title', {
             defaultMessage: 'Add monitors with Heartbeat',
-          }),
-          description: i18n.translate('xpack.synthetics.noDataConfig.beatsCard.description', {
-            defaultMessage:
-              'Proactively monitor the availability of your sites and services. Receive alerts and resolve issues faster to optimize your users experience.',
           }),
           href: basePath + `/app/home#/tutorial/uptimeMonitors`,
         },

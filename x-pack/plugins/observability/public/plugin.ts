@@ -176,7 +176,6 @@ export class Plugin
         ObservabilityPageTemplate: navigation.PageTemplate,
         kibanaFeatures,
         usageCollection: pluginsSetup.usageCollection,
-        sharedUX: pluginsStart.sharedUX,
       });
     };
 
@@ -297,6 +296,7 @@ export class Plugin
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
+      getSharedUXContext: pluginsStart.sharedUX.getContextServices,
     });
 
     return {
