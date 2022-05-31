@@ -41,12 +41,13 @@ export const IntegrationDescriptionComponent: React.FC<{ integration: Integratio
       <EuiBadge color={badgeColor}>{badgeText}</EuiBadge>
       {integration.is_enabled && !integration.version_satisfied && (
         <VersionWarningIcon
-          type="alert"
+          type={'alert'}
+          color={'yellow'}
           content={i18n.INTEGRATIONS_INSTALLED_VERSION_TOOLTIP(
             integration.package_version,
             integration.target_version
           )}
-          position="right"
+          position={'right'}
         />
       )}
     </Wrapper>
@@ -79,10 +80,16 @@ export const RelatedIntegrationsDescription: React.FC<{
 
 export const buildRelatedIntegrationsDescription = (
   label: string,
-  relatedIntegrations: RelatedIntegrationArray
-): ListItems[] => [
-  {
-    title: label,
-    description: <RelatedIntegrationsDescription integrations={relatedIntegrations} />,
-  },
-];
+  relatedIntegrations: RelatedIntegrationArray | undefined
+): ListItems[] => {
+  if (relatedIntegrations == null) {
+    return [];
+  }
+
+  return [
+    {
+      title: label,
+      description: <RelatedIntegrationsDescription integrations={relatedIntegrations} />,
+    },
+  ];
+};

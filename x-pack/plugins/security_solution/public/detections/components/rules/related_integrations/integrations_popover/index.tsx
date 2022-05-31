@@ -31,12 +31,12 @@ const IntegrationsPopoverWrapper = styled(EuiFlexGroup)`
 `;
 
 const PopoverTitleWrapper = styled(EuiPopoverTitle)`
-  max-width: 368px;
+  max-width: 390px;
 `;
 
 const PopoverContentWrapper = styled('div')`
   max-height: 400px;
-  max-width: 368px;
+  max-width: 390px;
   overflow: auto;
   line-height: ${({ theme }) => theme.eui.euiLineHeight};
 `;
@@ -44,7 +44,7 @@ const PopoverContentWrapper = styled('div')`
 const IntegrationListItem = styled('li')`
   list-style-type: disc;
   margin-left: 25px;
-  margin-bottom: 3px;
+  margin-bottom: 5px;
 `;
 
 /**
@@ -95,7 +95,7 @@ const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps
           {i18n.INTEGRATIONS_POPOVER_TITLE(integrations.length)}
         </PopoverTitleWrapper>
         <PopoverContentWrapper data-test-subj={'IntegrationsPopoverContentWrapper'}>
-          <EuiText size={'s'}>{i18n.INTEGRATIONS_POPOVER_DESCRIPTION}</EuiText>
+          <EuiText size={'s'}>{i18n.INTEGRATIONS_POPOVER_DESCRIPTION(integrations.length)}</EuiText>
           <EuiSpacer size={'s'} />
           <ul>
             {integrationDetails.map((integration, index) => (

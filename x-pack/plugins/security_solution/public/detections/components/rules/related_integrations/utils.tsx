@@ -102,5 +102,15 @@ export const getInstalledRelatedIntegrations = (
     }
   });
 
-  return integrationDetails;
+  return integrationDetails.sort((a, b) => {
+    if (a.integration_title != null && b.integration_title != null) {
+      return a.integration_title.localeCompare(b.integration_title);
+    } else if (a.integration_title != null) {
+      return a.integration_title.localeCompare(b.package_title);
+    } else if (b.integration_title != null) {
+      return a.package_title.localeCompare(b.integration_title);
+    } else {
+      return a.package_title.localeCompare(b.package_title);
+    }
+  });
 };

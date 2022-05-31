@@ -35,13 +35,12 @@ export const INTEGRATIONS_POPOVER_TITLE = (integrationsCount: number) =>
       '[{integrationsCount}] Related {integrationsCount, plural, =1 {integration} other {integrations}} available',
   });
 
-export const INTEGRATIONS_POPOVER_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.relatedIntegrations.popoverDescription',
-  {
+export const INTEGRATIONS_POPOVER_DESCRIPTION = (integrationsCount: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.relatedIntegrations.popoverDescription', {
+    values: { integrationsCount },
     defaultMessage:
-      'Install and configure the below integrations to ingest the necessary data for this detection rule:',
-  }
-);
+      'Install and configure {integrationsCount, plural, =1 {the below integration} other {one or more of the below integrations}} to ingest the necessary data for this detection rule:',
+  });
 
 export const INTEGRATIONS_INSTALLED_VERSION_TOOLTIP = (
   installedVersion: string,

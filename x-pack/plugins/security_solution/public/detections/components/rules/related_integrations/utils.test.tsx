@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { render } from '@testing-library/react';
 import { getInstalledRelatedIntegrations, getIntegrationLink } from './utils';
 
 describe('Related Integrations Utilities', () => {
@@ -12,10 +13,14 @@ describe('Related Integrations Utilities', () => {
     test('it returns a correctly formatted integrations link', () => {
       const link = getIntegrationLink(
         { package: 'test', integration: 'int', version: '1.23.4' },
-        ''
+        'http://localhost'
       );
+      const { container } = render(link);
 
-      expect(link).toBeFalsy();
+      expect(container.firstChild).toHaveProperty(
+        'href',
+        'http://localhost/app/integrations/detail/test-1.23.4/overview?integration=int'
+      );
     });
   });
 
@@ -23,7 +28,7 @@ describe('Related Integrations Utilities', () => {
     test('it returns a the correct integrationDetails', () => {
       const integrationDetails = getInstalledRelatedIntegrations([], []);
 
-      expect(integrationDetails.length).to.eql(0);
+      expect(integrationDetails.length).toEqual(0);
     });
   });
 });
