@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { ConsoleHeader } from './components/console_header';
@@ -103,6 +103,13 @@ export const Console = memo<ConsoleProps>(
         inputFocusRef.current();
       }
     }, []);
+
+    // When the console is shown, set focus to it so that user can just start typing
+    useEffect(() => {
+      if (!managedConsole || managedConsole.isOpen) {
+        setTimeout(handleConsoleClick, 2);
+      }
+    }, [handleConsoleClick, managedConsole]);
 
     return (
       <ConsoleStateProvider
