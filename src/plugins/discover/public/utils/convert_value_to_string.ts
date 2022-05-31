@@ -76,6 +76,15 @@ export const convertValueToString = ({
   };
 };
 
+export const convertNameToString = (
+  name: string
+): { formattedString: string; withFormula: boolean } => {
+  return {
+    formattedString: escapeFormattedValue(name),
+    withFormula: cellHasFormulas(name),
+  };
+};
+
 const stringify = (val: object | string, disableMultiline: boolean) => {
   // it will wrap "strings" with quotes
   return disableMultiline ? JSON.stringify(val) : JSON.stringify(val, null, 2);
@@ -83,6 +92,6 @@ const stringify = (val: object | string, disableMultiline: boolean) => {
 
 const escapeValueFn = createEscapeValue(true, true);
 
-export const escapeFormattedValue = (formattedValue: string): string => {
+const escapeFormattedValue = (formattedValue: string): string => {
   return escapeValueFn(formattedValue);
 };

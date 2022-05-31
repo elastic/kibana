@@ -8,10 +8,9 @@
 
 import { copyToClipboard } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { cellHasFormulas } from '@kbn/data-plugin/common';
 import type { ValueToStringConverter } from '../types';
 import { DiscoverServices } from '../build_services';
-import { escapeFormattedValue } from './convert_value_to_string';
+import { convertNameToString } from './convert_value_to_string';
 
 const WARNING_FOR_FORMULAS = i18n.translate(
   'discover.grid.copyEscapedValueWithFormulasToClipboardWarningText',
@@ -68,7 +67,8 @@ export const copyColumnValuesToClipboard = async ({
   rowsCount: number;
 }): Promise<string> => {
   const { toastNotifications } = services;
-  let withFormula = cellHasFormulas(columnId);
+  const nameFormattedResult = convertNameToString(columnId);
+  let withFormula = nameFormattedResult.withFormula;
 
   const valuesFormatted = [...Array(rowsCount)].map((_, rowIndex) => {
     const result = valueToStringConverter(rowIndex, columnId, { disableMultiline: true });
@@ -76,7 +76,7 @@ export const copyColumnValuesToClipboard = async ({
     return result.formattedString;
   });
 
-  const textToCopy = `${escapeFormattedValue(columnId)}\n${valuesFormatted.join('\n')}`;
+  const textToCopy = `${nameFormattedResult.formattedString}\n${valuesFormatted.join('\n')}`;
 
   let copiedWithoutBrowserStyles = false;
   try {

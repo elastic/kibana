@@ -97,5 +97,6 @@ export const discoverServiceMock = {
   addBasePath: jest.fn(),
   toastNotifications: {
     addInfo: jest.fn(),
+    addWarning: jest.fn(),
   },
 } as unknown as DiscoverServices;

@@ -84,4 +84,32 @@ describe('copyValueToClipboard', () => {
       value: originalClipboard,
     });
   });
+
+  it('should copy column values to clipboard with a warning', async () => {
+    const originalClipboard = global.window.navigator.clipboard;
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: jest.fn(),
+      },
+      writable: true,
+    });
+
+    const result = await copyColumnValuesToClipboard({
+      services: discoverServiceMock,
+      columnId: 'scripted_string',
+      rowsCount: 3,
+      valueToStringConverter,
+    });
+
+    expect(result).toBe('"scripted_string"\n"hi there"\n"hi there"\n"\'=1+2\'"" ;,=1+2"');
+    expect(discoverServiceMock.toastNotifications.addWarning).toHaveBeenCalledWith({
+      title: 'Copied values of "scripted_string" column to clipboard',
+      text: 'It may contain formulas whose values have been escaped.',
+    });
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+    });
+  });
 });

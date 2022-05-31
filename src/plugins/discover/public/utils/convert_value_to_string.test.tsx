@@ -8,7 +8,7 @@
 
 import { discoverGridContextComplexMock, discoverGridContextMock } from '../__mocks__/grid_context';
 import { discoverServiceMock } from '../__mocks__/services';
-import { convertValueToString } from './convert_value_to_string';
+import { convertValueToString, convertNameToString } from './convert_value_to_string';
 
 describe('convertValueToString', () => {
   it('should convert a keyword value to text', () => {
@@ -405,5 +405,19 @@ describe('convertValueToString', () => {
 
     expect(result2.formattedString).toBe('"\'=1+2\'"" ;,=1+2"');
     expect(result2.withFormula).toBe(true);
+  });
+
+  it('should return a formatted name', () => {
+    const result = convertNameToString('test');
+
+    expect(result.formattedString).toBe('"test"');
+    expect(result.withFormula).toBe(false);
+  });
+
+  it('should return a formatted name when with a formula', () => {
+    const result = convertNameToString('=1+2";=1+2');
+
+    expect(result.formattedString).toBe('"\'=1+2"";=1+2"');
+    expect(result.withFormula).toBe(true);
   });
 });
