@@ -331,6 +331,7 @@ exports[`XYChart component it renders area 1`] = `
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
@@ -699,6 +700,7 @@ exports[`XYChart component it renders area 1`] = `
             "type": "palette",
           },
           "seriesType": "area",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -881,6 +883,7 @@ exports[`XYChart component it renders bar 1`] = `
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
@@ -1249,6 +1252,7 @@ exports[`XYChart component it renders bar 1`] = `
             "type": "palette",
           },
           "seriesType": "bar",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -1431,6 +1435,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
@@ -1799,6 +1804,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             "type": "palette",
           },
           "seriesType": "bar_horizontal",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -1981,6 +1987,7 @@ exports[`XYChart component it renders line 1`] = `
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
@@ -2349,6 +2356,7 @@ exports[`XYChart component it renders line 1`] = `
             "type": "palette",
           },
           "seriesType": "line",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -2531,6 +2539,7 @@ exports[`XYChart component it renders stacked area 1`] = `
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
@@ -2899,6 +2908,7 @@ exports[`XYChart component it renders stacked area 1`] = `
             "type": "palette",
           },
           "seriesType": "area_stacked",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -3081,6 +3091,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
@@ -3449,6 +3460,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "type": "palette",
           },
           "seriesType": "bar_stacked",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -3631,6 +3643,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
@@ -3999,6 +4012,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "type": "palette",
           },
           "seriesType": "bar_horizontal_stacked",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -4181,6 +4195,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
@@ -4804,6 +4819,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
             "type": "palette",
           },
           "seriesType": "bar",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -4986,6 +5002,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
@@ -5608,6 +5625,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             "type": "palette",
           },
           "seriesType": "bar",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [
@@ -5790,6 +5808,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
       Object {
         "boundary": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
   />
@@ -6412,6 +6431,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             "type": "palette",
           },
           "seriesType": "bar",
+          "showLines": true,
           "splitAccessor": "d",
           "table": Object {
             "columns": Array [

@@ -11,14 +11,12 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataGrid = getService('dataGrid');
-  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'settings', 'header']);
   const testSubjects = getService('testSubjects');
   const es = getService('es');
 
-  // Failing: See https://github.com/elastic/kibana/issues/132553
-  describe.skip('encoded URL params in context page', () => {
+  describe('encoded URL params in context page', () => {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'context_encoded_param']);
       await PageObjects.common.navigateToApp('settings');
@@ -31,8 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
       });
       await PageObjects.settings.createIndexPattern('context-encoded-param');
-
-      await kibanaServer.uiSettings.update({ 'doc_table:legacy': false });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
@@ -40,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should navigate correctly', async () => {
       await PageObjects.discover.selectIndexPattern('context-encoded-param');
       await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitForDocTableLoadingComplete();
 
       // navigate to the context view
       await dataGrid.clickRowToggle({ rowIndex: 0 });

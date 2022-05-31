@@ -135,12 +135,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
       setIsSubmitting(false);
       const successMessage = isSingleAgent
         ? i18n.translate('xpack.fleet.upgradeAgents.successSingleNotificationTitle', {
-            defaultMessage: 'Upgraded {count} agent',
+            defaultMessage: 'Upgrading {count} agent',
             values: { count: 1 },
           })
         : i18n.translate('xpack.fleet.upgradeAgents.successMultiNotificationTitle', {
             defaultMessage:
-              'Upgraded {isMixed, select, true {{success} of {total}} other {{isAllAgents, select, true {all selected} other {{success}} }}} agents',
+              'Upgrading {isMixed, select, true {{success} of {total}} other {{isAllAgents, select, true {all selected} other {{success}} }}} agents',
             values: {
               isMixed: counts.success !== counts.total,
               success: counts.success,

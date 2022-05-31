@@ -16,12 +16,12 @@ export const allowedExperimentalValues = Object.freeze({
   tGridEventRenderedViewEnabled: true,
   excludePoliciesInFilterEnabled: false,
   usersEnabled: true,
-  detectionResponseEnabled: false,
   disableIsolationUIPendingStatuses: false,
   riskyHostsEnabled: false,
   riskyUsersEnabled: false,
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
+  policyResponseInFleetEnabled: false,
   groupedNavigation: true,
 
   /**
