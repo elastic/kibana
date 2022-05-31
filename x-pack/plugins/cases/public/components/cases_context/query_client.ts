@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-import { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
+import { QueryClient } from 'react-query';
 
-export interface CaseViewMetricsProps {
-  metrics: SingleCaseMetrics | null;
-  features: SingleCaseMetricsFeature[];
-  isLoading: boolean;
-}
+export const casesQueryClient = new QueryClient();

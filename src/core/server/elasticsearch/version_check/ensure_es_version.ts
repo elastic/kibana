@@ -13,11 +13,11 @@
 
 import { timer, of, from, Observable } from 'rxjs';
 import { map, distinctUntilChanged, catchError, exhaustMap } from 'rxjs/operators';
+import type { Logger } from '@kbn/logging';
 import {
   esVersionCompatibleWithKibana,
   esVersionEqualsKibana,
 } from './es_kibana_version_compatability';
-import { Logger } from '../../logging';
 import type { ElasticsearchClient } from '../client';
 
 /** @public */
