@@ -261,10 +261,10 @@ export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   }
 );
 
-export const BULK_EDIT_FLYOUT_FORM_CLOSE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.closeButtonLabel',
+export const BULK_EDIT_FLYOUT_FORM_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.cancelButtonLabel',
   {
-    defaultMessage: 'Close',
+    defaultMessage: 'Cancel',
   }
 );
 
