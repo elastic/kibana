@@ -95,8 +95,7 @@ async function updateRoutingAllocations(
   });
 }
 
-// Failing ES snapshot verification: https://github.com/elastic/kibana/issues/133014
-describe.skip('incompatible_cluster_routing_allocation', () => {
+describe('incompatible_cluster_routing_allocation', () => {
   let client: ElasticsearchClient;
   let root: Root;
 
