@@ -241,7 +241,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
           ) : (
             <FormattedMessage
               id="xpack.fleet.createFirstPackagePolicy.installAgentButton"
-              defaultMessage="Install Elastic agent"
+              defaultMessage="Save and continue"
             />
           )
         }
