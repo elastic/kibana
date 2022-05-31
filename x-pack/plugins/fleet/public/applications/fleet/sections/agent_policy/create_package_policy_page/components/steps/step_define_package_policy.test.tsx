@@ -8,17 +8,17 @@
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
-import type { TestRenderer } from '../../../../../../mock';
-import { createFleetTestRendererMock } from '../../../../../../mock';
-import type { AgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../types';
+import type { TestRenderer } from '../../../../../../../mock';
+import { createFleetTestRendererMock } from '../../../../../../../mock';
+import type { AgentPolicy, NewPackagePolicy, PackageInfo } from '../../../../../types';
 
-import { useGetPackagePolicies } from '../../../../hooks';
+import { useGetPackagePolicies } from '../../../../../hooks';
 
 import { StepDefinePackagePolicy } from './step_define_package_policy';
 
-jest.mock('../../../../hooks', () => {
+jest.mock('../../../../../hooks', () => {
   return {
-    ...jest.requireActual('../../../../hooks'),
+    ...jest.requireActual('../../../../../hooks'),
     useGetPackagePolicies: jest.fn().mockReturnValue({
       data: {
         items: [{ name: 'nginx-1' }, { name: 'other-policy' }],
