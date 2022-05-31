@@ -1475,10 +1475,10 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: <T extends string | Record<string, any> | Error | Buffer | Stream | {
+    custom: <T extends string | Record<string, any> | Error | Buffer | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
-    } | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
+    } | Stream | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
     badRequest: (options?: ErrorHttpResponseOptions) => KibanaResponse<string | Error | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
@@ -1499,10 +1499,10 @@ export const kibanaResponseFactory: {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
-    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Error | Buffer | Stream | {
+    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Error | Buffer | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
-    }>;
+    } | Stream>;
     redirected: (options: RedirectResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     ok: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
     accepted: (options?: HttpResponseOptions) => KibanaResponse<string | Record<string, any> | Buffer | Stream>;
@@ -3256,8 +3256,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:81:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:405:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:407:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:514:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:410:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:412:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:519:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```
