@@ -399,6 +399,8 @@
       "@kbn/task-manager-plugin/*": ["x-pack/plugins/task_manager/*"],
       "@kbn/telemetry-collection-xpack-plugin": ["x-pack/plugins/telemetry_collection_xpack"],
       "@kbn/telemetry-collection-xpack-plugin/*": ["x-pack/plugins/telemetry_collection_xpack/*"],
+      "@kbn/threat-intelligence-plugin": ["x-pack/plugins/threat_intelligence"],
+      "@kbn/threat-intelligence-plugin/*": ["x-pack/plugins/threat_intelligence/*"],
       "@kbn/timelines-plugin": ["x-pack/plugins/timelines"],
       "@kbn/timelines-plugin/*": ["x-pack/plugins/timelines/*"],
       "@kbn/transform-plugin": ["x-pack/plugins/transform"],
