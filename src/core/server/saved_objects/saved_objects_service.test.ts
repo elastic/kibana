@@ -8,6 +8,7 @@
 
 import { join } from 'path';
 import loadJsonFile from 'load-json-file';
+import { setImmediate } from 'timers/promises';
 
 import {
   clientProviderInstanceMock,
@@ -281,7 +282,7 @@ describe('SavedObjectsService', () => {
       expect(KibanaMigratorMock).toHaveBeenCalledWith(expect.objectContaining({ kibanaVersion }));
     });
 
-    it('waits for all es nodes to be compatible before running migrations', async (done) => {
+    it('waits for all es nodes to be compatible before running migrations', async () => {
       expect.assertions(2);
       const coreContext = createCoreContext({ skipMigration: false });
       const soService = new SavedObjectsService(coreContext);
@@ -306,10 +307,9 @@ describe('SavedObjectsService', () => {
         warningNodes: [],
         kibanaVersion: '8.0.0',
       });
-      setImmediate(() => {
-        expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
-        done();
-      });
+
+      await setImmediate();
+      expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
     });
 
     it('resolves with KibanaMigrator after waiting for migrations to complete', async () => {
