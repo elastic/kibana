@@ -83,8 +83,8 @@ const PageOverlayGlobalStyles = createGlobalStyle`
 
   //-------------------------------------------------------------------------------------------
   // TIMELINE SPECIFIC STYLES
-  // The timeline overlay uses a custom z-index, which causes issues with anyother content that
-  // is normally appended to the 'document.body' directly (like popups, masks, flyouts, ets).
+  // The timeline overlay uses a custom z-index, which causes issues with any other content that
+  // is normally appended to the 'document.body' directly (like popups, masks, flyouts, etc).
   // The styles below will be applied anytime the timeline is opened/visible and attempts to
   // mitigate the issues around z-index so that content that is shown after the PageOverlay is
   // opened is displayed properly.
