@@ -81,10 +81,38 @@ const PageOverlayGlobalStyles = createGlobalStyle`
     overflow: hidden;
   }
 
-  // If Timeline is opened, then ensure we use the same z-index so that if this page overlay
-  // is opened from inside of Timeline, it will appear above the timeline
-  body.${SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME} .${PAGE_OVERLAY_CSS_CLASSNAME} {
-    z-index: ${({ theme: { eui } }) => eui[TIMELINE_EUI_THEME_ZINDEX_LEVEL]};
+  //-------------------------------------------------------------------------------------------
+  // TIMELINE SPECIFIC STYLES
+  // The timeline overlay uses a custom z-index, which causes issues with anyother content that
+  // is normally appended to the 'document.body' directly (like popups, masks, flyouts, ets).
+  // The styles below will be applied anytime the timeline is opened/visible and attempts to
+  // mitigate the issues around z-index so that content that is shown after the PageOverlay is
+  // opened is displayed properly.
+  //-------------------------------------------------------------------------------------------
+  body.${SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME} {
+    .${PAGE_OVERLAY_CSS_CLASSNAME},
+    .euiOverlayMask,
+    .euiFlyout {
+      z-index: ${({ theme: { eui } }) => eui[TIMELINE_EUI_THEME_ZINDEX_LEVEL]};
+    }
+
+    // These were all copied from AppGlobalStyle: x-pack/plugins/security_solution/public/common/components/page/index.tsx
+    euiPopover__panel.euiPopover__panel-isOpen {
+      z-index: 9900 !important;
+      min-width: 24px;
+    }
+    .euiPopover__panel.euiPopover__panel-isOpen.sourcererPopoverPanel {
+      z-index: 5900 !important;
+    }
+    .euiToolTip {
+      z-index: 9950 !important;
+    }
+    .euiComboBoxOptionsList {
+      z-index: 9999;
+    }
+    .echTooltip {
+      z-index: 9950;
+    }
   }
 `;
 
