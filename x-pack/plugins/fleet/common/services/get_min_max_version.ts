@@ -22,9 +22,7 @@ export function sortVersions(versions: string[]) {
 // Find max version from an array of string versions
 export function getMaxVersion(versions: string[]) {
   const sorted = sortVersions(versions);
-  if (sorted.length === 1) {
-    return sorted[0];
-  } else if (sorted.length > 1) {
+  if (sorted.length >= 1) {
     return sorted[sorted.length - 1];
   }
   return '';
