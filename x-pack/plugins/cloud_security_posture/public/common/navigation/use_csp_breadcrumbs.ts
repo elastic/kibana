@@ -59,5 +59,5 @@ export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
       },
       ...additionalBreadCrumbs,
     ]);
-  }, [match.path, getUrlForApp, setBreadcrumbs, breadcrumbs]);
+  }, [match.path, getUrlForApp, setBreadcrumbs, breadcrumbs, history]);
 };
