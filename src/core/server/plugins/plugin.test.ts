@@ -10,8 +10,8 @@ import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
+import { Env } from '@kbn/config';
 
-import { Env } from '../config';
 import { CoreContext } from '../core_context';
 import { coreMock } from '../mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';

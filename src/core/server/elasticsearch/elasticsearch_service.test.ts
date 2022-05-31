@@ -22,7 +22,7 @@ import type { NodesVersionCompatibility } from './version_check/ensure_es_versio
 import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
-import { Env } from '../config';
+import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '../config/mocks';
 import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';

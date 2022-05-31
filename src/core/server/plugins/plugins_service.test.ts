@@ -10,11 +10,11 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
-import { schema } from '@kbn/config-schema';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT } from '@kbn/utils';
+import { schema } from '@kbn/config-schema';
+import { ConfigPath, ConfigService, Env } from '@kbn/config';
 
-import { ConfigPath, ConfigService, Env } from '../config';
 import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
 import { coreMock } from '../mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';

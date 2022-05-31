@@ -10,13 +10,13 @@ import { duration } from 'moment';
 import { first } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
 import { fromRoot } from '@kbn/utils';
+import { Env } from '@kbn/config';
 import {
   createPluginInitializerContext,
   createPluginPrebootSetupContext,
   InstanceInfo,
 } from './plugin_context';
 import { CoreContext } from '../core_context';
-import { Env } from '../config';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '../config/mocks';
 import { PluginManifest, PluginType } from './types';

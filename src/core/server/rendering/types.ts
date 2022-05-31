@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
-import { EnvironmentMode, PackageInfo } from '../config';
+import { EnvironmentMode, PackageInfo } from '@kbn/config';
 import { ICspConfig } from '../csp';
 import { InternalHttpServicePreboot, InternalHttpServiceSetup, KibanaRequest } from '../http';
 import { UiPlugins, DiscoveredPlugin } from '../plugins';
