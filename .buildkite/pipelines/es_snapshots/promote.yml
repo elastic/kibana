@@ -12,7 +12,3 @@ steps:
     command: .buildkite/scripts/steps/es_snapshots/promote.sh
     agents:
       queue: kibana-default
-  - wait
-  - label: Trigger packer agent cache pipeline
-    command: node .buildkite/scripts/steps/trigger_packer_cache.js
-    branches: main
