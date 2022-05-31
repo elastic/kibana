@@ -12,6 +12,11 @@ import { formatFieldValue } from './format_value';
 import { ElasticSearchHit, HitsFlattened } from '../types';
 import { DiscoverServices } from '../build_services';
 
+interface ConvertedResult {
+  formattedString: string;
+  withFormula: boolean;
+}
+
 export const convertValueToString = ({
   rowIndex,
   rows,
@@ -30,11 +35,11 @@ export const convertValueToString = ({
   options?: {
     disableMultiline?: boolean;
   };
-}): { formattedString: string; withFormula: boolean } => {
+}): ConvertedResult => {
   const { fieldFormats } = services;
   const rowFlattened = rowsFlattened[rowIndex];
+  const value = rowFlattened?.[columnId];
   const field = dataView.fields.getByName(columnId);
-  const value = rowFlattened[columnId];
   const valuesArray = Array.isArray(value) ? value : [value];
   const disableMultiline = options?.disableMultiline ?? false;
 
@@ -76,9 +81,7 @@ export const convertValueToString = ({
   };
 };
 
-export const convertNameToString = (
-  name: string
-): { formattedString: string; withFormula: boolean } => {
+export const convertNameToString = (name: string): ConvertedResult => {
   return {
     formattedString: escapeFormattedValue(name),
     withFormula: cellHasFormulas(name),
