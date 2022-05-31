@@ -40,6 +40,7 @@ export class BaseVisType<TVisParams = VisParams> {
   public readonly editorConfig;
   public hidden;
   public readonly requiresSearch;
+  public readonly hasPartialRows;
   public readonly hierarchicalData;
   public readonly setup;
   public readonly getUsedIndexPattern;
@@ -73,6 +74,7 @@ export class BaseVisType<TVisParams = VisParams> {
     this.hidden = opts.hidden ?? false;
     this.requiresSearch = opts.requiresSearch ?? false;
     this.setup = opts.setup;
+    this.hasPartialRows = opts.hasPartialRows ?? false;
     this.hierarchicalData = opts.hierarchicalData ?? false;
     this.getUsedIndexPattern = opts.getUsedIndexPattern;
     this.inspectorAdapters = opts.inspectorAdapters;

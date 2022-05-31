@@ -811,6 +811,15 @@ describe('AggConfigs', () => {
       );
     });
 
+    it('should generate the `partialRows` argument', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      ac.partialRows = true;
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
+        `"esaggs index={indexPatternLoad id=\\"logstash-*\\"} partialRows=true"`
+      );
+    });
+
     it('should generate the `aggs` argument', () => {
       const configStates = [
         {

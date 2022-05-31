@@ -58,6 +58,7 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
 export interface AggConfigsOptions {
   typesRegistry: AggTypesRegistryStart;
   hierarchical?: boolean;
+  partialRows?: boolean;
 }
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
@@ -86,6 +87,7 @@ export class AggConfigs {
   public timeFields?: string[];
   public forceNow?: Date;
   public hierarchical?: boolean = false;
+  public partialRows?: boolean = false;
 
   private readonly typesRegistry: AggTypesRegistryStart;
 
@@ -103,6 +105,7 @@ export class AggConfigs {
     this.aggs = [];
     this.indexPattern = indexPattern;
     this.hierarchical = opts.hierarchical;
+    this.partialRows = opts.partialRows;
 
     configStates.forEach((params: any) => this.createAggConfig(params));
   }
@@ -513,6 +516,7 @@ export class AggConfigs {
           ),
         ]),
         metricsAtAllLevels: this.hierarchical,
+        partialRows: this.partialRows,
         aggs: this.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
       }),
     ]).toAst();

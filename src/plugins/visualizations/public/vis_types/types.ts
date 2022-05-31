@@ -216,6 +216,10 @@ export interface VisTypeDefinition<TVisParams> {
    * with the selection of a search source - an index pattern or a saved search.
    */
   readonly requiresSearch?: boolean;
+  /**
+   * In case when the visualization performs an aggregation, this option will be used to display or hide the rows with partial data.
+   */
+  readonly hasPartialRows?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly hierarchicalData?: boolean | ((vis: { params: TVisParams }) => boolean);
   readonly inspectorAdapters?: Adapters | (() => Adapters);
   /**

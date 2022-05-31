@@ -30,6 +30,10 @@ export const toExpressionAst: VisToExpressionAst = async (
 
   if (vis.data.aggs) {
     vis.data.aggs.hierarchical = vis.isHierarchical();
+    vis.data.aggs.partialRows =
+      typeof vis.type.hasPartialRows === 'function'
+        ? vis.type.hasPartialRows(vis)
+        : vis.type.hasPartialRows;
     searchSource?.setField('aggs', vis.data.aggs);
   }
 
