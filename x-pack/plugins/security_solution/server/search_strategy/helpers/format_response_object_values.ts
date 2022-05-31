@@ -40,15 +40,11 @@ export const unflattenObject = <T extends object = GenericObject>(object: object
 
 export const formatLocationAsGeoEcs = (item: unknown[]) => {
   const itemGeo = item.length > 0 ? (item[0] as { coordinates: number[] }) : null;
-  if (itemGeo != null && !isEmpty(itemGeo.coordinates)) {
-    try {
-      return {
-        lon: [itemGeo.coordinates[0]],
-        lat: [itemGeo.coordinates[1]],
-      };
-    } catch {
-      return item;
-    }
+  if (!!itemGeo && isArray(itemGeo.coordinates) && itemGeo.coordinates.length > 1) {
+    return {
+      lon: [itemGeo.coordinates[0]],
+      lat: [itemGeo.coordinates[1]],
+    };
   }
   return item;
 };
