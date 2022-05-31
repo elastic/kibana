@@ -64,7 +64,8 @@ const testBrowserConfig: Partial<MonitorFields> = {
   'source.zip_url.proxy_url': '',
   'source.inline.script':
     "step('Go to https://www.google.com/', async () => {\n  await page.goto('https://www.google.com/');\n});",
-  params: '',
+  params: '{"a":"param"}',
+  playwright_options: '{"playwright":"option"}',
   screenshots: 'on',
   synthetics_args: ['--hasTouch true'],
   'filter_journeys.match': '',
