@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
-export default function ({ loadTestFile }) {
-  describe('index_patterns/_fields_for_time_pattern', () => {
-    loadTestFile(require.resolve('./errors'));
-    loadTestFile(require.resolve('./pattern'));
-    loadTestFile(require.resolve('./query_params'));
-  });
-}
+module.exports = {
+  // TODO replace the line below with
+  // preset: '@kbn/test/jest_integration_node
+  // to do so, we must fix all integration tests first
+  // see https://github.com/elastic/kibana/pull/130255/
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../..',
+  roots: ['<rootDir>/src/core/server'],
+};
