@@ -16,6 +16,7 @@ enum CollectionMode {
 }
 
 enum MonitoredProduct {
+  Cluster = 'cluster',
   Elasticsearch = 'elasticsearch',
   Kibana = 'kibana',
   Beats = 'beats',
