@@ -46,6 +46,7 @@ import {
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
   NavType,
+  ChromeHelpMenuActions,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -324,6 +325,7 @@ export type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeHelpMenuActions,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,

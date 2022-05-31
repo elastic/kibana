@@ -21,6 +21,7 @@ export const allowedExperimentalValues = Object.freeze({
   riskyUsersEnabled: false,
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
+  policyResponseInFleetEnabled: false,
   groupedNavigation: true,
 
   /**
