@@ -8,6 +8,7 @@
 
 import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
+import type { Logger, LoggerFactory } from '@kbn/logging';
 import {
   ConfigService,
   Env,
@@ -21,7 +22,7 @@ import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
+import { LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';

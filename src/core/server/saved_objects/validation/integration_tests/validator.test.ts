@@ -190,9 +190,7 @@ describe('validates saved object types when a schema is provided', () => {
         },
         { migrationVersion: { foo: '7.16.0' } }
       );
-    }).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Migration function for version 8.3.0 threw an error"`
-    );
+    }).rejects.toThrowError(`Migration function for version ${kibanaVersion} threw an error`);
   });
 
   it('returns validation errors with bulkCreate', async () => {
