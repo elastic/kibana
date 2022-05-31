@@ -37,7 +37,7 @@ const defaultValues = {
   eqlQueryBar: {
     query: { query: '', language: 'eql' },
     filters: [],
-    saved_id: undefined,
+    saved_id: null,
   },
 };
 
@@ -187,6 +187,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
           idAria: 'timelineEqlQueryBar',
           isDisabled: indexPatternsLoading,
           isLoading: indexPatternsLoading,
+          indexPattern,
           dataTestSubj: 'timelineEqlQueryBar',
         }}
         config={{

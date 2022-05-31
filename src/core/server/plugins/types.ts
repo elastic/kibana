@@ -10,9 +10,14 @@ import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { PathConfigType } from '@kbn/utils';
+import { LoggerFactory } from '@kbn/logging';
+import type {
+  ConfigPath,
+  EnvironmentMode,
+  PackageInfo,
+  ConfigDeprecationProvider,
+} from '@kbn/config';
 
-import { ConfigPath, EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '../config';
-import { LoggerFactory } from '../logging';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
 import { CorePreboot, CoreSetup, CoreStart } from '..';
