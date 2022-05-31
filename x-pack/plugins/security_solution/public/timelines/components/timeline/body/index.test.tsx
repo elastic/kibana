@@ -208,7 +208,7 @@ describe('Body', () => {
         });
       });
     }, 20000);
-
+  });
   describe('action on event', () => {
     const addaNoteToEvent = (wrapper: ReturnType<typeof mount>, note: string) => {
       wrapper.find('[data-test-subj="add-note"]').first().find('button').simulate('click');
