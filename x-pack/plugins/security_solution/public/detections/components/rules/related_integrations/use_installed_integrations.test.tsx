@@ -17,8 +17,6 @@ import { useInstalledIntegrations } from './use_installed_integrations';
 import * as api from '../../../containers/detection_engine/rules/api';
 import { useToasts } from '../../../../common/lib/kibana';
 
-const SOME_RULE_ID = 'some-rule-id';
-
 describe('useInstalledIntegrations', () => {
   beforeEach(() => {
     jest.clearAllMocks();
