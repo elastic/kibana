@@ -225,6 +225,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const packageMock = createPackagePolicyMock();
       packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+      packageMock.vars = { dataYaml: { type: 'yaml' } };
 
       const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
       fleetMock.registerExternalCallback.mockImplementation((...args) => {
