@@ -150,12 +150,6 @@ class TableListView<V extends {}> extends React.Component<
   }
 
   componentDidUpdate(prevProps: TableListViewProps<V>, prevState: TableListViewState<V>) {
-    if (prevState.viewsCountRange !== this.state.viewsCountRange) {
-      this.loadUserContentTableColumnDefinition();
-    }
-  }
-
-  componentDidUpdate(prevProps: TableListViewProps<V>, prevState: TableListViewState<V>) {
     if (this.state.hasUpdatedAtMetadata === null && prevState.items !== this.state.items) {
       // We check if the saved object have the "updatedAt" metadata
       // to render or not that column in the table
@@ -174,6 +168,10 @@ class TableListView<V extends {}> extends React.Component<
             : prev.tableSort,
         };
       });
+    }
+
+    if (prevState.viewsCountRange !== this.state.viewsCountRange) {
+      this.loadUserContentTableColumnDefinition();
     }
   }
 
