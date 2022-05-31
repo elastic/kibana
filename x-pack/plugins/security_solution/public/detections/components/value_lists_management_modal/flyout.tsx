@@ -15,7 +15,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
-  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
