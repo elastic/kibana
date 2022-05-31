@@ -18,7 +18,7 @@ export type Action =
     }
   | { action: 'uploaded'; payload: { content_ref: string; size: number } }
   | { action: 'uploadError'; payload?: undefined }
-  | { action: 'updateFile'; payload: UpdatableFileAttributes };
+  | { action: 'updateFile'; payload: Partial<UpdatableFileAttributes> };
 
 export function createDefaultFileAttributes(): Pick<
   FileSavedObjectAttributes,
@@ -49,7 +49,9 @@ export function fileAttributesReducer(
       const d = new Date();
       return {
         ...state,
-        ...payload,
+        name: payload.name ?? state.name,
+        alt: payload.alt ?? state.alt,
+        meta: payload.meta ?? state.meta,
         updated_at: d.toISOString(),
       };
     default:
