@@ -22,10 +22,7 @@ const WorkpadAppComponent = withElementsLoadedTelemetry(Component);
 
 const mapDispatchToProps = (dispatch: Dispatch): { deselectElement: MouseEventHandler } => ({
   deselectElement: (ev) => {
-    // @ts-expect-error update types
-    if (ev.target.id !== 'canvasInteractionBoundary') {
-      ev.stopPropagation();
-    }
+    ev.stopPropagation();
     dispatch(selectToplevelNodes([]));
   },
 });

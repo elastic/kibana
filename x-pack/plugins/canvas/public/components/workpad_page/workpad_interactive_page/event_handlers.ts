@@ -76,11 +76,6 @@ const setupHandler = (commit: CommitFn, canvasOrigin: CanvasOriginFn, zoomScale?
       return;
     }
 
-    // @ts-expect-error update types
-    if (target.id !== 'canvasInteractionBoundary') {
-      e.stopPropagation();
-    }
-
     const { x, y } = localMousePosition(canvasOrigin, clientX, clientY, zoomScale);
     commit('mouseEvent', { event: 'mouseUp', x, y, altKey, metaKey, shiftKey, ctrlKey });
     resetHandler();
@@ -125,11 +120,6 @@ const handleMouseDown = (
 
   if (!isInCanvas(target)) {
     return;
-  }
-
-  // @ts-expect-error update types
-  if (e.target.id !== 'canvasInteractionBoundary') {
-    e.stopPropagation();
   }
 
   if (buttons !== 1 || !commit) {
