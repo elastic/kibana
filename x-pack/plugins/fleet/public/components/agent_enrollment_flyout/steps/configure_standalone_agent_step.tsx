@@ -28,11 +28,15 @@ export const ConfigureStandaloneAgentStep = ({
   selectedPolicyId,
   yaml,
   downloadLink,
+  isComplete,
+  onCopy,
 }: {
   isK8s?: K8sMode;
   selectedPolicyId?: string;
   yaml: string;
   downloadLink: string;
+  isComplete?: boolean;
+  onCopy?: () => void;
 }): EuiContainedStepProps => {
   const policyMsg =
     isK8s === 'IS_KUBERNETES' ? (
@@ -83,7 +87,13 @@ export const ConfigureStandaloneAgentStep = ({
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={yaml}>
                   {(copy) => (
-                    <EuiButton onClick={copy} iconType="copyClipboard">
+                    <EuiButton
+                      onClick={() => {
+                        copy();
+                        if (onCopy) onCopy();
+                      }}
+                      iconType="copyClipboard"
+                    >
                       <FormattedMessage
                         id="xpack.fleet.agentEnrollment.copyPolicyButton"
                         defaultMessage="Copy to clipboard"
@@ -111,6 +121,6 @@ export const ConfigureStandaloneAgentStep = ({
         )}
       </>
     ),
-    status: !yaml ? 'loading' : undefined,
+    status: !yaml ? 'loading' : isComplete ? 'complete' : undefined,
   };
 };

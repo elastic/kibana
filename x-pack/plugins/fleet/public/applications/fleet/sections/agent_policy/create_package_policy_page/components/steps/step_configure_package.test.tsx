@@ -8,9 +8,9 @@
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
-import type { TestRenderer } from '../../../../../../mock';
-import { createFleetTestRendererMock } from '../../../../../../mock';
-import type { NewPackagePolicy, PackageInfo } from '../../../../types';
+import type { TestRenderer } from '../../../../../../../mock';
+import { createFleetTestRendererMock } from '../../../../../../../mock';
+import type { NewPackagePolicy, PackageInfo } from '../../../../../types';
 
 import { StepConfigurePackagePolicy } from './step_configure_package';
 

@@ -10,12 +10,13 @@ import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiTabbedContent } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { useGetAgentPolicies } from '../../../../hooks';
-import type { AgentPolicy, NewAgentPolicy, PackageInfo } from '../../../../types';
-import { AgentPolicyIntegrationForm } from '../../components';
-import type { ValidationResults } from '../../components/agent_policy_validation';
-import { SO_SEARCH_LIMIT } from '../../../../constants';
-import { incrementPolicyName } from '../../../../services';
+import { useGetAgentPolicies } from '../../../../../hooks';
+import type { AgentPolicy, NewAgentPolicy, PackageInfo } from '../../../../../types';
+import { AgentPolicyIntegrationForm } from '../../../components';
+import { SO_SEARCH_LIMIT } from '../../../../../constants';
+import type { ValidationResults } from '../../../components/agent_policy_validation';
+
+import { incrementPolicyName } from '../../../../../services';
 
 import { StepSelectAgentPolicy } from './step_select_agent_policy';
 

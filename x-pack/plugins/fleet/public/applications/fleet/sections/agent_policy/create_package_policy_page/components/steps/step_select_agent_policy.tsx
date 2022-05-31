@@ -21,21 +21,21 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { Error } from '../../../../components';
+import { Error } from '../../../../../components';
 import type {
   AgentPolicy,
   Output,
   PackageInfo,
   GetAgentPoliciesResponseItem,
-} from '../../../../types';
-import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../../services';
+} from '../../../../../types';
+import { isPackageLimited, doesAgentPolicyAlreadyIncludePackage } from '../../../../../services';
 import {
   useGetAgentPolicies,
   useGetOutputs,
   sendGetOneAgentPolicy,
   useFleetStatus,
-} from '../../../../hooks';
-import { FLEET_APM_PACKAGE, SO_SEARCH_LIMIT, outputType } from '../../../../../../../common';
+} from '../../../../../hooks';
+import { FLEET_APM_PACKAGE, SO_SEARCH_LIMIT, outputType } from '../../../../../../../../common';
 
 const AgentPolicyFormRow = styled(EuiFormRow)`
   .euiFormRow__label {
