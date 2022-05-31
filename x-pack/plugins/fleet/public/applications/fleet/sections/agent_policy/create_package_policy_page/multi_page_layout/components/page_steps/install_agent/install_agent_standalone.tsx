@@ -38,8 +38,7 @@ import { StandaloneInstructions } from '../../../../../../../../../components/en
 import type { InstallAgentPageProps } from './types';
 
 export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPageProps> = (props) => {
-  const { cancelUrl, onNext, cancelClickHandler, setIsManaged, agentPolicy, enrolledAgentIds } =
-    props;
+  const { onBack, onNext, setIsManaged, agentPolicy, enrolledAgentIds } = props;
   const core = useStartServices();
   const kibanaVersion = useKibanaVersion();
   const { docLinks } = core;
@@ -132,8 +131,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
         <>
           <NotObscuredByBottomBar />
           <CreatePackagePolicyBottomBar
-            cancelUrl={cancelUrl}
-            cancelClickHandler={cancelClickHandler}
+            cancelClickHandler={onBack}
             onNext={onNext}
             actionMessage={
               <FormattedMessage
