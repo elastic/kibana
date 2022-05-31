@@ -28,6 +28,7 @@ export function ContextAppRoute() {
 
   const { indexPatternId, id } = useParams<ContextUrlParams>();
   const anchorId = decodeURIComponent(id);
+  const dataViewId = decodeURIComponent(indexPatternId);
   const breadcrumb = useMainRouteBreadcrumb();
 
   useEffect(() => {
@@ -41,7 +42,7 @@ export function ContextAppRoute() {
     ]);
   }, [chrome, breadcrumb]);
 
-  const { indexPattern, error } = useIndexPattern(services.indexPatterns, indexPatternId);
+  const { indexPattern, error } = useIndexPattern(services.indexPatterns, dataViewId);
 
   if (error) {
     return (
@@ -57,8 +58,8 @@ export function ContextAppRoute() {
         body={
           <FormattedMessage
             id="discover.singleDocRoute.errorMessage"
-            defaultMessage="No matching index pattern for id {indexPatternId}"
-            values={{ indexPatternId }}
+            defaultMessage="No matching index pattern for id {dataViewId}"
+            values={{ dataViewId }}
           />
         }
       />
