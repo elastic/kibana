@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
@@ -84,6 +84,7 @@ export class AggConfigs {
   public forceNow?: Date;
   public aggs: IAggConfig[] = [];
   public hierarchical?: boolean;
+  public readonly timeZone: string;
 
   constructor(
     public indexPattern: IndexPattern,
@@ -92,6 +93,11 @@ export class AggConfigs {
     private getConfig: GetConfigFn
   ) {
     this.hierarchical = opts.hierarchical ?? false;
+
+    this.timeZone = getUserTimeZone(
+      this.getConfig,
+      opts?.aggExecutionContext?.shouldDetectTimeZone
+    );
 
     configStates = AggConfig.ensureIds(configStates);
     configStates.forEach((params: any) => this.createAggConfig(params));
@@ -253,16 +259,7 @@ export class AggConfigs {
       }
 
       if (hasMultipleTimeShifts) {
-        const { shouldDetectTimeZone } = this.opts.aggExecutionContext ?? {};
-        const defaultTimeZone = getUserTimeZone(this.getConfig, shouldDetectTimeZone);
-
-        dslLvlCursor = insertTimeShiftSplit(
-          this,
-          config,
-          timeShifts,
-          dslLvlCursor,
-          defaultTimeZone
-        );
+        dslLvlCursor = insertTimeShiftSplit(this, config, timeShifts, dslLvlCursor, this.timeZone);
       }
 
       if (config.type.hasNoDsl) {
@@ -414,8 +411,14 @@ export class AggConfigs {
                       range: {
                         [field]: {
                           format: 'strict_date_optional_time',
-                          gte: moment(filter?.query.range[field].gte).subtract(shift).toISOString(),
-                          lte: moment(filter?.query.range[field].lte).subtract(shift).toISOString(),
+                          gte: moment
+                            .tz(filter?.query.range[field].gte, this.timeZone)
+                            .subtract(shift)
+                            .toISOString(),
+                          lte: moment
+                            .tz(filter?.query.range[field].lte, this.timeZone)
+                            .subtract(shift)
+                            .toISOString(),
                         },
                       },
                     })),

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { AggTypesDependencies } from '..';
 import type { IKibanaSearchResponse } from './types';
 
@@ -35,11 +35,12 @@ export const getUserTimeZone = (
   getConfig: AggTypesDependencies['getConfig'],
   shouldDetectTimezone: boolean = true
 ) => {
+  const defaultTimeZone = 'UTC';
   const userTimeZone = getConfig<string>('dateFormat:tz');
 
   if (userTimeZone === 'Browser') {
     if (!shouldDetectTimezone) {
-      return 'UTC';
+      return defaultTimeZone;
     }
 
     // If the typeMeta data index template does not have a timezone assigned to the selected field, use the configured tz
@@ -49,5 +50,5 @@ export const getUserTimeZone = (
     return detectedTimezone || tzOffset;
   }
 
-  return userTimeZone;
+  return userTimeZone ?? defaultTimeZone;
 };
