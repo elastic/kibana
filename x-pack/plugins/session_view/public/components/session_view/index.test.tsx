@@ -127,6 +127,13 @@ describe('SessionView component', () => {
         expect(renderResult.getByText('Timestamp')).toBeTruthy();
         expect(renderResult.getByText('Verbose mode')).toBeTruthy();
       });
+
+      it('should show refresh button', async () => {
+        render();
+        await waitForApiCall();
+
+        expect(renderResult.getAllByTestId('sessionView:sessionViewRefreshButton')).toBeTruthy();
+      });
     });
   });
 });
