@@ -31,7 +31,6 @@ export const useOnUpdateField = ({
         updateCaseProperty({
           updateKey,
           updateValue,
-          updateCase: (newCase) => handleUpdateField(newCase, updateKey),
           caseData,
           onSuccess,
           onError,
@@ -81,7 +80,7 @@ export const useOnUpdateField = ({
           return null;
       }
     },
-    [updateCaseProperty, handleUpdateField, caseData]
+    [updateCaseProperty, caseData]
   );
   return { onUpdateField, isLoading, loadingKey };
 };
