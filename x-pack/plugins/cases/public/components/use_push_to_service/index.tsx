@@ -22,7 +22,7 @@ import * as i18n from './translations';
 import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common/api';
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { ErrorMessage } from './callout/types';
-import { useRefreshCaseViewPage } from '../case_view/case_view_page';
+import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 
 export interface UsePushToService {
   caseId: string;
