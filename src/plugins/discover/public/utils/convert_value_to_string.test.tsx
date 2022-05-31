@@ -402,6 +402,22 @@ describe('convertValueToString', () => {
     expect(result.formattedString).toBe('');
   });
 
+  it('should return an empty string when rowIndex is out of range', () => {
+    const result = convertValueToString({
+      rows: discoverGridContextComplexMock.rows,
+      rowsFlattened: discoverGridContextComplexMock.rowsFlattened,
+      dataView: discoverGridContextComplexMock.indexPattern,
+      services: discoverServiceMock,
+      columnId: 'unknown',
+      rowIndex: -1,
+      options: {
+        disableMultiline: true,
+      },
+    });
+
+    expect(result.formattedString).toBe('');
+  });
+
   it('should return _source value', () => {
     const result = convertValueToString({
       rows: discoverGridContextMock.rows,
@@ -410,6 +426,9 @@ describe('convertValueToString', () => {
       services: discoverServiceMock,
       columnId: '_source',
       rowIndex: 0,
+      options: {
+        disableMultiline: false,
+      },
     });
 
     expect(result.formattedString).toBe(
