@@ -8,7 +8,7 @@
 /* eslint-disable no-console */
 
 const { executeSyntheticsRunner } = require('./base_e2e');
-import path from 'path';
+const path = require('path');
 
 const e2eDir = path.join(__dirname, '../e2e');
 
