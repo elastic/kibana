@@ -13,6 +13,7 @@ import {
   createMockAgentService,
   createMockAgentPolicyService,
 } from '@kbn/fleet-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
@@ -66,6 +67,7 @@ describe('Cloud Security Posture Plugin', () => {
     const mockPlugins: CspServerPluginStartDeps = {
       fleet: fleetMock,
       data: dataPluginMock.createStartContract(),
+      taskManager: taskManagerMock.createStart(),
     };
 
     const contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);

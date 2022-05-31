@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesIndexSettings, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { benchmarkScoreMapping } from './benchmark_score_mapping';
 import { latestFindingsMapping } from './latest_findings_mapping';
@@ -14,19 +14,20 @@ import {
   LATEST_FINDINGS_INDEX_NAME,
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_NAME,
+  CSP_INGEST_TIMESTAMP_PIPELINE,
 } from '../../common/constants';
+import { createPipelineIfNotExists } from './create_processor';
 
 // TODO: Add integration tests
-export const initializeCspTransformsIndices = async (
-  esClient: ElasticsearchClient,
-  logger: Logger
-) => {
+export const initializeCspIndices = async (esClient: ElasticsearchClient, logger: Logger) => {
+  await createPipelineIfNotExists(esClient, CSP_INGEST_TIMESTAMP_PIPELINE, logger);
   return Promise.all([
     createIndexIfNotExists(
       esClient,
       LATEST_FINDINGS_INDEX_NAME,
       LATEST_FINDINGS_INDEX_DEFAULT_NS,
       latestFindingsMapping,
+      {},
       logger
     ),
     createIndexIfNotExists(
@@ -34,6 +35,7 @@ export const initializeCspTransformsIndices = async (
       BENCHMARK_SCORE_INDEX_NAME,
       BENCHMARK_SCORE_INDEX_DEFAULT_NS,
       benchmarkScoreMapping,
+      { default_pipeline: CSP_INGEST_TIMESTAMP_PIPELINE },
       logger
     ),
   ]);
@@ -44,6 +46,7 @@ export const createIndexIfNotExists = async (
   indexTemplateName: string,
   indexPattern: string,
   mappings: MappingTypeMapping,
+  settings: IndicesIndexSettings,
   logger: Logger
 ) => {
   try {
@@ -61,6 +64,7 @@ export const createIndexIfNotExists = async (
       await esClient.indices.create({
         index: indexPattern,
         mappings,
+        settings,
       });
     }
   } catch (err) {
