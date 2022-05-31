@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { Formatter, commonFormatters, objectFormatter, arrayFormatter } from './common';
+import {
+  Formatter,
+  commonFormatters,
+  objectFormatter,
+  stringToObjectFormatter,
+  arrayFormatter,
+} from './common';
 import { BrowserFields, ConfigKey } from '../../../common/runtime_types/monitor_management';
 import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../common/constants/monitor_defaults';
 
@@ -43,7 +49,7 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.SOURCE_ZIP_PROXY_URL]: null,
   [ConfigKey.SOURCE_PROJECT_CONTENT]: null,
   [ConfigKey.SOURCE_INLINE]: null,
-  [ConfigKey.PARAMS]: null,
+  [ConfigKey.PARAMS]: (fields) => stringToObjectFormatter(fields[ConfigKey.PARAMS] || ''),
   [ConfigKey.SCREENSHOTS]: null,
   [ConfigKey.SYNTHETICS_ARGS]: (fields) => arrayFormatter(fields[ConfigKey.SYNTHETICS_ARGS]),
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: null,
@@ -62,7 +68,8 @@ export const browserFormatters: BrowserFormatMap = {
   [ConfigKey.IGNORE_HTTPS_ERRORS]: null,
   [ConfigKey.JOURNEY_ID]: null,
   [ConfigKey.PROJECT_ID]: null,
-  [ConfigKey.PLAYWRIGHT_OPTIONS]: null,
+  [ConfigKey.PLAYWRIGHT_OPTIONS]: (fields) =>
+    stringToObjectFormatter(fields[ConfigKey.PLAYWRIGHT_OPTIONS] || ''),
   [ConfigKey.CUSTOM_HEARTBEAT_ID]: null,
   [ConfigKey.ORIGINAL_SPACE]: null,
   ...commonFormatters,

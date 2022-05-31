@@ -6,18 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Config } from './config';
-
-type ConfigMock = jest.Mocked<Config>;
-
-const createConfigMock = (): ConfigMock => ({
-  has: jest.fn(),
-  get: jest.fn(),
-  set: jest.fn(),
-  getFlattenedPaths: jest.fn(),
-  toRaw: jest.fn(),
-});
-
-export const configMock = {
-  create: createConfigMock,
+module.exports = {
+  preset: '@kbn/test/jest_integration',
+  rootDir: '../../..',
+  roots: ['<rootDir>/src/core/public'],
 };
