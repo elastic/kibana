@@ -60,7 +60,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
       caseId,
       caseData,
-      handleUpdateField: refreshCaseViewPage,
     });
 
     // Set `refreshRef` if needed
