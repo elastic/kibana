@@ -680,7 +680,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).simulate('click');
+          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -727,7 +727,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(RangePopover).find(EuiLink).simulate('click');
+          instance.find(RangePopover).find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -814,7 +814,7 @@ describe('ranges', () => {
         );
 
         act(() => {
-          instance.find(RangePopover).last().find(EuiLink).simulate('click');
+          instance.find(RangePopover).last().find(EuiLink).find('button').simulate('click');
         });
 
         act(() => {
@@ -921,7 +921,7 @@ describe('ranges', () => {
 
         // This series of act closures are made to make it work properly the update flush
         act(() => {
-          instance.find(EuiLink).first().simulate('click');
+          instance.find(EuiLink).first().find('button').simulate('click');
         });
 
         expect(updateLayerSpy.mock.calls[0][0].columns.col1.params.format).toEqual({

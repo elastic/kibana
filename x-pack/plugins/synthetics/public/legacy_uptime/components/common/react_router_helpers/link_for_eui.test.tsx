@@ -57,7 +57,8 @@ describe('EUI & React Router Component Helpers', () => {
         target: { getAttribute: () => '_self' },
         preventDefault: jest.fn(),
       };
-      wrapper.find(EuiLink).simulate('click', simulatedEvent);
+      console.log(wrapper.find(EuiLink).debug());
+      wrapper.find(EuiLink).find('a').simulate('click', simulatedEvent);
 
       expect(simulatedEvent.preventDefault).toHaveBeenCalled();
       expect(mockHistory.push).toHaveBeenCalled();
@@ -70,7 +71,7 @@ describe('EUI & React Router Component Helpers', () => {
         shiftKey: true,
         target: { getAttribute: () => '_blank' },
       };
-      wrapper.find(EuiLink).simulate('click', simulatedEvent);
+      wrapper.find(EuiLink).find('a').simulate('click', simulatedEvent);
 
       expect(mockHistory.push).not.toHaveBeenCalled();
     });
