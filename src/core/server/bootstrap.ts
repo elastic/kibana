@@ -7,7 +7,7 @@
  */
 
 import chalk from 'chalk';
-import { CliArgs, Env, RawConfigService } from './config';
+import { CliArgs, Env, RawConfigService } from '@kbn/config';
 import { Root } from './root';
 import { CriticalError } from './errors';
 
