@@ -13,7 +13,6 @@ import { ConsoleProps } from '../../types';
 export interface ConsoleRegistrationInterface<TMeta extends object = any> {
   id: string;
   consoleProps: ConsoleProps;
-  onBeforeTerminate?: () => void; // FIXME:PT remove support for this
   /**
    * Any additional metadata about the console. Helpful for when consuming Registered consoles
    * (ex. could hold the details data for the Host that the console is opened against)

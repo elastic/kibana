@@ -28,7 +28,6 @@ interface ManagedConsole {
   console: JSX.Element; // actual console component
   isOpen: boolean;
   key: symbol;
-  onBeforeTerminate?: ConsoleRegistrationInterface['onBeforeTerminate'];
   TitleComponent: ConsoleRegistrationInterface['TitleComponent'];
   BodyComponent: ConsoleRegistrationInterface['BodyComponent'];
   ActionComponents: ConsoleRegistrationInterface['ActionComponents'];
@@ -126,12 +125,6 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       validateIdOrThrow(id);
 
       setConsoleStorage((prevState) => {
-        const { onBeforeTerminate } = prevState[id];
-
-        if (onBeforeTerminate) {
-          onBeforeTerminate();
-        }
-
         const newState = { ...prevState };
         delete newState[id];
 

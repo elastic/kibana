@@ -83,7 +83,6 @@ describe('When using ConsoleManager', () => {
 
       expect(renderResult.result.current.getOne(newConsole.id)).toEqual({
         id: newConsole.id,
-        title: newConsole.title,
         meta: newConsole.meta,
         show: expect.any(Function),
         hide: expect.any(Function),
@@ -145,17 +144,6 @@ describe('When using ConsoleManager', () => {
       });
 
       expect(renderResult.result.current.getOne(consoleId)).toBeUndefined();
-    });
-
-    it('should call `onBeforeTerminate()`', () => {
-      renderHook();
-      const { id: consoleId, onBeforeTerminate } = registerNewConsole();
-
-      act(() => {
-        renderResult.result.current.terminate(consoleId);
-      });
-
-      expect(onBeforeTerminate).toHaveBeenCalled();
     });
 
     it('should throw if attempting to terminate a console with invalid `id`', () => {

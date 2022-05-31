@@ -22,13 +22,12 @@ export const getNewConsoleRegistrationMock = (
 ): ConsoleRegistrationInterface => {
   return {
     id: Math.random().toString(36),
-    title: 'Test console',
+    TitleComponent: () => <>{'Test console'}</>,
     meta: { about: 'for unit testing ' },
     consoleProps: {
       'data-test-subj': 'testRunningConsole',
       commands: getCommandListMock(),
     },
-    onBeforeTerminate: jest.fn(),
     ...overrides,
   };
 };
@@ -102,7 +101,7 @@ const RunningConsole = memo<{ registeredConsole: RegisteredConsoleClient }>(
       <div data-test-subj="runningConsole">
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow data-test-subj="runningConsoleTitle">
-            {registeredConsole.title}
+            {registeredConsole.id}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
