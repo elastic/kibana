@@ -99,7 +99,7 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
@@ -236,7 +236,7 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
@@ -269,7 +269,7 @@ describe('rule helpers', () => {
             language: 'kuery',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         relatedIntegrations: [],
         requiredFields: [],
@@ -285,7 +285,7 @@ describe('rule helpers', () => {
             language: '',
           },
           filters: [],
-          saved_id: undefined,
+          saved_id: null,
         },
         timeline: {
           id: '86aa74d0-2136-11ea-9864-ebc8cc1cb8c2',
