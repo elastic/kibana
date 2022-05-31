@@ -35,7 +35,7 @@ async function getCompatibleActions(
   trigger: typeof VISUALIZE_FIELD_TRIGGER | typeof VISUALIZE_GEO_FIELD_TRIGGER
 ) {
   const compatibleActions = await getUiActions().getTriggerCompatibleActions(trigger, {
-    dataViewId,
+    indexPatternId: dataViewId,
     fieldName,
     contextualFields,
   });
@@ -50,7 +50,7 @@ export function triggerVisualizeActions(
   if (!dataViewId) return;
   const trigger = getTriggerConstant(field.type);
   const triggerOptions = {
-    dataViewId,
+    indexPatternId: dataViewId,
     fieldName: field.name,
     contextualFields,
   };
@@ -92,7 +92,7 @@ export async function getVisualizeInformation(
     // if the field has compatible actions use this field for visualizing
     if (actions.length > 0) {
       const triggerOptions = {
-        dataViewId,
+        indexPatternId: dataViewId,
         fieldName: f.name,
         contextualFields,
         trigger: getTrigger(f.type),
