@@ -50,7 +50,7 @@ export const syntheticsMonitor: SavedObjectsType = {
       project_id: {
         type: 'keyword',
       },
-      'monitor.origin': {
+      origin: {
         type: 'keyword',
       },
       custom_heartbeat_id: {
