@@ -568,7 +568,41 @@
         "signature": [
           "() => Promise<void>"
         ],
-        "path": "packages/kbn-optimizer/src/babel_runtime_helpers/find_babel_runtime_helpers_in_entry_bundles.ts",
+        "path": "packages/kbn-optimizer/src/audit_bundle_dependencies/find_babel_runtime_helpers_in_entry_bundles.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/optimizer",
+        "id": "def-server.runFindNodeLibsBrowserPolyfillsInEntryBundlesCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runFindNodeLibsBrowserPolyfillsInEntryBundlesCli",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-optimizer/src/audit_bundle_dependencies/find_node_libs_browser_polyfills_in_entry_bundles.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/optimizer",
+        "id": "def-server.runFindTargetNodeImportsCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runFindTargetNodeImportsCli",
+        "description": [
+          "\nAnalyzes the bundle dependencies to find any imports using the `@kbn/<package_name>/target_node` build target.\n\nWe should aim for those packages to be imported using the `@kbn/<package_name>/target_web` build because it's optimized\nfor browser compatibility.\n\nThis utility also helps identify when code that should only run in the server is leaked into the browser."
+        ],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-optimizer/src/audit_bundle_dependencies/find_target_node_imports.ts",
         "deprecated": false,
         "children": [],
         "returnComment": [],

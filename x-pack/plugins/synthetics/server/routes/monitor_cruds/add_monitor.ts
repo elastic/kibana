@@ -17,7 +17,9 @@ import { API_URLS } from '../../../common/constants';
 import { syntheticsMonitorType } from '../../legacy_uptime/lib/saved_objects/synthetics_monitor';
 import { validateMonitor } from './monitor_validation';
 import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_upgrade_sender';
+import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
+import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
 export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
   method: 'POST',
@@ -58,27 +60,7 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       });
     }
 
-    const { syntheticsService } = server;
-
-    const errors = await syntheticsService.addConfig({
-      ...monitor,
-      id: newMonitor.id,
-      fields: {
-        config_id: newMonitor.id,
-      },
-      fields_under_root: true,
-    });
-
-    sendTelemetryEvents(
-      server.logger,
-      server.telemetry,
-      formatTelemetryEvent({
-        monitor: newMonitor,
-        errors,
-        isInlineScript: Boolean((monitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
-        kibanaVersion: server.kibanaVersion,
-      })
-    );
+    const errors = await syncNewMonitor({ monitor, monitorSavedObject: newMonitor, server });
 
     if (errors && errors.length > 0) {
       return response.ok({
@@ -93,3 +75,34 @@ export const addSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
     return response.ok({ body: newMonitor });
   },
 });
+
+export const syncNewMonitor = async ({
+  monitor,
+  monitorSavedObject,
+  server,
+}: {
+  monitor: SyntheticsMonitor;
+  monitorSavedObject: SavedObject<EncryptedSyntheticsMonitor>;
+  server: UptimeServerSetup;
+}) => {
+  const errors = await server.syntheticsService.addConfig(
+    formatHeartbeatRequest({
+      monitor,
+      monitorId: monitorSavedObject.id,
+      customHeartbeatId: (monitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID],
+    })
+  );
+
+  sendTelemetryEvents(
+    server.logger,
+    server.telemetry,
+    formatTelemetryEvent({
+      monitor: monitorSavedObject,
+      errors,
+      isInlineScript: Boolean((monitor as MonitorFields)[ConfigKey.SOURCE_INLINE]),
+      kibanaVersion: server.kibanaVersion,
+    })
+  );
+
+  return errors;
+};

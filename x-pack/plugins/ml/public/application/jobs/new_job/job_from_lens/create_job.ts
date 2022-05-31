@@ -13,6 +13,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { Filter, Query, DataViewBase } from '@kbn/es-query';
 
 import type {
+  Embeddable,
   LensPublicStart,
   LensSavedObjectAttributes,
   FieldBasedIndexPatternColumn,
@@ -38,8 +39,9 @@ import {
   hasIncompatibleProperties,
   hasSourceField,
   isTermsField,
-  isStringField,
+  isCompatibleSplitFieldType,
   getMlFunction,
+  getJobsItemsFromEmbeddable,
 } from './utils';
 
 type VisualizationType = Awaited<ReturnType<LensPublicStart['getXyVisTypes']>>[number];
@@ -123,7 +125,17 @@ export async function canCreateAndStashADJob(
     console.error(error);
   }
 }
-export async function getLayers(
+
+export async function getResultLayersFromEmbeddable(
+  embeddable: Embeddable,
+  dataViewClient: DataViewsContract,
+  lens: LensPublicStart
+): Promise<LayerResult[]> {
+  const { vis } = getJobsItemsFromEmbeddable(embeddable);
+  return getLayers(vis, dataViewClient, lens);
+}
+
+async function getLayers(
   vis: LensSavedObjectAttributes,
   dataViewClient: DataViewsContract,
   lens: LensPublicStart
@@ -276,7 +288,7 @@ async function extractFields(
     );
   }
 
-  if (splitField !== null && isStringField(splitField) === false) {
+  if (splitField !== null && isCompatibleSplitFieldType(splitField) === false) {
     throw Error(
       i18n.translate('xpack.ml.newJob.fromLens.createJob.error.splitFieldMustBeString', {
         defaultMessage: 'Selected split field type must be string.',
