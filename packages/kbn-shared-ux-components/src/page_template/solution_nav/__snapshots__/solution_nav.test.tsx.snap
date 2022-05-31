@@ -95,6 +95,100 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
 </Fragment>
 `;
 
+exports[`KibanaPageTemplateSolutionNav accepts isForceOpenOnDesktop prop 1`] = `
+<Fragment>
+  <EuiCollapsibleNavGroup
+    background="none"
+    className="kbnPageTemplateSolutionNav"
+    initialIsOpen={false}
+    isCollapsible={true}
+    paddingSize="m"
+    title={
+      <EuiTitle
+        id="KibanaPageTemplateSolutionNav_generated-id_heading"
+        size="xs"
+      >
+        <h2>
+          <strong>
+            <FormattedMessage
+              defaultMessage="{solutionName} {menuText}"
+              id="sharedUXComponents.solutionNav.mobileTitleText"
+              values={
+                Object {
+                  "menuText": "menu",
+                  "solutionName": "Solution",
+                }
+              }
+            />
+          </strong>
+        </h2>
+      </EuiTitle>
+    }
+    titleElement="span"
+  >
+    <EuiSideNav
+      aria-hidden={false}
+      aria-labelledby="KibanaPageTemplateSolutionNav_generated-id_heading"
+      items={
+        Array [
+          Object {
+            "id": "1",
+            "items": Array [
+              Object {
+                "id": "1.1",
+                "items": undefined,
+                "name": "Ingest Node Pipelines",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "1.2",
+                "items": undefined,
+                "name": "Logstash Pipelines",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "1.3",
+                "items": undefined,
+                "name": "Beats Central Management",
+                "tabIndex": undefined,
+              },
+            ],
+            "name": "Ingest",
+            "tabIndex": undefined,
+          },
+          Object {
+            "id": "2",
+            "items": Array [
+              Object {
+                "id": "2.1",
+                "items": undefined,
+                "name": "Index Management",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "2.2",
+                "items": undefined,
+                "name": "Index Lifecycle Policies",
+                "tabIndex": undefined,
+              },
+              Object {
+                "id": "2.3",
+                "items": undefined,
+                "name": "Snapshot and Restore",
+                "tabIndex": undefined,
+              },
+            ],
+            "name": "Data",
+            "tabIndex": undefined,
+          },
+        ]
+      }
+      mobileBreakpoints={Array []}
+    />
+  </EuiCollapsibleNavGroup>
+</Fragment>
+`;
+
 exports[`KibanaPageTemplateSolutionNav heading accepts more headingProps 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup

@@ -100,4 +100,11 @@ describe('KibanaPageTemplateSolutionNav', () => {
     );
     expect(component).toMatchSnapshot();
   });
+
+  test('accepts isForceOpenOnDesktop prop', () => {
+    const component = shallow(
+      <KibanaPageTemplateSolutionNav name="Solution" isForceOpenOnDesktop={true} items={items} />
+    );
+    expect(component).toMatchSnapshot();
+  });
 });
