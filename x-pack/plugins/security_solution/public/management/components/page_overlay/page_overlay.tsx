@@ -20,6 +20,10 @@ import { EuiFocusTrap, EuiPortal } from '@elastic/eui';
 import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
 import { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
+import {
+  SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
+  TIMELINE_EUI_THEME_ZINDEX_LEVEL,
+} from '../../../timelines/components/timeline/styles';
 import { useIsMounted } from '../../hooks/use_is_mounted';
 
 const OverlayRootContainer = styled.div`
@@ -69,11 +73,18 @@ const OverlayRootContainer = styled.div`
   }
 `;
 
-const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = 'securitySolution-page-overlay-lock';
+const PAGE_OVERLAY_CSS_CLASSNAME = 'securitySolution-pageOverlay';
+const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
 
 const PageOverlayGlobalStyles = createGlobalStyle`
   body.${PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME} {
     overflow: hidden;
+  }
+
+  // If Timeline is opened, then ensure we use the same z-index so that if this page overlay
+  // is opened from inside of Timeline, it will appear above the timeline
+  body.${SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME} .${PAGE_OVERLAY_CSS_CLASSNAME} {
+    z-index: ${({ theme: { eui } }) => eui[TIMELINE_EUI_THEME_ZINDEX_LEVEL]};
   }
 `;
 
@@ -173,9 +184,10 @@ export const PageOverlay = memo<PageOverlayProps>(
 
     const containerClassName = useMemo(() => {
       return classnames({
-        'eui-scrollBar': enableScrolling,
+        [PAGE_OVERLAY_CSS_CLASSNAME]: true,
         scrolling: enableScrolling,
         hidden: isHidden,
+        'eui-scrollBar': enableScrolling,
         'padding-xs': paddingSize === 'xs',
         'padding-s': paddingSize === 's',
         'padding-m': paddingSize === 'm',
@@ -202,7 +214,7 @@ export const PageOverlay = memo<PageOverlayProps>(
             }
           }
 
-          return pathname;
+          return prevState;
         });
       }
     }, [appendAsBodyLastNode, isHidden, isMounted, pathname]);
