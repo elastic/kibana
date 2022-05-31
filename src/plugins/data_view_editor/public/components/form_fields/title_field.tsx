@@ -206,7 +206,6 @@ export const TitleField = ({
               isInvalid={isInvalid}
               value={field.value}
               onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                e.persist();
                 let query = e.target.value;
                 if (query.length === 1 && !appendedWildcard && canAppendWildcard(query)) {
                   query += '*';
