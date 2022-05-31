@@ -121,6 +121,14 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getShowTooltipHelp: () =>
+    i18n.translate('expressionXY.xyVis.showTooltip.help', {
+      defaultMessage: 'Show tooltip',
+    }),
+  getOrderBucketsBySum: () =>
+    i18n.translate('expressionXY.xyVis.orderBucketsBySum.help', {
+      defaultMessage: 'Order buckets by sum',
+    }),
   getAddTimeMakerHelp: () =>
     i18n.translate('expressionXY.xyVis.addTimeMaker.help', {
       defaultMessage: 'Show time marker',
@@ -192,6 +200,10 @@ export const strings = {
   getPointsRadiusHelp: () =>
     i18n.translate('expressionXY.dataLayer.pointsRadius.help', {
       defaultMessage: 'Points radius',
+    }),
+  getShowLinesHelp: () =>
+    i18n.translate('expressionXY.dataLayer.showLines.help', {
+      defaultMessage: 'Show lines between points',
     }),
   getYConfigHelp: () =>
     i18n.translate('expressionXY.dataLayer.yConfig.help', {

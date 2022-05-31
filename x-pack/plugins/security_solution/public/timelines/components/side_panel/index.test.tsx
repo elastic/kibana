@@ -30,8 +30,7 @@ import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_cont
 
 jest.mock('../../../common/lib/kibana');
 
-// Failing: See https://github.com/elastic/kibana/issues/132845
-describe.skip('Details Panel Component', () => {
+describe('Details Panel Component', () => {
   const state: State = {
     ...mockGlobalState,
     timeline: {

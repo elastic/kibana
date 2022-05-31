@@ -9,9 +9,9 @@
 import uuid from 'uuid';
 import { join } from 'path';
 import { PathConfigType } from '@kbn/utils';
+import type { Logger } from '@kbn/logging';
 import { readFile, writeFile } from './fs';
 import { HttpConfigType } from '../http';
-import { Logger } from '../logging';
 import { uuidRegexp } from '../http/http_config';
 
 const FILE_ENCODING = 'utf8';

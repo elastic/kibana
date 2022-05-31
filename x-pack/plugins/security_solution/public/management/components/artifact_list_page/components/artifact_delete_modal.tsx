@@ -20,7 +20,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { AutoFocusButton } from '../../../../common/components/autofocus_button/autofocus_button';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import {
   getPolicyIdsFromArtifact,
   isArtifactGlobal,
