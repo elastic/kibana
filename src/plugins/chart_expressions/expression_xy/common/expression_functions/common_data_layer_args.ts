@@ -43,6 +43,22 @@ export const commonDataLayerArgs: Omit<
     default: false,
     help: strings.getIsHistogramHelp(),
   },
+  lineWidth: {
+    types: ['number'],
+    help: strings.getLineWidthHelp(),
+  },
+  showPoints: {
+    types: ['boolean'],
+    help: strings.getShowPointsHelp(),
+  },
+  pointsRadius: {
+    types: ['number'],
+    help: strings.getPointsRadiusHelp(),
+  },
+  showLines: {
+    types: ['boolean'],
+    help: strings.getShowLinesHelp(),
+  },
   yConfig: {
     types: [Y_CONFIG],
     help: strings.getYConfigHelp(),

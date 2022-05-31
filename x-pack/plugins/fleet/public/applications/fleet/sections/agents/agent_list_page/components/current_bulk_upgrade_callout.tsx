@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useCallback, useState, useMemo } from 'react';
+import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import {
   EuiCallOut,
   EuiLink,
@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiLoadingSpinner,
+  EuiIcon,
 } from '@elastic/eui';
 
 import { useStartServices } from '../../../../hooks';
@@ -39,6 +40,44 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
     }
   }, [currentUpgrade, abortUpgrade]);
 
+  const isScheduled = useMemo(() => {
+    const now = Date.now();
+    const startDate = new Date(currentUpgrade.startTime).getTime();
+
+    return startDate > now;
+  }, [currentUpgrade]);
+
+  const calloutTitle = isScheduled ? (
+    <FormattedMessage
+      id="xpack.fleet.currentUpgrade.scheduleCalloutTitle"
+      defaultMessage="{nbAgents} agents scheduled to upgrade to version {version} on {date}"
+      values={{
+        nbAgents: currentUpgrade.nbAgents - currentUpgrade.nbAgentsAck,
+        version: currentUpgrade.version,
+        date: (
+          <>
+            <FormattedDate
+              value={currentUpgrade.startTime}
+              year="numeric"
+              month="short"
+              day="2-digit"
+            />
+            &nbsp;
+            <FormattedTime value={currentUpgrade.startTime} />
+          </>
+        ),
+      }}
+    />
+  ) : (
+    <FormattedMessage
+      id="xpack.fleet.currentUpgrade.calloutTitle"
+      defaultMessage="Upgrading {nbAgents, plural, one {# agent} other {# agents}} to version {version}"
+      values={{
+        nbAgents: currentUpgrade.nbAgents - currentUpgrade.nbAgentsAck,
+        version: currentUpgrade.version,
+      }}
+    />
+  );
   return (
     <EuiCallOut color="primary">
       <EuiFlexGroup
@@ -49,16 +88,9 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
       >
         <EuiFlexItem grow={false}>
           <div>
-            <EuiLoadingSpinner />
+            {isScheduled ? <EuiIcon type="iInCircle" /> : <EuiLoadingSpinner />}
             &nbsp;&nbsp;
-            <FormattedMessage
-              id="xpack.fleet.currentUpgrade.calloutTitle"
-              defaultMessage="Upgrading {nbAgents} agents to version {version}"
-              values={{
-                nbAgents: currentUpgrade.nbAgents - currentUpgrade.nbAgentsAck,
-                version: currentUpgrade.version,
-              }}
-            />
+            {calloutTitle}
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>

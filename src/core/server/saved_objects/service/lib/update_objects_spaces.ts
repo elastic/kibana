@@ -10,7 +10,7 @@ import pMap from 'p-map';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import intersection from 'lodash/intersection';
 
-import type { Logger } from '../../../logging';
+import type { Logger } from '@kbn/logging';
 import { isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
 import type { IndexMapping } from '../../mappings';
 import type { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';

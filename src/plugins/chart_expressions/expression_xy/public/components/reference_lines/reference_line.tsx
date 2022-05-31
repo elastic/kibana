@@ -19,6 +19,7 @@ interface ReferenceLineProps {
   formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   axesMap: Record<'left' | 'right', boolean>;
   isHorizontal: boolean;
+  nextValue?: number;
 }
 
 export const ReferenceLine: FC<ReferenceLineProps> = ({
@@ -27,6 +28,7 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
   formatters,
   paddingMap,
   isHorizontal,
+  nextValue,
 }) => {
   const {
     yConfig: [yConfig],
@@ -46,7 +48,7 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
 
   return (
     <ReferenceLineAnnotations
-      config={{ id, ...yConfig }}
+      config={{ id, ...yConfig, nextValue }}
       paddingMap={paddingMap}
       axesMap={axesMap}
       formatter={formatter}

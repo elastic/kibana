@@ -7,9 +7,7 @@
 
 import React, { FC } from 'react';
 import type { Embeddable } from '@kbn/lens-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import {
@@ -25,16 +23,21 @@ import {
 } from '@elastic/eui';
 
 import { FlyoutBody } from './flyout_body';
+import type { LayerResult } from '../../../application/jobs/new_job/job_from_lens';
 
 interface Props {
+  layerResults: LayerResult[];
   embeddable: Embeddable;
-  data: DataPublicPluginStart;
   share: SharePluginStart;
-  lens: LensPublicStart;
   onClose: () => void;
 }
 
-export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable, data, share, lens }) => {
+export const LensLayerSelectionFlyout: FC<Props> = ({
+  onClose,
+  layerResults,
+  embeddable,
+  share,
+}) => {
   return (
     <>
       <EuiFlyoutHeader hasBorder>
@@ -57,10 +60,9 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable, data,
       <EuiFlyoutBody className="mlLensToJobFlyoutBody">
         <FlyoutBody
           onClose={onClose}
+          layerResults={layerResults}
           embeddable={embeddable}
-          data={data}
           share={share}
-          lens={lens}
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
