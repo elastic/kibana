@@ -74,10 +74,15 @@ export class AggsCommonService {
       indexPattern: IndexPattern,
       configStates?: CreateAggConfigParams[]
     ) => {
-      return new AggConfigs(indexPattern, configStates, {
-        typesRegistry: aggTypesStart,
-        aggExecutionContext,
-      });
+      return new AggConfigs(
+        indexPattern,
+        configStates,
+        {
+          typesRegistry: aggTypesStart,
+          aggExecutionContext,
+        },
+        getConfig
+      );
     };
 
     return {

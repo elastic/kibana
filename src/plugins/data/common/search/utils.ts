@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment';
-import type { AggTypesDependencies } from './aggs/agg_types';
+import { AggTypesDependencies } from '..';
 import type { IKibanaSearchResponse } from './types';
 
 /**
@@ -32,13 +32,12 @@ export const isPartialResponse = (response?: IKibanaSearchResponse) => {
 };
 
 export const getUserTimeZone = (
-  shouldDetectTimezone: boolean,
-  getConfig: AggTypesDependencies['getConfig']
+  getConfig: AggTypesDependencies['getConfig'],
+  shouldDetectTimezone: boolean = true
 ) => {
-  const configTimezone = getConfig<string>('dateFormat:tz');
-  const isDefaultTimezone = configTimezone === 'Browser';
+  const userTimeZone = getConfig<string>('dateFormat:tz');
 
-  if (isDefaultTimezone) {
+  if (userTimeZone === 'Browser') {
     if (!shouldDetectTimezone) {
       return 'UTC';
     }
@@ -50,5 +49,5 @@ export const getUserTimeZone = (
     return detectedTimezone || tzOffset;
   }
 
-  return configTimezone;
+  return userTimeZone;
 };

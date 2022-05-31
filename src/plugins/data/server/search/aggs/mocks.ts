@@ -59,12 +59,14 @@ export const searchAggsSetupMock = (): AggsSetup => ({
 const commonStartMock = (): AggsCommonStart => ({
   calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
   createAggConfigs: jest.fn().mockImplementation((indexPattern, configStates = [], schemas) => {
-    return new AggConfigs(indexPattern, configStates, {
-      typesRegistry: mockAggTypesRegistry(),
-      aggExecutionContext: {
-        getDefaultTimeZone: () => 'UTC',
+    return new AggConfigs(
+      indexPattern,
+      configStates,
+      {
+        typesRegistry: mockAggTypesRegistry(),
       },
-    });
+      jest.fn()
+    );
   }),
   types: mockAggTypesRegistry(),
 });

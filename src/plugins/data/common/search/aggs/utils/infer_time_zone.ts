@@ -7,12 +7,14 @@
  */
 
 import type { AggTypesDependencies, DataViewField, DataView } from '../../..';
+import { getUserTimeZone } from '../../utils';
 
 export function inferTimeZone(
   params: { field?: DataViewField | string; time_zone?: string },
   dataView: DataView,
   aggName: 'date_histogram' | 'date_range',
-  { getDefaultTimeZone }: AggTypesDependencies['aggExecutionContext']
+  getConfig: AggTypesDependencies['getConfig'],
+  { shouldDetectTimeZone }: AggTypesDependencies['aggExecutionContext'] = {}
 ) {
   let tz = params.time_zone;
 
@@ -25,7 +27,7 @@ export function inferTimeZone(
   }
 
   if (!tz) {
-    return getDefaultTimeZone();
+    return getUserTimeZone(getConfig, shouldDetectTimeZone);
   }
 
   return tz;

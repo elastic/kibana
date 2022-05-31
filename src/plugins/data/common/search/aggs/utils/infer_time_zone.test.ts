@@ -15,7 +15,7 @@ describe('inferTimeZone', () => {
       time_zone: 'CEST',
     };
     expect(
-      inferTimeZone(params, {} as DataView, 'date_histogram', { getDefaultTimeZone: () => 'UTC' })
+      inferTimeZone(params, {} as DataView, 'date_histogram', jest.fn().mockReturnValue('UTC'))
     ).toEqual('CEST');
   });
 
@@ -35,7 +35,7 @@ describe('inferTimeZone', () => {
           },
         } as unknown as DataView,
         'date_histogram',
-        { getDefaultTimeZone: () => 'CET' }
+        jest.fn().mockReturnValue('CET')
       )
     ).toEqual('UTC');
   });
@@ -60,14 +60,14 @@ describe('inferTimeZone', () => {
           },
         } as unknown as DataView,
         'date_histogram',
-        { getDefaultTimeZone: () => 'CET' }
+        jest.fn().mockReturnValue('CET')
       )
     ).toEqual('UTC');
   });
 
   it('reads time zone from config if not set to default', () => {
     expect(
-      inferTimeZone({}, {} as DataView, 'date_histogram', { getDefaultTimeZone: () => 'CET' })
+      inferTimeZone({}, {} as DataView, 'date_histogram', jest.fn().mockReturnValue('CET'))
     ).toEqual('CET');
   });
 });

@@ -33,7 +33,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.aggs).toHaveLength(1);
     });
 
@@ -58,7 +58,7 @@ describe('AggConfigs', () => {
       ];
 
       const spy = jest.spyOn(AggConfig, 'ensureIds');
-      new AggConfigs(indexPattern, configStates, { typesRegistry });
+      new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(spy).toHaveBeenCalledTimes(1);
       expect(spy.mock.calls[0]).toEqual([configStates]);
       spy.mockRestore();
@@ -80,7 +80,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.aggs).toHaveLength(2);
 
       ac.createAggConfig(
@@ -103,7 +103,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.aggs).toHaveLength(1);
 
       ac.createAggConfig({
@@ -124,7 +124,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.aggs).toHaveLength(1);
 
       ac.createAggConfig(
@@ -148,7 +148,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(() =>
         ac.createAggConfig({
           enabled: true,
@@ -173,7 +173,7 @@ describe('AggConfigs', () => {
         { type: 'percentiles', enabled: true, params: {}, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const sorted = ac.getRequestAggs();
       const aggs = keyBy(ac.aggs, (agg) => agg.type.name);
 
@@ -196,7 +196,7 @@ describe('AggConfigs', () => {
         { type: 'count', enabled: true, params: {}, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const sorted = ac.getResponseAggs();
       const aggs = keyBy(ac.aggs, (agg) => agg.type.name);
 
@@ -213,7 +213,7 @@ describe('AggConfigs', () => {
         { type: 'percentiles', enabled: true, params: { percents: [1, 2, 3] }, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const sorted = ac.getResponseAggs();
       const aggs = keyBy(ac.aggs, (agg) => agg.type.name);
 
@@ -234,7 +234,7 @@ describe('AggConfigs', () => {
         { id: '101', type: 'count', enabled: true, params: {}, schema: 'metric' },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.getResponseAggById('1')?.type.name).toEqual('terms');
       expect(ac.getResponseAggById('10')?.type.name).toEqual('date_histogram');
       expect(ac.getResponseAggById('101')?.type.name).toEqual('count');
@@ -253,7 +253,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       expect(ac.getResponseAggById('1')?.type.name).toEqual('terms');
       expect(ac.getResponseAggById('10')?.type.name).toEqual('date_histogram');
       expect(ac.getResponseAggById('101.1')?.type.name).toEqual('percentiles');
@@ -265,7 +265,7 @@ describe('AggConfigs', () => {
   describe('#toDsl', () => {
     it('uses the sorted aggs', () => {
       const configStates = [{ enabled: true, type: 'avg', params: { field: 'bytes' } }];
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const spy = jest.spyOn(AggConfigs.prototype, 'getRequestAggs');
       ac.toDsl();
       expect(spy).toHaveBeenCalledTimes(1);
@@ -279,7 +279,7 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'count', params: {} },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
 
       const aggInfos = ac.aggs.map((aggConfig) => {
         const football = {};
@@ -322,7 +322,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const dsl = ac.toDsl();
       const histo = ac.byName('date_histogram')[0];
       const count = ac.byName('count')[0];
@@ -347,7 +347,7 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       const dsl = ac.toDsl();
       const histo = ac.byName('date_histogram')[0];
       const metrics = ac.bySchemaName('metrics');
@@ -379,7 +379,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       ac.timeFields = ['@timestamp'];
       ac.timeRange = {
         from: '2021-05-05T00:00:00.000Z',
@@ -442,7 +442,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       ac.timeFields = ['timestamp'];
       ac.timeRange = {
         from: '2021-05-05T00:00:00.000Z',
@@ -469,7 +469,12 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, hierarchical: true });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry, hierarchical: true },
+        jest.fn()
+      );
       const topLevelDsl = ac.toDsl();
       const buckets = ac.bySchemaName('buckets');
       const metrics = ac.bySchemaName('metrics');
@@ -539,7 +544,12 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry, hierarchical: true });
+      const ac = new AggConfigs(
+        indexPattern,
+        configStates,
+        { typesRegistry, hierarchical: true },
+        jest.fn()
+      );
       const topLevelDsl = ac.toDsl()['2'];
 
       expect(Object.keys(topLevelDsl.aggs)).toContain('1');
@@ -586,7 +596,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       ac.timeFields = ['@timestamp'];
       ac.timeRange = {
         from: '2021-05-05T00:00:00.000Z',
@@ -728,7 +738,7 @@ describe('AggConfigs', () => {
         },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
       ac.timeFields = ['@timestamp'];
       ac.timeRange = {
         from: '2021-05-05T00:00:00.000Z',

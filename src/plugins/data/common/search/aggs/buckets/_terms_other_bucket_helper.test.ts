@@ -283,7 +283,7 @@ describe('Terms Agg Other bucket helper', () => {
   const typesRegistry = mockAggTypesRegistry();
 
   const getAggConfigs = (aggs: CreateAggConfigParams[] = []) => {
-    return new AggConfigs(indexPattern, [...aggs], { typesRegistry });
+    return new AggConfigs(indexPattern, [...aggs], { typesRegistry }, jest.fn());
   };
 
   describe('buildOtherBucketAgg', () => {

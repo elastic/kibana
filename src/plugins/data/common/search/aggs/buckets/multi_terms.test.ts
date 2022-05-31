@@ -66,7 +66,8 @@ describe('Multi Terms Agg', () => {
           type: BUCKET_TYPES.MULTI_TERMS,
         },
       ],
-      { typesRegistry: mockAggTypesRegistry() }
+      { typesRegistry: mockAggTypesRegistry() },
+      jest.fn()
     );
   };
 
@@ -186,7 +187,8 @@ describe('Multi Terms Agg', () => {
           type: BUCKET_TYPES.MULTI_TERMS,
         },
       ],
-      { typesRegistry: mockAggTypesRegistry() }
+      { typesRegistry: mockAggTypesRegistry() },
+      jest.fn()
     );
     const { [BUCKET_TYPES.MULTI_TERMS]: params } = aggConfigs.aggs[0].toDsl();
     expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });

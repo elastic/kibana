@@ -141,6 +141,7 @@ export const getDateHistogramBucketAgg = ({
         agg.params,
         agg.getIndexPattern(),
         'date_histogram',
+        getConfig,
         aggExecutionContext
       );
 
@@ -274,6 +275,7 @@ export const getDateHistogramBucketAgg = ({
             agg.params,
             agg.getIndexPattern(),
             'date_histogram',
+            getConfig,
             aggExecutionContext
           );
           output.params.time_zone = tz;
@@ -291,6 +293,7 @@ export const getDateHistogramBucketAgg = ({
             agg.params,
             agg.getIndexPattern(),
             'date_histogram',
+            getConfig,
             aggExecutionContext
           );
         },
@@ -321,6 +324,7 @@ export const getDateHistogramBucketAgg = ({
             agg.params,
             agg.getIndexPattern(),
             'date_histogram',
+            getConfig,
             aggExecutionContext
           );
 

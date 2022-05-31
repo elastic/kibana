@@ -32,7 +32,7 @@ describe('tabifyAggResponse Integration', () => {
       }),
     } as unknown as IndexPattern;
 
-    return new AggConfigs(indexPattern, aggs, { typesRegistry });
+    return new AggConfigs(indexPattern, aggs, { typesRegistry }, jest.fn());
   };
 
   const mockAggConfig = (agg: any): IAggConfig => agg as unknown as IAggConfig;

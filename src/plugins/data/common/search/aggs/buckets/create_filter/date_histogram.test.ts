@@ -49,7 +49,8 @@ describe('AggConfig Filters', () => {
         ],
         {
           typesRegistry: mockAggTypesRegistry(),
-        }
+        },
+        jest.fn()
       );
       const bucketKey = 1422579600000;
 

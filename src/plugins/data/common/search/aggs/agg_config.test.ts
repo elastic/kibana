@@ -65,7 +65,7 @@ describe('AggConfig', () => {
 
   describe('#toDsl', () => {
     it('calls #write()', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -80,7 +80,7 @@ describe('AggConfig', () => {
     });
 
     it('uses the type name as the agg name', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -95,7 +95,7 @@ describe('AggConfig', () => {
     });
 
     it('uses the params from #write() output as the agg params', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -125,7 +125,7 @@ describe('AggConfig', () => {
           params: {},
         },
       ];
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
 
       const histoConfig = ac.byName('date_histogram')[0];
       const avgConfig = ac.byName('avg')[0];
@@ -164,7 +164,7 @@ describe('AggConfig', () => {
           params: {},
         },
       ];
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
 
       const histoConfig = ac.byName('date_histogram')[0];
       const avgConfig = ac.byName('avg')[0];
@@ -280,8 +280,8 @@ describe('AggConfig', () => {
 
     testsIdentical.forEach((configState, index) => {
       it(`identical aggregations (${index})`, () => {
-        const ac1 = new AggConfigs(indexPattern, configState, { typesRegistry });
-        const ac2 = new AggConfigs(indexPattern, configState, { typesRegistry });
+        const ac1 = new AggConfigs(indexPattern, configState, { typesRegistry }, jest.fn());
+        const ac2 = new AggConfigs(indexPattern, configState, { typesRegistry }, jest.fn());
         expect(ac1.jsonDataEquals(ac2.aggs)).toBe(true);
       });
     });
@@ -321,8 +321,8 @@ describe('AggConfig', () => {
 
     testsIdenticalDifferentOrder.forEach((test, index) => {
       it(`identical aggregations (${index}) - init json is in different order`, () => {
-        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry });
-        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry });
+        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry }, jest.fn());
+        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry }, jest.fn());
         expect(ac1.jsonDataEquals(ac2.aggs)).toBe(true);
       });
     });
@@ -386,8 +386,8 @@ describe('AggConfig', () => {
 
     testsDifferent.forEach((test, index) => {
       it(`different aggregations (${index})`, () => {
-        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry });
-        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry });
+        const ac1 = new AggConfigs(indexPattern, test.config1, { typesRegistry }, jest.fn());
+        const ac2 = new AggConfigs(indexPattern, test.config2, { typesRegistry }, jest.fn());
         expect(ac1.jsonDataEquals(ac2.aggs)).toBe(false);
       });
     });
@@ -395,7 +395,7 @@ describe('AggConfig', () => {
 
   describe('#serialize', () => {
     it('includes the aggs id, params, type and schema', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       const configStates = {
         enabled: true,
         type: 'date_histogram',
@@ -426,8 +426,8 @@ describe('AggConfig', () => {
           params: {},
         },
       ];
-      const ac1 = new AggConfigs(indexPattern, configStates, { typesRegistry });
-      const ac2 = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac1 = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
+      const ac2 = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
 
       // this relies on the assumption that js-engines consistently loop over properties in insertion order.
       // most likely the case, but strictly speaking not guaranteed by the JS and JSON specifications.
@@ -455,7 +455,7 @@ describe('AggConfig', () => {
           params: { field: 'machine.os.keyword' },
         },
       ];
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
 
       expect(ac.aggs.map((agg) => agg.toSerializedFieldFormat())).toMatchInlineSnapshot(`
         Array [
@@ -517,7 +517,7 @@ describe('AggConfig', () => {
           },
         },
       ];
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
 
       expect(ac.aggs.map((agg) => agg.toSerializedFieldFormat())).toMatchInlineSnapshot(`
         Array [
@@ -540,7 +540,7 @@ describe('AggConfig', () => {
 
   describe('#toExpressionAst', () => {
     it('works with primitive param types', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       const configStates = {
         enabled: true,
         type: 'terms',
@@ -597,7 +597,7 @@ describe('AggConfig', () => {
     });
 
     it('creates a subexpression for params of type "agg"', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       const configStates = {
         type: 'terms',
         params: {
@@ -688,7 +688,7 @@ describe('AggConfig', () => {
           return Array.isArray(val) ? val.map(toExpression) : toExpression(val);
         };
 
-        ac = new AggConfigs(indexPattern, [], { typesRegistry });
+        ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       });
 
       it('creates a subexpression for param types other than "agg" which have specified toExpressionAst', () => {
@@ -775,7 +775,7 @@ describe('AggConfig', () => {
     });
 
     it('stringifies any other params which are an object', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       const configStates = {
         type: 'terms',
         params: {
@@ -790,7 +790,7 @@ describe('AggConfig', () => {
     });
 
     it('stringifies arrays only if they are objects', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       const configStates = {
         type: 'range',
         params: {
@@ -808,7 +808,7 @@ describe('AggConfig', () => {
     });
 
     it('does not stringify arrays which are not objects', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       const configStates = {
         type: 'percentiles',
         params: {
@@ -826,7 +826,7 @@ describe('AggConfig', () => {
     let aggConfig: AggConfig;
 
     beforeEach(() => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       aggConfig = ac.createAggConfig({ type: 'count' } as CreateAggConfigParams);
     });
 

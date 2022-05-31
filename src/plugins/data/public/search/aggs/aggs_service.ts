@@ -8,19 +8,20 @@
 
 import { Subscription } from 'rxjs';
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { calculateBounds, getUserTimeZone, TimeRange } from '../../../common';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { calculateBounds, TimeRange } from '../../../common';
 import {
+  AggConfigs,
   aggsRequiredUiSettings,
   AggsCommonStartDependencies,
   AggsCommonService,
   AggTypesDependencies,
 } from '../../../common/search/aggs';
-import { AggsSetup, AggsStart } from './types';
-import { IndexPatternsContract } from '../..';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { AggsSetup, AggsStart } from './types';
+import type { IndexPatternsContract } from '../..';
+import type { NowProviderInternalContract } from '../../now_provider';
 
 /**
  * Aggs needs synchronous access to specific uiSettings. Since settings can change
@@ -89,10 +90,10 @@ export class AggsService {
 
   public start({ fieldFormats, indexPatterns }: AggsStartDependencies): AggsStart {
     const aggExecutionContext: AggTypesDependencies['aggExecutionContext'] = {
-      getDefaultTimeZone: () => getUserTimeZone(true, this.getConfig!),
+      shouldDetectTimeZone: true,
     };
 
-    const { calculateAutoTimeExpression, types, createAggConfigs } = this.aggsCommonService.start({
+    const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
       getIndexPattern: indexPatterns.get,
       aggExecutionContext,
@@ -136,7 +137,14 @@ export class AggsService {
 
     return {
       calculateAutoTimeExpression,
-      createAggConfigs,
+      createAggConfigs: (indexPattern, configStates = []) => {
+        return new AggConfigs(
+          indexPattern,
+          configStates,
+          { typesRegistry, aggExecutionContext },
+          this.getConfig!
+        );
+      },
       types: typesRegistry,
     };
   }

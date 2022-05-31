@@ -127,9 +127,14 @@ describe('SearchSource', () => {
     test('sets the value for the property with AggConfigs', () => {
       const typesRegistry = mockAggTypesRegistry();
 
-      const ac = new AggConfigs(indexPattern3, [{ type: 'avg', params: { field: 'field1' } }], {
-        typesRegistry,
-      });
+      const ac = new AggConfigs(
+        indexPattern3,
+        [{ type: 'avg', params: { field: 'field1' } }],
+        {
+          typesRegistry,
+        },
+        jest.fn()
+      );
 
       searchSource.setField('aggs', ac);
       const request = searchSource.getSearchRequestBody();
@@ -1146,7 +1151,8 @@ describe('SearchSource', () => {
           ],
           {
             typesRegistry,
-          }
+          },
+          jest.fn()
         );
       }
 
@@ -1231,7 +1237,8 @@ describe('SearchSource', () => {
           ],
           {
             typesRegistry,
-          }
+          },
+          jest.fn()
         );
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1266,7 +1273,8 @@ describe('SearchSource', () => {
           ],
           {
             typesRegistry,
-          }
+          },
+          jest.fn()
         );
 
         searchSource = new SearchSource({}, searchSourceDependencies);

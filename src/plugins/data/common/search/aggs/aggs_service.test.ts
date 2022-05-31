@@ -23,9 +23,6 @@ describe('Aggs service', () => {
     calculateBounds: jest.fn(),
     getFieldFormatsStart: jest.fn(),
     getConfig: jest.fn(),
-    aggExecutionContext: {
-      browserTimezone: 'UTC',
-    },
   };
 
   beforeEach(() => {

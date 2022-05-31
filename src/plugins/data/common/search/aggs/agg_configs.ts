@@ -24,7 +24,7 @@ import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import { AggTypesDependencies, IndexPattern } from '../..';
+import { AggTypesDependencies, GetConfigFn, getUserTimeZone, IndexPattern } from '../..';
 import { TimeRange, getTime, calculateBounds } from '../..';
 import { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
@@ -83,12 +83,13 @@ export class AggConfigs {
   public timeFields?: string[];
   public forceNow?: Date;
   public aggs: IAggConfig[] = [];
-  public hierarchical: boolean;
+  public hierarchical?: boolean;
 
   constructor(
     public indexPattern: IndexPattern,
     configStates: CreateAggConfigParams[] = [],
-    private opts: AggConfigsOptions
+    private opts: AggConfigsOptions,
+    private getConfig: GetConfigFn
   ) {
     this.hierarchical = opts.hierarchical ?? false;
 
@@ -141,10 +142,15 @@ export class AggConfigs {
       return agg.enabled;
     };
 
-    return new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), {
-      ...this.opts,
-      hierarchical: this.hierarchical,
-    });
+    return new AggConfigs(
+      this.indexPattern,
+      this.aggs.filter(filterAggs),
+      {
+        ...this.opts,
+        hierarchical: this.hierarchical,
+      },
+      this.getConfig
+    );
   }
 
   createAggConfig = <T extends AggConfig = AggConfig>(
@@ -210,7 +216,7 @@ export class AggConfigs {
     const timeShifts = this.getTimeShifts();
     const hasMultipleTimeShifts = Object.keys(timeShifts).length > 1;
 
-    if (this.opts.hierarchical) {
+    if (this.hierarchical) {
       if (hasMultipleTimeShifts) {
         throw new Error('Multiple time shifts not supported for hierarchical metrics');
       }
@@ -247,7 +253,16 @@ export class AggConfigs {
       }
 
       if (hasMultipleTimeShifts) {
-        dslLvlCursor = insertTimeShiftSplit(this, config, timeShifts, dslLvlCursor);
+        const { shouldDetectTimeZone } = this.opts.aggExecutionContext ?? {};
+        const defaultTimeZone = getUserTimeZone(this.getConfig, shouldDetectTimeZone);
+
+        dslLvlCursor = insertTimeShiftSplit(
+          this,
+          config,
+          timeShifts,
+          dslLvlCursor,
+          defaultTimeZone
+        );
       }
 
       if (config.type.hasNoDsl) {
