@@ -158,7 +158,6 @@ export const SessionView = ({
     updatedAlertsStatus,
     fetchAlertStatus[0] ?? ''
   );
-  // console.log(dataLoaded && data.pages[0].events.length);
 
   useEffect(() => {
     if (newUpdatedAlertsStatus) {
