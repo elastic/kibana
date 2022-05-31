@@ -6,6 +6,7 @@ const { BuildkiteClient } = require('kibana-buildkite-library');
     const build = await client.triggerBuild('kibana-agent-packer-cache', {
       commit: 'HEAD',
       branch: 'main',
+      ignore_pipeline_branch_filters: true, // Required because of a Buildkite bug
     });
     console.log(`Triggered build: ${build.web_url}`);
     process.exit(0);
