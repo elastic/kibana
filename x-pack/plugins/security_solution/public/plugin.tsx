@@ -59,6 +59,7 @@ import { ExperimentalFeaturesService } from './common/experimental_features_serv
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
+import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
 import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
@@ -210,6 +211,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         view: 'package-policy-edit',
         Component: getLazyEndpointPolicyEditExtension(core, plugins),
       });
+
+      if (this.experimentalFeatures.policyResponseInFleetEnabled) {
+        registerExtension({
+          package: 'endpoint',
+          view: 'package-policy-response',
+          Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+        });
+      }
 
       registerExtension({
         package: 'endpoint',

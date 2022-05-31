@@ -221,6 +221,7 @@ export interface XYArgs extends DataLayerArgs {
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   orderBucketsBySum?: boolean;
+  showTooltip: boolean;
 }
 
 export interface LayeredXYArgs {
@@ -250,6 +251,7 @@ export interface LayeredXYArgs {
   markSizeRatio?: number;
   minTimeBarInterval?: string;
   orderBucketsBySum?: boolean;
+  showTooltip: boolean;
 }
 
 export interface XYProps {
@@ -281,6 +283,7 @@ export interface XYProps {
   splitRowAccessor?: ExpressionValueVisDimension | string;
   splitColumnAccessor?: ExpressionValueVisDimension | string;
   orderBucketsBySum?: boolean;
+  showTooltip: boolean;
 }
 
 export interface AnnotationLayerArgs {
