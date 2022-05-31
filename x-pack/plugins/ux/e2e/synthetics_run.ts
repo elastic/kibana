@@ -27,7 +27,7 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
 
       await syntheticsRunner.setup();
 
-      const fixturesDir = path.join(__dirname, '../e2e/fixtures');
+      const fixturesDir = path.join(__dirname, '../e2e/fixtures/');
 
       await syntheticsRunner.loadTestData(fixturesDir, [
         'rum_8.0.0',

@@ -57,9 +57,7 @@ export class SyntheticsRunner {
 
     const esArchiver = this.getService('esArchiver');
 
-    const promises = dataArchives.map((archive) =>
-      esArchiver.loadIfNeeded(e2eDir + '/rum_test_data')
-    );
+    const promises = dataArchives.map((archive) => esArchiver.loadIfNeeded(e2eDir + archive));
 
     await Promise.all([
       ...promises,
