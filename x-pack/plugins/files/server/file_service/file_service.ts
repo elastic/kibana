@@ -14,9 +14,6 @@ import {
   ListFilesArgs,
 } from './internal_file_service';
 
-// TODO: Add file kind registry
-// export interface FileServiceSetup {}
-
 /**
  * Public file service interface.
  */
