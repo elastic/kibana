@@ -221,19 +221,17 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
         <EuiFlyoutBody>
           <ValueListsForm onSuccess={handleUploadSuccess} onError={handleUploadError} />
           <EuiSpacer />
-          <EuiPanel hasBorder>
-            <EuiText size="s">
-              <h2>{i18n.TABLE_TITLE}</h2>
-            </EuiText>
-            <EuiBasicTable
-              data-test-subj="value-lists-table"
-              columns={columns}
-              items={tableItems}
-              loading={lists.loading}
-              onChange={handleTableChange}
-              pagination={pagination}
-            />
-          </EuiPanel>
+          <EuiText size="s">
+            <h2>{i18n.TABLE_TITLE}</h2>
+          </EuiText>
+          <EuiBasicTable
+            data-test-subj="value-lists-table"
+            columns={columns}
+            items={tableItems}
+            loading={lists.loading}
+            onChange={handleTableChange}
+            pagination={pagination}
+          />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiButton data-test-subj="value-lists-flyout-close-action" onClick={onClose}>
