@@ -33,14 +33,12 @@ export const CaseViewActivity = ({
   caseData,
   actionsNavigation,
   showAlertDetails,
-  updateCase,
   useFetchAlertData,
 }: {
   ruleDetailsNavigation?: CasesNavigation<string | null | undefined, 'configurable'>;
   caseData: Case;
   actionsNavigation?: CasesNavigation<string, 'configurable'>;
   showAlertDetails?: (alertId: string, index: string) => void;
-  updateCase: () => void;
   useFetchAlertData: UseFetchAlertData;
 }) => {
   const { userCanCrud } = useCasesContext();
@@ -111,10 +109,9 @@ export const CaseViewActivity = ({
 
   const handleUpdateCase = useCallback(
     (_newCase: Case) => {
-      updateCase();
-      fetchCaseUserActions();
+      queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
     },
-    [updateCase, fetchCaseUserActions]
+    [queryClient]
   );
 
   const onSubmitConnector = useCallback(
@@ -164,7 +161,7 @@ export const CaseViewActivity = ({
                     />
                   ) : null
                 }
-                updateCase={updateCase}
+                updateCase={handleUpdateCase}
                 useFetchAlertData={useFetchAlertData}
                 userCanCrud={userCanCrud}
               />

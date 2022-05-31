@@ -34,7 +34,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
     caseData,
     caseId,
-    fetchCase,
     onComponentInitialized,
     refreshRef,
     ruleDetailsNavigation,
@@ -87,7 +86,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           refreshRef.current = null;
         };
       }
-    }, [fetchCase, isLoading, refreshRef, handleRefresh]);
+    }, [isLoading, refreshRef, handleRefresh]);
 
     const onSubmitTitle = useCallback(
       (newTitle) =>
@@ -119,7 +118,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               caseData={caseData}
               actionsNavigation={actionsNavigation}
               showAlertDetails={showAlertDetails}
-              updateCase={fetchCase}
               useFetchAlertData={useFetchAlertData}
             />
           ),
@@ -149,7 +147,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         actionsNavigation,
         caseData,
         features.alerts.enabled,
-        fetchCase,
         ruleDetailsNavigation,
         showAlertDetails,
         useFetchAlertData,
