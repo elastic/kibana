@@ -15,11 +15,12 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../types';
-import { Loading } from '../../../../components';
-import { getStreamsForInputType, doesPackageHaveIntegrations } from '../../../../services';
+import type { PackageInfo, NewPackagePolicy, NewPackagePolicyInput } from '../../../../../types';
+import { Loading } from '../../../../../components';
+import { getStreamsForInputType, doesPackageHaveIntegrations } from '../../../../../services';
 
-import type { PackagePolicyValidationResults } from './services';
+import type { PackagePolicyValidationResults } from '../../services';
+
 import { PackagePolicyInputPanel } from './components';
 
 export const StepConfigurePackagePolicy: React.FunctionComponent<{
@@ -29,6 +30,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   updatePackagePolicy: (fields: Partial<NewPackagePolicy>) => void;
   validationResults: PackagePolicyValidationResults;
   submitAttempted: boolean;
+  noTopRule?: boolean;
 }> = ({
   packageInfo,
   showOnlyIntegration,
@@ -36,6 +38,7 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
   updatePackagePolicy,
   validationResults,
   submitAttempted,
+  noTopRule = false,
 }) => {
   const hasIntegrations = useMemo(() => doesPackageHaveIntegrations(packageInfo), [packageInfo]);
   const packagePolicyTemplates = useMemo(
@@ -47,12 +50,11 @@ export const StepConfigurePackagePolicy: React.FunctionComponent<{
         : packageInfo.policy_templates || [],
     [packageInfo.policy_templates, showOnlyIntegration]
   );
-
   // Configure inputs (and their streams)
   const renderConfigureInputs = () =>
     packagePolicyTemplates.length ? (
       <>
-        <EuiHorizontalRule margin="m" />
+        {!noTopRule && <EuiHorizontalRule margin="m" />}
         <EuiFlexGroup direction="column" gutterSize="none">
           {packagePolicyTemplates.map((policyTemplate) => {
             return (policyTemplate.inputs || []).map((packageInput) => {

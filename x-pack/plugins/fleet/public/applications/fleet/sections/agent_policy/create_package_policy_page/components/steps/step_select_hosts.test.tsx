@@ -8,17 +8,17 @@
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
 
-import type { TestRenderer } from '../../../../../../mock';
-import { createFleetTestRendererMock } from '../../../../../../mock';
+import type { TestRenderer } from '../../../../../../../mock';
+import { createFleetTestRendererMock } from '../../../../../../../mock';
 
-import { useGetAgentPolicies } from '../../../../hooks';
-import type { AgentPolicy, PackageInfo } from '../../../../types';
+import { useGetAgentPolicies } from '../../../../../hooks';
+import type { AgentPolicy, PackageInfo } from '../../../../../types';
 
 import { StepSelectHosts } from './step_select_hosts';
 
-jest.mock('../../../../hooks', () => {
+jest.mock('../../../../../hooks', () => {
   return {
-    ...jest.requireActual('../../../../hooks'),
+    ...jest.requireActual('../../../../../hooks'),
     useGetAgentPolicies: jest.fn(),
     useGetOutputs: jest.fn().mockResolvedValue({
       data: [],

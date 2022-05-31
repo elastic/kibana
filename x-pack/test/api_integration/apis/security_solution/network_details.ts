@@ -39,8 +39,8 @@ export default function ({ getService }: FtrProviderContext) {
           strategy: 'securitySolutionSearchStrategy',
         });
 
-        expect(body.networkDetails.source?.geo.continent_name).to.be('North America');
-        expect(body.networkDetails.source?.geo.location?.lat!).to.be(37.751);
+        expect(body.networkDetails.source?.geo.continent_name).to.eql(['North America']);
+        expect(body.networkDetails.source?.geo.location?.lat!).to.eql([37.751]);
         expect(body.networkDetails.host?.os?.platform).to.eql(['raspbian']);
       });
     });
