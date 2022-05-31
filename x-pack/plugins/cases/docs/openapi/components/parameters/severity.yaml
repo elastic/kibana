@@ -1,0 +1,10 @@
+in: query
+name: severity
+description: The severity of the case.
+schema:
+  type: string
+  enum:
+    - critical
+    - high
+    - low
+    - medium
