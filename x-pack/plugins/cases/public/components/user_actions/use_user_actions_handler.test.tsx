@@ -27,9 +27,6 @@ const clearDraftComment = jest.fn();
 const openLensModal = jest.fn();
 
 describe('useUserActionsHandler', () => {
-  const fetchUserActions = jest.fn();
-  const updateCase = jest.fn();
-
   beforeAll(() => {
     jest.useFakeTimers();
     jest.spyOn(global, 'setTimeout');
