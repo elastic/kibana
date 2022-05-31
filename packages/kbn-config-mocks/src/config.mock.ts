@@ -6,10 +6,18 @@
  * Side Public License, v 1.
  */
 
-export {
-  getEnvOptions,
-  rawConfigServiceMock,
-  configServiceMock,
-  configMock,
-  configDeprecationsMock,
-} from '@kbn/config-mocks';
+import type { Config } from '@kbn/config';
+
+export type ConfigMock = jest.Mocked<Config>;
+
+const createConfigMock = (): ConfigMock => ({
+  has: jest.fn(),
+  get: jest.fn(),
+  set: jest.fn(),
+  getFlattenedPaths: jest.fn(),
+  toRaw: jest.fn(),
+});
+
+export const configMock = {
+  create: createConfigMock,
+};
