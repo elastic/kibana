@@ -8,6 +8,7 @@
 
 import { Subject, Observable, firstValueFrom } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
+import type { Logger } from '@kbn/logging';
 import { CoreService } from '../../types';
 import {
   SavedObjectsClient,
@@ -40,7 +41,6 @@ import {
   SavedObjectsClientFactoryProvider,
   SavedObjectsClientWrapperFactory,
 } from './service/lib/scoped_client_provider';
-import { Logger } from '../logging';
 import { SavedObjectTypeRegistry, ISavedObjectTypeRegistry } from './saved_objects_type_registry';
 import { SavedObjectsSerializer } from './serialization';
 import { SavedObjectsExporter, ISavedObjectsExporter } from './export';

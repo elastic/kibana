@@ -36,6 +36,7 @@ import type {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import type { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   Setup as InspectorSetup,
   Start as InspectorStart,
@@ -89,6 +90,7 @@ import {
   setSpaces,
   setTheme,
   setExecutionContext,
+  setFieldFormats,
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 
@@ -136,6 +138,7 @@ export interface VisualizationsStartDeps {
   urlForwarding: UrlForwardingStart;
   usageCollection?: UsageCollectionStart;
   screenshotMode: ScreenshotModePluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 /**
@@ -359,6 +362,7 @@ export class VisualizationsPlugin
       spaces,
       savedObjectsTaggingOss,
       usageCollection,
+      fieldFormats,
     }: VisualizationsStartDeps
   ): VisualizationsStart {
     const types = this.types.start();
@@ -377,6 +381,7 @@ export class VisualizationsPlugin
     setOverlays(core.overlays);
     setExecutionContext(core.executionContext);
     setChrome(core.chrome);
+    setFieldFormats(fieldFormats);
 
     if (spaces) {
       setSpaces(spaces);

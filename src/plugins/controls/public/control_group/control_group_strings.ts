@@ -18,9 +18,14 @@ export const ControlGroupStrings = {
       defaultMessage: 'Controls',
     }),
   emptyState: {
+    getBadge: () =>
+      i18n.translate('controls.controlGroup.emptyState.badgeText', {
+        defaultMessage: 'New',
+      }),
     getCallToAction: () =>
       i18n.translate('controls.controlGroup.emptyState.callToAction', {
-        defaultMessage: 'Controls let you filter and interact with your dashboard data',
+        defaultMessage:
+          'Filtering your data just got better with Controls, letting you display only the data you want to explore.',
       }),
     getAddControlButtonTitle: () =>
       i18n.translate('controls.controlGroup.emptyState.addControlButtonTitle', {
@@ -44,6 +49,14 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.manageControl.editFlyoutTitle', {
         defaultMessage: 'Edit control',
       }),
+    getDataViewTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.dataViewTitle', {
+        defaultMessage: 'Data view',
+      }),
+    getFieldTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.fielditle', {
+        defaultMessage: 'Field',
+      }),
     getTitleInputTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.titleInputTitle', {
         defaultMessage: 'Label',
@@ -56,6 +69,10 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.manageControl.widthInputTitle', {
         defaultMessage: 'Minimum width',
       }),
+    getControlSettingsTitle: () =>
+      i18n.translate('controls.controlGroup.manageControl.controlSettingsTitle', {
+        defaultMessage: 'Additional settings',
+      }),
     getSaveChangesTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {
         defaultMessage: 'Save and close',
@@ -63,6 +80,14 @@ export const ControlGroupStrings = {
     getCancelTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.cancelTitle', {
         defaultMessage: 'Cancel',
+      }),
+    getSelectFieldMessage: () =>
+      i18n.translate('controls.controlGroup.manageControl.selectFieldMessage', {
+        defaultMessage: 'Please select a field',
+      }),
+    getSelectDataViewMessage: () =>
+      i18n.translate('controls.controlGroup.manageControl.selectDataViewMessage', {
+        defaultMessage: 'Please select a data view',
       }),
     getGrowSwitchTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.growSwitchTitle', {
