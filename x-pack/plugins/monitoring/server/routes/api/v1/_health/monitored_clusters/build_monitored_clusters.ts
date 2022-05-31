@@ -12,7 +12,7 @@ enum CollectionMode {
   Internal = 'internal-monitoring',
   Metricbeat7 = 'metricbeat-7',
   Metricbeat8 = 'metricbeat-8',
-  Unknown = 'unknowna',
+  Unknown = 'unknown',
 }
 
 enum MonitoredProduct {
@@ -72,7 +72,7 @@ const getCollectionMode = (index: string): CollectionMode => {
  *     "elasticsearch": {
  *       "9NXA8Ov5QCeWAalKIHWFJg": {
  *         "shard": {
- *           "Metricbeat 8": {
+ *           "metricbeat-8": {
  *             "index": ".ds-.monitoring-es-8-mb-2022.05.17-000001",
  *             "lastSeen": "2022-05-17T16:56:52.929Z"
  *           }
