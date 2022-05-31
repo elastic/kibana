@@ -18,7 +18,6 @@ import { CspNavigationItem } from '../../common/navigation/types';
 import { extractErrorMessage } from '../../../common/utils/helpers';
 import { useCspIntegration } from './use_csp_integration';
 import { CspPageTemplate } from '../../components/csp_page_template';
-import * as TEXT from './translations';
 
 const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
   [allNavigationItems.benchmarks, { ...allNavigationItems.rules, name }].filter(
@@ -48,13 +47,26 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
                 />
               </EuiButtonEmpty>
             </Link>
-            {TEXT.RULES}
+            <FormattedMessage
+              id="xpack.csp.rules.rulePageHeader.pageHeaderTitle"
+              defaultMessage="Rules - {integrationName}"
+              values={{
+                integrationName: integrationInfo.data?.name,
+              }}
+            />
           </EuiFlexGroup>
         ),
         description: integrationInfo.data && integrationInfo.data.package && (
-          <PageDescription
-            text={`${integrationInfo.data.package.title}, ${integrationInfo.data.name}`}
-          />
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="xpack.csp.rules.rulePageHeader.pageDescriptionTitle"
+              defaultMessage="{integrationType}, {agentPolicyName}"
+              values={{
+                integrationType: integrationInfo.data.package.title,
+                agentPolicyName: integrationInfo.data.name,
+              }}
+            />
+          </EuiTextColor>
         ),
       },
     }),
@@ -85,10 +97,6 @@ const extractErrorBodyMessage = (err: unknown) => {
   if (bodyError.is(err)) return err.body.message;
   return extractErrorMessage(err);
 };
-
-const PageDescription = ({ text }: { text: string }) => (
-  <EuiTextColor color="subdued">{text}</EuiTextColor>
-);
 
 const RulesErrorPrompt = ({ error }: { error: string }) => (
   <EuiEmptyPrompt
