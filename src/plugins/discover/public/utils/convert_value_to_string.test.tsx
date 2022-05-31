@@ -24,7 +24,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result.formattedString).toBe('"abcd1"');
+    expect(result.formattedString).toBe('abcd1');
   });
 
   it('should convert a text value to text', () => {
@@ -56,7 +56,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result.formattedString).toBe('"I\'m multiline\\n*&%$#@"');
+    expect(result.formattedString).toBe('"I\'m multiline\n*&%$#@"');
     expect(result.withFormula).toBe(false);
   });
 
@@ -137,7 +137,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result.formattedString).toBe('"John"');
+    expect(result.formattedString).toBe('John');
   });
 
   it('should convert a nested value to text', () => {
@@ -285,7 +285,7 @@ describe('convertValueToString', () => {
       },
     });
 
-    expect(result.formattedString).toBe('"elasticsearch", "wow"');
+    expect(result.formattedString).toBe('elasticsearch, wow');
   });
 
   it('should convert a runtime value to text', () => {
@@ -410,7 +410,7 @@ describe('convertValueToString', () => {
   it('should return a formatted name', () => {
     const result = convertNameToString('test');
 
-    expect(result.formattedString).toBe('"test"');
+    expect(result.formattedString).toBe('test');
     expect(result.withFormula).toBe(false);
   });
 

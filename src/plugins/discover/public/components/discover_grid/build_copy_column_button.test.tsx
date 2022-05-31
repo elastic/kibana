@@ -62,7 +62,7 @@ describe('Build a column button to copy to clipboard', () => {
     await wrapper.find(EuiButton).simulate('click');
 
     // first row out of 3 rows does not have a value
-    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('extension\n\n"jpg"\n"gif"');
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('extension\n\njpg\ngif');
 
     const {
       label: labelSource,

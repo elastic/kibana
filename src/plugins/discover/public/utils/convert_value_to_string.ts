@@ -61,8 +61,8 @@ export const convertValueToString = ({
         }
       );
 
-      if (typeof formattedValue === 'string' && cellHasFormulas(formattedValue)) {
-        withFormula = true;
+      if (typeof formattedValue === 'string') {
+        withFormula = withFormula || cellHasFormulas(formattedValue);
         return escapeFormattedValue(formattedValue);
       }
 
@@ -86,7 +86,7 @@ export const convertNameToString = (
 };
 
 const stringify = (val: object | string, disableMultiline: boolean) => {
-  // it will wrap "strings" with quotes
+  // it can wrap "strings" with quotes
   return disableMultiline ? JSON.stringify(val) : JSON.stringify(val, null, 2);
 };
 
