@@ -12,7 +12,7 @@ import { noop } from 'lodash';
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/utils';
 import { ConfigService, Env } from '@kbn/config';
-import { getEnvOptions } from '../config/mocks';
+import { getEnvOptions } from '@kbn/config-mocks';
 import { HttpService } from '.';
 import { HttpConfigType, config } from './http_config';
 import { httpServerMock } from './http_server.mocks';

@@ -10,8 +10,8 @@
 import { REPO_ROOT } from '@kbn/utils';
 import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
+import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
 
 import { firstValueFrom, from } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';

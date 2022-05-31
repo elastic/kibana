@@ -13,8 +13,8 @@ import { mockPackage, mockDiscover } from './plugins_service.test.mocks';
 import { join } from 'path';
 
 import { ConfigPath, ConfigService, Env } from '@kbn/config';
+import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
 import { PluginsService } from '../plugins_service';
-import { getEnvOptions, rawConfigServiceMock } from '../../config/mocks';
 import { BehaviorSubject, from } from 'rxjs';
 import { config } from '../plugins_config';
 import { loggingSystemMock } from '../../logging/logging_system.mock';

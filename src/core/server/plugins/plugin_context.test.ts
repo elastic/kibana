@@ -11,6 +11,7 @@ import { first } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
 import { fromRoot } from '@kbn/utils';
 import { Env } from '@kbn/config';
+import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 import {
   createPluginInitializerContext,
   createPluginPrebootSetupContext,
@@ -18,7 +19,6 @@ import {
 } from './plugin_context';
 import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '../config/mocks';
 import { PluginManifest, PluginType } from './types';
 import { Server } from '../server';
 import { schema, ByteSizeValue } from '@kbn/config-schema';

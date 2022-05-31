@@ -29,7 +29,7 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '@kbn/config';
-import { rawConfigServiceMock, getEnvOptions } from './config/mocks';
+import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { Server } from './server';
 
 import { loggingSystemMock } from './logging/logging_system.mock';

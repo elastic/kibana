@@ -15,7 +15,7 @@ import { REPO_ROOT } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
 import { ConfigPath, ConfigService, Env } from '@kbn/config';
 
-import { rawConfigServiceMock, getEnvOptions } from '../config/mocks';
+import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { coreMock } from '../mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { environmentServiceMock } from '../environment/environment_service.mock';

@@ -12,10 +12,10 @@ import { REPO_ROOT } from '@kbn/utils';
 import { schema } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
 
+import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { CoreContext } from '../core_context';
 import { coreMock } from '../mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { configServiceMock, getEnvOptions } from '../config/mocks';
 
 import { PluginWrapper } from './plugin';
 import { PluginManifest, PluginType } from './types';

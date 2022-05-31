@@ -26,7 +26,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { first, concatMap } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '@kbn/config';
-import { configServiceMock, getEnvOptions } from '../config/mocks';
+import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { CoreContext } from '../core_context';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServiceMock } from '../http/http_service.mock';

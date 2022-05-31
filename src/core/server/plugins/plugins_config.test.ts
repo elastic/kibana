@@ -8,7 +8,7 @@
 
 import { REPO_ROOT } from '@kbn/utils';
 import { Env } from '@kbn/config';
-import { getEnvOptions } from '../config/mocks';
+import { getEnvOptions } from '@kbn/config-mocks';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
 
 describe('PluginsConfig', () => {
