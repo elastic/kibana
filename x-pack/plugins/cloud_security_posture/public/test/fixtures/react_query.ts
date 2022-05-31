@@ -33,5 +33,16 @@ export const createReactQueryResponse = <TData = unknown, TError = unknown>({
     return { status, data: undefined, isSuccess: false, isLoading: true, isError: false };
   }
 
+  if (status === 'idle') {
+    return {
+      status,
+      data: undefined,
+      isSuccess: false,
+      isLoading: false,
+      isError: false,
+      isIdle: true,
+    };
+  }
+
   return { status };
 };

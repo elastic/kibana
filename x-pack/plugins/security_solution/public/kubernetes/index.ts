@@ -5,5 +5,15 @@
  * 2.0.
  */
 
-export const RULE_PASSED = `passed`;
-export const RULE_FAILED = `failed`;
+import { SecuritySubPlugin } from '../app/types';
+import { routes } from './routes';
+
+export class Kubernetes {
+  public setup() {}
+
+  public start(): SecuritySubPlugin {
+    return {
+      routes,
+    };
+  }
+}
