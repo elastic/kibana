@@ -17,10 +17,10 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       Appearance
     </h6>
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs css-h21dd6-euiSpacer-xs"
     />
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs css-h21dd6-euiSpacer-xs"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -30,7 +30,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -71,7 +71,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -95,7 +95,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -145,7 +145,9 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -157,7 +159,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -181,7 +183,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -211,7 +213,9 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -221,7 +225,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       </div>
     </div>
     <div
-      className="euiSpacer euiSpacer--m"
+      className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
     />
     <h6
       className="euiTitle euiTitle--xxxsmall euiTitle--uppercase"
@@ -229,10 +233,10 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
       Border
     </h6>
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs css-h21dd6-euiSpacer-xs"
     />
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs css-h21dd6-euiSpacer-xs"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -241,7 +245,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -282,7 +286,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -318,7 +322,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -359,7 +363,7 @@ exports[`Storyshots arguments/ContainerStyle extended 1`] = `
         className="euiFlexItem euiFlexItem--flexGrow1"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
           style={
             Object {
@@ -444,7 +448,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow2"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -485,7 +489,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow3"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -509,7 +513,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <select
-                className="euiSelect euiSelect--compressed"
+                className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                 id="generated-id"
                 onBlur={[Function]}
                 onChange={[Function]}
@@ -559,7 +563,9 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                 </span>
               </div>
             </div>
@@ -571,7 +577,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow3"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -595,7 +601,7 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
               className="euiFormControlLayout__childrenWrapper"
             >
               <select
-                className="euiSelect euiSelect--compressed"
+                className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                 id="generated-id"
                 onBlur={[Function]}
                 onChange={[Function]}
@@ -625,7 +631,9 @@ exports[`Storyshots arguments/ContainerStyle/components appearance form 1`] = `
                     className="euiFormControlLayoutCustomIcon__icon"
                     data-euiicon-type="arrowDown"
                     size="s"
-                  />
+                  >
+                    
+                  </span>
                 </span>
               </div>
             </div>
@@ -654,7 +662,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow2"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -695,7 +703,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow3"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -731,7 +739,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow2"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
       >
         <div
@@ -772,7 +780,7 @@ exports[`Storyshots arguments/ContainerStyle/components border form 1`] = `
       className="euiFlexItem euiFlexItem--flexGrow1"
     >
       <div
-        className="euiFormRow euiFormRow--compressed"
+        className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
         id="generated-id-row"
         style={
           Object {
@@ -855,10 +863,10 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       Appearance
     </h6>
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs css-h21dd6-euiSpacer-xs"
     />
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs css-h21dd6-euiSpacer-xs"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -868,7 +876,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -909,7 +917,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -933,7 +941,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -983,7 +991,9 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -995,7 +1005,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1019,7 +1029,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -1049,7 +1059,9 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
                       className="euiFormControlLayoutCustomIcon__icon"
                       data-euiicon-type="arrowDown"
                       size="s"
-                    />
+                    >
+                      
+                    </span>
                   </span>
                 </div>
               </div>
@@ -1059,7 +1071,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       </div>
     </div>
     <div
-      className="euiSpacer euiSpacer--m"
+      className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
     />
     <h6
       className="euiTitle euiTitle--xxxsmall euiTitle--uppercase"
@@ -1067,10 +1079,10 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
       Border
     </h6>
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs css-h21dd6-euiSpacer-xs"
     />
     <div
-      className="euiSpacer euiSpacer--xs"
+      className="euiSpacer euiSpacer--xs css-h21dd6-euiSpacer-xs"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -1079,7 +1091,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1120,7 +1132,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow3"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1156,7 +1168,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow2"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -1197,7 +1209,7 @@ exports[`Storyshots arguments/ContainerStyle/components extended template 1`] = 
         className="euiFlexItem euiFlexItem--flexGrow1"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
           style={
             Object {

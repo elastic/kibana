@@ -10,10 +10,10 @@ import path from 'path';
 
 import { safeLoad } from 'js-yaml';
 import { loggerMock } from '@kbn/logging-mocks';
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { createAppContextStartContractMock } from '../../../../mocks';
-import { appContextService } from '../../../../services';
+import { appContextService } from '../../..';
 import type { RegistryDataStream } from '../../../../types';
 import { processFields } from '../../fields/field';
 import type { Field } from '../../fields/field';
@@ -155,6 +155,27 @@ describe('EPM template', () => {
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(longWithIndexFalseMapping);
+  });
+
+  it('tests processing keyword field with doc_values false', () => {
+    const keywordWithIndexFalseYml = `
+- name: keywordIndexFalse
+  type: keyword
+  doc_values: false
+`;
+    const keywordWithIndexFalseMapping = {
+      properties: {
+        keywordIndexFalse: {
+          ignore_above: 1024,
+          type: 'keyword',
+          doc_values: false,
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(keywordWithIndexFalseYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(keywordWithIndexFalseMapping);
   });
 
   it('tests processing text field with multi fields', () => {
@@ -376,6 +397,34 @@ describe('EPM template', () => {
     const processedFields = processFields(fields);
     const mappings = generateMappings(processedFields);
     expect(mappings).toEqual(keywordWithMultiFieldsMapping);
+  });
+
+  it('tests processing wildcard field with multi fields with match_only_text type', () => {
+    const wildcardWithMultiFieldsLiteralYml = `
+- name: wildcardWithMultiFields
+  type: wildcard
+  multi_fields:
+    - name: text
+      type: match_only_text
+`;
+
+    const wildcardWithMultiFieldsMapping = {
+      properties: {
+        wildcardWithMultiFields: {
+          ignore_above: 1024,
+          type: 'wildcard',
+          fields: {
+            text: {
+              type: 'match_only_text',
+            },
+          },
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(wildcardWithMultiFieldsLiteralYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(wildcardWithMultiFieldsMapping);
   });
 
   it('tests processing object field with no other attributes', () => {

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import {
   AGENT_NAME,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../../common/elasticsearch_fieldnames';
-import { kqlQuery, rangeQuery } from '../../../../../observability/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import { ProcessorEvent } from '../../../../common/processor_event';
 import { Setup } from '../../../lib/helpers/setup_request';
@@ -21,6 +21,7 @@ import { ServiceGroup } from '../../../../common/service_groups';
 export async function getServicesFromErrorAndMetricDocuments({
   environment,
   setup,
+  probability,
   maxNumServices,
   kuery,
   start,
@@ -29,6 +30,7 @@ export async function getServicesFromErrorAndMetricDocuments({
 }: {
   setup: Setup;
   environment: string;
+  probability: number;
   maxNumServices: number;
   kuery: string;
   start: number;
@@ -56,21 +58,28 @@ export async function getServicesFromErrorAndMetricDocuments({
           },
         },
         aggs: {
-          services: {
-            terms: {
-              field: SERVICE_NAME,
-              size: maxNumServices,
+          sample: {
+            random_sampler: {
+              probability,
             },
             aggs: {
-              environments: {
+              services: {
                 terms: {
-                  field: SERVICE_ENVIRONMENT,
+                  field: SERVICE_NAME,
+                  size: maxNumServices,
                 },
-              },
-              latest: {
-                top_metrics: {
-                  metrics: [{ field: AGENT_NAME } as const],
-                  sort: { '@timestamp': 'desc' },
+                aggs: {
+                  environments: {
+                    terms: {
+                      field: SERVICE_ENVIRONMENT,
+                    },
+                  },
+                  latest: {
+                    top_metrics: {
+                      metrics: [{ field: AGENT_NAME } as const],
+                      sort: { '@timestamp': 'desc' },
+                    },
+                  },
                 },
               },
             },
@@ -81,7 +90,7 @@ export async function getServicesFromErrorAndMetricDocuments({
   );
 
   return (
-    response.aggregations?.services.buckets.map((bucket) => {
+    response.aggregations?.sample.services.buckets.map((bucket) => {
       return {
         serviceName: bucket.key as string,
         environments: bucket.environments.buckets.map(

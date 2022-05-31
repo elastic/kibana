@@ -14,6 +14,13 @@ export const RULE_AND_TIMELINE_FETCH_FAILURE = i18n.translate(
   }
 );
 
+export const RULE_EXECUTION_FETCH_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.ruleExecutionLogFailureDescription',
+  {
+    defaultMessage: 'Failed to fetch Rule Execution Events',
+  }
+);
+
 export const RULE_ADD_FAILURE = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.addRuleFailDescription',
   {
@@ -114,5 +121,12 @@ export const RULE_EXECUTION_EVENTS_FETCH_FAILURE = i18n.translate(
   'xpack.securitySolution.containers.detectionEngine.ruleExecutionEventsFetchFailDescription',
   {
     defaultMessage: 'Failed to fetch rule execution events',
+  }
+);
+
+export const INSTALLED_INTEGRATIONS_FETCH_FAILURE = i18n.translate(
+  'xpack.securitySolution.containers.detectionEngine.installedIntegrationsFetchFailDescription',
+  {
+    defaultMessage: 'Failed to fetch installed integrations',
   }
 );

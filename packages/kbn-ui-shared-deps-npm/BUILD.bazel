@@ -24,11 +24,9 @@ filegroup(
 
 NPM_MODULE_EXTRA_FILES = [
   "package.json",
-  "README.md"
 ]
 
 RUNTIME_DEPS = [
-  "//packages/elastic-datemath",
   "@npm//@babel/runtime",
   "@npm//@elastic/charts",
   "@npm//@elastic/eui",

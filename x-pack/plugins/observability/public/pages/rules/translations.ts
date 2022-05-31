@@ -125,6 +125,13 @@ export const RULES_LOAD_ERROR = i18n.translate('xpack.observability.rules.loadEr
   defaultMessage: 'Unable to load rules',
 });
 
+export const RULE_TAGS_LOAD_ERROR = i18n.translate(
+  'xpack.observability.rulesList.unableToLoadRuleTags',
+  {
+    defaultMessage: 'Unable to load rule tags',
+  }
+);
+
 export const RULES_SINGLE_TITLE = i18n.translate(
   'xpack.observability.rules.rulesTable.singleTitle',
   {
@@ -142,6 +149,13 @@ export const RULES_PLURAL_TITLE = i18n.translate(
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.observability.rules.searchPlaceholderTitle',
   { defaultMessage: 'Search' }
+);
+
+export const RULES_CHANGE_STATUS = i18n.translate(
+  'xpack.observability.rules.rulesTable.changeStatusAriaLabel',
+  {
+    defaultMessage: 'Change status',
+  }
 );
 
 export const confirmModalText = (

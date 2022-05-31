@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import type { LensMultiTable } from '../../../../lens/common';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { Datatable } from '@kbn/expressions-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import type { ChoroplethChartConfig, ChoroplethChartProps } from './types';
 import { RENDERER_ID } from './expression_renderer';
 
@@ -18,7 +20,7 @@ interface ChoroplethChartRender {
 
 export const getExpressionFunction = (): ExpressionFunctionDefinition<
   'lens_choropleth_chart',
-  LensMultiTable,
+  Datatable,
   Omit<ChoroplethChartConfig, 'layerType'>,
   ChoroplethChartRender
 > => ({
@@ -55,8 +57,33 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
       help: 'Value accessor identifies the value column',
     },
   },
-  inputTypes: ['lens_multitable'],
-  fn(data, args) {
+  inputTypes: ['datatable'],
+  fn(data, args, handlers) {
+    if (handlers?.inspectorAdapters?.tables) {
+      handlers.inspectorAdapters.tables.reset();
+      handlers.inspectorAdapters.tables.allowCsvExport = true;
+
+      const logTable = prepareLogTable(
+        data,
+        [
+          [
+            args.valueAccessor ? [args.valueAccessor] : undefined,
+            i18n.translate('xpack.maps.logDatatable.value', {
+              defaultMessage: 'Value',
+            }),
+          ],
+          [
+            args.regionAccessor ? [args.regionAccessor] : undefined,
+            i18n.translate('xpack.maps.logDatatable.region', {
+              defaultMessage: 'Region key',
+            }),
+          ],
+        ],
+        true
+      );
+
+      handlers.inspectorAdapters.tables.logDatatable('default', logTable);
+    }
     return {
       type: 'render',
       as: RENDERER_ID,
@@ -64,6 +91,6 @@ export const getExpressionFunction = (): ExpressionFunctionDefinition<
         data,
         args,
       },
-    } as ChoroplethChartRender;
+    };
   },
 });

@@ -9,8 +9,8 @@ import { act, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import uuid from 'uuid';
-import { getFoundExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/found_exception_list_item_schema.mock';
-import { getExceptionListItemSchemaMock } from '../../../../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getFoundExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/found_exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import {
   AppContextTestRender,
   createAppRootMockRenderer,
@@ -27,7 +27,7 @@ import {
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { cleanEventFilterToUpdate } from '../../../../event_filters/service/service_actions';
-import { EventFiltersApiClient } from '../../../../event_filters/service/event_filters_api_client';
+import { EventFiltersApiClient } from '../../../../event_filters/service/api_client';
 import { POLICY_ARTIFACT_FLYOUT_LABELS } from './translations';
 
 const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
@@ -38,8 +38,8 @@ const getDefaultQueryParameters = (customFilter: string | undefined = '') => ({
     namespace_type: ['agnostic'],
     page: MANAGEMENT_DEFAULT_PAGE + 1,
     per_page: MAX_ALLOWED_RESULTS,
-    sort_field: undefined,
-    sort_order: undefined,
+    sort_field: 'created_at',
+    sort_order: 'desc',
   },
 });
 const getEmptyList = () => ({

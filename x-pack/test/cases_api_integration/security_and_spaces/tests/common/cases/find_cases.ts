@@ -6,9 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import { CASES_URL } from '@kbn/cases-plugin/common/constants';
+import {
+  CaseResponse,
+  CaseSeverity,
+  CaseStatuses,
+  CommentType,
+} from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { CASES_URL } from '../../../../../../plugins/cases/common/constants';
 import {
   postCaseReq,
   postCommentUserReq,
@@ -23,11 +29,6 @@ import {
   updateCase,
   createComment,
 } from '../../../../common/lib/utils';
-import {
-  CaseResponse,
-  CaseStatuses,
-  CommentType,
-} from '../../../../../../plugins/cases/common/api';
 import {
   obsOnly,
   secOnly,
@@ -52,6 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   describe('find_cases', () => {
     describe('basic tests', () => {
@@ -117,6 +119,45 @@ export default ({ getService }: FtrProviderContext): void => {
           count_open_cases: 1,
           count_closed_cases: 1,
           count_in_progress_cases: 0,
+        });
+      });
+
+      it('filters by severity', async () => {
+        await createCase(supertest, postCaseReq);
+        const theCase = await createCase(supertest, postCaseReq);
+        const patchedCase = await updateCase({
+          supertest,
+          params: {
+            cases: [
+              {
+                id: theCase.id,
+                version: theCase.version,
+                severity: CaseSeverity.HIGH,
+              },
+            ],
+          },
+        });
+
+        const cases = await findCases({ supertest, query: { severity: CaseSeverity.HIGH } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 1,
+          cases: [patchedCase[0]],
+          count_open_cases: 1,
+        });
+      });
+
+      it('filters by severity (none found)', async () => {
+        await createCase(supertest, postCaseReq);
+        await createCase(supertest, postCaseReq);
+
+        const cases = await findCases({ supertest, query: { severity: CaseSeverity.CRITICAL } });
+
+        expect(cases).to.eql({
+          ...findCasesResp,
+          total: 0,
+          cases: [],
         });
       });
 
@@ -193,6 +234,46 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(cases.count_open_cases).to.eql(1);
         expect(cases.count_closed_cases).to.eql(1);
         expect(cases.count_in_progress_cases).to.eql(1);
+      });
+
+      it('returns the correct fields', async () => {
+        const postedCase = await createCase(supertest, postCaseReq);
+        const queryFields: Array<keyof CaseResponse | Array<keyof CaseResponse>> = [
+          'title',
+          ['title', 'description'],
+        ];
+
+        for (const fields of queryFields) {
+          const cases = await findCases({ supertest, query: { fields } });
+          const fieldsAsArray = Array.isArray(fields) ? fields : [fields];
+
+          const expectedValues = fieldsAsArray.reduce(
+            (theCase, field) => ({
+              ...theCase,
+              [field]: postedCase[field],
+            }),
+            {}
+          );
+
+          expect(cases).to.eql({
+            ...findCasesResp,
+            total: 1,
+            cases: [
+              {
+                id: postedCase.id,
+                version: postedCase.version,
+                external_service: postedCase.external_service,
+                owner: postedCase.owner,
+                connector: postedCase.connector,
+                comments: [],
+                totalAlerts: 0,
+                totalComment: 0,
+                ...expectedValues,
+              },
+            ],
+            count_open_cases: 1,
+          });
+        }
       });
 
       it('unhappy path - 400s when bad query supplied', async () => {
@@ -438,6 +519,60 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    describe('range queries', () => {
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      it('returns all cases without a range filter', async () => {
+        const EXPECTED_CASES = 3;
+        const cases = await findCases({ supertest });
+
+        expect(cases.total).to.be(EXPECTED_CASES);
+        expect(cases.count_open_cases).to.be(EXPECTED_CASES);
+        expect(cases.cases.length).to.be(EXPECTED_CASES);
+      });
+
+      it('respects the range parameters', async () => {
+        const queries = [
+          { expectedCases: 2, query: { from: '2022-03-16' } },
+          { expectedCases: 2, query: { to: '2022-03-21' } },
+          { expectedCases: 2, query: { from: '2022-03-15', to: '2022-03-21' } },
+        ];
+
+        for (const query of queries) {
+          const cases = await findCases({
+            supertest,
+            query: query.query,
+          });
+
+          expect(cases.total).to.be(query.expectedCases);
+          expect(cases.count_open_cases).to.be(query.expectedCases);
+          expect(cases.cases.length).to.be(query.expectedCases);
+        }
+      });
+
+      it('escapes correctly', async () => {
+        const cases = await findCases({
+          supertest,
+          query: { from: '2022-03-15T10:16:56.252Z', to: '2022-03-20T10:16:56.252' },
+        });
+
+        expect(cases.total).to.be(2);
+        expect(cases.count_open_cases).to.be(2);
+        expect(cases.cases.length).to.be(2);
+      });
+    });
+
     describe('rbac', () => {
       afterEach(async () => {
         await deleteAllCaseItems(es);
@@ -676,6 +811,89 @@ export default ({ getService }: FtrProviderContext): void => {
 
         // Only security solution cases are being returned
         ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
+      });
+
+      describe('range queries', () => {
+        before(async () => {
+          await kibanaServer.importExport.load(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            { space: 'space1' }
+          );
+        });
+
+        after(async () => {
+          await kibanaServer.importExport.unload(
+            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.2.0/cases_various_dates.json',
+            { space: 'space1' }
+          );
+          await deleteAllCaseItems(es);
+        });
+
+        it('should respect the owner filter when using range queries', async () => {
+          const res = await findCases({
+            supertest: supertestWithoutAuth,
+            query: {
+              from: '2022-03-15',
+              to: '2022-03-21',
+            },
+            auth: {
+              user: secOnly,
+              space: 'space1',
+            },
+          });
+
+          // Only security solution cases are being returned
+          ensureSavedObjectIsAuthorized(res.cases, 1, ['securitySolutionFixture']);
+        });
+      });
+
+      describe('RBAC query filter', () => {
+        it('should return the correct cases when trying to query filter by severity', async () => {
+          await Promise.all([
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsSec,
+                space: 'space1',
+              }
+            ),
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'securitySolutionFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsSec,
+                space: 'space1',
+              }
+            ),
+            createCase(
+              supertestWithoutAuth,
+              getPostCaseRequest({ owner: 'observabilityFixture', severity: CaseSeverity.HIGH }),
+              200,
+              {
+                user: obsOnly,
+                space: 'space1',
+              }
+            ),
+          ]);
+
+          // User with permissions only to security solution should get only the security solution cases
+          const res = await findCases({
+            supertest: supertestWithoutAuth,
+            query: {
+              severity: CaseSeverity.HIGH,
+            },
+            auth: {
+              user: secOnly,
+              space: 'space1',
+            },
+          });
+
+          // Only security solution cases are being returned
+          ensureSavedObjectIsAuthorized(res.cases, 2, ['securitySolutionFixture']);
+        });
       });
     });
   });

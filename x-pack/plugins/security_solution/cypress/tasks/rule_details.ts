@@ -32,10 +32,11 @@ import {
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
 export const enablesRule = () => {
-  cy.intercept('PATCH', '/api/detection_engine/rules/_bulk_update').as('bulk_update');
+  // Rules get enabled via _bulk_action endpoint
+  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
-  cy.wait('@bulk_update').then(({ response }) => {
+  cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
   });
 };
@@ -69,12 +70,7 @@ export const openExceptionFlyoutFromRuleSettings = () => {
 };
 
 export const addsExceptionFromRuleSettings = (exception: Exception) => {
-  cy.get(ADD_EXCEPTIONS_BTN).click();
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(LOADING_SPINNER).should('exist');
-  cy.get(LOADING_SPINNER).should('not.exist');
-  cy.get(FIELD_INPUT).should('be.visible');
+  openExceptionFlyoutFromRuleSettings();
   cy.get(FIELD_INPUT).type(`${exception.field}{enter}`);
   cy.get(OPERATOR_INPUT).type(`${exception.operator}{enter}`);
   exception.values.forEach((value) => {

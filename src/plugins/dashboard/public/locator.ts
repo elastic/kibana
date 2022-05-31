@@ -9,12 +9,17 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import { flow } from 'lodash';
 import { type Filter } from '@kbn/es-query';
-import type { TimeRange, Query, QueryState, RefreshInterval } from '../../data/public';
-import type { LocatorDefinition, LocatorPublic } from '../../share/public';
+import type {
+  TimeRange,
+  Query,
+  GlobalQueryStateFromUrl,
+  RefreshInterval,
+} from '@kbn/data-plugin/public';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { SavedDashboardPanel } from '../common/types';
 import type { RawDashboardState } from './types';
-import { setStateToKbnUrl } from '../../kibana_utils/public';
-import { ViewMode } from '../../embeddable/public';
 import { DashboardConstants } from './dashboard_constants';
 
 /**
@@ -155,7 +160,7 @@ export class DashboardAppLocatorDefinition implements LocatorDefinition<Dashboar
     const { isFilterPinned } = await import('@kbn/es-query');
 
     let path = `#/${hash}`;
-    path = setStateToKbnUrl<QueryState>(
+    path = setStateToKbnUrl<GlobalQueryStateFromUrl>(
       '_g',
       cleanEmptyKeys({
         time: params.timeRange,

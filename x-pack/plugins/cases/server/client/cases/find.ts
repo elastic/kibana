@@ -38,8 +38,10 @@ export const find = async (
   const { caseService, authorization, logger } = clientArgs;
 
   try {
+    const fields = asArray(params.fields);
+
     const queryParams = pipe(
-      excess(CasesFindRequestRt).decode(params),
+      excess(CasesFindRequestRt).decode({ ...params, fields }),
       fold(throwErrors(Boom.badRequest), identity)
     );
 
@@ -51,7 +53,10 @@ export const find = async (
       reporters: queryParams.reporters,
       sortByField: queryParams.sortField,
       status: queryParams.status,
+      severity: queryParams.severity,
       owner: queryParams.owner,
+      from: queryParams.from,
+      to: queryParams.to,
     };
 
     const statusStatsOptions = constructQueryOptions({
@@ -67,7 +72,7 @@ export const find = async (
           ...queryParams,
           ...caseQueryOptions,
           searchFields: asArray(queryParams.searchFields),
-          fields: includeFieldsRequiredForAuthentication(queryParams.fields),
+          fields: includeFieldsRequiredForAuthentication(fields),
         },
       }),
       caseService.getCaseStatusStats({

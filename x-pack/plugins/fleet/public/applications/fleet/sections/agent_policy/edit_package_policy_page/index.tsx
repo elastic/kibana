@@ -47,24 +47,26 @@ import {
   useBreadcrumbs as useIntegrationsBreadcrumbs,
   useGetOnePackagePolicy,
 } from '../../../../integrations/hooks';
-import { Loading, Error, ExtensionWrapper } from '../../../components';
+import { Loading, Error, ExtensionWrapper, EuiButtonWithTooltip } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
-import { CreatePackagePolicyPageLayout } from '../create_package_policy_page/components';
-import type { PackagePolicyValidationResults } from '../create_package_policy_page/services';
-import { validatePackagePolicy, validationHasErrors } from '../create_package_policy_page/services';
+import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
+import type { PackagePolicyValidationResults } from '../create_package_policy_page/single_page_layout/services';
+import {
+  validatePackagePolicy,
+  validationHasErrors,
+} from '../create_package_policy_page/single_page_layout/services';
 import type {
   PackagePolicyFormState,
   EditPackagePolicyFrom,
 } from '../create_package_policy_page/types';
-import { StepConfigurePackagePolicy } from '../create_package_policy_page/step_configure_package';
-import { StepDefinePackagePolicy } from '../create_package_policy_page/step_define_package_policy';
+import { StepConfigurePackagePolicy } from '../create_package_policy_page/single_page_layout/step_configure_package';
+import { StepDefinePackagePolicy } from '../create_package_policy_page/single_page_layout/step_define_package_policy';
 import type {
   GetOnePackagePolicyResponse,
   UpgradePackagePolicyDryRunResponse,
 } from '../../../../../../common/types/rest_spec';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
 import { pkgKeyFromPackageInfo } from '../../../services';
-import { EuiButtonWithTooltip } from '../../../../integrations/sections/epm/screens/detail';
 
 import { fixApmDurationVars, hasUpgradeAvailable } from './utils';
 
@@ -566,7 +568,7 @@ export const EditPackagePolicyForm = memo<{
   );
 
   return (
-    <CreatePackagePolicyPageLayout {...layoutProps} data-test-subj="editPackagePolicy">
+    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="editPackagePolicy">
       <EuiErrorBoundary>
         {isLoadingData ? (
           <Loading />
@@ -680,7 +682,7 @@ export const EditPackagePolicyForm = memo<{
           </>
         )}
       </EuiErrorBoundary>
-    </CreatePackagePolicyPageLayout>
+    </CreatePackagePolicySinglePageLayout>
   );
 });
 

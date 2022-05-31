@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { create as createHandlebars, HelperDelegate, HelperOptions } from 'handlebars';
+import Handlebars from '@kbn/handlebars';
 import { encode, RisonValue } from 'rison-node';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import moment, { Moment } from 'moment';
 import numeral from '@elastic/numeral';
-import { url } from '../../../../../../src/plugins/kibana_utils/public';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
-const handlebars = createHandlebars();
+const handlebars = Handlebars.create();
 
 function createSerializationHelper(
   fnName: string,
   serializeFn: (value: unknown) => string
-): HelperDelegate {
+): Handlebars.HelperDelegate {
   return (...args) => {
-    const { hash } = args.slice(-1)[0] as HelperOptions;
+    const { hash } = args.slice(-1)[0] as Handlebars.HelperOptions;
     const hasHash = Object.keys(hash).length > 0;
     const hasValues = args.length > 1;
     if (hasHash && hasValues) {

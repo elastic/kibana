@@ -11,12 +11,12 @@ import { stringify } from 'querystring';
 import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/utils';
+import { Logger } from '@kbn/logging';
 
 import { IRouter, IBasePath, IKibanaResponse, KibanaResponseFactory, KibanaRequest } from '../http';
 import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';
 import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
 import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
 import { registerBundleRoutes } from './bundle_routes';
 import { UiPlugins } from '../plugins';
 
@@ -89,7 +89,8 @@ export class CoreApp {
     const resources = coreSetup.httpResources.createRegistrar(router);
 
     router.get({ path: '/', validate: false }, async (context, req, res) => {
-      const defaultRoute = await context.core.uiSettings.client.get<string>('defaultRoute');
+      const { uiSettings } = await context.core;
+      const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
       const basePath = httpSetup.basePath.get(req);
       const url = `${basePath}${defaultRoute}`;
 

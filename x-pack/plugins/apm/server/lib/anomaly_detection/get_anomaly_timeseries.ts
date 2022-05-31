@@ -7,7 +7,9 @@
 
 import type { Logger } from '@kbn/logging';
 import { compact, keyBy } from 'lodash';
-import { rangeQuery } from '../../../../observability/server';
+import { rangeQuery } from '@kbn/observability-plugin/server';
+import { parseInterval } from '@kbn/data-plugin/common';
+import { Environment } from '../../../common/environment_rt';
 import { apmMlAnomalyQuery } from './apm_ml_anomaly_query';
 import {
   ApmMlDetectorType,
@@ -29,11 +31,13 @@ export async function getAnomalyTimeseries({
   end,
   logger,
   mlSetup,
+  environment: preferredEnvironment,
 }: {
   serviceName: string;
   transactionType: string;
   start: number;
   end: number;
+  environment: Environment;
   logger: Logger;
   mlSetup: Required<Setup>['ml'];
 }): Promise<ServiceAnomalyTimeseries[]> {
@@ -41,16 +45,30 @@ export async function getAnomalyTimeseries({
     return [];
   }
 
-  const { intervalString } = getAnomalyResultBucketSize({
-    start,
-    end,
-  });
-
   const mlJobs = await getMlJobsWithAPMGroup(mlSetup.anomalyDetectors);
 
   if (!mlJobs.length) {
     return [];
   }
+
+  // If multiple ML jobs exist
+  // find the first job with valid running datafeed that matches the preferred environment
+  const preferredBucketSpan = mlJobs.find(
+    (j) =>
+      j.datafeedState !== undefined && j.environment === preferredEnvironment
+  )?.bucketSpan;
+
+  // If the calculated bucketSize is smaller than the bucket span interval,
+  // use the original job's bucket_span
+  const minBucketSize = preferredBucketSpan
+    ? parseInterval(preferredBucketSpan)?.asSeconds()
+    : undefined;
+
+  const { intervalString } = getAnomalyResultBucketSize({
+    start,
+    end,
+    minBucketSize,
+  });
 
   const anomaliesResponse = await anomalySearch(
     mlSetup.mlSystem.mlAnomalySearch,

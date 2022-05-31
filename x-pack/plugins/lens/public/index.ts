@@ -11,7 +11,14 @@ export type {
   EmbeddableComponentProps,
   TypedLensByValueInput,
 } from './embeddable/embeddable_component';
-export type { XYState } from './xy_visualization/types';
+export type {
+  XYState,
+  XYReferenceLineLayerConfig,
+  XYLayerConfig,
+  ValidLayer,
+  XYDataLayerConfig,
+  XYAnnotationLayerConfig,
+} from './xy_visualization/types';
 export type {
   DatasourcePublicAPI,
   DataType,
@@ -22,15 +29,7 @@ export type {
   VisualizationSuggestion,
 } from './types';
 export type {
-  AxesSettingsConfig,
-  XYLayerConfig,
-  LegendConfig,
-  SeriesType,
-  YAxisMode,
-  XYCurveType,
-  YConfig,
-} from '../common/expressions';
-export type {
+  MetricState,
   ValueLabelConfig,
   PieVisualizationState,
   PieLayerState,
@@ -58,6 +57,7 @@ export type {
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
@@ -69,8 +69,45 @@ export type {
   OverallSumIndexPatternColumn,
   FormulaPublicApi,
   StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
+  IndexPatternLayer,
 } from './indexpattern_datasource/types';
-export type { LensEmbeddableInput } from './embeddable';
+export type {
+  XYArgs,
+  ExtendedYConfig,
+  XYRender,
+  LayerType,
+  YAxisMode,
+  LineStyle,
+  FillStyle,
+  SeriesType,
+  YScaleType,
+  XScaleType,
+  AxisConfig,
+  XYCurveType,
+  XYChartProps,
+  LegendConfig,
+  IconPosition,
+  ExtendedYConfigResult,
+  DataLayerArgs,
+  ValueLabelMode,
+  AxisExtentMode,
+  DataLayerConfig,
+  FittingFunction,
+  AxisExtentConfig,
+  LegendConfigResult,
+  AxesSettingsConfig,
+  GridlinesConfigResult,
+  TickLabelsConfigResult,
+  AxisExtentConfigResult,
+  ReferenceLineLayerArgs,
+  LabelsOrientationConfig,
+  ReferenceLineLayerConfig,
+  LabelsOrientationConfigResult,
+  AxisTitlesVisibilityConfigResult,
+} from '@kbn/expression-xy-plugin/common';
+export type { LensEmbeddableInput, LensSavedObjectAttributes, Embeddable } from './embeddable';
+
 export { layerTypes } from '../common';
 
 export type { LensPublicStart, LensPublicSetup } from './plugin';

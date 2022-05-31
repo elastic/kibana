@@ -11,6 +11,8 @@
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
+import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
+import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import {
   DATA_VIEW_SAVED_OBJECT_TYPE,
   DEFAULT_ASSETS_TO_IGNORE,
@@ -34,9 +36,7 @@ import {
   DataViewFieldMap,
   TypeMeta,
 } from '../types';
-import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '../../../field_formats/common/';
-import { META_FIELDS, SavedObject } from '../../common';
-import { SavedObjectNotFound } from '../../../kibana_utils/common';
+import { META_FIELDS, SavedObject } from '..';
 import { DataViewMissingIndices } from '../lib';
 import { findByTitle } from '../utils';
 import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../errors';
@@ -113,7 +113,17 @@ export class DataViewsService {
   private savedObjectsCache?: Array<SavedObject<IndexPatternSavedObjectAttrs>> | null;
   private apiClient: IDataViewsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
+  /**
+   *  Handler for service notifications
+   * @param toastInputFields notification content in toast format
+   * @param key used to indicate uniqueness of the notification
+   */
   private onNotification: OnNotification;
+  /*
+   *   Handler for service errors
+   * @param error notification content in toast format
+   * @param key used to indicate uniqueness of the error
+   */
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
   public getCanSave: () => Promise<boolean>;
@@ -333,15 +343,22 @@ export class DataViewsService {
       indexPattern.fields.replaceAll(fieldsWithSavedAttrs);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification({ title: err.message, color: 'danger', iconType: 'alert' });
+        this.onNotification(
+          { title: err.message, color: 'danger', iconType: 'alert' },
+          `refreshFields:${indexPattern.title}`
+        );
       }
 
-      this.onError(err, {
-        title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-          values: { id: indexPattern.id, title: indexPattern.title },
-        }),
-      });
+      this.onError(
+        err,
+        {
+          title: i18n.translate('dataViews.fetchFieldErrorTitle', {
+            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+            values: { id: indexPattern.id, title: indexPattern.title },
+          }),
+        },
+        indexPattern.title
+      );
     }
   };
 
@@ -378,16 +395,23 @@ export class DataViewsService {
       return this.fieldArrayToMap(updatedFieldList, fieldAttrs);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification({ title: err.message, color: 'danger', iconType: 'alert' });
+        this.onNotification(
+          { title: err.message, color: 'danger', iconType: 'alert' },
+          `refreshFieldSpecMap:${title}`
+        );
         return {};
       }
 
-      this.onError(err, {
-        title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-          defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-          values: { id, title },
-        }),
-      });
+      this.onError(
+        err,
+        {
+          title: i18n.translate('dataViews.fetchFieldErrorTitle', {
+            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+            values: { id, title },
+          }),
+        },
+        title
+      );
       throw err;
     }
   };
@@ -530,18 +554,25 @@ export class DataViewsService {
       }
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
-        this.onNotification({
-          title: err.message,
-          color: 'danger',
-          iconType: 'alert',
-        });
+        this.onNotification(
+          {
+            title: err.message,
+            color: 'danger',
+            iconType: 'alert',
+          },
+          `initFromSavedObject:${title}`
+        );
       } else {
-        this.onError(err, {
-          title: i18n.translate('dataViews.fetchFieldErrorTitle', {
-            defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
-            values: { id: savedObject.id, title },
-          }),
-        });
+        this.onError(
+          err,
+          {
+            title: i18n.translate('dataViews.fetchFieldErrorTitle', {
+              defaultMessage: 'Error fetching fields for data view {title} (ID: {id})',
+              values: { id: savedObject.id, title },
+            }),
+          },
+          title || ''
+        );
       }
     }
 
@@ -718,7 +749,10 @@ export class DataViewsService {
                 'Unable to write data view! Refresh the page to get the most up to date changes for this data view.',
             });
 
-            this.onNotification({ title, color: 'danger' });
+            this.onNotification(
+              { title, color: 'danger' },
+              `updateSavedObject:${indexPattern.title}`
+            );
             throw err;
           }
 

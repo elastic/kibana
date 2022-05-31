@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
+import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { buildFilter, FILTERS } from '@kbn/es-query';
 import { KibanaField, KibanaFilter } from './kibana_context_type';
 import { IndexPattern } from '../..';
@@ -19,14 +19,14 @@ interface Arguments {
 }
 
 export type ExpressionFunctionPhraseFilter = ExpressionFunctionDefinition<
-  'rangeFilter',
+  'phraseFilter',
   null,
   Arguments,
   KibanaFilter
 >;
 
 export const phraseFilterFunction: ExpressionFunctionPhraseFilter = {
-  name: 'rangeFilter',
+  name: 'phraseFilter',
   type: 'kibana_filter',
   inputTypes: ['null'],
   help: i18n.translate('data.search.functions.phraseFilter.help', {

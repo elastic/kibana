@@ -8,16 +8,16 @@
 
 import React from 'react';
 import { Subscription } from 'rxjs';
+import {
+  CalloutProps,
+  ControlGroupContainer,
+  LazyControlsCallout,
+} from '@kbn/controls-plugin/public';
 import { ViewMode } from '../../../services/embeddable';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGrid } from '../grid';
 import { context } from '../../../services/kibana_react';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import {
-  CalloutProps,
-  ControlGroupContainer,
-  LazyControlsCallout,
-} from '../../../../../controls/public';
 import { withSuspense } from '../../../services/presentation_util';
 
 export interface DashboardViewportProps {
@@ -117,7 +117,15 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
                 }}
               />
             ) : null}
-            <div className="dshDashboardViewport-controls" ref={this.controlsRoot} />
+
+            <div
+              className={
+                controlGroup && controlGroup.getPanelCount() > 0
+                  ? 'dshDashboardViewport-controls'
+                  : ''
+              }
+              ref={this.controlsRoot}
+            />
           </>
         ) : null}
         <div

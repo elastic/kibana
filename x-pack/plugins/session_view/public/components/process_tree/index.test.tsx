@@ -6,20 +6,26 @@
  */
 
 import React from 'react';
-import { mockData } from '../../../common/mocks/constants/session_view_process.mock';
+import {
+  mockData,
+  nullMockData,
+  deepNullMockData,
+} from '../../../common/mocks/constants/session_view_process.mock';
 import { Process } from '../../../common/types/process_tree';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import { ProcessImpl } from './hooks';
-import { ProcessTreeDeps, ProcessTree } from './index';
+import { ProcessTreeDeps, ProcessTree } from '.';
+import { useDateFormat } from '../../hooks';
+
+jest.mock('../../hooks/use_date_format');
+const mockUseDateFormat = useDateFormat as jest.Mock;
 
 describe('ProcessTree component', () => {
   let render: () => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let mockedContext: AppContextTestRender;
-  const sessionLeader = mockData[0].events[0];
-  const sessionLeaderVerboseTest = mockData[0].events[3];
+  const sessionLeader = mockData[0].events![0];
   const props: ProcessTreeDeps = {
-    sessionEntityId: sessionLeader.process.entity_id,
+    sessionEntityId: sessionLeader.process!.entity_id!,
     data: mockData,
     isFetching: false,
     fetchNextPage: jest.fn(),
@@ -28,11 +34,12 @@ describe('ProcessTree component', () => {
     hasPreviousPage: false,
     onProcessSelected: jest.fn(),
     updatedAlertsStatus: {},
-    handleOnAlertDetailsClosed: jest.fn(),
+    onShowAlertDetails: jest.fn(),
   };
 
   beforeEach(() => {
     mockedContext = createAppRootMockRenderer();
+    mockUseDateFormat.mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   });
 
   describe('When ProcessTree is mounted', () => {
@@ -42,13 +49,41 @@ describe('ProcessTree component', () => {
       expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
     });
 
+    it('should not crash given a valid sessionEntityId and data with empty object', () => {
+      renderResult = mockedContext.render(<ProcessTree {...props} data={[{}]} />);
+      expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
+      expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
+    });
+
+    it('should not crash given a valid sessionEntityId and data with empty events', () => {
+      renderResult = mockedContext.render(<ProcessTree {...props} data={[{ events: [{}] }]} />);
+      expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
+      expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
+    });
+
+    it('should not crash given a valid sessionEntityId and data with null fields', () => {
+      renderResult = mockedContext.render(<ProcessTree {...props} data={nullMockData} />);
+      expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
+      expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
+    });
+
+    it('should not crash given a valid sessionEntityId and data with deep nested null fields', () => {
+      renderResult = mockedContext.render(<ProcessTree {...props} data={deepNullMockData} />);
+      expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
+      expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
+    });
+
     it('should auto select jumpToEvent when it exists and without selectedProcess', () => {
-      const jumpToEvent = mockData[0].events[2];
+      const jumpToEvent = mockData[0].events![2];
       const onProcessSelected = jest.fn((process: Process | null) => {
-        expect(process?.id).toBe(jumpToEvent.process.entity_id);
+        expect(process?.id).toBe(jumpToEvent.process!.entity_id!);
       });
       renderResult = mockedContext.render(
-        <ProcessTree {...props} jumpToEvent={jumpToEvent} onProcessSelected={onProcessSelected} />
+        <ProcessTree
+          {...props}
+          jumpToEntityId={jumpToEvent?.process?.entity_id}
+          onProcessSelected={onProcessSelected}
+        />
       );
       expect(renderResult.queryByTestId('sessionView:sessionViewProcessTree')).toBeTruthy();
       expect(renderResult.queryAllByTestId('sessionView:processTreeNode')).toBeTruthy();
@@ -58,7 +93,7 @@ describe('ProcessTree component', () => {
 
     it('should auto select session leader without selectedProcess', () => {
       const onProcessSelected = jest.fn((process: Process | null) => {
-        expect(process?.id).toBe(sessionLeader.process.entity_id);
+        expect(process?.id).toBe(sessionLeader.process!.entity_id!);
       });
       renderResult = mockedContext.render(
         <ProcessTree {...props} onProcessSelected={onProcessSelected} />
@@ -70,50 +105,13 @@ describe('ProcessTree component', () => {
     });
 
     it('When Verbose mode is OFF, it should not show all childrens', () => {
-      renderResult = mockedContext.render(<ProcessTree {...props} verboseModeOn={false} />);
+      renderResult = mockedContext.render(<ProcessTree {...props} verboseMode={false} />);
       expect(renderResult.queryByText('cat')).toBeFalsy();
-
-      const selectionArea = renderResult.queryAllByTestId('sessionView:processTreeNode');
-      const result = selectionArea.map((a) => a?.getAttribute('data-id'));
-
-      expect(result.includes(sessionLeader.process.entity_id)).toBeTruthy();
-      expect(result.includes(sessionLeaderVerboseTest.process.entity_id)).toBeFalsy();
     });
 
     it('When Verbose mode is ON, it should show all childrens', () => {
-      renderResult = mockedContext.render(<ProcessTree {...props} verboseModeOn={true} />);
+      renderResult = mockedContext.render(<ProcessTree {...props} verboseMode={true} />);
       expect(renderResult.queryByText('cat')).toBeTruthy();
-
-      const selectionArea = renderResult.queryAllByTestId('sessionView:processTreeNode');
-      const result = selectionArea.map((a) => a?.getAttribute('data-id'));
-
-      expect(result.includes(sessionLeader.process.entity_id)).toBeTruthy();
-      expect(result.includes(sessionLeaderVerboseTest.process.entity_id)).toBeTruthy();
-    });
-
-    it('should insert a DOM element used to highlight a process when selectedProcess is set', () => {
-      const mockSelectedProcess = new ProcessImpl(mockData[0].events[0].process.entity_id);
-
-      renderResult = mockedContext.render(
-        <ProcessTree {...props} selectedProcess={mockSelectedProcess} />
-      );
-
-      expect(
-        renderResult
-          .queryByTestId('sessionView:processTreeSelectionArea')
-          ?.parentElement?.getAttribute('data-id')
-      ).toEqual(mockSelectedProcess.id);
-
-      // change the selected process
-      const mockSelectedProcess2 = new ProcessImpl(mockData[0].events[1].process.entity_id);
-
-      renderResult.rerender(<ProcessTree {...props} selectedProcess={mockSelectedProcess2} />);
-
-      expect(
-        renderResult
-          .queryByTestId('sessionView:processTreeSelectionArea')
-          ?.parentElement?.getAttribute('data-id')
-      ).toEqual(mockSelectedProcess2.id);
     });
   });
 });

@@ -8,10 +8,10 @@
 
 import type { IconType } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import type { Adapters } from 'src/plugins/inspector';
-import type { AggGroupNames, AggParam, AggGroupName, Query } from '../../../data/public';
-import type { DataView } from '../../../data_views/public';
-import { PaletteOutput } from '../../../charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { Adapters } from '@kbn/inspector-plugin';
+import type { AggGroupNames, AggParam, AggGroupName, Query } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
 import { VisGroups } from './vis_groups_enum';
 
@@ -20,6 +20,7 @@ export interface VisTypeOptions {
   showQueryBar: boolean;
   showFilterBar: boolean;
   showIndexSelection: boolean;
+  showQueryInput: boolean;
   hierarchicalData: boolean;
 }
 
@@ -55,6 +56,7 @@ interface DefaultEditorConfig<TVisParams> {
     [key: string]: Array<{ text: string; value: string }> | Array<{ id: string; label: string }>;
   };
   enableAutoApply?: boolean;
+  enableDataViewChange?: boolean;
   defaultSize?: string;
   optionsTemplate?: DefaultEditorOptionsComponent<TVisParams>;
   optionTabs?: Array<{
@@ -192,6 +194,10 @@ export interface VisTypeDefinition<TVisParams> {
    * @default 'production'
    */
   readonly stage?: 'experimental' | 'beta' | 'production';
+  /**
+   * It sets the vis type on a deprecated mode when is true
+   */
+  readonly isDeprecated?: boolean;
   /**
    * Describes the experience group that the visualization belongs.
    * It can be on tools, aggregation based or promoted group.

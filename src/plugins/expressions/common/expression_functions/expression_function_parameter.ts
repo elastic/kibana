@@ -16,6 +16,7 @@ export class ExpressionFunctionParameter<T = unknown> {
   types: ArgumentType<T>['types'];
   default?: ArgumentType<T>['default'];
   aliases: string[];
+  deprecated: boolean;
   multi: boolean;
   resolve: boolean;
   /**
@@ -25,7 +26,7 @@ export class ExpressionFunctionParameter<T = unknown> {
   options: T[];
 
   constructor(name: string, arg: ArgumentType<T>) {
-    const { required, help, types, aliases, multi, options, resolve, strict } = arg;
+    const { required, help, types, aliases, deprecated, multi, options, resolve, strict } = arg;
 
     if (name === '_') {
       throw Error('Arg names must not be _. Use it in aliases instead.');
@@ -37,6 +38,7 @@ export class ExpressionFunctionParameter<T = unknown> {
     this.types = types || [];
     this.default = arg.default;
     this.aliases = aliases || [];
+    this.deprecated = !!deprecated;
     this.multi = !!multi;
     this.options = options || [];
     this.resolve = resolve == null ? true : resolve;

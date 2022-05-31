@@ -15,15 +15,15 @@ import { useAnomalyExplorerContext } from '../../../explorer/anomaly_explorer_co
  * React component for a checkbox element to toggle charts display.
  */
 export const CheckboxShowCharts: FC = () => {
-  const { anomalyExplorerCommonStateService } = useAnomalyExplorerContext();
+  const { chartsStateService } = useAnomalyExplorerContext();
 
   const showCharts = useObservable(
-    anomalyExplorerCommonStateService.getShowCharts$(),
-    anomalyExplorerCommonStateService.getShowCharts()
+    chartsStateService.getShowCharts$(),
+    chartsStateService.getShowCharts()
   );
 
   const onChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    anomalyExplorerCommonStateService.setShowCharts(e.target.checked);
+    chartsStateService.setShowCharts(e.target.checked);
   }, []);
 
   const id = useMemo(() => htmlIdGenerator()(), []);

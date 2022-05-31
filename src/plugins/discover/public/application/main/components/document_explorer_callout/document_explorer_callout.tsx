@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import './document_explorer_callout.scss';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -17,10 +17,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DOC_TABLE_LEGACY } from '../../../../../common';
-import { Storage } from '../../../../../../kibana_utils/public';
 
 export const CALLOUT_STATE_KEY = 'discover:docExplorerCalloutClosed';
 
@@ -32,7 +34,11 @@ const updateStoredCalloutState = (newState: boolean, storage: Storage) => {
   storage.set(CALLOUT_STATE_KEY, newState);
 };
 
+/**
+ * The callout that's displayed when Document explorer is disabled
+ */
 export const DocumentExplorerCallout = () => {
+  const { euiTheme } = useEuiTheme();
   const { storage, capabilities, docLinks, addBasePath } = useDiscoverServices();
   const [calloutClosed, setCalloutClosed] = useState(getStoredCalloutState(storage));
 
@@ -40,6 +46,13 @@ export const DocumentExplorerCallout = () => {
     updateStoredCalloutState(true, storage);
     setCalloutClosed(true);
   }, [storage]);
+
+  const semiBoldStyle = useMemo(
+    () => css`
+      font-weight: ${euiTheme.font.weight.semiBold};
+    `,
+    [euiTheme.font.weight.semiBold]
+  );
 
   if (calloutClosed || !capabilities.advancedSettings.save) {
     return null;
@@ -54,7 +67,17 @@ export const DocumentExplorerCallout = () => {
       <p>
         <FormattedMessage
           id="discover.docExplorerCallout.bodyMessage"
-          defaultMessage="Quickly sort, select, and compare data, resize columns, and view documents in fullscreen with the Document Explorer."
+          defaultMessage="Quickly sort, select, and compare data, resize columns, and view documents in fullscreen with the {documentExplorer}."
+          values={{
+            documentExplorer: (
+              <span css={semiBoldStyle}>
+                <FormattedMessage
+                  id="discover.docExplorerCallout.documentExplorer"
+                  defaultMessage="Document Explorer"
+                />
+              </span>
+            ),
+          }}
         />
       </p>
       <EuiFlexGroup
@@ -75,8 +98,8 @@ export const DocumentExplorerCallout = () => {
             />
           </EuiButton>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiLink href={docLinks.links.discover.documentExplorer}>
+        <EuiFlexItem grow={false}>
+          <EuiLink href={docLinks.links.discover.documentExplorer} target="_blank">
             <FormattedMessage
               id="discover.docExplorerCallout.learnMore"
               defaultMessage="Learn more"
@@ -102,6 +125,7 @@ function CalloutTitle({ onCloseCallout }: { onCloseCallout: () => void }) {
           aria-label={i18n.translate('discover.docExplorerCallout.closeButtonAriaLabel', {
             defaultMessage: 'Close',
           })}
+          data-test-subj="dscExplorerCalloutClose"
           onClick={onCloseCallout}
           type="button"
           iconType="cross"

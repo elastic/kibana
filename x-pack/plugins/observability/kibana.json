@@ -29,17 +29,20 @@
     "ruleRegistry",
     "timelines",
     "triggersActionsUi",
-    "inspector"
+    "inspector",
+    "unifiedSearch"
   ],
   "ui": true,
   "server": true,
   "requiredBundles": [
+    "unifiedSearch",
     "data",
     "dataViews",
     "embeddable",
     "kibanaReact",
     "kibanaUtils",
-    "lens"
+    "lens",
+    "usageCollection"
   ],
   "extraPublicDirs": [
     "common"

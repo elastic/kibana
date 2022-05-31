@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { firstValueFrom, Observable } from 'rxjs';
 import { mapToObject } from '@kbn/std';
 
+import type { Logger } from '@kbn/logging';
 import { CoreService } from '../../types';
 import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
 import { SavedObjectsClientContract } from '../saved_objects/types';
 import { InternalSavedObjectsServiceSetup } from '../saved_objects';
 import { InternalHttpServiceSetup } from '../http';
@@ -53,7 +52,7 @@ export class UiSettingsService
   public async preboot(): Promise<InternalUiSettingsServicePreboot> {
     this.log.debug('Prebooting ui settings service');
 
-    const { overrides } = await this.config$.pipe(first()).toPromise();
+    const { overrides } = await firstValueFrom(this.config$);
     this.overrides = overrides;
 
     this.register(getCoreSettings({ isDist: this.isDist }));
@@ -74,7 +73,7 @@ export class UiSettingsService
     savedObjects.registerType(uiSettingsType);
     registerRoutes(http.createRouter(''));
 
-    const config = await this.config$.pipe(first()).toPromise();
+    const config = await firstValueFrom(this.config$);
     this.overrides = config.overrides;
 
     return {

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup } from '../../../../core/public';
+import { CoreSetup } from '@kbn/core/public';
 
 export interface ControlsHTTPService {
   fetch: CoreSetup['http']['fetch'];

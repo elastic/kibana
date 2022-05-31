@@ -48,6 +48,7 @@ export const getColumns = ({
   toggleColumn,
   getLinkValue,
   isDraggable,
+  isReadOnly,
 }: {
   browserFields: BrowserFields;
   columnHeaders: ColumnHeaderOptions[];
@@ -58,40 +59,45 @@ export const getColumns = ({
   toggleColumn: (column: ColumnHeaderOptions) => void;
   getLinkValue: (field: string) => string | null;
   isDraggable?: boolean;
+  isReadOnly?: boolean;
 }) => [
-  {
-    field: 'values',
-    name: (
-      <EuiText size="xs">
-        <strong>{i18n.ACTIONS}</strong>
-      </EuiText>
-    ),
-    sortable: false,
-    truncateText: false,
-    width: '132px',
-    render: (values: string[] | null | undefined, data: EventFieldsData) => {
-      const label = data.isObjectArray
-        ? i18n.NESTED_COLUMN(data.field)
-        : i18n.VIEW_COLUMN(data.field);
-      const fieldFromBrowserField = getFieldFromBrowserField(
-        [data.category, 'fields', data.field],
-        browserFields
-      );
-      return (
-        <ActionCell
-          aria-label={label}
-          contextId={contextId}
-          data={data}
-          eventId={eventId}
-          fieldFromBrowserField={fieldFromBrowserField}
-          getLinkValue={getLinkValue}
-          toggleColumn={toggleColumn}
-          timelineId={timelineId}
-          values={values}
-        />
-      );
-    },
-  },
+  ...(!isReadOnly
+    ? [
+        {
+          field: 'values',
+          name: (
+            <EuiText size="xs">
+              <strong>{i18n.ACTIONS}</strong>
+            </EuiText>
+          ),
+          sortable: false,
+          truncateText: false,
+          width: '132px',
+          render: (values: string[] | null | undefined, data: EventFieldsData) => {
+            const label = data.isObjectArray
+              ? i18n.NESTED_COLUMN(data.field)
+              : i18n.VIEW_COLUMN(data.field);
+            const fieldFromBrowserField = getFieldFromBrowserField(
+              [data.category, 'fields', data.field],
+              browserFields
+            );
+            return (
+              <ActionCell
+                aria-label={label}
+                contextId={contextId}
+                data={data}
+                eventId={eventId}
+                fieldFromBrowserField={fieldFromBrowserField}
+                getLinkValue={getLinkValue}
+                toggleColumn={toggleColumn}
+                timelineId={timelineId}
+                values={values}
+              />
+            );
+          },
+        },
+      ]
+    : []),
   {
     field: 'field',
     className: 'eventFieldsTable__fieldNameCell',

@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IEmbeddable } from '../../../../../src/plugins/embeddable/public';
-import { UiActionsPresentableGrouping as PresentableGrouping } from '../../../../../src/plugins/ui_actions/public';
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { UiActionsPresentableGrouping as PresentableGrouping } from '@kbn/ui-actions-plugin/public';
 
 export const dynamicActionGrouping: PresentableGrouping<{
   embeddable?: IEmbeddable;

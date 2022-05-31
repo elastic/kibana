@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ElasticsearchServiceSetup,
   HttpServiceSetup,
@@ -14,7 +13,9 @@ import type {
   KibanaRequest,
   Logger,
   LoggerFactory,
-} from 'src/core/server';
+} from '@kbn/core/server';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
@@ -49,6 +50,8 @@ interface AuthenticationServiceStartParams {
   featureUsageService: SecurityFeatureUsageServiceStart;
   session: PublicMethodsOf<Session>;
   loggers: LoggerFactory;
+  applicationName: string;
+  kibanaFeatures: KibanaFeature[];
 }
 
 export interface InternalAuthenticationServiceStart extends AuthenticationServiceStart {
@@ -296,11 +299,15 @@ export class AuthenticationService {
     http,
     loggers,
     session,
+    applicationName,
+    kibanaFeatures,
   }: AuthenticationServiceStartParams): InternalAuthenticationServiceStart {
     const apiKeys = new APIKeys({
       clusterClient,
       logger: this.logger.get('api-key'),
       license: this.license,
+      applicationName,
+      kibanaFeatures,
     });
 
     /**

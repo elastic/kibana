@@ -6,35 +6,37 @@
 
 Retrieves a paginated subset of cases.
 
-=== Request
+=== {api-request-title}
 
 `GET <kibana host>:<port>/api/cases/_find`
 
 `GET <kibana host>:<port>/s/<space_id>/api/cases/_find`
 
-=== Prerequisite
+=== {api-prereq-title}
 
 You must have `read` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
 `owner` of the cases you're seeking.
 
-=== Path parameters
+=== {api-path-parms-title}
 
 `<space_id>`::
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
-=== Query parameters
+=== {api-query-parms-title}
 
 `defaultSearchOperator`::
 (Optional, string) The default operator to use for the `simple_query_string`.
 Defaults to `OR`.
 
-////
 `fields`::
 (Optional, array of strings) The fields in the entity to return in the response.
-////
+
+`from`::
+(Optional, string) Returns only cases that were created after a specific date. The date must be specified as a <<kuery-query,KQL>> data range or date match expression.  preview:[]
+
 `owner`::
 (Optional, string or array of strings) A filter to limit the retrieved cases to
 a specific set of applications. Valid values are: `cases`, `observability`,
@@ -60,6 +62,10 @@ filters the objects in the response.
 (Optional, string or array of strings) The fields to perform the
 `simple_query_string` parsed query against.
 
+`severity`::
+(Optional,string) The severity of the case. Valid values are: `critical`, `high`,
+`low`, and `medium`.
+
 `sortField`::
 (Optional, string) Determines which field is used to sort the results,
 `createdAt` or `updatedAt`. Defaults to `createdAt`.
@@ -79,12 +85,15 @@ Defaults to `desc`.
 `tags`::
 (Optional, string or array of strings) Filters the returned cases by tags.
 
-=== Response code
+`to`::
+(Optional, string) Returns only cases that were created before a specific date. The date must be specified as a <<kuery-query,KQL>> data range or date match expression.  preview:[]
+
+=== {api-response-codes-title}
 
 `200`::
    Indicates a successful call.
 
-=== Example
+=== {api-examples-title}
 
 Retrieve the first five cases with the `phishing` tag, in ascending order by
 last update time:
@@ -120,6 +129,8 @@ The API returns a JSON object listing the retrieved cases. For example:
         "syncAlerts": true
       },
       "owner": "securitySolution",
+      "duration": null,
+      "severity": "low",
       "closed_at": null,
       "closed_by": null,
       "created_at": "2022-03-29T13:03:23.533Z",
@@ -159,6 +170,7 @@ The API returns a JSON object listing the retrieved cases. For example:
         "syncAlerts": false
       },
       "owner": "cases",
+      "duration": null,
       "closed_at": null,
       "closed_by": null,
       "created_at": "2022-03-29T11:30:02.658Z",

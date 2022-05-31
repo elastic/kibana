@@ -8,7 +8,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110905
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializerContext, PluginInitializer } from 'kibana/public';
+import { PluginInitializerContext, PluginInitializer } from '@kbn/core/public';
 import { lazy } from 'react';
 import {
   Plugin,
@@ -17,6 +17,7 @@ import {
   ObservabilityPublicStart,
   ObservabilityPublicSetup,
 } from './plugin';
+export { ALL_VALUES_SELECTED } from './components/shared/exploratory_view/configurations/constants/url_constants';
 export type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -28,6 +29,7 @@ export {
   enableComparisonByDefault,
   enableInfrastructureView,
   enableServiceGroups,
+  enableNewSyntheticsView,
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 
@@ -36,7 +38,6 @@ export interface ConfigSchema {
     alertingExperience: { enabled: boolean };
     rules: { enabled: boolean };
     cases: { enabled: boolean };
-    overviewNext: { enabled: boolean };
   };
 }
 
@@ -49,9 +50,9 @@ export const plugin: PluginInitializer<
   return new Plugin(context);
 };
 
-export * from './components/shared/action_menu/';
+export * from './components/shared/action_menu';
 
-export type { UXMetrics } from './components/shared/core_web_vitals/';
+export type { UXMetrics } from './components/shared/core_web_vitals';
 export { DatePickerContextProvider } from './context/date_picker_context';
 export {
   getCoreVitalsComponent,
@@ -61,7 +62,7 @@ export {
   SelectableUrlList,
   ExploratoryView,
   DatePicker,
-} from './components/shared/';
+} from './components/shared';
 
 export type { LazyObservabilityPageTemplateProps } from './components/shared';
 
@@ -90,8 +91,7 @@ export type { LinkDescriptor } from './hooks/use_link_props';
 
 export { NavigationWarningPromptProvider, Prompt } from './utils/navigation_warning_prompt';
 export { getApmTraceUrl } from './utils/get_apm_trace_url';
-export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/utils';
-export { ALL_VALUES_SELECTED } from './components/shared/field_value_suggestions/field_value_combobox';
+export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 export type { AllSeries } from './components/shared/exploratory_view/hooks/use_series_storage';
 export type { SeriesUrl } from './components/shared/exploratory_view/types';
 
@@ -110,9 +110,13 @@ export { useInspectorContext } from './context/inspector/use_inspector_context';
 export type { SeriesConfig, ConfigProps } from './components/shared/exploratory_view/types';
 export {
   ReportTypes,
+  FILTER_RECORDS,
   REPORT_METRIC_FIELD,
-  RECORDS_PERCENTAGE_FIELD,
+  USE_BREAK_DOWN_COLUMN,
   RECORDS_FIELD,
+  OPERATION_COLUMN,
+  TERMS_COLUMN,
+  RECORDS_PERCENTAGE_FIELD,
 } from './components/shared/exploratory_view/configurations/constants';
 export { ExploratoryViewContextProvider } from './components/shared/exploratory_view/contexts/exploratory_view_config';
 export { fromQuery, toQuery } from './utils/url';

@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import {
   INDEX_CREATED_BY,
   JOB_MAP_NODE_TYPES,
@@ -78,7 +78,6 @@ export class AnalyticsManager {
   async setJobStats() {
     try {
       const jobStats = await this.getAnalyticsStats();
-      // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
       this.jobStats = jobStats;
     } catch (error) {
       // eslint-disable-next-line

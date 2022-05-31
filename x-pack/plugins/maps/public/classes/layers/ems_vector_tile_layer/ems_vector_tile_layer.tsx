@@ -5,12 +5,20 @@
  * 2.0.
  */
 
-import type { Map as MbMap, Layer as MbLayer, Style as MbStyle } from '@kbn/mapbox-gl';
+import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
+import { type EmsSpriteSheet, TMSService } from '@elastic/ems-client';
+import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 // @ts-expect-error
 import { RGBAImage } from './image_utils';
 import { AbstractLayer } from '../layer';
-import { SOURCE_DATA_REQUEST_ID, LAYER_TYPE, LAYER_STYLE_TYPE } from '../../../../common/constants';
+import {
+  AUTOSELECT_EMS_LOCALE,
+  NO_EMS_LOCALE,
+  SOURCE_DATA_REQUEST_ID,
+  LAYER_TYPE,
+  LAYER_STYLE_TYPE,
+} from '../../../../common/constants';
 import { LayerDescriptor } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 import { isRetina } from '../../../util';
@@ -22,23 +30,9 @@ interface SourceRequestMeta {
   tileLayerId: string;
 }
 
-// TODO remove once ems_client exports EmsSpriteSheet and EmsSprite type
-interface EmsSprite {
-  height: number;
-  pixelRatio: number;
-  sdf?: boolean;
-  width: number;
-  x: number;
-  y: number;
-}
-
-export interface EmsSpriteSheet {
-  [spriteName: string]: EmsSprite;
-}
-
 interface SourceRequestData {
   spriteSheetImageData?: ImageData;
-  vectorStyleSheet?: MbStyle;
+  vectorStyleSheet?: StyleSpecification;
   spriteMeta?: {
     png: string;
     json: EmsSpriteSheet;
@@ -50,6 +44,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     const tileLayerDescriptor = super.createDescriptor(options);
     tileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
     tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
+    tileLayerDescriptor.locale = _.get(options, 'locale', AUTOSELECT_EMS_LOCALE);
     tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
     return tileLayerDescriptor;
   }
@@ -67,6 +62,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
     this._style = new TileStyle();
   }
 
+  isInitialDataLoadComplete(): boolean {
+    return !!this._descriptor.__areTilesLoaded;
+  }
+
   getSource(): EMSTMSSource {
     return super.getSource() as EMSTMSSource;
   }
@@ -81,6 +80,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
   getCurrentStyle() {
     return this._style;
+  }
+
+  getLocale() {
+    return this._descriptor.locale ?? NO_EMS_LOCALE;
   }
 
   _canSkipSync({
@@ -141,7 +144,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return `${this._generateMbSourceIdPrefix()}${name}`;
   }
 
-  _getVectorStyle() {
+  _getVectorStyle(): StyleSpecification | null | undefined {
     const sourceDataRequest = this.getSourceDataRequest();
     if (!sourceDataRequest) {
       return null;
@@ -305,7 +308,6 @@ export class EmsVectorTileLayer extends AbstractLayer {
         return;
       }
       this._addSpriteSheetToMapFromImageData(newJson, imageData, mbMap);
-
       // sync layers
       const layers = vectorStyle.layers ? vectorStyle.layers : [];
       layers.forEach((layer) => {
@@ -317,8 +319,8 @@ export class EmsVectorTileLayer extends AbstractLayer {
         const newLayerObject = {
           ...layer,
           source: this._generateMbSourceId(
-            typeof (layer as MbLayer).source === 'string'
-              ? ((layer as MbLayer).source as string)
+            'source' in layer && typeof layer.source === 'string'
+              ? (layer.source as string)
               : undefined
           ),
           id: mbLayerId,
@@ -375,7 +377,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return [];
   }
 
-  _setOpacityForType(mbMap: MbMap, mbLayer: MbLayer, mbLayerId: string) {
+  _setOpacityForType(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     this._getOpacityProps(mbLayer.type).forEach((opacityProp) => {
       const mbPaint = mbLayer.paint as { [key: string]: unknown } | undefined;
       if (mbPaint && typeof mbPaint[opacityProp] === 'number') {
@@ -387,7 +389,28 @@ export class EmsVectorTileLayer extends AbstractLayer {
     });
   }
 
-  _setLayerZoomRange(mbMap: MbMap, mbLayer: MbLayer, mbLayerId: string) {
+  _setLanguage(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
+    const locale = this.getLocale();
+    if (locale === null || locale === NO_EMS_LOCALE) {
+      if (mbLayer.type !== 'symbol') return;
+
+      const textProperty = mbLayer.layout?.['text-field'];
+      if (mbLayer.layout && textProperty) {
+        mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
+      }
+      return;
+    }
+
+    const textProperty =
+      locale === AUTOSELECT_EMS_LOCALE
+        ? TMSService.transformLanguageProperty(mbLayer, i18n.getLocale())
+        : TMSService.transformLanguageProperty(mbLayer, locale);
+    if (textProperty !== undefined) {
+      mbMap.setLayoutProperty(mbLayerId, 'text-field', textProperty);
+    }
+  }
+
+  _setLayerZoomRange(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     let minZoom = this.getMinZoom();
     if (typeof mbLayer.minzoom === 'number') {
       minZoom = Math.max(minZoom, mbLayer.minzoom);
@@ -410,6 +433,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
       this.syncVisibilityWithMb(mbMap, mbLayerId);
       this._setLayerZoomRange(mbMap, mbLayer, mbLayerId);
       this._setOpacityForType(mbMap, mbLayer, mbLayerId);
+      this._setLanguage(mbMap, mbLayer, mbLayerId);
     });
   }
 
@@ -418,6 +442,10 @@ export class EmsVectorTileLayer extends AbstractLayer {
   }
 
   supportsLabelsOnTop() {
+    return true;
+  }
+
+  supportsLabelLocales(): boolean {
     return true;
   }
 

@@ -28,10 +28,10 @@ import { useStartServices } from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
 
-import { policyHasFleetServer } from '../../../agents/services/has_fleet_server';
-
 import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
+
+import { policyHasFleetServer } from '../../../../services';
 
 import { useOutputOptions, DEFAULT_OUTPUT_VALUE } from './hooks';
 
@@ -309,6 +309,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.data_output_id && validation.data_output_id)}
         >
           <EuiSuperSelect
+            disabled={agentPolicy.is_managed === true}
             valueOfSelected={agentPolicy.data_output_id || DEFAULT_OUTPUT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}
@@ -347,6 +348,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.monitoring_output_id && validation.monitoring_output_id)}
         >
           <EuiSuperSelect
+            disabled={agentPolicy.is_managed === true}
             valueOfSelected={agentPolicy.monitoring_output_id || DEFAULT_OUTPUT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}

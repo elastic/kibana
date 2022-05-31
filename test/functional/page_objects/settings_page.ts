@@ -244,6 +244,13 @@ export class SettingsPageObject extends FtrService {
     });
   }
 
+  async getRelationshipsTabCount() {
+    return await this.retry.try(async () => {
+      const text = await this.testSubjects.getVisibleText('tab-relationships');
+      return text.split(' ')[1].replace(/\((.*)\)/, '$1');
+    });
+  }
+
   async getFieldNames() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldName');
     return await Promise.all(
@@ -273,8 +280,12 @@ export class SettingsPageObject extends FtrService {
 
   async clearFieldTypeFilter(type: string) {
     await this.testSubjects.clickWhenNotDisabled('indexedFieldTypeFilterDropdown');
-    await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
-    await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('indexedFieldTypeFilterDropdown-popover');
+    });
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
+    });
     await this.testSubjects.click(`indexedFieldTypeFilterDropdown-option-${type}-checked`);
     await this.testSubjects.existOrFail(`indexedFieldTypeFilterDropdown-option-${type}`);
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -291,10 +302,14 @@ export class SettingsPageObject extends FtrService {
 
   async clearScriptedFieldLanguageFilter(type: string) {
     await this.testSubjects.clickWhenNotDisabled('scriptedFieldLanguageFilterDropdown');
-    await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
-    await this.testSubjects.existOrFail(
-      `scriptedFieldLanguageFilterDropdown-option-${type}-checked`
-    );
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail('scriptedFieldLanguageFilterDropdown-popover');
+    });
+    await this.retry.try(async () => {
+      await this.testSubjects.existOrFail(
+        `scriptedFieldLanguageFilterDropdown-option-${type}-checked`
+      );
+    });
     await this.testSubjects.click(`scriptedFieldLanguageFilterDropdown-option-${type}-checked`);
     await this.testSubjects.existOrFail(`scriptedFieldLanguageFilterDropdown-option-${type}`);
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -552,6 +567,11 @@ export class SettingsPageObject extends FtrService {
   async clickSourceFiltersTab() {
     this.log.debug('click Source Filters tab');
     await this.testSubjects.click('tab-sourceFilters');
+  }
+
+  async clickRelationshipsTab() {
+    this.log.debug('click Relationships tab');
+    await this.testSubjects.click('tab-relationships');
   }
 
   async editScriptedField(name: string) {

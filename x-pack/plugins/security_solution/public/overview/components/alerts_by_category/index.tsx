@@ -12,12 +12,12 @@ import styled from 'styled-components';
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { EuiButton } from '@elastic/eui';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../common/constants';
 import { SHOWING, UNIT } from '../../../common/components/alerts_viewer/translations';
 import { MatrixHistogram } from '../../../common/components/matrix_histogram';
 import { useKibana, useUiSetting$ } from '../../../common/lib/kibana';
 import { convertToBuildEsQuery } from '../../../common/lib/keury';
-import { getEsQueryConfig } from '../../../../../../../src/plugins/data/common';
 import { HostsTableType } from '../../../hosts/store/model';
 
 import * as i18n from '../../pages/translations';
@@ -37,7 +37,10 @@ const ID = 'alertsByCategoryOverview';
 const DEFAULT_STACK_BY = 'event.module';
 
 const StyledLinkButton = styled(EuiButton)`
-  margin-left: ${({ theme }) => theme.eui.paddingSizes.l};
+  margin-left: 0;
+  @media only screen and (min-width: ${(props) => props.theme.eui.euiBreakpoints.m}) {
+    margin-left: ${({ theme }) => theme.eui.paddingSizes.l};
+  }
 `;
 interface Props extends Pick<GlobalTimeArgs, 'from' | 'to' | 'deleteQuery' | 'setQuery'> {
   filters: Filter[];

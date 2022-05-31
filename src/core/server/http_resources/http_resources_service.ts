@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { RequestHandlerContext } from 'src/core/server';
+import type { Logger } from '@kbn/logging';
+import { RequestHandlerContext } from '..';
 
 import { CoreContext } from '../core_context';
 import {
@@ -18,7 +19,6 @@ import {
   InternalHttpServicePreboot,
 } from '../http';
 
-import { Logger } from '../logging';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
 import { CoreService } from '../../types';
 
@@ -93,11 +93,13 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
     return {
       async renderCoreApp(options: HttpResourcesRenderOptions = {}) {
         const apmConfig = getApmConfig(request.url.pathname);
-        const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-          includeUserSettings: true,
+        const { uiSettings } = await context.core;
+        const body = await deps.rendering.render(request, uiSettings.client, {
+          isAnonymousPage: false,
           vars: {
             apmConfig,
           },
+          includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({
@@ -107,11 +109,13 @@ export class HttpResourcesService implements CoreService<InternalHttpResourcesSe
       },
       async renderAnonymousCoreApp(options: HttpResourcesRenderOptions = {}) {
         const apmConfig = getApmConfig(request.url.pathname);
-        const body = await deps.rendering.render(request, context.core.uiSettings.client, {
-          includeUserSettings: false,
+        const { uiSettings } = await context.core;
+        const body = await deps.rendering.render(request, uiSettings.client, {
+          isAnonymousPage: true,
           vars: {
             apmConfig,
           },
+          includeExposedConfigKeys: options.includeExposedConfigKeys,
         });
 
         return response.ok({

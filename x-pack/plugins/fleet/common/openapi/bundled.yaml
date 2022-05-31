@@ -184,7 +184,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/get_packages_response'
       operationId: list-all-packages
-    parameters: []
+    parameters:
+      - in: query
+        name: excludeInstallStatus
+        schema:
+          type: boolean
+          default: false
+        description: >-
+          Whether to exclude the install status of each package. Enabling this
+          option will opt in to caching for the response via `cache-control`
+          headers. If you don't need up-to-date installation info for a package,
+          and are querying for a list of available packages, providing this flag
+          can improve performance substantially.
   /epm/packages/_bulk:
     post:
       summary: Packages - Bulk install
@@ -763,6 +774,45 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/bulk_upgrade_agents'
+  /agents/current_upgrades:
+    get:
+      summary: Agents - Current Bulk Upgrades
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        actionId:
+                          type: string
+                        complete:
+                          type: boolean
+                        nbAgents:
+                          type: number
+                        nbAgentsAck:
+                          type: number
+                        version:
+                          type: string
+                        startTime:
+                          type: string
+                      required:
+                        - actionId
+                        - complete
+                        - nbAgents
+                        - nbAgentsAck
+                        - version
+                        - startTime
+                required:
+                  - items
+      operationId: agents-current-upgrades
   /agents/{agentId}:
     parameters:
       - schema:
@@ -1412,7 +1462,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/get_enrollment_api_keys_response'
+                type: object
+                properties:
+                  item:
+                    $ref: '#/components/schemas/enrollment_api_key'
+                required:
+                  - item
       operationId: get-enrollment-api-key
     delete:
       summary: Enrollment API Key - Delete
@@ -2212,8 +2267,6 @@ components:
           type: string
         path:
           type: string
-        removable:
-          type: boolean
       required:
         - name
         - title
@@ -2238,6 +2291,7 @@ components:
         - lens
         - ml-module
         - security-rule
+        - csp_rule_template
     elasticsearch_asset_type:
       title: Elasticsearch asset type
       type: string
@@ -2271,10 +2325,16 @@ components:
               - api_keys
               - fleet_admin_user
               - fleet_server
+        missing_optional_features:
+          type: array
+          items:
+            type: string
+            enum:
               - encrypted_saved_object_encryption_key_required
       required:
         - isReady
         - missing_requirements
+        - missing_optional_features
     agent_type:
       type: string
       title: Agent type
@@ -2367,6 +2427,10 @@ components:
         version:
           type: string
         source_uri:
+          type: string
+        rollout_duration_seconds:
+          type: number
+        start_time:
           type: string
         agents:
           oneOf:
@@ -2612,22 +2676,6 @@ components:
         - api_key
         - active
         - created_at
-    get_enrollment_api_keys_response:
-      title: Bulk install packages response
-      type: object
-      properties:
-        list:
-          type: array
-          deprecated: true
-          properties:
-            items:
-              $ref: '#/components/schemas/enrollment_api_key'
-        item:
-          type: array
-          items:
-            $ref: '#/components/schemas/enrollment_api_key'
-      required:
-        - item
     upgrade_diff:
       title: Package policy Upgrade dryrun
       type: array

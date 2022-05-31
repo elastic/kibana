@@ -8,7 +8,7 @@
 
 import $ from 'jquery';
 import moment from 'moment';
-import dateMath from '@elastic/datemath';
+import dateMath from '@kbn/datemath';
 import { scheme, loader, logger, Warn, version as vegaVersion, expressionFunction } from 'vega';
 import { expressionInterpreter } from 'vega-interpreter';
 import { version as vegaLiteVersion } from 'vega-lite';
@@ -98,6 +98,11 @@ export class VegaBaseView {
     this._initialized = true;
 
     try {
+      if (this._parser.useResize) {
+        this._$parentEl.addClass('vgaVis--autoresize');
+      } else {
+        this._$parentEl.removeClass('vgaVis--autoresize');
+      }
       this._$parentEl.empty().addClass(`vgaVis`).css('flex-direction', this._parser.containerDir);
 
       // bypass the onWarn warning checks - in some cases warnings may still need to be shown despite being disabled
@@ -110,10 +115,7 @@ export class VegaBaseView {
         return;
       }
 
-      this._$container = $('<div class="vgaVis__view">')
-        // Force a height here because css is not loaded in mocha test
-        .css('height', '100%')
-        .appendTo(this._$parentEl);
+      this._$container = $('<div class="vgaVis__view">').appendTo(this._$parentEl);
       this._$controls = $(
         `<div class="vgaVis__controls vgaVis__controls--${this._parser.controlsDir}">`
       ).appendTo(this._$parentEl);
@@ -160,7 +162,7 @@ export class VegaBaseView {
     let idxObj;
 
     if (index) {
-      [idxObj] = await dataViews.find(index);
+      [idxObj] = await dataViews.find(index, 1);
       if (!idxObj) {
         throw new Error(
           i18n.translate('visTypeVega.vegaParser.baseView.indexNotFoundErrorMessage', {
@@ -262,9 +264,9 @@ export class VegaBaseView {
     }
   }
 
-  async resize(dimensions) {
+  async resize() {
     if (this._parser.useResize && this._view) {
-      this.updateVegaSize(this._view, dimensions);
+      this.updateVegaSize(this._view);
       await this._view.runAsync();
 
       // The derived class should create this method

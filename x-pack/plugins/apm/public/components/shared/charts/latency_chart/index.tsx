@@ -9,18 +9,19 @@ import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 import { useLicenseContext } from '../../../../context/license/use_license_context';
 import { useTransactionLatencyChartsFetcher } from '../../../../hooks/use_transaction_latency_chart_fetcher';
-import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
+import { TimeseriesChart } from '../timeseries_chart';
 import {
   getMaxY,
   getResponseTimeTickFormatter,
-} from '../../../shared/charts/transaction_charts/helper';
-import { MLHeader } from '../../../shared/charts/transaction_charts/ml_header';
-import * as urlHelpers from '../../../shared/links/url_helpers';
-import { getComparisonChartTheme } from '../../time_comparison/get_time_range_comparison';
+} from '../transaction_charts/helper';
+import { MLHeader } from '../transaction_charts/ml_header';
+import * as urlHelpers from '../../links/url_helpers';
+import { getComparisonChartTheme } from '../../time_comparison/get_comparison_chart_theme';
 import { useEnvironmentsContext } from '../../../../context/environments_context/use_environments_context';
 import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { usePreferredServiceAnomalyTimeseries } from '../../../../hooks/use_preferred_service_anomaly_timeseries';
@@ -48,7 +49,7 @@ export function LatencyChart({ height, kuery }: Props) {
   const license = useLicenseContext();
 
   const {
-    query: { comparisonEnabled, latencyAggregationType },
+    query: { comparisonEnabled, latencyAggregationType, offset },
   } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
     '/services/{serviceName}/transactions',
@@ -68,10 +69,11 @@ export function LatencyChart({ height, kuery }: Props) {
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
     ApmMlDetectorType.txLatency
   );
+  const anomalyTimeseriesColor = previousPeriod?.color as string;
 
   const timeseries = [
     currentPeriod,
-    comparisonEnabled ? previousPeriod : undefined,
+    comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
   ].filter(filterNil);
 
   const latencyMaxY = getMaxY(timeseries);
@@ -131,7 +133,14 @@ export function LatencyChart({ height, kuery }: Props) {
           customTheme={comparisonChartTheme}
           timeseries={timeseries}
           yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-          anomalyTimeseries={preferredAnomalyTimeseries}
+          anomalyTimeseries={
+            preferredAnomalyTimeseries
+              ? {
+                  ...preferredAnomalyTimeseries,
+                  color: anomalyTimeseriesColor,
+                }
+              : undefined
+          }
         />
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { PluginServiceFactory } from '../../../../presentation_util/public';
-import { OptionsListResponse } from '../../control_types/options_list/types';
-import { ControlsOptionsListService, OptionsListRequest } from '../options_list';
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+
+import { ControlsOptionsListService } from '../options_list';
+import { OptionsListRequest, OptionsListResponse } from '../../control_types/options_list/types';
 
 export type OptionsListServiceFactory = PluginServiceFactory<ControlsOptionsListService>;
 

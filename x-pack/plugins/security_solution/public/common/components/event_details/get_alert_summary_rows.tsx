@@ -37,6 +37,8 @@ const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
   { id: 'user.name' },
   { id: ALERT_RULE_TYPE, label: i18n.RULE_TYPE },
+  { id: 'kibana.alert.original_event.id', label: i18n.SOURCE_EVENT_ID },
+  { id: 'process.entry_leader.entity_id', label: i18n.SESSION_ID },
 ];
 
 /**
@@ -135,7 +137,11 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
     case 'threshold':
       return [
         { id: THRESHOLD_COUNT, label: ALERTS_HEADERS_THRESHOLD_COUNT },
-        { id: THRESHOLD_TERMS_FIELD, label: ALERTS_HEADERS_THRESHOLD_TERMS },
+        {
+          id: THRESHOLD_TERMS_FIELD,
+          overrideField: THRESHOLD_TERMS_VALUE,
+          label: ALERTS_HEADERS_THRESHOLD_TERMS,
+        },
         {
           id: THRESHOLD_CARDINALITY_FIELD,
           label: ALERTS_HEADERS_THRESHOLD_CARDINALITY,
@@ -226,12 +232,14 @@ export const getSummaryRows = ({
   timelineId,
   eventId,
   isDraggable = false,
+  isReadOnly = false,
 }: {
   data: TimelineEventsDetailsItem[];
   browserFields: BrowserFields;
   timelineId: string;
   eventId: string;
   isDraggable?: boolean;
+  isReadOnly?: boolean;
 }) => {
   const eventCategories = getEventCategoriesFromData(data);
 
@@ -279,6 +287,7 @@ export const getSummaryRows = ({
             field,
           }),
           isDraggable,
+          isReadOnly,
         };
 
         if (field.id === 'agent.id' && !isAlertFromEndpointEvent({ data })) {

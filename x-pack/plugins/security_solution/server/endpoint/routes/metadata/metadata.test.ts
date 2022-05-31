@@ -10,17 +10,17 @@ import {
   RequestHandler,
   RouteConfig,
   SavedObjectsClientContract,
-} from 'kibana/server';
+} from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
   loggingSystemMock,
   savedObjectsClientMock,
-} from '../../../../../../../src/core/server/mocks';
+} from '@kbn/core/server/mocks';
 import { HostInfo, HostStatus, MetadataListResponse } from '../../../../common/endpoint/types';
 import { parseExperimentalConfigValue } from '../../../../common/experimental_features';
-import { registerEndpointRoutes } from './index';
+import { registerEndpointRoutes } from '.';
 import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
@@ -32,12 +32,12 @@ import {
 } from '../../endpoint_app_context_services';
 import { createMockConfig } from '../../../lib/detection_engine/routes/__mocks__';
 import { EndpointDocGenerator } from '../../../../common/endpoint/generate_data';
-import { Agent, ElasticsearchAssetType } from '../../../../../fleet/common/types/models';
+import { Agent, ElasticsearchAssetType } from '@kbn/fleet-plugin/common/types/models';
 import {
   legacyMetadataSearchResponseMock,
   unitedMetadataSearchResponseMock,
 } from './support/test_support';
-import type { AgentClient, PackageService, PackageClient } from '../../../../../fleet/server';
+import type { AgentClient, PackageService, PackageClient } from '@kbn/fleet-plugin/server';
 import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
@@ -48,15 +48,15 @@ import {
 } from '../../../../common/endpoint/constants';
 import { TRANSFORM_STATES } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
-import { AgentNotFoundError, PackagePolicyServiceInterface } from '../../../../../fleet/server';
+import { AgentNotFoundError, PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
 import {
   ClusterClientMock,
   ScopedClusterClientMock,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-} from '../../../../../../../src/core/server/elasticsearch/client/mocks';
+} from '@kbn/core/server/elasticsearch/client/mocks';
 import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
-import { createMockAgentClient, createMockPackageService } from '../../../../../fleet/server/mocks';
+import { createMockAgentClient, createMockPackageService } from '@kbn/fleet-plugin/server/mocks';
 import { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz';
 

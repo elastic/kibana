@@ -14,7 +14,13 @@ import { TitleRow } from '.';
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 
 const mockTheme = getMockTheme({
-  eui: { euiSizeS: '10px', euiLineHeight: 10, euiBreakpoints: { s: '10px' }, euiSize: '10px' },
+  eui: {
+    euiSizeS: '10px',
+    euiLineHeight: 10,
+    euiBreakpoints: { s: '10px' },
+    euiSize: '10px',
+    paddingSizes: { m: '16px' },
+  },
 });
 
 describe('TitleRow', () => {

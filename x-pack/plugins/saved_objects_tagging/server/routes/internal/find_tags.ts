@@ -26,7 +26,7 @@ export const registerInternalFindTagsRoute = (router: TagsPluginRouter) => {
     },
     router.handleLegacyErrors(async (ctx, req, res) => {
       const { query } = req;
-      const { client, typeRegistry } = ctx.core.savedObjects;
+      const { client, typeRegistry } = (await ctx.core).savedObjects;
 
       const findResponse = await client.find<TagAttributes>({
         page: query.page,

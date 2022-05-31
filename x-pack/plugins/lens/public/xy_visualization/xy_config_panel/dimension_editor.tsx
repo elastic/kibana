@@ -8,14 +8,18 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFormRow, htmlIdGenerator } from '@elastic/eui';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { YAxisMode, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import { State, XYState } from '../types';
+import { State, XYState, XYDataLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
-import { XYDataLayerConfig, YAxisMode, YConfig } from '../../../common/expressions';
 import { isHorizontalChart } from '../state_helpers';
 import { ColorPicker } from './color_picker';
 import { PalettePicker, useDebouncedValue } from '../../shared_components';
+import { isAnnotationsLayer, isReferenceLayer } from '../visualization_helpers';
+import { ReferenceLinePanel } from './reference_line_config_panel';
+import { AnnotationsPanel } from './annotations_config_panel';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -43,24 +47,22 @@ export function DimensionEditor(
 ) {
   const { state, setState, layerId, accessor } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
+  const layer = state.layers[index] as XYDataLayerConfig;
 
   const { inputValue: localState, handleInputChange: setLocalState } = useDebouncedValue<XYState>({
     value: props.state,
     onChange: props.setState,
   });
 
-  const localLayer = localState.layers.find((l) => l.layerId === layerId) as XYDataLayerConfig;
-  const localYConfig = localLayer?.yConfig?.find(
-    (yAxisConfig) => yAxisConfig.forAccessor === accessor
-  );
+  const localYConfig = layer?.yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === accessor);
   const axisMode = localYConfig?.axisMode || 'auto';
 
   const setConfig = useCallback(
-    (yConfig: Partial<YConfig> | undefined) => {
+    (yConfig: Partial<ExtendedYConfig> | undefined) => {
       if (yConfig == null) {
         return;
       }
-      const newYConfigs = [...(localLayer.yConfig || [])];
+      const newYConfigs = [...(layer.yConfig || [])];
       const existingIndex = newYConfigs.findIndex(
         (yAxisConfig) => yAxisConfig.forAccessor === accessor
       );
@@ -72,14 +74,29 @@ export function DimensionEditor(
           ...yConfig,
         });
       }
-      setLocalState(updateLayer(localState, { ...localLayer, yConfig: newYConfigs }, index));
+      setLocalState(updateLayer(localState, { ...layer, yConfig: newYConfigs }, index));
     },
-    [accessor, index, localState, localLayer, setLocalState]
+    [accessor, index, localState, layer, setLocalState]
   );
 
+  if (isAnnotationsLayer(layer)) {
+    return <AnnotationsPanel {...props} />;
+  }
+
+  if (isReferenceLayer(layer)) {
+    return <ReferenceLinePanel {...props} />;
+  }
+
+  const localLayer: XYDataLayerConfig = layer;
   if (props.groupId === 'breakdown') {
     return (
       <>
+        <CollapseSetting
+          value={layer.collapseFn || ''}
+          onChange={(collapseFn) => {
+            setLocalState(updateLayer(localState, { ...layer, collapseFn }, index));
+          }}
+        />
         <PalettePicker
           palettes={props.paletteService}
           activePalette={localLayer?.palette}
@@ -95,7 +112,11 @@ export function DimensionEditor(
 
   return (
     <>
-      <ColorPicker {...props} disabled={Boolean(localLayer.splitAccessor)} setConfig={setConfig} />
+      <ColorPicker
+        {...props}
+        disabled={Boolean(!localLayer.collapseFn && localLayer.splitAccessor)}
+        setConfig={setConfig}
+      />
 
       <EuiFormRow
         display="columnCompressed"

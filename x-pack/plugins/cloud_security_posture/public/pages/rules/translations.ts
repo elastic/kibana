@@ -35,9 +35,10 @@ export const RULE_NAME = i18n.translate('xpack.csp.rules.rulesTable.rulesTableCo
   defaultMessage: 'Rule Name',
 });
 
-export const SECTION = i18n.translate('xpack.csp.rules.rulesTable.rulesTableColumn.sectionLabel', {
-  defaultMessage: 'Section',
-});
+export const CIS_SECTION = i18n.translate(
+  'xpack.csp.rules.rulesTable.rulesTableColumn.cisSectionLabel',
+  { defaultMessage: 'CIS Section' }
+);
 
 export const LAST_MODIFIED = i18n.translate(
   'xpack.csp.rules.rulesTable.rulesTableColumn.lastModifiedLabel',
@@ -56,10 +57,30 @@ export const ENABLE = i18n.translate('xpack.csp.rules.enableLabel', {
   defaultMessage: 'Enable',
 });
 
+export const DEACTIVATE = i18n.translate('xpack.csp.rules.deactivateLabel', {
+  defaultMessage: 'Deactivate',
+});
+
+export const ACTIVATE = i18n.translate('xpack.csp.rules.activateLabel', {
+  defaultMessage: 'Activate',
+});
+
+export const ACTIVATED = i18n.translate('xpack.csp.rules.activatedLabel', {
+  defaultMessage: 'Activated',
+});
+
 export const MISSING_RULES = i18n.translate('xpack.csp.rules.missingRulesMessage', {
   defaultMessage: 'Rules are missing',
 });
 
 export const UPDATE_FAILED = i18n.translate('xpack.csp.rules.updateFailedMessage', {
   defaultMessage: 'Update failed',
+});
+
+export const OVERVIEW = i18n.translate('xpack.csp.rules.ruleFlyout.tabs.overviewTabLabel', {
+  defaultMessage: 'Overview',
+});
+
+export const REMEDIATION = i18n.translate('xpack.csp.rules.ruleFlyout.tabs.remediationTabLabel', {
+  defaultMessage: 'Remediation',
 });

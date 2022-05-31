@@ -6,18 +6,19 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import { ElasticsearchClient } from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
-import { Logger } from '../../logging';
 import type { SavedObjectsMigrationVersion } from '../types';
 import type { TransformRawDocs } from './types';
-import { MigrationResult } from '../migrations/core';
+import { MigrationResult } from './core';
 import { next } from './next';
 import { model } from './model';
 import { createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
+import { DocLinksServiceStart } from '../../doc_links';
 
 /**
  * Migrates the provided indexPrefix index using a resilient algorithm that is
@@ -35,6 +36,7 @@ export async function runResilientMigrator({
   indexPrefix,
   migrationsConfig,
   typeRegistry,
+  docLinks,
 }: {
   client: ElasticsearchClient;
   kibanaVersion: string;
@@ -46,6 +48,7 @@ export async function runResilientMigrator({
   indexPrefix: string;
   migrationsConfig: SavedObjectsMigrationConfigType;
   typeRegistry: ISavedObjectTypeRegistry;
+  docLinks: DocLinksServiceStart;
 }): Promise<MigrationResult> {
   const initialState = createInitialState({
     kibanaVersion,
@@ -55,6 +58,7 @@ export async function runResilientMigrator({
     indexPrefix,
     migrationsConfig,
     typeRegistry,
+    docLinks,
   });
   return migrationStateActionMachine({
     initialState,

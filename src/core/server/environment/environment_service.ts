@@ -6,16 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs/operators';
+import { firstValueFrom, of } from 'rxjs';
 import { PathConfigType, config as pathConfigDef } from '@kbn/utils';
+import type { Logger } from '@kbn/logging';
+import type { IConfigService } from '@kbn/config';
+import type { AnalyticsServicePreboot } from '../analytics';
 import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
-import { IConfigService } from '../config';
 import { HttpConfigType, config as httpConfigDef } from '../http';
 import { PidConfigType, config as pidConfigDef } from './pid_config';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';
 import { writePidFile } from './write_pid_file';
+
+/**
+ * @internal
+ */
+export interface PrebootDeps {
+  /**
+   * {@link AnalyticsServicePreboot}
+   */
+  analytics: AnalyticsServicePreboot;
+}
 
 /**
  * @internal
@@ -45,13 +56,13 @@ export class EnvironmentService {
     this.configService = core.configService;
   }
 
-  public async preboot() {
+  public async preboot({ analytics }: PrebootDeps) {
     // IMPORTANT: This code is based on the assumption that none of the configuration values used
     // here is supposed to change during preboot phase and it's safe to read them only once.
     const [pathConfig, serverConfig, pidConfig] = await Promise.all([
-      this.configService.atPath<PathConfigType>(pathConfigDef.path).pipe(take(1)).toPromise(),
-      this.configService.atPath<HttpConfigType>(httpConfigDef.path).pipe(take(1)).toPromise(),
-      this.configService.atPath<PidConfigType>(pidConfigDef.path).pipe(take(1)).toPromise(),
+      firstValueFrom(this.configService.atPath<PathConfigType>(pathConfigDef.path)),
+      firstValueFrom(this.configService.atPath<HttpConfigType>(httpConfigDef.path)),
+      firstValueFrom(this.configService.atPath<PidConfigType>(pidConfigDef.path)),
     ]);
 
     // Log unhandled rejections so that we can fix them in preparation for https://github.com/elastic/kibana/issues/77469
@@ -75,6 +86,24 @@ export class EnvironmentService {
       pathConfig,
       serverConfig,
       logger: this.log,
+    });
+
+    analytics.registerContextProvider({
+      name: 'kibana info',
+      context$: of({
+        kibana_uuid: this.uuid,
+        pid: process.pid,
+      }),
+      schema: {
+        kibana_uuid: {
+          type: 'keyword',
+          _meta: { description: 'Kibana instance UUID' },
+        },
+        pid: {
+          type: 'long',
+          _meta: { description: 'Process ID' },
+        },
+      },
     });
 
     return {

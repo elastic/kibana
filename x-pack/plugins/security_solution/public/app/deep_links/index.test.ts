@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { getDeepLinks } from '.';
-import { AppDeepLink, Capabilities } from '../../../../../../src/core/public';
+import { AppDeepLink, Capabilities } from '@kbn/core/public';
 import { SecurityPageName } from '../types';
 import { mockGlobalState } from '../../common/mock';
 import { CASES_FEATURE_ID, SERVER_APP_ID } from '../../../common/constants';
@@ -142,7 +142,11 @@ describe('deepLinks', () => {
 
   describe('experimental flags', () => {
     it('should return NO users link when enableExperimental.usersEnabled === false', () => {
-      const deepLinks = getDeepLinks(mockGlobalState.app.enableExperimental);
+      const deepLinks = getDeepLinks({
+        ...mockGlobalState.app.enableExperimental,
+        usersEnabled: false,
+      });
+
       expect(findDeepLink(SecurityPageName.users, deepLinks)).toBeFalsy();
     });
 
@@ -154,17 +158,29 @@ describe('deepLinks', () => {
       expect(findDeepLink(SecurityPageName.users, deepLinks)).toBeTruthy();
     });
 
-    it('should return NO detection & Response link when enableExperimental.detectionResponseEnabled === false', () => {
-      const deepLinks = getDeepLinks(mockGlobalState.app.enableExperimental);
-      expect(findDeepLink(SecurityPageName.detectionAndResponse, deepLinks)).toBeFalsy();
-    });
-
-    it('should return detection & Response link when enableExperimental.detectionResponseEnabled === true', () => {
+    it('should NOT return host authentications when enableExperimental.usersEnabled === true', () => {
       const deepLinks = getDeepLinks({
         ...mockGlobalState.app.enableExperimental,
-        detectionResponseEnabled: true,
+        usersEnabled: true,
       });
-      expect(findDeepLink(SecurityPageName.detectionAndResponse, deepLinks)).toBeTruthy();
+      expect(findDeepLink(SecurityPageName.hostsAuthentications, deepLinks)).toBeFalsy();
+    });
+
+    it('should return NO kubernetes link when enableExperimental.kubernetesEnabled === false', () => {
+      const deepLinks = getDeepLinks({
+        ...mockGlobalState.app.enableExperimental,
+        kubernetesEnabled: false,
+      });
+
+      expect(findDeepLink(SecurityPageName.kubernetes, deepLinks)).toBeFalsy();
+    });
+
+    it('should return kubernetes link when enableExperimental.kubernetesEnabled === true', () => {
+      const deepLinks = getDeepLinks({
+        ...mockGlobalState.app.enableExperimental,
+        kubernetesEnabled: true,
+      });
+      expect(findDeepLink(SecurityPageName.kubernetes, deepLinks)).toBeTruthy();
     });
   });
 });

@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest } from 'src/core/server';
+import { KibanaRequest } from '@kbn/core/server';
 import { flatten, get } from 'lodash';
+import { isVisSeriesData } from '@kbn/vis-type-timeseries-plugin/server';
 import { TIMESTAMP_FIELD } from '../../../../common/constants';
 import { NodeDetailsMetricData } from '../../../../common/http_api/node_details_api';
 import { KibanaFramework } from '../framework/kibana_framework_adapter';
@@ -22,7 +23,6 @@ import {
 import { calculateMetricInterval } from '../../../utils/calculate_metric_interval';
 import { CallWithRequestParams, InfraDatabaseSearchResponse } from '../framework';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
-import { isVisSeriesData } from '../../../../../../../src/plugins/vis_types/timeseries/server';
 
 export class KibanaMetricsAdapter implements InfraMetricsAdapter {
   private framework: KibanaFramework;

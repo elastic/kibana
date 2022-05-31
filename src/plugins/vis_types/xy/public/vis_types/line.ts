@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { euiPaletteColorBlind } from '@elastic/eui/lib/services';
 import { Position, Fit } from '@elastic/charts';
 
-import { AggGroupNames } from '../../../../data/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../visualizations/public';
-import { defaultCountLabel, LabelRotation } from '../../../../charts/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import { defaultCountLabel, LabelRotation } from '@kbn/charts-plugin/public';
 
 import {
   ChartMode,
@@ -127,6 +127,7 @@ export const lineVisTypeDefinition = {
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionTabs,
     schemas: [
       {
@@ -134,7 +135,13 @@ export const lineVisTypeDefinition = {
         name: 'metric',
         title: i18n.translate('visTypeXy.line.metricTitle', { defaultMessage: 'Y-axis' }),
         min: 1,
-        aggFilter: ['!geo_centroid', '!geo_bounds', '!filtered_metric', '!single_percentile'],
+        aggFilter: [
+          '!geo_centroid',
+          '!geo_bounds',
+          '!filtered_metric',
+          '!single_percentile',
+          '!single_percentile_rank',
+        ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },
       {

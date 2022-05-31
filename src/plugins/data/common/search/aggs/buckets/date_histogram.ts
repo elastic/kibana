@@ -10,7 +10,7 @@ import { get, noop, find, every, omitBy, isNil } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
-import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../../../common';
+import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../..';
 import { IFieldType } from '../../..';
 
 import { ExtendedBounds, extendedBoundsToAst, timerangeToAst } from '../../expressions';
@@ -310,7 +310,11 @@ export const getDateHistogramBucketAgg = ({
             return;
           }
 
-          if (agg.params.extendToTimeRange && agg.buckets.hasBounds()) {
+          if (
+            agg.params.extendToTimeRange &&
+            agg.buckets.hasBounds() &&
+            !agg.aggConfigs.hasTimeShifts()
+          ) {
             const bucketBounds = agg.buckets.getBounds()!;
             output.params.extended_bounds = omitBy(
               {

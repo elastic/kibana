@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as t from 'io-ts';
-import { Logger } from 'kibana/server';
+import { Logger } from '@kbn/core/server';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
 import { getClientMetrics } from './get_client_metrics';
@@ -14,8 +14,6 @@ import { getLongTaskMetrics } from './get_long_task_metrics';
 import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistBreakdown } from './get_pl_dist_breakdown';
-import { getRumServices } from './get_rum_services';
-import { getUrlSearch } from './get_url_search';
 import { getVisitorBreakdown } from './get_visitor_breakdown';
 import { getWebCoreVitals } from './get_web_core_vitals';
 import { hasRumData } from './has_rum_data';
@@ -190,22 +188,6 @@ const rumPageViewsTrendRoute = createApmServerRoute({
   },
 });
 
-const rumServicesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/services',
-  params: t.type({
-    query: t.intersection([uiFiltersRt, rangeRt]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<{ rumServices: string[] }> => {
-    const setup = await setupUXRequest(resources);
-    const {
-      query: { start, end },
-    } = resources.params;
-    const rumServices = await getRumServices({ setup, start, end });
-    return { rumServices };
-  },
-});
-
 const rumVisitorsBreakdownRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/ux/visitor-breakdown',
   params: t.type({
@@ -291,34 +273,6 @@ const rumLongTaskMetrics = createApmServerRoute({
       setup,
       urlQuery,
       percentile: percentile ? Number(percentile) : undefined,
-      start,
-      end,
-    });
-  },
-});
-
-const rumUrlSearch = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/url-search',
-  params: t.type({
-    query: uxQueryRt,
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    total: number;
-    items: Array<{ url: string; count: number; pld: number }>;
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { urlQuery, percentile, start, end },
-    } = resources.params;
-
-    return getUrlSearch({
-      setup,
-      urlQuery,
-      percentile: Number(percentile),
       start,
       end,
     });
@@ -426,11 +380,9 @@ export const rumRouteRepository = {
   ...rumPageLoadDistributionRoute,
   ...rumPageLoadDistBreakdownRoute,
   ...rumPageViewsTrendRoute,
-  ...rumServicesRoute,
   ...rumVisitorsBreakdownRoute,
   ...rumWebCoreVitals,
   ...rumLongTaskMetrics,
-  ...rumUrlSearch,
   ...rumJSErrors,
   ...rumHasDataRoute,
 };

@@ -5,18 +5,27 @@
  * 2.0.
  */
 import { schema } from '@kbn/config-schema';
-import type { ElasticsearchClient } from 'kibana/server';
-import { IRouter } from '../../../../../src/core/server';
+import _ from 'lodash';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import { IRouter } from '@kbn/core/server';
+import type {
+  AlertsClient,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
 import {
+  ALERTS_PER_PROCESS_EVENTS_PAGE,
   PROCESS_EVENTS_ROUTE,
   PROCESS_EVENTS_PER_PAGE,
   PROCESS_EVENTS_INDEX,
-  ALERTS_INDEX,
   ENTRY_SESSION_ENTITY_ID_PROPERTY,
 } from '../../common/constants';
-import { expandDottedObject } from '../../common/utils/expand_dotted_object';
+import { ProcessEvent } from '../../common/types/process_tree';
+import { searchAlerts } from './alerts_route';
 
-export const registerProcessEventsRoute = (router: IRouter) => {
+export const registerProcessEventsRoute = (
+  router: IRouter,
+  ruleRegistry: RuleRegistryPluginStartContract
+) => {
   router.get(
     {
       path: PROCESS_EVENTS_ROUTE,
@@ -29,57 +38,78 @@ export const registerProcessEventsRoute = (router: IRouter) => {
       },
     },
     async (context, request, response) => {
-      const client = context.core.elasticsearch.client.asCurrentUser;
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
+      const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
       const { sessionEntityId, cursor, forward = true } = request.query;
-      const body = await doSearch(client, sessionEntityId, cursor, forward);
+      const body = await fetchEventsAndScopedAlerts(
+        client,
+        alertsClient,
+        sessionEntityId,
+        cursor,
+        forward
+      );
 
       return response.ok({ body });
     }
   );
 };
 
-export const doSearch = async (
+export const fetchEventsAndScopedAlerts = async (
   client: ElasticsearchClient,
+  alertsClient: AlertsClient,
   sessionEntityId: string,
   cursor: string | undefined,
   forward = true
 ) => {
+  const cursorMillis = cursor && new Date(cursor).getTime() + (forward ? -1 : 1);
+
   const search = await client.search({
-    // TODO: move alerts into it's own route with it's own pagination.
-    index: [PROCESS_EVENTS_INDEX, ALERTS_INDEX],
-    ignore_unavailable: true,
+    index: [PROCESS_EVENTS_INDEX],
     body: {
       query: {
         match: {
           [ENTRY_SESSION_ENTITY_ID_PROPERTY]: sessionEntityId,
         },
       },
-      // This runtime_mappings is a temporary fix, so we are able to Query these ECS fields while they are not available
-      // TODO: Remove the runtime_mappings once process.entry_leader.entity_id is implemented to ECS
-      runtime_mappings: {
-        [ENTRY_SESSION_ENTITY_ID_PROPERTY]: {
-          type: 'keyword',
-        },
-      },
       size: PROCESS_EVENTS_PER_PAGE,
       sort: [{ '@timestamp': forward ? 'asc' : 'desc' }],
-      search_after: cursor ? [cursor] : undefined,
+      search_after: cursorMillis ? [cursorMillis] : undefined,
     },
   });
 
-  const events = search.hits.hits.map((hit: any) => {
-    // TODO: re-eval if this is needed after moving alerts to it's own route.
-    // the .siem-signals-default index flattens many properties. this util unflattens them.
-    hit._source = expandDottedObject(hit._source);
-
-    return hit;
-  });
+  let events = search.hits.hits;
 
   if (!forward) {
     events.reverse();
   }
 
+  const total =
+    typeof search.hits.total === 'number' ? search.hits.total : search.hits.total?.value;
+
+  if (events.length > 0) {
+    // go grab any alerts which happened in this page of events.
+    const firstEvent = _.first(events)?._source as ProcessEvent;
+    const lastEvent = _.last(events)?._source as ProcessEvent;
+
+    let range;
+
+    if (firstEvent?.['@timestamp'] && lastEvent?.['@timestamp']) {
+      range = [firstEvent['@timestamp'], lastEvent['@timestamp']];
+    }
+
+    const alertsBody = await searchAlerts(
+      alertsClient,
+      sessionEntityId,
+      ALERTS_PER_PROCESS_EVENTS_PAGE,
+      undefined,
+      range
+    );
+
+    events = [...events, ...alertsBody.events];
+  }
+
   return {
+    total,
     events,
   };
 };

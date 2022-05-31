@@ -19,10 +19,7 @@ import {
   EuiHighlight,
 } from '@elastic/eui';
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
-import type {
-  BrowserFieldItem,
-  GetFieldTableColumns,
-} from '../../../../../../timelines/common/types';
+import type { BrowserFieldItem, GetFieldTableColumns } from '@kbn/timelines-plugin/common/types';
 
 import * as i18n from './translations';
 import {

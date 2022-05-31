@@ -7,7 +7,7 @@
  */
 
 import { updateSearchSource } from './update_search_source';
-import { createSearchSourceMock } from '../../../../../data/common/search/search_source/mocks';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { indexPatternMock } from '../../../__mocks__/index_pattern';
 import type { SortOrder } from '../../../services/saved_searches';
 import { discoverServiceMock } from '../../../__mocks__/services';

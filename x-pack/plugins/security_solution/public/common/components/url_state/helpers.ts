@@ -12,7 +12,7 @@ import * as H from 'history';
 
 import type { Filter, Query } from '@kbn/es-query';
 
-import { url } from '../../../../../../../src/plugins/kibana_utils/public';
+import { url } from '@kbn/kibana-utils-plugin/public';
 
 import { TimelineId, TimelineTabs } from '../../../../common/types/timeline';
 import { SecurityPageName } from '../../../app/types';
@@ -30,6 +30,7 @@ import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/mod
 export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||
   pageName === SecurityPageName.rules ||
+  pageName === SecurityPageName.rulesCreate ||
   pageName === SecurityPageName.exceptions;
 
 export const decodeRisonUrlState = <T>(value: string | undefined): T | null => {
@@ -94,13 +95,16 @@ export const replaceQueryStringInLocation = (
 export const getUrlType = (pageName: string): UrlStateType => {
   if (pageName === SecurityPageName.overview) {
     return 'overview';
+  }
+  if (pageName === SecurityPageName.landing) {
+    return 'get_started';
   } else if (pageName === SecurityPageName.hosts) {
     return 'host';
   } else if (pageName === SecurityPageName.network) {
     return 'network';
   } else if (pageName === SecurityPageName.alerts) {
     return 'alerts';
-  } else if (pageName === SecurityPageName.rules) {
+  } else if (pageName === SecurityPageName.rules || pageName === SecurityPageName.rulesCreate) {
     return 'rules';
   } else if (pageName === SecurityPageName.exceptions) {
     return 'exceptions';

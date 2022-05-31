@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MlSummaryJob } from '../../../../../ml/public';
+import { MlSummaryJob } from '@kbn/ml-plugin/public';
 import {
   Group,
   Module,
@@ -548,7 +548,7 @@ export const mockSecurityJobs: SecurityJob[] = [
     datafeedState: '',
     hasDatafeed: false,
     isSingleMetricViewerJob: false,
-    jobState: '',
+    jobState: 'closed',
     memory_status: '',
     processed_record_count: 0,
     id: 'rare_process_by_host_windows_ecs',

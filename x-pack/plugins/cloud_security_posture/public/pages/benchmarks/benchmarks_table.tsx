@@ -15,14 +15,15 @@ import {
 import React from 'react';
 import moment from 'moment';
 import { Link, useHistory, generatePath } from 'react-router-dom';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { TABLE_COLUMN_HEADERS } from './translations';
 import type { Benchmark } from '../../../common/types';
-import { pagePathGetters } from '../../../../fleet/public';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { allNavigationItems } from '../../common/navigation/constants';
 
 interface BenchmarksTableProps
-  extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage'>,
+  extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
     Pagination {
   benchmarks: Benchmark[];
   setQuery(pagination: CriteriaWithPagination<Benchmark>): void;
@@ -66,12 +67,26 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
       </Link>
     ),
     truncateText: true,
+    sortable: true,
+  },
+  {
+    field: 'rules',
+    name: TABLE_COLUMN_HEADERS.ACTIVE_RULES,
+    truncateText: true,
+    render: ({ enabled, all }: Benchmark['rules']) => (
+      <FormattedMessage
+        id="xpack.csp.benchmark.benchmarkTable.activeRulesColumnRenderTitle"
+        defaultMessage="{enabled} of {all}"
+        values={{ enabled, all }}
+      />
+    ),
   },
   {
     field: 'package_policy.package.title',
     name: TABLE_COLUMN_HEADERS.INTEGRATION_TYPE,
     dataType: 'string',
     truncateText: true,
+    sortable: true,
   },
   {
     field: 'agent_policy.name',
@@ -91,6 +106,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     name: TABLE_COLUMN_HEADERS.CREATED_BY,
     dataType: 'string',
     truncateText: true,
+    sortable: true,
   },
   {
     field: 'package_policy.created_at',
@@ -98,13 +114,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     dataType: 'date',
     truncateText: true,
     render: (date: Benchmark['package_policy']['created_at']) => moment(date).fromNow(),
-  },
-  {
-    field: 'package_policy.rules', // TODO: add fields
-    name: TABLE_COLUMN_HEADERS.ACTIVE_RULES,
-    truncateText: true,
-    // render: (benchmarkIntegration) =>
-    //   `${benchmarkIntegration.rules.active} of ${benchmarkIntegration.rules.total}`,
+    sortable: true,
   },
 ];
 
@@ -117,6 +127,7 @@ export const BenchmarksTable = ({
   error,
   setQuery,
   noItemsMessage,
+  sorting,
   ...rest
 }: BenchmarksTableProps) => {
   const history = useHistory();
@@ -137,9 +148,8 @@ export const BenchmarksTable = ({
     totalItemCount,
   };
 
-  const onChange = ({ page }: CriteriaWithPagination<Benchmark>) => {
-    if (!page) return;
-    setQuery({ page: { ...page, index: page.index + 1 } });
+  const onChange = ({ page, sort }: CriteriaWithPagination<Benchmark>) => {
+    setQuery({ page: { ...page, index: page.index + 1 }, sort });
   };
 
   return (
@@ -155,6 +165,7 @@ export const BenchmarksTable = ({
       loading={loading}
       noItemsMessage={noItemsMessage}
       error={error}
+      sorting={sorting}
     />
   );
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import {
   CoreSetup,
   CoreStart,
@@ -13,13 +13,13 @@ import {
   Logger,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/server';
+} from '@kbn/core/server';
 import { isEmpty, mapValues } from 'lodash';
-import { mappingFromFieldMap } from '../../rule_registry/common/mapping_from_field_map';
-import { experimentalRuleFieldMap } from '../../rule_registry/common/assets/field_maps/experimental_rule_field_map';
-import { Dataset } from '../../rule_registry/server';
+import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
+import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { Dataset } from '@kbn/rule-registry-plugin/server';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
-import { UI_SETTINGS } from '../../../../src/plugins/data/common';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmAlerts } from './routes/alerts/register_apm_alerts';
 import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
@@ -154,7 +154,7 @@ export class APMPlugin
     const boundGetApmIndices = async () =>
       getApmIndices({
         savedObjectsClient: await getInternalSavedObjectsClient(core),
-        config: await config$.pipe(take(1)).toPromise(),
+        config: await firstValueFrom(config$),
       });
 
     boundGetApmIndices().then((indices) => {
@@ -194,6 +194,7 @@ export class APMPlugin
         ml: plugins.ml,
         config$,
         logger: this.logger!.get('rule'),
+        basePath: core.http.basePath,
       });
     }
 
@@ -217,12 +218,13 @@ export class APMPlugin
         request: KibanaRequest;
         context: ApmPluginRequestHandlerContext;
       }) => {
+        const coreContext = await context.core;
         const [indices, includeFrozen] = await Promise.all([
           boundGetApmIndices(),
-          context.core.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
+          coreContext.uiSettings.client.get(UI_SETTINGS.SEARCH_INCLUDE_FROZEN),
         ]);
 
-        const esClient = context.core.elasticsearch.client.asCurrentUser;
+        const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
         return new APMEventClient({
           debug: debug ?? false,

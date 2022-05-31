@@ -32,17 +32,23 @@ import { useFormatUrl } from '../../../../../common/components/link_to';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { LinkAnchor } from '../../../../../common/components/links';
+import { GenericLinkButton } from '../../../../../common/components/links/helpers';
 
 const EventModuleFlexItem = styled(EuiFlexItem)`
   width: 100%;
 `;
 
 interface RenderRuleNameProps {
+  children?: React.ReactNode;
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
+  isButton?: boolean;
+  onClick?: () => void;
   linkValue: string | null | undefined;
   truncate?: boolean;
   title?: string;
@@ -50,11 +56,16 @@ interface RenderRuleNameProps {
 }
 
 export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
+  children,
   Component,
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isDraggable,
+  isButton,
+  onClick,
   linkValue,
   truncate,
   title,
@@ -64,11 +75,6 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
   const ruleId = linkValue;
   const { search } = useFormatUrl(SecurityPageName.rules);
   const { navigateToApp, getUrlForApp } = useKibana().services.application;
-  const content = truncate ? (
-    <TruncatableText dataTestSubj={`formatted-field-${fieldName}`}>{value}</TruncatableText>
-  ) : (
-    value
-  );
 
   const goToRuleDetails = useCallback(
     (ev) => {
@@ -90,27 +96,64 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     [getUrlForApp, ruleId, search]
   );
   const id = `event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${ruleId}`;
+  const link = useMemo(() => {
+    const content = truncate ? (
+      <TruncatableText dataTestSubj={`formatted-field-${fieldName}`}>{value}</TruncatableText>
+    ) : (
+      value
+    );
+    if (isButton) {
+      return (
+        <GenericLinkButton
+          Component={Component}
+          dataTestSubj="data-grid-host-details"
+          href={href}
+          iconType="expand"
+          onClick={onClick ?? goToRuleDetails}
+          title={title ?? ruleName}
+        >
+          {children}
+        </GenericLinkButton>
+      );
+    } else if (Component) {
+      return (
+        <Component
+          aria-label={title}
+          data-test-subj={`view-${fieldName}`}
+          iconType="link"
+          onClick={goToRuleDetails}
+          title={title}
+        >
+          {title ?? value}
+        </Component>
+      );
+    } else {
+      return (
+        <LinkAnchor onClick={goToRuleDetails} href={href} data-test-subj="ruleName">
+          {content}
+        </LinkAnchor>
+      );
+    }
+  }, [
+    Component,
+    children,
+    fieldName,
+    goToRuleDetails,
+    href,
+    isButton,
+    onClick,
+    ruleName,
+    title,
+    truncate,
+    value,
+  ]);
 
   if (isString(value) && ruleName.length > 0 && ruleId != null) {
-    const link = Component ? (
-      <Component
-        aria-label={title}
-        data-test-subj={`view-${fieldName}`}
-        iconType="link"
-        onClick={goToRuleDetails}
-        title={title}
-      >
-        {title ?? value}
-      </Component>
-    ) : (
-      <LinkAnchor onClick={goToRuleDetails} href={href} data-test-subj="ruleName">
-        {content}
-      </LinkAnchor>
-    );
-
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         id={id}
         isDraggable={isDraggable}
         tooltipContent={value}
@@ -125,6 +168,8 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
     return isDraggable ? (
       <DefaultDraggable
         field={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         id={id}
         isDraggable={isDraggable}
         tooltipContent={value}
@@ -151,6 +196,8 @@ export const renderEventModule = ({
   contextId,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isDraggable,
   linkValue,
   truncate,
@@ -159,6 +206,8 @@ export const renderEventModule = ({
   contextId: string;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   linkValue: string | null | undefined;
   truncate?: boolean;
@@ -182,6 +231,8 @@ export const renderEventModule = ({
           <DefaultDraggable
             field={fieldName}
             id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${moduleName}`}
+            fieldType={fieldType}
+            isAggregatable={isAggregatable}
             isDraggable={isDraggable}
             tooltipContent={value}
             value={value}
@@ -249,6 +300,8 @@ export const renderUrl = ({
   Component,
   eventId,
   fieldName,
+  fieldType,
+  isAggregatable,
   isDraggable,
   truncate,
   title,
@@ -259,6 +312,8 @@ export const renderUrl = ({
   Component?: typeof EuiButtonEmpty | typeof EuiButtonIcon;
   eventId: string;
   fieldName: string;
+  fieldType: string;
+  isAggregatable: boolean;
   isDraggable: boolean;
   truncate?: boolean;
   title?: string;
@@ -284,6 +339,8 @@ export const renderUrl = ({
     isDraggable ? (
       <DefaultDraggable
         field={fieldName}
+        fieldType={fieldType}
+        isAggregatable={isAggregatable}
         id={`event-details-value-default-draggable-${contextId}-${eventId}-${fieldName}-${value}-${urlName}`}
         isDraggable={isDraggable}
         tooltipContent={value}

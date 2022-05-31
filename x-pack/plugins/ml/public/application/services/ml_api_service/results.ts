@@ -6,8 +6,9 @@
  */
 
 // Service for obtaining data for the ML Results dashboards.
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { HttpService } from '../http_service';
-import { basePath } from './index';
+import { basePath } from '.';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
 import type {
   GetStoppedPartitionResult,
@@ -16,12 +17,12 @@ import type {
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 import type { PartitionFieldsConfig } from '../../../../common/types/storage';
-import type {
-  ESSearchRequest,
-  ESSearchResponse,
-} from '../../../../../../../src/core/types/elasticsearch';
 import type { MLAnomalyDoc } from '../../../../common/types/anomalies';
 import type { EntityField } from '../../../../common/util/anomaly_utils';
+import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
+import type { ExplorerChartsData } from '../../../../common/types/results';
+
+export type ResultsApiService = ReturnType<typeof resultsApiProvider>;
 
 export const resultsApiProvider = (httpService: HttpService) => ({
   getAnomaliesTableData(
@@ -159,6 +160,35 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
     return httpService.http<GetDatafeedResultsChartDataResult>({
       path: `${basePath()}/results/datafeed_results_chart`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  getAnomalyCharts$(
+    jobIds: string[],
+    influencers: EntityField[],
+    threshold: number,
+    earliestMs: number,
+    latestMs: number,
+    timeBounds: { min?: number; max?: number },
+    maxResults: number,
+    numberOfPoints: number,
+    influencersFilterQuery?: InfluencersFilterQuery
+  ) {
+    const body = JSON.stringify({
+      jobIds,
+      influencers,
+      threshold,
+      earliestMs,
+      latestMs,
+      maxResults,
+      influencersFilterQuery,
+      numberOfPoints,
+      timeBounds,
+    });
+    return httpService.http$<ExplorerChartsData>({
+      path: `${basePath()}/results/anomaly_charts`,
       method: 'POST',
       body,
     });

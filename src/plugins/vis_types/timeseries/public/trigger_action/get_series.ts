@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { VisualizeEditorLayersContext } from '../../../../visualizations/public';
+import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
 import type { Metric } from '../../common/types';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import {
   getPercentilesSeries,
+  getPercentileRankSeries,
   getFormulaSeries,
   getParentPipelineSeries,
   getSiblingPipelineSeriesFormula,
@@ -45,6 +46,19 @@ export const getSeries = (
       }
       break;
     }
+    case 'percentile_rank': {
+      const values = metrics[metricIdx].values;
+      const colors = metrics[metricIdx].colors;
+      if (values?.length) {
+        const percentileRanksSeries = getPercentileRankSeries(
+          values,
+          colors,
+          fieldName
+        ) as VisualizeEditorLayersContext['metrics'];
+        metricsArray = [...metricsArray, ...percentileRanksSeries];
+      }
+      break;
+    }
     case 'math': {
       // find the metric idx that has math expression
       const mathMetricIdx = metrics.findIndex((metric) => metric.type === 'math');
@@ -69,7 +83,7 @@ export const getSeries = (
         }
 
         // should treat percentiles differently
-        if (currentMetric.type === 'percentile') {
+        if (currentMetric.type === 'percentile' || currentMetric.type === 'percentile_rank') {
           variables.forEach((variable) => {
             const [_, meta] = variable?.field?.split('[') ?? [];
             const metaValue = Number(meta?.replace(']', ''));
@@ -100,7 +114,7 @@ export const getSeries = (
       break;
     }
     case 'cumulative_sum': {
-      //  percentile value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
+      //  percentile and percentile_rank value is derived from the field Id. It has the format xxx-xxx-xxx-xxx[percentile]
       const [fieldId, meta] = metrics[metricIdx]?.field?.split('[') ?? [];
       const subFunctionMetric = metrics.find((metric) => metric.id === fieldId);
       if (!subFunctionMetric || subFunctionMetric.type === 'static') {

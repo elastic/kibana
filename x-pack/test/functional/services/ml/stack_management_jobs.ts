@@ -10,12 +10,12 @@ import { REPO_ROOT } from '@kbn/utils';
 import fs from 'fs';
 import path from 'path';
 
+import type { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlADJobTable } from './job_table';
 import type { MlDFAJobTable } from './data_frame_analytics_table';
-import type { JobType } from '../../../../plugins/ml/common/types/saved_objects';
-import type { Job, Datafeed } from '../../../../plugins/ml/common/types/anomaly_detection_jobs';
-import type { DataFrameAnalyticsConfig } from '../../../../plugins/ml/public/application/data_frame_analytics/common';
 
 type SyncFlyoutObjectType =
   | 'MissingObjects'

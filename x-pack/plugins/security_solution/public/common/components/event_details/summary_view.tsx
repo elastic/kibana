@@ -23,8 +23,9 @@ import { VIEW_ALL_FIELDS } from './translations';
 import { SummaryTable } from './table/summary_table';
 import { SummaryValueCell } from './table/summary_value_cell';
 import { PrevalenceCellRenderer } from './table/prevalence_cell';
+import { AddToTimelineCellRenderer } from './table/add_to_timeline_cell';
 
-const summaryColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
+const baseColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
   {
     field: 'title',
     truncateText: false,
@@ -37,6 +38,10 @@ const summaryColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
     render: SummaryValueCell,
     name: i18n.HIGHLIGHTED_FIELDS_VALUE,
   },
+];
+
+const allColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
+  ...baseColumns,
   {
     field: 'description',
     truncateText: true,
@@ -47,13 +52,20 @@ const summaryColumns: Array<EuiBasicTableColumn<AlertSummaryRow>> = [
         <EuiIconTip
           type="iInCircle"
           color="subdued"
-          title="Alert Prevalence"
+          title={i18n.HIGHLIGHTED_FIELDS_ALERT_PREVALENCE}
           content={<span>{i18n.HIGHLIGHTED_FIELDS_ALERT_PREVALENCE_TOOLTIP}</span>}
         />
       </>
     ),
     align: 'right',
     width: '130px',
+  },
+  {
+    field: 'description',
+    truncateText: true,
+    render: AddToTimelineCellRenderer,
+    name: '',
+    width: '30px',
   },
 ];
 
@@ -66,7 +78,10 @@ const SummaryViewComponent: React.FC<{
   goToTable: () => void;
   title: string;
   rows: AlertSummaryRow[];
-}> = ({ goToTable, rows, title }) => {
+  isReadOnly?: boolean;
+}> = ({ goToTable, rows, title, isReadOnly }) => {
+  const columns = isReadOnly ? baseColumns : allColumns;
+
   return (
     <div>
       <EuiFlexGroup>
@@ -85,7 +100,7 @@ const SummaryViewComponent: React.FC<{
       <SummaryTable
         data-test-subj="summary-view"
         items={rows}
-        columns={summaryColumns}
+        columns={columns}
         rowProps={rowProps}
         compressed
       />

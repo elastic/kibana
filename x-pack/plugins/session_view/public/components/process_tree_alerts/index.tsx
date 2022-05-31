@@ -13,30 +13,31 @@ import { MOUSE_EVENT_PLACEHOLDER } from '../../../common/constants';
 
 export interface ProcessTreeAlertsDeps {
   alerts: ProcessEvent[];
-  jumpToAlertID?: string;
+  investigatedAlertId?: string;
   isProcessSelected?: boolean;
   onAlertSelected: (e: MouseEvent) => void;
-  loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
-  handleOnAlertDetailsClosed: (alertUuid: string) => void;
+  onShowAlertDetails: (alertUuid: string) => void;
 }
 
 export function ProcessTreeAlerts({
   alerts,
-  jumpToAlertID,
+  investigatedAlertId,
   isProcessSelected = false,
   onAlertSelected,
-  loadAlertDetails,
-  handleOnAlertDetailsClosed,
+  onShowAlertDetails,
 }: ProcessTreeAlertsDeps) {
   const [selectedAlert, setSelectedAlert] = useState<ProcessEventAlert | null>(null);
   const styles = useStyles();
 
   useEffect(() => {
-    const jumpToAlert = alerts.find((alert) => alert.kibana?.alert.uuid === jumpToAlertID);
-    if (jumpToAlertID && jumpToAlert) {
+    const jumpToAlert =
+      investigatedAlertId &&
+      alerts.find((alert) => alert.kibana?.alert?.uuid === investigatedAlertId);
+
+    if (jumpToAlert) {
       setSelectedAlert(jumpToAlert.kibana?.alert!);
     }
-  }, [jumpToAlertID, alerts]);
+  }, [investigatedAlertId, alerts]);
 
   const scrollerRef = useRef<HTMLDivElement>(null);
 
@@ -80,18 +81,17 @@ export function ProcessTreeAlerts({
       data-test-subj="sessionView:sessionViewAlertDetails"
     >
       {alerts.map((alert: ProcessEvent, idx: number) => {
-        const alertUuid = alert.kibana?.alert.uuid || null;
+        const alertUuid = alert.kibana?.alert?.uuid || null;
 
         return (
           <ProcessTreeAlert
             key={`${alertUuid}-${idx}`}
             alert={alert}
-            isInvestigated={jumpToAlertID === alertUuid}
+            isInvestigated={investigatedAlertId === alertUuid}
             isSelected={isProcessSelected && selectedAlert?.uuid === alertUuid}
             onClick={handleAlertClick}
             selectAlert={selectAlert}
-            loadAlertDetails={loadAlertDetails}
-            handleOnAlertDetailsClosed={handleOnAlertDetailsClosed}
+            onShowAlertDetails={onShowAlertDetails}
           />
         );
       })}

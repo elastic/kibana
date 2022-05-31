@@ -43,11 +43,7 @@ import { ComponentLoader } from '../../../components/shared/component_loader';
 import { LicenseBadge } from '../../../components/shared/license_badge';
 import { StatusItem } from '../../../components/shared/status_item';
 import { ViewContentHeader } from '../../../components/shared/view_content_header';
-import {
-  RECENT_ACTIVITY_TITLE,
-  CREDENTIALS_TITLE,
-  DOCUMENTATION_LINK_TITLE,
-} from '../../../constants';
+import { RECENT_ACTIVITY_TITLE } from '../../../constants';
 import {
   SYNC_FREQUENCY_PATH,
   BLOCKED_TIME_WINDOWS_PATH,
@@ -78,7 +74,6 @@ import {
   EXTERNAL_IDENTITIES_LINK,
   LEARN_CUSTOM_FEATURES_BUTTON,
   DOC_PERMISSIONS_DESCRIPTION,
-  CUSTOM_CALLOUT_TITLE,
   SOURCE_SYNCHRONIZATION_TITLE,
   SOURCE_SYNC_FREQUENCY_LINK_LABEL,
   SOURCE_BLOCKED_TIME_WINDOWS_LINK_LABEL,
@@ -88,7 +83,7 @@ import {
 } from '../constants';
 import { SourceLogic } from '../source_logic';
 
-import { SourceIdentifier } from './source_identifier';
+import { CustomSourceDeployment } from './custom_source_deployment';
 import { SourceLayout } from './source_layout';
 
 export const Overview: React.FC = () => {
@@ -110,7 +105,7 @@ export const Overview: React.FC = () => {
     isFederatedSource,
     isIndexedSource,
     serviceType,
-    name,
+    baseServiceType,
   } = contentSource;
 
   const [isSyncing, setIsSyncing] = useState(false);
@@ -363,27 +358,27 @@ export const Overview: React.FC = () => {
   );
 
   const sourceStatus = (
-    <EuiPanel hasShadow={false} color="subdued">
-      <EuiText size="s">
-        <h6>
-          <EuiTextColor color="subdued">{STATUS_HEADER}</EuiTextColor>
-        </h6>
-      </EuiText>
+    <>
+      <EuiTitle size="xs">
+        <h6>{STATUS_HEADER}</h6>
+      </EuiTitle>
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="m" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon size="l" type="checkInCircleFilled" color="success" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiText>
-            <strong>{STATUS_HEADING}</strong>
-          </EuiText>
-          <EuiText size="s">
-            <p>{STATUS_TEXT}</p>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+      <EuiPanel hasShadow={false} color="subdued">
+        <EuiFlexGroup gutterSize="m" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon size="l" type="checkInCircleFilled" color="success" />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText>
+              <strong>{STATUS_HEADING}</strong>
+            </EuiText>
+            <EuiText size="s">
+              <p>{STATUS_TEXT}</p>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </>
   );
 
   const permissionsStatus = (
@@ -422,56 +417,45 @@ export const Overview: React.FC = () => {
     </EuiPanel>
   );
 
-  const credentials = (
-    <EuiPanel hasShadow={false} color="subdued">
-      <EuiText size="s">
-        <h6>
-          <EuiTextColor color="subdued">{CREDENTIALS_TITLE}</EuiTextColor>
-        </h6>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <SourceIdentifier id={id} />
-    </EuiPanel>
-  );
-
-  const DocumentationCallout = ({
-    title,
-    children,
-  }: {
-    title: string;
-    children: React.ReactNode;
-  }) => (
-    <EuiPanel hasShadow={false} color="subdued">
-      <EuiText size="s">
-        <h6>
-          <EuiTextColor color="subdued">{DOCUMENTATION_LINK_TITLE}</EuiTextColor>
-        </h6>
-      </EuiText>
-      <EuiSpacer size="s" />
+  const customSourceDeployment = (
+    <>
       <EuiTitle size="xs">
-        <span>{title}</span>
+        <h6>
+          {i18n.translate('xpack.enterpriseSearch.workplaceSearch.deployment.title', {
+            defaultMessage: 'Deployment',
+          })}
+        </h6>
       </EuiTitle>
-      <EuiText size="s">{children}</EuiText>
-    </EuiPanel>
+      <EuiSpacer size="s" />
+      <CustomSourceDeployment source={contentSource} baseServiceType={baseServiceType} small />
+    </>
   );
 
   const documentPermssionsLicenseLocked = (
-    <EuiPanel hasShadow={false} color="subdued">
-      <LicenseBadge />
+    <>
+      <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <span>{DOCUMENT_PERMISSIONS_TITLE}</span>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LicenseBadge />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiTitle size="xs">
-        <span>{DOCUMENT_PERMISSIONS_TITLE}</span>
-      </EuiTitle>
-      <EuiText size="s">
-        <p>{DOC_PERMISSIONS_DESCRIPTION}</p>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiText size="s">
-        <EuiLink target="_blank" href={docLinks.licenseManagement}>
-          {LEARN_CUSTOM_FEATURES_BUTTON}
-        </EuiLink>
-      </EuiText>
-    </EuiPanel>
+      <EuiPanel hasShadow={false} color="subdued">
+        <EuiText size="s">
+          <p>{DOC_PERMISSIONS_DESCRIPTION}</p>
+        </EuiText>
+        <EuiSpacer size="s" />
+        <EuiText size="s">
+          <EuiLink target="_blank" href={docLinks.licenseManagement}>
+            {LEARN_CUSTOM_FEATURES_BUTTON}
+          </EuiLink>
+        </EuiText>
+      </EuiPanel>
+    </>
   );
 
   const syncTriggerCallout = (
@@ -557,27 +541,7 @@ export const Overview: React.FC = () => {
             {custom && (
               <>
                 <EuiFlexItem>{sourceStatus}</EuiFlexItem>
-                <EuiFlexItem>{credentials}</EuiFlexItem>
-                <EuiFlexItem>
-                  <DocumentationCallout
-                    data-test-subj="DocumentationCallout"
-                    title={CUSTOM_CALLOUT_TITLE}
-                  >
-                    <p>
-                      <FormattedMessage
-                        id="xpack.enterpriseSearch.workplaceSearch.sources.learnMoreCustom.text"
-                        defaultMessage="{learnMoreLink} about custom sources."
-                        values={{
-                          learnMoreLink: (
-                            <EuiLink target="_blank" href={docLinks.workplaceSearchCustomSources}>
-                              {LEARN_MORE_LINK}
-                            </EuiLink>
-                          ),
-                        }}
-                      />
-                    </p>
-                  </DocumentationCallout>
-                </EuiFlexItem>
+                <EuiFlexItem>{customSourceDeployment}</EuiFlexItem>
                 {!licenseSupportsPermissions && (
                   <EuiFlexItem>{documentPermssionsLicenseLocked}</EuiFlexItem>
                 )}
@@ -601,8 +565,7 @@ export const Overview: React.FC = () => {
                       'xpack.enterpriseSearch.workplaceSearch.sources.feedbackCallOutText',
                       {
                         defaultMessage:
-                          'Have feedback about deploying a {name} Connector Package? Let us know.',
-                        values: { name },
+                          'Have feedback about deploying a connector package? Let us know.',
                       }
                     )}
                   </EuiLink>

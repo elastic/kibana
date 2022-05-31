@@ -13,6 +13,7 @@ import { thresholdRuleParams, ThresholdRuleParams } from '../../schemas/rule_sch
 import { thresholdExecutor } from '../../signals/executors/threshold';
 import { ThresholdAlertState } from '../../signals/types';
 import { CreateRuleOptions, SecurityAlertType } from '../types';
+import { validateImmutable, validateIndexPatterns } from '../utils';
 
 export const createThresholdAlertType = (
   createOptions: CreateRuleOptions
@@ -21,7 +22,6 @@ export const createThresholdAlertType = (
   return {
     id: THRESHOLD_RULE_TYPE_ID,
     name: 'Threshold Rule',
-    ruleTaskTimeout: experimentalFeatures.securityRulesCancelEnabled ? '5m' : '1d',
     validate: {
       params: {
         validate: (object: unknown): ThresholdRuleParams => {
@@ -33,6 +33,18 @@ export const createThresholdAlertType = (
             throw new Error('Validation of rule params failed');
           }
           return validated;
+        },
+        /**
+         * validate rule params when rule is bulk edited (update and created in future as well)
+         * returned params can be modified (useful in case of version increment)
+         * @param mutatedRuleParams
+         * @returns mutatedRuleParams
+         */
+        validateMutatedParams: (mutatedRuleParams) => {
+          validateImmutable(mutatedRuleParams.immutable);
+          validateIndexPatterns(mutatedRuleParams.index);
+
+          return mutatedRuleParams;
         },
       },
     },
@@ -51,7 +63,15 @@ export const createThresholdAlertType = (
     producer: SERVER_APP_ID,
     async executor(execOptions) {
       const {
-        runOpts: { buildRuleMessage, bulkCreate, exceptionItems, completeRule, tuple, wrapHits },
+        runOpts: {
+          buildRuleMessage,
+          bulkCreate,
+          exceptionItems,
+          completeRule,
+          tuple,
+          wrapHits,
+          ruleDataReader,
+        },
         services,
         startedAt,
         state,
@@ -70,6 +90,7 @@ export const createThresholdAlertType = (
         tuple,
         version,
         wrapHits,
+        ruleDataReader,
       });
 
       return result;

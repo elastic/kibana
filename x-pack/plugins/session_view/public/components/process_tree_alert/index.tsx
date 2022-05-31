@@ -6,8 +6,9 @@
  */
 
 import React, { useEffect, useCallback } from 'react';
-import { EuiBadge, EuiIcon, EuiText, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiIcon, EuiText, EuiButtonIcon } from '@elastic/eui';
 import { ProcessEvent, ProcessEventAlert } from '../../../common/types/process_tree';
+import { dataOrDash } from '../../utils/data_or_dash';
 import { getBadgeColorFromAlertStatus } from './helpers';
 import { useStyles } from './styles';
 
@@ -17,8 +18,7 @@ export interface ProcessTreeAlertDeps {
   isSelected: boolean;
   onClick: (alert: ProcessEventAlert | null) => void;
   selectAlert: (alertUuid: string) => void;
-  loadAlertDetails?: (alertUuid: string, handleOnAlertDetailsClosed: () => void) => void;
-  handleOnAlertDetailsClosed: (alertUuid: string, status?: string) => void;
+  onShowAlertDetails: (alertUuid: string) => void;
 }
 
 export const ProcessTreeAlert = ({
@@ -27,11 +27,11 @@ export const ProcessTreeAlert = ({
   isSelected,
   onClick,
   selectAlert,
-  loadAlertDetails,
-  handleOnAlertDetailsClosed,
+  onShowAlertDetails,
 }: ProcessTreeAlertDeps) => {
   const styles = useStyles({ isInvestigated, isSelected });
 
+  const { event } = alert;
   const { uuid, rule, workflow_status: status } = alert.kibana?.alert || {};
 
   useEffect(() => {
@@ -41,10 +41,10 @@ export const ProcessTreeAlert = ({
   }, [isInvestigated, uuid, selectAlert]);
 
   const handleExpandClick = useCallback(() => {
-    if (loadAlertDetails && uuid) {
-      loadAlertDetails(uuid, () => handleOnAlertDetailsClosed(uuid));
+    if (uuid) {
+      onShowAlertDetails(uuid);
     }
-  }, [handleOnAlertDetailsClosed, loadAlertDetails, uuid]);
+  }, [onShowAlertDetails, uuid]);
 
   const handleClick = useCallback(() => {
     if (alert.kibana?.alert) {
@@ -59,28 +59,39 @@ export const ProcessTreeAlert = ({
   const { name } = rule;
 
   return (
-    <EuiText
-      key={uuid}
-      size="s"
-      css={styles.alert}
-      data-id={uuid}
-      data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}`}
-      onClick={handleClick}
-    >
-      <EuiButtonIcon
-        iconType="expand"
-        aria-label="expand"
-        css={styles.alertRowItem}
-        data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
-        onClick={handleExpandClick}
-      />
-      <EuiIcon type="alert" css={styles.alertRowItem} />
-      <EuiText size="s" css={styles.alertRuleName}>
-        {name}
-      </EuiText>
-      <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>
-        {status}
-      </EuiBadge>
-    </EuiText>
+    <div key={uuid} css={styles.alert} data-id={uuid}>
+      <EuiFlexGroup
+        alignItems="center"
+        gutterSize="s"
+        wrap
+        onClick={handleClick}
+        data-test-subj={`sessionView:sessionViewAlertDetail-${uuid}`}
+      >
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="expand"
+            aria-label="expand"
+            data-test-subj={`sessionView:sessionViewAlertDetailExpand-${uuid}`}
+            onClick={handleExpandClick}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="alert" color="danger" />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText css={styles.alertName} size="s">
+            {dataOrDash(name)}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={getBadgeColorFromAlertStatus(status)} css={styles.alertStatus}>
+            {dataOrDash(status)}
+          </EuiBadge>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge css={styles.actionBadge}>{event?.action}</EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
   );
 };

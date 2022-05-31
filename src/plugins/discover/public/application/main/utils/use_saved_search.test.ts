@@ -76,7 +76,7 @@ describe('test useSavedSearch', () => {
       });
     });
 
-    result.current.refetch$.next();
+    result.current.refetch$.next(undefined);
 
     await waitForValueToChange(() => {
       return result.current.data$.main$.value.fetchStatus === 'complete';
@@ -119,7 +119,7 @@ describe('test useSavedSearch', () => {
       });
     });
 
-    result.current.refetch$.next();
+    result.current.refetch$.next(undefined);
 
     await waitForValueToChange(() => {
       return result.current.data$.main$.value.fetchStatus === FetchStatus.COMPLETE;

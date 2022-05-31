@@ -13,17 +13,19 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsImporter,
   Logger,
-} from 'src/core/server';
-import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from 'src/core/server/types';
+} from '@kbn/core/server';
+import type { SavedObjectsImportSuccess, SavedObjectsImportFailure } from '@kbn/core/server/types';
 import { createListStream } from '@kbn/utils';
 import { partition } from 'lodash';
 
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
-import type { AssetType, AssetReference, AssetParts } from '../../../../types';
+import type { AssetType, AssetReference, AssetParts, Installation } from '../../../../types';
 import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
+import { saveKibanaAssetsRefs } from '../../packages/install';
+import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
 
 type SavedObjectsImporterContract = Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
 const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
@@ -52,7 +54,11 @@ const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedObjectTyp
   [KibanaAssetType.lens]: KibanaSavedObjectType.lens,
   [KibanaAssetType.mlModule]: KibanaSavedObjectType.mlModule,
   [KibanaAssetType.securityRule]: KibanaSavedObjectType.securityRule,
+  [KibanaAssetType.cloudSecurityPostureRuleTemplate]:
+    KibanaSavedObjectType.cloudSecurityPostureRuleTemplate,
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
+  [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
+  [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
@@ -118,6 +124,41 @@ export async function installKibanaAssets(options: {
 
   return installedAssets;
 }
+
+export async function installKibanaAssetsAndReferences({
+  savedObjectsClient,
+  savedObjectsImporter,
+  logger,
+  pkgName,
+  paths,
+  installedPkg,
+}: {
+  savedObjectsClient: SavedObjectsClientContract;
+  savedObjectsImporter: Pick<SavedObjectsImporter, 'import' | 'resolveImportErrors'>;
+  logger: Logger;
+  pkgName: string;
+  paths: string[];
+  installedPkg?: SavedObject<Installation>;
+}) {
+  const kibanaAssets = await getKibanaAssets(paths);
+  if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
+  // save new kibana refs before installing the assets
+  const installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
+    savedObjectsClient,
+    pkgName,
+    kibanaAssets
+  );
+
+  await installKibanaAssets({
+    logger,
+    savedObjectsImporter,
+    pkgName,
+    kibanaAssets,
+  });
+
+  return installedKibanaAssetsRefs;
+}
+
 export const deleteKibanaInstalledRefs = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
@@ -227,6 +268,7 @@ export async function installKibanaSavedObjects({
         overwrite: true,
         readStream: createListStream(toBeSavedObjects),
         createNewCopies: false,
+        refresh: false,
       })
     );
 
@@ -250,7 +292,7 @@ export async function installKibanaSavedObjects({
     /*
     A reference error here means that a saved object reference in the references
     array cannot be found. This is an error in the package its-self but not a fatal
-    one. For example a dashboard may still refer to the legacy `metricbeat-*` index 
+    one. For example a dashboard may still refer to the legacy `metricbeat-*` index
     pattern. We ignore reference errors here so that legacy version of a package
     can still be installed, but if a warning is logged it should be reported to
     the integrations team. */

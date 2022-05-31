@@ -27,6 +27,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createStructuredSelector } from 'reselect';
 import { useDispatch } from 'react-redux';
+import {
+  CreatePackagePolicyRouteState,
+  AgentPolicyDetailsDeployAgentAction,
+  pagePathGetters,
+} from '@kbn/fleet-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
@@ -40,11 +46,6 @@ import { PolicyEmptyState, HostsEmptyState } from '../../../components/managemen
 import { FormattedDate } from '../../../../common/components/formatted_date';
 import { useNavigateToAppEventHandler } from '../../../../common/hooks/endpoint/use_navigate_to_app_event_handler';
 import { EndpointPolicyLink } from '../../../components/endpoint_policy_link';
-import {
-  CreatePackagePolicyRouteState,
-  AgentPolicyDetailsDeployAgentAction,
-  pagePathGetters,
-} from '../../../../../../fleet/public';
 import { SecurityPageName } from '../../../../app/types';
 import {
   getEndpointListPath,
@@ -57,7 +58,6 @@ import { EndpointAction } from '../store/action';
 import { OutOfDate } from './components/out_of_date';
 import { AdminSearchBar } from './components/search_bar';
 import { AdministrationListPage } from '../../../components/administration_list_page';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { LinkToApp } from '../../../../common/components/endpoint/link_to_app';
 import { TableRowActions } from './components/table_row_actions';
 import { EndpointAgentStatus } from './components/endpoint_agent_status';
@@ -68,6 +68,7 @@ import {
   BackToExternalAppButton,
   BackToExternalAppButtonProps,
 } from '../../../components/back_to_external_app_button/back_to_external_app_button';
+import { ManagementEmptyStateWrapper } from '../../../components/management_empty_state_wrapper';
 
 const MAX_PAGINATED_ITEM = 9999;
 const TRANSFORM_URL = '/data/transform';
@@ -131,6 +132,7 @@ export const EndpointList = () => {
     metadataTransformStats,
   } = useEndpointSelector(selector);
   const { search } = useFormatUrl(SecurityPageName.administration);
+  const { search: searchParams } = useLocation();
   const { getAppUrl } = useAppUrl();
   const dispatch = useDispatch<(a: EndpointAction) => void>();
   // cap ability to page at 10k records. (max_result_window)
@@ -149,6 +151,7 @@ export const EndpointList = () => {
       };
     }
 
+    // default back button is to the policy list
     const policyListPath = getPoliciesPath();
 
     return {
@@ -239,6 +242,23 @@ export const EndpointList = () => {
       },
     }
   );
+
+  const backToEndpointList: PolicyDetailsRouteState['backLink'] = useMemo(() => {
+    const endpointListPath = getEndpointListPath({ name: 'endpointList' }, searchParams);
+
+    return {
+      navigateTo: [
+        APP_UI_ID,
+        {
+          path: endpointListPath,
+        },
+      ],
+      label: i18n.translate('xpack.securitySolution.endpoint.policy.details.backToListTitle', {
+        defaultMessage: 'View all endpoints',
+      }),
+      href: getAppUrl({ path: endpointListPath }),
+    };
+  }, [getAppUrl, searchParams]);
 
   const onRefresh = useCallback(() => {
     dispatch({
@@ -361,6 +381,7 @@ export const EndpointList = () => {
                   policyId={policy.id}
                   className="eui-textTruncate"
                   data-test-subj="policyNameCellLink"
+                  backLink={backToEndpointList}
                 >
                   {policy.name}
                 </EndpointPolicyLink>
@@ -503,7 +524,7 @@ export const EndpointList = () => {
         ],
       },
     ];
-  }, [queryParams, search, getAppUrl, PAD_LEFT]);
+  }, [queryParams, search, getAppUrl, backToEndpointList, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
     if (endpointsExist || areEndpointsEnrolling) {
@@ -530,7 +551,9 @@ export const EndpointList = () => {
       );
     } else {
       return (
-        <PolicyEmptyState loading={policyItemsLoading} onActionClick={handleCreatePolicyClick} />
+        <ManagementEmptyStateWrapper>
+          <PolicyEmptyState loading={policyItemsLoading} onActionClick={handleCreatePolicyClick} />
+        </ManagementEmptyStateWrapper>
       );
     }
   }, [
@@ -650,6 +673,7 @@ export const EndpointList = () => {
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
+      hideHeader={!(endpointsExist || areEndpointsEnrolling)}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -698,7 +722,7 @@ export const EndpointList = () => {
           </>
         )}
         {transformFailedCallout}
-        <EuiFlexGroup gutterSize="s">
+        <EuiFlexGroup gutterSize="s" alignItems="center">
           {shouldShowKQLBar && (
             <EuiFlexItem>
               <AdminSearchBar />

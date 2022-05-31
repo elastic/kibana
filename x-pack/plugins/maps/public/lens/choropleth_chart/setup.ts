@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { ExpressionsSetup } from 'src/plugins/expressions/public';
-import type { CoreSetup, CoreStart } from 'src/core/public';
-import type { LensPublicSetup } from '../../../../lens/public';
+import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
+import type { CoreSetup, CoreStart } from '@kbn/core/public';
+import type { LensPublicSetup } from '@kbn/lens-plugin/public';
+import type { FileLayer } from '@elastic/ems-client';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import { getExpressionFunction } from './expression_function';
 import { getExpressionRenderer } from './expression_renderer';
@@ -28,9 +29,17 @@ export function setupLensChoroplethChart(
       await coreSetup.getStartServices();
     const { getEmsFileLayers } = await import('../../util');
     const { getVisualization } = await import('./visualization');
+
+    let emsFileLayers: FileLayer[] = [];
+    try {
+      emsFileLayers = await getEmsFileLayers();
+    } catch (error) {
+      // ignore error, lack of EMS file layers will be surfaced in dimension editor
+    }
+
     return getVisualization({
       theme: coreStart.theme,
-      emsFileLayers: await getEmsFileLayers(),
+      emsFileLayers,
       paletteService: await plugins.charts.palettes.getPalettes(),
     });
   });

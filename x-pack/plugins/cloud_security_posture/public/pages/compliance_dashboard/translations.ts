@@ -75,10 +75,26 @@ export const VIEW_ALL_FAILED_FINDINGS = i18n.translate('xpack.csp.view_all_faile
   defaultMessage: 'View all failed findings',
 });
 
-export const RESOURCE_TYPE = i18n.translate('xpack.csp.resource_type', {
-  defaultMessage: 'Resource Type',
+export const CIS_SECTION = i18n.translate('xpack.csp.dashboard.risksTable.cisSectionColumnLabel', {
+  defaultMessage: 'CIS Section',
 });
 
 export const FINDINGS = i18n.translate('xpack.csp.findings', {
   defaultMessage: 'Findings',
 });
+
+export const NO_DATA_CONFIG_TEXT = {
+  PAGE_TITLE: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.pageTitle', {
+    defaultMessage: 'Cloud Posture Dashboard',
+  }),
+  SOLUTION: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.solutionNameLabel', {
+    defaultMessage: 'Cloud Security Posture',
+  }),
+  BUTTON_TITLE: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.actionTitle', {
+    defaultMessage: 'Try Again',
+  }),
+  DESCRIPTION: i18n.translate('xpack.csp.complianceDashboard.noDataConfig.actionDescription', {
+    defaultMessage:
+      "The cloud posture dashboard can't be presented since there are no findings. This can happen due to the agent not being installed yet, or since data is still being processed.",
+  }),
+};

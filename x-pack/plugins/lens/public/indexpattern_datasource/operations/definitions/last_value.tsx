@@ -15,10 +15,10 @@ import {
   EuiSwitch,
   EuiToolTip,
 } from '@elastic/eui';
-import { AggFunctionsMapping } from '../../../../../../../src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../src/plugins/expressions/public';
-import { OperationDefinition } from './index';
-import { FieldBasedIndexPatternColumn } from './column_types';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { OperationDefinition } from '.';
+import { FieldBasedIndexPatternColumn, ValueFormatConfig } from './column_types';
 import { IndexPatternField, IndexPattern } from '../../types';
 import { adjustColumnReferencesForChangedColumn, updateColumnParam } from '../layer_helpers';
 import { DataType } from '../../../types';
@@ -108,12 +108,7 @@ export interface LastValueIndexPatternColumn extends FieldBasedIndexPatternColum
     sortField: string;
     showArrayValues: boolean;
     // last value on numeric fields can be formatted
-    format?: {
-      id: string;
-      params?: {
-        decimals: number;
-      };
-    };
+    format?: ValueFormatConfig;
   };
 }
 

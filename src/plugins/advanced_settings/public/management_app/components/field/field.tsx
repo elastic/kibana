@@ -32,10 +32,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { UiSettingsType, DocLinksStart, ToastsStart } from '@kbn/core/public';
 import { FieldCodeEditor } from './field_code_editor';
 import { FieldSetting, FieldState } from '../../types';
 import { isDefaultValue } from '../../lib';
-import { UiSettingsType, DocLinksStart, ToastsStart } from '../../../../../../core/public';
 
 interface FieldProps {
   setting: FieldSetting;
@@ -100,7 +100,7 @@ export class Field extends PureComponent<FieldProps> {
     if (type === 'image') {
       this.cancelChangeImage();
       return this.handleChange({
-        value: getEditableValue(type, defVal),
+        value: getEditableValue(type, defVal, defVal),
         changeImage: true,
       });
     }

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { DataViewField, DataView } from 'src/plugins/data/common';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { asyncMap } from '@kbn/std';
+import { indexPatterns } from '@kbn/data-plugin/public';
 import { getIndexPatternService } from './kibana_services';
-import { indexPatterns } from '../../../../src/plugins/data/public';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../common/constants';
 import { getIsGoldPlus } from './licensed_features';
 

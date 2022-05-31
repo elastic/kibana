@@ -11,12 +11,13 @@ import {
   httpServiceMock,
   themeServiceMock,
   docLinksServiceMock,
-} from '../../../../../core/public/mocks';
+} from '@kbn/core/public/mocks';
 
 import type { ObjectStorageClient } from '../../../common/types';
 import { HistoryMock } from '../../services/history.mock';
 import { SettingsMock } from '../../services/settings.mock';
 import { StorageMock } from '../../services/storage.mock';
+import { AutocompleteInfoMock } from '../../services/autocomplete.mock';
 import { createApi, createEsHostService } from '../lib';
 
 import { ContextValue } from './services_context';
@@ -37,6 +38,8 @@ export const serviceContextMock = {
         history: new HistoryMock(storage),
         notifications: notificationServiceMock.createSetupContract(),
         objectStorageClient: {} as unknown as ObjectStorageClient,
+        http,
+        autocompleteInfo: new AutocompleteInfoMock(),
       },
       docLinkVersion: 'NA',
       theme$: themeServiceMock.create().start().theme$,

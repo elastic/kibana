@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import { Query } from 'src/plugins/data/public';
+import { Query } from '@kbn/data-plugin/public';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
@@ -26,6 +26,7 @@ import {
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   Attribution,
+  CustomIcon,
   LayerDescriptor,
   MapExtent,
   StyleDescriptor,
@@ -52,6 +53,7 @@ export interface ILayer {
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
   getLabel(): string;
+  getLocale(): string | null;
   hasLegendDetails(): Promise<boolean>;
   renderLegendDetails(): ReactElement<any> | null;
   showAtZoomLevel(zoom: number): boolean;
@@ -92,14 +94,15 @@ export interface ILayer {
   isVisible(): boolean;
   cloneDescriptor(): Promise<LayerDescriptor>;
   renderStyleEditor(
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ): ReactElement<any> | null;
   getInFlightRequestTokens(): symbol[];
   getPrevRequestToken(dataId: string): symbol | undefined;
-  destroy: () => void;
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
+  supportsLabelLocales: () => boolean;
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
   getLicensedFeatures(): Promise<LICENSED_FEATURES[]>;
@@ -147,12 +150,6 @@ export class AbstractLayer implements ILayer {
       includeInFitToBounds:
         typeof options.includeInFitToBounds === 'boolean' ? options.includeInFitToBounds : true,
     };
-  }
-
-  destroy() {
-    if (this._source) {
-      this._source.destroy();
-    }
   }
 
   constructor({ layerDescriptor, source }: ILayerArguments) {
@@ -253,6 +250,10 @@ export class AbstractLayer implements ILayer {
 
   getLabel(): string {
     return this._descriptor.label ? this._descriptor.label : '';
+  }
+
+  getLocale(): string | null {
+    return null;
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {
@@ -431,13 +432,14 @@ export class AbstractLayer implements ILayer {
   }
 
   renderStyleEditor(
-    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void
+    onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void,
+    onCustomIconsChange: (customIcons: CustomIcon[]) => void
   ): ReactElement<any> | null {
     const style = this.getStyleForEditing();
     if (!style) {
       return null;
     }
-    return style.renderEditor(onStyleDescriptorChange);
+    return style.renderEditor(onStyleDescriptorChange, onCustomIconsChange);
   }
 
   getIndexPatternIds(): string[] {
@@ -462,6 +464,10 @@ export class AbstractLayer implements ILayer {
   }
 
   supportsLabelsOnTop(): boolean {
+    return false;
+  }
+
+  supportsLabelLocales(): boolean {
     return false;
   }
 

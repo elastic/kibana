@@ -6,16 +6,14 @@
  */
 
 import { getColorAssignments } from './color_assignment';
-import type { FormatFactory, LensMultiTable } from '../../common';
-import type { DataLayerArgs } from '../../common/expressions';
+import type { FormatFactory } from '../../common';
 import { layerTypes } from '../../common';
+import { XYDataLayerConfig } from './types';
+import { Datatable } from '@kbn/expressions-plugin';
 
 describe('color_assignment', () => {
-  const layers: DataLayerArgs[] = [
+  const layers: XYDataLayerConfig[] = [
     {
-      yScaleType: 'linear',
-      xScaleType: 'linear',
-      isHistogram: true,
       seriesType: 'bar',
       palette: { type: 'palette', name: 'palette1' },
       layerId: '1',
@@ -24,9 +22,6 @@ describe('color_assignment', () => {
       accessors: ['y1', 'y2'],
     },
     {
-      yScaleType: 'linear',
-      xScaleType: 'linear',
-      isHistogram: true,
       seriesType: 'bar',
       palette: { type: 'palette', name: 'palette2' },
       layerId: '2',
@@ -36,8 +31,7 @@ describe('color_assignment', () => {
     },
   ];
 
-  const data: LensMultiTable = {
-    type: 'lens_multitable',
+  const data: { tables: Record<string, Datatable> } = {
     tables: {
       '1': {
         type: 'datatable',

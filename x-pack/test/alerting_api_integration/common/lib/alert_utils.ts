@@ -76,6 +76,16 @@ export class AlertUtils {
     return request;
   }
 
+  public getAPIKeyRequest(ruleId: string) {
+    const request = this.supertestWithoutAuth.get(
+      `${getUrlPrefix(this.space.id)}/api/alerts_fixture/rule/${ruleId}/_get_api_key`
+    );
+    if (this.user) {
+      return request.auth(this.user.username, this.user.password);
+    }
+    return request;
+  }
+
   public getDisableRequest(alertId: string) {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/_disable`)
@@ -89,6 +99,17 @@ export class AlertUtils {
   public getSnoozeRequest(alertId: string) {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_snooze`)
+      .set('kbn-xsrf', 'foo')
+      .set('content-type', 'application/json');
+    if (this.user) {
+      return request.auth(this.user.username, this.user.password);
+    }
+    return request;
+  }
+
+  public getUnsnoozeRequest(alertId: string) {
+    const request = this.supertestWithoutAuth
+      .post(`${getUrlPrefix(this.space.id)}/internal/alerting/rule/${alertId}/_unsnooze`)
       .set('kbn-xsrf', 'foo')
       .set('content-type', 'application/json');
     if (this.user) {

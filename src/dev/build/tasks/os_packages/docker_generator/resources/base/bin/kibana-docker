@@ -27,6 +27,7 @@ kibana_vars=(
     console.proxyFilter
     csp.strict
     csp.warnLegacyBrowsers
+    csp.disableUnsafeEval
     csp.script_src
     csp.worker_src
     csp.style_src
@@ -40,6 +41,18 @@ kibana_vars=(
     csp.report_to
     data.autocomplete.valueSuggestions.terminateAfter
     data.autocomplete.valueSuggestions.timeout
+    data.search.sessions.defaultExpiration
+    data.search.sessions.enabled
+    data.search.sessions.maxUpdateRetries
+    data.search.sessions.notTouchedInProgressTimeout
+    data.search.sessions.notTouchedTimeout
+    data.search.sessions.pageSize
+    data.search.sessions.trackingInterval
+    unifiedSearch.autocomplete.valueSuggestions.terminateAfter
+    unifiedSearch.autocomplete.valueSuggestions.timeout
+    unifiedSearch.autocomplete.querySuggestions.enabled
+    unifiedSearch.autocomplete.valueSuggestions.enabled
+    unifiedSearch.autocomplete.valueSuggestions.tiers
     elasticsearch.customHeaders
     elasticsearch.hosts
     elasticsearch.logQueries
@@ -170,6 +183,7 @@ kibana_vars=(
     status.v6ApiFormat
     telemetry.allowChangingOptInStatus
     telemetry.enabled
+    telemetry.hidePrivacyStatement
     telemetry.optIn
     telemetry.sendUsageTo
     telemetry.sendUsageFrom
@@ -182,6 +196,7 @@ kibana_vars=(
     vis_type_vega.enableExternalUrls
     xpack.actions.allowedHosts
     xpack.actions.customHostSettings
+    xpack.actions.email.domain_allowlist
     xpack.actions.enabledActionTypes
     xpack.actions.maxResponseContentLength
     xpack.actions.preconfigured
@@ -199,10 +214,13 @@ kibana_vars=(
     xpack.alerting.invalidateApiKeysTask.interval
     xpack.alerting.invalidateApiKeysTask.removalDelay
     xpack.alerting.defaultRuleTaskTimeout
+    xpack.alerting.rules.run.timeout
+    xpack.alerting.rules.run.ruleTypeOverrides
     xpack.alerting.cancelAlertsOnRuleTimeout
     xpack.alerting.rules.minimumScheduleInterval.value
     xpack.alerting.rules.minimumScheduleInterval.enforce
-    xpack.alerting.rules.execution.actions.max
+    xpack.alerting.rules.run.actions.max
+    xpack.alerting.rules.run.actions.connectorTypeOverrides
     xpack.alerts.healthCheck.interval
     xpack.alerts.invalidateApiKeysTask.interval
     xpack.alerts.invalidateApiKeysTask.removalDelay
@@ -379,6 +397,8 @@ kibana_vars=(
     xpack.task_manager.poll_interval
     xpack.task_manager.request_capacity
     xpack.task_manager.version_conflict_threshold
+    xpack.task_manager.event_loop_delay.monitor
+    xpack.task_manager.event_loop_delay.warn_threshold
     xpack.uptime.index
 )
 

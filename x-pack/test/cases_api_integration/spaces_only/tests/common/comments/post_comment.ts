@@ -6,18 +6,16 @@
  */
 
 import expect from '@kbn/expect';
+import { AttributesTypeUser } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
-import { AttributesTypeUser } from '../../../../../../plugins/cases/common/api';
 import { nullUser, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';
 import {
-  deleteCasesByESQuery,
-  deleteCasesUserActions,
-  deleteComments,
   createCase,
   createComment,
   removeServerGeneratedPropertiesFromSavedObject,
   getAuthWithSuperUser,
+  deleteAllCaseItems,
 } from '../../../../common/lib/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -28,9 +26,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
   describe('post_comment', () => {
     afterEach(async () => {
-      await deleteCasesByESQuery(es);
-      await deleteComments(es);
-      await deleteCasesUserActions(es);
+      await deleteAllCaseItems(es);
     });
 
     it('should post a comment in space1', async () => {

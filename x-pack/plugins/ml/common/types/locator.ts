@@ -6,8 +6,9 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { LocatorPublic } from 'src/plugins/share/public';
-import type { RefreshInterval, TimeRange } from '../../../../../src/plugins/data/common/query';
+// eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import type { RefreshInterval, TimeRange } from '@kbn/data-plugin/common/query';
 import type { JobId } from './anomaly_detection_jobs/job';
 import type { DataFrameAnalysisConfigType } from './data_frame_analytics';
 import type { SearchQueryLanguage } from '../constants/search';
@@ -45,7 +46,9 @@ export interface MlGenericUrlPageState extends MlIndexBasedSearchState {
 export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB
+  | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED
+  | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_LENS
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
   | typeof ML_PAGES.DATA_FRAME_ANALYTICS_CREATE_JOB
@@ -58,7 +61,10 @@ export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.ACCESS_DENIED
   | typeof ML_PAGES.DATA_VISUALIZER
   | typeof ML_PAGES.DATA_VISUALIZER_FILE
-  | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT,
+  | typeof ML_PAGES.DATA_VISUALIZER_INDEX_SELECT
+  | typeof ML_PAGES.AIOPS
+  | typeof ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES
+  | typeof ML_PAGES.AIOPS_EXPLAIN_LOG_RATE_SPIKES_INDEX_SELECT,
   MlGenericUrlPageState | undefined
 >;
 

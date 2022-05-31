@@ -19,7 +19,7 @@ import {
   isReferenced,
   getReferenceRoot,
 } from './layer_helpers';
-import { operationDefinitionMap, OperationType } from '../operations';
+import { operationDefinitionMap, OperationType } from '.';
 import { TermsIndexPatternColumn } from './definitions/terms';
 import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
 import { AvgIndexPatternColumn } from './definitions/metrics';
@@ -36,10 +36,10 @@ import {
   MovingAverageIndexPatternColumn,
   OperationDefinition,
 } from './definitions';
-import { TinymathAST } from 'packages/kbn-tinymath';
-import { CoreStart } from 'kibana/public';
+import { TinymathAST } from '@kbn/tinymath';
+import { CoreStart } from '@kbn/core/public';
 
-jest.mock('../operations');
+jest.mock('.');
 jest.mock('../../id_generator');
 
 const indexPatternFields = [
@@ -767,7 +767,7 @@ describe('state_helpers', () => {
         }).columns.col2
       ).toEqual(
         expect.objectContaining({
-          label: 'Top values of bytes',
+          label: 'Top 3 values of bytes',
         })
       );
     });
@@ -901,6 +901,39 @@ describe('state_helpers', () => {
           columns: { col1: expect.objectContaining({ operationType: 'date_histogram' }) },
           incompleteColumns: {
             col1: { operationType: 'terms' },
+          },
+        })
+      );
+    });
+
+    it('should set incompleteColumns without crashing when switching to a field-based operation from managed reference column with custom label', () => {
+      expect(
+        replaceColumn({
+          layer: {
+            indexPatternId: '1',
+            columnOrder: ['col1'],
+            columns: {
+              col1: {
+                label: 'My formula',
+                dataType: 'number',
+                isBucketed: false,
+                customLabel: true,
+
+                // Private
+                operationType: 'formula',
+              } as FormulaIndexPatternColumn,
+            },
+          },
+          columnId: 'col1',
+          indexPattern,
+          op: 'median',
+          visualizationGroups: [],
+        })
+      ).toEqual(
+        expect.objectContaining({
+          columns: { col1: expect.objectContaining({ operationType: 'formula' }) },
+          incompleteColumns: {
+            col1: { operationType: 'median' },
           },
         })
       );
@@ -1079,7 +1112,7 @@ describe('state_helpers', () => {
           }).columns.col1
         ).toEqual(
           expect.objectContaining({
-            label: 'Top values of source',
+            label: 'Top 3 values of source',
           })
         );
       });
@@ -2251,7 +2284,7 @@ describe('state_helpers', () => {
 
     it('should remove column and any incomplete state', () => {
       const termsColumn: TermsIndexPatternColumn = {
-        label: 'Top values of source',
+        label: 'Top 5 values of source',
         dataType: 'string',
         isBucketed: true,
 

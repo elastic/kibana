@@ -19,32 +19,33 @@ import {
   EuiToolTip,
   EuiButtonEmpty,
   EuiAccordion,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiSpacer,
+  EuiText,
 } from '@elastic/eui';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
-import { Ast, toExpression } from '@kbn/interpreter';
+import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import { ExecutionContextSearch } from 'src/plugins/data/public';
+import { ExecutionContextSearch } from '@kbn/data-plugin/public';
+import {
+  ReactExpressionRendererProps,
+  ReactExpressionRendererType,
+} from '@kbn/expressions-plugin/public';
 import {
   Datasource,
   Visualization,
   FramePublicAPI,
-  DatasourcePublicAPI,
   DatasourceMap,
   VisualizationMap,
+  DatasourceLayers,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
-import {
-  ReactExpressionRendererProps,
-  ReactExpressionRendererType,
-} from '../../../../../../src/plugins/expressions/public';
-import { prependDatasourceExpression } from './expression_helpers';
+import { getDatasourceExpressionsByLayers } from './expression_helpers';
 import { trackUiEvent, trackSuggestionEvent } from '../../lens_ui_telemetry';
-import { getMissingIndexPattern, validateDatasourceAndVisualization } from './state_helpers';
+import {
+  getMissingIndexPattern,
+  validateDatasourceAndVisualization,
+  getDatasourceLayers,
+} from './state_helpers';
 import {
   rollbackSuggestion,
   selectExecutionContextSearch,
@@ -229,16 +230,28 @@ export function SuggestionPanel({
               visualizationId,
               visualizationState: suggestionVisualizationState,
               datasourceState: suggestionDatasourceState,
-              datasourceId: suggetionDatasourceId,
+              datasourceId: suggestionDatasourceId,
             }) => {
               return (
                 !hide &&
                 validateDatasourceAndVisualization(
-                  suggetionDatasourceId ? datasourceMap[suggetionDatasourceId] : null,
+                  suggestionDatasourceId ? datasourceMap[suggestionDatasourceId] : null,
                   suggestionDatasourceState,
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
-                  frame
+                  {
+                    datasourceLayers: getDatasourceLayers(
+                      suggestionDatasourceId
+                        ? {
+                            [suggestionDatasourceId]: {
+                              isLoading: true,
+                              state: suggestionDatasourceState,
+                            },
+                          }
+                        : {},
+                      datasourceMap
+                    ),
+                  }
                 ) == null
               );
             }
@@ -287,6 +300,7 @@ export function SuggestionPanel({
     activeDatasourceId,
     datasourceMap,
     visualizationMap,
+    frame.activeData,
   ]);
 
   const context: ExecutionContextSearch = useLensSelector(selectExecutionContextSearch);
@@ -337,41 +351,33 @@ export function SuggestionPanel({
     }
   }
 
-  const applyChangesPrompt = (
-    <EuiPanel
-      hasBorder
-      hasShadow={false}
-      className="lnsSuggestionPanel__applyChangesPrompt"
-      paddingSize="m"
-    >
-      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
-        <EuiFlexItem grow={false}>
-          <h3>
-            <FormattedMessage
-              id="xpack.lens.suggestions.applyChangesPrompt"
-              defaultMessage="Apply your changes to see suggestions."
-            />
-          </h3>
-          <EuiSpacer size="s" />
-          <EuiButton
-            fill
-            iconType="play"
-            size="s"
-            className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
-            onClick={() => dispatchLens(applyChanges())}
-            data-test-subj="lnsSuggestionApplyChanges"
-          >
-            <FormattedMessage
-              id="xpack.lens.suggestions.applyChangesLabel"
-              defaultMessage="Apply"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+  const renderApplyChangesPrompt = () => (
+    <EuiPanel hasShadow={false} className="lnsSuggestionPanel__applyChangesPrompt" paddingSize="m">
+      <EuiText size="s" color="subdued" className="lnsSuggestionPanel__applyChangesMessage">
+        <p>
+          <FormattedMessage
+            id="xpack.lens.suggestions.applyChangesPrompt"
+            defaultMessage="Latest changes must be applied to view suggestions."
+          />
+        </p>
+      </EuiText>
+
+      <EuiButtonEmpty
+        iconType="checkInCircleFilled"
+        size="s"
+        className={DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS}
+        onClick={() => dispatchLens(applyChanges())}
+        data-test-subj="lnsApplyChanges__suggestions"
+      >
+        <FormattedMessage
+          id="xpack.lens.suggestions.applyChangesLabel"
+          defaultMessage="Apply changes"
+        />
+      </EuiButtonEmpty>
     </EuiPanel>
   );
 
-  const suggestionsUI = (
+  const renderSuggestionsUI = () => (
     <>
       {currentVisualization.activeId && !hideSuggestions && (
         <SuggestionPreview
@@ -461,7 +467,7 @@ export function SuggestionPanel({
         }
       >
         <div className="lnsSuggestionPanel__suggestions" data-test-subj="lnsSuggestionsPanel">
-          {changesApplied ? suggestionsUI : applyChangesPrompt}
+          {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}
         </div>
       </EuiAccordion>
     </div>
@@ -479,13 +485,16 @@ function getPreviewExpression(
   visualizableState: VisualizableState,
   visualization: Visualization,
   datasources: Record<string, Datasource>,
+  datasourceStates: DatasourceStates,
   frame: FramePublicAPI
 ) {
   if (!visualization.toPreviewExpression) {
     return null;
   }
 
-  const suggestionFrameApi: FramePublicAPI = { datasourceLayers: { ...frame.datasourceLayers } };
+  const suggestionFrameApi: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'> = {
+    datasourceLayers: { ...frame.datasourceLayers },
+  };
 
   // use current frame api and patch apis for changed datasource layers
   if (
@@ -495,7 +504,7 @@ function getPreviewExpression(
   ) {
     const datasource = datasources[visualizableState.datasourceId];
     const datasourceState = visualizableState.datasourceState;
-    const updatedLayerApis: Record<string, DatasourcePublicAPI> = pick(
+    const updatedLayerApis: DatasourceLayers = pick(
       frame.datasourceLayers,
       visualizableState.keptLayerIds
     );
@@ -510,9 +519,15 @@ function getPreviewExpression(
     });
   }
 
+  const datasourceExpressionsByLayers = getDatasourceExpressionsByLayers(
+    datasources,
+    datasourceStates
+  );
+
   return visualization.toPreviewExpression(
     visualizableState.visualizationState,
-    suggestionFrameApi.datasourceLayers
+    suggestionFrameApi.datasourceLayers,
+    datasourceExpressionsByLayers ?? undefined
   );
 }
 
@@ -526,10 +541,21 @@ function preparePreviewExpression(
   const suggestionDatasourceId = visualizableState.datasourceId;
   const suggestionDatasourceState = visualizableState.datasourceState;
 
+  const datasourceStatesWithSuggestions = suggestionDatasourceId
+    ? {
+        ...datasourceStates,
+        [suggestionDatasourceId]: {
+          isLoading: false,
+          state: suggestionDatasourceState,
+        },
+      }
+    : datasourceStates;
+
   const expression = getPreviewExpression(
     visualizableState,
     visualization,
     datasourceMap,
+    datasourceStatesWithSuggestions,
     framePublicAPI
   );
 
@@ -537,19 +563,5 @@ function preparePreviewExpression(
     return;
   }
 
-  const expressionWithDatasource = prependDatasourceExpression(
-    expression,
-    datasourceMap,
-    suggestionDatasourceId
-      ? {
-          ...datasourceStates,
-          [suggestionDatasourceId]: {
-            isLoading: false,
-            state: suggestionDatasourceState,
-          },
-        }
-      : datasourceStates
-  );
-
-  return expressionWithDatasource;
+  return typeof expression === 'string' ? fromExpression(expression) : expression;
 }

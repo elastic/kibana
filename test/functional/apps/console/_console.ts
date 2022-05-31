@@ -49,7 +49,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('default request response should include `"timed_out" : false`', async () => {
-      const expectedResponseContains = '"timed_out" : false,';
+      const expectedResponseContains = `"timed_out": false`;
       await PageObjects.console.clickPlay();
       await retry.try(async () => {
         const actualResponse = await PageObjects.console.getResponse();
@@ -103,6 +103,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await retry.try(async () => {
             expect(await toasts.getToastCount()).to.equal(1);
           });
+        });
+      });
+    });
+
+    describe('with kbn: prefix in request', () => {
+      before(async () => {
+        await PageObjects.console.clearTextArea();
+      });
+      it('it should send successful request to Kibana API', async () => {
+        const expectedResponseContains = 'default space';
+        await PageObjects.console.enterRequest('\n GET kbn:/api/spaces/space');
+        await PageObjects.console.clickPlay();
+        await retry.try(async () => {
+          const actualResponse = await PageObjects.console.getResponse();
+          log.debug(actualResponse);
+          expect(actualResponse).to.contain(expectedResponseContains);
         });
       });
     });

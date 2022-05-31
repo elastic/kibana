@@ -54,6 +54,7 @@ interface HostRiskScoreTableProps {
   isInspect: boolean;
   loading: boolean;
   loadPage: (newActivePage: number) => void;
+  setQuerySkip: (skip: boolean) => void;
   severityCount: SeverityCount;
   totalCount: number;
   type: hostsModel.HostsType;
@@ -71,6 +72,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
   isInspect,
   loading,
   loadPage,
+  setQuerySkip,
   severityCount,
   totalCount,
   type,
@@ -149,7 +151,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
 
   const headerTitle = (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>{i18nHosts.HOSTS_BY_RISK}</EuiFlexItem>
+      <EuiFlexItem grow={false}>{i18nHosts.HOST_RISK_TITLE}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiIconTip
           color="subdued"
@@ -207,6 +209,7 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
       loadPage={loadPage}
       onChange={onSort}
       pageOfItems={data}
+      setQuerySkip={setQuerySkip}
       showMorePagesIndicator={false}
       sorting={sort}
       split={true}

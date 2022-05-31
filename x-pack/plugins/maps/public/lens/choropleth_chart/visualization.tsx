@@ -10,12 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render } from 'react-dom';
 import type { FileLayer } from '@elastic/ems-client';
-import { ThemeServiceStart } from 'kibana/public';
-import type { PaletteRegistry } from 'src/plugins/charts/public';
-import { KibanaThemeProvider } from '../../../../../../src/plugins/kibana_react/public';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { layerTypes } from '@kbn/lens-plugin/public';
+import type { OperationMetadata, SuggestionRequest, Visualization } from '@kbn/lens-plugin/public';
 import { getSuggestions } from './suggestions';
-import { layerTypes } from '../../../../lens/public';
-import type { OperationMetadata, SuggestionRequest, Visualization } from '../../../../lens/public';
 import type { ChoroplethChartState } from './types';
 import { Icon } from './icon';
 import { RegionKeyEditor } from './region_key_editor';
@@ -138,14 +138,16 @@ export const getVisualization = ({
     }
   },
 
-  toExpression: (state, datasourceLayers, attributes) => {
+  toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers = {}) => {
     if (!state.regionAccessor || !state.valueAccessor) {
       return null;
     }
 
+    const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
     return {
       type: 'expression',
       chain: [
+        ...(datasourceExpression ? datasourceExpression.chain : []),
         {
           type: 'function',
           function: 'lens_choropleth_chart',

@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { MLSavedObjectService } from '../../saved_objects';
 import { getJobDetailsFromTrainedModel } from '../../saved_objects/util';
 import { JobType } from '../../../common/types/saved_objects';
@@ -493,6 +493,31 @@ export function getMlClient(
     async stopTrainedModelDeployment(...p: Parameters<MlClient['stopTrainedModelDeployment']>) {
       await modelIdsCheck(p);
       return mlClient.stopTrainedModelDeployment(...p);
+    },
+    async inferTrainedModelDeployment(...p: Parameters<MlClient['inferTrainedModelDeployment']>) {
+      await modelIdsCheck(p);
+      // Temporary workaround for the incorrect inferTrainedModelDeployment function in the esclient
+      if (
+        // @ts-expect-error TS complains it's always false
+        p.length === 0 ||
+        p[0] === undefined
+      ) {
+        // Temporary generic error message. This should never be triggered
+        // but is added for type correctness below
+        throw new Error('Incorrect arguments supplied');
+      }
+      // @ts-expect-error body doesn't exist in the type
+      const { model_id: id, body, query: querystring } = p[0];
+
+      return client.asInternalUser.transport.request(
+        {
+          method: 'POST',
+          path: `/_ml/trained_models/${id}/_infer`,
+          body,
+          querystring,
+        },
+        p[1]
+      );
     },
     async info(...p: Parameters<MlClient['info']>) {
       return mlClient.info(...p);

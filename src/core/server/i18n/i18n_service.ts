@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs/operators';
-import { Logger } from '../logging';
-import { IConfigService } from '../config';
+import { firstValueFrom } from 'rxjs';
+import type { Logger } from '@kbn/logging';
+import type { IConfigService } from '@kbn/config';
 import { CoreContext } from '../core_context';
 import { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http';
 import { config as i18nConfigDef, I18nConfigType } from './i18n_config';
@@ -68,10 +68,9 @@ export class I18nService {
   }
 
   private async initTranslations(pluginPaths: string[]) {
-    const i18nConfig = await this.configService
-      .atPath<I18nConfigType>(i18nConfigDef.path)
-      .pipe(take(1))
-      .toPromise();
+    const i18nConfig = await firstValueFrom(
+      this.configService.atPath<I18nConfigType>(i18nConfigDef.path)
+    );
 
     const locale = i18nConfig.locale;
     this.log.debug(`Using locale: ${locale}`);

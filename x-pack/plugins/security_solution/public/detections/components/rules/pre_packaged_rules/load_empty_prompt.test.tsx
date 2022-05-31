@@ -161,9 +161,9 @@ describe('LoadPrebuiltRulesAndTemplatesButton', () => {
     await waitFor(() => {
       wrapper.update();
 
-      expect(
-        wrapper.find('[data-test-subj="load-prebuilt-rules"] button').props().disabled
-      ).toEqual(true);
+      expect(wrapper.find('button[data-test-subj="load-prebuilt-rules"]').props().disabled).toEqual(
+        true
+      );
     });
   });
 });

@@ -16,19 +16,23 @@ import {
   Severity,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { Filter } from '@kbn/es-query';
+import { RuleAction } from '@kbn/alerting-plugin/common';
 import { RuleAlertAction } from '../../../../../common/detection_engine/types';
-import { AlertAction } from '../../../../../../alerting/common';
 import { FieldValueQueryBar } from '../../../components/rules/query_bar';
 import { FieldValueTimeline } from '../../../components/rules/pick_timeline';
 import { FieldValueThreshold } from '../../../components/rules/threshold_input';
-import {
+import type {
   Author,
   BuildingBlockType,
   License,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
   RuleNameOverride,
   SortOrder,
+  SetupGuide,
   TimestampOverride,
-} from '../../../../../common/detection_engine/schemas/common/schemas';
+} from '../../../../../common/detection_engine/schemas/common';
+import { EqlOptionsSelected } from '../../../../../common/search_strategy';
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -109,6 +113,7 @@ export interface AboutStepRule {
 export interface AboutStepRuleDetails {
   note: string;
   description: string;
+  setup: SetupGuide;
 }
 
 export interface AboutStepSeverity {
@@ -128,12 +133,15 @@ export interface DefineStepRule {
   index: string[];
   machineLearningJobId: string[];
   queryBar: FieldValueQueryBar;
+  relatedIntegrations: RelatedIntegrationArray;
+  requiredFields: RequiredFieldArray;
   ruleType: Type;
   timeline: FieldValueTimeline;
   threshold: FieldValueThreshold;
   threatIndex: ThreatIndex;
   threatQueryBar: FieldValueQueryBar;
   threatMapping: ThreatMapping;
+  eqlOptions: EqlOptionsSelected;
 }
 
 export interface ScheduleStepRule {
@@ -143,7 +151,7 @@ export interface ScheduleStepRule {
 }
 
 export interface ActionsStepRule {
-  actions: AlertAction[];
+  actions: RuleAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
   throttle?: string | null;
@@ -173,6 +181,9 @@ export interface DefineStepRuleJson {
   timeline_id?: string;
   timeline_title?: string;
   type: Type;
+  timestamp_field?: string;
+  event_category_override?: string;
+  tiebreaker_field?: string;
 }
 
 export interface AboutStepRuleJson {

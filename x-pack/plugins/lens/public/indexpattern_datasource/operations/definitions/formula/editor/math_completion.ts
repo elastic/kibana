@@ -17,9 +17,10 @@ import {
   TinymathNamedArgument,
 } from '@kbn/tinymath';
 import type {
-  DataPublicPluginStart,
+  UnifiedSearchPublicPluginStart,
   QuerySuggestion,
-} from '../../../../../../../../../src/plugins/data/public';
+} from '@kbn/unified-search-plugin/public';
+import { parseTimeShift } from '@kbn/data-plugin/common';
 import { IndexPattern } from '../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
 import { tinymathFunctions, groupArgsByType, unquotedStringRegex } from '../util';
@@ -27,7 +28,6 @@ import type { GenericOperationDefinition } from '../..';
 import { getFunctionSignatureLabel, getHelpTextContent } from './formula_help';
 import { hasFunctionFieldArgument } from '../validation';
 import { timeShiftOptions, timeShiftOptionOrder } from '../../../../time_shift_utils';
-import { parseTimeShift } from '../../../../../../../../../src/plugins/data/common';
 
 export enum SUGGESTION_TYPE {
   FIELD = 'field',
@@ -120,7 +120,7 @@ export async function suggest({
   context,
   indexPattern,
   operationDefinitionMap,
-  data,
+  unifiedSearch,
   dateHistogramInterval,
 }: {
   expression: string;
@@ -128,7 +128,7 @@ export async function suggest({
   context: monaco.languages.CompletionContext;
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
-  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   dateHistogramInterval?: number;
 }): Promise<LensMathSuggestions> {
   const text =
@@ -148,7 +148,7 @@ export async function suggest({
     if (tokenInfo?.parent && (context.triggerCharacter === '=' || isNamedArgument)) {
       return await getNamedArgumentSuggestions({
         ast: tokenAst as TinymathNamedArgument,
-        data,
+        unifiedSearch,
         indexPattern,
         dateHistogramInterval,
       });
@@ -331,13 +331,13 @@ function getArgumentSuggestions(
 
 export async function getNamedArgumentSuggestions({
   ast,
-  data,
+  unifiedSearch,
   indexPattern,
   dateHistogramInterval,
 }: {
   ast: TinymathNamedArgument;
   indexPattern: IndexPattern;
-  data: DataPublicPluginStart;
+  unifiedSearch: UnifiedSearchPublicPluginStart;
   dateHistogramInterval?: number;
 }) {
   if (ast.name === 'shift') {
@@ -359,14 +359,14 @@ export async function getNamedArgumentSuggestions({
   if (ast.name !== 'kql' && ast.name !== 'lucene') {
     return { list: [], type: SUGGESTION_TYPE.KQL };
   }
-  if (!data.autocomplete.hasQuerySuggestions(ast.name === 'kql' ? 'kuery' : 'lucene')) {
+  if (!unifiedSearch.autocomplete.hasQuerySuggestions(ast.name === 'kql' ? 'kuery' : 'lucene')) {
     return { list: [], type: SUGGESTION_TYPE.KQL };
   }
 
   const query = ast.value.split(MARKER)[0];
   const position = ast.value.indexOf(MARKER) + 1;
 
-  const suggestions = await data.autocomplete.getQuerySuggestions({
+  const suggestions = await unifiedSearch.autocomplete.getQuerySuggestions({
     language: ast.name === 'kql' ? 'kuery' : 'lucene',
     query,
     selectionStart: position,

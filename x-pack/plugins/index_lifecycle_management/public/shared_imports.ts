@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
 import { AppServicesContext } from './types';
-import { useKibana as _useKibana } from '../../../../src/plugins/kibana_react/public';
 
 export type {
   FormHook,
@@ -19,7 +19,7 @@ export type {
   FormSchema,
   ValidationConfig,
   ValidationError,
-} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {
   useForm,
@@ -28,9 +28,9 @@ export {
   getFieldValidityAndErrorMessage,
   useFormContext,
   UseMultiFields,
-} from '../../../../src/plugins/es_ui_shared/static/forms/hook_form_lib';
+} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
-export { fieldValidators } from '../../../../src/plugins/es_ui_shared/static/forms/helpers';
+export { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 
 export {
   ToggleField,
@@ -40,20 +40,21 @@ export {
   ComboBoxField,
   TextField,
   CheckBoxField,
-} from '../../../../src/plugins/es_ui_shared/static/forms/components';
+} from '@kbn/es-ui-shared-plugin/static/forms/components';
 
-export { attemptToURIDecode } from '../../../../src/plugins/es_ui_shared/public';
+export { attemptToURIDecode } from '@kbn/es-ui-shared-plugin/public';
 
 export {
   KibanaContextProvider,
   KibanaThemeProvider,
   RedirectAppLinks,
-} from '../../../../src/plugins/kibana_react/public';
+  useExecutionContext,
+} from '@kbn/kibana-react-plugin/public';
 
-export { APP_WRAPPER_CLASS } from '../../../../src/core/public';
+export { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 export const useKibana = () => _useKibana<AppServicesContext>();
 
-export type { CloudSetup } from '../../cloud/public';
+export type { CloudSetup } from '@kbn/cloud-plugin/public';
 
-export type { ILicense } from '../../licensing/public';
+export type { ILicense } from '@kbn/licensing-plugin/public';

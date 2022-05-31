@@ -8,8 +8,9 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { flatMap, get } from 'lodash';
+import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { parseDuration } from '.';
-import { AggregateEventsBySavedObjectResult } from '../../../event_log/server';
+import { IExecutionLog, IExecutionLogResult } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions
 
@@ -19,45 +20,27 @@ const ACTION_FIELD = 'event.action';
 const OUTCOME_FIELD = 'event.outcome';
 const DURATION_FIELD = 'event.duration';
 const MESSAGE_FIELD = 'message';
+const VERSION_FIELD = 'kibana.version';
+const ERROR_MESSAGE_FIELD = 'error.message';
 const SCHEDULE_DELAY_FIELD = 'kibana.task.schedule_delay';
 const ES_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.es_search_duration_ms';
 const TOTAL_SEARCH_DURATION_FIELD = 'kibana.alert.rule.execution.metrics.total_search_duration_ms';
 const NUMBER_OF_TRIGGERED_ACTIONS_FIELD =
   'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
+const NUMBER_OF_GENERATED_ACTIONS_FIELD =
+  'kibana.alert.rule.execution.metrics.number_of_generated_actions';
+const NUMBER_OF_ACTIVE_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.alert_counts.active';
+const NUMBER_OF_NEW_ALERTS_FIELD = 'kibana.alert.rule.execution.metrics.alert_counts.new';
+const NUMBER_OF_RECOVERED_ALERTS_FIELD =
+  'kibana.alert.rule.execution.metrics.alert_counts.recovered';
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 
 const Millis2Nanos = 1000 * 1000;
 
-export interface IExecutionLog {
-  id: string;
-  timestamp: string;
-  duration_ms: number;
-  status: string;
-  message: string;
-  num_active_alerts: number;
-  num_new_alerts: number;
-  num_recovered_alerts: number;
-  num_triggered_actions: number;
-  num_succeeded_actions: number;
-  num_errored_actions: number;
-  total_search_duration_ms: number;
-  es_search_duration_ms: number;
-  schedule_delay_ms: number;
-  timed_out: boolean;
-}
-
-export interface IExecutionLogResult {
-  total: number;
-  data: IExecutionLog[];
-}
-
-interface IAlertCounts extends estypes.AggregationsMultiBucketAggregateBase {
-  buckets: {
-    activeAlerts: estypes.AggregationsSingleBucketAggregateBase;
-    newAlerts: estypes.AggregationsSingleBucketAggregateBase;
-    recoveredAlerts: estypes.AggregationsSingleBucketAggregateBase;
-  };
-}
+export const EMPTY_EXECUTION_LOG_RESULT = {
+  total: 0,
+  data: [],
+};
 
 interface IActionExecution
   extends estypes.AggregationsTermsAggregateBase<{ key: string; doc_count: number }> {
@@ -73,17 +56,25 @@ interface IExecutionUuidAggBucket extends estypes.AggregationsStringTermsBucketK
     esSearchDuration: estypes.AggregationsMaxAggregate;
     totalSearchDuration: estypes.AggregationsMaxAggregate;
     numTriggeredActions: estypes.AggregationsMaxAggregate;
+    numGeneratedActions: estypes.AggregationsMaxAggregate;
+    numActiveAlerts: estypes.AggregationsMaxAggregate;
+    numRecoveredAlerts: estypes.AggregationsMaxAggregate;
+    numNewAlerts: estypes.AggregationsMaxAggregate;
     outcomeAndMessage: estypes.AggregationsTopHitsAggregate;
   };
-  alertCounts: IAlertCounts;
   actionExecution: {
     actionOutcomes: IActionExecution;
   };
 }
 
-interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
+export interface ExecutionUuidAggResult<TBucket = IExecutionUuidAggBucket>
   extends estypes.AggregationsAggregateBase {
   buckets: TBucket[];
+}
+
+interface ExcludeExecuteStartAggResult extends estypes.AggregationsAggregateBase {
+  executionUuid: ExecutionUuidAggResult;
+  executionUuidCardinality: estypes.AggregationsCardinalityAggregate;
 }
 export interface IExecutionLogAggOptions {
   page: number;
@@ -98,6 +89,10 @@ const ExecutionLogSortFields: Record<string, string> = {
   es_search_duration: 'ruleExecution>esSearchDuration',
   schedule_delay: 'ruleExecution>scheduleDelay',
   num_triggered_actions: 'ruleExecution>numTriggeredActions',
+  num_generated_actions: 'ruleExecution>numGeneratedActions',
+  num_active_alerts: 'ruleExecution>numActiveAlerts',
+  num_recovered_alerts: 'ruleExecution>numRecoveredAlerts',
+  num_new_alerts: 'ruleExecution>numNewAlerts',
 };
 
 export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLogAggOptions) {
@@ -124,98 +119,123 @@ export function getExecutionLogAggregation({ page, perPage, sort }: IExecutionLo
   }
 
   return {
-    // Get total number of executions
-    executionUuidCardinality: {
-      cardinality: {
-        field: EXECUTION_UUID_FIELD,
-      },
-    },
-    executionUuid: {
-      // Bucket by execution UUID
-      terms: {
-        field: EXECUTION_UUID_FIELD,
-        size: DEFAULT_MAX_BUCKETS_LIMIT,
-        order: formatSortForTermSort(sort),
+    excludeExecuteStart: {
+      filter: {
+        bool: {
+          must_not: [
+            {
+              term: {
+                [ACTION_FIELD]: 'execute-start',
+              },
+            },
+          ],
+        },
       },
       aggs: {
-        // Bucket sort to allow paging through executions
-        executionUuidSorted: {
-          bucket_sort: {
-            sort: formatSortForBucketSort(sort),
-            from: (page - 1) * perPage,
-            size: perPage,
-            gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
+        // Get total number of executions
+        executionUuidCardinality: {
+          cardinality: {
+            field: EXECUTION_UUID_FIELD,
           },
         },
-        // Get counts for types of alerts and whether there was an execution timeout
-        alertCounts: {
-          filters: {
-            filters: {
-              newAlerts: { match: { [ACTION_FIELD]: 'new-instance' } },
-              activeAlerts: { match: { [ACTION_FIELD]: 'active-instance' } },
-              recoveredAlerts: { match: { [ACTION_FIELD]: 'recovered-instance' } },
-            },
+        executionUuid: {
+          // Bucket by execution UUID
+          terms: {
+            field: EXECUTION_UUID_FIELD,
+            size: DEFAULT_MAX_BUCKETS_LIMIT,
+            order: formatSortForTermSort(sort),
           },
-        },
-        // Filter by action execute doc and get information from this event
-        actionExecution: {
-          filter: getProviderAndActionFilter('actions', 'execute'),
           aggs: {
-            actionOutcomes: {
-              terms: {
-                field: OUTCOME_FIELD,
-                size: 2,
+            // Bucket sort to allow paging through executions
+            executionUuidSorted: {
+              bucket_sort: {
+                sort: formatSortForBucketSort(sort),
+                from: (page - 1) * perPage,
+                size: perPage,
+                gap_policy: 'insert_zeros' as estypes.AggregationsGapPolicy,
               },
             },
-          },
-        },
-        // Filter by rule execute doc and get information from this event
-        ruleExecution: {
-          filter: getProviderAndActionFilter('alerting', 'execute'),
-          aggs: {
-            executeStartTime: {
-              min: {
-                field: START_FIELD,
-              },
-            },
-            scheduleDelay: {
-              max: {
-                field: SCHEDULE_DELAY_FIELD,
-              },
-            },
-            totalSearchDuration: {
-              max: {
-                field: TOTAL_SEARCH_DURATION_FIELD,
-              },
-            },
-            esSearchDuration: {
-              max: {
-                field: ES_SEARCH_DURATION_FIELD,
-              },
-            },
-            numTriggeredActions: {
-              max: {
-                field: NUMBER_OF_TRIGGERED_ACTIONS_FIELD,
-              },
-            },
-            executionDuration: {
-              max: {
-                field: DURATION_FIELD,
-              },
-            },
-            outcomeAndMessage: {
-              top_hits: {
-                size: 1,
-                _source: {
-                  includes: [OUTCOME_FIELD, MESSAGE_FIELD],
+            // Filter by action execute doc and get information from this event
+            actionExecution: {
+              filter: getProviderAndActionFilter('actions', 'execute'),
+              aggs: {
+                actionOutcomes: {
+                  terms: {
+                    field: OUTCOME_FIELD,
+                    size: 2,
+                  },
                 },
               },
             },
+            // Filter by rule execute doc and get information from this event
+            ruleExecution: {
+              filter: getProviderAndActionFilter('alerting', 'execute'),
+              aggs: {
+                executeStartTime: {
+                  min: {
+                    field: START_FIELD,
+                  },
+                },
+                scheduleDelay: {
+                  max: {
+                    field: SCHEDULE_DELAY_FIELD,
+                  },
+                },
+                totalSearchDuration: {
+                  max: {
+                    field: TOTAL_SEARCH_DURATION_FIELD,
+                  },
+                },
+                esSearchDuration: {
+                  max: {
+                    field: ES_SEARCH_DURATION_FIELD,
+                  },
+                },
+                numTriggeredActions: {
+                  max: {
+                    field: NUMBER_OF_TRIGGERED_ACTIONS_FIELD,
+                  },
+                },
+                numGeneratedActions: {
+                  max: {
+                    field: NUMBER_OF_GENERATED_ACTIONS_FIELD,
+                  },
+                },
+                numActiveAlerts: {
+                  max: {
+                    field: NUMBER_OF_ACTIVE_ALERTS_FIELD,
+                  },
+                },
+                numRecoveredAlerts: {
+                  max: {
+                    field: NUMBER_OF_RECOVERED_ALERTS_FIELD,
+                  },
+                },
+                numNewAlerts: {
+                  max: {
+                    field: NUMBER_OF_NEW_ALERTS_FIELD,
+                  },
+                },
+                executionDuration: {
+                  max: {
+                    field: DURATION_FIELD,
+                  },
+                },
+                outcomeAndMessage: {
+                  top_hits: {
+                    size: 1,
+                    _source: {
+                      includes: [OUTCOME_FIELD, MESSAGE_FIELD, ERROR_MESSAGE_FIELD, VERSION_FIELD],
+                    },
+                  },
+                },
+              },
+            },
+            // If there was a timeout, this filter will return non-zero doc count
+            timeoutMessage: {
+              filter: getProviderAndActionFilter('alerting', 'execute-timeout'),
+            },
           },
-        },
-        // If there was a timeout, this filter will return non-zero doc count
-        timeoutMessage: {
-          filter: getProviderAndActionFilter('alerting', 'execute-timeout'),
         },
       },
     },
@@ -256,16 +276,25 @@ function formatExecutionLogAggBucket(bucket: IExecutionUuidAggBucket): IExecutio
   const actionExecutionError =
     actionExecutionOutcomes.find((subBucket) => subBucket?.key === 'failure')?.doc_count ?? 0;
 
+  const outcomeAndMessage = bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source;
+  const status = outcomeAndMessage ? outcomeAndMessage?.event?.outcome ?? '' : '';
+  const message =
+    status === 'failure'
+      ? `${outcomeAndMessage?.message ?? ''} - ${outcomeAndMessage?.error?.message ?? ''}`
+      : outcomeAndMessage?.message ?? '';
+  const version = outcomeAndMessage ? outcomeAndMessage?.kibana?.version ?? '' : '';
   return {
     id: bucket?.key ?? '',
     timestamp: bucket?.ruleExecution?.executeStartTime.value_as_string ?? '',
     duration_ms: durationUs / Millis2Nanos,
-    status: bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.event?.outcome,
-    message: bucket?.ruleExecution?.outcomeAndMessage?.hits?.hits[0]?._source?.message,
-    num_active_alerts: bucket?.alertCounts?.buckets?.activeAlerts?.doc_count ?? 0,
-    num_new_alerts: bucket?.alertCounts?.buckets?.newAlerts?.doc_count ?? 0,
-    num_recovered_alerts: bucket?.alertCounts?.buckets?.recoveredAlerts?.doc_count ?? 0,
+    status,
+    message,
+    version,
+    num_active_alerts: bucket?.ruleExecution?.numActiveAlerts?.value ?? 0,
+    num_new_alerts: bucket?.ruleExecution?.numNewAlerts?.value ?? 0,
+    num_recovered_alerts: bucket?.ruleExecution?.numRecoveredAlerts?.value ?? 0,
     num_triggered_actions: bucket?.ruleExecution?.numTriggeredActions?.value ?? 0,
+    num_generated_actions: bucket?.ruleExecution?.numGeneratedActions?.value ?? 0,
     num_succeeded_actions: actionExecutionSuccess,
     num_errored_actions: actionExecutionError,
     total_search_duration_ms: bucket?.ruleExecution?.totalSearchDuration?.value ?? 0,
@@ -280,16 +309,14 @@ export function formatExecutionLogResult(
 ): IExecutionLogResult {
   const { aggregations } = results;
 
-  if (!aggregations) {
-    return {
-      total: 0,
-      data: [],
-    };
+  if (!aggregations || !aggregations.excludeExecuteStart) {
+    return EMPTY_EXECUTION_LOG_RESULT;
   }
 
-  const total = (aggregations.executionUuidCardinality as estypes.AggregationsCardinalityAggregate)
-    .value;
-  const buckets = (aggregations.executionUuid as ExecutionUuidAggResult).buckets;
+  const aggs = aggregations.excludeExecuteStart as ExcludeExecuteStartAggResult;
+
+  const total = aggs.executionUuidCardinality.value;
+  const buckets = aggs.executionUuid.buckets;
 
   return {
     total,

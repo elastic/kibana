@@ -18,14 +18,19 @@ import {
   AppMountParameters,
   CoreStart,
   APP_WRAPPER_CLASS,
-} from '../../../../../src/core/public';
+} from '@kbn/core/public';
 
 import {
   KibanaContextProvider,
   RedirectAppLinks,
   useUiSetting$,
-} from '../../../../../src/plugins/kibana_react/public';
+} from '@kbn/kibana-react-plugin/public';
 
+import {
+  DatePickerContextProvider,
+  InspectorContextProvider,
+  useBreadcrumbs,
+} from '@kbn/observability-plugin/public';
 import {
   DASHBOARD_LABEL,
   RumHome,
@@ -33,11 +38,6 @@ import {
 import { ApmPluginSetupDeps, ApmPluginStartDeps } from '../plugin';
 import { UXActionMenu } from '../components/app/rum_dashboard/action_menu';
 
-import {
-  DatePickerContextProvider,
-  InspectorContextProvider,
-  useBreadcrumbs,
-} from '../../../observability/public';
 import { UrlParamsProvider } from '../context/url_params_context/url_params_context';
 import { createStaticDataView } from '../services/rest/data_view';
 import { createCallApmApi } from '../services/rest/create_call_apm_api';
@@ -106,7 +106,7 @@ export function UXAppRoot({
   appMountParameters,
   core,
   deps,
-  corePlugins: { embeddable, inspector, maps, observability, data },
+  corePlugins: { embeddable, inspector, maps, observability, data, dataViews },
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
@@ -130,6 +130,7 @@ export function UXAppRoot({
           observability,
           embeddable,
           data,
+          dataViews,
         }}
       >
         <i18nCore.Context>

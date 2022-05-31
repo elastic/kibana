@@ -5,12 +5,24 @@
  * 2.0.
  */
 
-import type { ChromeBreadcrumb, CoreStart } from 'kibana/public';
+import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { useEffect } from 'react';
-import { useKibana } from '../../../../../../src/plugins/kibana_react/public';
-import { PLUGIN_ID } from '../../../common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { type RouteProps, useRouteMatch, useHistory } from 'react-router-dom';
 import type { CspNavigationItem } from './types';
 import { CLOUD_POSTURE } from './translations';
+
+const getClickableBreadcrumb = (
+  routeMatch: RouteProps['path'],
+  breadcrumbPath: CspNavigationItem['path']
+) => {
+  const hasParams = breadcrumbPath.includes(':');
+  if (hasParams) return;
+
+  if (routeMatch !== breadcrumbPath) {
+    return breadcrumbPath.startsWith('/') ? `${breadcrumbPath}` : `/${breadcrumbPath}`;
+  }
+};
 
 export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
   const {
@@ -19,22 +31,33 @@ export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
       application: { getUrlForApp },
     },
   } = useKibana<CoreStart>();
+  const match = useRouteMatch();
+  const history = useHistory();
 
   useEffect(() => {
-    const cspPath = getUrlForApp(PLUGIN_ID);
-    const additionalBreadCrumbs: ChromeBreadcrumb[] = breadcrumbs.map((breadcrumb) => ({
-      text: breadcrumb.name,
-      path: breadcrumb.path.startsWith('/')
-        ? `${cspPath}${breadcrumb.path}`
-        : `${cspPath}/${breadcrumb.path}`,
-    }));
+    const additionalBreadCrumbs: ChromeBreadcrumb[] = breadcrumbs.map((breadcrumb) => {
+      const clickableLink = getClickableBreadcrumb(match.path, breadcrumb.path);
+
+      return {
+        text: breadcrumb.name,
+        ...(clickableLink && {
+          onClick: (e) => {
+            e.preventDefault();
+            history.push(clickableLink);
+          },
+        }),
+      };
+    });
 
     setBreadcrumbs([
       {
         text: CLOUD_POSTURE,
-        href: cspPath,
+        onClick: (e) => {
+          e.preventDefault();
+          history.push(`/`);
+        },
       },
       ...additionalBreadCrumbs,
     ]);
-  }, [getUrlForApp, setBreadcrumbs, breadcrumbs]);
+  }, [match.path, getUrlForApp, setBreadcrumbs, breadcrumbs, history]);
 };

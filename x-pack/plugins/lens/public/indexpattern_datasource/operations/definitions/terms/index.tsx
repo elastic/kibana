@@ -19,11 +19,11 @@ import {
   EuiButtonGroup,
 } from '@elastic/eui';
 import { uniq } from 'lodash';
-import { AggFunctionsMapping } from '../../../../../../../../src/plugins/data/public';
-import { buildExpressionFunction } from '../../../../../../../../src/plugins/expressions/public';
+import { AggFunctionsMapping } from '@kbn/data-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { insertOrReplaceColumn, updateColumnParam, updateDefaultLabels } from '../../layer_helpers';
 import type { DataType } from '../../../../types';
-import { OperationDefinition } from '../index';
+import { OperationDefinition } from '..';
 import { FieldBasedIndexPatternColumn } from '../column_types';
 import { ValuesInput } from './values_input';
 import { getInvalidFieldMessage } from '../helpers';
@@ -39,6 +39,7 @@ import {
   getMultiTermsScriptedFieldErrorMessage,
   getFieldsByValidationState,
   isSortableByColumn,
+  isPercentileRankSortable,
 } from './helpers';
 import {
   DEFAULT_MAX_DOC_COUNT,
@@ -60,7 +61,12 @@ const missingFieldLabel = i18n.translate('xpack.lens.indexPattern.missingFieldLa
   defaultMessage: 'Missing field',
 });
 
-function ofName(name?: string, count: number = 0, rare: boolean = false) {
+function ofName(
+  name?: string,
+  secondaryFieldsCount: number = 0,
+  rare: boolean = false,
+  termsSize: number = 0
+) {
   if (rare) {
     return i18n.translate('xpack.lens.indexPattern.rareTermsOf', {
       defaultMessage: 'Rare values of {name}',
@@ -69,19 +75,22 @@ function ofName(name?: string, count: number = 0, rare: boolean = false) {
       },
     });
   }
-  if (count) {
+  if (secondaryFieldsCount) {
     return i18n.translate('xpack.lens.indexPattern.multipleTermsOf', {
       defaultMessage: 'Top values of {name} + {count} {count, plural, one {other} other {others}}',
       values: {
         name: name ?? missingFieldLabel,
-        count,
+        count: secondaryFieldsCount,
       },
     });
   }
   return i18n.translate('xpack.lens.indexPattern.termsOf', {
-    defaultMessage: 'Top values of {name}',
+    defaultMessage:
+      'Top {numberOfTermsLabel}{termsCount, plural, one {value} other {values}} of {name}',
     values: {
       name: name ?? missingFieldLabel,
+      termsCount: termsSize,
+      numberOfTermsLabel: termsSize > 1 ? `${termsSize} ` : '',
     },
   });
 }
@@ -227,18 +236,34 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         max_doc_count: column.params.orderBy.maxDocCount,
       }).toAst();
     }
+    let orderBy = '_key';
+
+    if (column.params?.orderBy.type === 'column') {
+      const orderColumn = layer.columns[column.params.orderBy.columnId];
+      orderBy = String(orderedColumnIds.indexOf(column.params.orderBy.columnId));
+      // percentile rank with non integer value should default to alphabetical order
+      if (!isPercentileRankSortable(orderColumn)) {
+        orderBy = '_key';
+      }
+    }
+
+    // To get more accurate results, we set shard_size to a minimum of 1000
+    // The other calculation matches the current Elasticsearch shard_size default,
+    // but they may diverge in the future
+    const shardSize = column.params.accuracyMode
+      ? Math.max(1000, column.params.size * 1.5 + 10)
+      : undefined;
+
     if (column.params?.secondaryFields?.length) {
       return buildExpressionFunction<AggFunctionsMapping['aggMultiTerms']>('aggMultiTerms', {
         id: columnId,
         enabled: true,
         schema: 'segment',
         fields: [column.sourceField, ...column.params.secondaryFields],
-        orderBy:
-          column.params.orderBy.type === 'alphabetical'
-            ? '_key'
-            : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
+        orderBy,
         order: column.params.orderDirection,
         size: column.params.size,
+        shardSize,
         otherBucket: Boolean(column.params.otherBucket),
         otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
           defaultMessage: 'Other',
@@ -250,12 +275,10 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       enabled: true,
       schema: 'segment',
       field: column.sourceField,
-      orderBy:
-        column.params.orderBy.type === 'alphabetical'
-          ? '_key'
-          : String(orderedColumnIds.indexOf(column.params.orderBy.columnId)),
+      orderBy,
       order: column.params.orderDirection,
       size: column.params.size,
+      shardSize,
       otherBucket: Boolean(column.params.otherBucket),
       otherBucketLabel: i18n.translate('xpack.lens.indexPattern.terms.otherLabel', {
         defaultMessage: 'Other',
@@ -270,7 +293,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     ofName(
       indexPattern.getFieldByName(column.sourceField)?.displayName,
       column.params.secondaryFields?.length,
-      column.params.orderBy.type === 'rare'
+      column.params.orderBy.type === 'rare',
+      column.params.size
     ),
   onFieldChange: (oldColumn, field, params) => {
     const newParams = {
@@ -285,6 +309,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
     if (!supportsRarityRanking(field) && newParams.orderBy.type === 'rare') {
       newParams.orderBy = { type: 'alphabetical' };
     }
+
     return {
       ...oldColumn,
       dataType: field.type as DataType,
@@ -293,7 +318,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
         : ofName(
             field.displayName,
             newParams.secondaryFields?.length,
-            newParams.orderBy.type === 'rare'
+            newParams.orderBy.type === 'rare',
+            newParams.size
           ),
       sourceField: field.name,
       params: newParams,
@@ -398,7 +424,8 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 : ofName(
                     mainField?.displayName,
                     fields.length - 1,
-                    newParams.orderBy.type === 'rare'
+                    newParams.orderBy.type === 'rare',
+                    newParams.size
                   ),
               params: {
                 ...newParams,
@@ -522,20 +549,37 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
       });
     }
 
+    const secondaryFieldsCount = currentColumn.params.secondaryFields
+      ? currentColumn.params.secondaryFields.length
+      : 0;
+
     return (
       <>
         <ValuesInput
           value={currentColumn.params.size}
           disabled={currentColumn.params.orderBy.type === 'rare'}
           onChange={(value) => {
-            updateLayer(
-              updateColumnParam({
-                layer,
-                columnId,
-                paramName: 'size',
-                value,
-              })
-            );
+            updateLayer({
+              ...layer,
+              columns: {
+                ...layer.columns,
+                [columnId]: {
+                  ...currentColumn,
+                  label: currentColumn.customLabel
+                    ? currentColumn.label
+                    : ofName(
+                        indexPattern.getFieldByName(currentColumn.sourceField)?.displayName,
+                        secondaryFieldsCount,
+                        currentColumn.params.orderBy.type === 'rare',
+                        value
+                      ),
+                  params: {
+                    ...currentColumn.params,
+                    size: value,
+                  },
+                },
+              } as Record<string, TermsIndexPatternColumn>,
+            });
           }}
         />
         {currentColumn.params.orderBy.type === 'rare' && (
@@ -596,6 +640,7 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                 }),
                 indexPattern
               );
+
               updateLayer(
                 updateColumnParam({
                   layer: updatedLayer,
@@ -713,6 +758,44 @@ export const termsOperation: OperationDefinition<TermsIndexPatternColumn, 'field
                       layer,
                       columnId,
                       paramName: 'missingBucket',
+                      value: e.target.checked,
+                    })
+                  )
+                }
+              />
+              <EuiSpacer size="m" />
+              <EuiSwitch
+                label={
+                  <>
+                    {i18n.translate('xpack.lens.indexPattern.terms.accuracyModeDescription', {
+                      defaultMessage: 'Enable accuracy mode',
+                    })}{' '}
+                    <EuiIconTip
+                      color="subdued"
+                      content={i18n.translate('xpack.lens.indexPattern.terms.accuracyModeHelp', {
+                        defaultMessage: `Improves results for high-cardinality data, but increases the load on the Elasticsearch cluster.`,
+                      })}
+                      iconProps={{
+                        className: 'eui-alignTop',
+                      }}
+                      position="top"
+                      size="s"
+                      type="questionInCircle"
+                    />
+                  </>
+                }
+                compressed
+                disabled={currentColumn.params.orderBy.type === 'rare'}
+                data-test-subj="indexPattern-accuracy-mode"
+                checked={Boolean(
+                  currentColumn.params.accuracyMode && currentColumn.params.orderBy.type !== 'rare'
+                )}
+                onChange={(e: EuiSwitchEvent) =>
+                  updateLayer(
+                    updateColumnParam({
+                      layer,
+                      columnId,
+                      paramName: 'accuracyMode',
                       value: e.target.checked,
                     })
                   )

@@ -7,8 +7,8 @@
  */
 
 import { withTimeout, isPromise } from '@kbn/std';
+import type { Logger } from '@kbn/logging';
 import { CoreContext } from '../core_context';
-import { Logger } from '../logging';
 import { PluginWrapper } from './plugin';
 import { DiscoveredPlugin, PluginDependencies, PluginName, PluginType } from './types';
 import {
@@ -262,6 +262,7 @@ export class PluginsSystem<T extends PluginType> {
               uiPluginNames.includes(p)
             ),
             requiredBundles: plugin.manifest.requiredBundles,
+            enabledOnAnonymousPages: plugin.manifest.enabledOnAnonymousPages,
           },
         ];
       })

@@ -23,7 +23,7 @@ const ALERTS_TABLE_CONTAINER_SELECTOR = 'events-viewer-panel';
 const VIEW_RULE_DETAILS_SELECTOR = 'viewRuleDetails';
 const VIEW_RULE_DETAILS_FLYOUT_SELECTOR = 'viewRuleDetailsFlyout';
 
-const ACTION_COLUMN_INDEX = 0;
+const ACTION_COLUMN_INDEX = 1;
 
 type WorkflowStatus = 'open' | 'acknowledged' | 'closed';
 
@@ -44,6 +44,15 @@ export function ObservabilityAlertsCommonProvider({
       'observability',
       '/alerts',
       `?_a=(rangeFrom:'${DATE_WITH_DATA.rangeFrom}',rangeTo:'${DATE_WITH_DATA.rangeTo}')`,
+      { ensureCurrentUrl: false }
+    );
+  };
+
+  const navigateToRulesPage = async () => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      '/alerts/rules',
+      '?',
       { ensureCurrentUrl: false }
     );
   };
@@ -131,12 +140,14 @@ export function ObservabilityAlertsCommonProvider({
   };
 
   // Flyout
-  const getOpenFlyoutButton = async () => {
-    return await testSubjects.find('openFlyoutButton');
+  const getViewAlertDetailsFlyoutButton = async () => {
+    await openActionsMenuForRow(0);
+
+    return await testSubjects.find('viewAlertDetails');
   };
 
   const openAlertsFlyout = async () => {
-    await (await getOpenFlyoutButton()).click();
+    await (await getViewAlertDetailsFlyoutButton()).click();
     await retry.waitFor(
       'flyout open',
       async () => await testSubjects.exists(ALERTS_FLYOUT_SELECTOR, { timeout: 2500 })
@@ -324,5 +335,6 @@ export function ObservabilityAlertsCommonProvider({
     viewRuleDetailsLinkClick,
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
     getRuleStatValue,
+    navigateToRulesPage,
   };
 }

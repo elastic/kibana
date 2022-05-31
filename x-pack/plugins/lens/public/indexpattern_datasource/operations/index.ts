@@ -28,6 +28,7 @@ export type {
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
@@ -41,4 +42,5 @@ export type {
   FormulaIndexPatternColumn,
   MathIndexPatternColumn,
   StaticValueIndexPatternColumn,
+  TimeScaleIndexPatternColumn,
 } from './definitions';

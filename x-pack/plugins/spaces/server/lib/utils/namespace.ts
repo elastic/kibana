@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsUtils } from '../../../../../../src/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 
 /**
  * Converts a Space ID string to its namespace ID representation. Note that a Space ID string is equivalent to a namespace string.

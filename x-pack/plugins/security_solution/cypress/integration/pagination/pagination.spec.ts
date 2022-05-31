@@ -9,98 +9,143 @@ import {
   PROCESS_NAME_FIELD,
   UNCOMMON_PROCESSES_TABLE,
 } from '../../screens/hosts/uncommon_processes';
-import { FIRST_PAGE_SELECTOR, THIRD_PAGE_SELECTOR } from '../../screens/pagination';
-import { cleanKibana } from '../../tasks/common';
-
+import { FIRST_PAGE_SELECTOR, SECOND_PAGE_SELECTOR } from '../../screens/pagination';
+import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 import { waitsForEventsToBeLoaded } from '../../tasks/hosts/events';
 import { openEvents, openUncommonProcesses } from '../../tasks/hosts/main';
 import { waitForUncommonProcessesToBeLoaded } from '../../tasks/hosts/uncommon_processes';
-import { loginAndWaitForPage } from '../../tasks/login';
-import { goToFirstPage, goToThirdPage } from '../../tasks/pagination';
+import { login, visit } from '../../tasks/login';
+import { goToFirstPage, goToSecondPage, sortFirstColumn } from '../../tasks/pagination';
 import { refreshPage } from '../../tasks/security_header';
-
-import { HOSTS_PAGE_TAB_URLS } from '../../urls/navigation';
+import { HOSTS_URL, USERS_URL, HOSTS_PAGE_TAB_URLS } from '../../urls/navigation';
+import { ALL_HOSTS_TABLE } from '../../screens/hosts/all_hosts';
+import { ALL_USERS_TABLE } from '../../screens/users/all_users';
 
 describe('Pagination', () => {
   before(() => {
-    cleanKibana();
-    loginAndWaitForPage(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
-    waitForUncommonProcessesToBeLoaded();
+    login();
   });
 
-  afterEach(() => {
-    goToFirstPage();
+  describe('Host uncommon processes table)', () => {
+    before(() => {
+      esArchiverLoad('host_uncommon_processes');
+      visit(HOSTS_PAGE_TAB_URLS.uncommonProcesses);
+      waitForUncommonProcessesToBeLoaded();
+    });
+    after(() => {
+      esArchiverUnload('host_uncommon_processes');
+    });
+
+    afterEach(() => {
+      goToFirstPage();
+    });
+
+    it('pagination updates results and page number', () => {
+      cy.get(UNCOMMON_PROCESSES_TABLE)
+        .find(FIRST_PAGE_SELECTOR)
+        .should('have.class', 'euiPaginationButton-isActive');
+
+      cy.get(UNCOMMON_PROCESSES_TABLE)
+        .find(PROCESS_NAME_FIELD)
+        .first()
+        .invoke('text')
+        .then((processNameFirstPage) => {
+          goToSecondPage();
+          waitForUncommonProcessesToBeLoaded();
+          cy.get(UNCOMMON_PROCESSES_TABLE)
+            .find(PROCESS_NAME_FIELD)
+            .first()
+            .invoke('text')
+            .should((processNameSecondPage) => {
+              expect(processNameFirstPage).not.to.eq(processNameSecondPage);
+            });
+        });
+      cy.get(UNCOMMON_PROCESSES_TABLE)
+        .find(FIRST_PAGE_SELECTOR)
+        .should('not.have.class', 'euiPaginationButton-isActive');
+      cy.get(UNCOMMON_PROCESSES_TABLE)
+        .find(SECOND_PAGE_SELECTOR)
+        .should('have.class', 'euiPaginationButton-isActive');
+    });
+
+    it('pagination keeps track of page results when tabs change', () => {
+      cy.get(UNCOMMON_PROCESSES_TABLE)
+        .find(FIRST_PAGE_SELECTOR)
+        .should('have.class', 'euiPaginationButton-isActive');
+      goToSecondPage();
+      waitForUncommonProcessesToBeLoaded();
+
+      cy.get(PROCESS_NAME_FIELD)
+        .first()
+        .invoke('text')
+        .then((expectedThirdPageResult) => {
+          openEvents();
+          waitsForEventsToBeLoaded();
+          cy.get(FIRST_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
+          openUncommonProcesses();
+          waitForUncommonProcessesToBeLoaded();
+          cy.get(SECOND_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
+          cy.get(PROCESS_NAME_FIELD)
+            .first()
+            .invoke('text')
+            .should((actualThirdPageResult) => {
+              expect(expectedThirdPageResult).to.eq(actualThirdPageResult);
+            });
+        });
+    });
+
+    it('pagination resets results and page number to first page when refresh is clicked', () => {
+      cy.get(UNCOMMON_PROCESSES_TABLE)
+        .find(FIRST_PAGE_SELECTOR)
+        .should('have.class', 'euiPaginationButton-isActive');
+      goToSecondPage();
+      waitForUncommonProcessesToBeLoaded();
+      cy.get(UNCOMMON_PROCESSES_TABLE)
+        .find(FIRST_PAGE_SELECTOR)
+        .should('not.have.class', 'euiPaginationButton-isActive');
+      refreshPage();
+      waitForUncommonProcessesToBeLoaded();
+      cy.get(UNCOMMON_PROCESSES_TABLE)
+        .find(FIRST_PAGE_SELECTOR)
+        .should('have.class', 'euiPaginationButton-isActive');
+    });
   });
 
-  it('pagination updates results and page number', () => {
-    cy.get(UNCOMMON_PROCESSES_TABLE)
-      .find(FIRST_PAGE_SELECTOR)
-      .should('have.class', 'euiPaginationButton-isActive');
+  describe('All users and all Hosts tables', () => {
+    before(() => {
+      esArchiverLoad('all_users');
+    });
 
-    cy.get(UNCOMMON_PROCESSES_TABLE)
-      .find(PROCESS_NAME_FIELD)
-      .first()
-      .invoke('text')
-      .then((processNameFirstPage) => {
-        goToThirdPage();
-        waitForUncommonProcessesToBeLoaded();
-        cy.wait(1500);
-        cy.get(UNCOMMON_PROCESSES_TABLE)
-          .find(PROCESS_NAME_FIELD)
-          .first()
-          .invoke('text')
-          .should((processNameSecondPage) => {
-            expect(processNameFirstPage).not.to.eq(processNameSecondPage);
-          });
-      });
-    cy.wait(3000);
-    cy.get(UNCOMMON_PROCESSES_TABLE)
-      .find(FIRST_PAGE_SELECTOR)
-      .should('not.have.class', 'euiPaginationButton-isActive');
-    cy.get(UNCOMMON_PROCESSES_TABLE)
-      .find(THIRD_PAGE_SELECTOR)
-      .should('have.class', 'euiPaginationButton-isActive');
-  });
+    after(() => {
+      esArchiverUnload('all_users');
+    });
 
-  it('pagination keeps track of page results when tabs change', () => {
-    cy.get(UNCOMMON_PROCESSES_TABLE)
-      .find(FIRST_PAGE_SELECTOR)
-      .should('have.class', 'euiPaginationButton-isActive');
-    goToThirdPage();
-    waitForUncommonProcessesToBeLoaded();
+    it(`reset all Hosts pagination when sorting column`, () => {
+      visit(HOSTS_URL);
+      goToSecondPage();
+      cy.get(ALL_HOSTS_TABLE)
+        .find(FIRST_PAGE_SELECTOR)
+        .should('not.have.class', 'euiPaginationButton-isActive');
 
-    cy.get(PROCESS_NAME_FIELD)
-      .first()
-      .invoke('text')
-      .then((expectedThirdPageResult) => {
-        openEvents();
-        waitsForEventsToBeLoaded();
-        cy.get(FIRST_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
-        openUncommonProcesses();
-        waitForUncommonProcessesToBeLoaded();
-        cy.get(THIRD_PAGE_SELECTOR).should('have.class', 'euiPaginationButton-isActive');
-        cy.get(PROCESS_NAME_FIELD)
-          .first()
-          .invoke('text')
-          .should((actualThirdPageResult) => {
-            expect(expectedThirdPageResult).to.eq(actualThirdPageResult);
-          });
-      });
-  });
+      sortFirstColumn();
 
-  it('pagination resets results and page number to first page when refresh is clicked', () => {
-    cy.get(UNCOMMON_PROCESSES_TABLE)
-      .find(FIRST_PAGE_SELECTOR)
-      .should('have.class', 'euiPaginationButton-isActive');
-    goToThirdPage();
-    waitForUncommonProcessesToBeLoaded();
-    cy.get(UNCOMMON_PROCESSES_TABLE)
-      .find(FIRST_PAGE_SELECTOR)
-      .should('not.have.class', 'euiPaginationButton-isActive');
-    refreshPage();
-    waitForUncommonProcessesToBeLoaded();
-    cy.get(UNCOMMON_PROCESSES_TABLE)
-      .find(FIRST_PAGE_SELECTOR)
-      .should('have.class', 'euiPaginationButton-isActive');
+      cy.get(ALL_HOSTS_TABLE)
+        .find(FIRST_PAGE_SELECTOR)
+        .should('have.class', 'euiPaginationButton-isActive');
+    });
+
+    it(`reset all users pagination when sorting column`, () => {
+      visit(USERS_URL);
+      goToSecondPage();
+      cy.get(ALL_USERS_TABLE)
+        .find(FIRST_PAGE_SELECTOR)
+        .should('not.have.class', 'euiPaginationButton-isActive');
+
+      sortFirstColumn();
+
+      cy.get(ALL_USERS_TABLE)
+        .find(FIRST_PAGE_SELECTOR)
+        .should('have.class', 'euiPaginationButton-isActive');
+    });
   });
 });

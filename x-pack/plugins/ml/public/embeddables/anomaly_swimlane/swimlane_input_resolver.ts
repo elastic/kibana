@@ -19,7 +19,9 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
-import { CoreStart } from 'kibana/public';
+import { CoreStart } from '@kbn/core/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { TimeBuckets } from '../../application/util/time_buckets';
 import { MlStartDependencies } from '../../plugin';
 import {
@@ -28,10 +30,8 @@ import {
   SWIMLANE_TYPE,
   SwimlaneType,
 } from '../../application/explorer/explorer_constants';
-import { UI_SETTINGS } from '../../../../../../src/plugins/data/public';
 import { OverallSwimlaneData } from '../../application/explorer/explorer_utils';
 import { isViewBySwimLaneData } from '../../application/explorer/swimlane_container';
-import { ViewMode } from '../../../../../../src/plugins/embeddable/public';
 import {
   AnomalySwimlaneEmbeddableInput,
   AnomalySwimlaneEmbeddableOutput,
@@ -46,10 +46,15 @@ const FETCH_RESULTS_DEBOUNCE_MS = 500;
 export function useSwimlaneInputResolver(
   embeddableInput$: Observable<AnomalySwimlaneEmbeddableInput>,
   onInputChange: (output: Partial<AnomalySwimlaneEmbeddableOutput>) => void,
-  refresh: Observable<any>,
+  refresh: Observable<void>,
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
   chartWidth: number,
-  fromPage: number
+  fromPage: number,
+  renderCallbacks: {
+    onRenderComplete: () => void;
+    onLoading: () => void;
+    onError: (error: Error) => void;
+  }
 ): [
   string | undefined,
   OverallSwimlaneData | undefined,
@@ -122,6 +127,9 @@ export function useSwimlaneInputResolver(
       .pipe(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
+        tap(() => {
+          renderCallbacks.onLoading();
+        }),
         switchMap(([explorerJobs, input, bucketInterval, fromPageInput, perPageFromState]) => {
           if (!explorerJobs) {
             // couldn't load the list of jobs
@@ -226,6 +234,18 @@ export function useSwimlaneInputResolver(
   useEffect(() => {
     chartWidth$.next(chartWidth);
   }, [chartWidth]);
+
+  useEffect(() => {
+    if (error) {
+      renderCallbacks.onError(error);
+    }
+  }, [error]);
+
+  useEffect(() => {
+    if (swimlaneData) {
+      renderCallbacks.onRenderComplete();
+    }
+  }, [swimlaneData]);
 
   return [
     swimlaneType,

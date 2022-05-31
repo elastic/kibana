@@ -39,6 +39,8 @@ export const getAnomaliesUserTableColumns = (
           anomaliesByUser.anomaly
         )}-userName`,
         render: (item) => <UserDetailsLink userName={item} />,
+        isAggregatable: true,
+        fieldType: 'keyword',
       }),
   },
   ...getAnomaliesDefaultTableColumns(startDate, endDate),

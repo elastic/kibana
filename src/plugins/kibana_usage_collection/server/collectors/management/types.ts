@@ -10,13 +10,11 @@ export interface UsageStats {
   /**
    * sensitive settings
    */
-  'timelion:quandl.key': string;
   'securitySolution:defaultIndex': string;
   'securitySolution:defaultThreatIndex': string;
   'securitySolution:newsFeedUrl': string;
   'xpackReporting:customPdfLogo': string;
   'notifications:banner': string;
-  'timelion:graphite.url': string;
   'xpackDashboardMode:roles': string;
   'securitySolution:ipReputationLinks': string;
   'banners:textContent': string;
@@ -38,6 +36,7 @@ export interface UsageStats {
   'discover:maxDocFieldsDisplayed': number;
   'securitySolution:rulesTableRefresh': string;
   'observability:enableInspectEsQueries': boolean;
+  'observability:enableNewSyntheticsView': boolean;
   'observability:maxSuggestions': number;
   'observability:enableComparisonByDefault': boolean;
   'observability:enableInfrastructureView': boolean;

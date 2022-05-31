@@ -6,15 +6,15 @@
  */
 
 import React, { createContext, useContext, Context, useState, useCallback, useMemo } from 'react';
-import { HttpFetchError } from 'kibana/public';
-import type { DataView } from '../../../../../../../../src/plugins/data_views/common';
+import { HttpFetchError } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { DataViewInsufficientAccessError } from '@kbn/data-views-plugin/common';
 import { AppDataType } from '../types';
-import { useKibana } from '../../../../../../../../src/plugins/kibana_react/public';
 import { ObservabilityPublicPluginsStart } from '../../../../plugin';
 import { ObservabilityDataViews } from '../../../../utils/observability_data_views';
 import { getDataHandler } from '../../../../data_handler';
 import { useExploratoryView } from '../contexts/exploratory_view_config';
-import { DataViewInsufficientAccessError } from '../../../../../../../../src/plugins/data_views/common';
 import { getApmDataViewTitle } from '../utils/utils';
 
 export interface DataViewContext {
@@ -71,6 +71,11 @@ export function DataViewContextProvider({ children }: ProviderProps) {
               const resultMetrics = await getDataHandler(dataType)?.hasData();
               hasDataT = Boolean(resultMetrics?.hasData);
               indices = resultMetrics?.indices;
+              break;
+            case 'infra_logs':
+              const resultLogs = await getDataHandler(dataType)?.hasData();
+              hasDataT = Boolean(resultLogs?.hasData);
+              indices = resultLogs?.indices;
               break;
             case 'apm':
             case 'mobile':

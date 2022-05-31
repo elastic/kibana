@@ -6,15 +6,15 @@
  */
 
 import { RulesClient, ConstructorOptions } from '../rules_client';
-import { savedObjectsClientMock, loggingSystemMock } from '../../../../../../src/core/server/mocks';
-import { taskManagerMock } from '../../../../task_manager/server/mocks';
+import { savedObjectsClientMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
-import { encryptedSavedObjectsMock } from '../../../../encrypted_saved_objects/server/mocks';
-import { actionsAuthorizationMock } from '../../../../actions/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
 import { AlertingAuthorization } from '../../authorization/alerting_authorization';
-import { ActionsAuthorization } from '../../../../actions/server';
-import { auditLoggerMock } from '../../../../security/server/audit/mocks';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { RecoveredActionGroup } from '../../../common';
 import { RegistryRuleType } from '../../rule_type_registry';
@@ -101,6 +101,33 @@ describe('aggregate()', () => {
             { key: 1, key_as_string: '1', doc_count: 3 },
           ],
         },
+        snoozed: {
+          buckets: [
+            {
+              key: '2022-03-21T20:22:01.501Z-*',
+              format: 'strict_date_time',
+              from: 1.647894121501e12,
+              from_as_string: '2022-03-21T20:22:01.501Z',
+              doc_count: 2,
+            },
+          ],
+        },
+        tags: {
+          buckets: [
+            {
+              key: 'a',
+              doc_count: 10,
+            },
+            {
+              key: 'b',
+              doc_count: 20,
+            },
+            {
+              key: 'c',
+              doc_count: 30,
+            },
+          ],
+        },
       },
     });
 
@@ -146,6 +173,14 @@ describe('aggregate()', () => {
           "muted": 3,
           "unmuted": 27,
         },
+        "ruleSnoozedStatus": Object {
+          "snoozed": 2,
+        },
+        "ruleTags": Array [
+          "a",
+          "b",
+          "c",
+        ],
       }
     `);
     expect(unsecuredSavedObjectsClient.find).toHaveBeenCalledTimes(1);
@@ -165,6 +200,16 @@ describe('aggregate()', () => {
           },
           muted: {
             terms: { field: 'alert.attributes.muteAll' },
+          },
+          snoozed: {
+            date_range: {
+              field: 'alert.attributes.snoozeSchedule.rRule.dtstart',
+              format: 'strict_date_time',
+              ranges: [{ from: 'now' }],
+            },
+          },
+          tags: {
+            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
           },
         },
       },
@@ -192,6 +237,16 @@ describe('aggregate()', () => {
           },
           muted: {
             terms: { field: 'alert.attributes.muteAll' },
+          },
+          snoozed: {
+            date_range: {
+              field: 'alert.attributes.snoozeSchedule.rRule.dtstart',
+              format: 'strict_date_time',
+              ranges: [{ from: 'now' }],
+            },
+          },
+          tags: {
+            terms: { field: 'alert.attributes.tags', order: { _key: 'asc' } },
           },
         },
       },

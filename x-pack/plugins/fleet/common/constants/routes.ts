@@ -14,6 +14,7 @@ export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
 export const PACKAGE_POLICY_API_ROOT = `${API_ROOT}/package_policies`;
 export const AGENT_POLICY_API_ROOT = `${API_ROOT}/agent_policies`;
+export const K8S_API_ROOT = `${API_ROOT}/kubernetes`;
 
 export const LIMITED_CONCURRENCY_ROUTE_TAG = 'ingest:limited-concurrency';
 
@@ -67,6 +68,12 @@ export const AGENT_POLICY_API_ROUTES = {
   FULL_INFO_DOWNLOAD_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/download`,
 };
 
+// Kubernetes Manifest API routes
+export const K8S_API_ROUTES = {
+  K8S_DOWNLOAD_PATTERN: `${K8S_API_ROOT}/download`,
+  K8S_INFO_PATTERN: `${K8S_API_ROOT}`,
+};
+
 // Output API routes
 export const OUTPUT_API_ROUTES = {
   LIST_PATTERN: `${API_ROOT}/outputs`,
@@ -100,6 +107,7 @@ export const AGENT_API_ROUTES = {
   CHECKIN_PATTERN: `${API_ROOT}/agents/{agentId}/checkin`,
   ACKS_PATTERN: `${API_ROOT}/agents/{agentId}/acks`,
   ACTIONS_PATTERN: `${API_ROOT}/agents/{agentId}/actions`,
+  CANCEL_ACTIONS_PATTERN: `${API_ROOT}/agents/actions/{actionId}/cancel`,
   UNENROLL_PATTERN: `${API_ROOT}/agents/{agentId}/unenroll`,
   BULK_UNENROLL_PATTERN: `${API_ROOT}/agents/bulk_unenroll`,
   REASSIGN_PATTERN: `${API_ROOT}/agents/{agentId}/reassign`,
@@ -110,6 +118,7 @@ export const AGENT_API_ROUTES = {
   STATUS_PATTERN_DEPRECATED: `${API_ROOT}/agent-status`,
   UPGRADE_PATTERN: `${API_ROOT}/agents/{agentId}/upgrade`,
   BULK_UPGRADE_PATTERN: `${API_ROOT}/agents/bulk_upgrade`,
+  CURRENT_UPGRADES_PATTERN: `${API_ROOT}/agents/current_upgrades`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

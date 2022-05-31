@@ -8,8 +8,8 @@
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
 import { format, UrlObject } from 'url';
-import { SecurityServiceProvider } from 'test/common/services/security';
 import { Client } from '@elastic/elasticsearch';
+import { SecurityServiceProvider } from '../../../../test/common/services/security';
 import { InheritedFtrProviderContext, InheritedServices } from './ftr_provider_context';
 import { createApmUser, APM_TEST_PASSWORD, ApmUser } from './authentication';
 import { APMFtrConfigName } from '../configs';
@@ -89,8 +89,8 @@ export function createTestConfig(config: ApmFtrConfig) {
 
           return {
             noAccessUser: await getApmApiClient(servers.kibana, security, ApmUser.noAccessUser, es),
-            readUser: await getApmApiClient(servers.kibana, security, ApmUser.apmReadUser, es),
-            writeUser: await getApmApiClient(servers.kibana, security, ApmUser.apmWriteUser, es),
+            readUser: await getApmApiClient(servers.kibana, security, ApmUser.viewerUser, es),
+            writeUser: await getApmApiClient(servers.kibana, security, ApmUser.editorUser, es),
             annotationWriterUser: await getApmApiClient(
               servers.kibana,
               security,
@@ -120,8 +120,8 @@ export function createTestConfig(config: ApmFtrConfig) {
         ml: MachineLearningAPIProvider,
         // legacy clients
         legacySupertestAsNoAccessUser: getLegacySupertestClient(kibanaServer, ApmUser.noAccessUser),
-        legacySupertestAsApmReadUser: getLegacySupertestClient(kibanaServer, ApmUser.apmReadUser),
-        legacySupertestAsApmWriteUser: getLegacySupertestClient(kibanaServer, ApmUser.apmWriteUser),
+        legacySupertestAsApmReadUser: getLegacySupertestClient(kibanaServer, ApmUser.viewerUser),
+        legacySupertestAsApmWriteUser: getLegacySupertestClient(kibanaServer, ApmUser.editorUser),
         legacySupertestAsApmAnnotationsWriteUser: getLegacySupertestClient(
           kibanaServer,
           ApmUser.apmAnnotationsWriteUser

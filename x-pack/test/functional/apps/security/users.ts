@@ -7,9 +7,8 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
+import type { UserFormValues } from '@kbn/security-plugin/public/management/users/edit_user/user_form';
 import { FtrProviderContext } from '../../ftr_provider_context';
-
-import type { UserFormValues } from '../../../../plugins/security/public/management/users/edit_user/user_form';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'settings']);
@@ -203,8 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/118728
-      describe.skip('Deactivate/Activate user', () => {
+      describe('Deactivate/Activate user', () => {
         it('deactivates user when confirming', async () => {
           await PageObjects.security.deactivatesUser(optionalUser);
           const users = keyBy(await PageObjects.security.getElasticsearchUsers(), 'username');

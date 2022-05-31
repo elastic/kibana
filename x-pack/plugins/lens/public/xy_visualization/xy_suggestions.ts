@@ -8,7 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { partition } from 'lodash';
 import { Position } from '@elastic/charts';
-import { PaletteOutput } from 'src/plugins/charts/public';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { SeriesType } from '@kbn/expression-xy-plugin/common';
 import {
   SuggestionRequest,
   VisualizationSuggestion,
@@ -16,8 +17,7 @@ import {
   TableSuggestion,
   TableChangeType,
 } from '../types';
-import { State, XYState, visualizationTypes } from './types';
-import type { SeriesType, XYDataLayerConfig } from '../../common/expressions';
+import { State, XYState, visualizationTypes, XYLayerConfig, XYDataLayerConfig } from './types';
 import { layerTypes } from '../../common';
 import { getIconForSeries } from './state_helpers';
 import { getDataLayers, isDataLayer } from './visualization_helpers';
@@ -32,6 +32,7 @@ const columnSortOrder = {
   histogram: 6,
   geo_point: 7,
   geo_shape: 8,
+  murmur3: 9,
 };
 
 /**
@@ -499,29 +500,35 @@ function buildSuggestion({
     splitBy = xValue;
     xValue = undefined;
   }
-  const existingLayer: XYDataLayerConfig | {} =
-    getExistingLayer(currentState, layerId) || ({} as XYDataLayerConfig);
+  const existingLayer = getExistingLayer(currentState, layerId) || null;
   const accessors = yValues.map((col) => col.columnId);
-  const newLayer = {
-    ...existingLayer,
-    palette: mainPalette || ('palette' in existingLayer ? existingLayer.palette : undefined),
+  const newLayer: XYDataLayerConfig = {
+    ...(existingLayer || {}),
+    palette:
+      mainPalette ||
+      (existingLayer && 'palette' in existingLayer
+        ? (existingLayer as XYDataLayerConfig).palette
+        : undefined),
     layerId,
     seriesType,
     xAccessor: xValue?.columnId,
     splitAccessor: splitBy?.columnId,
     accessors,
     yConfig:
-      'yConfig' in existingLayer && existingLayer.yConfig
+      existingLayer && 'yConfig' in existingLayer && existingLayer.yConfig
         ? existingLayer.yConfig.filter(({ forAccessor }) => accessors.indexOf(forAccessor) !== -1)
         : undefined,
     layerType: layerTypes.DATA,
   };
 
   // Maintain consistent order for any layers that were saved
-  const keptLayers = currentState
+  const keptLayers: XYLayerConfig[] = currentState
     ? currentState.layers
         // Remove layers that aren't being suggested
-        .filter((layer) => keptLayerIds.includes(layer.layerId))
+        .filter(
+          (layer) =>
+            keptLayerIds.includes(layer.layerId) || layer.layerType === layerTypes.ANNOTATIONS
+        )
         // Update in place
         .map((layer) => (layer.layerId === layerId ? newLayer : layer))
         // Replace the seriesType on all previous layers
@@ -544,6 +551,8 @@ function buildSuggestion({
     valuesInLegend: currentState?.valuesInLegend,
     yLeftExtent: currentState?.yLeftExtent,
     yRightExtent: currentState?.yRightExtent,
+    yLeftScale: currentState?.yLeftScale,
+    yRightScale: currentState?.yRightScale,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
       x: true,
       yLeft: true,
@@ -565,7 +574,8 @@ function buildSuggestion({
       yRight: true,
     },
     preferredSeriesType: seriesType,
-    layers: Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
+    layers:
+      existingLayer && Object.keys(existingLayer).length ? keptLayers : [...keptLayers, newLayer],
   };
 
   return {
