@@ -243,6 +243,12 @@ export type {
 
 export type { IRenderOptions } from './rendering';
 export type {
+  LoggingServiceSetup,
+  LoggerContextConfigInput,
+  LoggerConfigType,
+  AppenderConfigType,
+} from './logging';
+export type {
   Logger,
   LoggerFactory,
   Ecs,
@@ -253,11 +259,7 @@ export type {
   LogMeta,
   LogRecord,
   LogLevel,
-  LoggingServiceSetup,
-  LoggerContextConfigInput,
-  LoggerConfigType,
-  AppenderConfigType,
-} from './logging';
+} from '@kbn/logging';
 
 export { PluginType } from './plugins';
 
