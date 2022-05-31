@@ -57,7 +57,7 @@ describe('ValueListsFlyout', () => {
       </TestProviders>
     );
 
-    expect(container.find('EuiModal')).toHaveLength(0);
+    expect(container.find('EuiFlyout')).toHaveLength(0);
   });
 
   it('renders flyout if showFlyout is true', () => {
@@ -67,7 +67,7 @@ describe('ValueListsFlyout', () => {
       </TestProviders>
     );
 
-    expect(container.find('EuiModal')).toHaveLength(1);
+    expect(container.find('EuiFlyout')).toHaveLength(1);
   });
 
   it('calls onClose when flyout is closed', () => {
