@@ -13,14 +13,11 @@ import { PageLayout, PageLayoutProps } from './page_layout';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { PageOverlay } from '../../../../page_overlay/page_overlay';
 
-const RESPONDER_PAGE_BACK_LABEL = i18n.translate(
-  'xpack.securitySolution.responder_overlay.backButtonLabel',
-  {
-    defaultMessage: 'Return to page content',
-  }
-);
+const BACK_LABEL = i18n.translate('xpack.securitySolution.consolePageOverlay.backButtonLabel', {
+  defaultMessage: 'Return to page content',
+});
 
-export interface ResponderOverlayProps {
+export interface ConsolePageOverlayProps {
   runningConsoles: ReactNode;
   isHidden: boolean;
   onHide: () => void;
@@ -29,7 +26,7 @@ export interface ResponderOverlayProps {
   actions?: ReactNode[];
 }
 
-export const ResponderOverlay = memo<ResponderOverlayProps>(
+export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
   ({ runningConsoles, onHide, isHidden, body, actions, pageTitle = '' }) => {
     const getTestId = useTestIdGenerator('responder');
     const handleCloseOverlayOnClick: MouseEventHandler = useCallback(
@@ -56,7 +53,7 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
             iconType="arrowLeft"
             onClick={handleCloseOverlayOnClick}
           >
-            {RESPONDER_PAGE_BACK_LABEL}
+            {BACK_LABEL}
           </EuiButtonEmpty>
         ),
         actions: [
@@ -67,7 +64,7 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
             data-test-subj={getTestId('doneButton')}
           >
             <FormattedMessage
-              id="xpack.securitySolution.responder_overlay.doneButtonLabel"
+              id="xpack.securitySolution.consolePageOverlay.doneButtonLabel"
               defaultMessage="Done"
             />
           </EuiButton>,
@@ -94,4 +91,4 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
     );
   }
 );
-ResponderOverlay.displayName = 'ResponderOverlay';
+ConsolePageOverlay.displayName = 'ConsolePageOverlay';

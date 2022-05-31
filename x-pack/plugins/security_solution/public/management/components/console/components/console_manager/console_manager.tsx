@@ -14,7 +14,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { ResponderOverlay } from './components/responder_overlay';
+import { ConsolePageOverlay } from './components/console_page_overlay';
 import {
   ConsoleManagerClient,
   ConsoleRegistrationInterface,
@@ -269,7 +269,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     <ConsoleManagerContext.Provider value={consoleManageContextClients}>
       {children}
 
-      <ResponderOverlay
+      <ConsolePageOverlay
         onHide={handleOnHide}
         runningConsoles={runningConsoles}
         isHidden={!visibleConsole}
