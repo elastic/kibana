@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import { ElasticsearchClient } from '../../elasticsearch';
 import { IndexMapping } from '../mappings';
-import { Logger } from '../../logging';
 import type { SavedObjectsMigrationVersion } from '../types';
 import type { TransformRawDocs } from './types';
 import { MigrationResult } from './core';
