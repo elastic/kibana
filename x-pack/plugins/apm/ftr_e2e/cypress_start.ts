@@ -7,6 +7,9 @@
 
 /* eslint-disable no-console */
 
+import { resolve } from 'path';
+import glob from 'glob';
+import { chunk } from 'lodash';
 import { argv } from 'yargs';
 import Url from 'url';
 import cypress from 'cypress';
@@ -52,7 +55,8 @@ export async function cypressStart(
   console.log(`Creating APM mappings`);
   await esArchiverLoad(archiveName);
 
-  const spec = argv.grep as string | undefined;
+  const spec = getSpecsToRun();
+
   const res = await cypressExecution({
     ...(spec ? { spec } : {}),
     config: { baseUrl: kibanaUrl },
@@ -68,4 +72,26 @@ export async function cypressStart(
   await esArchiverUnload(archiveName);
 
   return res;
+}
+
+function getSpecsToRun() {
+  const grep = argv.grep as string | undefined;
+  if (grep) {
+    return grep;
+  }
+
+  const pattern = resolve(
+    __dirname,
+    '../../apm/ftr_e2e/cypress/integration/**/*.spec.ts'
+  );
+  const allSpecs = glob.sync(pattern);
+
+  const cliJobNumber = parseInt(process.env.CLI_NUMBER ?? '1', 10);
+  const cliJobCount = parseInt(process.env.CLI_COUNT ?? '1', 10);
+
+  const chunkSize = Math.ceil(allSpecs.length / cliJobCount);
+  const specsToRun = chunk(allSpecs, chunkSize)[cliJobNumber - 1];
+
+  const specList = specsToRun.join(',');
+  return specList;
 }

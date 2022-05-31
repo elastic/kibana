@@ -71,6 +71,18 @@ node scripts/test/api --runner --basic --updateSnapshots
 
 The E2E tests are located in [`x-pack/plugins/apm/ftr_e2e`](../ftr_e2e)
 
+Tests run on buildkite PR pipeline is parallelized(current value = 4 parallel jobs). It can be configured in [.buildkite/pipelines/pull_request/apm_cypress.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/apm_cypress.yml) with property `parallelism` 
+
+```yml
+    ...
+    agents:
+      queue: ci-group-6
+    depends_on: build
+    timeout_in_minutes: 120
+    parallelism: 4
+    ...
+```
+
 ### Start test server
 
 ```
