@@ -13,9 +13,6 @@ import { PageLayout, PageLayoutProps } from './page_layout';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { PageOverlay } from '../../../../page_overlay/page_overlay';
 
-const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_overlay.pageTitle', {
-  defaultMessage: 'Responder',
-});
 const RESPONDER_PAGE_BACK_LABEL = i18n.translate(
   'xpack.securitySolution.responder_overlay.backButtonLabel',
   {
@@ -27,12 +24,13 @@ export interface ResponderOverlayProps {
   runningConsoles: ReactNode;
   isHidden: boolean;
   onHide: () => void;
+  pageTitle?: ReactNode;
   body?: ReactNode;
   actions?: ReactNode[];
 }
 
 export const ResponderOverlay = memo<ResponderOverlayProps>(
-  ({ runningConsoles, onHide, isHidden, body, actions }) => {
+  ({ runningConsoles, onHide, isHidden, body, actions, pageTitle = '' }) => {
     const getTestId = useTestIdGenerator('responder');
     const handleCloseOverlayOnClick: MouseEventHandler = useCallback(
       (ev) => {
@@ -48,7 +46,7 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
       if (isHidden) return {};
 
       return {
-        pageTitle: RESPONDER_PAGE_TITLE,
+        pageTitle,
         headerHasBottomBorder: false,
         'data-test-subj': getTestId('layout'),
         headerBackComponent: (
@@ -77,7 +75,7 @@ export const ResponderOverlay = memo<ResponderOverlayProps>(
           ...(actions ?? []),
         ],
       };
-    }, [actions, getTestId, handleCloseOverlayOnClick, isHidden]);
+    }, [actions, getTestId, handleCloseOverlayOnClick, isHidden, pageTitle]);
 
     return (
       <PageOverlay

@@ -29,6 +29,7 @@ interface ManagedConsole {
   isOpen: boolean;
   key: symbol;
   onBeforeTerminate?: ConsoleRegistrationInterface['onBeforeTerminate'];
+  TitleComponent: ConsoleRegistrationInterface['TitleComponent'];
   BodyComponent: ConsoleRegistrationInterface['BodyComponent'];
   ActionComponents: ConsoleRegistrationInterface['ActionComponents'];
 }
@@ -166,7 +167,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
   }, []); // << IMPORTANT: this callback should have no dependencies
 
   const register = useCallback<ConsoleManagerClient['register']>(
-    ({ id, title, meta, consoleProps, ...otherRegisterProps }) => {
+    ({ id, meta, consoleProps, ...otherRegisterProps }) => {
       if (consoleStorage[id]) {
         throw new Error(`Console with id ${id} already registered`);
       }
@@ -182,10 +183,10 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       const managedConsole: ManagedConsole = {
         BodyComponent: undefined,
         ActionComponents: undefined,
+        TitleComponent: undefined,
         ...otherRegisterProps,
         client: {
           id,
-          title,
           meta,
           // The use of `setTimeout()` below is needed because this client interface can be consumed
           // prior to the component state being updated. Placing a delay on the execution of these
@@ -272,6 +273,12 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
         onHide={handleOnHide}
         runningConsoles={runningConsoles}
         isHidden={!visibleConsole}
+        pageTitle={
+          visibleConsole &&
+          visibleConsole.TitleComponent && (
+            <visibleConsole.TitleComponent meta={visibleConsoleMeta} />
+          )
+        }
         body={
           visibleConsole &&
           visibleConsole.BodyComponent && <visibleConsole.BodyComponent meta={visibleConsoleMeta} />

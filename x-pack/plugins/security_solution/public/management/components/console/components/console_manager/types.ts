@@ -7,13 +7,11 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import type { ComponentType, ReactNode } from 'react';
+import type { ComponentType } from 'react';
 import { ConsoleProps } from '../../types';
 
 export interface ConsoleRegistrationInterface<TMeta extends object = any> {
   id: string;
-  /** The title for the console popup */
-  title: ReactNode; // FIXME:PT remove this once pending PR is merged
   consoleProps: ConsoleProps;
   onBeforeTerminate?: () => void; // FIXME:PT remove support for this
   /**
@@ -21,6 +19,9 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
    * (ex. could hold the details data for the Host that the console is opened against)
    */
   meta?: TMeta;
+
+  /** An optional component used to render the Overlay page title where the console will be displayed */
+  TitleComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
 
   /**
    * An optional component that will be rendered in the Responder page overlay, above the Console area
@@ -45,7 +46,7 @@ export interface ManagedConsoleExtensionComponentProps<TMeta extends object = an
 }
 
 export interface RegisteredConsoleClient<TMeta extends object = any>
-  extends Pick<ConsoleRegistrationInterface<TMeta>, 'id' | 'title' | 'meta'> {
+  extends Pick<ConsoleRegistrationInterface<TMeta>, 'id' | 'meta'> {
   show(): void;
 
   hide(): void;
