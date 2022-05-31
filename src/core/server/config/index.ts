@@ -8,27 +8,3 @@
 
 export { coreDeprecationProvider } from './deprecation';
 export { ensureValidConfiguration } from './ensure_valid_configuration';
-
-export {
-  ConfigService,
-  isConfigPath,
-  hasConfigPathIntersection,
-  Env,
-  ObjectToConfigAdapter,
-  RawConfigService,
-} from '@kbn/config';
-
-export type {
-  IConfigService,
-  RawConfigurationProvider,
-  Config,
-  ConfigPath,
-  CliArgs,
-  ConfigDeprecation,
-  ConfigDeprecationContext,
-  AddConfigDeprecation,
-  ConfigDeprecationProvider,
-  ConfigDeprecationFactory,
-  EnvironmentMode,
-  PackageInfo,
-} from '@kbn/config';

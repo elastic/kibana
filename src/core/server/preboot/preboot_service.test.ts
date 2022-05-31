@@ -6,14 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { nextTick } from '@kbn/test-jest-helpers';
 import { REPO_ROOT } from '@kbn/utils';
 import { LoggerFactory } from '@kbn/logging';
 import { Env } from '@kbn/config';
-import { getEnvOptions } from '../config/mocks';
+import { getEnvOptions } from '@kbn/config-mocks';
 import { configServiceMock, loggingSystemMock } from '../mocks';
 
 import { PrebootService } from './preboot_service';
+
+function nextTick() {
+  // we can't import { nextTick } from '@kbn/test-jest-helpers' on server-side tests
+  // because the package contains code that relies on jsdom (aka browser-like Jest presets)
+  // see https://github.com/elastic/kibana/pull/130255#discussion_r855033733
+  return new Promise((resolve) => setImmediate(resolve));
+}
 
 describe('PrebootService', () => {
   describe('#preboot()', () => {
