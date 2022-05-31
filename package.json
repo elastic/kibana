@@ -11,7 +11,7 @@
     "dashboarding"
   ],
   "private": true,
-  "version": "8.3.0",
+  "version": "8.4.0",
   "branch": "main",
   "types": "./kibana.d.ts",
   "tsdocMetadata": "./build/tsdoc-metadata.json",
@@ -394,7 +394,6 @@
     "react-virtualized": "^9.21.2",
     "react-vis": "^1.8.1",
     "react-visibility-sensor": "^5.1.1",
-    "reactcss": "1.2.3",
     "recompose": "^0.26.0",
     "reduce-reducers": "^1.0.4",
     "redux": "^4.1.0",
