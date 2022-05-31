@@ -12,6 +12,7 @@ export type {
   FormData,
   FormHook,
   FormSchema,
+  ValidationConfig,
   ValidationError,
   ValidationFunc,
   ValidationFuncArg,

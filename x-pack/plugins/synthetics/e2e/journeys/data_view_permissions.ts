@@ -6,7 +6,7 @@
  */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
-import { callKibana } from '@kbn/apm-plugin/scripts/create_apm_users_and_roles/helpers/call_kibana';
+import { callKibana } from '@kbn/apm-plugin/scripts/create_apm_users/helpers/call_kibana';
 import { byTestId, waitForLoadingToFinish } from './utils';
 import { loginPageProvider } from '../page_objects/login';
 
@@ -17,7 +17,7 @@ journey('DataViewPermissions', async ({ page, params }) => {
     try {
       await callKibana({
         elasticsearch: { username: 'elastic', password: 'changeme' },
-        kibana: { hostname: params.kibanaUrl, roleSuffix: '' },
+        kibana: { hostname: params.kibanaUrl },
         options: {
           method: 'DELETE',
           url: '/api/saved_objects/index-pattern/synthetics_static_index_pattern_id_heartbeat_?force=false',

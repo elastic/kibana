@@ -8,6 +8,7 @@
 
 import {
   AreaSeriesProps,
+  AreaSeriesStyle,
   BarSeriesProps,
   ColorVariant,
   LineSeriesProps,
@@ -55,6 +56,7 @@ type GetSeriesPropsFn = (config: {
   emphasizeFitting?: boolean;
   fillOpacity?: number;
   formattedDatatableInfo: DatatableWithFormatInfo;
+  defaultXScaleType: XScaleType;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -82,6 +84,19 @@ type GetColorFn = (
   },
   titles: LayerAccessorsTitles
 ) => string | null;
+
+type GetPointConfigFn = (config: {
+  xAccessor: string | undefined;
+  markSizeAccessor: string | undefined;
+  emphasizeFitting?: boolean;
+  showPoints?: boolean;
+  pointsRadius?: number;
+}) => Partial<AreaSeriesStyle['point']>;
+
+type GetLineConfigFn = (config: {
+  showLines?: boolean;
+  lineWidth?: number;
+}) => Partial<AreaSeriesStyle['line']>;
 
 export interface DatatableWithFormatInfo {
   table: Datatable;
@@ -237,12 +252,29 @@ const getSeriesName: GetSeriesNameFn = (
     : columnToLabelMap[data.seriesKeys[0]] ?? titles.yTitles[data.seriesKeys[0]] ?? null;
 };
 
-const getPointConfig = (xAccessor?: string, emphasizeFitting?: boolean) => ({
-  visible: !xAccessor,
-  radius: xAccessor && !emphasizeFitting ? 5 : 0,
+const getPointConfig: GetPointConfigFn = ({
+  xAccessor,
+  markSizeAccessor,
+  emphasizeFitting,
+  showPoints,
+  pointsRadius,
+}) => ({
+  visible: showPoints !== undefined ? showPoints : !xAccessor || markSizeAccessor !== undefined,
+  radius: pointsRadius !== undefined ? pointsRadius : xAccessor && !emphasizeFitting ? 5 : 0,
+  fill: markSizeAccessor ? ColorVariant.Series : undefined,
 });
 
-const getLineConfig = () => ({ visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] });
+const getFitLineConfig = () => ({
+  visible: true,
+  stroke: ColorVariant.Series,
+  opacity: 1,
+  dash: [],
+});
+
+const getLineConfig: GetLineConfigFn = ({ showLines, lineWidth }) => ({
+  strokeWidth: lineWidth,
+  visible: showLines,
+});
 
 const getColor: GetColorFn = (
   { yAccessor, seriesKeys },
@@ -319,8 +351,9 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   emphasizeFitting,
   fillOpacity,
   formattedDatatableInfo,
+  defaultXScaleType,
 }): SeriesSpec => {
-  const { table } = layer;
+  const { table, markSizeAccessor } = layer;
   const isStacked = layer.seriesType.includes('stacked');
   const isPercentage = layer.seriesType.includes('percentage');
   const isBarChart = layer.seriesType.includes('bar');
@@ -337,6 +370,14 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     ? getFormatByAccessor(layer.splitAccessor, table.columns)
     : undefined;
   const splitFormatter = formatFactory(splitHint);
+
+  const markSizeColumnId = markSizeAccessor
+    ? getAccessorByDimension(markSizeAccessor, table.columns)
+    : undefined;
+
+  const markFormatter = formatFactory(
+    markSizeAccessor ? getFormat(table.columns, markSizeAccessor) : undefined
+  );
 
   // what if row values are not primitive? That is the case of, for instance, Ranges
   // remaps them to their serialized version with the formatHint metadata
@@ -370,8 +411,10 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     id: generateSeriesId(layer, accessor),
     xAccessor: xColumnId || 'unifiedX',
     yAccessors: [accessor],
+    markSizeAccessor: markSizeColumnId,
+    markFormat: (value) => markFormatter.convert(value),
     data: rows,
-    xScaleType: xColumnId ? layer.xScaleType : 'ordinal',
+    xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
     yScaleType:
       formatter?.id === 'bytes' && yAxis?.scale === ScaleType.Linear
         ? ScaleType.LinearBinary
@@ -394,15 +437,32 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     stackMode: isPercentage ? StackMode.Percentage : undefined,
     timeZone,
     areaSeriesStyle: {
-      point: getPointConfig(xColumnId, emphasizeFitting),
+      point: getPointConfig({
+        xAccessor: xColumnId,
+        markSizeAccessor: markSizeColumnId,
+        emphasizeFitting,
+        showPoints: layer.showPoints,
+        pointsRadius: layer.pointsRadius,
+      }),
       ...(fillOpacity && { area: { opacity: fillOpacity } }),
       ...(emphasizeFitting && {
-        fit: { area: { opacity: fillOpacity || 0.5 }, line: getLineConfig() },
+        fit: { area: { opacity: fillOpacity || 0.5 }, line: getFitLineConfig() },
+      }),
+      line: getLineConfig({
+        showLines: layer.showLines,
+        lineWidth: layer.lineWidth,
       }),
     },
     lineSeriesStyle: {
-      point: getPointConfig(xColumnId, emphasizeFitting),
-      ...(emphasizeFitting && { fit: { line: getLineConfig() } }),
+      point: getPointConfig({
+        xAccessor: xColumnId,
+        markSizeAccessor: markSizeColumnId,
+        emphasizeFitting,
+        showPoints: layer.showPoints,
+        pointsRadius: layer.pointsRadius,
+      }),
+      ...(emphasizeFitting && { fit: { line: getFitLineConfig() } }),
+      line: getLineConfig({ lineWidth: layer.lineWidth, showLines: layer.showLines }),
     },
     name(d) {
       return getSeriesName(

@@ -38,7 +38,7 @@ describe('Case View Page activity tab', () => {
     });
   });
 
-  it('should call the alerts table with correct props', async () => {
+  it('should call the alerts table with correct props for security solution', async () => {
     appMockRender.render(<CaseViewAlerts caseData={caseData} />);
     await waitFor(async () => {
       expect(getAlertsStateTableMock).toHaveBeenCalledWith({
@@ -51,6 +51,30 @@ describe('Case View Page activity tab', () => {
             values: ['alert-id-1'],
           },
         },
+        flyoutState: 'internal',
+        showExpandToDetails: true,
+      });
+    });
+  });
+
+  it('should call the alerts table with correct props for observability', async () => {
+    const getFeatureIdsMock = jest.spyOn(api, 'getFeatureIds');
+    getFeatureIdsMock.mockResolvedValueOnce(['observability']);
+    appMockRender.render(<CaseViewAlerts caseData={caseData} />);
+
+    await waitFor(async () => {
+      expect(getAlertsStateTableMock).toHaveBeenCalledWith({
+        alertsTableConfigurationRegistry: expect.anything(),
+        configurationId: 'securitySolution',
+        featureIds: ['observability'],
+        id: 'case-details-alerts-securitySolution',
+        query: {
+          ids: {
+            values: ['alert-id-1'],
+          },
+        },
+        flyoutState: 'external',
+        showExpandToDetails: false,
       });
     });
   });
@@ -63,6 +87,20 @@ describe('Case View Page activity tab', () => {
         { registrationContext: ['matchme'] },
         expect.anything()
       );
+    });
+  });
+
+  it('should show an empty prompt when the cases has no alerts', async () => {
+    const result = appMockRender.render(
+      <CaseViewAlerts
+        caseData={{
+          ...caseData,
+          comments: [],
+        }}
+      />
+    );
+    await waitFor(async () => {
+      expect(result.getByTestId('caseViewAlertsEmpty')).toBeTruthy();
     });
   });
 });

@@ -42,17 +42,16 @@ jest.mock('../../common/hooks');
 const useUrlParamsMock = useUrlParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
-const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 
 export const caseProps: CaseViewPageProps = {
   ...caseViewProps,
   caseId: caseData.id,
   caseData,
   fetchCase: jest.fn(),
-  updateCase: jest.fn(),
 };
 
 export const caseClosedProps: CaseViewPageProps = {
@@ -76,22 +75,24 @@ describe('CaseViewPage', () => {
   };
 
   const defaultUseGetCaseUserActions = {
-    caseUserActions: [...caseUserActions, getAlertUserAction()],
-    caseServices: {},
-    fetchCaseUserActions,
-    firstIndexPushToService: -1,
-    hasDataToPush: false,
+    data: {
+      caseUserActions: [...caseUserActions, getAlertUserAction()],
+      caseServices: {},
+      hasDataToPush: false,
+      participants: [data.createdBy],
+    },
+    refetch: fetchCaseUserActions,
     isLoading: false,
     isError: false,
-    lastIndexPushToService: -1,
-    participants: [data.createdBy],
   };
 
   const defaultGetCaseMetrics = {
     isLoading: false,
     isError: false,
-    metrics: basicCaseMetrics,
-    fetchCaseMetrics,
+    data: {
+      metrics: basicCaseMetrics,
+    },
+    refetch: fetchCaseMetrics,
   };
 
   beforeEach(() => {
@@ -120,7 +121,7 @@ describe('CaseViewPage', () => {
       'Open'
     );
 
-    expect(wrapper.find(`[data-test-subj="case-view-metrics"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="case-view-metrics"]`).exists()).toBeTruthy();
 
     expect(
       wrapper
@@ -300,7 +301,10 @@ describe('CaseViewPage', () => {
   it('should push updates on button click', async () => {
     useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
+      data: {
+        ...defaultUseGetCaseUserActions.data,
+        hasDataToPush: true,
+      },
     }));
 
     const wrapper = mount(
@@ -324,7 +328,10 @@ describe('CaseViewPage', () => {
   it('should disable the push button when connector is invalid', async () => {
     useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
+      data: {
+        ...defaultUseGetCaseUserActions.data,
+        hasDataToPush: true,
+      },
     }));
 
     const wrapper = mount(
@@ -448,15 +455,13 @@ describe('CaseViewPage', () => {
     });
   });
 
-  it('should show loading content when loading alerts', async () => {
+  it('should show loading content when loading user actions', async () => {
     const useFetchAlertData = jest.fn().mockReturnValue([true]);
     useGetCaseUserActionsMock.mockReturnValue({
-      caseServices: {},
-      caseUserActions: [],
-      hasDataToPush: false,
+      data: undefined,
       isError: false,
       isLoading: true,
-      participants: [],
+      isFetching: true,
     });
 
     const wrapper = mount(
@@ -529,7 +534,10 @@ describe('CaseViewPage', () => {
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
+      data: {
+        ...defaultUseGetCaseUserActions.data,
+        hasDataToPush: true,
+      },
     }));
 
     const wrapper = mount(
@@ -585,8 +593,7 @@ describe('CaseViewPage', () => {
       appMockRender = createAppMockRenderer();
     });
 
-    // unskip when alerts tab is activated
-    it.skip('renders tabs correctly', async () => {
+    it('renders tabs correctly', async () => {
       const result = appMockRender.render(<CaseViewPage {...caseProps} />);
       await act(async () => {
         expect(result.getByTestId('case-view-tab-title-alerts')).toBeTruthy();

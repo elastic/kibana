@@ -59,6 +59,7 @@ import {
   FormArrayField,
 } from '../../shared_imports';
 import { OsqueryIcon } from '../../components/osquery_icon';
+import { removeMultilines } from '../../../common/utils/build_query/remove_multilines';
 
 export const CommonUseField = getUseField({ component: Field });
 
@@ -397,7 +398,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       return ecsKeySchemaOption?.value?.normalization !== 'array';
     }
 
-    return true;
+    return !!ecsKey?.length;
   }, [typeValue, formData, item.path]);
 
   const onTypeChange = useCallback(
@@ -636,6 +637,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
               osquerySchemaOptions,
               editForm: !isLastItem,
             },
+            readDefaultValueOnForm: !item.isNew,
             config: {
               valueChangeDebounceTime: 300,
               type: FIELD_TYPES.COMBO_BOX,
@@ -701,6 +703,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                 component={ECSComboboxField}
                 euiFieldProps={ecsComboBoxEuiFieldProps}
                 validationData={validationData}
+                readDefaultValueOnForm={!item.isNew}
                 // @ts-expect-error update types
                 config={config}
               />
@@ -773,11 +776,13 @@ export const ECSMappingEditorField = React.memo(
         return;
       }
 
+      const oneLineQuery = removeMultilines(query);
+
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       let ast: Record<string, any> | undefined;
 
       try {
-        ast = sqliteParser(query)?.statement?.[0];
+        ast = sqliteParser(oneLineQuery)?.statement?.[0];
       } catch (e) {
         return;
       }
@@ -1014,7 +1019,9 @@ export const ECSMappingEditorField = React.memo(
         if (itemKey) {
           const serializedFormData = formDataSerializer();
           const itemValue =
-            serializedFormData.ecs_mapping && serializedFormData.ecs_mapping[`${itemKey}`]?.field;
+            serializedFormData.ecs_mapping &&
+            (serializedFormData.ecs_mapping[`${itemKey}`]?.field ||
+              serializedFormData.ecs_mapping[`${itemKey}`]?.value);
 
           if (itemValue && onAdd.current) {
             onAdd.current();

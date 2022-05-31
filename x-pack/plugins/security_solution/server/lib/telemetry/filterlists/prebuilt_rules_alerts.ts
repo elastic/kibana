@@ -54,6 +54,24 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
   'kibana.alert.workflow_status': true,
   'kibana.space_ids': true,
   'kibana.version': true,
+  // Event specific fileter entries
+  'event.ingested': true,
+  'event.provider': true,
+  'event.created': true,
+  'event.kind': true,
+  'event.action': true,
+  'event.id': true,
+  'event.type': true,
+  'event.category': true,
+  'event.dataset': true,
+  'event.outcome': true,
+  'event.module': true,
+  job_id: true,
+  causes: true,
+  typical: true,
+  multi_bucket_impact: true,
+  partition_field_name: true,
+  partition_field_value: true,
   // Alert specific filter entries
   agent: {
     id: true,
@@ -72,6 +90,7 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       name: true,
     },
   },
+  event: true,
   group: {
     name: true,
   },
@@ -207,18 +226,6 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
     metadata: {
       type: true,
     },
-  },
-  event: {
-    action: true,
-    agent_id_status: true,
-    category: true,
-    code: true,
-    dataset: true,
-    kind: true,
-    module: true,
-    outcome: true,
-    provider: true,
-    type: true,
   },
   file: {
     Ext: {

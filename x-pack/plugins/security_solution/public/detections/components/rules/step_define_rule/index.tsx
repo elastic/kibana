@@ -6,9 +6,11 @@
  */
 
 import { EuiButtonEmpty, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import React, { FC, memo, useCallback, useState, useEffect } from 'react';
+import React, { FC, memo, useCallback, useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
-import { isEqual } from 'lodash';
+import { isEqual, isEmpty } from 'lodash';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
+import usePrevious from 'react-use/lib/usePrevious';
 
 import {
   DEFAULT_INDEX_KEY,
@@ -21,6 +23,7 @@ import { hasMlAdminPermissions } from '../../../../../common/machine_learning/ha
 import { hasMlLicense } from '../../../../../common/machine_learning/has_ml_license';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { useUiSetting$ } from '../../../../common/lib/kibana';
+import { EqlOptionsSelected, FieldsEqlOptions } from '../../../../../common/search_strategy';
 import { filterRuleFieldsForType } from '../../../pages/detection_engine/rules/create/helpers';
 import {
   DefineStepRule,
@@ -73,13 +76,15 @@ export const stepDefineDefaultValue: DefineStepRule = {
   queryBar: {
     query: { query: '', language: 'kuery' },
     filters: [],
-    saved_id: undefined,
+    saved_id: null,
   },
   threatQueryBar: {
     query: { query: DEFAULT_THREAT_MATCH_QUERY, language: 'kuery' },
     filters: [],
-    saved_id: undefined,
+    saved_id: null,
   },
+  requiredFields: [],
+  relatedIntegrations: [],
   threatMapping: [],
   threshold: {
     field: [],
@@ -93,6 +98,7 @@ export const stepDefineDefaultValue: DefineStepRule = {
     id: null,
     title: DEFAULT_TIMELINE_TITLE,
   },
+  eqlOptions: {},
 };
 
 /**
@@ -104,6 +110,11 @@ export const stepDefineDefaultValue: DefineStepRule = {
 const threatQueryBarDefaultValue: DefineStepRule['queryBar'] = {
   ...stepDefineDefaultValue.queryBar,
   query: { ...stepDefineDefaultValue.queryBar.query, query: '*:*' },
+};
+
+const defaultCustomQuery = {
+  forNormalRules: stepDefineDefaultValue.queryBar,
+  forThreatMatchRules: threatQueryBarDefaultValue,
 };
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
@@ -190,8 +201,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const machineLearningJobId = formMachineLearningJobId ?? initialState.machineLearningJobId;
   const anomalyThreshold = formAnomalyThreshold ?? initialState.anomalyThreshold;
   const ruleType = formRuleType || initialState.ruleType;
+  const previousRuleType = usePrevious(ruleType);
   const [indexPatternsLoading, { browserFields, indexPatterns }] = useFetchIndex(index);
   const fields: Readonly<BrowserFields> = aggregatableFields(browserFields);
+  const [optionsSelected, setOptionsSelected] = useState<EqlOptionsSelected>(
+    defaultValues?.eqlOptions || {}
+  );
 
   const [
     threatIndexPatternsLoading,
@@ -212,36 +227,55 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [threatIndex, threatIndicesConfig]);
 
   /**
-   * When a rule type is changed to or from a threat match this will modify the
-   * default query string to either:
-   *   * from the empty string '' to '*:*' if the rule type is "threatMatchRule"
-   *   * from '*:*' back to the empty string '' if the rule type is not "threatMatchRule"
-   * This calls queryBar.reset() in both cases to not trigger validation errors as
-   * the user has not entered data into those areas yet.
-   * If the user has entered data then through reference compares we can detect reliably if
-   * the user has changed data.
-   *   * queryBar.value === defaultQueryBar (Has the user changed the input of '' yet?)
-   *   * queryBar.value === threatQueryBarDefaultValue (Has the user changed the input of '*:*' yet?)
-   * This is a stronger guarantee than "isPristine" off of the forms as that value can be reset
-   * if you go to step 2) and then back to step 1) or the form is reset in another way. Using
-   * the reference compare we know factually if the data is changed as the references must change
-   * in the form libraries form the initial defaults.
+   * When the user changes rule type to or from "threat_match" this will modify the
+   * default "Custom query" string to either:
+   *   * from '' to '*:*' if the type is switched to "threat_match"
+   *   * from '*:*' back to '' if the type is switched back from "threat_match" to another one
    */
   useEffect(() => {
     const { queryBar } = getFields();
-    if (queryBar != null) {
-      const { queryBar: defaultQueryBar } = stepDefineDefaultValue;
-      if (isThreatMatchRule(ruleType) && queryBar.value === defaultQueryBar) {
+    if (queryBar == null) {
+      return;
+    }
+
+    // NOTE: Below this code does two things that are worth commenting.
+
+    // 1. If the user enters some text in the "Custom query" form field, we want
+    // to keep it even if the user switched to another rule type. So we want to
+    // be able to figure out if the field has been modified.
+    // - The forms library provides properties (isPristine, isModified, isDirty)
+    //   for that but they can't be used in our case: their values can be reset
+    //   if you go to step 2 and then back to step 1 or the form is reset in another way.
+    // - That's why we compare the actual value of the field with default ones.
+    //   NOTE: It's important to do a deep object comparison by value.
+    //   Don't do it by reference because the forms lib can change it internally.
+
+    // 2. We call queryBar.reset() in both cases to not trigger validation errors
+    // as the user has not entered data into those areas yet.
+
+    // If the user switched rule type to "threat_match" from any other one,
+    // but hasn't changed the custom query used for normal rules (''),
+    // we reset the custom query to the default used for "threat_match" rules ('*:*').
+    if (isThreatMatchRule(ruleType) && !isThreatMatchRule(previousRuleType)) {
+      if (isEqual(queryBar.value, defaultCustomQuery.forNormalRules)) {
         queryBar.reset({
-          defaultValue: threatQueryBarDefaultValue,
+          defaultValue: defaultCustomQuery.forThreatMatchRules,
         });
-      } else if (queryBar.value === threatQueryBarDefaultValue) {
+        return;
+      }
+    }
+
+    // If the user switched rule type from "threat_match" to any other one,
+    // but hasn't changed the custom query used for "threat_match" rules ('*:*'),
+    // we reset the custom query to another default value ('').
+    if (!isThreatMatchRule(ruleType) && isThreatMatchRule(previousRuleType)) {
+      if (isEqual(queryBar.value, defaultCustomQuery.forThreatMatchRules)) {
         queryBar.reset({
-          defaultValue: defaultQueryBar,
+          defaultValue: defaultCustomQuery.forNormalRules,
         });
       }
     }
-  }, [ruleType, getFields]);
+  }, [ruleType, previousRuleType, getFields]);
 
   const handleSubmit = useCallback(() => {
     if (onSubmit) {
@@ -251,13 +285,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const getData = useCallback(async () => {
     const result = await submit();
+    result.data = {
+      ...result.data,
+      eqlOptions: optionsSelected,
+    };
     return result.isValid
       ? result
       : {
           isValid: false,
-          data: getFormData(),
+          data: {
+            ...getFormData(),
+            eqlOptions: optionsSelected,
+          },
         };
-  }, [getFormData, submit]);
+  }, [getFormData, optionsSelected, submit]);
 
   useEffect(() => {
     let didCancel = false;
@@ -322,6 +363,36 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
       threatIndexPatternsLoading,
     ]
   );
+
+  const onOptionsChange = useCallback((field: FieldsEqlOptions, value: string | undefined) => {
+    setOptionsSelected((prevOptions) => ({
+      ...prevOptions,
+      [field]: value,
+    }));
+  }, []);
+
+  const optionsData = useMemo(
+    () =>
+      isEmpty(indexPatterns.fields)
+        ? {
+            keywordFields: [],
+            dateFields: [],
+            nonDateFields: [],
+          }
+        : {
+            keywordFields: (indexPatterns.fields as FieldSpec[])
+              .filter((f) => f.esTypes?.includes('keyword'))
+              .map((f) => ({ label: f.name })),
+            dateFields: indexPatterns.fields
+              .filter((f) => f.type === 'date')
+              .map((f) => ({ label: f.name })),
+            nonDateFields: indexPatterns.fields
+              .filter((f) => f.type !== 'date')
+              .map((f) => ({ label: f.name })),
+          },
+    [indexPatterns]
+  );
+
   return isReadOnlyView ? (
     <StepContentWrapper data-test-subj="definitionRule" addPadding={addPadding}>
       <StepRuleDescription
@@ -372,6 +443,10 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   path="queryBar"
                   component={EqlQueryBar}
                   componentProps={{
+                    optionsData,
+                    optionsSelected,
+                    isSizeOptionDisabled: true,
+                    onOptionsChange,
                     onValidityChange: setIsQueryBarValid,
                     idAria: 'detectionEngineStepDefineRuleEqlQueryBar',
                     isDisabled: isLoading,
@@ -507,6 +582,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
           threshold={formThreshold}
           machineLearningJobId={machineLearningJobId}
           anomalyThreshold={anomalyThreshold}
+          eqlOptions={optionsSelected}
         />
       </StepContentWrapper>
 
