@@ -9,9 +9,9 @@
 import { omit, isObject } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as esKuery from '@kbn/es-query';
+import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '../../../elasticsearch';
 import { isSupportedEsServer, isNotFoundFromUnsupportedServer } from '../../../elasticsearch';
-import type { Logger } from '../../../logging';
 import { getRootPropertiesObjects, IndexMapping } from '../../mappings';
 import {
   ISavedObjectsPointInTimeFinder,
