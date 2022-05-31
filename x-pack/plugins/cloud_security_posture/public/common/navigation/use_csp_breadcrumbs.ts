@@ -9,7 +9,6 @@ import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type RouteProps, useRouteMatch, useHistory } from 'react-router-dom';
-import { PLUGIN_ID } from '../../../common';
 import type { CspNavigationItem } from './types';
 import { CLOUD_POSTURE } from './translations';
 
@@ -36,7 +35,6 @@ export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
   const history = useHistory();
 
   useEffect(() => {
-    const cspPath = getUrlForApp(PLUGIN_ID);
     const additionalBreadCrumbs: ChromeBreadcrumb[] = breadcrumbs.map((breadcrumb) => {
       const clickableLink = getClickableBreadcrumb(match.path, breadcrumb.path);
 
@@ -54,7 +52,10 @@ export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
     setBreadcrumbs([
       {
         text: CLOUD_POSTURE,
-        href: cspPath,
+        onClick: (e) => {
+          e.preventDefault();
+          history.push(`/`);
+        },
       },
       ...additionalBreadCrumbs,
     ]);
