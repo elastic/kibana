@@ -24,12 +24,14 @@ import {
   UpdateFileArgs,
 } from './internal_file_service';
 import { FileServiceStart } from './file_service';
+import { FileKindsRegistry } from '../file_kinds_registry';
 
 export class FileServiceFactory {
   constructor(
     private readonly savedObjectsService: SavedObjectsServiceStart,
     private readonly blobStorageService: BlobStorageService,
     private readonly security: undefined | SecurityPluginSetup,
+    private readonly fileKindRegistry: FileKindsRegistry,
     private readonly logger: Logger
   ) {}
 
@@ -51,6 +53,7 @@ export class FileServiceFactory {
       soClient,
       this.blobStorageService,
       auditLogger,
+      this.fileKindRegistry,
       this.logger
     );
 
