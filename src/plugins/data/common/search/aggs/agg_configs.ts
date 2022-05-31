@@ -93,6 +93,10 @@ export class AggConfigs {
     configStates.forEach((params: any) => this.createAggConfig(params));
   }
 
+  public get hierarchical() {
+    return this.opts.hierarchical;
+  }
+
   setTimeFields(timeFields: string[] | undefined) {
     this.timeFields = timeFields;
   }

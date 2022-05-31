@@ -57,6 +57,7 @@ export function inferTimeZone(
     if (isDefaultTimezone) {
       return getConfigTimeZone(aggExecutionContext, getConfig);
     }
+    return configTimezone;
   }
 
   return tz || DEFAULT_TIME_ZONE;

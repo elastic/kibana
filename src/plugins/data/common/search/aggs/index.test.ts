@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { getAggTypes } from '.';
+import { AggTypesDependencies, getAggTypes } from '.';
 import { mockGetFieldFormatsStart } from './test_helpers';
 
 import { isBucketAggType } from './buckets/bucket_agg_type';
@@ -15,7 +15,7 @@ import { isMetricAggType } from './metrics/metric_agg_type';
 describe('AggTypesComponent', () => {
   const aggTypes = getAggTypes();
   const { buckets, metrics } = aggTypes;
-  const aggTypesDependencies = {
+  const aggTypesDependencies: AggTypesDependencies = {
     calculateBounds: jest.fn(),
     getConfig: jest.fn(),
     getFieldFormatsStart: mockGetFieldFormatsStart,
