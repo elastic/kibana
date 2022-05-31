@@ -189,7 +189,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
     });
 
     // for test purpose only, will be removed
-    for (let i = 0; i < 100; i++) {
+    for (let i = 0; i < 200; i++) {
       it(`should return mapped params after bulk edit #${i}`, async () => {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)

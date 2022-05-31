@@ -59,8 +59,18 @@ export interface TaskSchedulingOpts {
   taskManagerId: string;
 }
 
+/**
+ * return type of TaskScheduling.bulkUpdateSchedules method
+ */
 export interface BulkUpdateSchedulesResult {
+  /**
+   * list of successfully updated tasks
+   */
   tasks: ConcreteTaskInstance[];
+
+  /**
+   * list of failed tasks and error caused failure
+   */
   errors: Array<{ task: ConcreteTaskInstance; error: Error }>;
 }
 export interface RunNowResult {
