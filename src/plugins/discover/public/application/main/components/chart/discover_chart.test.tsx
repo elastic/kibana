@@ -169,7 +169,7 @@ describe('Discover chart', () => {
     component.find('[data-test-subj="discoverEditVisualization"]').first().simulate('click');
     expect(fn).toHaveBeenCalledWith(
       expect.objectContaining({
-        dataViewId: '123',
+        indexPatternId: '123',
         fieldName: 'timefield',
       })
     );

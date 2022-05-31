@@ -3018,8 +3018,6 @@
     "discover.showAllDocuments": "Afficher tous les documents",
     "discover.showChart": "Afficher le graphique",
     "discover.showErrorMessageAgain": "Afficher le message d'erreur",
-    "discover.showingDefaultDataViewWarningDescription": "Affichage de la vue de données par défaut : \"{loadedIndexPatternTitle}\" ({loadedIndexPatternId})",
-    "discover.showingSavedDataViewWarningDescription": "Affichage de la vue de données enregistrée : \"{ownIndexPatternTitle}\" ({ownIndexPatternId})",
     "discover.showSelectedDocumentsOnly": "Afficher uniquement les documents sélectionnés",
     "discover.singleDocRoute.errorTitle": "Une erreur s'est produite",
     "discover.skipToBottomButtonLabel": "Atteindre la fin du tableau",

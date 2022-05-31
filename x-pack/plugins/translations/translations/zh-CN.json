@@ -3122,7 +3122,6 @@
     "discover.showAllDocuments": "显示所有文档",
     "discover.showChart": "显示图表",
     "discover.showErrorMessageAgain": "显示错误消息",
-    "discover.showingDefaultDataViewWarningDescription": "正在显示默认数据视图：“{loadedDataViewTitle}”({loadedDataViewId})",
     "discover.showingSavedDataViewWarningDescription": "正在显示已保存数据视图：“{ownDataViewTitle}”({ownDataViewId})",
     "discover.showSelectedDocumentsOnly": "仅显示选定的文档",
     "discover.singleDocRoute.errorTitle": "发生错误",

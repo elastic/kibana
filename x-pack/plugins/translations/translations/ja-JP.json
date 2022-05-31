@@ -3112,7 +3112,6 @@
     "discover.showAllDocuments": "すべてのドキュメントを表示",
     "discover.showChart": "グラフを表示",
     "discover.showErrorMessageAgain": "エラーメッセージを表示",
-    "discover.showingDefaultDataViewWarningDescription": "デフォルトのデータビュー「{loadedDataViewTitle}」（{loadedDataViewId}）を表示中",
     "discover.showingSavedDataViewWarningDescription": "保存されたデータビュー「{ownDataViewTitle}」（{ownDataViewId}）を表示中",
     "discover.showSelectedDocumentsOnly": "選択したドキュメントのみを表示",
     "discover.singleDocRoute.errorTitle": "エラーが発生しました",
