@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { lazy, useEffect } from 'react';
+import React, { lazy, useEffect, useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { EuiFlexItem, EuiFlexGroup, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import { AdditionalEmailServices } from '@kbn/actions-plugin/common';
+import { AdditionalEmailServices, InvalidEmailReason } from '@kbn/actions-plugin/common';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import {
   UseField,
   useFormContext,
   useFormData,
+  FieldConfig,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   NumericField,
@@ -38,15 +40,38 @@ const shouldDisableEmailConfiguration = (service: string | null | undefined) =>
   isEmpty(service) ||
   (service !== AdditionalEmailServices.EXCHANGE && service !== AdditionalEmailServices.OTHER);
 
-// const emailValidator = ({ value }) => {
-//   const validatedEmail = validateEmailAddresses(value);
-//   // const validatedEmail = services.validateEmailAddresses([action.config.from])[0];
-//   //       if (!validatedEmail.valid) {
-//   //         const message =
-//   //           validatedEmail.reason === InvalidEmailReason.notAllowed
-//   //             ? translations.getNotAllowedEmailAddress(action.config.from)
-//   //             : translations.getInvalidEmailAddress(action.config.from)
-// };
+const getEmailConfig = (
+  href: string,
+  validateFunc: ActionsPublicPluginSetup['validateEmailAddresses']
+): FieldConfig<string> => ({
+  label: i18n.FROM_LABEL,
+  helpText: (
+    <EuiLink href={href} target="_blank">
+      <FormattedMessage
+        id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
+        defaultMessage="Configure email accounts"
+      />
+    </EuiLink>
+  ),
+  validations: [
+    { validator: emptyField(i18n.SENDER_REQUIRED) },
+    {
+      validator: ({ value }) => {
+        const validatedEmail = validateFunc([value])[0];
+        if (!validatedEmail.valid) {
+          const message =
+            validatedEmail.reason === InvalidEmailReason.notAllowed
+              ? i18n.getNotAllowedEmailAddress(value)
+              : i18n.getInvalidEmailAddress(value);
+
+          return {
+            message,
+          };
+        }
+      },
+    },
+  ],
+});
 
 export const EmailActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsProps> = ({
   readOnly,
@@ -65,13 +90,24 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
     watch: ['config.service', 'config.hasAuth'],
   });
 
+  const emailFieldConfig = useMemo(
+    () => getEmailConfig(docLinks.links.alerting.emailActionConfig, validateEmailAddresses),
+    [docLinks.links.alerting.emailActionConfig, validateEmailAddresses]
+  );
+
   const { service = null, hasAuth = false } = config ?? {};
   const disableServiceConfig = shouldDisableEmailConfiguration(service);
-
   const { isLoading, getEmailServiceConfig } = useEmailConfig({ http, toasts });
 
   useEffect(() => {
     async function fetchConfig() {
+      if (
+        service === AdditionalEmailServices.OTHER ||
+        service === AdditionalEmailServices.EXCHANGE
+      ) {
+        return;
+      }
+
       const emailConfig = await getEmailServiceConfig(service);
       updateFieldValues({
         config: {
@@ -92,22 +128,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
           <UseField
             path="config.from"
             component={TextField}
-            config={{
-              label: i18n.FROM_LABEL,
-              helpText: (
-                <EuiLink href={docLinks.links.alerting.emailActionConfig} target="_blank">
-                  <FormattedMessage
-                    id="xpack.triggersActionsUI.components.builtinActionTypes.emailAction.configureAccountsHelpLabel"
-                    defaultMessage="Configure email accounts"
-                  />
-                </EuiLink>
-              ),
-              validations: [
-                {
-                  validator: emptyField(i18n.SENDER_REQUIRED),
-                },
-              ],
-            }}
+            config={emailFieldConfig}
             componentProps={{
               euiFieldProps: { 'data-test-subj': 'emailFromInput' },
             }}
