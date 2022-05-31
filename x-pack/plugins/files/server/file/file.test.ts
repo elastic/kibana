@@ -15,6 +15,7 @@ import { Readable } from 'stream';
 
 import { BlobStorageService } from '../blob_storage_service';
 import { InternalFileService } from '../file_service/internal_file_service';
+import { fileKindsRegistry } from '../file_kinds_registry';
 
 describe('File', () => {
   let esClient: ElasticsearchClient;
@@ -23,13 +24,25 @@ describe('File', () => {
   let soClient: ISavedObjectsRepository;
 
   const sandbox = createSandbox();
+  const fileKind = 'fileKind';
+
+  beforeAll(() => {
+    fileKindsRegistry.register({ http: {}, id: fileKind });
+  });
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createInternalClient();
     soClient = savedObjectsServiceMock.createStartContract().createInternalRepository();
     const logger = loggingSystemMock.createLogger();
     blobStorageService = new BlobStorageService(esClient, logger);
-    fileService = new InternalFileService('test', soClient, blobStorageService, undefined, logger);
+    fileService = new InternalFileService(
+      'test',
+      soClient,
+      blobStorageService,
+      undefined,
+      fileKindsRegistry,
+      logger
+    );
   });
 
   afterEach(() => {
@@ -37,15 +50,18 @@ describe('File', () => {
   });
 
   it('deletes file content when an upload fails', async () => {
-    const spy = sandbox.spy(blobStorageService, 'delete');
+    const createBlobSpy = sandbox.spy(blobStorageService, 'createBlobStore');
 
     (esClient.index as jest.Mock).mockRejectedValue(new Error('test'));
     const fileSO = { attributes: { status: 'AWAITING_UPLOAD' } };
     (soClient.create as jest.Mock).mockResolvedValue(fileSO);
     (soClient.update as jest.Mock).mockResolvedValue(fileSO);
 
-    const file = await fileService.createFile({ name: 'test', fileKind: 'fileKind' });
+    const file = await fileService.createFile({ name: 'test', fileKind });
+    const [{ returnValue: blobStore }] = createBlobSpy.getCalls();
+    const blobStoreSpy = sandbox.spy(blobStore, 'delete');
+    expect(blobStoreSpy.calledOnce).toBe(false);
     await expect(file.uploadContent(Readable.from(['test']))).rejects.toThrow(new Error('test'));
-    expect(spy.calledOnce).toBe(true);
+    expect(blobStoreSpy.calledOnce).toBe(true);
   });
 });
