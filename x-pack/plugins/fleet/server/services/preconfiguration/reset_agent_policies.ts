@@ -183,18 +183,16 @@ async function _deleteExistingData(
       }
     );
   }
-  if (existingPolicies.length > 0) {
-    logger.info(`Deleting ${existingPolicies.length} agent policies`);
-    await pMap(
-      existingPolicies,
-      (policy) =>
-        agentPolicyService.delete(soClient, esClient, policy.id, {
-          force: true,
-          removeFleetServerDocuments: true,
-        }),
-      {
-        concurrency: 20,
-      }
-    );
-  }
+  logger.info(`Deleting ${existingPolicies.length} agent policies`);
+  await pMap(
+    existingPolicies,
+    (policy) =>
+      agentPolicyService.delete(soClient, esClient, policy.id, {
+        force: true,
+        removeFleetServerDocuments: true,
+      }),
+    {
+      concurrency: 20,
+    }
+  );
 }
