@@ -5,13 +5,12 @@
  * 2.0.
  */
 import React from 'react';
-import type { DataView } from '@kbn/data-plugin/common';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
-import type { FindingsBaseURLQuery } from '../types';
+import type { FindingsBaseProps, FindingsBaseURLQuery } from '../types';
 import { FindingsByResourceQuery, useFindingsByResource } from './use_findings_by_resource';
 import { FindingsByResourceTable } from './findings_by_resource_table';
 import { getBaseQuery, getPaginationQuery, getPaginationTableParams } from '../utils';
@@ -28,7 +27,7 @@ const getDefaultQuery = (): FindingsBaseURLQuery & FindingsByResourceQuery => ({
   pageSize: 10,
 });
 
-export const FindingsByResourceContainer = ({ dataView }: { dataView: DataView }) => (
+export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
   <Switch>
     <Route
       exact
@@ -42,7 +41,7 @@ export const FindingsByResourceContainer = ({ dataView }: { dataView: DataView }
   </Switch>
 );
 
-const LatestFindingsByResource = ({ dataView }: { dataView: DataView }) => {
+const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_by_resource]);
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
   const findingsGroupByResource = useFindingsByResource({

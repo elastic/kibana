@@ -188,7 +188,9 @@ export const CspPageTemplate = <TData, TError>({
   };
 
   const render = () => {
-    if (query?.isLoading || cisKubernetesPackageInfo.isLoading) return loadingRender();
+    if (query?.isLoading || query?.isIdle || cisKubernetesPackageInfo.isLoading) {
+      return loadingRender();
+    }
     if (query?.isError) return errorRender(query.error);
     if (query?.isSuccess) return children;
 
