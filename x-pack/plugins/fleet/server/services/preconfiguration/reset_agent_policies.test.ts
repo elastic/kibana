@@ -52,30 +52,18 @@ jest.mock('../app_context', () => ({
 }));
 
 describe('reset agent policies', () => {
-  beforeEach(() => {
-    mockedAgentPolicyService.list.mockReset();
-  });
-
   it('should not unenroll agents or revoke enrollment api keys if there is no existing policies', async () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockedAgentPolicyService.list.mockResolvedValueOnce({
       items: [],
-      page: 0,
-      perPage: 10,
-      total: 0,
-    });
+    } as any);
     mockedPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
-      page: 0,
-      perPage: 10,
-      total: 0,
-    });
+    } as any);
     soClient.find.mockImplementation(async (option) => {
       if (option.type === PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE) {
-        return {
-          saved_objects: [],
-        } as any;
+        return { saved_objects: [] } as any;
       }
 
       throw new Error('not mocked');
@@ -91,21 +79,11 @@ describe('reset agent policies', () => {
     const soClient = savedObjectsClientMock.create();
     const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockedAgentPolicyService.list.mockResolvedValueOnce({
-      items: [
-        {
-          id: 'policy1',
-        } as any,
-      ],
-      page: 0,
-      perPage: 10,
-      total: 0,
-    });
+      items: [{ id: 'policy1' }],
+    } as any);
     mockedPackagePolicyService.list.mockResolvedValueOnce({
       items: [],
-      page: 0,
-      perPage: 10,
-      total: 0,
-    });
+    } as any);
     mockedGetAgentsByKuery.mockResolvedValueOnce({
       agents: [{ id: 'agent1' }],
     } as any);
