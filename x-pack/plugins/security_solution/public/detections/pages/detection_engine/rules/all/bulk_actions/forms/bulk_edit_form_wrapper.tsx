@@ -59,12 +59,11 @@ const BulkEditFormWrapperComponent: FC<BulkEditFormWrapperProps> = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              iconType="cross"
               onClick={onClose}
               flush="left"
               data-test-subj="rulesBulkEditFormCancelBtn"
             >
-              {i18n.BULK_EDIT_FLYOUT_FORM_CLOSE}
+              {i18n.BULK_EDIT_FLYOUT_FORM_CANCEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
