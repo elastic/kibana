@@ -215,6 +215,8 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       addClientWrapper: deps.savedObjects.addClientWrapper,
       registerType: deps.savedObjects.registerType,
       getKibanaIndex: deps.savedObjects.getKibanaIndex,
+      pre: deps.savedObjects.pre,
+      post: deps.savedObjects.post,
     },
     status: {
       core$: deps.status.core$,

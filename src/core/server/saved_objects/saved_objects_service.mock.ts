@@ -61,6 +61,8 @@ const createSetupContractMock = () => {
     addClientWrapper: jest.fn(),
     registerType: jest.fn(),
     getKibanaIndex: jest.fn(),
+    pre: jest.fn(),
+    post: jest.fn(),
   };
 
   setupContract.getKibanaIndex.mockReturnValue('.kibana');

@@ -45,6 +45,8 @@ export type {
   SavedObjectsCollectMultiNamespaceReferencesResponse,
   SavedObjectsBulkResolveObject,
   SavedObjectsResolveResponse,
+  SavedObjectsTypeMappingDefinition,
+  SavedObjectsFieldMapping,
 } from '../../server';
 
 export type {

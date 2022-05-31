@@ -10,6 +10,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { SavedObject } from '@kbn/core/server';
+import { defaultUserContentAttributes } from '@kbn/user-content-plugin/server';
 
 export const getSavedObjects = (): SavedObject[] => [
   {
@@ -1306,6 +1307,7 @@ export const getSavedObjects = (): SavedObject[] => [
         defaultMessage: '[eCommerce] Revenue Dashboard',
       }),
       version: 1,
+      ...defaultUserContentAttributes,
     },
     coreMigrationVersion: '8.0.0',
     id: '722b74f0-b882-11e8-a6d9-e546fe2bba5f',

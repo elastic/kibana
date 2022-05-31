@@ -14,6 +14,8 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { UserContentPluginSetup } from '@kbn/user-content-plugin/server';
+
 import { createDashboardSavedObjectType } from './saved_objects';
 import { capabilitiesProvider } from './capabilities_provider';
 
@@ -32,6 +34,7 @@ interface SetupDeps {
   embeddable: EmbeddableSetup;
   usageCollection: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;
+  userContent: UserContentPluginSetup;
 }
 
 interface StartDeps {
@@ -50,13 +53,13 @@ export class DashboardPlugin
   public setup(core: CoreSetup<StartDeps>, plugins: SetupDeps) {
     this.logger.debug('dashboard: Setup');
 
-    core.savedObjects.registerType(
-      createDashboardSavedObjectType({
+    plugins.userContent.registerContent({
+      soType: createDashboardSavedObjectType({
         migrationDeps: {
           embeddable: plugins.embeddable,
         },
-      })
-    );
+      }),
+    });
 
     if (plugins.taskManager) {
       initializeDashboardTelemetryTask(this.logger, core, plugins.taskManager, plugins.embeddable);

@@ -13,6 +13,7 @@ import React from 'react';
 import moment, { Moment } from 'moment';
 import { act } from 'react-dom/test-utils';
 import { themeServiceMock, applicationServiceMock } from '@kbn/core/public/mocks';
+import { userContentMock } from '@kbn/user-content-plugin/public/mocks';
 import { TableListView, TableListViewProps } from './table_list_view';
 
 jest.mock('lodash', () => {
@@ -38,6 +39,8 @@ const requiredProps: TableListViewProps<Record<string, unknown>> = {
   findItems: jest.fn(() => Promise.resolve({ total: 0, hits: [] })),
   theme: themeServiceMock.createStartContract(),
   application: applicationServiceMock.createStartContract(),
+  userContent: userContentMock.createStart(),
+  contentType: 'dashboard',
 };
 
 describe('TableListView', () => {

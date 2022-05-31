@@ -57,6 +57,9 @@ export interface SavedObjectSaveOpts {
   isTitleDuplicateConfirmed?: boolean;
   onTitleDuplicate?: () => void;
   returnToOrigin?: boolean;
+  eventMetadata?: {
+    registerEvent: boolean;
+  };
 }
 
 export interface SavedObjectCreationOpts {

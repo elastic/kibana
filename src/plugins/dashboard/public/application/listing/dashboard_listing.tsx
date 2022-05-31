@@ -66,6 +66,7 @@ export const DashboardListing = ({
       dashboardCapabilities,
       dashboardSessionStorage,
       chrome: { setBreadcrumbs },
+      userContent,
     },
   } = useKibana<DashboardAppServices>();
 
@@ -321,6 +322,8 @@ export const DashboardListing = ({
           }}
           theme={core.theme}
           application={core.application}
+          userContent={userContent}
+          contentType="dashboard"
         >
           <DashboardUnsavedListing
             redirectTo={redirectTo}

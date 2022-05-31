@@ -26,6 +26,7 @@ import {
   SavedObjectsClientContract,
 } from '@kbn/core/public';
 import { VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { UserContentPluginStart } from '@kbn/user-content-plugin/public';
 
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
@@ -111,6 +112,7 @@ export interface DashboardStartDependencies {
   visualizations: VisualizationsStart;
   screenshotMode: ScreenshotModePluginStart;
   dataViewEditor: DataViewEditorStart;
+  userContent: UserContentPluginStart;
 }
 
 export interface DashboardSetup {

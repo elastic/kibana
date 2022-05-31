@@ -332,6 +332,9 @@ export interface SavedObjectsUpdateResponse<T = unknown>
 export interface SavedObjectsBulkResolveObject {
   id: string;
   type: string;
+  options?: {
+    eventMetadata?: SavedObjectsBaseOptions['eventMetadata'];
+  };
 }
 
 /**
