@@ -6,20 +6,12 @@
  */
 
 import React from 'react';
-import datemath from '@kbn/datemath';
 import { useEsSearch } from '@kbn/observability-plugin/public';
 import { serviceNameQuery } from '../../../../services/data/service_name_query';
 import { ServiceNameFilter } from '../url_filter/service_name_filter';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useDataView } from '../local_uifilters/use_data_view';
-
-function callDateMath(value: unknown): number {
-  const DEFAULT_RETURN_VALUE = 0;
-  if (typeof value === 'string') {
-    return datemath.parse(value)?.valueOf() ?? DEFAULT_RETURN_VALUE;
-  }
-  return DEFAULT_RETURN_VALUE;
-}
+import { callDateMath } from '../../../../services/data/call_date_math';
 
 export function WebApplicationSelect() {
   const {
@@ -42,6 +34,9 @@ export function WebApplicationSelect() {
     data?.aggregations?.services?.buckets.map(({ key }) => key as string) ?? [];
 
   return (
-    <ServiceNameFilter loading={!!loading} serviceNames={rumServiceNames} />
+    <ServiceNameFilter
+      loading={loading ?? true}
+      serviceNames={rumServiceNames}
+    />
   );
 }
