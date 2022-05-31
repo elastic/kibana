@@ -45,6 +45,7 @@ The API returns a list of data views:
                 "default"
             ],
             "title": "tmp*",
+            "type": "rollup",
             "typeMeta": {}
         },
         {
