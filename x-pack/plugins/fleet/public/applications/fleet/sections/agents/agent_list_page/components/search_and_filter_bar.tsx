@@ -16,7 +16,6 @@ import {
   EuiHorizontalRule,
   EuiIcon,
   EuiPopover,
-  EuiPortal,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { AgentEnrollmentFlyout, SearchBar } from '../../../../components';
+import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX } from '../../../../constants';
 
 import { MAX_TAG_DISPLAY_LENGTH, truncateTag } from '../utils';
@@ -89,6 +88,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   currentQuery: string;
   selectedAgents: Agent[];
   refreshAgents: () => void;
+  onClickAddAgent: () => void;
 }> = ({
   agentPolicies,
   draftKuery,
@@ -109,9 +109,8 @@ export const SearchAndFilterBar: React.FunctionComponent<{
   currentQuery,
   selectedAgents,
   refreshAgents,
+  onClickAddAgent,
 }) => {
-  const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState<boolean>(false);
-
   // Policies state for filtering
   const [isAgentPoliciesFilterOpen, setIsAgentPoliciesFilterOpen] = useState<boolean>(false);
 
@@ -142,12 +141,6 @@ export const SearchAndFilterBar: React.FunctionComponent<{
 
   return (
     <>
-      {isEnrollmentFlyoutOpen ? (
-        <EuiPortal>
-          <AgentEnrollmentFlyout onClose={() => setIsEnrollmentFlyoutOpen(false)} />
-        </EuiPortal>
-      ) : null}
-
       {/* Search and filter bar */}
       <EuiFlexGroup alignItems="center">
         <EuiFlexItem grow={4}>
@@ -329,7 +322,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
               <EuiButton
                 fill
                 iconType="plusInCircle"
-                onClick={() => setIsEnrollmentFlyoutOpen(true)}
+                onClick={() => onClickAddAgent()}
                 data-test-subj="addAgentButton"
               >
                 <FormattedMessage id="xpack.fleet.agentList.addButton" defaultMessage="Add agent" />
