@@ -13,62 +13,105 @@ import { LayerTypes } from '../constants';
 import { extendedDataLayerFunction } from './extended_data_layer';
 
 describe('extendedDataLayerConfig', () => {
+  const args: ExtendedDataLayerArgs = {
+    seriesType: 'line',
+    xAccessor: 'c',
+    accessors: ['a', 'b'],
+    splitAccessor: 'd',
+    xScaleType: 'linear',
+    isHistogram: false,
+    palette: mockPaletteOutput,
+  };
+
   test('produces the correct arguments', async () => {
     const { data } = sampleArgs();
-    const args: ExtendedDataLayerArgs = {
-      seriesType: 'line',
-      xAccessor: 'c',
-      accessors: ['a', 'b'],
-      splitAccessor: 'd',
-      xScaleType: 'linear',
-      isHistogram: false,
-      palette: mockPaletteOutput,
+    const fullArgs: ExtendedDataLayerArgs = {
+      ...args,
       markSizeAccessor: 'b',
+      showPoints: true,
+      lineWidth: 10,
+      pointsRadius: 10,
     };
 
-    const result = await extendedDataLayerFunction.fn(data, args, createMockExecutionContext());
+    const result = await extendedDataLayerFunction.fn(data, fullArgs, createMockExecutionContext());
 
     expect(result).toEqual({
       type: 'extendedDataLayer',
       layerType: LayerTypes.DATA,
-      ...args,
+      ...fullArgs,
       table: data,
+      showLines: true,
     });
   });
 
   test('throws the error if markSizeAccessor is provided to the not line/area chart', async () => {
     const { data } = sampleArgs();
-    const args: ExtendedDataLayerArgs = {
-      seriesType: 'bar',
-      xAccessor: 'c',
-      accessors: ['a', 'b'],
-      splitAccessor: 'd',
-      xScaleType: 'linear',
-      isHistogram: false,
-      palette: mockPaletteOutput,
-      markSizeAccessor: 'b',
-    };
 
     expect(
-      extendedDataLayerFunction.fn(data, args, createMockExecutionContext())
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, seriesType: 'bar', markSizeAccessor: 'b' },
+        createMockExecutionContext()
+      )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test("throws the error if markSizeAccessor doesn't have the corresponding column in the table", async () => {
     const { data } = sampleArgs();
-    const args: ExtendedDataLayerArgs = {
-      seriesType: 'line',
-      xAccessor: 'c',
-      accessors: ['a', 'b'],
-      splitAccessor: 'd',
-      xScaleType: 'linear',
-      isHistogram: false,
-      palette: mockPaletteOutput,
-      markSizeAccessor: 'nonsense',
-    };
 
     expect(
-      extendedDataLayerFunction.fn(data, args, createMockExecutionContext())
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, markSizeAccessor: 'nonsense' },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws the error if lineWidth is provided to the not line/area chart', async () => {
+    const { data } = sampleArgs();
+    expect(
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, seriesType: 'bar', lineWidth: 10 },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws the error if showPoints is provided to the not line/area chart', async () => {
+    const { data } = sampleArgs();
+
+    expect(
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, seriesType: 'bar', showPoints: true },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws the error if pointsRadius is provided to the not line/area chart', async () => {
+    const { data } = sampleArgs();
+
+    expect(
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, seriesType: 'bar', pointsRadius: 10 },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws the error if showLines is provided to the not line/area chart', async () => {
+    const { data } = sampleArgs();
+
+    expect(
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, seriesType: 'bar', showLines: true },
+        createMockExecutionContext()
+      )
     ).rejects.toThrowErrorMatchingSnapshot();
   });
 });

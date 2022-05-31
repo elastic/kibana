@@ -14,9 +14,8 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 
 |  Class | Description |
 |  --- | --- |
-|  [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md) | Saved Objects is Kibana's data persisentence mechanism allowing plugins to use Elasticsearch for storing plugin state. The client-side SavedObjectsClient is a thin convenience library around the SavedObjects HTTP API for interacting with Saved Objects. |
 |  [ScopedHistory](./kibana-plugin-core-public.scopedhistory.md) | A wrapper around a <code>History</code> instance that is scoped to a particular base path of the history stack. Behaves similarly to the <code>basename</code> option except that this wrapper hides any history stack entries from outside the scope of this base path.<!-- -->This wrapper also allows Core and Plugins to share a single underlying global <code>History</code> instance without exposing the history of other applications.<!-- -->The [createSubHistory](./kibana-plugin-core-public.scopedhistory.createsubhistory.md) method is particularly useful for applications that contain any number of "sub-apps" which should not have access to the main application's history or basePath. |
-|  [SimpleSavedObject](./kibana-plugin-core-public.simplesavedobject.md) | This class is a very simple wrapper for SavedObjects loaded from the server with the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md)<!-- -->.<!-- -->It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations. |
+|  [SimpleSavedObject](./kibana-plugin-core-public.simplesavedobject.md) | This class is a very simple wrapper for SavedObjects loaded from the server with the [SavedObjectsClientContract](./kibana-plugin-core-public.savedobjectsclientcontract.md)<!-- -->.<!-- -->It provides basic functionality for creating/saving/deleting saved objects, but doesn't include any type-specific implementations. |
 |  [ToastsApi](./kibana-plugin-core-public.toastsapi.md) | Methods for adding and removing global toast messages. |
 
 ## Enumerations
@@ -47,6 +46,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeHelpExtensionMenuDiscussLink](./kibana-plugin-core-public.chromehelpextensionmenudiscusslink.md) |  |
 |  [ChromeHelpExtensionMenuDocumentationLink](./kibana-plugin-core-public.chromehelpextensionmenudocumentationlink.md) |  |
 |  [ChromeHelpExtensionMenuGitHubLink](./kibana-plugin-core-public.chromehelpextensionmenugithublink.md) |  |
+|  [ChromeHelpMenuActions](./kibana-plugin-core-public.chromehelpmenuactions.md) | List of actions in order to manipulate with the help menu from the help extensions content components. |
 |  [ChromeNavControl](./kibana-plugin-core-public.chromenavcontrol.md) |  |
 |  [ChromeNavControls](./kibana-plugin-core-public.chromenavcontrols.md) | [APIs](./kibana-plugin-core-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
 |  [ChromeNavLink](./kibana-plugin-core-public.chromenavlink.md) |  |
@@ -98,7 +98,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OverlayStart](./kibana-plugin-core-public.overlaystart.md) |  |
 |  [Plugin\_2](./kibana-plugin-core-public.plugin_2.md) | The interface that should be returned by a <code>PluginInitializer</code>. |
 |  [PluginInitializerContext](./kibana-plugin-core-public.plugininitializercontext.md) | The available core services passed to a <code>PluginInitializer</code> |
-|  [ResolvedSimpleSavedObject](./kibana-plugin-core-public.resolvedsimplesavedobject.md) | This interface is a very simple wrapper for SavedObjects resolved from the server with the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md)<!-- -->. |
+|  [ResolvedSimpleSavedObject](./kibana-plugin-core-public.resolvedsimplesavedobject.md) | This interface is a very simple wrapper for SavedObjects resolved from the server with the [SavedObjectsClientContract](./kibana-plugin-core-public.savedobjectsclientcontract.md)<!-- -->. |
 |  [ResponseErrorBody](./kibana-plugin-core-public.responseerrorbody.md) |  |
 |  [SavedObject](./kibana-plugin-core-public.savedobject.md) |  |
 |  [SavedObjectAttributes](./kibana-plugin-core-public.savedobjectattributes.md) | The data for a Saved Object is stored as an object in the <code>attributes</code> property. |
@@ -113,6 +113,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [SavedObjectsBulkResolveResponse](./kibana-plugin-core-public.savedobjectsbulkresolveresponse.md) |  |
 |  [SavedObjectsBulkUpdateObject](./kibana-plugin-core-public.savedobjectsbulkupdateobject.md) |  |
 |  [SavedObjectsBulkUpdateOptions](./kibana-plugin-core-public.savedobjectsbulkupdateoptions.md) |  |
+|  [SavedObjectsClientContract](./kibana-plugin-core-public.savedobjectsclientcontract.md) | The client-side SavedObjectsClient is a thin convenience library around the SavedObjects HTTP API for interacting with Saved Objects. |
 |  [SavedObjectsCollectMultiNamespaceReferencesResponse](./kibana-plugin-core-public.savedobjectscollectmultinamespacereferencesresponse.md) | The response when object references are collected. |
 |  [SavedObjectsCreateOptions](./kibana-plugin-core-public.savedobjectscreateoptions.md) |  |
 |  [SavedObjectsFindOptions](./kibana-plugin-core-public.savedobjectsfindoptions.md) |  |
@@ -178,7 +179,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ResolveDeprecationResponse](./kibana-plugin-core-public.resolvedeprecationresponse.md) |  |
 |  [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) | Type definition for a Saved Object attribute value |
 |  [SavedObjectAttributeSingle](./kibana-plugin-core-public.savedobjectattributesingle.md) | Don't use this type, it's simply a helper type for [SavedObjectAttribute](./kibana-plugin-core-public.savedobjectattribute.md) |
-|  [SavedObjectsClientContract](./kibana-plugin-core-public.savedobjectsclientcontract.md) | SavedObjectsClientContract as implemented by the [SavedObjectsClient](./kibana-plugin-core-public.savedobjectsclient.md) |
 |  [SavedObjectsImportWarning](./kibana-plugin-core-public.savedobjectsimportwarning.md) | Composite type of all the possible types of import warnings.<!-- -->See [SavedObjectsImportSimpleWarning](./kibana-plugin-core-public.savedobjectsimportsimplewarning.md) and [SavedObjectsImportActionRequiredWarning](./kibana-plugin-core-public.savedobjectsimportactionrequiredwarning.md) for more details. |
 |  [SavedObjectsNamespaceType](./kibana-plugin-core-public.savedobjectsnamespacetype.md) | The namespace type dictates how a saved object can be interacted in relation to namespaces. Each type is mutually exclusive: \* single (default): This type of saved object is namespace-isolated, e.g., it exists in only one namespace. \* multiple: This type of saved object is shareable, e.g., it can exist in one or more namespaces. \* multiple-isolated: This type of saved object is namespace-isolated, e.g., it exists in only one namespace, but object IDs must be unique across all namespaces. This is intended to be an intermediate step when objects with a "single" namespace type are being converted to a "multiple" namespace type. In other words, objects with a "multiple-isolated" namespace type will be \*share-capable\*, but will not actually be shareable until the namespace type is changed to "multiple". \* agnostic: This type of saved object is global. |
 |  [StartServicesAccessor](./kibana-plugin-core-public.startservicesaccessor.md) | Allows plugins to get access to APIs available in start inside async handlers, such as [App.mount](./kibana-plugin-core-public.app.mount.md)<!-- -->. Promise will not resolve until Core and plugin dependencies have completed <code>start</code>. |

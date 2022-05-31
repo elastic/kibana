@@ -79,7 +79,7 @@ describe('ALL - Add Integration', () => {
   it('should have integration and packs copied when upgrading integration', () => {
     const packageName = 'osquery_manager';
     const oldVersion = '1.2.0';
-    const newVersion = '1.3.0';
+    const newVersion = '1.3.1';
 
     cy.visit(`app/integrations/detail/${packageName}-${oldVersion}/overview`);
     cy.contains('Add Osquery Manager').click();
@@ -101,7 +101,9 @@ describe('ALL - Add Integration', () => {
     findFormFieldByRowsLabelAndType('Name', 'Integration');
     findFormFieldByRowsLabelAndType('Scheduled agent policies (optional)', '{downArrow} {enter}');
     findAndClickButton('Add query');
-    cy.react('EuiComboBox', { props: { placeholder: 'Search for saved queries' } })
+    cy.react('EuiComboBox', {
+      props: { placeholder: 'Search for a query to run, or write a new query below' },
+    })
       .click()
       .type('{downArrow} {enter}');
     cy.contains(/^Save$/).click();

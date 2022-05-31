@@ -55,7 +55,7 @@ export function getFillFilterExpression(
 ): FilterSpecification {
   return getFilterExpression(
     [
-      // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
+      // explicit "exclude centroid features" filter not needed. Label features are points and are filtered out by geometry narrowing
       [
         'any',
         ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
@@ -73,7 +73,7 @@ export function getLineFilterExpression(
 ): FilterSpecification {
   return getFilterExpression(
     [
-      // explicit EXCLUDE_CENTROID_FEATURES filter not needed. Centroids are points and are filtered out by geometry narrowing
+      // explicit "exclude centroid features" filter not needed. Label features are points and are filtered out by geometry narrowing
       [
         'any',
         ['==', ['geometry-type'], GEO_JSON_TYPE.POLYGON],
@@ -94,18 +94,25 @@ const IS_POINT_FEATURE = [
 ];
 
 export function getPointFilterExpression(
+  isSourceGeoJson: boolean,
+  isESSource: boolean,
   joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): FilterSpecification {
-  return getFilterExpression(
-    [EXCLUDE_CENTROID_FEATURES, IS_POINT_FEATURE],
-    joinFilter,
-    timesliceMaskConfig
-  );
+  const filters: FilterSpecification[] = [];
+  if (isSourceGeoJson) {
+    filters.push(EXCLUDE_CENTROID_FEATURES);
+  } else if (!isSourceGeoJson && isESSource) {
+    filters.push(['!=', ['get', '_mvt_label_position'], true]);
+  }
+  filters.push(IS_POINT_FEATURE);
+
+  return getFilterExpression(filters, joinFilter, timesliceMaskConfig);
 }
 
 export function getLabelFilterExpression(
   isSourceGeoJson: boolean,
+  isESSource: boolean,
   joinFilter?: FilterSpecification,
   timesliceMaskConfig?: TimesliceMaskConfig
 ): FilterSpecification {
@@ -116,6 +123,8 @@ export function getLabelFilterExpression(
     // For GeoJSON sources, show label for centroid features or point/multi-point features only.
     // no explicit isCentroidFeature filter is needed, centroids are points and are included in the geometry filter.
     filters.push(IS_POINT_FEATURE);
+  } else if (!isSourceGeoJson && isESSource) {
+    filters.push(['==', ['get', '_mvt_label_position'], true]);
   }
 
   return getFilterExpression(filters, joinFilter, timesliceMaskConfig);
