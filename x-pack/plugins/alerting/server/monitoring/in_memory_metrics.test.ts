@@ -8,6 +8,8 @@
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '.';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 
+jest.useFakeTimers();
+
 describe('inMemoryMetrics', () => {
   const logger = loggingSystemMock.createLogger();
   const inMemoryMetrics = new InMemoryMetrics(logger);
