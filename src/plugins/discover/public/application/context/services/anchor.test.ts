@@ -47,7 +47,7 @@ describe('context app', function () {
       });
     });
 
-    it('should set the SearchSource index pattern', function () {
+    it('should set the SearchSource data view', function () {
       return fetchAnchor('id', dataView, searchSourceStub, [
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },

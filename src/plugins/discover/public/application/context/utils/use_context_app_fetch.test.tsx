@@ -49,7 +49,7 @@ jest.mock('../services/anchor', () => ({
   },
 }));
 
-const initDefaults = (tieBreakerFields: string[], dataViewId = 'the-index-pattern-id') => {
+const initDefaults = (tieBreakerFields: string[], dataViewId = 'the-data-view-id') => {
   const dangerNotification = jest.fn();
   const mockSearchSource = createContextSearchSourceStub('timestamp');
 

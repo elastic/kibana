@@ -164,12 +164,12 @@ function mountComponent(dataView: DataView, prevSidebarClosed?: boolean) {
 }
 
 describe('Discover component', () => {
-  test('selected index pattern without time field displays no chart toggle', () => {
+  test('selected data view without time field displays no chart toggle', () => {
     const component = mountComponent(dataViewMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeFalsy();
   });
 
-  test('selected index pattern with time field displays chart toggle', () => {
+  test('selected data view with time field displays chart toggle', () => {
     const component = mountComponent(dataViewWithTimefieldMock);
     expect(component.find('[data-test-subj="discoverChartOptionsToggle"]').exists()).toBeTruthy();
   });

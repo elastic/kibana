@@ -73,7 +73,7 @@ export function groupFields(
       }
     }
   }
-  // add selected columns, that are not part of the index pattern, to be removeable
+  // add selected columns, that are not part of the data view, to be removable
   for (const column of columns) {
     const tmpField = {
       name: column,

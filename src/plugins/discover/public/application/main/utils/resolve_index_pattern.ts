@@ -14,19 +14,19 @@ export type DataViewSavedObject = SavedObject & { title: string };
 
 interface DataViewData {
   /**
-   * List of existing index patterns
+   * List of existing data views
    */
   list: DataViewSavedObject[];
   /**
-   * Loaded index pattern (might be default index pattern if requested was not found)
+   * Loaded data view (might be default data view if requested was not found)
    */
   loaded: DataView;
   /**
-   * Id of the requested index pattern
+   * Id of the requested data view
    */
   stateVal: string;
   /**
-   * Determines if requested index pattern was found
+   * Determines if requested data view was found
    */
   stateValFound: boolean;
 }
@@ -43,7 +43,7 @@ export function findDataViewById(
 
 /**
  * Checks if the given defaultIndex exists and returns
- * the first available index pattern id if not
+ * the first available data view id if not
  */
 export function getFallbackDataViewId(
   dataViews: DataViewSavedObject[],
@@ -56,7 +56,7 @@ export function getFallbackDataViewId(
 }
 
 /**
- * A given index pattern id is checked for existence and a fallback is provided if it doesn't exist
+ * A given data view id is checked for existence and a fallback is provided if it doesn't exist
  * The provided defaultIndex is usually configured in Advanced Settings, if it's also invalid
  * the first entry of the given list of dataViews is used
  */
@@ -72,7 +72,7 @@ export function getDataViewId(
 }
 
 /**
- * Function to load the given index pattern by id, providing a fallback if it doesn't exist
+ * Function to load the given data view by id, providing a fallback if it doesn't exist
  */
 export async function loadDataView(
   id: string,
@@ -92,7 +92,7 @@ export async function loadDataView(
 
 /**
  * Function used in the discover controller to message the user about the state of the current
- * index pattern
+ * data view
  */
 export function resolveDataView(
   ip: DataViewData,

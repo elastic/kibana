@@ -22,7 +22,7 @@ interface RangeQuery {
  * Fetch the hits between a given `interval` up to a maximum of `maxCount` documents.
  * The documents are sorted by `sort`
  *
- * The `searchSource` is assumed to have the appropriate index pattern
+ * The `searchSource` is assumed to have the appropriate data view
  * and filters set.
  */
 export async function fetchHitsInInterval(

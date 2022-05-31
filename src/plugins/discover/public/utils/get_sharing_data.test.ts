@@ -78,7 +78,7 @@ describe('getSharingData', () => {
     const { getSearchSource } = await getSharingData(searchSourceMock, {}, services);
     expect(getSearchSource()).toMatchInlineSnapshot(`
       Object {
-        "index": "the-index-pattern-id",
+        "index": "the-data-view-id",
         "sort": Array [
           Object {
             "_doc": "desc",
@@ -117,7 +117,7 @@ describe('getSharingData', () => {
     );
     expect(getSearchSource()).toMatchInlineSnapshot(`
       Object {
-        "index": "the-index-pattern-id",
+        "index": "the-data-view-id",
         "sort": Array [
           Object {
             "_doc": "desc",

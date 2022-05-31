@@ -48,7 +48,7 @@ export interface FieldStatisticsTableProps {
    */
   columns: string[];
   /**
-   * The used index pattern
+   * The used data view
    */
   dataView: DataView;
   /**

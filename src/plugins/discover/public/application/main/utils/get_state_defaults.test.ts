@@ -17,7 +17,7 @@ import { discoverServiceMock } from '../../../__mocks__/services';
 describe('getStateDefaults', () => {
   const storage = discoverServiceMock.storage;
 
-  test('index pattern with timefield', () => {
+  test('data view with timefield', () => {
     savedSearchMock.searchSource = createSearchSourceMock({ index: dataViewWithTimefieldMock });
     const actual = getStateDefaults({
       config: uiSettingsMock,
@@ -49,7 +49,7 @@ describe('getStateDefaults', () => {
     `);
   });
 
-  test('index pattern without timefield', () => {
+  test('data view without timefield', () => {
     savedSearchMock.searchSource = createSearchSourceMock({ index: dataViewMock });
 
     const actual = getStateDefaults({
@@ -66,7 +66,7 @@ describe('getStateDefaults', () => {
         "filters": undefined,
         "hideAggregatedPreview": undefined,
         "hideChart": undefined,
-        "index": "the-index-pattern-id",
+        "index": "the-data-view-id",
         "interval": "auto",
         "query": undefined,
         "rowHeight": undefined,

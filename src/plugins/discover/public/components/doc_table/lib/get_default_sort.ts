@@ -12,7 +12,7 @@ import { SortOrder } from '../components/table_header/helpers';
 
 /**
  * use in case the user didn't manually sort.
- * the default sort is returned depending of the index pattern
+ * the default sort is returned depending of the data view
  */
 export function getDefaultSort(
   dataView: DataView | undefined,

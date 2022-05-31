@@ -63,16 +63,16 @@ describe('Discover flyout', function () {
     return { component, props };
   };
 
-  it('should be rendered correctly using an index pattern without timefield', async () => {
+  it('should be rendered correctly using an data view without timefield', async () => {
     const { component, props } = mountComponent({});
 
     const url = findTestSubject(component, 'docTableRowAction').prop('href');
-    expect(url).toMatchInlineSnapshot(`"/base/app/discover#/doc/the-index-pattern-id/i?id=1"`);
+    expect(url).toMatchInlineSnapshot(`"/base/app/discover#/doc/the-data-view-id/i?id=1"`);
     findTestSubject(component, 'euiFlyoutCloseButton').simulate('click');
     expect(props.onClose).toHaveBeenCalled();
   });
 
-  it('should be rendered correctly using an index pattern with timefield', async () => {
+  it('should be rendered correctly using an data view with timefield', async () => {
     const { component, props } = mountComponent({ dataView: dataViewWithTimefieldMock });
 
     const actions = findTestSubject(component, 'docTableRowAction');

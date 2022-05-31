@@ -77,7 +77,7 @@ export function sendErrorMsg(
 
 /**
  * Sends a RESET message to all data subjects
- * Needed when index pattern is switched or a new runtime field is added
+ * Needed when data view is switched or a new runtime field is added
  */
 export function sendResetMsg(data: SavedSearchData, initialFetchStatus: FetchStatus) {
   data.main$.next({

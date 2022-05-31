@@ -25,10 +25,10 @@ export const fetchDocuments = (
   searchSource.setField('highlightAll', true);
   searchSource.setField('version', true);
   if (searchSource.getField('index')?.type === 'rollup') {
-    // We treat that index pattern as "normal" even if it was a rollup index pattern,
+    // We treat that data view as "normal" even if it was a rollup data view,
     // since the rollup endpoint does not support querying individual documents, but we
-    // can get them from the regular _search API that will be used if the index pattern
-    // not a rollup index pattern.
+    // can get them from the regular _search API that will be used if the data view
+    // not a rollup data view.
     searchSource.setOverwriteDataViewType(undefined);
   }
 

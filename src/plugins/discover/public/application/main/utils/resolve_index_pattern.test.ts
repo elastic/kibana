@@ -11,15 +11,15 @@ import { dataViewsMock } from '../../../__mocks__/index_patterns';
 import { dataViewMock } from '../../../__mocks__/index_pattern';
 import { configMock } from '../../../__mocks__/config';
 
-describe('Resolve index pattern tests', () => {
-  test('returns valid data for an existing index pattern', async () => {
-    const dataViewId = 'the-index-pattern-id';
+describe('Resolve data view tests', () => {
+  test('returns valid data for an existing data view', async () => {
+    const dataViewId = 'the-data-view-id';
     const result = await loadDataView(dataViewId, dataViewsMock, configMock);
     expect(result.loaded).toEqual(dataViewMock);
     expect(result.stateValFound).toEqual(true);
     expect(result.stateVal).toEqual(dataViewId);
   });
-  test('returns fallback data for an invalid index pattern', async () => {
+  test('returns fallback data for an invalid data view', async () => {
     const dataViewId = 'invalid-id';
     const result = await loadDataView(dataViewId, dataViewsMock, configMock);
     expect(result.loaded).toEqual(dataViewMock);
@@ -33,6 +33,6 @@ describe('Resolve index pattern tests', () => {
   test('getFallbackDataViewId with an dataViews array', async () => {
     const list = await dataViewsMock.getCache();
     const result = await getFallbackDataViewId(list as unknown as DataViewSavedObject[], '');
-    expect(result).toBe('the-index-pattern-id');
+    expect(result).toBe('the-data-view-id');
   });
 });

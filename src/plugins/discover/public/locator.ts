@@ -27,7 +27,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   savedSearchId?: string;
 
   /**
-   * Optionally set index pattern ID.
+   * Optionally set data view ID.
    */
   dataViewId?: string;
 

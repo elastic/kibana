@@ -112,7 +112,7 @@ describe('ContextApp test', () => {
     expect(mockFilterManager.addFilters.mock.calls[0][0]).toEqual([
       {
         $state: { store: 'appState' },
-        meta: { alias: null, disabled: false, index: 'the-index-pattern-id', negate: false },
+        meta: { alias: null, disabled: false, index: 'the-data-view-id', negate: false },
         query: { match_phrase: { message: '2021-06-08T07:52:19.000Z' } },
       },
     ]);

@@ -11,7 +11,7 @@ import { dataViewWithTimefieldMock } from '../__mocks__/index_pattern_with_timef
 import { dataViewMock } from '../__mocks__/index_pattern';
 
 describe('getDisplayedColumns', () => {
-  test('returns default columns given a index pattern without timefield', async () => {
+  test('returns default columns given a data view without timefield', async () => {
     const result = getDisplayedColumns([], dataViewMock);
     expect(result).toMatchInlineSnapshot(`
       Array [
@@ -19,7 +19,7 @@ describe('getDisplayedColumns', () => {
       ]
     `);
   });
-  test('returns default columns given a index pattern with timefield', async () => {
+  test('returns default columns given a data view with timefield', async () => {
     const result = getDisplayedColumns([], dataViewWithTimefieldMock);
     expect(result).toMatchInlineSnapshot(`
       Array [

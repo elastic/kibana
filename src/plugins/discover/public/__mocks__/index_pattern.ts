@@ -73,7 +73,7 @@ fields.getAll = () => {
 };
 
 const dataView = {
-  id: 'the-index-pattern-id',
+  id: 'the-data-view-id',
   title: 'the-index-pattern-title',
   metaFields: ['_index', '_score'],
   fields,

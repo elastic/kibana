@@ -279,7 +279,7 @@ export class DiscoverPlugin
           this.locator!
         );
 
-        // make sure the index pattern list is up to date
+        // make sure the data view list is up to date
         await discoverStartPlugins.data.dataViews.clearCache();
 
         const { renderApp } = await import('./application');

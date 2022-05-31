@@ -11,12 +11,12 @@ import { getFieldSubtypeNested } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 /**
- * This function checks if the given field in a given index pattern is a nested field's parent.
+ * This function checks if the given field in a given data view is a nested field's parent.
  * Discover doesn't flatten arrays of objects, so for documents with an `object` or `nested` field that
  * contains an array, Discover will only detect the top level root field. We want to detect when those
  * root fields are `nested` so that we can display the proper icon and label. However, those root
- * `nested` fields are not a part of the index pattern. Their children are though, and contain nested path
- * info. So to detect nested fields we look through the index pattern for nested children
+ * `nested` fields are not a part of the data view. Their children are though, and contain nested path
+ * info. So to detect nested fields we look through the data view for nested children
  * whose path begins with the current field. There are edge cases where
  * this could incorrectly identify a plain `object` field as `nested`. Say we had the following document
  * where `foo` is a plain object field and `bar` is a nested field.
@@ -43,7 +43,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
  * field that happens to match a segment of a nested path, we'll get a false positive.
  * We're aware of this issue and we'll have to live with
  * it in the short term. The long term fix will be to add info about the `nested` and `object` root fields
- * to the index pattern, but that has its own complications which you can read more about in the following
+ * to the data view, but that has its own complications which you can read more about in the following
  * issue: https://github.com/elastic/kibana/issues/54957
  */
 export function isNestedFieldParent(fieldName: string, dataView: DataView): boolean {

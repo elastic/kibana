@@ -55,7 +55,7 @@ describe('Discover url generator', () => {
     expect(_g).toEqual({});
   });
 
-  test('can specify specific index pattern', async () => {
+  test('can specify specific data view', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({
       dataViewId,
@@ -226,7 +226,7 @@ describe('Discover url generator', () => {
 
   describe('useHash property', () => {
     describe('when default useHash is set to false', () => {
-      test('when using default, sets index pattern ID in the generated URL', async () => {
+      test('when using default, sets data view ID in the generated URL', async () => {
         const { locator } = await setup();
         const { path } = await locator.getLocation({
           dataViewId,
@@ -235,7 +235,7 @@ describe('Discover url generator', () => {
         expect(path.indexOf(dataViewId) > -1).toBe(true);
       });
 
-      test('when enabling useHash, does not set index pattern ID in the generated URL', async () => {
+      test('when enabling useHash, does not set data view ID in the generated URL', async () => {
         const { locator } = await setup();
         const { path } = await locator.getLocation({
           useHash: true,
@@ -247,7 +247,7 @@ describe('Discover url generator', () => {
     });
 
     describe('when default useHash is set to true', () => {
-      test('when using default, does not set index pattern ID in the generated URL', async () => {
+      test('when using default, does not set data view ID in the generated URL', async () => {
         const { locator } = await setup({ useHash: true });
         const { path } = await locator.getLocation({
           dataViewId,
@@ -256,7 +256,7 @@ describe('Discover url generator', () => {
         expect(path.indexOf(dataViewId) > -1).toBe(false);
       });
 
-      test('when disabling useHash, sets index pattern ID in the generated URL', async () => {
+      test('when disabling useHash, sets data view ID in the generated URL', async () => {
         const { locator } = await setup({ useHash: true });
         const { path } = await locator.getLocation({
           useHash: false,

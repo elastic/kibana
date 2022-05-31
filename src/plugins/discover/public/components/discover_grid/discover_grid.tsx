@@ -75,7 +75,7 @@ export interface DiscoverGridProps {
    */
   expandedDoc?: ElasticSearchHit;
   /**
-   * The used index pattern
+   * The used data view
    */
   dataView: DataView;
   /**

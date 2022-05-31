@@ -3115,7 +3115,6 @@
     "discover.showingDefaultDataViewWarningDescription": "デフォルトのデータビュー「{loadedDataViewTitle}」（{loadedDataViewId}）を表示中",
     "discover.showingSavedDataViewWarningDescription": "保存されたデータビュー「{ownDataViewTitle}」（{ownDataViewId}）を表示中",
     "discover.showSelectedDocumentsOnly": "選択したドキュメントのみを表示",
-    "discover.singleDocRoute.errorMessage": "ID {indexPatternId} の一致するインデックスパターンが見つかりません",
     "discover.singleDocRoute.errorTitle": "エラーが発生しました",
     "discover.skipToBottomButtonLabel": "テーブルの最後に移動",
     "discover.sourceViewer.errorMessage": "現在データを取得できませんでした。タブを更新して、再試行してください。",

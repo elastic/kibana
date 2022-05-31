@@ -17,7 +17,7 @@ const capabilities = {
 } as unknown as Capabilities;
 
 describe('Popularize field', () => {
-  test('returns undefined if index pattern lacks id', async () => {
+  test('returns undefined if data view lacks id', async () => {
     const dataView = {} as unknown as DataView;
     const fieldName = '@timestamp';
     const dataViewsService = {} as unknown as DataViewsContract;
@@ -76,7 +76,7 @@ describe('Popularize field', () => {
     expect(result).toBeUndefined();
   });
 
-  test('should not try to update index pattern without permissions', async () => {
+  test('should not try to update data view without permissions', async () => {
     const field = {
       count: 0,
     };

@@ -22,7 +22,7 @@ const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
 export interface DiscoverMainProps {
   /**
-   * List of available index patterns
+   * List of available data views
    */
   dataViewList: Array<SavedObject<DataViewAttributes>>;
   /**

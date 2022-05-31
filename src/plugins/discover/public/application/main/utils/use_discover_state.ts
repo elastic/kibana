@@ -130,7 +130,7 @@ export function useDiscoverState({
       if (nextState.index && dataViewChanged) {
         /**
          *  Without resetting the fetch state, e.g. a time column would be displayed when switching
-         *  from a index pattern without to a index pattern with time filter for a brief moment
+         *  from a data view without to a data view with time filter for a brief moment
          *  That's because appState is updated before savedSearchData$
          *  The following line of code catches this, but should be improved
          */
@@ -184,7 +184,7 @@ export function useDiscoverState({
   );
 
   /**
-   * Function triggered when user changes index pattern in the sidebar
+   * Function triggered when user changes data view in the sidebar
    */
   const onChangeDataView = useCallback(
     async (id: string) => {

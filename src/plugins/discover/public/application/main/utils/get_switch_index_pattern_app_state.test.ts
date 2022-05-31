@@ -10,7 +10,7 @@ import { getDataViewAppState } from './get_switch_index_pattern_app_state';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 /**
- * Helper function returning an index pattern
+ * Helper function returning an data view
  */
 const getDataView = (id: string, timeFieldName: string, fields: string[]) => {
   return {
@@ -39,7 +39,7 @@ const currentDataView = getDataView('curr', '', ['category', 'name']);
 const nextDataView = getDataView('next', '', ['category']);
 
 describe('Discover getDataViewAppState', () => {
-  test('removing fields that are not part of the next index pattern, keeping unknown fields ', async () => {
+  test('removing fields that are not part of the next data view, keeping unknown fields ', async () => {
     const result = getDataViewAppState(
       currentDataView,
       nextDataView,
@@ -49,7 +49,7 @@ describe('Discover getDataViewAppState', () => {
     expect(result.columns).toEqual(['category', 'unknown']);
     expect(result.sort).toEqual([['category', 'desc']]);
   });
-  test('removing sorted by fields that are not part of the next index pattern', async () => {
+  test('removing sorted by fields that are not part of the next data view', async () => {
     const result = getDataViewAppState(
       currentDataView,
       nextDataView,
@@ -62,7 +62,7 @@ describe('Discover getDataViewAppState', () => {
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['category', 'desc']]);
   });
-  test('removing sorted by fields not available in the next index pattern without modifying columns', async () => {
+  test('removing sorted by fields not available in the next data view without modifying columns', async () => {
     const result = getDataViewAppState(
       currentDataView,
       nextDataView,
@@ -76,7 +76,7 @@ describe('Discover getDataViewAppState', () => {
     expect(result.columns).toEqual(['name']);
     expect(result.sort).toEqual([['category', 'desc']]);
   });
-  test('keep sorting by timefield when switching between index patterns with different timeFields', async () => {
+  test('keep sorting by timefield when switching between data views with different timeFields', async () => {
     const current = getDataView('a', 'timeFieldA', ['timeFieldA']);
     const next = getDataView('b', 'timeFieldB', ['timeFieldB']);
 
@@ -84,7 +84,7 @@ describe('Discover getDataViewAppState', () => {
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['timeFieldB', 'desc']]);
   });
-  test('remove sorting by timefield when switching to an index pattern without timefield that contains the timefield column', async () => {
+  test('remove sorting by timefield when switching to an data view without timefield that contains the timefield column', async () => {
     // Why: timefield column is prepended, keeping the sort, user would need to add the column to remove sorting in legacy grid
     const current = getDataView('a', 'timeFieldA', ['timeFieldA']);
     const next = getDataView('b', '', ['timeFieldA']);
@@ -93,7 +93,7 @@ describe('Discover getDataViewAppState', () => {
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([]);
   });
-  test('add sorting by timefield when switching from an index pattern without timefield to an dataView with timefield', async () => {
+  test('add sorting by timefield when switching from an data view without timefield to an dataView with timefield', async () => {
     const current = getDataView('b', '', ['timeFieldA']);
     const next = getDataView('a', 'timeFieldA', ['timeFieldA']);
 
@@ -101,7 +101,7 @@ describe('Discover getDataViewAppState', () => {
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['timeFieldA', 'desc']]);
   });
-  test('should change sorting for similar index patterns', async () => {
+  test('should change sorting for similar data views', async () => {
     const current = getDataView('timebased', 'timefield', ['timefield']);
     const next = getDataView('timebased2', 'timefield2', ['timefield', 'timefield2']);
 

@@ -11,7 +11,7 @@ import { getSortArray, SortPairArr } from '../../../components/doc_table/lib/get
 
 /**
  * Helper function to remove or adapt the currently selected columns/sort to be valid with the next
- * index pattern, returns a new state object
+ * data view, returns a new state object
  */
 export function getDataViewAppState(
   currentDataView: DataView,
@@ -29,8 +29,8 @@ export function getDataViewAppState(
     : currentColumns;
   const columns = nextColumns.length ? nextColumns : [];
 
-  // when switching from an index pattern with timeField to an index pattern without timeField
-  // filter out sorting by timeField in case it is set. index patterns without timeField don't
+  // when switching from an data view with timeField to an data view without timeField
+  // filter out sorting by timeField in case it is set. data views without timeField don't
   // prepend this field in the table, so in legacy grid you would need to add this column to
   // remove sorting
   let nextSort = getSortArray(currentSort, nextDataView).filter((value) => {

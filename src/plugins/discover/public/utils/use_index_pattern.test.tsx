@@ -10,10 +10,10 @@ import { dataViewMock } from '../__mocks__/index_pattern';
 import { dataViewsMock } from '../__mocks__/index_patterns';
 import { renderHook } from '@testing-library/react-hooks';
 
-describe('Use Index Pattern', () => {
-  test('returning a valid index pattern', async () => {
+describe('Use data view', () => {
+  test('returning a valid data view', async () => {
     const { result, waitForNextUpdate } = renderHook(() =>
-      useDataView(dataViewsMock, 'the-index-pattern-id')
+      useDataView(dataViewsMock, 'the-data-view-id')
     );
     await waitForNextUpdate();
     expect(result.current.dataView).toBe(dataViewMock);

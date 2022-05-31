@@ -54,7 +54,7 @@ export interface AppState {
    */
   hideChart?: boolean;
   /**
-   * id of the used index pattern
+   * id of the used data view
    */
   index?: string;
   /**
@@ -259,7 +259,7 @@ export function getState({
       data: DataPublicPluginStart
     ) => {
       if (appStateContainer.getState().index !== dataView.id) {
-        // used index pattern is different than the given by url/state which is invalid
+        // used data view is different than the given by url/state which is invalid
         setState(appStateContainerModified, { index: dataView.id });
       }
       // sync initial app filters from state to filterManager

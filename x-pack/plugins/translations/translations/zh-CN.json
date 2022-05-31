@@ -3125,7 +3125,6 @@
     "discover.showingDefaultDataViewWarningDescription": "正在显示默认数据视图：“{loadedDataViewTitle}”({loadedDataViewId})",
     "discover.showingSavedDataViewWarningDescription": "正在显示已保存数据视图：“{ownDataViewTitle}”({ownDataViewId})",
     "discover.showSelectedDocumentsOnly": "仅显示选定的文档",
-    "discover.singleDocRoute.errorMessage": "找不到与 ID {indexPatternId} 匹配的索引模式",
     "discover.singleDocRoute.errorTitle": "发生错误",
     "discover.skipToBottomButtonLabel": "转到表尾",
     "discover.sourceViewer.errorMessage": "当前无法获取数据。请刷新选项卡以重试。",
