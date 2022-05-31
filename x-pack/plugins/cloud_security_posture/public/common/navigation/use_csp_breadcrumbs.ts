@@ -8,23 +8,20 @@
 import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { type RouteProps, useRouteMatch } from 'react-router-dom';
+import { type RouteProps, useRouteMatch, useHistory } from 'react-router-dom';
 import { PLUGIN_ID } from '../../../common';
 import type { CspNavigationItem } from './types';
 import { CLOUD_POSTURE } from './translations';
 
-const getClickableHref = (
+const getClickableBreadcrumb = (
   routeMatch: RouteProps['path'],
-  breadcrumbPath: CspNavigationItem['path'],
-  basePath: string
+  breadcrumbPath: CspNavigationItem['path']
 ) => {
   const hasParams = breadcrumbPath.includes(':');
   if (hasParams) return;
 
   if (routeMatch !== breadcrumbPath) {
-    return breadcrumbPath.startsWith('/')
-      ? `${basePath}${breadcrumbPath}`
-      : `${basePath}/${breadcrumbPath}`;
+    return breadcrumbPath.startsWith('/') ? `${breadcrumbPath}` : `/${breadcrumbPath}`;
   }
 };
 
@@ -36,13 +33,23 @@ export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
     },
   } = useKibana<CoreStart>();
   const match = useRouteMatch();
+  const history = useHistory();
 
   useEffect(() => {
     const cspPath = getUrlForApp(PLUGIN_ID);
-    const additionalBreadCrumbs: ChromeBreadcrumb[] = breadcrumbs.map((breadcrumb) => ({
-      text: breadcrumb.name,
-      href: getClickableHref(match.path, breadcrumb.path, cspPath),
-    }));
+    const additionalBreadCrumbs: ChromeBreadcrumb[] = breadcrumbs.map((breadcrumb) => {
+      const clickableLink = getClickableBreadcrumb(match.path, breadcrumb.path);
+
+      return {
+        text: breadcrumb.name,
+        ...(clickableLink && {
+          onClick: (e) => {
+            e.preventDefault();
+            history.push(clickableLink);
+          },
+        }),
+      };
+    });
 
     setBreadcrumbs([
       {
