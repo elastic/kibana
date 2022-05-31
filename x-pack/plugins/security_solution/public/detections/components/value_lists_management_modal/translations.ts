@@ -7,9 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const VALUE_LISTS_MODAL_TITLE = i18n.translate('xpack.securitySolution.lists.importValueListTitle', {
-  defaultMessage: 'Import value lists',
-});
+export const VALUE_LISTS_MODAL_TITLE = i18n.translate(
+  'xpack.securitySolution.lists.importValueListTitle',
+  {
+    defaultMessage: 'Import value lists',
+  }
+);
 
 export const FILE_PICKER_LABEL = i18n.translate(
   'xpack.securitySolution.lists.importValueListDescription',
