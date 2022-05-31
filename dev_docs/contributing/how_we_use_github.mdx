@@ -178,3 +178,37 @@ it might mean the version the team is tentatively planning to merge a fix.
 
 Consult the owning team if you have a question about how a version label is meant
 to be used on an issue.
+
+### Issue type and workflow labels
+
+These labels categorize the type of work. For example:
+
+- `blocked`: Indicates the issue is currently blocked
+- `blocker`: Indicates that we should not release the product at the next
+   proposed version without the issue being resolved
+- `bug`: Indicates an unexpected problem or unintended behavior
+- `discuss`: Indicates that an issue is a discussion topic
+- `docs`/`documentation`: Indicates improvements or additions to documentation
+- `enhancement`: Indicates new feature or enhancement requests
+- `meta`: Indicates that the issue tracks tasks related to a project
+- `needs_triage`: Indicates that someone from the area team needs to investigate.
+
+These labels affect whether your PR appears in the release notes (that is to say,
+it's notable and affects our users) and which section it appears in. For example:
+
+- `release highlight`: The PR is included in the release highlights
+- `release_note:breaking`: A breaking change
+- `release_note:deprecation`: Deprecates a feature
+- `release_note:enhancement`: An enhancement
+- `release_note:feature`: The PR is included in the condensed release notes
+- `release_note:fix`: A fix
+- `release_node:plugin_api_changes`: A change to a plugin API
+- `release_note:skip`: Omits the PR from release notes
+
+These labels related to backporting PRs:
+
+- `auto-backport`: Automatically backport this PR (to the branches related to
+   version labels) after it's merged
+- `backport`: This PR was backported
+- `backport:skip`: This PR does not require backporting
+
