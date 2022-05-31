@@ -7,10 +7,8 @@
 
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useQueryClient } from 'react-query';
 import styled from 'styled-components';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
-import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseActionBar } from '../case_action_bar';
 import { HeaderPage } from '../header_page';
@@ -24,18 +22,12 @@ import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewMetrics } from './metrics';
 import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
 import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
+import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 
 const ExperimentalBadge = styled(EuiBetaBadge)`
   margin-left: 5px;
 `;
-
-export const useRefreshCaseViewPage = () => {
-  const queryClient = useQueryClient();
-  return useCallback(() => {
-    queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
-  }, [queryClient]);
-};
 
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({

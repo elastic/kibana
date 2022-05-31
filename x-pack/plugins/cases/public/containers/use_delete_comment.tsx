@@ -7,7 +7,7 @@
 
 import { useReducer, useCallback, useRef, useEffect } from 'react';
 import { useToasts } from '../common/lib/kibana';
-import { useRefreshCaseViewPage } from '../components/case_view/case_view_page';
+import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 import { deleteComment } from './api';
 import * as i18n from './translations';
 
