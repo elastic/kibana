@@ -236,7 +236,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
           </EuiPanel>
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiButton data-test-subj="value-lists-modal-close-action" onClick={onClose}>
+          <EuiButton data-test-subj="value-lists-flyout-close-action" onClick={onClose}>
             {i18n.CLOSE_BUTTON}
           </EuiButton>
         </EuiFlyoutFooter>
