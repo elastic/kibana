@@ -2236,6 +2236,7 @@ describe('XYChart component', () => {
       yRightTitle: '',
       yLeftScale: 'linear',
       yRightScale: 'linear',
+      showTooltip: true,
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
       tickLabelsVisibilitySettings: {
@@ -2328,6 +2329,7 @@ describe('XYChart component', () => {
       yRightTitle: '',
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
+      showTooltip: true,
       tickLabelsVisibilitySettings: {
         type: 'tickLabelsConfig',
         x: true,
@@ -2401,6 +2403,7 @@ describe('XYChart component', () => {
       xTitle: '',
       yTitle: '',
       yRightTitle: '',
+      showTooltip: true,
       legend: { type: 'legendConfig', isVisible: true, position: Position.Top },
       valueLabels: 'hide',
       tickLabelsVisibilitySettings: {
