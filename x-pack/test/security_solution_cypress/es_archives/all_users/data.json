@@ -1,0 +1,265 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_1",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:33.045Z",      
+      "user" : {
+        "id" : "505",
+        "name" : "test1"
+      },
+      "host": {
+        "name": "test-host1"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_2",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:33.045Z",      
+      "user" : {
+        "id" : "505",
+        "name" : "test2"
+      },
+      "host": {
+        "name": "test-host2"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_3",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:33.045Z",      
+      "user" : {
+        "id" : "505",
+        "name" : "test3"
+      },
+      "host": {
+        "name": "test-host3"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_4",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:33.045Z",      
+      "user" : {
+        "id" : "505",
+        "name" : "test4"
+      },
+      "host": {
+        "name": "test-host4"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_5",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:33.045Z",      
+      "user" : {
+        "id" : "505",
+        "name" : "test5"
+      },
+      "host": {
+        "name": "test-host5"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_6",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:33.045Z",      
+      "user" : {
+        "id" : "505",
+        "name" : "test6"
+      },
+      "host": {
+        "name": "test-host6"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_7",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:33.045Z",      
+      "user" : {
+        "id" : "505",
+        "name" : "test7"
+      },
+      "host": {
+        "name": "test-host7"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "_aZE5nwBOpWiDweSth_8",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:33.045Z",      
+      "user" : {
+        "id" : "505",
+        "name" : "test8"
+      },
+      "host": {
+        "name": "test-host8"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+
+{
+  "type": "doc",
+  "value": {
+    "id": "AsHnFIEB0n46H1MqOpz1",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:33.045Z",      
+      "user" : {
+        "id" : "108",
+        "name" : "elasticsearch"
+      },
+      "host": {
+        "name": "test-host9"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+
+{
+  "type": "doc",
+  "value": {
+    "id": "AsHnFIEB0n46H1MqOpz2",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:33.045Z",      
+      "user" : {
+        "id" : "0",
+        "name" : "root"
+      },
+      "host": {
+        "name": "test-host10"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "AsHnFIEB0n46H1MqOpz3",
+    "index": "auditbeat-users-2022",
+    "source": {
+      "@timestamp" : "2022-02-04T19:41:33.045Z",      
+      "user" : {
+        "id" : "107",
+        "name" : "redis"
+      },
+      "host": {
+        "name": "test-host11"
+      },
+      "service" : {
+        "type" : "system"
+      },
+      "ecs" : {
+        "version" : "8.0.0"
+      }
+    }
+  }
+}
