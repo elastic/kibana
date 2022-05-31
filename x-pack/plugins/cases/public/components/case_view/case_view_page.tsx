@@ -30,6 +30,13 @@ const ExperimentalBadge = styled(EuiBetaBadge)`
   margin-left: 5px;
 `;
 
+export const useRefreshCaseViewPage = () => {
+  const queryClient = useQueryClient();
+  return useCallback(() => {
+    queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
+  }, [queryClient]);
+};
+
 export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
     caseData,
@@ -44,7 +51,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const { userCanCrud, features } = useCasesContext();
     const { navigateToCaseView } = useCaseViewNavigation();
     const { urlParams } = useUrlParams();
-    const queryClient = useQueryClient();
+    const refreshCaseViewPage = useRefreshCaseViewPage();
 
     useCasesTitleBreadcrumbs(caseData.title);
 
@@ -58,14 +65,10 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const init = useRef(true);
     const timelineUi = useTimelineContext()?.ui;
 
-    const handleRefresh = useCallback(() => {
-      queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
-    }, [queryClient]);
-
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
       caseId,
       caseData,
-      handleUpdateField: handleRefresh,
+      handleUpdateField: refreshCaseViewPage,
     });
 
     // Set `refreshRef` if needed
@@ -78,7 +81,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             if (isStale || isLoading) {
               return;
             }
-            handleRefresh();
+            refreshCaseViewPage();
           },
         };
         return () => {
@@ -86,7 +89,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           refreshRef.current = null;
         };
       }
-    }, [isLoading, refreshRef, handleRefresh]);
+    }, [isLoading, refreshRef, refreshCaseViewPage]);
 
     const onSubmitTitle = useCallback(
       (newTitle) =>
@@ -189,7 +192,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             caseData={caseData}
             userCanCrud={userCanCrud}
             isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
-            onRefresh={handleRefresh}
+            onRefresh={refreshCaseViewPage}
             onUpdateField={onUpdateField}
           />
         </HeaderPage>

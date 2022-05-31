@@ -11,8 +11,10 @@ import { render } from '@testing-library/react';
 
 import { basicCase, caseUserActions, getAlertUserAction } from '../../containers/mock';
 import { CaseActionBar, CaseActionBarProps } from '.';
-import { TestProviders } from '../../common/mock';
+import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import userEvent from '@testing-library/user-event';
+import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
 
 jest.mock('../../containers/use_get_case_user_actions');
 
@@ -29,7 +31,6 @@ const defaultUseGetCaseUserActions = {
 };
 
 describe('CaseActionBar', () => {
-  const onRefresh = jest.fn();
   const onUpdateField = jest.fn();
   const defaultProps = {
     allCasesNavigation: {
@@ -39,7 +40,6 @@ describe('CaseActionBar', () => {
     caseData: basicCase,
     disableAlerting: false,
     isLoading: false,
-    onRefresh,
     onUpdateField,
     currentExternalIncident: null,
     userCanCrud: true,
@@ -51,7 +51,7 @@ describe('CaseActionBar', () => {
     useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
   });
 
-  it('it renders', () => {
+  it('renders', () => {
     const wrapper = mount(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
@@ -81,7 +81,7 @@ describe('CaseActionBar', () => {
     expect(wrapper.find(`[data-test-subj="case-view-action-bar-spinner"]`).exists()).toBeTruthy();
   });
 
-  it('it should show correct status', () => {
+  it('should show correct status', () => {
     const wrapper = mount(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
@@ -93,7 +93,7 @@ describe('CaseActionBar', () => {
     );
   });
 
-  it('it should show the correct date', () => {
+  it('should show the correct date', () => {
     const wrapper = mount(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
@@ -105,18 +105,17 @@ describe('CaseActionBar', () => {
     );
   });
 
-  it('it call onRefresh', () => {
-    const wrapper = mount(
-      <TestProviders>
-        <CaseActionBar {...defaultProps} />
-      </TestProviders>
-    );
+  it('invalidates the queryClient cache onRefresh', () => {
+    const app = createAppMockRenderer();
+    const spy = jest.spyOn(app.queryClient, 'invalidateQueries');
+    const result = app.render(<CaseActionBar {...defaultProps} />);
 
-    wrapper.find(`[data-test-subj="case-refresh"]`).first().simulate('click');
-    expect(onRefresh).toHaveBeenCalled();
+    userEvent.click(result.getByTestId('case-refresh'));
+
+    expect(spy).toHaveBeenCalledWith(CASE_VIEW_CACHE_KEY);
   });
 
-  it('it should call onUpdateField when changing status', () => {
+  it('should call onUpdateField when changing status', () => {
     const wrapper = mount(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
@@ -131,7 +130,7 @@ describe('CaseActionBar', () => {
     expect(onUpdateField).toHaveBeenCalledWith({ key: 'status', value: 'in-progress' });
   });
 
-  it('it should call onUpdateField when changing syncAlerts setting', () => {
+  it('should call onUpdateField when changing syncAlerts setting', () => {
     const wrapper = mount(
       <TestProviders>
         <CaseActionBar {...defaultProps} />
