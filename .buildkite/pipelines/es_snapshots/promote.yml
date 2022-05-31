@@ -13,6 +13,6 @@ steps:
     agents:
       queue: kibana-default
   - wait
-  - trigger: kibana-agent-packer-cache
-    async: true
+  - label: Trigger packer agent cache pipeline
+    command: node .buildkite/scripts/steps/trigger_packer_cache.js
     branches: main
