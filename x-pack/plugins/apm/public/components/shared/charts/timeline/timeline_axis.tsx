@@ -88,14 +88,14 @@ export function TimelineAxis({
 
         {topTraceDuration > 0 && (
           <LastTickValue
-            x={xScale(topTraceDuration)}
+            x={xScale(topTraceDuration) ?? 0}
             value={topTraceDurationFormatted}
             marginTop={28}
           />
         )}
 
         {marks.map((mark) => (
-          <Marker key={mark.id} mark={mark} x={xScale(mark.offset)} />
+          <Marker key={mark.id} mark={mark} x={xScale(mark.offset) ?? 0} />
         ))}
       </XYPlot>
     </div>
