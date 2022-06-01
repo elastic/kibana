@@ -15,10 +15,10 @@ import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
-import { IndexPattern, IndexPatternField, IIndexPatternFieldList } from '../..';
+import { DataView, DataViewField, IIndexPatternFieldList } from '../..';
 
 describe('AggConfig', () => {
-  let indexPattern: IndexPattern;
+  let indexPattern: DataView;
   let typesRegistry: AggTypesRegistryStart;
   const fields = [
     {
@@ -55,11 +55,11 @@ describe('AggConfig', () => {
       fields: {
         getByName: (name: string) => fields.find((f) => f.name === name),
         filter: () => fields,
-      } as unknown as IndexPattern['fields'],
-      getFormatterForField: (field: IndexPatternField) => ({
+      } as unknown as DataView['fields'],
+      getFormatterForField: (field: DataViewField) => ({
         toJSON: () => ({}),
       }),
-    } as IndexPattern;
+    } as DataView;
     typesRegistry = mockAggTypesRegistry();
   });
 

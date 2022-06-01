@@ -46,7 +46,6 @@ export {
 } from './data_views';
 
 export {
-  IndexPatternField,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
