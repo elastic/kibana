@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import { Env } from '@kbn/config';
 import { OnPostAuthHandler } from './lifecycle/on_post_auth';
 import { OnPreResponseHandler } from './lifecycle/on_pre_response';
 import { HttpConfig } from './http_config';
 import { isSafeMethod } from './router';
-import { Env } from '../config';
 import { LifecycleRegistrar } from './http_server';
 
 const VERSION_HEADER = 'kbn-version';

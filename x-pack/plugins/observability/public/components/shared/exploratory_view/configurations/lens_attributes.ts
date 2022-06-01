@@ -9,37 +9,37 @@ import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
 import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
 import {
-  CountIndexPatternColumn,
-  DateHistogramIndexPatternColumn,
   AvgIndexPatternColumn,
+  CardinalityIndexPatternColumn,
+  CountIndexPatternColumn,
+  DataType,
+  DateHistogramIndexPatternColumn,
+  FieldBasedIndexPatternColumn,
+  FiltersIndexPatternColumn,
   MedianIndexPatternColumn,
+  OperationMetadata,
+  OperationType,
   PercentileIndexPatternColumn,
   LastValueIndexPatternColumn,
-  OperationType,
   PersistedIndexPatternLayer,
   RangeIndexPatternColumn,
   SeriesType,
-  TypedLensByValueInput,
-  XYState,
-  XYCurveType,
-  DataType,
-  OperationMetadata,
-  FieldBasedIndexPatternColumn,
   SumIndexPatternColumn,
   TermsIndexPatternColumn,
-  CardinalityIndexPatternColumn,
-  FiltersIndexPatternColumn,
+  TypedLensByValueInput,
+  XYCurveType,
+  XYState,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
 import { urlFiltersToKueryString } from '../utils/stringify_kueries';
 import {
   FILTER_RECORDS,
-  USE_BREAK_DOWN_COLUMN,
-  TERMS_COLUMN,
-  REPORT_METRIC_FIELD,
   RECORDS_FIELD,
   RECORDS_PERCENTAGE_FIELD,
+  REPORT_METRIC_FIELD,
+  TERMS_COLUMN,
+  USE_BREAK_DOWN_COLUMN,
   PERCENTILE,
   PERCENTILE_RANKS,
   ReportTypes,
@@ -75,6 +75,7 @@ export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricF
   let timeScale;
   let columnLabel;
   let columnField;
+  let showPercentileAnnotations;
 
   const metricOptions = seriesConfig.metricOptions ?? [];
 
@@ -88,6 +89,7 @@ export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricF
       columnFilter = currField?.columnFilter;
       timeScale = currField?.timeScale;
       columnLabel = currField?.label;
+      showPercentileAnnotations = currField?.showPercentileAnnotations;
       paramFilters = currField?.paramFilters;
       columnField = currField?.field;
     }
@@ -102,6 +104,7 @@ export const parseCustomFieldName = (seriesConfig: SeriesConfig, selectedMetricF
     columnLabel,
     columnFilter,
     columnField,
+    showPercentileAnnotations,
   };
 };
 
@@ -117,6 +120,7 @@ export interface LayerConfig {
   selectedMetricField: string;
   color: string;
   name: string;
+  showPercentileAnnotations?: boolean;
 }
 
 export class LensAttributes {
@@ -124,11 +128,20 @@ export class LensAttributes {
   visualization?: XYState;
   layerConfigs: LayerConfig[] = [];
   isMultiSeries?: boolean;
+  seriesReferenceLines: Record<
+    string,
+    {
+      layerData: PersistedIndexPatternLayer;
+      layerState: XYState['layers'];
+      indexPattern: DataView;
+    }
+  >;
   globalFilter?: { query: string; language: string };
   reportType: string;
 
   constructor(layerConfigs: LayerConfig[], reportType: string) {
     this.layers = {};
+    this.seriesReferenceLines = {};
     this.reportType = reportType;
 
     layerConfigs.forEach(({ seriesConfig, operationType }) => {
@@ -373,6 +386,7 @@ export class LensAttributes {
 
   getPercentileBreakdowns(
     layerConfig: LayerConfig,
+    layerId: string,
     columnFilter?: string
   ): Record<string, FieldBasedIndexPatternColumn> {
     const yAxisColumns = layerConfig.seriesConfig.yAxisColumns;
@@ -387,6 +401,7 @@ export class LensAttributes {
           operationType: PERCENTILE_RANKS[i],
           label: mainLabel,
           layerConfig,
+          layerId,
           colIndex: i,
         }),
         filter: { query: columnFilter || '', language: 'kuery' },
@@ -408,6 +423,7 @@ export class LensAttributes {
       }),
       operationType: 'percentile',
       params: getPercentileParam(percentileValue),
+      customLabel: true,
     };
   }
 
@@ -468,6 +484,7 @@ export class LensAttributes {
 
     return this.getColumnBasedOnType({
       layerConfig,
+      layerId,
       label: xAxisColumn.label,
       sourceField: xAxisColumn.sourceField,
     });
@@ -479,16 +496,29 @@ export class LensAttributes {
     layerConfig,
     operationType,
     colIndex,
+    layerId,
   }: {
     sourceField: string;
     operationType?: OperationType;
     label?: string;
+    layerId: string;
     layerConfig: LayerConfig;
     colIndex?: number;
   }) {
     const { breakdown, seriesConfig } = layerConfig;
-    const { fieldMeta, columnType, fieldName, columnLabel, timeScale, columnFilters } =
-      this.getFieldMeta(sourceField, layerConfig);
+    const {
+      fieldMeta,
+      columnType,
+      fieldName,
+      columnLabel,
+      timeScale,
+      columnFilters,
+      showPercentileAnnotations,
+    } = this.getFieldMeta(sourceField, layerConfig);
+
+    if (showPercentileAnnotations) {
+      this.addThresholdLayer(fieldName, layerId, layerConfig);
+    }
 
     const { type: fieldType } = fieldMeta ?? {};
 
@@ -553,8 +583,15 @@ export class LensAttributes {
 
   getFieldMeta(sourceField: string, layerConfig: LayerConfig) {
     if (sourceField === REPORT_METRIC_FIELD) {
-      const { fieldName, columnType, columnLabel, columnFilters, timeScale, paramFilters } =
-        parseCustomFieldName(layerConfig.seriesConfig, layerConfig.selectedMetricField);
+      const {
+        fieldName,
+        columnType,
+        columnLabel,
+        columnFilters,
+        timeScale,
+        paramFilters,
+        showPercentileAnnotations,
+      } = parseCustomFieldName(layerConfig.seriesConfig, layerConfig.selectedMetricField);
       const fieldMeta = layerConfig.indexPattern.getFieldByName(fieldName!);
       return {
         fieldMeta,
@@ -564,6 +601,8 @@ export class LensAttributes {
         columnFilters,
         timeScale,
         paramFilters,
+        showPercentileAnnotations:
+          layerConfig.showPercentileAnnotations ?? showPercentileAnnotations,
       };
     } else {
       const fieldMeta = layerConfig.indexPattern.getFieldByName(sourceField);
@@ -591,22 +630,28 @@ export class LensAttributes {
       layerConfig,
       colIndex: 0,
       operationType: breakdown === PERCENTILE ? PERCENTILE_RANKS[0] : operationType,
+      layerId,
     });
   }
 
-  getChildYAxises(layerConfig: LayerConfig, layerId?: string, columnFilter?: string) {
+  getChildYAxises(
+    layerConfig: LayerConfig,
+    layerId: string,
+    columnFilter?: string,
+    forAccessorsKeys?: boolean
+  ) {
     const { breakdown } = layerConfig;
     const lensColumns: Record<string, FieldBasedIndexPatternColumn | SumIndexPatternColumn> = {};
     const yAxisColumns = layerConfig.seriesConfig.yAxisColumns;
     const { sourceField: mainSourceField, label: mainLabel } = yAxisColumns[0];
 
-    if (mainSourceField === RECORDS_PERCENTAGE_FIELD && layerId) {
+    if (mainSourceField === RECORDS_PERCENTAGE_FIELD && layerId && !forAccessorsKeys) {
       return getDistributionInPercentageColumn({ label: mainLabel, layerId, columnFilter })
         .supportingColumns;
     }
 
     if (yAxisColumns.length === 1 && breakdown === PERCENTILE) {
-      return this.getPercentileBreakdowns(layerConfig, columnFilter);
+      return this.getPercentileBreakdowns(layerConfig, layerId, columnFilter);
     }
 
     if (yAxisColumns.length === 1) {
@@ -623,6 +668,7 @@ export class LensAttributes {
         label,
         layerConfig,
         colIndex: i,
+        layerId,
       });
     }
     return lensColumns;
@@ -805,6 +851,10 @@ export class LensAttributes {
       };
     });
 
+    Object.entries(this.seriesReferenceLines).forEach(([id, { layerData }]) => {
+      layers[id] = layerData;
+    });
+
     return layers;
   }
 
@@ -822,46 +872,131 @@ export class LensAttributes {
       tickLabelsVisibilitySettings: { x: true, yLeft: true, yRight: true },
       gridlinesVisibilitySettings: { x: true, yLeft: true, yRight: true },
       preferredSeriesType: 'line',
-      layers: this.layerConfigs.map((layerConfig, index) => ({
-        accessors: [
-          `y-axis-column-layer${index}`,
-          ...Object.keys(this.getChildYAxises(layerConfig)),
-        ],
-        layerId: `layer${index}`,
-        layerType: 'data',
-        seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
-        palette: layerConfig.seriesConfig.palette,
-        yConfig: layerConfig.seriesConfig.yConfig || [
-          {
-            forAccessor: `y-axis-column-layer${index}`,
-            color: layerConfig.color,
-            /* if the fields format matches the field format of the first layer, use the default y axis (right)
-             * if not, use the secondary y axis (left) */
-            axisMode:
-              layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
-              this.layerConfigs[0].indexPattern.fieldFormatMap[
-                this.layerConfigs[0].selectedMetricField
-              ]?.id
-                ? 'left'
-                : 'right',
-          },
-        ],
-        xAccessor: `x-axis-column-layer${index}`,
-        ...(layerConfig.breakdown &&
-        layerConfig.breakdown !== PERCENTILE &&
-        layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
-          ? { splitAccessor: `breakdown-column-layer${index}` }
-          : {}),
-      })),
+      layers: this.getDataLayers(),
       ...(this.layerConfigs[0].seriesConfig.yTitle
         ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
         : {}),
     };
   }
 
+  getDataLayers(): XYState['layers'] {
+    const dataLayers = this.layerConfigs.map((layerConfig, index) => ({
+      accessors: [
+        `y-axis-column-layer${index}`,
+        ...Object.keys(this.getChildYAxises(layerConfig, `layer${index}`, undefined, true)),
+      ],
+      layerId: `layer${index}`,
+      layerType: 'data' as any,
+      seriesType: layerConfig.seriesType || layerConfig.seriesConfig.defaultSeriesType,
+      palette: layerConfig.seriesConfig.palette,
+      yConfig: layerConfig.seriesConfig.yConfig || [
+        {
+          forAccessor: `y-axis-column-layer${index}`,
+          color: layerConfig.color,
+          /* if the fields format matches the field format of the first layer, use the default y axis (right)
+           * if not, use the secondary y axis (left) */
+          axisMode:
+            layerConfig.indexPattern.fieldFormatMap[layerConfig.selectedMetricField]?.id ===
+            this.layerConfigs[0].indexPattern.fieldFormatMap[
+              this.layerConfigs[0].selectedMetricField
+            ]?.id
+              ? 'left'
+              : 'right',
+        },
+      ],
+      xAccessor: `x-axis-column-layer${index}`,
+      ...(layerConfig.breakdown &&
+      layerConfig.breakdown !== PERCENTILE &&
+      layerConfig.seriesConfig.xAxisColumn.sourceField !== USE_BREAK_DOWN_COLUMN
+        ? { splitAccessor: `breakdown-column-layer${index}` }
+        : {}),
+      ...(this.layerConfigs[0].seriesConfig.yTitle
+        ? { yTitle: this.layerConfigs[0].seriesConfig.yTitle }
+        : {}),
+    }));
+
+    const referenceLineLayers: XYState['layers'] = [];
+
+    Object.entries(this.seriesReferenceLines).forEach(([_id, { layerState }]) => {
+      referenceLineLayers.push(layerState[0]);
+    });
+
+    return [...dataLayers, ...referenceLineLayers];
+  }
+
+  addThresholdLayer(
+    fieldName: string,
+    layerId: string,
+    { seriesConfig, indexPattern }: LayerConfig
+  ) {
+    const referenceLineLayerId = `${layerId}-reference-lines`;
+
+    const referenceLineColumns = this.getThresholdColumns(
+      fieldName,
+      referenceLineLayerId,
+      seriesConfig
+    );
+
+    const layerData = {
+      columnOrder: Object.keys(referenceLineColumns),
+      columns: referenceLineColumns,
+      incompleteColumns: {},
+    };
+
+    const layerState = this.getThresholdLayer(fieldName, referenceLineLayerId, seriesConfig);
+
+    this.seriesReferenceLines[referenceLineLayerId] = { layerData, layerState, indexPattern };
+  }
+
+  getThresholdLayer(
+    fieldName: string,
+    referenceLineLayerId: string,
+    seriesConfig: SeriesConfig
+  ): XYState['layers'] {
+    const columns = this.getThresholdColumns(fieldName, referenceLineLayerId, seriesConfig);
+
+    return [
+      {
+        layerId: referenceLineLayerId,
+        accessors: Object.keys(columns),
+        layerType: 'referenceLine',
+        yConfig: Object.keys(columns).map((columnId) => ({
+          axisMode: 'bottom',
+          color: '#6092C0',
+          forAccessor: columnId,
+          lineStyle: 'solid',
+          lineWidth: 2,
+          textVisibility: true,
+        })),
+      },
+    ];
+  }
+
+  getThresholdColumns(fieldName: string, layerId: string, seriesConfig: SeriesConfig) {
+    const referenceLines = ['50th', '75th', '90th', '95th', '99th'];
+    const columns: Record<string, PercentileIndexPatternColumn> = {};
+
+    referenceLines.forEach((referenceLine) => {
+      columns[`${referenceLine}-percentile-reference-line-${layerId}`] = {
+        ...this.getPercentileNumberColumn(fieldName, referenceLine, seriesConfig),
+        label: referenceLine,
+      };
+    });
+
+    return columns;
+  }
+
   getReferences() {
     const uniqueIndexPatternsIds = Array.from(
       new Set([...this.layerConfigs.map(({ indexPattern }) => indexPattern.id)])
+    );
+
+    const referenceLineIndexReferences = Object.entries(this.seriesReferenceLines).map(
+      ([id, { indexPattern }]) => ({
+        id: indexPattern.id!,
+        name: getLayerReferenceName(id),
+        type: 'index-pattern',
+      })
     );
 
     return [
@@ -875,6 +1010,7 @@ export class LensAttributes {
         name: getLayerReferenceName(`layer${index}`),
         type: 'index-pattern',
       })),
+      ...referenceLineIndexReferences,
     ];
   }
 
