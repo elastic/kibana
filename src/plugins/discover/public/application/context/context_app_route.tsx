@@ -51,13 +51,13 @@ export function ContextAppRoute() {
         iconColor="danger"
         title={
           <FormattedMessage
-            id="discover.singleDocRoute.errorTitle"
-            defaultMessage="An error occured"
+            id="discover.contextViewRoute.errorTitle"
+            defaultMessage="An error occurred"
           />
         }
         body={
           <FormattedMessage
-            id="discover.singleDocRoute.errorMessage"
+            id="discover.contextViewRoute.errorMessage"
             defaultMessage="No matching index pattern for id {dataViewId}"
             values={{ dataViewId }}
           />

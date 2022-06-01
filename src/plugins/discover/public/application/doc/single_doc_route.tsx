@@ -67,7 +67,7 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
         title={
           <FormattedMessage
             id="discover.singleDocRoute.errorTitle"
-            defaultMessage="An error occured"
+            defaultMessage="An error occurred"
           />
         }
         body={
