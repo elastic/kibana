@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { stackMonitoring, timerange } from '../..';
-import { Scenario } from '../scenario';
-import { getLogger } from '../utils/get_common_services';
-import { RunOptions } from '../utils/parse_run_cli_flags';
-import { ApmFields } from '../../lib/apm/apm_fields';
+import { stackMonitoring, timerange } from '../src';
+import { Scenario } from '../src/scripts/scenario';
+import { getLogger } from '../src/scripts/utils/get_common_services';
+import { RunOptions } from '../src/scripts/utils/parse_run_cli_flags';
+import { ApmFields } from '../src/lib/apm/apm_fields';
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);

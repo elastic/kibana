@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { observer, timerange } from '../..';
-import { Scenario } from '../scenario';
-import { getLogger } from '../utils/get_common_services';
-import { RunOptions } from '../utils/parse_run_cli_flags';
-import { AgentConfigFields } from '../../lib/agent_config/agent_config_fields';
+import { observer, timerange } from '../src';
+import { Scenario } from '../src/scripts/scenario';
+import { getLogger } from '../src/scripts/utils/get_common_services';
+import { RunOptions } from '../src/scripts/utils/parse_run_cli_flags';
+import { AgentConfigFields } from '../src/lib/agent_config/agent_config_fields';
 
 const scenario: Scenario<AgentConfigFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);
