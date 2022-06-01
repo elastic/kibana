@@ -8,9 +8,8 @@
 
 import moment from 'moment';
 import { keys } from 'lodash';
-import { RangeFilter } from '@kbn/es-query';
-import { TimefilterContract } from '..';
-import { TimeRange } from '../../../../common';
+import type { RangeFilter } from '../build_filters';
+import type { TimeRange } from './types';
 
 export function convertRangeFilterToTimeRange(filter: RangeFilter) {
   const key = keys(filter.query.range)[0];
@@ -28,8 +27,4 @@ export function convertRangeFilterToTimeRangeString(filter: RangeFilter): TimeRa
     from: from?.toISOString(),
     to: to?.toISOString(),
   };
-}
-
-export function changeTimeFilter(timeFilter: TimefilterContract, filter: RangeFilter) {
-  timeFilter.setTime(convertRangeFilterToTimeRange(filter));
 }
