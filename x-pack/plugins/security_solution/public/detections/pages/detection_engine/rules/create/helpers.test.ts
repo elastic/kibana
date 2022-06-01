@@ -364,6 +364,7 @@ describe('helpers', () => {
         threatQueryBar: {
           query: { language: 'kql', query: 'threat_host: *' },
           filters: threatFilters,
+          saved_id: null,
         },
         threatMapping,
       };

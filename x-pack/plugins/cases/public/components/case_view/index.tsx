@@ -18,7 +18,6 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import { generateCaseViewPath, useCaseViewParams } from '../../common/navigation';
 import { CaseViewPage } from './case_view_page';
 import type { CaseViewProps } from './types';
-import { Case } from '../../containers/types';
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   height: 100%;
@@ -47,10 +46,6 @@ export const CaseView = React.memo(
     const { basePath } = useCasesContext();
 
     const { data, isLoading, isError, refetch } = useGetCase(caseId);
-
-    const updateCase = (_newCase: Case) => {
-      refetch();
-    };
 
     useEffect(() => {
       if (spacesApi && data?.outcome === 'aliasMatch' && data.aliasTargetId != null) {
@@ -97,7 +92,6 @@ export const CaseView = React.memo(
           actionsNavigation={actionsNavigation}
           ruleDetailsNavigation={ruleDetailsNavigation}
           showAlertDetails={showAlertDetails}
-          updateCase={updateCase}
           useFetchAlertData={useFetchAlertData}
           refreshRef={refreshRef}
         />
