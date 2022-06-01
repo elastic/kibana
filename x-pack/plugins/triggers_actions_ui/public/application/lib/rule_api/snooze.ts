@@ -24,7 +24,7 @@ export async function snoozeRule({
   snoozeSchedule,
   http,
 }: {
-  id?: string;
+  id: string;
   snoozeSchedule: SnoozeSchedule;
   http: HttpSetup;
 }): Promise<void> {
