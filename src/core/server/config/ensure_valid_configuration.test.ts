@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { configServiceMock } from './mocks';
+import { configServiceMock } from '@kbn/config-mocks';
 import { ensureValidConfiguration } from './ensure_valid_configuration';
 import { CriticalError } from '../errors';
 
