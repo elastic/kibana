@@ -146,13 +146,13 @@ describe('getSharingData', () => {
       services
     );
     expect(getSearchSource().fields).toStrictEqual([
-      'cool-timefield',
-      'cool-field-1',
-      'cool-field-2',
-      'cool-field-3',
-      'cool-field-4',
-      'cool-field-5',
-      'cool-field-6',
+      { field: 'cool-timefield', include_unmapped: 'true' },
+      { field: 'cool-field-1', include_unmapped: 'true' },
+      { field: 'cool-field-2', include_unmapped: 'true' },
+      { field: 'cool-field-3', include_unmapped: 'true' },
+      { field: 'cool-field-4', include_unmapped: 'true' },
+      { field: 'cool-field-5', include_unmapped: 'true' },
+      { field: 'cool-field-6', include_unmapped: 'true' },
     ]);
   });
 
