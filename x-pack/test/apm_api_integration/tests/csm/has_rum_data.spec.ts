@@ -10,13 +10,19 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function rumHasDataApiTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiClient = getService('apmApiClient');
 
   registry.when('has_rum_data without data', { config: 'trial', archives: [] }, () => {
     it('returns empty list', async () => {
-      const response = await supertest.get(
-        '/api/apm/observability_overview/has_rum_data?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-14T20%3A35%3A54.654Z&uiFilters='
-      );
+      const response = await apmApiClient.readUser({
+        endpoint: 'GET /api/apm/observability_overview/has_rum_data',
+        params: {
+          query: {
+            start: '2020-09-07T20%3A35%3A54.654Z&',
+            end: '2020-09-14T20%3A35%3A54.654Z',
+          },
+        },
+      });
 
       expect(response.status).to.be(200);
       expectSnapshot(response.body).toMatchInline(`
@@ -33,9 +39,15 @@ export default function rumHasDataApiTests({ getService }: FtrProviderContext) {
     { config: 'trial', archives: ['8.0.0', 'rum_8.0.0'] },
     () => {
       it('returns that it has data and service name with most traffic', async () => {
-        const response = await supertest.get(
-          '/api/apm/observability_overview/has_rum_data?start=2020-09-07T20%3A35%3A54.654Z&end=2020-09-16T20%3A35%3A54.654Z&uiFilters='
-        );
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /api/apm/observability_overview/has_rum_data',
+          params: {
+            query: {
+              start: '2020-09-07T20%3A35%3A54.654Z&',
+              end: '2020-09-16T20%3A35%3A54.654Z',
+            },
+          },
+        });
 
         expect(response.status).to.be(200);
 

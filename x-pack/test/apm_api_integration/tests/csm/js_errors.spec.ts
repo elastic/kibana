@@ -10,16 +10,21 @@ import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function rumJsErrorsApiTests({ getService }: FtrProviderContext) {
   const registry = getService('registry');
-  const supertest = getService('legacySupertestAsApmReadUser');
+  const apmApiClient = getService('apmApiClient');
 
   registry.when('CSM JS errors with data', { config: 'trial', archives: [] }, () => {
     it('returns no js errors', async () => {
-      const response = await supertest.get('/internal/apm/ux/js-errors').query({
-        pageSize: 5,
-        pageIndex: 0,
-        start: '2020-09-07T20:35:54.654Z',
-        end: '2020-09-14T20:35:54.654Z',
-        uiFilters: '{"serviceName":["elastic-co-rum-test"]}',
+      const response = await apmApiClient.readUser({
+        endpoint: 'GET /internal/apm/ux/js-errors',
+        params: {
+          query: {
+            pageSize: '5',
+            pageIndex: '0',
+            start: '2020-09-07T20:35:54.654Z',
+            end: '2020-09-14T20:35:54.654Z',
+            uiFilters: '{"serviceName":["elastic-co-rum-test"]}',
+          },
+        },
       });
 
       expect(response.status).to.be(200);
@@ -38,12 +43,17 @@ export default function rumJsErrorsApiTests({ getService }: FtrProviderContext) 
     { config: 'trial', archives: ['8.0.0', 'rum_test_data'] },
     () => {
       it('returns js errors', async () => {
-        const response = await supertest.get('/internal/apm/ux/js-errors').query({
-          start: '2021-01-18T12:20:17.202Z',
-          end: '2021-01-18T12:25:17.203Z',
-          uiFilters: '{"environment":"ENVIRONMENT_ALL","serviceName":["elastic-co-frontend"]}',
-          pageSize: 5,
-          pageIndex: 0,
+        const response = await apmApiClient.readUser({
+          endpoint: 'GET /internal/apm/ux/js-errors',
+          params: {
+            query: {
+              pageSize: '5',
+              pageIndex: '0',
+              start: '2021-01-18T12:20:17.202Z',
+              end: '2021-01-18T12:25:17.203Z',
+              uiFilters: '{"environment":"ENVIRONMENT_ALL","serviceName":["elastic-co-frontend"]}',
+            },
+          },
         });
 
         expect(response.status).to.be(200);
