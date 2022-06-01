@@ -26,10 +26,8 @@ import { useUrlStateHooks } from './use_url_state';
 import { waitFor } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';
 import { updateAppLinks } from '../../links';
-import { getAppLinks } from '../../links/app_links';
-import { StartPlugins } from '../../../types';
+import { links } from '../../links/app_links';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
-import { coreMock } from '@kbn/core/public/mocks';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -89,11 +87,9 @@ jest.mock('../navigation/helpers', () => ({
 }));
 
 describe('UrlStateContainer', () => {
-  beforeAll(async () => {
+  beforeAll(() => {
     mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
-
-    const appLinks = await getAppLinks(coreMock.createStart(), {} as StartPlugins);
-    updateAppLinks(appLinks, {
+    updateAppLinks(links, {
       experimentalFeatures: allowedExperimentalValues,
       capabilities: {
         navLinks: {},

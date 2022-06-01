@@ -58,6 +58,23 @@ export const useAppLinks = (): AppLinkItems => {
 };
 
 /**
+ * Hook to check if a link exists in the application links,
+ * It can be used to know if a link access is authorized.
+ */
+export const useLinkExists = (id: SecurityPageName): boolean => {
+  const [linkExists, setLinkExists] = useState(!!getNormalizedLink(id));
+
+  useEffect(() => {
+    const linksSubscription = subscribeAppLinks(() => {
+      setLinkExists(!!getNormalizedLink(id));
+    });
+    return () => linksSubscription.unsubscribe();
+  }, [id]);
+
+  return linkExists;
+};
+
+/**
  * Updates the app links applying the filter by permissions
  */
 export const updateAppLinks = (
@@ -68,44 +85,6 @@ export const updateAppLinks = (
   appLinksUpdater$.next({
     links: Object.freeze(filteredAppLinks),
     normalizedLinks: Object.freeze(getNormalizedLinks(filteredAppLinks)),
-  });
-};
-
-/**
- * Excludes a link by id from the current app links
- * @deprecated this function will not be needed when async link filtering is migrated to the main getAppLinks functions
- */
-export const excludeAppLink = (linkId: SecurityPageName) => {
-  const { links, normalizedLinks } = appLinksUpdater$.getValue();
-  if (!normalizedLinks[linkId]) {
-    return;
-  }
-
-  let found = false;
-  const excludeRec = (currentLinks: AppLinkItems): LinkItem[] =>
-    currentLinks.reduce<LinkItem[]>((acc, link) => {
-      if (!found) {
-        if (link.id === linkId) {
-          found = true;
-          return acc;
-        }
-        if (link.links) {
-          const excludedLinks = excludeRec(link.links);
-          if (excludedLinks.length > 0) {
-            acc.push({ ...link, links: excludedLinks });
-            return acc;
-          }
-        }
-      }
-      acc.push(link);
-      return acc;
-    }, []);
-
-  const excludedLinks = excludeRec(links);
-
-  appLinksUpdater$.next({
-    links: Object.freeze(excludedLinks),
-    normalizedLinks: Object.freeze(getNormalizedLinks(excludedLinks)),
   });
 };
 

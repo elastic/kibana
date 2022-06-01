@@ -67,7 +67,7 @@ const categories = [
   },
 ];
 
-const links: LinkItem = {
+export const links: LinkItem = {
   id: SecurityPageName.administration,
   title: MANAGE,
   path: MANAGE_PATH,
@@ -201,7 +201,10 @@ const links: LinkItem = {
   ],
 };
 
-export const getManagementLinkItems = async (core: CoreStart, plugins: StartPlugins) => {
+export const getManagementFilteredLinks = async (
+  core: CoreStart,
+  plugins: StartPlugins
+): Promise<LinkItem> => {
   // TODO: implement async logic to exclude links
   return links;
 };
