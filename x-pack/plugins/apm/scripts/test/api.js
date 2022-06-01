@@ -82,7 +82,7 @@ if (server) {
 const cmd = [
   'node',
   ...(inspect ? ['--inspect-brk'] : []),
-  `../../../../scripts/${ftrScript}`,
+  `../../../../../scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
   ...(updateSnapshots ? [`--updateSnapshots`] : []),
   `--config ../../../../test/apm_api_integration/${license}/config.ts`,
