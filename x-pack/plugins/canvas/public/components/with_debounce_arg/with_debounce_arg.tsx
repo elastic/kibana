@@ -29,6 +29,7 @@ export const withDebounceArg =
       [localArgValue]
     );
 
+    // handle the changed argument from within the expression.
     useEffect(() => {
       if (argValue) {
         setArgValue(argValue);
