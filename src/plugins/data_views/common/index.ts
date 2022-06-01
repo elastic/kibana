@@ -51,7 +51,7 @@ export type {
   HasDataService,
 } from './types';
 export { DataViewType } from './types';
-export type { IndexPatternsContract, DataViewsContract } from './data_views';
+export type { DataViewsContract } from './data_views';
 export { IndexPatternsService, DataViewsService } from './data_views';
 export type {
   DataViewListItem,

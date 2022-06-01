@@ -129,11 +129,7 @@ export type {
   IndexPatternLoadStartDependencies,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '@kbn/data-views-plugin/common';
-export type {
-  IndexPatternsContract,
-  DataViewsContract,
-  DataViewListItem,
-} from '@kbn/data-views-plugin/common';
+export type { DataViewsContract, DataViewListItem } from '@kbn/data-views-plugin/common';
 export {
   RUNTIME_FIELD_TYPES,
   DEFAULT_ASSETS_TO_IGNORE,
