@@ -29,7 +29,7 @@ describe('ColorPicker', () => {
 
   it('should not render the clear button', () => {
     component = mount(<ColorPicker {...defaultProps} />);
-    expect(findTestSubject(component, 'tvbColorPicker').length).toBe(0);
+    expect(findTestSubject(component, 'tvbColorPickerClear').length).toBe(0);
   });
 
   it('should render the correct value to the input text if the prop value is hex', () => {

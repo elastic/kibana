@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 import PropTypes from 'prop-types';
 import { last } from 'lodash';
-import React, { useMemo, useState, useEffect, useCallback, useEuiTheme } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
@@ -26,6 +26,7 @@ import {
   EuiCode,
   EuiHorizontalRule,
   EuiFieldNumber,
+  useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from '../../series_config_query_bar_with_ignore_global_filter';
