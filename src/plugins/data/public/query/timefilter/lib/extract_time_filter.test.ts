@@ -7,10 +7,10 @@
  */
 
 import { extractTimeFilter } from './extract_time_filter';
+import { DataViewFieldBase } from '@kbn/es-query';
 import {
   Filter,
   IIndexPattern,
-  IFieldType,
   buildQueryFilter,
   buildRangeFilter,
   buildPhraseFilter,
@@ -30,7 +30,7 @@ describe('filter manager utilities', () => {
       const filters: Filter[] = [
         buildQueryFilter({ query_string: { query: 'apache' } }, 'logstash-*', ''),
         buildRangeFilter(
-          { name: 'time' } as IFieldType,
+          { name: 'time' } as DataViewFieldBase,
           { gt: 1388559600000, lt: 1388646000000 },
           indexPattern
         ),
@@ -45,7 +45,7 @@ describe('filter manager utilities', () => {
       const filters: Filter[] = [
         buildQueryFilter({ query_string: { query: 'apache' } }, 'logstash-*', ''),
         buildRangeFilter(
-          { name: '@timestamp' } as IFieldType,
+          { name: '@timestamp' } as DataViewFieldBase,
           { from: 1, to: 2 },
           indexPattern,
           ''
@@ -60,7 +60,7 @@ describe('filter manager utilities', () => {
     test('should not return a non range filter, even when names match', async () => {
       const filters: Filter[] = [
         buildQueryFilter({ query_string: { query: 'apache' } }, 'logstash-*', ''),
-        buildPhraseFilter({ name: 'time' } as IFieldType, 'banana', indexPattern),
+        buildPhraseFilter({ name: 'time' } as DataViewFieldBase, 'banana', indexPattern),
       ];
       const result = await extractTimeFilter('time', filters);
 
