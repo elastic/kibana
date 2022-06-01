@@ -114,7 +114,7 @@ export default ({ getService }: FtrProviderContext) => {
           async () => await testSubjects.exists('ruleDetails')
         );
       });
-      it('should navigate to the new rule details page by clicking on the rule from the rules table', async () => {
+      it('should navigate to the new rule details page by URL', async () => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(uptimeRuleId);
         await retry.waitFor(
           'Rule details to be visible',
