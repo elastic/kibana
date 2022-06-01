@@ -11,6 +11,7 @@ import { dateHistogramOperation } from '.';
 import { mount, shallow } from 'enzyme';
 import { EuiSwitch } from '@elastic/eui';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
@@ -22,6 +23,7 @@ import { act } from 'react-dom/test-utils';
 
 const dataStart = dataPluginMock.createStartContract();
 const unifiedSearchStart = unifiedSearchPluginMock.createStartContract();
+const dataViewsStart = dataViewPluginMocks.createStartContract();
 dataStart.search.aggs.calculateAutoTimeExpression = getCalculateAutoTimeExpression(
   (path: string) => {
     if (path === UI_SETTINGS.HISTOGRAM_MAX_BARS) {
@@ -97,6 +99,7 @@ const defaultOptions = {
   },
   data: dataStart,
   unifiedSearch: unifiedSearchStart,
+  dataViews: dataViewsStart,
   http: {} as HttpSetup,
   indexPattern: indexPattern1,
   operationDefinitionMap: {},
