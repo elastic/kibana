@@ -6,7 +6,7 @@
  */
 
 import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
-import { type EmsSpriteSheet, TMSService } from '@elastic/ems-client';
+import { type blendMode, type EmsSpriteSheet, TMSService } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 // @ts-expect-error
@@ -170,17 +170,11 @@ export class EmsVectorTileLayer extends AbstractLayer {
   }
 
   getDefaultColorOperation() {
-    const defaultOperation = TMSService.colorOperationDefaults.find(
+    const { operation, percentage } = TMSService.colorOperationDefaults.find(
       ({ style }) => style === this.getSource().getTileLayerId()
-    );
-    if (!defaultOperation) {
-      return {
-        operation: 'screen',
-        percentage: 0,
-      };
-    }
-
-    const { operation, percentage } = defaultOperation;
+    ) ?? {
+      operation: 'screen',
+    };
     return { operation, percentage };
   }
 
@@ -395,18 +389,12 @@ export class EmsVectorTileLayer extends AbstractLayer {
 
   _setColorFilter(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     const { color, operation, percentage } = this.getColorFilter();
-    if (color === undefined) {
-      // TODO reset the colors back to original style
-      // see https://github.com/elastic/ems-client/issues/116
-      return;
-    }
 
     const properties = TMSService.transformColorProperties(
       mbLayer,
       color,
-      operation,
-      // TODO percentage should be optional? https://github.com/elastic/ems-client/issues/115
-      percentage ?? 0,
+      operation as blendMode,
+      percentage
     );
     for (const { property, color } of properties) {
       mbMap.setPaintProperty(mbLayerId, property, color);

@@ -9,6 +9,7 @@
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Query } from '@kbn/data-plugin/public';
+import type { blendMode } from '@elastic/ems-client';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
@@ -74,7 +75,7 @@ export interface ILayer {
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
-  getDefaultColorOperation(): { operation?: string, percentage?: number }
+  getDefaultColorOperation(): { operation?: blendMode, percentage?: number }
 
   /*
    * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
