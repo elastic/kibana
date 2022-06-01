@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { CoreService } from '@kbn/core-base-browser-internal';
 import { IUiSettingsClient } from '../ui_settings';
-import { CoreService } from '../../types';
 
 import { MomentService } from './moment';
 import { StylesService } from './styles';

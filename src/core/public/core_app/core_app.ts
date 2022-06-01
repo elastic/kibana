@@ -7,6 +7,7 @@
  */
 
 import { UnregisterCallback } from 'history';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InternalApplicationSetup,
   InternalApplicationStart,
@@ -14,7 +15,6 @@ import {
   AppMountParameters,
 } from '../application';
 import type { HttpSetup, HttpStart } from '../http';
-import type { CoreContext } from '../core_system';
 import type { NotificationsSetup, NotificationsStart } from '../notifications';
 import type { IUiSettingsClient } from '../ui_settings';
 import type { InjectedMetadataSetup } from '../injected_metadata';

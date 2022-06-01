@@ -8,10 +8,10 @@
 
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import { of } from 'rxjs';
 import { trackClicks } from './track_clicks';
 import { InjectedMetadataSetup } from '../injected_metadata';
-import { CoreContext } from '../core_system';
 import { getSessionId } from './get_session_id';
 import { createLogger } from './logger';
 

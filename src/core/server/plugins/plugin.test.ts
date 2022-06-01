@@ -13,7 +13,7 @@ import { schema } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
 
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
-import { CoreContext } from '../core_context';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { coreMock } from '../mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 

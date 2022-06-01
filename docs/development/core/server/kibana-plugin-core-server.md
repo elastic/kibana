@@ -301,8 +301,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [OnPreRoutingHandler](./kibana-plugin-core-server.onpreroutinghandler.md) | See [OnPreRoutingToolkit](./kibana-plugin-core-server.onpreroutingtoolkit.md)<!-- -->. |
 |  [PluginConfigSchema](./kibana-plugin-core-server.pluginconfigschema.md) | Dedicated type for plugin configuration schema. |
 |  [PluginInitializer](./kibana-plugin-core-server.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>server</code> directory should conform to this interface. |
-|  [PluginName](./kibana-plugin-core-server.pluginname.md) | Dedicated type for plugin name/id that is supposed to make Map/Set/Arrays that use it as a key or value more obvious. |
-|  [PluginOpaqueId](./kibana-plugin-core-server.pluginopaqueid.md) |  |
 |  [PublicUiSettingsParams](./kibana-plugin-core-server.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-server.uisettingsparams.md) exposed to the client-side. |
 |  [RedirectResponseOptions](./kibana-plugin-core-server.redirectresponseoptions.md) | HTTP response parameters for redirection response |
 |  [RequestHandler](./kibana-plugin-core-server.requesthandler.md) | A function executed when route path matched requested resource path. Request handler is expected to return a result of one of [KibanaResponseFactory](./kibana-plugin-core-server.kibanaresponsefactory.md) functions. If anything else is returned, or an error is thrown, the HTTP service will automatically log the error and respond <code>500 - Internal Server Error</code>. |

@@ -11,10 +11,10 @@ import { firstValueFrom, Observable } from 'rxjs';
 import { filter, map, tap, toArray } from 'rxjs/operators';
 import { getFlattenedObject } from '@kbn/std';
 
-import type { Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
-import { CoreService } from '../../types';
-import { CoreContext } from '../core_context';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { PluginName } from '@kbn/core-base-common';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
 import {
@@ -22,7 +22,6 @@ import {
   InternalPluginInfo,
   PluginConfigDescriptor,
   PluginDependencies,
-  PluginName,
   PluginType,
 } from './types';
 import { PluginsConfig, PluginsConfigType } from './plugins_config';
