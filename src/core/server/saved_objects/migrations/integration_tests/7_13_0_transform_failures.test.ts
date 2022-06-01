@@ -11,7 +11,7 @@ import Fs from 'fs';
 import Util from 'util';
 import { Env } from '@kbn/config';
 import { REPO_ROOT } from '@kbn/utils';
-import { getEnvOptions } from '../../../config/mocks';
+import { getEnvOptions } from '@kbn/config-mocks';
 import type { ElasticsearchClient } from '../../../elasticsearch';
 import * as kbnTestServer from '../../../../test_helpers/kbn_server';
 import { Root } from '../../../root';
