@@ -480,6 +480,20 @@ export default async function ({ readConfigFile }) {
           },
         },
 
+        cluster_security_manager: {
+          elasticsearch: {
+            cluster: ['manage_security'],
+          },
+          kibana: [
+            {
+              feature: {
+                advancedSettings: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        },
+
         ccr_user: {
           elasticsearch: {
             cluster: ['manage', 'manage_ccr'],
