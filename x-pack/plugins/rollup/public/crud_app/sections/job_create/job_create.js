@@ -334,13 +334,13 @@ export class JobCreateUi extends Component {
     const { currentStepId, checkpointStepId } = this.state;
     const indexOfCurrentStep = stepIds.indexOf(currentStepId);
 
-    getStepStatus = (index, indexOfCurrentStep) => {
+    let getStepStatus = (index, indexOfCurrentStep) => {
       if (index === indexOfCurrentStep) {
-        stepStatus = 'selected';
+        return 'selected';
       } else if (index < indexOfCurrentStep) {
-        stepStatus = 'complete';
+        return 'complete';
       } else {
-        stepStatus = 'incomplete';
+        return 'incomplete';
       }
     };
 
