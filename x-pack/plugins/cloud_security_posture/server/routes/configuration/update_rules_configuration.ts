@@ -138,7 +138,7 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
           packagePolicyId
         );
 
-        const updatedPackagePolicy = updateAgentConfiguration(
+        const updatedPackagePolicy = await updateAgentConfiguration(
           packagePolicyService,
           packagePolicy,
           esClient,
