@@ -68,14 +68,13 @@ export const removeCspRulesInstancesCallback = async (
   logger: Logger
 ): Promise<void> => {
   try {
-    console.log('$$$$$$$$$$$$$$$$$$$$');
     const { saved_objects: cspRules }: SavedObjectsFindResponse<CspRuleSchema> =
       await soClient.find({
         type: cspRuleAssetSavedObjectType,
         filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${deletedPackagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${deletedPackagePolicy.policy_id}`,
         perPage: 10000,
       });
-    console.log({ cspRules });
+
     await Promise.all(
       cspRules.map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id))
     );
