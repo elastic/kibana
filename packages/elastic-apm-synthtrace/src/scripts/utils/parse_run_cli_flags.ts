@@ -23,8 +23,8 @@ function getParsedFile(flags: RunCliFlags) {
   const result = [
     path.resolve(parsedFile),
     path.resolve(`${parsedFile}.ts`),
-    path.resolve(__dirname, '../../../scenarios', parsedFile),
-    path.resolve(__dirname, '../../../scenarios', `${parsedFile}.ts`),
+    path.resolve(__dirname, '../../scenarios', parsedFile),
+    path.resolve(__dirname, '../../scenarios', `${parsedFile}.ts`),
   ].find((filepath) => existsSync(filepath));
 
   if (result) {
