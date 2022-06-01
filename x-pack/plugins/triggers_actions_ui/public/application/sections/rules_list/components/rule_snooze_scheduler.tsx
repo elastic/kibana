@@ -37,6 +37,7 @@ interface PanelOpts {
 
 export interface ComponentOpts extends PanelOpts {
   onClose: () => void;
+  hasTitle: boolean;
 }
 
 const TIMEZONE_OPTIONS = moment.tz.names().map((n) => ({ label: n }));
@@ -44,17 +45,20 @@ const TIMEZONE_OPTIONS = moment.tz.names().map((n) => ({ label: n }));
 export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
   onClose,
   initialSchedule,
+  hasTitle = true,
   ...rest
 }: ComponentOpts) => {
   // We have to use refs for these things because setting state in an onFocus call re-renders and then blurs an EuiDatePicker input field
 
-  const title = initialSchedule
-    ? i18n.translate('xpack.triggersActionsUi.ruleSnoozeScheduler.editSchedule', {
-        defaultMessage: 'Edit schedule',
-      })
-    : i18n.translate('xpack.triggersActionsUi.ruleSnoozeScheduler.addSchedule', {
-        defaultMessage: 'Add schedule',
-      });
+  const title =
+    hasTitle &&
+    (initialSchedule
+      ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.editSchedule', {
+          defaultMessage: 'Edit schedule',
+        })
+      : i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.addSchedule', {
+          defaultMessage: 'Add schedule',
+        }));
 
   return (
     <EuiContextMenuPanel title={title} onClose={onClose}>
@@ -85,7 +89,10 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   // Component initializes in State C
   const [selectingEndDate, setSelectingEndDate] = useState(false);
   const [selectingEndTime, setSelectingEndTime] = useState(false);
-  const minDate = useMemo(() => moment(initialSchedule?.rRule.dtstart ?? undefined), []);
+  const minDate = useMemo(
+    () => moment(initialSchedule?.rRule.dtstart ?? undefined),
+    [initialSchedule]
+  );
 
   const initialState = useMemo(() => {
     if (!initialSchedule) {
@@ -194,7 +201,15 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       },
       duration: endDT.valueOf() - startDT.valueOf(),
     });
-  }, [onSaveSchedule, endDT, startDT, selectedTimezone, isRecurring, recurrenceSchedule]);
+  }, [
+    onSaveSchedule,
+    endDT,
+    startDT,
+    selectedTimezone,
+    isRecurring,
+    recurrenceSchedule,
+    initialSchedule,
+  ]);
 
   const onCancelSchedule = useCallback(() => {
     if (!initialSchedule?.id) return;
@@ -278,7 +293,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       <EuiSpacer size="m" />
       <EuiSwitch
         compressed
-        label={i18n.translate('xpack.triggersActionsUi.ruleSnoozeScheduler.reucrringSwitch', {
+        label={i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.reucrringSwitch', {
           defaultMessage: 'Make recurring',
         })}
         onChange={() => setIsRecurring(!isRecurring)}
@@ -303,7 +318,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
         onClick={onClickSaveSchedule}
         isLoading={isLoading}
       >
-        {i18n.translate('xpack.triggersActionsUi.ruleSnoozeScheduler.saveSchedule', {
+        {i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.saveSchedule', {
           defaultMessage: 'Save schedule',
         })}
       </EuiButton>

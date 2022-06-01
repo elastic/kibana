@@ -66,7 +66,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
   }, [rule.enabled]);
   useEffect(() => {
     if (!hideSnoozeOption) setIsSnoozed(isRuleSnoozed(rule));
-  }, [rule]);
+  }, [rule, hideSnoozeOption]);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
 
@@ -280,6 +280,7 @@ const RuleStatusMenu: React.FunctionComponent<RuleStatusMenuProps> = ({
                 snoozeRule={snoozeRule}
                 unsnoozeRule={unsnoozeRule}
                 scheduledSnoozes={scheduledSnoozes}
+                hasTitle={false}
               />
             </EuiPanel>
           ),

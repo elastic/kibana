@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React, { useState, useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { RuleSnooze } from '@kbn/alerting-plugin/common';
@@ -38,6 +45,7 @@ interface SnoozePanelProps {
   unsnoozeRule: (scheduleIds?: string[]) => Promise<void>;
   showCancel: boolean;
   scheduledSnoozes: RuleSnooze;
+  hasTitle?: boolean;
 }
 
 interface BaseSnoozePanelProps extends SnoozePanelProps {
@@ -52,28 +60,35 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
   unsnoozeRule,
   showCancel,
   scheduledSnoozes,
+  hasTitle = true,
 }) => {
   const [isSchedulerOpen, setIsSchedulerOpen] = useState(false);
   const [initialSchedule, setInitialSchedule] = useState<SnoozeSchedule | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const onSnoozeRule = useCallback(async (schedule: SnoozeSchedule) => {
-    setIsLoading(true);
-    try {
-      await snoozeRule(schedule);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const onSnoozeRule = useCallback(
+    async (schedule: SnoozeSchedule) => {
+      setIsLoading(true);
+      try {
+        await snoozeRule(schedule);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [setIsLoading, snoozeRule]
+  );
 
-  const onUnsnoozeRule = useCallback(async (scheduleIds?: string[]) => {
-    setIsLoading(true);
-    try {
-      await unsnoozeRule(scheduleIds);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+  const onUnsnoozeRule = useCallback(
+    async (scheduleIds?: string[]) => {
+      setIsLoading(true);
+      try {
+        await unsnoozeRule(scheduleIds);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [setIsLoading, unsnoozeRule]
+  );
 
   const saveSnoozeSchedule = useCallback(
     async (schedule: SnoozeSchedule) => {
@@ -84,7 +99,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
         setIsLoading(false);
       }
     },
-    [snoozeRule]
+    [snoozeRule, setIsLoading]
   );
 
   const cancelSnoozeSchedules = useCallback(
@@ -96,7 +111,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
         setIsLoading(false);
       }
     },
-    [unsnoozeRule]
+    [unsnoozeRule, setIsLoading]
   );
 
   const onOpenScheduler = useCallback(
@@ -119,6 +134,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
       scheduledSnoozes={scheduledSnoozes}
       navigateToScheduler={onOpenScheduler}
       onRemoveAllSchedules={cancelSnoozeSchedules}
+      hasTitle={hasTitle}
     />
   ) : (
     <RuleSnoozeScheduler
@@ -127,6 +143,7 @@ export const SnoozePanel: React.FC<SnoozePanelProps> = ({
       onClose={onCloseScheduler}
       onSaveSchedule={saveSnoozeSchedule}
       onCancelSchedules={cancelSnoozeSchedules}
+      hasTitle={hasTitle}
     />
   );
 };
@@ -157,6 +174,7 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   scheduledSnoozes,
   navigateToScheduler,
   onRemoveAllSchedules,
+  hasTitle,
 }) => {
   const [intervalValue, setIntervalValue] = useState(parseInterval(interval).value);
   const [intervalUnit, setIntervalUnit] = useState(parseInterval(interval).unit);
@@ -175,9 +193,9 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   );
 
   const snoozeRuleAndStoreInterval = useCallback(
-    (newSnoozeEndTime: string | -1, interval: string | null) => {
-      if (interval) {
-        setPreviousSnoozeInterval(interval);
+    (newSnoozeEndTime: string | -1, intervalToStore: string | null) => {
+      if (intervalToStore) {
+        setPreviousSnoozeInterval(intervalToStore);
       }
       const newSnoozeSchedule = {
         id: null,
@@ -253,6 +271,18 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   );
   return (
     <>
+      {hasTitle && (
+        <>
+          <EuiTitle size="xxs">
+            <h5>
+              {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozePanelTitle', {
+                defaultMessage: 'Snooze notifications',
+              })}
+            </h5>
+          </EuiTitle>
+          <EuiHorizontalRule margin="xs" />
+        </>
+      )}
       <EuiSpacer size="s" />
       <EuiFlexGroup data-test-subj="snoozePanel" gutterSize="xs">
         <EuiFlexItem>
@@ -368,7 +398,7 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
               <EuiTitle size="xxxs">
                 <h5>
                   {i18n.translate(
-                    'xpack.triggersActionsUi.sections.rulesList.snoozeSchedulesTitle',
+                    'xpack.triggersActionsUI.sections.rulesList.snoozeSchedulesTitle',
                     {
                       defaultMessage: 'Schedules',
                     }
@@ -382,7 +412,7 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
                 size="xs"
                 onClick={() => setIsRemoveAllModalVisible(true)}
               >
-                {i18n.translate('xpack.triggersActionsUi.sections.rulesList.removeAllButton', {
+                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.removeAllButton', {
                   defaultMessage: 'Remove all',
                 })}
               </EuiButtonEmpty>
@@ -414,7 +444,7 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onClickAddSchedule}>
-                {i18n.translate('xpack.triggersActionsUi.sections.rulesList.addButton', {
+                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.addButton', {
                   defaultMessage: 'Add',
                 })}
               </EuiButtonEmpty>
@@ -445,7 +475,7 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       {isRemoveAllModalVisible && (
         <EuiConfirmModal
           title={i18n.translate(
-            'xpack.triggersActionsUi.sections.rulesList.removeAllSnoozeSchedules',
+            'xpack.triggersActionsUI.sections.rulesList.removeAllSnoozeSchedules',
             {
               defaultMessage: 'Remove all schedules',
             }
@@ -454,13 +484,13 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
           onConfirm={onClickRemoveAllSchedules}
           buttonColor="danger"
           cancelButtonText={i18n.translate(
-            'xpack.triggersActionsUi.sections.rulesList.removeCancelButton',
+            'xpack.triggersActionsUI.sections.rulesList.removeCancelButton',
             {
               defaultMessage: 'Cancel',
             }
           )}
           confirmButtonText={i18n.translate(
-            'xpack.triggersActionsUi.sections.rulesList.removeConfirmButton',
+            'xpack.triggersActionsUI.sections.rulesList.removeConfirmButton',
             {
               defaultMessage: 'Remove all',
             }
@@ -468,7 +498,7 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
         >
           <EuiText>
             {i18n.translate(
-              'xpack.triggersActionsUi.sections.rulesList.removeAllSnoozeSchedulesConfirmText',
+              'xpack.triggersActionsUI.sections.rulesList.removeAllSnoozeSchedulesConfirmText',
               {
                 defaultMessage:
                   'This will remove {count, plural, one {# scheduled snooze} other {# scheduled snoozes}} from this rule. Are you sure?',
