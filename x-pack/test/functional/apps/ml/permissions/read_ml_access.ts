@@ -9,9 +9,10 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { USER } from '../../../services/ml/security_common';
 
-export default function ({ getService }: FtrProviderContext) {
+export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
+  const PageObjects = getPageObjects(['common', 'error']);
 
   const testUsers = [
     { user: USER.ML_VIEWER, discoverAvailable: true },
@@ -99,6 +100,13 @@ export default function ({ getService }: FtrProviderContext) {
             await ml.overviewPage.assertDFAEmptyStateExists();
             await ml.overviewPage.assertDFACreateJobButtonExists();
             await ml.overviewPage.assertDFACreateJobButtonEnabled(false);
+          });
+
+          it('should redirect to the Overview page from the unrecognized routes', async () => {
+            await PageObjects.common.navigateToUrl('ml', 'magic-ai');
+
+            await ml.testExecution.logTestStep('should display a warning banner');
+            await ml.overviewPage.assertPageNotFoundBannerText('magic-ai');
           });
         });
       }
