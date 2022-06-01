@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env/node_version_validator');
-require('../packages/elastic-apm-synthtrace/bin/synthtrace');
+require('@elastic/apm-synthtrace/bin/synthtrace');
