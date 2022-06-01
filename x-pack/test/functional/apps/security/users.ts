@@ -175,7 +175,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             return toastCount >= 1;
           });
           const successToast = await toasts.getToastElement(1);
-          expect(await successToast.getVisibleText()).to.be('Password successfully changed.');
+          expect(await successToast.getVisibleText()).to.be('Password successfully changed');
         });
 
         it('of current user when submitting form', async () => {
@@ -194,7 +194,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             return toastCount >= 1;
           });
           const successToast = await toasts.getToastElement(1);
-          expect(await successToast.getVisibleText()).to.be('Password successfully changed.');
+          expect(await successToast.getVisibleText()).to.be('Password successfully changed');
         });
       });
 
