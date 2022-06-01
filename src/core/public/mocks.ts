@@ -8,13 +8,13 @@
 
 import { createMemoryHistory } from 'history';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 
 // Only import types from '.' to avoid triggering default Jest mocks.
 import { PluginInitializerContext, AppMountParameters } from '.';
 // Import values from their individual modules instead.
 import { ScopedHistory } from './application';
 
-import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { analyticsServiceMock } from './analytics/analytics_service.mock';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
