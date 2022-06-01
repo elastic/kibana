@@ -230,5 +230,23 @@ describe('plain_column_renderer', () => {
 
       expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').first().exists()).toBe(true);
     });
+
+    test('join multiple values with a comma', () => {
+      const data = mockTimelineData[19].data;
+      const column = plainColumnRenderer.renderColumn({
+        columnName: 'process.args',
+        eventId: _id,
+        values: getValues('process.args', data),
+        field: defaultHeaders.find((h) => h.id === 'message')!,
+        timelineId: 'test',
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
+      const values = getValues('process.args', data);
+      expect(wrapper.text()).toEqual(values?.join(', '));
+    });
   });
 });

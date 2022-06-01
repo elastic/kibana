@@ -14,7 +14,6 @@ import { TimelineNonEcsData } from '../../../../../../common/search_strategy/tim
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { ColumnRenderer } from './column_renderer';
 import { FormattedFieldValue } from './formatted_field';
-import { parseValue } from './parse_value';
 
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex((item) => item.field === columnName) !== -1;
@@ -43,23 +42,36 @@ export const plainColumnRenderer: ColumnRenderer = {
     truncate?: boolean;
     values: string[] | undefined | null;
     linkValues?: string[] | null | undefined;
-  }) =>
-    values != null
-      ? values.map((value, i) => (
-          <FormattedFieldValue
-            asPlainText={asPlainText}
-            contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
-            eventId={eventId}
-            fieldFormat={field.format ?? ''}
-            fieldName={columnName}
-            isAggregatable={field.aggregatable ?? false}
-            fieldType={field.type ?? ''}
-            isDraggable={isDraggable}
-            key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
-            linkValue={head(linkValues)}
-            truncate={truncate}
-            value={parseValue(value)}
-          />
-        ))
-      : getEmptyTagValue(),
+  }) => {
+    const value = joinValues(values);
+    return value ? (
+      <FormattedFieldValue
+        asPlainText={asPlainText}
+        contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
+        eventId={eventId}
+        fieldFormat={field.format ?? ''}
+        fieldName={columnName}
+        isAggregatable={field.aggregatable ?? false}
+        fieldType={field.type ?? ''}
+        isDraggable={isDraggable}
+        key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}`}
+        linkValue={head(linkValues)}
+        truncate={truncate}
+        value={value}
+      />
+    ) : (
+      getEmptyTagValue()
+    );
+  },
 };
+
+function joinValues(values: string[] | undefined | null): string | undefined {
+  if (Array.isArray(values)) {
+    if (values.length > 0) {
+      return values.join(', ');
+    } else {
+      return values[0];
+    }
+  }
+  return undefined;
+}
