@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  coreMock,
+  httpServerMock,
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core/server/mocks';
 import {
   createPackagePolicyServiceMock,
   createArtifactsClientMock,
@@ -15,7 +20,7 @@ import {
 } from '@kbn/fleet-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CspPlugin } from './plugin';
 import { CspServerPluginStartDeps } from './types';
@@ -23,13 +28,18 @@ import { createFleetAuthzMock, Installation } from '@kbn/fleet-plugin/common';
 import {
   ExternalCallback,
   FleetStartContract,
+  PostPackagePolicyDeleteCallback,
   PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import Chance from 'chance';
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
-import { RequestHandlerContext } from '@kbn/core/server';
+import {
+  ISavedObjectsRepository,
+  RequestHandlerContext,
+  SavedObjectsFindResponse,
+} from '@kbn/core/server';
 
 const chance = new Chance();
 
@@ -70,6 +80,7 @@ describe('Cloud Security Posture Plugin', () => {
       taskManager: taskManagerMock.createStart(),
     };
 
+    let savedObjectRepositoryMock: jest.Mocked<ISavedObjectsRepository>;
     const contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);
     const findMock = mockRouteContext.core.savedObjects.client.find as jest.Mock;
     findMock.mockReturnValue(
@@ -151,6 +162,7 @@ describe('Cloud Security Posture Plugin', () => {
       await mockPlugins.fleet.fleetSetupCompleted();
 
       // Assert
+      // expect((await contextMock.core).savedObjects.client.find).toHaveBeenCalledTimes(2);
       expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledTimes(0);
 
@@ -199,6 +211,51 @@ describe('Cloud Security Posture Plugin', () => {
       }
 
       expect(spy).toHaveBeenCalledTimes(0);
+    });
+
+    it('should uninstall resources when package is removed', async () => {
+      fleetMock.packageService.asInternalUser.getInstallation.mockImplementationOnce(
+        async (): Promise<Installation | undefined> => {
+          return;
+        }
+      );
+
+      const deletedPackagePolicyMock = deletePackagePolicyMock();
+      deletedPackagePolicyMock[0].package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+
+      const packagePolicyPostDeleteCallbacks: PostPackagePolicyDeleteCallback[] = [];
+      fleetMock.registerExternalCallback.mockImplementation((...args) => {
+        if (args[0] === 'postPackagePolicyDelete') {
+          packagePolicyPostDeleteCallbacks.push(args[1]);
+        }
+      });
+      savedObjectRepositoryMock = savedObjectsRepositoryMock.create();
+      savedObjectRepositoryMock.find.mockResolvedValueOnce({
+        saved_objects: [],
+      } as unknown as SavedObjectsFindResponse);
+      savedObjectRepositoryMock.find.mockResolvedValueOnce({
+        saved_objects: [],
+        length: 0,
+      } as unknown as SavedObjectsFindResponse);
+      const context = coreMock.createPluginInitializerContext<unknown>();
+      plugin = new CspPlugin(context);
+      const spy = jest.spyOn(plugin, 'uninstallResources').mockImplementation();
+
+      // Act
+      await plugin.start(coreMock.createStart(), mockPlugins);
+      await mockPlugins.fleet.fleetSetupCompleted();
+
+      // Assert
+      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
+      // expect(spy).toHaveBeenCalledTimes(0);
+
+      expect(packagePolicyPostDeleteCallbacks.length).toBeGreaterThan(0);
+
+      for (const cb of packagePolicyPostDeleteCallbacks) {
+        await cb(deletedPackagePolicyMock);
+      }
+      expect(savedObjectRepositoryMock.find).toHaveBeenCalledTimes(3);
+      // expect(spy).toHaveBeenCalledTimes(1);
     });
   });
 });
