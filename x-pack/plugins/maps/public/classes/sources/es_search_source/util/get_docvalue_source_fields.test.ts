@@ -6,10 +6,9 @@
  */
 
 import { getDocValueAndSourceFields } from './get_docvalue_source_fields';
-import type { IndexPatternField } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 
-function createMockIndexPattern(fields: IndexPatternField[]): DataView {
+function createMockIndexPattern(fields: DataViewField[]): DataView {
   const indexPattern = {
     get fields() {
       return {
@@ -30,7 +29,7 @@ describe('getDocValueAndSourceFields', () => {
         {
           name: 'foobar',
           runtimeField: { type: 'keyword' },
-        } as IndexPatternField,
+        } as DataViewField,
       ]),
       ['foobar'],
       'epoch_millis'

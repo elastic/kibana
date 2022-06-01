@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { IndexPatternField } from './data_view_field';
 import { DataView } from '..';
+import { DataViewField } from './data_view_field';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldSpec, RuntimeField } from '../types';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -18,7 +18,7 @@ describe('Field', function () {
   }
 
   function getField(values = {}) {
-    return new IndexPatternField({ ...fieldValues, ...values });
+    return new DataViewField({ ...fieldValues, ...values });
   }
 
   const fieldValues = {
@@ -146,12 +146,12 @@ describe('Field', function () {
   });
 
   it('exports the property to JSON', () => {
-    const field = new IndexPatternField(fieldValues);
+    const field = new DataViewField(fieldValues);
     expect(flatten(field)).toMatchSnapshot();
   });
 
   it('spec snapshot', () => {
-    const field = new IndexPatternField(fieldValues);
+    const field = new DataViewField(fieldValues);
     const getFormatterForField = () =>
       ({
         toJSON: () => ({

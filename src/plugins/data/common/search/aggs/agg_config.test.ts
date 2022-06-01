@@ -15,8 +15,7 @@ import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
-import { IndexPatternField, IIndexPatternFieldList } from '../..';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField, IIndexPatternFieldList } from '../..';
 
 describe('AggConfig', () => {
   let indexPattern: DataView;
@@ -57,7 +56,7 @@ describe('AggConfig', () => {
         getByName: (name: string) => fields.find((f) => f.name === name),
         filter: () => fields,
       } as unknown as DataView['fields'],
-      getFormatterForField: (field: IndexPatternField) => ({
+      getFormatterForField: (field: DataViewField) => ({
         toJSON: () => ({}),
       }),
     } as DataView;

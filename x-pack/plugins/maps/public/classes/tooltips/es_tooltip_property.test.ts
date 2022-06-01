@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { IndexPatternField } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { ESTooltipProperty } from './es_tooltip_property';
 import { TooltipProperty } from './tooltip_property';
 import { AbstractField } from '../fields/field';
@@ -26,7 +25,7 @@ const indexPatternField = {
   searchable: true,
   aggregatable: true,
   readFromDocValues: false,
-} as IndexPatternField;
+} as DataViewField;
 
 const featurePropertyField = new MockField({
   fieldName: 'machine.os',
@@ -42,7 +41,7 @@ const nonFilterableIndexPatternField = {
   searchable: true,
   aggregatable: true,
   readFromDocValues: false,
-} as IndexPatternField;
+} as DataViewField;
 
 const nonFilterableFeaturePropertyField = new MockField({
   fieldName: 'location',
@@ -52,7 +51,7 @@ const nonFilterableFeaturePropertyField = new MockField({
 const indexPattern = {
   id: 'indexPatternId',
   fields: {
-    getByName: (name: string): IndexPatternField | null => {
+    getByName: (name: string): DataViewField | null => {
       if (name === 'machine.os') {
         return indexPatternField;
       }

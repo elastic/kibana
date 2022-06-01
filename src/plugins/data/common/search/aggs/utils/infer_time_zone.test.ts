@@ -18,8 +18,7 @@ jest.mock('moment', () => {
   return moment;
 });
 
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { IndexPatternField } from '../../..';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { AggParamsDateHistogram } from '../buckets';
 import { inferTimeZone } from './infer_time_zone';
 
@@ -58,7 +57,7 @@ describe('inferTimeZone', () => {
         {
           field: {
             name: 'mydatefield',
-          } as IndexPatternField,
+          } as DataViewField,
         },
         {
           typeMeta: {

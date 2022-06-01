@@ -142,7 +142,6 @@ export {
   isFilterable,
   fieldList,
   DataViewField,
-  IndexPatternField,
   DataViewType,
   IndexPatternsService,
   DataViewsService,
