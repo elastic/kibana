@@ -67,7 +67,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
               <p data-test-subj={'mlPageNotFoundBannerText'}>
                 <FormattedMessage
                   id="xpack.ml.notFoundPage.bannerText"
-                  defaultMessage="ML application doesn't recognize this route: {route}. You've been redirected to the Overview page."
+                  defaultMessage="The Machine Learning application doesn't recognize this route: {route}. You've been redirected to the Overview page."
                   values={{
                     route: pathname,
                   }}
