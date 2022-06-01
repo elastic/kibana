@@ -210,7 +210,8 @@ describe('QueryBar ', () => {
     });
   });
 
-  describe('#onQuerySubmit', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/132659
+  describe.skip('#onQuerySubmit', () => {
     test(' is the only reference that changed when filterQuery props get updated', async () => {
       const wrapper = await getWrapper(
         <Proxy
