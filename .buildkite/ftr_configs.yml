@@ -189,6 +189,7 @@ enabled:
   - x-pack/test/functional/config_security_basic.ts
   - x-pack/test/functional/config.ccs.ts
   - x-pack/test/functional/config.firefox.js
+  - x-pack/test/kubernetes_security/basic/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
   - x-pack/test/lists_api_integration/security_and_spaces/config.ts
@@ -235,6 +236,7 @@ enabled:
   - x-pack/test/security_functional/saml.config.ts
   - x-pack/test/security_solution_endpoint_api_int/config.ts
   - x-pack/test/security_solution_endpoint/config.ts
+  - x-pack/test/session_view/basic/config.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/spaces_api_integration/spaces_only/config.ts
