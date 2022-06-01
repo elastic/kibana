@@ -109,7 +109,7 @@ export type {
   AddConfigDeprecation,
   EnvironmentMode,
   PackageInfo,
-} from './config';
+} from '@kbn/config';
 export type {
   IContextContainer,
   IContextProvider,
@@ -117,7 +117,7 @@ export type {
   HandlerContextType,
   HandlerParameters,
 } from './context';
-export type { CoreId } from './core_context';
+export type { CoreId } from '@kbn/core-base-common-internal';
 
 export { CspConfig } from './csp';
 export type { ICspConfig } from './csp';
@@ -243,6 +243,12 @@ export type {
 
 export type { IRenderOptions } from './rendering';
 export type {
+  LoggingServiceSetup,
+  LoggerContextConfigInput,
+  LoggerConfigType,
+  AppenderConfigType,
+} from './logging';
+export type {
   Logger,
   LoggerFactory,
   Ecs,
@@ -253,11 +259,7 @@ export type {
   LogMeta,
   LogRecord,
   LogLevel,
-  LoggingServiceSetup,
-  LoggerContextConfigInput,
-  LoggerConfigType,
-  AppenderConfigType,
-} from './logging';
+} from '@kbn/logging';
 
 export { PluginType } from './plugins';
 
