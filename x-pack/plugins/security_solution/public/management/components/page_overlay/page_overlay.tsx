@@ -20,6 +20,7 @@ import { EuiFocusTrap, EuiPortal } from '@elastic/eui';
 import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
 import { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
+import { TIMELINE_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
 import {
   SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
   TIMELINE_EUI_THEME_ZINDEX_LEVEL,
@@ -74,6 +75,7 @@ const OverlayRootContainer = styled.div`
 `;
 
 const PAGE_OVERLAY_CSS_CLASSNAME = 'securitySolution-pageOverlay';
+const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
 const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
 
 const PageOverlayGlobalStyles = createGlobalStyle`
@@ -89,32 +91,26 @@ const PageOverlayGlobalStyles = createGlobalStyle`
   // mitigate the issues around z-index so that content that is shown after the PageOverlay is
   // opened is displayed properly.
   //-------------------------------------------------------------------------------------------
-  body.${SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME} {
+  body.${SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME}.${PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME} {
     .${PAGE_OVERLAY_CSS_CLASSNAME},
     .euiOverlayMask,
     .euiFlyout {
       z-index: ${({ theme: { eui } }) => eui[TIMELINE_EUI_THEME_ZINDEX_LEVEL]};
     }
 
-    // These were all copied from AppGlobalStyle: x-pack/plugins/security_solution/public/common/components/page/index.tsx
-    euiPopover__panel.euiPopover__panel-isOpen {
-      z-index: 9900 !important;
-      min-width: 24px;
-    }
-    .euiPopover__panel.euiPopover__panel-isOpen.sourcererPopoverPanel {
-      z-index: 5900 !important;
-    }
-    .euiToolTip {
-      z-index: 9950 !important;
-    }
-    .euiComboBoxOptionsList {
-      z-index: 9999;
-    }
-    .echTooltip {
-      z-index: 9950;
-    }
+    // Other Timeline overrides from AppGlobalStyle:
+    // x-pack/plugins/security_solution/public/common/components/page/index.tsx
+    ${TIMELINE_OVERRIDES_CSS_STYLESHEET}
   }
 `;
+
+const setDocumentBodyOverlayIsVisible = () => {
+  document.body.classList.add(PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME);
+};
+
+const unSetDocumentBodyOverlayIsVisible = () => {
+  document.body.classList.remove(PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME);
+};
 
 const setDocumentBodyLock = () => {
   document.body.classList.add(PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME);
@@ -261,13 +257,18 @@ export const PageOverlay = memo<PageOverlayProps>(
       }
     }, [hideOnUrlPathnameChange, isHidden, isMounted, onHide, openedOnPathName, pathname]);
 
-    // Handle locking the document.body scrolling
+    // Handle adding class names to the `document.body` DOM element
     useEffect(() => {
       if (isMounted) {
         if (isHidden) {
+          unSetDocumentBodyOverlayIsVisible();
           unSetDocumentBodyLock();
-        } else if (lockDocumentBody) {
-          setDocumentBodyLock();
+        } else {
+          setDocumentBodyOverlayIsVisible();
+
+          if (lockDocumentBody) {
+            setDocumentBodyLock();
+          }
         }
       }
 
