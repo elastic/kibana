@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from '@kbn/core/public';
+import { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { DatatableColumn } from '@kbn/expressions-plugin';
@@ -27,6 +28,7 @@ import {
   updateDefaultLabels,
   RangeIndexPatternColumn,
   FormulaIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
 } from './operations';
 
 import { getInvalidFieldMessage, isColumnOfType } from './operations/definitions/helpers';
@@ -342,6 +344,21 @@ function extractQueriesFromRanges(column: RangeIndexPatternColumn) {
 }
 
 /**
+ * If the data view doesn't have a default time field, Discover can't use the global time range - construct an equivalent filter instead
+ */
+function extractTimeRangeFromDateHistogram(
+  column: DateHistogramIndexPatternColumn,
+  timeRange: TimeRange
+) {
+  return [
+    {
+      language: 'kuery',
+      query: `${column.sourceField} >= "${timeRange.from}" AND ${column.sourceField} <= "${timeRange.to}"`,
+    },
+  ];
+}
+
+/**
  * Given an Terms/Top values column transform each entry into a "field: term" KQL query
  * This works also for multi-terms variant
  */
@@ -442,14 +459,16 @@ function collectOnlyValidQueries(
 export function getFiltersInLayer(
   layer: IndexPatternLayer,
   columnIds: string[],
-  layerData: NonNullable<FramePublicAPI['activeData']>[string] | undefined
+  layerData: NonNullable<FramePublicAPI['activeData']>[string] | undefined,
+  indexPattern: IndexPattern,
+  timeRange: TimeRange | undefined
 ) {
   const filtersGroupedByState = collectFiltersFromMetrics(layer, columnIds);
   const [enabledFiltersFromMetricsByLanguage, disabledFitleredFromMetricsByLanguage] = (
     ['enabled', 'disabled'] as const
   ).map((state) => groupBy(filtersGroupedByState[state], 'language') as unknown as GroupedQueries);
 
-  const filterOperation = columnIds
+  const filterOperationsOrErrors = columnIds
     .map((colId) => {
       const column = layer.columns[colId];
 
@@ -472,6 +491,27 @@ export function getFiltersInLayer(
       }
 
       if (
+        isColumnOfType<DateHistogramIndexPatternColumn>('date_histogram', column) &&
+        timeRange &&
+        column.sourceField &&
+        !column.params.ignoreTimeRange &&
+        indexPattern.timeFieldName !== column.sourceField
+      ) {
+        if (indexPattern.timeFieldName) {
+          // non-default time field is not supported in Discover
+          return {
+            error: i18n.translate('xpack.lens.indexPattern.nonDefaultTimeFieldError', {
+              defaultMessage:
+                'Underlying data does not support date histograms on non-default time fields if time field is set on the data view',
+            }),
+          };
+        }
+        return {
+          kuery: extractTimeRangeFromDateHistogram(column, timeRange),
+        };
+      }
+
+      if (
         isColumnOfType<TermsIndexPatternColumn>('terms', column) &&
         !(column.params.otherBucket || column.params.missingBucket)
       ) {
@@ -490,13 +530,30 @@ export function getFiltersInLayer(
         };
       }
     })
-    .filter(Boolean) as GroupedQueries[];
+    .filter(Boolean);
+
+  const errors = filterOperationsOrErrors.filter((filter) => filter && 'error' in filter) as Array<{
+    error: string;
+  }>;
+
+  if (errors.length) {
+    return {
+      error: errors.map(({ error }) => error).join(', '),
+    };
+  }
+
+  const filterOperations = filterOperationsOrErrors as GroupedQueries[];
+
   return {
     enabled: {
-      kuery: collectOnlyValidQueries(enabledFiltersFromMetricsByLanguage, filterOperation, 'kuery'),
+      kuery: collectOnlyValidQueries(
+        enabledFiltersFromMetricsByLanguage,
+        filterOperations,
+        'kuery'
+      ),
       lucene: collectOnlyValidQueries(
         enabledFiltersFromMetricsByLanguage,
-        filterOperation,
+        filterOperations,
         'lucene'
       ),
     },
