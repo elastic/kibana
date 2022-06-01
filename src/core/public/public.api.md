@@ -9,8 +9,9 @@
 import { Action } from 'history';
 import { AnalyticsClient } from '@kbn/analytics-client';
 import type { ButtonColor } from '@elastic/eui';
-import { ConfigPath } from '@kbn/config';
+import type { ConfigPath } from '@kbn/config';
 import { ContextProviderOpts } from '@kbn/analytics-client';
+import { CoreContext } from '@kbn/core-base-browser-internal';
 import type { DocLinks } from '@kbn/doc-links';
 import { EnvironmentMode } from '@kbn/config';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -35,6 +36,8 @@ import { Observable } from 'rxjs';
 import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
+import { PluginName } from '@kbn/core-base-common';
+import { PluginOpaqueId } from '@kbn/core-base-common';
 import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import * as Rx from 'rxjs';
@@ -388,18 +391,7 @@ export interface ChromeUserBanner {
 
 export { ContextProviderOpts }
 
-// @internal (undocumented)
-export interface CoreContext {
-    // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    coreId: CoreId;
-    // (undocumented)
-    env: {
-        mode: Readonly<EnvironmentMode>;
-        packageInfo: Readonly<PackageInfo>;
-    };
-}
+export { CoreContext }
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
@@ -966,8 +958,7 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
     readonly opaqueId: PluginOpaqueId;
 }
 
-// @public (undocumented)
-export type PluginOpaqueId = symbol;
+export { PluginOpaqueId }
 
 // @public
 export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'> & {
@@ -1574,6 +1565,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:195:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:186:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

@@ -19,6 +19,7 @@ import {
 import {
   Filter,
   Query,
+  TimeRange,
   enableFilter,
   disableFilter,
   toggleFilterNegated,
@@ -28,12 +29,7 @@ import {
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from '@kbn/data-plugin/common';
-import type {
-  IDataPluginServices,
-  TimeRange,
-  SavedQueryService,
-  SavedQuery,
-} from '@kbn/data-plugin/public';
+import type { IDataPluginServices, SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
 import { fromUser } from './from_user';
 import { QueryLanguageSwitcher } from './language_switcher';
 import { FilterPanelOption } from '../types';

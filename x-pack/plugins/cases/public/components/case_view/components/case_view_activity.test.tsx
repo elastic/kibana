@@ -86,7 +86,6 @@ const defaultUseGetCaseUserActions = {
 export const caseProps = {
   ...caseViewProps,
   caseData,
-  updateCase: jest.fn(),
   fetchCaseMetrics: jest.fn(),
 };
 
