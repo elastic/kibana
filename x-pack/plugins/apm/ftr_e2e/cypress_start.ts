@@ -92,6 +92,11 @@ function getSpecsToRun() {
   const chunkSize = Math.ceil(allSpecs.length / cliJobCount);
   const specsToRun = chunk(allSpecs, chunkSize)[cliJobNumber - 1];
 
+  console.log({ pattern });
+  console.log({ allSpecs });
+  console.log({ chunkSize });
+  console.log({ specsToRun });
+
   const specList = specsToRun.join(',');
   return specList;
 }
