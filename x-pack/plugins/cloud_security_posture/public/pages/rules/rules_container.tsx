@@ -112,7 +112,7 @@ export const RulesContainer = () => {
     filter: `${cspRuleAssetSavedObjectType}.attributes.policy_id: "${params.policyId}" and ${cspRuleAssetSavedObjectType}.attributes.package_policy_id: "${params.packagePolicyId}"`,
     search: '',
     page: 0,
-    perPage: 25,
+    perPage: 10,
   });
 
   const { data, status, error, refetch } = useFindCspRules({
