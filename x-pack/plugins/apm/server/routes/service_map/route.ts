@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import * as t from 'io-ts';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { invalidLicenseMessage } from '../../../common/service_map';
 import { notifyFeatureUsage } from '../../feature';
@@ -109,8 +110,11 @@ const serviceMapRoute = createApmServerRoute({
       },
     } = params;
 
-    const savedObjectsClient = (await context.core).savedObjects.client;
-    const [setup, serviceGroup] = await Promise.all([
+    const {
+      savedObjects: { client: savedObjectsClient },
+      uiSettings: { client: uiSettingsClient },
+    } = await context.core;
+    const [setup, serviceGroup, maxNumberOfServices] = await Promise.all([
       setupRequest(resources),
       serviceGroupId
         ? getServiceGroup({
@@ -118,6 +122,7 @@ const serviceMapRoute = createApmServerRoute({
             serviceGroupId,
           })
         : Promise.resolve(null),
+      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
     ]);
 
     const serviceNames = [
@@ -140,6 +145,7 @@ const serviceMapRoute = createApmServerRoute({
       logger,
       start,
       end,
+      maxNumberOfServices,
     });
   },
 });

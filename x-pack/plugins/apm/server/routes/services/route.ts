@@ -16,6 +16,7 @@ import {
 } from '@kbn/ml-plugin/server';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { Annotation } from '@kbn/observability-plugin/common/annotations';
+import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
 import { ProfilingValueType } from '../../../common/profiling';
 import { getSearchAggregatedTransactions } from '../../lib/helpers/transactions';
@@ -1246,14 +1247,17 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
       };
     }
 
-    const savedObjectsClient = (await resources.context.core).savedObjects
-      .client;
+    const {
+      savedObjects: { client: savedObjectsClient },
+      uiSettings: { client: uiSettingsClient },
+    } = await resources.context.core;
 
-    const [setup, serviceGroup] = await Promise.all([
+    const [setup, serviceGroup, maxNumberOfServices] = await Promise.all([
       setupRequest(resources),
       serviceGroupId
         ? getServiceGroup({ savedObjectsClient, serviceGroupId })
         : Promise.resolve(null),
+      uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
     ]);
     return {
       services: await getSortedAndFilteredServices({
@@ -1263,6 +1267,7 @@ const sortedAndFilteredServicesRoute = createApmServerRoute({
         environment,
         logger: resources.logger,
         serviceGroup,
+        maxNumberOfServices,
       }),
     };
   },
