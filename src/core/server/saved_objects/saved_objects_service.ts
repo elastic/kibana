@@ -9,14 +9,13 @@
 import { Subject, Observable, firstValueFrom } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
-import { CoreService } from '../../types';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,
   SavedObjectsClientProviderOptions,
 } from '.';
 import { KibanaMigrator, IKibanaMigrator } from './migrations';
-import { CoreContext } from '../core_context';
 import { InternalCoreUsageDataSetup } from '../core_usage_data';
 import {
   ElasticsearchClient,
