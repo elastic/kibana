@@ -8,7 +8,7 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import type { CoreContext } from '@kbn/core-server-internal-base';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { EnvironmentService } from './environment_service';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';

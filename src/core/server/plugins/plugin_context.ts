@@ -7,7 +7,8 @@
  */
 
 import { shareReplay } from 'rxjs/operators';
-import type { CoreContext, PluginOpaqueId } from '@kbn/core-server-internal-base';
+import type { CoreContext } from '@kbn/core-base-server-internal';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { RequestHandlerContext } from '..';
 import { PluginWrapper } from './plugin';
 import {

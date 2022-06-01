@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { CoreContext } from '@kbn/core-server-internal-base';
-import { PluginOpaqueId } from '..';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { MockContextConstructor } from './context_service.test.mocks';
 import { ContextService } from './context_service';
 

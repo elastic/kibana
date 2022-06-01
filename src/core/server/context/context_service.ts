@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { CoreContext, PluginOpaqueId } from '@kbn/core-server-internal-base';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { IContextContainer, ContextContainer } from './container';
 
 type PrebootDeps = SetupDeps;

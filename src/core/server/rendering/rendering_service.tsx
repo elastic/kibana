@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 
 import { firstValueFrom, of } from 'rxjs';
-import type { CoreContext } from '@kbn/core-server-internal-base';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { UiPlugins } from '../plugins';
 import { Template } from './views';
 import {

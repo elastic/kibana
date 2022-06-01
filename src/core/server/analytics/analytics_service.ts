@@ -9,7 +9,7 @@
 import { of } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
-import type { CoreContext } from '@kbn/core-server-internal-base';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 
 /**
  * Exposes the public APIs of the AnalyticsClient during the preboot phase

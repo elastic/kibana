@@ -12,7 +12,7 @@ import { REPO_ROOT } from '@kbn/utils';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { Env } from '@kbn/config';
 import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
-import type { CoreContext } from '@kbn/core-server-internal-base';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { HttpService } from './http_service';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 

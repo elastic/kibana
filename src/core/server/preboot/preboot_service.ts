@@ -7,7 +7,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { CoreContext } from '@kbn/core-server-internal-base';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { InternalPrebootServicePreboot } from './types';
 
 /** @internal */

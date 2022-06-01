@@ -12,7 +12,8 @@ import { pick } from '@kbn/std';
 
 import { Logger } from '@kbn/logging';
 import { Env } from '@kbn/config';
-import type { CoreContext, CoreService, PluginOpaqueId } from '@kbn/core-server-internal-base';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
 
 import type { RequestHandlerContext } from '..';
 import type { InternalExecutionContextSetup } from '../execution_context';
