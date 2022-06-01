@@ -1,5 +1,5 @@
 {
-  "name": "@kbn/core-injected-metadata-common",
+  "name": "@kbn/core-injected-metadata-common-internal",
   "private": true,
   "version": "1.0.0",
   "main": "./target_node/index.js",

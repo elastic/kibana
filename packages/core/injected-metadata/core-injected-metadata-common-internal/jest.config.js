@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/injected-metadata/core-injected-metadata-common'],
+  roots: ['<rootDir>/packages/core/injected-metadata/core-injected-metadata-common-internal'],
 };

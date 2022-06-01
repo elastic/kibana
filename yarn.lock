@@ -3016,7 +3016,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-common@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common":
+"@kbn/core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal":
   version "0.0.0"
   uid ""
 
@@ -6310,7 +6310,7 @@
   version "0.0.0"
   uid ""
 
-"@types/kbn__core-injected-metadata-common@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common/npm_module_types":
+"@types/kbn__core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal/npm_module_types":
   version "0.0.0"
   uid ""
 
