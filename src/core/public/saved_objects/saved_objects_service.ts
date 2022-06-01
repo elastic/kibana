@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CoreService } from '../../types';
-import { CoreStart } from '..';
+import type { CoreService } from '@kbn/core-base-browser-internal';
+import type { HttpStart } from '../http';
 import { SavedObjectsClient, SavedObjectsClientContract } from './saved_objects_client';
 
 /**
@@ -20,7 +20,7 @@ export interface SavedObjectsStart {
 
 export class SavedObjectsService implements CoreService<void, SavedObjectsStart> {
   public async setup() {}
-  public async start({ http }: { http: CoreStart['http'] }): Promise<SavedObjectsStart> {
+  public async start({ http }: { http: HttpStart }): Promise<SavedObjectsStart> {
     return { client: new SavedObjectsClient(http) };
   }
   public async stop() {}

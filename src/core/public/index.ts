@@ -46,6 +46,7 @@ import {
   ChromeRecentlyAccessedHistoryItem,
   ChromeUserBanner,
   NavType,
+  ChromeHelpMenuActions,
 } from './chrome';
 import { FatalErrorsSetup, FatalErrorsStart, FatalErrorInfo } from './fatal_errors';
 import { HttpSetup, HttpStart } from './http';
@@ -68,7 +69,8 @@ export type {
   IExternalUrlPolicy,
   DomainDeprecationDetails,
 } from '../server/types';
-export type { CoreContext, CoreSystem } from './core_system';
+export type { CoreContext } from '@kbn/core-base-browser-internal';
+export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';
 
@@ -324,6 +326,7 @@ export type {
   ChromeBadge,
   ChromeBreadcrumb,
   ChromeHelpExtension,
+  ChromeHelpMenuActions,
   ChromeHelpExtensionMenuLink,
   ChromeHelpExtensionLinkBase,
   ChromeHelpExtensionMenuCustomLink,
