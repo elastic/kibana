@@ -50,6 +50,7 @@ export function UXSection({ bucketSize }: Props) {
       breakdown: SERVICE_NAME,
       dataType: 'ux' as AppDataType,
       selectedMetricField: TRANSACTION_DURATION,
+      showPercentileAnnotations: false,
     },
   ];
 

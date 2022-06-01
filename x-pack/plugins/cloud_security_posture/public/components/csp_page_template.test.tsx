@@ -132,6 +132,22 @@ describe('<CspPageTemplate />', () => {
     );
   });
 
+  it('renders default loading text when query is idle', () => {
+    const query = createReactQueryResponse({
+      status: 'idle',
+    }) as unknown as UseQueryResult;
+
+    const children = chance.sentence();
+    renderCspPageTemplate({ children, query });
+
+    expect(screen.getByTestId(LOADING_STATE_TEST_SUBJECT)).toBeInTheDocument();
+    expect(screen.queryByText(children)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(ERROR_STATE_TEST_SUBJECT)).not.toBeInTheDocument();
+    packageNotInstalledUniqueTexts.forEach((text) =>
+      expect(screen.queryByText(text)).not.toBeInTheDocument()
+    );
+  });
+
   it('renders default error texts when query isError', () => {
     const error = chance.sentence();
     const message = chance.sentence();
