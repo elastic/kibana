@@ -28,7 +28,7 @@ export interface ConsolePageOverlayProps {
 
 export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
   ({ runningConsoles, onHide, isHidden, body, actions, pageTitle = '' }) => {
-    const getTestId = useTestIdGenerator('responder');
+    const getTestId = useTestIdGenerator('consolePageOverlay');
     const handleCloseOverlayOnClick: MouseEventHandler = useCallback(
       (ev) => {
         ev.preventDefault();
@@ -77,7 +77,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
     return (
       <PageOverlay
         isHidden={isHidden}
-        data-test-subj={getTestId('pageOverlay')}
+        data-test-subj="consolePageOverlay"
         onHide={onHide}
         paddingSize="xl"
         enableScrolling={false}

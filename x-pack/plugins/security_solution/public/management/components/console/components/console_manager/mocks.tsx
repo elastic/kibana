@@ -68,9 +68,9 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
       });
 
       await waitFor(() => {
-        expect(
-          renderResult.getByTestId('consolePopupWrapper').classList.contains('is-hidden')
-        ).toBe(false);
+        expect(renderResult.getByTestId('consolePageOverlay').classList.contains('is-hidden')).toBe(
+          false
+        );
       });
     },
 
@@ -83,9 +83,9 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
 
       userEvent.click(hideConsoleButton);
       await waitFor(() => {
-        expect(
-          renderResult.getByTestId('consolePopupWrapper').classList.contains('is-hidden')
-        ).toBe(true);
+        expect(renderResult.getByTestId('consolePageOverlay').classList.contains('is-hidden')).toBe(
+          true
+        );
       });
     },
   };
