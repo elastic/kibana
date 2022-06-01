@@ -7,7 +7,7 @@
  */
 
 import { LoggerFactory } from '@kbn/logging';
-import { IConfigService, Env } from './config';
+import { IConfigService, Env } from '@kbn/config';
 
 /** @internal */
 export type CoreId = symbol;
