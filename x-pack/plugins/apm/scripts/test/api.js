@@ -71,9 +71,14 @@ if (server) {
   ftrScript = 'functional_test_runner';
 }
 
-const inspectArg = inspect ? '--inspect-brk' : '';
-const grepArg = grep ? `--grep "${grep}"` : '';
-const cmd = `node ${inspectArg} ../../../../scripts/${ftrScript} ${grepArg} --config ../../../../test/apm_api_integration/${license}/config.ts`;
+const cmd = [
+  'node',
+  ...(inspect ? ['--inspect-brk'] : []),
+  `../../../../../scripts/${ftrScript}`,
+  ...(grep ? [`--grep "${grep}"`] : []),
+  ...(updateSnapshots ? [`--updateSnapshots`] : []),
+  `--config ../../../../test/apm_api_integration/${license}/config.ts`,
+].join(' ');
 
 console.log(`Running ${cmd}`);
 
