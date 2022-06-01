@@ -40,7 +40,7 @@ export interface ComponentOpts extends PanelOpts {
   hasTitle: boolean;
 }
 
-const TIMEZONE_OPTIONS = moment.tz.names().map((n) => ({ label: n }));
+const TIMEZONE_OPTIONS = moment.tz?.names().map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
 
 export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
   onClose,
