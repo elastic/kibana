@@ -11,7 +11,7 @@ import { isUndefined, omitBy } from 'lodash';
 import type { Subscription } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
-import type { CoreContext, CoreService } from '@kbn/core-server-internal-base';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { KibanaExecutionContext } from '../../types';
 import type { ExecutionContextConfigType } from './execution_context_config';
 

@@ -16,7 +16,7 @@ import type {
   AggregationsSingleBucketAggregateBase,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { CoreContext, CoreService } from '@kbn/core-server-internal-base';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import { SavedObjectsServiceStart, SavedObjectTypeRegistry } from '..';
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';

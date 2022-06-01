@@ -7,7 +7,7 @@
  */
 
 import { firstValueFrom, ReplaySubject } from 'rxjs';
-import type { CoreContext, CoreService } from '@kbn/core-server-internal-base';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import { Logger } from '@kbn/logging';
 import { InternalHttpServiceSetup } from '../http';
 import { InternalMetricsServiceSetup, InternalMetricsServiceStart, OpsMetrics } from './types';

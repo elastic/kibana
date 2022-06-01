@@ -13,8 +13,8 @@ import { getFlattenedObject } from '@kbn/std';
 
 import { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
-import type { CoreContext, PluginName } from '@kbn/core-server-internal-base';
-import { CoreService } from '../../types';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { PluginName } from '@kbn/core-base-common';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
 import {

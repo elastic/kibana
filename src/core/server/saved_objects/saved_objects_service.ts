@@ -9,8 +9,7 @@
 import { Subject, Observable, firstValueFrom } from 'rxjs';
 import { filter, take, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
-import type { CoreContext } from '@kbn/core-server-internal-base';
-import { CoreService } from '../../types';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import {
   SavedObjectsClient,
   SavedObjectsClientProvider,

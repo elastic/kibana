@@ -20,7 +20,7 @@ import { isDeepStrictEqual } from 'util';
 
 import type { RootSchema } from '@kbn/analytics-client';
 import { Logger, LogMeta } from '@kbn/logging';
-import type { CoreContext, CoreService } from '@kbn/core-server-internal-base';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import { AnalyticsServiceSetup } from '../analytics';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { InternalHttpServiceSetup } from '../http';

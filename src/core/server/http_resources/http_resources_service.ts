@@ -7,7 +7,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { CoreContext, CoreService } from '@kbn/core-server-internal-base';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import { RequestHandlerContext } from '..';
 import {
   IRouter,
