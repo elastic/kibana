@@ -11,14 +11,12 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiAccordion,
   EuiAccordionProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
 import deepMerge from 'deepmerge';
-import styled from 'styled-components';
 
 import { pickBy, isEmpty, map } from 'lodash';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
@@ -32,15 +30,9 @@ import { useErrorToast } from '../../common/hooks/use_error_toast';
 import { ECSMappingEditorField } from '../../packs/queries/lazy_ecs_mapping_editor_field';
 import { SavedQueriesDropdown } from '../../saved_queries/saved_queries_dropdown';
 import { liveQueryFormSchema } from './schema';
+import { StyledEuiAccordion } from '../../components/accordion';
 
 const FORM_ID = 'liveQueryForm';
-
-const StyledEuiAccordion = styled(EuiAccordion)`
-  ${({ isDisabled }: { isDisabled?: boolean }) => isDisabled && 'display: none;'}
-  .euiAccordion__button {
-    color: ${({ theme }) => theme.eui.euiColorPrimary};
-  }
-`;
 
 const GhostFormField = () => <></>;
 
