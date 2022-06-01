@@ -30,7 +30,6 @@ import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/p
 
 import { FleetStart } from '@kbn/fleet-plugin/public';
 import {
-  enableNewSyntheticsView,
   FetchDataParams,
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
@@ -191,29 +190,6 @@ export class UptimePlugin
         return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
       },
     });
-
-    const isSyntheticsViewEnabled = core.uiSettings.get<boolean>(enableNewSyntheticsView);
-
-    if (isSyntheticsViewEnabled) {
-      registerSyntheticsRoutesWithNavigation(core, plugins);
-
-      // Register the Synthetics UI plugin
-      core.application.register({
-        id: 'synthetics',
-        euiIconType: 'logoObservability',
-        order: 8400,
-        title: PLUGIN.SYNTHETICS,
-        category: DEFAULT_APP_CATEGORIES.observability,
-        keywords: appKeywords,
-        deepLinks: [],
-        mount: async (params: AppMountParameters) => {
-          const [coreStart, corePlugins] = await core.getStartServices();
-
-          const { renderApp } = await import('./apps/synthetics/render_app');
-          return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
-        },
-      });
-    }
   }
 
   public start(start: CoreStart, plugins: ClientPluginsStart): void {
@@ -243,40 +219,6 @@ export class UptimePlugin
 
   public stop(): void {}
 }
-
-function registerSyntheticsRoutesWithNavigation(
-  core: CoreSetup<ClientPluginsStart, unknown>,
-  plugins: ClientPluginsSetup
-) {
-  plugins.observability.navigation.registerSections(
-    from(core.getStartServices()).pipe(
-      map(([coreStart]) => {
-        if (coreStart.application.capabilities.uptime.show) {
-          return [
-            {
-              label: 'Synthetics',
-              sortKey: 499,
-              entries: [
-                {
-                  label: i18n.translate('xpack.synthetics.overview.heading', {
-                    defaultMessage: 'Monitors',
-                  }),
-                  app: 'synthetics',
-                  path: '/manage-monitors',
-                  matchFullPath: false,
-                  ignoreTrailingSlash: true,
-                },
-              ],
-            },
-          ];
-        }
-
-        return [];
-      })
-    )
-  );
-}
-
 function registerUptimeRoutesWithNavigation(
   core: CoreSetup<ClientPluginsStart, unknown>,
   plugins: ClientPluginsSetup
