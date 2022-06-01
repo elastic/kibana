@@ -4577,7 +4577,7 @@
     "indexPatternEditor.rollupDataView.warning.textParagraphTwo": "ロールアップデータビューは、1つのロールアップインデックスとゼロ以上の標準インデックスと一致させることができます。ロールアップデータビューでは、メトリック、フィールド、間隔、アグリゲーションが制限されています。ロールアップインデックスは、1つのジョブ構成があるインデックス、または複数のジョブと互換する構成があるインデックスに制限されています。",
     "indexPatternEditor.rollupIndexPattern.warning.title": "ベータ機能",
     "indexPatternEditor.rollupLabel": "ロールアップ",
-    "indexPatternEditor.saved": "Saved '{indexPatternTitle}'",
+    "indexPatternEditor.saved": "Saved '{indexPatternName}'",
     "indexPatternEditor.status.matchAnyLabel.matchAnyDetail": "インデックスパターンは、{sourceCount, plural, other  {# 個のソース} }と一致します。",
     "indexPatternEditor.status.noSystemIndicesLabel": "データストリーム、インデックス、またはインデックスエイリアスがインデックスパターンと一致しません。",
     "indexPatternEditor.status.noSystemIndicesWithPromptLabel": "データストリーム、インデックス、またはインデックスエイリアスがインデックスパターンと一致しません。",

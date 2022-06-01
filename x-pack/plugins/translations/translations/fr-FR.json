@@ -4484,7 +4484,7 @@
     "indexPatternEditor.rollupDataView.warning.textParagraphTwo": "Vous pouvez mettre une vue de données de cumul en correspondance avec un index de cumul et zéro index régulier ou plus. Une vue de données de cumul dispose d'indicateurs, de champs, d'intervalles et d'agrégations limités. Un index de cumul se limite aux index disposant d'une configuration de tâche ou de plusieurs tâches avec des configurations compatibles.",
     "indexPatternEditor.rollupIndexPattern.warning.title": "Fonctionnalité bêta",
     "indexPatternEditor.rollupLabel": "Cumul",
-    "indexPatternEditor.saved": "\"{indexPatternTitle}\" enregistré",
+    "indexPatternEditor.saved": "\"{indexPatternName}\" enregistré",
     "indexPatternEditor.status.matchAnyLabel.matchAnyDetail": "Votre modèle d'indexation peut correspondre à {sourceCount, plural, one {# source} other {# sources} }.",
     "indexPatternEditor.status.noSystemIndicesLabel": "Aucun flux de données, index ni alias d'index ne correspond à votre modèle d'indexation.",
     "indexPatternEditor.status.noSystemIndicesWithPromptLabel": "Aucun flux de données, index ni alias d'index ne correspond à votre modèle d'indexation.",

@@ -4588,7 +4588,7 @@
     "indexPatternEditor.rollupDataView.warning.textParagraphTwo": "可以根据一个汇总/打包索引和零个或更多常规索引匹配汇总/打包数据视图。汇总/打包数据视图的指标、字段、时间间隔和聚合有限。汇总/打包索引仅限于具有一个作业配置或多个作业配置兼容的索引。",
     "indexPatternEditor.rollupIndexPattern.warning.title": "公测版功能",
     "indexPatternEditor.rollupLabel": "汇总/打包",
-    "indexPatternEditor.saved": "已保存“{indexPatternTitle}”",
+    "indexPatternEditor.saved": "已保存“{indexPatternName}”",
     "indexPatternEditor.status.matchAnyLabel.matchAnyDetail": "您的索引模式可以匹配{sourceCount, plural, other {# 个源} }。",
     "indexPatternEditor.status.noSystemIndicesLabel": "没有数据流、索引或索引别名匹配您的索引模式。",
     "indexPatternEditor.status.noSystemIndicesWithPromptLabel": "没有数据流、索引或索引别名匹配您的索引模式。",
