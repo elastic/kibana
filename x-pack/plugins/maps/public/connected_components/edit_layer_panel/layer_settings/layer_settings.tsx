@@ -54,7 +54,7 @@ export function LayerSettings(props: Props) {
 
   const onColorChange = (color: string) => {
     // TODO default operation does not change when selecting new basemap style
-    // maybe we can move this to a layer action? more testing needed
+    // not sure how to resolve this?
     const { operation, percentage } = props.layer.getDefaultColorOperation();
     props.updateColorFilter(layerId, { color, operation, percentage });
   }

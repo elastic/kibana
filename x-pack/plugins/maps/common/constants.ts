@@ -289,17 +289,6 @@ export enum DATA_MAPPING_FUNCTION {
   PERCENTILES = 'PERCENTILES',
 }
 
-export const COLOR_FILTER_OPERATIONS = [
-  'screen',
-  'overlay',
-  'multiply',
-  'darken',
-  'lighten',
-  'burn',
-  'dodge',
-  'mix',
-];
-
 export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
 export type RawValue = string | string[] | number | boolean | undefined | null;

@@ -396,8 +396,8 @@ export class EmsVectorTileLayer extends AbstractLayer {
       operation as blendMode,
       percentage
     );
-    for (const { property, color } of properties) {
-      mbMap.setPaintProperty(mbLayerId, property, color);
+    for (const { property, color: newColor } of properties) {
+      mbMap.setPaintProperty(mbLayerId, property, newColor);
     }
     return;
   }
