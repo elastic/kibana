@@ -7,7 +7,7 @@
  */
 
 import { createMemoryHistory } from 'history';
-import { CoreContext } from '@kbn/core-public-internal-base';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 
 // Only import types from '.' to avoid triggering default Jest mocks.
 import { PluginInitializerContext, AppMountParameters } from '.';

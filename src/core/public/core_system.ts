@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreContext } from '@kbn/core-public-internal-base';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';

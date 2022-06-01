@@ -8,7 +8,7 @@
 
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
-import { CoreContext } from '@kbn/core-public-internal-base';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import { of } from 'rxjs';
 import { trackClicks } from './track_clicks';
 import { InjectedMetadataSetup } from '../injected_metadata';

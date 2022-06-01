@@ -7,7 +7,7 @@
  */
 
 import { UnregisterCallback } from 'history';
-import { CoreContext } from '@kbn/core-public-internal-base';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InternalApplicationSetup,
   InternalApplicationStart,

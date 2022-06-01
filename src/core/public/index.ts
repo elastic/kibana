@@ -69,7 +69,7 @@ export type {
   IExternalUrlPolicy,
   DomainDeprecationDetails,
 } from '../server/types';
-export type { CoreContext } from '@kbn/core-public-internal-base';
+export type { CoreContext } from '@kbn/core-base-browser-internal';
 export type { CoreSystem } from './core_system';
 export { DEFAULT_APP_CATEGORIES, APP_WRAPPER_CLASS } from '../utils';
 export type { AppCategory, UiSettingsParams, UserProvidedValues, UiSettingsType } from '../types';

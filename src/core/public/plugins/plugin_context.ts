@@ -7,7 +7,7 @@
  */
 
 import { omit } from 'lodash';
-import { CoreContext } from '@kbn/core-public-internal-base';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import { DiscoveredPlugin } from '../../server';
 import { PluginOpaqueId, PackageInfo, EnvironmentMode } from '../../server/types';
 import { PluginWrapper } from './plugin';
