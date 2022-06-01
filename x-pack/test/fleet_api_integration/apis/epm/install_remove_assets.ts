@@ -12,6 +12,12 @@ import { FtrProviderContext } from '../../../api_integration/ftr_provider_contex
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { setupFleetAndAgents } from '../agents/services';
 
+function checkErrorWithResponseDataOrThrow(err: any) {
+  if (!err?.response?.data) {
+    throw err;
+  }
+}
+
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const kibanaServer = getService('kibanaServer');
@@ -202,9 +208,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_dashboard',
           });
         } catch (err) {
-          if (!err?.response?.data) {
-            throw err;
-          }
+          checkErrorWithResponseDataOrThrow(err);
           resDashboard = err;
         }
         expect(resDashboard.response.data.statusCode).equal(404);
@@ -215,6 +219,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_dashboard2',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resDashboard2 = err;
         }
         expect(resDashboard2.response.data.statusCode).equal(404);
@@ -225,6 +230,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_visualization',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resVis = err;
         }
         expect(resVis.response.data.statusCode).equal(404);
@@ -235,6 +241,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_search',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resSearch = err;
         }
         expect(resSearch.response.data.statusCode).equal(404);
@@ -245,6 +252,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'test-*',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resIndexPattern = err;
         }
         expect(resIndexPattern.response.data.statusCode).equal(404);
@@ -255,6 +263,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_osquery_pack_asset',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resOsqueryPackAsset = err;
         }
         expect(resOsqueryPackAsset.response.data.statusCode).equal(404);
@@ -265,6 +274,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_osquery_saved_query',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           resOsquerySavedQuery = err;
         }
         expect(resOsquerySavedQuery.response.data.statusCode).equal(404);
@@ -277,6 +287,7 @@ export default function (providerContext: FtrProviderContext) {
             id: 'all_assets',
           });
         } catch (err) {
+          checkErrorWithResponseDataOrThrow(err);
           res = err;
         }
         expect(res.response.data.statusCode).equal(404);
@@ -488,6 +499,7 @@ const expectAssetsInstalled = ({
         id: 'invalid',
       });
     } catch (err) {
+      checkErrorWithResponseDataOrThrow(err);
       resInvalidTypeIndexPattern = err;
     }
     expect(resInvalidTypeIndexPattern.response.data.statusCode).equal(404);
