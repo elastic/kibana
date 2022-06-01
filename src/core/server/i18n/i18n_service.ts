@@ -8,7 +8,7 @@
 
 import { firstValueFrom } from 'rxjs';
 import type { Logger } from '@kbn/logging';
-import { IConfigService } from '../config';
+import type { IConfigService } from '@kbn/config';
 import { CoreContext } from '../core_context';
 import { InternalHttpServicePreboot, InternalHttpServiceSetup } from '../http';
 import { config as i18nConfigDef, I18nConfigType } from './i18n_config';

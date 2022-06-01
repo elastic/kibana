@@ -374,6 +374,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         hosts: new subPluginClasses.Hosts(),
         users: new subPluginClasses.Users(),
         network: new subPluginClasses.Network(),
+        kubernetes: new subPluginClasses.Kubernetes(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -402,6 +403,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       users: subPlugins.users.start(storage),
       network: subPlugins.network.start(storage),
       timelines: subPlugins.timelines.start(),
+      kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
     };
