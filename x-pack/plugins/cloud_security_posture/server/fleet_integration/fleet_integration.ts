@@ -40,6 +40,7 @@ export const onPackagePolicyPostCreateCallback = async (
       type: cloudSecurityPostureRuleTemplateSavedObjectType,
       perPage: 10000,
     });
+
   if (existingRuleTemplates.total === 0) {
     return;
   }
@@ -74,7 +75,6 @@ export const removeCspRulesInstancesCallback = async (
         filter: `${cspRuleAssetSavedObjectType}.attributes.package_policy_id: ${deletedPackagePolicy.id} AND ${cspRuleAssetSavedObjectType}.attributes.policy_id: ${deletedPackagePolicy.policy_id}`,
         perPage: 10000,
       });
-
     await Promise.all(
       cspRules.map((rule) => soClient.delete(cspRuleAssetSavedObjectType, rule.id))
     );
@@ -90,14 +90,10 @@ export const isCspPackageInstalled = async (
 ): Promise<boolean> => {
   // TODO: check if CSP package installed via the Fleet API
   try {
-    console.log('sssssss');
-    // console.log(soClient);
     const { saved_objects: postDeleteRules }: SavedObjectsFindResponse<CspRuleSchema> =
       await soClient.find({
         type: cspRuleAssetSavedObjectType,
       });
-
-    console.log({ postDeleteRules });
 
     if (!postDeleteRules.length) {
       return true;
