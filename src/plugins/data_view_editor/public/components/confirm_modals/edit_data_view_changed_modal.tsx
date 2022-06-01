@@ -15,35 +15,31 @@ interface EditDataViewDeps {
   onEdit: () => void;
 }
 
-export const editDataViewModal = ({ dataViewName, overlays, onEdit }: EditDataViewDeps) => {
+export const editDataViewModal = ({ dataViewName, overlays, onEdit }: EditDataViewDeps) =>
   overlays &&
-    overlays
-      .openConfirm(
-        i18n.translate('indexPatternEditor.editDataView.editConfirmationModal.modalDescription', {
-          defaultMessage: 'Changing this data view can break other objects that depend on it.',
+  overlays
+    .openConfirm(
+      i18n.translate('indexPatternEditor.editDataView.editConfirmationModal.modalDescription', {
+        defaultMessage: 'Changing this data view can break other objects that depend on it.',
+      }),
+      {
+        confirmButtonText: i18n.translate(
+          'indexPatternEditor.editDataView.editConfirmationModal.editButton',
+          {
+            defaultMessage: 'Edit',
+          }
+        ),
+        title: i18n.translate('indexPatternEditor.editDataView.editConfirmationModal.editHeader', {
+          defaultMessage: `Edit '{name}'`,
+          values: {
+            name: dataViewName,
+          },
         }),
-        {
-          confirmButtonText: i18n.translate(
-            'indexPatternEditor.editDataView.editConfirmationModal.editButton',
-            {
-              defaultMessage: 'Edit',
-            }
-          ),
-          title: i18n.translate(
-            'indexPatternEditor.editDataView.editConfirmationModal.editHeader',
-            {
-              defaultMessage: `Edit '{name}'`,
-              values: {
-                name: dataViewName,
-              },
-            }
-          ),
-          buttonColor: 'danger',
-        }
-      )
-      .then(async (isConfirmed) => {
-        if (isConfirmed) {
-          onEdit();
-        }
-      });
-};
+        buttonColor: 'danger',
+      }
+    )
+    .then(async (isConfirmed) => {
+      if (isConfirmed) {
+        onEdit();
+      }
+    });

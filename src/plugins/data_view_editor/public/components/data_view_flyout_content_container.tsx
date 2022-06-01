@@ -40,8 +40,8 @@ const IndexPatternFlyoutContentContainer = ({
 
       if (indexPattern && !(indexPattern instanceof Error)) {
         const message = i18n.translate('indexPatternEditor.saved', {
-          defaultMessage: "Saved '{indexPatternTitle}'",
-          values: { indexPatternTitle: indexPattern.title },
+          defaultMessage: "Saved '{indexPatternName}'",
+          values: { indexPatternName: indexPattern.getName() },
         });
         notifications.toasts.addSuccess(message);
         await onSave(indexPattern);

@@ -306,6 +306,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
   );
 
   // If editData exists, loadSources so that MatchedIndices can be loaded for the Timestampfields
+  // We use the below eslint-disable as adding 'loadSources' and 'reloadMatchedIndices' as a dependency creates an infinite loop
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (editData) {
       loadSources();
@@ -313,6 +315,8 @@ const IndexPatternEditorFlyoutContentComponent = ({
     }
   }, [editData]);
 
+  // We use the below eslint-disable as adding editData as a dependency create an infinite loop
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadTimestampFieldOptions(editData ? editData.title : title);
     if (!editData) getFields().timestampField?.setValue('');
