@@ -176,7 +176,7 @@ export async function getClustersFromRequest(
           getClusterRuleDataForClusters(req, clusters, CCS_REMOTE_PATTERN),
           getInstanceRuleDataForClusters(req, clusters, CCS_REMOTE_PATTERN),
         ])
-      : [[], []];
+      : [[], [], []];
   // add the kibana data to each cluster
   kibanas.forEach((kibana) => {
     const clusterIndex = clusters.findIndex(
@@ -185,14 +185,12 @@ export async function getClustersFromRequest(
     );
     set(clusters[clusterIndex], 'kibana', kibana.stats);
 
-    const clusterKibanaRules =
-      kibanaClusterRules === null
-        ? null
-        : kibanaClusterRules?.find((rule) => rule?.clusterUuid === kibana.clusterUuid);
-    const instanceKibanaRules =
-      kibanaInstanceRules === null
-        ? null
-        : kibanaInstanceRules?.find((rule) => rule?.clusterUuid === kibana.clusterUuid);
+    const clusterKibanaRules = kibanaClusterRules.every((rule) => !Boolean(rule))
+      ? null
+      : kibanaClusterRules?.find((rule) => rule?.clusterUuid === kibana.clusterUuid);
+    const instanceKibanaRules = kibanaInstanceRules.every((rule) => !Boolean(rule))
+      ? null
+      : kibanaInstanceRules?.find((rule) => rule?.clusterUuid === kibana.clusterUuid);
     set(
       clusters[clusterIndex],
       'kibana.rules.cluster',
