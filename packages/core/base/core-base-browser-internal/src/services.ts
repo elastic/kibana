@@ -6,9 +6,15 @@
  * Side Public License, v 1.
  */
 
-/** @internal */
+import { MaybePromise } from '@kbn/utility-types';
+
+/**
+ * Base interface that all core service should implement
+ *
+ * @internal
+ */
 export interface CoreService<TSetup = void, TStart = void> {
-  setup(...params: any[]): TSetup | Promise<TSetup>;
-  start(...params: any[]): TStart | Promise<TStart>;
-  stop(): void | Promise<void>;
+  setup(...params: any[]): MaybePromise<TSetup>;
+  start(...params: any[]): MaybePromise<TStart>;
+  stop(): MaybePromise<void>;
 }

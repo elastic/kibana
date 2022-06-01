@@ -7,3 +7,4 @@
  */
 
 export type { CoreContext } from './core_context';
+export type { CoreService } from './services';
