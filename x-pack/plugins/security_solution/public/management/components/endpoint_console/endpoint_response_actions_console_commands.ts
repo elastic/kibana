@@ -29,7 +29,7 @@ export const getEndpointResponseActionsConsoleCommands = (
           required: false,
           allowMultiples: false,
           about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.isolate.arg.command',
+            'xpack.securitySolution.endpointConsoleCommands.isolate.arg.comment',
             { defaultMessage: 'A comment to go along with the action' }
           ),
         },
@@ -49,8 +49,8 @@ export const getEndpointResponseActionsConsoleCommands = (
           required: false,
           allowMultiples: false,
           about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.release.arg.command',
-            { defaultMessage: 'This action will release the host from isolation.' }
+            'xpack.securitySolution.endpointConsoleCommands.release.arg.comment',
+            { defaultMessage: 'A comment to go along with the action' }
           ),
         },
       },
