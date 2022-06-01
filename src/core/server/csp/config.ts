@@ -7,7 +7,7 @@
  */
 
 import { TypeOf, schema } from '@kbn/config-schema';
-import type { ServiceConfigDescriptor } from '@kbn/core-server-internal-base';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 
 interface DirectiveValidationOptions {
   allowNone: boolean;

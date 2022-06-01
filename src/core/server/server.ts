@@ -10,7 +10,7 @@ import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
-import type { ServiceConfigDescriptor } from '@kbn/core-server-internal-base';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { coreDeprecationProvider, ensureValidConfiguration } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
