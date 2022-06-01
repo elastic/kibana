@@ -11,7 +11,7 @@ import { of as mockOf } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import { KibanaRequest } from '@kbn/core/server';
 import type { ExecutionContext } from '@kbn/expressions-plugin/server';
-import type { IndexPatternsContract } from '../../../common';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
   AggsCommonStart,
   ISearchStartSearchSource,
@@ -71,7 +71,7 @@ describe('esaggs expression function - server', () => {
       } as unknown as jest.Mocked<AggsCommonStart>,
       indexPatterns: {
         create: jest.fn().mockResolvedValue({}),
-      } as unknown as jest.Mocked<IndexPatternsContract>,
+      } as unknown as jest.Mocked<DataViewsContract>,
       searchSource: {} as unknown as jest.Mocked<ISearchStartSearchSource>,
     };
     getStartDependencies = jest.fn().mockResolvedValue(startDependencies);

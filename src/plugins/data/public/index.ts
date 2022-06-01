@@ -74,7 +74,7 @@ export const indexPatterns = {
   validate: validateDataView,
 };
 
-export type { IndexPatternsContract, DataViewsContract, TypeMeta } from './data_views';
+export type { DataViewsContract, TypeMeta } from './data_views';
 
 export type {
   IFieldType,
