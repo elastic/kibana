@@ -79,8 +79,8 @@ import { normalizeSortRequest } from './normalize_sort_request';
 import {
   AggConfigSerialized,
   IIndexPattern,
-  IndexPattern,
-  IndexPatternField,
+  DataView,
+  DataViewField,
   SerializedSearchSourceFields,
 } from '../..';
 import {
@@ -633,7 +633,7 @@ export class SearchSource {
     typeof fld === 'string' ? fld : fld.field;
 
   private getFieldsWithoutSourceFilters(
-    index: IndexPattern | undefined,
+    index: DataView | undefined,
     bodyFields: SearchFieldValue[]
   ) {
     if (!index) {
@@ -661,14 +661,14 @@ export class SearchSource {
     }
     // we need to get the list of fields from an index pattern
     return fields
-      .filter((fld: IndexPatternField) => filterSourceFields(fld.name))
-      .map((fld: IndexPatternField) => ({ field: fld.name }));
+      .filter((fld: DataViewField) => filterSourceFields(fld.name))
+      .map((fld: DataViewField) => ({ field: fld.name }));
   }
 
   private getFieldFromDocValueFieldsOrIndexPattern(
     docvaluesIndex: Record<string, object>,
     fld: SearchFieldValue,
-    index?: IndexPattern
+    index?: DataView
   ) {
     if (typeof fld === 'string') {
       return fld;

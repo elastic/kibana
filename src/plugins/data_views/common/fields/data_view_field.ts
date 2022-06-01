@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { KbnFieldType, getKbnFieldType } from '@kbn/field-types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { RuntimeFieldSpec } from '../types';
@@ -235,8 +233,3 @@ export class DataViewField implements IFieldType {
     return this.runtimeField?.type === 'composite';
   }
 }
-
-/**
- * @deprecated Use DataViewField instead. All index pattern interfaces were renamed.
- */
-export class IndexPatternField extends DataViewField {}

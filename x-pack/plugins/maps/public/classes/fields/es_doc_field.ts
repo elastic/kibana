@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IndexPatternField } from '@kbn/data-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { indexPatterns } from '@kbn/data-plugin/public';
 import type {
   AggregationsExtendedStatsAggregation,
@@ -52,7 +52,7 @@ export class ESDocField extends AbstractField implements IField {
     return this._source;
   }
 
-  async _getIndexPatternField(): Promise<IndexPatternField | undefined> {
+  async _getIndexPatternField(): Promise<DataViewField | undefined> {
     const indexPattern = await this._source.getIndexPattern();
     const indexPatternField = indexPattern.fields.getByName(this.getName());
     return indexPatternField && indexPatterns.isNestedField(indexPatternField)

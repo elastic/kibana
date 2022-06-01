@@ -17,7 +17,6 @@ export {
   isFilterable,
   fieldList,
   DataViewField,
-  IndexPatternField,
   isNestedField,
   isMultiField,
   getFieldSubtypeMulti,

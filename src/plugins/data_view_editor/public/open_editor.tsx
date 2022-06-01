@@ -14,7 +14,7 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   createKibanaReactContext,
   toMountPoint,
-  IndexPattern,
+  DataView,
   DataPublicPluginStart,
 } from './shared_imports';
 
@@ -58,7 +58,7 @@ export const getEditorOpener =
         }
       };
 
-      const onSaveIndexPattern = (indexPattern: IndexPattern) => {
+      const onSaveIndexPattern = (indexPattern: DataView) => {
         closeEditor();
 
         if (onSave) {
