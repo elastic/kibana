@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginName } from '../plugins';
+import type { PluginName } from '@kbn/core-base-common';
 import { PluginsStatusService } from './plugins_status';
 import { of, Observable, BehaviorSubject, ReplaySubject } from 'rxjs';
 import { ServiceStatusLevels, CoreStatus, ServiceStatus } from './types';
