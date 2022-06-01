@@ -24,6 +24,7 @@ import {
   EntryMatchWildcard,
   EntryList,
   entriesList,
+  Entry,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { Filter } from '@kbn/es-query';
 import { ListClient } from '@kbn/lists-plugin/server';
@@ -197,9 +198,12 @@ export const buildExceptionFilter = ({
   const smallValueListExceptions: Array<ExceptionListItemSchema | CreateExceptionListItemSchema> =
     [];
   if (listClient) {
-    const filteredExceptions = filterOutLargeValueLists(valueListExceptions, listClient);
-    smallValueListExceptions.push(filteredExceptions);
+    filterOutLargeValueLists(valueListExceptions, listClient).then((filteredExceptions) => {
+      smallValueListExceptions.push(filteredExceptions);
+    });
   }
+
+  exceptionsWithoutValueLists.push(smallValueListExceptions);
 
   const exceptionFilter: Filter = {
     meta: {
@@ -383,6 +387,20 @@ const isBooleanFilter = (clause: object): clause is BooleanFilter => {
   return keys.includes('bool') != null;
 };
 
+export const buildListClause = async (entry: EntryList, listClient: ListClient): BooleanFilter => {
+  const { field, operator } = entry;
+  const list = await listClient.findListItem({ listId: entry.list.id });
+  return {
+    bool: {
+      [operator === 'excluded' ? 'must_not' : 'must']: {
+        terms: {
+          [field]: list,
+        },
+      },
+    },
+  };
+};
+
 export const getBaseNestedClause = (
   entries: NonListEntry[],
   parentField: string
@@ -415,7 +433,7 @@ export const buildNestedClause = (entry: EntryNested): NestedFilter => {
 };
 
 export const createInnerAndClauses = (
-  entry: NonListEntry,
+  entry: Entry,
   parent?: string
 ): BooleanFilter | NestedFilter => {
   const field = parent != null ? `${parent}.${entry.field}` : entry.field;
@@ -427,6 +445,9 @@ export const createInnerAndClauses = (
     return buildMatchAnyClause({ ...entry, field });
   } else if (entriesMatchWildcard.is(entry)) {
     return buildMatchWildcardClause({ ...entry, field });
+  } else if (entriesList.is(entry)) {
+    const field = parent != null ? `${parent}.${entry.field}` : entry.field;
+    return buildListClause({ ...entry, field });
   } else if (entriesNested.is(entry)) {
     return buildNestedClause(entry);
   } else {
