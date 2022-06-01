@@ -44,7 +44,7 @@ import {
   SavedObjectsCreatePointInTimeFinderOptions,
 } from './point_in_time_finder';
 import { ALL_NAMESPACES_STRING } from './utils';
-import { loggerMock } from '../../../logging/logger.mock';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   SavedObjectsRawDocSource,
   SavedObjectsSerializer,
