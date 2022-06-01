@@ -24,7 +24,6 @@ import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
-import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
@@ -37,6 +36,7 @@ import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
+import { useFetchActionLicense } from '../../containers/use_get_action_license';
 
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_bulk_update_case');
@@ -59,7 +59,7 @@ const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
-const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
+const useGetActionLicenseMock = useFetchActionLicense as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetReportersMock = useGetReporters as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -136,7 +136,7 @@ describe('AllCasesListGeneric', () => {
   };
 
   const defaultActionLicense = {
-    actionLicense: null,
+    data: null,
     isLoading: false,
     isError: false,
   };

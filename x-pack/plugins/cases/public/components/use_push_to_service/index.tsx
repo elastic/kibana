@@ -8,7 +8,6 @@
 import { EuiButtonEmpty, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { CaseCallOut } from './callout';
 import {
@@ -23,6 +22,7 @@ import { CaseConnector, ActionConnector, CaseStatuses } from '../../../common/ap
 import { CaseServices } from '../../containers/use_get_case_user_actions';
 import { ErrorMessage } from './callout/types';
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
+import { useFetchActionLicense } from '../../containers/use_get_action_license';
 
 export interface UsePushToService {
   caseId: string;
@@ -54,7 +54,7 @@ export const usePushToService = ({
 }: UsePushToService): ReturnUsePushToService => {
   const { isLoading, pushCaseToExternalService } = usePostPushToService();
 
-  const { isLoading: loadingLicense, actionLicense } = useGetActionLicense();
+  const { isLoading: loadingLicense, data: actionLicense = null } = useFetchActionLicense();
   const hasLicenseError = actionLicense != null && !actionLicense.enabledInLicense;
   const refreshCaseViewPage = useRefreshCaseViewPage();
 

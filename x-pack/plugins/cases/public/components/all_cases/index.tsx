@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { CasesDeepLinkId } from '../../common/navigation';
-import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { useFetchActionLicense } from '../../containers/use_get_action_license';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesBreadcrumbs } from '../use_breadcrumbs';
 import { getActionLicenseError } from '../use_push_to_service/helpers';
@@ -18,7 +18,7 @@ export const AllCases: React.FC = () => {
   const { userCanCrud } = useCasesContext();
   useCasesBreadcrumbs(CasesDeepLinkId.cases);
 
-  const { actionLicense } = useGetActionLicense();
+  const { data: actionLicense = null } = useFetchActionLicense();
   const actionsErrors = useMemo(() => getActionLicenseError(actionLicense), [actionLicense]);
 
   return (
