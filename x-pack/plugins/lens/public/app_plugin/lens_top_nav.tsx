@@ -694,7 +694,7 @@ export const LensTopNavMenu = ({
 
   const dataViewPickerProps = {
     trigger: {
-      label: currentIndexPattern?.getName() || '',
+      label: (currentIndexPattern?.getName && currentIndexPattern?.getName()) || '',
       'data-test-subj': 'lns-dataView-switch-link',
       title: currentIndexPattern?.title || '',
     },
