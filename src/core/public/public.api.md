@@ -9,7 +9,7 @@
 import { Action } from 'history';
 import { AnalyticsClient } from '@kbn/analytics-client';
 import type { ButtonColor } from '@elastic/eui';
-import { ConfigPath } from '@kbn/config';
+import type { ConfigPath } from '@kbn/config';
 import { ContextProviderOpts } from '@kbn/analytics-client';
 import type { DocLinks } from '@kbn/doc-links';
 import { EnvironmentMode } from '@kbn/config';
@@ -248,7 +248,7 @@ export interface ChromeDocTitle {
 // @public (undocumented)
 export interface ChromeHelpExtension {
     appName: string;
-    content?: (element: HTMLDivElement) => () => void;
+    content?: (element: HTMLDivElement, menuActions: ChromeHelpMenuActions) => () => void;
     links?: ChromeHelpExtensionMenuLink[];
 }
 
@@ -283,6 +283,12 @@ export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLi
 
 // @public (undocumented)
 export type ChromeHelpExtensionMenuLink = ChromeHelpExtensionMenuGitHubLink | ChromeHelpExtensionMenuDiscussLink | ChromeHelpExtensionMenuDocumentationLink | ChromeHelpExtensionMenuCustomLink;
+
+// @public (undocumented)
+export interface ChromeHelpMenuActions {
+    // (undocumented)
+    hideHelpMenu: () => void;
+}
 
 // @public (undocumented)
 export interface ChromeNavControl {
