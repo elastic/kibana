@@ -15,7 +15,6 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
-  const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const observability = getService('observability');
   const supertest = getService('supertest');
@@ -38,7 +37,6 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Observability Rule Details page', function () {
     this.tags('includeFirefox');
-    const observability = getService('observability');
 
     let uptimeRuleId: string;
     const uptimeRuleName = 'uptime';
@@ -112,9 +110,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Rule details page components', () => {
-      it('show the rule name as the page title', async () => {
+    describe('Page components', () => {
+      before(async () => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+      });
+      it('show the rule name as the page title', async () => {
         await retry.waitFor(
           'Rule name to be visible',
           async () => await testSubjects.exists('ruleName')
@@ -123,14 +123,45 @@ export default ({ getService }: FtrProviderContext) => {
         expect(ruleName).to.be(logThresholdRuleName);
       });
 
-      it('show the rule name as the page title', async () => {
+      it('shows the rule status section in the rule summary', async () => {
+        await testSubjects.existOrFail('ruleSummaryRuleStatus');
+      });
+
+      it('shows the rule definition section in the rule summary', async () => {
+        await testSubjects.existOrFail('ruleSummaryRuleDefinition');
+      });
+
+      it('maps correctly the rule type with the human readable rule type', async () => {
+        const ruleType = await testSubjects.getVisibleText('ruleSummaryRuleType');
+        expect(ruleType).to.be('Log threshold');
+      });
+    });
+
+    describe('User permissions', () => {
+      before(async () => {
         await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+      });
+      it('should show the more (...) button if user has permissions', async () => {
         await retry.waitFor(
-          'Rule name to be visible',
-          async () => await testSubjects.exists('ruleName')
+          'More button to be visible',
+          async () => await testSubjects.exists('moreButton')
         );
-        const ruleName = await testSubjects.getVisibleText('ruleName');
-        expect(ruleName).to.be(logThresholdRuleName);
+      });
+
+      it('should shows the rule edit and delete button if user has permissions', async () => {
+        await testSubjects.click('moreButton');
+        await testSubjects.existOrFail('editRuleButton');
+        await testSubjects.existOrFail('deleteRuleButton');
+      });
+
+      it('should not let user edit/delete the rule if he has no permissions', async () => {
+        await observability.users.setTestUserRole(
+          observability.users.defineBasicObservabilityRole({
+            logs: ['read'],
+          })
+        );
+        await observability.alerts.common.navigateToRuleDetailsByRuleId(logThresholdRuleId);
+        await testSubjects.missingOrFail('moreButton');
       });
     });
   });
