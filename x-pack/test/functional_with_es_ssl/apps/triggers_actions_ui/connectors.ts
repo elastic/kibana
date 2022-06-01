@@ -50,7 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.setValue('nameInput', connectorName);
 
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
 
       await find.clickByCssSelector(
         '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
@@ -84,7 +84,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await testSubjects.setValue('nameInput', updatedConnectorName);
 
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
 
       await find.clickByCssSelector(
         '[data-test-subj="edit-connector-flyout-save-close-btn"]:not(disabled)'
@@ -275,7 +275,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     await testSubjects.setValue('nameInput', connectorName);
 
-    await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+    await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
 
     await find.clickByCssSelector(
       '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'

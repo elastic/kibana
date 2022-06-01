@@ -137,7 +137,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
@@ -191,7 +191,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addNewActionConnectorButton-.slack');
       const slackConnectorName = generateUniqueKey();
       await testSubjects.setValue('nameInput', slackConnectorName);
-      await testSubjects.setValue('slackWebhookUrlInput', 'https://test');
+      await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
       const createdConnectorToastTitle = await pageObjects.common.closeToast();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);

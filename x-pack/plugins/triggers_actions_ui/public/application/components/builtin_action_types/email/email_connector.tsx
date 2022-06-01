@@ -102,6 +102,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
   useEffect(() => {
     async function fetchConfig() {
       if (
+        service === null ||
         service === AdditionalEmailServices.OTHER ||
         service === AdditionalEmailServices.EXCHANGE
       ) {

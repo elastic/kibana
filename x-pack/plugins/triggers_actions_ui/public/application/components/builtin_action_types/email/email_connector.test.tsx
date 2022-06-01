@@ -7,14 +7,23 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { useKibana } from '../../../../common/lib/kibana';
 import EmailActionConnectorFields from './email_connector';
 import * as hooks from './use_email_config';
-import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../test_utils';
+import {
+  AppMockRenderer,
+  ConnectorFormTestProvider,
+  createAppMockRenderer,
+  waitForComponentToUpdate,
+} from '../test_utils';
 
 jest.mock('../../../../common/lib/kibana');
+const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 
-describe('EmailActionConnectorFields renders', () => {
-  test('all connector fields is rendered', async () => {
+describe('EmailActionConnectorFields', () => {
+  test('all connector fields are rendered', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -53,7 +62,7 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="emailPasswordInput"]').length > 0).toBeTruthy();
   });
 
-  test('secret connector fields is not rendered when hasAuth false', async () => {
+  test('secret connector fields are not rendered when hasAuth false', async () => {
     const actionConnector = {
       secrets: {},
       id: 'test',
@@ -125,7 +134,7 @@ describe('EmailActionConnectorFields renders', () => {
     );
   });
 
-  test('service field is correctly selected when defined', async () => {
+  test('service field are correctly selected when defined', async () => {
     const actionConnector = {
       secrets: {
         user: 'user',
@@ -245,5 +254,303 @@ describe('EmailActionConnectorFields renders', () => {
     expect(wrapper.find('[data-test-subj="emailSecureSwitch"]').first().prop('disabled')).toBe(
       false
     );
+  });
+
+  describe('Validation', () => {
+    let appMockRenderer: AppMockRenderer;
+    const onSubmit = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRenderer = createAppMockRenderer();
+      useKibanaMock().services.actions.validateEmailAddresses = jest
+        .fn()
+        .mockReturnValue([{ valid: true }]);
+    });
+
+    it('submits the connector', async () => {
+      const actionConnector = {
+        secrets: {
+          user: 'user',
+          password: 'pass',
+          clientSecret: null,
+        },
+        id: 'test',
+        actionTypeId: '.email',
+        name: 'email',
+        config: {
+          from: 'test@test.com',
+          port: 2323,
+          host: 'localhost',
+          test: 'test',
+          hasAuth: true,
+          service: 'other',
+        },
+        isDeprecated: false,
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <EmailActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await waitForComponentToUpdate();
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          actionTypeId: '.email',
+          config: {
+            from: 'test@test.com',
+            hasAuth: true,
+            host: 'localhost',
+            port: 2323,
+            secure: false,
+            service: 'other',
+          },
+          id: 'test',
+          isDeprecated: false,
+          name: 'email',
+          secrets: {
+            user: 'user',
+            password: 'pass',
+          },
+        },
+        isValid: true,
+      });
+    });
+
+    it('submits the connector with auth false', async () => {
+      const actionConnector = {
+        secrets: {
+          user: null,
+          password: null,
+          clientSecret: null,
+        },
+        id: 'test',
+        actionTypeId: '.email',
+        name: 'email',
+        config: {
+          from: 'test@test.com',
+          port: 2323,
+          host: 'localhost',
+          test: 'test',
+          hasAuth: false,
+          service: 'other',
+        },
+        isDeprecated: false,
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <EmailActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await waitForComponentToUpdate();
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          actionTypeId: '.email',
+          config: {
+            from: 'test@test.com',
+            port: 2323,
+            host: 'localhost',
+            hasAuth: false,
+            service: 'other',
+            secure: false,
+          },
+          id: 'test',
+          isDeprecated: false,
+          name: 'email',
+        },
+        isValid: true,
+      });
+    });
+
+    it('connector validation fails when connector config is not valid', async () => {
+      useKibanaMock().services.actions.validateEmailAddresses = jest
+        .fn()
+        .mockReturnValue([{ valid: false }]);
+      const actionConnector = {
+        secrets: {
+          user: 'user',
+          password: 'pass',
+        },
+        id: 'test',
+        actionTypeId: '.email',
+        name: 'email',
+        config: {
+          from: 'test@notallowed.com',
+          hasAuth: true,
+          service: 'other',
+        },
+        isDeprecated: false,
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <EmailActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await waitForComponentToUpdate();
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {},
+        isValid: false,
+      });
+    });
+
+    it('connector validation fails when user specified but not password', async () => {
+      const actionConnector = {
+        secrets: {
+          user: 'user',
+          password: '',
+          clientSecret: null,
+        },
+        id: 'test',
+        actionTypeId: '.email',
+        isPreconfigured: false,
+        isDeprecated: false,
+        name: 'email',
+        config: {
+          from: 'test@test.com',
+          port: 2323,
+          host: 'localhost',
+          test: 'test',
+          hasAuth: true,
+          service: 'other',
+        },
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <EmailActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await waitForComponentToUpdate();
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {},
+        isValid: false,
+      });
+    });
+
+    it('connector validation fails when server type is not selected', async () => {
+      const actionConnector = {
+        secrets: {
+          user: 'user',
+          password: 'password',
+        },
+        id: 'test',
+        actionTypeId: '.email',
+        isPreconfigured: false,
+        isDeprecated: false,
+        name: 'email',
+        config: {
+          from: 'test@test.com',
+          port: 2323,
+          host: 'localhost',
+          test: 'test',
+          hasAuth: true,
+        },
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <EmailActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await waitForComponentToUpdate();
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {},
+        isValid: false,
+      });
+    });
+
+    it('connector validation fails when for exchange service selected, but clientId, tenantId and clientSecrets were not defined', async () => {
+      const actionConnector = {
+        secrets: {
+          user: 'user',
+          password: 'pass',
+          clientSecret: null,
+        },
+        id: 'test',
+        actionTypeId: '.email',
+        name: 'email',
+        isPreconfigured: false,
+        isDeprecated: false,
+        config: {
+          from: 'test@test.com',
+          hasAuth: true,
+          service: 'exchange_server',
+        },
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <EmailActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await waitForComponentToUpdate();
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {},
+        isValid: false,
+      });
+    });
   });
 });

@@ -11,7 +11,8 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { screen, fireEvent, waitFor, render } from '@testing-library/react';
 import IndexActionConnectorFields from './es_index_connector';
 import { EuiComboBox, EuiSwitch, EuiSwitchEvent, EuiSelect } from '@elastic/eui';
-import { ConnectorFormTestProvider } from '../test_utils';
+import { AppMockRenderer, ConnectorFormTestProvider, createAppMockRenderer } from '../test_utils';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../../common/lib/kibana');
 
@@ -78,7 +79,7 @@ function setupGetFieldsResponse(getFieldsWithDateMapping: boolean) {
   ]);
 }
 
-describe('IndexActionConnectorFields renders', () => {
+describe('IndexActionConnectorFields', () => {
   test('renders correctly when creating connector', async () => {
     const connector = {
       actionTypeId: '.index',
@@ -327,5 +328,135 @@ describe('IndexActionConnectorFields renders', () => {
     expect(await screen.findAllByRole('option')).toHaveLength(2);
     expect(screen.getByText('indexPattern1')).toBeInTheDocument();
     expect(screen.getByText('indexPattern2')).toBeInTheDocument();
+  });
+
+  describe('Validation', () => {
+    let appMockRenderer: AppMockRenderer;
+    const onSubmit = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appMockRenderer = createAppMockRenderer();
+    });
+
+    test('connector validation succeeds when connector config is valid', async () => {
+      const actionConnector = {
+        secrets: {},
+        id: 'test',
+        actionTypeId: '.index',
+        name: 'es_index',
+        config: {
+          index: 'test_es_index',
+          refresh: false,
+          executionTimeField: '1',
+        },
+        isDeprecated: false,
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <IndexActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          actionTypeId: '.index',
+          config: {
+            index: 'test_es_index',
+            refresh: false,
+            executionTimeField: '1',
+          },
+          id: 'test',
+          isDeprecated: false,
+          __internal__: {
+            hasTimeFieldCheckbox: true,
+          },
+          name: 'es_index',
+        },
+        isValid: true,
+      });
+    });
+
+    test('connector validation succeeds when connector config is valid with minimal config', async () => {
+      const actionConnector = {
+        secrets: {},
+        id: 'test',
+        actionTypeId: '.index',
+        name: 'es_index',
+        config: {
+          index: 'test_es_index',
+        },
+        isDeprecated: false,
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <IndexActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {
+          actionTypeId: '.index',
+          config: {
+            index: 'test_es_index',
+            refresh: false,
+          },
+          id: 'test',
+          isDeprecated: false,
+          name: 'es_index',
+        },
+        isValid: true,
+      });
+    });
+
+    test('connector validation fails when index is empty', async () => {
+      const actionConnector = {
+        secrets: {},
+        id: 'test',
+        actionTypeId: '.index',
+        name: 'es_index',
+        config: {
+          index: '',
+        },
+        isDeprecated: false,
+      };
+
+      const { getByTestId } = appMockRenderer.render(
+        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+          <IndexActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toBeCalledWith({
+        data: {},
+        isValid: false,
+      });
+    });
   });
 });
