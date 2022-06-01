@@ -10,6 +10,15 @@ import { SavedObjectsClientContract } from '../../saved_objects/types';
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
 /**
+ * This contains a subset of `config` object attributes that are relevant for upgrading it.
+ */
+export interface UpgradeableConfigType {
+  buildNum: string;
+  defaultIndex: string | undefined;
+  isDefaultIndexMigrated: boolean | undefined;
+}
+
+/**
  *  Find the most recent SavedConfig that is upgradeable to the specified version
  *  @param {Object} options
  *  @property {SavedObjectsClient} savedObjectsClient
@@ -24,10 +33,11 @@ export async function getUpgradeableConfig({
   version: string;
 }) {
   // attempt to find a config we can upgrade
-  const { saved_objects: savedConfigs } = await savedObjectsClient.find({
+  const { saved_objects: savedConfigs } = await savedObjectsClient.find<UpgradeableConfigType>({
     type: 'config',
     page: 1,
     perPage: 1000,
+    fields: ['buildNum', 'defaultIndex', 'isDefaultIndexMigrated'], // Optimization: we only need these type-level fields, don't return anything else
     sortField: 'buildNum',
     sortOrder: 'desc',
   });
