@@ -49,7 +49,10 @@ export function ContextAppRoute() {
         iconType="alert"
         iconColor="danger"
         title={
-          <FormattedMessage id="discover.context.dataViewErrorTitle" defaultMessage="An error occurred" />
+          <FormattedMessage
+            id="discover.context.dataViewErrorTitle"
+            defaultMessage="An error occurred"
+          />
         }
         body={
           <FormattedMessage
