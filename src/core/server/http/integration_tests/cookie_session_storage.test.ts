@@ -16,7 +16,6 @@ import { Env } from '@kbn/config';
 import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 
 import type { CoreContext } from '@kbn/core-server-internal-base';
-import { Env } from '@kbn/config';
 import { HttpService } from '../http_service';
 
 import { contextServiceMock } from '../../context/context_service.mock';
