@@ -225,7 +225,7 @@ describe('Cloud Security Posture Plugin', () => {
 
       const packageMock = createPackagePolicyMock();
       packageMock.package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
-      packageMock.vars = { dataYaml: { type: 'yaml' } };
+      packageMock.vars = { dataYaml: { type: 'foo' } };
 
       const packagePolicyPostCreateCallbacks: PostPackagePolicyPostCreateCallback[] = [];
       fleetMock.registerExternalCallback.mockImplementation((...args) => {
@@ -257,6 +257,7 @@ describe('Cloud Security Posture Plugin', () => {
         if (fleetMock.packagePolicyService.update.mock.calls.length) {
           expect(updatedPackagePolicy).toHaveProperty('vars');
           expect(updatedPackagePolicy.vars).toHaveProperty('dataYaml');
+          expect(updatedPackagePolicy.vars!.dataYaml).toHaveProperty('value');
         }
       }
       expect(fleetMock.packagePolicyService.update).toHaveBeenCalledTimes(1);

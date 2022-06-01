@@ -90,6 +90,8 @@ export const setVarToPackagePolicy = (
     unset(draft, 'id');
     if (draft.vars?.dataYaml) {
       draft.vars.dataYaml = configFile.dataYaml;
+    } else {
+      draft.vars = configFile;
     }
   });
   return updatedPackagePolicy;

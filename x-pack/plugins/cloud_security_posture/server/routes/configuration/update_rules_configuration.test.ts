@@ -174,7 +174,7 @@ describe('Update rules configuration API', () => {
     expect(cspConfig).toMatchObject({ data_yaml: { activated_rules: { cis_k8s: [] } } });
   });
 
-  it('validate adding new data.yaml to package policy instance', async () => {
+  it('validate adding new dataYaml to package policy instance', async () => {
     const packagePolicy = createPackagePolicyMock();
     packagePolicy.vars = { dataYaml: { type: 'yaml' } };
 
@@ -183,10 +183,30 @@ describe('Update rules configuration API', () => {
     expect(updatedPackagePolicy.vars).toEqual({ dataYaml: { type: 'yaml', value: dataYaml } });
   });
 
-  it('validate updateAgentConfiguration is called with the right parameters', async () => {
+  it('validate adding new datYaml to package policy instance when it not exists on source', async () => {
+    const packagePolicy = createPackagePolicyMock();
+
+    const dataYaml = 'data_yaml:\n  activated_rules:\n  cis_k8s:\n    - 1.1.1\n    - 1.1.2\n';
+    const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
+    expect(updatedPackagePolicy.vars).toEqual({ dataYaml: { type: 'yaml', value: dataYaml } });
+  });
+
+  it('verify that the API for updating package policy was invoked', async () => {
     mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockSoClient = savedObjectsClientMock.create();
     const mockPackagePolicyService = createPackagePolicyServiceMock();
+
+    mockPackagePolicyService.update.mockImplementation(
+      (
+        soClient: SavedObjectsClientContract,
+        esClient: ElasticsearchClient,
+        id: string,
+        packagePolicyUpdate: UpdatePackagePolicy
+      ): Promise<PackagePolicy> => {
+        // @ts-expect-error 2322
+        return packagePolicyUpdate;
+      }
+    );
 
     mockSoClient.find.mockResolvedValueOnce({
       page: 1,
@@ -210,17 +230,19 @@ describe('Update rules configuration API', () => {
     } as unknown as SavedObjectsFindResponse<CspRuleSchema>);
 
     const mockPackagePolicy = createPackagePolicyMock();
-    mockPackagePolicy.vars = { dataYaml: { type: 'yaml' } };
+    mockPackagePolicy.vars = { dataYaml: { type: 'foo' } };
     const packagePolicyId1 = chance.guid();
     mockPackagePolicy.id = packagePolicyId1;
 
-    await updateAgentConfiguration(
+    const updatePackagePolicy = await updateAgentConfiguration(
       mockPackagePolicyService,
       mockPackagePolicy,
       mockEsClient,
       mockSoClient
     );
 
+    expect(updatePackagePolicy.vars!.dataYaml).toHaveProperty('value');
+    expect(updatePackagePolicy.vars!.dataYaml).toMatchObject({ type: 'yaml' });
     expect(mockPackagePolicyService.update).toBeCalledTimes(1);
     expect(mockPackagePolicyService.update.mock.calls[0][2]).toEqual(packagePolicyId1);
   });
