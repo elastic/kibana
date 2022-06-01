@@ -15,7 +15,7 @@ import { AggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
 import { MetricAggType } from './metrics/metric_agg_type';
-import { DataView, DataViewField, IIndexPatternFieldList } from '../..';
+import type { DataView, DataViewField, IIndexPatternFieldList } from '../..';
 
 describe('AggConfig', () => {
   let indexPattern: DataView;
