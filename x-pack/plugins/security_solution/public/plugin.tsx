@@ -59,6 +59,7 @@ import { ExperimentalFeaturesService } from './common/experimental_features_serv
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
+import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
 import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
@@ -210,6 +211,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         view: 'package-policy-edit',
         Component: getLazyEndpointPolicyEditExtension(core, plugins),
       });
+
+      if (this.experimentalFeatures.policyResponseInFleetEnabled) {
+        registerExtension({
+          package: 'endpoint',
+          view: 'package-policy-response',
+          Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+        });
+      }
 
       registerExtension({
         package: 'endpoint',
@@ -365,6 +374,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         hosts: new subPluginClasses.Hosts(),
         users: new subPluginClasses.Users(),
         network: new subPluginClasses.Network(),
+        kubernetes: new subPluginClasses.Kubernetes(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -393,6 +403,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       users: subPlugins.users.start(storage),
       network: subPlugins.network.start(storage),
       timelines: subPlugins.timelines.start(),
+      kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
     };

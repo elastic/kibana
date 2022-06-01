@@ -9,13 +9,8 @@
 import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
 import type { Logger, LoggerFactory } from '@kbn/logging';
-import {
-  ConfigService,
-  Env,
-  RawConfigurationProvider,
-  coreDeprecationProvider,
-  ensureValidConfiguration,
-} from './config';
+import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
+import { coreDeprecationProvider, ensureValidConfiguration } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
