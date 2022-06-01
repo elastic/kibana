@@ -91,7 +91,7 @@ const esEvents = toElasticsearchOutput([
 
 ### CLI
 
-Via the CLI, you can run scenarios, either using a fixed time range or continuously generating data. Some examples are available in [`scenarios/`](https://github.com/elastic/kibana/blob/main/packages/elastic-apm-synthtrace/scenarios/).
+Via the CLI, you can run scenarios, either using a fixed time range or continuously generating data. Scenarios are available in [`packages/elastic-apm-synthtrace/src/scenarios/`](https://github.com/elastic/kibana/blob/main/packages/elastic-apm-synthtrace/src/scenarios/).
 
 For live data ingestion:
 

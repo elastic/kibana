@@ -8,11 +8,11 @@
 
 // Run with: node ./src/scripts/run ./src/scripts/examples/03_monitoring.ts --target=http://elastic:changeme@localhost:9200
 
-import { stackMonitoring, timerange } from '../src';
-import { Scenario } from '../src/scripts/scenario';
-import { getLogger } from '../src/scripts/utils/get_common_services';
-import { RunOptions } from '../src/scripts/utils/parse_run_cli_flags';
-import { StackMonitoringFields } from '../src/lib/stack_monitoring/stack_monitoring_fields';
+import { stackMonitoring, timerange } from '..';
+import { Scenario } from '../scripts/scenario';
+import { getLogger } from '../scripts/utils/get_common_services';
+import { RunOptions } from '../scripts/utils/parse_run_cli_flags';
+import { StackMonitoringFields } from '../lib/stack_monitoring/stack_monitoring_fields';
 
 const scenario: Scenario<StackMonitoringFields> = async (runOptions: RunOptions) => {
   const logger = getLogger(runOptions);

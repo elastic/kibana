@@ -7,9 +7,9 @@
  */
 
 import { compact, shuffle } from 'lodash';
-import { apm, ApmFields, EntityArrayIterable, timerange } from '../src';
-import { generateLongId, generateShortId } from '../src/lib/utils/generate_id';
-import { Scenario } from '../src/scripts/scenario';
+import { apm, ApmFields, EntityArrayIterable, timerange } from '..';
+import { generateLongId, generateShortId } from '../lib/utils/generate_id';
+import { Scenario } from '../scripts/scenario';
 
 function generateExternalSpanLinks() {
   // randomly creates external span links 0 - 10
