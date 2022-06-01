@@ -121,6 +121,9 @@ export const getRecordRangeLabel = ({
   rangeEnd: number;
   total: number;
 }) => {
+  // If total is less than the end range, use total as end range.
+  const availableEndRange = Math.min(rangeEnd, total);
+
   return (
     <FormattedMessage
       id="xpack.synthetics.management.monitorList.recordRange"
@@ -128,7 +131,7 @@ export const getRecordRangeLabel = ({
       values={{
         range: (
           <strong>
-            <EuiI18nNumber value={rangeStart} />-<EuiI18nNumber value={rangeEnd} />
+            <EuiI18nNumber value={rangeStart} />-<EuiI18nNumber value={availableEndRange} />
           </strong>
         ),
         total: <EuiI18nNumber value={total} />,
