@@ -29,7 +29,7 @@ const customLineStaticAnnotation = {
   id: 'ann1',
   key: { type: 'point_in_time' as const, timestamp: '2022-03-18T08:25:00.000Z' },
   label: 'Event',
-  icon: 'triangle',
+  icon: 'triangle' as const,
   color: 'red',
   lineStyle: 'dashed' as const,
   lineWidth: 3,

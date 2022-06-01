@@ -69,6 +69,8 @@
     {
       "label": "Contributors Newsletters",
       "items": [
+        { "id": "kibMay2022ContributorNewsletter" },
+        { "id": "kibApril2022ContributorNewsletter" },
         { "id": "kibMarch2022ContributorNewsletter" },
         { "id": "kibFebruary2022ContributorNewsletter" },
         { "id": "kibJanuary2022ContributorNewsletter" },
@@ -99,8 +101,6 @@
         { "id": "kibCoreSavedObjectsPluginApi" },
         { "id": "kibFieldFormatsPluginApi" },
         { "id": "kibDataPluginApi" },
-        { "id": "kibDataAutocompletePluginApi" },
-        { "id": "kibDataEnhancedPluginApi" },
         { "id": "kibDataViewsPluginApi" },
         { "id": "kibDataQueryPluginApi" },
         { "id": "kibDataSearchPluginApi" },
@@ -164,6 +164,50 @@
         { "id": "kibUsageCollectionPluginApi" },
         { "id": "kibVisTypeTimeseriesPluginApi" },
         { "id": "kibVisualizationsPluginApi" }
+      ]
+    },
+    {
+      "label": "Operations",
+      "items": [
+        { "id": "kibDevDocsOpsOverview", "label": "Overview" },
+        {
+          "label": "CI",
+          "items": [
+            { "id": "kibDevDocsOpsCiStats" }
+          ]
+        },
+        {
+          "label": "Build tooling",
+          "items": [
+            { "id": "kibDevDocsOpsOptimizer" },
+            { "id": "kibDevDocsOpsBabelPreset" },
+            { "id": "kibDevDocsOpsTypeSummarizer" },
+            { "id": "kibDevDocsOpsBabelPluginSyntheticPackages" },
+            { "id": "kibDevDocsOpsUiSharedDepsNpm" },
+            { "id": "kibDevDocsOpsUiSharedDepsSrc" }
+          ]
+        },
+        {
+          "label": "Linting & Validation",
+          "items": [
+            { "id": "kibDevDocsOpsEslintConfig" },
+            { "id": "kibDevDocsOpsEslintPluginEslint" },
+            { "id": "kibDevDocsOpsEslintWithTypes" },
+            { "id": "kibDevDocsOpsEslintPluginImports" }
+          ]
+        },
+        {
+          "label": "Utilities",
+          "items": [
+            { "id": "kibDevDocsToolingLog" },
+            { "id": "kibDevDocsOpsJestSerializers" },
+            { "id": "kibDevDocsOpsExpect" },
+            { "id": "kibDevDocsOpsAmbientStorybookTypes" },
+            { "id": "kibDevDocsOpsAmbientUiTypes" },
+            { "id": "kibDevDocsOpsTestSubjSelector" },
+            { "id": "kibDevDocsOpsBazelRunner" }
+          ]
+        }
       ]
     }
   ]

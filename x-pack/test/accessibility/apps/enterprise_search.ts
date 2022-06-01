@@ -14,7 +14,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const { common } = getPageObjects(['common']);
 
-  describe('Enterprise Search', () => {
+  describe('Enterprise Search Accessibility', () => {
     // NOTE: These accessibility tests currently only run against Enterprise Search in Kibana
     // without a sidecar Enterprise Search service/host configured, and as such only test
     // the basic setup guides and not the full application(s)

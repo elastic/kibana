@@ -5,35 +5,56 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren } from 'react';
-import { EuiCallOut, EuiText } from '@elastic/eui';
-import { UserCommandInput } from './user_command_input';
+import React, { memo, PropsWithChildren, useEffect } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCode, EuiText } from '@elastic/eui';
+import { UnsupportedMessageCallout } from './unsupported_message_callout';
 import { ParsedCommandInput } from '../service/parsed_command_input';
-import { CommandDefinition } from '../types';
+import { CommandDefinition, CommandExecutionComponentProps } from '../types';
 import { CommandInputUsage } from './command_usage';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export type BadArgumentProps = PropsWithChildren<{
   parsedInput: ParsedCommandInput;
   commandDefinition: CommandDefinition;
 }>;
 
-export const BadArgument = memo<BadArgumentProps>(
-  ({ parsedInput, commandDefinition, children = null }) => {
-    const getTestId = useTestIdGenerator(useDataTestSubj());
+/**
+ * Shows a bad argument error. The error message needs to be defined via the Command History Item's
+ * `state.errorMessage`
+ */
+export const BadArgument = memo<CommandExecutionComponentProps>(({ command, setStatus, store }) => {
+  const getTestId = useTestIdGenerator(useDataTestSubj());
 
-    return (
+  useEffect(() => {
+    setStatus('success');
+  }, [setStatus]);
+
+  return (
+    <UnsupportedMessageCallout
+      header={
+        <FormattedMessage
+          id="xpack.securitySolution.console.badArgument.title"
+          defaultMessage="Unsupported argument!"
+        />
+      }
+      data-test-subj={getTestId('badArgument')}
+    >
       <>
-        <EuiText>
-          <UserCommandInput input={parsedInput.input} />
+        {store.errorMessage}
+        <CommandInputUsage commandDef={command.commandDefinition} />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.securitySolution.console.badArgument.helpMessage"
+            defaultMessage="Type {helpCmd} for assistance."
+            values={{
+              helpCmd: <EuiCode>{`${command.commandDefinition.name} --help`}</EuiCode>,
+            }}
+          />
         </EuiText>
-        <EuiCallOut color="danger" data-test-subj={getTestId('badArgument')}>
-          {children}
-          <CommandInputUsage commandDef={commandDefinition} />
-        </EuiCallOut>
       </>
-    );
-  }
-);
+    </UnsupportedMessageCallout>
+  );
+});
 BadArgument.displayName = 'BadArgument';

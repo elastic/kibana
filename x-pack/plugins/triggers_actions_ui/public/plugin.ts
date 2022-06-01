@@ -31,7 +31,11 @@ import { getAddAlertFlyoutLazy } from './common/get_add_alert_flyout';
 import { getEditAlertFlyoutLazy } from './common/get_edit_alert_flyout';
 import { getAlertsTableLazy } from './common/get_alerts_table';
 import { getRuleStatusDropdownLazy } from './common/get_rule_status_dropdown';
+import { getRuleTagFilterLazy } from './common/get_rule_tag_filter';
+import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
 import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
+import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
+import { getRulesListLazy } from './common/get_rules_list';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import {
   ExperimentalFeatures,
@@ -47,12 +51,17 @@ import type {
   ConnectorEditFlyoutProps,
   AlertsTableProps,
   RuleStatusDropdownProps,
+  RuleTagFilterProps,
+  RuleStatusFilterProps,
   RuleTagBadgeProps,
+  RuleEventLogListProps,
   AlertsTableConfigurationRegistry,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
 import { PLUGIN_ID } from './common/constants';
+import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
+import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -77,8 +86,13 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
+  getAlertsStateTable: (props: AlertsTableStateProps) => ReactElement<AlertsTableStateProps>;
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
+  getRuleTagFilter: (props: RuleTagFilterProps) => ReactElement<RuleTagFilterProps>;
+  getRuleStatusFilter: (props: RuleStatusFilterProps) => ReactElement<RuleStatusFilterProps>;
   getRuleTagBadge: (props: RuleTagBadgeProps) => ReactElement<RuleTagBadgeProps>;
+  getRuleEventLogList: (props: RuleEventLogListProps) => ReactElement<RuleEventLogListProps>;
+  getRulesList: () => ReactElement;
 }
 
 interface PluginsSetup {
@@ -246,14 +260,29 @@ export class Plugin
           ruleTypeRegistry: this.ruleTypeRegistry,
         });
       },
+      getAlertsStateTable: (props: AlertsTableStateProps) => {
+        return getAlertsTableStateLazy(props);
+      },
       getAlertsTable: (props: AlertsTableProps) => {
         return getAlertsTableLazy(props);
       },
       getRuleStatusDropdown: (props: RuleStatusDropdownProps) => {
         return getRuleStatusDropdownLazy(props);
       },
+      getRuleTagFilter: (props: RuleTagFilterProps) => {
+        return getRuleTagFilterLazy(props);
+      },
+      getRuleStatusFilter: (props: RuleStatusFilterProps) => {
+        return getRuleStatusFilterLazy(props);
+      },
       getRuleTagBadge: (props: RuleTagBadgeProps) => {
         return getRuleTagBadgeLazy(props);
+      },
+      getRuleEventLogList: (props: RuleEventLogListProps) => {
+        return getRuleEventLogListLazy(props);
+      },
+      getRulesList: () => {
+        return getRulesListLazy();
       },
     };
   }

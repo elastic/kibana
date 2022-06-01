@@ -90,7 +90,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
       </div>
     </div>
     <div
-      className="euiSpacer euiSpacer--l"
+      className="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
     />
     <div
       className="euiBasicTable"
@@ -868,7 +868,7 @@ exports[`Storyshots Home/Components/Workpad Table Workpad Table 1`] = `
       </div>
       <div>
         <div
-          className="euiSpacer euiSpacer--m"
+          className="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
         />
         <div
           className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--wrap eui-xScroll"

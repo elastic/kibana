@@ -6,13 +6,13 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiPanel, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { AxisStyle, Rotation, ScaleType } from '@elastic/charts';
 import styled from 'styled-components';
 import { FormattedNumber } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { BarChart } from '../../../../common/components/charts/barchart';
-import { LastUpdatedAt } from '../util';
+import { LastUpdatedAt } from '../utils';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { HeaderSection } from '../../../../common/components/header_section';
 import {
@@ -177,11 +177,8 @@ const CasesByStatusComponent: React.FC = () => {
                 <>
                   <b>
                     <FormattedNumber value={totalCounts} />
-                  </b>
-                  <> </>
-                  <small>
-                    <EuiLink onClick={goToCases}>{CASES(totalCounts)}</EuiLink>
-                  </small>
+                  </b>{' '}
+                  <span> {CASES(totalCounts)}</span>
                 </>
               </EuiText>
             )}

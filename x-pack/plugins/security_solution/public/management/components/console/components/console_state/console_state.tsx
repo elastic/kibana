@@ -17,15 +17,12 @@ type ConsoleStateProviderProps = PropsWithChildren<{}> & InitialStateInterface;
  * A Console wide data store for internal state management between inner components
  */
 export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
-  ({ commandService, scrollToBottom, dataTestSubj, children }) => {
+  ({ commands, scrollToBottom, HelpComponent, dataTestSubj, children }) => {
     const [state, dispatch] = useReducer(
       stateDataReducer,
-      { commandService, scrollToBottom, dataTestSubj },
+      { commands, scrollToBottom, HelpComponent, dataTestSubj },
       initiateState
     );
-
-    // FIXME:PT should handle cases where props that are in the store change
-    //          Probably need to have a `useAffect()` that just does a `dispatch()` to update those.
 
     return (
       <ConsoleStateContext.Provider value={{ state, dispatch }}>

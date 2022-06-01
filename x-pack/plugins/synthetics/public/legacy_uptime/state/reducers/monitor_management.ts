@@ -209,6 +209,7 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         enablement: null,
       },
       enablement: {
+        canManageApiKeys: state.enablement?.canManageApiKeys || false,
         canEnable: state.enablement?.canEnable || false,
         areApiKeysEnabled: state.enablement?.areApiKeysEnabled || false,
         isEnabled: false,
@@ -246,6 +247,7 @@ export const monitorManagementListReducer = createReducer(initialState, (builder
         enablement: null,
       },
       enablement: {
+        canManageApiKeys: state.enablement?.canManageApiKeys || false,
         canEnable: state.enablement?.canEnable || false,
         areApiKeysEnabled: state.enablement?.areApiKeysEnabled || false,
         isEnabled: true,

@@ -21,7 +21,12 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import {
+  SavedObjectRelation,
+  SavedObjectManagementTypeInfo,
+} from '@kbn/saved-objects-management-plugin/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
 import { IndexHeader } from './index_header';
@@ -34,6 +39,10 @@ const codeStyle = {
 
 export interface EditIndexPatternProps extends RouteComponentProps {
   indexPattern: DataView;
+}
+
+export interface SavedObjectRelationWithTitle extends SavedObjectRelation {
+  title: string;
 }
 
 const mappingConflictHeader = i18n.translate(
@@ -54,7 +63,7 @@ const securitySolution = 'security-solution';
 
 export const EditIndexPattern = withRouter(
   ({ indexPattern, history, location }: EditIndexPatternProps) => {
-    const { uiSettings, overlays, chrome, dataViews, IndexPatternEditor } =
+    const { uiSettings, overlays, chrome, dataViews, IndexPatternEditor, savedObjectsManagement } =
       useKibana<IndexPatternManagmentContext>().services;
     const [fields, setFields] = useState<DataViewField[]>(indexPattern.getNonScriptedFields());
     const [conflictedFields, setConflictedFields] = useState<DataViewField[]>(
@@ -63,6 +72,26 @@ export const EditIndexPattern = withRouter(
     const [defaultIndex, setDefaultIndex] = useState<string>(uiSettings.get('defaultIndex'));
     const [tags, setTags] = useState<any[]>([]);
     const [showEditDialog, setShowEditDialog] = useState<boolean>(false);
+    const [relationships, setRelationships] = useState<SavedObjectRelationWithTitle[]>([]);
+    const [allowedTypes, setAllowedTypes] = useState<SavedObjectManagementTypeInfo[]>([]);
+
+    useEffect(() => {
+      savedObjectsManagement.getAllowedTypes().then((resp) => {
+        setAllowedTypes(resp);
+      });
+    }, [savedObjectsManagement]);
+
+    useEffect(() => {
+      if (allowedTypes.length === 0) {
+        return;
+      }
+      const allowedAsString = allowedTypes.map((item) => item.name);
+      savedObjectsManagement
+        .getRelationships(DATA_VIEW_SAVED_OBJECT_TYPE, indexPattern.id!, allowedAsString)
+        .then((resp) => {
+          setRelationships(resp.relations.map((r) => ({ ...r, title: r.meta.title! })));
+        });
+    }, [savedObjectsManagement, indexPattern, allowedTypes]);
 
     useEffect(() => {
       setFields(indexPattern.getNonScriptedFields());
@@ -217,6 +246,8 @@ export const EditIndexPattern = withRouter(
           indexPattern={indexPattern}
           saveIndexPattern={dataViews.updateSavedObject.bind(dataViews)}
           fields={fields}
+          relationships={relationships}
+          allowedTypes={allowedTypes}
           history={history}
           location={location}
           refreshFields={() => {

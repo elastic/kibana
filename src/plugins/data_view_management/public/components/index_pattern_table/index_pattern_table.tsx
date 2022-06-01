@@ -330,7 +330,7 @@ export const IndexPatternTable = ({
           pagination={pagination}
           sorting={sorting}
           search={search}
-          selection={selection}
+          selection={dataViews.getCanSaveSync() ? selection : undefined}
         />
       </ContextWrapper>
       {displayIndexPatternEditor}

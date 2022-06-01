@@ -51,3 +51,17 @@ export function extractUnknownDocFailureReason(
     `'`
   );
 }
+
+/**
+ * Constructs migration failure message string for doc exceeds max batch size in bytes
+ */
+export const fatalReasonDocumentExceedsMaxBatchSizeBytes = ({
+  _id,
+  docSizeBytes,
+  maxBatchSizeBytes,
+}: {
+  _id: string;
+  docSizeBytes: number;
+  maxBatchSizeBytes: number;
+}) =>
+  `The document with _id "${_id}" is ${docSizeBytes} bytes which exceeds the configured maximum batch size of ${maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`;

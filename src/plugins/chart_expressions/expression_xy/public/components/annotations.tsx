@@ -7,7 +7,7 @@
  */
 
 import './annotations.scss';
-import './reference_lines.scss';
+import './reference_lines/reference_lines.scss';
 
 import React from 'react';
 import { snakeCase } from 'lodash';
@@ -29,7 +29,11 @@ import {
   defaultAnnotationColor,
   defaultAnnotationRangeColor,
 } from '@kbn/event-annotation-plugin/public';
-import type { AnnotationLayerArgs, AnnotationLayerConfigResult } from '../../common/types';
+import type {
+  AnnotationLayerArgs,
+  CommonXYAnnotationLayerConfig,
+  CollectiveConfig,
+} from '../../common';
 import { AnnotationIcon, hasIcon, Marker, MarkerBody } from '../helpers';
 import { mapVerticalToHorizontalPlacement, LINES_MARKER_SIZE } from '../helpers';
 
@@ -50,12 +54,6 @@ export interface AnnotationsProps {
   minInterval?: number;
   isBarChart?: boolean;
   outsideDimension: number;
-}
-
-interface CollectiveConfig extends ManualPointEventAnnotationArgs {
-  roundedTimestamp: number;
-  axisMode: 'bottom';
-  customTooltipDetails?: AnnotationTooltipFormatter | undefined;
 }
 
 const groupVisibleConfigsByInterval = (
@@ -131,7 +129,7 @@ const getCommonStyles = (configArr: ManualPointEventAnnotationArgs[]) => {
   };
 };
 
-export const getRangeAnnotations = (layers: AnnotationLayerConfigResult[]) => {
+export const getRangeAnnotations = (layers: CommonXYAnnotationLayerConfig[]) => {
   return layers
     .flatMap(({ annotations }) =>
       annotations.filter(
@@ -146,7 +144,7 @@ export const OUTSIDE_RECT_ANNOTATION_WIDTH = 8;
 export const OUTSIDE_RECT_ANNOTATION_WIDTH_SUGGESTION = 2;
 
 export const getAnnotationsGroupedByInterval = (
-  layers: AnnotationLayerConfigResult[],
+  layers: CommonXYAnnotationLayerConfig[],
   minInterval?: number,
   firstTimestamp?: number,
   formatter?: FieldFormat

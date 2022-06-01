@@ -28,16 +28,17 @@ jest.mock('../../../../common/containers/use_global_time', () => {
 });
 jest.mock('../../../../common/lib/kibana');
 
-const mockGetAllCasesMetrics = jest.fn();
-mockGetAllCasesMetrics.mockResolvedValue({
-  count_open_cases: 1,
-  count_in_progress_cases: 2,
-  count_closed_cases: 3,
+const mockGetCasesStatus = jest.fn();
+mockGetCasesStatus.mockResolvedValue({
+  countOpenCases: 1,
+  countInProgressCases: 2,
+  countClosedCases: 3,
 });
-mockGetAllCasesMetrics.mockResolvedValueOnce({
-  count_open_cases: 0,
-  count_in_progress_cases: 0,
-  count_closed_cases: 0,
+
+mockGetCasesStatus.mockResolvedValueOnce({
+  countOpenCases: 0,
+  countInProgressCases: 0,
+  countClosedCases: 0,
 });
 
 const mockUseKibana = {
@@ -46,7 +47,7 @@ const mockUseKibana = {
       ...mockCasesContract(),
       api: {
         cases: {
-          getAllCasesMetrics: mockGetAllCasesMetrics,
+          getCasesStatus: mockGetCasesStatus,
         },
       },
     },

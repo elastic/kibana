@@ -8,19 +8,46 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { AlertsFlyout } from './alerts_flyout';
-import { AlertsField } from '../../../../types';
+import { AlertsField, AlertsTableFlyoutState } from '../../../../types';
 
 const onClose = jest.fn();
-const onPaginateNext = jest.fn();
-const onPaginatePrevious = jest.fn();
+const onPaginate = jest.fn();
 const props = {
   alert: {
     [AlertsField.name]: ['one'],
     [AlertsField.reason]: ['two'],
   },
+  alertsTableConfiguration: {
+    id: 'test',
+    columns: [
+      {
+        id: AlertsField.name,
+        displayAsText: 'Name',
+        initialWidth: 150,
+      },
+      {
+        id: AlertsField.reason,
+        displayAsText: 'Reason',
+        initialWidth: 250,
+      },
+    ],
+    externalFlyout: {
+      body: () => <h3>External flyout body</h3>,
+    },
+    internalFlyout: {
+      body: () => <h3>Internal flyout body</h3>,
+    },
+    getRenderCellValue: () =>
+      jest.fn().mockImplementation((rcvProps) => {
+        return `${rcvProps.colIndex}:${rcvProps.rowIndex}`;
+      }),
+  },
+  flyoutIndex: 0,
+  alertsCount: 4,
+  isLoading: false,
+  state: AlertsTableFlyoutState.internal,
   onClose,
-  onPaginateNext,
-  onPaginatePrevious,
+  onPaginate,
 };
 
 describe('AlertsFlyout', () => {
@@ -34,19 +61,114 @@ describe('AlertsFlyout', () => {
       await nextTick();
       wrapper.update();
     });
-    expect(wrapper.find('[data-test-subj="alertsFlyoutTitle"]').first().text()).toBe('one');
-    expect(wrapper.find('[data-test-subj="alertsFlyoutReason"]').first().text()).toBe('two');
+    expect(wrapper.find('h3').first().text()).toBe('Internal flyout body');
+
+    const externalWrapper = mountWithIntl(
+      <AlertsFlyout
+        {...{
+          ...props,
+          state: AlertsTableFlyoutState.external,
+        }}
+      />
+    );
+    await act(async () => {
+      await nextTick();
+      externalWrapper.update();
+    });
+    expect(externalWrapper.find('h3').first().text()).toBe('External flyout body');
   });
 
-  it('should allow pagination', async () => {
+  const configurations = [AlertsTableFlyoutState.external, AlertsTableFlyoutState.internal];
+  for (const configuration of configurations) {
+    const base = {
+      body: () => <h5>Body</h5>,
+    };
+
+    it(`should use ${configuration} header configuration`, async () => {
+      const customProps = {
+        ...props,
+        alertsTableConfiguration: {
+          ...props.alertsTableConfiguration,
+          [`${configuration}Flyout`]: {
+            ...base,
+            header: () => <h4>Header</h4>,
+          },
+        },
+        state: configuration,
+      };
+      const wrapper = mountWithIntl(<AlertsFlyout {...customProps} />);
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      expect(wrapper.find('h4').first().text()).toBe('Header');
+      expect(wrapper.find('h5').first().text()).toBe('Body');
+    });
+
+    it(`should use ${configuration} body configuration`, async () => {
+      const customProps = {
+        ...props,
+        alertsTableConfiguration: {
+          ...props.alertsTableConfiguration,
+          [`${configuration}Flyout`]: {
+            ...base,
+          },
+        },
+        state: configuration,
+      };
+      const wrapper = mountWithIntl(<AlertsFlyout {...customProps} />);
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      expect(wrapper.find('h2').first().text()).toBe('one');
+      expect(wrapper.find('h5').first().text()).toBe('Body');
+    });
+
+    it(`should use ${configuration} body configuration`, async () => {
+      const customProps = {
+        ...props,
+        alertsTableConfiguration: {
+          ...props.alertsTableConfiguration,
+          [`${configuration}Flyout`]: {
+            ...base,
+            footer: () => <h6>Footer</h6>,
+          },
+        },
+        state: configuration,
+      };
+      const wrapper = mountWithIntl(<AlertsFlyout {...customProps} />);
+      await act(async () => {
+        await nextTick();
+        wrapper.update();
+      });
+      expect(wrapper.find('h2').first().text()).toBe('one');
+      expect(wrapper.find('h5').first().text()).toBe('Body');
+      expect(wrapper.find('h6').first().text()).toBe('Footer');
+    });
+  }
+
+  it('should allow pagination with next', async () => {
     const wrapper = mountWithIntl(<AlertsFlyout {...props} />);
     await act(async () => {
       await nextTick();
       wrapper.update();
     });
-    wrapper.find('[data-test-subj="alertsFlyoutPaginatePrevious"]').first().simulate('click');
-    expect(onPaginatePrevious).toHaveBeenCalled();
-    wrapper.find('[data-test-subj="alertsFlyoutPaginateNext"]').first().simulate('click');
-    expect(onPaginateNext).toHaveBeenCalled();
+    wrapper.find('[data-test-subj="pagination-button-next"]').first().simulate('click');
+    expect(onPaginate).toHaveBeenCalledWith(1);
+  });
+
+  it('should allow pagination with previous', async () => {
+    const customProps = {
+      ...props,
+      flyoutIndex: 1,
+    };
+    const wrapper = mountWithIntl(<AlertsFlyout {...customProps} />);
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+    wrapper.find('[data-test-subj="pagination-button-previous"]').first().simulate('click');
+    expect(onPaginate).toHaveBeenCalledWith(0);
   });
 });

@@ -5,29 +5,29 @@
  * 2.0.
  */
 
-import React from 'react';
+import { act, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { mount } from 'enzyme';
-import { waitFor } from '@testing-library/react';
-
+import React from 'react';
+import { ConnectorTypes } from '../../../common/api';
+import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import '../../common/mock/match_media';
-import { CaseViewPage } from './case_view_page';
-import { CaseViewPageProps } from './types';
+import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
+import { useConnectors } from '../../containers/configure/use_connectors';
 import {
   basicCaseClosed,
   basicCaseMetrics,
   caseUserActions,
-  getAlertUserAction,
   connectorsMock,
+  getAlertUserAction,
 } from '../../containers/mock';
-import { TestProviders } from '../../common/mock';
-import { useUpdateCase } from '../../containers/use_update_case';
-import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-
-import { useConnectors } from '../../containers/configure/use_connectors';
-import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
-import { ConnectorTypes } from '../../../common/api';
-import { caseViewProps, caseData } from './index.test';
+import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { usePostPushToService } from '../../containers/use_post_push_to_service';
+import { useUpdateCase } from '../../containers/use_update_case';
+import { CaseViewPage } from './case_view_page';
+import { caseData, caseViewProps } from './index.test';
+import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
 
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_metrics');
@@ -37,19 +37,21 @@ jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../user_actions/timestamp');
 jest.mock('../../common/navigation/hooks');
+jest.mock('../../common/hooks');
 
+const useUrlParamsMock = useUrlParams as jest.Mock;
+const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
-const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useConnectorsMock = useConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 
 export const caseProps: CaseViewPageProps = {
   ...caseViewProps,
   caseId: caseData.id,
   caseData,
   fetchCase: jest.fn(),
-  updateCase: jest.fn(),
 };
 
 export const caseClosedProps: CaseViewPageProps = {
@@ -73,22 +75,24 @@ describe('CaseViewPage', () => {
   };
 
   const defaultUseGetCaseUserActions = {
-    caseUserActions: [...caseUserActions, getAlertUserAction()],
-    caseServices: {},
-    fetchCaseUserActions,
-    firstIndexPushToService: -1,
-    hasDataToPush: false,
+    data: {
+      caseUserActions: [...caseUserActions, getAlertUserAction()],
+      caseServices: {},
+      hasDataToPush: false,
+      participants: [data.createdBy],
+    },
+    refetch: fetchCaseUserActions,
     isLoading: false,
     isError: false,
-    lastIndexPushToService: -1,
-    participants: [data.createdBy],
   };
 
   const defaultGetCaseMetrics = {
     isLoading: false,
     isError: false,
-    metrics: basicCaseMetrics,
-    fetchCaseMetrics,
+    data: {
+      metrics: basicCaseMetrics,
+    },
+    refetch: fetchCaseMetrics,
   };
 
   beforeEach(() => {
@@ -117,7 +121,7 @@ describe('CaseViewPage', () => {
       'Open'
     );
 
-    expect(wrapper.find(`[data-test-subj="case-view-metrics"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="case-view-metrics"]`).exists()).toBeTruthy();
 
     expect(
       wrapper
@@ -297,7 +301,10 @@ describe('CaseViewPage', () => {
   it('should push updates on button click', async () => {
     useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
+      data: {
+        ...defaultUseGetCaseUserActions.data,
+        hasDataToPush: true,
+      },
     }));
 
     const wrapper = mount(
@@ -321,7 +328,10 @@ describe('CaseViewPage', () => {
   it('should disable the push button when connector is invalid', async () => {
     useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
+      data: {
+        ...defaultUseGetCaseUserActions.data,
+        hasDataToPush: true,
+      },
     }));
 
     const wrapper = mount(
@@ -445,15 +455,13 @@ describe('CaseViewPage', () => {
     });
   });
 
-  it('should show loading content when loading alerts', async () => {
+  it('should show loading content when loading user actions', async () => {
     const useFetchAlertData = jest.fn().mockReturnValue([true]);
     useGetCaseUserActionsMock.mockReturnValue({
-      caseServices: {},
-      caseUserActions: [],
-      hasDataToPush: false,
+      data: undefined,
       isError: false,
       isLoading: true,
-      participants: [],
+      isFetching: true,
     });
 
     const wrapper = mount(
@@ -526,7 +534,10 @@ describe('CaseViewPage', () => {
     useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
     useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
+      data: {
+        ...defaultUseGetCaseUserActions.data,
+        hasDataToPush: true,
+      },
     }));
 
     const wrapper = mount(
@@ -572,6 +583,109 @@ describe('CaseViewPage', () => {
       await waitFor(() => {
         wrapper.update();
         expect(wrapper.find('.euiCallOut--danger').first().exists()).toBeFalsy();
+      });
+    });
+  });
+
+  describe('Tabs', () => {
+    let appMockRender: AppMockRenderer;
+    beforeEach(() => {
+      appMockRender = createAppMockRenderer();
+    });
+
+    it('renders tabs correctly', async () => {
+      const result = appMockRender.render(<CaseViewPage {...caseProps} />);
+      await act(async () => {
+        expect(result.getByTestId('case-view-tab-title-alerts')).toBeTruthy();
+        expect(result.getByTestId('case-view-tab-title-activity')).toBeTruthy();
+      });
+    });
+
+    it('renders the activity tab by default', async () => {
+      const result = appMockRender.render(<CaseViewPage {...caseProps} />);
+      await act(async () => {
+        expect(result.getByTestId('case-view-tab-content-activity')).toBeTruthy();
+      });
+    });
+
+    it('renders the alerts tab when the query parameter tabId has alerts', async () => {
+      useUrlParamsMock.mockReturnValue({
+        urlParams: {
+          tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+        },
+      });
+      const result = appMockRender.render(<CaseViewPage {...caseProps} />);
+      await act(async () => {
+        expect(result.getByTestId('case-view-tab-content-alerts')).toBeTruthy();
+      });
+    });
+
+    it('renders the activity tab when the query parameter tabId has activity', async () => {
+      useUrlParamsMock.mockReturnValue({
+        urlParams: {
+          tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
+        },
+      });
+      const result = appMockRender.render(<CaseViewPage {...caseProps} />);
+      await act(async () => {
+        expect(result.getByTestId('case-view-tab-content-activity')).toBeTruthy();
+      });
+    });
+
+    it('renders the activity tab when the query parameter tabId has an unknown value', async () => {
+      useUrlParamsMock.mockReturnValue({
+        urlParams: {
+          tabId: 'what-is-love',
+        },
+      });
+      const result = appMockRender.render(<CaseViewPage {...caseProps} />);
+      await act(async () => {
+        expect(result.getByTestId('case-view-tab-content-activity')).toBeTruthy();
+        expect(result.queryByTestId('case-view-tab-content-alerts')).toBeFalsy();
+      });
+    });
+
+    it('navigates to the activity tab when the activity tab is clicked', async () => {
+      const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+      const result = appMockRender.render(<CaseViewPage {...caseProps} />);
+      userEvent.click(result.getByTestId('case-view-tab-title-activity'));
+      await act(async () => {
+        expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+          detailName: caseData.id,
+          tabId: CASE_VIEW_PAGE_TABS.ACTIVITY,
+        });
+      });
+    });
+
+    // unskip when alerts tab is activated
+    it.skip('navigates to the alerts tab when the alerts tab is clicked', async () => {
+      const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+      const result = appMockRender.render(<CaseViewPage {...caseProps} />);
+      userEvent.click(result.getByTestId('case-view-tab-title-alerts'));
+      await act(async () => {
+        expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+          detailName: caseData.id,
+          tabId: CASE_VIEW_PAGE_TABS.ALERTS,
+        });
+      });
+    });
+
+    // unskip when alerts tab is activated
+    it.skip('should display the alerts tab when the feature is enabled', async () => {
+      appMockRender = createAppMockRenderer({ features: { alerts: { enabled: true } } });
+      const result = appMockRender.render(<CaseViewPage {...caseProps} />);
+      await act(async () => {
+        expect(result.queryByTestId('case-view-tab-title-activity')).toBeTruthy();
+        expect(result.queryByTestId('case-view-tab-title-alerts')).toBeTruthy();
+      });
+    });
+
+    it('should not display the alerts tab when the feature is disabled', async () => {
+      appMockRender = createAppMockRenderer({ features: { alerts: { enabled: false } } });
+      const result = appMockRender.render(<CaseViewPage {...caseProps} />);
+      await act(async () => {
+        expect(result.queryByTestId('case-view-tab-title-activity')).toBeTruthy();
+        expect(result.queryByTestId('case-view-tab-title-alerts')).toBeFalsy();
       });
     });
   });

@@ -5,26 +5,30 @@
  * 2.0.
  */
 
-import { ConsoleDataState, ConsoleStoreReducer } from './types';
+import { handleSidePanel } from './state_update_handlers/handle_side_panel';
+import { handleUpdateCommandState } from './state_update_handlers/handle_update_command_state';
+import type { ConsoleDataState, ConsoleStoreReducer } from './types';
 import { handleExecuteCommand } from './state_update_handlers/handle_execute_command';
-import { ConsoleBuiltinCommandsService } from '../../service/builtin_command_service';
+import { getBuiltinCommands } from '../../service/builtin_commands';
 
 export type InitialStateInterface = Pick<
   ConsoleDataState,
-  'commandService' | 'scrollToBottom' | 'dataTestSubj'
+  'commands' | 'scrollToBottom' | 'dataTestSubj' | 'HelpComponent'
 >;
 
 export const initiateState = ({
-  commandService,
+  commands,
   scrollToBottom,
   dataTestSubj,
+  HelpComponent,
 }: InitialStateInterface): ConsoleDataState => {
   return {
-    commandService,
+    commands: getBuiltinCommands().concat(commands),
     scrollToBottom,
+    HelpComponent,
     dataTestSubj,
     commandHistory: [],
-    builtinCommandService: new ConsoleBuiltinCommandsService(),
+    sidePanel: { show: null },
   };
 };
 
@@ -36,6 +40,16 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
 
     case 'executeCommand':
       return handleExecuteCommand(state, action);
+
+    case 'updateCommandStatusState':
+    case 'updateCommandStoreState':
+      return handleUpdateCommandState(state, action);
+
+    case 'showSidePanel':
+      return handleSidePanel(state, action);
+
+    case 'clear':
+      return { ...state, commandHistory: [] };
   }
 
   return state;

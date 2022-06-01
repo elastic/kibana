@@ -7,9 +7,9 @@
  */
 
 import { Type } from '@kbn/config-schema';
+import type { ConfigDeprecationProvider } from '@kbn/config';
 
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { ConfigDeprecationProvider } from './config';
 import { InternalContextPreboot, ContextSetup } from './context';
 import {
   InternalElasticsearchServicePreboot,

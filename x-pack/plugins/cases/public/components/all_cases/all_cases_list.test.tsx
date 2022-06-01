@@ -17,7 +17,7 @@ import { TestProviders } from '../../common/mock';
 import { casesStatus, useGetCasesMockState, mockCase, connectorsMock } from '../../containers/mock';
 
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../../common/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { useDeleteCases } from '../../containers/use_delete_cases';
@@ -36,12 +36,14 @@ import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
+import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
+jest.mock('../../containers/use_get_cases_metrics');
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_reporters');
@@ -55,6 +57,7 @@ jest.mock('../app/use_available_owners', () => ({
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
+const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
@@ -118,6 +121,12 @@ describe('AllCasesListGeneric', () => {
     isLoading: false,
   };
 
+  const defaultCasesMetrics = {
+    mttr: 5,
+    isLoading: false,
+    fetchCasesMetrics: jest.fn(),
+  };
+
   const defaultUpdateCases = {
     isUpdated: false,
     isLoading: false,
@@ -157,6 +166,7 @@ describe('AllCasesListGeneric', () => {
     useGetCasesMock.mockReturnValue(defaultGetCases);
     useDeleteCasesMock.mockReturnValue(defaultDeleteCases);
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
+    useGetCasesMetricsMock.mockReturnValue(defaultCasesMetrics);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetTagsMock.mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
     useGetReportersMock.mockReturnValue({
@@ -195,7 +205,7 @@ describe('AllCasesListGeneric', () => {
         wrapper.find(`span[data-test-subj="case-table-column-tags-coke"]`).first().prop('title')
       ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
       expect(wrapper.find(`[data-test-subj="case-table-column-createdBy"]`).first().text()).toEqual(
-        useGetCasesMockState.data.cases[0].createdBy.username
+        'LK'
       );
       expect(
         wrapper
@@ -204,9 +214,53 @@ describe('AllCasesListGeneric', () => {
           .childAt(0)
           .prop('value')
       ).toBe(useGetCasesMockState.data.cases[0].createdAt);
+
+      expect(
+        wrapper.find(`[data-test-subj="case-table-column-severity"]`).first().text().toLowerCase()
+      ).toBe(useGetCasesMockState.data.cases[0].severity);
+
       expect(wrapper.find(`[data-test-subj="case-table-case-count"]`).first().text()).toEqual(
         'Showing 10 cases'
       );
+    });
+  });
+
+  it('should show a tooltip with the reporter username when hover over the reporter avatar', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
+    });
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    userEvent.hover(result.queryAllByTestId('case-table-column-createdBy')[0]);
+
+    await waitFor(() => {
+      expect(result.getByTestId('case-table-column-createdBy-tooltip')).toBeTruthy();
+      expect(result.getByTestId('case-table-column-createdBy-tooltip').textContent).toEqual(
+        'lknope'
+      );
+    });
+  });
+
+  it('should show a tooltip with all tags when hovered', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
+    });
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    userEvent.hover(result.queryAllByTestId('case-table-column-tags')[0]);
+
+    await waitFor(() => {
+      expect(result.getByTestId('case-table-column-tags-tooltip')).toBeTruthy();
     });
   });
 
@@ -223,6 +277,7 @@ describe('AllCasesListGeneric', () => {
             createdAt: null,
             createdBy: null,
             status: null,
+            severity: null,
             tags: null,
             title: null,
             totalComment: null,
@@ -316,6 +371,15 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+  });
+
+  it('should render the case stats', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="cases-count-stats"]')).toBeTruthy();
   });
 
   it.skip('Bulk delete', async () => {
@@ -505,6 +569,31 @@ describe('AllCasesListGeneric', () => {
     });
   });
 
+  it('should render metrics when isSelectorView=false', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={false} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="cases-metrics-stats"]').exists()).toBe(true);
+    });
+  });
+
+  it('should not render metrics when isSelectorView=true', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={true} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="case-table-selected-case-count"]').exists()).toBe(
+        false
+      );
+      expect(wrapper.find('[data-test-subj="cases-metrics-stats"]').exists()).toBe(false);
+    });
+  });
+
   it('case table should not be selectable when isSelectorView=true', async () => {
     const wrapper = mount(
       <TestProviders>
@@ -560,6 +649,7 @@ describe('AllCasesListGeneric', () => {
           username: 'lknope',
         },
         description: 'Security banana Issue',
+        severity: CaseSeverity.LOW,
         duration: null,
         externalService: {
           connectorId: '123',

@@ -1970,17 +1970,7 @@
                   "\nToast notifications service to show toasts in error cases."
                 ],
                 "signature": [
-                  "{ get$: () => ",
-                  "Observable",
-                  "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "[]>; add: (toastOrTitle: ",
+                  "{ add: (toastOrTitle: ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -1996,7 +1986,17 @@
                     "section": "def-public.Toast",
                     "text": "Toast"
                   },
-                  "; remove: (toastOrId: string | ",
+                  "; get$: () => ",
+                  "Observable",
+                  "<",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.Toast",
+                    "text": "Toast"
+                  },
+                  "[]>; remove: (toastOrId: string | ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -3526,17 +3526,7 @@
                   "\nToast notifications service to show toasts in error cases."
                 ],
                 "signature": [
-                  "{ get$: () => ",
-                  "Observable",
-                  "<",
-                  {
-                    "pluginId": "core",
-                    "scope": "public",
-                    "docId": "kibCorePluginApi",
-                    "section": "def-public.Toast",
-                    "text": "Toast"
-                  },
-                  "[]>; add: (toastOrTitle: ",
+                  "{ add: (toastOrTitle: ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -3552,7 +3542,17 @@
                     "section": "def-public.Toast",
                     "text": "Toast"
                   },
-                  "; remove: (toastOrId: string | ",
+                  "; get$: () => ",
+                  "Observable",
+                  "<",
+                  {
+                    "pluginId": "core",
+                    "scope": "public",
+                    "docId": "kibCorePluginApi",
+                    "section": "def-public.Toast",
+                    "text": "Toast"
+                  },
+                  "[]>; remove: (toastOrId: string | ",
                   {
                     "pluginId": "core",
                     "scope": "public",
@@ -7480,7 +7480,9 @@
           "\n"
         ],
         "signature": [
-          "(res: { custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: ",
+          "(res: { custom: <T extends string | Record<string, any> | Error | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7488,9 +7490,7 @@
             "section": "def-server.ResponseErrorAttributes",
             "text": "ResponseErrorAttributes"
           },
-          " | undefined; } | Buffer | ",
-          "Stream",
-          " | undefined>(options: ",
+          " | undefined; } | Buffer | undefined>(options: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7599,6 +7599,8 @@
             "text": "CustomHttpResponseOptions"
           },
           "<",
+          "Stream",
+          " | ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7606,9 +7608,11 @@
             "section": "def-server.ResponseError",
             "text": "ResponseError"
           },
-          ">) => ",
+          " | Buffer>) => ",
           "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
+          "<string | Error | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7616,7 +7620,7 @@
             "section": "def-server.ResponseErrorAttributes",
             "text": "ResponseErrorAttributes"
           },
-          " | undefined; }>; redirected: (options: ",
+          " | undefined; } | Buffer>; redirected: (options: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7626,9 +7630,9 @@
           },
           ") => ",
           "KibanaResponse",
-          "<string | Record<string, any> | Buffer | ",
+          "<string | Record<string, any> | ",
           "Stream",
-          ">; ok: (options?: ",
+          " | Buffer>; ok: (options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7638,9 +7642,9 @@
           },
           ") => ",
           "KibanaResponse",
-          "<string | Record<string, any> | Buffer | ",
+          "<string | Record<string, any> | ",
           "Stream",
-          ">; accepted: (options?: ",
+          " | Buffer>; accepted: (options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7650,9 +7654,9 @@
           },
           ") => ",
           "KibanaResponse",
-          "<string | Record<string, any> | Buffer | ",
+          "<string | Record<string, any> | ",
           "Stream",
-          ">; noContent: (options?: ",
+          " | Buffer>; noContent: (options?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7672,7 +7676,9 @@
           },
           ") => ",
           "KibanaResponse",
-          "<string | Error | { message: string | Error; attributes?: ",
+          "<string | Error | ",
+          "Stream",
+          " | { message: string | Error; attributes?: ",
           {
             "pluginId": "core",
             "scope": "server",
@@ -7680,7 +7686,7 @@
             "section": "def-server.ResponseErrorAttributes",
             "text": "ResponseErrorAttributes"
           },
-          " | undefined; }>"
+          " | undefined; } | Buffer>"
         ],
         "path": "src/plugins/kibana_utils/server/report_server_error.ts",
         "deprecated": false,
@@ -7695,7 +7701,9 @@
               "Formats a `KbnServerError` into a server error response"
             ],
             "signature": [
-              "{ custom: <T extends string | Record<string, any> | Error | { message: string | Error; attributes?: ",
+              "{ custom: <T extends string | Record<string, any> | Error | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -7703,9 +7711,7 @@
                 "section": "def-server.ResponseErrorAttributes",
                 "text": "ResponseErrorAttributes"
               },
-              " | undefined; } | Buffer | ",
-              "Stream",
-              " | undefined>(options: ",
+              " | undefined; } | Buffer | undefined>(options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -7814,6 +7820,8 @@
                 "text": "CustomHttpResponseOptions"
               },
               "<",
+              "Stream",
+              " | ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -7821,9 +7829,11 @@
                 "section": "def-server.ResponseError",
                 "text": "ResponseError"
               },
-              ">) => ",
+              " | Buffer>) => ",
               "KibanaResponse",
-              "<string | Error | { message: string | Error; attributes?: ",
+              "<string | Error | ",
+              "Stream",
+              " | { message: string | Error; attributes?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -7831,7 +7841,7 @@
                 "section": "def-server.ResponseErrorAttributes",
                 "text": "ResponseErrorAttributes"
               },
-              " | undefined; }>; redirected: (options: ",
+              " | undefined; } | Buffer>; redirected: (options: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -7841,9 +7851,9 @@
               },
               ") => ",
               "KibanaResponse",
-              "<string | Record<string, any> | Buffer | ",
+              "<string | Record<string, any> | ",
               "Stream",
-              ">; ok: (options?: ",
+              " | Buffer>; ok: (options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -7853,9 +7863,9 @@
               },
               ") => ",
               "KibanaResponse",
-              "<string | Record<string, any> | Buffer | ",
+              "<string | Record<string, any> | ",
               "Stream",
-              ">; accepted: (options?: ",
+              " | Buffer>; accepted: (options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",
@@ -7865,9 +7875,9 @@
               },
               ") => ",
               "KibanaResponse",
-              "<string | Record<string, any> | Buffer | ",
+              "<string | Record<string, any> | ",
               "Stream",
-              ">; noContent: (options?: ",
+              " | Buffer>; noContent: (options?: ",
               {
                 "pluginId": "core",
                 "scope": "server",

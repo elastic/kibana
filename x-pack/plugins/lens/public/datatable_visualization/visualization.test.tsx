@@ -490,7 +490,13 @@ describe('Datatable Visualization', () => {
   describe('#toExpression', () => {
     const getDatatableExpressionArgs = (state: DatatableVisualizationState) =>
       buildExpression(
-        datatableVisualization.toExpression(state, frame.datasourceLayers) as Ast
+        datatableVisualization.toExpression(
+          state,
+          frame.datasourceLayers,
+
+          {},
+          { '1': { type: 'expression', chain: [] } }
+        ) as Ast
       ).findFunction('lens_datatable')[0].arguments;
 
     const defaultExpressionTableState = {
@@ -524,7 +530,9 @@ describe('Datatable Visualization', () => {
 
       const expression = datatableVisualization.toExpression(
         defaultExpressionTableState,
-        frame.datasourceLayers
+        frame.datasourceLayers,
+        {},
+        { '1': { type: 'expression', chain: [] } }
       ) as Ast;
 
       const tableArgs = buildExpression(expression).findFunction('lens_datatable');
@@ -573,7 +581,9 @@ describe('Datatable Visualization', () => {
 
       const expression = datatableVisualization.toExpression(
         defaultExpressionTableState,
-        frame.datasourceLayers
+        frame.datasourceLayers,
+        {},
+        { '1': { type: 'expression', chain: [] } }
       );
 
       expect(expression).toEqual(null);

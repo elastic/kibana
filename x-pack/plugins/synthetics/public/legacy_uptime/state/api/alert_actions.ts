@@ -127,11 +127,11 @@ function getIndexActionParams(selectedMonitor: Ping, recovery = false): IndexAct
     return {
       documents: [
         {
-          monitorName: '{{state.monitorName}}',
-          monitorUrl: '{{{state.monitorUrl}}}',
+          monitorName: '{{context.monitorName}}',
+          monitorUrl: '{{{context.monitorUrl}}}',
           statusMessage: getRecoveryMessage(selectedMonitor),
           latestErrorMessage: '',
-          observerLocation: '{{state.observerLocation}}',
+          observerLocation: '{{context.observerLocation}}',
         },
       ],
       indexOverride: null,
@@ -140,11 +140,11 @@ function getIndexActionParams(selectedMonitor: Ping, recovery = false): IndexAct
   return {
     documents: [
       {
-        monitorName: '{{state.monitorName}}',
-        monitorUrl: '{{{state.monitorUrl}}}',
-        statusMessage: '{{{state.statusMessage}}}',
-        latestErrorMessage: '{{{state.latestErrorMessage}}}',
-        observerLocation: '{{state.observerLocation}}',
+        monitorName: '{{context.monitorName}}',
+        monitorUrl: '{{{context.monitorUrl}}}',
+        statusMessage: '{{{context.statusMessage}}}',
+        latestErrorMessage: '{{{context.latestErrorMessage}}}',
+        observerLocation: '{{context.observerLocation}}',
       },
     ],
     indexOverride: null,

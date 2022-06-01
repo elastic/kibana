@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 
 import type { RouteDefinitionParams } from '../..';
 import { wrapIntoCustomErrorResponse } from '../../../errors';
+import { validateKibanaPrivileges } from '../../../lib';
 import { createLicensedRouteHandler } from '../../licensed_route_handler';
-import {
-  getPutPayloadSchema,
-  transformPutPayloadToElasticsearchRole,
-  validateKibanaPrivileges,
-} from './model';
+import type { RolePayloadSchemaType } from './model';
+import { getPutPayloadSchema, transformPutPayloadToElasticsearchRole } from './model';
 
-const roleGrantsSubFeaturePrivileges = (
-  features: KibanaFeature[],
-  role: TypeOf<ReturnType<typeof getPutPayloadSchema>>
-) => {
+const roleGrantsSubFeaturePrivileges = (features: KibanaFeature[], role: RolePayloadSchemaType) => {
   if (!role.kibana) {
     return false;
   }
@@ -53,6 +47,7 @@ export function definePutRolesRoutes({
       path: '/api/security/role/{name}',
       validate: {
         params: schema.object({ name: schema.string({ minLength: 1, maxLength: 1024 }) }),
+        query: schema.object({ createOnly: schema.boolean({ defaultValue: false }) }),
         body: getPutPayloadSchema(() => {
           const privileges = authz.privileges.get();
           return {
@@ -64,7 +59,7 @@ export function definePutRolesRoutes({
     },
     createLicensedRouteHandler(async (context, request, response) => {
       const { name } = request.params;
-
+      const { createOnly } = request.query;
       try {
         const esClient = (await context.core).elasticsearch.client;
         const [features, rawRoles] = await Promise.all([
@@ -79,6 +74,14 @@ export function definePutRolesRoutes({
               message: `Role cannot be updated due to validation errors: ${JSON.stringify(
                 validationErrors
               )}`,
+            },
+          });
+        }
+
+        if (createOnly && !!rawRoles[name]) {
+          return response.conflict({
+            body: {
+              message: `Role already exists and cannot be created: ${name}`,
             },
           });
         }

@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import apm from 'elastic-apm-node';
-import type { Logger } from '@kbn/core/server';
 import type { HeadlessChromiumDriver } from '../browsers';
 import { Layout } from '../layouts';
 import { CONTEXT_WAITFORRENDER } from './constants';
+import { Actions, EventLogger } from './event_logger';
 
 export const waitForRenderComplete = async (
   browser: HeadlessChromiumDriver,
-  logger: Logger,
+  eventLogger: EventLogger,
   loadDelay: number,
   layout: Layout
 ) => {
-  const span = apm.startSpan('wait_for_render', 'wait');
-
-  logger.debug('waiting for rendering to complete');
+  const spanEnd = eventLogger.logScreenshottingEvent(
+    'wait for render complete',
+    Actions.WAIT_RENDER,
+    'wait'
+  );
 
   return await browser
     .evaluate(
@@ -66,11 +67,9 @@ export const waitForRenderComplete = async (
         args: [layout.selectors.renderComplete, loadDelay],
       },
       { context: CONTEXT_WAITFORRENDER },
-      logger
+      eventLogger.kbnLogger
     )
     .then(() => {
-      logger.debug('rendering is complete');
-
-      span?.end();
+      spanEnd();
     });
 };

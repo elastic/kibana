@@ -258,6 +258,13 @@ export class SettingsPageObject extends FtrService {
     });
   }
 
+  async getRelationshipsTabCount() {
+    return await this.retry.try(async () => {
+      const text = await this.testSubjects.getVisibleText('tab-relationships');
+      return text.split(' ')[1].replace(/\((.*)\)/, '$1');
+    });
+  }
+
   async getFieldNames() {
     const fieldNameCells = await this.testSubjects.findAll('editIndexPattern > indexedFieldName');
     return await Promise.all(
@@ -618,6 +625,11 @@ export class SettingsPageObject extends FtrService {
   async clickSourceFiltersTab() {
     this.log.debug('click Source Filters tab');
     await this.testSubjects.click('tab-sourceFilters');
+  }
+
+  async clickRelationshipsTab() {
+    this.log.debug('click Relationships tab');
+    await this.testSubjects.click('tab-relationships');
   }
 
   async editScriptedField(name: string) {

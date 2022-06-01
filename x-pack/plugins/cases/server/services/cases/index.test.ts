@@ -20,6 +20,7 @@ import {
   SavedObject,
   SavedObjectReference,
   SavedObjectsCreateOptions,
+  SavedObjectsFindResponse,
   SavedObjectsFindResult,
   SavedObjectsUpdateOptions,
   SavedObjectsUpdateResponse,
@@ -165,6 +166,7 @@ describe('CasesService', () => {
             "settings": Object {
               "syncAlerts": true,
             },
+            "severity": "low",
             "status": "open",
             "tags": Array [
               "defacement",
@@ -518,6 +520,7 @@ describe('CasesService', () => {
             "settings": Object {
               "syncAlerts": true,
             },
+            "severity": "low",
             "status": "open",
             "tags": Array [
               "defacement",
@@ -1132,6 +1135,73 @@ describe('CasesService', () => {
 
         expect(res.attributes.external_service).toMatchInlineSnapshot(`null`);
       });
+    });
+  });
+
+  describe('executeAggregations', () => {
+    const aggregationBuilders = [
+      {
+        build: () => ({
+          myAggregation: { avg: { field: 'avg-field' } },
+        }),
+        getName: () => 'avg-test-builder',
+        formatResponse: () => {},
+      },
+      {
+        build: () => ({
+          myAggregation: { min: { field: 'min-field' } },
+        }),
+        getName: () => 'min-test-builder',
+        formatResponse: () => {},
+      },
+    ];
+
+    it('returns an aggregation correctly', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 1,
+        aggregations: { myAggregation: { value: 0 } },
+      } as SavedObjectsFindResponse<ESCaseAttributes>);
+
+      const res = await service.executeAggregations({ aggregationBuilders });
+      expect(res).toEqual({ myAggregation: { value: 0 } });
+    });
+
+    it('calls find correctly', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        saved_objects: [],
+        total: 0,
+        page: 1,
+        per_page: 1,
+        aggregations: { myAggregation: { value: 0 } },
+      } as SavedObjectsFindResponse<ESCaseAttributes>);
+
+      await service.executeAggregations({ aggregationBuilders, options: { perPage: 20 } });
+      expect(unsecuredSavedObjectsClient.find.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Object {
+          "aggs": Object {
+            "myAggregation": Object {
+              "min": Object {
+                "field": "min-field",
+              },
+            },
+          },
+          "perPage": 20,
+          "sortField": "created_at",
+          "type": "cases",
+        }
+      `);
+    });
+
+    it('throws an error correctly', async () => {
+      expect.assertions(1);
+      unsecuredSavedObjectsClient.find.mockRejectedValue(new Error('Aggregation error'));
+
+      await expect(service.executeAggregations({ aggregationBuilders })).rejects.toThrow(
+        'Failed to execute aggregations [avg-test-builder,min-test-builder]: Error: Aggregation error'
+      );
     });
   });
 });

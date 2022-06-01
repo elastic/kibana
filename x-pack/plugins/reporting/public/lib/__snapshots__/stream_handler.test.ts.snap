@@ -188,42 +188,40 @@ Array [
 `;
 
 exports[`stream handler showNotifications show success 1`] = `
-Array [
-  Object {
-    "color": "success",
-    "data-test-subj": "completeReportSuccess",
-    "text": MountPoint {
-      "reactNode": <React.Fragment>
-        <p>
-          <ReportLink
-            getUrl={[Function]}
-          />
-        </p>
-        <DownloadButton
+Object {
+  "color": "success",
+  "data-test-subj": "completeReportSuccess",
+  "text": MountPoint {
+    "reactNode": <React.Fragment>
+      <p>
+        <ReportLink
           getUrl={[Function]}
-          job={
-            Object {
-              "id": "yas1",
-              "jobtype": "yas",
-              "status": "completed",
-              "title": "Yas",
-            }
-          }
         />
-      </React.Fragment>,
-    },
-    "title": MountPoint {
-      "reactNode": <FormattedMessage
-        defaultMessage="{reportType} created for '{reportObjectTitle}'"
-        id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
-        values={
+      </p>
+      <DownloadButton
+        getUrl={[Function]}
+        job={
           Object {
-            "reportObjectTitle": "Yas",
-            "reportType": "yas",
+            "id": "yas1",
+            "jobtype": "yas",
+            "status": "completed",
+            "title": "Yas",
           }
         }
-      />,
-    },
+      />
+    </React.Fragment>,
   },
-]
+  "title": MountPoint {
+    "reactNode": <FormattedMessage
+      defaultMessage="{reportType} created for '{reportObjectTitle}'"
+      id="xpack.reporting.publicNotifier.successfullyCreatedReportNotificationTitle"
+      values={
+        Object {
+          "reportObjectTitle": "Yas",
+          "reportType": "yas",
+        }
+      }
+    />,
+  },
+}
 `;

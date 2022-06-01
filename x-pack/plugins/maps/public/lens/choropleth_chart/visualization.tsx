@@ -138,14 +138,16 @@ export const getVisualization = ({
     }
   },
 
-  toExpression: (state, datasourceLayers, attributes) => {
+  toExpression: (state, datasourceLayers, attributes, datasourceExpressionsByLayers = {}) => {
     if (!state.regionAccessor || !state.valueAccessor) {
       return null;
     }
 
+    const datasourceExpression = datasourceExpressionsByLayers[state.layerId];
     return {
       type: 'expression',
       chain: [
+        ...(datasourceExpression ? datasourceExpression.chain : []),
         {
           type: 'function',
           function: 'lens_choropleth_chart',

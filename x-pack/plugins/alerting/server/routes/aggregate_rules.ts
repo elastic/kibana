@@ -50,6 +50,7 @@ const rewriteBodyRes: RewriteResponseCase<AggregateResult> = ({
   ruleEnabledStatus,
   ruleMutedStatus,
   ruleSnoozedStatus,
+  ruleTags,
   ...rest
 }) => ({
   ...rest,
@@ -57,6 +58,7 @@ const rewriteBodyRes: RewriteResponseCase<AggregateResult> = ({
   rule_enabled_status: ruleEnabledStatus,
   rule_muted_status: ruleMutedStatus,
   rule_snoozed_status: ruleSnoozedStatus,
+  rule_tags: ruleTags,
 });
 
 export const aggregateRulesRoute = (

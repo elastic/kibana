@@ -11,7 +11,7 @@ import { MouseEvent, useEffect } from 'react';
 import { EuiBreadcrumb } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UptimeUrlParams } from '../lib/helper';
-import { stringifyUrlParams } from '../lib/helper/stringify_url_params';
+import { stringifyUrlParams } from '../../apps/synthetics/utils/url_params/stringify_url_params';
 import { useUrlParams } from '.';
 import { PLUGIN } from '../../../common/constants/plugin';
 
@@ -57,7 +57,7 @@ export const makeBaseBreadcrumb = (
       href: observabilityPath,
     },
     {
-      text: i18n.translate('xpack.synthetics.breadcrumbs.overviewBreadcrumbText', {
+      text: i18n.translate('xpack.synthetics.breadcrumbs.legacyOverviewBreadcrumbText', {
         defaultMessage: 'Uptime',
       }),
       href: uptimePath,

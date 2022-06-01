@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
 
-  describe('Lens', () => {
+  describe('Lens Accessibility', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
