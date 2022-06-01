@@ -21,20 +21,20 @@ import { Link, generatePath } from 'react-router-dom';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
-import type { CspFindingsByResource } from './use_findings_by_resource';
+import type { FindingsByResourcePage } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
 
 interface Props {
-  items: CspFindingsByResource[];
+  items: FindingsByResourcePage[];
   loading: boolean;
   pagination: Pagination;
-  setTableOptions(options: CriteriaWithPagination<CspFindingsByResource>): void;
+  setTableOptions(options: CriteriaWithPagination<FindingsByResourcePage>): void;
 }
 
-export const getResourceId = (resource: CspFindingsByResource) =>
+export const getResourceId = (resource: FindingsByResourcePage) =>
   [resource.resource_id, ...resource.cis_sections].join('/');
 
 const FindingsByResourceTableComponent = ({
@@ -43,7 +43,7 @@ const FindingsByResourceTableComponent = ({
   pagination,
   setTableOptions,
 }: Props) => {
-  const getRowProps = (row: CspFindingsByResource) => ({
+  const getRowProps = (row: FindingsByResourcePage) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
   });
 
@@ -62,7 +62,7 @@ const FindingsByResourceTableComponent = ({
   );
 };
 
-const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
+const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
   {
     field: 'resource_id',
     name: (
@@ -76,7 +76,7 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
         )}
       />
     ),
-    render: (resourceId: CspFindingsByResource['resource_id']) => (
+    render: (resourceId: FindingsByResourcePage['resource_id']) => (
       <Link to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}>
         {resourceId}
       </Link>
@@ -138,7 +138,7 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
         defaultMessage="Failed Findings"
       />
     ),
-    render: (failedFindings: CspFindingsByResource['failed_findings']) => (
+    render: (failedFindings: FindingsByResourcePage['failed_findings']) => (
       <EuiToolTip
         content={i18n.translate('xpack.csp.findings.groupByResourceTable.failedFindingsToolTip', {
           defaultMessage: '{failed} out of {total}',

@@ -13,11 +13,11 @@ import type { PropsOf } from '@elastic/eui';
 import Chance from 'chance';
 import numeral from '@elastic/numeral';
 import { TestProvider } from '../../../test/test_provider';
-import type { CspFindingsByResource } from './use_findings_by_resource';
+import type { FindingsByResourcePage } from './use_findings_by_resource';
 
 const chance = new Chance();
 
-const getFakeFindingsByResource = (): CspFindingsByResource => {
+const getFakeFindingsByResource = (): FindingsByResourcePage => {
   const count = chance.integer();
   const total = chance.integer() + count + 1;
   const normalized = count / total;

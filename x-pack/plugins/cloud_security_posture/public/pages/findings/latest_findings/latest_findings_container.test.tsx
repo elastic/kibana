@@ -79,6 +79,7 @@ describe('<LatestFindingsContainer />', () => {
         ...baseQuery,
         ...getPaginationQuery(query),
         sort: query.sort,
+        enabled: true,
       }),
     });
   });

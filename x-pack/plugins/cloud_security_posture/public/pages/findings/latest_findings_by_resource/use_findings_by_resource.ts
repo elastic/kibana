@@ -40,7 +40,7 @@ type FindingsAggResponse = IKibanaSearchResponse<
   estypes.SearchResponse<{}, FindingsByResourceAggs>
 >;
 
-interface FindingsByResourcePage {
+export interface FindingsByResourcePage {
   failed_findings: {
     count: number;
     normalized: number;
@@ -53,15 +53,10 @@ interface FindingsByResourcePage {
   cis_sections: string[];
 }
 
-interface UseFindingsByResourceData {
-  page: FindingsByResourcePage[];
-  total: number;
-}
-
-// export type CspFindingsByResourceResult = FindingsQueryResult<
-//   UseFindingsByResourceData | undefined,
-//   unknown
-// >;
+// interface UseFindingsByResourceData {
+//   page: FindingsByResourcePage[];
+//   total: number;
+// }
 
 interface FindingsByResourceAggs {
   resource_total: estypes.AggregationsCardinalityAggregate;
@@ -160,7 +155,7 @@ export const useFindingsByResource = (options: UseFindingsByResourceOptions) => 
     {
       enabled: options.enabled,
       keepPreviousData: true,
-      onError: (err) => showErrorToast(toasts, err),
+      onError: (err: Error) => showErrorToast(toasts, err),
       onSuccess: ({ newPitId }) => {
         setPitId(newPitId);
       },

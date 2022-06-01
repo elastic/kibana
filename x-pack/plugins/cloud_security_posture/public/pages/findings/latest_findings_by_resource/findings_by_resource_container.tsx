@@ -62,7 +62,6 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   const findingsGroupByResource = useFindingsByResource({
     ...getPaginationQuery(urlQuery),
     query: baseEsQuery.query,
-    index: baseEsQuery.index,
     enabled: !baseEsQuery.error,
   });
 

@@ -20,12 +20,10 @@ export const getDefaultUrlQuery = (): FindingsBaseURLQuery => ({
 const getBaseQuery = ({ dataView, query, filters }: FindingsBaseURLQuery & FindingsBaseProps) => {
   try {
     return {
-      index: dataView.title,
       query: buildEsQuery(dataView, query, filters), // will throw for malformed query
     };
   } catch (error) {
     return {
-      index: dataView.title,
       query: undefined,
       error: error instanceof Error ? error : new Error('Unknown Error'),
     };
