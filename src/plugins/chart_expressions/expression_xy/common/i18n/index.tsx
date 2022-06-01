@@ -121,6 +121,10 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getDetailedTooltipHelp: () =>
+    i18n.translate('expressionXY.xyVis.detailedTooltip.help', {
+      defaultMessage: 'Show detailed tooltip',
+    }),
   getShowTooltipHelp: () =>
     i18n.translate('expressionXY.xyVis.showTooltip.help', {
       defaultMessage: 'Show tooltip',
