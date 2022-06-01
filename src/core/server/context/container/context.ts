@@ -8,7 +8,8 @@
 
 import { flatten } from 'lodash';
 import { ShallowPromise, MaybePromise } from '@kbn/utility-types';
-import type { CoreId, PluginOpaqueId } from '@kbn/core-base-common';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { CoreId } from '@kbn/core-base-common-internal';
 import type { RequestHandler, RequestHandlerContext } from '../..';
 
 /**
