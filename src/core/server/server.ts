@@ -8,21 +8,17 @@
 
 import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
+import type { Logger, LoggerFactory } from '@kbn/logging';
+import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-server-internal-base';
-import {
-  ConfigService,
-  Env,
-  RawConfigurationProvider,
-  coreDeprecationProvider,
-  ensureValidConfiguration,
-} from './config';
+import { coreDeprecationProvider, ensureValidConfiguration } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
+import { LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';

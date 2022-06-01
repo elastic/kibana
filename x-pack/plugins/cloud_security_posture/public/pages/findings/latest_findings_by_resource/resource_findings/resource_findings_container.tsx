@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { EuiSpacer, EuiButtonEmpty } from '@elastic/eui';
-import type { DataView } from '@kbn/data-plugin/common';
 import { Link, useParams } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiTheme } from '@elastic/eui';
@@ -17,7 +16,7 @@ import { useCspBreadcrumbs } from '../../../../common/navigation/use_csp_breadcr
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
-import type { FindingsBaseURLQuery } from '../../types';
+import type { FindingsBaseProps, FindingsBaseURLQuery } from '../../types';
 import { getBaseQuery, getPaginationQuery, getPaginationTableParams } from '../../utils';
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
@@ -40,7 +39,7 @@ const BackToResourcesButton = () => (
   </Link>
 );
 
-export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
+export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_default]);
   const { euiTheme } = useEuiTheme();
   const params = useParams<{ resourceId: string }>();
@@ -63,7 +62,9 @@ export const ResourceFindings = ({ dataView }: { dataView: DataView }) => {
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
       <FindingsSearchBar
         dataView={dataView}
-        setQuery={setUrlQuery}
+        setQuery={(query) => {
+          setUrlQuery({ ...query, pageIndex: 0 });
+        }}
         query={urlQuery.query}
         filters={urlQuery.filters}
         loading={resourceFindings.isFetching}

@@ -16,15 +16,18 @@ jest.mock('./version_check/ensure_es_version', () => ({
   pollEsNodesVersion: jest.fn(),
 }));
 
+// Mocking the module to disable caching for tests
+jest.mock('../ui_settings/cache');
+
 import { MockClusterClient, isScriptingEnabledMock } from './elasticsearch_service.test.mocks';
 
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { BehaviorSubject } from 'rxjs';
-import { first } from 'rxjs/operators';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { first, concatMap } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
-import type { CoreContext } from '@kbn/core-server-internal-base';
 import { Env } from '@kbn/config';
-import { configServiceMock, getEnvOptions } from '../config/mocks';
+import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
+import type { CoreContext } from '@kbn/core-server-internal-base';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { executionContextServiceMock } from '../execution_context/execution_context_service.mock';
@@ -85,10 +88,11 @@ beforeEach(() => {
   pollEsNodesVersionMocked.mockImplementation(pollEsNodesVersionActual);
 });
 
-afterEach(() => {
+afterEach(async () => {
   jest.clearAllMocks();
   MockClusterClient.mockClear();
   isScriptingEnabledMock.mockReset();
+  await elasticsearchService?.stop();
 });
 
 describe('#preboot', () => {
@@ -186,7 +190,7 @@ describe('#setup', () => {
     );
   });
 
-  it('esNodeVersionCompatibility$ only starts polling when subscribed to', async (done) => {
+  it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
@@ -196,13 +200,12 @@ describe('#setup', () => {
     await delay(10);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
-    setupContract.esNodesCompatibility$.subscribe(() => {
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-      done();
-    });
+
+    await firstValueFrom(setupContract.esNodesCompatibility$);
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
   });
 
-  it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async (done) => {
+  it('esNodeVersionCompatibility$ stops polling when unsubscribed from', async () => {
     const mockedClient = mockClusterClientInstance.asInternalUser;
     mockedClient.nodes.info.mockImplementation(() =>
       elasticsearchClientMock.createErrorTransportRequestPromise(new Error())
@@ -211,12 +214,10 @@ describe('#setup', () => {
     const setupContract = await elasticsearchService.setup(setupDeps);
 
     expect(mockedClient.nodes.info).toHaveBeenCalledTimes(0);
-    const sub = setupContract.esNodesCompatibility$.subscribe(async () => {
-      sub.unsubscribe();
-      await delay(100);
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-      done();
-    });
+
+    await firstValueFrom(setupContract.esNodesCompatibility$);
+    await delay(100);
+    expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -402,7 +403,7 @@ describe('#stop', () => {
     expect(mockClusterClientInstance.close).toHaveBeenCalledTimes(1);
   });
 
-  it('stops pollEsNodeVersions even if there are active subscriptions', async (done) => {
+  it('stops pollEsNodeVersions even if there are active subscriptions', async () => {
     expect.assertions(3);
 
     const mockedClient = mockClusterClientInstance.asInternalUser;
@@ -412,15 +413,18 @@ describe('#stop', () => {
 
     const setupContract = await elasticsearchService.setup(setupDeps);
 
-    setupContract.esNodesCompatibility$.subscribe(async () => {
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
-      await delay(10);
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
+    await firstValueFrom(
+      setupContract.esNodesCompatibility$.pipe(
+        concatMap(async () => {
+          expect(mockedClient.nodes.info).toHaveBeenCalledTimes(1);
+          await delay(10);
+          expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
 
-      await elasticsearchService.stop();
-      await delay(100);
-      expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
-      done();
-    });
+          await elasticsearchService.stop();
+          await delay(100);
+          expect(mockedClient.nodes.info).toHaveBeenCalledTimes(2);
+        })
+      )
+    );
   });
 });

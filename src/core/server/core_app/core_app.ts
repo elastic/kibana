@@ -11,8 +11,8 @@ import { stringify } from 'querystring';
 import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/utils';
-import type { CoreContext } from '@kbn/core-server-internal-base';
 import type { Logger } from '@kbn/logging';
+import type { CoreContext } from '@kbn/core-server-internal-base';
 
 import { IRouter, IBasePath, IKibanaResponse, KibanaResponseFactory, KibanaRequest } from '../http';
 import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';

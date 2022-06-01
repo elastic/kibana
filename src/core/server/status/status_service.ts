@@ -19,9 +19,8 @@ import { map, distinctUntilChanged, shareReplay, debounceTime, takeUntil } from 
 import { isDeepStrictEqual } from 'util';
 
 import type { RootSchema } from '@kbn/analytics-client';
-
-import type { CoreContext, CoreService } from '@kbn/core-server-internal-base';
 import { Logger, LogMeta } from '@kbn/logging';
+import type { CoreContext, CoreService } from '@kbn/core-server-internal-base';
 import { AnalyticsServiceSetup } from '../analytics';
 import { InternalElasticsearchServiceSetup } from '../elasticsearch';
 import { InternalHttpServiceSetup } from '../http';

@@ -8,13 +8,13 @@
 
 import { firstValueFrom } from 'rxjs';
 
-import type { CoreContext } from '@kbn/core-server-internal-base';
 import type { Logger } from '@kbn/logging';
+import type { IConfigService } from '@kbn/config';
+import type { CoreContext } from '@kbn/core-server-internal-base';
 import { DeprecationsFactory } from './deprecations_factory';
 import { DomainDeprecationDetails, RegisterDeprecationsConfig } from './types';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
-import { IConfigService } from '../config';
 import { CoreService } from '../../types';
 import { InternalHttpServiceSetup } from '../http';
 import { IScopedClusterClient } from '../elasticsearch/client';

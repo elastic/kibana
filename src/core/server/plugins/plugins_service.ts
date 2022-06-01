@@ -11,8 +11,9 @@ import { firstValueFrom, Observable } from 'rxjs';
 import { filter, map, tap, toArray } from 'rxjs/operators';
 import { getFlattenedObject } from '@kbn/std';
 
-import type { CoreContext, PluginName } from '@kbn/core-server-internal-base';
 import { Logger } from '@kbn/logging';
+import type { IConfigService } from '@kbn/config';
+import type { CoreContext, PluginName } from '@kbn/core-server-internal-base';
 import { CoreService } from '../../types';
 import { discover, PluginDiscoveryError, PluginDiscoveryErrorType } from './discovery';
 import { PluginWrapper } from './plugin';
@@ -27,7 +28,6 @@ import { PluginsConfig, PluginsConfigType } from './plugins_config';
 import { PluginsSystem } from './plugins_system';
 import { createBrowserConfig } from './create_browser_config';
 import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from '../internal_types';
-import { IConfigService } from '../config';
 import { InternalEnvironmentServicePreboot } from '../environment';
 
 /** @internal */

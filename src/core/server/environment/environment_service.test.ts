@@ -15,7 +15,7 @@ import { createDataFolder } from './create_data_folder';
 import { writePidFile } from './write_pid_file';
 import type { AnalyticsServicePreboot } from '../analytics';
 
-import { configServiceMock } from '../config/mocks';
+import { configServiceMock } from '@kbn/config-mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 import { mockCoreContext } from '../core_context.mock';
 import { analyticsServiceMock } from '../analytics/analytics_service.mock';

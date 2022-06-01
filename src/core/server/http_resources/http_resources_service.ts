@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-server-internal-base';
-import { Logger } from '@kbn/logging';
 import { RequestHandlerContext } from '..';
 import {
   IRouter,
@@ -18,7 +18,6 @@ import {
   InternalHttpServicePreboot,
 } from '../http';
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
-
 import {
   InternalHttpResourcesSetup,
   HttpResources,

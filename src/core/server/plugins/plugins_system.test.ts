@@ -18,7 +18,7 @@ import { REPO_ROOT } from '@kbn/utils';
 import type { CoreContext, PluginName } from '@kbn/core-server-internal-base';
 import { Logger } from '@kbn/logging';
 import { Env } from '@kbn/config';
-import { configServiceMock, getEnvOptions } from '../config/mocks';
+import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 
 import { PluginWrapper } from './plugin';
@@ -202,7 +202,6 @@ test('correctly orders plugins and returns exposed values for "setup" and "start
     setup: Record<PluginName, unknown>;
     start: Record<PluginName, unknown>;
   }
-
   const plugins = new Map([
     [
       createPlugin('order-4', { required: ['order-2'] }),

@@ -8,9 +8,9 @@
 
 import { REPO_ROOT } from '@kbn/utils';
 import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import { Env, IConfigService } from '@kbn/config';
+import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import type { CoreContext } from '@kbn/core-server-internal-base';
-import { Env, IConfigService } from './config';
-import { configServiceMock, getEnvOptions } from './config/mocks';
 import { loggingSystemMock } from './logging/logging_system.mock';
 import { ILoggingSystem } from './logging';
 

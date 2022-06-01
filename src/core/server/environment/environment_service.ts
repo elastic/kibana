@@ -8,9 +8,9 @@
 
 import { firstValueFrom, of } from 'rxjs';
 import { PathConfigType, config as pathConfigDef } from '@kbn/utils';
-import type { CoreContext } from '@kbn/core-server-internal-base';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
+import type { CoreContext } from '@kbn/core-server-internal-base';
 import type { AnalyticsServicePreboot } from '../analytics';
 import { HttpConfigType, config as httpConfigDef } from '../http';
 import { PidConfigType, config as pidConfigDef } from './pid_config';

@@ -8,10 +8,12 @@
 
 import { parse as parseCookie } from 'tough-cookie';
 import supertest from 'supertest';
-import { REPO_ROOT } from '@kbn/utils';
-import { ByteSizeValue } from '@kbn/config-schema';
 import { BehaviorSubject } from 'rxjs';
 import { duration as momentDuration } from 'moment';
+import { REPO_ROOT } from '@kbn/utils';
+import { ByteSizeValue } from '@kbn/config-schema';
+import { Env } from '@kbn/config';
+import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
 
 import type { CoreContext } from '@kbn/core-server-internal-base';
 import { Env } from '@kbn/config';
@@ -20,7 +22,6 @@ import { HttpService } from '../http_service';
 import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
-import { getEnvOptions, configServiceMock } from '../../config/mocks';
 import { httpServerMock } from '../http_server.mocks';
 
 import { createCookieSessionStorageFactory } from '../cookie_session_storage';

@@ -10,9 +10,9 @@ import { Observable, Subscription, combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { pick } from '@kbn/std';
 
-import type { CoreContext, CoreService, PluginOpaqueId } from '@kbn/core-server-internal-base';
 import { Logger } from '@kbn/logging';
 import { Env } from '@kbn/config';
+import type { CoreContext, CoreService, PluginOpaqueId } from '@kbn/core-server-internal-base';
 
 import type { RequestHandlerContext } from '..';
 import type { InternalExecutionContextSetup } from '../execution_context';

@@ -10,10 +10,10 @@ import { BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { REPO_ROOT } from '@kbn/utils';
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { CoreContext } from '@kbn/core-server-internal-base';
 import { Env } from '@kbn/config';
+import { getEnvOptions, configServiceMock } from '@kbn/config-mocks';
+import type { CoreContext } from '@kbn/core-server-internal-base';
 import { HttpService } from './http_service';
-import { getEnvOptions, configServiceMock } from '../config/mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 
 const coreId = Symbol('core');

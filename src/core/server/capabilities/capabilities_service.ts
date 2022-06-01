@@ -7,8 +7,8 @@
  */
 
 import type { CoreContext } from '@kbn/core-server-internal-base';
+import { Logger } from '@kbn/logging';
 import { Capabilities, CapabilitiesProvider, CapabilitiesSwitcher } from './types';
-import { Logger } from '../logging';
 import { InternalHttpServicePreboot, InternalHttpServiceSetup, KibanaRequest } from '../http';
 import { mergeCapabilities } from './merge_capabilities';
 import { getCapabilitiesResolver, CapabilitiesResolver } from './resolve_capabilities';

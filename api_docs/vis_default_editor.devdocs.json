@@ -438,7 +438,7 @@
         "label": "LegendSizeSettings",
         "description": [],
         "signature": [
-          "({ legendSize, onLegendSizeChange, isVerticalLegend, }: LegendSizeSettingsProps) => JSX.Element"
+          "({ legendSize, onLegendSizeChange, isVerticalLegend, showAutoOption, }: LegendSizeSettingsProps) => JSX.Element"
         ],
         "path": "src/plugins/vis_default_editor/public/components/options/legend_size_settings.tsx",
         "deprecated": false,
@@ -448,7 +448,7 @@
             "id": "def-public.LegendSizeSettings.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  legendSize,\n  onLegendSizeChange,\n  isVerticalLegend,\n}",
+            "label": "{\n  legendSize,\n  onLegendSizeChange,\n  isVerticalLegend,\n  showAutoOption,\n}",
             "description": [],
             "signature": [
               "LegendSizeSettingsProps"
