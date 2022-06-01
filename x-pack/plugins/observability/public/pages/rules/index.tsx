@@ -402,7 +402,6 @@ function RulesPage() {
                 defaultMessage="Refresh"
               />
             </EuiButton>
-            ,
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup>
