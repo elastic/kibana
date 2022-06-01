@@ -25,8 +25,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
+import semverGt from 'semver/functions/gt';
 
+import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
 import type { Agent } from '../../../../types';
 import {
   sendPostAgentUpgrade,
@@ -62,12 +63,24 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   const isAllAgents = agents === '';
 
   const fallbackVersions = [kibanaVersion].concat(FALLBACK_VERSIONS);
-  const fallbackOptions: Array<EuiComboBoxOptionOption<string>> = fallbackVersions.map(
-    (option) => ({
+
+  const minVersion = useMemo(() => {
+    const versions = (agents as Agent[]).map(
+      (agent) => agent.local_metadata?.elastic?.agent?.version
+    );
+    return getMinVersion(versions);
+  }, [agents]);
+
+  const versionOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
+    const displayVersions = minVersion
+      ? fallbackVersions.filter((v) => semverGt(v, minVersion))
+      : fallbackVersions;
+    return displayVersions.map((option) => ({
       label: option,
       value: option,
-    })
-  );
+    }));
+  }, [fallbackVersions, minVersion]);
+
   const maintainanceWindows =
     isSmallBatch && !isScheduled ? [0].concat(MAINTAINANCE_VALUES) : MAINTAINANCE_VALUES;
   const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = maintainanceWindows.map(
@@ -84,7 +97,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
       value: option === 0 ? 0 : option * 3600,
     })
   );
-  const [selectedVersion, setSelectedVersion] = useState([fallbackOptions[0]]);
+  const [selectedVersion, setSelectedVersion] = useState([versionOptions[0]]);
   const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([
     maintainanceOptions[0],
   ]);
@@ -183,7 +196,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
 
   const onCreateOption = (searchValue: string) => {
     const agentVersionNumber = semverCoerce(searchValue);
-    if (agentVersionNumber?.version && semverLt(agentVersionNumber?.version, kibanaVersion)) {
+    if (
+      agentVersionNumber?.version &&
+      semverGt(kibanaVersion, agentVersionNumber?.version) &&
+      minVersion &&
+      semverGt(agentVersionNumber?.version, minVersion)
+    ) {
       const newOption = {
         label: searchValue,
         value: searchValue,
@@ -274,7 +292,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           data-test-subj="agentUpgradeModal.VersionCombobox"
           fullWidth
           singleSelection={{ asPlainText: true }}
-          options={fallbackOptions}
+          options={versionOptions}
           selectedOptions={selectedVersion}
           onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
             setSelectedVersion(selected);
