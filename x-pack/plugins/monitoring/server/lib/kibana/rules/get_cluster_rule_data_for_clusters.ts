@@ -73,7 +73,7 @@ export async function getClusterRuleDataForClusters(
       };
       const { callWithRequest } = req.server.plugins.elasticsearch.getCluster('monitoring');
       const response = await callWithRequest(req, 'search', params);
-      const indices = response.aggregations?.indices?.buckets;
+      const indices = response.aggregations?.indices?.buckets ?? [];
       if (indices.length === 0) {
         // This means they are only using internal monitoring and rule monitoring data is not available
         return null;
