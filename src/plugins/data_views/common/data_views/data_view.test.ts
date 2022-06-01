@@ -369,6 +369,8 @@ describe('IndexPattern', () => {
           name: 'scriptedFieldWithEmptyFormatter',
           type: 'number',
           esTypes: ['long'],
+          searchable: true,
+          aggregatable: true,
         })
       ).toEqual(
         expect.objectContaining({

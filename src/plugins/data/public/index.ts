@@ -77,8 +77,6 @@ export const indexPatterns = {
 export type { DataViewsContract, TypeMeta } from './data_views';
 
 export type {
-  IFieldType,
-  IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,

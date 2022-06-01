@@ -100,13 +100,11 @@ export {
   CSV_MIME_TYPE,
 } from './exports';
 export type {
-  IFieldType,
   IIndexPatternFieldList,
   FieldFormatMap,
   RuntimeType,
   RuntimeField,
   DataViewAttributes,
-  IndexPatternAttributes,
   FieldAttrs,
   FieldAttrSet,
   OnNotification,
