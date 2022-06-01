@@ -36,8 +36,23 @@ You must have `all` privileges for the *Actions and Connectors* feature in the
 
 `config`::
 (Required, object) The configuration for the connector. Configuration properties
-vary depending on the connector type. For information about the configuration
-properties, refer to <<action-types>>.
+vary depending on the connector type. For example:
++
+.Index connectors
+[%collapsible%open]
+====
+`executionTimeField`::
+(Optional, string) Specifies a field that will contain the time the alert
+condition was detected. The default value is `null`.
+
+`index`::
+(Required, string) The {es} index to be written to.
+
+`refresh`::
+(Optional, boolean) The {ref}/docs-refresh.html[refresh] policy for the write
+request. The default value is `false`.
+
+====
 +
 .Jira connectors
 [%collapsible%open]
@@ -49,6 +64,8 @@ properties, refer to <<action-types>>.
 `projectKey`::
 (Required, string) The Jira project key.
 ====
++
+For more configuration properties, refer to <<action-types>>.
 
 `connector_type_id`::
 (Required, string) The connector type ID for the connector.
