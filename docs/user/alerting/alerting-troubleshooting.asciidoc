@@ -16,6 +16,14 @@ server    log   [11:39:40.389] [error][alerting][alerting][plugins][plugins] Exe
 Some of the resources, such as saved objects and API keys, may no longer be available or valid, yielding error messages about those missing resources.
 
 [float]
+[[alerting-stack-monitoring]]
+=== Use Stack Monitoring
+
+Starting in 8.4, you can use Stack Monitoring to gain insight into the performance of your rules and actions. This integration requires monitoring through Metricbeat (https://www.elastic.co/guide/en/kibana/current/monitoring-metricbeat.html) and requires no additional setup - simply ensure you are monitoring Kibana through Metricbeat and rule and action metrics will show up in the Stack Monitoring UI.
+
+TODO: add screenshots
+
+[float]
 [[alerting-kibana-version]]
 === Use the debugging tools
 The following debugging tools are available:
