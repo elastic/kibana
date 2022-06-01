@@ -1809,8 +1809,7 @@ describe('XYChart component', () => {
         .find(LineSeries)
         .prop('name') as SeriesNameFn;
 
-      // In this case, the ID is used as the name. This shouldn't happen in practice
-      expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual(null);
+      expect(nameFn({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('a');
       expect(nameFn({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
     });
 
@@ -1890,7 +1889,7 @@ describe('XYChart component', () => {
       // This accessor has a human-readable name
       expect(nameFn1({ ...nameFnArgs, seriesKeys: ['a'] }, false)).toEqual('Label A');
       // This accessor does not
-      expect(nameFn2({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual(null);
+      expect(nameFn2({ ...nameFnArgs, seriesKeys: ['b'] }, false)).toEqual('b');
       expect(nameFn1({ ...nameFnArgs, seriesKeys: ['nonsense'] }, false)).toEqual(null);
     });
 
@@ -2951,6 +2950,52 @@ describe('XYChart component', () => {
 
       expect(smallMultiples.prop('splitVertically')).toEqual(SPLIT_COLUMN);
       expect(smallMultiples.prop('splitHorizontally')).toEqual(SPLIT_ROW);
+    });
+  });
+
+  describe('detailed tooltip', () => {
+    it('should render custom detailed tooltip', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            detailedTooltip: true,
+          }}
+        />
+      );
+      const settings = component.find(Settings);
+      const tooltip = settings.prop('tooltip');
+      expect(tooltip).toEqual(
+        expect.objectContaining({
+          headerFormatter: undefined,
+          customTooltip: expect.any(Function),
+        })
+      );
+    });
+
+    it('should render default tooltip, if detailed tooltip is hidden', () => {
+      const { args } = sampleArgs();
+      const component = shallow(
+        <XYChart
+          {...defaultProps}
+          args={{
+            ...args,
+            layers: [{ ...(args.layers[0] as DataLayerConfig), seriesType: 'bar' }],
+            detailedTooltip: false,
+          }}
+        />
+      );
+      const settings = component.find(Settings);
+      const tooltip = settings.prop('tooltip');
+      expect(tooltip).toEqual(
+        expect.objectContaining({
+          headerFormatter: expect.any(Function),
+          customTooltip: undefined,
+        })
+      );
     });
   });
 });
