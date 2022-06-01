@@ -234,15 +234,18 @@ export const getAgentDataHandler: RequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asCurrentUser;
   try {
-    let items;
+    const returnDataPreview = request.query.previewData;
+    const agentIds = isStringArray(request.query.agentsIds)
+      ? request.query.agentsIds
+      : [request.query.agentsIds];
 
-    if (isStringArray(request.query.agentsIds)) {
-      items = await AgentService.getIncomingDataByAgentsId(esClient, request.query.agentsIds);
-    } else {
-      items = await AgentService.getIncomingDataByAgentsId(esClient, [request.query.agentsIds]);
-    }
+    const { items, dataPreview } = await AgentService.getIncomingDataByAgentsId(
+      esClient,
+      agentIds,
+      returnDataPreview
+    );
 
-    const body = { items };
+    const body = { items, dataPreview };
 
     return response.ok({ body });
   } catch (error) {
