@@ -16,6 +16,6 @@ describe('Loading indicator', () => {
   });
   it('elastic renders correctly', () => {
     const component = mount(<LoadingIndicator type="elastic" />);
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 });
