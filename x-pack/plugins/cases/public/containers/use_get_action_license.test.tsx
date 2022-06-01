@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import * as api from './api';
-import { useFetchActionLicense } from './use_get_action_license';
+import { useGetActionLicense } from './use_get_action_license';
 import { AppMockRenderer, createAppMockRenderer } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
 
@@ -25,7 +25,7 @@ describe('useGetActionLicense', () => {
 
   it('calls getActionLicense with correct arguments', async () => {
     const spyOnGetActionLicense = jest.spyOn(api, 'getActionLicense');
-    const { waitForNextUpdate } = renderHook(() => useFetchActionLicense(), {
+    const { waitForNextUpdate } = renderHook(() => useGetActionLicense(), {
       wrapper: appMockRenderer.AppWrapper,
     });
 
@@ -42,7 +42,7 @@ describe('useGetActionLicense', () => {
       throw new Error('Something went wrong');
     });
 
-    const { waitForNextUpdate } = renderHook(() => useFetchActionLicense(), {
+    const { waitForNextUpdate } = renderHook(() => useGetActionLicense(), {
       wrapper: appMockRenderer.AppWrapper,
     });
     await waitForNextUpdate();

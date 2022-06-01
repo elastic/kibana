@@ -15,7 +15,7 @@ import { ServerError } from '../types';
 
 const MINIMUM_LICENSE_REQUIRED_CONNECTOR = ConnectorTypes.jira;
 
-export const useFetchActionLicense = () => {
+export const useGetActionLicense = () => {
   const toasts = useToasts();
   return useQuery(
     [CASE_LIST_CACHE_KEY, 'action-license'],

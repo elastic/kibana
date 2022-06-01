@@ -13,7 +13,7 @@ import { AllCases } from '.';
 import { TestProviders } from '../../common/mock';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
-import { useFetchActionLicense } from '../../containers/use_get_action_license';
+import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { CaseStatuses } from '../../../common/api';
 import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
@@ -31,7 +31,7 @@ jest.mock('../../containers/use_get_cases_status');
 const useConnectorsMock = useConnectors as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
-const useGetActionLicenseMock = useFetchActionLicense as jest.Mock;
+const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 
 describe('AllCases', () => {
   const dispatchUpdateCaseProperty = jest.fn();

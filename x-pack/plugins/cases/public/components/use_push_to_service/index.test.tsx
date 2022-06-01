@@ -17,14 +17,14 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { basicPush, actionLicenses, connectorsMock } from '../../containers/mock';
 import { CLOSED_CASE_PUSH_ERROR_ID } from './callout/types';
 import * as i18n from './translations';
-import { useFetchActionLicense } from '../../containers/use_get_action_license';
+import { useGetActionLicense } from '../../containers/use_get_action_license';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_post_push_to_service');
 jest.mock('../../containers/configure/api');
 jest.mock('../../common/navigation/hooks');
 
-const useFetchActionLicenseMock = useFetchActionLicense as jest.Mock;
+const useFetchActionLicenseMock = useGetActionLicense as jest.Mock;
 
 describe('usePushToService', () => {
   const caseId = '12345';
