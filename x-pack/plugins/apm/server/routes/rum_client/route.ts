@@ -14,7 +14,6 @@ import { getLongTaskMetrics } from './get_long_task_metrics';
 import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistBreakdown } from './get_pl_dist_breakdown';
-import { getUrlSearch } from './get_url_search';
 import { getVisitorBreakdown } from './get_visitor_breakdown';
 import { getWebCoreVitals } from './get_web_core_vitals';
 import { hasRumData } from './has_rum_data';
@@ -280,34 +279,6 @@ const rumLongTaskMetrics = createApmServerRoute({
   },
 });
 
-const rumUrlSearch = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/url-search',
-  params: t.type({
-    query: uxQueryRt,
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    total: number;
-    items: Array<{ url: string; count: number; pld: number }>;
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { urlQuery, percentile, start, end },
-    } = resources.params;
-
-    return getUrlSearch({
-      setup,
-      urlQuery,
-      percentile: Number(percentile),
-      start,
-      end,
-    });
-  },
-});
-
 const rumJSErrors = createApmServerRoute({
   endpoint: 'GET /internal/apm/ux/js-errors',
   params: t.type({
@@ -412,7 +383,6 @@ export const rumRouteRepository = {
   ...rumVisitorsBreakdownRoute,
   ...rumWebCoreVitals,
   ...rumLongTaskMetrics,
-  ...rumUrlSearch,
   ...rumJSErrors,
   ...rumHasDataRoute,
 };
