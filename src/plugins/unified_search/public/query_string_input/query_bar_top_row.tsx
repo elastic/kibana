@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -27,7 +27,6 @@ import {
 } from '@elastic/eui';
 import {
   IDataPluginServices,
-  TimeRange,
   TimeHistoryContract,
   Query,
   getQueryLog,

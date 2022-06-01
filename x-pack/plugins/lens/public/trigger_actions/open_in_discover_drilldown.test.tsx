@@ -52,9 +52,9 @@ describe('open in discover drilldown', () => {
     );
     expect(isCompatible).toHaveBeenCalledWith(expect.objectContaining({ filters }));
   });
-  it('calls through to execute helper', () => {
+  it('calls through to execute helper', async () => {
     const filters: Filter[] = [{ meta: { disabled: false } }];
-    drilldown.execute(
+    await drilldown.execute(
       { openInNewTab: true },
       { embeddable: { type: 'lens' } as IEmbeddable<EmbeddableInput>, filters }
     );

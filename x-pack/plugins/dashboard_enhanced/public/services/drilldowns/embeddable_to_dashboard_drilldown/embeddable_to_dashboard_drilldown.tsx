@@ -14,8 +14,8 @@ import {
   isTimeRange,
   Query,
   TimeRange,
-  extractTimeRange,
 } from '@kbn/data-plugin/public';
+import { extractTimeRange } from '@kbn/es-query';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
 import { IEmbeddable, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
