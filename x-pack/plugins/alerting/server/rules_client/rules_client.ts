@@ -211,7 +211,10 @@ export interface FindOptions extends IndexType {
   filter?: string;
 }
 
-export type BulkEditFields = keyof Pick<Rule, 'actions' | 'tags' | 'schedule'>;
+export type BulkEditFields = keyof Pick<
+  Rule,
+  'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen'
+>;
 
 export type BulkEditOperation =
   | {
@@ -228,19 +231,17 @@ export type BulkEditOperation =
       operation: 'set';
       field: Extract<BulkEditFields, 'schedule'>;
       value: Rule['schedule'];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'throttle'>;
+      value: Rule['throttle'];
+    }
+  | {
+      operation: 'set';
+      field: Extract<BulkEditFields, 'notifyWhen'>;
+      value: Rule['notifyWhen'];
     };
-
-// throttle, notifyWhen is commented out before https://github.com/elastic/kibana/issues/124850 will be implemented
-// | {
-//     operation: 'set';
-//     field: Extract<BulkEditFields, 'throttle'>;
-//     value: Rule['throttle'];
-//   }
-// | {
-//     operation: 'set';
-//     field: Extract<BulkEditFields, 'notifyWhen'>;
-//     value: Rule['notifyWhen'];
-//   };
 
 type RuleParamsModifier<Params extends RuleTypeParams> = (params: Params) => Promise<Params>;
 
