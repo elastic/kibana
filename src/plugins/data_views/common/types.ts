@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DataViewFieldBase, IFieldSubType, DataViewBase } from '@kbn/es-query';
+import type { DataViewFieldBase, IFieldSubType } from '@kbn/es-query';
 import { ToastInputFields, ErrorToastOptions } from '@kbn/core/public/notifications';
 // eslint-disable-next-line
 import type { SavedObject } from 'src/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { FieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { IFieldType } from './fields';
+import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { RUNTIME_FIELD_TYPES } from './constants';
-import { DataViewField } from './fields';
 
 export type { QueryDslQueryContainer };
 
@@ -63,27 +61,6 @@ export interface RuntimeField extends RuntimeFieldBase, FieldConfiguration {
 
 export interface RuntimeFieldSubField extends FieldConfiguration {
   type: RuntimeTypeExceptComposite;
-}
-
-/**
- * @deprecated
- * IIndexPattern allows for an IndexPattern OR an index pattern saved object
- * Use DataView or DataViewSpec instead
- */
-export interface IIndexPattern extends DataViewBase {
-  title: string;
-  fields: IFieldType[];
-  /**
-   * Type is used for identifying rollup indices, otherwise left undefined
-   */
-  type?: string;
-  timeFieldName?: string;
-  getTimeField?(): IFieldType | undefined;
-  fieldFormatMap?: Record<string, SerializedFieldFormat<unknown> | undefined>;
-  /**
-   * Look up a formatter for a given field
-   */
-  getFormatterForField?: (field: DataViewField | DataViewField['spec'] | IFieldType) => FieldFormat;
 }
 
 /**
