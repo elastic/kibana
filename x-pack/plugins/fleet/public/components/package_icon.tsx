@@ -15,7 +15,7 @@ import { usePackageIconType } from '../hooks';
 export const PackageIcon: React.FunctionComponent<UsePackageIconType & Omit<EuiIconProps, 'type'>> =
   ({ packageName, integrationName, version, icons, tryApi, ...euiIconProps }) => {
     const iconType = usePackageIconType({ packageName, integrationName, version, icons, tryApi });
-  // @ts-expect-error loading="lazy" is not supported by EuiIcon
+    // @ts-expect-error loading="lazy" is not supported by EuiIcon
     return <EuiIcon size="s" type={iconType} {...euiIconProps} loading="lazy" />;
   };
 
