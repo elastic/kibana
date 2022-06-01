@@ -20,7 +20,9 @@ import { KibanaThemeProvider } from '../theme';
 const ReactMarkdown = React.lazy(() => import('react-markdown'));
 const ErrorRenderer = (props: { children: string }) => (
   <React.Suspense fallback={<EuiLoadingSpinner />}>
-    <ReactMarkdown {...props} />
+    <>
+      <ReactMarkdown {...props} />
+    </>
   </React.Suspense>
 );
 

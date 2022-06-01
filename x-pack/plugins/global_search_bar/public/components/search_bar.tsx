@@ -325,7 +325,6 @@ export const SearchBar: FC<SearchBarProps> = ({
         panelClassName: 'navSearch__panel',
         repositionOnScroll: true,
         buttonRef: setButtonRef,
-        // @ts-expect-error EuiPopover doesn't export `ref`
         ref: setPopoverRef,
       }}
       popoverButton={

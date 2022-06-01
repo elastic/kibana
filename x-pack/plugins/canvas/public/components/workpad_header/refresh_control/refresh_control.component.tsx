@@ -30,8 +30,8 @@ const strings = {
 export const RefreshControl = () => {
   const dispatch = useDispatch();
   const inFlight = useSelector(getInFlight);
-
   const doRefresh = useCallback(() => dispatch(fetchAllRenderables()), [dispatch]);
+
   return (
     <EuiToolTip
       position="bottom"
