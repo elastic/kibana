@@ -275,7 +275,7 @@ on the {kib} index at startup. {kib} users still need to authenticate with
 {es}, which is proxied through the {kib} server.
 
 |[[elasticsearch-service-account-token]] `elasticsearch.serviceAccountToken:`
- | beta[]. If your {es} is protected with basic authentication, this token provides the credentials
+ | If your {es} is protected with basic authentication, this token provides the credentials
 that the {kib} server uses to perform maintenance on the {kib} index at startup. This setting
 is an alternative to `elasticsearch.username` and `elasticsearch.password`.
 
@@ -493,7 +493,7 @@ send on all responses to the client from the {kib} server. *Default: `{}`*
 
 |[[server-host]] `server.host:`
  | This setting specifies the host of the
-back end server. To allow remote users to connect, set the value to the IP address or DNS name of the {kib} server. *Default: `"localhost"`*
+back end server. To allow remote users to connect, set the value to the IP address or DNS name of the {kib} server. Use `0.0.0.0` to make Kibana listen on all IPs (public and private). *Default: `"localhost"`*
 
 | `server.keepaliveTimeout:`
  | The number of milliseconds to wait for additional data before restarting
@@ -535,10 +535,6 @@ inactive socket. *Default: `"120000"`*
 |[[server-ssl-cert-key]] `server.ssl.certificate:` and `server.ssl.key:`
  | Paths to a PEM-encoded X.509 server certificate and its corresponding private key. These
 are used by {kib} to establish trust when receiving inbound SSL/TLS connections from users.
-
-|[[server-uuid]] `server.uuid:`
- | The unique identifier for this {kib} instance.
-
 
 |===
 
@@ -620,6 +616,9 @@ all http requests to https over the port configured as <<server-port, `server.po
  | An array of supported protocols with versions.
 Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: TLSv1.1, TLSv1.2, TLSv1.3*
 
+|[[server-uuid]] `server.uuid:`
+ | The unique identifier for this {kib} instance. It must be a valid UUIDv4. It gets automatically generated on the first startup if not specified and persisted in the `data` path.
+
 | [[settings-xsrf-allowlist]] `server.xsrf.allowlist:`
  | It is not recommended to disable protections for
 arbitrary API endpoints. Instead, supply the `kbn-xsrf` header.
@@ -668,7 +667,7 @@ out through *Advanced Settings*. *Default: `true`*
 sources and images. When false, Vega can only get data from {es}. *Default: `false`*
 
 | `xpack.ccr.ui.enabled`
-Set this value to false to disable the Cross-Cluster Replication UI.
+ | Set this value to false to disable the Cross-Cluster Replication UI.
 *Default: `true`*
 
 |[[settings-explore-data-in-context]] `xpack.discoverEnhanced.actions.`
@@ -680,29 +679,29 @@ Set this value to false to disable the Cross-Cluster Replication UI.
  | Enables you to view the underlying documents in a data series from a dashboard panel. *Default: `false`*
 
 | `xpack.ilm.ui.enabled`
-Set this value to false to disable the Index Lifecycle Policies UI.
+ | Set this value to false to disable the Index Lifecycle Policies UI.
 *Default: `true`*
 
 | `xpack.index_management.ui.enabled`
-Set this value to false to disable the Index Management UI.
+ | Set this value to false to disable the Index Management UI.
 *Default: `true`*
 
 | `xpack.license_management.ui.enabled`
-Set this value to false to disable the License Management UI.
+ | Set this value to false to disable the License Management UI.
 *Default: `true`*
 
 | `xpack.remote_clusters.ui.enabled`
-Set this value to false to disable the Remote Clusters UI.
+ | Set this value to false to disable the Remote Clusters UI.
 *Default: `true`*
 
 | `xpack.rollup.ui.enabled:`
-Set this value to false to disable the Rollup Jobs UI. *Default: true*
+ | Set this value to false to disable the Rollup Jobs UI. *Default: true*
 
 | `xpack.snapshot_restore.ui.enabled:`
-Set this value to false to disable the Snapshot and Restore UI. *Default: true*
+ | Set this value to false to disable the Snapshot and Restore UI. *Default: true*
 
 | `xpack.upgrade_assistant.ui.enabled:`
-Set this value to false to disable the Upgrade Assistant UI. *Default: true*
+ | Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 
 | `i18n.locale` {ess-icon}
  | Set this value to change the {kib} interface language.
