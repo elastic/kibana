@@ -172,7 +172,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [MountPoint](./kibana-plugin-core-public.mountpoint.md) | A function that should mount DOM content inside the provided container element and return a handler to unmount it. |
 |  [NavType](./kibana-plugin-core-public.navtype.md) |  |
 |  [PluginInitializer](./kibana-plugin-core-public.plugininitializer.md) | The <code>plugin</code> export at the root of a plugin's <code>public</code> directory should conform to this interface. |
-|  [PluginOpaqueId](./kibana-plugin-core-public.pluginopaqueid.md) |  |
 |  [PublicAppDeepLinkInfo](./kibana-plugin-core-public.publicappdeeplinkinfo.md) | Public information about a registered app's [deepLinks](./kibana-plugin-core-public.appdeeplink.md) |
 |  [PublicAppInfo](./kibana-plugin-core-public.publicappinfo.md) | Public information about a registered [application](./kibana-plugin-core-public.app.md) |
 |  [PublicUiSettingsParams](./kibana-plugin-core-public.publicuisettingsparams.md) | A sub-set of [UiSettingsParams](./kibana-plugin-core-public.uisettingsparams.md) exposed to the client-side. |
