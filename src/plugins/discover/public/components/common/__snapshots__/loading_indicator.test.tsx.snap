@@ -1,5 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+<<<<<<< HEAD
 exports[`Loading indicator renders correctly 1`] = `
 <div
   class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -14,4 +15,76 @@ exports[`Loading indicator renders correctly 1`] = `
     />
   </div>
 </div>
+=======
+exports[`Loading indicator default renders correctly 1`] = `
+<LoadingIndicator>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="none"
+    justifyContent="spaceAround"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiLoadingSpinner
+            size="l"
+          >
+            <span
+              className="euiLoadingSpinner euiLoadingSpinner--large"
+            />
+          </EuiLoadingSpinner>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</LoadingIndicator>
+>>>>>>> 0eef31fe9f66b7f8b15b18a23353c2b24055f519
+`;
+
+exports[`Loading indicator elastic renders correctly 1`] = `
+<LoadingIndicator
+  type="elastic"
+>
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="none"
+    justifyContent="spaceAround"
+  >
+    <div
+      className="euiFlexGroup euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
+    >
+      <EuiFlexItem
+        grow={false}
+      >
+        <div
+          className="euiFlexItem euiFlexItem--flexGrowZero"
+        >
+          <EuiLoadingElastic
+            size="xxl"
+          >
+            <span
+              className="euiLoadingElastic euiLoadingElastic--xxLarge"
+            >
+              <EuiIcon
+                size="xxl"
+                type="logoElastic"
+              >
+                <span
+                  data-euiicon-type="logoElastic"
+                  size="xxl"
+                />
+              </EuiIcon>
+            </span>
+          </EuiLoadingElastic>
+        </div>
+      </EuiFlexItem>
+    </div>
+  </EuiFlexGroup>
+</LoadingIndicator>
 `;

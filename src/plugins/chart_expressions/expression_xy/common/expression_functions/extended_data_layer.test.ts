@@ -40,6 +40,7 @@ describe('extendedDataLayerConfig', () => {
       layerType: LayerTypes.DATA,
       ...fullArgs,
       table: data,
+      showLines: true,
     });
   });
 
@@ -97,6 +98,18 @@ describe('extendedDataLayerConfig', () => {
       extendedDataLayerFunction.fn(
         data,
         { ...args, seriesType: 'bar', pointsRadius: 10 },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  test('throws the error if showLines is provided to the not line/area chart', async () => {
+    const { data } = sampleArgs();
+
+    expect(
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, seriesType: 'bar', showLines: true },
         createMockExecutionContext()
       )
     ).rejects.toThrowErrorMatchingSnapshot();

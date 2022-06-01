@@ -27,7 +27,8 @@
     "spaces",
     "savedObjectsTaggingOss",
     "screenshotMode",
-    "usageCollection"
+    "usageCollection",
+    "taskManager"
   ],
   "server": true,
   "ui": true,
