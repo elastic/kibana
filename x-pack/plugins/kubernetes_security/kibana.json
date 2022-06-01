@@ -9,7 +9,8 @@
   "requiredPlugins": [
     "data",
     "timelines",
-    "ruleRegistry"
+    "ruleRegistry",
+    "sessionView"
   ],
   "requiredBundles": [],
   "server": true,
