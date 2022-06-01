@@ -65,7 +65,7 @@ describe('Editor', () => {
       data = null;
     }
     if (data && typeof data !== 'string') {
-      data = JSON.stringify(data, null, 3);
+      data = JSON.stringify(data, null, 2);
     }
     if (data) {
       if (prefix) {
@@ -340,6 +340,46 @@ describe('Editor', () => {
         data: [collapseLiteralStrings(simpleRequest.data)],
       };
 
+      compareRequest(request, expected);
+      done();
+    })
+  );
+
+  const singleLineRequestBodyComment = {
+    prefix: 'PUT index_1/type1/1',
+    data: ['{', '  "f": 1', '// "f": 2', '}'].join('\n'),
+  };
+
+  const multiLineRequestBodyComment = {
+    prefix: 'PUT index_1/type1/2',
+    data: ['{', '  "f": 1', '/* "f": { "t": 2 } */', '}'].join('\n'),
+  };
+
+  utilsTest(
+    'request-body comments - single line',
+    singleLineRequestBodyComment.prefix,
+    singleLineRequestBodyComment.data,
+    callWithEditorMethod('getRequest', (request, done) => {
+      const expected = {
+        method: 'PUT',
+        url: 'index_1/type1/1',
+        data: [singleLineRequestBodyComment.data],
+      };
+      compareRequest(request, expected);
+      done();
+    })
+  );
+
+  utilsTest(
+    'request-body comments - multi line',
+    multiLineRequestBodyComment.prefix,
+    multiLineRequestBodyComment.data,
+    callWithEditorMethod('getRequest', (request, done) => {
+      const expected = {
+        method: 'PUT',
+        url: 'index_1/type1/2',
+        data: [multiLineRequestBodyComment.data],
+      };
       compareRequest(request, expected);
       done();
     })

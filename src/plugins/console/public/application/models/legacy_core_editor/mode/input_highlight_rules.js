@@ -115,7 +115,7 @@ export function InputHighlightRules() {
   };
 
   addXJsonToRules(this);
-
+  // Add comment rules to json rule set
   this.$rules.json.unshift({ include: 'comments' });
 
   if (this.constructor === InputHighlightRules) {
