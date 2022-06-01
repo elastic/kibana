@@ -8,7 +8,7 @@
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { ILicenseState, RuleMutedError } from '../lib';
-import { verifyAccessAndContext, RewriteRequestCase } from './lib';
+import { verifyAccessAndContext } from './lib';
 import { SnoozeOptions } from '../rules_client';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { validateSnoozeStartDate, validateSnoozeEndDate } from '../lib/validate_snooze_date';
@@ -37,9 +37,9 @@ const bodySchema = schema.object({
   }),
 });
 
-const rewriteBodyReq: RewriteRequestCase<SnoozeOptions> = ({
-  snooze_schedule: snoozeSchedule,
-}) => ({
+const rewriteBodyReq: (opts: {
+  snooze_schedule: SnoozeOptions['snoozeSchedule'];
+}) => SnoozeOptions = ({ snooze_schedule: snoozeSchedule }) => ({
   snoozeSchedule,
 });
 

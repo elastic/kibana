@@ -7,14 +7,20 @@
 
 import type { WeekdayStr } from 'rrule';
 
-export type RuleSnooze = RuleSnoozeSchedule[];
-
-export type RuleSnoozeSchedule = {
+export interface RuleSnoozeSchedule {
   duration: number;
   rRule: Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
   // For scheduled/recurring snoozes, `id` uniquely identifies them so that they can be displayed, modified, and deleted individually
   id?: string;
-};
+}
+
+// Type signature of has to be repeated here to avoid issues with SavedObject compatibility
+// RuleSnooze = RuleSnoozeSchedule[] throws typescript errors across the whole lib
+export type RuleSnooze = Array<{
+  duration: number;
+  rRule: Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
+  id?: string;
+}>;
 
 // An iCal RRULE  to define a recurrence schedule, see https://github.com/jakubroztocil/rrule for the spec
 export interface RRuleRecord {

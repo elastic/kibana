@@ -192,7 +192,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         onClosePopover();
       }
     },
-    [snoozeRule, onRuleChanged, onClosePopover]
+    [onRuleChanged, onClosePopover, unsnoozeRule]
   );
 
   return (
