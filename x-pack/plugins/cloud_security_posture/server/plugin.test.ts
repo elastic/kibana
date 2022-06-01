@@ -157,7 +157,6 @@ describe('Cloud Security Posture Plugin', () => {
       await mockPlugins.fleet.fleetSetupCompleted();
 
       // Assert
-      // expect((await contextMock.core).savedObjects.client.find).toHaveBeenCalledTimes(2);
       expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
       expect(spy).toHaveBeenCalledTimes(0);
 
