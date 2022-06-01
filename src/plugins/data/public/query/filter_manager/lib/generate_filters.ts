@@ -17,10 +17,10 @@ import {
   buildFilter,
   FilterStateStore,
   FILTERS,
+  DataViewFieldBase,
 } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
-import { IFieldType } from '../../../../common';
 import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
@@ -69,7 +69,7 @@ function updateExistingFilter(existingFilter: Filter, negate: boolean) {
  */
 export function generateFilters(
   filterManager: FilterManager,
-  field: IFieldType | string,
+  field: DataViewFieldBase | string,
   values: any,
   operation: string,
   index: string
@@ -81,7 +81,7 @@ export function generateFilters(
       : {
           name: field,
         }
-  ) as IFieldType;
+  ) as DataViewFieldBase;
   const fieldName = fieldObj.name;
   const newFilters: Filter[] = [];
   const appFilters = filterManager.getAppFilters();
@@ -114,7 +114,8 @@ export function generateFilters(
       const tmpIndexPattern = { id: index } as DataView;
       // exists filter special case:  fieldname = '_exists' and value = fieldname
       const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
-      const actualFieldObj = fieldName === '_exists_' ? ({ name: value } as IFieldType) : fieldObj;
+      const actualFieldObj =
+        fieldName === '_exists_' ? ({ name: value } as DataViewFieldBase) : fieldObj;
 
       // Fix for #7189 - if value is empty, phrase filters become exists filters.
       const isNullFilter = value === null || value === undefined;
