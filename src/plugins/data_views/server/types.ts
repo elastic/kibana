@@ -61,7 +61,7 @@ export interface DataViewsServerPluginSetup {}
  */
 export interface DataViewsServerPluginSetupDependencies {
   /**
-   * Fie formats
+   * File formats
    */
   fieldFormats: FieldFormatsSetup;
   /**
