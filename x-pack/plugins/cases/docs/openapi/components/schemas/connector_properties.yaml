@@ -50,16 +50,14 @@ fields:
     urgency:
       description: The extent to which the incident resolution can be delayed for ServiceNow ITSM connectors.
       type: string
-  required:
-    - fields
-    - id
-    - name
-    - type
+  example: null
 id:
   description: The identifier for the connector. To create a case without a connector, use `none`.
   type: string
+  example: none
 name:
   description: The name of the connector. To create a case without a connector, use `none`.
   type: string
+  example: none
 type:
   $ref: 'connector_types.yaml'
