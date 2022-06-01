@@ -49,7 +49,7 @@ export const useActiveRoute = (routesList: MlRoute[]): MlRoute => {
 
   useEffect(
     function handleNotFoundRoute() {
-      if (!activeRoute) {
+      if (!activeRoute && !!pathname) {
         bannerId.current = overlays.banners.replace(
           bannerId.current,
           toMountPoint(
