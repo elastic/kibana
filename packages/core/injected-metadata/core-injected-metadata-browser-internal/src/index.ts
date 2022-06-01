@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+export { InjectedMetadataService } from './injected_metadata_service';
+export type {
+  InternalInjectedMetadataSetup,
+  InternalInjectedMetadataStart,
+  InjectedMetadataParams,
+} from './types';

@@ -13,11 +13,11 @@ import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { I18nService } from './i18n';
 import {
-  InjectedMetadataParams,
   InjectedMetadataService,
-  InjectedMetadataSetup,
-  InjectedMetadataStart,
-} from './injected_metadata';
+  InjectedMetadataParams,
+  InternalInjectedMetadataSetup,
+  InternalInjectedMetadataStart,
+} from '@kbn/core-injected-metadata-browser-internal';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
@@ -45,13 +45,13 @@ interface Params {
 /** @internal */
 export interface InternalCoreSetup extends Omit<CoreSetup, 'application' | 'getStartServices'> {
   application: InternalApplicationSetup;
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
 }
 
 /** @internal */
 export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
   application: InternalApplicationStart;
-  injectedMetadata: InjectedMetadataStart;
+  injectedMetadata: InternalInjectedMetadataStart;
 }
 
 /**
