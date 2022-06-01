@@ -98,7 +98,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
           defaultMessage="Username"
         />
       ),
-      description: user.username,
+      description: user.username as string | undefined,
       helpText: (
         <FormattedMessage
           id="xpack.security.accountManagement.userProfile.usernameHelpText"
@@ -110,43 +110,39 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
   ];
 
   if (!canChangeDetails) {
-    if (user.full_name) {
-      rightSideItems.push({
-        title: (
-          <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.fullNameLabel"
-            defaultMessage="Full name"
-          />
-        ),
-        description: user.full_name,
-        helpText: (
-          <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.fullNameHelpText"
-            defaultMessage="Please contact an administrator to change your full name."
-          />
-        ),
-        testSubj: 'full_name',
-      });
-    }
+    rightSideItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.fullNameLabel"
+          defaultMessage="Full name"
+        />
+      ),
+      description: user.full_name,
+      helpText: (
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.fullNameHelpText"
+          defaultMessage="Please contact an administrator to change your full name."
+        />
+      ),
+      testSubj: 'full_name',
+    });
 
-    if (user.email) {
-      rightSideItems.push({
-        title: (
-          <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.emailLabel"
-            defaultMessage="Email address"
-          />
-        ),
-        description: user.email,
-        helpText: (
-          <FormattedMessage
-            id="xpack.security.accountManagement.userProfile.emailHelpText"
-            defaultMessage="Please contact an administrator to change your email address."
-          />
-        ),
-        testSubj: 'email',
-      });
-    }
+    rightSideItems.push({
+      title: (
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.emailLabel"
+          defaultMessage="Email address"
+        />
+      ),
+      description: user.email,
+      helpText: (
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.emailHelpText"
+          defaultMessage="Please contact an administrator to change your email address."
+        />
+      ),
+      testSubj: 'email',
+    });
   }
 
   return (
@@ -167,10 +163,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
 
           <EuiPageTemplate
             style={{ backgroundColor: euiTheme.colors.emptyShade }}
-            pageContentBodyProps={{ style: { paddingLeft: 0, paddingRight: 0 } }}
             className="eui-fullHeight"
             pageHeader={{
-              style: { paddingLeft: 0, paddingRight: 0 },
               bottomBorder: true,
               pageTitle: (
                 <FormattedMessage
@@ -194,7 +188,18 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                           </EuiFlexGroup>
                         </EuiText>
                       ),
-                      description: <span data-test-subj={item.testSubj}>{item.description}</span>,
+                      description: (
+                        <span data-test-subj={item.testSubj}>
+                          {item.description || (
+                            <EuiText color="subdued" size="s">
+                              <FormattedMessage
+                                id="xpack.security.accountManagement.userProfile.noneProvided"
+                                defaultMessage="None provided"
+                              />
+                            </EuiText>
+                          )}
+                        </span>
+                      ),
                     },
                   ]}
                   compressed
@@ -202,7 +207,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
               )),
             }}
             bottomBar={formChanges.count > 0 ? <SaveChangesBottomBar /> : null}
-            bottomBarProps={{ paddingSize: 'm' }}
+            bottomBarProps={{ paddingSize: 'm', position: 'fixed' }}
             restrictWidth={1000}
           >
             <Form aria-labelledby={titleId}>
@@ -650,7 +655,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
   const { count } = useFormChangesContext();
 
   return (
-    <EuiFlexGroup alignItems="center" style={{ width: '100%' }}>
+    <EuiFlexGroup alignItems="center" style={{ width: '100%' }} responsive={false}>
       <EuiFlexItem>
         <EuiFlexGroup responsive={false} gutterSize="xs">
           <EuiFlexItem grow={false}>
