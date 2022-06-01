@@ -57,6 +57,15 @@ export function ObservabilityAlertsCommonProvider({
     );
   };
 
+  const navigateToRuleDetailsByRuleId = async (ruleId: string) => {
+    return await pageObjects.common.navigateToUrlWithBrowserHistory(
+      'observability',
+      `/alerts/rules/${ruleId}`,
+      '?',
+      { ensureCurrentUrl: false }
+    );
+  };
+
   const navigateWithoutFilter = async () => {
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
       'observability',
@@ -336,5 +345,6 @@ export function ObservabilityAlertsCommonProvider({
     getAlertsFlyoutViewRuleDetailsLinkOrFail,
     getRuleStatValue,
     navigateToRulesPage,
+    navigateToRuleDetailsByRuleId,
   };
 }

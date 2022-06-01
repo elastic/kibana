@@ -266,6 +266,7 @@ export function RuleDetailsPage() {
     rule.notifyWhen;
   return (
     <ObservabilityPageTemplate
+      data-test-subj="ruleDetails"
       pageHeader={{
         pageTitle: <PageTitle rule={rule} />,
         bottomBorder: false,
