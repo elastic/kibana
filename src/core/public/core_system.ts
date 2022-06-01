@@ -7,17 +7,17 @@
  */
 
 import type { CoreContext } from '@kbn/core-base-browser-internal';
-import { CoreSetup, CoreStart } from '.';
-import { ChromeService } from './chrome';
-import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
-import { HttpService } from './http';
-import { I18nService } from './i18n';
 import {
   InjectedMetadataService,
   InjectedMetadataParams,
   InternalInjectedMetadataSetup,
   InternalInjectedMetadataStart,
 } from '@kbn/core-injected-metadata-browser-internal';
+import { CoreSetup, CoreStart } from '.';
+import { ChromeService } from './chrome';
+import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
+import { HttpService } from './http';
+import { I18nService } from './i18n';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
