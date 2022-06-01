@@ -6,7 +6,11 @@
  */
 
 import { journey, step, expect, before } from '@elastic/synthetics';
-import { UXDashboardDatePicker } from '../page_objects/date_picker';
+import {
+  UXDashboardDatePicker,
+  DEFAULT_ABS_START_UTC_DATE,
+  DEFAULT_ABS_END_UTC_DATE,
+} from '../page_objects/date_picker';
 import { byTestId, loginToKibana, waitForLoadingToFinish } from './utils';
 
 journey('UX URL Query', async ({ page, params }) => {
@@ -16,8 +20,8 @@ journey('UX URL Query', async ({ page, params }) => {
 
   const queryParams = {
     percentile: '50',
-    rangeFrom: '2020-05-18T11:51:00.000Z',
-    rangeTo: '2021-10-30T06:37:15.536Z',
+    rangeFrom: DEFAULT_ABS_START_UTC_DATE,
+    rangeTo: DEFAULT_ABS_END_UTC_DATE,
   };
   const queryString = new URLSearchParams(queryParams).toString();
 
