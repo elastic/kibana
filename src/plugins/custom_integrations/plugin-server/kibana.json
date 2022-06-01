@@ -1,0 +1,15 @@
+{
+  "packageType": "plugin-server",
+  "packageId": "@kbn/custom-integration-plugin-server",
+  "plugin": {
+    "id": "customIntegrations",
+    "description": "Add custom data integrations so they can be displayed in the Fleet integrations app"
+  },
+  "owner": "@elastic/fleet",
+  "runtimeDependencies": [
+    // automatically determined and cached here
+  ],
+  "typeDependencies": [
+    // automatically determined and cached here
+  ]
+}

@@ -7,8 +7,11 @@
  */
 
 import React, { createContext, FC, useContext } from 'react';
+
+import { CustomIntegrationsPlatformService } from './kibana';
 import { CustomIntegrationsFindService } from './find';
-import { CustomIntegrationsPlatformService } from './platform';
+
+export { filterCustomIntegrations } from './find';
 
 /**
  * Services used by the custom_integrations plugin.

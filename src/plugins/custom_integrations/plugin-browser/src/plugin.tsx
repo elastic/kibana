@@ -9,15 +9,16 @@
 import React from 'react';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
+  CustomIntegration,
+  ROUTES_APPEND_CUSTOM_INTEGRATIONS,
+  ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
+} from '@kbn/custom-integrations-common';
+
+import {
   CustomIntegrationsSetup,
   CustomIntegrationsStart,
   CustomIntegrationsStartDependencies,
 } from './types';
-import {
-  CustomIntegration,
-  ROUTES_APPEND_CUSTOM_INTEGRATIONS,
-  ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
-} from '../common';
 
 import { CustomIntegrationsServicesProvider } from './services';
 import { servicesFactory } from './services/kibana';

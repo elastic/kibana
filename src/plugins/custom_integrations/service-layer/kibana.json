@@ -1,0 +1,12 @@
+{
+  "packageType": "plugin-server",
+  "packageId": "@kbn/custom-integration-service-layer",
+  "owner": "@elastic/fleet",
+  "runtimeDependencies": [
+    // automatically determined and cached here
+  ],
+  "typeDependencies": [
+    // automatically determined and cached here
+  ],
+  "sharedBrowserBundle"
+}

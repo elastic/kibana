@@ -6,7 +6,7 @@
  */
 
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
-import { filterCustomIntegrations } from '@kbn/custom-integrations-plugin/public';
+import { filterCustomIntegrations } from '@kbn/custom-integrations-service-layer';
 
 import type { PackageListItem } from '../../../../common/types/models';
 import { FLEET_APM_PACKAGE } from '../../../../common/constants';

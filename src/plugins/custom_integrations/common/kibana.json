@@ -1,0 +1,11 @@
+{
+  "packageType": "plugin-server",
+  "packageId": "@kbn/custom-integration-common",
+  "owner": "@elastic/fleet",
+  "runtimeDependencies": [
+    // automatically determined and cached here
+  ],
+  "typeDependencies": [
+    // automatically determined and cached here
+  ]
+}

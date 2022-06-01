@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { CustomIntegration } from '../../common';
+import { CustomIntegration } from '@kbn/custom-integrations-common';
+import { FindParams } from '@kbn/custom-integrations-service-layer';
 
 interface FindParams {
   eprPackageName?: string;

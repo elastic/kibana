@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CustomIntegration } from '../../../../common';
+import type { CustomIntegration } from '@kbn/custom-integration-common';
 
 export const integrations: CustomIntegration[] = [
   {

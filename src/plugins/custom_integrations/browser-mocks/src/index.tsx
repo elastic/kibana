@@ -8,9 +8,12 @@
 
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import { CustomIntegrationsSetup, CustomIntegrationsStart } from './types';
-import { CustomIntegrationsServicesProvider } from './services';
-import { servicesFactory } from './services/stub';
+import type {
+  CustomIntegrationsSetup,
+  CustomIntegrationsStart,
+} from '@kbn/custom-integration-plugin-browser';
+import { CustomIntegrationsServicesProvider } from '@kbn/custom-integration-service-layer';
+import { servicesFactory } from './services';
 
 function createCustomIntegrationsSetup(): jest.Mocked<CustomIntegrationsSetup> {
   const mock: jest.Mocked<CustomIntegrationsSetup> = {

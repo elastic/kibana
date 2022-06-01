@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CustomIntegration } from '../common';
+import { CustomIntegration } from '@kbn/custom-integrations-common';
 
 export interface CustomIntegrationsSetup {
   getAppendCustomIntegrations: () => Promise<CustomIntegration[]>;

@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { CustomIntegrationsFindService, filterCustomIntegrations } from '../find';
+import {
+  CustomIntegrationsFindService,
+  filterCustomIntegrations,
+} from '@kbn/custom-integration-service-layer';
 import { PluginServiceFactory } from '../types';
 import { CustomIntegrationsStartDependencies } from '../../types';
 
