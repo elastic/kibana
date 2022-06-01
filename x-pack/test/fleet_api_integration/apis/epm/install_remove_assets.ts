@@ -57,15 +57,18 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/132333
-    describe.skip('uninstalls all assets when uninstalling a package', async () => {
-      before(async () => {
+    describe('uninstalls all assets when uninstalling a package', async () => {
+      // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
+      // and then we'll test that not artifacts are left behind.
+      before(() => {
         if (!server.enabled) return;
-        // these tests ensure that uninstall works properly so make sure that the package gets installed and uninstalled
-        // and then we'll test that not artifacts are left behind.
-        await installPackage(pkgName, pkgVersion);
-        await uninstallPackage(pkgName, pkgVersion);
+        return installPackage(pkgName, pkgVersion);
       });
+      before(() => {
+        if (!server.enabled) return;
+        return uninstallPackage(pkgName, pkgVersion);
+      });
+
       it('should have uninstalled the index templates', async function () {
         const resLogsTemplate = await es.transport.request(
           {
@@ -199,6 +202,9 @@ export default function (providerContext: FtrProviderContext) {
             id: 'sample_dashboard',
           });
         } catch (err) {
+          if (!err?.response?.data) {
+            throw err;
+          }
           resDashboard = err;
         }
         expect(resDashboard.response.data.statusCode).equal(404);
