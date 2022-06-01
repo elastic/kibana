@@ -19,7 +19,7 @@ import {
   LAYER_TYPE,
   LAYER_STYLE_TYPE,
 } from '../../../../common/constants';
-import { LayerDescriptor } from '../../../../common/descriptor_types';
+import { ColorFilter, LayerDescriptor } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 import { isRetina } from '../../../util';
 import { DataRequestContext } from '../../../actions';
@@ -175,7 +175,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     ) ?? {
       operation: 'screen',
     };
-    return { operation, percentage };
+    return { operation, percentage } as unknown as Partial<ColorFilter>;
   }
 
   getMbLayerIds() {
