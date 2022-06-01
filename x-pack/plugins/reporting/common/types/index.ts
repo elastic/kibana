@@ -74,6 +74,7 @@ export interface ReportSource {
    */
   jobtype: string; // refers to `ExportTypeDefinition.jobType`
   created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
+  interval?: { hours: number } | { minutes: number } | { days: number }; // Used when report job is scheduled
   payload: BasePayload;
   meta: {
     // for telemetry

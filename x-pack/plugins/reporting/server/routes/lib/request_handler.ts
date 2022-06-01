@@ -6,13 +6,16 @@
  */
 
 import Boom from '@hapi/boom';
-import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import type { ReportingCore } from '../..';
 import { API_BASE_URL } from '../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../lib';
-import { Report } from '../../lib/store';
+import { Report, reportFromTask } from '../../lib/store';
+import { ScheduledReportTaskParams } from '../../lib/tasks';
+import { ScheduleIntervalSchemaType } from '../../lib/tasks/scheduling';
 import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
+import { BadRequestError } from './errors';
 
 export const handleUnavailable = (res: KibanaResponseFactory) => {
   return res.custom({ statusCode: 503, body: 'Not Available' });
@@ -33,14 +36,25 @@ export class RequestHandler {
     private logger: Logger
   ) {}
 
-  private async encryptHeaders() {
+  private async encryptHeaders(apiKeyText?: string) {
     const encryptionKey = this.reporting.getConfig().get('encryptionKey');
     const crypto = cryptoFactory(encryptionKey);
-    return await crypto.encrypt(this.req.headers);
+
+    let headers = { ...this.req.headers };
+
+    // If the caller provided an API Key, we use that to handle authorization
+    if (apiKeyText) {
+      headers = {
+        ...headers,
+        authorization: `ApiKey ${apiKeyText}`,
+      };
+    }
+
+    return await crypto.encrypt(headers);
   }
 
-  public async enqueueJob(exportTypeId: string, jobParams: BaseParams) {
-    const { reporting, logger, context, req: request, user } = this;
+  private setupRequest(exportTypeId: string, jobParamsRaw: BaseParams) {
+    const { reporting, logger } = this;
 
     const exportType = reporting.getExportTypesRegistry().getById(exportTypeId);
 
@@ -52,17 +66,24 @@ export class RequestHandler {
       throw new Error(`Export type ${exportTypeId} is not an async job type!`);
     }
 
-    const [createJob, store] = await Promise.all([
-      exportType.createJobFnFactory(reporting, logger.get(exportType.id)),
-      reporting.getStore(),
-    ]);
+    const createJob = exportType.createJobFnFactory(reporting, logger.get(exportType.id));
 
     if (!createJob) {
       throw new Error(`Export type ${exportTypeId} is not an async job type!`);
     }
 
     // 1. ensure the incoming params have a version field
-    jobParams.version = checkParamsVersion(jobParams, logger);
+    const jobParams = {
+      ...jobParamsRaw,
+      version: checkParamsVersion(jobParamsRaw, logger), // ensure job params are versioned
+    };
+
+    return { exportType, createJob, jobParams };
+  }
+
+  public async enqueueJob(exportTypeId: string, jobParamsRaw: BaseParams) {
+    const { reporting, logger, context, req, user } = this;
+    const { exportType, createJob, jobParams } = this.setupRequest(exportTypeId, jobParamsRaw);
 
     // 2. encrypt request headers for the running report job to authenticate itself with Kibana
     // 3. call the export type's createJobFn to create the job payload
@@ -71,18 +92,17 @@ export class RequestHandler {
       createJob(jobParams, context),
     ]);
 
-    const payload = {
-      ...job,
-      headers,
-      spaceId: reporting.getSpaceId(request, logger),
-    };
-
     // 4. Add the report to ReportingStore to show as pending
+    const store = await reporting.getStore();
     const report = await store.addReport(
       new Report({
         jobtype: exportType.jobType,
         created_by: user ? user.username : false,
-        payload,
+        payload: {
+          ...job,
+          headers,
+          spaceId: reporting.getSpaceId(req, logger),
+        },
         meta: {
           // telemetry fields
           objectType: jobParams.objectType,
@@ -139,6 +159,55 @@ export class RequestHandler {
       this.logger.error(err);
       throw err;
     }
+  }
+
+  public async handleScheduleRequest(
+    exportTypeId: string,
+    jobParamsRaw: BaseParams,
+    interval: ScheduleIntervalSchemaType,
+    apiKey: { base64: string }
+  ) {
+    const { reporting, logger, context, user } = this;
+
+    // check if `reporting.roles.enabled: false` is set
+    const config = reporting.getConfig();
+    if (config.get('roles', 'enabled')) {
+      throw new BadRequestError(
+        `Kibana config must have 'xpack.reporting.roles.enabled: false' set in order for API keys to authenticate report generation.`
+      );
+    }
+
+    const { exportType, createJob, jobParams } = this.setupRequest(exportTypeId, jobParamsRaw);
+
+    const [headers, job] = await Promise.all([
+      this.encryptHeaders(apiKey?.base64),
+      createJob(jobParams, context),
+    ]);
+
+    // schedule the task with task manager
+    const task = await reporting.scheduleTask({
+      title: jobParams.title,
+      jobtype: exportType.jobType,
+      created_by: user ? user.username : false, // "false" = security is disabled, the schedule is available upon any request
+      payload: {
+        ...job,
+        headers,
+        spaceId: reporting.getSpaceId(this.req, logger),
+      },
+      interval,
+    });
+    logger.debug(`Successfully scheduled report. Task ID: ${task.id}`);
+
+    const report = reportFromTask(task.params as ScheduledReportTaskParams);
+
+    return this.res.ok({
+      headers: {
+        'content-type': 'application/json',
+      },
+      body: {
+        schedule: { ...task, params: report.toApiJSON() },
+      },
+    });
   }
 
   /*

@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { registerJobInfoRoutes } from './jobs';
-export { registerScheduleInfoRoutes } from './schedules';
+export class BadRequestError extends Error {
+  public readonly name = 'BadRequest';
+  constructor(message: string) {
+    super(message);
+  }
+}

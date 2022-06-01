@@ -7,44 +7,54 @@
 
 import { UpdateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger } from '@kbn/core/server';
-import moment from 'moment';
+import type {
+  RunContext,
+  TaskInstance,
+  TaskManagerStartContract,
+  TaskRunCreatorFunction,
+} from '@kbn/task-manager-plugin/server';
+import moment, { Moment } from 'moment';
 import * as Rx from 'rxjs';
 import { timeout } from 'rxjs/operators';
 import { finished, Writable } from 'stream';
 import { promisify } from 'util';
-import type {
-  RunContext,
-  TaskManagerStartContract,
-  TaskRunCreatorFunction,
-} from '@kbn/task-manager-plugin/server';
-import { getContentStream } from '..';
-import type { ReportingCore } from '../..';
-import { CancellationToken } from '../../../common/cancellation_token';
-import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import { ReportingError, QueueTimeoutError, KibanaShuttingDownError } from '../../../common/errors';
-import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
-import type { ReportOutput } from '../../../common/types';
-import type { ReportingConfigType } from '../../config';
-import type { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
-import type { ReportDocument, ReportingStore } from '../store';
-import { Report, SavedReport } from '../store';
-import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import {
   ReportingTask,
   ReportingTaskStatus,
   REPORTING_EXECUTE_TYPE,
   ReportTaskParams,
+  ScheduledReportTaskParams,
   TaskRunResult,
 } from '.';
+import { getContentStream } from '..';
+import type { ReportingCore } from '../..';
+import { CancellationToken } from '../../../common/cancellation_token';
+import { SCHEDULED_REPORTS_SCOPE } from '../../../common/constants';
+import { KibanaShuttingDownError, QueueTimeoutError, ReportingError } from '../../../common/errors';
+import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
+import { durationToNumber, numberToDuration } from '../../../common/schema_utils';
+import { ReportOutput } from '../../../common/types';
+import { ReportingConfigType } from '../../config';
+import { BasePayload, ExportTypeDefinition, RunTaskFn } from '../../types';
+import { Report, ReportDocument, reportFromTask, ReportingStore, SavedReport } from '../store';
+import { ReportFailedFields, ReportProcessingFields } from '../store/store';
 import { errorLogger } from './error_logger';
+import { getNextRun, isScheduled } from './scheduling';
 
 type CompletedReportOutput = Omit<ReportOutput, 'content'>;
 
 interface ReportingExecuteTaskInstance {
-  state: object;
-  taskType: string;
-  params: ReportTaskParams;
-  runAt?: Date;
+  state: object; // required by task manager
+
+  // all reports require
+  taskType: typeof REPORTING_EXECUTE_TYPE;
+  params: ReportTaskParams | ScheduledReportTaskParams;
+
+  // only scheduled reports require
+  scheduledAt: TaskInstance['scheduledAt'];
+  runAt?: TaskInstance['runAt'];
+  user: TaskInstance['user'];
+  scope: TaskInstance['scope'];
 }
 
 interface TaskExecutor extends Pick<ExportTypeDefinition, 'jobContentEncoding'> {
@@ -53,10 +63,6 @@ interface TaskExecutor extends Pick<ExportTypeDefinition, 'jobContentEncoding'> 
 
 function isOutput(output: CompletedReportOutput | Error): output is CompletedReportOutput {
   return (output as CompletedReportOutput).size != null;
-}
-
-function reportFromTask(task: ReportTaskParams) {
-  return new Report({ ...task, _id: task.id, _index: task.index });
 }
 
 export class ExecuteReportTask implements ReportingTask {
@@ -256,6 +262,12 @@ export class ExecuteReportTask implements ReportingTask {
       throw new Error(`No defined task runner function for ${task.jobtype}!`);
     }
 
+    if (!task.id) {
+      const notRetrievable = new Error(`Unable to retrieve pending report: Invalid report ID!`);
+      this.logger.error(notRetrievable); // for stack trace
+      throw notRetrievable;
+    }
+
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const queueTimeout = durationToNumber(this.config.queue.timeout);
@@ -298,11 +310,46 @@ export class ExecuteReportTask implements ReportingTask {
   }
 
   /*
+   * Convert ScheduledReportTaskParams into ReportTaskParams by creating a new report record
+   */
+  private async defineTask(params: ScheduledReportTaskParams): Promise<ReportTaskParams> {
+    const store = await this.getStore();
+    const now = moment.utc().toISOString();
+    let newReport: SavedReport;
+
+    try {
+      // FIXME: set the status to "processing" so that we can shortcut around having to claim this task
+      newReport = await store.addReport(
+        reportFromTask({
+          ...params,
+          created_at: now,
+          payload: { ...params.payload },
+        })
+      );
+    } catch (err) {
+      this.logger.error(err);
+      errorLogger(this.logger, `Error in creating a new report record from scheduled report task!`);
+      throw err;
+    }
+
+    this.logger.info(`Created new report record from scheduled report task: ${newReport._id}`);
+
+    return {
+      ...params,
+      id: newReport._id,
+      index: newReport._index,
+      created_at: now,
+      attempts: newReport.attempts,
+      meta: newReport.meta,
+    };
+  }
+
+  /*
    * Provides a TaskRunner for Task Manager
    */
   private getTaskRunner(): TaskRunCreatorFunction {
     // Keep a separate local stack for each task run
-    return (context: RunContext) => {
+    return ({ taskInstance }: RunContext) => {
       let jobId: string;
       const cancellationToken = new CancellationToken();
 
@@ -317,25 +364,29 @@ export class ExecuteReportTask implements ReportingTask {
         run: async () => {
           let report: SavedReport | undefined;
 
-          // find the job in the store and set status to processing
-          const task = context.taskInstance.params as ReportTaskParams;
-          jobId = task?.id;
+          const params = taskInstance.params as ReportTaskParams | ScheduledReportTaskParams;
+
+          let task: ReportTaskParams;
+          let nextRun: Moment | null = null; // calculate nextRun before executing current report, so time between recurrences does not drift
+          if (isScheduled(params)) {
+            task = await this.defineTask(params);
+            nextRun = getNextRun(params.interval);
+          } else {
+            task = params;
+          }
 
           try {
-            if (!jobId) {
-              throw new Error('Invalid report data provided in scheduled task!');
-            }
-            this.reporting.trackReport(jobId);
-
             // Update job status to claimed
             report = await this._claimJob(task);
+            jobId = report._id;
+            this.reporting.trackReport(jobId);
           } catch (failedToClaim) {
             // error claiming report - log the error
             // could be version conflict, or no longer connected to ES
             errorLogger(this.logger, `Error in claiming ${jobId}`, failedToClaim);
           }
 
-          if (!report) {
+          if (!report || report._id == null) {
             this.reporting.untrackReport(jobId);
             errorLogger(this.logger, `Job ${jobId} could not be claimed. Exiting...`);
             return;
@@ -396,6 +447,15 @@ export class ExecuteReportTask implements ReportingTask {
             }
             // untrack the report for concurrency awareness
             this.logger.debug(`Stopping ${jobId}.`);
+
+            // schedule the next scheduled report task
+            if (nextRun) {
+              const next = await this.scheduleTask(params, taskInstance.scheduledAt, nextRun);
+              this.logger.info(
+                `Scheduled [${next.taskType}] task [${next.id}] ` +
+                  `to recur at [${next.runAt.toISOString()}]`
+              );
+            }
           } catch (failedToExecuteErr) {
             eventLog.logError(failedToExecuteErr);
 
@@ -415,7 +475,11 @@ export class ExecuteReportTask implements ReportingTask {
                   failedToExecuteErr
                 );
 
-                await this.rescheduleTask(reportFromTask(task).toReportTaskJSON(), this.logger);
+                await this.rescheduleTask(
+                  taskInstance,
+                  reportFromTask(task).toReportTaskJSON(),
+                  this.logger
+                );
               } catch (rescheduleErr) {
                 // can not be rescheduled - log the error
                 errorLogger(
@@ -476,23 +540,40 @@ export class ExecuteReportTask implements ReportingTask {
     };
   }
 
-  public async scheduleTask(params: ReportTaskParams) {
+  public async scheduleTask(
+    params: ReportTaskParams | ScheduledReportTaskParams,
+    scheduledAt?: Date, // if scheduled to recur, this is this time of the first instance of this schedule, carried over from the task instance
+    runAt?: Moment // if scheduled to recur
+  ) {
+    // add a scope to assist APIs for schedule reports
+    let scope: string[] | undefined;
+    if ((params as ScheduledReportTaskParams<BasePayload>).interval) {
+      scope = [SCHEDULED_REPORTS_SCOPE];
+    }
+
     const taskInstance: ReportingExecuteTaskInstance = {
       taskType: REPORTING_EXECUTE_TYPE,
       state: {},
       params,
+      runAt: runAt?.toDate(),
+      scheduledAt,
+      scope,
+      user: params.created_by || undefined,
     };
 
     return await this.getTaskManagerStart().schedule(taskInstance);
   }
 
-  private async rescheduleTask(task: ReportTaskParams, logger: Logger) {
+  private async rescheduleTask(taskInstance: TaskInstance, task: ReportTaskParams, logger: Logger) {
     logger.info(`Rescheduling task:${task.id} to retry after error.`);
 
     const oldTaskInstance: ReportingExecuteTaskInstance = {
       taskType: REPORTING_EXECUTE_TYPE,
       state: {},
       params: task,
+      scheduledAt: taskInstance.scheduledAt,
+      user: taskInstance.user,
+      scope: taskInstance.scope,
     };
     const newTask = await this.getTaskManagerStart().schedule(oldTaskInstance);
     logger.debug(`Rescheduled task:${task.id}. New task: task:${newTask.id}`);

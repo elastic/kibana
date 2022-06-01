@@ -120,3 +120,9 @@ export const UNVERSIONED_VERSION = '7.14.0';
 // hacky endpoint: download CSV without queueing a report
 // FIXME: find a way to make these endpoints "generic" instead of hardcoded, as are the queued report export types
 export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv_searchsource`;
+
+// Scheduled Reports APIs
+export const BASE_SCHEDULE = `${API_BASE_URL}/schedule`;
+export const BASE_SCHEDULES = `${API_BASE_URL}/schedules`;
+
+export const SCHEDULED_REPORTS_SCOPE = 'scheduled-reports';

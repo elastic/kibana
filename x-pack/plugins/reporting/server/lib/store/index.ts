@@ -5,11 +5,19 @@
  * 2.0.
  */
 
+import { ReportTaskParams, ScheduledReportTaskParams } from '../tasks';
+import { Report } from './report';
+
 export type { ReportDocument } from '../../../common/types';
+export { IlmPolicyManager } from './ilm_policy_manager';
 export { Report } from './report';
 export { SavedReport } from './saved_report';
 export { ReportingStore } from './store';
-export { IlmPolicyManager } from './ilm_policy_manager';
+
+export function reportFromTask(task: ReportTaskParams | ScheduledReportTaskParams) {
+  const reportTask = task as ReportTaskParams;
+  return new Report({ ...task, _id: reportTask.id, _index: reportTask.index });
+}
 
 export interface IReport {
   _id?: string;

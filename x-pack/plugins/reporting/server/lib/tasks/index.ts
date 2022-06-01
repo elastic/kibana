@@ -8,6 +8,7 @@
 import { TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
 import { ReportSource, TaskRunResult } from '../../../common/types';
 import { BasePayload } from '../../types';
+import { ScheduleIntervalSchemaType, ScheduleReportFromJobParams } from './scheduling';
 
 export const REPORTING_EXECUTE_TYPE = 'report:execute';
 export const REPORTING_MONITOR_TYPE = 'reports:monitor';
@@ -15,7 +16,18 @@ export const REPORTING_MONITOR_TYPE = 'reports:monitor';
 export { ExecuteReportTask } from './execute_report';
 export { MonitorReportsTask } from './monitor_reports';
 export type { TaskRunResult };
+export { ScheduleReportFromJobParams };
 
+// scheduled report
+export interface ScheduledReportTaskParams<JobPayloadType = BasePayload> {
+  title: string;
+  payload: JobPayloadType;
+  created_by: ReportSource['created_by'];
+  jobtype: ReportSource['jobtype'];
+  interval: ScheduleIntervalSchemaType;
+}
+
+// non-scheduled report
 export interface ReportTaskParams<JobPayloadType = BasePayload> {
   id: string;
   index: string;

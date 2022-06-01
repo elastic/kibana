@@ -122,6 +122,31 @@ describe('Class Report', () => {
     });
   });
 
+  it('includes schedule in payload', () => {
+    const report = new Report({
+      _index: '.reporting-test-index-12345',
+      jobtype: 'test-report',
+      created_by: 'created_by_test_string',
+      max_attempts: 50,
+      payload: {
+        headers: 'payload_test_field',
+        objectType: 'testOt',
+        title: 'hot report',
+        version: '7.14.0',
+        browserTimezone: 'UTC',
+      },
+      interval: { minutes: 24 },
+      meta: { objectType: 'stange' },
+      timeout: 30000,
+    });
+    expect(report.toApiJSON()).toMatchObject({
+      payload: {
+        objectType: 'testOt',
+      },
+      interval: { minutes: 24 },
+    });
+  });
+
   it('throws error if converted to task JSON before being synced with ES storage', () => {
     const report = new Report({ jobtype: 'spam', payload: {} } as any);
     expect(() => report.updateWithEsDoc(report)).toThrowErrorMatchingInlineSnapshot(

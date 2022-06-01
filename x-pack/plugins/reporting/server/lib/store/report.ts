@@ -36,6 +36,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
   public readonly created_at: ReportSource['created_at'];
   public readonly created_by: ReportSource['created_by'];
   public readonly payload: ReportSource['payload'];
+  public readonly interval: ReportSource['interval'];
 
   public readonly meta: ReportSource['meta'];
 
@@ -76,6 +77,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
     }
 
     this.payload = opts.payload;
+    this.interval = opts.interval;
     this.kibana_id = opts.kibana_id;
     this.kibana_name = opts.kibana_name;
     this.jobtype = opts.jobtype;
@@ -175,6 +177,7 @@ export class Report implements Partial<ReportSource & ReportDocumentHead> {
       started_at: this.started_at,
       completed_at: this.completed_at,
       migration_version: this.migration_version,
+      interval: this.interval,
       payload: omit(this.payload, 'headers'),
       output: omit(this.output, 'content'),
       metrics: this.metrics,
