@@ -10,6 +10,6 @@ import { createTestConfig } from '../common/config';
 // eslint-disable-next-line import/no-default-export
 export default createTestConfig({
   license: 'basic',
-  name: 'X-Pack kubernetes_security API integration tests (basic)',
+  name: 'X-Pack session_view API integration tests (basic)',
   testFiles: [require.resolve('./tests')],
 });

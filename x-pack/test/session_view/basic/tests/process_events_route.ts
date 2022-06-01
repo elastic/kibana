@@ -127,7 +127,9 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
             });
           expect(response.status).to.be(200);
 
-          if (username !== 'no_kibana_privileges') {
+          if (username === 'no_kibana_privileges') {
+            expect(response.body.events.length).to.be.equal(0);
+          } else {
             // process events should still load (since logs-* is granted, except for no_kibana_privileges user)
             expect(response.body.events.length).to.be.above(0);
           }

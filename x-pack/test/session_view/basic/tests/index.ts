@@ -100,7 +100,7 @@ export default function kubernetesSecurityApiIntegrationTests({
   loadTestFile,
   getService,
 }: FtrProviderContext) {
-  describe('Kubernetes security API (basic)', function () {
+  describe('Session View API (basic)', function () {
     before(async () => {
       await createUsersAndRoles(getService, users, roles);
     });
