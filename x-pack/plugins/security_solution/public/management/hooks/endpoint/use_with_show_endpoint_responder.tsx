@@ -34,6 +34,9 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
         consoleManager
           .register({
             id: endpointAgentId,
+            meta: {
+              endpoint: endpointMetadata,
+            },
             consoleProps: {
               commands: getEndpointResponseActionsConsoleCommands(endpointAgentId),
               'data-test-subj': 'endpointResponseActionsConsole',
