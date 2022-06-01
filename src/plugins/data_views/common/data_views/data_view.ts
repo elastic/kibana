@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -17,10 +15,9 @@ import {
   FieldFormat,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
+import type { DataViewBase } from '@kbn/es-query';
 import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType, FieldConfiguration } from '../types';
-
-import { IIndexPattern } from '..';
 import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
 import { flattenHitWrapper } from './flatten_hit';
 import { DataViewSpec, TypeMeta, SourceFilter, DataViewFieldMap } from '../types';
@@ -52,7 +49,7 @@ export interface TimeBasedDataView extends DataView {
   getTimeField: () => DataViewField;
 }
 
-export class DataView implements IIndexPattern {
+export class DataView implements DataViewBase {
   public id?: string;
   public title: string = '';
   public fieldFormatMap: Record<string, any>;
@@ -600,8 +597,3 @@ export class DataView implements IIndexPattern {
     return createdField ?? existingField!;
   }
 }
-
-/**
- * @deprecated Use DataView instead. All index pattern interfaces were renamed.
- */
-export class IndexPattern extends DataView {}

@@ -18,7 +18,6 @@ export { onRedirectNoIndexPattern } from './data_views';
 export type { IIndexPatternFieldList, TypeMeta, RuntimeType } from '../common';
 export type { DataViewSpec, FieldSpec, DataViewAttributes } from '../common';
 export {
-  IndexPatternField,
   DataViewField,
   DataViewType,
   DataViewSavedObjectConflictError,
@@ -28,15 +27,8 @@ export {
   getFieldSubtypeNested,
 } from '../common';
 
-export type { IndexPatternsContract } from './data_views';
 export type { DataViewListItem } from './data_views';
-export {
-  IndexPatternsService,
-  IndexPattern,
-  DataViewsApiClient,
-  DataViewsService,
-  DataView,
-} from './data_views';
+export { IndexPatternsService, DataViewsApiClient, DataViewsService, DataView } from './data_views';
 export { UiSettingsPublicToCommon } from './ui_settings_wrapper';
 export { SavedObjectsClientPublicToCommon } from './saved_objects_client_wrapper';
 

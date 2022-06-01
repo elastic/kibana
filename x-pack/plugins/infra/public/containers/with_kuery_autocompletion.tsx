@@ -12,8 +12,8 @@ import {
   KibanaReactContextValue,
   KibanaServices,
 } from '@kbn/kibana-react-plugin/public';
-import { QuerySuggestion, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { QuerySuggestion, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { RendererFunction } from '../utils/typed_react';
 
 interface WithKueryAutocompletionLifecycleProps {

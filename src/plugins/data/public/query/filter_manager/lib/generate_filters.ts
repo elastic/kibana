@@ -19,8 +19,8 @@ import {
   FILTERS,
   DataViewFieldBase,
 } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
-import { IIndexPattern } from '../../../../common';
 import { FilterManager } from '../filter_manager';
 
 function getExistingFilter(
@@ -98,7 +98,7 @@ export function generateFilters(
     } else if (fieldObj.type?.includes('range') && value && typeof value === 'object') {
       // When dealing with range fields, the filter type depends on the data passed in. If it's an
       // object we assume that it's a min/max value
-      const tmpIndexPattern = { id: index } as IIndexPattern;
+      const tmpIndexPattern = { id: index } as DataView;
 
       filter = buildFilter(
         tmpIndexPattern,
@@ -111,7 +111,7 @@ export function generateFilters(
         FilterStateStore.APP_STATE
       );
     } else {
-      const tmpIndexPattern = { id: index } as IIndexPattern;
+      const tmpIndexPattern = { id: index } as DataView;
       // exists filter special case:  fieldname = '_exists' and value = fieldname
       const filterType = fieldName === '_exists_' ? FILTERS.EXISTS : FILTERS.PHRASE;
       const actualFieldObj =

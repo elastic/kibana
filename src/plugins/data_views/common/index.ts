@@ -17,7 +17,6 @@ export {
   isFilterable,
   fieldList,
   DataViewField,
-  IndexPatternField,
   isNestedField,
   isMultiField,
   getFieldSubtypeMulti,
@@ -29,7 +28,6 @@ export type {
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeFieldSubField,
-  IIndexPattern,
   DataViewAttributes,
   FieldAttrs,
   FieldAttrSet,
@@ -52,14 +50,14 @@ export type {
   HasDataService,
 } from './types';
 export { DataViewType } from './types';
-export type { IndexPatternsContract, DataViewsContract } from './data_views';
+export type { DataViewsContract } from './data_views';
 export { IndexPatternsService, DataViewsService } from './data_views';
 export type {
   DataViewListItem,
   DataViewsServicePublicMethods,
   TimeBasedDataView,
 } from './data_views';
-export { IndexPattern, DataView } from './data_views';
+export { DataView } from './data_views';
 export {
   DuplicateDataViewError,
   DataViewSavedObjectConflictError,
