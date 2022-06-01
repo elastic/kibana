@@ -81,7 +81,7 @@ export const LOADING_STATE_TEST_SUBJECT = 'csp_page_template_loading';
 export const ERROR_STATE_TEST_SUBJECT = 'csp_page_template_error';
 
 const getPackageNotInstalledNoDataConfig = (
-  cisIntegrationLink: string
+  cisIntegrationLink?: string
 ): KibanaPageTemplateProps['noDataConfig'] => ({
   pageTitle: PACKAGE_NOT_INSTALLED_TEXT.PAGE_TITLE,
   solution: PACKAGE_NOT_INSTALLED_TEXT.SOLUTION,
@@ -91,6 +91,7 @@ const getPackageNotInstalledNoDataConfig = (
   actions: {
     elasticAgent: {
       href: cisIntegrationLink,
+      isDisabled: !cisIntegrationLink,
       title: PACKAGE_NOT_INSTALLED_TEXT.BUTTON_TITLE,
       description: PACKAGE_NOT_INSTALLED_TEXT.DESCRIPTION,
     },
