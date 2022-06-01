@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { UseQueryResult } from 'react-query';
+import { createReactQueryResponse } from '../../../test/fixtures/react_query';
 import React from 'react';
 import { render } from '@testing-library/react';
 import { LatestFindingsContainer, getDefaultQuery } from './latest_findings_container';
@@ -19,6 +21,7 @@ import { RisonObject } from 'rison-node';
 import { buildEsQuery } from '@kbn/es-query';
 import { getFindingsCountAggQuery } from '../use_findings_count';
 import { getPaginationQuery } from '../utils';
+import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
 
 jest.mock('../../../common/api/use_latest_findings_data_view');
 jest.mock('../../../common/api/use_cis_kubernetes_integration');
@@ -47,6 +50,13 @@ describe('<LatestFindingsContainer />', () => {
       search: encodeQuery(query as unknown as RisonObject),
     });
 
+    const setPitId = jest.fn();
+    const pitIdRef = { current: '' };
+    const pitQuery = createReactQueryResponse({
+      status: 'success',
+      data: '',
+    }) as UseQueryResult<string>;
+
     render(
       <TestProvider
         deps={{
@@ -54,13 +64,15 @@ describe('<LatestFindingsContainer />', () => {
           unifiedSearch: unifiedSearchPluginMock.createStartContract(),
         }}
       >
-        <LatestFindingsContainer dataView={dataView} />
+        <FindingsEsPitContext.Provider value={{ setPitId, pitIdRef, pitQuery }}>
+          <LatestFindingsContainer dataView={dataView} />
+        </FindingsEsPitContext.Provider>
       </TestProvider>
     );
 
     const baseQuery = {
-      index: dataView.title,
       query: buildEsQuery(dataView, query.query, query.filters),
+      pitId: pitIdRef.current,
     };
 
     expect(dataMock.search.search).toHaveBeenNthCalledWith(1, {

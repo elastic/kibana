@@ -227,6 +227,7 @@ export class ProjectMonitorFormatter {
     } = normalizeSecrets(decryptedPreviousMonitor);
     const hasMonitorBeenEdited = !isEqual(normalizedMonitor, normalizedPreviousMonitorAttributes);
     const monitorWithRevision = formatSecrets({
+      ...normalizedPreviousMonitorAttributes, // ensures monitor AAD remains consistent in the event of field name changes
       ...normalizedMonitor,
       revision: hasMonitorBeenEdited
         ? (previousMonitor.attributes[ConfigKey.REVISION] || 0) + 1
