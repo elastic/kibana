@@ -61,7 +61,7 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
   const pitId = pitIdRef.current;
 
   return useQuery(
-    ['csp_resource_findings', { ...options, pitId }],
+    ['csp_resource_findings', { options }],
     () =>
       lastValueFrom(
         data.search.search({

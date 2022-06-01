@@ -53,11 +53,6 @@ export interface FindingsByResourcePage {
   cis_sections: string[];
 }
 
-// interface UseFindingsByResourceData {
-//   page: FindingsByResourcePage[];
-//   total: number;
-// }
-
 interface FindingsByResourceAggs {
   resource_total: estypes.AggregationsCardinalityAggregate;
   resources: estypes.AggregationsMultiBucketAggregateBase<FindingsAggBucket>;

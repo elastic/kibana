@@ -90,7 +90,7 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
   const pitId = pitIdRef.current;
 
   return useQuery(
-    ['csp_findings', { ...options, pitId }],
+    ['csp_findings', { options }],
     async () => {
       const {
         rawResponse: { hits, aggregations, pit_id: newPitId },
