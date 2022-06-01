@@ -40,6 +40,7 @@ import {
   removeCspRulesInstancesCallback,
 } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
+import { updateAgentConfiguration } from './routes/configuration/update_rules_configuration';
 
 import {
   removeFindingsStatsTask,
@@ -119,7 +120,16 @@ export class CspPlugin
             await this.initialize(core, plugins.taskManager);
 
             const soClient = (await context.core).savedObjects.client;
+            const esClient = (await context.core).elasticsearch.client.asCurrentUser;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
+
+            const updatedPackagePolicy = await updateAgentConfiguration(
+              plugins.fleet.packagePolicyService,
+              packagePolicy,
+              esClient,
+              soClient
+            );
+            return updatedPackagePolicy;
           }
 
           return packagePolicy;
