@@ -13,8 +13,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import Semver from 'semver';
+import type { Logger } from '@kbn/logging';
 import { ElasticsearchClient } from '../../elasticsearch';
-import { Logger } from '../../logging';
 import { IndexMapping, SavedObjectsTypeMappingDefinitions } from '../mappings';
 import {
   SavedObjectUnsanitizedDoc,
