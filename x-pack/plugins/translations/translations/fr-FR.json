@@ -22046,8 +22046,6 @@
     "xpack.observability.enableInfrastructureViewDescription": "Activer la fonctionnalité de vue d'infrastructure dans l'application APM",
     "xpack.observability.enableInspectEsQueriesExperimentDescription": "Inspectez les recherches Elasticsearch dans les réponses API.",
     "xpack.observability.enableInspectEsQueriesExperimentName": "Inspecter les recherches ES",
-    "xpack.observability.enableNewSyntheticsViewExperimentDescription": "Activez la nouvelle application de monitoring synthétique dans Observability. Actualisez la page pour appliquer le paramètre.",
-    "xpack.observability.enableNewSyntheticsViewExperimentName": "Activer la nouvelle application de monitoring synthétique",
     "xpack.observability.enableServiceGroups": "Fonctionnalité de groupes de services",
     "xpack.observability.enableServiceGroupsDescription": "{technicalPreviewLabel} Activer la fonctionnalité de groupes de services sur l’interface utilisateur APM",
     "xpack.observability.exp.breakDownFilter.noBreakdown": "Pas de répartition",
