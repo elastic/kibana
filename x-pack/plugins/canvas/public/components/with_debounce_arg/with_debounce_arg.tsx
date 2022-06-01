@@ -30,6 +30,12 @@ export const withDebounceArg =
     );
 
     useEffect(() => {
+      if (argValue) {
+        setArgValue(argValue);
+      }
+    }, [argValue]);
+
+    useEffect(() => {
       return () => {
         cancel();
       };
