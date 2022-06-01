@@ -17,7 +17,7 @@ import type {
   PackageInfo,
   ConfigDeprecationProvider,
 } from '@kbn/config';
-import { PluginOpaqueId, PluginName } from '@kbn/core-server-internal-base';
+import type { PluginName, PluginOpaqueId } from '@kbn/core-base-common';
 
 import { ElasticsearchConfigType } from '../elasticsearch/elasticsearch_config';
 import { SavedObjectsConfigType } from '../saved_objects/saved_objects_config';
@@ -26,7 +26,7 @@ import { CorePreboot, CoreSetup, CoreStart } from '..';
 type Maybe<T> = T | undefined;
 
 // re-exporting for now to avoid adapting all imports, will be removed later on in the migration process
-export type { PluginOpaqueId, PluginName } from '@kbn/core-server-internal-base';
+export type { PluginName, PluginOpaqueId } from '@kbn/core-base-common';
 
 /**
  * Dedicated type for plugin configuration schema.

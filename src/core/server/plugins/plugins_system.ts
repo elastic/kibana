@@ -7,7 +7,8 @@
  */
 
 import { withTimeout, isPromise } from '@kbn/std';
-import type { CoreContext, PluginName } from '@kbn/core-server-internal-base';
+import type { PluginName } from '@kbn/core-base-common';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { Logger } from '@kbn/logging';
 import { PluginWrapper } from './plugin';
 import { DiscoveredPlugin, PluginDependencies, PluginType } from './types';
