@@ -5,8 +5,8 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { CoreId } from '../server';
-import { PackageInfo, EnvironmentMode } from '../server/types';
+
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
@@ -40,15 +40,6 @@ interface Params {
   rootDomElement: HTMLElement;
   browserSupportsCsp: boolean;
   injectedMetadata: InjectedMetadataParams['injectedMetadata'];
-}
-
-/** @internal */
-export interface CoreContext {
-  coreId: CoreId;
-  env: {
-    mode: Readonly<EnvironmentMode>;
-    packageInfo: Readonly<PackageInfo>;
-  };
 }
 
 /** @internal */

@@ -8,7 +8,7 @@
 
 import type { GetDeprecationsContext } from './types';
 import { DeprecationsFactory, DeprecationsFactoryConfig } from './deprecations_factory';
-import { loggerMock } from '../logging/logger.mock';
+import { loggerMock } from '@kbn/logging-mocks';
 import { DeprecationsDetails } from './types';
 
 describe('DeprecationsFactory', () => {
