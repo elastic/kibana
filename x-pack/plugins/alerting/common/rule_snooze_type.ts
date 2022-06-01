@@ -9,12 +9,12 @@ import type { WeekdayStr } from 'rrule';
 
 export type RuleSnooze = RuleSnoozeSchedule[];
 
-export type RuleSnoozeSchedule = {
+export interface RuleSnoozeSchedule {
   duration: number;
   rRule: Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
   // For scheduled/recurring snoozes, `id` uniquely identifies them so that they can be displayed, modified, and deleted individually
   id?: string;
-};
+}
 
 // An iCal RRULE  to define a recurrence schedule, see https://github.com/jakubroztocil/rrule for the spec
 export interface RRuleRecord {
