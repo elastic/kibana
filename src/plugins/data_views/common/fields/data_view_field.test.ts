@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { DataView } from '..';
 import { DataViewField } from './data_view_field';
-import { IndexPattern } from '..';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldSpec, RuntimeField } from '../types';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
@@ -40,7 +40,7 @@ describe('Field', function () {
     displayName: 'displayName',
     indexPattern: {
       fieldFormatMap: { name: {}, _source: {}, _score: {}, _id: {} },
-    } as unknown as IndexPattern,
+    } as unknown as DataView,
     $$spec: {} as unknown as FieldSpec,
     conflictDescriptions: { a: ['b', 'c'], d: ['e'] },
     runtimeField: {

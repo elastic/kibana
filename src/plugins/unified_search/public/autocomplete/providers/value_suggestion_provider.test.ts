@@ -186,7 +186,7 @@ describe('FieldSuggestions', () => {
         ...stubIndexPattern,
         title: 'customIndexPattern',
         useTimeRange: false,
-      };
+      } as any;
 
       await getValueSuggestions({
         indexPattern: customIndexPattern,

@@ -9,7 +9,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPlainObject } from 'lodash';
 import { Datatable, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { IndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 type ValidMetaFieldNames = keyof Pick<
   estypes.SearchHit,
@@ -73,7 +73,7 @@ type Hit<T = unknown> = estypes.SearchHit<T> & { ignored_field_values?: Record<s
  * @param indexPattern The index pattern for the requested index if available.
  * @param params Parameters how to flatten the hit
  */
-export function flattenHit(hit: Hit, indexPattern?: IndexPattern, params?: TabifyDocsOptions) {
+export function flattenHit(hit: Hit, indexPattern?: DataView, params?: TabifyDocsOptions) {
   const flat = {} as Record<string, any>;
 
   function flatten(obj: Record<string, any>, keyPrefix: string = '') {
@@ -170,7 +170,7 @@ export function flattenHit(hit: Hit, indexPattern?: IndexPattern, params?: Tabif
 
 export const tabifyDocs = (
   esResponse: estypes.SearchResponse<unknown>,
-  index?: IndexPattern,
+  index?: DataView,
   params: TabifyDocsOptions = {}
 ): Datatable => {
   const columns: DatatableColumn[] = [];

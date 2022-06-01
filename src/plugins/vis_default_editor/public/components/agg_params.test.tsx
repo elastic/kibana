@@ -9,7 +9,8 @@
 import React from 'react';
 import { mount } from 'enzyme';
 
-import { IndexPattern, IAggConfig, AggGroupNames } from '@kbn/data-plugin/public';
+import { IAggConfig, AggGroupNames } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   DefaultEditorAggParams as PureDefaultEditorAggParams,
   DefaultEditorAggParamsProps,
@@ -95,7 +96,7 @@ describe('DefaultEditorAggParams component', () => {
       } as any as IAggConfig,
       groupName: AggGroupNames.Metrics,
       formIsTouched: false,
-      indexPattern: {} as IndexPattern,
+      indexPattern: {} as DataView,
       metricAggs: [],
       state: {} as EditorVisState,
       setAggParamValue,

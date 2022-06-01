@@ -7,7 +7,7 @@
  */
 
 import { Assign } from '@kbn/utility-types';
-import { IndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   aggAvg,
   aggBucketAvg,
@@ -115,7 +115,7 @@ export interface AggsCommonSetup {
 export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   createAggConfigs: (
-    indexPattern: IndexPattern,
+    indexPattern: DataView,
     configStates?: CreateAggConfigParams[]
   ) => InstanceType<typeof AggConfigs>;
   types: ReturnType<AggTypesRegistry['start']>;

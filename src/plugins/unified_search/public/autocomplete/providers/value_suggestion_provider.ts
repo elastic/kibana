@@ -12,14 +12,15 @@ import { memoize } from 'lodash';
 import { UI_SETTINGS, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
 // for replace IIndexPattern => DataView and IFieldType => DataViewField
 // need to fix the issue https://github.com/elastic/kibana/issues/131292
-import type { IIndexPattern, IFieldType } from '@kbn/data-views-plugin/common';
+import type { IFieldType } from '@kbn/data-views-plugin/common';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { AutocompleteUsageCollector } from '../collectors';
 
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
 
 interface ValueSuggestionsGetFnArgs {
-  indexPattern: IIndexPattern;
+  indexPattern: DataView;
   field: IFieldType;
   query: string;
   useTimeRange?: boolean;
@@ -28,10 +29,7 @@ interface ValueSuggestionsGetFnArgs {
   method?: ValueSuggestionsMethod;
 }
 
-const getAutocompleteTimefilter = (
-  { timefilter }: TimefilterSetup,
-  indexPattern: IIndexPattern
-) => {
+const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, indexPattern: DataView) => {
   const timeRange = timefilter.getTime();
 
   // Use a rounded timerange so that memoizing works properly

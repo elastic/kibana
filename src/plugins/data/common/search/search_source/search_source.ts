@@ -75,14 +75,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { normalizeSortRequest } from './normalize_sort_request';
-import {
-  AggConfigSerialized,
-  IIndexPattern,
-  DataView,
-  DataViewField,
-  SerializedSearchSourceFields,
-} from '../..';
+
+import { AggConfigSerialized, DataViewField, SerializedSearchSourceFields } from '../..';
+
 import {
   AggConfigs,
   EsQuerySortValue,
@@ -625,7 +622,7 @@ export class SearchSource {
     return searchRequest;
   }
 
-  private getIndexType(index?: IIndexPattern) {
+  private getIndexType(index?: DataView) {
     return this.shouldOverwriteDataViewType ? this.overwriteDataViewType : index?.type;
   }
 

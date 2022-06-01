@@ -7,7 +7,7 @@
  */
 
 import { RangeFilter } from '@kbn/es-query';
-import type { IIndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import moment from 'moment';
 import sinon from 'sinon';
 import { getTime, getRelativeTime, getAbsoluteTimeRange } from './get_time';
@@ -32,7 +32,7 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as unknown as IIndexPattern,
+        } as unknown as DataView,
         { from: 'now-60y', to: 'now' }
       ) as RangeFilter;
       expect(filter.query.range.date).toEqual({
@@ -69,7 +69,7 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as unknown as IIndexPattern,
+        } as unknown as DataView,
         { from: 'now-60y', to: 'now' },
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
@@ -123,7 +123,7 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as unknown as IIndexPattern,
+        } as unknown as DataView,
         { from: 'now-60y', to: 'now' },
         { fieldName: 'myCustomDate' }
       ) as RangeFilter;
@@ -159,7 +159,7 @@ describe('get_time', () => {
               filterable: true,
             },
           ],
-        } as unknown as IIndexPattern,
+        } as unknown as DataView,
         {
           from: '2020-09-01T08:30:00.000Z',
           to: 'now',

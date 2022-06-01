@@ -7,7 +7,7 @@
  */
 
 import { lastValueFrom, of, throwError } from 'rxjs';
-import { IndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { SearchSource, SearchSourceDependencies, SortDirection } from '.';
 import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
@@ -30,13 +30,13 @@ const indexPattern = {
   fields: [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }, { name: '_id' }],
   getComputedFields,
   getSourceFiltering: () => mockSource,
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 const indexPattern2 = {
   title: 'foo',
   getComputedFields,
   getSourceFiltering: () => mockSource2,
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 const fields3 = [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }];
 const indexPattern3 = {
@@ -51,7 +51,7 @@ const indexPattern3 = {
   },
   getComputedFields,
   getSourceFiltering: () => mockSource,
-} as unknown as IndexPattern;
+} as unknown as DataView;
 
 const runtimeFieldDef = {
   type: 'keyword',
@@ -147,7 +147,7 @@ describe('SearchSource', () => {
             docvalueFields: ['@timestamp'],
             runtimeFields,
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
 
         const request = searchSource.getSearchRequestBody();
         expect(request.stored_fields).toEqual(['hello']);
@@ -164,7 +164,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: ['@timestamp'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['@timestamp']);
         searchSource.setField('fieldsFromSource', ['foo']);
 
@@ -180,7 +180,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: ['hello'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
         searchSource.setField('docvalue_fields', ['world']);
 
@@ -197,7 +197,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: [{ field: 'a', format: 'date_time' }],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
         searchSource.setField('docvalue_fields', [{ field: 'b', format: 'date_time' }]);
         searchSource.setField('fields', ['c']);
@@ -223,7 +223,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: [{ field: 'hello', format: 'date_time' }],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', [{ field: 'hello', format: 'strict_date_time' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -239,7 +239,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: [{ field: 'hello', format: 'date_time' }],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['hello']);
 
         const request = searchSource.getSearchRequestBody();
@@ -260,7 +260,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: [{ field: 'hello', format: 'date_time', a: 'test', b: 'test' }],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', [{ field: 'hello', a: 'a', c: 'c' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -278,7 +278,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {} },
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         // @ts-expect-error TS won't like using this field name, but technically it's possible.
         searchSource.setField('script_fields', { world: {} });
 
@@ -298,7 +298,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {} },
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['hello', 'a', { field: 'c' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -314,7 +314,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {} },
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['hello', 'a', { foo: 'c' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -330,7 +330,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {} },
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fieldsFromSource', ['hello', 'a']);
 
         const request = searchSource.getSearchRequestBody();
@@ -433,7 +433,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: ['@timestamp', 'exclude-me'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         // @ts-expect-error Typings for excludes filters need to be fixed.
         searchSource.setField('source', { excludes: ['exclude-*'] });
 
@@ -449,7 +449,7 @@ describe('SearchSource', () => {
             scriptFields: {},
             docvalueFields: ['@timestamp', 'foo-bar', 'foo-baz'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
 
         const request = searchSource.getSearchRequestBody();
         expect(request.fields).toEqual(['@timestamp']);
@@ -463,7 +463,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {}, world: {} },
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['hello']);
 
         const request = searchSource.getSearchRequestBody();
@@ -478,7 +478,7 @@ describe('SearchSource', () => {
             scriptFields: [],
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', [
           'hello',
           'foo-bar',
@@ -499,7 +499,7 @@ describe('SearchSource', () => {
             scriptFields: [],
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
@@ -514,7 +514,7 @@ describe('SearchSource', () => {
             scriptFields: [],
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -529,7 +529,7 @@ describe('SearchSource', () => {
             scriptFields: [],
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', [{ field: '*', include_unmapped: 'true' }]);
 
         const request = searchSource.getSearchRequestBody();
@@ -551,7 +551,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {}, world: {} },
             docvalueFields: [],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['timestamp', '*']);
 
         const request = searchSource.getSearchRequestBody();
@@ -568,7 +568,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fieldsFromSource', [
           'hello',
           'world',
@@ -592,7 +592,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp', 'date'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
 
         const request = searchSource.getSearchRequestBody();
@@ -611,7 +611,7 @@ describe('SearchSource', () => {
             docvalueFields: ['@timestamp', 'date'],
             runtimeFields,
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fieldsFromSource', [
           'hello',
           '@timestamp',
@@ -638,7 +638,7 @@ describe('SearchSource', () => {
             scriptFields: { hello: {}, world: {} },
             docvalueFields: ['@timestamp', 'date', 'time'],
           }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['hello', '@timestamp', 'foo-a', 'bar']);
         searchSource.setField('fieldsFromSource', ['foo-b', 'date', 'baz']);
 
@@ -665,7 +665,7 @@ describe('SearchSource', () => {
             getByType: () => [{ name: '@timestamp', esTypes: ['date_nanos'] }],
           },
           getSourceFiltering: () => ({ excludes: [] }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
@@ -693,7 +693,7 @@ describe('SearchSource', () => {
           }),
           fields: indexPatternFields,
           getSourceFiltering: () => ({ excludes: ['custom_date'] }),
-        } as unknown as IndexPattern);
+        } as unknown as DataView);
         searchSource.setField('fields', ['*']);
 
         const request = searchSource.getSearchRequestBody();
@@ -796,7 +796,7 @@ describe('SearchSource', () => {
 
   describe('#serialize', () => {
     test('should reference index patterns', () => {
-      const indexPattern123 = { id: '123' } as IndexPattern;
+      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       const { searchSourceJSON, references } = searchSource.serialize();
       expect(references[0].id).toEqual('123');
@@ -838,7 +838,7 @@ describe('SearchSource', () => {
     });
 
     test('should reference index patterns in filters separately from index field', () => {
-      const indexPattern123 = { id: '123' } as IndexPattern;
+      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       const filter = [
         {
@@ -874,7 +874,7 @@ describe('SearchSource', () => {
           scriptFields: {},
           docvalueFields: [],
         }),
-      } as unknown as IndexPattern);
+      } as unknown as DataView);
       const request = searchSource.getSearchRequestBody();
       expect(request.stored_fields).toEqual(['geometry', 'prop1']);
       expect(request.docvalue_fields).toEqual(['prop1']);
@@ -896,7 +896,7 @@ describe('SearchSource', () => {
     ];
 
     test('should return serialized fields', () => {
-      const indexPattern123 = { id: '123' } as IndexPattern;
+      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       searchSource.setField('filter', () => {
         return filter;
@@ -928,7 +928,7 @@ describe('SearchSource', () => {
     });
 
     test('should support nested search sources', () => {
-      const indexPattern123 = { id: '123' } as IndexPattern;
+      const indexPattern123 = { id: '123' } as DataView;
       searchSource.setField('index', indexPattern123);
       searchSource.setField('from', 123);
       const childSearchSource = searchSource.createChild();

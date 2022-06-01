@@ -7,9 +7,8 @@
  */
 
 import { get, isEmpty } from 'lodash';
-
 import { IAggConfig, AggParam, IFieldParamType, IAggType } from '@kbn/data-plugin/public';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';
 
 import { filterAggTypes, filterAggTypeFields } from '../agg_filters';
