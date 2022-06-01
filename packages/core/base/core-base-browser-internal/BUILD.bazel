@@ -2,12 +2,13 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "internal-base"
-PKG_REQUIRE_NAME = "@kbn/core-server-internal-base"
+PKG_DIRNAME = "core-base-browser-internal"
+PKG_REQUIRE_NAME = "@kbn/core-base-browser-internal"
 
 SOURCE_FILES = glob(
   [
     "src/**/*.ts",
+    "src/**/*.tsx",
   ],
   exclude = [
     "**/*.test.*",
@@ -26,21 +27,28 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
+  "@npm//react"
 ]
 
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
+  "@npm//@types/react",
   "//packages/kbn-config:npm_module_types",
-  "//packages/kbn-logging:npm_module_types",
-  "//packages/kbn-utility-types:npm_module_types",
-  "//packages/core/common/internal-base:npm_module_types",
+  "//packages/core/base/core-base-common-internal:npm_module_types",
 ]
 
 jsts_transpiler(
   name = "target_node",
   srcs = SRCS,
   build_pkg_name = package_name(),
+)
+
+jsts_transpiler(
+  name = "target_web",
+  srcs = SRCS,
+  build_pkg_name = package_name(),
+  web = True,
 )
 
 ts_config(
@@ -67,7 +75,7 @@ ts_project(
 js_library(
   name = PKG_DIRNAME,
   srcs = NPM_MODULE_EXTRA_FILES,
-  deps = RUNTIME_DEPS + [":target_node"],
+  deps = RUNTIME_DEPS + [":target_node", ":target_web"],
   package_name = PKG_REQUIRE_NAME,
   visibility = ["//visibility:public"],
 )

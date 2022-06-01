@@ -6,14 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { EnvironmentMode, PackageInfo } from '@kbn/config';
-import type { CoreId } from '@kbn/core-common-internal-base';
-
-/** @internal */
-export interface CoreContext {
-  coreId: CoreId;
-  env: {
-    mode: Readonly<EnvironmentMode>;
-    packageInfo: Readonly<PackageInfo>;
-  };
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/base/core-base-server-internal'],
+};

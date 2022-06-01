@@ -6,8 +6,5 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/common/internal-base'],
-};
+export type { CoreContext } from './core_context';
+export type { CoreService, ServiceConfigDescriptor } from './services';

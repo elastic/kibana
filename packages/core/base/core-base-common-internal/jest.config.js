@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { PluginName, PluginOpaqueId } from './plugins';
-export type { CoreId } from './core';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/base/core-base-common-internal'],
+};
