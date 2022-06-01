@@ -18,6 +18,7 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
+import { ELASTIC_CLOUD_SSO_REALM_NAME } from './base';
 import type { MockAuthenticationProviderOptions } from './base.mock';
 import { mockAuthenticationProviderOptions } from './base.mock';
 import { SAMLAuthenticationProvider, SAMLLogin } from './saml';
@@ -364,6 +365,43 @@ describe('SAMLAuthenticationProvider', () => {
             user: mockUser,
           })
         );
+      });
+
+      it('recognizes Elastic Cloud users.', async () => {
+        const nonElasticCloudUser = mockAuthenticatedUser({
+          authentication_provider: { type: 'saml', name: 'saml' },
+          authentication_realm: { type: 'saml', name: 'random-saml' },
+        });
+        const elasticCloudUser = mockAuthenticatedUser({
+          authentication_provider: { type: 'saml', name: 'saml' },
+          authentication_realm: { type: 'saml', name: ELASTIC_CLOUD_SSO_REALM_NAME },
+        });
+
+        // The only case when user should be recognized as Elastic Cloud user: Kibana is running inside Cloud
+        // deployment and user is authenticated with SAML realm of the predefined name.
+        for (const [authentication, isElasticCloudDeployment, isElasticCloudUser] of [
+          [nonElasticCloudUser, false, false],
+          [nonElasticCloudUser, true, false],
+          [elasticCloudUser, false, false],
+          [elasticCloudUser, true, true],
+        ]) {
+          mockOptions.client.asInternalUser.transport.request.mockResolvedValue({
+            username: 'user',
+            access_token: 'valid-token',
+            refresh_token: 'valid-refresh-token',
+            realm: 'test-realm',
+            authentication,
+          });
+
+          mockOptions.isElasticCloudDeployment.mockReturnValue(isElasticCloudDeployment);
+
+          const loginResult = await provider.login(
+            httpServerMock.createKibanaRequest({ headers: {} }),
+            { type: SAMLLogin.LoginWithSAMLResponse, samlResponse: 'saml-response-xml' }
+          );
+
+          expect(loginResult.user?.elastic_cloud_user).toBe(isElasticCloudUser);
+        }
       });
 
       it('redirects to the home page if `relayState` includes external URL', async () => {

@@ -89,6 +89,7 @@ export interface AuthenticatorOptions {
   clusterClient: IClusterClient;
   session: PublicMethodsOf<Session>;
   getServerBaseURL: () => string;
+  isElasticCloudDeployment: () => boolean;
 }
 
 /** @internal */
@@ -232,6 +233,7 @@ export class Authenticator {
         logger: this.options.loggers.get('tokens'),
       }),
       getServerBaseURL: this.options.getServerBaseURL,
+      isElasticCloudDeployment: this.options.isElasticCloudDeployment,
     };
 
     this.providers = new Map(

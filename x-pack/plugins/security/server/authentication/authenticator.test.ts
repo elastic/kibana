@@ -72,6 +72,7 @@ function getMockOptions({
     session: sessionMock.create(),
     featureUsageService: securityFeatureUsageServiceMock.createStartContract(),
     userProfileService: userProfileServiceMock.createStart(),
+    isElasticCloudDeployment: jest.fn().mockReturnValue(false),
   };
 }
 

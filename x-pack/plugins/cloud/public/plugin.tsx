@@ -262,12 +262,8 @@ export class CloudPlugin implements Plugin<CloudSetup> {
         name: 'cloud_user_id',
         context$: from(security.authc.getCurrentUser()).pipe(
           map((user) => {
-            if (
-              getIsCloudEnabled(cloudId) &&
-              user.authentication_realm?.type === 'saml' &&
-              user.authentication_realm?.name === 'cloud-saml-kibana'
-            ) {
-              // If authenticated via Cloud SAML, use the SAML username as the user ID
+            if (user.elastic_cloud_user) {
+              // If authenticated via Elastic Cloud SSO, use the username as the user ID
               return user.username;
             }
 
