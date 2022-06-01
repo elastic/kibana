@@ -20,6 +20,7 @@ import type {
   UnifiedSearchPublicPluginStart,
   QuerySuggestion,
 } from '@kbn/unified-search-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { IndexPattern } from '../../../../types';
 import { memoizedGetAvailableOperationsByMetadata } from '../../../operations';
@@ -120,6 +121,7 @@ export async function suggest({
   context,
   indexPattern,
   operationDefinitionMap,
+  dataViews,
   unifiedSearch,
   dateHistogramInterval,
 }: {
@@ -129,6 +131,7 @@ export async function suggest({
   indexPattern: IndexPattern;
   operationDefinitionMap: Record<string, GenericOperationDefinition>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   dateHistogramInterval?: number;
 }): Promise<LensMathSuggestions> {
   const text =
@@ -149,6 +152,7 @@ export async function suggest({
       return await getNamedArgumentSuggestions({
         ast: tokenAst as TinymathNamedArgument,
         unifiedSearch,
+        dataViews,
         indexPattern,
         dateHistogramInterval,
       });
@@ -332,12 +336,14 @@ function getArgumentSuggestions(
 export async function getNamedArgumentSuggestions({
   ast,
   unifiedSearch,
+  dataViews,
   indexPattern,
   dateHistogramInterval,
 }: {
   ast: TinymathNamedArgument;
   indexPattern: IndexPattern;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  dataViews: DataViewsPublicPluginStart;
   dateHistogramInterval?: number;
 }) {
   if (ast.name === 'shift') {
@@ -371,7 +377,7 @@ export async function getNamedArgumentSuggestions({
     query,
     selectionStart: position,
     selectionEnd: position,
-    indexPatterns: [indexPattern],
+    indexPatterns: [await dataViews.get(indexPattern.id)],
     boolFilter: [],
   });
   return {
