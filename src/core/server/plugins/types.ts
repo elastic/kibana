@@ -27,7 +27,7 @@ type Maybe<T> = T | undefined;
 
 // re-exporting for now to avoid adapting all imports, will be removed later on in the migration process
 export type { PluginName, PluginOpaqueId, DiscoveredPlugin } from '@kbn/core-base-common';
-export type { PluginType } from '@kbn/core-base-common';
+export { PluginType } from '@kbn/core-base-common';
 
 /**
  * Dedicated type for plugin configuration schema.
