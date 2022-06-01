@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { CoreService } from '@kbn/core-base-browser-internal';
 import { HttpSetup, HttpStart } from './types';
 import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
@@ -13,7 +14,6 @@ import { BasePath } from './base_path';
 import { AnonymousPathsService } from './anonymous_paths_service';
 import { LoadingCountService } from './loading_count_service';
 import { Fetch } from './fetch';
-import { CoreService } from '../../types';
 import { ExternalUrlService } from './external_url_service';
 import { ExecutionContextSetup } from '../execution_context';
 
