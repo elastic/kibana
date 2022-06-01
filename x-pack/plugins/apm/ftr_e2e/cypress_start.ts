@@ -94,7 +94,10 @@ function getSpecsToRun() {
 
   console.log({ pattern });
   console.log({ allSpecs });
+  console.log({ cliJobNumber });
+  console.log({ cliJobCount });
   console.log({ chunkSize });
+  console.log({ chunk: chunk(allSpecs, chunkSize) });
   console.log({ specsToRun });
 
   const specList = specsToRun.join(',');
