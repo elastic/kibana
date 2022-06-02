@@ -20,23 +20,25 @@ import { UiSettingsServerToCommon } from './ui_settings_wrapper';
 import { IndexPatternsApiServer } from './index_patterns_api_client';
 import { SavedObjectsClientServerToCommon } from './saved_objects_client_wrapper';
 
-export const dataViewsServiceFactory = ({
-  logger,
-  uiSettings,
-  fieldFormats,
-  capabilities,
-}: {
+interface DataViewsServiceFactoryDeps {
   logger: Logger;
   uiSettings: UiSettingsServiceStart;
   fieldFormats: FieldFormatsStart;
   capabilities: CoreStart['capabilities'];
-}) =>
+}
+
+/**
+ * Creates a new DataViewsService instance.
+ * @param deps - Dependencies required by the DataViewsService
+ */
+export const dataViewsServiceFactory = (deps: DataViewsServiceFactoryDeps) =>
   async function (
     savedObjectsClient: SavedObjectsClientContract,
     elasticsearchClient: ElasticsearchClient,
     request?: KibanaRequest,
     byPassCapabilities?: boolean
   ) {
+    const { logger, uiSettings, fieldFormats, capabilities } = deps;
     const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
     const formats = await fieldFormats.fieldFormatServiceFactory(uiSettingsClient);
 

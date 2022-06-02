@@ -12,14 +12,14 @@ import type {
   UiSettingsServiceStart,
 } from '@kbn/core/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import type { IndexPatternsServiceStart } from '@kbn/data-views-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { DatatableUtilitiesService as DatatableUtilitiesServiceCommon } from '../../common';
 import type { AggsStart } from '../search';
 
 export class DatatableUtilitiesService {
   constructor(
     private aggs: AggsStart,
-    private dataViews: IndexPatternsServiceStart,
+    private dataViews: DataViewsServerPluginStart,
     private fieldFormats: FieldFormatsStart,
     private uiSettings: UiSettingsServiceStart
   ) {

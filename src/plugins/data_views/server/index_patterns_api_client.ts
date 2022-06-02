@@ -49,6 +49,9 @@ export class IndexPatternsApiServer implements IDataViewsApiClient {
       });
   }
 
+  /**
+   * Is there a user created data view?
+   */
   async hasUserIndexPattern() {
     return hasUserIndexPattern({
       esClient: this.esClient,

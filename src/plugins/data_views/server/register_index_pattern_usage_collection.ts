@@ -153,9 +153,9 @@ export function registerIndexPatternsUsageCollector(
     type: 'index-patterns',
     isReady: () => true,
     fetch: async () => {
-      const [{ savedObjects, elasticsearch }, , { indexPatternsServiceFactory }] =
+      const [{ savedObjects, elasticsearch }, , { dataViewsServiceFactory }] =
         await getStartServices();
-      const indexPatternService = await indexPatternsServiceFactory(
+      const indexPatternService = await dataViewsServiceFactory(
         new SavedObjectsClient(savedObjects.createInternalRepository()),
         elasticsearch.client.asInternalUser
       );

@@ -12,8 +12,8 @@ import {
   SavedObjectsClientCommon,
   SavedObjectsClientCommonFindArgs,
   SavedObject,
-  DataViewSavedObjectConflictError,
-} from '../common';
+} from '../common/types';
+import { DataViewSavedObjectConflictError } from '../common/errors';
 
 type SOClient = Pick<
   SavedObjectsClientContract,

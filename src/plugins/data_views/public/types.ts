@@ -65,12 +65,27 @@ export interface HasDataViewsResponse {
   hasUserDataView: boolean;
 }
 
+/**
+ * Data views public setup dependencies
+ */
 export interface DataViewsPublicSetupDependencies {
+  /**
+   * Expressions
+   */
   expressions: ExpressionsSetup;
+  /**
+   * Field formats
+   */
   fieldFormats: FieldFormatsSetup;
 }
 
+/**
+ * Data views public start dependencies
+ */
 export interface DataViewsPublicStartDependencies {
+  /**
+   * Field formats
+   */
   fieldFormats: FieldFormatsStart;
 }
 
