@@ -7,10 +7,8 @@
 
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import { useQueryClient } from 'react-query';
 import styled from 'styled-components';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation';
-import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CaseActionBar } from '../case_action_bar';
 import { HeaderPage } from '../header_page';
@@ -24,6 +22,7 @@ import { CaseViewAlerts } from './components/case_view_alerts';
 import { CaseViewMetrics } from './metrics';
 import { ACTIVITY_TAB, ALERTS_TAB } from './translations';
 import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
+import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 
 const ExperimentalBadge = styled(EuiBetaBadge)`
@@ -34,7 +33,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
   ({
     caseData,
     caseId,
-    fetchCase,
     onComponentInitialized,
     refreshRef,
     ruleDetailsNavigation,
@@ -45,7 +43,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const { userCanCrud, features } = useCasesContext();
     const { navigateToCaseView } = useCaseViewNavigation();
     const { urlParams } = useUrlParams();
-    const queryClient = useQueryClient();
+    const refreshCaseViewPage = useRefreshCaseViewPage();
 
     useCasesTitleBreadcrumbs(caseData.title);
 
@@ -59,14 +57,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     const init = useRef(true);
     const timelineUi = useTimelineContext()?.ui;
 
-    const handleRefresh = useCallback(() => {
-      queryClient.invalidateQueries(CASE_VIEW_CACHE_KEY);
-    }, [queryClient]);
-
     const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
       caseId,
       caseData,
-      handleUpdateField: handleRefresh,
     });
 
     // Set `refreshRef` if needed
@@ -79,7 +72,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             if (isStale || isLoading) {
               return;
             }
-            handleRefresh();
+            refreshCaseViewPage();
           },
         };
         return () => {
@@ -87,7 +80,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
           refreshRef.current = null;
         };
       }
-    }, [fetchCase, isLoading, refreshRef, handleRefresh]);
+    }, [isLoading, refreshRef, refreshCaseViewPage]);
 
     const onSubmitTitle = useCallback(
       (newTitle) =>
@@ -119,7 +112,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               caseData={caseData}
               actionsNavigation={actionsNavigation}
               showAlertDetails={showAlertDetails}
-              updateCase={fetchCase}
               useFetchAlertData={useFetchAlertData}
             />
           ),
@@ -149,7 +141,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         actionsNavigation,
         caseData,
         features.alerts.enabled,
-        fetchCase,
         ruleDetailsNavigation,
         showAlertDetails,
         useFetchAlertData,
@@ -192,7 +183,6 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             caseData={caseData}
             userCanCrud={userCanCrud}
             isLoading={isLoading && (loadingKey === 'status' || loadingKey === 'settings')}
-            onRefresh={handleRefresh}
             onUpdateField={onUpdateField}
           />
         </HeaderPage>

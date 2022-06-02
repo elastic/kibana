@@ -16,7 +16,7 @@ import { ActionConnectorTableItem } from '@kbn/triggers-actions-ui-plugin/public
 import { SUPPORTED_CONNECTORS } from '../../../common/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
-import { useActionTypes } from '../../containers/configure/use_action_types';
+import { useGetActionTypes } from '../../containers/configure/use_action_types';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 
 import { ClosureType } from '../../containers/configure/types';
@@ -75,7 +75,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
   } = useCaseConfigure();
 
   const { loading: isLoadingConnectors, connectors, refetchConnectors } = useConnectors();
-  const { loading: isLoadingActionTypes, actionTypes, refetchActionTypes } = useActionTypes();
+  const {
+    isLoading: isLoadingActionTypes,
+    data: actionTypes = [],
+    refetch: refetchActionTypes,
+  } = useGetActionTypes();
+
   const supportedActionTypes = useMemo(
     () => actionTypes.filter((actionType) => SUPPORTED_CONNECTORS.includes(actionType.id)),
     [actionTypes]
