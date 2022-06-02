@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { MockedKeys } from '@kbn/utility-types';
-import type { AwaitedProperties } from '@kbn/utility-types';
+import type { MockedKeys, AwaitedProperties } from '@kbn/utility-types';
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 
