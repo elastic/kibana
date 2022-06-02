@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import type { ThreatMapping } from '@kbn/securitysolution-io-ts-alerting-types';
 
 import { SearchAfterAndBulkCreateReturnType, SignalSourceHit } from '../types';
 import { parseInterval } from '../utils';
@@ -167,5 +168,29 @@ export const buildExecutionIntervalValidator: (interval: string) => () => void =
       const message = `Current rule execution has exceeded its allotted interval (${interval}) and has been stopped.`;
       throw new Error(message);
     }
+  };
+};
+
+export const getThreatListConfig = ({
+  threatIndicatorPath,
+  threatMapping,
+}: {
+  threatIndicatorPath?: string;
+  threatMapping?: ThreatMapping;
+}) => {
+  let sourceFields: string[] = [];
+  if (threatIndicatorPath) {
+    sourceFields = [...sourceFields, `${threatIndicatorPath}.*`, 'threat.feed.*'];
+  }
+  if (threatMapping) {
+    sourceFields = [
+      ...sourceFields,
+      ...threatMapping.map((mapping) => mapping.entries.map((item) => item.value)).flat(),
+    ];
+  }
+
+  return {
+    _source: sourceFields,
+    fields: undefined,
   };
 };

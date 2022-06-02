@@ -91,6 +91,7 @@ export const buildEnrichments = ({
     if (!isObject(indicator)) {
       throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
     }
+    const atomic = get(matchedThreat?._source, query.value) as unknown;
     const feed: { name?: string } = {};
     if (feedName) {
       feed.name = feedName;
@@ -99,7 +100,7 @@ export const buildEnrichments = ({
       indicator,
       feed,
       matched: {
-        atomic: undefined,
+        atomic,
         field: query.field,
         id: query.id,
         index: query.index,
@@ -136,7 +137,7 @@ export const enrichSignalThreatMatches = async (
   ];
   const matchedThreats = await getMatchedThreats(matchedThreatIds);
 
-  const enrichmentsWithoutAtomic = signalMatches.map((signalMatch) =>
+  const enrichments = signalMatches.map((signalMatch) =>
     buildEnrichments({
       indicatorPath,
       queries: signalMatch.queries,
@@ -155,14 +156,6 @@ export const enrichSignalThreatMatches = async (
     // new issues.
     const existingEnrichmentValue = get(signalHit._source, 'threat.enrichments') ?? [];
     const existingEnrichments = [existingEnrichmentValue].flat(); // ensure enrichments is an array
-    const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[i];
-    const newEnrichments = newEnrichmentsWithoutAtomic.map((enrichment) => ({
-      ...enrichment,
-      matched: {
-        ...enrichment.matched,
-        atomic: get(signalHit._source, enrichment.matched.field),
-      },
-    }));
 
     return {
       ...signalHit,
@@ -170,7 +163,7 @@ export const enrichSignalThreatMatches = async (
         ...signalHit._source,
         threat: {
           ...threat,
-          enrichments: [...existingEnrichments, ...newEnrichments],
+          enrichments: [...existingEnrichments, ...enrichments[i]],
         },
       },
     };

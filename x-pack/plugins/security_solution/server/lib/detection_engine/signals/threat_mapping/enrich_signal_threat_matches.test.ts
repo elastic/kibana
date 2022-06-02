@@ -114,14 +114,14 @@ describe('buildEnrichments', () => {
     expect(enrichments).toEqual([]);
   });
 
-  it('returns the value of the matched indicator as undefined', () => {
+  it('returns the value of the matched indicator as matched.atomic', () => {
     const [enrichment] = buildEnrichments({
       queries,
       threats,
       indicatorPath,
     });
 
-    expect(get(enrichment, 'matched.atomic')).toEqual(undefined);
+    expect(get(enrichment, 'matched.atomic')).toEqual('domain_1');
   });
 
   it('does not enrich from other fields in the indicator document', () => {
@@ -233,7 +233,7 @@ describe('buildEnrichments', () => {
           reference: 'https://test.com',
         },
         matched: {
-          atomic: undefined,
+          atomic: 'domain_1',
           id: '123',
           index: 'threat-index',
           field: 'event.field',
@@ -277,7 +277,7 @@ describe('buildEnrichments', () => {
           type: 'indicator_type',
         },
         matched: {
-          atomic: undefined,
+          atomic: 'domain_1',
           id: '123',
           index: 'threat-index',
           field: 'event.field',
@@ -464,7 +464,7 @@ describe('buildEnrichments', () => {
           type: 'type_1',
         },
         matched: {
-          atomic: undefined,
+          atomic: 'domain_1',
           field: 'event.field',
           id: '123',
           index: 'threat-index',
@@ -689,7 +689,7 @@ describe('enrichSignalThreatMatches', () => {
           type: 'custom_type',
         },
         matched: {
-          atomic: 'domain_1',
+          atomic: 'custom_domain',
           id: '123',
           index: 'custom_index',
           field: 'event.domain',
@@ -780,10 +780,63 @@ describe('enrichSignalThreatMatches', () => {
           type: 'type_2',
         },
         matched: {
-          atomic: 'test_val',
+          atomic: 'domain_2',
           id: '456',
           index: 'other_custom_index',
           field: 'event.other',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
+        },
+      },
+    ]);
+  });
+
+  it('enriches signals from threat with ip_range CIDR', async () => {
+    getMatchedThreats = async () => [
+      getThreatListItemMock({
+        _id: '123',
+        _source: {
+          threat: { indicator: { ip_range: '127.0.0.1/30' } },
+        },
+      }),
+    ];
+
+    matchedQuery = encodeThreatMatchNamedQuery(
+      getNamedQueryMock({
+        id: '123',
+        index: 'custom_index',
+        field: 'host.ip',
+        value: 'threat.indicator.ip_range',
+      })
+    );
+
+    const signalHit = getSignalHitMock({
+      _source: {
+        host: {
+          ip: '127.0.0.1',
+        },
+      },
+      matched_queries: [matchedQuery],
+    });
+    const signals: SignalSourceHit[] = [signalHit];
+    const enrichedSignals = await enrichSignalThreatMatches(
+      signals,
+      getMatchedThreats,
+      indicatorPath
+    );
+    const [enrichedHit] = enrichedSignals;
+    const enrichments = get(enrichedHit._source, ENRICHMENT_DESTINATION_PATH);
+
+    expect(enrichments).toEqual([
+      {
+        feed: {},
+        indicator: {
+          ip_range: '127.0.0.1/30',
+        },
+        matched: {
+          atomic: '127.0.0.1/30',
+          id: '123',
+          index: 'custom_index',
+          field: 'host.ip',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
       },
