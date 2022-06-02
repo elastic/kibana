@@ -10,7 +10,7 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { CommentType } from '@kbn/cases-plugin/common';
 import { CaseAttachments } from '@kbn/cases-plugin/public';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
-import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns'; // '../../../timelines/components/timeline/body/data_driven_columns';
+import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../common/types';
 import { APP_ID } from '../../../../../common/constants';
