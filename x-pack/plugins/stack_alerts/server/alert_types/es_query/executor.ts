@@ -24,7 +24,7 @@ export async function executor(
   options: ExecutorOptions<EsQueryRuleParams>
 ) {
   const esQueryRule = isEsQueryRule(options.params.searchType);
-  const { alertId: ruleId, name, services, params, state } = options;
+  const { alertId: ruleId, name, services, params, state, spaceId } = options;
   const { alertFactory, scopedClusterClient, searchSourceClient } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
@@ -57,9 +57,10 @@ export async function executor(
   const conditionMet = compareFn(numMatches, params.threshold);
 
   const base = publicBaseUrl;
+  const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
   const link = esQueryRule
-    ? `${base}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`
-    : `${base}/app/discover#/viewAlert/${ruleId}?from=${dateStart}&to=${dateEnd}&checksum=${getChecksum(
+    ? `${base}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`
+    : `${base}${spacePrefix}/app/discover#/viewAlert/${ruleId}?from=${dateStart}&to=${dateEnd}&checksum=${getChecksum(
         params as OnlyEsQueryRuleParams
       )}`;
   const baseContext: Omit<EsQueryRuleActionContext, 'conditions'> = {
