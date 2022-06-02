@@ -12,7 +12,7 @@ export {
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
 } from './constants';
-export type { IFieldType, IIndexPatternFieldList } from './fields';
+export type { IIndexPatternFieldList } from './fields';
 export {
   isFilterable,
   fieldList,
@@ -29,7 +29,6 @@ export type {
   RuntimeFieldSpec,
   RuntimeFieldSubField,
   DataViewAttributes,
-  IndexPatternAttributes,
   FieldAttrs,
   FieldAttrSet,
   OnNotification,

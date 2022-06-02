@@ -12,7 +12,7 @@ import { ToastInputFields, ErrorToastOptions } from '@kbn/core/public/notificati
 import type { SavedObject } from 'src/core/server';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { RUNTIME_FIELD_TYPES } from './constants';
 
 export type { QueryDslQueryContainer };
@@ -81,11 +81,6 @@ export interface DataViewAttributes {
    */
   allowNoIndex?: boolean;
 }
-
-/**
- * @deprecated Use DataViewAttributes. All index pattern interfaces were renamed.
- */
-export type IndexPatternAttributes = DataViewAttributes;
 
 /**
  * @intenal
