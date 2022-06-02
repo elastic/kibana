@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
 import sinon, { stub } from 'sinon';
 import { NotificationsStart } from 'src/core/public';
 import { coreMock } from '../../../../../src/core/public/mocks';
@@ -99,7 +98,7 @@ describe('stream handler', () => {
         expect(mockShowDanger.callCount).toBe(0);
         expect(mockShowSuccess.callCount).toBe(1);
         expect(mockShowWarning.callCount).toBe(0);
-        expect(omit(mockShowSuccess.args[0][0], 'toastLifeTimeMs')).toMatchSnapshot();
+        expect(mockShowSuccess.args[0]).toMatchSnapshot();
         done();
       });
     });
