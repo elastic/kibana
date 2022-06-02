@@ -7,6 +7,8 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 
+import type { SearchHit } from '@kbn/core/types/elasticsearch';
+
 import type { IncomingDataList } from '../../../common/types/rest_spec/agent';
 
 import { sendGetAgentIncomingData, useLink } from '../../hooks';
@@ -72,37 +74,66 @@ export const useGetAgentIncomingData = (
   };
 };
 
+const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
+const POLLING_TIMEOUT_MS = 5 * 60 * 1000; // 5 min
+
 /**
  * Hook for polling incoming data for the selected agent policy.
  * @param agentIds
  * @returns incomingData, isLoading
  */
-const POLLING_INTERVAL_MS = 5 * 1000; // 5 sec
-
-export const usePollingIncomingData = (agentsIds: string[]) => {
+export const usePollingIncomingData = (
+  agentIds: string[],
+  previewData?: boolean,
+  stopPollingAfterPreviewLength: number = 0
+) => {
   const timeout = useRef<number | undefined>(undefined);
-  const [incomingData, setIncomingData] = useState<IncomingDataList[]>([]);
+  const [result, setResult] = useState<{
+    incomingData: IncomingDataList[];
+    dataPreview: SearchHit[];
+  }>({
+    incomingData: [],
+    dataPreview: [],
+  });
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [hasReachedTimeout, setHasReachedTimeout] = useState(false);
+
+  const startedPollingAt = useRef<number>();
 
   useEffect(() => {
     let isAborted = false;
 
     const poll = () => {
       timeout.current = window.setTimeout(async () => {
-        const { data } = await sendGetAgentIncomingData({ agentsIds });
+        // On the first run, set an initial timestamp so we can track timeouts
+        if (!startedPollingAt.current) {
+          startedPollingAt.current = Date.now();
+        }
 
+        // If we've been polling for more than 5 minutes, we consider the request "timed out", but
+        // don't actually stop polling. This flag just allows consumers of this hook to display an
+        // appropriate timeout UI as needed.
+        if (Date.now() - startedPollingAt.current > POLLING_TIMEOUT_MS) {
+          setHasReachedTimeout(true);
+        }
+
+        const { data } = await sendGetAgentIncomingData({ agentsIds: agentIds, previewData });
         if (data?.items) {
-          // filter out agents that have `data = false` and keep polling
+          // filter out  agents that have `data = false` and keep polling
           const filtered = data?.items.filter((item) => {
             const key = Object.keys(item)[0];
             return item[key].data === true;
           });
 
           if (filtered.length > 0) {
-            setIncomingData(filtered);
+            setResult({
+              incomingData: filtered,
+              dataPreview: data.dataPreview || [],
+            });
             setIsLoading(false);
           }
         }
+
         if (!isAborted) {
           poll();
         }
@@ -110,12 +141,23 @@ export const usePollingIncomingData = (agentsIds: string[]) => {
     };
 
     poll();
-    if (isAborted || incomingData.length > 0) clearTimeout(timeout.current);
+
+    const previewLengthReached = result.dataPreview.length >= stopPollingAfterPreviewLength;
+    const incomingDataReceived = result.incomingData.length > 0;
+    const dataReceived = previewData ? previewLengthReached : incomingDataReceived;
+
+    if (isAborted || dataReceived) {
+      clearTimeout(timeout.current);
+    }
 
     return () => {
       isAborted = true;
     };
-  }, [agentsIds, incomingData]);
+  }, [agentIds, result, previewData, stopPollingAfterPreviewLength, startedPollingAt]);
 
-  return { incomingData, isLoading };
+  return {
+    ...result,
+    isLoading,
+    hasReachedTimeout,
+  };
 };
