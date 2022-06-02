@@ -8,8 +8,8 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import * as Option from 'fp-ts/Option';
-import { DocLinksServiceSetup } from '../../doc_links';
-import { docLinksServiceMock } from '../../mocks';
+import type { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { createInitialState } from './initial_state';
