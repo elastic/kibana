@@ -64,10 +64,6 @@ export const setupValueSuggestionProvider = (
       )
     ) => {
       usageCollector?.trackRequest();
-      const reportInfo = {
-        timeTookMs: new Date().getTime(),
-        resCount: 0,
-      };
 
       return core.http
         .fetch<string[]>(`/api/kibana/suggestions/values/${index}`, {
@@ -82,11 +78,6 @@ export const setupValueSuggestionProvider = (
           signal,
         })
         .then((r) => {
-          reportInfo.timeTookMs = new Date().getTime() - reportInfo.timeTookMs;
-          reportInfo.resCount = r.length;
-          // consider sending a hash of the index being queried
-          core.analytics.reportEvent('autocomplete-results', reportInfo);
-
           usageCollector?.trackResult();
           return r;
         });
