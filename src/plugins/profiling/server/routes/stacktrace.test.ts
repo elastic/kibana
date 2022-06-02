@@ -6,26 +6,81 @@
  * Side Public License, v 1.
  */
 
-import { extractFileIDFromFrameID } from './stacktrace';
+import { StackTrace } from '../../common/profiling';
+import { decodeStackTrace, EncodedStackTrace, runLengthDecodeReverse } from './stacktrace';
 
-describe('Extract FileID from FrameID', () => {
-  test('extractFileIDFromFrameID', () => {
+describe('Stack trace operations', () => {
+  test('decodeStackTrace', () => {
     const tests: Array<{
-      frameID: string;
-      expected: string;
+      original: EncodedStackTrace;
+      expected: StackTrace;
     }> = [
       {
-        frameID: 'aQpJmTLWydNvOapSFZOwKgAAAAAAB924',
-        expected: 'aQpJmTLWydNvOapSFZOwKg==',
+        original: {
+          FrameID: 'aQpJmTLWydNvOapSFZOwKgAAAAAAB924',
+          Type: Buffer.from([0x1, 0x0]).toString('base64url'),
+        } as EncodedStackTrace,
+        expected: {
+          FileID: ['aQpJmTLWydNvOapSFZOwKg=='],
+          FrameID: ['aQpJmTLWydNvOapSFZOwKgAAAAAAB924'],
+          Type: [0],
+        } as StackTrace,
       },
       {
-        frameID: 'hz_u-HGyrN6qeIk6UIJeCAAAAAAAAAZZ',
-        expected: 'hz_u-HGyrN6qeIk6UIJeCA==',
+        original: {
+          FrameID: 'hz_u-HGyrN6qeIk6UIJeCAAAAAAAAAZZ',
+          Type: Buffer.from([0x1, 0x8]).toString('base64url'),
+        } as EncodedStackTrace,
+        expected: {
+          FileID: ['hz_u-HGyrN6qeIk6UIJeCA=='],
+          FrameID: ['hz_u-HGyrN6qeIk6UIJeCAAAAAAAAAZZ'],
+          Type: [8],
+        } as StackTrace,
       },
     ];
 
     for (const t of tests) {
-      expect(extractFileIDFromFrameID(t.frameID)).toEqual(t.expected);
+      expect(decodeStackTrace(t.original)).toEqual(t.expected);
+    }
+  });
+
+  test('runLengthDecodeReverse with optional parameter', () => {
+    const tests: Array<{
+      bytes: Buffer;
+      expected: number[];
+    }> = [
+      {
+        bytes: Buffer.from([0x5, 0x0, 0x2, 0x2]),
+        expected: [2, 2, 0, 0, 0, 0, 0],
+      },
+      {
+        bytes: Buffer.from([0x1, 0x8]),
+        expected: [8],
+      },
+    ];
+
+    for (const t of tests) {
+      expect(runLengthDecodeReverse(t.bytes, t.expected.length)).toEqual(t.expected);
+    }
+  });
+
+  test('runLengthDecodeReverse without optional parameter', () => {
+    const tests: Array<{
+      bytes: Buffer;
+      expected: number[];
+    }> = [
+      {
+        bytes: Buffer.from([0x5, 0x0, 0x2, 0x2]),
+        expected: [2, 2, 0, 0, 0, 0, 0],
+      },
+      {
+        bytes: Buffer.from([0x1, 0x8]),
+        expected: [8],
+      },
+    ];
+
+    for (const t of tests) {
+      expect(runLengthDecodeReverse(t.bytes)).toEqual(t.expected);
     }
   });
 });

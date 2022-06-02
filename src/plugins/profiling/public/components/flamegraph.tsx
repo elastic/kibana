@@ -8,9 +8,7 @@
 
 import React, { useContext, useEffect, useMemo } from 'react';
 
-import { Chart, Partition, PartitionLayout, PrimitiveValue, Settings } from '@elastic/charts';
-
-import { EuiSpacer } from '@elastic/eui';
+import { Chart, ColumnarViewModel, Datum, Flame, PartialTheme, Settings } from '@elastic/charts';
 
 import { FlameGraphContext } from './contexts/flamegraph';
 
@@ -19,6 +17,16 @@ export interface FlameGraphProps {
   height: number;
 }
 
+const nullColumnarViewModel = {
+  label: [],
+  value: new Float64Array(),
+  color: new Float32Array(),
+  position0: new Float32Array(),
+  position1: new Float32Array(),
+  size0: new Float32Array(),
+  size1: new Float32Array(),
+};
+
 export const FlameGraph: React.FC<FlameGraphProps> = ({ id, height }) => {
   const ctx = useContext(FlameGraphContext);
 
@@ -26,44 +34,47 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({ id, height }) => {
     console.log(new Date().toISOString(), 'updated flamegraph');
   });
 
-  const layers = useMemo(() => {
-    if (!ctx || !ctx.leaves || !ctx.leaves.length) {
-      return [];
+  const columnarData = useMemo(() => {
+    if (!ctx || !ctx.Label || ctx.Label.length === 0) {
+      return nullColumnarViewModel;
     }
 
-    const { leaves } = ctx;
-    const maxDepth = Math.max(...leaves.map((node: any) => node.depth));
+    const value = new Float64Array(ctx.Value);
+    const position = new Float32Array(ctx.Position);
+    const size = new Float32Array(ctx.Size);
+    const color = new Float32Array(ctx.Color);
 
-    const result = [...new Array(maxDepth)].map((_, depth) => {
-      return {
-        groupByRollup: (d: any) => d.pathFromRoot[depth],
-        nodeLabel: (label: PrimitiveValue) => label,
-        showAccessor: (n: PrimitiveValue) => !!n,
-        shape: {
-          fillColor: (d: any) => '#FD8484',
-        },
-      };
-    });
-
-    return result;
+    return {
+      label: ctx.Label,
+      value: value,
+      color: color,
+      position0: position,
+      position1: position,
+      size0: size,
+      size1: size,
+    } as ColumnarViewModel;
   }, [ctx]);
+
+  const theme: PartialTheme = {
+    chartMargins: { top: 0, left: 0, bottom: 0, right: 0 },
+    chartPaddings: { left: 0, right: 0, top: 0, bottom: 0 },
+  };
 
   return (
     <>
-      <EuiSpacer />
-      <Chart size={['100%', height]}>
-        <Settings />
-        <Partition
-          id={id}
-          data={ctx.leaves}
-          layers={layers}
-          drilldown
-          maxRowCount={1}
-          layout={PartitionLayout.icicle}
-          valueAccessor={(d: any) => d.value as number}
-          valueFormatter={() => ''}
-        />
-      </Chart>
+      {columnarData.label.length > 0 && (
+        <Chart size={['100%', height]}>
+          <Settings theme={theme} />
+          <Flame
+            id={id}
+            columnarData={columnarData}
+            valueAccessor={(d: Datum) => d.value as number}
+            valueFormatter={(value) => `${value}`}
+            animation={{ duration: 250 }}
+            controlProviderCallback={() => {}}
+          />
+        </Chart>
+      )}
     </>
   );
 };

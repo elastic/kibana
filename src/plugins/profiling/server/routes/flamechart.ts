@@ -12,7 +12,7 @@ import { getRoutePaths } from '../../common';
 import { FlameGraph } from '../../common/flamegraph';
 import { StackTraceID } from '../../common/profiling';
 import { logExecutionLatency } from './logger';
-import { newProjectTimeQuery, ProjectTimeQuery } from './mappings';
+import { newProjectTimeQuery, ProjectTimeQuery } from './query';
 import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
 import { mgetExecutables, mgetStackFrames, mgetStackTraces, searchStackTraces } from './stacktrace';
 import { getHitsItems, getAggs, getClient } from './compat';
@@ -149,8 +149,7 @@ async function queryFlameGraph(
       stackTraceEvents,
       stackTraces,
       stackFrames,
-      executables,
-      logger
+      executables
     );
   });
 }
