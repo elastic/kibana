@@ -164,3 +164,5 @@ export const validate: ValidateDictionary = {
   [DataStream.ICMP]: validateICMP,
   [DataStream.BROWSER]: validateBrowser,
 };
+
+// To trigger synthetics e2e tests
