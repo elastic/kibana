@@ -38,7 +38,7 @@ import {
 
 import { FALLBACK_VERSIONS, MAINTAINANCE_VALUES } from './constants';
 
-interface Props {
+export interface AgentUpgradeAgentModalProps {
   onClose: () => void;
   agents: Agent[] | string;
   agentCount: number;
@@ -47,7 +47,7 @@ interface Props {
 
 const getVersion = (version: Array<EuiComboBoxOptionOption<string>>) => version[0]?.value as string;
 
-export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
+export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentModalProps> = ({
   onClose,
   agents,
   agentCount,
@@ -59,17 +59,23 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   const [errors, setErrors] = useState<string | undefined>();
 
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
-  const isSmallBatch = Array.isArray(agents) && agents.length > 1 && agents.length <= 10;
+  const isSmallBatch = agentCount <= 10;
   const isAllAgents = agents === '';
 
-  const fallbackVersions = [kibanaVersion].concat(FALLBACK_VERSIONS);
+  const fallbackVersions = useMemo(
+    () => [kibanaVersion].concat(FALLBACK_VERSIONS),
+    [kibanaVersion]
+  );
 
   const minVersion = useMemo(() => {
+    if (!Array.isArray(agents)) {
+      return getMinVersion(fallbackVersions);
+    }
     const versions = (agents as Agent[]).map(
       (agent) => agent.local_metadata?.elastic?.agent?.version
     );
     return getMinVersion(versions);
-  }, [agents]);
+  }, [agents, fallbackVersions]);
 
   const versionOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     const displayVersions = minVersion
@@ -81,9 +87,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
     }));
   }, [fallbackVersions, minVersion]);
 
-  const maintainanceWindows =
-    isSmallBatch && !isScheduled ? [0].concat(MAINTAINANCE_VALUES) : MAINTAINANCE_VALUES;
-  const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = maintainanceWindows.map(
+  const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTAINANCE_VALUES.map(
     (option) => ({
       label:
         option === 0
@@ -99,7 +103,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   );
   const [selectedVersion, setSelectedVersion] = useState([versionOptions[0]]);
   const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([
-    maintainanceOptions[0],
+    isSmallBatch ? maintainanceOptions[0] : maintainanceOptions[1],
   ]);
 
   const initialDatetime = useMemo(() => moment(), []);
