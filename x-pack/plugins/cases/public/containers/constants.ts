@@ -7,3 +7,8 @@
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 5;
+
+export const CASE_VIEW_CACHE_KEY = 'case';
+export const CASE_VIEW_ACTIONS_CACHE_KEY = 'user-actions';
+export const CASE_VIEW_METRICS_CACHE_KEY = 'metrics';
+export const CASE_CONFIGURATION_CACHE_KEY = 'case-configuration';

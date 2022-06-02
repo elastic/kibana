@@ -14,7 +14,7 @@ export {
   EsVersion,
   Lifecycle,
   LifecyclePhase,
-  FTR_CONFIGS_MANIFEST_PATHS,
+  runCheckFtrConfigsCli,
 } from './lib';
 export { runFtrCli } from './cli';
 export * from './lib/docker_servers';

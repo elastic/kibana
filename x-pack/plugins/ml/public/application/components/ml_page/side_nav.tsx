@@ -86,6 +86,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         name: i18n.translate('xpack.ml.navMenu.anomalyDetectionTabLinkText', {
           defaultMessage: 'Anomaly Detection',
         }),
+        disabled: disableLinks,
         items: [
           {
             id: 'anomaly_detection',
@@ -235,15 +236,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             }),
             disabled: disableLinks,
             testSubj: 'mlMainTab explainLogRateSpikes',
-          },
-          {
-            id: 'singleEndpointStreamingDemo',
-            pathId: ML_PAGES.AIOPS_SINGLE_ENDPOINT_STREAMING_DEMO,
-            name: i18n.translate('xpack.ml.navMenu.singleEndpointStreamingDemoLinkText', {
-              defaultMessage: 'Single endpoint streaming demo',
-            }),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab singleEndpointStreamingDemo',
           },
         ],
       });

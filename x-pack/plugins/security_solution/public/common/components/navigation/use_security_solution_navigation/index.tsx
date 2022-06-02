@@ -34,7 +34,7 @@ export const useSecuritySolutionNavigation = () => {
 
   const disabledNavTabs = [
     ...(!useIsExperimentalFeatureEnabled('usersEnabled') ? ['users'] : []),
-    ...(!useIsExperimentalFeatureEnabled('detectionResponseEnabled') ? ['detection_response'] : []),
+    ...(!useIsExperimentalFeatureEnabled('kubernetesEnabled') ? ['kubernetes'] : []),
   ];
   const enabledNavTabs: GenericNavRecord = omit(disabledNavTabs, navTabs);
 

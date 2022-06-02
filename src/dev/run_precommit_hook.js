@@ -13,7 +13,7 @@ import { createFlagError, combineErrors } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/utils';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';
-import { getFilesForCommit, checkFileCasing, checkPossibleNewFtrConfig } from './precommit_hook';
+import { getFilesForCommit, checkFileCasing } from './precommit_hook';
 
 run(
   async ({ log, flags }) => {
@@ -34,12 +34,6 @@ run(
         `--max-files is set to ${maxFilesCount} and ${files.length} were discovered. The current script execution will be skipped.`
       );
       return;
-    }
-
-    try {
-      checkPossibleNewFtrConfig(files);
-    } catch (error) {
-      errors.push(error);
     }
 
     try {

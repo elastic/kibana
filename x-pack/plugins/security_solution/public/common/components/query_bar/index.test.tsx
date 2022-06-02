@@ -7,7 +7,7 @@
 
 import { mount } from 'enzyme';
 import React from 'react';
-import { render, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { DEFAULT_FROM, DEFAULT_TO } from '../../../../common/constants';
 import { TestProviders, mockIndexPattern } from '../../mock';
@@ -33,9 +33,9 @@ describe('QueryBar ', () => {
   // The data plugin's `SearchBar` is lazy loaded, so we need to ensure it is
   // available before we mount our component with Enzyme.
   const getWrapper = async (Component: ReturnType<typeof Proxy>) => {
-    const { getByTestId } = render(Component);
-    await waitFor(() => getByTestId('queryInput')); // check for presence of query input
-    return mount(Component);
+    const wrapper = mount(Component);
+    await waitFor(() => wrapper.find('[data-test-subj="queryInput"]').exists()); // check for presence of query input
+    return wrapper;
   };
   let abortSpy: jest.SpyInstance;
   beforeAll(() => {
@@ -210,7 +210,8 @@ describe('QueryBar ', () => {
     });
   });
 
-  describe('#onQuerySubmit', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/132659
+  describe.skip('#onQuerySubmit', () => {
     test(' is the only reference that changed when filterQuery props get updated', async () => {
       const wrapper = await getWrapper(
         <Proxy
