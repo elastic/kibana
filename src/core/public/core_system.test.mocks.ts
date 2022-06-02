@@ -108,7 +108,7 @@ jest.doMock('./application', () => ({
 
 export const MockDocLinksService = docLinksServiceMock.create();
 export const DocLinksServiceConstructor = jest.fn().mockImplementation(() => MockDocLinksService);
-jest.doMock('./doc_links', () => ({
+jest.doMock('@kbn/core-doc-links-browser-internal', () => ({
   DocLinksService: DocLinksServiceConstructor,
 }));
 
