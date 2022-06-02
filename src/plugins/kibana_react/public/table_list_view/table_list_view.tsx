@@ -23,7 +23,6 @@ import {
   SearchFilterConfig,
   EuiToolTip,
 } from '@elastic/eui';
-import type { AnalyticsClient } from '@kbn/analytics-client';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
@@ -32,7 +31,6 @@ import React from 'react';
 import moment from 'moment';
 import { KibanaPageTemplate } from '../page_template';
 import { toMountPoint } from '../util';
-import { useKibana } from '../context';
 
 export interface TableListViewProps<V> {
   createItem?(): void;
@@ -97,16 +95,10 @@ class TableListView<V extends {}> extends React.Component<
   TableListViewProps<V>,
   TableListViewState<V>
 > {
-  private analytics: AnalyticsClient;
   private _isMounted = false;
 
   constructor(props: TableListViewProps<V>) {
     super(props);
-
-    const {
-      services: { analytics },
-    } = useKibana();
-    this.analytics = analytics as AnalyticsClient;
 
     this.state = {
       items: [],
@@ -169,14 +161,7 @@ class TableListView<V extends {}> extends React.Component<
 
   debouncedFetch = debounce(async (filter: string) => {
     try {
-      const reportTime = new Date().getTime();
-
       const response = await this.props.findItems(filter);
-
-      this.analytics.reportEvent('list-data-loaded', {
-        resHitCount: response.hits.length,
-        timeTookMs: new Date().getTime() - reportTime,
-      });
 
       if (!this._isMounted) {
         return;

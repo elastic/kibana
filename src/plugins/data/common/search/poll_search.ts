@@ -15,7 +15,7 @@ import { isErrorResponse, isPartialResponse } from '..';
 export const pollSearch = <Response extends IKibanaSearchResponse>(
   search: () => Promise<Response>,
   cancel?: () => void,
-  { pollInterval = 1000, abortSignal, strategy, analytics }: IAsyncSearchOptions = {}
+  { pollInterval = 1000, abortSignal, strategy }: IAsyncSearchOptions = {}
 ): Observable<Response> => {
   return defer(() => {
     if (abortSignal?.aborted) {
@@ -58,7 +58,6 @@ export const pollSearch = <Response extends IKibanaSearchResponse>(
         const { hits, aggregations } = response.rawResponse;
         reportInfo.resHitCount = hits?.hits?.length ?? 0;
         reportInfo.resAggCount = aggregations ? Object.keys(aggregations).length : 0;
-        analytics?.reportEvent('search-result', reportInfo);
       }),
       takeUntil<Response>(aborted$)
     );

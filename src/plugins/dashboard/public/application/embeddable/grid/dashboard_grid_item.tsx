@@ -27,6 +27,7 @@ interface Props extends PanelProps, DivProps {
   expandedPanelId?: string;
   key: string;
   isRenderable?: boolean;
+  onPanelStatusChange?: (info: any) => void;
 }
 
 const Item = React.forwardRef<HTMLDivElement, Props>(
@@ -39,6 +40,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
       index,
       PanelComponent,
       type,
+      onPanelStatusChange,
       isRenderable = true,
       // The props below are passed from ReactGridLayoutn and need to be merged with their counterparts.
       // https://github.com/react-grid-layout/react-grid-layout/issues/1241#issuecomment-658306889
@@ -73,6 +75,7 @@ const Item = React.forwardRef<HTMLDivElement, Props>(
               key={type}
               embeddableId={id}
               index={index}
+              onPanelStatusChange={onPanelStatusChange}
               {...{ container, PanelComponent }}
             />
             {children}
