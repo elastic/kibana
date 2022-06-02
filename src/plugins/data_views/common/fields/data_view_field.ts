@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { KbnFieldType, getKbnFieldType } from '@kbn/field-types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { DataViewFieldBase } from '@kbn/es-query';
 import type { RuntimeFieldSpec } from '../types';
-import type { IFieldType } from './types';
 import { FieldSpec, DataView } from '..';
 import {
   shortenDottedString,
@@ -34,11 +32,8 @@ export interface ToSpecConfig {
 /**
  * Data view field class
  * @public
- * */
-export class DataViewField implements IFieldType {
-  /**
-   * Field data
-   */
+ */
+export class DataViewField implements DataViewFieldBase {
   readonly spec: FieldSpec;
   // not writable or serialized
   /**
@@ -372,8 +367,3 @@ export class DataViewField implements IFieldType {
     return this.runtimeField?.type === 'composite';
   }
 }
-
-/**
- * @deprecated Use DataViewField instead. All index pattern interfaces were renamed.
- */
-export class IndexPatternField extends DataViewField {}

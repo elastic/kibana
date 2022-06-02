@@ -9,14 +9,9 @@
 import { get } from 'lodash';
 import { deepFreeze } from '@kbn/std';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
+import type { EnvironmentMode, PackageInfo } from '@kbn/config';
 import { DiscoveredPlugin, PluginName } from '../../server';
-import {
-  EnvironmentMode,
-  IExternalUrlPolicy,
-  PackageInfo,
-  UiSettingsParams,
-  UserProvidedValues,
-} from '../../server/types';
+import { IExternalUrlPolicy, UiSettingsParams, UserProvidedValues } from '../../server/types';
 import { AppCategory } from '..';
 
 export interface InjectedPluginMetadata {

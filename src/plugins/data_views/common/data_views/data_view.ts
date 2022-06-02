@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import _, { each, reject } from 'lodash';
 import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -17,17 +15,9 @@ import {
   FieldFormat,
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
-import { DataViewAttributes } from '..';
-import type {
-  FieldAttrs,
-  FieldAttrSet,
-  RuntimeField,
-  RuntimeFieldSpec,
-  RuntimeType,
-  FieldConfiguration,
-} from '../types';
-
-import { IIndexPattern, IFieldType } from '..';
+import type { DataViewBase } from '@kbn/es-query';
+import { FieldAttrs, FieldAttrSet, DataViewAttributes } from '..';
+import type { RuntimeField, RuntimeFieldSpec, RuntimeType, FieldConfiguration } from '../types';
 import { DataViewField, IIndexPatternFieldList, fieldList } from '../fields';
 import { flattenHitWrapper } from './flatten_hit';
 import { DataViewSpec, TypeMeta, SourceFilter, DataViewFieldMap } from '../types';
@@ -68,7 +58,7 @@ export interface TimeBasedDataView extends DataView {
 /**
  * Data view class. Central kibana abstraction around multiple indices.
  */
-export class DataView implements IIndexPattern {
+export class DataView implements DataViewBase {
   /**
    * saved object id
    */
@@ -396,7 +386,7 @@ export class DataView implements IIndexPattern {
    * Provide a field, get its formatter
    * @param field field to get formatter for
    */
-  getFormatterForField(field: DataViewField | DataViewField['spec'] | IFieldType): FieldFormat {
+  getFormatterForField(field: DataViewField | DataViewField['spec']): FieldFormat {
     const fieldFormat = this.getFormatterForFieldNoDefault(field.name);
     if (fieldFormat) {
       return fieldFormat;
@@ -736,8 +726,3 @@ export class DataView implements IIndexPattern {
     return createdField ?? existingField!;
   }
 }
-
-/**
- * @deprecated Use DataView instead. All index pattern interfaces were renamed.
- */
-export class IndexPattern extends DataView {}

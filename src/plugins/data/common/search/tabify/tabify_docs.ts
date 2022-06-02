@@ -9,7 +9,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isPlainObject } from 'lodash';
 import { Datatable, DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
 type ValidMetaFieldNames = keyof Pick<
   estypes.SearchHit,

@@ -12,13 +12,13 @@ export {
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
 } from './constants';
-export type { IFieldType, IIndexPatternFieldList } from './fields';
+
 export type { ToSpecConfig } from './fields';
+export type { IIndexPatternFieldList } from './fields';
 export {
   isFilterable,
   fieldList,
   DataViewField,
-  IndexPatternField,
   isNestedField,
   isMultiField,
   getFieldSubtypeMulti,
@@ -30,9 +30,7 @@ export type {
   RuntimeField,
   RuntimeFieldSpec,
   RuntimeFieldSubField,
-  IIndexPattern,
   DataViewAttributes,
-  IndexPatternAttributes,
   OnNotification,
   OnError,
   UiSettingsCommon,
@@ -56,7 +54,8 @@ export type {
   FieldAttrSet,
 } from './types';
 export { DataViewType } from './types';
-export type { IndexPatternsContract, DataViewsContract, DataViewsServiceDeps } from './data_views';
+
+export type { DataViewsContract, DataViewsServiceDeps } from './data_views';
 export type { EnsureDefaultDataView } from './data_views/ensure_default_data_view';
 export { IndexPatternsService, DataViewsService } from './data_views';
 export type {
@@ -64,7 +63,7 @@ export type {
   DataViewsServicePublicMethods,
   TimeBasedDataView,
 } from './data_views';
-export { IndexPattern, DataView } from './data_views';
+export { DataView } from './data_views';
 export {
   DuplicateDataViewError,
   DataViewSavedObjectConflictError,

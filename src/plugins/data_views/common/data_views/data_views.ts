@@ -998,8 +998,3 @@ export class IndexPatternsService extends DataViewsService {}
  */
 
 export type DataViewsContract = PublicMethodsOf<DataViewsService>;
-
-/**
- * @deprecated Use DataViewsContract. All index pattern interfaces were renamed.
- */
-export type IndexPatternsContract = DataViewsContract;
