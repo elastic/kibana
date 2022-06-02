@@ -7,3 +7,4 @@
  */
 
 export { uiSettingsType } from './ui_settings';
+export { transformDefaultIndex } from './transforms';

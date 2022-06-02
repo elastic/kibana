@@ -13,6 +13,7 @@ import { SavedObjectsClientContract } from '../../saved_objects/types';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
+import { transformDefaultIndex } from '../saved_objects';
 
 interface ConfigLogMeta extends LogMeta {
   kibana: {
@@ -39,41 +40,15 @@ export async function createOrUpgradeSavedConfig(
     version,
   });
 
-  let defaultIndex: string | undefined;
-  let isDefaultIndexMigrated = false;
-  if (
-    upgradeableConfig?.attributes.defaultIndex &&
-    !upgradeableConfig.attributes.isDefaultIndexMigrated
-  ) {
-    defaultIndex = upgradeableConfig.attributes.defaultIndex; // Keep the existing defaultIndex attribute if the data view is not found
-    try {
-      // The defaultIndex for this config object was created prior to 8.3, and it might refer to a data view ID that is no longer valid.
-      // We should try to resolve the data view and change the defaultIndex to the new ID, if necessary.
-      const resolvedIndex = await savedObjectsClient.resolve('index-pattern', defaultIndex);
-      if (resolvedIndex.outcome === 'aliasMatch' || resolvedIndex.outcome === 'conflict') {
-        // This resolved to an aliasMatch or conflict outcome; that means we should change the defaultIndex to the data view's new ID.
-        // Note, the alias_target_id field is guaranteed to exist iff the resolve outcome is aliasMatch or conflict.
-        defaultIndex = resolvedIndex.alias_target_id!;
-        isDefaultIndexMigrated = true;
-      }
-    } catch (err) {
-      // If the defaultIndex is not found at all, it will throw a Not Found error and we should mark the defaultIndex attribute as upgraded.
-      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        isDefaultIndexMigrated = true;
-      }
-      // For any other error, leave it unchanged so we can try to upgrade this attribute again in the future.
-    }
-  }
-
   // default to the attributes of the upgradeableConfig if available
   const attributes = defaults(
     {
       buildNum,
-      ...(isDefaultIndexMigrated && {
-        // We migrated the defaultIndex attribute for this config, make sure these two fields take precedence over any in the old config
-        defaultIndex,
-        isDefaultIndexMigrated,
-      }),
+      // If there is an upgradeableConfig, attempt to transform the defaultIndex attribute to ensure it is set properly in 8.3.1+
+      ...(await transformDefaultIndex({
+        savedObjectsClient,
+        configAttributes: upgradeableConfig?.attributes,
+      })),
     },
     upgradeableConfig?.attributes
   );

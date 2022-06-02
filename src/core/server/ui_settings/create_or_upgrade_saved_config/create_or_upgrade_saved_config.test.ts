@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { mockGetUpgradeableConfig } from './create_or_upgrade_saved_config.test.mock';
+import {
+  mockTransformDefaultIndex,
+  mockGetUpgradeableConfig,
+} from './create_or_upgrade_saved_config.test.mock';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { savedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
@@ -103,6 +106,36 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         {
           id: version,
         }
+      );
+    });
+
+    it('should prefer transformed attributes when merging', async () => {
+      const { run, savedObjectsClient } = setup();
+      mockGetUpgradeableConfig.mockResolvedValue({
+        id: prevVersion,
+        attributes: {
+          buildNum: buildNum - 100,
+          defaultIndex: 'some-index',
+        },
+      });
+      mockTransformDefaultIndex.mockResolvedValue({
+        defaultIndex: 'another-index',
+        isDefaultIndexMigrated: true,
+      });
+
+      await run();
+
+      expect(mockGetUpgradeableConfig).toHaveBeenCalledTimes(1);
+      expect(mockTransformDefaultIndex).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.create).toHaveBeenCalledWith(
+        'config',
+        {
+          buildNum,
+          defaultIndex: 'another-index',
+          isDefaultIndexMigrated: true,
+        },
+        { id: version }
       );
     });
 

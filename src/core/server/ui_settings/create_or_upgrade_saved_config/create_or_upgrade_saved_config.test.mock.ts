@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
+import type { transformDefaultIndex } from '../saved_objects';
 import type { getUpgradeableConfig } from './get_upgradeable_config';
+
+export const mockTransformDefaultIndex = jest.fn() as jest.MockedFunction<
+  typeof transformDefaultIndex
+>;
+jest.mock('../saved_objects', () => ({
+  transformDefaultIndex: mockTransformDefaultIndex,
+}));
 
 export const mockGetUpgradeableConfig = jest.fn() as jest.MockedFunction<
   typeof getUpgradeableConfig
