@@ -80,6 +80,7 @@ export const eqlExecutor = async ({
       tuple.from.toISOString(),
       tuple.to.toISOString(),
       completeRule.ruleParams.maxSignals,
+      ruleParams.filters,
       ruleParams.timestampOverride,
       exceptionItems,
       runtimeMappings,

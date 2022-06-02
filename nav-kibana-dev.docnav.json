@@ -69,6 +69,7 @@
     {
       "label": "Contributors Newsletters",
       "items": [
+        { "id": "kibMay2022ContributorNewsletter" },
         { "id": "kibApril2022ContributorNewsletter" },
         { "id": "kibMarch2022ContributorNewsletter" },
         { "id": "kibFebruary2022ContributorNewsletter" },
@@ -204,7 +205,8 @@
             { "id": "kibDevDocsOpsAmbientStorybookTypes" },
             { "id": "kibDevDocsOpsAmbientUiTypes" },
             { "id": "kibDevDocsOpsTestSubjSelector" },
-            { "id": "kibDevDocsOpsBazelRunner" }
+            { "id": "kibDevDocsOpsBazelRunner" },
+            { "id": "kibDevDocsOpsCliDevMode" }
           ]
         }
       ]
