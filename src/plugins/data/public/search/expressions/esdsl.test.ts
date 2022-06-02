@@ -7,7 +7,7 @@
  */
 
 import { getEsdsl } from './esdsl';
-import { MockedKeys } from '@kbn/utility-types/jest';
+import { MockedKeys } from '@kbn/utility-types';
 import { EsdslExpressionFunctionDefinition } from '../../../common/search/expressions';
 import { StartServicesAccessor } from '@kbn/core/public';
 import { DataPublicPluginStart, DataStartDependencies } from '../../types';

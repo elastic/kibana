@@ -8,6 +8,8 @@
 
 export type { $Values, Assign, Class, Optional, Required } from 'utility-types';
 
+export type { DeeplyMockedKeys, MockedKeys } from './jest';
+
 export type {
   JsonArray,
   JsonValue,

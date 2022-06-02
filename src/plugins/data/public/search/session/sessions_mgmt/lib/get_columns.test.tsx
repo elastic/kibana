@@ -7,7 +7,7 @@
  */
 
 import { EuiTableFieldDataColumnType } from '@elastic/eui';
-import { MockedKeys } from '@kbn/utility-types/jest';
+import { MockedKeys } from '@kbn/utility-types';
 import { mount } from 'enzyme';
 import { CoreSetup, CoreStart } from '@kbn/core/public';
 import moment from 'moment';

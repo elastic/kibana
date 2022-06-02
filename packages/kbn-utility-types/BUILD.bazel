@@ -19,9 +19,7 @@ filegroup(
 )
 
 NPM_MODULE_EXTRA_FILES = [
-  "jest/package.json",
   "package.json",
-  "README.md",
 ]
 
 RUNTIME_DEPS = [
