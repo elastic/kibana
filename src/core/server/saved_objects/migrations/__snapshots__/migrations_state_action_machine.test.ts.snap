@@ -20,8 +20,8 @@ Object {
               "batchSize": 1000,
               "controlState": "LEGACY_REINDEX",
               "currentAlias": ".my-so-index",
-              "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "discardCorruptObjects": false,
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -190,8 +190,8 @@ Object {
               "batchSize": 1000,
               "controlState": "LEGACY_DELETE",
               "currentAlias": ".my-so-index",
-              "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "discardCorruptObjects": false,
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -364,8 +364,8 @@ Object {
               "batchSize": 1000,
               "controlState": "LEGACY_DELETE",
               "currentAlias": ".my-so-index",
-              "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "discardCorruptObjects": false,
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -542,8 +542,8 @@ Object {
               "batchSize": 1000,
               "controlState": "DONE",
               "currentAlias": ".my-so-index",
-              "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "discardCorruptObjects": false,
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -762,8 +762,8 @@ Object {
               "batchSize": 1000,
               "controlState": "LEGACY_DELETE",
               "currentAlias": ".my-so-index",
-              "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "discardCorruptObjects": false,
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
@@ -943,8 +943,8 @@ Object {
               "batchSize": 1000,
               "controlState": "FATAL",
               "currentAlias": ".my-so-index",
-              "discardCorruptObjects": false,
               "discardUnknownObjects": false,
+              "discardCorruptObjects": false,
               "excludeFromUpgradeFilterHooks": Object {},
               "excludeOnUpgradeQuery": Object {
                 "bool": Object {
