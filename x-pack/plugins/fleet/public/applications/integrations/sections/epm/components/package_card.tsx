@@ -56,6 +56,19 @@ export function PackageCard({
 
   const { application } = useStartServices();
 
+  const onCardClick = () => {
+    if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
+      application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+        path: url.slice(INTEGRATIONS_BASE_PATH.length),
+        state: { fromIntegrations },
+      });
+    } else if (url.startsWith('http') || url.startsWith('https')) {
+      window.open(url, '_blank');
+    } else {
+      application.navigateToUrl(url);
+    }
+  };
+
   const testid = `integration-card:${id}`;
   return (
     <TrackApplicationView viewId={testid}>
@@ -75,18 +88,7 @@ export function PackageCard({
             size="xl"
           />
         }
-        onClick={() => {
-          if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
-            application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-              path: url.slice(INTEGRATIONS_BASE_PATH.length),
-              state: { fromIntegrations },
-            });
-          } else if (url.startsWith('http') || url.startsWith('https')) {
-            window.open(url, '_blank');
-          } else {
-            application.navigateToUrl(url);
-          }
-        }}
+        onClick={onCardClick}
       >
         {releaseBadge}
       </Card>
