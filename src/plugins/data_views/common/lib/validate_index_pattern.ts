@@ -8,7 +8,7 @@
 
 import { ILLEGAL_CHARACTERS_VISIBLE, CONTAINS_SPACES_KEY, ILLEGAL_CHARACTERS_KEY } from './types';
 
-function dataViewContainsSpaces(indexPattern: string): boolean {
+function indexPatternContainsSpaces(indexPattern: string): boolean {
   return indexPattern.includes(' ');
 }
 
@@ -24,13 +24,12 @@ function findIllegalCharacters(indexPattern: string): string[] {
 }
 
 /**
- * Validate index pattern strings
- * @public
- * @param indexPattern string to validate
- * @returns errors object
+ * Validates index pattern strings
+ * @param indexPattern
+ * @returns Object with validation errors
  */
 
-export function validateDataView(indexPattern: string) {
+export function validateIndexPattern(indexPattern: string) {
   const errors: { [ILLEGAL_CHARACTERS_KEY]?: string[]; [CONTAINS_SPACES_KEY]?: boolean } = {};
 
   const illegalCharacters = findIllegalCharacters(indexPattern);
@@ -39,7 +38,7 @@ export function validateDataView(indexPattern: string) {
     errors[ILLEGAL_CHARACTERS_KEY] = illegalCharacters;
   }
 
-  if (dataViewContainsSpaces(indexPattern)) {
+  if (indexPatternContainsSpaces(indexPattern)) {
     errors[CONTAINS_SPACES_KEY] = true;
   }
 
