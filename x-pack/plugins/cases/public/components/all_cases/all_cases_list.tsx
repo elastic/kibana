@@ -27,6 +27,7 @@ import { EuiBasicTableOnChange } from './types';
 import { CasesTable } from './table';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { CasesMetrics } from './cases_metrics';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -56,6 +57,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const { owner, userCanCrud } = useCasesContext();
     const hasOwner = !!owner.length;
     const availableSolutions = useAvailableCasesOwners();
+    const [refresh, setRefresh] = useState(0);
 
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {
@@ -104,8 +106,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const refreshCases = useCallback(
       (dataRefresh = true) => {
         deselectCases();
-        if (dataRefresh) refetchCases();
-        if (doRefresh) doRefresh();
+        if (dataRefresh) {
+          refetchCases();
+          setRefresh((currRefresh: number) => currRefresh + 1);
+        }
+        if (doRefresh) {
+          doRefresh();
+        }
         if (filterRefetch.current != null) {
           filterRefetch.current();
         }
@@ -206,6 +213,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           className="essentialAnimation"
           $isShow={(isCasesLoading || isLoading) && !isDataEmpty}
         />
+        {!isSelectorView ? <CasesMetrics refresh={refresh} /> : null}
         <CasesTableFilters
           countClosedCases={data.countClosedCases}
           countOpenCases={data.countOpenCases}

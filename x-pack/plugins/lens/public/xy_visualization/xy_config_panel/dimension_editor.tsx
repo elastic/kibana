@@ -18,6 +18,7 @@ import { PalettePicker, useDebouncedValue } from '../../shared_components';
 import { isAnnotationsLayer, isReferenceLayer } from '../visualization_helpers';
 import { ReferenceLinePanel } from './reference_line_config_panel';
 import { AnnotationsPanel } from './annotations_config_panel';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
@@ -89,6 +90,12 @@ export function DimensionEditor(
   if (props.groupId === 'breakdown') {
     return (
       <>
+        <CollapseSetting
+          value={layer.collapseFn || ''}
+          onChange={(collapseFn) => {
+            setLocalState(updateLayer(localState, { ...layer, collapseFn }, index));
+          }}
+        />
         <PalettePicker
           palettes={props.paletteService}
           activePalette={localLayer?.palette}
@@ -104,7 +111,11 @@ export function DimensionEditor(
 
   return (
     <>
-      <ColorPicker {...props} disabled={Boolean(localLayer.splitAccessor)} setConfig={setConfig} />
+      <ColorPicker
+        {...props}
+        disabled={Boolean(!localLayer.collapseFn && localLayer.splitAccessor)}
+        setConfig={setConfig}
+      />
 
       <EuiFormRow
         display="columnCompressed"

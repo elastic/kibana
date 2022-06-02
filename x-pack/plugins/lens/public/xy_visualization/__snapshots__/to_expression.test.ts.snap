@@ -163,9 +163,6 @@ Object {
                     "linear",
                   ],
                   "yConfig": Array [],
-                  "yScaleType": Array [
-                    "linear",
-                  ],
                 },
                 "function": "extendedDataLayer",
                 "type": "function",

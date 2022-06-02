@@ -11,6 +11,7 @@ export const LAYERED_XY_VIS = 'layeredXyVis';
 export const Y_CONFIG = 'yConfig';
 export const X_AXIS_CONFIG = 'xAxisConfig';
 export const Y_AXIS_CONFIG = 'yAxisConfig';
+export const REFERENCE_LINE_Y_CONFIG = 'referenceLineYConfig';
 export const EXTENDED_Y_CONFIG = 'extendedYConfig';
 export const DATA_LAYER = 'dataLayer';
 export const EXTENDED_DATA_LAYER = 'extendedDataLayer';
@@ -19,8 +20,8 @@ export const XY_VIS_RENDERER = 'xyVis';
 export const ANNOTATION_LAYER = 'annotationLayer';
 export const EXTENDED_ANNOTATION_LAYER = 'extendedAnnotationLayer';
 export const AXIS_EXTENT_CONFIG = 'axisExtentConfig';
+export const REFERENCE_LINE = 'referenceLine';
 export const REFERENCE_LINE_LAYER = 'referenceLineLayer';
-export const EXTENDED_REFERENCE_LINE_LAYER = 'extendedReferenceLineLayer';
 
 export const LayerTypes = {
   DATA: 'data',

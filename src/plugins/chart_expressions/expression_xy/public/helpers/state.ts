@@ -7,14 +7,18 @@
  */
 
 import type { CommonXYLayerConfig, ExtendedYConfig, YConfig } from '../../common';
-import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization';
+import { getDataLayers, isAnnotationsLayer, isDataLayer, isReferenceLine } from './visualization';
 
 export function isHorizontalChart(layers: CommonXYLayerConfig[]) {
   return getDataLayers(layers).every((l) => l.isHorizontal);
 }
 
 export const getSeriesColor = (layer: CommonXYLayerConfig, accessor: string) => {
-  if ((isDataLayer(layer) && layer.splitAccessor) || isAnnotationsLayer(layer)) {
+  if (
+    (isDataLayer(layer) && layer.splitAccessor) ||
+    isAnnotationsLayer(layer) ||
+    isReferenceLine(layer)
+  ) {
     return null;
   }
   const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer?.yConfig;

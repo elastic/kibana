@@ -56,6 +56,5 @@ export type {
   CommonXYDataLayerConfigResult,
   ReferenceLineLayerConfigResult,
   CommonXYReferenceLineLayerConfig,
-  ExtendedReferenceLineLayerConfigResult,
   CommonXYReferenceLineLayerConfigResult,
 } from './types';

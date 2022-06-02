@@ -42,6 +42,10 @@ created_by:
 description:
   type: string
   example: "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
+duration:
+  type: integer
+  description: The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.
+  example: 120
 external_service:
   type: object
   properties:
@@ -80,6 +84,8 @@ settings:
     syncAlerts:
       type: boolean
       example: true
+severity:
+  $ref: 'severity_property.yaml'
 status:
   $ref: 'status.yaml'
 tags:

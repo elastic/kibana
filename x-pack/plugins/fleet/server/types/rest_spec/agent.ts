@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import moment from 'moment';
 
 import { NewAgentActionSchema } from '../models';
 
@@ -31,6 +32,12 @@ export const PostNewAgentActionRequestSchema = {
   }),
   params: schema.object({
     agentId: schema.string(),
+  }),
+};
+
+export const PostCancelActionRequestSchema = {
+  params: schema.object({
+    actionId: schema.string(),
   }),
 };
 
@@ -72,6 +79,15 @@ export const PostBulkAgentUpgradeRequestSchema = {
     version: schema.string(),
     force: schema.maybe(schema.boolean()),
     rollout_duration_seconds: schema.maybe(schema.number({ min: 600 })),
+    start_time: schema.maybe(
+      schema.string({
+        validate: (v: string) => {
+          if (!moment(v).isValid()) {
+            return 'not a valid date';
+          }
+        },
+      })
+    ),
   }),
 };
 
@@ -116,5 +132,6 @@ export const GetAgentStatusRequestSchema = {
 export const GetAgentDataRequestSchema = {
   query: schema.object({
     agentsIds: schema.oneOf([schema.arrayOf(schema.string()), schema.string()]),
+    previewData: schema.boolean({ defaultValue: false }),
   }),
 };

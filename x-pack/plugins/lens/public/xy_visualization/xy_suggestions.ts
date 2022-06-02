@@ -557,6 +557,8 @@ function buildSuggestion({
     valuesInLegend: currentState?.valuesInLegend,
     yLeftExtent: currentState?.yLeftExtent,
     yRightExtent: currentState?.yRightExtent,
+    yLeftScale: currentState?.yLeftScale,
+    yRightScale: currentState?.yRightScale,
     axisTitlesVisibilitySettings: currentState?.axisTitlesVisibilitySettings || {
       x: true,
       yLeft: true,

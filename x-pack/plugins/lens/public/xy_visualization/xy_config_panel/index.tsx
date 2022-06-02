@@ -455,6 +455,13 @@ export const XyToolbar = memo(function XyToolbar(
               hasBarOrAreaOnAxis={hasBarOrAreaOnLeftAxis}
               dataBounds={dataBounds.left}
               hasPercentageAxis={hasPercentageAxis(axisGroups, 'left', state)}
+              scale={state?.yLeftScale}
+              setScale={(scale) => {
+                setState({
+                  ...state,
+                  yLeftScale: scale,
+                });
+              }}
             />
           </TooltipWrapper>
 
@@ -516,6 +523,13 @@ export const XyToolbar = memo(function XyToolbar(
               setExtent={setRightExtent}
               hasBarOrAreaOnAxis={hasBarOrAreaOnRightAxis}
               dataBounds={dataBounds.right}
+              scale={state?.yRightScale}
+              setScale={(scale) => {
+                setState({
+                  ...state,
+                  yRightScale: scale,
+                });
+              }}
             />
           </TooltipWrapper>
         </EuiFlexGroup>

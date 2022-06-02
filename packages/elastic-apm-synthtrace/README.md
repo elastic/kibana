@@ -91,12 +91,19 @@ const esEvents = toElasticsearchOutput([
 
 ### CLI
 
-Via the CLI, you can upload scenarios, either using a fixed time range or continuously generating data. Some examples are available in in `src/scripts/examples`. Here's an example for live data:
+Via the CLI, you can run scenarios, either using a fixed time range or continuously generating data. Scenarios are available in [`packages/elastic-apm-synthtrace/src/scenarios/`](https://github.com/elastic/kibana/blob/main/packages/elastic-apm-synthtrace/src/scenarios/).
 
-`$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --live`
+For live data ingestion:
+
+```
+node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost:9200 --live
+```
 
 For a fixed time window:
-`$ node packages/elastic-apm-synthtrace/src/scripts/run packages/elastic-apm-synthtrace/src/scripts/examples/01_simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now`
+
+```
+node scripts/synthtrace simple_trace.ts --target=http://admin:changeme@localhost:9200 --from=now-24h --to=now
+```
 
 The script will try to automatically find bootstrapped APM indices. **If these indices do not exist, the script will exit with an error. It will not bootstrap the indices itself.**
 
@@ -104,24 +111,26 @@ The following options are supported:
 
 ### Connection options
 
-| Option                 | Type      | Default    | Description                                                                                                                                |
-|------------------------|-----------|:-----------|--------------------------------------------------------------------------------------------------------------------------------------------|
-| `--target`             | [string]  |            | Elasticsearch target                                                                                                                       |
-| `--kibana`             | [string]  |            | Kibana target, used to bootstrap datastreams/mappings/templates/settings                                                                   |
-| `--cloudId`            | [string]  |            | Provide connection information and will force APM on the cloud to migrate to run as a Fleet integration                                    |
-| `--local`              | [boolean] |            | Shortcut during development, assumes `yarn es snapshot` and `yarn start` are running                                                       |
-| `--username`           | [string]  | `elastic`  | Basic authentication username                                                                                                              |
-| `--password`           | [string]  | `changeme` | Basic authentication password                                                                                                              |
+| Option       | Type      | Default    | Description                                                                                             |
+| ------------ | --------- | :--------- | ------------------------------------------------------------------------------------------------------- |
+| `--target`   | [string]  |            | Elasticsearch target                                                                                    |
+| `--kibana`   | [string]  |            | Kibana target, used to bootstrap datastreams/mappings/templates/settings                                |
+| `--cloudId`  | [string]  |            | Provide connection information and will force APM on the cloud to migrate to run as a Fleet integration |
+| `--local`    | [boolean] |            | Shortcut during development, assumes `yarn es snapshot` and `yarn start` are running                    |
+| `--username` | [string]  | `elastic`  | Basic authentication username                                                                           |
+| `--password` | [string]  | `changeme` | Basic authentication password                                                                           |
 
-Note: 
-- If you only specify `--target` Synthtrace can not automatically setup APM.  
-- If you specify both `--target` and `--kibana` the tool will automatically attempt to install the appropriate APM package   
+Note:
+
+- If you only specify `--target` Synthtrace can not automatically setup APM.
+- If you specify both `--target` and `--kibana` the tool will automatically attempt to install the appropriate APM package
 - For Cloud its easiest to specify `--cloudId` as it will unpack the ES/Kibana targets and migrate cloud over to managed APM automatically.
 - If you only specify `--kibana` and it's using a cloud hostname a very naive `--target` to Elasticsearch will be inferred.
 
 ### Scenario options
+
 | Option                 | Type      | Default | Description                                                                                                                                |
-|------------------------|-----------|:--------|--------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------------- | --------- | :------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
 | `--from`               | [date]    | `now()` | The start of the time window                                                                                                               |
 | `--to`                 | [date]    |         | The end of the time window                                                                                                                 |
 | `--maxDocs`            | [number]  |         | The maximum number of documents we are allowed to generate                                                                                 |
@@ -132,16 +141,17 @@ Note:
 | `--forceLegacyIndices` | [boolean] | `false` | Force writing to legacy indices                                                                                                            |
 
 Note:
+
 - The default `--to` is `15m` unless `--maxDocs` is specified in which case `--to` is calculated based on the scenario's TPM.
 - You can combine `--from` `--maxDocs` and `--to` with `--live` to back-fill some data.
 
-
 ### Setup options
-| Option                 | Type      | Default    | Description                                                                                             |
-|------------------------|-----------|:-----------|---------------------------------------------------------------------------------------------------------|
-| `--numShards`          | [number]  |            | Updates the component templates to update the number of primary shards, requires cloudId to be provided |
-| `--clean`              | [boolean] | `false`    | Clean APM data before indexing new data                                                                 |
-| `--workers`            | [number]  |            | Amount of Node.js worker threads                                                                        |
-| `--logLevel`           | [enum]    | `info`     | Log level                                                                                               |
-| `--gcpRepository`      | [string]  |            | Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format                    |
 
+| Option            | Type      | Default | Description                                                                                             |
+| ----------------- | --------- | :------ | ------------------------------------------------------------------------------------------------------- |
+| `--numShards`     | [number]  |         | Updates the component templates to update the number of primary shards, requires cloudId to be provided |
+| `--clean`         | [boolean] | `false` | Clean APM data before indexing new data                                                                 |
+| `--workers`       | [number]  |         | Amount of Node.js worker threads                                                                        |
+| `--logLevel`      | [enum]    | `info`  | Log level                                                                                               |
+| `--gcpRepository` | [string]  |         | Allows you to register a GCP repository in <client_name>:<bucket>[:base_path] format                    |
+| `-p`              | [string]  |         | Specify multiple sets of streamaggregators to be included in the StreamProcessor                        |

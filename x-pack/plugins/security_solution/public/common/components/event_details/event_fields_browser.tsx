@@ -60,7 +60,6 @@ const StyledEuiInMemoryTable = styled(EuiInMemoryTable as any)`
   flex: 1;
   overflow: auto;
   overflow-x: hidden;
-
   &::-webkit-scrollbar {
     height: ${({ theme }) => theme.eui.euiScrollBar};
     width: ${({ theme }) => theme.eui.euiScrollBar};

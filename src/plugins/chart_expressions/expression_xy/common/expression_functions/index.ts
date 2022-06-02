@@ -17,5 +17,5 @@ export * from './x_axis_config';
 export * from './extended_y_config';
 export * from './extended_data_layer';
 export * from './axis_extent_config';
+export * from './reference_line';
 export * from './reference_line_layer';
-export * from './extended_reference_line_layer';

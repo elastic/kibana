@@ -26,18 +26,21 @@ disabled:
   - x-pack/test/security_solution_cypress/cases_cli_config.ts
   - x-pack/test/security_solution_cypress/ccs_config.ts
   - x-pack/test/security_solution_cypress/cli_config.ts
+  - x-pack/test/security_solution_cypress/cli_config_parallel.ts
   - x-pack/test/security_solution_cypress/config.firefox.ts
   - x-pack/test/security_solution_cypress/config.ts
   - x-pack/test/security_solution_cypress/response_ops_cli_config.ts
   - x-pack/test/security_solution_cypress/upgrade_config.ts
   - x-pack/test/security_solution_cypress/visual_config.ts
   - x-pack/test/functional_enterprise_search/with_host_configured.config.ts
+  - x-pack/plugins/apm/ftr_e2e/ftr_config_open.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config_run.ts
   - x-pack/plugins/apm/ftr_e2e/ftr_config.ts
 
   # Elastic Synthetics configs
   - x-pack/plugins/synthetics/e2e/config.ts
-  - x-pack/plugins/synthetics/e2e/playwright_run.ts
+  - x-pack/plugins/synthetics/e2e/synthetics_run.ts
+  - x-pack/plugins/ux/e2e/synthetics_run.ts
 
   # Configs that exist but weren't running in CI when this file was introduced
   - test/visual_regression/config.ts
@@ -66,6 +69,7 @@ enabled:
   - test/functional/apps/dashboard/group3/config.ts
   - test/functional/apps/dashboard/group4/config.ts
   - test/functional/apps/dashboard/group5/config.ts
+  - test/functional/apps/dashboard/group6/config.ts
   - test/functional/apps/discover/config.ts
   - test/functional/apps/getting_started/config.ts
   - test/functional/apps/home/config.ts
@@ -185,6 +189,7 @@ enabled:
   - x-pack/test/functional/config_security_basic.ts
   - x-pack/test/functional/config.ccs.ts
   - x-pack/test/functional/config.firefox.js
+  - x-pack/test/kubernetes_security/basic/config.ts
   - x-pack/test/licensing_plugin/config.public.ts
   - x-pack/test/licensing_plugin/config.ts
   - x-pack/test/lists_api_integration/security_and_spaces/config.ts
@@ -231,6 +236,7 @@ enabled:
   - x-pack/test/security_functional/saml.config.ts
   - x-pack/test/security_solution_endpoint_api_int/config.ts
   - x-pack/test/security_solution_endpoint/config.ts
+  - x-pack/test/session_view/basic/config.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/spaces_api_integration/spaces_only/config.ts

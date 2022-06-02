@@ -8,19 +8,17 @@
 
 import { Position } from '@elastic/charts';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
+import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
 import {
-  CommonXYDataLayerConfig,
-  CommonXYReferenceLineLayerConfig,
-  ExtendedYConfigResult,
-  ExtendedYConfig,
-  YAxisConfig,
-  YConfig,
   AxisExtentConfig,
+  CommonXYDataLayerConfig,
+  ExtendedYConfig,
+  YConfig,
+  YAxisConfig,
+  ExtendedYConfigResult,
 } from '../../common';
-import { AxisModes } from '../../common/constants';
-import { isDataLayer } from './visualization';
-import { getFormat } from './format';
+import { LayersFieldFormats } from './layers';
 
 export interface Series {
   layer: string;
@@ -49,12 +47,13 @@ export function isFormatterCompatible(
   formatter1: SerializedFieldFormat,
   formatter2: SerializedFieldFormat
 ) {
-  return formatter1.id === formatter2.id;
+  return formatter1?.id === formatter2?.id;
 }
 
 export function groupAxesByType(
-  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
-  axes?: YAxisConfig[]
+  layers: CommonXYDataLayerConfig[],
+  fieldFormats: LayersFieldFormats,
+  axes?: YAxisConfig[],
 ) {
   const series: AxesSeries = {
     auto: [],
@@ -63,37 +62,17 @@ export function groupAxesByType(
   };
 
   layers.forEach((layer) => {
-    const { table } = layer;
+    const { layerId, table } = layer;
     layer.accessors.forEach((accessor) => {
-      const yConfig: Array<ExtendedYConfig | YConfig> | undefined = layer.yConfig;
-      const yConfigByAccessor = yConfig?.find((config) => config.forAccessor === accessor);
+      const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
+      const yAccessor = getAccessorByDimension(accessor, table.columns);
+      const yConfigByAccessor = yConfig?.find((config) => config.forAccessor === yAccessor);
       const axisConfigById = axes?.find(
         (axis) => yConfigByAccessor?.axisId && axis.id && axis.id === yConfigByAccessor?.axisId
       );
       const key = axisConfigById?.id || 'auto';
-      const col = table.columns?.find((column) => column.id === accessor);
-      let formatter: SerializedFieldFormat = col?.meta ? getFormat(col.meta) : { id: 'number' };
-      if (
-        isDataLayer(layer) &&
-        (layer.isPercentage || axisConfigById?.mode === AxisModes.PERCENTAGE) &&
-        formatter.id !== 'percent'
-      ) {
-        formatter = {
-          id: 'percent',
-          params: {
-            pattern: '0.[00]%',
-          },
-        };
-      }
-      if (!series[key]) {
-        series[key] = [];
-      }
-      series[key].push({
-        layer: layer.layerId,
-        accessor,
-        fieldFormat: formatter,
-        axisId: yConfigByAccessor?.axisId,
-      });
+      const fieldFormat = fieldFormats[layerId].yAccessors[yAccessor]!;
+      series[key].push({ layer: layer.layerId, accessor: yAccessor, fieldFormat });
     });
   });
 
@@ -163,12 +142,13 @@ function axisGlobalConfig(position: Position, axes?: YAxisConfig[]) {
 }
 
 export function getAxesConfiguration(
-  layers: Array<CommonXYDataLayerConfig | CommonXYReferenceLineLayerConfig>,
+  layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
   axes?: YAxisConfig[],
-  formatFactory?: FormatFactory
+  formatFactory: FormatFactory | undefined,
+  fieldFormats: LayersFieldFormats,
 ): GroupsConfiguration {
-  const series = groupAxesByType(layers, axes);
+  const series = groupAxesByType(layers, fieldFormats, axes);
 
   const axisGroups: GroupsConfiguration = [];
   let position: Position;

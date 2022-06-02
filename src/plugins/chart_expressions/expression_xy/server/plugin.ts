@@ -18,9 +18,9 @@ import {
   extendedYConfigFunction,
   axisExtentConfigFunction,
   annotationLayerFunction,
-  referenceLineLayerFunction,
+  referenceLineFunction,
   extendedDataLayerFunction,
-  extendedReferenceLineLayerFunction,
+  referenceLineLayerFunction,
   layeredXyVisFunction,
   extendedAnnotationLayerFunction,
 } from '../common/expression_functions';
@@ -39,8 +39,8 @@ export class ExpressionXyPlugin
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(annotationLayerFunction);
     expressions.registerFunction(extendedAnnotationLayerFunction);
+    expressions.registerFunction(referenceLineFunction);
     expressions.registerFunction(referenceLineLayerFunction);
-    expressions.registerFunction(extendedReferenceLineLayerFunction);
     expressions.registerFunction(xyVisFunction);
     expressions.registerFunction(layeredXyVisFunction);
   }

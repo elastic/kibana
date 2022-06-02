@@ -50,11 +50,11 @@ const getFakeFindings = (name: string): CspFinding & { id: string } => ({
     version: chance.string(),
   },
   resource: {
-    filename: chance.string(),
+    name: chance.string(),
     type: chance.string(),
-    path: chance.string(),
-    uid: chance.string(),
-    mode: chance.string(),
+    raw: {} as any,
+    sub_type: chance.string(),
+    id: chance.string(),
   },
   cycle_id: chance.string(),
   host: {} as any,
@@ -70,10 +70,9 @@ describe('<FindingsTable />', () => {
       loading: false,
       data: { page: [], total: 0 },
       error: null,
-      sort: [],
-      from: 1,
-      size: 10,
-      setQuery: jest.fn,
+      sorting: { sort: { field: '@timestamp', direction: 'desc' } },
+      pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
+      setTableOptions: jest.fn(),
     };
 
     render(
@@ -93,10 +92,9 @@ describe('<FindingsTable />', () => {
       loading: false,
       data: { page: data, total: 10 },
       error: null,
-      sort: [],
-      from: 0,
-      size: 10,
-      setQuery: jest.fn,
+      sorting: { sort: { field: '@timestamp', direction: 'desc' } },
+      pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
+      setTableOptions: jest.fn(),
     };
 
     render(

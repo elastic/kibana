@@ -10,6 +10,9 @@ $euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
   @include euiSideNavEmbellish;
   @include euiYScroll;
 
+  display: flex;
+  flex-direction: column;
+
   @include euiBreakpoint('m' ,'l', 'xl') {
     width: 248px;
     padding: $euiSizeL;
