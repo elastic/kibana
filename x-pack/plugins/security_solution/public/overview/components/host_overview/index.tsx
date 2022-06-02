@@ -19,6 +19,7 @@ import {
   DefaultFieldRenderer,
   hostIdRenderer,
 } from '../../../timelines/components/field_renderers/field_renderers';
+import { FirstLastSeen, FirstLastSeenType } from '../../../common/components/first_last_seen';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { Loader } from '../../../common/components/loader';
 import { NetworkDetailsLink } from '../../../common/components/links';
@@ -27,11 +28,6 @@ import { useMlCapabilities } from '../../../common/components/ml/hooks/use_ml_ca
 import { AnomalyScores } from '../../../common/components/ml/score/anomaly_scores';
 import { Anomalies, NarrowDateRange } from '../../../common/components/ml/types';
 import { DescriptionListStyled, OverviewWrapper } from '../../../common/components/page';
-import {
-  FirstLastSeen,
-  FirstLastSeenHostType,
-} from '../../../hosts/components/first_last_seen_host';
-
 import * as i18n from './translations';
 import { EndpointOverview } from './endpoint_overview';
 import { OverviewDescriptionList } from '../../../common/components/overview_description_list';
@@ -133,25 +129,23 @@ export const HostOverview = React.memo<HostSummaryProps>(
         },
         {
           title: i18n.FIRST_SEEN,
-          description:
-            data && data.host != null && data.host.name && data.host.name.length ? (
-              <FirstLastSeen
-                field={'hostName'}
-                value={data.host.name[0]}
-                type={FirstLastSeenHostType.FIRST_SEEN}
-              />
-            ) : (
-              getEmptyTagValue()
-            ),
+          description: (
+            <FirstLastSeen
+              field={'host.name'}
+              value={hostName}
+              type={FirstLastSeenType.FIRST_SEEN}
+            />
+          ),
         },
         {
           title: i18n.LAST_SEEN,
-          description:
-            data && data.host != null && data.host.name && data.host.name.length ? (
-              <FirstLastSeen hostName={data.host.name[0]} type={FirstLastSeenHostType.LAST_SEEN} />
-            ) : (
-              getEmptyTagValue()
-            ),
+          description: (
+            <FirstLastSeen
+              field={'host.name'}
+              value={hostName}
+              type={FirstLastSeenType.LAST_SEEN}
+            />
+          ),
         },
       ],
       [data, isDraggable]

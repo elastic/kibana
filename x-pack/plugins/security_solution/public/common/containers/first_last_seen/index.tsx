@@ -12,15 +12,15 @@ import { Subscription } from 'rxjs';
 import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 import { useKibana } from '../../lib/kibana';
-import {
-  HostsQueries as Queries,
-  FirstLastSeenStrategyResponse,
-  FirstLastSeenRequestOptions,
-} from '../../../../common/search_strategy/security_solution';
 
 import * as i18n from './translations';
-import { Direction, DocValueFields } from '../../../../common/search_strategy';
-import { hostname } from 'os';
+import {
+  Direction,
+  DocValueFields,
+  FirstLastSeenRequestOptions,
+  FirstLastSeenStrategyResponse,
+  HostsQueries,
+} from '../../../../common/search_strategy';
 
 const ID = 'firstLastSeenHostQuery';
 
@@ -33,7 +33,7 @@ export interface FirstLastSeenArgs {
 }
 interface UseFirstLastSeen {
   docValueFields: DocValueFields[];
-  field: 'hostName' | 'userName' | 'hostIp';
+  field: string;
   value: string;
   indexNames: string[];
   order: Direction.asc | Direction.desc;
@@ -54,14 +54,14 @@ export const useFirstLastSeen = ({
   const [firstLastSeenRequest, setFirstLastSeenRequest] = useState<FirstLastSeenRequestOptions>({
     defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
-    factoryQueryType: Queries.firstOrLastSeen,
-    field: getField(field),
+    factoryQueryType: HostsQueries.firstOrLastSeen,
+    field,
     value,
     order,
   });
 
   const [firstLastSeenResponse, setFirstLastSeenResponse] = useState<FirstLastSeenArgs>({
-    order: null, // I dont think this is use anywhere
+    order: null,
     firstSeen: null,
     lastSeen: null,
     errorMessage: null,
@@ -123,13 +123,14 @@ export const useFirstLastSeen = ({
         defaultIndex: indexNames,
         docValueFields: docValueFields ?? [],
         field,
+        value,
       };
       if (!deepEqual(prevRequest, myRequest)) {
         return myRequest;
       }
       return prevRequest;
     });
-  }, [indexNames, docValueFields, field]);
+  }, [docValueFields, field, indexNames, value]);
 
   useEffect(() => {
     firstLastSeenSearch(firstLastSeenRequest);
@@ -140,24 +141,4 @@ export const useFirstLastSeen = ({
   }, [firstLastSeenRequest, firstLastSeenSearch]);
 
   return [loading, firstLastSeenResponse];
-};
-
-enum fieldMap {
-  hostName = 'host.name',
-}
-
-const x = fieldMap.hostName;
-console.log(x === 'host.name');
-
-const getField = (fieldMap: UseFirstLastSeen['field']) => {
-  switch (fieldMap) {
-    case 'hostName':
-      return 'host.name';
-    case 'userName':
-      return 'user.name';
-    case 'hostIp':
-      return 'host.ip';
-    default:
-      return 'host.name';
-  }
 };

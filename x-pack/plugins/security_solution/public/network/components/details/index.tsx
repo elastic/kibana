@@ -24,6 +24,7 @@ import {
   reputationRenderer,
   whoisRenderer,
 } from '../../../timelines/components/field_renderers/field_renderers';
+import { FirstLastSeen, FirstLastSeenType } from '../../../common/components/first_last_seen';
 import * as i18n from './translations';
 import { OverviewWrapper } from '../../../common/components/page';
 import { Loader } from '../../../common/components/loader';
@@ -112,11 +113,23 @@ export const IpOverview = React.memo<IpOverviewProps>(
       [
         {
           title: i18n.FIRST_SEEN,
-          description: typeData ? dateRenderer(typeData.firstSeen) : getEmptyTagValue(),
+          description: (
+            <FirstLastSeen
+              field={`${flowTarget}.ip`}
+              value={ip}
+              type={FirstLastSeenType.FIRST_SEEN}
+            />
+          ),
         },
         {
           title: i18n.LAST_SEEN,
-          description: typeData ? dateRenderer(typeData.lastSeen) : getEmptyTagValue(),
+          description: (
+            <FirstLastSeen
+              field={`${flowTarget}.ip`}
+              value={ip}
+              type={FirstLastSeenType.LAST_SEEN}
+            />
+          ),
         },
       ],
       [

@@ -15,10 +15,8 @@ import { DEFAULT_DARK_MODE } from '../../../../common/constants';
 import { DescriptionList } from '../../../../common/utility_types';
 import { useUiSetting$ } from '../../../common/lib/kibana';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
-import {
-  dateRenderer,
-  DefaultFieldRenderer,
-} from '../../../timelines/components/field_renderers/field_renderers';
+import { DefaultFieldRenderer } from '../../../timelines/components/field_renderers/field_renderers';
+import { FirstLastSeen, FirstLastSeenType } from '../../../common/components/first_last_seen';
 import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
 import { Loader } from '../../../common/components/loader';
 import { NetworkDetailsLink } from '../../../common/components/links';
@@ -169,11 +167,23 @@ export const UserOverview = React.memo<UserSummaryProps>(
         [
           {
             title: i18n.FIRST_SEEN,
-            description: data ? dateRenderer(data.firstSeen) : getEmptyTagValue(),
+            description: (
+              <FirstLastSeen
+                field={'user.name'}
+                value={userName}
+                type={FirstLastSeenType.FIRST_SEEN}
+              />
+            ),
           },
           {
             title: i18n.LAST_SEEN,
-            description: data ? dateRenderer(data.lastSeen) : getEmptyTagValue(),
+            description: (
+              <FirstLastSeen
+                field={'user.name'}
+                value={userName}
+                type={FirstLastSeenType.LAST_SEEN}
+              />
+            ),
           },
         ],
         [

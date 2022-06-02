@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
+
+import { EuiIcon, EuiLoadingSpinner, EuiText, EuiToolTip } from '@elastic/eui';
 
 import { useFirstLastSeen } from '../../containers/first_last_seen';
 import { getEmptyTagValue } from '../empty_value';
@@ -20,7 +21,7 @@ export enum FirstLastSeenType {
 }
 
 interface FirstLastSeenProps {
-  field: 'hostName' | 'userName' | 'hostIp';
+  field: string;
   value: string;
   type: FirstLastSeenType;
 }
@@ -39,8 +40,6 @@ export const FirstLastSeen = React.memo<FirstLastSeenProps>(({ field, type, valu
     [firstSeen, lastSeen, type]
   );
 
-  const fieldTermKey = Object.keys(field)[0];
-
   if (errorMessage != null) {
     return (
       <EuiToolTip
@@ -48,9 +47,9 @@ export const FirstLastSeen = React.memo<FirstLastSeenProps>(({ field, type, valu
         content={errorMessage}
         data-test-subj="firstLastSeenErrorToolTip"
         aria-label={`firstLastSeenError-${type}`}
-        id={`firstLastSeenError-${fieldTermKey}-${type}`}
+        id={`firstLastSeenError-${field}-${type}`}
       >
-        <EuiIcon aria-describedby={`firstLastSeenError-${fieldTermKey}-${type}`} type="alert" />
+        <EuiIcon aria-describedby={`firstLastSeenError-${field}-${type}`} type="alert" />
       </EuiToolTip>
     );
   }
@@ -61,12 +60,12 @@ export const FirstLastSeen = React.memo<FirstLastSeenProps>(({ field, type, valu
       {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
         ? valueSeen
         : !loading &&
-          valueSeen != null && (
+          valueSeen !== null && (
             <EuiText size="s">
               <FormattedRelativePreferenceDate value={`${valueSeen}`} />
             </EuiText>
           )}
-      {!loading && valueSeen == null && getEmptyTagValue()}
+      {!loading && valueSeen === null && getEmptyTagValue()}
     </>
   );
 });
