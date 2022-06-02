@@ -87,13 +87,13 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
   threatQueryBar: {
     query: { query: rule.threat_query ?? '', language: rule.threat_language ?? '' },
     filters: (rule.threat_filters ?? []) as Filter[],
-    saved_id: undefined,
+    saved_id: null,
   },
   threatMapping: rule.threat_mapping ?? [],
   queryBar: {
     query: { query: rule.query ?? '', language: rule.language ?? '' },
     filters: (rule.filters ?? []) as Filter[],
-    saved_id: rule.saved_id,
+    saved_id: rule.saved_id ?? null,
   },
   relatedIntegrations: rule.related_integrations ?? [],
   requiredFields: rule.required_fields ?? [],
@@ -112,6 +112,11 @@ export const getDefineStepsData = (rule: Rule): DefineStepRule => ({
           },
         }
       : {}),
+  },
+  eqlOptions: {
+    timestampField: rule.timestamp_field,
+    eventCategoryField: rule.event_category_override,
+    tiebreakerField: rule.tiebreaker_field,
   },
 });
 

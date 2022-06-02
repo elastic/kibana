@@ -45,13 +45,10 @@ export {
   getCapabilitiesForRollupIndices,
 } from './data_views';
 
-export type { IndexPatternAttributes } from '../common';
 export {
-  IndexPatternField,
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
-  IndexPattern,
   IndexPatternsService,
   IndexPatternsService as IndexPatternsCommonService,
   DataView,

@@ -27,6 +27,7 @@ import {
   TIMELINES,
   MANAGE,
   USERS,
+  KUBERNETES,
   HOST_ISOLATION_EXCEPTIONS,
   EVENT_FILTERS,
   BLOCKLIST,
@@ -57,6 +58,7 @@ import {
   HOST_ISOLATION_EXCEPTIONS_PATH,
   SERVER_APP_ID,
   USERS_PATH,
+  KUBERNETES_PATH,
   EXPLORE_PATH,
   DASHBOARDS_PATH,
   MANAGE_PATH,
@@ -131,7 +133,6 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     title: DETECTION_RESPONSE,
     path: DETECTION_RESPONSE_PATH,
     navLinkStatus: AppNavLinkStatus.hidden,
-    experimentalKey: 'detectionResponseEnabled',
     features: [FEATURE.general],
     keywords: [
       i18n.translate('xpack.securitySolution.search.detectionAndResponse', {
@@ -379,6 +380,19 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
           },
         ],
       },
+      {
+        id: SecurityPageName.kubernetes,
+        title: KUBERNETES,
+        path: KUBERNETES_PATH,
+        navLinkStatus: AppNavLinkStatus.hidden,
+        experimentalKey: 'kubernetesEnabled',
+        keywords: [
+          i18n.translate('xpack.securitySolution.search.kubernetes', {
+            defaultMessage: 'Kubernetes',
+          }),
+        ],
+        order: 9005,
+      },
     ],
   },
   {
@@ -403,7 +417,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
             defaultMessage: 'Timelines',
           }),
         ],
-        order: 9005,
+        order: 9006,
         deepLinks: [
           {
             id: SecurityPageName.timelinesTemplates,
@@ -419,7 +433,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         extend: {
           [SecurityPageName.case]: {
             navLinkStatus: AppNavLinkStatus.visible,
-            order: 9006,
+            order: 9007,
             features: [FEATURE.casesRead],
           },
           [SecurityPageName.caseConfigure]: {
@@ -449,7 +463,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         id: SecurityPageName.endpoints,
         navLinkStatus: AppNavLinkStatus.visible,
         title: ENDPOINTS,
-        order: 9006,
+        order: 9008,
         path: ENDPOINTS_PATH,
       },
       {

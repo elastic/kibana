@@ -160,6 +160,26 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
       });
+
+      it('should respond 400 if trying to downgrade version', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '7.0.0' } } },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: '6.0.0',
+          })
+          .expect(400);
+      });
       it('should respond 400 if trying to upgrade with source_uri set', async () => {
         const kibanaVersion = await kibanaServer.version.get();
         const res = await supertest
@@ -710,8 +730,7 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
       });
-      it('should respond 200 if trying to bulk upgrade to a version higher than the latest fleet server version if the agents include fleet server agents', async () => {
-        const higherVersion = semver.inc(fleetServerVersion, 'patch');
+      it('should prevent any agent to downgrade', async () => {
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -719,7 +738,7 @@ export default function (providerContext: FtrProviderContext) {
           body: {
             doc: {
               policy_id: `agent-policy-1`,
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '6.0.0' } } },
             },
           },
         });
@@ -730,7 +749,7 @@ export default function (providerContext: FtrProviderContext) {
           body: {
             doc: {
               policy_id: `agent-policy-2`,
-              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '6.0.0' } } },
             },
           },
         });
@@ -738,10 +757,16 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agents/bulk_upgrade`)
           .set('kbn-xsrf', 'xxx')
           .send({
-            agents: ['agent1', 'agent2', 'agentWithFS'],
-            version: higherVersion,
+            agents: ['agent1', 'agent2'],
+            version: '5.0.0',
           })
           .expect(200);
+        const [agent1data, agent2data] = await Promise.all([
+          supertest.get(`/api/fleet/agents/agent1`).set('kbn-xsrf', 'xxx'),
+          supertest.get(`/api/fleet/agents/agent2`).set('kbn-xsrf', 'xxx'),
+        ]);
+        expect(typeof agent1data.body.item.upgrade_started_at).to.be('undefined');
+        expect(typeof agent2data.body.item.upgrade_started_at).to.be('undefined');
       });
 
       it('should throw an error if source_uri parameter is passed', async () => {
