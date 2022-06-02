@@ -332,6 +332,7 @@ test('Incorporate error code stats', () => {
           browser_unexpectedly_closed_error: 8,
           browser_screenshot_error: 27,
           visual_reporting_soft_disabled_error: 1,
+          invalid_layout_parameters_error: 0,
         },
       },
       printable_pdf_v2: {
@@ -351,6 +352,7 @@ test('Incorporate error code stats', () => {
           browser_unexpectedly_closed_error: 8,
           browser_screenshot_error: 27,
           visual_reporting_soft_disabled_error: 1,
+          invalid_layout_parameters_error: 0,
         },
       },
       csv_searchsource_immediate: {
