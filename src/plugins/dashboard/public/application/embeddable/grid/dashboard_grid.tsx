@@ -242,6 +242,17 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
       }
     });
 
+    const panelIds = [];
+    const startTime = new Date().getTime();
+
+    const onPanelStatusChange = (info: any) => {
+      console.log(info);
+      panelIds.push(info);
+      if (panelIds.length === panelsInOrder.length) {
+        console.log(`Took ${new Date().getTime() - startTime} in total`);
+      }
+    };
+
     const dashboardPanels = _.map(panelsInOrder, ({ explicitInput, type }, index) => (
       <DashboardGridItem
         key={explicitInput.id}
@@ -252,6 +263,7 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
         PanelComponent={kibana.services.embeddable.EmbeddablePanel}
         expandedPanelId={expandedPanelId}
         focusedPanelId={focusedPanelIndex}
+        onPanelStatusChange={onPanelStatusChange}
       />
     ));
 

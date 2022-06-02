@@ -463,12 +463,18 @@ export class Embeddable
     return isDirty;
   }
 
-  private updateActiveData: ExpressionWrapperProps['onData$'] = (_, adapters) => {
+  private updateActiveData: ExpressionWrapperProps['onData$'] = (data: any, adapters) => {
     this.activeDataInfo.activeData = adapters?.tables?.tables;
     if (this.input.onLoad) {
       // once onData$ is get's called from expression renderer, loading becomes false
       this.input.onLoad(false);
     }
+
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: false,
+      error: data.type === 'error' ? data.error : undefined,
+    });
   };
 
   private onRender: ExpressionWrapperProps['onRender$'] = () => {
@@ -492,6 +498,11 @@ export class Embeddable
 
     this.domNode.setAttribute('data-shared-item', '');
 
+    this.updateOutput({
+      ...this.getOutput(),
+      loading: true,
+      error: undefined,
+    });
     this.renderComplete.dispatchInProgress();
 
     const parentContext = this.input.executionContext;
