@@ -41,6 +41,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');
+      await retry.waitFor(
+        'fields list presented',
+        async () => await testSubjects.exists('fieldList-unpopular')
+      );
+
       for (const columnName of TEST_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItemAdd(columnName);
       }
