@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { DashboardEditTourProvider } from './dashboard_edit_tour_provider';
-export { useDashboardEditTourContext } from './dashboard_edit_tour_context';
+export { DashboardEditTourProvider } from './dashboard_tour_provider';
+export { useDashboardEditTourContext } from './dashboard_tour_context';

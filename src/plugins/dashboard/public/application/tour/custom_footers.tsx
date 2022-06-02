@@ -15,14 +15,32 @@ import {
   EuiI18n,
 } from '@elastic/eui';
 import React from 'react';
-import { DashboardTourContextProps } from './dashboard_edit_tour_context';
-interface CustomFooterProps {
+import { DashboardTourContextProps } from './dashboard_tour_context';
+
+interface ViewFooterProps {
+  onFinishTour: () => void;
+}
+
+interface EditFooterProps {
   isLastStep: boolean;
   onNextTourStep: DashboardTourContextProps['getNextEditTourStep'];
   onFinishTour: DashboardTourContextProps['finishEditTour'];
 }
 
-export const CustomFooter = ({ isLastStep, onNextTourStep, onFinishTour }: CustomFooterProps) => {
+export const ViewTourFooter = ({ onFinishTour }: ViewFooterProps) => (
+  <EuiFlexItem grow={false}>
+    <EuiButtonEmpty
+      color="text"
+      size="xs"
+      onClick={onFinishTour}
+      data-test-subj="discoverTourButtonSkip"
+    >
+      {EuiI18n({ token: 'core.euiTourStep.closeTour', default: 'Close tour' })}
+    </EuiButtonEmpty>
+  </EuiFlexItem>
+);
+
+export const EditTourFooter = ({ isLastStep, onNextTourStep, onFinishTour }: EditFooterProps) => {
   const actionButtonProps: Partial<EuiButtonProps> = {
     size: 's',
     color: 'success',
