@@ -6,7 +6,7 @@
  */
 
 import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
-import { type blendMode, type EmsSpriteSheet, TMSService } from '@elastic/ems-client';
+import { type EmsSpriteSheet, TMSService } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 // @ts-expect-error
@@ -390,12 +390,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
   _setColorFilter(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
     const { color, operation, percentage } = this.getColorFilter();
 
-    const properties = TMSService.transformColorProperties(
-      mbLayer,
-      color,
-      operation as blendMode,
-      percentage
-    );
+    const properties = TMSService.transformColorProperties(mbLayer, color, operation, percentage);
     for (const { property, color: newColor } of properties) {
       mbMap.setPaintProperty(mbLayerId, property, newColor);
     }
