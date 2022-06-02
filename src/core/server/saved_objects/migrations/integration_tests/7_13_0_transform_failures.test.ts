@@ -54,33 +54,40 @@ describe('migration v2', () => {
         await root.start();
       } catch (err) {
         const errorMessage = err.message;
+        const errorLines = errorMessage.split('\n');
+        const errorMessageWithoutStack = errorLines
+          .filter((line: string) => !line.includes(' at '))
+          .join('\n');
 
-        expect(
-          errorMessage.startsWith(
-            'Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 7 corrupt saved object documents were found: '
-          )
-        ).toBeTruthy();
-        expect(errorMessage).toMatchInlineSnapshot('');
+        expect(errorMessageWithoutStack).toMatchInlineSnapshot(`
+          "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 7 corrupt saved object documents were found: P2SQfHkBs3dBRGh--No5, QGSZfHkBs3dBRGh-ANoD, QWSZfHkBs3dBRGh-hNob, QmSZfHkBs3dBRGh-w9qH, one, two, Q2SZfHkBs3dBRGh-9dp2
+           7 transformation errors were encountered:
+          - space:default: Error: Migration function for version 7.14.0 threw an error
+          Caused by:
+          TypeError: Cannot set properties of undefined (setting 'bar')
+          - space:first: Error: Migration function for version 7.14.0 threw an error
+          Caused by:
+          TypeError: Cannot set properties of undefined (setting 'bar')
+          - space:forth: Error: Migration function for version 7.14.0 threw an error
+          Caused by:
+          TypeError: Cannot set properties of undefined (setting 'bar')
+          - space:second: Error: Migration function for version 7.14.0 threw an error
+          Caused by:
+          TypeError: Cannot set properties of undefined (setting 'bar')
+          - space:fifth: Error: Migration function for version 7.14.0 threw an error
+          Caused by:
+          TypeError: Cannot set properties of undefined (setting 'bar')
+          - space:third: Error: Migration function for version 7.14.0 threw an error
+          Caused by:
+          TypeError: Cannot set properties of undefined (setting 'bar')
+          - space:sixth: Error: Migration function for version 7.14.0 threw an error
+          Caused by:
+          TypeError: Cannot set properties of undefined (setting 'bar')
 
-        const expectedCorruptDocIds = [
-          'P2SQfHkBs3dBRGh--No5',
-          'QGSZfHkBs3dBRGh-ANoD',
-          'QWSZfHkBs3dBRGh-hNob',
-          'QmSZfHkBs3dBRGh-w9qH',
-          'one',
-          'two',
-          'Q2SZfHkBs3dBRGh-9dp2',
-        ];
-        for (const corruptDocId of expectedCorruptDocIds) {
-          expect(errorMessage.includes(corruptDocId)).toBeTruthy();
-        }
-
-        expect(errorMessage.includes('7 transformation errors were encountered:')).toBeTruthy();
-        expect(errorMessage).toEqual(
-          expect.stringContaining(
-            'space:sixth: Error: Migration function for version 7.14.0 threw an error'
-          )
-        );
+          To allow migrations to proceed, please delete or fix these documents.
+          Note that you can configure Kibana to automatically discard corrupt documents and transform errors for this migration.
+          Please refer to https://www.elastic.co/guide/en/kibana/master/resolve-migrations-failures.html for more information."
+        `);
         return;
       }
       // Fail test if above expression doesn't throw anything.
