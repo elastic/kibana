@@ -82,7 +82,7 @@ export const buildRelatedIntegrationsDescription = (
   label: string,
   relatedIntegrations: RelatedIntegrationArray | undefined
 ): ListItems[] => {
-  if (relatedIntegrations == null) {
+  if (relatedIntegrations == null || relatedIntegrations.length === 0) {
     return [];
   }
 
