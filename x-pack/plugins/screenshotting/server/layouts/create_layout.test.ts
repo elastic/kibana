@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LayoutParams, LayoutTypes } from '../../common/layout';
+import { LayoutParams } from '../../common/layout';
 import { CanvasLayout } from './canvas_layout';
 import { PreserveLayout } from './preserve_layout';
 import { createLayout } from './create_layout';
@@ -39,7 +39,7 @@ describe('Create Layout', () => {
   });
 
   it('creates the print layout', () => {
-    const print = createLayout({ id: LayoutTypes.PRINT, zoom: 1 });
+    const print = createLayout({ zoom: 1 });
     const printParams: LayoutParams = {
       id: print.id,
       zoom: 1,
