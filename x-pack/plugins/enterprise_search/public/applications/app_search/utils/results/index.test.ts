@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { Result } from '../../components/result/types';
-import { flattenSearchResult, flattenField } from '.';
+
+import { flattenObject, flattenField } from '.';
 
 describe('flattenField', () => {
   it('flattens field if raw key is absent', () => {
@@ -39,7 +40,7 @@ describe('flattenField', () => {
   });
 });
 
-describe('flattenSearchResult', () => {
+describe('flattenObject', () => {
   it('flattens all fields without raw key', () => {
     const result: Result = {
       id: { raw: '123' },
@@ -54,6 +55,6 @@ describe('flattenSearchResult', () => {
       'address.city': { raw: 'Los Angeles' },
       'address.state': { raw: 'California' },
     };
-    expect(flattenSearchResult(result)).toEqual(expected);
+    expect(flattenObject(result)).toEqual(expected);
   });
 });

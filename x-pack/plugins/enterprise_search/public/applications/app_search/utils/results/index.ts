@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Result, ResultMeta } from '../../components/result/types';
 
 export const flattenField = (fieldName: string, fieldValue: object): Array<[string, object]> => {
   const flattened: Array<[string, object]> = [];
@@ -22,20 +21,12 @@ export const flattenField = (fieldName: string, fieldValue: object): Array<[stri
   return flattened;
 };
 
-export const flattenSearchResult = (result: Result): Result => {
-  const flattened: Result = {
-    id: { raw: '' },
-    _meta: {
-      id: '',
-      engine: '',
-    },
-  };
+export const flattenObject = (result: object): object => {
+  const flattened: { [index: string]: object } = {};
 
   Object.entries(result).map(([key, value]) => {
-    if (key === 'id') {
-      flattened[key] = value as { raw: string };
-    } else if (key === '_meta') {
-      flattened[key] = value as ResultMeta;
+    if (key === 'id' || key === '_meta') {
+      flattened[key] = value;
     } else {
       flattenField(key, value).map(([flatName, flatValue]) => {
         flattened[flatName] = flatValue;
