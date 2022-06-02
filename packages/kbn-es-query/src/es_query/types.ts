@@ -7,7 +7,6 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SerializableRecord } from '@kbn/utility-types';
 
 /**
  * A field's sub type
@@ -15,17 +14,19 @@ import { SerializableRecord } from '@kbn/utility-types';
  */
 export type IFieldSubType = IFieldSubTypeMultiOptional | IFieldSubTypeNestedOptional;
 
-export interface IFieldSubTypeMultiOptional extends SerializableRecord {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type IFieldSubTypeMultiOptional = {
   multi?: { parent: string };
-}
+};
 
 export interface IFieldSubTypeMulti {
   multi: { parent: string };
 }
 
-export interface IFieldSubTypeNestedOptional extends SerializableRecord {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type IFieldSubTypeNestedOptional = {
   nested?: { path: string };
-}
+};
 
 export interface IFieldSubTypeNested {
   nested: { path: string };
@@ -48,7 +49,7 @@ export type DataViewFieldBase = {
    */
   script?: string;
   /**
-   * Scripted field langauge
+   * Scripted field language
    * Painless is the only valid scripted field language
    */
   lang?: estypes.ScriptLanguage;
