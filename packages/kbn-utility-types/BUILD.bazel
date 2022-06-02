@@ -6,7 +6,6 @@ PKG_BASE_NAME = "kbn-utility-types"
 PKG_REQUIRE_NAME = "@kbn/utility-types"
 
 SOURCE_FILES = glob([
-  "src/jest/index.ts",
   "src/serializable/**",
   "src/index.ts"
 ])
@@ -28,8 +27,7 @@ RUNTIME_DEPS = [
 
 TYPES_DEPS = [
   "@npm//utility-types",
-  "@npm//@types/node",
-  "@npm//@types/jest",
+  "@npm//@types/node"
 ]
 
 jsts_transpiler(
