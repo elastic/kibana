@@ -18,6 +18,7 @@ import yaml from 'js-yaml';
 
 import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { CspAppContext } from '../../plugin';
 import { CspRulesConfigSchema } from '../../../common/schemas/csp_configuration';
 import { CspRuleSchema } from '../../../common/schemas/csp_rule';
@@ -101,13 +102,19 @@ export const updateAgentConfiguration = async (
   packagePolicyService: PackagePolicyServiceInterface,
   packagePolicy: PackagePolicy,
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  user?: AuthenticatedUser | null
 ): Promise<PackagePolicy> => {
   const cspRules = await getCspRules(soClient, packagePolicy);
   const rulesConfig = createRulesConfig(cspRules);
   const dataYaml = convertRulesConfigToYaml(rulesConfig);
   const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
 
+  if (!!user) {
+    return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy, {
+      user,
+    });
+  }
   return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy);
 };
 
@@ -123,6 +130,7 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
       }
 
       try {
+        const userAuth = await cspContext.security.authc.getCurrentUser(request);
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
         const soClient = coreContext.savedObjects.client;
@@ -142,7 +150,8 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
           packagePolicyService,
           packagePolicy,
           esClient,
-          soClient
+          soClient,
+          userAuth
         );
 
         return response.ok({ body: updatedPackagePolicy });

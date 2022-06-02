@@ -23,6 +23,7 @@ import type {
 } from '@kbn/core/server';
 
 import type { FleetStartContract, FleetRequestHandlerContext } from '@kbn/fleet-plugin/server';
+import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface CspServerPluginSetup {}
@@ -33,6 +34,7 @@ export interface CspServerPluginSetupDeps {
   // required
   data: DataPluginSetup;
   taskManager: TaskManagerSetupContract;
+  security: SecurityPluginStart;
 
   // optional
 }
