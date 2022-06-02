@@ -18,7 +18,7 @@ import {
   EuiPageHeaderSection,
   EuiTitle,
 } from '@elastic/eui';
-import { IndexPattern } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { AllSeries } from '@kbn/observability-plugin/public';
 import { StartDependencies } from './plugin';
@@ -26,7 +26,7 @@ import { StartDependencies } from './plugin';
 export const App = (props: {
   core: CoreStart;
   plugins: StartDependencies;
-  defaultIndexPattern: IndexPattern | null;
+  defaultIndexPattern: DataView | null;
 }) => {
   const ExploratoryViewComponent = props.plugins.observability.ExploratoryViewEmbeddable;
 

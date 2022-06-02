@@ -7,9 +7,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import { RequestHandlerContext } from '..';
-
-import { CoreContext } from '../core_context';
 import {
   IRouter,
   RouteConfig,
@@ -18,10 +17,7 @@ import {
   KibanaResponseFactory,
   InternalHttpServicePreboot,
 } from '../http';
-
 import { InternalRenderingServicePreboot, InternalRenderingServiceSetup } from '../rendering';
-import { CoreService } from '../../types';
-
 import {
   InternalHttpResourcesSetup,
   HttpResources,
