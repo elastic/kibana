@@ -6,14 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('index_pattern_crud', () => {
-    loadTestFile(require.resolve('./create_index_pattern'));
-    loadTestFile(require.resolve('./get_index_pattern'));
-    loadTestFile(require.resolve('./delete_index_pattern'));
-    loadTestFile(require.resolve('./update_index_pattern'));
-    loadTestFile(require.resolve('./get_data_views'));
+  describe('get_data_views', () => {
+    loadTestFile(require.resolve('./main'));
   });
 }

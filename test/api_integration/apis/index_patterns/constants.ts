@@ -22,7 +22,7 @@ const legacyConfig = {
   serviceKey: SERVICE_KEY_LEGACY,
 };
 
-const dataViewConfig = {
+export const dataViewConfig = {
   name: 'data view api',
   path: DATA_VIEW_PATH,
   basePath: SERVICE_PATH,
