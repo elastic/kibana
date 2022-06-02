@@ -11,7 +11,6 @@ import { DataViewsService } from '../common';
 export function createIndexPatternsStartMock() {
   const dataViewsServiceFactory = jest.fn().mockResolvedValue({ get: jest.fn() });
   return {
-    indexPatternsServiceFactory: dataViewsServiceFactory,
     dataViewsServiceFactory,
   };
 }

@@ -122,6 +122,16 @@ describe('useSecuritySolutionNavigation', () => {
     expect(result?.current?.items?.[2].items?.[2].id).toEqual(SecurityPageName.users);
   });
 
+  // TODO: [kubernetes] remove when no longer experimental
+  it('should include kubernetes when feature flag is on', async () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
+      () => useSecuritySolutionNavigation(),
+      { wrapper: TestProviders }
+    );
+    expect(result?.current?.items?.[2].items?.[3].id).toEqual(SecurityPageName.kubernetes);
+  });
+
   it('should omit host isolation exceptions if hook reports false', () => {
     (useCanSeeHostIsolationExceptionsMenu as jest.Mock).mockReturnValueOnce(false);
     const { result } = renderHook<{}, KibanaPageTemplateProps['solutionNav']>(
