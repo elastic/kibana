@@ -2462,10 +2462,10 @@
               "schema": {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/alert_comment_request_properties"
+                    "$ref": "#/components/schemas/add_alert_comment_request_properties"
                   },
                   {
-                    "$ref": "#/components/schemas/user_comment_request_properties"
+                    "$ref": "#/components/schemas/add_user_comment_request_properties"
                   }
                 ]
               },
@@ -2795,7 +2795,7 @@
         ]
       },
       "patch": {
-        "description": "Updates a comment in a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.\n",
+        "description": "Updates a comment in a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. NOTE: You cannot change the comment type or the owner of a comment.\n",
         "tags": [
           "cases",
           "kibana"
@@ -2812,67 +2812,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "cases": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "alertId": {
-                          "description": "The alert identifier.",
-                          "type": "string"
-                        },
-                        "comment": {
-                          "description": "The new comment.",
-                          "type": "string"
-                        },
-                        "id": {
-                          "description": "The identifier for the comment. To retrieve comment IDs, use the get comments API.",
-                          "type": "string"
-                        },
-                        "index": {
-                          "description": "The alert index.",
-                          "type": "string"
-                        },
-                        "owner": {
-                          "$ref": "#/components/schemas/owners"
-                        },
-                        "rule": {
-                          "description": "The rule that is associated with the alert.",
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "description": "The rule identifier.",
-                              "type": "string"
-                            },
-                            "name": {
-                              "description": "The rule name.",
-                              "type": "string"
-                            }
-                          }
-                        },
-                        "type": {
-                          "$ref": "#/components/schemas/comment_types"
-                        },
-                        "version": {
-                          "description": "The current comment version. To retrieve version values, use the get comments API.",
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "alertId",
-                        "comment",
-                        "id",
-                        "index",
-                        "owner",
-                        "rule",
-                        "type",
-                        "version"
-                      ]
-                    }
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/update_alert_comment_request_properties"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_user_comment_request_properties"
                   }
-                }
+                ]
               },
               "examples": {
                 "updateCaseCommentRequest": {
@@ -5638,10 +5585,10 @@
               "schema": {
                 "oneOf": [
                   {
-                    "$ref": "#/components/schemas/alert_comment_request_properties"
+                    "$ref": "#/components/schemas/add_alert_comment_request_properties"
                   },
                   {
-                    "$ref": "#/components/schemas/user_comment_request_properties"
+                    "$ref": "#/components/schemas/add_user_comment_request_properties"
                   }
                 ]
               },
@@ -5974,7 +5921,7 @@
         ]
       },
       "patch": {
-        "description": "Updates a comment in a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating.\n",
+        "description": "Updates a comment in a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. NOTE: You cannot change the comment type or the owner of a comment.\n",
         "tags": [
           "cases",
           "kibana"
@@ -5994,67 +5941,14 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "properties": {
-                  "cases": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "alertId": {
-                          "description": "The alert identifier.",
-                          "type": "string"
-                        },
-                        "comment": {
-                          "description": "The new comment.",
-                          "type": "string"
-                        },
-                        "id": {
-                          "description": "The identifier for the comment. To retrieve comment IDs, use the get comments API.",
-                          "type": "string"
-                        },
-                        "index": {
-                          "description": "The alert index.",
-                          "type": "string"
-                        },
-                        "owner": {
-                          "$ref": "#/components/schemas/owners"
-                        },
-                        "rule": {
-                          "description": "The rule that is associated with the alert.",
-                          "type": "object",
-                          "properties": {
-                            "id": {
-                              "description": "The rule identifier.",
-                              "type": "string"
-                            },
-                            "name": {
-                              "description": "The rule name.",
-                              "type": "string"
-                            }
-                          }
-                        },
-                        "type": {
-                          "$ref": "#/components/schemas/comment_types"
-                        },
-                        "version": {
-                          "description": "The current comment version. To retrieve version values, use the get comments API.",
-                          "type": "string"
-                        }
-                      },
-                      "required": [
-                        "alertId",
-                        "comment",
-                        "id",
-                        "index",
-                        "owner",
-                        "rule",
-                        "type",
-                        "version"
-                      ]
-                    }
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/update_alert_comment_request_properties"
+                  },
+                  {
+                    "$ref": "#/components/schemas/update_user_comment_request_properties"
                   }
-                }
+                ]
               },
               "examples": {
                 "updateCaseCommentRequest": {
@@ -6710,7 +6604,7 @@
         ],
         "example": "close-by-user"
       },
-      "alert_comment_request_properties": {
+      "add_alert_comment_request_properties": {
         "type": "object",
         "properties": {
           "alertId": {
@@ -6763,7 +6657,7 @@
           "type"
         ]
       },
-      "user_comment_request_properties": {
+      "add_user_comment_request_properties": {
         "type": "object",
         "properties": {
           "comment": {
@@ -6789,14 +6683,108 @@
           "type"
         ]
       },
-      "comment_types": {
-        "type": "string",
-        "description": "The type of comment.",
-        "enum": [
-          "alert",
-          "user"
-        ],
-        "example": "user"
+      "update_alert_comment_request_properties": {
+        "type": "object",
+        "properties": {
+          "alertId": {
+            "description": "The alert identifier. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+            "type": "string",
+            "x-technical-preview": true,
+            "example": "6b24c4dc44bc720cfc92797f3d61fff952f2b2627db1fb4f8cc49f4530c4ff42"
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the comment. To retrieve comment IDs, use the get comments API.\n",
+            "example": "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+          },
+          "index": {
+            "description": "The alert index. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+            "type": "string",
+            "x-technical-preview": true
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owners"
+          },
+          "rule": {
+            "description": "The rule that is associated with the alert. It is required only when `type` is `alert`. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
+            "type": "object",
+            "x-technical-preview": true,
+            "properties": {
+              "id": {
+                "description": "The rule identifier.",
+                "type": "string",
+                "x-technical-preview": true,
+                "example": "94d80550-aaf4-11ec-985f-97e55adae8b9"
+              },
+              "name": {
+                "description": "The rule name.",
+                "type": "string",
+                "x-technical-preview": true,
+                "example": "security_rule"
+              }
+            }
+          },
+          "type": {
+            "description": "The type of comment.",
+            "type": "string",
+            "enum": [
+              "alert"
+            ],
+            "example": "alert"
+          },
+          "version": {
+            "description": "The current comment version. To retrieve version values, use the get comments API.\n",
+            "type": "string",
+            "example": "Wzk1LDFd"
+          }
+        },
+        "required": [
+          "alertId",
+          "id",
+          "index",
+          "owner",
+          "rule",
+          "type",
+          "version"
+        ]
+      },
+      "update_user_comment_request_properties": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "description": "The new comment. It is required only when `type` is `user`.",
+            "type": "string",
+            "example": "A new comment."
+          },
+          "id": {
+            "type": "string",
+            "description": "The identifier for the comment. To retrieve comment IDs, use the get comments API.\n",
+            "example": "8af6ac20-74f6-11ea-b83a-553aecdb28b6"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/owners"
+          },
+          "type": {
+            "type": "string",
+            "description": "The type of comment.",
+            "enum": [
+              "user"
+            ],
+            "example": "user"
+          },
+          "version": {
+            "description": "The current comment version. To retrieve version values, use the get comments API.\n",
+            "type": "string",
+            "example": "Wzk1LDFd"
+          }
+        },
+        "required": [
+          "comment",
+          "id",
+          "owner",
+          "type",
+          "version"
+        ]
       }
     },
     "examples": {
@@ -7033,12 +7021,12 @@
               "version": "WzIwNDMxLDFd",
               "type": "user",
               "owner": "cases",
-              "comment": "That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives.",
+              "comment": "A new comment.",
               "created_at": "2022-06-02T00:49:47.716Z",
               "created_by": {
                 "username": "elastic",
-                "email": "null",
-                "full_name": "null"
+                "email": null,
+                "full_name": null
               },
               "pushed_at": null,
               "pushed_by": null,
@@ -7050,12 +7038,11 @@
           "id": "293f1bc0-74f6-11ea-b83a-553aecdb28b6",
           "version": "WzIzMzgsMV0=",
           "totalComment": 1,
-          "title": "This case will self-destruct in 5 seconds",
+          "title": "Case title 1",
           "tags": [
-            "phishing",
-            "social engineering"
+            "tag 1"
           ],
-          "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants.",
+          "description": "A case description.",
           "settings": {
             "syncAlerts": false
           },
@@ -7066,16 +7053,16 @@
           "closed_by": null,
           "created_at": "2022-03-24T00:37:03.906Z",
           "created_by": {
-            "email": "ahunley@imf.usa.gov",
-            "full_name": "Alan Hunley",
-            "username": "ahunley"
+            "email": null,
+            "full_name": null,
+            "username": "elastic"
           },
           "status": "open",
           "updated_at": "2022-06-03T00:49:47.716Z",
           "updated_by": {
             "username": "elastic",
-            "email": "null",
-            "full_name": "null"
+            "email": null,
+            "full_name": null
           },
           "connector": {
             "id": "none",
@@ -7092,7 +7079,7 @@
           "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
           "version": "Wzk1LDFd",
           "type": "user",
-          "comment": "That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives. Even worse, he likes baked beans."
+          "comment": "An updated comment."
         }
       },
       "update_comment_response": {
@@ -7102,22 +7089,22 @@
             {
               "id": "8af6ac20-74f6-11ea-b83a-553aecdb28b6",
               "version": "WzIwNjM3LDFd",
-              "comment": "That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives. Even worse, he likes baked beans.",
+              "comment": "An updated comment.",
               "type": "user",
               "owner": "cases",
               "created_at": "2022-03-24T00:37:10.832Z",
               "created_by": {
                 "username": "elastic",
-                "full_name": "null",
-                "email": "null"
+                "full_name": null,
+                "email": null
               },
               "pushed_at": null,
               "pushed_by": null,
               "updated_at": "2022-03-24T01:27:06.210Z",
               "updated_by": {
-                "username": "_007",
-                "full_name": "null",
-                "email": "null"
+                "username": "elastic",
+                "full_name": null,
+                "email": null
               }
             }
           ],
@@ -7125,12 +7112,11 @@
           "id": "293f1bc0-74f6-11ea-b83a-553aecdb28b6",
           "version": "WzIwNjM2LDFd",
           "totalComment": 1,
-          "title": "This case will self-destruct in 5 seconds",
+          "title": "Case title 1",
           "tags": [
-            "phishing",
-            "social engineering"
+            "tag 1"
           ],
-          "description": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants.",
+          "description": "A case description.",
           "settings": {
             "syncAlerts": false
           },
@@ -7142,15 +7128,15 @@
           "created_at": "2022-03-24T00:37:03.906Z",
           "created_by": {
             "username": "elastic",
-            "full_name": "null",
-            "email": "null"
+            "full_name": null,
+            "email": null
           },
           "status": "open",
           "updated_at": "2022-03-24T01:27:06.210Z",
           "updated_by": {
-            "username": "_007",
-            "full_name": "null",
-            "email": "null"
+            "username": "elastic",
+            "full_name": null,
+            "email": null
           },
           "connector": {
             "id": "none",
