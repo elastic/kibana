@@ -151,8 +151,9 @@ export const UpdateButton: React.FunctionComponent<UpdateButtonProps> = ({
           pkgkey: `${name}-.*`,
         })
       )
-    )
+    ) {
       return;
+    }
     const settingsPath = getPath('integration_details_settings', {
       pkgkey: `${name}-${version}`,
     });
