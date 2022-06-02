@@ -34,6 +34,7 @@ import {
   useStartServices,
   useAuthz,
   usePermissionCheck,
+  useIntegrationsStateContext,
 } from '../../../../hooks';
 import { INTEGRATIONS_ROUTING_PATHS } from '../../../../constants';
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -94,6 +95,7 @@ function Breadcrumbs({ packageTitle }: { packageTitle: string }) {
 
 export function Detail() {
   const { getId: getAgentPolicyId } = useAgentPolicyContext();
+  const { getFromIntegrations } = useIntegrationsStateContext();
   const { pkgkey, panel } = useParams<DetailParams>();
   const { getHref } = useLink();
   const canInstallPackages = useAuthz().integrations.installPackages;
@@ -195,21 +197,25 @@ export function Detail() {
     [integration, packageInfo]
   );
 
+  const fromIntegrations = getFromIntegrations();
+
+  const href =
+    fromIntegrations === 'updates_available'
+      ? getHref('integrations_installed_updates_available')
+      : fromIntegrations === 'installed'
+      ? getHref('integrations_installed')
+      : getHref('integrations_all');
+
   const headerLeftContent = useMemo(
     () => (
       <EuiFlexGroup direction="column" gutterSize="m">
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
-            <EuiButtonEmpty
-              iconType="arrowLeft"
-              size="xs"
-              flush="left"
-              href={getHref('integrations_all')}
-            >
+            <EuiButtonEmpty iconType="arrowLeft" size="xs" flush="left" href={href}>
               <FormattedMessage
                 id="xpack.fleet.epm.browseAllButtonText"
-                defaultMessage="Browse all integrations"
+                defaultMessage="Back to integrations"
               />
             </EuiButtonEmpty>
           </div>
@@ -261,7 +267,7 @@ export function Detail() {
         </EuiFlexItem>
       </EuiFlexGroup>
     ),
-    [getHref, integrationInfo, isLoading, packageInfo]
+    [integrationInfo, isLoading, packageInfo, href]
   );
 
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
