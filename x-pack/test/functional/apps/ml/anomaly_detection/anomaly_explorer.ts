@@ -217,6 +217,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('restores app state from the URL state');
           await browser.refresh();
           await elasticChart.setNewChartUiDebugFlag(true);
+          await ml.swimLane.waitForSwimLanesToLoad();
           await ml.swimLane.assertSelection(overallSwimLaneTestSubj, {
             x: [1454846400000, 1454860800000],
             y: ['Overall'],
@@ -290,6 +291,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('restores app state from the URL state');
           await browser.refresh();
           await elasticChart.setNewChartUiDebugFlag(true);
+          await ml.swimLane.waitForSwimLanesToLoad();
           await ml.swimLane.assertSelection(viewBySwimLaneTestSubj, {
             x: [1454817600000, 1454832000000],
             y: ['AAL'],
