@@ -20,7 +20,7 @@ import { validateCasesFromAlertIDResponse } from '../../../../common/lib/validat
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const authSpace1 = getAuthWithSuperUser();
   const authSpace2 = getAuthWithSuperUser('space2');
@@ -32,26 +32,26 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return all cases with the same alert ID attached to them in space1', async () => {
       const [case1, case2, case3] = await Promise.all([
-        createCase(supertest, getPostCaseRequest(), 200, authSpace1),
-        createCase(supertest, getPostCaseRequest(), 200, authSpace1),
-        createCase(supertest, getPostCaseRequest(), 200, authSpace1),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, authSpace1),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, authSpace1),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, authSpace1),
       ]);
 
       await Promise.all([
         createComment({
-          supertest,
+          supertest: supertestWithoutAuth,
           caseId: case1.id,
           params: postCommentAlertReq,
           auth: authSpace1,
         }),
         createComment({
-          supertest,
+          supertest: supertestWithoutAuth,
           caseId: case2.id,
           params: postCommentAlertReq,
           auth: authSpace1,
         }),
         createComment({
-          supertest,
+          supertest: supertestWithoutAuth,
           caseId: case3.id,
           params: postCommentAlertReq,
           auth: authSpace1,
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext): void => {
       ]);
 
       const cases = await getCasesByAlert({
-        supertest,
+        supertest: supertestWithoutAuth,
         alertID: 'test-id',
         auth: authSpace1,
       });
@@ -70,26 +70,26 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('should return 1 case in space2 when 2 cases were created in space1 and 1 in space2', async () => {
       const [case1, case2, case3] = await Promise.all([
-        createCase(supertest, getPostCaseRequest(), 200, authSpace1),
-        createCase(supertest, getPostCaseRequest(), 200, authSpace1),
-        createCase(supertest, getPostCaseRequest(), 200, authSpace2),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, authSpace1),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, authSpace1),
+        createCase(supertestWithoutAuth, getPostCaseRequest(), 200, authSpace2),
       ]);
 
       await Promise.all([
         createComment({
-          supertest,
+          supertest: supertestWithoutAuth,
           caseId: case1.id,
           params: postCommentAlertReq,
           auth: authSpace1,
         }),
         createComment({
-          supertest,
+          supertest: supertestWithoutAuth,
           caseId: case2.id,
           params: postCommentAlertReq,
           auth: authSpace1,
         }),
         createComment({
-          supertest,
+          supertest: supertestWithoutAuth,
           caseId: case3.id,
           params: postCommentAlertReq,
           auth: authSpace2,
@@ -97,7 +97,7 @@ export default ({ getService }: FtrProviderContext): void => {
       ]);
 
       const casesByAlert = await getCasesByAlert({
-        supertest,
+        supertest: supertestWithoutAuth,
         alertID: 'test-id',
         auth: authSpace2,
       });

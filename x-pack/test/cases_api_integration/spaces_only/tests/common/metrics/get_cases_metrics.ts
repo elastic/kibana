@@ -17,7 +17,7 @@ import {
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
-  const supertest = getService('supertest');
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const kibanaServer = getService('kibanaServer');
   const authSpace1 = getAuthWithSuperUser();
 
@@ -50,7 +50,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('MTTR', () => {
       it('should calculate the mttr correctly on space 1', async () => {
         const metrics = await getCasesMetrics({
-          supertest,
+          supertest: supertestWithoutAuth,
           features: ['mttr'],
           auth: authSpace1,
         });
@@ -61,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should calculate the mttr correctly on space 2', async () => {
         const authSpace2 = getAuthWithSuperUser('space2');
         const metrics = await getCasesMetrics({
-          supertest,
+          supertest: supertestWithoutAuth,
           features: ['mttr'],
           auth: authSpace2,
         });
