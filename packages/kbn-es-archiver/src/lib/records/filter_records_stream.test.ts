@@ -26,7 +26,7 @@ describe('esArchiver: createFilterRecordsStream()', () => {
         },
         chance.bool(),
       ]),
-      createFilterRecordsStream('type'),
+      createFilterRecordsStream((record) => record.type === 'type'),
       createConcatStream([]),
     ]);
 
@@ -45,7 +45,7 @@ describe('esArchiver: createFilterRecordsStream()', () => {
         { type: chance.word({ length: 10 }), value: {} },
         { type: chance.word({ length: 10 }), value: {} },
       ]),
-      createFilterRecordsStream(type1),
+      createFilterRecordsStream((record) => record.type === type1),
       createConcatStream([]),
     ]);
 
