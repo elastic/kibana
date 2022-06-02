@@ -17,11 +17,9 @@ import { UrlStateContainerPropTypes } from './types';
 import { useUrlStateHooks } from './use_url_state';
 import { useLocation } from 'react-router-dom';
 import { DASHBOARDS_PATH, MANAGEMENT_PATH } from '../../../../common/constants';
-import { getAppLinks } from '../../links/app_links';
-import { StartPlugins } from '../../../types';
+import { links } from '../../links/app_links';
 import { updateAppLinks } from '../../links';
 import { allowedExperimentalValues } from '../../../../common/experimental_features';
-import { coreMock } from '@kbn/core/public/mocks';
 
 let mockProps: UrlStateContainerPropTypes;
 
@@ -56,11 +54,9 @@ jest.mock('../navigation/helpers', () => ({
 }));
 
 describe('UrlStateContainer - lodash.throttle mocked to test update url', () => {
-  beforeAll(async () => {
+  beforeAll(() => {
     mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
-
-    const appLinks = await getAppLinks(coreMock.createStart(), {} as StartPlugins);
-    updateAppLinks(appLinks, {
+    updateAppLinks(links, {
       experimentalFeatures: allowedExperimentalValues,
       capabilities: {
         navLinks: {},

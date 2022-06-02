@@ -17,7 +17,7 @@ import {
   getLinkInfo,
   needsUrlState,
   updateAppLinks,
-  excludeAppLink,
+  useLinkExists,
 } from './links';
 
 const defaultAppLinks: AppLinkItems = [
@@ -56,6 +56,10 @@ const mockLicense = {
 
 const renderUseAppLinks = () =>
   renderHook<{}, AppLinkItems>(() => useAppLinks(), { wrapper: TestProviders });
+const renderUseLinkExists = (id: SecurityPageName) =>
+  renderHook<SecurityPageName, boolean>(() => useLinkExists(id), {
+    wrapper: TestProviders,
+  });
 
 describe('Security app links', () => {
   beforeEach(() => {
@@ -159,27 +163,68 @@ describe('Security app links', () => {
     });
   });
 
-  describe('excludeAppLink', () => {
-    it('should exclude link from app links', async () => {
-      const { result, waitForNextUpdate } = renderUseAppLinks();
+  describe('useLinkExists', () => {
+    it('should return true if the link exists', () => {
+      const { result } = renderUseLinkExists(SecurityPageName.hostsEvents);
+      expect(result.current).toBe(true);
+    });
+
+    it('should return false if the link does not exists', () => {
+      const { result } = renderUseLinkExists(SecurityPageName.rules);
+      expect(result.current).toBe(false);
+    });
+
+    it('should update if the links are removed', async () => {
+      const { result, waitForNextUpdate } = renderUseLinkExists(SecurityPageName.hostsEvents);
+      expect(result.current).toBe(true);
       await act(async () => {
-        excludeAppLink(SecurityPageName.hostsEvents);
-        await waitForNextUpdate();
-      });
-      expect(result.current).toStrictEqual([
-        {
-          id: SecurityPageName.hosts,
-          title: 'Hosts',
-          path: '/hosts',
-          links: [
+        updateAppLinks(
+          [
             {
-              id: SecurityPageName.hostsAuthentications,
-              title: 'Authentications',
-              path: `/hosts/authentications`,
+              id: SecurityPageName.hosts,
+              title: 'Hosts',
+              path: '/hosts',
             },
           ],
-        },
-      ]);
+          {
+            capabilities: mockCapabilities,
+            experimentalFeatures: mockExperimentalDefaults,
+            license: mockLicense,
+          }
+        );
+        await waitForNextUpdate();
+      });
+      expect(result.current).toBe(false);
+    });
+
+    it('should update if the links are added', async () => {
+      const { result, waitForNextUpdate } = renderUseLinkExists(SecurityPageName.rules);
+      expect(result.current).toBe(false);
+      await act(async () => {
+        updateAppLinks(
+          [
+            {
+              id: SecurityPageName.hosts,
+              title: 'Hosts',
+              path: '/hosts',
+              links: [
+                {
+                  id: SecurityPageName.rules,
+                  title: 'Rules',
+                  path: '/rules',
+                },
+              ],
+            },
+          ],
+          {
+            capabilities: mockCapabilities,
+            experimentalFeatures: mockExperimentalDefaults,
+            license: mockLicense,
+          }
+        );
+        await waitForNextUpdate();
+      });
+      expect(result.current).toBe(true);
     });
   });
 
