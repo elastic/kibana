@@ -111,15 +111,18 @@ function OverviewPageStatusIndicator({ staleMessage }) {
       <div style={{ marginBottom: '8px' }}>
         <EuiToolTip position="top" content={staleMessage}>
           <EuiBadge iconType="alert" color="warning">
-            {i18n.translate('xpack.monitoring.kibana.clusterStatus.staleStatusInstancesLabel', {
-              defaultMessage: 'Stale',
-            })}
+            {i18n.translate(
+              'xpack.monitoring.kibana.clusterStatus.overview.staleStatusInstancesLabel',
+              {
+                defaultMessage: 'Stale',
+              }
+            )}
           </EuiBadge>
         </EuiToolTip>
       </div>
       <EuiLink href={instancesHref}>
         {i18n.translate(
-          'xpack.monitoring.cluster.overview.kibanaPanel.staleStatusLinkToInstancesLabel',
+          'xpack.monitoring.kibana.clusterStatus.overview.staleStatusLinkToInstancesLabel',
           {
             defaultMessage: 'View all instances',
           }
@@ -130,7 +133,7 @@ function OverviewPageStatusIndicator({ staleMessage }) {
 
   return (
     <EuiStat
-      description={i18n.translate('xpack.monitoring.kibana.clusterStatus.statusLabel', {
+      description={i18n.translate('xpack.monitoring.kibana.clusterStatus.overview.statusLabel', {
         defaultMessage: 'Status',
       })}
       title={title}
@@ -145,16 +148,19 @@ function InstancesPageStatusIndicator({ staleMessage }) {
   const title = (
     <EuiToolTip position="top" content={staleMessage}>
       <EuiBadge iconType="alert" color="warning">
-        {i18n.translate('xpack.monitoring.kibana.clusterStatus.staleStatusInstancesLabel', {
-          defaultMessage: 'Stale',
-        })}
+        {i18n.translate(
+          'xpack.monitoring.kibana.clusterStatus.instances.staleStatusInstancesLabel',
+          {
+            defaultMessage: 'Stale',
+          }
+        )}
       </EuiBadge>
     </EuiToolTip>
   );
 
   return (
     <EuiStat
-      description={i18n.translate('xpack.monitoring.kibana.clusterStatus.statusLabel', {
+      description={i18n.translate('xpack.monitoring.kibana.clusterStatus.instances.statusLabel', {
         defaultMessage: 'Status',
       })}
       title={title}

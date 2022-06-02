@@ -101,7 +101,7 @@ function prepareStaleMessage(status, lastSeenTimestamp, staleStatusThresholdSeco
     dateFormat
   );
 
-  const staleMessage = i18n.translate('xpack.monitoring.kibana.listing.staleStatusTooltip', {
+  const staleMessage = i18n.translate('xpack.monitoring.kibana.detailStatus.staleStatusTooltip', {
     defaultMessage:
       "It's been more than {staleStatusThresholdSeconds} seconds since we have heard from this instance. Last seen: {lastSeenTimestamp}",
     values: {
@@ -125,7 +125,7 @@ function prepareStaleMessage(status, lastSeenTimestamp, staleStatusThresholdSeco
       <span style={{ marginLeft: '8px' }}>
         <EuiToolTip position="top" content={staleMessage}>
           <EuiBadge iconType="alert" color="warning">
-            {i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.staleStatusLabel', {
+            {i18n.translate('xpack.monitoring.kibana.detailStatus.staleStatusLabel', {
               defaultMessage: 'Stale',
             })}
           </EuiBadge>
