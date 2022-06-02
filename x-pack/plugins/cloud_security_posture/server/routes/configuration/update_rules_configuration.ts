@@ -130,10 +130,10 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
       }
 
       try {
-        const userAuth = await cspContext.security.authc.getCurrentUser(request);
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
         const soClient = coreContext.savedObjects.client;
+        const userAuth = await cspContext.security.authc.getCurrentUser(request);
         const packagePolicyService = cspContext.service.packagePolicyService;
         const packagePolicyId = request.body.package_policy_id;
 
