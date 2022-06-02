@@ -9,8 +9,7 @@
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import type { DataViewField } from '../../..';
-import { DataView } from '../../..';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 describe('rare terms Agg', () => {
   const getAggConfigs = (params: Record<string, any> = {}) => {

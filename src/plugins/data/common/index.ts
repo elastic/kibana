@@ -100,28 +100,22 @@ export {
   CSV_MIME_TYPE,
 } from './exports';
 export type {
-  IFieldType,
   IIndexPatternFieldList,
   FieldFormatMap,
   RuntimeType,
   RuntimeField,
-  IIndexPattern,
   DataViewAttributes,
-  IndexPatternAttributes,
   FieldAttrs,
   FieldAttrSet,
   OnNotification,
   OnError,
   UiSettingsCommon,
-  SavedObjectsClientCommonFindArgs,
-  SavedObjectsClientCommon,
   GetFieldsOptions,
   IDataViewsApiClient,
   SavedObject,
   AggregationRestrictions,
   TypeMeta,
   FieldSpecConflictDescriptions,
-  FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
   DataViewSpec,
@@ -130,11 +124,7 @@ export type {
   IndexPatternLoadStartDependencies,
   IndexPatternLoadExpressionFunctionDefinition,
 } from '@kbn/data-views-plugin/common';
-export type {
-  IndexPatternsContract,
-  DataViewsContract,
-  DataViewListItem,
-} from '@kbn/data-views-plugin/common';
+export type { DataViewsContract, DataViewListItem } from '@kbn/data-views-plugin/common';
 export {
   RUNTIME_FIELD_TYPES,
   DEFAULT_ASSETS_TO_IGNORE,
@@ -146,7 +136,6 @@ export {
   DataViewType,
   IndexPatternsService,
   DataViewsService,
-  IndexPattern,
   DataView,
   DuplicateDataViewError,
   DataViewSavedObjectConflictError,
