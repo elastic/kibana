@@ -134,7 +134,7 @@ const getColumns = (
         const lastSeenTimestamp = prepareLastSeenTimestamp(lastSeenTimestampRaw, dateFormat);
         const staleMessage = i18n.translate('xpack.monitoring.kibana.listing.staleStatusTooltip', {
           defaultMessage:
-            "It's been more than {staleStatusThresholdSeconds} seconds since we heard from this instance.",
+            "It's been more than {staleStatusThresholdSeconds} seconds since we have heard from this instance.",
           values: {
             staleStatusThresholdSeconds,
           },

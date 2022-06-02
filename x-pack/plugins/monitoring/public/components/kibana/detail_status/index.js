@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIconTip, EuiStat } from '@elastic/eui';
+import { EuiBadge, EuiStat, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { capitalize } from 'lodash';
@@ -103,27 +103,18 @@ function prepareStaleMessage(status, lastSeenTimestamp, staleStatusThresholdSeco
 
   const staleMessage = i18n.translate('xpack.monitoring.kibana.listing.staleStatusTooltip', {
     defaultMessage:
-      "It's been more than {staleStatusThresholdSeconds} seconds since we heard from this instance. Last seen: {lastSeenTimestamp}",
+      "It's been more than {staleStatusThresholdSeconds} seconds since we have heard from this instance. Last seen: {lastSeenTimestamp}",
     values: {
       staleStatusThresholdSeconds,
       lastSeenTimestamp: shouldShowRelativeTime ? relativeTime : formattedTimestamp,
     },
   });
 
-  const description = (
-    <>
-      {i18n.translate('xpack.monitoring.kibana.detailStatus.staleStatusMetricDescription', {
-        defaultMessage: 'Last Reported Status',
-      })}
-      &nbsp;
-      <EuiIconTip
-        aria-label={staleMessage}
-        content={staleMessage}
-        size="l"
-        type="alert"
-        color="warning"
-      />
-    </>
+  const description = i18n.translate(
+    'xpack.monitoring.kibana.detailStatus.staleStatusMetricDescription',
+    {
+      defaultMessage: 'Last Reported Status',
+    }
   );
 
   const title = (
@@ -131,6 +122,15 @@ function prepareStaleMessage(status, lastSeenTimestamp, staleStatusThresholdSeco
       <KibanaStatusIcon status={status} />
       &nbsp;
       {capitalize(status)}
+      <span style={{ marginLeft: '8px' }}>
+        <EuiToolTip position="top" content={staleMessage}>
+          <EuiBadge iconType="alert" color="warning">
+            {i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.staleStatusLabel', {
+              defaultMessage: 'Stale',
+            })}
+          </EuiBadge>
+        </EuiToolTip>
+      </span>
     </>
   );
 

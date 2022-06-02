@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiLink, EuiToolTip, EuiIcon, EuiStat } from '@elastic/eui';
+import { EuiBadge, EuiLink, EuiStat, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
 import { formatMetric } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
-import { SummaryStatus, DefaultStatusIndicator } from '../../summary_status';
+import { DefaultStatusIndicator, SummaryStatus } from '../../summary_status';
 import { KibanaStatusIcon } from '../status_icon';
 
 export function ClusterStatus({ stats, alerts }) {
@@ -79,7 +79,7 @@ export function ClusterStatus({ stats, alerts }) {
       'xpack.monitoring.kibana.clusterStatus.staleStatusTooltip',
       {
         defaultMessage:
-          "It's been more than {staleStatusThresholdSeconds} seconds since we heard from some instances.",
+          "It's been more than {staleStatusThresholdSeconds} seconds since we have heard from some instances.",
         values: {
           staleStatusThresholdSeconds,
         },
@@ -108,15 +108,13 @@ function OverviewPageStatusIndicator({ staleMessage }) {
 
   const title = (
     <>
-      <div>
+      <div style={{ marginBottom: '8px' }}>
         <EuiToolTip position="top" content={staleMessage}>
-          <>
-            <EuiIcon size="l" type="alert" color="warning" />
-            &nbsp;
+          <EuiBadge iconType="alert" color="warning">
             {i18n.translate('xpack.monitoring.kibana.clusterStatus.staleStatusInstancesLabel', {
               defaultMessage: 'Stale',
             })}
-          </>
+          </EuiBadge>
         </EuiToolTip>
       </div>
       <EuiLink href={instancesHref}>
@@ -146,13 +144,11 @@ function OverviewPageStatusIndicator({ staleMessage }) {
 function InstancesPageStatusIndicator({ staleMessage }) {
   const title = (
     <EuiToolTip position="top" content={staleMessage}>
-      <span>
-        <EuiIcon size="l" type="alert" color="warning" />
-        &nbsp;
+      <EuiBadge iconType="alert" color="warning">
         {i18n.translate('xpack.monitoring.kibana.clusterStatus.staleStatusInstancesLabel', {
           defaultMessage: 'Stale',
         })}
-      </span>
+      </EuiBadge>
     </EuiToolTip>
   );
 

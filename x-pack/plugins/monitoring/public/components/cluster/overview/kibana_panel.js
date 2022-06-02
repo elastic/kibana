@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiDescriptionList,
   EuiDescriptionListDescription,
   EuiDescriptionListTitle,
@@ -16,7 +17,6 @@ import {
   EuiLink,
   EuiPanel,
   EuiTitle,
-  EuiIcon,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,10 +27,10 @@ import { KIBANA_SYSTEM_ID, RULE_KIBANA_VERSION_MISMATCH } from '../../../../comm
 import { SetupModeFeature } from '../../../../common/enums';
 import { AlertsBadge } from '../../../alerts/badge';
 import { shouldShowAlertBadge } from '../../../alerts/lib/should_show_alert_badge';
+import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
 import { formatNumber } from '../../../lib/format_number';
 import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
 import { isSetupModeFeatureEnabled } from '../../../lib/setup_mode';
-import { ExternalConfigContext } from '../../../application/contexts/external_config_context';
 import { SetupModeContext } from '../../setup_mode/setup_mode_context';
 import { SetupModeTooltip } from '../../setup_mode/tooltip';
 import {
@@ -220,7 +220,7 @@ function statusIndicator(status, someStatusIsStale, instancesHref, staleStatusTh
     'xpack.monitoring.cluster.overview.kibanaPanel.staleStatusTooltip',
     {
       defaultMessage:
-        "It's been more than {staleStatusThresholdSeconds} seconds since we heard from some instances.",
+        "It's been more than {staleStatusThresholdSeconds} seconds since we have heard from some instances.",
       values: {
         staleStatusThresholdSeconds,
       },
@@ -229,15 +229,13 @@ function statusIndicator(status, someStatusIsStale, instancesHref, staleStatusTh
 
   return (
     <>
-      <div>
+      <div style={{ marginBottom: '8px' }}>
         <EuiToolTip position="top" content={staleMessage}>
-          <>
-            <EuiIcon size="l" type="alert" color="warning" />
-            &nbsp;
+          <EuiBadge iconType="alert" color="warning">
             {i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.staleStatusLabel', {
               defaultMessage: 'Stale',
             })}
-          </>
+          </EuiBadge>
         </EuiToolTip>
       </div>
       <EuiLink href={instancesHref}>
