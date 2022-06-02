@@ -76,6 +76,7 @@ describe('EMS is enabled', () => {
   it('Should get initial layer with EMS tile source', () => {
     expect(createBasemapLayerDescriptor()).toEqual({
       alpha: 1,
+      colorFilter: {},
       __dataRequests: [],
       id: '12345',
       includeInFitToBounds: true,
