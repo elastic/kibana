@@ -7,7 +7,7 @@
  */
 
 /**
- * All runtime field types
+ * All runtime field types.
  * @public
  */
 export const RUNTIME_FIELD_TYPES = [
@@ -37,19 +37,19 @@ export const DEFAULT_ASSETS_TO_IGNORE = {
 };
 
 /**
- * UiSettings key to get metaFields list
+ * UiSettings key for metaFields list.
  * @public
  */
 export const META_FIELDS = 'metaFields';
 
 /**
- * Data view saved object type
+ * Data view saved object type.
  * @public
  */
 export const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
 
 /**
- * Data views plugin name
+ * Data views plugin name.
  * @public
  */
 export const PLUGIN_NAME = 'DataViews';

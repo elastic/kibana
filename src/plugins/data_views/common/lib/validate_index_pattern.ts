@@ -24,9 +24,9 @@ function findIllegalCharacters(indexPattern: string): string[] {
 }
 
 /**
- * validates index pattern strings
+ * Validates index pattern strings
  * @param indexPattern
- * @returns object with validation errors
+ * @returns Object with validation errors
  */
 
 export function validateIndexPattern(indexPattern: string) {

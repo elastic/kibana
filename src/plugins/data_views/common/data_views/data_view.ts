@@ -50,7 +50,7 @@ export interface TimeBasedDataView extends DataView {
    */
   timeFieldName: NonNullable<DataView['timeFieldName']>;
   /**
-   * The timestamp field
+   * The timestamp field.
    */
   getTimeField: () => DataViewField;
 }
@@ -60,7 +60,7 @@ export interface TimeBasedDataView extends DataView {
  */
 export class DataView implements DataViewBase {
   /**
-   * saved object id
+   * Saved object id
    */
   public id?: string;
   /**
@@ -72,7 +72,7 @@ export class DataView implements DataViewBase {
    */
   public fieldFormatMap: Record<string, any>;
   /**
-   * Only used by rollup indices, used by rollup specific endpoint to load field list
+   * Only used by rollup indices, used by rollup specific endpoint to load field list.
    */
   public typeMeta?: TypeMeta;
   /**
@@ -84,7 +84,7 @@ export class DataView implements DataViewBase {
    */
   public timeFieldName: string | undefined;
   /**
-   * Type is used to identify rollup index patterns
+   * Type is used to identify rollup index patterns.
    */
   public type: string | undefined;
   /**
@@ -120,7 +120,7 @@ export class DataView implements DataViewBase {
    */
   private fieldFormats: FieldFormatsStartCommon;
   /**
-   * Map of field attributes by field name. Currently count and customLabel
+   * Map of field attributes by field name. Currently count and customLabel.
    */
   private fieldAttrs: FieldAttrs;
   /**
@@ -129,7 +129,7 @@ export class DataView implements DataViewBase {
   private runtimeFieldMap: Record<string, RuntimeFieldSpec>;
 
   /**
-   * prevents errors when index pattern exists before indices
+   * Prevents errors when index pattern exists before indices
    */
   public readonly allowNoIndex: boolean = false;
 
@@ -175,7 +175,7 @@ export class DataView implements DataViewBase {
   getOriginalSavedObjectBody = () => ({ ...this.originalSavedObjectBody });
 
   /**
-   * Reset last saved saved object fields. used after saving
+   * Reset last saved saved object fields. Used after saving.
    */
   resetOriginalSavedObjectBody = () => {
     this.originalSavedObjectBody = this.getAsSavedObjectBody();
@@ -257,7 +257,7 @@ export class DataView implements DataViewBase {
   }
 
   /**
-   * Create static representation of index pattern
+   * Creates static representation of the data view.
    */
   public toSpec(): DataViewSpec {
     return {
@@ -287,7 +287,7 @@ export class DataView implements DataViewBase {
   }
 
   /**
-   * Remove scripted field from field list
+   * Removes scripted field from field list.
    * @param fieldName name of scripted field to remove
    * @deprecated use runtime field instead
    */
@@ -301,7 +301,7 @@ export class DataView implements DataViewBase {
 
   /**
    *
-   * @deprecated Will be removed when scripted fields are removed
+   * @deprecated Will be removed when scripted fields are removed.
    */
   getNonScriptedFields() {
     return [...this.fields.getAll().filter((field) => !field.scripted)];
@@ -309,7 +309,7 @@ export class DataView implements DataViewBase {
 
   /**
    *
-   * @deprecated use runtime field instead
+   * @deprecated Use runtime field instead.
    */
   getScriptedFields() {
     return [...this.fields.getAll().filter((field) => field.scripted)];
@@ -341,7 +341,7 @@ export class DataView implements DataViewBase {
   }
 
   /**
-   * Get field by name
+   * Get field by name.
    * @param name field name
    */
 
@@ -351,7 +351,7 @@ export class DataView implements DataViewBase {
   }
 
   /**
-   * Get aggregation restrictions
+   * Get aggregation restrictions. Rollup fields can only perform a subset of aggregations.
    */
 
   getAggregationRestrictions() {
@@ -461,7 +461,7 @@ export class DataView implements DataViewBase {
   }
 
   /**
-   * Get all runtime field definitions
+   * Get all runtime field definitions.
    * @returns map of runtime field definitions by field name
    */
 
@@ -476,7 +476,7 @@ export class DataView implements DataViewBase {
   }
 
   /**
-   * Returns data view fields backed by runtime fields
+   * Returns data view fields backed by runtime fields.
    * @param name runtime field name
    * @returns map of DataViewFields (that are runtime fields) by field name
    */
@@ -511,7 +511,7 @@ export class DataView implements DataViewBase {
   }
 
   /**
-   * Replaces all existing runtime fields with new fields
+   * Replaces all existing runtime fields with new fields.
    * @param newFields Map of runtime field definitions by field name
    */
   replaceAllRuntimeFields(newFields: Record<string, RuntimeField>) {
@@ -545,7 +545,7 @@ export class DataView implements DataViewBase {
   }
 
   /**
-   * Return the "runtime_mappings" section of the ES search query
+   * Return the "runtime_mappings" section of the ES search query.
    */
   getRuntimeMappings(): estypes.MappingRuntimeFields {
     // @ts-expect-error The ES client does not yet include the "composite" runtime type
@@ -553,7 +553,7 @@ export class DataView implements DataViewBase {
   }
 
   /**
-   * Get formatter for a given field name. Return undefined if none exists
+   * Get formatter for a given field name. Return undefined if none exists.
    * @param fieldname name of field to get formatter for
    */
   getFormatterForFieldNoDefault(fieldname: string) {
@@ -616,7 +616,7 @@ export class DataView implements DataViewBase {
   }
 
   /**
-   * set field formatter
+   * Set field formatter
    * @param fieldName name of field to set format on
    * @param format field format in serialized form
    */
@@ -625,7 +625,7 @@ export class DataView implements DataViewBase {
   };
 
   /**
-   * Remove field format from the field format map
+   * Remove field format from the field format map.
    * @param fieldName field name associated with the format for removal
    */
 
@@ -634,7 +634,7 @@ export class DataView implements DataViewBase {
   };
 
   /**
-   *
+   * Add composite runtime field and all subfields.
    * @param name field name
    * @param runtimeField runtime field definition
    * @returns data view field instance

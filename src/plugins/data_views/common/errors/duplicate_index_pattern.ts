@@ -7,7 +7,7 @@
  */
 
 /**
- * Error thrown when attempting to create duplicate index pattern based on title
+ * Error thrown when attempting to create duplicate index pattern based on title.
  * @public
  */
 export class DuplicateDataViewError extends Error {

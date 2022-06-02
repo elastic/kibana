@@ -7,7 +7,7 @@
  */
 
 /**
- * Error thrown when saved object has been changed when attempting to save
+ * Error thrown when saved object has been changed when attempting to save.
  */
 export class DataViewSavedObjectConflictError extends Error {
   /**

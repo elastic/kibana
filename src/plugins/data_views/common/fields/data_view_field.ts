@@ -21,6 +21,7 @@ import {
 
 /**
  * Optional format getter when serializing a field
+ * @public
  */
 export interface ToSpecConfig {
   /**
@@ -37,7 +38,7 @@ export class DataViewField implements DataViewFieldBase {
   readonly spec: FieldSpec;
   // not writable or serialized
   /**
-   * Kbn field type - Type used mainly for formattering
+   * Kbn field type, used mainly for formattering.
    */
   private readonly kbnFieldType: KbnFieldType;
 
@@ -54,14 +55,14 @@ export class DataViewField implements DataViewFieldBase {
 
   // writable attrs
   /**
-   * Count is used for field popularity in discover
+   * Count is used for field popularity in discover.
    */
   public get count() {
     return this.spec.count || 0;
   }
 
   /**
-   * Set count, which is used for field popularity in discover
+   * Set count, which is used for field popularity in discover.
    * @param count count number
    */
   public set count(count: number) {
@@ -69,7 +70,7 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
-   * Returns runtime field definition or undefined if field is not runtime field
+   * Returns runtime field definition or undefined if field is not runtime field.
    */
 
   public get runtimeField() {
@@ -77,7 +78,7 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
-   * Sets runtime field definition or unsets if undefined is provided
+   * Sets runtime field definition or unsets if undefined is provided.
    * @param runtimeField runtime field definition
    */
   public set runtimeField(runtimeField: RuntimeFieldSpec | undefined) {
@@ -107,7 +108,7 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
-   * Sets scripted field langauge
+   * Sets scripted field langauge.
    * @param lang Scripted field language
    */
   public set lang(lang) {
@@ -115,7 +116,7 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
-   * Returns custom label if set, otherwise undefined
+   * Returns custom label if set, otherwise undefined.
    */
 
   public get customLabel() {
@@ -123,7 +124,7 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
-   * Sets custom label for field, or unsets if passed undefined
+   * Sets custom label for field, or unsets if passed undefined.
    * @param customLabel custom label value
    */
   public set customLabel(customLabel) {
@@ -131,14 +132,14 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
-   * Description of field type conflicts across different indices in the same index pattern
+   * Description of field type conflicts across different indices in the same index pattern.
    */
   public get conflictDescriptions() {
     return this.spec.conflictDescriptions;
   }
 
   /**
-   * Sets conflict descriptions for field
+   * Sets conflict descriptions for field.
    * @param conflictDescriptions conflict descriptions
    */
 
@@ -156,7 +157,7 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
-   * Gets display name, calcualted based on name, custom label and shortDotsEnable
+   * Gets display name, calcualted based on name, custom label and shortDotsEnable.
    */
 
   public get displayName(): string {
@@ -207,7 +208,7 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
-   * Returns true if field is available vai doc values
+   * Returns true if field is available via doc values
    */
 
   public get readFromDocValues() {
@@ -331,8 +332,8 @@ export class DataViewField implements DataViewFieldBase {
   }
 
   /**
-   * Get field in serialized form - fieldspec
-   * @param param0 provide a method to get a field formatter
+   * Get field in serialized form - fieldspec.
+   * @param config provide a method to get a field formatter
    * @returns field in serialized form - field spec
    */
   public toSpec(config: ToSpecConfig = {}): FieldSpec {

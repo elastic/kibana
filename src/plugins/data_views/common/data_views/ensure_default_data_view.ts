@@ -12,13 +12,14 @@ import { DataViewsContract } from './data_views';
  * one otherwise.
  * @public
  */
-export type EnsureDefaultDataView = () => Promise<unknown> | void;
+export type EnsureDefaultDataView = () => Promise<void> | void;
 
 /**
  * Checks whether a default data view is set and exists and defines
  * one otherwise.
  * @public
  * @param onRedirectNoDefaultView - Callback to redirect to a new data view
+ * @return returned promise resolves when the default data view is set
  */
 export const createEnsureDefaultDataView = (onRedirectNoDefaultView: EnsureDefaultDataView) => {
   return async function ensureDefaultDataView(this: DataViewsContract) {
