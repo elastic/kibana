@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { getDocLinksMock, getDocLinksMetaMock } from './doc_links_service.test.mocks';
 import { DocLinksService } from './doc_links_service';
-import { mockCoreContext } from '../core_context.mock';
 
 describe('DocLinksService', () => {
   let coreContext: ReturnType<typeof mockCoreContext.create>;

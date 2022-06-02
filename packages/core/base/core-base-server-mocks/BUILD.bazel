@@ -2,8 +2,8 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_DIRNAME = "core-doc-links-server-internal"
-PKG_REQUIRE_NAME = "@kbn/core-doc-links-server-internal"
+PKG_DIRNAME = "core-base-server-mocks"
+PKG_REQUIRE_NAME = "@kbn/core-base-server-mocks"
 
 SOURCE_FILES = glob(
   [
@@ -26,16 +26,21 @@ NPM_MODULE_EXTRA_FILES = [
 ]
 
 RUNTIME_DEPS = [
-  "//packages/core/base/core-base-server-mocks",
+  "//packages/kbn-utils",
+  "//packages/kbn-config",
+  "//packages/kbn-logging-mocks",
+  "//packages/kbn-config-mocks",
 ]
 
 TYPES_DEPS = [
   "@npm//@types/node",
   "@npm//@types/jest",
-  "//packages/kbn-doc-links:npm_module_types",
+  "//packages/kbn-utils:npm_module_types",
+  "//packages/kbn-config:npm_module_types",
+  "//packages/kbn-config-mocks:npm_module_types",
+  "//packages/kbn-logging:npm_module_types",
+  "//packages/kbn-logging-mocks:npm_module_types",
   "//packages/core/base/core-base-server-internal:npm_module_types",
-  "//packages/core/base/core-base-server-mocks:npm_module_types",
-  "//packages/core/doc-links/core-doc-links-server:npm_module_types",
 ]
 
 jsts_transpiler(
