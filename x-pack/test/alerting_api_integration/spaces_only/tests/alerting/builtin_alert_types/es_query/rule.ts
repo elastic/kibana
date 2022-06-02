@@ -481,7 +481,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(activeTitle).to.be(`rule 'fire then recovers' matched query`);
         expect(activeValue).to.be('0');
         expect(activeMessage).to.match(
-          /rule 'fire then recovers' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is less than 1 over 3s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/
+          /rule 'fire then recovers' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is less than 1 over 4s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/
         );
 
         const recoveredDoc = docs[1];
@@ -494,7 +494,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
         expect(recoveredName).to.be('fire then recovers');
         expect(recoveredTitle).to.be(`rule 'fire then recovers' recovered`);
         expect(recoveredMessage).to.match(
-          /rule 'fire then recovers' is recovered:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is NOT less than 1 over 3s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/
+          /rule 'fire then recovers' is recovered:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is NOT less than 1 over 4s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/
         );
       })
     );
