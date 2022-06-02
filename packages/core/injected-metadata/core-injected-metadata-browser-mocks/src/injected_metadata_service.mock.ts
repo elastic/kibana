@@ -7,10 +7,13 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { InjectedMetadataService, InjectedMetadataSetup } from './injected_metadata_service';
+import type {
+  InjectedMetadataService,
+  InternalInjectedMetadataSetup,
+} from '@kbn/core-injected-metadata-browser-internal';
 
 const createSetupContractMock = () => {
-  const setupContract: jest.Mocked<InjectedMetadataSetup> = {
+  const setupContract: jest.Mocked<InternalInjectedMetadataSetup> = {
     getBasePath: jest.fn(),
     getServerBasePath: jest.fn(),
     getPublicBaseUrl: jest.fn(),

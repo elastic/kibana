@@ -261,7 +261,7 @@ export type {
   LogLevel,
 } from '@kbn/logging';
 
-export { PluginType } from './plugins';
+export { PluginType } from '@kbn/core-base-common';
 
 export type {
   DiscoveredPlugin,
