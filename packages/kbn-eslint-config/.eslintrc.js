@@ -104,8 +104,8 @@ module.exports = {
         },
         {
           from: '@kbn/utility-types/jest',
-          to: '@kbn/utility-types',
-          disallowedMessage: `import from @kbn/utility-types instead`
+          to: '@kbn/utility-types-jest',
+          disallowedMessage: `import from @kbn/utility-types-jest instead`
         },
       ],
     ],

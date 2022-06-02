@@ -14,7 +14,7 @@ import {
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import type { DeeplyMockedKeys } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { RouteDefinitionParams } from '.';
 import { licenseMock } from '../../common/licensing/index.mock';

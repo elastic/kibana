@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import type { DeeplyMockedKeys } from '@kbn/utility-types';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { InternalAuthenticationServiceStart } from '../../authentication';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
@@ -36,6 +36,7 @@ describe('API keys enabled', () => {
     defineEnabledApiKeysRoutes(mockRouteDefinitionParams);
 
     const [, apiKeyRouteHandler] = mockRouteDefinitionParams.router.get.mock.calls.find(
+      // @ts-expect-error
       ([{ path }]) => path === '/internal/security/api_key/_enabled'
     )!;
     routeHandler = apiKeyRouteHandler;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerHasDataViewsRoute } from './has_data_views';

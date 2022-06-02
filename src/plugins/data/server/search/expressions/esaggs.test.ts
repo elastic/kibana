@@ -8,7 +8,7 @@
 
 import { omit } from 'lodash';
 import { of as mockOf } from 'rxjs';
-import type { MockedKeys } from '@kbn/utility-types';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { KibanaRequest } from '@kbn/core/server';
 import type { ExecutionContext } from '@kbn/expressions-plugin/server';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
