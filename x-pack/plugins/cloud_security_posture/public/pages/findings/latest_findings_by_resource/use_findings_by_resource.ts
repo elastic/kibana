@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { useContext } from 'react';
 import { useQuery } from 'react-query';
 import { lastValueFrom } from 'rxjs';
 import { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Pagination } from '@elastic/eui';
+import { FindingsEsPitContext } from '../es_pit/findings_es_pit_context';
+import { FINDINGS_REFETCH_INTERVAL_MS } from '../constants';
 import { useKibana } from '../../../common/hooks/use_kibana';
 import { showErrorToast } from '../latest_findings/use_latest_findings';
 import type { FindingsBaseEsQuery, FindingsQueryResult } from '../types';
@@ -31,8 +34,26 @@ type FindingsAggResponse = IKibanaSearchResponse<
   estypes.SearchResponse<{}, FindingsByResourceAggs>
 >;
 
+interface FindingsByResourcePage {
+  failed_findings: {
+    count: number;
+    normalized: number;
+    total_findings: number;
+  };
+  resource_id: string;
+  resource_name: string;
+  resource_subtype: string;
+  cluster_id: string;
+  cis_sections: string[];
+}
+
+interface UseFindingsByResourceData {
+  page: FindingsByResourcePage[];
+  total: number;
+}
+
 export type CspFindingsByResourceResult = FindingsQueryResult<
-  ReturnType<typeof useFindingsByResource>['data'],
+  UseFindingsByResourceData | undefined,
   unknown
 >;
 
@@ -50,12 +71,11 @@ interface FindingsAggBucket extends estypes.AggregationsStringRareTermsBucketKey
 }
 
 export const getFindingsByResourceAggQuery = ({
-  index,
   query,
   from,
   size,
-}: UseResourceFindingsOptions): estypes.SearchRequest => ({
-  index,
+  pitId,
+}: UseResourceFindingsOptions & { pitId: string }): estypes.SearchRequest => ({
   body: {
     query,
     size: 0,
@@ -95,23 +115,28 @@ export const getFindingsByResourceAggQuery = ({
         },
       },
     },
+    pit: { id: pitId },
   },
+  ignore_unavailable: false,
 });
 
-export const useFindingsByResource = ({ index, query, from, size }: UseResourceFindingsOptions) => {
+export const useFindingsByResource = ({ query, from, size }: UseResourceFindingsOptions) => {
   const {
     data,
     notifications: { toasts },
   } = useKibana().services;
 
-  return useQuery(
-    ['csp_findings_resource', { index, query, size, from }],
+  const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
+  const pitId = pitIdRef.current;
+
+  return useQuery<UseFindingsByResourceData & { newPitId: string }>(
+    ['csp_findings_resource', { query, size, from, pitId }],
     () =>
       lastValueFrom(
         data.search.search<FindingsAggRequest, FindingsAggResponse>({
-          params: getFindingsByResourceAggQuery({ index, query, from, size }),
+          params: getFindingsByResourceAggQuery({ query, from, size, pitId }),
         })
-      ).then(({ rawResponse: { aggregations } }) => {
+      ).then(({ rawResponse: { aggregations, pit_id: newPitId } }) => {
         if (!aggregations) throw new Error('expected aggregations to be defined');
 
         if (!Array.isArray(aggregations.resources.buckets))
@@ -120,16 +145,23 @@ export const useFindingsByResource = ({ index, query, from, size }: UseResourceF
         return {
           page: aggregations.resources.buckets.map(createFindingsByResource),
           total: aggregations.resource_total.value,
+          newPitId: newPitId!,
         };
       }),
     {
       keepPreviousData: true,
       onError: (err) => showErrorToast(toasts, err),
+      onSuccess: ({ newPitId }) => {
+        setPitId(newPitId);
+      },
+      // Refetching on an interval to ensure the PIT window stays open
+      refetchInterval: FINDINGS_REFETCH_INTERVAL_MS,
+      refetchIntervalInBackground: true,
     }
   );
 };
 
-const createFindingsByResource = (resource: FindingsAggBucket) => {
+const createFindingsByResource = (resource: FindingsAggBucket): FindingsByResourcePage => {
   if (
     !Array.isArray(resource.cis_sections.buckets) ||
     !Array.isArray(resource.name.buckets) ||

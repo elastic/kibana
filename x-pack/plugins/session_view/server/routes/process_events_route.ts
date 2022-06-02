@@ -40,16 +40,26 @@ export const registerProcessEventsRoute = (
     async (context, request, response) => {
       const client = (await context.core).elasticsearch.client.asCurrentUser;
       const alertsClient = await ruleRegistry.getRacClientWithRequest(request);
-      const { sessionEntityId, cursor, forward = true } = request.query;
-      const body = await fetchEventsAndScopedAlerts(
-        client,
-        alertsClient,
-        sessionEntityId,
-        cursor,
-        forward
-      );
+      const { sessionEntityId, cursor, forward } = request.query;
 
-      return response.ok({ body });
+      try {
+        const body = await fetchEventsAndScopedAlerts(
+          client,
+          alertsClient,
+          sessionEntityId,
+          cursor,
+          forward
+        );
+
+        return response.ok({ body });
+      } catch (err) {
+        // unauthorized
+        if (err.meta.statusCode === 403) {
+          return response.ok({ body: { total: 0, events: [] } });
+        }
+
+        return response.badRequest(err.message);
+      }
     }
   );
 };
@@ -58,7 +68,7 @@ export const fetchEventsAndScopedAlerts = async (
   client: ElasticsearchClient,
   alertsClient: AlertsClient,
   sessionEntityId: string,
-  cursor: string | undefined,
+  cursor?: string,
   forward = true
 ) => {
   const cursorMillis = cursor && new Date(cursor).getTime() + (forward ? -1 : 1);
