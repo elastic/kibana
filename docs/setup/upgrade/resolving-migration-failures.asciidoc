@@ -109,7 +109,6 @@ Unable to complete saved object migrations for the [.kibana] index: Migration fa
 - "firstDocId" (type "someType")
 - "secondtDocId" (type "someType")
 - "thirdDocId" (type "someOtherType")
-- ... # non-exhaustive list of unknown object ids and their types>
 
 To proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.
 --------------------------------------------
