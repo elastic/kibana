@@ -35,7 +35,6 @@ export interface CspServerPluginSetupDeps {
   data: DataPluginSetup;
   taskManager: TaskManagerSetupContract;
   security: SecurityPluginStart;
-
   // optional
 }
 
@@ -44,6 +43,7 @@ export interface CspServerPluginStartDeps {
   data: DataPluginStart;
   fleet: FleetStartContract;
   taskManager: TaskManagerStartContract;
+  security: SecurityPluginStart;
 }
 
 export type CspServerPluginStartServices = Promise<
