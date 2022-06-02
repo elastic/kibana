@@ -498,7 +498,7 @@ export function getFiltersInLayer(
         indexPattern.timeFieldName !== column.sourceField
       ) {
         if (indexPattern.timeFieldName) {
-          // non-default time field is not supported in Discover
+          // non-default time field is not supported in Discover if data view has a time field
           return {
             error: i18n.translate('xpack.lens.indexPattern.nonDefaultTimeFieldError', {
               defaultMessage:
@@ -506,6 +506,7 @@ export function getFiltersInLayer(
             }),
           };
         }
+        // if the data view has no default time field but the date histograms' time field is bound to the time range, create a KQL query for the time range
         return {
           kuery: extractTimeRangeFromDateHistogram(column, timeRange),
         };
