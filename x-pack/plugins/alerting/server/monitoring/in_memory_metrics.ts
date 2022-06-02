@@ -24,7 +24,7 @@ export class InMemoryMetrics {
     [IN_MEMORY_METRICS.RULE_TIMEOUTS]: 0,
   };
 
-  private otelMetrics?: {
+  private readonly otelMetrics?: {
     [IN_MEMORY_METRICS.RULE_EXECUTIONS]: Counter;
     [IN_MEMORY_METRICS.RULE_FAILURES]: Counter;
     [IN_MEMORY_METRICS.RULE_TIMEOUTS]: Counter;
