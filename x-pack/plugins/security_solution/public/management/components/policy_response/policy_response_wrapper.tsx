@@ -13,77 +13,93 @@ import { useGetEndpointPolicyResponse } from '../../hooks/endpoint/use_get_endpo
 import { PolicyResponse } from './policy_response';
 import { getFailedOrWarningActionCountFromPolicyResponse } from '../../pages/endpoint_hosts/store/utils';
 
-export const PolicyResponseWrapper = memo<{
+export interface PolicyResponseWrapperProps {
   endpointId: string;
-}>(({ endpointId }) => {
-  const { data, isLoading, isFetching, isError } = useGetEndpointPolicyResponse(endpointId);
+  showRevisionMessage?: boolean;
+  onShowNeedsAttentionButton?: (val: boolean) => void;
+}
 
-  const [policyResponseConfig, setPolicyResponseConfig] =
-    useState<HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations']>();
-  const [policyResponseActions, setPolicyResponseActions] =
-    useState<HostPolicyResponse['Endpoint']['policy']['applied']['actions']>();
-  const [policyResponseAttentionCount, setPolicyResponseAttentionCount] = useState<
-    Map<string, number>
-  >(new Map<string, number>());
+export const PolicyResponseWrapper = memo<PolicyResponseWrapperProps>(
+  ({ endpointId, showRevisionMessage = true, onShowNeedsAttentionButton }) => {
+    const { data, isLoading, isFetching, isError } = useGetEndpointPolicyResponse(endpointId);
 
-  useEffect(() => {
-    if (!!data && !isLoading && !isFetching && !isError) {
-      setPolicyResponseConfig(data.policy_response.Endpoint.policy.applied.response.configurations);
-      setPolicyResponseActions(data.policy_response.Endpoint.policy.applied.actions);
-      setPolicyResponseAttentionCount(
-        getFailedOrWarningActionCountFromPolicyResponse(
-          data.policy_response.Endpoint.policy.applied
-        )
-      );
-    }
-  }, [data, isLoading, isFetching, isError]);
+    const [policyResponseConfig, setPolicyResponseConfig] =
+      useState<HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations']>();
+    const [policyResponseActions, setPolicyResponseActions] =
+      useState<HostPolicyResponse['Endpoint']['policy']['applied']['actions']>();
+    const [policyResponseAttentionCount, setPolicyResponseAttentionCount] = useState<
+      Map<string, number>
+    >(new Map<string, number>());
 
-  return (
-    <>
-      <EuiText data-test-subj="endpointDetailsPolicyResponseTitle">
-        <h4>
-          <FormattedMessage
-            id="xpack.securitySolution.endpoint.policyResponse.title"
-            defaultMessage="Policy Response"
-          />
-        </h4>
-      </EuiText>
-      <EuiSpacer size="s" />
-      <EuiText size="xs" color="subdued" data-test-subj="endpointDetailsPolicyResponseTimestamp">
-        <FormattedMessage
-          id="xpack.securitySolution.endpoint.policyResponse.appliedOn"
-          defaultMessage="Revision {rev} applied on {date}"
-          values={{
-            rev: data?.policy_response.Endpoint.policy.applied.endpoint_policy_version ?? '',
-            date: (
-              <PreferenceFormattedDateFromPrimitive
-                value={data?.policy_response['@timestamp'] ?? ''}
-              />
-            ),
-          }}
-        />
-      </EuiText>
-      <EuiSpacer size="s" />
-      {isError && (
-        <EuiEmptyPrompt
-          title={
-            <FormattedMessage
-              id="xpack.securitySolution.endpoint.details.noPolicyResponse"
-              defaultMessage="No policy response available"
-            />
+    useEffect(() => {
+      if (!!data && !isLoading && !isFetching && !isError) {
+        setPolicyResponseConfig(
+          data.policy_response.Endpoint.policy.applied.response.configurations
+        );
+        setPolicyResponseActions(data.policy_response.Endpoint.policy.applied.actions);
+        setPolicyResponseAttentionCount(
+          getFailedOrWarningActionCountFromPolicyResponse(
+            data.policy_response.Endpoint.policy.applied
+          )
+        );
+      }
+    }, [data, isLoading, isFetching, isError]);
+
+    // This is needed for the `needs attention` action button in fleet. Will callback `true` if any error in policy response
+    useEffect(() => {
+      if (onShowNeedsAttentionButton) {
+        for (const count of policyResponseAttentionCount.values()) {
+          if (count) {
+            // When an error has found, callback to true and return for loop exit
+            onShowNeedsAttentionButton(true);
+            return;
           }
-        />
-      )}
-      {isLoading && <EuiLoadingSpinner size="m" />}
-      {policyResponseConfig !== undefined && policyResponseActions !== undefined && (
-        <PolicyResponse
-          policyResponseConfig={policyResponseConfig}
-          policyResponseActions={policyResponseActions}
-          policyResponseAttentionCount={policyResponseAttentionCount}
-        />
-      )}
-    </>
-  );
-});
+        }
+      }
+    }, [policyResponseAttentionCount, onShowNeedsAttentionButton]);
+
+    return (
+      <>
+        {showRevisionMessage && (
+          <>
+            <EuiText size="xs" color="subdued" data-test-subj="endpointPolicyResponseTimestamp">
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.policyResponse.appliedOn"
+                defaultMessage="Revision {rev} applied on {date}"
+                values={{
+                  rev: data?.policy_response.Endpoint.policy.applied.endpoint_policy_version ?? '',
+                  date: (
+                    <PreferenceFormattedDateFromPrimitive
+                      value={data?.policy_response['@timestamp'] ?? ''}
+                    />
+                  ),
+                }}
+              />
+            </EuiText>
+            <EuiSpacer size="s" />
+          </>
+        )}
+        {isError && (
+          <EuiEmptyPrompt
+            title={
+              <FormattedMessage
+                id="xpack.securitySolution.endpoint.details.noPolicyResponse"
+                defaultMessage="No policy response available"
+              />
+            }
+          />
+        )}
+        {isLoading && <EuiLoadingSpinner size="m" />}
+        {policyResponseConfig !== undefined && policyResponseActions !== undefined && (
+          <PolicyResponse
+            policyResponseConfig={policyResponseConfig}
+            policyResponseActions={policyResponseActions}
+            policyResponseAttentionCount={policyResponseAttentionCount}
+          />
+        )}
+      </>
+    );
+  }
+);
 
 PolicyResponseWrapper.displayName = 'PolicyResponse';

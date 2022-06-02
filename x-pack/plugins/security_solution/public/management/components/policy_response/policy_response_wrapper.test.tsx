@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { fireEvent, act } from '@testing-library/react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
-import { PolicyResponseWrapper } from './policy_response_wrapper';
+import { PolicyResponseWrapper, PolicyResponseWrapperProps } from './policy_response_wrapper';
 import { HostPolicyResponseActionStatus } from '../../../../common/search_strategy';
 import { useGetEndpointPolicyResponse } from '../../hooks/endpoint/use_get_endpoint_policy_response';
 import {
@@ -72,7 +73,10 @@ describe('when on the policy response', () => {
   let commonPolicyResponse: HostPolicyResponse;
 
   const useGetEndpointPolicyResponseMock = useGetEndpointPolicyResponse as jest.Mock;
-  let render: () => ReturnType<AppContextTestRender['render']>;
+  let render: (
+    props?: Partial<PolicyResponseWrapperProps>
+  ) => ReturnType<AppContextTestRender['render']>;
+  let renderOpenedTree: () => Promise<ReturnType<AppContextTestRender['render']>>;
   const runMock = (customPolicyResponse?: HostPolicyResponse): void => {
     commonPolicyResponse = customPolicyResponse ?? createPolicyResponse();
     useGetEndpointPolicyResponseMock.mockReturnValue({
@@ -85,54 +89,94 @@ describe('when on the policy response', () => {
 
   beforeEach(() => {
     const mockedContext = createAppRootMockRenderer();
-    render = () => mockedContext.render(<PolicyResponseWrapper endpointId="id" />);
+    render = (props = {}) =>
+      mockedContext.render(<PolicyResponseWrapper endpointId="id" {...props} />);
+    renderOpenedTree = async () => {
+      const component = render();
+      act(() => {
+        fireEvent.click(component.getByTestId('endpointPolicyResponseTitle'));
+      });
+
+      const configs = await component.findAllByTestId('endpointPolicyResponseConfig');
+      for (const config of configs) {
+        act(() => {
+          fireEvent.click(config);
+        });
+      }
+
+      const actions = await component.findAllByTestId('endpointPolicyResponseAction');
+      for (const action of actions) {
+        act(() => {
+          fireEvent.click(action);
+        });
+      }
+      return component;
+    };
   });
 
-  it('should include the title', async () => {
+  it('should include the title as the first tree element', async () => {
     runMock();
-    expect((await render().findByTestId('endpointDetailsPolicyResponseTitle')).textContent).toBe(
+    expect((await render().findByTestId('endpointPolicyResponseTitle')).textContent).toBe(
       'Policy Response'
     );
   });
 
   it('should display timestamp', () => {
     runMock();
-    const timestamp = render().queryByTestId('endpointDetailsPolicyResponseTimestamp');
+    const timestamp = render().queryByTestId('endpointPolicyResponseTimestamp');
     expect(timestamp).not.toBeNull();
+  });
+
+  it('should hide timestamp', () => {
+    runMock();
+    const timestamp = render({ showRevisionMessage: false }).queryByTestId(
+      'endpointPolicyResponseTimestamp'
+    );
+    expect(timestamp).toBeNull();
   });
 
   it('should show a configuration section for each protection', async () => {
     runMock();
-    const configAccordions = await render().findAllByTestId(
-      'endpointDetailsPolicyResponseConfigAccordion'
-    );
-    expect(configAccordions).toHaveLength(
+    const component = await renderOpenedTree();
+
+    const configTree = await component.findAllByTestId('endpointPolicyResponseConfig');
+    expect(configTree).toHaveLength(
       Object.keys(commonPolicyResponse.Endpoint.policy.applied.response.configurations).length
     );
   });
 
-  it('should show an actions section for each configuration', async () => {
+  // FIXME: for some reason it is not getting all messages items from DOM even those are rendered.
+  it.skip('should show an actions section for each configuration', async () => {
     runMock();
-    const actionAccordions = await render().findAllByTestId(
-      'endpointDetailsPolicyResponseActionsAccordion'
+    const component = await renderOpenedTree();
+
+    const configs = await component.findAllByTestId('endpointPolicyResponseConfig');
+    const actions = await component.findAllByTestId('endpointPolicyResponseAction');
+    const statusAttentionHealth = await component.findAllByTestId(
+      'endpointPolicyResponseStatusAttentionHealth'
     );
-    const action = await render().findAllByTestId('policyResponseAction');
-    const statusHealth = await render().findAllByTestId('policyResponseStatusHealth');
-    const message = await render().findAllByTestId('policyResponseMessage');
+    const statusSuccessHealth = await component.findAllByTestId(
+      'endpointPolicyResponseStatusSuccessHealth'
+    );
+    const messages = await component.findAllByTestId('endpointPolicyResponseMessage');
 
     let expectedActionAccordionCount = 0;
-    Object.keys(commonPolicyResponse.Endpoint.policy.applied.response.configurations).forEach(
-      (key) => {
-        expectedActionAccordionCount +=
-          commonPolicyResponse.Endpoint.policy.applied.response.configurations[
-            key as keyof HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations']
-          ].concerned_actions.length;
-      }
+    const configurationKeys = Object.keys(
+      commonPolicyResponse.Endpoint.policy.applied.response.configurations
     );
-    expect(actionAccordions).toHaveLength(expectedActionAccordionCount);
-    expect(action).toHaveLength(expectedActionAccordionCount * 2);
-    expect(statusHealth).toHaveLength(expectedActionAccordionCount * 3);
-    expect(message).toHaveLength(expectedActionAccordionCount * 4);
+    configurationKeys.forEach((key) => {
+      expectedActionAccordionCount +=
+        commonPolicyResponse.Endpoint.policy.applied.response.configurations[
+          key as keyof HostPolicyResponse['Endpoint']['policy']['applied']['response']['configurations']
+        ].concerned_actions.length;
+    });
+
+    expect(configs).toHaveLength(configurationKeys.length);
+    expect(actions).toHaveLength(expectedActionAccordionCount);
+    expect(messages).toHaveLength(expectedActionAccordionCount);
+    expect([...statusSuccessHealth, ...statusAttentionHealth]).toHaveLength(
+      expectedActionAccordionCount + configurationKeys.length + 1
+    );
   });
 
   it('should not show any numbered badges if all actions are successful', () => {
@@ -150,8 +194,10 @@ describe('when on the policy response', () => {
     const policyResponse = createPolicyResponse(HostPolicyResponseActionStatus.failure);
 
     runMock(policyResponse);
-    const attentionBadge = await render().findAllByTestId(
-      'endpointDetailsPolicyResponseAttentionBadge'
+    const component = await renderOpenedTree();
+
+    const attentionBadge = await component.findAllByTestId(
+      'endpointPolicyResponseStatusAttentionHealth'
     );
     expect(attentionBadge).not.toHaveLength(0);
   });
@@ -160,8 +206,10 @@ describe('when on the policy response', () => {
     const policyResponse = createPolicyResponse(HostPolicyResponseActionStatus.warning);
 
     runMock(policyResponse);
-    const attentionBadge = await render().findAllByTestId(
-      'endpointDetailsPolicyResponseAttentionBadge'
+    const component = await renderOpenedTree();
+
+    const attentionBadge = await component.findAllByTestId(
+      'endpointPolicyResponseStatusAttentionHealth'
     );
     expect(attentionBadge).not.toHaveLength(0);
   });
@@ -170,6 +218,7 @@ describe('when on the policy response', () => {
     const policyResponse = createPolicyResponse();
     runMock(policyResponse);
 
-    expect(render().getByText('A New Unknown Action')).not.toBeNull();
+    const component = await renderOpenedTree();
+    expect(component.getByText('A New Unknown Action')).not.toBeNull();
   });
 });

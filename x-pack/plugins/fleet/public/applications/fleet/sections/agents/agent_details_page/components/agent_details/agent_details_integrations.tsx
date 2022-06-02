@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import type { EuiBasicTableProps } from '@elastic/eui';
+import React, { memo, useMemo, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,25 +14,39 @@ import {
   EuiTitle,
   EuiToolTip,
   EuiPanel,
-  EuiButtonIcon,
-  EuiBasicTable,
+  EuiSpacer,
+  EuiText,
+  EuiTreeView,
+  EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
 
-import type { Agent, AgentPolicy, PackagePolicy, PackagePolicyInput } from '../../../../../types';
+import type { Agent, AgentPolicy, PackagePolicy } from '../../../../../types';
 import { useLink, useUIExtension } from '../../../../../hooks';
 import { ExtensionWrapper, PackageIcon } from '../../../../../components';
 
 import { displayInputType, getLogsQueryByInputType } from './input_type_utils';
 
 const StyledEuiAccordion = styled(EuiAccordion)`
-  .ingest-integration-title-button {
-    padding: ${(props) => props.theme.eui.paddingSizes.m};
+  .euiAccordion__button {
+    width: 90%;
   }
 
-  &.euiAccordion-isOpen .ingest-integration-title-button {
-    border-bottom: 1px solid ${(props) => props.theme.eui.euiColorLightShade};
+  .euiAccordion__triggerWrapper {
+    padding-left: ${(props) => props.theme.eui.paddingSizes.m};
+  }
+
+  &.euiAccordion-isOpen {
+    .euiAccordion__childWrapper {
+      padding: ${(props) => props.theme.eui.paddingSizes.m};
+      padding-top: 0px;
+    }
+  }
+
+  .ingest-integration-title-button {
+    padding: ${(props) => props.theme.eui.paddingSizes.s};
   }
 
   .euiTableRow:last-child .euiTableRowCell {
@@ -43,6 +56,19 @@ const StyledEuiAccordion = styled(EuiAccordion)`
   .euiIEFlexWrapFix {
     min-width: 0;
   }
+
+  .euiAccordion__buttonContent {
+    width: 100%;
+  }
+`;
+
+const StyledEuiLink = styled(EuiLink)`
+  font-size: ${(props) => props.theme.eui.euiFontSizeS};
+`;
+
+const StyledEuiButton = styled(EuiButton)`
+  font-size: ${(props) => props.theme.eui.euiFontSizeXS};
+  height: 22px !important;
 `;
 
 const CollapsablePanel: React.FC<{ id: string; title: React.ReactNode }> = ({
@@ -54,7 +80,7 @@ const CollapsablePanel: React.FC<{ id: string; title: React.ReactNode }> = ({
     <EuiPanel paddingSize="none">
       <StyledEuiAccordion
         id={id}
-        arrowDisplay="right"
+        arrowDisplay="left"
         buttonClassName="ingest-integration-title-button"
         buttonContent={title}
       >
@@ -71,54 +97,61 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
 }> = memo(({ agent, agentPolicy, packagePolicy }) => {
   const { getHref } = useLink();
 
+  const [showNeedsAttentionButton, setShowNeedsAttentionButton] = useState(false);
   const extensionView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-response'
   );
 
-  const inputs = useMemo(() => {
-    return packagePolicy.inputs.filter((input) => input.enabled);
-  }, [packagePolicy.inputs]);
+  const policiResponseExtensionView = useMemo(() => {
+    return (
+      extensionView && (
+        <ExtensionWrapper>
+          <extensionView.Component
+            agent={agent}
+            onShowNeedsAttentionButton={setShowNeedsAttentionButton} // TBD: don't really like this, I'm thinking about creating a new extension point for it with it's own api call
+          />
+        </ExtensionWrapper>
+      )
+    );
+  }, [agent, extensionView]);
 
-  const columns: EuiBasicTableProps<PackagePolicyInput>['columns'] = [
+  const inputItems = [
     {
-      field: 'type',
-      width: '100%',
-      name: i18n.translate('xpack.fleet.agentDetailsIntegrations.inputTypeLabel', {
-        defaultMessage: 'Input',
-      }),
-      render: (inputType: string) => {
-        return displayInputType(inputType);
-      },
-    },
-    {
-      align: 'right',
-      name: i18n.translate('xpack.fleet.agentDetailsIntegrations.actionsLabel', {
-        defaultMessage: 'Actions',
-      }),
-      field: 'type',
-      width: 'auto',
-      render: (inputType: string) => {
-        return (
-          <EuiToolTip
-            content={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
-              defaultMessage: 'View logs',
-            })}
-          >
-            <EuiButtonIcon
-              href={getHref('agent_details', {
-                agentId: agent.id,
-                tabId: 'logs',
-                logQuery: getLogsQueryByInputType(inputType),
-              })}
-              iconType="editorAlignLeft"
-              aria-label={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
+      label: (
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.fleet.agentDetailsIntegrations.inputsTypeLabel"
+            defaultMessage="Inputs"
+          />
+        </EuiText>
+      ),
+      id: 'inputs',
+      children: packagePolicy.inputs
+        .filter((input) => input.enabled)
+        .map((input) => ({
+          label: (
+            <EuiToolTip
+              content={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
                 defaultMessage: 'View logs',
               })}
-            />
-          </EuiToolTip>
-        );
-      },
+            >
+              <StyledEuiLink
+                href={getHref('agent_details', {
+                  agentId: agent.id,
+                  tabId: 'logs',
+                  logQuery: getLogsQueryByInputType(input.type),
+                })}
+                aria-label={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
+                  defaultMessage: 'View logs',
+                })}
+              >
+                {displayInputType(input.type)}
+              </StyledEuiLink>
+            </EuiToolTip>
+          ),
+          id: input.type,
+        })),
     },
   ];
 
@@ -128,7 +161,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
       title={
         <EuiTitle size="xs">
           <h3>
-            <EuiFlexGroup gutterSize="s">
+            <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 {packagePolicy.package ? (
                   <PackageIcon
@@ -153,17 +186,29 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
                   {packagePolicy.name}
                 </EuiLink>
               </EuiFlexItem>
+              {showNeedsAttentionButton && (
+                <EuiFlexItem grow={false}>
+                  <StyledEuiButton iconType="alert" size="s" iconSize="s" color="danger" fill>
+                    <FormattedMessage
+                      id="xpack.fleet.agentDetailsIntegrations.needsAttention.label"
+                      defaultMessage="Needs attention"
+                    />
+                  </StyledEuiButton>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </h3>
         </EuiTitle>
       }
     >
-      <EuiBasicTable<PackagePolicyInput> tableLayout="auto" items={inputs} columns={columns} />
-      {extensionView && (
-        <ExtensionWrapper>
-          <extensionView.Component endpointId={agent.id} />
-        </ExtensionWrapper>
-      )}
+      <EuiTreeView
+        items={inputItems}
+        showExpansionArrows
+        aria-label="inputsTreeView"
+        aria-labelledby="inputsTreeView"
+      />
+      {policiResponseExtensionView}
+      <EuiSpacer />
     </CollapsablePanel>
   );
 });
