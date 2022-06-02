@@ -24,7 +24,7 @@ export class InMemoryMetrics {
     [IN_MEMORY_METRICS.RULE_TIMEOUTS]: 0,
   };
 
-  private otelMetrics: {
+  private otelMetrics?: {
     [IN_MEMORY_METRICS.RULE_EXECUTIONS]: Counter;
     [IN_MEMORY_METRICS.RULE_FAILURES]: Counter;
     [IN_MEMORY_METRICS.RULE_TIMEOUTS]: Counter;
@@ -33,17 +33,19 @@ export class InMemoryMetrics {
   constructor(logger: Logger) {
     this.logger = logger;
 
-    this.logger.debug('MATSCHAFFER: CREATING meter provider');
-    const provider = new MeterProvider({
-      exporter: new OTLPMetricExporter(),
-      interval: 1000,
-    });
-    const meter = provider.getMeter('example-meter');
-    this.otelMetrics = {
-      [IN_MEMORY_METRICS.RULE_EXECUTIONS]: meter.createCounter(IN_MEMORY_METRICS.RULE_EXECUTIONS),
-      [IN_MEMORY_METRICS.RULE_FAILURES]: meter.createCounter(IN_MEMORY_METRICS.RULE_FAILURES),
-      [IN_MEMORY_METRICS.RULE_TIMEOUTS]: meter.createCounter(IN_MEMORY_METRICS.RULE_TIMEOUTS),
-    };
+    if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
+      const provider = new MeterProvider({
+        exporter: new OTLPMetricExporter(),
+        interval: 1000,
+      });
+
+      const meter = provider.getMeter('alerting-meter');
+      this.otelMetrics = {
+        [IN_MEMORY_METRICS.RULE_EXECUTIONS]: meter.createCounter(IN_MEMORY_METRICS.RULE_EXECUTIONS),
+        [IN_MEMORY_METRICS.RULE_FAILURES]: meter.createCounter(IN_MEMORY_METRICS.RULE_FAILURES),
+        [IN_MEMORY_METRICS.RULE_TIMEOUTS]: meter.createCounter(IN_MEMORY_METRICS.RULE_TIMEOUTS),
+      };
+    }
   }
 
   public increment(metric: IN_MEMORY_METRICS, attributes?: Attributes) {
@@ -63,7 +65,9 @@ export class InMemoryMetrics {
       (this.inMemoryMetrics[metric] as number)++;
     }
 
-    this.otelMetrics[metric].add(1, attributes);
+    if (this.otelMetrics) {
+      this.otelMetrics[metric].add(1, attributes);
+    }
   }
 
   public getInMemoryMetric(metric: IN_MEMORY_METRICS) {
