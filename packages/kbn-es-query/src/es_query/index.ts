@@ -16,9 +16,7 @@ export type {
   IFieldSubType,
   BoolQuery,
   DataViewBase,
-  DataViewBaseSerializable,
   DataViewFieldBase,
-  DataViewFieldBaseSerializable,
   IFieldSubTypeMulti,
   IFieldSubTypeNested,
 } from './types';

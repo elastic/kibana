@@ -15,6 +15,7 @@ import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
+import { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { ISearchSource } from '../../../public';
 import { initParams } from './agg_params';
 import { AggConfig } from './agg_config';
@@ -208,7 +209,7 @@ export class AggType<
    * @param  {agg} agg - the agg to pick a format for
    * @return {SerializedFieldFormat}
    */
-  getSerializedFormat: (agg: TAggConfig) => SerializedFieldFormat;
+  getSerializedFormat: <T extends FieldFormatParams>(agg: TAggConfig) => SerializedFieldFormat<T>;
 
   getValue: (agg: TAggConfig, bucket: any) => any;
 

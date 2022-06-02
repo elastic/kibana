@@ -35,7 +35,8 @@ export interface IFieldSubTypeNested {
  * A base interface for an index pattern field
  * @public
  */
-export interface DataViewFieldBase {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DataViewFieldBase = {
   name: string;
   /**
    * Kibana field type
@@ -52,21 +53,18 @@ export interface DataViewFieldBase {
    */
   lang?: estypes.ScriptLanguage;
   scripted?: boolean;
-}
-
-export type DataViewFieldBaseSerializable = SerializableRecord & DataViewFieldBase;
+};
 
 /**
  * A base interface for an index pattern
  * @public
  */
-export interface DataViewBase {
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DataViewBase = {
   fields: DataViewFieldBase[];
   id?: string;
   title: string;
-}
-
-export type DataViewBaseSerializable = SerializableRecord & DataViewBase;
+};
 
 export interface BoolQuery {
   must: estypes.QueryDslQueryContainer[];
