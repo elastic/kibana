@@ -24,7 +24,6 @@ import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
 import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
@@ -37,6 +36,7 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
 
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_bulk_update_case');
@@ -63,7 +63,7 @@ const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetReportersMock = useGetReporters as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
-const useConnectorsMock = useConnectors as jest.Mock;
+const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
@@ -176,8 +176,7 @@ describe('AllCasesListGeneric', () => {
       isError: false,
       fetchReporters: jest.fn(),
     });
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
+    useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     mockKibana();
     moment.tz.setDefault('UTC');
   });

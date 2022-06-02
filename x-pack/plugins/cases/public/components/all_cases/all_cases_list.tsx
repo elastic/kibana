@@ -25,9 +25,9 @@ import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CasesMetrics } from './cases_metrics';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -79,7 +79,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       setSelectedCases,
     } = useGetCases({ initialFilterOptions });
 
-    const { connectors } = useConnectors();
+    const { data: connectors = [] } = useGetConnectors();
 
     const sorting = useMemo(
       () => ({
