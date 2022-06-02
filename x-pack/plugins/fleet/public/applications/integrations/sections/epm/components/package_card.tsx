@@ -14,6 +14,9 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { CardIcon } from '../../../../../components/package_icon';
 import type { IntegrationCardItem } from '../../../../../../common/types/models/epm';
 
+import { useStartServices } from '../../../hooks';
+import { INTEGRATIONS_BASE_PATH, INTEGRATIONS_PLUGIN_ID } from '../../../constants';
+
 import { RELEASE_BADGE_DESCRIPTION, RELEASE_BADGE_LABEL } from './release_badge';
 
 export type PackageCardProps = IntegrationCardItem;
@@ -34,6 +37,7 @@ export function PackageCard({
   url,
   release,
   id,
+  fromIntegrations,
 }: PackageCardProps) {
   let releaseBadge: React.ReactNode | null = null;
 
@@ -49,6 +53,8 @@ export function PackageCard({
       </EuiFlexItem>
     );
   }
+
+  const { application } = useStartServices();
 
   const testid = `integration-card:${id}`;
   return (
@@ -69,8 +75,18 @@ export function PackageCard({
             size="xl"
           />
         }
-        href={url}
-        target={url.startsWith('http') || url.startsWith('https') ? '_blank' : undefined}
+        onClick={() => {
+          if (url.startsWith(INTEGRATIONS_BASE_PATH)) {
+            application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+              path: url.slice(INTEGRATIONS_BASE_PATH.length),
+              state: { fromIntegrations },
+            });
+          } else if (url.startsWith('http') || url.startsWith('https')) {
+            window.open(url, '_blank');
+          } else {
+            application.navigateToUrl(url);
+          }
+        }}
       >
         {releaseBadge}
       </Card>
