@@ -15,7 +15,7 @@ import {
 } from '@kbn/fleet-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CspPlugin } from './plugin';
 import { CspServerPluginStartDeps } from './types';
@@ -28,6 +28,7 @@ import {
 import {
   ExternalCallback,
   FleetStartContract,
+  PostPackagePolicyDeleteCallback,
   PostPackagePolicyPostCreateCallback,
 } from '@kbn/fleet-plugin/server';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
@@ -263,6 +264,64 @@ describe('Cloud Security Posture Plugin', () => {
         }
       }
       expect(fleetMock.packagePolicyService.update).toHaveBeenCalledTimes(1);
+    });
+
+    it('should uninstall resources when package is removed', async () => {
+      fleetMock.packageService.asInternalUser.getInstallation.mockImplementationOnce(
+        async (): Promise<Installation | undefined> => {
+          return;
+        }
+      );
+
+      const deletedPackagePolicyMock = deletePackagePolicyMock();
+      deletedPackagePolicyMock[0].package!.name = CLOUD_SECURITY_POSTURE_PACKAGE_NAME;
+
+      const packagePolicyPostDeleteCallbacks: PostPackagePolicyDeleteCallback[] = [];
+      fleetMock.registerExternalCallback.mockImplementation((...args) => {
+        if (args[0] === 'postPackagePolicyDelete') {
+          packagePolicyPostDeleteCallbacks.push(args[1]);
+        }
+      });
+
+      const coreStart = coreMock.createStart();
+      const repositoryFindMock = coreStart.savedObjects.createInternalRepository()
+        .find as jest.Mock;
+
+      repositoryFindMock.mockReturnValueOnce(
+        Promise.resolve({
+          saved_objects: [
+            {
+              type: 'csp-rule-template',
+              id: 'csp_rule_template-41308bcdaaf665761478bb6f0d745a5c',
+            },
+          ],
+        })
+      );
+
+      repositoryFindMock.mockReturnValueOnce(
+        Promise.resolve({
+          saved_objects: [],
+        })
+      );
+
+      const context = coreMock.createPluginInitializerContext<unknown>();
+      plugin = new CspPlugin(context);
+      const spy = jest.spyOn(plugin, 'uninstallResources').mockImplementation();
+
+      // Act
+      await plugin.start(coreStart, mockPlugins);
+      await mockPlugins.fleet.fleetSetupCompleted();
+
+      // Assert
+      expect(fleetMock.packageService.asInternalUser.getInstallation).toHaveBeenCalledTimes(1);
+
+      expect(packagePolicyPostDeleteCallbacks.length).toBeGreaterThan(0);
+
+      for (const cb of packagePolicyPostDeleteCallbacks) {
+        await cb(deletedPackagePolicyMock);
+      }
+      expect(repositoryFindMock).toHaveBeenCalledTimes(2);
+      expect(spy).toHaveBeenCalledTimes(1);
     });
   });
 });
