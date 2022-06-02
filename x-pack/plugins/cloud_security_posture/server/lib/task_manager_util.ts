@@ -20,7 +20,7 @@ export async function scheduleTaskSafe(
 ): Promise<boolean> {
   try {
     await taskManager.ensureScheduled(taskConfig);
-    logger.info(`task: ${taskConfig.id} is scheduled`);
+    logger.info(`Task: ${taskConfig.id} is scheduled`);
   } catch (errMsg) {
     const error = transformError(errMsg);
     logger.error(`Error scheduling task, received ${error.message}`);
