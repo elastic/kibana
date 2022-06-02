@@ -1971,12 +1971,7 @@
               }
             },
             "type": {
-              "type": "text",
-              "fields": {
-                "keyword": {
-                  "type": "keyword"
-                }
-              }
+              "type": "keyword"
             }
           }
         },
@@ -2028,7 +2023,12 @@
               }
             },
             "type": {
-              "type": "keyword"
+              "type": "text",
+              "fields": {
+                "keyword": {
+                  "type": "keyword"
+                }
+              }
             }
           }
         },
