@@ -753,7 +753,6 @@ export class DataViewsService {
    * Get an index pattern by id, cache optimized.
    * @param id
    */
-
   get = async (id: string): Promise<DataView> => {
     const indexPatternPromise =
       this.dataViewCache.get(id) || this.dataViewCache.set(id, this.getSavedObjectAndInit(id));
