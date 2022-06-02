@@ -176,46 +176,49 @@ describe('Fleet preconfiguration reset', () => {
         );
         expect(fleetServerPackagePolicy?.attributes.vars).toMatchInlineSnapshot(`undefined`);
         expect(fleetServerPackagePolicy?.attributes.inputs).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "compiled_input": Object {
-              "server": Object {
-                "host": "0.0.0.0",
-                "port": 8220,
+          Array [
+            Object {
+              "compiled_input": Object {
+                "server": Object {
+                  "host": "0.0.0.0",
+                  "port": 8220,
+                },
+                "server.runtime": Object {
+                  "gc_percent": 20,
+                },
               },
-              "server.runtime": Object {
-                "gc_percent": 20,
+              "enabled": true,
+              "keep_enabled": true,
+              "policy_template": "fleet_server",
+              "streams": Array [],
+              "type": "fleet-server",
+              "vars": Object {
+                "custom": Object {
+                  "type": "yaml",
+                  "value": "server.runtime:
+            gc_percent: 20          # Force the GC to execute more frequently: see https://golang.org/pkg/runtime/debug/#SetGCPercent
+          ",
+                },
+                "host": Object {
+                  "frozen": true,
+                  "type": "text",
+                  "value": "0.0.0.0",
+                },
+                "max_agents": Object {
+                  "type": "integer",
+                },
+                "max_connections": Object {
+                  "type": "integer",
+                },
+                "port": Object {
+                  "frozen": true,
+                  "type": "integer",
+                  "value": 8220,
+                },
               },
             },
-            "enabled": true,
-            "keep_enabled": true,
-            "policy_template": "fleet_server",
-            "streams": Array [],
-            "type": "fleet-server",
-            "vars": Object {
-              "custom": Object {
-                "type": "yaml",
-                "value": "server.runtime:
-          gc_percent: 20          # Force the GC to execute more frequently: see https://golang.org/pkg/runtime/debug/#SetGCPercent
-        ",
-              },
-              "host": Object {
-                "frozen": true,
-                "type": "text",
-                "value": "0.0.0.0",
-              },
-              "max_connections": Object {
-                "type": "integer",
-              },
-              "port": Object {
-                "frozen": true,
-                "type": "integer",
-                "value": 8220,
-              },
-            },
-          },
-        ]
-      `);
+          ]
+        `);
       });
     });
     describe('Adding APM to a preconfigured agent policy after first setup', () => {
