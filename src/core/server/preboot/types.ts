@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { PluginName } from '..';
+import type { PluginName } from '@kbn/core-base-common';
 
 /** @internal */
 export interface InternalPrebootServicePreboot {

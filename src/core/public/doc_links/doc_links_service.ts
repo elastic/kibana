@@ -8,10 +8,10 @@
 
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinks } from '@kbn/doc-links';
-import { InjectedMetadataSetup } from '../injected_metadata';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 
 export interface StartDeps {
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
 }
 
 /** @internal */
