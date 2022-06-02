@@ -6,6 +6,9 @@
  */
 
 import { renderHook, act } from '@testing-library/react-hooks';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
+import { updateAppLinks } from '../../links';
+import { links } from '../../links/app_links';
 import { useShowTimeline } from './use_show_timeline';
 
 const mockUseLocation = jest.fn().mockReturnValue({ pathname: '/overview' });
@@ -17,6 +20,15 @@ jest.mock('react-router-dom', () => {
   };
 });
 
+const mockUseSourcererDataView = jest.fn(
+  (): { indicesExist: boolean; dataViewId: string | null } => ({
+    indicesExist: true,
+    dataViewId: null,
+  })
+);
+jest.mock('../../containers/sourcerer', () => ({
+  useSourcererDataView: () => mockUseSourcererDataView(),
+}));
 const mockedUseIsGroupedNavigationEnabled = jest.fn();
 
 jest.mock('../../components/navigation/helpers', () => ({
@@ -24,6 +36,22 @@ jest.mock('../../components/navigation/helpers', () => ({
 }));
 
 describe('use show timeline', () => {
+  beforeAll(() => {
+    // initialize all App links before running test
+    updateAppLinks(links, {
+      experimentalFeatures: allowedExperimentalValues,
+      capabilities: {
+        navLinks: {},
+        management: {},
+        catalogue: {},
+        actions: { show: true, crud: true },
+        siem: {
+          show: true,
+          crud: true,
+        },
+      },
+    });
+  });
   describe('useIsGroupedNavigationEnabled false', () => {
     beforeAll(() => {
       mockedUseIsGroupedNavigationEnabled.mockReturnValue(false);
@@ -107,6 +135,26 @@ describe('use show timeline', () => {
         const showTimeline = result.current;
         expect(showTimeline).toEqual([false]);
       });
+    });
+  });
+
+  describe('sourcererDataView', () => {
+    it('should show timeline when indices exist', () => {
+      mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: true, dataViewId: 'test' });
+      const { result } = renderHook(() => useShowTimeline());
+      expect(result.current).toEqual([true]);
+    });
+
+    it('should show timeline when dataViewId is null', () => {
+      mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: null });
+      const { result } = renderHook(() => useShowTimeline());
+      expect(result.current).toEqual([true]);
+    });
+
+    it('should not show timeline when dataViewId is not null and indices does not exist', () => {
+      mockUseSourcererDataView.mockReturnValueOnce({ indicesExist: false, dataViewId: 'test' });
+      const { result } = renderHook(() => useShowTimeline());
+      expect(result.current).toEqual([false]);
     });
   });
 });

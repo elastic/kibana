@@ -810,7 +810,11 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return 'hits';
   }
 
-  async getTileUrl(searchFilters: VectorSourceRequestMeta, refreshToken: string): Promise<string> {
+  async getTileUrl(
+    searchFilters: VectorSourceRequestMeta,
+    refreshToken: string,
+    hasLabels: boolean
+  ): Promise<string> {
     const indexPattern = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(indexPattern.title);
 
@@ -847,6 +851,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     return `${mvtUrlServicePath}\
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${indexPattern.title}\
+&hasLabels=${hasLabels}\
 &requestBody=${encodeMvtResponseBody(searchSource.getSearchRequestBody())}\
 &token=${refreshToken}`;
   }

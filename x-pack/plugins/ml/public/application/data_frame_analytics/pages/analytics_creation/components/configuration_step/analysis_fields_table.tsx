@@ -12,7 +12,7 @@ import { isEqual } from 'lodash';
 import { LEFT_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FieldSelectionItem } from '../../../../common/analytics';
+import { FieldSelectionItem } from '../../../../../../../common/types/data_frame_analytics';
 // @ts-ignore could not find declaration file
 import { CustomSelectionTable } from '../../../../../components/custom_selection_table';
 

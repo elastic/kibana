@@ -69,6 +69,7 @@
     {
       "label": "Contributors Newsletters",
       "items": [
+        { "id": "kibMay2022ContributorNewsletter" },
         { "id": "kibApril2022ContributorNewsletter" },
         { "id": "kibMarch2022ContributorNewsletter" },
         { "id": "kibFebruary2022ContributorNewsletter" },
@@ -100,7 +101,6 @@
         { "id": "kibCoreSavedObjectsPluginApi" },
         { "id": "kibFieldFormatsPluginApi" },
         { "id": "kibDataPluginApi" },
-        { "id": "kibDataEnhancedPluginApi" },
         { "id": "kibDataViewsPluginApi" },
         { "id": "kibDataQueryPluginApi" },
         { "id": "kibDataSearchPluginApi" },
@@ -181,7 +181,10 @@
           "items": [
             { "id": "kibDevDocsOpsOptimizer" },
             { "id": "kibDevDocsOpsBabelPreset" },
-            { "id": "kibDevDocsOpsTypeSummarizer" }
+            { "id": "kibDevDocsOpsTypeSummarizer" },
+            { "id": "kibDevDocsOpsBabelPluginSyntheticPackages" },
+            { "id": "kibDevDocsOpsUiSharedDepsNpm" },
+            { "id": "kibDevDocsOpsUiSharedDepsSrc" }
           ]
         },
         {
@@ -200,7 +203,10 @@
             { "id": "kibDevDocsOpsJestSerializers" },
             { "id": "kibDevDocsOpsExpect" },
             { "id": "kibDevDocsOpsAmbientStorybookTypes" },
-            { "id": "kibDevDocsOpsAmbientUiTypes" }
+            { "id": "kibDevDocsOpsAmbientUiTypes" },
+            { "id": "kibDevDocsOpsTestSubjSelector" },
+            { "id": "kibDevDocsOpsBazelRunner" },
+            { "id": "kibDevDocsOpsCliDevMode" }
           ]
         }
       ]

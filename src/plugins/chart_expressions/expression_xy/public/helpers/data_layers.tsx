@@ -8,6 +8,7 @@
 
 import {
   AreaSeriesProps,
+  AreaSeriesStyle,
   BarSeriesProps,
   ColorVariant,
   LineSeriesProps,
@@ -35,12 +36,14 @@ import { FormatFactory } from '../types';
 import { getSeriesColor } from './state';
 import { ColorAssignments } from './color_assignment';
 import { GroupsConfiguration } from './axes_configuration';
+import { LayerAccessorsTitles } from './layers';
 import { getFormat } from './format';
 
 type SeriesSpec = LineSeriesProps & BarSeriesProps & AreaSeriesProps;
 
 type GetSeriesPropsFn = (config: {
   layer: CommonXYDataLayerConfig;
+  titles?: LayerAccessorsTitles;
   accessor: string;
   chartHasMoreThanOneBarSeries?: boolean;
   formatFactory: FormatFactory;
@@ -53,6 +56,7 @@ type GetSeriesPropsFn = (config: {
   emphasizeFitting?: boolean;
   fillOpacity?: number;
   formattedDatatableInfo: DatatableWithFormatInfo;
+  defaultXScaleType: XScaleType;
 }) => SeriesSpec;
 
 type GetSeriesNameFn = (
@@ -64,7 +68,8 @@ type GetSeriesNameFn = (
     splitFormatter: FieldFormat;
     alreadyFormattedColumns: Record<string, boolean>;
     columnToLabelMap: Record<string, string>;
-  }
+  },
+  titles: LayerAccessorsTitles
 ) => SeriesName;
 
 type GetColorFn = (
@@ -76,8 +81,22 @@ type GetColorFn = (
     columnToLabelMap: Record<string, string>;
     paletteService: PaletteRegistry;
     syncColors?: boolean;
-  }
+  },
+  titles: LayerAccessorsTitles
 ) => string | null;
+
+type GetPointConfigFn = (config: {
+  xAccessor: string | undefined;
+  markSizeAccessor: string | undefined;
+  emphasizeFitting?: boolean;
+  showPoints?: boolean;
+  pointsRadius?: number;
+}) => Partial<AreaSeriesStyle['point']>;
+
+type GetLineConfigFn = (config: {
+  showLines?: boolean;
+  lineWidth?: number;
+}) => Partial<AreaSeriesStyle['line']>;
 
 export interface DatatableWithFormatInfo {
   table: Datatable;
@@ -194,7 +213,8 @@ const getSeriesName: GetSeriesNameFn = (
     splitFormatter,
     alreadyFormattedColumns,
     columnToLabelMap,
-  }
+  },
+  titles
 ) => {
   // For multiple y series, the name of the operation is used on each, either:
   // * Key - Y name
@@ -206,9 +226,15 @@ const getSeriesName: GetSeriesNameFn = (
         if (i === 0 && splitHint && splitColumnId && !formatted) {
           return splitFormatter.convert(key);
         }
-        return splitColumnId && i === 0 ? key : columnToLabelMap[key] ?? null;
+        return splitColumnId && i === 0
+          ? key
+          : columnToLabelMap[key] ??
+              titles?.yTitles?.[key] ??
+              titles?.splitSeriesTitles?.[key] ??
+              null;
       })
       .join(' - ');
+
     return result;
   }
 
@@ -220,36 +246,55 @@ const getSeriesName: GetSeriesNameFn = (
     }
     return splitFormatter.convert(data.seriesKeys[0]);
   }
+
   // This handles both split and single-y cases:
   // * If split series without formatting, show the value literally
   // * If single Y, the seriesKey will be the accessor, so we show the human-readable name
-  return splitColumnId ? data.seriesKeys[0] : columnToLabelMap[data.seriesKeys[0]] ?? null;
+  return splitColumnId
+    ? data.seriesKeys[0]
+    : columnToLabelMap[data.seriesKeys[0]] ?? titles?.yTitles?.[data.seriesKeys[0]] ?? null;
 };
 
-const getPointConfig = (
-  xAccessor: string | undefined,
-  markSizeAccessor: string | undefined,
-  emphasizeFitting?: boolean
-) => ({
-  visible: !xAccessor || markSizeAccessor !== undefined,
-  radius: xAccessor && !emphasizeFitting ? 5 : 0,
+const getPointConfig: GetPointConfigFn = ({
+  xAccessor,
+  markSizeAccessor,
+  emphasizeFitting,
+  showPoints,
+  pointsRadius,
+}) => ({
+  visible: showPoints !== undefined ? showPoints : !xAccessor || markSizeAccessor !== undefined,
+  radius: pointsRadius !== undefined ? pointsRadius : xAccessor && !emphasizeFitting ? 5 : 0,
   fill: markSizeAccessor ? ColorVariant.Series : undefined,
 });
 
-const getLineConfig = () => ({ visible: true, stroke: ColorVariant.Series, opacity: 1, dash: [] });
+const getFitLineConfig = () => ({
+  visible: true,
+  stroke: ColorVariant.Series,
+  opacity: 1,
+  dash: [],
+});
+
+const getLineConfig: GetLineConfigFn = ({ showLines, lineWidth }) => ({
+  strokeWidth: lineWidth,
+  visible: showLines,
+});
 
 const getColor: GetColorFn = (
   { yAccessor, seriesKeys },
-  { layer, accessor, colorAssignments, columnToLabelMap, paletteService, syncColors }
+  { layer, accessor, colorAssignments, columnToLabelMap, paletteService, syncColors },
+  titles
 ) => {
   const overwriteColor = getSeriesColor(layer, accessor);
   if (overwriteColor !== null) {
     return overwriteColor;
   }
   const colorAssignment = colorAssignments[layer.palette.name];
+
   const seriesLayers: SeriesLayer[] = [
     {
-      name: layer.splitAccessor ? String(seriesKeys[0]) : columnToLabelMap[seriesKeys[0]],
+      name: layer.splitAccessor
+        ? String(seriesKeys[0])
+        : columnToLabelMap[seriesKeys[0]] ?? titles?.yTitles?.[seriesKeys[0]] ?? null,
       totalSeriesAtDepth: colorAssignment.totalSeriesCount,
       rankAtDepth: colorAssignment.getRank(layer, String(seriesKeys[0]), String(yAccessor)),
     },
@@ -266,8 +311,37 @@ const getColor: GetColorFn = (
   );
 };
 
+const EMPTY_ACCESSOR = '-';
+const SPLIT_CHAR = '.';
+
+export const generateSeriesId = (
+  {
+    layerId,
+    xAccessor,
+    splitAccessor,
+  }: Pick<CommonXYDataLayerConfig, 'layerId' | 'xAccessor' | 'splitAccessor'>,
+  accessor?: string
+) =>
+  [
+    layerId,
+    xAccessor ?? EMPTY_ACCESSOR,
+    accessor ?? EMPTY_ACCESSOR,
+    splitAccessor ?? EMPTY_ACCESSOR,
+  ].join(SPLIT_CHAR);
+
+export const getMetaFromSeriesId = (seriesId: string) => {
+  const [layerId, xAccessor, yAccessor, splitAccessor] = seriesId.split(SPLIT_CHAR);
+  return {
+    layerId,
+    xAccessor: xAccessor === EMPTY_ACCESSOR ? undefined : xAccessor,
+    yAccessor,
+    splitAccessor: splitAccessor === EMPTY_ACCESSOR ? undefined : splitAccessor,
+  };
+};
+
 export const getSeriesProps: GetSeriesPropsFn = ({
   layer,
+  titles = {},
   accessor,
   chartHasMoreThanOneBarSeries,
   colorAssignments,
@@ -280,6 +354,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   emphasizeFitting,
   fillOpacity,
   formattedDatatableInfo,
+  defaultXScaleType,
 }): SeriesSpec => {
   const { table, markSizeAccessor } = layer;
   const isStacked = layer.seriesType.includes('stacked');
@@ -335,51 +410,76 @@ export const getSeriesProps: GetSeriesPropsFn = ({
 
   return {
     splitSeriesAccessors: splitColumnId ? [splitColumnId] : [],
-    stackAccessors: isStacked ? [xColumnId as string] : [],
-    id: splitColumnId ? `${splitColumnId}-${accessor}` : accessor,
+    stackAccessors: isStacked ? [layer.xAccessor as string] : [],
+    id: generateSeriesId(layer, accessor),
     xAccessor: xColumnId || 'unifiedX',
     yAccessors: [accessor],
     markSizeAccessor: markSizeColumnId,
     markFormat: (value) => markFormatter.convert(value),
     data: rows,
-    xScaleType: xColumnId ? layer.xScaleType : 'ordinal',
+    xScaleType: xColumnId ? layer.xScaleType ?? defaultXScaleType : 'ordinal',
     yScaleType:
       formatter?.id === 'bytes' && yAxis?.scale === ScaleType.Linear
         ? ScaleType.LinearBinary
         : yAxis?.scale || ScaleType.Linear,
     color: (series) =>
-      getColor(series, {
-        layer,
-        accessor,
-        colorAssignments,
-        columnToLabelMap,
-        paletteService,
-        syncColors,
-      }),
+      getColor(
+        series,
+        {
+          layer,
+          accessor,
+          colorAssignments,
+          columnToLabelMap,
+          paletteService,
+          syncColors,
+        },
+        titles
+      ),
     groupId: yAxis?.groupId,
     enableHistogramMode,
     stackMode: isPercentage ? StackMode.Percentage : undefined,
     timeZone,
     areaSeriesStyle: {
-      point: getPointConfig(xColumnId, markSizeColumnId, emphasizeFitting),
+      point: getPointConfig({
+        xAccessor: xColumnId,
+        markSizeAccessor: markSizeColumnId,
+        emphasizeFitting,
+        showPoints: layer.showPoints,
+        pointsRadius: layer.pointsRadius,
+      }),
       ...(fillOpacity && { area: { opacity: fillOpacity } }),
       ...(emphasizeFitting && {
-        fit: { area: { opacity: fillOpacity || 0.5 }, line: getLineConfig() },
+        fit: { area: { opacity: fillOpacity || 0.5 }, line: getFitLineConfig() },
+      }),
+      line: getLineConfig({
+        showLines: layer.showLines,
+        lineWidth: layer.lineWidth,
       }),
     },
     lineSeriesStyle: {
-      point: getPointConfig(xColumnId, markSizeColumnId, emphasizeFitting),
-      ...(emphasizeFitting && { fit: { line: getLineConfig() } }),
+      point: getPointConfig({
+        xAccessor: xColumnId,
+        markSizeAccessor: markSizeColumnId,
+        emphasizeFitting,
+        showPoints: layer.showPoints,
+        pointsRadius: layer.pointsRadius,
+      }),
+      ...(emphasizeFitting && { fit: { line: getFitLineConfig() } }),
+      line: getLineConfig({ lineWidth: layer.lineWidth, showLines: layer.showLines }),
     },
     name(d) {
-      return getSeriesName(d, {
-        splitColumnId,
-        accessorsCount: layer.accessors.length,
-        splitHint,
-        splitFormatter,
-        alreadyFormattedColumns: formattedColumns,
-        columnToLabelMap,
-      });
+      return getSeriesName(
+        d,
+        {
+          splitColumnId,
+          accessorsCount: layer.accessors.length,
+          splitHint,
+          splitFormatter,
+          alreadyFormattedColumns: formattedColumns,
+          columnToLabelMap,
+        },
+        titles
+      );
     },
   };
 };

@@ -46,6 +46,7 @@ const AddCisIntegrationButton = () => {
       fill
       iconType="plusInCircle"
       href={cisIntegrationLink}
+      isDisabled={!cisIntegrationLink}
     >
       <FormattedMessage
         id="xpack.csp.benchmarks.addCisIntegrationButtonLabel"

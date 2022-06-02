@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`xyVis it should throw error if addTimeMarker applied for not time chart 1`] = `"Only time charts can have current time marker"`;
+
 exports[`xyVis it should throw error if markSizeRatio is lower then 1 or greater then 100 1`] = `"Mark size ratio must be greater or equal to 1 and less or equal to 100"`;
 
 exports[`xyVis it should throw error if markSizeRatio is lower then 1 or greater then 100 2`] = `"Mark size ratio must be greater or equal to 1 and less or equal to 100"`;
@@ -13,3 +15,5 @@ exports[`xyVis it should throw error if minTimeBarInterval is invalid 1`] = `"Pr
 exports[`xyVis it should throw error if splitColumnAccessor is pointing to the absent column 1`] = `"Provided column name or index is invalid: absent-accessor"`;
 
 exports[`xyVis it should throw error if splitRowAccessor is pointing to the absent column 1`] = `"Provided column name or index is invalid: absent-accessor"`;
+
+exports[`xyVis throws the error if showLines is provided to the not line/area chart 1`] = `"Lines visibility can be controlled only at line charts"`;

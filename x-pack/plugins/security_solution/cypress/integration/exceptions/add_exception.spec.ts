@@ -58,7 +58,7 @@ describe('Adds rule exception', () => {
     esArchiverUnload('exceptions');
   });
 
-  it.skip('Creates an exception from an alert and deletes it', () => {
+  it('Creates an exception from an alert and deletes it', () => {
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(NUMBER_OF_ALERTS).should('have.text', NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS);
     // Create an exception from the alerts actions menu that matches
