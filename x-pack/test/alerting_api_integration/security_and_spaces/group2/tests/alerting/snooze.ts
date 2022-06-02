@@ -336,7 +336,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
           }
         });
 
-        it('should handle snooze rule request appropriately when snoozeEndTime is -1', async () => {
+        it('should handle snooze rule request appropriately when duration is -1', async () => {
           const { body: createdAction } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
             .set('kbn-xsrf', 'foo')
@@ -366,9 +366,12 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
-          const response = await alertUtils
-            .getSnoozeRequest(createdAlert.id)
-            .send({ snooze_end_time: -1 });
+          const response = await alertUtils.getSnoozeRequest(createdAlert.id).send({
+            snooze_schedule: {
+              ...SNOOZE_SCHEDULE,
+              duration: -1,
+            },
+          });
 
           switch (scenario.id) {
             case 'no_kibana_privileges at space1':
