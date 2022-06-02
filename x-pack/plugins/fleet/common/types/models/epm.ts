@@ -397,7 +397,7 @@ export interface IntegrationCardItem {
   integration: string;
   id: string;
   categories: string[];
-  fromIntegrations: string | undefined;
+  fromIntegrations?: string;
 }
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;
