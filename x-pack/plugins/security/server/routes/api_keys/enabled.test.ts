@@ -36,7 +36,6 @@ describe('API keys enabled', () => {
     defineEnabledApiKeysRoutes(mockRouteDefinitionParams);
 
     const [, apiKeyRouteHandler] = mockRouteDefinitionParams.router.get.mock.calls.find(
-      // @ts-expect-error
       ([{ path }]) => path === '/internal/security/api_key/_enabled'
     )!;
     routeHandler = apiKeyRouteHandler;

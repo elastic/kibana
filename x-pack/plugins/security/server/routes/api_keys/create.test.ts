@@ -36,7 +36,6 @@ describe('Create API Key route', () => {
     defineCreateApiKeyRoutes(mockRouteDefinitionParams);
 
     const [, apiKeyRouteHandler] = mockRouteDefinitionParams.router.post.mock.calls.find(
-      // @ts-expect-error
       ([{ path }]) => path === '/internal/security/api_key'
     )!;
     routeHandler = apiKeyRouteHandler;
