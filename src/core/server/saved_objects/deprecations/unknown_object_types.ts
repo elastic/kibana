@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import type { DeprecationsDetails } from '../../deprecations';
 import { IScopedClusterClient } from '../../elasticsearch';
+import { getAggregatedTypesDocuments } from '../migrations/actions/check_for_unknown_docs';
+import { addExcludedTypesToBoolQuery } from '../migrations/model/helpers';
 import { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
-import { SavedObjectsRawDocSource } from '../serialization';
 import { getIndexForType } from '../service/lib';
 
 interface UnknownTypesDeprecationOptions {
@@ -49,16 +49,6 @@ const getTargetIndices = ({
   ];
 };
 
-const getUnknownTypesQuery = (knownTypes: string[]): estypes.QueryDslQueryContainer => {
-  return {
-    bool: {
-      must_not: knownTypes.map((type) => ({
-        term: { type },
-      })),
-    },
-  };
-};
-
 const getUnknownSavedObjects = async ({
   typeRegistry,
   esClient,
@@ -72,18 +62,12 @@ const getUnknownSavedObjects = async ({
     kibanaIndex,
     kibanaVersion,
   });
-  const query = getUnknownTypesQuery(knownTypes);
-
-  const body = await esClient.asInternalUser.search<SavedObjectsRawDocSource>({
-    index: targetIndices,
-    body: {
-      size: 10000,
-      query,
-    },
-  });
-  const { hits: unknownDocs } = body.hits;
-
-  return unknownDocs.map((doc) => ({ id: doc._id, type: doc._source?.type ?? 'unknown' }));
+  const excludeRegisteredTypes = addExcludedTypesToBoolQuery(knownTypes);
+  return await getAggregatedTypesDocuments(
+    esClient.asInternalUser,
+    targetIndices,
+    excludeRegisteredTypes
+  );
 };
 
 export const getUnknownTypesDeprecations = async (
@@ -149,13 +133,13 @@ export const deleteUnknownTypeObjects = async ({
     kibanaIndex,
     kibanaVersion,
   });
-  const query = getUnknownTypesQuery(knownTypes);
+  const nonRegisteredTypesQuery = addExcludedTypesToBoolQuery(knownTypes);
 
   await esClient.asInternalUser.deleteByQuery({
     index: targetIndices,
     wait_for_completion: false,
     body: {
-      query,
+      query: nonRegisteredTypesQuery,
     },
   });
 };
