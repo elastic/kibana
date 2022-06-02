@@ -18,6 +18,11 @@ post:
               type: object
               properties:
                 $ref: '../components/schemas/connector_properties.yaml'
+              required:
+                - fields
+                - id
+                - name
+                - type
             description:
               description: The description for the case.
               type: string
@@ -112,6 +117,11 @@ patch:
                     type: object
                     properties:
                       $ref: '../components/schemas/connector_properties.yaml'
+                    required:
+                      - fields
+                      - id
+                      - name
+                      - type
                   description:
                     description: The description for the case.
                     type: string
