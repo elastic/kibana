@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LayoutParams } from '../../common/layout';
+import type { LayoutParams } from '../../common/layout';
 import { CanvasLayout } from './canvas_layout';
 import { PreserveLayout } from './preserve_layout';
 import { createLayout } from './create_layout';
