@@ -6,7 +6,7 @@
  */
 
 import { JobAppParamsPDFV2 } from '@kbn/reporting-plugin/common/types';
-import { LayoutTypes } from '@kbn/screenshotting-plugin/public';
+import type { LayoutTypes } from '@kbn/screenshotting-plugin/common';
 import type { RedirectOptions } from '@kbn/share-plugin/public';
 import { CanvasAppLocatorParams, CANVAS_APP_LOCATOR } from '../../../../common/locator';
 import { CanvasWorkpad } from '../../../../types';
@@ -48,7 +48,7 @@ export function getPdfJobParams(
   return {
     layout: {
       dimensions: { width, height },
-      id: LayoutTypes.CANVAS,
+      id: 'canvas' as LayoutTypes, // uses the const value instead of `LayoutTypes.CANVAS`, to avoid the screenshotting plugin being a required bundle with canvas
     },
     objectType: 'canvas workpad',
     locatorParams,
