@@ -55,9 +55,10 @@ export interface AllCasesListProps {
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick, doRefresh }) => {
     const { owner, userCanCrud } = useCasesContext();
-    const hasOwner = !!owner.length;
     const availableSolutions = useAvailableCasesOwners();
     const [refresh, setRefresh] = useState(0);
+
+    const hasOwner = !!owner.length;
 
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {

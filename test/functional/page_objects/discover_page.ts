@@ -284,8 +284,10 @@ export class DiscoverPageObject extends FtrService {
       );
       return await fields[usedCellIdx].getVisibleText();
     }
+    await this.testSubjects.click('dataGridFullScreenButton');
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
-    const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+    const result = await Promise.all(row.map(async (cell) => (await cell.getVisibleText()).trim()));
+    await this.testSubjects.click('dataGridFullScreenButton');
     return result[usedCellIdx];
   }
 
