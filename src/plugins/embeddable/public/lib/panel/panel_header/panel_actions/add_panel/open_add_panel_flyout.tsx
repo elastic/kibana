@@ -19,7 +19,7 @@ export function openAddPanelFlyout(options: {
   getFactory: EmbeddableStart['getEmbeddableFactory'];
   getAllFactories: EmbeddableStart['getEmbeddableFactories'];
   overlays: OverlayStart;
-  showTour: () => void;
+  showTour?: () => void;
   notifications: NotificationsStart;
   SavedObjectFinder: React.ComponentType<any>;
   showCreateNewMenu?: boolean;
@@ -43,7 +43,7 @@ export function openAddPanelFlyout(options: {
     if (flyoutSession) {
       flyoutSession.close();
     }
-    showTour();
+    showTour?.();
   };
 
   const flyoutSession = overlays.openFlyout(

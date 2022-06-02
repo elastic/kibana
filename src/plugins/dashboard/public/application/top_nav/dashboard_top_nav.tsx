@@ -54,11 +54,7 @@ import {
   useDashboardDispatch,
   useDashboardSelector,
 } from '../state';
-import {
-  DashboardViewTour,
-  DASHBOARD_VIEW_TOUR_STORAGE_KEY,
-  useDashboardEditTourContext,
-} from '../tour';
+import { useDashboardEditTourContext } from '../tour';
 
 export interface DashboardTopNavState {
   chromeIsVisible: boolean;
@@ -134,7 +130,8 @@ export function DashboardTopNav({
   const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
 
-  const { currentTourStep, onNextTourStep, setTourVisibility } = useDashboardEditTourContext();
+  const { currentEditTourStep, getNextEditTourStep, onViewModeChange, setTourVisibility } =
+    useDashboardEditTourContext();
 
   const trackUiMetric = usageCollection?.reportUiCounter.bind(
     usageCollection,
@@ -221,11 +218,17 @@ export function DashboardTopNav({
         },
       });
 
-      if (currentTourStep === 1) {
-        onNextTourStep();
+      if (currentEditTourStep === 1) {
+        getNextEditTourStep();
       }
     },
-    [stateTransferService, data.search.session, trackUiMetric, currentTourStep, onNextTourStep]
+    [
+      stateTransferService,
+      data.search.session,
+      trackUiMetric,
+      currentEditTourStep,
+      getNextEditTourStep,
+    ]
   );
 
   const closeAllFlyouts = useCallback(() => {
@@ -238,22 +241,7 @@ export function DashboardTopNav({
 
   const onChangeViewMode = useCallback(
     async (newMode: ViewMode) => {
-      if (newMode === ViewMode.EDIT) {
-        // if the initial state is in the local storage, that means the user has seen the tour at least once -
-        // therefore, on switch to edit mode, the tour should be disabled to prevent them from seeing it again
-        const initialTourState = JSON.parse(
-          localStorage.getItem(DASHBOARD_VIEW_TOUR_STORAGE_KEY) ?? 'null'
-        );
-        if (initialTourState && initialTourState.isTourActive) {
-          localStorage.setItem(
-            DASHBOARD_VIEW_TOUR_STORAGE_KEY,
-            JSON.stringify({ ...initialTourState, isTourActive: false })
-          );
-        }
-        setTourVisibility(true);
-      } else {
-        setTourVisibility(false);
-      }
+      onViewModeChange(newMode);
       closeAllFlyouts();
       const willLoseChanges = newMode === ViewMode.VIEW && dashboardAppState.hasUnsavedChanges;
 
@@ -271,7 +259,7 @@ export function DashboardTopNav({
       core.overlays,
       dashboardAppState,
       dispatchDashboardStateChange,
-      setTourVisibility,
+      onViewModeChange,
     ]
   );
 
@@ -627,7 +615,6 @@ export function DashboardTopNav({
 
   return (
     <>
-      {dashboardState.viewMode === ViewMode.VIEW && <DashboardViewTour />}
       <TopNavMenu {...getNavBarProps()} />
       {!printMode && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />

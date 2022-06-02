@@ -121,10 +121,14 @@ export function DashboardApp({
     };
   }, [data.search.session]);
 
-  const printMode = useMemo(
-    () => dashboardAppState.getLatestDashboardState?.().viewMode === ViewMode.PRINT,
-    [dashboardAppState]
-  );
+  const [printMode, editMode, viewMode] = useMemo(() => {
+    const currentViewMode = dashboardAppState.getLatestDashboardState?.().viewMode;
+    return [
+      currentViewMode === ViewMode.PRINT,
+      currentViewMode === ViewMode.EDIT,
+      currentViewMode === ViewMode.VIEW,
+    ];
+  }, [dashboardAppState]);
 
   useEffect(() => {
     if (!embedSettings) chrome.setIsVisible(!printMode);
@@ -136,7 +140,7 @@ export function DashboardApp({
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
       {!showNoDataPage && isCompleteDashboardAppState(dashboardAppState) && (
-        <DashboardEditTourProvider>
+        <DashboardEditTourProvider editMode={editMode} viewMode={viewMode}>
           <DashboardTopNav
             printMode={printMode}
             redirectTo={redirectTo}

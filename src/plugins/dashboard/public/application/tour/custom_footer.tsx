@@ -18,8 +18,8 @@ import React from 'react';
 import { DashboardTourContextProps } from './dashboard_edit_tour_context';
 interface CustomFooterProps {
   isLastStep: boolean;
-  onNextTourStep: DashboardTourContextProps['onNextTourStep'];
-  onFinishTour: DashboardTourContextProps['onFinishTour'];
+  onNextTourStep: DashboardTourContextProps['getNextEditTourStep'];
+  onFinishTour: DashboardTourContextProps['finishEditTour'];
 }
 
 export const CustomFooter = ({ isLastStep, onNextTourStep, onFinishTour }: CustomFooterProps) => {
@@ -36,7 +36,7 @@ export const CustomFooter = ({ isLastStep, onNextTourStep, onFinishTour }: Custo
             color="text"
             size="xs"
             onClick={onFinishTour}
-            data-test-subj="discoverTourButtonSkip"
+            data-test-subj="dashboardTourButtonSkip"
           >
             {EuiI18n({ token: 'core.euiTourStep.skipTour', default: 'Skip tour' })}
           </EuiButtonEmpty>
@@ -47,15 +47,15 @@ export const CustomFooter = ({ isLastStep, onNextTourStep, onFinishTour }: Custo
           <EuiButton
             {...actionButtonProps}
             onClick={onFinishTour}
-            data-test-subj="discoverTourButtonEnd"
+            data-test-subj="dashboardTourButtonEnd"
           >
             {EuiI18n({ token: 'core.euiTourStep.endTour', default: 'End tour' })}
           </EuiButton>
         ) : (
           <EuiButton
             {...actionButtonProps}
-            onClick={onNextTourStep}
-            data-test-subj="discoverTourButtonNext"
+            onClick={() => onNextTourStep()}
+            data-test-subj="dashboardTourButtonNext"
           >
             {EuiI18n({ token: 'core.euiTourStep.nextStep', default: 'Next' })}
           </EuiButton>

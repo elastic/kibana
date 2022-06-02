@@ -6,21 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { createContext, useContext } from 'react';
 
 export interface DashboardTourContextProps {
-  currentTourStep: number;
-  onStartTour: () => void;
-  onNextTourStep: () => void;
-  onFinishTour: () => void;
+  currentEditTourStep: number;
+  getNextEditTourStep: (step?: number) => void;
+  finishEditTour: () => void;
+  onViewModeChange: (newMode: ViewMode) => void;
   setTourVisibility: (visibility: boolean) => void;
 }
 
 export const DashboardTourContext = createContext<DashboardTourContextProps>({
-  currentTourStep: -1,
-  onStartTour: () => {},
-  onNextTourStep: () => {},
-  onFinishTour: () => {},
+  currentEditTourStep: -1,
+  getNextEditTourStep: () => {},
+  finishEditTour: () => {},
+  onViewModeChange: () => {},
   setTourVisibility: () => {},
 });
 
