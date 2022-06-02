@@ -8,7 +8,7 @@
 
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { CoreContext } from '@kbn/core-base-server-internal';
-import type { DocLinksServiceSetup, DocLinksServiceStart } from './types';
+import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-links-server';
 
 /** @internal */
 export class DocLinksService {

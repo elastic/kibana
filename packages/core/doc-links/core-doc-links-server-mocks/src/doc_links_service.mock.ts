@@ -8,8 +8,8 @@
 
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
-import type { DocLinksServiceStart, DocLinksServiceSetup } from './types';
-import type { DocLinksService } from './doc_links_service';
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import type { DocLinksService } from '@kbn/core-doc-links-server-internal';
 
 type DocLinksServiceContract = PublicMethodsOf<DocLinksService>;
 

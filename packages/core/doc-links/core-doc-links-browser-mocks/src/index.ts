@@ -6,5 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { DocLinksService } from './doc_links_service';
-export type { DocLinksServiceStart, DocLinksServiceSetup } from './types';
+export { docLinksServiceMock } from './doc_links_service.mock';

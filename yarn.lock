@@ -3004,6 +3004,30 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-doc-links-browser-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-doc-links-browser-mocks@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-doc-links-browser@link:bazel-bin/packages/core/doc-links/core-doc-links-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-doc-links-server-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-doc-links-server-mocks@link:bazel-bin/packages/core/doc-links/core-doc-links-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-doc-links-server@link:bazel-bin/packages/core/doc-links/core-doc-links-server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal":
   version "0.0.0"
   uid ""
@@ -6295,6 +6319,30 @@
   uid ""
 
 "@types/kbn__core-common-internal-base@link:bazel-bin/packages/core/common/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-doc-links-browser-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-doc-links-browser-mocks@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-doc-links-browser@link:bazel-bin/packages/core/doc-links/core-doc-links-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-doc-links-server-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-doc-links-server-mocks@link:bazel-bin/packages/core/doc-links/core-doc-links-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-doc-links-server@link:bazel-bin/packages/core/doc-links/core-doc-links-server/npm_module_types":
   version "0.0.0"
   uid ""
 

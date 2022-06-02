@@ -7,10 +7,11 @@
  */
 
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
-import type { DocLinks } from '@kbn/doc-links';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
-export interface StartDeps {
+/** @internal */
+export interface DocLinksServiceStartDeps {
   injectedMetadata: InternalInjectedMetadataSetup;
 }
 
@@ -18,7 +19,7 @@ export interface StartDeps {
 export class DocLinksService {
   public setup() {}
 
-  public start({ injectedMetadata }: StartDeps): DocLinksStart {
+  public start({ injectedMetadata }: DocLinksServiceStartDeps): DocLinksStart {
     const kibanaBranch = injectedMetadata.getKibanaBranch();
     const docMeta = getDocLinksMeta({ kibanaBranch });
     const docLinks = getDocLinks({ kibanaBranch });
@@ -31,9 +32,3 @@ export class DocLinksService {
   }
 }
 
-/** @public */
-export interface DocLinksStart {
-  readonly DOC_LINK_VERSION: string;
-  readonly ELASTIC_WEBSITE_URL: string;
-  readonly links: DocLinks;
-}
