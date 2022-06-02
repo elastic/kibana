@@ -75,10 +75,7 @@ export async function createOrUpgradeSavedConfig(
         isDefaultIndexMigrated,
       }),
     },
-    upgradeableConfig ?? {
-      // We didn't find an upgradeable config, so this is a fresh one; mark the defaultIndex as migrated so we don't change it later!
-      isDefaultIndexMigrated: true,
-    }
+    upgradeableConfig?.attributes
   );
 
   try {

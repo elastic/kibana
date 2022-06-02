@@ -6,29 +6,25 @@
  * Side Public License, v 1.
  */
 
-import Chance from 'chance';
-
-import { getUpgradeableConfigMock } from './get_upgradeable_config.test.mock';
+import { mockGetUpgradeableConfig } from './create_or_upgrade_saved_config.test.mock';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { savedObjectsClientMock } from '../../saved_objects/service/saved_objects_client.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 
 import { createOrUpgradeSavedConfig } from './create_or_upgrade_saved_config';
 
-const chance = new Chance();
 describe('uiSettings/createOrUpgradeSavedConfig', function () {
   afterEach(() => jest.resetAllMocks());
 
   const version = '4.0.1';
   const prevVersion = '4.0.0';
-  const buildNum = chance.integer({ min: 1000, max: 5000 });
+  const buildNum = 1337;
 
   function setup() {
     const logger = loggingSystemMock.create();
-    const getUpgradeableConfig = getUpgradeableConfigMock;
     const savedObjectsClient = savedObjectsClientMock.create();
     savedObjectsClient.create.mockImplementation(
-      async (type, attributes, options = {}) =>
+      async (type, _, options = {}) =>
         ({
           type,
           id: options.id,
@@ -46,8 +42,8 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
         ...options,
       });
 
-      expect(getUpgradeableConfigMock).toHaveBeenCalledTimes(1);
-      expect(getUpgradeableConfig).toHaveBeenCalledWith({ savedObjectsClient, version });
+      expect(mockGetUpgradeableConfig).toHaveBeenCalledTimes(1);
+      expect(mockGetUpgradeableConfig).toHaveBeenCalledWith({ savedObjectsClient, version });
 
       return resp;
     }
@@ -58,7 +54,6 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       run,
       version,
       savedObjectsClient,
-      getUpgradeableConfig,
     };
   }
 
@@ -83,25 +78,21 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
 
   describe('something is upgradeable', () => {
     it('should merge upgraded attributes with current build number in new config', async () => {
-      const { run, getUpgradeableConfig, savedObjectsClient } = setup();
+      const { run, savedObjectsClient } = setup();
 
       const savedAttributes = {
         buildNum: buildNum - 100,
-        [chance.word()]: chance.sentence(),
-        [chance.word()]: chance.sentence(),
-        [chance.word()]: chance.sentence(),
+        defaultIndex: 'some-index',
       };
 
-      getUpgradeableConfig.mockResolvedValue({
+      mockGetUpgradeableConfig.mockResolvedValue({
         id: prevVersion,
         attributes: savedAttributes,
-        type: '',
-        references: [],
       });
 
       await run();
 
-      expect(getUpgradeableConfig).toHaveBeenCalledTimes(1);
+      expect(mockGetUpgradeableConfig).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
         'config',
@@ -116,13 +107,11 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
     });
 
     it('should log a message for upgrades', async () => {
-      const { getUpgradeableConfig, logger, run } = setup();
+      const { logger, run } = setup();
 
-      getUpgradeableConfig.mockResolvedValue({
+      mockGetUpgradeableConfig.mockResolvedValue({
         id: prevVersion,
         attributes: { buildNum: buildNum - 100 },
-        type: '',
-        references: [],
       });
 
       await run();
@@ -144,13 +133,11 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
     });
 
     it('does not log when upgrade fails', async () => {
-      const { getUpgradeableConfig, logger, run, savedObjectsClient } = setup();
+      const { logger, run, savedObjectsClient } = setup();
 
-      getUpgradeableConfig.mockResolvedValue({
+      mockGetUpgradeableConfig.mockResolvedValue({
         id: prevVersion,
         attributes: { buildNum: buildNum - 100 },
-        type: '',
-        references: [],
       });
 
       savedObjectsClient.create.mockRejectedValue(new Error('foo'));

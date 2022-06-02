@@ -13,9 +13,9 @@ import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
  * This contains a subset of `config` object attributes that are relevant for upgrading it.
  */
 export interface UpgradeableConfigType {
-  buildNum: string;
-  defaultIndex: string | undefined;
-  isDefaultIndexMigrated: boolean | undefined;
+  buildNum: number;
+  defaultIndex?: string;
+  isDefaultIndexMigrated?: boolean;
 }
 
 /**
@@ -43,5 +43,11 @@ export async function getUpgradeableConfig({
   });
 
   // try to find a config that we can upgrade
-  return savedConfigs.find((savedConfig) => isConfigVersionUpgradeable(savedConfig.id, version));
+  const findResult = savedConfigs.find((savedConfig) =>
+    isConfigVersionUpgradeable(savedConfig.id, version)
+  );
+  if (findResult) {
+    return { id: findResult.id, attributes: findResult.attributes };
+  }
+  return null;
 }
