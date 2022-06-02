@@ -18,14 +18,13 @@ import {
   typeRegistryInstanceMock,
 } from './saved_objects_service.test.mocks';
 import { BehaviorSubject } from 'rxjs';
-import { RawPackageInfo } from '@kbn/config';
+import { RawPackageInfo, Env } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/utils';
+import { getEnvOptions } from '@kbn/config-mocks';
 
 import { SavedObjectsService } from './saved_objects_service';
 import { mockCoreContext } from '../core_context.mock';
-import { Env } from '../config';
-import { getEnvOptions } from '../config/mocks';
 import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';

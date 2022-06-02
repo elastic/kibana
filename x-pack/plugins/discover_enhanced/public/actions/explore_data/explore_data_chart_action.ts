@@ -8,7 +8,6 @@
 import { Action } from '@kbn/ui-actions-plugin/public';
 import { DiscoverAppLocatorParams, SearchInput } from '@kbn/discover-plugin/public';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
-import { extractTimeRange } from '@kbn/data-plugin/public';
 import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { KibanaLocation } from '@kbn/share-plugin/public';
 import * as shared from './shared';
@@ -50,6 +49,7 @@ export class ExploreDataChartAction
     }
 
     const { embeddable } = context;
+    const { extractTimeRange } = await import('@kbn/es-query');
     const { restOfFilters: filters, timeRange } = extractTimeRange(
       context.filters,
       context.timeFieldName

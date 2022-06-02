@@ -11,6 +11,7 @@ import { HttpStart, IUiSettingsClient } from '@kbn/core/public';
 import { PersistableStateService, VersionedState } from '@kbn/kibana-utils-plugin/common';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { buildEsQuery } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterManager } from './filter_manager';
 import { createAddToQueryLog } from './lib';
 import type { TimefilterSetup } from './timefilter';
@@ -26,7 +27,6 @@ import { QueryStringManager } from './query_string';
 import { getEsQueryConfig, TimeRange } from '../../common';
 import { getUiSettings } from '../services';
 import { NowProviderInternalContract } from '../now_provider';
-import { IndexPattern } from '..';
 import {
   extract,
   getAllMigrations,
@@ -67,7 +67,7 @@ export interface QueryStart extends PersistableStateService<QueryState> {
   // TODO: type explicitly
   savedQueries: ReturnType<typeof createSavedQueryService>;
   // TODO: type explicitly
-  getEsQuery(indexPattern: IndexPattern, timeRange?: TimeRange): ReturnType<typeof buildEsQuery>;
+  getEsQuery(indexPattern: DataView, timeRange?: TimeRange): ReturnType<typeof buildEsQuery>;
 }
 
 /**
@@ -120,7 +120,7 @@ export class QueryService implements PersistableStateService<QueryState> {
       state$: this.state$,
       getState: () => this.getQueryState(),
       timefilter: this.timefilter,
-      getEsQuery: (indexPattern: IndexPattern, timeRange?: TimeRange) => {
+      getEsQuery: (indexPattern: DataView, timeRange?: TimeRange) => {
         const timeFilter = this.timefilter.timefilter.createFilter(indexPattern, timeRange);
 
         return buildEsQuery(
