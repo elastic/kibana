@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { ReactElement, ReactNode } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -136,3 +136,5 @@ export interface CasesUiStart {
 
 export type SupportedCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
 export type CaseAttachments = SupportedCaseAttachment[];
+
+export type ServerError = IHttpFetchError<ResponseErrorBody>;

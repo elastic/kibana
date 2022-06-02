@@ -23,7 +23,6 @@ export {
   getDisplayValueFromFilter,
   getFieldDisplayValueFromFilter,
   generateFilters,
-  extractTimeRange,
   getIndexPatternFromFilter,
 } from './query';
 
@@ -75,13 +74,9 @@ export const indexPatterns = {
   validate: validateDataView,
 };
 
-export type { IndexPatternsContract, DataViewsContract, TypeMeta } from './data_views';
-export { IndexPattern, IndexPatternField } from './data_views';
+export type { DataViewsContract, TypeMeta } from './data_views';
 
 export type {
-  IIndexPattern,
-  IFieldType,
-  IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,
