@@ -85,7 +85,7 @@ settings:
       type: boolean
       example: true
 severity:
-  $ref: 'severity.yaml'
+  $ref: 'severity_property.yaml'
 status:
   $ref: 'status.yaml'
 tags:
