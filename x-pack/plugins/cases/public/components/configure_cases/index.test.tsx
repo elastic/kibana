@@ -17,7 +17,6 @@ import { ClosureOptions } from './closure_options';
 import { useKibana } from '../../common/lib/kibana';
 import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
-import { useActionTypes } from '../../containers/configure/use_action_types';
 
 import {
   connectors,
@@ -28,6 +27,7 @@ import {
 } from './__mock__';
 import { ConnectorTypes } from '../../../common/api';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
+import { useGetActionTypes } from '../../containers/configure/use_action_types';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/configure/use_connectors');
@@ -38,7 +38,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useConnectorsMock = useConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 const useGetUrlSearchMock = jest.fn();
-const useActionTypesMock = useActionTypes as jest.Mock;
+const useGetActionTypesMock = useGetActionTypes as jest.Mock;
 const getAddConnectorFlyoutMock = jest.fn();
 const getEditConnectorFlyoutMock = jest.fn();
 
@@ -57,7 +57,7 @@ describe('ConfigureCases', () => {
   });
 
   beforeEach(() => {
-    useActionTypesMock.mockImplementation(() => useActionTypesResponse);
+    useGetActionTypesMock.mockImplementation(() => useActionTypesResponse);
   });
 
   describe('rendering', () => {
@@ -285,7 +285,10 @@ describe('ConfigureCases', () => {
         loading: false,
       }));
 
-      useActionTypesMock.mockImplementation(() => ({ ...useActionTypesResponse, loading: true }));
+      useGetActionTypesMock.mockImplementation(() => ({
+        ...useActionTypesResponse,
+        isLoading: true,
+      }));
 
       wrapper = mount(<ConfigureCases />, {
         wrappingComponent: TestProviders,

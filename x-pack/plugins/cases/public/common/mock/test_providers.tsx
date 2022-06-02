@@ -72,6 +72,7 @@ export interface AppMockRenderer {
   render: UiRender;
   coreStart: StartServices;
   queryClient: QueryClient;
+  AppWrapper: React.FC<{ children: React.ReactElement }>;
 }
 export const testQueryClient = new QueryClient({
   defaultOptions: {
@@ -120,6 +121,7 @@ export const createAppMockRenderer = ({
     coreStart: services,
     queryClient,
     render,
+    AppWrapper,
   };
 };
 
