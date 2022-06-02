@@ -1,7 +1,9 @@
 post:
   description: >
     Adds a comment to a case.
-    You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.
+    You must have all privileges for the **Cases** feature in the **Management**,
+    **Observability**, or **Security** section of the Kibana feature privileges,
+    depending on the owner of the case you're creating.
   tags:
     - cases
     - kibana
@@ -12,38 +14,9 @@ post:
     content:
       application/json:
         schema:
-          type: object
-          properties:
-            alertId: 
-              description: The alert identifier.
-              type: string 
-            comment:
-              description: The new comment.
-              type: string
-            index:
-              description: The alert index.
-              type: string
-            owner:
-              $ref: '../components/schemas/owners.yaml'
-            rule:
-              description: The rule that is associated with the alert.
-              type: object
-              properties:
-                id:
-                  description: The rule identifier.
-                  type: string
-                name: 
-                  description: The rule name.
-                  type: string
-            type: 
-              $ref: '../components/schemas/comment_types.yaml'
-          required:
-            - alertId
-            - comment
-            - index
-            - owner
-            - rule
-            - type
+          oneOf: 
+            - $ref: '../components/schemas/alert_comment_request_properties.yaml'
+            - $ref: '../components/schemas/user_comment_request_properties.yaml'
         examples:
           createCaseCommentRequest:
             $ref: '../components/examples/add_comment_request.yaml'
