@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { CommandDefinition } from '../console';
 import { IsolateActionResult } from './isolate_action';
+import { ReleaseActionResult } from './release_action';
 import { EndpointStatusActionResult } from './status_action';
 
 export const getEndpointResponseActionsConsoleCommands = (
@@ -28,7 +29,27 @@ export const getEndpointResponseActionsConsoleCommands = (
           required: false,
           allowMultiples: false,
           about: i18n.translate(
-            'xpack.securitySolution.endpointConsoleCommands.isolate.arg.command',
+            'xpack.securitySolution.endpointConsoleCommands.isolate.arg.comment',
+            { defaultMessage: 'A comment to go along with the action' }
+          ),
+        },
+      },
+    },
+    {
+      name: 'release',
+      about: i18n.translate('xpack.securitySolution.endpointConsoleCommands.release.about', {
+        defaultMessage: 'Release the host',
+      }),
+      RenderComponent: ReleaseActionResult,
+      meta: {
+        endpointId: endpointAgentId,
+      },
+      args: {
+        comment: {
+          required: false,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.release.arg.comment',
             { defaultMessage: 'A comment to go along with the action' }
           ),
         },
