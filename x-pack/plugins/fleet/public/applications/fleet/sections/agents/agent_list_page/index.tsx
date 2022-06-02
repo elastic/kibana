@@ -468,7 +468,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         <EuiPortal>
           <AgentEnrollmentFlyout
             agentPolicy={agentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
-            onClose={() => setEnrollmentFlyoutState({ isOpen: false })}
+            onClose={() => {
+              setEnrollmentFlyoutState({ isOpen: false });
+              fetchData();
+              agentPoliciesRequest.resendRequest();
+            }}
           />
         </EuiPortal>
       ) : null}
@@ -548,6 +552,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         currentQuery={kuery}
         selectedAgents={selectedAgents}
         refreshAgents={() => Promise.all([fetchData(), refreshUpgrades()])}
+        onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}

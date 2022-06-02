@@ -5,22 +5,16 @@
  * 2.0.
  */
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
+import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { EuiTitle } from '@elastic/eui';
 import { AlertsTableFlyoutBaseProps } from '../../../../types';
-
-const SAMPLE_TITLE_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.alertsFlyout.sampleTitle',
-  {
-    defaultMessage: 'Sample title',
-  }
-);
 
 type Props = AlertsTableFlyoutBaseProps;
 const AlertsFlyoutHeader = ({ alert }: Props) => {
   return (
     <EuiTitle size="m">
-      <h2>{SAMPLE_TITLE_LABEL}</h2>
+      <h2>{get(alert, ALERT_RULE_NAME)}</h2>
     </EuiTitle>
   );
 };

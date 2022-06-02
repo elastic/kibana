@@ -50,17 +50,16 @@ import {
 import { Loading, Error, ExtensionWrapper, EuiButtonWithTooltip } from '../../../components';
 import { ConfirmDeployAgentPolicyModal } from '../components';
 import { CreatePackagePolicySinglePageLayout } from '../create_package_policy_page/single_page_layout/components';
-import type { PackagePolicyValidationResults } from '../create_package_policy_page/single_page_layout/services';
-import {
-  validatePackagePolicy,
-  validationHasErrors,
-} from '../create_package_policy_page/single_page_layout/services';
+import type { PackagePolicyValidationResults } from '../create_package_policy_page/services';
+import { validatePackagePolicy, validationHasErrors } from '../create_package_policy_page/services';
 import type {
   PackagePolicyFormState,
   EditPackagePolicyFrom,
 } from '../create_package_policy_page/types';
-import { StepConfigurePackagePolicy } from '../create_package_policy_page/single_page_layout/step_configure_package';
-import { StepDefinePackagePolicy } from '../create_package_policy_page/single_page_layout/step_define_package_policy';
+import {
+  StepConfigurePackagePolicy,
+  StepDefinePackagePolicy,
+} from '../create_package_policy_page/components';
 import type {
   GetOnePackagePolicyResponse,
   UpgradePackagePolicyDryRunResponse,
