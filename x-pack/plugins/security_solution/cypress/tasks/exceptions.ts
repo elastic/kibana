@@ -24,12 +24,12 @@ export const addExceptionEntryFieldValueOfItemX = (
     .eq(itemIndex)
     .find(FIELD_INPUT)
     .eq(fieldIndex)
-    .type(`${field}{downArrow}{enter}`);
+    .type(`${field}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
 export const addExceptionEntryFieldValue = (field: string, index = 0) => {
-  cy.get(FIELD_INPUT).eq(index).type(`${field}{downArrow}{enter}`);
+  cy.get(FIELD_INPUT).eq(index).type(`${field}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
