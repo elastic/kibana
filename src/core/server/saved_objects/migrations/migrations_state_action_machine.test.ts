@@ -51,6 +51,7 @@ describe('migrationsStateActionMachine', () => {
     },
     typeRegistry,
     docLinks,
+    logger: mockLogger.get(),
   });
 
   const next = jest.fn((s: State) => {
