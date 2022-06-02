@@ -36,7 +36,7 @@ export class InMemoryMetrics {
     if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
       const provider = new MeterProvider({
         exporter: new OTLPMetricExporter(),
-        interval: 1000,
+        interval: 10000,
       });
 
       const meter = provider.getMeter('alerting-meter');
