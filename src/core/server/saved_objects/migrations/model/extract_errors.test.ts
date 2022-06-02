@@ -63,34 +63,24 @@ describe('extractDiscardedUnknownDocs', () => {
 
 describe('extractTransformFailuresReason', () => {
   it('generates the correct error message', () => {
-    expect(
-      extractTransformFailuresReason(
-        'https://someurl.co',
-        ['corrupt_1', 'corrupt_2'],
-        [
-          { rawId: 'transform_1', err: new Error('Oops!') },
-          { rawId: 'transform_2', err: new Error('I did it again!') },
-        ]
-      )
-    ).toMatchInlineSnapshot(`
+    const errorMessage = extractTransformFailuresReason(
+      'https://someurl.co',
+      ['corrupt_1', 'corrupt_2'],
+      [
+        { rawId: 'transform_1', err: new Error('Oops!') },
+        { rawId: 'transform_2', err: new Error('I did it again!') },
+      ]
+    );
+    const errorLines = errorMessage.split('\n');
+    const errorMessageWithoutStack = errorLines
+      .filter((line: string) => !line.includes(' at '))
+      .join('\n');
+
+    expect(errorMessageWithoutStack).toMatchInlineSnapshot(`
       "Migrations failed. Reason: 2 corrupt saved object documents were found: corrupt_1, corrupt_2
        2 transformation errors were encountered:
-       - transform_1: Error: Oops!
-          at Object.<anonymous> (/Users/gsoldevila/Work/kibana-8.x/src/core/server/saved_objects/migrations/model/extract_errors.test.ts:71:40)
-          at Object.asyncJestTest (/Users/gsoldevila/Work/kibana-8.x/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:106:37)
-          at /Users/gsoldevila/Work/kibana-8.x/node_modules/jest-jasmine2/build/queueRunner.js:45:12
-          at new Promise (<anonymous>)
-          at mapper (/Users/gsoldevila/Work/kibana-8.x/node_modules/jest-jasmine2/build/queueRunner.js:28:19)
-          at /Users/gsoldevila/Work/kibana-8.x/node_modules/jest-jasmine2/build/queueRunner.js:75:41
-          at processTicksAndRejections (node:internal/process/task_queues:96:5)
+      - transform_1: Error: Oops!
       - transform_2: Error: I did it again!
-          at Object.<anonymous> (/Users/gsoldevila/Work/kibana-8.x/src/core/server/saved_objects/migrations/model/extract_errors.test.ts:72:40)
-          at Object.asyncJestTest (/Users/gsoldevila/Work/kibana-8.x/node_modules/jest-jasmine2/build/jasmineAsyncInstall.js:106:37)
-          at /Users/gsoldevila/Work/kibana-8.x/node_modules/jest-jasmine2/build/queueRunner.js:45:12
-          at new Promise (<anonymous>)
-          at mapper (/Users/gsoldevila/Work/kibana-8.x/node_modules/jest-jasmine2/build/queueRunner.js:28:19)
-          at /Users/gsoldevila/Work/kibana-8.x/node_modules/jest-jasmine2/build/queueRunner.js:75:41
-          at processTicksAndRejections (node:internal/process/task_queues:96:5)
 
       To allow migrations to proceed, please delete or fix these documents.
       Note that you can configure Kibana to automatically discard corrupt documents and transform errors for this migration.

@@ -96,7 +96,7 @@ describe('migration v2 with corrupt saved object documents', () => {
 
       expect(errorMessageWithoutStack).toMatchInlineSnapshot(`
         "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 2 transformation errors were encountered:
-         - foo:3: Error: Migration function for version 7.14.0 threw an error
+        - foo:3: Error: Migration function for version 7.14.0 threw an error
         Caused by:
         Error: \\"number\\" attribute should be present
         - foo:4: Error: Migration function for version 7.14.0 threw an error

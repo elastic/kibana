@@ -26,7 +26,7 @@ export function extractTransformFailuresReason(
   // we have both the saved object Id and the stack trace in each `transformErrors` item.
   const transformErrorsReason =
     transformErrors.length > 0
-      ? ` ${transformErrors.length} transformation errors were encountered:\n ` +
+      ? ` ${transformErrors.length} transformation errors were encountered:\n` +
         transformErrors
           .map((errObj) => `- ${errObj.rawId}: ${errObj.err.stack ?? errObj.err.message}\n`)
           .join('')
