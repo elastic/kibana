@@ -1642,7 +1642,14 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     criteria = criteria.concat(config.entityFields);
 
     try {
-      return await getRecordsForCriteria([config.jobId], criteria, 0, range.min, range.max, 500);
+      return await getRecordsForCriteria(
+        [config.jobId],
+        criteria,
+        0,
+        range.min,
+        range.max,
+        config.interval
+      );
     } catch (error) {
       handleError(
         i18n.translate('xpack.ml.timeSeriesJob.recordsForCriteriaErrorMessage', {
