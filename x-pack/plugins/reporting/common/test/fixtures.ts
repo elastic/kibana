@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { LayoutTypes } from '@kbn/screenshotting-plugin/common';
 import type { ReportApiJSON } from '../types';
 import type { ReportMock } from './types';
 
-const buildMockReport = (baseObj: ReportMock) => ({
+const buildMockReport = (baseObj: ReportMock): ReportApiJSON => ({
   index: '.reporting-2020.04.12',
   migration_version: '7.15.0',
   max_attempts: 1,
@@ -19,7 +20,7 @@ const buildMockReport = (baseObj: ReportMock) => ({
   ...baseObj,
   payload: {
     browserTimezone: 'America/Phoenix',
-    layout: { dimensions: { height: 720, width: 1080 }, id: 'preserve_layout' },
+    layout: { dimensions: { height: 720, width: 1080 }, id: 'preserve_layout' as LayoutTypes },
     version: '7.14.0',
     isDeprecated: baseObj.payload.isDeprecated === true,
     ...baseObj.payload,
