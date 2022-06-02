@@ -8,7 +8,6 @@
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/public';
-import { LayoutTypes } from '@kbn/screenshotting-plugin/public';
 import React, { Component } from 'react';
 import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
 
@@ -115,14 +114,14 @@ export class ScreenCapturePanelContent extends Component<Props, State> {
     }
 
     if (this.state.usePrintLayout) {
-      return { id: LayoutTypes.PRINT, dimensions };
+      return { id: 'print', dimensions };
     }
 
     if (this.state.useCanvasLayout) {
-      return { id: LayoutTypes.CANVAS, dimensions };
+      return { id: 'canvas', dimensions };
     }
 
-    return { id: LayoutTypes.PRESERVE_LAYOUT, dimensions };
+    return { id: 'preserve_layout', dimensions };
   };
 
   private getJobParams = () => {

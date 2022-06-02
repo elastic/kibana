@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LayoutTypes } from '@kbn/screenshotting-plugin/common';
 import apm from 'elastic-apm-node';
 import * as Rx from 'rxjs';
 import { finalize, map, mergeMap, takeUntil, tap } from 'rxjs/operators';
@@ -39,10 +38,7 @@ export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadPNGV2>> =
           return generatePngObservable(reporting, jobLogger, {
             headers,
             browserTimezone: job.browserTimezone,
-            layout: {
-              ...job.layout,
-              id: LayoutTypes.PRESERVE_LAYOUT,
-            },
+            layout: { ...job.layout, id: 'preserve_layout' },
             urls: [[url, locatorParams]],
           });
         }),

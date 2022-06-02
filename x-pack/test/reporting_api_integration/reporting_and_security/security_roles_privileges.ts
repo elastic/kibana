@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { LayoutTypes } from '@kbn/screenshotting-plugin/common';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
@@ -68,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
           {
             browserTimezone: 'UTC',
             title: 'test PDF disallowed',
-            layout: { id: LayoutTypes.PRESERVE_LAYOUT },
+            layout: { id: 'preserve_layout' },
             relativeUrls: ['/fooyou'],
             objectType: 'dashboard',
             version: '7.14.0',
@@ -84,7 +83,7 @@ export default function ({ getService }: FtrProviderContext) {
           {
             browserTimezone: 'UTC',
             title: 'test PDF allowed',
-            layout: { id: LayoutTypes.PRESERVE_LAYOUT },
+            layout: { id: 'preserve_layout' },
             relativeUrls: ['/fooyou'],
             objectType: 'dashboard',
             version: '7.14.0',
@@ -102,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
           {
             browserTimezone: 'UTC',
             title: 'test PDF disallowed',
-            layout: { id: LayoutTypes.PRESERVE_LAYOUT },
+            layout: { id: 'preserve_layout' },
             relativeUrls: ['/fooyou'],
             objectType: 'visualization',
             version: '7.14.0',
@@ -118,7 +117,7 @@ export default function ({ getService }: FtrProviderContext) {
           {
             browserTimezone: 'UTC',
             title: 'test PDF allowed',
-            layout: { id: LayoutTypes.PRESERVE_LAYOUT },
+            layout: { id: 'preserve_layout' },
             relativeUrls: ['/fooyou'],
             objectType: 'visualization',
             version: '7.14.0',
@@ -136,7 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
           {
             browserTimezone: 'UTC',
             title: 'test PDF disallowed',
-            layout: { id: LayoutTypes.PRESERVE_LAYOUT },
+            layout: { id: 'preserve_layout' },
             relativeUrls: ['/fooyou'],
             objectType: 'canvas',
             version: '7.14.0',
@@ -152,7 +151,7 @@ export default function ({ getService }: FtrProviderContext) {
           {
             browserTimezone: 'UTC',
             title: 'test PDF allowed',
-            layout: { id: LayoutTypes.PRESERVE_LAYOUT },
+            layout: { id: 'preserve_layout' },
             relativeUrls: ['/fooyou'],
             objectType: 'canvas',
             version: '7.14.0',

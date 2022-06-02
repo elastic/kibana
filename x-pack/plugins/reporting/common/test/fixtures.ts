@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { LayoutTypes } from '@kbn/screenshotting-plugin/common';
 import type { ReportApiJSON } from '../types';
 import type { ReportMock } from './types';
 
@@ -20,7 +19,7 @@ const buildMockReport = (baseObj: ReportMock): ReportApiJSON => ({
   ...baseObj,
   payload: {
     browserTimezone: 'America/Phoenix',
-    layout: { dimensions: { height: 720, width: 1080 }, id: 'preserve_layout' as LayoutTypes },
+    layout: { dimensions: { height: 720, width: 1080 }, id: 'preserve_layout' },
     version: '7.14.0',
     isDeprecated: baseObj.payload.isDeprecated === true,
     ...baseObj.payload,

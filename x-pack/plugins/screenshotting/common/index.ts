@@ -6,7 +6,7 @@
  */
 
 export type { LayoutParams } from './layout';
-export { LayoutTypes } from './layout';
+export { LayoutType } from './layout';
 import * as errors from './errors';
 export { errors };
 export {

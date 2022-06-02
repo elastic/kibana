@@ -7,7 +7,6 @@
 
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { LayoutTypes } from '@kbn/screenshotting-plugin/common';
 import { ReportingCore } from '../..';
 import { JobParamsPDFDeprecated, TaskPayloadPDF } from '../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../lib/store';
@@ -54,7 +53,7 @@ describe('Handle request to generate', () => {
     objectType: 'cool_object_type',
     title: 'cool_title',
     version: 'unknown',
-    layout: { id: LayoutTypes.PRESERVE_LAYOUT },
+    layout: { id: 'preserve_layout' },
     relativeUrls: [],
   };
 

@@ -9,10 +9,9 @@
 // we should get rid of this lib.
 import * as PDFJS from 'pdfjs-dist/legacy/build/pdf.js';
 
-import { groupBy } from 'lodash';
 import type { PackageInfo } from '@kbn/core/server';
-import type { LayoutParams } from '../../../common';
-import { LayoutTypes, LayoutId } from '../../../common/layout';
+import { groupBy } from 'lodash';
+import type { LayoutParams, LayoutType } from '../../../common';
 import type { Layout } from '../../layouts';
 import type { CaptureMetrics, CaptureOptions, CaptureResult } from '../../screenshots';
 import { EventLogger, Transactions } from '../../screenshots/event_logger';
@@ -24,7 +23,7 @@ import { pngsToPdf } from './pdf_maker';
  * => When creating a PDF intended for print multiple PNGs will be spread out across pages
  * => When creating a PDF from a Canvas workpad, each page in the workpad will be placed on a separate page
  */
-export type PdfLayoutParams = LayoutParams<LayoutId>;
+export type PdfLayoutParams = LayoutParams<LayoutType>;
 
 /**
  * Options that should be provided to a PDF screenshot request.
@@ -102,7 +101,7 @@ export async function toPdf(
 ): Promise<PdfScreenshotResult> {
   let buffer: Buffer;
   let pages: number;
-  const shouldConvertPngsToPdf = layout.id !== LayoutTypes.PRINT;
+  const shouldConvertPngsToPdf = layout.id !== 'print';
   if (shouldConvertPngsToPdf) {
     const timeRange = getTimeRange(results);
     try {

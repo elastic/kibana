@@ -6,12 +6,14 @@
  */
 
 import { InvalidLayoutParametersError } from '../../common/errors';
-import type { LayoutParams } from '../../common/layout';
-import { LayoutTypes } from '../../common';
+import type { LayoutParams, LayoutType } from '../../common/layout';
 import type { Layout } from '.';
 import { CanvasLayout } from './canvas_layout';
 import { PreserveLayout } from './preserve_layout';
 import { PrintLayout } from './print_layout';
+
+// utility for validating the layout type from user's job params
+const LAYOUTS: LayoutType[] = ['canvas', 'print', 'preserve_layout'];
 
 /**
  * Layout dimensions must be sanitized as they are passed in the args that spawn the
@@ -30,18 +32,18 @@ const sanitizeLayout = (dimensions: { width: number; height: number }) => {
 };
 
 export function createLayout({ id, dimensions, selectors, ...config }: LayoutParams): Layout {
-  const layoutId = id ?? LayoutTypes.PRINT;
+  const layoutId = id ?? 'print';
 
-  if (!Object.values(LayoutTypes).includes(layoutId)) {
+  if (!LAYOUTS.includes(layoutId)) {
     throw new InvalidLayoutParametersError(`Invalid layout type`);
   }
 
   if (dimensions) {
-    if (layoutId === LayoutTypes.PRESERVE_LAYOUT) {
+    if (layoutId === 'preserve_layout') {
       return new PreserveLayout(sanitizeLayout(dimensions), selectors);
     }
 
-    if (layoutId === LayoutTypes.CANVAS) {
+    if (layoutId === 'canvas') {
       return new CanvasLayout(sanitizeLayout(dimensions));
     }
   }
