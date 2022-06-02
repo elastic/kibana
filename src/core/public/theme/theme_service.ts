@@ -8,11 +8,11 @@
 
 import { Subject, Observable, of } from 'rxjs';
 import { shareReplay, takeUntil } from 'rxjs/operators';
-import { InjectedMetadataSetup } from '../injected_metadata';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { CoreTheme, ThemeServiceSetup, ThemeServiceStart } from './types';
 
 export interface SetupDeps {
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
 }
 
 export class ThemeService {

@@ -25,7 +25,7 @@ export interface CoreStart
 |  [fatalErrors](./kibana-plugin-core-public.corestart.fatalerrors.md) | FatalErrorsStart | [FatalErrorsStart](./kibana-plugin-core-public.fatalerrorsstart.md) |
 |  [http](./kibana-plugin-core-public.corestart.http.md) | HttpStart | [HttpStart](./kibana-plugin-core-public.httpstart.md) |
 |  [i18n](./kibana-plugin-core-public.corestart.i18n.md) | I18nStart | [I18nStart](./kibana-plugin-core-public.i18nstart.md) |
-|  [injectedMetadata](./kibana-plugin-core-public.corestart.injectedmetadata.md) | { getInjectedVar: (name: string, defaultValue?: any) =&gt; unknown; } | exposed temporarily until https://github.com/elastic/kibana/issues/41990 done use \*only\* to retrieve config values. There is no way to set injected values in the new platform. |
+|  [injectedMetadata](./kibana-plugin-core-public.corestart.injectedmetadata.md) | InjectedMetadataStart |  |
 |  [notifications](./kibana-plugin-core-public.corestart.notifications.md) | NotificationsStart | [NotificationsStart](./kibana-plugin-core-public.notificationsstart.md) |
 |  [overlays](./kibana-plugin-core-public.corestart.overlays.md) | OverlayStart | [OverlayStart](./kibana-plugin-core-public.overlaystart.md) |
 |  [savedObjects](./kibana-plugin-core-public.corestart.savedobjects.md) | SavedObjectsStart | [SavedObjectsStart](./kibana-plugin-core-public.savedobjectsstart.md) |

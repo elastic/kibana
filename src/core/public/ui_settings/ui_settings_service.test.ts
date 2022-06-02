@@ -9,7 +9,7 @@
 import * as Rx from 'rxjs';
 
 import { httpServiceMock } from '../http/http_service.mock';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { UiSettingsService } from './ui_settings_service';
 
 const httpSetup = httpServiceMock.createSetupContract();

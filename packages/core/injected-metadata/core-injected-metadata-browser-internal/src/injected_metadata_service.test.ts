@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DiscoveredPlugin } from '../../server';
+import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import { InjectedMetadataService } from './injected_metadata_service';
 
 describe('setup.getElasticsearchInfo()', () => {

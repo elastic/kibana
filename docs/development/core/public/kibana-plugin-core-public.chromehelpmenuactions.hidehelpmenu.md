@@ -4,8 +4,6 @@
 
 ## ChromeHelpMenuActions.hideHelpMenu property
 
-The action provides the capability to hide the help menu from within the help extension content components.
-
 <b>Signature:</b>
 
 ```typescript

@@ -7,8 +7,8 @@
  */
 
 import type { CoreService } from '@kbn/core-base-browser-internal';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import { HttpSetup, HttpStart } from './types';
-import { InjectedMetadataSetup } from '../injected_metadata';
 import { FatalErrorsSetup } from '../fatal_errors';
 import { BasePath } from './base_path';
 import { AnonymousPathsService } from './anonymous_paths_service';
@@ -18,7 +18,7 @@ import { ExternalUrlService } from './external_url_service';
 import { ExecutionContextSetup } from '../execution_context';
 
 interface HttpDeps {
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
   fatalErrors: FatalErrorsSetup;
   executionContext: ExecutionContextSetup;
 }

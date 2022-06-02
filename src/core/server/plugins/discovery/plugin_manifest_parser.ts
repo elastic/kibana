@@ -12,7 +12,8 @@ import { coerce } from 'semver';
 import { promisify } from 'util';
 import { snakeCase } from 'lodash';
 import { isConfigPath, PackageInfo } from '@kbn/config';
-import { PluginManifest, PluginType } from '../types';
+import { PluginType } from '@kbn/core-base-common';
+import { PluginManifest } from '../types';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { isCamelCase } from './is_camel_case';
 

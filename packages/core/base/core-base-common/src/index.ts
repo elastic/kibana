@@ -6,4 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { PluginOpaqueId, PluginName } from './plugins';
+export type { PluginOpaqueId, PluginName, DiscoveredPlugin } from './plugins';
+export { PluginType } from './plugins';

@@ -37,7 +37,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  --- | --- |
 |  [AuthResultType](./kibana-plugin-core-server.authresulttype.md) |  |
 |  [AuthStatus](./kibana-plugin-core-server.authstatus.md) | Status indicating an outcome of the authentication. |
-|  [PluginType](./kibana-plugin-core-server.plugintype.md) |  |
 
 ## Interfaces
 
@@ -68,7 +67,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [DeprecationsClient](./kibana-plugin-core-server.deprecationsclient.md) | Server-side client that provides access to fetch all Kibana deprecations |
 |  [DeprecationSettings](./kibana-plugin-core-server.deprecationsettings.md) | UiSettings deprecation field options. |
 |  [DeprecationsServiceSetup](./kibana-plugin-core-server.deprecationsservicesetup.md) | The deprecations service provides a way for the Kibana platform to communicate deprecated features and configs with its users. These deprecations are only communicated if the deployment is using these features. Allowing for a user tailored experience for upgrading the stack version.<!-- -->The Deprecation service is consumed by the upgrade assistant to assist with the upgrade experience.<!-- -->If a deprecated feature can be resolved without manual user intervention. Using correctiveActions.api allows the Upgrade Assistant to use this api to correct the deprecation upon a user trigger. |
-|  [DiscoveredPlugin](./kibana-plugin-core-server.discoveredplugin.md) | Small container object used to expose information about discovered plugins that may or may not have been started. |
 |  [DocLinksServiceSetup](./kibana-plugin-core-server.doclinksservicesetup.md) |  |
 |  [ElasticsearchConfigPreboot](./kibana-plugin-core-server.elasticsearchconfigpreboot.md) | A limited set of Elasticsearch configuration entries exposed to the <code>preboot</code> plugins at <code>setup</code>. |
 |  [ElasticsearchErrorDetails](./kibana-plugin-core-server.elasticsearcherrordetails.md) |  |
