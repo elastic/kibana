@@ -90,7 +90,7 @@ describe('copyValueToClipboard', () => {
       columnId: 'text_message',
     });
 
-    expect(result).toBe('text_message');
+    expect(result).toBe('"text_message"');
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(discoverServiceMock.toastNotifications.addInfo).toHaveBeenCalledWith({
       title: 'Copied to clipboard',
