@@ -8,11 +8,13 @@
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import * as Option from 'fp-ts/Option';
-import { DocLinksServiceSetup } from '../../doc_links';
-import { docLinksServiceMock } from '../../mocks';
-import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
+import type { DocLinksServiceSetup } from '../../doc_links';
+import { docLinksServiceMock, loggingSystemMock } from '../../mocks';
+import type { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { createInitialState } from './initial_state';
+
+const mockLogger = loggingSystemMock.create();
 
 describe('createInitialState', () => {
   let typeRegistry: SavedObjectTypeRegistry;
@@ -41,62 +43,16 @@ describe('createInitialState', () => {
         migrationsConfig,
         typeRegistry,
         docLinks,
+        logger: mockLogger.get(),
       })
     ).toMatchInlineSnapshot(`
       Object {
         "batchSize": 1000,
         "controlState": "INIT",
         "currentAlias": ".kibana_task_manager",
+        "discardUnknownObjects": false,
         "excludeFromUpgradeFilterHooks": Object {},
-        "indexPrefix": ".kibana_task_manager",
-        "kibanaVersion": "8.1.0",
-        "knownTypes": Array [],
-        "legacyIndex": ".kibana_task_manager",
-        "logs": Array [],
-        "maxBatchSizeBytes": 104857600,
-        "migrationDocLinks": Object {
-          "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
-          "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
-          "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
-          "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
-        },
-        "outdatedDocumentsQuery": Object {
-          "bool": Object {
-            "should": Array [],
-          },
-        },
-        "preMigrationScript": Object {
-          "_tag": "None",
-        },
-        "retryAttempts": 15,
-        "retryCount": 0,
-        "retryDelay": 0,
-        "targetIndexMappings": Object {
-          "dynamic": "strict",
-          "properties": Object {
-            "my_type": Object {
-              "properties": Object {
-                "title": Object {
-                  "type": "text",
-                },
-              },
-            },
-          },
-        },
-        "tempIndex": ".kibana_task_manager_8.1.0_reindex_temp",
-        "tempIndexMappings": Object {
-          "dynamic": false,
-          "properties": Object {
-            "migrationVersion": Object {
-              "dynamic": "true",
-              "type": "object",
-            },
-            "type": Object {
-              "type": "keyword",
-            },
-          },
-        },
-        "unusedTypesQuery": Object {
+        "excludeOnUpgradeQuery": Object {
           "bool": Object {
             "must_not": Array [
               Object {
@@ -193,6 +149,54 @@ describe('createInitialState', () => {
             ],
           },
         },
+        "indexPrefix": ".kibana_task_manager",
+        "kibanaVersion": "8.1.0",
+        "knownTypes": Array [],
+        "legacyIndex": ".kibana_task_manager",
+        "logs": Array [],
+        "maxBatchSizeBytes": 104857600,
+        "migrationDocLinks": Object {
+          "clusterShardLimitExceeded": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#cluster-shard-limit-exceeded",
+          "repeatedTimeoutRequests": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#_repeated_time_out_requests_that_eventually_fail",
+          "resolveMigrationFailures": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html",
+          "routingAllocationDisabled": "https://www.elastic.co/guide/en/kibana/test-branch/resolve-migrations-failures.html#routing-allocation-disabled",
+        },
+        "outdatedDocumentsQuery": Object {
+          "bool": Object {
+            "should": Array [],
+          },
+        },
+        "preMigrationScript": Object {
+          "_tag": "None",
+        },
+        "retryAttempts": 15,
+        "retryCount": 0,
+        "retryDelay": 0,
+        "targetIndexMappings": Object {
+          "dynamic": "strict",
+          "properties": Object {
+            "my_type": Object {
+              "properties": Object {
+                "title": Object {
+                  "type": "text",
+                },
+              },
+            },
+          },
+        },
+        "tempIndex": ".kibana_task_manager_8.1.0_reindex_temp",
+        "tempIndexMappings": Object {
+          "dynamic": false,
+          "properties": Object {
+            "migrationVersion": Object {
+              "dynamic": "true",
+              "type": "object",
+            },
+            "type": Object {
+              "type": "keyword",
+            },
+          },
+        },
         "versionAlias": ".kibana_task_manager_8.1.0",
         "versionIndex": ".kibana_task_manager_8.1.0_001",
       }
@@ -224,6 +228,7 @@ describe('createInitialState', () => {
       migrationsConfig,
       typeRegistry,
       docLinks,
+      logger: mockLogger.get(),
     });
 
     expect(initialState.knownTypes).toEqual(['foo', 'bar']);
@@ -250,6 +255,7 @@ describe('createInitialState', () => {
       migrationsConfig,
       typeRegistry,
       docLinks,
+      logger: mockLogger.get(),
     });
 
     expect(initialState.excludeFromUpgradeFilterHooks).toEqual({ foo: fooExcludeOnUpgradeHook });
@@ -269,6 +275,7 @@ describe('createInitialState', () => {
       migrationsConfig,
       typeRegistry,
       docLinks,
+      logger: mockLogger.get(),
     });
 
     expect(Option.isSome(initialState.preMigrationScript)).toEqual(true);
@@ -291,6 +298,7 @@ describe('createInitialState', () => {
           migrationsConfig,
           typeRegistry,
           docLinks,
+          logger: mockLogger.get(),
         }).preMigrationScript
       )
     ).toEqual(true);
@@ -309,6 +317,7 @@ describe('createInitialState', () => {
         migrationsConfig,
         typeRegistry,
         docLinks,
+        logger: mockLogger.get(),
       }).outdatedDocumentsQuery
     ).toMatchInlineSnapshot(`
         Object {
@@ -346,5 +355,72 @@ describe('createInitialState', () => {
           },
         }
       `);
+  });
+
+  it('initializes the `discardUnknownObjects` flag to false if the flag is not provided in the config', () => {
+    const logger = mockLogger.get();
+    const initialState = createInitialState({
+      kibanaVersion: '8.1.0',
+      targetMappings: {
+        dynamic: 'strict',
+        properties: { my_type: { properties: { title: { type: 'text' } } } },
+      },
+      migrationVersionPerType: {},
+      indexPrefix: '.kibana_task_manager',
+      migrationsConfig,
+      typeRegistry,
+      docLinks,
+      logger,
+    });
+
+    expect(logger.warn).not.toBeCalled();
+    expect(initialState.discardUnknownObjects).toEqual(false);
+  });
+
+  it('initializes the `discardUnknownObjects` flag to false if the value provided in the config does not match the current kibana version', () => {
+    const logger = mockLogger.get();
+    const initialState = createInitialState({
+      kibanaVersion: '8.1.0',
+      targetMappings: {
+        dynamic: 'strict',
+        properties: { my_type: { properties: { title: { type: 'text' } } } },
+      },
+      migrationVersionPerType: {},
+      indexPrefix: '.kibana_task_manager',
+      migrationsConfig: {
+        ...migrationsConfig,
+        discardUnknownObjects: '8.0.0',
+      },
+      typeRegistry,
+      docLinks,
+      logger,
+    });
+
+    expect(initialState.discardUnknownObjects).toEqual(false);
+    expect(logger.warn).toBeCalledTimes(1);
+    expect(logger.warn).toBeCalledWith(
+      'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be ignored.'
+    );
+  });
+
+  it('initializes the `discardUnknownObjects` flag to true if the value provided in the config matches the current kibana version', () => {
+    const initialState = createInitialState({
+      kibanaVersion: '8.1.0',
+      targetMappings: {
+        dynamic: 'strict',
+        properties: { my_type: { properties: { title: { type: 'text' } } } },
+      },
+      migrationVersionPerType: {},
+      indexPrefix: '.kibana_task_manager',
+      migrationsConfig: {
+        ...migrationsConfig,
+        discardUnknownObjects: '8.1.0',
+      },
+      typeRegistry,
+      docLinks,
+      logger: mockLogger.get(),
+    });
+
+    expect(initialState.discardUnknownObjects).toEqual(true);
   });
 });

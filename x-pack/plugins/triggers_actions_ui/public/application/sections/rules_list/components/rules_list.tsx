@@ -647,6 +647,7 @@ export const RulesList: React.FunctionComponent = () => {
       </EuiFlexGroup>
       <EuiHorizontalRule margin="xs" />
       <RulesListTable
+        canExecuteActions={canExecuteActions}
         isLoading={rulesState.isLoading || ruleTypesState.isLoading || isPerformingAction}
         rulesState={rulesState}
         ruleTypesState={ruleTypesState}

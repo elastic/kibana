@@ -30,6 +30,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   DataRequestHandlerContext,
   IScopedSearchClient,
@@ -41,7 +42,6 @@ import type {
 
 import { AggsService } from './aggs';
 
-import { IndexPatternsServiceStart } from '../data_views';
 import { registerSearchRoute, registerSessionRoutes } from './routes';
 import { ES_SEARCH_STRATEGY, esSearchStrategyProvider } from './strategies/es_search';
 import { DataPluginStart, DataPluginStartDependencies } from '../plugin';
@@ -116,7 +116,7 @@ export interface SearchServiceSetupDependencies {
 /** @internal */
 export interface SearchServiceStartDependencies {
   fieldFormats: FieldFormatsStart;
-  indexPatterns: IndexPatternsServiceStart;
+  indexPatterns: DataViewsServerPluginStart;
   taskManager?: TaskManagerStartContract;
 }
 
@@ -289,7 +289,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
         asScoped: async (request: KibanaRequest) => {
           const esClient = elasticsearch.client.asScoped(request);
           const savedObjectsClient = savedObjects.getScopedClient(request);
-          const scopedIndexPatterns = await indexPatterns.indexPatternsServiceFactory(
+          const scopedIndexPatterns = await indexPatterns.dataViewsServiceFactory(
             savedObjectsClient,
             esClient.asCurrentUser
           );
