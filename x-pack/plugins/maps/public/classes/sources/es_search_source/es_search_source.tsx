@@ -10,12 +10,10 @@ import React, { ReactElement } from 'react';
 import { i18n } from '@kbn/i18n';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { type Filter, buildPhraseFilter } from '@kbn/es-query';
-import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewField, DataView } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { SortDirection, SortDirectionNumeric, TimeRange } from '@kbn/data-plugin/common';
-import { flattenHit } from '@kbn/data-plugin/public';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { AbstractESSource } from '../es_source';
 import {
   getHttp,
@@ -535,8 +533,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     const unusedMetaFields = indexPattern.metaFields.filter((metaField) => {
       return !['_id', '_index'].includes(metaField);
     });
-    const flatten = (hit: estypes.SearchHit) => {
-      const properties = flattenHit(hit, indexPattern);
+    const flattenHit = (hit: Record<string, any>) => {
+      const properties = indexPattern.flattenHit(hit);
       // remove metaFields
       unusedMetaFields.forEach((metaField) => {
         delete properties[metaField];
@@ -553,7 +551,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       const geoField = await this._getGeoField();
       featureCollection = hitsToGeoJson(
         hits,
-        flatten,
+        flattenHit,
         geoField.name,
         geoField.type as ES_GEO_FIELD_TYPE,
         epochMillisFields
@@ -622,7 +620,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       );
     }
 
-    const properties = flattenHit(hit, indexPattern);
+    const properties = indexPattern.flattenHit(hit);
     indexPattern.metaFields.forEach((metaField: string) => {
       if (!this._getTooltipPropertyNames().includes(metaField)) {
         delete properties[metaField];
