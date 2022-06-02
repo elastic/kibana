@@ -7,8 +7,8 @@
 
 import { EuiFormRow, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import { LayoutTypes } from '@kbn/screenshotting-plugin/common';
+import type { LayoutParams } from '@kbn/screenshotting-plugin/public';
+import { LayoutTypes } from '@kbn/screenshotting-plugin/public';
 import React, { Component } from 'react';
 import { ReportingPanelContent, ReportingPanelProps } from './reporting_panel_content';
 
