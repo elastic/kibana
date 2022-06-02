@@ -12,7 +12,9 @@ export {
   META_FIELDS,
   DATA_VIEW_SAVED_OBJECT_TYPE,
 } from './constants';
-export type { IFieldType, IIndexPatternFieldList } from './fields';
+
+export type { ToSpecConfig } from './fields';
+export type { IIndexPatternFieldList } from './fields';
 export {
   isFilterable,
   fieldList,
@@ -29,13 +31,9 @@ export type {
   RuntimeFieldSpec,
   RuntimeFieldSubField,
   DataViewAttributes,
-  IndexPatternAttributes,
-  FieldAttrs,
-  FieldAttrSet,
   OnNotification,
   OnError,
   UiSettingsCommon,
-  SavedObjectsClientCommonFindArgs,
   SavedObjectsClientCommon,
   GetFieldsOptions,
   IDataViewsApiClient,
@@ -43,15 +41,22 @@ export type {
   AggregationRestrictions,
   TypeMeta,
   FieldSpecConflictDescriptions,
-  FieldSpecExportFmt,
   FieldSpec,
   DataViewFieldMap,
   DataViewSpec,
   SourceFilter,
   HasDataService,
+  RuntimeTypeExceptComposite,
+  RuntimeFieldBase,
+  FieldConfiguration,
+  SavedObjectsClientCommonFindArgs,
+  FieldAttrs,
+  FieldAttrSet,
 } from './types';
 export { DataViewType } from './types';
-export type { IndexPatternsContract, DataViewsContract } from './data_views';
+
+export type { DataViewsContract, DataViewsServiceDeps } from './data_views';
+export type { EnsureDefaultDataView } from './data_views/ensure_default_data_view';
 export { IndexPatternsService, DataViewsService } from './data_views';
 export type {
   DataViewListItem,

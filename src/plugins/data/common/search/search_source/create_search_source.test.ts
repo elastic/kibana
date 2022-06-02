@@ -8,13 +8,12 @@
 
 import { createSearchSource as createSearchSourceFactory } from './create_search_source';
 import { SearchSourceDependencies } from './search_source';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import { IndexPatternsContract } from '../..';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/common';
 import { Filter } from '../../es_query';
 
 describe('createSearchSource', () => {
   const indexPatternMock: DataView = {} as DataView;
-  let indexPatternContractMock: jest.Mocked<IndexPatternsContract>;
+  let indexPatternContractMock: jest.Mocked<DataViewsContract>;
   let dependencies: SearchSourceDependencies;
   let createSearchSource: ReturnType<typeof createSearchSourceFactory>;
 
@@ -27,7 +26,7 @@ describe('createSearchSource', () => {
 
     indexPatternContractMock = {
       get: jest.fn().mockReturnValue(Promise.resolve(indexPatternMock)),
-    } as unknown as jest.Mocked<IndexPatternsContract>;
+    } as unknown as jest.Mocked<DataViewsContract>;
 
     createSearchSource = createSearchSourceFactory(indexPatternContractMock, dependencies);
   });
