@@ -11,12 +11,12 @@ import { stringify } from 'querystring';
 import { Env } from '@kbn/config';
 import { schema } from '@kbn/config-schema';
 import { fromRoot } from '@kbn/utils';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 
 import { IRouter, IBasePath, IKibanaResponse, KibanaResponseFactory, KibanaRequest } from '../http';
 import { HttpResources, HttpResourcesServiceToolkit } from '../http_resources';
 import { InternalCorePreboot, InternalCoreSetup } from '../internal_types';
-import { CoreContext } from '../core_context';
 import { registerBundleRoutes } from './bundle_routes';
 import { UiPlugins } from '../plugins';
 
