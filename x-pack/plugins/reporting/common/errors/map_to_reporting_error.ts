@@ -14,6 +14,7 @@ import {
   BrowserScreenshotError,
   PdfWorkerOutOfMemoryError,
   VisualReportingSoftDisabledError,
+  InvalidLayoutParametersError,
 } from '.';
 
 export function mapToReportingError(error: unknown): ReportingError {
@@ -21,6 +22,8 @@ export function mapToReportingError(error: unknown): ReportingError {
     return error;
   }
   switch (true) {
+    case error instanceof errors.InvalidLayoutParametersError:
+      return new InvalidLayoutParametersError((error as Error).message);
     case error instanceof errors.BrowserClosedUnexpectedly:
       return new BrowserUnexpectedlyClosedError((error as Error).message);
     case error instanceof errors.FailedToCaptureScreenshot:

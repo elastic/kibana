@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { InvalidLayoutParametersError } from '../../common/errors';
 import type { LayoutParams } from '../../common/layout';
 import { LayoutTypes } from '../../common';
 import type { Layout } from '.';
@@ -23,7 +24,7 @@ import { PrintLayout } from './print_layout';
 const sanitizeLayout = (dimensions: { width: number; height: number }) => {
   const { width, height } = dimensions;
   if (isNaN(width) || isNaN(height)) {
-    throw new Error(`invalid layout params!`);
+    throw new InvalidLayoutParametersError(`Invalid layout width or height`);
   }
   return {
     width: Math.round(width),
@@ -32,16 +33,18 @@ const sanitizeLayout = (dimensions: { width: number; height: number }) => {
 };
 
 export function createLayout({ id, dimensions, selectors, ...config }: LayoutParams): Layout {
-  if (!id || !Object.values(LayoutTypes).includes(id)) {
-    throw new Error(`invalid layout type!`);
+  const layoutId = id ?? LayoutTypes.PRINT;
+
+  if (!Object.values(LayoutTypes).includes(layoutId)) {
+    throw new InvalidLayoutParametersError(`Invalid layout type`);
   }
 
   if (dimensions) {
-    if (id === LayoutTypes.PRESERVE_LAYOUT) {
+    if (layoutId === LayoutTypes.PRESERVE_LAYOUT) {
       return new PreserveLayout(sanitizeLayout(dimensions), selectors);
     }
 
-    if (id === LayoutTypes.CANVAS) {
+    if (layoutId === LayoutTypes.CANVAS) {
       return new CanvasLayout(sanitizeLayout(dimensions));
     }
   }
