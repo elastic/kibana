@@ -1429,12 +1429,13 @@
   dependencies:
     object-hash "^1.3.0"
 
-"@elastic/charts@46.0.2":
-  version "46.0.2"
-  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.0.2.tgz#e7078f2a57efdc16aa7ccbdf5fafe2f2bb4d0c9f"
-  integrity sha512-5YQ6aySoWbmVP63Zr4drB5Vr+3tIejLKtc5uwP5SsJeamOqiu31bHR6Z9HbZkk0InSi9OMH1GPFOwjYoX14WJg==
+"@elastic/charts@46.7.0":
+  version "46.7.0"
+  resolved "https://registry.yarnpkg.com/@elastic/charts/-/charts-46.7.0.tgz#e64255a59a77d7e8c18289c624c885ee4460d45e"
+  integrity sha512-RP55HSf8Jphf3qS+TCA7fVMCo238OxPJFOP85WpTnPNoPa0U/N20CrdZzhjtM5z2NptFpenAE5e8Ye7Te8fYxA==
   dependencies:
     "@popperjs/core" "^2.4.0"
+    bezier-easing "^2.1.0"
     chroma-js "^2.1.0"
     classnames "^2.2.6"
     d3-array "^1.2.4"
@@ -9508,6 +9509,11 @@ better-opn@^2.1.1:
   integrity sha512-kIPXZS5qwyKiX/HcRvDYfmBQUa8XP17I0mYZZ0y4UhpYOSvtsLHDYqmomS+Mj20aDvD3knEiQ0ecQy2nhio3yA==
   dependencies:
     open "^7.0.3"
+
+bezier-easing@^2.1.0:
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/bezier-easing/-/bezier-easing-2.1.0.tgz#c04dfe8b926d6ecaca1813d69ff179b7c2025d86"
+  integrity sha512-gbIqZ/eslnUFC1tjEvtz0sgx+xTK20wDnYMIA27VA04R7w6xxXQPZDbibjA9DTWZRA2CXtwHykkVzlCaAJAZig==
 
 big-integer@^1.6.16:
   version "1.6.48"

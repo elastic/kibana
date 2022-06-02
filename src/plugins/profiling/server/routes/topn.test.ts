@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { loggerMock } from '@kbn/logging/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import { topNElasticSearchQuery } from './topn';
 import { ElasticsearchClient, kibanaResponseFactory } from '../../../../core/server';
 import { coreMock } from '../../../../core/server/mocks';
@@ -16,7 +16,7 @@ const anyQuery = 'any::query';
 const index = 'test';
 const testAgg = { aggs: { test: {} } };
 
-jest.mock('./mappings', () => ({
+jest.mock('./query', () => ({
   newProjectTimeQuery: (proj: string, from: string, to: string) => {
     return anyQuery;
   },

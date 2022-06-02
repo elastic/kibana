@@ -10,9 +10,11 @@ import { clone } from 'lodash';
 
 import {
   compareFrameGroup,
+  createStackFrameMetadata,
   defaultGroupBy,
   FrameGroup,
   FrameGroupID,
+  groupStackFrameMetadataByStackTrace,
   hashFrameGroup,
   StackFrameMetadata,
   StackTraceID,
@@ -262,4 +264,20 @@ export function fromCallerCalleeIntermediateNode(
   }
 
   return node;
+}
+
+export function createCallerCalleeDiagram(
+  events: Map<StackTraceID, number>,
+  stackTraces: Map<StackTraceID, StackTrace>,
+  stackFrames: Map<StackFrameID, StackFrame>,
+  executables: Map<FileID, Executable>
+): CallerCalleeNode {
+  const rootFrame = createStackFrameMetadata();
+  const frameMetadataForTraces = groupStackFrameMetadataByStackTrace(
+    stackTraces,
+    stackFrames,
+    executables
+  );
+  const root = createCallerCalleeIntermediateRoot(rootFrame, events, frameMetadataForTraces);
+  return fromCallerCalleeIntermediateNode(root);
 }

@@ -1,6 +1,6 @@
 NODE_VERSION    = $(shell cat .node-version)
 
-KIBANA_VERSION ?= 8.1.x
+KIBANA_VERSION ?= 8.2.x
 NETWORK        ?= apm-integration-testing
 PORT           ?= 5601
 

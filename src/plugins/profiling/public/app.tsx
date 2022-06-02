@@ -107,7 +107,7 @@ function App({ fetchTopN, fetchElasticFlamechart, fetchPixiFlamechart }: Props) 
     series: new Map(),
   });
 
-  const [elasticFlamegraph, setElasticFlamegraph] = useState({ leaves: [] });
+  const [elasticFlamegraph, setElasticFlamegraph] = useState({});
   const [pixiFlamegraph, setPixiFlamegraph] = useState({});
 
   const handleTimeChange = (selectedTime: { start: string; end: string; isInvalid: boolean }) => {

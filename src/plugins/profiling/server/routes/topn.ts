@@ -18,7 +18,7 @@ import { groupStackFrameMetadataByStackTrace, StackTraceID } from '../../common/
 import { createTopNBucketsByDate } from '../../common/topn';
 import { findDownsampledIndex } from './downsampling';
 import { logExecutionLatency } from './logger';
-import { autoHistogramSumCountOnGroupByField, newProjectTimeQuery } from './mappings';
+import { autoHistogramSumCountOnGroupByField, newProjectTimeQuery } from './query';
 import { mgetExecutables, mgetStackFrames, mgetStackTraces } from './stacktrace';
 import { getClient, getAggs } from './compat';
 

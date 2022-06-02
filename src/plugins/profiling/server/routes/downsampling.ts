@@ -8,7 +8,7 @@
 
 import seedrandom from 'seedrandom';
 import type { ElasticsearchClient, Logger } from 'kibana/server';
-import { ProjectTimeQuery } from './mappings';
+import { ProjectTimeQuery } from './query';
 import { StackTraceID } from '../../common/profiling';
 import { getHits } from './compat';
 
