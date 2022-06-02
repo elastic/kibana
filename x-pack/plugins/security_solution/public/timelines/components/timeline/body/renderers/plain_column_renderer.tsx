@@ -43,25 +43,49 @@ export const plainColumnRenderer: ColumnRenderer = {
     values: string[] | undefined | null;
     linkValues?: string[] | null | undefined;
   }) => {
-    const value = joinValues(values);
-    return value ? (
-      <FormattedFieldValue
-        asPlainText={asPlainText}
-        contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
-        eventId={eventId}
-        fieldFormat={field.format ?? ''}
-        fieldName={columnName}
-        isAggregatable={field.aggregatable ?? false}
-        fieldType={field.type ?? ''}
-        isDraggable={isDraggable}
-        key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}`}
-        linkValue={head(linkValues)}
-        truncate={truncate}
-        value={value}
-      />
-    ) : (
-      getEmptyTagValue()
-    );
+    if (!Array.isArray(values) || values.length === 0) {
+      return getEmptyTagValue();
+    }
+    // Draggable columns should render individual fields to give the user
+    // fine-grained control over the individual values
+    if (isDraggable) {
+      return values.map((value, i) => (
+        <FormattedFieldValue
+          asPlainText={asPlainText}
+          contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
+          eventId={eventId}
+          fieldFormat={field.format ?? ''}
+          fieldName={columnName}
+          isAggregatable={field.aggregatable ?? false}
+          fieldType={field.type ?? ''}
+          isDraggable={isDraggable}
+          key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
+          linkValue={head(linkValues)}
+          truncate={truncate}
+          value={value}
+        />
+      ));
+    } else {
+      // In case the column isn't draggable, fields are joined
+      // to give users a faster overview of all values.
+      // (note: the filter-related hover actions still produce individual filters for each value)
+      return (
+        <FormattedFieldValue
+          asPlainText={asPlainText}
+          contextId={`plain-column-renderer-formatted-field-value-${timelineId}`}
+          eventId={eventId}
+          fieldFormat={field.format ?? ''}
+          fieldName={columnName}
+          isAggregatable={field.aggregatable ?? false}
+          fieldType={field.type ?? ''}
+          isDraggable={isDraggable}
+          key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}`}
+          linkValue={head(linkValues)}
+          truncate={truncate}
+          value={joinValues(values)}
+        />
+      );
+    }
   },
 };
 

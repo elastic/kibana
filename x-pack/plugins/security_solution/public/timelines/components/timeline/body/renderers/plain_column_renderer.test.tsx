@@ -231,7 +231,7 @@ describe('plain_column_renderer', () => {
       expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').first().exists()).toBe(true);
     });
 
-    test('join multiple values with a comma', () => {
+    test('should join multiple values with a comma [not draggable]', () => {
       const data = mockTimelineData[19].data;
       const column = plainColumnRenderer.renderColumn({
         columnName: 'process.args',
@@ -239,6 +239,7 @@ describe('plain_column_renderer', () => {
         values: getValues('process.args', data),
         field: defaultHeaders.find((h) => h.id === 'message')!,
         timelineId: 'test',
+        isDraggable: false,
       });
       const wrapper = mount(
         <TestProviders>
@@ -247,6 +248,24 @@ describe('plain_column_renderer', () => {
       );
       const values = getValues('process.args', data);
       expect(wrapper.text()).toEqual(values?.join(', '));
+    });
+
+    test('should NOT join multiple values with a comma [draggable]', () => {
+      const data = mockTimelineData[19].data;
+      const column = plainColumnRenderer.renderColumn({
+        columnName: 'process.args',
+        eventId: _id,
+        values: getValues('process.args', data),
+        field: defaultHeaders.find((h) => h.id === 'message')!,
+        timelineId: 'test',
+        isDraggable: true,
+      });
+      const wrapper = mount(
+        <TestProviders>
+          <span>{column}</span>
+        </TestProviders>
+      );
+      expect(wrapper.find('[data-test-subj="draggableWrapperDiv"]').first().exists()).toBe(true);
     });
   });
 });

@@ -10,7 +10,7 @@ exports[`get_column_renderer renders correctly against snapshot 1`] = `
     fieldType=""
     isAggregatable={false}
     isDraggable={true}
-    key="plain-column-renderer-formatted-field-value-test-event.severity-1-message"
+    key="plain-column-renderer-formatted-field-value-test-event.severity-1-message-3-0"
     value="3"
   />
 </span>
