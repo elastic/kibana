@@ -25,7 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const find = getService('find');
-  const testSubjects = getService('testSubjects');
 
   describe('discover - context - back navigation', function contextSize() {
     before(async () => {
@@ -35,10 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');
-      await retry.waitFor(
-        'fields list presented',
-        async () => await testSubjects.exists('fieldList-unpopular')
-      );
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItem(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
