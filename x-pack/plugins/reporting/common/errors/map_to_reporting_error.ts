@@ -17,6 +17,15 @@ import {
   InvalidLayoutParametersError,
 } from '.';
 
+/**
+ * Map an error object from the Screenshotting plugin into an error type of the Reporting domain.
+ *
+ * NOTE: each type of ReportingError code must be referenced in each applicable `errorCodesSchema*` object in
+ * x-pack/plugins/reporting/server/usage/schema.ts
+ *
+ * @param {unknown} error - a kind of error object
+ * @returns {ReportingError} - the converted error object
+ */
 export function mapToReportingError(error: unknown): ReportingError {
   if (error instanceof ReportingError) {
     return error;
