@@ -55,6 +55,7 @@ const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
   const { form } = useForm({ defaultValue });
   const { submit } = form;
   // console.log(form.getErrors());
+  // console.log(form.getFormData());
 
   const onClick = useCallback(async () => {
     const res = await submit();
