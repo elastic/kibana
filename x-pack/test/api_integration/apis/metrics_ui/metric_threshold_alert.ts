@@ -768,6 +768,49 @@ export default function ({ getService }: FtrProviderContext) {
     describe('with rate data', () => {
       before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/alerts_test_data'));
       after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts_test_data'));
+      it('should alert on rate with long threshold', async () => {
+        const params = {
+          ...baseParams,
+          criteria: [
+            {
+              timeSize: 1,
+              timeUnit: 'm',
+              threshold: [107374182400],
+              comparator: Comparator.LT_OR_EQ,
+              aggType: Aggregators.RATE,
+              metric: 'value',
+            } as NonCountMetricExpressionParams,
+          ],
+        };
+        const timeFrame = { end: rate.max };
+        const results = await evaluateRule(
+          esClient,
+          params,
+          configuration,
+          10000,
+          true,
+          logger,
+          void 0,
+          timeFrame
+        );
+        expect(results).to.eql([
+          {
+            '*': {
+              timeSize: 1,
+              timeUnit: 'm',
+              threshold: [107374182400],
+              comparator: '<=',
+              aggType: 'rate',
+              metric: 'value',
+              currentValue: 0.6666666666666666,
+              timestamp: '2021-01-02T00:05:00.000Z',
+              shouldFire: true,
+              shouldWarn: false,
+              isNoData: false,
+            },
+          },
+        ]);
+      });
       describe('without groupBy', () => {
         it('should alert on rate', async () => {
           const params = {
