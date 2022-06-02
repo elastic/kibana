@@ -5,10 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export { InjectedMetadataService } from './injected_metadata_service';
-export type {
-  InjectedMetadataParams,
-  InjectedMetadataSetup,
-  InjectedMetadataStart,
-  InjectedPluginMetadata,
-} from './injected_metadata_service';
+
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/injected-metadata/core-injected-metadata-browser-internal'],
+};
