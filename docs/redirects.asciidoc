@@ -415,3 +415,15 @@ This page has been deleted. Refer to <<document-explorer>>.
 == Advanced Osquery
 
 This page has been deleted. Refer to <<osquery>>.
+
+[role="exclude",id="url-drilldowns"]
+== Create URL drilldowns
+
+This page has been moved. Refer to <<create-url-drilldowns>>.
+
+[role="exclude",id="url_templating-language"]
+== URL templating
+
+This page has been moved. Refer to <<url_templating>>.
+
+
