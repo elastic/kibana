@@ -9,13 +9,9 @@
 import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
 import type { Logger, LoggerFactory } from '@kbn/logging';
-import {
-  ConfigService,
-  Env,
-  RawConfigurationProvider,
-  coreDeprecationProvider,
-  ensureValidConfiguration,
-} from './config';
+import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { coreDeprecationProvider, ensureValidConfiguration } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
@@ -43,12 +39,7 @@ import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
 import { ContextService } from './context';
-import {
-  InternalCorePreboot,
-  InternalCoreSetup,
-  InternalCoreStart,
-  ServiceConfigDescriptor,
-} from './internal_types';
+import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService, config as deprecationConfig } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';

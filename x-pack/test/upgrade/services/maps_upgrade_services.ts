@@ -8,10 +8,23 @@
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function MapsHelper({ getPageObjects, getService }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['maps']);
+  const PageObjects = getPageObjects(['maps', 'common']);
   const testSubjects = getService('testSubjects');
+  const log = getService('log');
 
   return {
+    async toggleLayerVisibility(layerName: string) {
+      log.debug('Inside toggleLayerVisibility');
+      await PageObjects.maps.openLayerTocActionsPanel(layerName);
+      await testSubjects.click('layerVisibilityToggleButton');
+      await PageObjects.common.sleep(3000);
+      const isTooltipOpen = await testSubjects.exists(`layerTocTooltip`, { timeout: 5000 });
+      if (isTooltipOpen) {
+        await testSubjects.click(`layerTocTooltip`);
+        await PageObjects.common.sleep(1000);
+      }
+    },
+
     // In v8.0, the default base map switched from bright to desaturated.
     // https://github.com/elastic/kibana/pull/116179
     // Maps created before this change will have a base map called "Road map"
@@ -26,10 +39,10 @@ export function MapsHelper({ getPageObjects, getService }: FtrProviderContext) {
         throw new Error('Layer road map not found');
       }
       if (isRoadMapDesaturated) {
-        await PageObjects.maps.toggleLayerVisibility('Road map - desaturated');
+        await this.toggleLayerVisibility('Road map - desaturated');
       }
       if (isRoadMap) {
-        await PageObjects.maps.toggleLayerVisibility('Road map');
+        await this.toggleLayerVisibility('Road map');
       }
     },
 

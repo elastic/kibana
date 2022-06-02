@@ -32,7 +32,7 @@ post:
                   description: Turns alert syncing on or off.
                   type: boolean
             severity:
-              $ref: '../components/schemas/severity.yaml'
+              $ref: '../components/schemas/severity_property.yaml'
             tags:
               description: The words and phrases that help categorize cases. It can be an empty array.
               type: array
@@ -129,7 +129,7 @@ patch:
                         description: Turns alert syncing on or off.
                         type: boolean
                   severity:
-                    $ref: '../components/schemas/severity.yaml' 
+                    $ref: '../components/schemas/severity_property.yaml' 
                   status:
                     $ref: '../components/schemas/status.yaml'
                   tags:

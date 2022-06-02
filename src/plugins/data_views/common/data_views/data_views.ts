@@ -13,11 +13,8 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { FieldFormatsStartCommon, FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import {
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  DEFAULT_ASSETS_TO_IGNORE,
-  SavedObjectsClientCommon,
-} from '..';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, DEFAULT_ASSETS_TO_IGNORE } from '..';
+import { SavedObjectsClientCommon } from '../types';
 
 import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
@@ -43,63 +40,214 @@ import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../erro
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
-export type IndexPatternSavedObjectAttrs = Pick<DataViewAttributes, 'title' | 'type' | 'typeMeta'>;
+export type DataViewSavedObjectAttrs = Pick<DataViewAttributes, 'title' | 'type' | 'typeMeta'>;
 
 export type IndexPatternListSavedObjectAttrs = Pick<
   DataViewAttributes,
   'title' | 'type' | 'typeMeta'
 >;
 
+/**
+ * Result from data view search - summary data.
+ */
 export interface DataViewListItem {
+  /**
+   * Saved object id
+   */
   id: string;
+  /**
+   * Namespace ids
+   */
   namespaces?: string[];
+  /**
+   * Data view title
+   */
   title: string;
+  /**
+   * Data view type
+   */
   type?: string;
+  /**
+   * Data view type meta
+   */
   typeMeta?: TypeMeta;
 }
 
+/**
+ * Data views API service dependencies
+ */
 export interface DataViewsServiceDeps {
+  /**
+   * UiSettings service instance wrapped in a common interface
+   */
   uiSettings: UiSettingsCommon;
+  /**
+   * Saved objects client interface wrapped in a common interface
+   */
   savedObjectsClient: SavedObjectsClientCommon;
+  /**
+   * Wrapper around http call functionality so it can be used on client or server
+   */
   apiClient: IDataViewsApiClient;
+  /**
+   * Field formats service
+   */
   fieldFormats: FieldFormatsStartCommon;
+  /**
+   * Hander for service notifications
+   */
   onNotification: OnNotification;
+  /**
+   * Handler for service errors
+   */
   onError: OnError;
+  /**
+   * Redirects when there's no data view. only used on client
+   */
   onRedirectNoIndexPattern?: () => void;
+  /**
+   * Determines whether the user can save data views
+   */
   getCanSave: () => Promise<boolean>;
 }
 
+/**
+ * Data views API service methods
+ * @public
+ */
 export interface DataViewsServicePublicMethods {
+  /**
+   * Clear the cache of data views.
+   * @param id
+   */
   clearCache: (id?: string | undefined) => void;
+  /**
+   * Create data view based on the provided spec.
+   * @param spec - Data view spec.
+   * @param skipFetchFields - If true, do not fetch fields.
+   */
   create: (spec: DataViewSpec, skipFetchFields?: boolean) => Promise<DataView>;
+  /**
+   * Create and save data view based on provided spec.
+   * @param spec - Data view spec.
+   * @param override - If true, save over existing data view
+   * @param skipFetchFields - If true, do not fetch fields.
+   */
   createAndSave: (
     spec: DataViewSpec,
     override?: boolean,
     skipFetchFields?: boolean
   ) => Promise<DataView>;
+  /**
+   * Save data view
+   * @param dataView - Data view instance to save.
+   * @param override - If true, save over existing data view
+   */
   createSavedObject: (indexPattern: DataView, override?: boolean) => Promise<DataView>;
+  /**
+   * Delete data view
+   * @param indexPatternId - Id of the data view to delete.
+   */
   delete: (indexPatternId: string) => Promise<{}>;
+  /**
+   * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
+   *             'no data view' case in api consumer code - no more auto redirect
+   */
   ensureDefaultDataView: EnsureDefaultDataView;
+  /**
+   * Takes field array and field attributes and returns field map by name.
+   * @param fields - Array of fieldspecs
+   * @params fieldAttrs - Field attributes, map by name
+   * @returns Field map by name
+   */
   fieldArrayToMap: (fields: FieldSpec[], fieldAttrs?: FieldAttrs | undefined) => DataViewFieldMap;
+  /**
+   * Search for data views based on title
+   * @param search - Search string
+   * @param size - Number of results to return
+   */
   find: (search: string, size?: number) => Promise<DataView[]>;
+  /**
+   * Get data view by id.
+   * @param id - Id of the data view to get.
+   */
   get: (id: string) => Promise<DataView>;
-  getCache: () => Promise<Array<SavedObject<IndexPatternSavedObjectAttrs>> | null | undefined>;
+  /**
+   * Get populated data view saved object cache.
+   */
+  getCache: () => Promise<Array<SavedObject<DataViewSavedObjectAttrs>> | null | undefined>;
+  /**
+   * If user can save data view, return true.
+   */
   getCanSave: () => Promise<boolean>;
+  /**
+   * Get default data view as data view instance.
+   */
   getDefault: () => Promise<DataView | null>;
+  /**
+   * Get default data view id.
+   */
   getDefaultId: () => Promise<string | null>;
+  /**
+   * Get default data view, if it doesn't exist, choose and save new default data view and return it.
+   */
   getDefaultDataView: () => Promise<DataView | null>;
+  /**
+   * Get fields for data view
+   * @param dataView - Data view instance or spec
+   * @param options - Options for getting fields
+   * @returns FieldSpec array
+   */
   getFieldsForIndexPattern: (
     indexPattern: DataView | DataViewSpec,
     options?: GetFieldsOptions | undefined
   ) => Promise<FieldSpec[]>;
+  /**
+   * Get fields for index pattern string
+   * @param options - options for getting fields
+   */
   getFieldsForWildcard: (options: GetFieldsOptions) => Promise<FieldSpec[]>;
+  /**
+   * Get list of data view ids.
+   * @param refresh - clear cache and fetch from server
+   */
   getIds: (refresh?: boolean) => Promise<string[]>;
+  /**
+   * Get list of data view ids and title (and more) for each data view.
+   * @param refresh - clear cache and fetch from server
+   */
   getIdsWithTitle: (refresh?: boolean) => Promise<DataViewListItem[]>;
+  /**
+   * Get list of data view ids and title (and more) for each data view.
+   * @param refresh - clear cache and fetch from server
+   */
   getTitles: (refresh?: boolean) => Promise<string[]>;
+  /**
+   * Returns true if user has access to view a data view.
+   */
   hasUserDataView: () => Promise<boolean>;
+  /**
+   * Refresh fields for data view instance
+   * @params dataView - Data view instance
+   */
   refreshFields: (indexPattern: DataView) => Promise<void>;
+  /**
+   * Converts data view saved object to spec
+   * @params savedObject - Data view saved object
+   */
   savedObjectToSpec: (savedObject: SavedObject<DataViewAttributes>) => DataViewSpec;
+  /**
+   * Set default data view.
+   * @param id - Id of the data view to set as default.
+   * @param force - Overwrite if true
+   */
   setDefault: (id: string | null, force?: boolean) => Promise<void>;
+  /**
+   * Save saved object
+   * @param indexPattern - data view instance
+   * @param saveAttempts - number of times to try saving
+   * @oaram ignoreErrors - if true, do not throw error on failure
+   */
   updateSavedObject: (
     indexPattern: DataView,
     saveAttempts?: number,
@@ -107,25 +255,32 @@ export interface DataViewsServicePublicMethods {
   ) => Promise<void | Error>;
 }
 
+/**
+ * Data views service, providing CRUD operations for data views.
+ * @public
+ */
 export class DataViewsService {
   private config: UiSettingsCommon;
   private savedObjectsClient: SavedObjectsClientCommon;
-  private savedObjectsCache?: Array<SavedObject<IndexPatternSavedObjectAttrs>> | null;
+  private savedObjectsCache?: Array<SavedObject<DataViewSavedObjectAttrs>> | null;
   private apiClient: IDataViewsApiClient;
   private fieldFormats: FieldFormatsStartCommon;
   /**
-   *  Handler for service notifications
+   * Handler for service notifications
    * @param toastInputFields notification content in toast format
    * @param key used to indicate uniqueness of the notification
    */
   private onNotification: OnNotification;
   /*
-   *   Handler for service errors
+   * Handler for service errors
    * @param error notification content in toast format
    * @param key used to indicate uniqueness of the error
    */
   private onError: OnError;
   private dataViewCache: ReturnType<typeof createDataViewCache>;
+  /**
+   * Can the user save data views?
+   */
   public getCanSave: () => Promise<boolean>;
 
   /**
@@ -134,33 +289,38 @@ export class DataViewsService {
    */
   ensureDefaultDataView: EnsureDefaultDataView;
 
-  constructor({
-    uiSettings,
-    savedObjectsClient,
-    apiClient,
-    fieldFormats,
-    onNotification,
-    onError,
-    onRedirectNoIndexPattern = () => {},
-    getCanSave = () => Promise.resolve(false),
-  }: DataViewsServiceDeps) {
+  /**
+   * DataViewsService constructor
+   * @param deps Service dependencies
+   */
+  constructor(deps: DataViewsServiceDeps) {
+    const {
+      uiSettings,
+      savedObjectsClient,
+      apiClient,
+      fieldFormats,
+      onNotification,
+      onError,
+      onRedirectNoIndexPattern = () => {},
+      getCanSave = () => Promise.resolve(false),
+    } = deps;
     this.apiClient = apiClient;
     this.config = uiSettings;
     this.savedObjectsClient = savedObjectsClient;
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
-    this.ensureDefaultDataView = createEnsureDefaultDataView(uiSettings, onRedirectNoIndexPattern);
+    this.ensureDefaultDataView = createEnsureDefaultDataView(onRedirectNoIndexPattern);
     this.getCanSave = getCanSave;
 
     this.dataViewCache = createDataViewCache();
   }
 
   /**
-   * Refresh cache of index pattern ids and titles
+   * Refresh cache of index pattern ids and titles.
    */
   private async refreshSavedObjectsCache() {
-    const so = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+    const so = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
       fields: ['title', 'type', 'typeMeta'],
       perPage: 10000,
@@ -169,7 +329,7 @@ export class DataViewsService {
   }
 
   /**
-   * Get list of index pattern ids
+   * Gets list of index pattern ids.
    * @param refresh Force refresh of index pattern list
    */
   getIds = async (refresh: boolean = false) => {
@@ -183,7 +343,7 @@ export class DataViewsService {
   };
 
   /**
-   * Get list of index pattern titles
+   * Gets list of index pattern titles.
    * @param refresh Force refresh of index pattern list
    */
   getTitles = async (refresh: boolean = false): Promise<string[]> => {
@@ -197,13 +357,13 @@ export class DataViewsService {
   };
 
   /**
-   * Find and load index patterns by title
-   * @param search
-   * @param size
-   * @returns IndexPattern[]
+   * Find and load index patterns by title.
+   * @param search Search string
+   * @param size  Number of data views to return
+   * @returns DataView[]
    */
   find = async (search: string, size: number = 10): Promise<DataView[]> => {
-    const savedObjects = await this.savedObjectsClient.find<IndexPatternSavedObjectAttrs>({
+    const savedObjects = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
       fields: ['title'],
       search,
@@ -217,7 +377,7 @@ export class DataViewsService {
   };
 
   /**
-   * Get list of index pattern ids with titles
+   * Gets list of index pattern ids with titles.
    * @param refresh Force refresh of index pattern list
    */
   getIdsWithTitle = async (refresh: boolean = false): Promise<DataViewListItem[]> => {
@@ -237,7 +397,7 @@ export class DataViewsService {
   };
 
   /**
-   * Clear index pattern list cache
+   * Clear index pattern list cache.
    * @param id optionally clear a single id
    */
   clearCache = (id?: string) => {
@@ -248,6 +408,10 @@ export class DataViewsService {
       this.dataViewCache.clearAll();
     }
   };
+
+  /**
+   * Get cache, contains data view saved objects.
+   */
 
   getCache = async () => {
     if (!this.savedObjectsCache) {
@@ -278,8 +442,8 @@ export class DataViewsService {
 
   /**
    * Optionally set default index pattern, unless force = true
-   * @param id
-   * @param force
+   * @param id data view id
+   * @param force set default data view even if there's an existing default
    */
   setDefault = async (id: string | null, force = false) => {
     if (force || !(await this.config.get('defaultIndex'))) {
@@ -288,15 +452,15 @@ export class DataViewsService {
   };
 
   /**
-   * Checks if current user has a user created index pattern ignoring fleet's server default index patterns
+   * Checks if current user has a user created index pattern ignoring fleet's server default index patterns.
    */
   async hasUserDataView(): Promise<boolean> {
     return this.apiClient.hasUserIndexPattern();
   }
 
   /**
-   * Get field list by providing { pattern }
-   * @param options
+   * Get field list by providing { pattern }.
+   * @param options options for getting field list
    * @returns FieldSpec[]
    */
   getFieldsForWildcard = async (options: GetFieldsOptions): Promise<FieldSpec[]> => {
@@ -312,8 +476,8 @@ export class DataViewsService {
   };
 
   /**
-   * Get field list by providing an index patttern (or spec)
-   * @param options
+   * Get field list by providing an index patttern (or spec).
+   * @param options options for getting field list
    * @returns FieldSpec[]
    */
   getFieldsForIndexPattern = async (
@@ -328,7 +492,7 @@ export class DataViewsService {
     });
 
   /**
-   * Refresh field list for a given index pattern
+   * Refresh field list for a given index pattern.
    * @param indexPattern
    */
   refreshFields = async (indexPattern: DataView) => {
@@ -363,7 +527,7 @@ export class DataViewsService {
   };
 
   /**
-   * Refreshes a field list from a spec before an index pattern instance is created
+   * Refreshes a field list from a spec before an index pattern instance is created.
    * @param fields
    * @param id
    * @param title
@@ -417,7 +581,7 @@ export class DataViewsService {
   };
 
   /**
-   * Converts field array to map
+   * Converts field array to map.
    * @param fields: FieldSpec[]
    * @param fieldAttrs: FieldAttrs
    * @returns Record<string, FieldSpec>
@@ -433,7 +597,7 @@ export class DataViewsService {
     }, {});
 
   /**
-   * Converts index pattern saved object to index pattern spec
+   * Converts data view saved object to data view spec.
    * @param savedObject
    * @returns DataViewSpec
    */
@@ -586,7 +750,7 @@ export class DataViewsService {
   };
 
   /**
-   * Get an index pattern by id. Cache optimized
+   * Get an index pattern by id, cache optimized.
    * @param id
    */
 
@@ -603,10 +767,10 @@ export class DataViewsService {
   };
 
   /**
-   * Create a new index pattern instance
-   * @param spec
-   * @param skipFetchFields
-   * @returns IndexPattern
+   * Create a new data view instance.
+   * @param spec data view spec
+   * @param skipFetchFields if true, will not fetch fields
+   * @returns DataView
    */
   async create(spec: DataViewSpec, skipFetchFields = false): Promise<DataView> {
     const shortDotsEnable = await this.config.get(FORMATS_UI_SETTINGS.SHORT_DOTS_ENABLE);
@@ -627,8 +791,8 @@ export class DataViewsService {
   }
 
   /**
-   * Create a new index pattern and save it right away
-   * @param spec
+   * Create a new data view and save it right away.
+   * @param spec data view spec
    * @param override Overwrite if existing index pattern exists.
    * @param skipFetchFields Whether to skip field refresh step.
    */
@@ -641,30 +805,30 @@ export class DataViewsService {
   }
 
   /**
-   * Save a new index pattern
-   * @param indexPattern
+   * Save a new data view.
+   * @param dataView data view instance
    * @param override Overwrite if existing index pattern exists
    */
 
-  async createSavedObject(indexPattern: DataView, override = false) {
+  async createSavedObject(dataView: DataView, override = false) {
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError();
     }
-    const dupe = await findByTitle(this.savedObjectsClient, indexPattern.title);
+    const dupe = await findByTitle(this.savedObjectsClient, dataView.title);
     if (dupe) {
       if (override) {
         await this.delete(dupe.id);
       } else {
-        throw new DuplicateDataViewError(`Duplicate index pattern: ${indexPattern.title}`);
+        throw new DuplicateDataViewError(`Duplicate data view: ${dataView.title}`);
       }
     }
 
-    const body = indexPattern.getAsSavedObjectBody();
+    const body = dataView.getAsSavedObjectBody();
     const response: SavedObject<DataViewAttributes> = (await this.savedObjectsClient.create(
       DATA_VIEW_SAVED_OBJECT_TYPE,
       body,
       {
-        id: indexPattern.id,
+        id: dataView.id,
       }
     )) as SavedObject<DataViewAttributes>;
 
@@ -677,7 +841,7 @@ export class DataViewsService {
   }
 
   /**
-   * Save existing index pattern. Will attempt to merge differences if there are conflicts
+   * Save existing dat aview. Will attempt to merge differences if there are conflicts.
    * @param indexPattern
    * @param saveAttempts
    */
@@ -773,7 +937,7 @@ export class DataViewsService {
   }
 
   /**
-   * Deletes an index pattern from .kibana index
+   * Deletes an index pattern from .kibana index.
    * @param indexPatternId: Id of kibana Index Pattern to delete
    */
   async delete(indexPatternId: string) {
@@ -788,7 +952,7 @@ export class DataViewsService {
    * Returns the default data view as an object.
    * If no default is found, or it is missing
    * another data view is selected as default and returned.
-   * If no possible data view found to become a default returns null
+   * If no possible data view found to become a default returns null.
    *
    * @returns default data view
    */
@@ -828,9 +992,9 @@ export class DataViewsService {
  */
 export class IndexPatternsService extends DataViewsService {}
 
-export type DataViewsContract = PublicMethodsOf<DataViewsService>;
-
 /**
- * @deprecated Use DataViewsContract. All index pattern interfaces were renamed.
+ * Data views service interface
+ * @public
  */
-export type IndexPatternsContract = DataViewsContract;
+
+export type DataViewsContract = PublicMethodsOf<DataViewsService>;
