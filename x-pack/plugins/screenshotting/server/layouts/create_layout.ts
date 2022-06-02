@@ -17,9 +17,6 @@ import { PrintLayout } from './print_layout';
  * Layout dimensions must be sanitized as they are passed in the args that spawn the
  * Chromium process. Width and height must be int32 value.
  *
- * We naively round all numeric values in the object, this will break screenshotting
- * if ever a have a non-number set as a value, but this points to an issue
- * in the code responsible for creating the dimensions object.
  */
 const sanitizeLayout = (dimensions: { width: number; height: number }) => {
   const { width, height } = dimensions;
