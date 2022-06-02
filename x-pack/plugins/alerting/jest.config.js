@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/alerting'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/alerting',

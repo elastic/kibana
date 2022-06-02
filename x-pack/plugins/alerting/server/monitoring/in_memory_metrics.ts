@@ -33,7 +33,7 @@ export class InMemoryMetrics {
   constructor(logger: Logger) {
     this.logger = logger;
 
-    // this.logger.debug('MATSCHAFFER: CREATING meter provider');
+    this.logger.debug('MATSCHAFFER: CREATING meter provider');
     const provider = new MeterProvider({
       exporter: new OTLPMetricExporter(),
       interval: 1000,

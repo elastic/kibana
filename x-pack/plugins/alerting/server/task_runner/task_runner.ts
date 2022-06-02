@@ -797,7 +797,7 @@ export class TaskRunner<
     };
 
     if (!this.cancelled) {
-      // this.logger.debug("MATSCHAFFER: INCREMENTING rule's execution count");
+      this.logger.debug("MATSCHAFFER: INCREMENTING rule's execution count");
       // this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS, { rule: this.ruleType.id });
       this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
       if (executionStatus.error) {
