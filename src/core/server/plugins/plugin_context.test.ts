@@ -10,19 +10,19 @@ import { duration } from 'moment';
 import { first } from 'rxjs/operators';
 import { REPO_ROOT } from '@kbn/utils';
 import { fromRoot } from '@kbn/utils';
+import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '@kbn/config-mocks';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import {
   createPluginInitializerContext,
   createPluginPrebootSetupContext,
   InstanceInfo,
 } from './plugin_context';
-import { CoreContext } from '../core_context';
-import { Env } from '../config';
+
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { rawConfigServiceMock, getEnvOptions, configServiceMock } from '../config/mocks';
 import { PluginManifest, PluginType } from './types';
 import { Server } from '../server';
 import { schema, ByteSizeValue } from '@kbn/config-schema';
-import { ConfigService } from '@kbn/config';
+import { ConfigService, Env } from '@kbn/config';
 import { PluginWrapper } from './plugin';
 import { coreMock } from '../mocks';
 
