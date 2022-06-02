@@ -33,13 +33,12 @@ If this field is empty, see <<environment-selector,service environment filter>> 
 [float]
 ==== Step 1: Create filtered aliases
 
-The APM app uses data views to query your APM data.
-A data view is a pattern that matches data streams, indices, and/or aliases.
+The APM app uses index patterns to query your APM data. An index pattern can match data streams, indices, and/or aliases.
 The default values are:
 
 [options="header"]
 |====
-| Index setting     | Default data view
+| Index setting     | Default index pattern
 | Error             | `logs-apm*`
 | Span/Transaction  | `traces-apm*`
 | Metrics           | `metrics-apm*`
