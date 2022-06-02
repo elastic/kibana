@@ -24,7 +24,7 @@ const ES_TEST_INDEX_REFERENCE = '-na-';
 const ES_TEST_OUTPUT_INDEX_NAME = `${ES_TEST_INDEX_NAME}-output`;
 
 const RULE_INTERVALS_TO_WRITE = 5;
-const RULE_INTERVAL_SECONDS = 3;
+const RULE_INTERVAL_SECONDS = 4;
 const RULE_INTERVAL_MILLIS = RULE_INTERVAL_SECONDS * 1000;
 const ES_GROUPS_TO_WRITE = 3;
 
@@ -137,7 +137,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`rule 'always fire' matched query`);
           const messagePattern =
-            /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -174,46 +174,46 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           });
         },
       ] as const,
-      // [
-      //   'searchSource',
-      //   async () => {
-      //     const esTestDataView = await indexPatterns.create(
-      //       { title: ES_TEST_INDEX_NAME, timeFieldName: 'date_epoch_millis' },
-      //       { override: true },
-      //       getUrlPrefix(Spaces.space1.id)
-      //     );
-      //     await createRule({
-      //       name: 'never fire',
-      //       size: 100,
-      //       thresholdComparator: '<',
-      //       threshold: [0],
-      //       searchType: 'searchSource',
-      //       searchConfiguration: {
-      //         query: {
-      //           query: '',
-      //           language: 'kuery',
-      //         },
-      //         index: esTestDataView.id,
-      //         filter: [],
-      //       },
-      //     });
-      //     await createRule({
-      //       name: 'always fire',
-      //       size: 100,
-      //       thresholdComparator: '>',
-      //       threshold: [-1],
-      //       searchType: 'searchSource',
-      //       searchConfiguration: {
-      //         query: {
-      //           query: '',
-      //           language: 'kuery',
-      //         },
-      //         index: esTestDataView.id,
-      //         filter: [],
-      //       },
-      //     });
-      //   },
-      // ] as const,
+      [
+        'searchSource',
+        async () => {
+          const esTestDataView = await indexPatterns.create(
+            { title: ES_TEST_INDEX_NAME, timeFieldName: 'date_epoch_millis' },
+            { override: true },
+            getUrlPrefix(Spaces.space1.id)
+          );
+          await createRule({
+            name: 'never fire',
+            size: 100,
+            thresholdComparator: '<',
+            threshold: [0],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+          });
+          await createRule({
+            name: 'always fire',
+            size: 100,
+            thresholdComparator: '>',
+            threshold: [-1],
+            searchType: 'searchSource',
+            searchConfiguration: {
+              query: {
+                query: '',
+                language: 'kuery',
+              },
+              index: esTestDataView.id,
+              filter: [],
+            },
+          });
+        },
+      ] as const,
     ].forEach(([searchType, initData]) =>
       it(`runs correctly: use epoch millis - threshold on hit count < > for ${searchType} search type`, async () => {
         // write documents from now to the future end date in groups
@@ -229,7 +229,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`rule 'always fire' matched query`);
           const messagePattern =
-            /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than -1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
 
@@ -339,7 +339,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('fires once');
           expect(title).to.be(`rule 'fires once' matched query`);
           const messagePattern =
-            /rule 'fires once' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than or equal to 0 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /rule 'fires once' is active:\n\n- Value: \d+\n- Conditions Met: Number of matching documents is greater than or equal to 0 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
           expect(message).to.match(messagePattern);
           expect(hits).not.to.be.empty();
           expect(previousTimestamp).to.be.empty();
@@ -399,7 +399,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           expect(name).to.be('always fire');
           expect(title).to.be(`rule 'always fire' matched query`);
           const messagePattern =
-            /rule 'always fire' is active:\n\n- Value: 0+\n- Conditions Met: Number of matching documents is less than 1 over 15s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
+            /rule 'always fire' is active:\n\n- Value: 0+\n- Conditions Met: Number of matching documents is less than 1 over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z/;
           expect(message).to.match(messagePattern);
           expect(hits).to.be.empty();
 
