@@ -58,6 +58,7 @@ describe('When using the release action from response actions console', () => {
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.releaseHost).toHaveBeenCalledTimes(1);
+      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalled();
     });
   });
 
