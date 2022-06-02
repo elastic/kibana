@@ -106,8 +106,8 @@ export function TimeseriesChart({
     comparisonEnabled && isExpectedBoundsComparison(offset);
   const allSeries = [
     ...timeseries,
-    ...(isComparingExpectedBounds && anomalyChartTimeseries?.boundaries
-      ? anomalyChartTimeseries?.boundaries
+    ...(isComparingExpectedBounds
+      ? anomalyChartTimeseries?.boundaries ?? []
       : []),
     ...(anomalyChartTimeseries?.scores ?? []),
   ]
