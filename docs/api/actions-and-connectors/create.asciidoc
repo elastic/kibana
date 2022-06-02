@@ -6,7 +6,6 @@
 
 Creates a connector.
 
-[discrete]
 [[create-connector-api-request]]
 === {api-request-title}
 
@@ -14,14 +13,12 @@ Creates a connector.
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/connector`
 
-[discrete]
 === {api-prereq-title}
 
 You must have `all` privileges for the *Actions and Connectors* feature in the
 *Management* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 
-[discrete]
 [[create-connector-api-path-params]]
 === {api-path-parms-title}
 
@@ -29,7 +26,6 @@ You must have `all` privileges for the *Actions and Connectors* feature in the
   (Optional, string) An identifier for the space. If `space_id` is not provided
   in the URL, the default space is used.
 
-[discrete]
 [role="child_attributes"]
 [[create-connector-api-request-body]]
 === {api-request-body-title}
@@ -93,14 +89,12 @@ authentication.
 (Required, string) The account email for HTTP Basic authentication.
 ====
 
-[discrete]
 [[create-connector-api-request-codes]]
 === {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
-[discrete]
 [[create-connector-api-example]]
 === {api-examples-title}
 
