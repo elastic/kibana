@@ -7,13 +7,13 @@
  */
 
 import * as Option from 'fp-ts/Option';
+import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { IndexMapping } from '../mappings';
 import { SavedObjectsMigrationVersion } from '../../../types';
 import { SavedObjectsMigrationConfigType } from '../saved_objects_config';
 import type { ISavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
-import { DocLinksServiceStart } from '../../doc_links';
 
 /**
  * Construct the initial state for the model
