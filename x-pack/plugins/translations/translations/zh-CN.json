@@ -2812,7 +2812,6 @@
     "dataViews.deprecations.scriptedFields.manualStepTwoMessage": "更新 {numberOfIndexPatternsWithScriptedFields} 个具有脚本字段的数据视图以改为使用运行时字段。多数情况下，要迁移现有脚本，您需要将“return <value>;”更改为“emit(<value>);”。至少有一个脚本字段的数据视图：{allTitles}",
     "dataViews.deprecations.scriptedFieldsMessage": "您具有 {numberOfIndexPatternsWithScriptedFields} 个使用脚本字段的数据视图 ({titlesPreview}...)。脚本字段已过时，将在未来移除。请改为使用运行时脚本。",
     "dataViews.deprecations.scriptedFieldsTitle": "找到使用脚本字段的数据视图",
-    "dataViews.ensureDefaultIndexPattern.bannerLabel": "要在 Kibana 中可视化和浏览数据，必须创建索引模式，以从 Elasticsearch 中检索数据。",
     "dataViews.fetchFieldErrorTitle": "提取数据视图 {title}（ID：{id}）的字段时出错",
     "dataViews.functions.dataViewLoad.help": "加载数据视图",
     "dataViews.functions.dataViewLoad.id.help": "要加载的数据视图 ID",

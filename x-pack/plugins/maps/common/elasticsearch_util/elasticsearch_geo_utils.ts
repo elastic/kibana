@@ -9,6 +9,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Feature, FeatureCollection, Geometry, Polygon, Point, Position } from 'geojson';
 import { BBox } from '@turf/helpers';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   DECIMAL_DEGREES_PRECISION,
   ES_GEO_FIELD_TYPE,
@@ -66,8 +67,8 @@ function ensureGeometryType(type: string, expectedTypes: GEO_JSON_TYPE[]) {
  * @returns {number}
  */
 export function hitsToGeoJson(
-  hits: Array<Record<string, unknown>>,
-  flattenHit: (elasticSearchHit: Record<string, unknown>) => Record<string, unknown>,
+  hits: estypes.SearchHit[],
+  flattenHit: (elasticSearchHit: estypes.SearchHit) => Record<string, unknown>,
   geoFieldName: string,
   geoFieldType: ES_GEO_FIELD_TYPE,
   epochMillisFields: string[]
