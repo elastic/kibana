@@ -1,0 +1,7 @@
+summary: Adds a comment to a case.
+value:
+  {
+    "type": "user",
+    "comment": "That is nothing - Ethan Hunt answered a targeted social media campaign promoting phishy pension schemes to IMF operatives.",
+    "owner": "cases"
+  }
