@@ -288,11 +288,13 @@ export async function mgetExecutables(
   );
 
   // Create a lookup map StackFrameID -> StackFrame.
+  let exeFound = 0;
   await logExecutionLatency(logger, 'processing data', async () => {
     const docs = getDocs(resExecutables);
     for (const exe of docs) {
       if (exe.found) {
         executables.set(exe._id, exe._source);
+        exeFound++;
       } else {
         executables.set(exe._id, {
           FileName: '',
@@ -300,6 +302,8 @@ export async function mgetExecutables(
       }
     }
   });
+
+  logger.info('found ' + exeFound + ' / ' + executableIDs.size + ' executables');
 
   return executables;
 }
