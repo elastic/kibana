@@ -18,7 +18,7 @@ jest.mock('moment', () => {
   return moment;
 });
 
-import { DataView, DataViewField } from '../../..';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { AggParamsDateHistogram } from '../buckets';
 import { inferTimeZone } from './infer_time_zone';
 
