@@ -52,7 +52,7 @@ export function ObservabilityAlertsCommonProvider({
     return await pageObjects.common.navigateToUrlWithBrowserHistory(
       'observability',
       '/alerts/rules',
-      '?',
+      '',
       { ensureCurrentUrl: false }
     );
   };
