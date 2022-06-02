@@ -74,8 +74,8 @@ export function buildCopyColumnValuesButton({
         defaultMessage="Copy column"
       />
     ),
-    onCopy: async () =>
-      await copyColumnValuesToClipboard({
+    onCopy: () =>
+      copyColumnValuesToClipboard({
         columnId,
         services,
         rowsCount,

@@ -18,6 +18,9 @@ const WARNING_FOR_FORMULAS = i18n.translate(
     defaultMessage: 'It may contain formulas whose values have been escaped.',
   }
 );
+const COPY_FAILED_ERROR_MESSAGE = i18n.translate('discover.grid.copyFailedErrorText', {
+  defaultMessage: 'Unable to copy to clipboard in this browser',
+});
 
 export const copyValueToClipboard = ({
   rowIndex,
@@ -29,13 +32,21 @@ export const copyValueToClipboard = ({
   columnId: string;
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
-}): string => {
+}): string | null => {
   const { toastNotifications } = services;
 
   const result = valueToStringConverter(rowIndex, columnId);
   const valueFormatted = result.formattedString;
 
-  copyToClipboard(valueFormatted);
+  const copied = copyToClipboard(valueFormatted);
+
+  if (!copied) {
+    toastNotifications.addWarning({
+      title: COPY_FAILED_ERROR_MESSAGE,
+    });
+
+    return null;
+  }
 
   const toastTitle = i18n.translate('discover.grid.copyValueToClipboard.toastTitle', {
     defaultMessage: 'Copied to clipboard',
@@ -65,7 +76,7 @@ export const copyColumnValuesToClipboard = async ({
   services: DiscoverServices;
   valueToStringConverter: ValueToStringConverter;
   rowsCount: number;
-}): Promise<string> => {
+}): Promise<string | null> => {
   const { toastNotifications } = services;
   const nameFormattedResult = convertNameToString(columnId);
   let withFormula = nameFormattedResult.withFormula;
@@ -78,28 +89,36 @@ export const copyColumnValuesToClipboard = async ({
 
   const textToCopy = `${nameFormattedResult.formattedString}\n${valuesFormatted.join('\n')}`;
 
-  let copiedWithoutBrowserStyles = false;
+  let copied;
   try {
-    copiedWithoutBrowserStyles = Boolean(await window.navigator?.clipboard?.writeText(textToCopy));
+    // try to copy without browser styles
+    await window.navigator?.clipboard?.writeText(textToCopy);
+    copied = true;
   } catch (error) {
-    if (!copiedWithoutBrowserStyles) {
-      copyToClipboard(textToCopy);
-    }
+    copied = copyToClipboard(textToCopy);
   }
 
-  const messageTitle = i18n.translate('discover.grid.copyColumnValuesToClipboard.toastTitle', {
+  if (!copied) {
+    toastNotifications.addWarning({
+      title: COPY_FAILED_ERROR_MESSAGE,
+    });
+
+    return null;
+  }
+
+  const toastTitle = i18n.translate('discover.grid.copyColumnValuesToClipboard.toastTitle', {
     defaultMessage: 'Copied values of "{column}" column to clipboard',
     values: { column: columnId },
   });
 
   if (withFormula) {
     toastNotifications.addWarning({
-      title: messageTitle,
+      title: toastTitle,
       text: WARNING_FOR_FORMULAS,
     });
   } else {
     toastNotifications.addInfo({
-      title: messageTitle,
+      title: toastTitle,
     });
   }
 
@@ -112,17 +131,35 @@ export const copyColumnNameToClipboard = ({
 }: {
   columnId: string;
   services: DiscoverServices;
-}): string => {
+}): string | null => {
   const { toastNotifications } = services;
 
-  const textToCopy = columnId;
-  copyToClipboard(textToCopy);
+  const nameFormattedResult = convertNameToString(columnId);
+  const textToCopy = nameFormattedResult.formattedString;
+  const copied = copyToClipboard(textToCopy);
 
-  toastNotifications.addInfo({
-    title: i18n.translate('discover.grid.copyColumnNameToClipboard.toastTitle', {
-      defaultMessage: 'Copied to clipboard',
-    }),
+  if (!copied) {
+    toastNotifications.addWarning({
+      title: COPY_FAILED_ERROR_MESSAGE,
+    });
+
+    return null;
+  }
+
+  const toastTitle = i18n.translate('discover.grid.copyColumnNameToClipboard.toastTitle', {
+    defaultMessage: 'Copied to clipboard',
   });
+
+  if (nameFormattedResult.withFormula) {
+    toastNotifications.addWarning({
+      title: toastTitle,
+      text: WARNING_FOR_FORMULAS,
+    });
+  } else {
+    toastNotifications.addInfo({
+      title: toastTitle,
+    });
+  }
 
   return textToCopy;
 };

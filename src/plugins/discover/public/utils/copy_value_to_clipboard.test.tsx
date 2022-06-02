@@ -16,7 +16,8 @@ import {
 import { convertValueToString } from './convert_value_to_string';
 import type { ValueToStringConverter } from '../types';
 
-const execCommandMock = (global.document.execCommand = jest.fn(() => true));
+const execCommandMock = (global.document.execCommand = jest.fn());
+const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
 
 describe('copyValueToClipboard', () => {
   const valueToStringConverter: ValueToStringConverter = (rowIndex, columnId, options) =>
@@ -30,7 +31,25 @@ describe('copyValueToClipboard', () => {
       options,
     });
 
+  const originalClipboard = global.window.navigator.clipboard;
+
+  beforeAll(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: jest.fn(),
+      },
+      writable: true,
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
+    });
+  });
+
   it('should copy a value to clipboard', () => {
+    execCommandMock.mockImplementationOnce(() => true);
     const result = copyValueToClipboard({
       services: discoverServiceMock,
       columnId: 'keyword_key',
@@ -40,12 +59,32 @@ describe('copyValueToClipboard', () => {
 
     expect(result).toBe('abcd1');
     expect(execCommandMock).toHaveBeenCalledWith('copy');
+    expect(warn).not.toHaveBeenCalled();
     expect(discoverServiceMock.toastNotifications.addInfo).toHaveBeenCalledWith({
       title: 'Copied to clipboard',
     });
   });
 
+  it('should inform when copy a value to clipboard failed', () => {
+    execCommandMock.mockImplementationOnce(() => false);
+
+    const result = copyValueToClipboard({
+      services: discoverServiceMock,
+      columnId: 'keyword_key',
+      rowIndex: 0,
+      valueToStringConverter,
+    });
+
+    expect(result).toBe(null);
+    expect(execCommandMock).toHaveBeenCalledWith('copy');
+    expect(warn).toHaveBeenCalledWith('Unable to copy to clipboard.');
+    expect(discoverServiceMock.toastNotifications.addWarning).toHaveBeenCalledWith({
+      title: 'Unable to copy to clipboard in this browser',
+    });
+  });
+
   it('should copy a column name to clipboard', () => {
+    execCommandMock.mockImplementationOnce(() => true);
     const result = copyColumnNameToClipboard({
       services: discoverServiceMock,
       columnId: 'text_message',
@@ -58,15 +97,23 @@ describe('copyValueToClipboard', () => {
     });
   });
 
-  it('should copy column values to clipboard', async () => {
-    const originalClipboard = global.window.navigator.clipboard;
-
-    Object.defineProperty(navigator, 'clipboard', {
-      value: {
-        writeText: jest.fn(),
-      },
-      writable: true,
+  it('should inform when copy a column name to clipboard failed', () => {
+    execCommandMock.mockImplementationOnce(() => false);
+    const result = copyColumnNameToClipboard({
+      services: discoverServiceMock,
+      columnId: 'text_message',
     });
+
+    expect(result).toBe(null);
+    expect(execCommandMock).toHaveBeenCalledWith('copy');
+    expect(warn).toHaveBeenCalledWith('Unable to copy to clipboard.');
+    expect(discoverServiceMock.toastNotifications.addWarning).toHaveBeenCalledWith({
+      title: 'Unable to copy to clipboard in this browser',
+    });
+  });
+
+  it('should copy column values to clipboard', async () => {
+    execCommandMock.mockImplementationOnce(() => true);
 
     const result = await copyColumnValuesToClipboard({
       services: discoverServiceMock,
@@ -76,25 +123,16 @@ describe('copyValueToClipboard', () => {
     });
 
     expect(result).toBe('"bool_enabled"\nfalse\ntrue');
+    expect(global.window.navigator.clipboard.writeText).toHaveBeenCalledWith(
+      '"bool_enabled"\nfalse\ntrue'
+    );
     expect(discoverServiceMock.toastNotifications.addInfo).toHaveBeenCalledWith({
       title: 'Copied values of "bool_enabled" column to clipboard',
-    });
-
-    Object.defineProperty(navigator, 'clipboard', {
-      value: originalClipboard,
     });
   });
 
   it('should copy column values to clipboard with a warning', async () => {
-    const originalClipboard = global.window.navigator.clipboard;
-
-    Object.defineProperty(navigator, 'clipboard', {
-      value: {
-        writeText: jest.fn(),
-      },
-      writable: true,
-    });
-
+    execCommandMock.mockImplementationOnce(() => true);
     const result = await copyColumnValuesToClipboard({
       services: discoverServiceMock,
       columnId: 'scripted_string',
@@ -106,10 +144,6 @@ describe('copyValueToClipboard', () => {
     expect(discoverServiceMock.toastNotifications.addWarning).toHaveBeenCalledWith({
       title: 'Copied values of "scripted_string" column to clipboard',
       text: 'It may contain formulas whose values have been escaped.',
-    });
-
-    Object.defineProperty(navigator, 'clipboard', {
-      value: originalClipboard,
     });
   });
 });
