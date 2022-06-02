@@ -162,7 +162,7 @@ export function getAggsFormats(getFieldFormat: GetFieldFormat): FieldFormatInsta
           return `${params.otherBucketLabel}`;
         }
 
-        const joinTemplate = `${params.separator}` ?? ' › ';
+        const joinTemplate = `${params.separator ?? ' › '}`;
 
         return (val as MultiFieldKey).keys
           .map((valPart, i) => formats[i].convert(valPart, type))
