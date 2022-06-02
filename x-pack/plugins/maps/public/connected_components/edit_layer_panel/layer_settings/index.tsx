@@ -27,7 +27,8 @@ function mapDispatchToProps(dispatch: Dispatch<AnyAction>) {
     clearLayerAttribution: (id: string) => dispatch(clearLayerAttribution(id)),
     setLayerAttribution: (id: string, attribution: Attribution) =>
       dispatch(setLayerAttribution(id, attribution)),
-    updateColorFilter: (id: string, colorFilter: ColorFilter) => dispatch(updateLayerColorFilter(id, colorFilter)),
+    updateColorFilter: (id: string, colorFilter: ColorFilter) =>
+      dispatch(updateLayerColorFilter(id, colorFilter)),
     updateLabel: (id: string, label: string) => dispatch(updateLayerLabel(id, label)),
     updateLocale: (id: string, locale: string) => dispatch(updateLayerLocale(id, locale)),
     updateMinZoom: (id: string, minZoom: number) => dispatch(updateLayerMinZoom(id, minZoom)),

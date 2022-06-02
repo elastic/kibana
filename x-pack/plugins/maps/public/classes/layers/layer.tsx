@@ -75,7 +75,7 @@ export interface ILayer {
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
-  getDefaultColorOperation(): { operation?: blendMode, percentage?: number }
+  getDefaultColorOperation(): { operation?: blendMode; percentage?: number };
 
   /*
    * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.

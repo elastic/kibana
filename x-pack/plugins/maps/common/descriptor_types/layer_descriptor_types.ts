@@ -10,6 +10,7 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Query } from '@kbn/data-plugin/public';
 import { Feature } from 'geojson';
+import type { blendMode } from '@elastic/ems-client';
 import {
   HeatmapStyleDescriptor,
   StyleDescriptor,
@@ -18,7 +19,6 @@ import {
 import { DataRequestDescriptor } from './data_request_descriptor_types';
 import { AbstractSourceDescriptor, TermJoinSourceDescriptor } from './source_descriptor_types';
 import { LAYER_TYPE } from '../constants';
-import type { blendMode } from '@elastic/ems-client';
 
 export type Attribution = {
   label: string;

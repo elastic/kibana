@@ -57,7 +57,7 @@ export function LayerSettings(props: Props) {
     // not sure how to resolve this?
     const { operation, percentage } = props.layer.getDefaultColorOperation();
     props.updateColorFilter(layerId, { color, operation, percentage });
-  }
+  };
 
   const onLocaleChange = (event: ChangeEvent<HTMLSelectElement>) => {
     const { value } = event.target;
@@ -179,25 +179,26 @@ export function LayerSettings(props: Props) {
     const { color } = props.layer.getColorFilter();
 
     return (
-      <EuiFormRow display="columnCompressed"
+      <EuiFormRow
+        display="columnCompressed"
         label={i18n.translate('xpack.maps.layerPanel.settingsPanel.colorFilterPickerLabel', {
-          defaultMessage: "Color filter",
+          defaultMessage: 'Color filter',
         })}
       >
         <EuiColorPicker
-            compressed
-            aria-label="Color"
-            color={color}
-            onChange={onColorChange}
-            secondaryInputDisplay="top"
-            isClearable
-            format="hex"
-            placeholder="No filter"
-            aria-placeholder="No filter"
+          compressed
+          aria-label="Color"
+          color={color}
+          onChange={onColorChange}
+          secondaryInputDisplay="top"
+          isClearable
+          format="hex"
+          placeholder="No filter"
+          aria-placeholder="No filter"
         />
       </EuiFormRow>
-    )
-  }
+    );
+  };
   const renderShowLocaleSelector = () => {
     if (!props.layer.supportsLabelLocales()) {
       return null;
