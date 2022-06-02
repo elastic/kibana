@@ -53,8 +53,8 @@ describe('createInitialState', () => {
         "batchSize": 1000,
         "controlState": "INIT",
         "currentAlias": ".kibana_task_manager",
-        "discardUnknownObjects": false,
         "discardCorruptObjects": false,
+        "discardUnknownObjects": false,
         "excludeFromUpgradeFilterHooks": Object {},
         "excludeOnUpgradeQuery": Object {
           "bool": Object {
