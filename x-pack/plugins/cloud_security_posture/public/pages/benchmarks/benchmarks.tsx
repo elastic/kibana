@@ -135,7 +135,7 @@ export const Benchmarks = () => {
   const [query, setQuery] = useState<UseCspBenchmarkIntegrationsProps>({
     name: '',
     page: 1,
-    perPage: 5,
+    perPage: 10,
     sortField: 'package_policy.name',
     sortOrder: 'asc',
   });
