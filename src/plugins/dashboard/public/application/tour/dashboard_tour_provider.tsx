@@ -24,6 +24,7 @@ const DASHBOARD_TOUR_STORAGE_KEY = 'dashboard.tourState';
 
 interface DashboardTourState {
   viewTourComplete: boolean;
+  editTourComplete: boolean;
   editTourState: EuiTourState;
 }
 
@@ -36,6 +37,7 @@ const tourConfig: EuiTourState = {
 
 const defaultTourState: DashboardTourState = {
   viewTourComplete: false,
+  editTourComplete: false,
   editTourState: tourConfig,
 };
 
@@ -62,6 +64,7 @@ export const DashboardEditTourProvider: React.FC<{ viewMode: boolean; editMode: 
     dashboardTourStateRef.current.editTourState
   );
   const { currentTourStep: currentEditTourStep, isTourActive: isEditTourActive } = editReducerState;
+
   const [isViewTourActive, setViewTourActive] = useState(
     viewMode && !dashboardTourStateRef.current.viewTourComplete
   );
@@ -95,6 +98,8 @@ export const DashboardEditTourProvider: React.FC<{ viewMode: boolean; editMode: 
   );
 
   const finishEditTour = useCallback(() => {
+    dashboardTourStateRef.current.editTourComplete = true;
+
     editActions.finishTour();
   }, [editActions]);
 
@@ -148,6 +153,7 @@ export const DashboardEditTourProvider: React.FC<{ viewMode: boolean; editMode: 
           ) : (
             <>
               {isEditTourActive &&
+                !dashboardTourStateRef.current.editTourComplete &&
                 editSteps.map((step) => (
                   <EuiTourStep
                     key={`edit-step-${step.step}-is-${String(step.isStepOpen)}`}
