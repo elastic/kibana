@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
   const browser = getService('browser');
+  const security = getService('security');
 
   function isCloudEnvironment() {
     return config.get('servers.elasticsearch.hostname') !== 'localhost';
@@ -30,8 +31,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       roles: ['superuser'],
     };
 
+    after(async () => {
+      await security.testUser.restoreDefaults();
+    });
+
     before(async () => {
       log.debug('users');
+      await security.testUser.setRoles(['cluster_security_manager']);
       await PageObjects.settings.navigateTo();
       await PageObjects.security.clickElasticsearchUsers();
     });

@@ -2988,6 +2988,38 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-common-internal@link:bazel-bin/packages/core/base/core-base-common-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-common@link:bazel-bin/packages/core/base/core-base-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-server-internal@link:bazel-bin/packages/core/base/core-base-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-browser-mocks@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-browser@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/crypto@link:bazel-bin/packages/kbn-crypto":
   version "0.0.0"
   uid ""
@@ -6235,6 +6267,58 @@
   uid ""
 
 "@types/kbn__config@link:bazel-bin/packages/kbn-config/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-browser@link:bazel-bin/packages/core/base/core-base-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-common-internal@link:bazel-bin/packages/core/base/core-base-common-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-common@link:bazel-bin/packages/core/base/core-base-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-server-internal@link:bazel-bin/packages/core/base/core-base-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-server@link:bazel-bin/packages/core/base/core-base-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-common-internal-base@link:bazel-bin/packages/core/common/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-browser-mocks@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-browser@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-public-internal-base@link:bazel-bin/packages/core/public/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-server-internal-base@link:bazel-bin/packages/core/server/internal-base/npm_module_types":
   version "0.0.0"
   uid ""
 
