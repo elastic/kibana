@@ -14,13 +14,12 @@ export function disambiguateRequestNames(requests: Request[]): Request[] {
 
   const newNamesById = Object.entries(requestsByName).reduce<{ [requestId: string]: string }>(
     (acc, [name, reqs]) => {
-      const next = { ...acc };
       const moreThanOne = reqs.length > 1;
       reqs.forEach((req, idx) => {
         const id = req.id;
-        next[id] = moreThanOne ? `${name} (${idx + 1})` : name;
+        acc[id] = moreThanOne ? `${name} (${idx + 1})` : name;
       });
-      return next;
+      return acc;
     },
     {}
   );
