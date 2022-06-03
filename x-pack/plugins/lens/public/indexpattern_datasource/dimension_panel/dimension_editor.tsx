@@ -96,6 +96,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     http: props.http,
     storage: props.storage,
     unifiedSearch: props.unifiedSearch,
+    dataViews: props.dataViews,
   };
   const { fieldByOperation, operationWithoutField } = operationSupportMatrix;
 
