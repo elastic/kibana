@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { useBreadcrumbs } from '../../hooks';
-import { fetchServiceLocationsAction } from '../../state/monitor_management/service_locations';
+import { getServiceLocations } from '../../state';
 import { SimpleMonitorForm } from './simple_monitor_form';
 import { MONITORING_OVERVIEW_LABEL } from '../../../../legacy_uptime/routes';
 
@@ -19,7 +19,7 @@ export const GettingStartedPage = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchServiceLocationsAction.get());
+    dispatch(getServiceLocations());
   }, [dispatch]);
 
   useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview

@@ -6,7 +6,11 @@
  */
 
 import { SyntheticsAppState } from '../../../state/root_reducer';
-import { LocationStatus } from '../../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  DEFAULT_THROTTLING,
+  LocationStatus,
+} from '../../../../../../common/runtime_types';
 
 /**
  * NOTE: This variable name MUST start with 'mock*' in order for
@@ -27,6 +31,7 @@ export const mockState: SyntheticsAppState = {
     loading: false,
   },
   serviceLocations: {
+    throttling: DEFAULT_THROTTLING,
     locations: [
       {
         id: 'us_central',
@@ -55,6 +60,12 @@ export const mockState: SyntheticsAppState = {
     error: null,
   },
   monitorList: {
+    pageState: {
+      pageIndex: 0,
+      pageSize: 10,
+      sortOrder: 'asc',
+      sortField: `${ConfigKey.NAME}.keyword`,
+    },
     data: {
       total: 0,
       monitors: [],
@@ -65,6 +76,5 @@ export const mockState: SyntheticsAppState = {
     error: null,
     loading: false,
   },
+  syntheticsEnablement: { loading: false, error: null, enablement: null },
 };
-
-// TODO: Complete mock state

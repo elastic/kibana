@@ -14,7 +14,10 @@ export const MONITOR_EDIT_ROUTE = '/edit-monitor/:monitorId';
 export const MONITOR_MANAGEMENT_ROUTE = '/manage-monitors';
 
 export const OVERVIEW_ROUTE = '/';
-export const GETTING_STARTED_ROUTE = '/manage-monitors/getting-started';
+
+export const MONITORS_ROUTE = '/monitors';
+
+export const GETTING_STARTED_ROUTE = '/monitors/getting-started';
 
 export const SETTINGS_ROUTE = '/settings';
 

@@ -21,17 +21,22 @@ import { useSelector } from 'react-redux';
 import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { showSyncErrors } from '../../../../apps/synthetics/components/monitors_page/management/show_sync_errors';
 import { MONITOR_MANAGEMENT_ROUTE } from '../../../../../common/constants';
 import { UptimeSettingsContext } from '../../../contexts';
 import { setMonitor } from '../../../state/api';
 
-import { ConfigKey, SyntheticsMonitor, SourceType } from '../../../../../common/runtime_types';
+import {
+  ConfigKey,
+  SyntheticsMonitor,
+  SourceType,
+  ServiceLocationErrors,
+} from '../../../../../common/runtime_types';
 import { TestRun } from '../test_now_mode/test_now_mode';
 
 import { monitorManagementListSelector } from '../../../state/selectors';
 
 import { kibanaService } from '../../../state/kibana_service';
-import { showSyncErrors } from '../../../../apps/synthetics/components/monitor_management/show_sync_errors';
 
 export interface ActionBarProps {
   monitor: SyntheticsMonitor;
@@ -104,7 +109,11 @@ export const ActionBar = ({
       });
       setIsSuccessful(true);
     } else if (hasErrors && !loading) {
-      showSyncErrors(data.attributes.errors, locations, kibanaService.toasts);
+      showSyncErrors(
+        (data as { attributes: { errors: ServiceLocationErrors } })?.attributes.errors ?? [],
+        locations,
+        kibanaService.toasts
+      );
       setIsSuccessful(true);
     }
   }, [data, status, isSaving, isValid, monitorId, hasErrors, locations, loading]);
