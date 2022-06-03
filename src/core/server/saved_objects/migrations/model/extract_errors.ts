@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TransformErrorObjects } from '../core';
-import { CheckForUnknownDocsFoundDoc } from '../actions';
+import type { TransformErrorObjects } from '../core';
+import type { DocumentIdAndType } from '../actions';
 
 /**
  * Constructs migration failure message strings from corrupt document ids and document transformation errors
@@ -36,19 +36,23 @@ export function extractTransformFailuresReason(
   );
 }
 
+export function extractDiscardedUnknownDocs(unknownDocs: DocumentIdAndType[]): string {
+  return (
+    `Kibana has been configured to discard unknown documents for this migration.\n` +
+    `Therefore, the following documents with unknown types will not be taken into account and they will not be available after the migration:\n` +
+    unknownDocs.map((doc) => `- "${doc.id}" (type: "${doc.type}")\n`).join('')
+  );
+}
+
 export function extractUnknownDocFailureReason(
-  unknownDocs: CheckForUnknownDocsFoundDoc[],
-  sourceIndex: string
+  resolveMigrationFailuresUrl: string,
+  unknownDocs: DocumentIdAndType[]
 ): string {
   return (
-    `Migration failed because documents were found for unknown saved object types. ` +
-    `To proceed with the migration, please delete these documents from the "${sourceIndex}" index.\n` +
-    `The documents with unknown types are:\n` +
+    `Migration failed because some documents were found which use unknown saved object types:\n` +
     unknownDocs.map((doc) => `- "${doc.id}" (type: "${doc.type}")\n`).join('') +
-    `You can delete them using the following command:\n` +
-    `curl -X POST "{elasticsearch}/${sourceIndex}/_bulk?pretty" -H 'Content-Type: application/json' -d'\n` +
-    unknownDocs.map((doc) => `{ "delete" : { "_id" : "${doc.id}" } }\n`).join('') +
-    `'`
+    `\nTo proceed with the migration you can configure Kibana to discard unknown saved objects for this migration.\n` +
+    `Please refer to ${resolveMigrationFailuresUrl} for more information.`
   );
 }
 
@@ -65,18 +69,3 @@ export const fatalReasonDocumentExceedsMaxBatchSizeBytes = ({
   maxBatchSizeBytes: number;
 }) =>
   `The document with _id "${_id}" is ${docSizeBytes} bytes which exceeds the configured maximum batch size of ${maxBatchSizeBytes} bytes. To proceed, please increase the 'migrations.maxBatchSizeBytes' Kibana configuration option and ensure that the Elasticsearch 'http.max_content_length' configuration option is set to an equal or larger value.`;
-
-/**
- * Constructs migration failure message and logs message strings when an unsupported cluster routing allocation is configured.
- * The full errorMessage is "[unsupported_cluster_routing_allocation] The elasticsearch cluster has cluster routing allocation incorrectly set for migrations to continue."
- */
-export const fatalReasonClusterRoutingAllocationUnsupported = ({
-  errorMessage,
-  docSectionLink,
-}: {
-  errorMessage: string;
-  docSectionLink: string;
-}) => ({
-  fatalReason: `${errorMessage} To proceed, please remove the cluster routing allocation settings with PUT /_cluster/settings {"transient": {"cluster.routing.allocation.enable": null}, "persistent": {"cluster.routing.allocation.enable": null}}. Refer to ${docSectionLink} for more information on how to resolve the issue.`,
-  logsErrorMessage: `${errorMessage} Ensure that the persistent and transient Elasticsearch configuration option 'cluster.routing.allocation.enable' is not set or set it to a value of 'all'. Refer to ${docSectionLink} for more information on how to resolve the issue.`,
-});

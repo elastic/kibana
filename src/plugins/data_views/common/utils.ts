@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IndexPatternSavedObjectAttrs } from './data_views';
+import type { DataViewSavedObjectAttrs } from './data_views';
 import type { SavedObjectsClientCommon } from './types';
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from './constants';
@@ -20,7 +20,7 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from './constants';
  */
 export async function findByTitle(client: SavedObjectsClientCommon, title: string) {
   if (title) {
-    const savedObjects = await client.find<IndexPatternSavedObjectAttrs>({
+    const savedObjects = await client.find<DataViewSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
       perPage: 10,
       search: `"${title}"`,

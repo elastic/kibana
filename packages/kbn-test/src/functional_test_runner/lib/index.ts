@@ -8,11 +8,10 @@
 
 export { Lifecycle } from './lifecycle';
 export { LifecyclePhase } from './lifecycle_phase';
-export { readConfigFile, Config } from './config';
+export { readConfigFile, Config, runCheckFtrConfigsCli } from './config';
 export * from './providers';
 // @internal
 export { runTests, setupMocha } from './mocha';
-export * from './test_metadata';
 export * from './docker_servers';
 export { SuiteTracker } from './suite_tracker';
 

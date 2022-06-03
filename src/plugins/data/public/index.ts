@@ -23,7 +23,6 @@ export {
   getDisplayValueFromFilter,
   getFieldDisplayValueFromFilter,
   generateFilters,
-  extractTimeRange,
   getIndexPatternFromFilter,
 } from './query';
 
@@ -75,13 +74,9 @@ export const indexPatterns = {
   validate: validateDataView,
 };
 
-export type { IndexPatternsContract, DataViewsContract, TypeMeta } from './data_views';
-export { IndexPattern, IndexPatternField } from './data_views';
+export type { DataViewsContract, TypeMeta } from './data_views';
 
 export type {
-  IIndexPattern,
-  IFieldType,
-  IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,
@@ -255,6 +250,7 @@ export {
   createSavedQueryService,
   connectToQueryState,
   syncQueryStateWithUrl,
+  syncGlobalQueryStateWithUrl,
   getDefaultQuery,
   FilterManager,
   TimeHistory,
@@ -264,10 +260,11 @@ export {
 } from './query';
 
 export { NowProvider } from './now_provider';
-export type { NowProviderInternalContract } from './now_provider';
+export type { NowProviderInternalContract, NowProviderPublicContract } from './now_provider';
 
 export type {
   QueryState,
+  QueryState$,
   SavedQuery,
   SavedQueryService,
   SavedQueryTimeFilter,
@@ -280,6 +277,7 @@ export type {
   QueryStringContract,
   QuerySetup,
   TimefilterSetup,
+  GlobalQueryStateFromUrl,
 } from './query';
 
 export type { AggsStart } from './search/aggs';

@@ -6,9 +6,10 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { SerializableRecord } from '@kbn/utility-types';
+import { useMemo } from 'react';
 import {
   PublicDrilldownManagerProps,
   DrilldownManagerDependencies,
@@ -255,6 +256,24 @@ export class DrilldownManagerState {
     return context;
   }
 
+  public getCompatibleActionFactories(
+    context: BaseActionFactoryContext
+  ): Observable<ActionFactory[] | undefined> {
+    const compatibleActionFactories$ = new BehaviorSubject<undefined | ActionFactory[]>(undefined);
+    Promise.allSettled(
+      this.deps.actionFactories.map((factory) => factory.isCompatible(context))
+    ).then((factoryCompatibility) => {
+      compatibleActionFactories$.next(
+        this.deps.actionFactories.filter((_factory, i) => {
+          const result = factoryCompatibility[i];
+          // treat failed isCompatible checks as non-compatible
+          return result.status === 'fulfilled' && result.value;
+        })
+      );
+    });
+    return compatibleActionFactories$.asObservable();
+  }
+
   /**
    * Get state object of the drilldown which is currently being created.
    */
@@ -478,4 +497,9 @@ export class DrilldownManagerState {
   public readonly useActionFactory = () =>
     useObservable(this.actionFactory$, this.actionFactory$.getValue());
   public readonly useEvents = () => useObservable(this.events$, this.events$.getValue());
+  public readonly useCompatibleActionFactories = (context: BaseActionFactoryContext) =>
+    useObservable(
+      useMemo(() => this.getCompatibleActionFactories(context), [context]),
+      undefined
+    );
 }

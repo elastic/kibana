@@ -22,6 +22,9 @@ export class DiscoverPageObject extends FtrService {
   private readonly config = this.ctx.getService('config');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly kibanaServer = this.ctx.getService('kibanaServer');
+  private readonly queryBar = this.ctx.getService('queryBar');
+
+  private readonly unifiedSearch = this.ctx.getPageObject('unifiedSearch');
 
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
 
@@ -196,6 +199,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async toggleChartVisibility() {
+    await this.testSubjects.moveMouseTo('discoverChartOptionsToggle');
     await this.testSubjects.click('discoverChartOptionsToggle');
     await this.testSubjects.exists('discoverChartToggle');
     await this.testSubjects.click('discoverChartToggle');
@@ -280,8 +284,10 @@ export class DiscoverPageObject extends FtrService {
       );
       return await fields[usedCellIdx].getVisibleText();
     }
+    await this.testSubjects.click('dataGridFullScreenButton');
     const row = await this.dataGrid.getRow({ rowIndex: index - 1 });
-    const result = await Promise.all(row.map(async (cell) => await cell.getVisibleText()));
+    const result = await Promise.all(row.map(async (cell) => (await cell.getVisibleText()).trim()));
+    await this.testSubjects.click('dataGridFullScreenButton');
     return result[usedCellIdx];
   }
 
@@ -365,8 +371,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async clickIndexPatternActions() {
     await this.retry.try(async () => {
-      await this.testSubjects.click('discoverIndexPatternActions');
-      await this.testSubjects.existOrFail('discover-addRuntimeField-popover');
+      await this.testSubjects.click('discover-dataView-switch-link');
     });
   }
 
@@ -494,7 +499,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async selectIndexPattern(indexPattern: string) {
-    await this.testSubjects.click('indexPattern-switch-link');
+    await this.testSubjects.click('discover-dataView-switch-link');
     await this.find.setValue('[data-test-subj="indexPattern-switcher"] input', indexPattern);
     await this.find.clickByCssSelector(
       `[data-test-subj="indexPattern-switcher"] [title="${indexPattern}"]`
@@ -557,6 +562,7 @@ export class DiscoverPageObject extends FtrService {
     await this.retry.waitFor('Discover app on screen', async () => {
       return await this.isDiscoverAppOnScreen();
     });
+    await this.unifiedSearch.closeTourPopoverByLocalStorage();
   }
 
   public async showAllFilterActions() {
@@ -564,10 +570,13 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickSavedQueriesPopOver() {
-    await this.testSubjects.click('saved-query-management-popover-button');
+    await this.testSubjects.click('showQueryBarMenu');
   }
 
   public async clickCurrentSavedQuery() {
+    await this.queryBar.setQuery('Cancelled : true');
+    await this.queryBar.clickQuerySubmitButton();
+    await this.testSubjects.click('showQueryBarMenu');
     await this.testSubjects.click('saved-query-management-save-button');
   }
 
@@ -630,7 +639,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async getCurrentlySelectedDataView() {
     await this.testSubjects.existOrFail('discover-sidebar');
-    const button = await this.testSubjects.find('indexPattern-switch-link');
+    const button = await this.testSubjects.find('discover-dataView-switch-link');
     return button.getAttribute('title');
   }
 }

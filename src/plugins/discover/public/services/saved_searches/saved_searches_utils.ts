@@ -8,9 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import type { SavedSearchAttributes, SavedSearch } from './types';
 
-export const getSavedSearchUrl = (id?: string) => (id ? `#/view/${encodeURIComponent(id)}` : '#/');
-
-export const getSavedSearchFullPathUrl = (id?: string) => `/app/discover${getSavedSearchUrl(id)}`;
+export {
+  getSavedSearchUrl,
+  getSavedSearchFullPathUrl,
+} from '../../../common/services/saved_searches';
 
 export const getSavedSearchUrlConflictMessage = async (savedSearch: SavedSearch) =>
   i18n.translate('discover.savedSearchEmbeddable.legacyURLConflict.errorMessage', {

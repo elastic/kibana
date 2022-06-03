@@ -11,7 +11,7 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
       Object {
         "name": "Groups",
         "render": [Function],
-        "width": "140px",
+        "width": "80px",
       },
       Object {
         "align": "center",
@@ -100,7 +100,7 @@ exports[`JobsTableComponent renders correctly against snapshot 1`] = `
         "isElasticJob": true,
         "isInstalled": false,
         "isSingleMetricViewerJob": false,
-        "jobState": "",
+        "jobState": "closed",
         "jobTags": Object {},
         "memory_status": "",
         "moduleId": "siem_winlogbeat",

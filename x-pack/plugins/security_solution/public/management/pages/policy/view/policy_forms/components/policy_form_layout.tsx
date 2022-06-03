@@ -146,7 +146,7 @@ export const PolicyFormLayout = React.memo(() => {
     <>
       {showConfirm && (
         <ConfirmUpdate
-          hostCount={policyAgentStatusSummary?.total ?? 0}
+          endpointCount={policyAgentStatusSummary?.total ?? 0}
           onCancel={handleSaveCancel}
           onConfirm={handleSaveConfirmation}
         />

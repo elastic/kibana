@@ -9,6 +9,12 @@
 import Path from 'path';
 import { format } from 'url';
 import del from 'del';
+import Uuid from 'uuid';
+import globby from 'globby';
+import createArchiver from 'archiver';
+import Fs from 'fs';
+import { pipeline } from 'stream/promises';
+import type { ChildProcess } from 'child_process';
 // @ts-expect-error in js
 import { Cluster } from '@kbn/es';
 import { Client, HttpConnection } from '@elastic/elasticsearch';
@@ -41,6 +47,8 @@ interface Node {
   ) => Promise<{ insallPath: string }>;
   start: (installPath: string, opts: Record<string, unknown>) => Promise<void>;
   stop: () => Promise<void>;
+  kill: () => Promise<void>;
+  _process?: ChildProcess;
 }
 
 export interface ICluster {
@@ -145,6 +153,11 @@ export interface CreateTestEsClusterOptions {
    * defaults to the transport port from `packages/kbn-test/src/es/es_test_config.ts`
    */
   transportPort?: number | string;
+  /**
+   * Report to the creator of the es-test-cluster that the es node has exitted before stop() was called, allowing
+   * this caller to react appropriately. If this is not passed then an uncatchable exception will be thrown
+   */
+  onEarlyExit?: (msg: string) => void;
 }
 
 export function createTestEsCluster<
@@ -164,6 +177,7 @@ export function createTestEsCluster<
     clusterName: customClusterName = 'es-test-cluster',
     ssl,
     transportPort,
+    onEarlyExit,
   } = options;
 
   const clusterName = `${CI_PARALLEL_PROCESS_PREFIX}${customClusterName}`;
@@ -257,6 +271,7 @@ export function createTestEsCluster<
             // set it up after the last node is started.
             skipNativeRealmSetup: this.nodes.length > 1 && i < this.nodes.length - 1,
             skipReadyCheck: this.nodes.length > 1 && i < this.nodes.length - 1,
+            onEarlyExit,
           });
         });
       }
@@ -268,22 +283,89 @@ export function createTestEsCluster<
     }
 
     async stop() {
-      const nodeStopPromises = [];
-      for (let i = 0; i < this.nodes.length; i++) {
-        nodeStopPromises.push(async () => {
+      const results = await Promise.allSettled(
+        this.nodes.map(async (node, i) => {
           log.info(`[es] stopping node ${nodes[i].name}`);
-          return await this.nodes[i].stop();
-        });
-      }
-      await Promise.all(nodeStopPromises.map(async (stop) => await stop()));
+          await node.stop();
+        })
+      );
 
       log.info('[es] stopped');
+      await this.captureDebugFiles();
+      this.handleStopResults(results);
+    }
+
+    private handleStopResults(results: Array<PromiseSettledResult<void>>) {
+      const failures = results.flatMap((r) => (r.status === 'rejected' ? r : []));
+      if (failures.length === 1) {
+        throw failures[0].reason;
+      }
+      if (failures.length > 1) {
+        throw new Error(
+          `${failures.length} nodes failed:\n - ${failures
+            .map((f) => f.reason.message)
+            .join('\n - ')}`
+        );
+      }
+    }
+
+    async captureDebugFiles() {
+      const debugFiles = await globby([`**/hs_err_pid*.log`, `**/replay_pid*.log`, `**/*.hprof`], {
+        cwd: config.installPath,
+        absolute: true,
+      });
+
+      if (!debugFiles.length) {
+        log.info('[es] no debug files found, assuming es did not write any');
+        return;
+      }
+
+      const uuid = Uuid.v4();
+      const debugPath = Path.resolve(KIBANA_ROOT, `data/es_debug_${uuid}.tar.gz`);
+      log.error(`[es] debug files found, archiving install to ${debugPath}`);
+      const archiver = createArchiver('tar', { gzip: true });
+      const promise = pipeline(archiver, Fs.createWriteStream(debugPath));
+
+      const archiveDirname = `es_debug_${uuid}`;
+      for (const name of Fs.readdirSync(config.installPath)) {
+        if (name === 'modules' || name === 'jdk') {
+          // drop these large and unnecessary directories
+          continue;
+        }
+
+        const src = Path.resolve(config.installPath, name);
+        const dest = Path.join(archiveDirname, name);
+        const stat = Fs.statSync(src);
+        if (stat.isDirectory()) {
+          archiver.directory(src, dest);
+        } else {
+          archiver.file(src, { name: dest });
+        }
+      }
+
+      archiver.finalize();
+      await promise;
+
+      // cleanup the captured debug files
+      for (const path of debugFiles) {
+        Fs.rmSync(path, { force: true });
+      }
     }
 
     async cleanup() {
-      await this.stop();
+      log.info('[es] killing', this.nodes.length === 1 ? 'node' : `${this.nodes.length} nodes`);
+      const results = await Promise.allSettled(
+        this.nodes.map(async (node, i) => {
+          log.info(`[es] stopping node ${nodes[i].name}`);
+          // we are deleting this install, stop ES more aggressively
+          await node.kill();
+        })
+      );
+
+      await this.captureDebugFiles();
       await del(config.installPath, { force: true });
       log.info('[es] cleanup complete');
+      this.handleStopResults(results);
     }
 
     /**

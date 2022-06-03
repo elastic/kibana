@@ -135,6 +135,7 @@ describe('interpreter/functions#treemapVis', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
     };

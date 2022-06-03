@@ -56,7 +56,6 @@ export default function ({ loadTestFile, getService }) {
       );
     });
 
-    this.tags('ciGroup10');
     loadTestFile(require.resolve('./vector_styling'));
   });
 }

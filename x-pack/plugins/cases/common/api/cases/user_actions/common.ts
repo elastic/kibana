@@ -17,6 +17,7 @@ export const ActionTypes = {
   title: 'title',
   status: 'status',
   settings: 'settings',
+  severity: 'severity',
   create_case: 'create_case',
   delete_case: 'delete_case',
 } as const;

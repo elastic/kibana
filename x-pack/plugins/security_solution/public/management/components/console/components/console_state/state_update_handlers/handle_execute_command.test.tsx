@@ -15,13 +15,13 @@ import { ConsoleProps } from '../../../types';
 describe('When a Console command is entered by the user', () => {
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
-  let commandServiceMock: ConsoleTestSetup['commandServiceMock'];
+  let commands: ConsoleTestSetup['commands'];
   let enterCommand: ConsoleTestSetup['enterCommand'];
 
   beforeEach(() => {
     const testSetup = getConsoleTestSetup();
 
-    ({ commandServiceMock, enterCommand } = testSetup);
+    ({ commands, enterCommand } = testSetup);
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
   });
 
@@ -34,18 +34,16 @@ describe('When a Console command is entered by the user', () => {
     await waitFor(() => {
       expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(
         // `+2` to account for builtin commands
-        commandServiceMock.getCommandList().length + 2
+        commands.length + 2
       );
     });
   });
 
   it('should display custom help output when Command service has `getHelp()` defined', async () => {
-    commandServiceMock.getHelp = async () => {
-      return {
-        result: <div data-test-subj="custom-help">{'help output'}</div>,
-      };
+    const HelpComponent: React.FunctionComponent = () => {
+      return <div data-test-subj="custom-help">{'help output'}</div>;
     };
-    render();
+    render({ HelpComponent });
     enterCommand('help');
 
     await waitFor(() => {
@@ -73,11 +71,15 @@ describe('When a Console command is entered by the user', () => {
   });
 
   it('should should custom command `--help` output when Command service defines `getCommandUsage()`', async () => {
-    commandServiceMock.getCommandUsage = async () => {
-      return {
-        result: <div data-test-subj="cmd-help">{'command help  here'}</div>,
+    const cmd2 = commands.find((command) => command.name === 'cmd2');
+
+    if (cmd2) {
+      cmd2.HelpComponent = () => {
+        return <div data-test-subj="cmd-help">{'command help  here'}</div>;
       };
-    };
+      cmd2.HelpComponent.displayName = 'HelpComponent';
+    }
+
     render();
     enterCommand('cmd2 --help');
 
@@ -108,7 +110,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-unknownCommandError').textContent).toEqual(
-        'Unknown commandFor a list of available command, enter: help'
+        'Unsupported text/command!The text you entered foo-foo is unsupported! Click  or type help for assistance.'
       );
     });
   });
@@ -119,7 +121,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'command does not support any argumentsUsage:cmd1'
+        'Unsupported argument!command does not support any argumentsUsage:cmd1Type cmd1 --help for assistance.'
       );
     });
   });
@@ -130,7 +132,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'unsupported argument: --fooUsage:cmd2 --file [--ext --bad]'
+        'Unsupported argument!unsupported argument: --fooUsage:cmd2--file [--ext --bad]Type cmd2 --help for assistance.'
       );
     });
   });
@@ -141,7 +143,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'missing required argument: --fileUsage:cmd2 --file [--ext --bad]'
+        'Unsupported argument!missing required argument: --fileUsage:cmd2--file [--ext --bad]Type cmd2 --help for assistance.'
       );
     });
   });
@@ -152,7 +154,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'argument can only be used once: --fileUsage:cmd2 --file [--ext --bad]'
+        'Unsupported argument!argument can only be used once: --fileUsage:cmd2--file [--ext --bad]Type cmd2 --help for assistance.'
       );
     });
   });
@@ -163,7 +165,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'invalid argument value: --bad. This is a bad valueUsage:cmd2 --file [--ext --bad]'
+        'Unsupported argument!invalid argument value: --bad. This is a bad valueUsage:cmd2--file [--ext --bad]Type cmd2 --help for assistance.'
       );
     });
   });
@@ -174,7 +176,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'missing required arguments: --fileUsage:cmd2 --file [--ext --bad]'
+        'Unsupported argument!missing required arguments: --fileUsage:cmd2--file [--ext --bad]Type cmd2 --help for assistance.'
       );
     });
   });
@@ -185,7 +187,7 @@ describe('When a Console command is entered by the user', () => {
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'at least one argument must be usedUsage:cmd4  [--foo --bar]'
+        'Unsupported argument!at least one argument must be usedUsage:cmd4[--foo --bar]Type cmd4 --help for assistance.'
       );
     });
   });

@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import { isNil } from 'lodash';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
-import {
-  Rule,
-  RuleExecutionStatusWarningReasons,
-  RuleTypeParams,
-  RecoveredActionGroup,
-} from '../../common';
+import { Rule, RuleTypeParams, RecoveredActionGroup } from '../../common';
 import { getDefaultRuleMonitoring } from './task_runner';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';
@@ -108,6 +102,8 @@ export const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
   producer: 'alerts',
+  cancelAlertsOnRuleTimeout: true,
+  ruleTaskTimeout: '5m',
 };
 
 export const mockRunNowResponse = {
@@ -182,177 +178,44 @@ export const mockTaskInstance = () => ({
   ownerId: null,
 });
 
-export const generateAlertSO = (id: string) => ({
-  id,
-  rel: 'primary',
-  type: 'alert',
-  type_id: RULE_TYPE_ID,
-});
+export const generateAlertOpts = ({ action, group, subgroup, state, id }: GeneratorParams = {}) => {
+  id = id ?? '1';
+  let message: string = '';
+  switch (action) {
+    case EVENT_LOG_ACTIONS.newInstance:
+      message = `test:1: 'rule-name' created new alert: '${id}'`;
+      break;
+    case EVENT_LOG_ACTIONS.activeInstance:
+      message = subgroup
+        ? `test:1: 'rule-name' active alert: '${id}' in actionGroup(subgroup): 'default(${subgroup})'`
+        : `test:1: 'rule-name' active alert: '${id}' in actionGroup: 'default'`;
+      break;
+    case EVENT_LOG_ACTIONS.recoveredInstance:
+      message = `test:1: 'rule-name' alert '${id}' has recovered`;
+      break;
+  }
+  return {
+    action,
+    id,
+    message,
+    state,
+    ...(group ? { group } : {}),
+    ...(subgroup ? { subgroup } : {}),
+  };
+};
 
-export const generateActionSO = (id: string) => ({
+export const generateActionOpts = ({
+  subgroup,
   id,
-  namespace: undefined,
-  type: 'action',
-  type_id: 'action',
-});
-
-export const generateEventLog = ({
-  action,
-  task,
-  duration,
-  consumer,
-  start,
-  end,
-  outcome,
-  reason,
-  instanceId,
-  actionSubgroup,
-  actionGroupId,
-  actionId,
-  status,
-  numberOfTriggeredActions,
-  numberOfGeneratedActions,
-  numberOfActiveAlerts,
-  numberOfRecoveredAlerts,
-  numberOfNewAlerts,
-  savedObjects = [generateAlertSO('1')],
+  alertGroup,
+  alertId,
 }: GeneratorParams = {}) => ({
-  ...(status === 'error' && {
-    error: {
-      message: generateErrorMessage(String(reason)),
-    },
-  }),
-  event: {
-    action,
-    ...(!isNil(duration) && { duration }),
-    ...(start && { start }),
-    ...(end && { end }),
-    ...(outcome && { outcome }),
-    ...(reason && { reason }),
-    category: ['alerts'],
-    kind: 'alert',
-  },
-  kibana: {
-    alert: {
-      rule: {
-        ...(consumer && { consumer }),
-        execution: {
-          uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-          ...((!isNil(numberOfTriggeredActions) || !isNil(numberOfGeneratedActions)) && {
-            metrics: {
-              number_of_triggered_actions: numberOfTriggeredActions,
-              number_of_generated_actions: numberOfGeneratedActions,
-              number_of_active_alerts: numberOfActiveAlerts ?? 0,
-              number_of_new_alerts: numberOfNewAlerts ?? 0,
-              number_of_recovered_alerts: numberOfRecoveredAlerts ?? 0,
-              total_number_of_alerts:
-                ((numberOfActiveAlerts ?? 0) as number) +
-                ((numberOfRecoveredAlerts ?? 0) as number),
-              number_of_searches: 3,
-              es_search_duration_ms: 33,
-              total_search_duration_ms: 23423,
-            },
-          }),
-        },
-        rule_type_id: 'test',
-      },
-    },
-    ...((actionSubgroup || actionGroupId || instanceId || status) && {
-      alerting: {
-        ...(actionSubgroup && { action_subgroup: actionSubgroup }),
-        ...(actionGroupId && { action_group_id: actionGroupId }),
-        ...(instanceId && { instance_id: instanceId }),
-        ...(status && { status }),
-      },
-    }),
-    saved_objects: savedObjects,
-    space_ids: ['default'],
-    ...(task && {
-      task: {
-        schedule_delay: 0,
-        scheduled: DATE_1970,
-      },
-    }),
-  },
-  message: generateMessage({
-    action,
-    instanceId,
-    actionGroupId,
-    actionSubgroup,
-    reason,
-    status,
-    actionId,
-  }),
-  rule: {
-    category: 'test',
-    id: '1',
-    license: 'basic',
-    ...(hasRuleName({ action, status }) && { name: RULE_NAME }),
-    ruleset: 'alerts',
-  },
+  id: id ?? '1',
+  typeId: 'action',
+  alertId: alertId ?? '1',
+  alertGroup: alertGroup ?? 'default',
+  ...(subgroup ? { alertSubgroup: subgroup } : {}),
 });
-
-const generateMessage = ({
-  action,
-  instanceId,
-  actionGroupId,
-  actionSubgroup,
-  actionId,
-  reason,
-  status,
-}: GeneratorParams) => {
-  if (action === EVENT_LOG_ACTIONS.executeStart) {
-    return `rule execution start: "${mockTaskInstance().params.alertId}"`;
-  }
-
-  if (action === EVENT_LOG_ACTIONS.newInstance) {
-    return `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' created new alert: '${instanceId}'`;
-  }
-
-  if (action === EVENT_LOG_ACTIONS.activeInstance) {
-    if (actionSubgroup) {
-      return `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' active alert: '${instanceId}' in actionGroup(subgroup): 'default(${actionSubgroup})'`;
-    }
-    return `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' active alert: '${instanceId}' in actionGroup: '${actionGroupId}'`;
-  }
-
-  if (action === EVENT_LOG_ACTIONS.recoveredInstance) {
-    return `${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' alert '${instanceId}' has recovered`;
-  }
-
-  if (action === EVENT_LOG_ACTIONS.executeAction) {
-    if (actionSubgroup) {
-      return `alert: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' instanceId: '${instanceId}' scheduled actionGroup(subgroup): 'default(${actionSubgroup})' action: action:${actionId}`;
-    }
-    return `alert: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${actionId}`;
-  }
-
-  if (action === EVENT_LOG_ACTIONS.execute) {
-    if (status === 'error' && reason === 'execute') {
-      return `rule execution failure: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`;
-    }
-    if (status === 'error') {
-      return `${RULE_TYPE_ID}:${RULE_ID}: execution failed`;
-    }
-    if (actionGroupId === 'recovered') {
-      return `rule-name' instanceId: '${instanceId}' scheduled actionGroup: '${actionGroupId}' action: action:${actionId}`;
-    }
-    if (
-      status === 'warning' &&
-      reason === RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS
-    ) {
-      return `The maximum number of actions for this rule type was reached; excess actions were not triggered.`;
-    }
-    return `rule executed: ${RULE_TYPE_ID}:${RULE_ID}: '${RULE_NAME}'`;
-  }
-};
-
-const generateErrorMessage = (reason: string) => {
-  if (reason === 'disabled') {
-    return 'Rule failed to execute because rule ran after it was disabled.';
-  }
-  return GENERIC_ERROR_MESSAGE;
-};
 
 export const generateRunnerResult = ({
   successRatio = 1,
@@ -424,6 +287,3 @@ export const generateAlertInstance = ({ id, duration, start }: GeneratorParams =
     },
   },
 });
-const hasRuleName = ({ action, status }: GeneratorParams) => {
-  return action !== 'execute-start' && status !== 'error';
-};

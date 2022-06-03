@@ -6,9 +6,10 @@
  */
 
 import { getColorAssignments } from './color_assignment';
-import type { FormatFactory, LensMultiTable } from '../../common';
+import type { FormatFactory } from '../../common';
 import { layerTypes } from '../../common';
 import { XYDataLayerConfig } from './types';
+import { Datatable } from '@kbn/expressions-plugin';
 
 describe('color_assignment', () => {
   const layers: XYDataLayerConfig[] = [
@@ -30,8 +31,7 @@ describe('color_assignment', () => {
     },
   ];
 
-  const data: LensMultiTable = {
-    type: 'lens_multitable',
+  const data: { tables: Record<string, Datatable> } = {
     tables: {
       '1': {
         type: 'datatable',

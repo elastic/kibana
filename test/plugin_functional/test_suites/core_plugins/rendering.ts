@@ -139,7 +139,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'newsfeed.fetchInterval (duration)',
         'newsfeed.mainInterval (duration)',
         'newsfeed.service.pathTemplate (string)',
-        'newsfeed.service.urlRoot (any)',
+        'newsfeed.service.urlRoot (string)',
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.banner (boolean)',
         'telemetry.enabled (boolean)',
@@ -173,6 +173,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
+        'xpack.fleet.enableExperimental (array)',
         'xpack.global_search.search_timeout (duration)',
         'xpack.graph.canEditDrillDownUrls (boolean)',
         'xpack.graph.savePolicy (alternatives)',
@@ -190,7 +191,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.osquery.savedQueries (boolean)',
         'xpack.remote_clusters.ui.enabled (boolean)',
         /**
-         * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.js).
+         * NOTE: The Reporting plugin is currently disabled in functional tests (see test/functional/config.base.js).
          * It will be re-enabled once #102552 is completed.
          */
         // 'xpack.reporting.roles.allow (array)',

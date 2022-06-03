@@ -59,5 +59,4 @@ export const installationStatuses = {
   Installing: 'installing',
   InstallFailed: 'install_failed',
   NotInstalled: 'not_installed',
-  InstalledBundled: 'installed_bundled',
 } as const;

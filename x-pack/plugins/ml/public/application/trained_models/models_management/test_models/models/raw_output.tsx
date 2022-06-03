@@ -14,14 +14,9 @@ import type { InferrerType } from '.';
 import { NerResponse } from './ner';
 import { TextClassificationResponse } from './text_classification';
 import { TextEmbeddingResponse } from './text_embedding';
-import { LangIdentResponse } from './lang_ident';
 import { RUNNING_STATE } from './inference_base';
 
-type InferenceResponse =
-  | LangIdentResponse
-  | NerResponse
-  | TextClassificationResponse
-  | TextEmbeddingResponse;
+type InferenceResponse = NerResponse | TextClassificationResponse | TextEmbeddingResponse;
 
 export const RawOutput: FC<{
   inferrer: InferrerType;

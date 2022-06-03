@@ -48,7 +48,7 @@ import { DatePickerWrapper } from '../../../common/components/date_picker_wrappe
 import { HelpMenu } from '../../../common/components/help_menu';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
-import { ResultLink } from '../../../common/components/results_links';
+import { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import './_index.scss';
@@ -110,7 +110,7 @@ export interface IndexDataVisualizerViewProps {
   currentDataView: DataView;
   currentSavedSearch: SavedSearchSavedObject | null;
   currentSessionId?: string;
-  additionalLinks?: ResultLink[];
+  getAdditionalLinks?: GetAdditionalLinks;
 }
 const restorableDefaults = getDefaultDataVisualizerListState();
 
@@ -129,7 +129,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     dataVisualizerProps.currentSavedSearch
   );
 
-  const { currentDataView, additionalLinks, currentSessionId } = dataVisualizerProps;
+  const { currentDataView, currentSessionId, getAdditionalLinks } = dataVisualizerProps;
 
   useEffect(() => {
     if (dataVisualizerProps?.currentSavedSearch !== undefined) {
@@ -487,7 +487,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
                 dataView={currentDataView}
                 searchQueryLanguage={searchQueryLanguage}
                 searchString={searchString}
-                additionalLinks={additionalLinks ?? []}
+                getAdditionalLinks={getAdditionalLinks}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
