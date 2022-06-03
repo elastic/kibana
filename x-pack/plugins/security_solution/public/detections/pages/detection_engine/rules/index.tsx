@@ -17,7 +17,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
-import { ValueListsFlyout } from '../../../components/value_lists_management_modal';
+import { ValueListsFlyout } from '../../../components/value_lists_management_flyout';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
 import {
   getPrePackagedRuleStatus,

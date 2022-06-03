@@ -74,7 +74,7 @@ jest.mock('../../../containers/detection_engine/rules/api', () => ({
   createPrepackagedRules: jest.fn(),
 }));
 
-jest.mock('../../../components/value_lists_management_modal', () => {
+jest.mock('../../../components/value_lists_management_flyout', () => {
   return {
     ValueListsFlyout: jest.fn().mockReturnValue(<div />),
   };

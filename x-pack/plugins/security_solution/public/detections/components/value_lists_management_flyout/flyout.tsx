@@ -15,7 +15,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
-  EuiPanel,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -215,7 +214,7 @@ export const ValueListsFlyoutComponent: React.FC<ValueListsFlyoutProps> = ({
       <EuiFlyout onClose={onClose} maxWidth={800}>
         <EuiFlyoutHeader>
           <EuiTitle>
-            <h2>{i18n.VALUE_LISTS_MODAL_TITLE}</h2>
+            <h2>{i18n.VALUE_LISTS_FLYOUT_TITLE}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
