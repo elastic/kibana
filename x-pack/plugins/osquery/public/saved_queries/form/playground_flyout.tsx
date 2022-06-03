@@ -26,9 +26,7 @@ interface PlaygroundFlyoutProps {
 }
 
 const PlaygroundFlyoutComponent: React.FC<PlaygroundFlyoutProps> = ({ enabled, onClose }) => {
-  const [{ query, ecs_mapping: ecsMapping, id }, formDataSerializer] = useFormData({
-    watch: ['query', 'ecs_mapping', 'savedQueryId'],
-  });
+  const [{ query, ecs_mapping: ecsMapping, id }, formDataSerializer] = useFormData();
 
   /* recalculate the form data when ecs_mapping changes */
   // eslint-disable-next-line react-hooks/exhaustive-deps

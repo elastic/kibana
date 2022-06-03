@@ -24,8 +24,6 @@ import { useDeleteCases } from '../../containers/use_delete_cases';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useUpdateCases } from '../../containers/use_bulk_update_case';
-import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
 import { CasesColumns, GetCasesColumn, useCasesColumns } from './columns';
@@ -36,12 +34,16 @@ import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
+import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
+import { useGetActionLicense } from '../../containers/use_get_action_license';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
 
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_bulk_update_case');
 jest.mock('../../containers/use_delete_cases');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
+jest.mock('../../containers/use_get_cases_metrics');
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_reporters');
@@ -55,12 +57,13 @@ jest.mock('../app/use_available_owners', () => ({
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
+const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetReportersMock = useGetReporters as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
-const useConnectorsMock = useConnectors as jest.Mock;
+const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
@@ -118,6 +121,12 @@ describe('AllCasesListGeneric', () => {
     isLoading: false,
   };
 
+  const defaultCasesMetrics = {
+    mttr: 5,
+    isLoading: false,
+    fetchCasesMetrics: jest.fn(),
+  };
+
   const defaultUpdateCases = {
     isUpdated: false,
     isLoading: false,
@@ -127,7 +136,7 @@ describe('AllCasesListGeneric', () => {
   };
 
   const defaultActionLicense = {
-    actionLicense: null,
+    data: null,
     isLoading: false,
     isError: false,
   };
@@ -157,6 +166,7 @@ describe('AllCasesListGeneric', () => {
     useGetCasesMock.mockReturnValue(defaultGetCases);
     useDeleteCasesMock.mockReturnValue(defaultDeleteCases);
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
+    useGetCasesMetricsMock.mockReturnValue(defaultCasesMetrics);
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetTagsMock.mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
     useGetReportersMock.mockReturnValue({
@@ -166,8 +176,7 @@ describe('AllCasesListGeneric', () => {
       isError: false,
       fetchReporters: jest.fn(),
     });
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
+    useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     mockKibana();
     moment.tz.setDefault('UTC');
   });
@@ -195,7 +204,7 @@ describe('AllCasesListGeneric', () => {
         wrapper.find(`span[data-test-subj="case-table-column-tags-coke"]`).first().prop('title')
       ).toEqual(useGetCasesMockState.data.cases[0].tags[0]);
       expect(wrapper.find(`[data-test-subj="case-table-column-createdBy"]`).first().text()).toEqual(
-        useGetCasesMockState.data.cases[0].createdBy.username
+        'LK'
       );
       expect(
         wrapper
@@ -212,6 +221,45 @@ describe('AllCasesListGeneric', () => {
       expect(wrapper.find(`[data-test-subj="case-table-case-count"]`).first().text()).toEqual(
         'Showing 10 cases'
       );
+    });
+  });
+
+  it('should show a tooltip with the reporter username when hover over the reporter avatar', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
+    });
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    userEvent.hover(result.queryAllByTestId('case-table-column-createdBy')[0]);
+
+    await waitFor(() => {
+      expect(result.getByTestId('case-table-column-createdBy-tooltip')).toBeTruthy();
+      expect(result.getByTestId('case-table-column-createdBy-tooltip').textContent).toEqual(
+        'lknope'
+      );
+    });
+  });
+
+  it('should show a tooltip with all tags when hovered', async () => {
+    useGetCasesMock.mockReturnValue({
+      ...defaultGetCases,
+      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.open },
+    });
+    const result = render(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+
+    userEvent.hover(result.queryAllByTestId('case-table-column-tags')[0]);
+
+    await waitFor(() => {
+      expect(result.getByTestId('case-table-column-tags-tooltip')).toBeTruthy();
     });
   });
 
@@ -322,6 +370,15 @@ describe('AllCasesListGeneric', () => {
         })
       );
     });
+  });
+
+  it('should render the case stats', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList />
+      </TestProviders>
+    );
+    expect(wrapper.find('[data-test-subj="cases-count-stats"]')).toBeTruthy();
   });
 
   it.skip('Bulk delete', async () => {
@@ -508,6 +565,31 @@ describe('AllCasesListGeneric', () => {
         false
       );
       expect(wrapper.find('[data-test-subj="case-table-bulk-actions"]').exists()).toBe(false);
+    });
+  });
+
+  it('should render metrics when isSelectorView=false', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={false} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="cases-metrics-stats"]').exists()).toBe(true);
+    });
+  });
+
+  it('should not render metrics when isSelectorView=true', async () => {
+    const wrapper = mount(
+      <TestProviders>
+        <AllCasesList isSelectorView={true} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="case-table-selected-case-count"]').exists()).toBe(
+        false
+      );
+      expect(wrapper.find('[data-test-subj="cases-metrics-stats"]').exists()).toBe(false);
     });
   });
 

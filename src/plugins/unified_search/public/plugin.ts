@@ -23,6 +23,8 @@ import type {
 import { createFilterAction } from './actions/apply_filter_action';
 import { ACTION_GLOBAL_APPLY_FILTER } from './actions';
 
+import './index.scss';
+
 export class UnifiedSearchPublicPlugin
   implements Plugin<UnifiedSearchPluginSetup, UnifiedSearchPublicPluginStart>
 {

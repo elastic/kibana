@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
   const PageObjects = getPageObjects(['common', 'triggersActionsUI', 'header']);
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
@@ -21,6 +22,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+    });
+
+    afterEach(async () => {
+      await browser.clearLocalStorage();
     });
 
     it('should load the table', async () => {
@@ -87,48 +92,41 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
     });
 
-    // This keeps failing in CI because the next button is not clickable
-    // Revisit this once we change the UI around based on feedback
-    /*
-    fail: Actions and Triggers app Alerts table should open a flyout and paginate through the flyout
-       │      Error: retry.try timeout: ElementClickInterceptedError: element click intercepted: Element <a class="euiButtonIcon euiButtonIcon--text euiButtonIcon--empty euiButtonIcon--xSmall euiPaginationArrowButton" href="#i5c22d1f1-c736-11ec-8510-cf83e5eb2b41" rel="noreferrer" aria-label="Next page" title="Next page" data-test-subj="pagination-button-next" aria-controls="i5c22d1f1-c736-11ec-8510-cf83e5eb2b41">...</a> is not clickable at point (1564, 795). Other element would receive the click: <div tabindex="0" class="euiFlyoutBody__overflow">...</div>
-    */
-    // it('should open a flyout and paginate through the flyout', async () => {
-    //   await PageObjects.common.navigateToUrlWithBrowserHistory('triggersActions', '/alerts');
-    //   await waitTableIsLoaded();
-    //   await testSubjects.click('expandColumnCellOpenFlyoutButton-0');
-    //   await waitFlyoutOpen();
-    //   await waitFlyoutIsLoaded();
+    it('should open a flyout and paginate through the flyout', async () => {
+      await PageObjects.common.navigateToUrlWithBrowserHistory('triggersActions', '/alerts');
+      await waitTableIsLoaded();
+      await testSubjects.click('expandColumnCellOpenFlyoutButton-0');
+      await waitFlyoutOpen();
+      await waitFlyoutIsLoaded();
 
-    //   expect(await testSubjects.getVisibleText('alertsFlyoutName')).to.be(
-    //     'APM Failed Transaction Rate (one)'
-    //   );
-    //   expect(await testSubjects.getVisibleText('alertsFlyoutReason')).to.be(
-    //     'Failed transactions rate is greater than 5.0% (current value is 31%) for elastic-co-frontend'
-    //   );
+      expect(await testSubjects.getVisibleText('alertsFlyoutName')).to.be(
+        'APM Failed Transaction Rate (one)'
+      );
+      expect(await testSubjects.getVisibleText('alertsFlyoutReason')).to.be(
+        'Failed transactions rate is greater than 5.0% (current value is 31%) for elastic-co-frontend'
+      );
 
-    //   await testSubjects.click('pagination-button-next');
+      await testSubjects.click('alertsFlyoutPagination > pagination-button-next');
 
-    //   expect(await testSubjects.getVisibleText('alertsFlyoutName')).to.be(
-    //     'APM Failed Transaction Rate (one)'
-    //   );
-    //   expect(await testSubjects.getVisibleText('alertsFlyoutReason')).to.be(
-    //     'Failed transactions rate is greater than 5.0% (current value is 35%) for opbeans-python'
-    //   );
+      expect(await testSubjects.getVisibleText('alertsFlyoutName')).to.be(
+        'APM Failed Transaction Rate (one)'
+      );
+      expect(await testSubjects.getVisibleText('alertsFlyoutReason')).to.be(
+        'Failed transactions rate is greater than 5.0% (current value is 35%) for opbeans-python'
+      );
 
-    //   await testSubjects.click('pagination-button-previous');
-    //   await testSubjects.click('pagination-button-previous');
+      await testSubjects.click('alertsFlyoutPagination > pagination-button-previous');
 
-    //   await waitTableIsLoaded();
+      await waitTableIsLoaded();
 
-    //   const rows = await getRows();
-    //   expect(rows[0].status).to.be('close');
-    //   expect(rows[0].lastUpdated).to.be('2021-10-19T14:55:14.503Z');
-    //   expect(rows[0].duration).to.be('252002000');
-    //   expect(rows[0].reason).to.be(
-    //     'CPU usage is greater than a threshold of 40 (current value is 56.7%) for gke-edge-oblt-default-pool-350b44de-c3dd'
-    //   );
-    // });
+      const rows = await getRows();
+      expect(rows[0].status).to.be('active');
+      expect(rows[0].lastUpdated).to.be('2021-10-19T15:20:38.749Z');
+      expect(rows[0].duration).to.be('1197194000');
+      expect(rows[0].reason).to.be(
+        'Failed transactions rate is greater than 5.0% (current value is 31%) for elastic-co-frontend'
+      );
+    });
 
     async function waitTableIsLoaded() {
       return await retry.try(async () => {
@@ -137,19 +135,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     }
 
-    // async function waitFlyoutOpen() {
-    //   return await retry.try(async () => {
-    //     const exists = await testSubjects.exists('alertsFlyout');
-    //     if (!exists) throw new Error('Still loading...');
-    //   });
-    // }
+    async function waitFlyoutOpen() {
+      return await retry.try(async () => {
+        const exists = await testSubjects.exists('alertsFlyout');
+        if (!exists) throw new Error('Still loading...');
+      });
+    }
 
-    // async function waitFlyoutIsLoaded() {
-    //   return await retry.try(async () => {
-    //     const exists = await testSubjects.exists('alertsFlyoutLoading');
-    //     if (exists) throw new Error('Still loading...');
-    //   });
-    // }
+    async function waitFlyoutIsLoaded() {
+      return await retry.try(async () => {
+        const exists = await testSubjects.exists('alertsFlyoutLoading');
+        if (exists) throw new Error('Still loading...');
+      });
+    }
 
     async function getRows() {
       const euiDataGridRows = await find.allByCssSelector('.euiDataGridRow');

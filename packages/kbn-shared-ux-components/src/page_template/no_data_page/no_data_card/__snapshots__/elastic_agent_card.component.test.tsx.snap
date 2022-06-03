@@ -4,7 +4,21 @@ exports[`ElasticAgentCardComponent props button 1`] = `
 <NoDataCard
   button="Button"
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
-  image="test-file-stub"
+  image={
+    <EuiImage
+      alt=""
+      size="fullWidth"
+      style={
+        Object {
+          "background": "aliceblue",
+          "height": 240,
+          "objectFit": "cover",
+          "width": "max(100%, 360px)",
+        }
+      }
+      url="test-file-stub"
+    />
+  }
   title="Add Elastic Agent"
 />
 `;
@@ -13,7 +27,21 @@ exports[`ElasticAgentCardComponent props href 1`] = `
 <NoDataCard
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
   href="some path"
-  image="test-file-stub"
+  image={
+    <EuiImage
+      alt=""
+      size="fullWidth"
+      style={
+        Object {
+          "background": "aliceblue",
+          "height": 240,
+          "objectFit": "cover",
+          "width": "max(100%, 360px)",
+        }
+      }
+      url="test-file-stub"
+    />
+  }
   title="Add Elastic Agent"
 />
 `;
@@ -21,7 +49,21 @@ exports[`ElasticAgentCardComponent props href 1`] = `
 exports[`ElasticAgentCardComponent renders 1`] = `
 <NoDataCard
   description="Use Elastic Agent for a simple, unified way to collect data from your machines."
-  image="test-file-stub"
+  image={
+    <EuiImage
+      alt=""
+      size="fullWidth"
+      style={
+        Object {
+          "background": "aliceblue",
+          "height": 240,
+          "objectFit": "cover",
+          "width": "max(100%, 360px)",
+        }
+      }
+      url="test-file-stub"
+    />
+  }
   title="Add Elastic Agent"
 />
 `;
@@ -35,7 +77,21 @@ exports[`ElasticAgentCardComponent renders with canAccessFleet false 1`] = `
       This integration is not yet enabled. Your administrator has the required permissions to turn it on.
     </EuiTextColor>
   }
-  image="test-file-stub"
+  image={
+    <EuiImage
+      alt=""
+      size="fullWidth"
+      style={
+        Object {
+          "background": "aliceblue",
+          "height": 240,
+          "objectFit": "cover",
+          "width": "max(100%, 360px)",
+        }
+      }
+      url="test-file-stub"
+    />
+  }
   isDisabled={true}
   title={
     <EuiTextColor

@@ -41,7 +41,7 @@ export interface RouteDependencies {
 interface IndexAndAliasFromEs {
   name: string;
   // per https://github.com/elastic/elasticsearch/pull/57626
-  attributes: Array<'open' | 'closed' | 'hidden' | 'frozen'>;
+  attributes: Array<'open' | 'closed' | 'hidden' | 'frozen' | 'system'>;
   data_stream?: string;
 }
 

@@ -26,9 +26,15 @@ interface AlertsPopoverProps {
   onClose: () => void;
   anchorElement: HTMLElement;
   searchSource: ISearchSource;
+  savedQueryId?: string;
 }
 
-export function AlertsPopover({ searchSource, anchorElement, onClose }: AlertsPopoverProps) {
+export function AlertsPopover({
+  searchSource,
+  anchorElement,
+  savedQueryId,
+  onClose,
+}: AlertsPopoverProps) {
   const dataView = searchSource.getField('index')!;
   const services = useDiscoverServices();
   const { triggersActionsUi } = services;
@@ -49,8 +55,9 @@ export function AlertsPopover({ searchSource, anchorElement, onClose }: AlertsPo
     return {
       searchType: 'searchSource',
       searchConfiguration: nextSearchSource.getSerializedFields(),
+      savedQueryId,
     };
-  }, [searchSource, services]);
+  }, [savedQueryId, searchSource, services]);
 
   const SearchThresholdAlertFlyout = useMemo(() => {
     if (!alertFlyoutVisible) {
@@ -101,12 +108,7 @@ export function AlertsPopover({ searchSource, anchorElement, onClose }: AlertsPo
       name: 'Alerting',
       items: [
         {
-          name: (
-            <>
-              {SearchThresholdAlertFlyout}
-              {createSearchThresholdRuleLink}
-            </>
-          ),
+          name: <>{createSearchThresholdRuleLink}</>,
           icon: 'bell',
           disabled: !hasTimeFieldName,
         },
@@ -156,11 +158,13 @@ export function openAlertsPopover({
   anchorElement,
   searchSource,
   services,
+  savedQueryId,
 }: {
   I18nContext: I18nStart['Context'];
   anchorElement: HTMLElement;
   searchSource: ISearchSource;
   services: DiscoverServices;
+  savedQueryId?: string;
 }) {
   if (isOpen) {
     closeAlertsPopover();
@@ -177,6 +181,7 @@ export function openAlertsPopover({
           onClose={closeAlertsPopover}
           anchorElement={anchorElement}
           searchSource={searchSource}
+          savedQueryId={savedQueryId}
         />
       </KibanaContextProvider>
     </I18nContext>

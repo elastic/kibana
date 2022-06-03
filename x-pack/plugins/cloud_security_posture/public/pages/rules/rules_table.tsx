@@ -58,7 +58,7 @@ export const RulesTable = ({
     pageIndex: page,
     pageSize,
     totalItemCount: total,
-    pageSizeOptions: [1, 5, 10, 25],
+    pageSizeOptions: [10, 25, 100],
   };
 
   const selection: EuiBasicTableProps<RuleSavedObject>['selection'] = {
@@ -128,8 +128,8 @@ const getColumns = ({
     ),
   },
   {
-    field: 'section', // TODO: what field is this?
-    name: TEXT.SECTION,
+    field: 'attributes.section',
+    name: TEXT.CIS_SECTION,
     width: '15%',
   },
   {

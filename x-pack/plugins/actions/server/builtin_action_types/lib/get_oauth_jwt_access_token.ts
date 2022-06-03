@@ -72,6 +72,9 @@ export const getOAuthJwtAccessToken = async ({
       keyId: jwtKeyId,
     });
 
+    // Save the time before requesting token so we can use it to calculate expiration
+    const requestTokenStart = Date.now();
+
     // request access token with jwt assertion
     const tokenResult = await requestOAuthJWTToken(
       tokenUrl,
@@ -92,6 +95,7 @@ export const getOAuthJwtAccessToken = async ({
           connectorId,
           token: connectorToken,
           newToken: accessToken,
+          tokenRequestDate: requestTokenStart,
           expiresInSec: tokenResult.expiresIn,
           deleteExisting: hasErrors,
         });

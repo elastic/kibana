@@ -11,10 +11,6 @@ import { getVisSchemas, SchemaConfig, VisToExpressionAst } from '@kbn/visualizat
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { inter } from '@kbn/expressions-plugin/common';
 
-import {
-  EsaggsExpressionFunctionDefinition,
-  IndexPatternLoadExpressionFunctionDefinition,
-} from '@kbn/data-plugin/public';
 import { VisParams } from './types';
 import { getStopsWithColorsFromRanges } from './utils';
 
@@ -30,17 +26,6 @@ const prepareDimension = (params: SchemaConfig) => {
 };
 
 export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
-  const esaggs = buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
-    index: buildExpression([
-      buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>('indexPatternLoad', {
-        id: vis.data.indexPattern!.id!,
-      }),
-    ]),
-    metricsAtAllLevels: vis.isHierarchical(),
-    partialRows: false,
-    aggs: vis.data.aggs!.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
-  });
-
   const schemas = getVisSchemas(vis, params);
 
   const {
@@ -75,13 +60,15 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
   metricVis.addArgument(
     'font',
     buildExpression(
-      `font family="${inter.value}" 
+      `font family="${inter.value}"
         weight="bold"
         align="center"
         sizeUnit="pt"
         ${style ? `size=${style.fontSize}` : ''}`
     )
   );
+
+  metricVis.addArgument('labelFont', buildExpression(`font size="14" align="center"`));
 
   if (colorsRange && colorsRange.length > 1) {
     const stopsWithColors = getStopsWithColorsFromRanges(colorsRange, colorSchema, invertColors);
@@ -102,7 +89,7 @@ export const toExpressionAst: VisToExpressionAst<VisParams> = (vis, params) => {
     metricVis.addArgument('metric', prepareDimension(metric));
   });
 
-  const ast = buildExpression([esaggs, metricVis]);
+  const ast = buildExpression([metricVis]);
 
   return ast.toAst();
 };

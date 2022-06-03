@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { LayeredXyVisFn } from '../types';
 import {
   EXTENDED_DATA_LAYER,
-  EXTENDED_REFERENCE_LINE_LAYER,
+  REFERENCE_LINE_LAYER,
   LAYERED_XY_VIS,
   EXTENDED_ANNOTATION_LAYER,
 } from '../constants';
@@ -25,7 +25,7 @@ export const layeredXyVisFunction: LayeredXyVisFn = {
   args: {
     ...commonXYArgs,
     layers: {
-      types: [EXTENDED_DATA_LAYER, EXTENDED_REFERENCE_LINE_LAYER, EXTENDED_ANNOTATION_LAYER],
+      types: [EXTENDED_DATA_LAYER, REFERENCE_LINE_LAYER, EXTENDED_ANNOTATION_LAYER],
       help: i18n.translate('expressionXY.layeredXyVis.layers.help', {
         defaultMessage: 'Layers of visual series',
       }),

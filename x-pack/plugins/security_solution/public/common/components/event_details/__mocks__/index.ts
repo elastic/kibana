@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-export const mockAlertDetailsData = [
+export const generateAlertDetailsDataMock = () => [
   { category: 'process', field: 'process.name', values: ['-'], originalValue: '-' },
   { category: 'process', field: 'process.pid', values: [0], originalValue: 0 },
   { category: 'process', field: 'process.executable', values: ['-'], originalValue: '-' },
+  {
+    category: 'process',
+    field: 'process.entry_leader.entity_id',
+    values: ['2938b3f873b4f3n84f938'],
+    originalValue: '2938b3f873b4f3n84f938',
+  },
   {
     category: 'agent',
     field: 'agent.hostname',
@@ -648,3 +654,5 @@ export const mockAlertDetailsData = [
     originalValue: ['dummy.exe'],
   },
 ];
+
+export const mockAlertDetailsData = generateAlertDetailsDataMock();

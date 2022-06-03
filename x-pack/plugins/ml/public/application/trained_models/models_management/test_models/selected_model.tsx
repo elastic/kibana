@@ -9,6 +9,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC } from 'react';
 
 import { NerInference } from './models/ner';
+import { QuestionAnsweringInference } from './models/question_answering';
 
 import {
   TextClassificationInference,
@@ -62,6 +63,11 @@ export const SelectedModel: FC<Props> = ({ model }) => {
 
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.FILL_MASK) {
       const inferrer = new FillMaskInference(trainedModels, model);
+      return <InferenceInputForm inferrer={inferrer} />;
+    }
+
+    if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING) {
+      const inferrer = new QuestionAnsweringInference(trainedModels, model);
       return <InferenceInputForm inferrer={inferrer} />;
     }
   }

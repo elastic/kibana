@@ -14,7 +14,7 @@ import type {
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
-import { Filter } from '@kbn/es-query';
+import { Filter, TimeRange } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -369,15 +369,20 @@ export interface DatasourcePublicAPI {
    */
   getSourceId: () => string | undefined;
   /**
-   * Collect all defined filters from all the operations in the layer
+   * Collect all defined filters from all the operations in the layer. If it returns undefined, this means that filters can't be constructed for the current layer
    */
-  getFilters: (activeData?: FramePublicAPI['activeData']) => Record<
-    'enabled' | 'disabled',
-    {
-      kuery: Query[][];
-      lucene: Query[][];
-    }
-  >;
+  getFilters: (
+    activeData?: FramePublicAPI['activeData'],
+    timeRange?: TimeRange
+  ) =>
+    | { error: string }
+    | Record<
+        'enabled' | 'disabled',
+        {
+          kuery: Query[][];
+          lucene: Query[][];
+        }
+      >;
 }
 
 export interface DatasourceDataPanelProps<T = unknown> {
@@ -557,7 +562,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
 
 export interface AccessorConfig {
   columnId: string;
-  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible';
+  triggerIcon?: 'color' | 'disabled' | 'colorBy' | 'none' | 'invisible' | 'aggregate';
   color?: string;
   palette?: string[] | Array<{ color: string; stop: number }>;
 }
@@ -931,12 +936,6 @@ export interface Visualization<T = unknown> {
    * On Edit events the frame will call this to know what's going to be the next visualization state
    */
   onEditAction?: (state: T, event: LensEditEvent<LensEditSupportedActions>) => T;
-
-  /**
-   * `datasourceExpressionsByLayers` will be passed to the params of `toExpression` and `toPreviewExpression`
-   * functions and datasource expressions will not be appended to the expression automatically.
-   */
-  shouldBuildDatasourceExpressionManually?: () => boolean;
 }
 
 // Use same technique as TriggerContext

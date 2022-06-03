@@ -141,6 +141,8 @@
 /x-pack/test/functional/es_archives/uptime @elastic/uptime
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
+/x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
+
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
@@ -187,16 +189,19 @@
 /x-pack/test/screenshot_creation/apps/ml_docs @elastic/ml-ui
 /x-pack/test/screenshot_creation/services/ml_screenshots.ts @elastic/ml-ui
 
-# ML team owns and maintains the transform plugin despite it living in the Data management section.
-/x-pack/plugins/transform/  @elastic/ml-ui
+# Additional plugins and packages maintained by the ML team.
+/x-pack/plugins/aiops/ @elastic/ml-ui
 /x-pack/plugins/data_visualizer/ @elastic/ml-ui
 /x-pack/plugins/file_upload/ @elastic/ml-ui
+/x-pack/plugins/transform/  @elastic/ml-ui
 /x-pack/test/accessibility/apps/transform.ts  @elastic/ml-ui
 /x-pack/test/api_integration/apis/transform/ @elastic/ml-ui
 /x-pack/test/api_integration_basic/apis/transform/ @elastic/ml-ui
 /x-pack/test/functional/apps/transform/ @elastic/ml-ui
 /x-pack/test/functional/services/transform/ @elastic/ml-ui
 /x-pack/test/functional_basic/apps/transform/ @elastic/ml-ui
+/packages/kbn-aiops-utils @elastic/ml-ui
+/examples/response_stream/ @elastic/ml-ui
 
 # Maps
 #CC# /x-pack/plugins/maps/ @elastic/kibana-gis
@@ -286,6 +291,7 @@
 /src/plugins/kibana_overview/ @elastic/kibana-core
 /src/plugins/advanced_settings/ @elastic/kibana-core
 /x-pack/plugins/global_search_bar/ @elastic/kibana-core
+/test/analytics @elastic/kibana-core
 #CC# /src/core/server/csp/ @elastic/kibana-core
 #CC# /src/plugins/saved_objects/ @elastic/kibana-core
 #CC# /x-pack/plugins/cloud/ @elastic/kibana-core
@@ -323,6 +329,7 @@
 
 # Kibana Platform Security
 /packages/kbn-crypto/ @elastic/kibana-security
+/packages/kbn-handlebars/ @elastic/kibana-security
 /src/core/server/csp/ @elastic/kibana-security @elastic/kibana-core
 /src/plugins/interactive_setup/ @elastic/kibana-security
 /test/interactive_setup_api_integration/ @elastic/kibana-security
@@ -499,6 +506,7 @@
 /x-pack/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/common/components/callouts @elastic/security-detections-response-rules
+/x-pack/plugins/security_solution/public/common/components/ml_popover @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/detections/components/callouts @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/detections/mitre @elastic/security-detections-response-rules
 /x-pack/plugins/security_solution/public/detections/pages/detection_engine/rules @elastic/security-detections-response-rules
@@ -573,8 +581,10 @@ x-pack/plugins/security_solution/cypress/README.md @elastic/security-engineering
 x-pack/test/security_solution_cypress @elastic/security-engineering-productivity
 
 ## Security Solution sub teams - adaptive-workload-protection
+x-pack/plugins/kubernetes_security @elastic/awp-platform
 x-pack/plugins/session_view @elastic/awp-platform
 x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/awp-platform
+x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
 
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics

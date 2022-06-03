@@ -19,5 +19,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
     loadTestFile(require.resolve('./rule_tag_filter'));
     loadTestFile(require.resolve('./rule_status_filter'));
     loadTestFile(require.resolve('./rule_tag_badge'));
+    loadTestFile(require.resolve('./rule_event_log_list'));
+    loadTestFile(require.resolve('./rules_list'));
   });
 };

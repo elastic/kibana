@@ -10,6 +10,7 @@ import { DataLayerConfig } from '../../common';
 import { LayerTypes } from '../../common/constants';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { getAxesConfiguration } from './axes_configuration';
+import { LayersFieldFormats } from './layers';
 
 describe('axes_configuration', () => {
   const tables: Record<string, Datatable> = {
@@ -224,21 +225,35 @@ describe('axes_configuration', () => {
     layerId: 'first',
     type: 'dataLayer',
     layerType: LayerTypes.DATA,
+    showLines: true,
     seriesType: 'line',
     xAccessor: 'c',
     accessors: ['yAccessorId'],
     splitAccessor: 'd',
     columnToLabel: '{"a": "Label A", "b": "Label B", "d": "Label D"}',
     xScaleType: 'ordinal',
-    yScaleType: 'linear',
     isHistogram: false,
     palette: { type: 'palette', name: 'default' },
     table: tables.first,
   };
 
+  const fieldFormats: LayersFieldFormats = {
+    first: {
+      xAccessors: { c: { id: 'number', params: {} } },
+      yAccessors: {
+        yAccessorId: { id: 'number', params: {} },
+        yAccessorId3: { id: 'currency', params: {} },
+        yAccessorId4: { id: 'currency', params: {} },
+      },
+      splitSeriesAccessors: { d: { id: 'number', params: {} } },
+      splitColumnAccessors: {},
+      splitRowAccessors: {},
+    },
+  };
+
   it('should map auto series to left axis', () => {
     const formatFactory = jest.fn();
-    const groups = getAxesConfiguration([sampleLayer], false, formatFactory);
+    const groups = getAxesConfiguration([sampleLayer], false, formatFactory, fieldFormats);
     expect(groups.length).toEqual(1);
     expect(groups[0].position).toEqual('left');
     expect(groups[0].series[0].accessor).toEqual('yAccessorId');
@@ -248,7 +263,7 @@ describe('axes_configuration', () => {
   it('should map auto series to right axis if formatters do not match', () => {
     const formatFactory = jest.fn();
     const twoSeriesLayer = { ...sampleLayer, accessors: ['yAccessorId', 'yAccessorId2'] };
-    const groups = getAxesConfiguration([twoSeriesLayer], false, formatFactory);
+    const groups = getAxesConfiguration([twoSeriesLayer], false, formatFactory, fieldFormats);
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('left');
     expect(groups[1].position).toEqual('right');
@@ -262,7 +277,7 @@ describe('axes_configuration', () => {
       ...sampleLayer,
       accessors: ['yAccessorId', 'yAccessorId2', 'yAccessorId3'],
     };
-    const groups = getAxesConfiguration([threeSeriesLayer], false, formatFactory);
+    const groups = getAxesConfiguration([threeSeriesLayer], false, formatFactory, fieldFormats);
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('left');
     expect(groups[1].position).toEqual('right');
@@ -281,7 +296,8 @@ describe('axes_configuration', () => {
         },
       ],
       false,
-      formatFactory
+      formatFactory,
+      fieldFormats
     );
     expect(groups.length).toEqual(1);
     expect(groups[0].position).toEqual('right');
@@ -300,7 +316,8 @@ describe('axes_configuration', () => {
         },
       ],
       false,
-      formatFactory
+      formatFactory,
+      fieldFormats
     );
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('left');
@@ -308,8 +325,8 @@ describe('axes_configuration', () => {
     expect(groups[0].series[1].accessor).toEqual('yAccessorId4');
     expect(groups[1].position).toEqual('right');
     expect(groups[1].series[0].accessor).toEqual('yAccessorId');
-    expect(formatFactory).toHaveBeenCalledWith({ id: 'number' });
-    expect(formatFactory).toHaveBeenCalledWith({ id: 'currency' });
+    expect(formatFactory).toHaveBeenCalledWith({ id: 'number', params: {} });
+    expect(formatFactory).toHaveBeenCalledWith({ id: 'currency', params: {} });
   });
 
   it('should create one formatter per series group', () => {
@@ -323,10 +340,11 @@ describe('axes_configuration', () => {
         },
       ],
       false,
-      formatFactory
+      formatFactory,
+      fieldFormats
     );
     expect(formatFactory).toHaveBeenCalledTimes(2);
-    expect(formatFactory).toHaveBeenCalledWith({ id: 'number' });
-    expect(formatFactory).toHaveBeenCalledWith({ id: 'currency' });
+    expect(formatFactory).toHaveBeenCalledWith({ id: 'number', params: {} });
+    expect(formatFactory).toHaveBeenCalledWith({ id: 'currency', params: {} });
   });
 });

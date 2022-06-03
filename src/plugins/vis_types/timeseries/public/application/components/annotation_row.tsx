@@ -29,7 +29,10 @@ import { FieldSelect } from './aggs/field_select';
 import { IndexPatternSelect, IndexPatternSelectProps } from './lib/index_pattern_select';
 import { QueryBarWrapper } from './query_bar_wrapper';
 import { YesNo } from './yes_no';
-import { fetchIndexPattern } from '../../../common/index_patterns_utils';
+import {
+  fetchIndexPattern,
+  isDataViewTypeIndexPattern,
+} from '../../../common/index_patterns_utils';
 import { getDefaultQueryLanguage } from './lib/get_default_query_language';
 
 // @ts-expect-error not typed yet
@@ -88,7 +91,9 @@ export const AnnotationRow = ({
               defaultIndex: await dataViews.getDefault(),
             };
       } catch {
-        // nothing to be here
+        if (isDataViewTypeIndexPattern(index)) {
+          fetchedIndexPattern.missedIndex = index.id;
+        }
       }
 
       setFetchedIndex(fetchedIndexPattern);

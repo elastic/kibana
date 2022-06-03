@@ -16,12 +16,14 @@ export const allowedExperimentalValues = Object.freeze({
   tGridEventRenderedViewEnabled: true,
   excludePoliciesInFilterEnabled: false,
   usersEnabled: true,
-  detectionResponseEnabled: false,
+  kubernetesEnabled: false,
   disableIsolationUIPendingStatuses: false,
   riskyHostsEnabled: false,
   riskyUsersEnabled: false,
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
+  policyResponseInFleetEnabled: false,
+  groupedNavigation: true,
 
   /**
    * This is used for enabling the end to end tests for the security_solution telemetry.

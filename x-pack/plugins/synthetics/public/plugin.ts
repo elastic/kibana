@@ -41,6 +41,7 @@ import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
+import { MONITORS_ROUTE } from '../common/constants/ui';
 import {
   LazySyntheticsPolicyCreateExtension,
   LazySyntheticsPolicyEditExtension,
@@ -262,7 +263,7 @@ function registerSyntheticsRoutesWithNavigation(
                     defaultMessage: 'Monitors',
                   }),
                   app: 'synthetics',
-                  path: '/manage-monitors',
+                  path: MONITORS_ROUTE,
                   matchFullPath: true,
                   ignoreTrailingSlash: true,
                 },

@@ -376,6 +376,10 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The Kibana actions plugin provides a framework to create executable actions. You can:
 
 
+|{kib-repo}blob/{branch}/x-pack/plugins/aiops/README.md[aiops]
+|The plugin provides APIs and components for AIOps features, including the “Explain log rate spikes” UI, maintained by the ML team.
+
+
 |{kib-repo}blob/{branch}/x-pack/plugins/alerting/README.md[alerting]
 |The Kibana Alerting plugin provides a common place to set up rules. You can:
 
@@ -489,6 +493,10 @@ the infrastructure monitoring use-case within Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/ingest_pipelines/README.md[ingestPipelines]
 |The ingest_pipelines plugin provides Kibana support for Elasticsearch's ingest pipelines.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/kubernetes_security/README.md[kubernetesSecurity]
+|(under construction)
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]

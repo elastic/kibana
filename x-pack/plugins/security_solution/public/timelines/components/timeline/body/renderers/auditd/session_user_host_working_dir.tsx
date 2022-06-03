@@ -50,6 +50,8 @@ export const SessionUserHostWorkingDir = React.memo<Props>(
           value={session}
           iconType="number"
           isDraggable={isDraggable}
+          isAggregatable={true}
+          fieldType="keyword"
         />
       </TokensFlexItem>
       <TokensFlexItem grow={false} component="span">

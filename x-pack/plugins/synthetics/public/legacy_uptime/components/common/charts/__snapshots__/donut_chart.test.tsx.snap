@@ -824,7 +824,7 @@ exports[`DonutChart component renders a donut chart 1`] = `
         </span>
       </div>
       <div
-        class="euiSpacer euiSpacer--m"
+        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
@@ -979,7 +979,7 @@ exports[`DonutChart component renders a green check when all monitors are up 1`]
         </span>
       </div>
       <div
-        class="euiSpacer euiSpacer--m"
+        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterLarge euiFlexGroup--directionRow"
