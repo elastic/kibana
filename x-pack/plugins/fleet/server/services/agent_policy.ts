@@ -379,7 +379,7 @@ class AgentPolicyService {
     }
     const { monitoring_enabled: monitoringEnabled } = agentPolicy;
     const packagesToInstall = [];
-    if (monitoringEnabled?.length) {
+    if (!existingAgentPolicy.monitoring_enabled && monitoringEnabled?.length) {
       packagesToInstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
     }
     if (packagesToInstall.length > 0) {
