@@ -95,12 +95,12 @@ describe('when on the policy response', () => {
       const component = render();
       userEvent.click(component.getByTestId('endpointPolicyResponseTitle'));
 
-      const configs = await component.findAllByTestId('endpointPolicyResponseConfig');
+      const configs = component.queryAllByTestId('endpointPolicyResponseConfig');
       for (const config of configs) {
         userEvent.click(config);
       }
 
-      const actions = await component.findAllByTestId('endpointPolicyResponseAction');
+      const actions = component.queryAllByTestId('endpointPolicyResponseAction');
       for (const action of actions) {
         userEvent.click(action);
       }
@@ -139,20 +139,23 @@ describe('when on the policy response', () => {
     );
   });
 
-  // FIXME: for some reason it is not getting all messages items from DOM even those are rendered.
-  it.skip('should show an actions section for each configuration', async () => {
+  it('should show an actions section for each configuration', async () => {
     runMock();
     const component = await renderOpenedTree();
 
-    const configs = await component.findAllByTestId('endpointPolicyResponseConfig');
-    const actions = await component.findAllByTestId('endpointPolicyResponseAction');
-    const statusAttentionHealth = await component.findAllByTestId(
-      'endpointPolicyResponseStatusAttentionHealth'
-    );
-    const statusSuccessHealth = await component.findAllByTestId(
-      'endpointPolicyResponseStatusSuccessHealth'
-    );
-    const messages = await component.findAllByTestId('endpointPolicyResponseMessage');
+    const configs = component.queryAllByTestId('endpointPolicyResponseConfig');
+    const actions = component.queryAllByTestId('endpointPolicyResponseAction');
+
+    /*
+    // Uncomment this when commented tests are fixed.
+     const statusAttentionHealth = component.queryAllByTestId(
+       'endpointPolicyResponseStatusAttentionHealth'
+     );
+     const statusSuccessHealth = component.queryAllByTestId(
+       'endpointPolicyResponseStatusSuccessHealth'
+     );
+     const messages = component.queryAllByTestId('endpointPolicyResponseMessage');
+    */
 
     let expectedActionAccordionCount = 0;
     const configurationKeys = Object.keys(
@@ -167,13 +170,14 @@ describe('when on the policy response', () => {
 
     expect(configs).toHaveLength(configurationKeys.length);
     expect(actions).toHaveLength(expectedActionAccordionCount);
-    expect(messages).toHaveLength(expectedActionAccordionCount);
-    expect([...statusSuccessHealth, ...statusAttentionHealth]).toHaveLength(
-      expectedActionAccordionCount + configurationKeys.length + 1
-    );
+    // FIXME:  for some reason it is not getting all messages items from DOM even those are rendered.
+    // expect(messages).toHaveLength(expectedActionAccordionCount);
+    // expect([...statusSuccessHealth, ...statusAttentionHealth]).toHaveLength(
+    //   expectedActionAccordionCount + configurationKeys.length + 1
+    // );
   });
 
-  it('should not show any numbered badges if all actions are successful', () => {
+  it('should not show any numbered badges if all actions are successful', async () => {
     const policyResponse = createPolicyResponse(HostPolicyResponseActionStatus.success);
     runMock(policyResponse);
 
