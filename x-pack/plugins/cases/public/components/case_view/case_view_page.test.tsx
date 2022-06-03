@@ -13,7 +13,7 @@ import { ConnectorTypes } from '../../../common/api';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import '../../common/mock/match_media';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
-import { useConnectors } from '../../containers/configure/use_connectors';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
 import {
   basicCaseClosed,
   basicCaseMetrics,
@@ -43,7 +43,7 @@ const useUrlParamsMock = useUrlParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
-const useConnectorsMock = useConnectors as jest.Mock;
+const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 
@@ -101,7 +101,7 @@ describe('CaseViewPage', () => {
     useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
     useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
-    useConnectorsMock.mockReturnValue({ connectors: connectorsMock, loading: false });
+    useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
   });
 
   it('should render CaseViewPage', async () => {
@@ -531,7 +531,7 @@ describe('CaseViewPage', () => {
   });
 
   it('should show the correct connector name on the push button', async () => {
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
+    useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
       data: {
@@ -559,7 +559,7 @@ describe('CaseViewPage', () => {
 
   describe('Callouts', () => {
     it('it shows the danger callout when a connector has been deleted', async () => {
-      useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: false }));
+      useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: false }));
       const wrapper = mount(
         <TestProviders>
           <CaseViewPage {...caseProps} />
@@ -573,7 +573,7 @@ describe('CaseViewPage', () => {
     });
 
     it('it does NOT shows the danger callout when connectors are loading', async () => {
-      useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: true }));
+      useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: true }));
       const wrapper = mount(
         <TestProviders>
           <CaseViewPage {...caseProps} />

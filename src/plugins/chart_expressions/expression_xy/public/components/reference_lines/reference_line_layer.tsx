@@ -13,6 +13,7 @@ import { Position } from '@elastic/charts';
 import { ReferenceLineLayerConfig } from '../../../common/types';
 import { getGroupId } from './utils';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
+import { LayerAccessorsTitles } from '../../helpers';
 
 interface ReferenceLineLayerProps {
   layer: ReferenceLineLayerConfig;
@@ -20,6 +21,7 @@ interface ReferenceLineLayerProps {
   paddingMap: Partial<Record<Position, number>>;
   axesMap: Record<'left' | 'right', boolean>;
   isHorizontal: boolean;
+  titles?: LayerAccessorsTitles;
 }
 
 export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
@@ -28,6 +30,7 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   paddingMap,
   axesMap,
   isHorizontal,
+  titles,
 }) => {
   if (!layer.yConfig) {
     return null;
@@ -54,7 +57,7 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
     const groupId = getGroupId(axisMode);
 
     const formatter = formatters[groupId || 'bottom'];
-    const name = columnToLabelMap[yConfig.forAccessor];
+    const name = columnToLabelMap[yConfig.forAccessor] ?? titles?.yTitles?.[yConfig.forAccessor];
     const value = row[yConfig.forAccessor];
     const yConfigsWithSameDirection = groupedByDirection[yConfig.fill!];
     const indexFromSameType = yConfigsWithSameDirection.findIndex(

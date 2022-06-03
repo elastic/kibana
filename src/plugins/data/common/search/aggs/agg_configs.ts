@@ -11,7 +11,10 @@ import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { isRangeFilter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndexPatternLoadExpressionFunctionDefinition } from '@kbn/data-views-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
 import {
   IEsSearchResponse,
@@ -20,11 +23,11 @@ import {
   RangeFilter,
   // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 } from '../../../public';
+import type { EsaggsExpressionFunctionDefinition } from '../expressions';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import { IndexPattern } from '../..';
 import { TimeRange, getTime, calculateBounds } from '../..';
 import { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
@@ -55,6 +58,7 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
 export interface AggConfigsOptions {
   typesRegistry: AggTypesRegistryStart;
   hierarchical?: boolean;
+  partialRows?: boolean;
 }
 
 export type CreateAggConfigParams = Assign<AggConfigSerialized, { type: string | IAggType }>;
@@ -78,18 +82,19 @@ export type GenericBucket = estypes.AggregationsBuckets<any> & {
 export type IAggConfigs = AggConfigs;
 
 export class AggConfigs {
-  public indexPattern: IndexPattern;
+  public indexPattern: DataView;
   public timeRange?: TimeRange;
   public timeFields?: string[];
   public forceNow?: Date;
   public hierarchical?: boolean = false;
+  public partialRows?: boolean = false;
 
   private readonly typesRegistry: AggTypesRegistryStart;
 
   aggs: IAggConfig[];
 
   constructor(
-    indexPattern: IndexPattern,
+    indexPattern: DataView,
     configStates: CreateAggConfigParams[] = [],
     opts: AggConfigsOptions
   ) {
@@ -100,6 +105,7 @@ export class AggConfigs {
     this.aggs = [];
     this.indexPattern = indexPattern;
     this.hierarchical = opts.hierarchical;
+    this.partialRows = opts.partialRows;
 
     configStates.forEach((params: any) => this.createAggConfig(params));
   }
@@ -492,5 +498,27 @@ export class AggConfigs {
       // @ts-ignore
       this.getRequestAggs().map((agg: AggConfig) => agg.onSearchRequestStart(searchSource, options))
     );
+  }
+
+  /**
+   * Generates an expression abstract syntax tree using the `esaggs` expression function.
+   * @returns The expression AST.
+   */
+  toExpressionAst() {
+    return buildExpression([
+      buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
+        index: buildExpression([
+          buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(
+            'indexPatternLoad',
+            {
+              id: this.indexPattern.id!,
+            }
+          ),
+        ]),
+        metricsAtAllLevels: this.hierarchical,
+        partialRows: this.partialRows,
+        aggs: this.aggs.map((agg) => buildExpression(agg.toExpressionAst())),
+      }),
+    ]).toAst();
   }
 }

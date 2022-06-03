@@ -8,6 +8,7 @@
 
 import { UnregisterCallback } from 'history';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import {
   InternalApplicationSetup,
   InternalApplicationStart,
@@ -17,7 +18,6 @@ import {
 import type { HttpSetup, HttpStart } from '../http';
 import type { NotificationsSetup, NotificationsStart } from '../notifications';
 import type { IUiSettingsClient } from '../ui_settings';
-import type { InjectedMetadataSetup } from '../injected_metadata';
 import {
   renderApp as renderErrorApp,
   setupPublicBaseUrlConfigWarning,
@@ -29,7 +29,7 @@ import { DocLinksStart } from '../doc_links';
 export interface SetupDeps {
   application: InternalApplicationSetup;
   http: HttpSetup;
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
   notifications: NotificationsSetup;
 }
 
