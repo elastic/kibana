@@ -6,6 +6,7 @@
  */
 
 import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import { UXMetrics } from '@kbn/observability-plugin/public';
 import {
   TBT_FIELD,
   FCP_FIELD,
@@ -32,7 +33,7 @@ const getRanksPercentages = (ranks?: Record<string, number | null>) => {
 export function transformCoreWebVitalsResponse<T>(
   response?: ESSearchResponse<T, ReturnType<typeof coreWebVitalsQuery>>,
   percentile = PERCENTILE_DEFAULT
-) {
+): UXMetrics | undefined {
   if (!response) return response;
   const {
     lcp,
