@@ -24,7 +24,7 @@ import { OptionalLabel } from '../optional_label';
 import { CodeEditor } from '../code_editor';
 import { ScriptRecorderFields } from './script_recorder_fields';
 import { ZipUrlTLSFields } from './zip_url_tls_fields';
-import { ConfigKey, MonacoEditorLangId } from '../types';
+import { ConfigKey, MonacoEditorLangId, Validation } from '../types';
 
 enum SourceType {
   INLINE = 'syntheticsBrowserInlineConfig',
@@ -48,6 +48,7 @@ interface Props {
   onChange: (sourceConfig: SourceConfig) => void;
   onFieldBlur: (field: ConfigKey) => void;
   defaultConfig?: SourceConfig;
+  validate: Validation;
 }
 
 export const defaultValues = {
@@ -72,13 +73,22 @@ const getDefaultTab = (defaultConfig: SourceConfig, isZipUrlSourceEnabled = true
   return isZipUrlSourceEnabled ? SourceType.ZIP : SourceType.INLINE;
 };
 
-export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValues }: Props) => {
+export const SourceField = ({
+  onChange,
+  onFieldBlur,
+  defaultConfig = defaultValues,
+  validate,
+}: Props) => {
   const { isZipUrlSourceEnabled } = usePolicyConfigContext();
   const [sourceType, setSourceType] = useState<SourceType>(
     getDefaultTab(defaultConfig, isZipUrlSourceEnabled)
   );
   const [config, setConfig] = useState<SourceConfig>(defaultConfig);
   const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
+
+  const isInlineInvalid = validate?.[ConfigKey.SOURCE_INLINE]?.({
+    [ConfigKey.SOURCE_INLINE]: config.inlineScript,
+  });
 
   useEffect(() => {
     onChange(config);
@@ -97,7 +107,7 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
     ? touchedFields[ConfigKey.SOURCE_ZIP_URL] && !config.zipUrl
     : !config.zipUrl;
   const isScriptInvalid = isWithInUptime
-    ? touchedFields[ConfigKey.SOURCE_INLINE] && !config.inlineScript
+    ? touchedFields[ConfigKey.SOURCE_INLINE] || isInlineInvalid
     : !config.inlineScript;
 
   const zipUrlLabel = (
@@ -284,6 +294,7 @@ export const SourceField = ({ onChange, onFieldBlur, defaultConfig = defaultValu
       'data-test-subj': `syntheticsSourceTab__inline`,
       content: (
         <EuiFormRow
+          style={{ minWidth: 600 }}
           isInvalid={isScriptInvalid}
           error={
             <FormattedMessage
