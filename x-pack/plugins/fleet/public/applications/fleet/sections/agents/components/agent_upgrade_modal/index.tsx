@@ -26,6 +26,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
+import semverValid from 'semver/functions/valid';
 
 import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
 import type { Agent } from '../../../../types';
@@ -199,6 +200,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   }
 
   const onCreateOption = (searchValue: string) => {
+    if (!semverValid(searchValue)) {
+      return;
+    }
+
     const agentVersionNumber = semverCoerce(searchValue);
     if (
       agentVersionNumber?.version &&
@@ -297,8 +302,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           fullWidth
           singleSelection={{ asPlainText: true }}
           options={versionOptions}
+          isClearable={false}
           selectedOptions={selectedVersion}
           onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
+            if (!selected.length) {
+              return;
+            }
             setSelectedVersion(selected);
           }}
           onCreateOption={onCreateOption}
@@ -369,10 +378,14 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           <EuiComboBox
             data-test-subj="agentUpgradeModal.MaintainanceCombobox"
             fullWidth
+            isClearable={false}
             singleSelection={{ asPlainText: true }}
             options={maintainanceOptions}
             selectedOptions={selectedMantainanceWindow}
             onChange={(selected: Array<EuiComboBoxOptionOption<number>>) => {
+              if (!selected.length) {
+                return;
+              }
               setSelectedMantainanceWindow(selected);
             }}
           />
