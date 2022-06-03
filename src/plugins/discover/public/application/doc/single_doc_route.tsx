@@ -73,7 +73,7 @@ const SingleDoc = ({ id }: SingleDocRouteProps) => {
         body={
           <FormattedMessage
             id="discover.singleDocRoute.errorMessage"
-            defaultMessage="No matching index pattern for id {indexPatternId}"
+            defaultMessage="No matching data view for id {indexPatternId}"
             values={{ indexPatternId }}
           />
         }

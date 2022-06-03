@@ -58,7 +58,7 @@ export function ContextAppRoute() {
         body={
           <FormattedMessage
             id="discover.contextViewRoute.errorMessage"
-            defaultMessage="No matching index pattern for id {dataViewId}"
+            defaultMessage="No matching data view for id {dataViewId}"
             values={{ dataViewId }}
           />
         }
