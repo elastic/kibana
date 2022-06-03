@@ -1,6 +1,13 @@
-# @kbn/es
+---
+id: kibDevDocsOpsEs
+slug: /kibana-dev-docs/ops/es
+title: "@kbn/es"
+description: A cli package for running elasticsearch or building snapshot artifacts
+date: 2022-05-24
+tags: ['kibana', 'dev', 'contributor', 'operations', 'es']
+---
 
-> A command line utility for running elasticsearch from source or archive.
+> A command line utility for running elasticsearch from snapshot, source, archive or even building snapshot artifacts. 
 
 ## Getting started
 If running elasticsearch from source, elasticsearch needs to be cloned to a sibling directory of Kibana.
@@ -71,41 +78,20 @@ To use these steps you'll need to setup the google-cloud-sdk, which can be insta
 
  1. Clone the elasticsearch repo somewhere
  2. Checkout the branch you want to build
- 3. Run the following to delete old distributables
+ 3. Build the new artifacts
 
     ```
-    find distribution/archives -type f \( -name 'elasticsearch-*-*.tar.gz' -o -name 'elasticsearch-*-*.zip' \) -not -path *no-jdk* -exec rm {} \;
+    node scripts/es build_snapshots --output=~/Downloads/tmp-artifacts --source-path=/path/to/es/repo
     ```
 
- 4. Build the new artifacts
-
-    ```
-    ./gradlew -p distribution/archives assemble --parallel
-    ```
-
- 4. Copy new artifacts to your `~/Downloads/tmp-artifacts`
-
-    ```
-    rm -rf ~/Downloads/tmp-artifacts
-    mkdir ~/Downloads/tmp-artifacts
-    find distribution/archives -type f \( -name 'elasticsearch-*-*.tar.gz' -o -name 'elasticsearch-*-*.zip' \) -not -path *no-jdk* -exec cp {} ~/Downloads/tmp-artifacts \;
-    ```
-
- 5. Calculate shasums of the uploads
-
-    ```
-    cd ~/Downloads/tmp-artifacts
-    find * -exec bash -c "shasum -a 512 {} > {}.sha512" \;
-    ```
-
- 6. Check that the files in `~/Downloads/tmp-artifacts` look reasonable
- 7. Upload the files to GCS
+ 4. Check that the files in `~/Downloads/tmp-artifacts` look reasonable
+ 5. Upload the files to GCS
 
     ```
     gsutil -m rsync . gs://kibana-ci-tmp-artifacts/
     ```
 
- 8. Once the artifacts are uploaded, modify `packages/kbn-es/src/custom_snapshots.js` in a PR to use a URL formatted like:
+ 6. Once the artifacts are uploaded, modify `packages/kbn-es/src/custom_snapshots.js` in a PR to use a URL formatted like:
 
     ```
     // force use of manually created snapshots until ReindexPutMappings fix
