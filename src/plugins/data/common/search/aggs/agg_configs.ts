@@ -88,9 +88,9 @@ export class AggConfigs {
   public timeFields?: string[];
   public forceNow?: Date;
   public aggs: IAggConfig[] = [];
+  public partialRows?: boolean;
   public hierarchical?: boolean;
   public readonly timeZone: string;
-  public partialRows?: boolean = false;
 
   constructor(
     public indexPattern: DataView,
@@ -99,7 +99,7 @@ export class AggConfigs {
     private getConfig: GetConfigFn
   ) {
     this.hierarchical = opts.hierarchical ?? false;
-    this.partialRows = opts.partialRows;
+    this.partialRows = opts.partialRows ?? false;
 
     this.timeZone = getUserTimeZone(
       this.getConfig,
@@ -161,6 +161,7 @@ export class AggConfigs {
       {
         ...this.opts,
         hierarchical: this.hierarchical,
+        partialRows: this.partialRows,
       },
       this.getConfig
     );
