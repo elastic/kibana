@@ -9,12 +9,11 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from '@kbn/core/public';
-import { TimeRange } from '@kbn/es-query';
 import { EuiLink, EuiTextColor, EuiButton, EuiSpacer } from '@elastic/eui';
 
 import { DatatableColumn } from '@kbn/expressions-plugin';
 import { groupBy, escape } from 'lodash';
-import { checkColumnForPrecisionError, Query } from '@kbn/data-plugin/common';
+import { checkColumnForPrecisionError, Query, TimeRange } from '@kbn/data-plugin/common';
 import type { FramePublicAPI, StateSetter } from '../types';
 import type { IndexPattern, IndexPatternLayer, IndexPatternPrivateState } from './types';
 import type { ReferenceBasedIndexPatternColumn } from './operations/definitions/column_types';
