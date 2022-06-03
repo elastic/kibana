@@ -110,6 +110,10 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
     class="euiFlexGroup euiFlexGroup--gutterMedium euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceBetween euiFlexGroup--directionRow euiFlexGroup--responsive"
   >
     <div
+      class="euiFlexItem euiFlexItem--flexGrowZero eui-textTruncate"
+      style="max-width:200px"
+    />
+    <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
       data-test-subj="freeDiskSpace"
       style="max-width:200px"
