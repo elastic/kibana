@@ -9,7 +9,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('dashboard', function () {
-    loadTestFile(require.resolve('./feature_controls'));
-    loadTestFile(require.resolve('./preserve_url'));
+    loadTestFile(require.resolve('./reporting'));
+    loadTestFile(require.resolve('./drilldowns'));
   });
 }
