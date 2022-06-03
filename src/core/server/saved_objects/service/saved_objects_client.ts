@@ -297,6 +297,9 @@ export interface SavedObjectsBulkGetObject {
    * * For global object types (registered with `namespaceType: 'agnostic'`): this option cannot be used.
    */
   namespaces?: string[];
+  options?: {
+    eventMetadata?: SavedObjectsBaseOptions['eventMetadata'];
+  };
 }
 
 /**

@@ -11,6 +11,7 @@ import {
   SavedObjectsServiceSetup,
   SavedObjectsType,
   SavedObjectsTypeMappingDefinition,
+  SavedObjectsBaseOptions,
   PostGetEvent,
   PostCreateEvent,
 } from '@kbn/core/server';
@@ -105,37 +106,70 @@ export class UserContentService {
     });
   }
 
-  private onPostGetSavedObject = (data: PostGetEvent['data']) => {
-    const registeredContents = this.userContentTypes;
-    const filteredToContentType = data.objects.filter(({ type }) =>
-      registeredContents.includes(type)
-    );
+  private onPostGetSavedObject = ({ objects, options, requestObjects }: PostGetEvent['data']) => {
+    if (options?.eventMetadata?.registerEvent !== false) {
+      const { objectsToRegisterEventsForById } = this.getObjectsToRegisterEventsFor(requestObjects);
 
-    if (filteredToContentType.length > 0) {
+      const filteredToContentType = objects
+        .filter(({ type }) => this.userContentTypes.includes(type))
+        .filter((obj) => objectsToRegisterEventsForById[obj.id]);
+
+      if (filteredToContentType.length > 0) {
+        this.metadataEventsService?.bulkRegisterEvents(
+          filteredToContentType.map(({ id: soId, type }) => ({
+            type: 'viewed:kibana',
+            data: {
+              so_id: soId,
+              so_type: type,
+            },
+          }))
+        );
+      }
+    }
+  };
+
+  private onPostCreateSavedObject = ({ objects, options }: PostCreateEvent['data']) => {
+    if (options?.eventMetadata?.registerEvent) {
       this.metadataEventsService?.bulkRegisterEvents(
-        filteredToContentType.map(({ id: soId, type }) => ({
-          type: 'viewed:kibana',
-          data: {
-            so_id: soId,
-            so_type: type,
-          },
-        }))
+        objects
+          .filter(({ id }) => id !== undefined)
+          .map(({ id: soId, type }) => ({
+            type: 'created:kibana',
+            data: {
+              so_id: soId!,
+              so_type: type,
+            },
+          }))
       );
     }
   };
 
-  private onPostCreateSavedObject = (data: PostCreateEvent['data']) => {
-    this.metadataEventsService?.bulkRegisterEvents(
-      data.objects
-        .filter(({ id }) => id !== undefined)
-        .map(({ id: soId, type }) => ({
-          type: 'created:kibana',
-          data: {
-            so_id: soId!,
-            so_type: type,
-          },
-        }))
-    );
+  /**
+   * Filter down a list of saved object to those which have the eventMetadata.registerEvent flag
+   * set to "true".
+   *
+   * @param objects The initial list of saved objects
+   * @returns The list filtered to only contain saved objects we want to register metadata events or
+   */
+  private getObjectsToRegisterEventsFor = <
+    T extends {
+      id: string;
+      options?: {
+        eventMetadata?: SavedObjectsBaseOptions['eventMetadata'];
+      };
+    }
+  >(
+    objects: T[]
+  ) => {
+    const objectsToRegisterEventsForById: { [key: string]: boolean } = {};
+    const objectsToRegisterEventsFor = objects.filter((obj) => {
+      // The eventMetadata?.registerEvent **must** be set to "true" for the specific saved object
+      const doRegisterEvent = obj.options?.eventMetadata?.registerEvent === true;
+      objectsToRegisterEventsForById[obj.id] = doRegisterEvent;
+      return doRegisterEvent;
+    });
+
+    return { objectsToRegisterEventsFor, objectsToRegisterEventsForById };
   };
 
   /**

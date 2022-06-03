@@ -355,7 +355,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    const [{ attributes: updatedAttribues }] = await this.onPreCreate<T>(
+    const [{ attributes: updatedAttributes }] = await this.onPreCreate<T>(
       [
         {
           ...options,
@@ -403,7 +403,7 @@ export class SavedObjectsRepository {
       ...(savedObjectNamespace && { namespace: savedObjectNamespace }),
       ...(savedObjectNamespaces && { namespaces: savedObjectNamespaces }),
       originId,
-      attributes: updatedAttribues,
+      attributes: updatedAttributes,
       migrationVersion,
       coreMigrationVersion,
       updated_at: time,
@@ -444,7 +444,7 @@ export class SavedObjectsRepository {
       ...body,
     });
 
-    await this.onPostCreate([result], options);
+    await this.onPostCreate([result], options, [{ type, attributes }]);
 
     return result;
   }
@@ -662,7 +662,7 @@ export class SavedObjectsRepository {
       });
     });
 
-    await this.onPostCreate(savedObjects, options);
+    await this.onPostCreate(savedObjects, options, objects);
 
     return {
       saved_objects: savedObjects,
@@ -1121,18 +1121,12 @@ export class SavedObjectsRepository {
     objects: SavedObjectsBulkGetObject[] = [],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    const { objectsToRegisterEventsFor, objectsToRegisterEventsForById } =
-      this.getObjectsToRegisterEventsFor(objects);
-
-    await this.onPreGet(objectsToRegisterEventsFor, options);
+    await this.onPreGet(objects, options);
 
     const namespace = normalizeNamespace(options.namespace);
 
     const onResponse = async (result: Array<SavedObject<T>>) => {
-      await this.onPostGet(
-        result.filter((obj) => objectsToRegisterEventsForById[obj.id]),
-        options
-      );
+      await this.onPostGet(result, options, objects);
 
       return { saved_objects: result };
     };
@@ -1253,10 +1247,7 @@ export class SavedObjectsRepository {
     objects: SavedObjectsBulkResolveObject[],
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsBulkResolveResponse<T>> {
-    const { objectsToRegisterEventsFor, objectsToRegisterEventsForById } =
-      this.getObjectsToRegisterEventsFor(objects);
-
-    await this.onPreGet(objectsToRegisterEventsFor, options);
+    await this.onPreGet(objects, options);
 
     const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
       registry: this._registry,
@@ -1282,10 +1273,9 @@ export class SavedObjectsRepository {
     });
 
     await this.onPostGet(
-      resolvedObjects
-        .filter((obj) => objectsToRegisterEventsForById[obj.saved_object.id])
-        .map(({ saved_object: savedObject }) => savedObject),
-      options
+      resolvedObjects.map(({ saved_object: savedObject }) => savedObject),
+      options,
+      objects
     );
 
     return { resolved_objects: resolvedObjects };
@@ -1336,7 +1326,7 @@ export class SavedObjectsRepository {
 
     const result = getSavedObjectFromSource<T>(this._registry, type, id, body);
 
-    await this.onPostGet([result], options);
+    await this.onPostGet([result], options, [{ id, type }]);
 
     return result;
   }
@@ -1372,7 +1362,9 @@ export class SavedObjectsRepository {
       throw (result as InternalBulkResolveError).error;
     }
 
-    await this.onPostGet([(result as SavedObjectsResolveResponse<T>).saved_object], options);
+    await this.onPostGet([(result as SavedObjectsResolveResponse<T>).saved_object], options, [
+      { id, type },
+    ]);
 
     return result as SavedObjectsResolveResponse<T>;
   }
@@ -2424,86 +2416,52 @@ export class SavedObjectsRepository {
     }
   }
 
-  /**
-   * Filter down a list of saved object to those which have the eventMetadata.registerEvent flag
-   * set to "true".
-   *
-   * @param objects The initial list of saved objects
-   * @returns The list filtered to only contain saved objects we want to register metadata events or
-   */
-  private getObjectsToRegisterEventsFor = <
-    T extends {
-      id: string;
-      options?: {
-        eventMetadata?: SavedObjectsBaseOptions['eventMetadata'];
-      };
-    }
-  >(
-    objects: T[]
-  ) => {
-    const objectsToRegisterEventsForById: { [key: string]: boolean } = {};
-    const objectsToRegisterEventsFor = objects.filter((obj) => {
-      // The eventMetadata?.registerEvent **must** be set to "true" for the specific saved object
-      const doRegisterEvent = obj.options?.eventMetadata?.registerEvent === true;
-      objectsToRegisterEventsForById[obj.id] = doRegisterEvent;
-      return doRegisterEvent;
-    });
-
-    return { objectsToRegisterEventsFor, objectsToRegisterEventsForById };
-  };
-
   private onPreGet = async (
     objects: SavedObjectsBulkGetObject[],
     options: SavedObjectsBaseOptions
   ) => {
-    if (options.eventMetadata?.registerEvent !== false) {
-      if (objects.length > 0) {
-        const preEventData = { objects, options };
+    if (objects.length > 0) {
+      const preGetData = { objects, options };
 
-        for (const preGetHook of this._hooks.preHooks.get) {
-          try {
-            await preGetHook(preEventData);
-          } catch (e) {
-            this._logger.error(e);
-          }
-        }
-
-        // Emit event on the stream
-        this._savedObjectEventStream.publish({ type: 'pre:get', data: preEventData });
-      }
-    }
-  };
-
-  private onPostGet = async <T>(
-    objects: Array<SavedObject<T>>,
-    options: SavedObjectsBaseOptions = {}
-  ) => {
-    if (options.eventMetadata?.registerEvent !== false) {
-      const postEventData = {
-        objects,
-        options,
-      };
-
-      for (const postGetHook of this._hooks.postHooks.get) {
+      for (const preGetHook of this._hooks.preHooks.get) {
         try {
-          await postGetHook(postEventData);
+          await preGetHook(preGetData);
         } catch (e) {
           this._logger.error(e);
         }
       }
 
-      this._savedObjectEventStream.publish({ type: 'post:get', data: postEventData });
+      // Emit event on the stream
+      this._savedObjectEventStream.publish({ type: 'pre:get', data: preGetData });
     }
+  };
+
+  private onPostGet = async <T>(
+    objects: Array<SavedObject<T>>,
+    options: SavedObjectsBaseOptions = {},
+    requestObjects: SavedObjectsBulkGetObject[]
+  ) => {
+    const postGetData = {
+      objects,
+      requestObjects,
+      options,
+    };
+
+    for (const postGetHook of this._hooks.postHooks.get) {
+      try {
+        await postGetHook(postGetData);
+      } catch (e) {
+        this._logger.error(e);
+      }
+    }
+
+    this._savedObjectEventStream.publish({ type: 'post:get', data: postGetData });
   };
 
   private onPreCreate = async <T>(
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<Array<SavedObjectsBulkCreateObject<T>>> => {
-    if (!options.eventMetadata?.registerEvent) {
-      return objects;
-    }
-
     const runPreCreateHooks = async (
       hooks: PreHooks['create'],
       updatedObjects: Array<SavedObjectsBulkCreateObject<T>>
@@ -2541,20 +2499,19 @@ export class SavedObjectsRepository {
 
   private onPostCreate = async (
     objects: SavedObjectsBulkResponse['saved_objects'],
-    options: SavedObjectsCreateOptions
+    options: SavedObjectsCreateOptions,
+    requestObjects: SavedObjectsBulkCreateObject[]
   ) => {
-    if (options.eventMetadata?.registerEvent) {
-      for (const postCreateHook of this._hooks.postHooks.create) {
-        await postCreateHook({ objects }).catch((e) => {
-          this._logger.error(e);
-        });
-      }
-
-      this._savedObjectEventStream.publish({
-        type: 'post:create',
-        data: { objects },
+    for (const postCreateHook of this._hooks.postHooks.create) {
+      await postCreateHook({ objects, options, requestObjects }).catch((e) => {
+        this._logger.error(e);
       });
     }
+
+    this._savedObjectEventStream.publish({
+      type: 'post:create',
+      data: { objects, options, requestObjects },
+    });
   };
 }
 

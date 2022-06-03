@@ -7,7 +7,6 @@
  */
 import { EventStream } from '../event_streams';
 import {
-  SavedObjectsClient,
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
   SavedObjectsCreateOptions,
@@ -26,15 +25,18 @@ export interface PreGetEvent extends BaseSavedObjectEvents {
   type: 'pre:get';
   data: {
     objects?: SavedObjectsBulkGetObject[];
-    options?: SavedObjectsBaseOptions;
+    options: SavedObjectsBaseOptions;
   };
 }
 
 export interface PostGetEvent<T = unknown> extends BaseSavedObjectEvents {
   type: 'post:get';
   data: {
+    /** Objects returned from the fetch */
     objects: Array<SavedObject<T>>;
-    options: Parameters<SavedObjectsClient['bulkGet']>[1];
+    /** Objects passed when calling the "get" handler */
+    requestObjects: SavedObjectsBulkGetObject[];
+    options: SavedObjectsBaseOptions;
   };
 }
 
@@ -42,14 +44,18 @@ export interface PreCreateEvent<T = unknown> extends BaseSavedObjectEvents {
   type: 'pre:create';
   data: {
     objects: Array<SavedObjectsBulkCreateObject<T>>;
-    options?: SavedObjectsCreateOptions;
+    options: SavedObjectsCreateOptions;
   };
 }
 
 export interface PostCreateEvent extends BaseSavedObjectEvents {
   type: 'post:create';
   data: {
+    /** Objects returned from the Create method */
     objects: SavedObjectsBulkResponse['saved_objects'];
+    /** Objects passed when calling the "create" handler */
+    requestObjects: SavedObjectsBulkCreateObject[];
+    options: SavedObjectsCreateOptions;
   };
 }
 

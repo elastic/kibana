@@ -353,10 +353,10 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
             return savedObject.id === queueItem.id && savedObject.type === queueItem.type;
           });
 
-          if (foundObject) {
+          if (foundObject && !foundObject.error) {
             // multiple calls may have been requested the same object.
             // we need to clone to avoid sharing references between the instances
-            queueItem.resolve(this.createSavedObject(cloneDeep(foundObject)));
+            queueItem.resolve(this.createSavedObject(cloneDeep(foundObject as SavedObject)));
           } else {
             queueItem.resolve(
               this.createSavedObject(pick(queueItem, ['id', 'type']) as SavedObject)
@@ -463,7 +463,12 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
       body: JSON.stringify(objects),
     });
     return request.then((resp) => {
-      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
+      resp.saved_objects = resp.saved_objects.map((d) => {
+        if (!d.error) {
+          return this.createSavedObject(d as SavedObject);
+        }
+        return d;
+      });
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkCreate']>>,
         SavedObjectsBatchResponse
@@ -567,7 +572,12 @@ export class SavedObjectsClient implements SavedObjectsClientContract {
   ) => {
     const filteredObjects = objects.map((obj) => ({ ...pick(obj, ['id', 'type', 'options']) }));
     return this.performBulkGet(filteredObjects).then((resp) => {
-      resp.saved_objects = resp.saved_objects.map((d) => this.createSavedObject(d));
+      resp.saved_objects = resp.saved_objects.map((d) => {
+        if (!d.error) {
+          return this.createSavedObject(d as SavedObject);
+        }
+        return d;
+      });
       return renameKeys<
         PromiseType<ReturnType<SavedObjectsApi['bulkGet']>>,
         SavedObjectsBatchResponse

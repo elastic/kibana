@@ -170,7 +170,7 @@ export interface SavedObjectsBaseOptions {
    * "create" and "bulkCreate"
    */
   eventMetadata?: {
-    /** Flag to indicate if pre/post events should be registered for the API call. */
+    /** Flag to indicate if pre/post events should be registered for action */
     registerEvent?: boolean;
     /** If "registerEvent" is set to "true" then a context.origin must be defined */
     context?: {
