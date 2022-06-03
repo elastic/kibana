@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { AggTypesDependencies, DataViewField, DataView } from '../../..';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { AggTypesDependencies } from '../../..';
 import { getUserTimeZone } from '../../utils';
 
 export function inferTimeZone(

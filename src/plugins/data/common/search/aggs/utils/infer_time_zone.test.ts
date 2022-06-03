@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewField } from '../../..';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { inferTimeZone } from './infer_time_zone';
 
 describe('inferTimeZone', () => {

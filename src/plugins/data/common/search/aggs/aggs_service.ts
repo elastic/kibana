@@ -7,7 +7,8 @@
  */
 
 import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
-import { AggTypesDependencies, CreateAggConfigParams, IndexPattern, UI_SETTINGS } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import { CreateAggConfigParams, UI_SETTINGS, AggTypesDependencies } from '../..';
 import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
@@ -37,7 +38,7 @@ export interface AggsCommonSetupDependencies {
 
 export interface AggsCommonStartDependencies {
   getConfig: GetConfigFn;
-  getIndexPattern(id: string): Promise<IndexPattern>;
+  getIndexPattern(id: string): Promise<DataView>;
   aggExecutionContext?: AggTypesDependencies['aggExecutionContext'];
 }
 
@@ -70,10 +71,7 @@ export class AggsCommonService {
     const aggTypesStart = this.aggTypesRegistry.start();
     const calculateAutoTimeExpression = getCalculateAutoTimeExpression(getConfig);
 
-    const createAggConfigs = (
-      indexPattern: IndexPattern,
-      configStates?: CreateAggConfigParams[]
-    ) => {
+    const createAggConfigs = (indexPattern: DataView, configStates?: CreateAggConfigParams[]) => {
       return new AggConfigs(
         indexPattern,
         configStates,

@@ -11,6 +11,7 @@ import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
 import { isRangeFilter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import {
@@ -24,7 +25,7 @@ import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import { AggTypesDependencies, GetConfigFn, getUserTimeZone, IndexPattern } from '../..';
+import { AggTypesDependencies, GetConfigFn, getUserTimeZone } from '../..';
 import { TimeRange, getTime, calculateBounds } from '../..';
 import { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
@@ -87,7 +88,7 @@ export class AggConfigs {
   public readonly timeZone: string;
 
   constructor(
-    public indexPattern: IndexPattern,
+    public indexPattern: DataView,
     configStates: CreateAggConfigParams[] = [],
     private opts: AggConfigsOptions,
     private getConfig: GetConfigFn

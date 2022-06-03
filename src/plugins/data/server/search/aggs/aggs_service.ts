@@ -15,6 +15,7 @@ import {
 } from '@kbn/core/server';
 import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
   AggConfigs,
   AggsCommonService,
@@ -23,7 +24,6 @@ import {
   calculateBounds,
   TimeRange,
 } from '../../../common';
-import { IndexPatternsServiceStart } from '../../data_views';
 import { AggsSetup, AggsStart } from './types';
 
 /** @internal */
@@ -35,7 +35,7 @@ export interface AggsSetupDependencies {
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
   uiSettings: UiSettingsServiceStart;
-  indexPatterns: IndexPatternsServiceStart;
+  indexPatterns: DataViewsServerPluginStart;
 }
 
 /**
@@ -79,7 +79,7 @@ export class AggsService {
           getConfig,
           aggExecutionContext,
           getIndexPattern: (
-            await indexPatterns.indexPatternsServiceFactory(savedObjectsClient, elasticsearchClient)
+            await indexPatterns.dataViewsServiceFactory(savedObjectsClient, elasticsearchClient)
           ).get,
         });
 
