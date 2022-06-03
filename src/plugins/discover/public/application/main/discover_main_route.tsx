@@ -81,9 +81,8 @@ export function DiscoverMainRoute(props: Props) {
           .catch(() => false);
 
         const hasESDataValue = await data.dataViews.hasData.hasESData().catch(() => false);
-
         setHasUserDataView(hasUserDataViewValue);
-        setHasESData(hasESDataValue);
+        setHasESData(isDev ? true : hasESDataValue);
 
         if (!hasUserDataViewValue || !hasESDataValue) {
           setShowNoDataPage(true);
@@ -213,7 +212,7 @@ export function DiscoverMainRoute(props: Props) {
 
           // We've already called this, so we can optimize the analytics services to
           // use the already-retrieved data to avoid a double-call.
-          hasESData: () => Promise.resolve(hasESData),
+          hasESData: () => Promise.resolve(isDev ? true : hasESData),
           hasUserDataView: () => Promise.resolve(hasUserDataView),
         },
       },
