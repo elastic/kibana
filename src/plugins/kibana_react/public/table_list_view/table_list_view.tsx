@@ -26,7 +26,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { ThemeServiceStart, HttpFetchError, ToastsStart, ApplicationStart } from '@kbn/core/public';
-import { debounce, keyBy, sortBy, uniq } from 'lodash';
+import { debounce, keyBy, sortBy, uniq, get } from 'lodash';
 import React from 'react';
 import moment from 'moment';
 import { KibanaPageTemplate } from '../page_template';
@@ -583,9 +583,13 @@ class TableListView<V extends {}> extends React.Component<
     if (this.props.editItem) {
       const actions: EuiTableActionsColumnType<V>['actions'] = [
         {
-          name: i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
-            defaultMessage: 'Edit',
-          }),
+          name: (item) =>
+            i18n.translate('kibana-react.tableListView.listing.table.editActionName', {
+              defaultMessage: 'Edit {itemDescription}',
+              values: {
+                itemDescription: get(item, this.props.rowHeader),
+              },
+            }),
           description: i18n.translate(
             'kibana-react.tableListView.listing.table.editActionDescription',
             {

@@ -5158,7 +5158,6 @@
     "kibana-react.tableListView.listing.noMatchedItemsMessage": "没有任何{entityNamePlural}匹配您的搜索。",
     "kibana-react.tableListView.listing.table.actionTitle": "操作",
     "kibana-react.tableListView.listing.table.editActionDescription": "编辑",
-    "kibana-react.tableListView.listing.table.editActionName": "编辑",
     "kibana-react.tableListView.listing.unableToDeleteDangerMessage": "无法删除{entityName}",
     "kibanaOverview.addData.sampleDataButtonLabel": "试用我们的样例数据",
     "kibanaOverview.addData.sectionTitle": "采集您的数据",
