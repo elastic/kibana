@@ -106,8 +106,6 @@ export interface DiscoverSetup {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-
-  readonly isDev: boolean;
 }
 
 export interface DiscoverStart {
