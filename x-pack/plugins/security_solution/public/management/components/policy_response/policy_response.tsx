@@ -35,6 +35,7 @@ const StyledEuiTreeView = styled(EuiTreeView)`
     max-height: none !important;
     .policy-response-action-expanded + div {
       .euiTreeView__node {
+        // When response action item displays a callout, this needs to be overwritten to remove the default max height of EuiTreeView
         max-height: none !important;
         padding-top: ${({ theme }) => theme.eui.paddingSizes.s};
         padding-bottom: ${({ theme }) => theme.eui.paddingSizes.s};
