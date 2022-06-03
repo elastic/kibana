@@ -482,6 +482,10 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
 
   const [ruleIndices, setRuleIndices] = useState<string[]>(rule?.index ?? DEFAULT_INDEX_PATTERN);
 
+  useEffect(() => {
+    if (rule != null && rule.index != null && rule.index.length > 0) setRuleIndices(rule.index);
+  }, [rule]);
+
   // TODO: Revisit this logic. I think we can remove the await data
   useEffect(() => {
     const fetchDataViews = async () => {
