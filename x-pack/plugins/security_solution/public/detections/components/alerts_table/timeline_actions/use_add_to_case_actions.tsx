@@ -10,7 +10,6 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import { CommentType } from '@kbn/cases-plugin/common';
 import { CaseAttachments } from '@kbn/cases-plugin/public';
 import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
-import { useGetMappedNonEcsValue } from '../../../../timelines/components/timeline/body/data_driven_columns';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { TimelineId } from '../../../../../common/types';
 import { APP_ID } from '../../../../../common/constants';
@@ -38,11 +37,9 @@ export const useAddToCaseActions = ({
   const casePermissions = useGetUserCasesPermissions();
   const hasWritePermissions = casePermissions?.crud ?? false;
 
-  const kindValues = useGetMappedNonEcsValue({ data: nonEcsData, fieldName: 'event.kind' });
-
   const isAlert = useMemo(() => {
-    return kindValues?.includes('signal');
-  }, [kindValues]);
+    return ecsData?.event?.kind?.includes('signal');
+  }, [ecsData]);
 
   const caseAttachments: CaseAttachments = useMemo(() => {
     return ecsData?._id
