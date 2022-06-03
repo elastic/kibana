@@ -26,7 +26,9 @@ import {
   RuleStatus,
   enableRule,
   disableRule,
+  snoozeRule,
   useLoadRuleTypes,
+  unsnoozeRule,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { RuleExecutionStatus, ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -235,14 +237,16 @@ function RulesPage() {
         'data-test-subj': 'rulesTableCell-ContextStatus',
         render: (_enabled: boolean, item: RuleTableItem) => {
           return triggersActionsUi.getRuleStatusDropdown({
-            hideSnoozeOption: true,
             rule: item,
             enableRule: async () => await enableRule({ http, id: item.id }),
             disableRule: async () => await disableRule({ http, id: item.id }),
             onRuleChanged: () => reload(),
             isEditable: item.isEditable && isRuleTypeEditableInContext(item.ruleTypeId),
-            snoozeRule: async () => {},
-            unsnoozeRule: async () => {},
+            snoozeRule: async (snoozeSchedule) => {
+              await snoozeRule({ http, id: item.id, snoozeSchedule });
+            },
+            unsnoozeRule: async (scheduleIds) =>
+              await unsnoozeRule({ http, id: item.id, scheduleIds }),
           });
         },
       },
