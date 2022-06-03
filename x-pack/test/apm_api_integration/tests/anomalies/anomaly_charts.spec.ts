@@ -196,7 +196,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(status).to.eql(200);
         });
 
-        describe('inspecting the body', () => {
+        describe.only('inspecting the body', () => {
           let allAnomalyTimeseries: ServiceAnomalyTimeseries[];
 
           let latencySeries: ServiceAnomalyTimeseries | undefined;
@@ -230,6 +230,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
             expect(
               allAnomalyTimeseries.every((spec) => spec.bounds.some((bound) => bound.y0 ?? 0 > 0))
+            );
+          });
+
+          it('returns model plots with bounds for x range within start and end', () => {
+            expect(allAnomalyTimeseries.length).to.eql(3);
+
+            expect(
+              allAnomalyTimeseries.every((spec) =>
+                spec.bounds.every(
+                  (bound) =>
+                    bound.x >= new Date(start).getTime() && bound.x <= new Date(end).getTime()
+                )
+              )
             );
           });
 
