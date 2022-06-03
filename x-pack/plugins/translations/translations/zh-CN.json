@@ -20601,7 +20601,6 @@
     "xpack.monitoring.kibana.listing.nameColumnTitle": "名称",
     "xpack.monitoring.kibana.listing.requestsColumnTitle": "请求",
     "xpack.monitoring.kibana.listing.responseTimeColumnTitle": "响应时间",
-    "xpack.monitoring.kibana.listing.statusColumnTitle": "状态",
     "xpack.monitoring.kibana.overview.pageTitle": "Kibana 概览",
     "xpack.monitoring.kibana.overview.title": "Kibana",
     "xpack.monitoring.kibana.shardActivity.bytesTitle": "字节",

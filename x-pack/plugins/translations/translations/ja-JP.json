@@ -20570,7 +20570,6 @@
     "xpack.monitoring.kibana.listing.nameColumnTitle": "名前",
     "xpack.monitoring.kibana.listing.requestsColumnTitle": "リクエスト",
     "xpack.monitoring.kibana.listing.responseTimeColumnTitle": "応答時間",
-    "xpack.monitoring.kibana.listing.statusColumnTitle": "ステータス",
     "xpack.monitoring.kibana.overview.pageTitle": "Kibanaの概要",
     "xpack.monitoring.kibana.overview.title": "Kibana",
     "xpack.monitoring.kibana.shardActivity.bytesTitle": "バイト",
