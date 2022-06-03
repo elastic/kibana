@@ -17,7 +17,6 @@ import {
   CommonXYDataLayerConfig,
   CommonXYLayerConfig,
   ReferenceLineLayerConfig,
-  SeriesType,
 } from '../../common/types';
 import { GroupsConfiguration } from './axes_configuration';
 import { getFormat } from './format';
