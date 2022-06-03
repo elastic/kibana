@@ -157,5 +157,5 @@ The API returns a JSON object listing the retrieved cases. For example:
 --------------------------------------------------
 <1> Duration represents the elapsed time from the creation of the case to its
 closure (in seconds). If the case has not been closed, the duration is set to
-`null`. If the case was closed after less than a second, the duration is rounded
-down to zero.
+`null`. If the case was closed after less than half a second, the duration is
+rounded down to zero.
