@@ -83,7 +83,7 @@ the following response:
 
 [source,sh]
 --------------------------------------------------
-{{"savedObjectsCreated":{"anomaly_detector":{"myjob1":{"success":true},"myjob2":{"success":true}}},"savedObjectsDeleted":{},"datafeedsAdded":{},"datafeedsRemoved":{}}
+{"savedObjectsCreated":{"anomaly_detector":{"myjob1":{"success":true},"myjob2":{"success":true}}},"savedObjectsDeleted":{},"datafeedsAdded":{},"datafeedsRemoved":{}}
 --------------------------------------------------
 
 To perform the synchronization, re-run the API and omit the `simulate` parameter.
