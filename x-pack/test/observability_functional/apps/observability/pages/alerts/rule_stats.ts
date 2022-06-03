@@ -6,15 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { ObjectRemover } from '../../../../functional_with_es_ssl/lib/object_remover';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { ObjectRemover } from '../../../../../functional_with_es_ssl/lib/object_remover';
 import {
   createAlert as createRule,
   disableAlert as disableRule,
   muteAlert as muteRule,
-} from '../../../../functional_with_es_ssl/lib/alert_api_actions';
-import { generateUniqueKey } from '../../../../functional_with_es_ssl/lib/get_test_data';
-import { asyncForEach } from '../helpers';
+} from '../../../../../functional_with_es_ssl/lib/alert_api_actions';
+import { generateUniqueKey } from '../../../../../functional_with_es_ssl/lib/get_test_data';
+import { asyncForEach } from '../../helpers';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
