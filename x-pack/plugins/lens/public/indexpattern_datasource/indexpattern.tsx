@@ -10,6 +10,7 @@ import { render } from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { CoreStart, SavedObjectReference } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { TimeRange } from '@kbn/es-query';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { isEqual } from 'lodash';
@@ -533,8 +534,14 @@ export function getIndexPatternDatasource({
           return null;
         },
         getSourceId: () => layer.indexPatternId,
-        getFilters: (activeData: FramePublicAPI['activeData']) =>
-          getFiltersInLayer(layer, visibleColumnIds, activeData?.[layerId]),
+        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) =>
+          getFiltersInLayer(
+            layer,
+            visibleColumnIds,
+            activeData?.[layerId],
+            state.indexPatterns[layer.indexPatternId],
+            timeRange
+          ),
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
       };
     },
