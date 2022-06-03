@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, getPageObject }: FtrProviderContext) => {
   describe('Observability alert table state storage', function () {
