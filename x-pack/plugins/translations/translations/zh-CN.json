@@ -25937,8 +25937,6 @@
     "xpack.securitySolution.hosts.topRiskScoreContributors.rankColumnTitle": "排名",
     "xpack.securitySolution.hosts.topRiskScoreContributors.ruleNameColumnTitle": "规则名称",
     "xpack.securitySolution.hosts.topRiskScoreContributors.title": "风险分数主要因素",
-    "xpack.securitySolution.hostsKpiAuthentications.errorSearchDescription": "搜索主机 KPI 身份验证时发生错误",
-    "xpack.securitySolution.hostsKpiAuthentications.failSearchDescription": "无法对主机 KPI 身份验证执行搜索",
     "xpack.securitySolution.hostsKpiHosts.errorSearchDescription": "搜索主机 KPI 主机时发生错误",
     "xpack.securitySolution.hostsKpiHosts.failSearchDescription": "无法对主机 KPI 主机执行搜索",
     "xpack.securitySolution.hostsKpiUniqueIps.errorSearchDescription": "搜索主机 KPI 唯一 IP 时发生错误",

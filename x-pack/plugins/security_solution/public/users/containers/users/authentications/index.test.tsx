@@ -7,9 +7,9 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../../common/mock';
-import { useHostsKpiAuthentications } from '.';
+import { useUsersKpiAuthentications } from '.';
 
-describe('kpi hosts - authentications', () => {
+describe('kpi users - authentications', () => {
   it('skip = true will cancel any running request', () => {
     const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
     const localProps = {
@@ -18,7 +18,7 @@ describe('kpi hosts - authentications', () => {
       indexNames: ['cool'],
       skip: false,
     };
-    const { rerender } = renderHook(() => useHostsKpiAuthentications(localProps), {
+    const { rerender } = renderHook(() => useUsersKpiAuthentications(localProps), {
       wrapper: TestProviders,
     });
     localProps.skip = true;

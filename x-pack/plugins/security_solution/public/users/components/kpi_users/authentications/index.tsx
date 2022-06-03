@@ -8,15 +8,20 @@
 import React, { useEffect, useState } from 'react';
 
 import { StatItems } from '../../../../common/components/stat_items';
-import { kpiUserAuthenticationsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_area';
-import { kpiUserAuthenticationsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_bar';
-import { kpiUserAuthenticationsMetricSuccessLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentications_metric_success';
-import { kpiUserAuthenticationsMetricFailureLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/hosts/kpi_user_authentication_metric_failure';
-import { useHostsKpiAuthentications, ID } from '../../../containers/kpi_hosts/authentications';
-import { KpiBaseComponentManage } from '../common';
-import { HostsKpiProps, HostsKpiChartColors } from '../types';
+import { kpiUserAuthenticationsAreaLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_area';
+import { kpiUserAuthenticationsBarLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_bar';
+import { kpiUserAuthenticationsMetricSuccessLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentications_metric_success';
+import { kpiUserAuthenticationsMetricFailureLensAttributes } from '../../../../common/components/visualization_actions/lens_attributes/users/kpi_user_authentication_metric_failure';
+import { useUsersKpiAuthentications, ID } from '../../../containers/users/authentications';
+import { KpiBaseComponentManage } from '../../../../hosts/components/kpi_hosts/common';
 import * as i18n from './translations';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
+import { UsersKpiProps } from '../types';
+
+enum ChartColors {
+  authenticationsSuccess = '#54B399',
+  authenticationsFailure = '#E7664C',
+}
 
 export const fieldsMapping: Readonly<StatItems[]> = [
   {
@@ -27,7 +32,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         name: i18n.SUCCESS_CHART_LABEL,
         description: i18n.SUCCESS_UNIT_LABEL,
         value: null,
-        color: HostsKpiChartColors.authenticationsSuccess,
+        color: ChartColors.authenticationsSuccess,
         icon: 'check',
         lensAttributes: kpiUserAuthenticationsMetricSuccessLensAttributes,
       },
@@ -36,7 +41,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
         name: i18n.FAIL_CHART_LABEL,
         description: i18n.FAIL_UNIT_LABEL,
         value: null,
-        color: HostsKpiChartColors.authenticationsFailure,
+        color: ChartColors.authenticationsFailure,
         icon: 'cross',
         lensAttributes: kpiUserAuthenticationsMetricFailureLensAttributes,
       },
@@ -49,7 +54,7 @@ export const fieldsMapping: Readonly<StatItems[]> = [
   },
 ];
 
-const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
+const UsersKpiAuthenticationsComponent: React.FC<UsersKpiProps> = ({
   filterQuery,
   from,
   indexNames,
@@ -63,7 +68,7 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
-  const [loading, { refetch, id, inspect, ...data }] = useHostsKpiAuthentications({
+  const [loading, { refetch, id, inspect, ...data }] = useUsersKpiAuthentications({
     filterQuery,
     endDate: to,
     indexNames,
@@ -88,6 +93,6 @@ const HostsKpiAuthenticationsComponent: React.FC<HostsKpiProps> = ({
   );
 };
 
-HostsKpiAuthenticationsComponent.displayName = 'HostsKpiAuthenticationsComponent';
+UsersKpiAuthenticationsComponent.displayName = 'UsersKpiAuthenticationsComponent';
 
-export const HostsKpiAuthentications = React.memo(HostsKpiAuthenticationsComponent);
+export const UsersKpiAuthentications = React.memo(UsersKpiAuthenticationsComponent);

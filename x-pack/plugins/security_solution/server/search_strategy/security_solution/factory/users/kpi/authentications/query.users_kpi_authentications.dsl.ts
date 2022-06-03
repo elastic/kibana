@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { HostsKpiAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy/security_solution/hosts';
+import { UsersKpiAuthenticationsRequestOptions } from '../../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../../utils/build_query';
 
-export const buildHostsKpiAuthenticationsQuery = ({
+export const buildUsersKpiAuthenticationsQuery = ({
   filterQuery,
   timerange: { from, to },
   defaultIndex,
-}: HostsKpiAuthenticationsRequestOptions) => {
+}: UsersKpiAuthenticationsRequestOptions) => {
   const filter = [
     ...createQueryFilterClauses(filterQuery),
     {

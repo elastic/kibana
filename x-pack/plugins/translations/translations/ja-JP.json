@@ -25904,8 +25904,6 @@
     "xpack.securitySolution.hosts.topRiskScoreContributors.rankColumnTitle": "ランク",
     "xpack.securitySolution.hosts.topRiskScoreContributors.ruleNameColumnTitle": "ルール名",
     "xpack.securitySolution.hosts.topRiskScoreContributors.title": "上位のリスクスコアの要因",
-    "xpack.securitySolution.hostsKpiAuthentications.errorSearchDescription": "ホストKPI認証検索でエラーが発生しました",
-    "xpack.securitySolution.hostsKpiAuthentications.failSearchDescription": "ホストKPI認証で検索を実行できませんでした",
     "xpack.securitySolution.hostsKpiHosts.errorSearchDescription": "ホストKPIホスト検索でエラーが発生しました",
     "xpack.securitySolution.hostsKpiHosts.failSearchDescription": "ホストKPIホストで検索を実行できませんでした",
     "xpack.securitySolution.hostsKpiUniqueIps.errorSearchDescription": "ホストKPI一意のIP検索でエラーが発生しました",
