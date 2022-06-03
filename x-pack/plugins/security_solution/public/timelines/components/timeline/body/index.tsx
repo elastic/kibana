@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { noop, isEmpty } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { connect, ConnectedProps, useDispatch } from 'react-redux';
@@ -144,19 +144,6 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
         onSelectAll({ isSelected: true });
       }
     }, [isSelectAllChecked, onSelectAll, selectAll]);
-
-    useEffect(() => {
-      if (!isEmpty(browserFields) && !isEmpty(columnHeaders)) {
-        columnHeaders.forEach(({ id: columnId }) => {
-          if (browserFields.base?.fields?.[columnId] == null) {
-            const [category] = columnId.split('.');
-            if (browserFields[category]?.fields?.[columnId] == null) {
-              dispatch(timelineActions.removeColumn({ id, columnId }));
-            }
-          }
-        });
-      }
-    }, [browserFields, columnHeaders, dispatch, id]);
 
     const enabledRowRenderers = useMemo(() => {
       if (
