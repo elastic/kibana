@@ -16,6 +16,7 @@ import {
   getNodeById,
   getNodes,
   getSelectedPageIndex,
+  getElementById,
 } from '../selectors/workpad';
 import { getValue as getResolvedArgsValue } from '../selectors/resolved_args';
 import { getDefaultElement } from '../defaults';
@@ -358,19 +359,21 @@ export const setAstAtIndex = createThunk(
  * @param {any} args.element - the element, which contains the expression.
  * @param {any} args.pageId - the workpad's page, where element is located.
  */
-export const setArgument = createThunk('setArgument', ({ dispatch }, args) => {
+export const setArgument = createThunk('setArgument', ({ dispatch, getState }, args) => {
   const { argName, value, valueIndex, element, pageId, path } = args;
   let selector = `${path}.${argName}`;
   if (valueIndex != null) {
     selector += '.' + valueIndex;
   }
+  const el = getElementById(getState(), element.id);
 
-  const newElement = set(element, selector, value);
+  const newElement = set(el, selector, value);
   const pathTerms = path.split('.');
   const argumentChainPath = pathTerms.slice(0, 3);
   const argumnentChainIndex = last(argumentChainPath);
   const newAst = get(newElement, argumentChainPath);
-  dispatch(setAstAtIndex(argumnentChainIndex, newAst, element, pageId));
+
+  dispatch(setAstAtIndex(argumnentChainIndex, newAst, el, pageId));
 });
 
 /**
@@ -381,13 +384,15 @@ export const setArgument = createThunk('setArgument', ({ dispatch }, args) => {
  * @param {any} args.element - the element, which contains the expression.
  * @param {any} args.pageId - the workpad's page, where element is located.
  */
-export const addArgumentValue = createThunk('addArgumentValue', ({ dispatch }, args) => {
+export const addArgumentValue = createThunk('addArgumentValue', ({ dispatch, getState }, args) => {
   const { argName, value, element, path } = args;
-  const values = get(element, [...path.split('.'), argName], []);
+  const el = getElementById(getState(), element.id);
+  const values = get(el, [...path.split('.'), argName], []);
   const newValue = values.concat(value);
   dispatch(
     setArgument({
       ...args,
+      element: el,
       value: newValue,
     })
   );

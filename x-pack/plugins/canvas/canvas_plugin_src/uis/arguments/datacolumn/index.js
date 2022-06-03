@@ -69,7 +69,6 @@ const DatacolumnArgInput = ({
       if (valueNotSet(fn)) {
         return onValueChange(column);
       }
-
       // fn has a value, so use it as a math.js expression
       onValueChange(`${fn}(${maybeQuoteValue(column)})`);
     },
@@ -83,15 +82,15 @@ const DatacolumnArgInput = ({
 
   useEffect(() => {
     if (!mathValue.error && mathValue.column !== '' && !mathValue.isValidColumn) {
-      updateFunctionValue(mathValue.fn, columns[0].id);
+      updateFunctionValue(mathValue.fn, columns[0].name);
     }
   }, [
-    columns,
-    mathValue.column,
-    mathValue.error,
     mathValue.fn,
-    mathValue.isValidColumn,
+    mathValue.column,
+    columns,
     updateFunctionValue,
+    mathValue.error,
+    mathValue.isValidColumn,
   ]);
 
   const onChangeFn = useCallback(
