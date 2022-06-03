@@ -4,6 +4,7 @@
 
 ## ChromeHelpMenuActions interface
 
+
 <b>Signature:</b>
 
 ```typescript
@@ -15,3 +16,4 @@ export interface ChromeHelpMenuActions
 |  Property | Type | Description |
 |  --- | --- | --- |
 |  [hideHelpMenu](./kibana-plugin-core-public.chromehelpmenuactions.hidehelpmenu.md) | () =&gt; void |  |
+

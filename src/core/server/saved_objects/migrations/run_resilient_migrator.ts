@@ -59,6 +59,7 @@ export async function runResilientMigrator({
     migrationsConfig,
     typeRegistry,
     docLinks,
+    logger,
   });
   return migrationStateActionMachine({
     initialState,
