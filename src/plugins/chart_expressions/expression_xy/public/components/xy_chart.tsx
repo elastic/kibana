@@ -67,7 +67,6 @@ import {
   getAxesConfiguration,
   GroupsConfiguration,
   getLinesCausedPaddings,
-  getAxisGroupConfig,
   validateExtent,
   Series,
 } from '../helpers';
