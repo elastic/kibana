@@ -17,10 +17,9 @@ export interface DownsampledEventsIndex {
   sampleRate: number;
 }
 
-function getFullDownsampledIndex(index: string, i: number): string {
-  const downsampledIndexPrefix =
-    (index.endsWith('-all') ? index.replaceAll('-all', '') : index) + '-5pow';
-  return downsampledIndexPrefix + i.toString().padStart(2, '0');
+function getFullDownsampledIndex(index: string, pow: number, factor: number): string {
+  const downsampledIndexPrefix = index.replaceAll('-all', '') + '-' + factor + 'pow';
+  return downsampledIndexPrefix + pow.toString().padStart(2, '0');
 }
 
 // Return the index that has between targetSampleSize..targetSampleSize*samplingFactor entries.
@@ -43,38 +42,23 @@ export function getSampledTraceEventsIndex(
     return fullEventsIndex;
   }
 
-  if (sampleCountFromInitialExp >= samplingFactor * targetSampleSize) {
-    // Search in more down-sampled indexes.
-    for (let i = initialExp + 1; i <= maxExp; i++) {
-      sampleCountFromInitialExp /= samplingFactor;
-      if (sampleCountFromInitialExp < samplingFactor * targetSampleSize) {
-        return { name: getFullDownsampledIndex(index, i), sampleRate: 1 / samplingFactor ** i };
-      }
-    }
-    // If we come here, it means that the most sparse index still holds too many items.
-    // The only problem is the query time, the result set is good.
-    return {
-      name: getFullDownsampledIndex(index, maxExp),
-      sampleRate: 1 / samplingFactor ** maxExp,
-    };
-  } else if (sampleCountFromInitialExp < targetSampleSize) {
-    // Search in less down-sampled indexes.
-    for (let i = initialExp - 1; i >= 1; i--) {
-      sampleCountFromInitialExp *= samplingFactor;
-      if (sampleCountFromInitialExp >= targetSampleSize) {
-        return {
-          name: getFullDownsampledIndex(index, i),
-          sampleRate: 1 / samplingFactor ** i,
-        };
-      }
-    }
+  let pow = Math.floor(
+    initialExp -
+      Math.log((targetSampleSize * samplingFactor) / sampleCountFromInitialExp) / Math.log(5) +
+      1
+  );
 
+  if (pow < 1) {
     return fullEventsIndex;
   }
 
+  if (pow > maxExp) {
+    pow = maxExp;
+  }
+
   return {
-    name: getFullDownsampledIndex(index, initialExp),
-    sampleRate: 1 / samplingFactor ** initialExp,
+    name: getFullDownsampledIndex(index, pow, samplingFactor),
+    sampleRate: 1 / samplingFactor ** pow,
   };
 }
 
@@ -91,7 +75,7 @@ export async function findDownsampledIndex(
   let sampleCountFromInitialExp = 0;
   try {
     const resp = await client.search({
-      index: getFullDownsampledIndex(index, initialExp),
+      index: getFullDownsampledIndex(index, initialExp, 5),
       body: {
         query: filter,
         size: 0,
