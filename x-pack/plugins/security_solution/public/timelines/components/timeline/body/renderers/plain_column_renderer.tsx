@@ -14,7 +14,6 @@ import { TimelineNonEcsData } from '../../../../../../common/search_strategy/tim
 import { getEmptyTagValue } from '../../../../../common/components/empty_value';
 import { ColumnRenderer } from './column_renderer';
 import { FormattedFieldValue } from './formatted_field';
-import { parseValue } from './parse_value';
 
 export const dataExistsAtColumn = (columnName: string, data: TimelineNonEcsData[]): boolean =>
   data.findIndex((item) => item.field === columnName) !== -1;
@@ -63,7 +62,7 @@ export const plainColumnRenderer: ColumnRenderer = {
           key={`plain-column-renderer-formatted-field-value-${timelineId}-${columnName}-${eventId}-${field.id}-${value}-${i}`}
           linkValue={head(linkValues)}
           truncate={truncate}
-          value={parseValue(value)}
+          value={value}
         />
       ));
     } else {
@@ -93,7 +92,7 @@ export const plainColumnRenderer: ColumnRenderer = {
 function joinValues(values: string[] | undefined | null): string | undefined | null {
   if (Array.isArray(values)) {
     if (values.length > 0) {
-      return values.map(parseValue).join(', ');
+      return values.join(', ');
     } else {
       return values[0];
     }
