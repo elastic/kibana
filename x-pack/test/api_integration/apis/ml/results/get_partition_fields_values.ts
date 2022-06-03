@@ -98,8 +98,86 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.partition_field.values[5].maxRecordScore).to.be.above(2);
     });
 
-    it('should fetch all values withing the time range sorting by name', async () => {});
+    it('should fetch all values withing the time range sorting by name', async () => {
+      const requestBody = {
+        jobId: JOB_CONFIG.job_id,
+        criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
+        earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
+        latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
+        searchTerm: {},
+        fieldsConfig: {
+          partition_field: {
+            applyTimeRange: true,
+            anomalousOnly: false,
+            sort: { by: 'name', order: 'asc' },
+          },
+        },
+      };
 
-    it('should fetch anomalous only field value applying the search term', async () => {});
+      const { body, status } = await supertest
+        .post(`/api/ml/results/partition_fields_values`)
+        .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+        .set(COMMON_REQUEST_HEADERS)
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
+
+      expect(body).to.eql({
+        partition_field: {
+          name: 'airline',
+          values: [
+            { value: 'AAL' },
+            { value: 'ACA' },
+            { value: 'AMX' },
+            { value: 'ASA' },
+            { value: 'AWE' },
+            { value: 'BAW' },
+            { value: 'DAL' },
+            { value: 'EGF' },
+            { value: 'FFT' },
+            { value: 'JAL' },
+            { value: 'JBU' },
+            { value: 'JZA' },
+            { value: 'KLM' },
+            { value: 'NKS' },
+            { value: 'SWA' },
+            { value: 'SWR' },
+            { value: 'TRS' },
+            { value: 'UAL' },
+            { value: 'VRD' },
+          ],
+        },
+      });
+    });
+
+    it('should fetch anomalous only field value applying the search term', async () => {
+      const requestBody = {
+        jobId: JOB_CONFIG.job_id,
+        criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
+        earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
+        latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
+        searchTerm: {
+          partition_field: 'JB',
+        },
+        fieldsConfig: {
+          partition_field: {
+            applyTimeRange: true,
+            anomalousOnly: true,
+            sort: { by: 'anomaly_score', order: 'asc' },
+          },
+        },
+      };
+
+      const { body, status } = await supertest
+        .post(`/api/ml/results/partition_fields_values`)
+        .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+        .set(COMMON_REQUEST_HEADERS)
+        .send(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
+
+      expect(body.partition_field.name).to.eql('airline');
+      expect(body.partition_field.values.length).to.eql(1);
+      expect(body.partition_field.values[0].value).to.eql('JBU');
+      expect(body.partition_field.values[0].maxRecordScore).to.be.above(30);
+    });
   });
 };
