@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { coreMock } from 'src/core/server/mocks';
 
 import { ActionsApiRequestHandlerContext } from '../../../../../../actions/server';
