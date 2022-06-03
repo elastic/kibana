@@ -8,12 +8,15 @@
 import type { Logger, LogMeta } from '@kbn/core/server';
 import deepMerge from 'deepmerge';
 import type { ReportingCore } from '../..';
+import type { ReportingStats } from '../stats';
 import type { IReportingEventLogger } from './logger';
+import { ReportingAction } from './types';
 
 /** @internal */
 export class EcsLogAdapter implements IReportingEventLogger {
   start?: Date;
   end?: Date;
+  stats: ReportingStats;
 
   private logger: Logger;
 
@@ -24,8 +27,9 @@ export class EcsLogAdapter implements IReportingEventLogger {
    * @param {Logger} logger - Reporting's wrapper of the core logger
    * @param {Partial<LogMeta>} properties - initial ECS data with template for Reporting metrics
    */
-  constructor(_reporting: ReportingCore, logger: Logger, private properties: Partial<LogMeta>) {
+  constructor(reporting: ReportingCore, logger: Logger, private properties: Partial<LogMeta>) {
     this.logger = logger.get('events');
+    this.stats = reporting.getStats();
   }
 
   logEvent(message: string, properties: LogMeta) {
@@ -48,7 +52,13 @@ export class EcsLogAdapter implements IReportingEventLogger {
     });
 
     // sends an ECS object with Reporting metrics to the DEBUG logs
-    this.logger.debug(message, deepMerge(newProperties, properties));
+    const event = deepMerge(newProperties, properties) as ReportingAction;
+
+    // show the event in the log filestream
+    this.logger.debug(message, event);
+
+    // update internal state
+    this.stats.addEvent(event);
   }
 
   startTiming() {

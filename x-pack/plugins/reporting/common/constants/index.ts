@@ -89,6 +89,9 @@ export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/re
 
 export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
 
+export const INTERNAL_BASE_URL = '/internal/reporting';
+export const API_STATS_URL = `${INTERNAL_BASE_URL}/_stats`;
+
 /**
  * A way to get the client side route for the reporting redirect app.
  *

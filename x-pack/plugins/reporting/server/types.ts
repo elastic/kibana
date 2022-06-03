@@ -33,6 +33,7 @@ import type { CancellationToken } from '../common/cancellation_token';
 import type { BaseParams, BasePayload, TaskRunResult, UrlOrUrlLocatorTuple } from '../common/types';
 import type { ReportingConfigType } from './config';
 import type { ReportingCore } from './core';
+import { IReportingStats } from './lib/stats';
 import type { ReportTaskParams } from './lib/tasks';
 
 /**
@@ -128,3 +129,26 @@ export interface PngScreenshotOptions extends Omit<BasePngScreenshotOptions, 'ti
 }
 
 export type { BaseParams, BasePayload };
+
+export interface ReportingStatsPayload {
+  reports: IReportingStats;
+  config: {
+    capture: {
+      maxAttempts: number;
+    };
+    queue: {
+      pollEnabled: boolean;
+      timeout: number;
+    };
+    roles: {
+      enabled: boolean;
+    };
+  };
+  kibana: {
+    uuid: string;
+    host: string;
+    name: string;
+    basePath: string;
+    version: string;
+  };
+}

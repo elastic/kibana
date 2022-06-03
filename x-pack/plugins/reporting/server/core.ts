@@ -42,6 +42,7 @@ import { REPORTING_REDIRECT_LOCATOR_STORE_KEY } from '../common/constants';
 import { ReportingConfigType } from './config';
 import { checkLicense, getExportTypesRegistry } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
+import { ReportingStats } from './lib/stats';
 import type { IReport, ReportingStore } from './lib/store';
 import { ExecuteReportTask, MonitorReportsTask, ReportTaskParams } from './lib/tasks';
 import type { PdfScreenshotOptions, PngScreenshotOptions, ReportingPluginRouter } from './types';
@@ -84,6 +85,7 @@ export class ReportingCore {
   private exportTypesRegistry = getExportTypesRegistry();
   private executeTask: ExecuteReportTask;
   private monitorTask: MonitorReportsTask;
+  private stats?: ReportingStats;
   private config?: ReportingConfig; // final config, includes dynamic values based on OS type
   private executing: Set<string>;
 
@@ -402,5 +404,21 @@ export class ReportingCore {
   public getEventLogger(report: IReport, task?: { id: string }) {
     const ReportingEventLogger = reportingEventLoggerFactory(this, this.logger);
     return new ReportingEventLogger(report, task);
+  }
+
+  /**
+   * Provides an internal service that accumulates events and summarizes system stats
+   *
+   * @returns {ReportingStats} internal service
+   */
+  public getStats(): ReportingStats {
+    if (!this.stats) {
+      // use a fn because config can not be accessed before it is initialized
+      const getConfigSync = () => this.getConfig();
+      const jobTypes = this.exportTypesRegistry.getAll().map((e) => e.jobType);
+      this.stats = new ReportingStats(getConfigSync, jobTypes, this.packageInfo.version);
+    }
+    // use a singleton
+    return this.stats;
   }
 }

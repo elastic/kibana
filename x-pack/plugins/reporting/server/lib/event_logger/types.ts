@@ -9,7 +9,7 @@ import { LogMeta } from '@kbn/core/server';
 import type { TaskRunMetrics } from '../../../common/types';
 import { ActionType } from '.';
 
-export interface ReportingAction<A extends ActionType> extends LogMeta {
+export interface ReportingAction<A extends ActionType = ActionType> extends LogMeta {
   event: {
     timezone: string;
     // Within ReportingEventLogger, duration is auto-calculated for "completion" event, manually calculated for
