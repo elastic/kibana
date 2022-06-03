@@ -38,6 +38,7 @@ export const getTagCloudVisTypeDefinition = ({ palettes }: TagCloudVisDependenci
         },
       },
     },
+    fetchDatatable: true,
     toExpressionAst,
     editorConfig: {
       enableDataViewChange: true,

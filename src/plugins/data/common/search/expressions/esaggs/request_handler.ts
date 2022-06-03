@@ -24,8 +24,6 @@ interface RequestHandlerParams {
   filters?: Filter[];
   indexPattern?: DataView;
   inspectorAdapters: Adapters;
-  metricsAtAllLevels?: boolean;
-  partialRows?: boolean;
   query?: Query;
   searchSessionId?: string;
   searchSourceService: ISearchStartSearchSource;
@@ -41,7 +39,6 @@ export const handleRequest = ({
   filters,
   indexPattern,
   inspectorAdapters,
-  partialRows,
   query,
   searchSessionId,
   searchSourceService,
@@ -131,7 +128,7 @@ export const handleRequest = ({
             const parsedTimeRange = timeRange ? calculateBounds(timeRange, { forceNow }) : null;
             const tabifyParams = {
               metricsAtAllLevels: aggs.hierarchical,
-              partialRows,
+              partialRows: aggs.partialRows,
               timeRange: parsedTimeRange
                 ? { from: parsedTimeRange.min, to: parsedTimeRange.max, timeFields: allTimeFields }
                 : undefined,

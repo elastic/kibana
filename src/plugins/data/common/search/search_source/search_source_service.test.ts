@@ -15,6 +15,7 @@ describe('SearchSource service', () => {
   beforeEach(() => {
     jest.resetModules();
     dependencies = {
+      aggs: {} as SearchSourceDependencies['aggs'],
       getConfig: jest.fn(),
       search: jest.fn(),
       onResponse: jest.fn(),

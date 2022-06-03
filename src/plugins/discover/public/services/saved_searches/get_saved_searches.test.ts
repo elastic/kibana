@@ -127,6 +127,7 @@ describe('getSavedSearch', () => {
           "setFields": [MockFunction],
           "setOverwriteDataViewType": [MockFunction],
           "setParent": [MockFunction],
+          "toExpressionAst": [MockFunction],
         },
         "sharingSavedObjectProps": Object {
           "aliasPurpose": undefined,

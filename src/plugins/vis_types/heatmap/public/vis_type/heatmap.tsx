@@ -28,6 +28,7 @@ export const getHeatmapVisTypeDefinition = ({
   description: i18n.translate('visTypeHeatmap.heatmap.heatmapDescription', {
     defaultMessage: 'Display values as colors in a matrix.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
   visConfig: {

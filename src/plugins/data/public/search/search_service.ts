@@ -231,7 +231,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
+    const aggs = this.aggsService.start({ fieldFormats, uiSettings, indexPatterns });
     const searchSourceDependencies: SearchSourceDependencies = {
+      aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       onResponse: (request: SearchRequest, response: IKibanaSearchResponse) =>
@@ -261,7 +263,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }
 
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
+      aggs,
       search,
       showError: (e: Error) => {
         this.searchInterceptor.showError(e);

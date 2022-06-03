@@ -112,11 +112,11 @@ describe('esaggs expression function - public', () => {
       aggs: {
         foo: 'bar',
         hierarchical: true,
+        partialRows: args.partialRows,
       },
       filters: undefined,
       indexPattern: {},
       inspectorAdapters: mockHandlers.inspectorAdapters,
-      partialRows: args.partialRows,
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: startDependencies.searchSource,
