@@ -98,7 +98,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
     'package-policy-response'
   );
 
-  const policiResponseExtensionView = useMemo(() => {
+  const policyResponseExtensionView = useMemo(() => {
     return (
       extensionView && (
         <ExtensionWrapper>
@@ -122,31 +122,43 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
         </EuiText>
       ),
       id: 'inputs',
-      children: packagePolicy.inputs
-        .filter((input) => input.enabled)
-        .map((input) => ({
-          label: (
-            <EuiToolTip
-              content={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
-                defaultMessage: 'View logs',
-              })}
-            >
-              <StyledEuiLink
-                href={getHref('agent_details', {
-                  agentId: agent.id,
-                  tabId: 'logs',
-                  logQuery: getLogsQueryByInputType(input.type),
-                })}
-                aria-label={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
-                  defaultMessage: 'View logs',
-                })}
-              >
-                {displayInputType(input.type)}
-              </StyledEuiLink>
-            </EuiToolTip>
-          ),
-          id: input.type,
-        })),
+      children: packagePolicy.inputs.reduce(
+        (acc: Array<{ label: JSX.Element; id: string }>, current) => {
+          if (current.enabled) {
+            return [
+              ...acc,
+              {
+                label: (
+                  <EuiToolTip
+                    content={i18n.translate('xpack.fleet.agentDetailsIntegrations.viewLogsButton', {
+                      defaultMessage: 'View logs',
+                    })}
+                  >
+                    <StyledEuiLink
+                      href={getHref('agent_details', {
+                        agentId: agent.id,
+                        tabId: 'logs',
+                        logQuery: getLogsQueryByInputType(current.type),
+                      })}
+                      aria-label={i18n.translate(
+                        'xpack.fleet.agentDetailsIntegrations.viewLogsButton',
+                        {
+                          defaultMessage: 'View logs',
+                        }
+                      )}
+                    >
+                      {displayInputType(current.type)}
+                    </StyledEuiLink>
+                  </EuiToolTip>
+                ),
+                id: current.type,
+              },
+            ];
+          }
+          return acc;
+        },
+        []
+      ),
     },
   ];
 
@@ -202,7 +214,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
         aria-label="inputsTreeView"
         aria-labelledby="inputsTreeView"
       />
-      {policiResponseExtensionView}
+      {policyResponseExtensionView}
       <EuiSpacer />
     </CollapsablePanel>
   );
