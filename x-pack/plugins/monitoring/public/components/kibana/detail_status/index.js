@@ -77,6 +77,7 @@ export function DetailStatus({ stats }) {
 
     return (
       <EuiStat
+        data-test-subj="status"
         description={description}
         title={title}
         titleSize="xxxs"

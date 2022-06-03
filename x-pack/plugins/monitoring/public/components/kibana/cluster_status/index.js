@@ -133,6 +133,7 @@ function OverviewPageStatusIndicator({ staleMessage }) {
 
   return (
     <EuiStat
+      data-test-subj="status"
       description={i18n.translate('xpack.monitoring.kibana.clusterStatus.overview.statusLabel', {
         defaultMessage: 'Status',
       })}
@@ -160,6 +161,7 @@ function InstancesPageStatusIndicator({ staleMessage }) {
 
   return (
     <EuiStat
+      data-test-subj="status"
       description={i18n.translate('xpack.monitoring.kibana.clusterStatus.instances.statusLabel', {
         defaultMessage: 'Status',
       })}

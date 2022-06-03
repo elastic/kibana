@@ -61,12 +61,13 @@ export const DefaultStatusIndicator = ({ status, isOnline, IconComponent }) => {
 
   return (
     <EuiStat
+      data-test-subj="status"
       title={
-        <Fragment>
+        <>
           <IconComponent status={status} isOnline={isOnline} />
           &nbsp;
           {capitalize(status)}
-        </Fragment>
+        </>
       }
       titleSize="xxxs"
       textAlign="left"

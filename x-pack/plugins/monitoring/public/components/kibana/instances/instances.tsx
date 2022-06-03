@@ -116,7 +116,7 @@ const getColumns = (
       field: 'status',
       render: (status: string) => {
         return (
-          <EuiHealth color={statusIconColor(status)} data-test-subj="statusIcon">
+          <EuiHealth color={statusIconColor(status)} data-test-subj="status">
             {capitalize(status)}
           </EuiHealth>
         );
@@ -140,7 +140,7 @@ const getColumns = (
           },
         });
         return (
-          <span>
+          <span data-test-subj="lastSeen">
             {lastSeenTimestamp}
             {kibana.statusIsStale && (
               <>

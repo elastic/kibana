@@ -231,7 +231,7 @@ function statusIndicator(status, someStatusIsStale, instancesHref, staleStatusTh
     <>
       <div style={{ marginBottom: '8px' }}>
         <EuiToolTip position="top" content={staleMessage}>
-          <EuiBadge iconType="alert" color="warning">
+          <EuiBadge iconType="alert" color="warning" data-test-subj="status">
             {i18n.translate('xpack.monitoring.cluster.overview.kibanaPanel.staleStatusLabel', {
               defaultMessage: 'Stale',
             })}
