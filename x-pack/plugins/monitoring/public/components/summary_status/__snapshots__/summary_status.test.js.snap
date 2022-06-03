@@ -14,6 +14,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
     >
       <div
         class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        data-test-subj="status"
       >
         <div
           class="euiText euiText--small euiStat__description"
@@ -191,6 +192,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
     >
       <div
         class="euiStat euiStat--leftAligned monSummaryStatusNoWrap__stat"
+        data-test-subj="status"
       >
         <div
           class="euiText euiText--small euiStat__description"
