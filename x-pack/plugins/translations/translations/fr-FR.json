@@ -5045,7 +5045,6 @@
     "kibana-react.tableListView.listing.listingLimitExceededTitle": "Limite de listing dépassée",
     "kibana-react.tableListView.listing.table.actionTitle": "Actions",
     "kibana-react.tableListView.listing.table.editActionDescription": "Modifier",
-    "kibana-react.tableListView.listing.table.editActionName": "Modifier",
     "kibana-react.tableListView.listing.unableToDeleteDangerMessage": "Impossible de supprimer la/le/les {entityName}(s)",
     "kibanaOverview.addData.sampleDataButtonLabel": "Essayer l’exemple de données",
     "kibanaOverview.addData.sectionTitle": "Ingérer des données",
