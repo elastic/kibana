@@ -73,7 +73,8 @@ export const TagList = React.memo(
         form.reset({ defaultValue: newData });
         setIsEditTags(false);
       }
-    }, [form, onSubmit, submit]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [onSubmit, submit]);
 
     const { tags: tagOptions } = useGetTags();
     const [options, setOptions] = useState(
