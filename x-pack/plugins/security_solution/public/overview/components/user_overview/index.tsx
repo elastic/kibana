@@ -210,7 +210,7 @@ export const UserOverview = React.memo<UserSummaryProps>(
           },
         ],
       ],
-      [data, getDefaultRenderer, contextID, isDraggable, firstColumn]
+      [data, getDefaultRenderer, contextID, isDraggable, userName, firstColumn]
     );
     return (
       <>

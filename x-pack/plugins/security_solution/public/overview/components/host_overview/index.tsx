@@ -148,7 +148,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
           ),
         },
       ],
-      [data, isDraggable]
+      [data, hostName, isDraggable]
     );
     const firstColumn = useMemo(
       () =>

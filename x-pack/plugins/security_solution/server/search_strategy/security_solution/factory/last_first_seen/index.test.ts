@@ -15,7 +15,7 @@ import {
   formattedSearchStrategyLastResponse,
   formattedSearchStrategyFirstResponse,
 } from './__mocks__';
-import { Direction, FirstLastSeenRequestOptions } from '../../../../../../common/search_strategy';
+import { Direction, FirstLastSeenRequestOptions } from '../../../../../common/search_strategy';
 
 describe('firstLastSeenHost search strategy', () => {
   describe('first seen search strategy', () => {

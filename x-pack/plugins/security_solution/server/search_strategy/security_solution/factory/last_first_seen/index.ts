@@ -10,15 +10,15 @@ import { getOr } from 'lodash/fp';
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
   FirstLastSeenStrategyResponse,
-  HostsQueries,
+  FirstLastSeenQuery,
   FirstLastSeenRequestOptions,
-} from '../../../../../../common/search_strategy/security_solution/hosts';
+} from '../../../../../common/search_strategy/security_solution/first_last_seen';
 
-import { inspectStringifyObject } from '../../../../../utils/build_query';
-import { SecuritySolutionFactory } from '../../types';
+import { inspectStringifyObject } from '../../../../utils/build_query';
+import { SecuritySolutionFactory } from '../types';
 import { buildFirstOrLastSeenQuery } from './query.first_or_last_seen_host.dsl';
 
-export const firstOrLastSeen: SecuritySolutionFactory<HostsQueries.firstOrLastSeen> = {
+export const firstOrLastSeen: SecuritySolutionFactory<typeof FirstLastSeenQuery> = {
   buildDsl: (options: FirstLastSeenRequestOptions) => buildFirstOrLastSeenQuery(options),
   parse: async (
     options: FirstLastSeenRequestOptions,

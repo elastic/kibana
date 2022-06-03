@@ -6,11 +6,12 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import { Inspect, Maybe, Direction } from '../../../common';
-import { RequestOptionsPaginated } from '../..';
-import { HostsFields } from '../common';
 
-export interface FirstLastSeenRequestOptions extends Partial<RequestOptionsPaginated<HostsFields>> {
+import { Inspect, Maybe, Direction } from '../../common';
+import { RequestBasicOptions } from '../..';
+
+export const FirstLastSeenQuery = 'firstlastseen';
+export interface FirstLastSeenRequestOptions extends RequestBasicOptions {
   order: Direction.asc | Direction.desc;
   field: string;
   value: string;
