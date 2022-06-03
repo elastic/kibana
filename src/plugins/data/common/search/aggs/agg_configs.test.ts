@@ -7,16 +7,17 @@
  */
 
 import { keyBy } from 'lodash';
+import { ExpressionAstExpression, buildExpression } from '@kbn/expressions-plugin/common';
 import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { mockAggTypesRegistry } from './test_helpers';
-import { IndexPattern } from '../..';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { stubIndexPattern } from '../../stubs';
 import { IEsSearchResponse } from '..';
 
 describe('AggConfigs', () => {
-  const indexPattern: IndexPattern = stubIndexPattern;
+  const indexPattern: DataView = stubIndexPattern;
   let typesRegistry: AggTypesRegistryStart;
 
   beforeEach(() => {
@@ -785,6 +786,64 @@ describe('AggConfigs', () => {
           },
         },
       });
+    });
+  });
+
+  describe('#toExpressionAst', () => {
+    function toString(ast: ExpressionAstExpression) {
+      return buildExpression(ast).toString();
+    }
+
+    it('should generate the `index` argument', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
+        `"esaggs index={indexPatternLoad id=\\"logstash-*\\"}"`
+      );
+    });
+
+    it('should generate the `metricsAtAllLevels` if hierarchical', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      ac.hierarchical = true;
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
+        `"esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=true"`
+      );
+    });
+
+    it('should generate the `partialRows` argument', () => {
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      ac.partialRows = true;
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
+        `"esaggs index={indexPatternLoad id=\\"logstash-*\\"} partialRows=true"`
+      );
+    });
+
+    it('should generate the `aggs` argument', () => {
+      const configStates = [
+        {
+          enabled: true,
+          type: 'date_histogram',
+          schema: 'segment',
+          params: { field: '@timestamp', interval: '10s' },
+        },
+        { enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } },
+        { enabled: true, type: 'sum', schema: 'metric', params: { field: 'bytes' } },
+        { enabled: true, type: 'min', schema: 'metric', params: { field: 'bytes' } },
+        { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
+      ];
+
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+
+      expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(`
+        "esaggs index={indexPatternLoad id=\\"logstash-*\\"} 
+          aggs={aggDateHistogram field=\\"@timestamp\\" useNormalizedEsInterval=true extendToTimeRange=false scaleMetricValues=false interval=\\"10s\\" drop_partials=false min_doc_count=1 extended_bounds={extendedBounds} id=\\"1\\" enabled=true schema=\\"segment\\"}
+          aggs={aggAvg field=\\"bytes\\" id=\\"2\\" enabled=true schema=\\"metric\\"}
+          aggs={aggSum field=\\"bytes\\" emptyAsNull=false id=\\"3\\" enabled=true schema=\\"metric\\"}
+          aggs={aggMin field=\\"bytes\\" id=\\"4\\" enabled=true schema=\\"metric\\"}
+          aggs={aggMax field=\\"bytes\\" id=\\"5\\" enabled=true schema=\\"metric\\"}"
+      `);
     });
   });
 });
