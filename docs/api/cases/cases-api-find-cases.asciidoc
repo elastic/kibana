@@ -124,7 +124,7 @@ The API returns a JSON object listing the retrieved cases. For example:
       "description": "Case description",
       "settings": { "syncAlerts": true },
       "owner": "securitySolution",
-      "duration": null,
+      "duration": null, <1>
       "severity": "low",
       "closed_at": null,
       "closed_by": null,
@@ -155,3 +155,7 @@ The API returns a JSON object listing the retrieved cases. For example:
   "count_closed_cases": 0
 }
 --------------------------------------------------
+<1> Duration represents the elapsed time from the creation of the case to its
+closure (in seconds). If the case has not been closed, the duration is set to
+`null`. If the case was closed after less than a second, the duration is rounded
+down to zero.
