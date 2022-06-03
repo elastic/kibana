@@ -22,6 +22,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { ISearchSetup, ISearchStart } from './types';
 
 import { handleResponse } from './fetch';
@@ -54,10 +55,10 @@ import {
   eqlRawResponse,
 } from '../../common/search';
 import { AggsService, AggsStartDependencies } from './aggs';
-import { IKibanaSearchResponse, IndexPatternsContract, SearchRequest } from '..';
+import { IKibanaSearchResponse, SearchRequest } from '..';
 import { ISearchInterceptor, SearchInterceptor } from './search_interceptor';
 import { createUsageCollector, SearchUsageCollector } from './collectors';
-import { getEsaggs, getEsdsl, getEql } from './expressions';
+import { getEsaggs, getEsdsl, getEssql, getEql } from './expressions';
 import { ISessionsClient, ISessionService, SessionsClient, SessionService } from './session';
 import { ConfigSchema } from '../../config';
 import {
@@ -84,7 +85,7 @@ export interface SearchServiceSetupDependencies {
 /** @internal */
 export interface SearchServiceStartDependencies {
   fieldFormats: AggsStartDependencies['fieldFormats'];
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   screenshotMode: ScreenshotModePluginStart;
 }
 
@@ -173,6 +174,11 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       })
     );
     expressions.registerFunction(
+      getEssql({ getStartServices } as {
+        getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
+      })
+    );
+    expressions.registerFunction(
       getEql({ getStartServices } as {
         getStartServices: StartServicesAccessor<DataStartDependencies, DataPublicPluginStart>;
       })
@@ -225,7 +231,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     const loadingCount$ = new BehaviorSubject(0);
     http.addLoadingCountSource(loadingCount$);
 
+    const aggs = this.aggsService.start({ fieldFormats, uiSettings, indexPatterns });
     const searchSourceDependencies: SearchSourceDependencies = {
+      aggs,
       getConfig: uiSettings.get.bind(uiSettings),
       search,
       onResponse: (request: SearchRequest, response: IKibanaSearchResponse) =>
@@ -252,7 +260,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     }
 
     return {
-      aggs: this.aggsService.start({ fieldFormats, uiSettings, indexPatterns }),
+      aggs,
       search,
       showError: (e: Error) => {
         this.searchInterceptor.showError(e);
