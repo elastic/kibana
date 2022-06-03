@@ -90,7 +90,7 @@ export const plainColumnRenderer: ColumnRenderer = {
   },
 };
 
-function joinValues(values: string[] | undefined | null): string | undefined {
+function joinValues(values: string[] | undefined | null): string | undefined | null {
   if (Array.isArray(values)) {
     if (values.length > 0) {
       return values.map(parseValue).join(', ');
@@ -98,5 +98,5 @@ function joinValues(values: string[] | undefined | null): string | undefined {
       return values[0];
     }
   }
-  return undefined;
+  return values;
 }
