@@ -15,7 +15,6 @@ import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 interface AllRulesProps {
   createPrePackagedRules: CreatePreBuiltRules | null;
   hasPermissions: boolean;
-  loading: boolean;
   loadingCreatePrePackagedRules: boolean;
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
@@ -35,7 +34,6 @@ export const AllRules = React.memo<AllRulesProps>(
   ({
     createPrePackagedRules,
     hasPermissions,
-    loading,
     loadingCreatePrePackagedRules,
     rulesCustomInstalled,
     rulesInstalled,
@@ -52,7 +50,6 @@ export const AllRules = React.memo<AllRulesProps>(
         <RulesTables
           createPrePackagedRules={createPrePackagedRules}
           hasPermissions={hasPermissions}
-          loading={loading}
           loadingCreatePrePackagedRules={loadingCreatePrePackagedRules}
           rulesCustomInstalled={rulesCustomInstalled}
           rulesInstalled={rulesInstalled}
