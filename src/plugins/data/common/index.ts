@@ -134,7 +134,6 @@ export {
   fieldList,
   DataViewField,
   DataViewType,
-  IndexPatternsService,
   DataViewsService,
   DataView,
   DuplicateDataViewError,

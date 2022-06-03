@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
@@ -19,7 +17,6 @@ import { SavedObjectsClientCommon } from '../types';
 import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
 import { DataView } from './data_view';
-import { createEnsureDefaultDataView, EnsureDefaultDataView } from './ensure_default_data_view';
 import {
   OnNotification,
   OnError,
@@ -150,11 +147,6 @@ export interface DataViewsServicePublicMethods {
    */
   delete: (indexPatternId: string) => Promise<{}>;
   /**
-   * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
-   *             'no data view' case in api consumer code - no more auto redirect
-   */
-  ensureDefaultDataView: EnsureDefaultDataView;
-  /**
    * Takes field array and field attributes and returns field map by name.
    * @param fields - Array of fieldspecs
    * @params fieldAttrs - Field attributes, map by name
@@ -284,12 +276,6 @@ export class DataViewsService {
   public getCanSave: () => Promise<boolean>;
 
   /**
-   * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
-   *             'no data view' case in api consumer code - no more auto redirect
-   */
-  ensureDefaultDataView: EnsureDefaultDataView;
-
-  /**
    * DataViewsService constructor
    * @param deps Service dependencies
    */
@@ -301,7 +287,6 @@ export class DataViewsService {
       fieldFormats,
       onNotification,
       onError,
-      onRedirectNoIndexPattern = () => {},
       getCanSave = () => Promise.resolve(false),
     } = deps;
     this.apiClient = apiClient;
@@ -310,7 +295,6 @@ export class DataViewsService {
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
-    this.ensureDefaultDataView = createEnsureDefaultDataView(onRedirectNoIndexPattern);
     this.getCanSave = getCanSave;
 
     this.dataViewCache = createDataViewCache();
@@ -985,11 +969,6 @@ export class DataViewsService {
     }
   }
 }
-
-/**
- * @deprecated Use DataViewsService. All index pattern interfaces were renamed.
- */
-export class IndexPatternsService extends DataViewsService {}
 
 /**
  * Data views service interface
