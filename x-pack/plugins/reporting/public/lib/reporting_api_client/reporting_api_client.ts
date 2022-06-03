@@ -13,7 +13,7 @@ import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { buildKibanaPath } from '../../../common/build_kibana_path';
 import {
   API_BASE_GENERATE,
-  API_BASE_URL,
+  PUBLIC_BASE_URL,
   API_GENERATE_IMMEDIATE,
   API_LIST_URL,
   API_MIGRATE_ILM_POLICY_URL,
@@ -222,13 +222,13 @@ export class ReportingAPIClient implements IReportingAPI {
   public getServerBasePath = () => this.http.basePath.serverBasePath;
 
   public verifyBrowser() {
-    return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/browser`, {
+    return this.http.post<DiagnoseResponse>(`${PUBLIC_BASE_URL}/diagnose/browser`, {
       asSystemRequest: true,
     });
   }
 
   public verifyScreenCapture() {
-    return this.http.post<DiagnoseResponse>(`${API_BASE_URL}/diagnose/screenshot`, {
+    return this.http.post<DiagnoseResponse>(`${PUBLIC_BASE_URL}/diagnose/screenshot`, {
       asSystemRequest: true,
     });
   }

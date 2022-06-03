@@ -9,12 +9,12 @@ import { schema } from '@kbn/config-schema';
 import rison from 'rison-node';
 import type { Logger } from '@kbn/core/server';
 import type { ReportingCore } from '../..';
-import { API_BASE_URL } from '../../../common/constants';
+import { PUBLIC_BASE_URL } from '../../../common/constants';
 import type { BaseParams } from '../../types';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { RequestHandler } from '../lib/request_handler';
 
-const BASE_GENERATE = `${API_BASE_URL}/generate`;
+const BASE_GENERATE = `${PUBLIC_BASE_URL}/generate`;
 
 export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Logger) {
   const setupDeps = reporting.getPluginSetupDeps();

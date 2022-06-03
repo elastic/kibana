@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, KibanaResponseFactory, Logger } from '@kbn/core/server';
 import type { ReportingCore } from '../..';
-import { API_BASE_URL } from '../../../common/constants';
+import { PUBLIC_BASE_URL } from '../../../common/constants';
 import { checkParamsVersion, cryptoFactory } from '../../lib';
 import { Report } from '../../lib/store';
 import type { BaseParams, ReportingRequestHandlerContext, ReportingUser } from '../../types';
@@ -20,7 +20,7 @@ export const handleUnavailable = (res: KibanaResponseFactory) => {
 
 const getDownloadBaseUrl = (reporting: ReportingCore) => {
   const config = reporting.getConfig();
-  return config.kbnConfig.get('server', 'basePath') + `${API_BASE_URL}/jobs/download`;
+  return config.kbnConfig.get('server', 'basePath') + `${PUBLIC_BASE_URL}/jobs/download`;
 };
 
 export class RequestHandler {

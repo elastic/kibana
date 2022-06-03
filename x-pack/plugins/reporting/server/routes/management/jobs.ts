@@ -9,13 +9,13 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { ROUTE_TAG_CAN_REDIRECT } from '@kbn/security-plugin/server';
 import { ReportingCore } from '../..';
-import { API_BASE_URL } from '../../../common/constants';
+import { PUBLIC_BASE_URL } from '../../../common/constants';
 import { authorizedUserPreRouting } from '../lib/authorized_user_pre_routing';
 import { jobsQueryFactory } from '../lib/jobs_query';
 import { deleteJobResponseHandler, downloadJobResponseHandler } from '../lib/job_response_handler';
 import { handleUnavailable } from '../lib/request_handler';
 
-const MAIN_ENTRY = `${API_BASE_URL}/jobs`;
+const MAIN_ENTRY = `${PUBLIC_BASE_URL}/jobs`;
 
 export function registerJobInfoRoutes(reporting: ReportingCore) {
   const setupDeps = reporting.getPluginSetupDeps();

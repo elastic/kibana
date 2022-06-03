@@ -73,13 +73,13 @@ export const LICENSE_TYPE_PLATINUM = 'platinum';
 export const LICENSE_TYPE_ENTERPRISE = 'enterprise';
 
 // Routes
-export const API_BASE_URL = '/api/reporting'; // "Generation URL" from share menu
-export const API_BASE_GENERATE = `${API_BASE_URL}/generate`;
-export const API_LIST_URL = `${API_BASE_URL}/jobs`;
-export const API_DIAGNOSE_URL = `${API_BASE_URL}/diagnose`;
+export const PUBLIC_BASE_URL = '/api/reporting'; // "Generation URL" from share menu
+export const API_BASE_GENERATE = `${PUBLIC_BASE_URL}/generate`;
+export const API_LIST_URL = `${PUBLIC_BASE_URL}/jobs`;
+export const API_DIAGNOSE_URL = `${PUBLIC_BASE_URL}/diagnose`;
 
-export const API_GET_ILM_POLICY_STATUS = `${API_BASE_URL}/ilm_policy_status`;
-export const API_MIGRATE_ILM_POLICY_URL = `${API_BASE_URL}/deprecations/migrate_ilm_policy`;
+export const API_GET_ILM_POLICY_STATUS = `${PUBLIC_BASE_URL}/ilm_policy_status`;
+export const API_MIGRATE_ILM_POLICY_URL = `${PUBLIC_BASE_URL}/deprecations/migrate_ilm_policy`;
 export const API_BASE_URL_V1 = '/api/reporting/v1'; //
 
 export const ILM_POLICY_NAME = 'kibana-reporting';
