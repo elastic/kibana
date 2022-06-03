@@ -3316,6 +3316,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/utility-types-jest@link:bazel-bin/packages/kbn-utility-types-jest":
+  version "0.0.0"
+  uid ""
+
 "@kbn/utility-types@link:bazel-bin/packages/kbn-utility-types":
   version "0.0.0"
   uid ""
@@ -6502,6 +6506,10 @@
   uid ""
 
 "@types/kbn__ui-theme@link:bazel-bin/packages/kbn-ui-theme/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__utility-types-jest@link:bazel-bin/packages/kbn-utility-types-jest/npm_module_types":
   version "0.0.0"
   uid ""
 
