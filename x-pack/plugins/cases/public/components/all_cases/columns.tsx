@@ -59,7 +59,6 @@ const renderStringField = (field: string, dataTestSubj: string) =>
 export interface GetCasesColumn {
   filterStatus: string;
   handleIsLoading: (a: boolean) => void;
-  isLoadingCases: string[];
   refreshCases?: (a?: boolean) => void;
   isSelectorView: boolean;
   userCanCrud: boolean;
@@ -71,7 +70,6 @@ export interface GetCasesColumn {
 export const useCasesColumns = ({
   filterStatus,
   handleIsLoading,
-  isLoadingCases,
   refreshCases,
   isSelectorView,
   userCanCrud,
@@ -96,7 +94,7 @@ export const useCasesColumns = ({
     title: '',
   });
 
-  const { updateCaseProperty } = useUpdateCase();
+  const { updateCaseProperty, isLoading: isLoadingUpdateCase } = useUpdateCase();
 
   const toggleDeleteModal = useCallback(
     (deleteCase: Case) => {
@@ -138,8 +136,8 @@ export const useCasesColumns = ({
   );
 
   useEffect(() => {
-    handleIsLoading(isDeleting || isLoadingCases.indexOf('caseUpdate') > -1);
-  }, [handleIsLoading, isDeleting, isLoadingCases]);
+    handleIsLoading(isDeleting || isLoadingUpdateCase);
+  }, [handleIsLoading, isDeleting, isLoadingUpdateCase]);
 
   useEffect(() => {
     if (isDeleted) {
@@ -321,7 +319,7 @@ export const useCasesColumns = ({
               return (
                 <StatusContextMenu
                   currentStatus={theCase.status}
-                  disabled={!userCanCrud || isLoadingCases.length > 0}
+                  disabled={!userCanCrud || isLoadingUpdateCase}
                   onStatusChanged={(status) =>
                     handleDispatchUpdate({
                       updateKey: 'status',

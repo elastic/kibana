@@ -14,10 +14,11 @@ import {
   Case,
   CaseStatusWithAllStatus,
   FilterOptions,
+  QueryParams,
   SortFieldCase,
+  StatusAll,
 } from '../../../common/ui/types';
 import { CaseStatuses, caseStatuses } from '../../../common/api';
-import { useGetCases } from '../../containers/use_get_cases';
 
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { useCasesColumns } from './columns';
@@ -28,6 +29,12 @@ import { CasesTable } from './table';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { CasesMetrics } from './cases_metrics';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
+import {
+  DEFAULT_FILTER_OPTIONS,
+  DEFAULT_QUERY_PARAMS,
+  initialData,
+  useFetchCases,
+} from '../../containers/use_get_cases';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -65,18 +72,21 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       ...(!isEmpty(hiddenStatuses) && firstAvailableStatus && { status: firstAvailableStatus }),
       owner: hasOwner ? owner : availableSolutions,
     };
+    const [filterOptions, setFilterOptions] = useState<FilterOptions>({
+      ...DEFAULT_FILTER_OPTIONS,
+      ...initialFilterOptions,
+    });
+    const [queryParams, setQueryParams] = useState<QueryParams>(DEFAULT_QUERY_PARAMS);
+    const [selectedCases, setSelectedCases] = useState<Case[]>([]);
 
     const {
-      data,
+      data = initialData,
+      isFetching: isLoadingCases,
+      refetch: refetchCases,
+    } = useFetchCases({
       filterOptions,
-      loading,
       queryParams,
-      selectedCases,
-      refetchCases,
-      setFilters,
-      setQueryParams,
-      setSelectedCases,
-    } = useGetCases({ initialFilterOptions });
+    });
 
     const { data: connectors = [] } = useGetConnectors();
 
@@ -146,29 +156,28 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
         if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.closed) {
-          setQueryParams({ sortField: SortFieldCase.closedAt });
+          setQueryParams({ ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.closedAt });
         } else if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.open) {
-          setQueryParams({ sortField: SortFieldCase.createdAt });
+          setQueryParams({ ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.createdAt });
         } else if (
           newFilterOptions.status &&
           newFilterOptions.status === CaseStatuses['in-progress']
         ) {
-          setQueryParams({ sortField: SortFieldCase.createdAt });
+          setQueryParams({ ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.createdAt });
         }
 
         deselectCases();
-        setFilters(newFilterOptions);
+        setFilterOptions({ ...DEFAULT_FILTER_OPTIONS, ...newFilterOptions });
         refreshCases(false);
       },
-      [deselectCases, setFilters, refreshCases, setQueryParams]
+      [deselectCases, setFilterOptions, refreshCases, setQueryParams]
     );
 
     const showActions = userCanCrud && !isSelectorView;
 
     const columns = useCasesColumns({
-      filterStatus: filterOptions.status,
+      filterStatus: filterOptions.status ?? StatusAll,
       handleIsLoading,
-      isLoadingCases: loading,
       refreshCases,
       isSelectorView,
       userCanCrud,
@@ -179,9 +188,9 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const pagination = useMemo(
       () => ({
-        pageIndex: queryParams.page - 1,
-        pageSize: queryParams.perPage,
-        totalItemCount: data.total,
+        pageIndex: (queryParams?.page ?? DEFAULT_QUERY_PARAMS.page) - 1,
+        pageSize: queryParams?.perPage ?? DEFAULT_QUERY_PARAMS.perPage,
+        totalItemCount: data.total ?? 0,
         pageSizeOptions: [5, 10, 15, 20, 25],
       }),
       [data, queryParams]
@@ -194,7 +203,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       }),
       [selectedCases, setSelectedCases]
     );
-    const isCasesLoading = useMemo(() => loading.indexOf('cases') > -1, [loading]);
     const isDataEmpty = useMemo(() => data.total === 0, [data]);
 
     const tableRowProps = useCallback(
@@ -210,7 +218,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           size="xs"
           color="accent"
           className="essentialAnimation"
-          $isShow={(isCasesLoading || isLoading) && !isDataEmpty}
+          $isShow={isLoading || isLoadingCases}
         />
         {!isSelectorView ? <CasesMetrics refresh={refresh} /> : null}
         <CasesTableFilters
@@ -238,8 +246,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           filterOptions={filterOptions}
           goToCreateCase={onRowClick}
           handleIsLoading={handleIsLoading}
-          isCasesLoading={isCasesLoading}
-          isCommentUpdating={isCasesLoading}
+          isCasesLoading={isLoadingCases && data.cases.length === 0}
+          isCommentUpdating={isLoadingCases}
           isDataEmpty={isDataEmpty}
           isSelectorView={isSelectorView}
           onChange={tableOnChangeCallback}

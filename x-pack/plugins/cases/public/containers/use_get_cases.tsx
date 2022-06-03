@@ -6,7 +6,8 @@
  */
 
 import { useCallback, useEffect, useReducer, useRef } from 'react';
-import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
+import { useQuery, UseQueryResult } from 'react-query';
+import { CASE_LIST_CACHE_KEY, DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from './constants';
 import {
   Cases,
   Case,
@@ -20,15 +21,7 @@ import {
 import { useToasts } from '../common/lib/kibana';
 import * as i18n from './translations';
 import { getCases } from './api';
-
-export interface UseGetCasesState {
-  data: Cases;
-  filterOptions: FilterOptions;
-  isError: boolean;
-  loading: string[];
-  queryParams: QueryParams;
-  selectedCases: Case[];
-}
+import { ServerError } from '../types';
 
 export interface UpdateCase extends Omit<UpdateByKey, 'caseData'> {
   caseId: string;
@@ -125,20 +118,57 @@ export const initialData: Cases = {
   perPage: 0,
   total: 0,
 };
-export interface UseGetCases extends UseGetCasesState {
+export interface UseGetCasesOld extends UseGetCasesState {
   refetchCases: () => void;
   setFilters: (filters: Partial<FilterOptions>) => void;
   setQueryParams: (queryParams: Partial<QueryParams>) => void;
   setSelectedCases: (mySelectedCases: Case[]) => void;
 }
 
+export const useFetchCases = (
+  params: {
+    queryParams?: Partial<QueryParams>;
+    filterOptions?: Partial<FilterOptions>;
+  } = {}
+): UseQueryResult<Cases> => {
+  const toasts = useToasts();
+  return useQuery(
+    [CASE_LIST_CACHE_KEY, 'cases', params],
+    () => {
+      const abortCtrl = new AbortController();
+      return getCases({
+        filterOptions: {
+          ...DEFAULT_FILTER_OPTIONS,
+          ...(params.filterOptions ?? {}),
+        },
+        queryParams: {
+          ...DEFAULT_QUERY_PARAMS,
+          ...(params.queryParams ?? {}),
+        },
+        signal: abortCtrl.signal,
+      });
+    },
+    {
+      keepPreviousData: true,
+      onError: (error: ServerError) => {
+        if (error.name !== 'AbortError') {
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: i18n.ERROR_TITLE }
+          );
+        }
+      },
+    }
+  );
+};
+
 const empty = {};
-export const useGetCases = (
+export const useGetCasesOld = (
   params: {
     initialQueryParams?: Partial<QueryParams>;
     initialFilterOptions?: Partial<FilterOptions>;
   } = {}
-): UseGetCases => {
+): UseGetCasesOld => {
   const { initialQueryParams = empty, initialFilterOptions = empty } = params;
   const [state, dispatch] = useReducer(dataFetchReducer, {
     data: initialData,
