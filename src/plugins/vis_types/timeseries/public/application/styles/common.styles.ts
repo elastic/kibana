@@ -14,3 +14,7 @@ export const tsvbEditorRowStyle = (theme: EuiThemeComputed) => css`
   padding: ${theme.size.s};
   margin-bottom: ${theme.size.s};
 `;
+
+export const aggRowChildrenStyle = (theme: EuiThemeComputed) => css`
+  padding-top: calc(${theme.size.s} - 2px);
+`;

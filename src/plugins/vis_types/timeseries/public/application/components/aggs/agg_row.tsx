@@ -10,10 +10,9 @@ import React from 'react';
 import { last } from 'lodash';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { SeriesDragHandler } from '../series_drag_handler';
-import { tsvbEditorRowStyle } from '../../styles/common.styles';
+import { tsvbEditorRowStyle, aggRowChildrenStyle } from '../../styles/common.styles';
 import type { Metric } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
 
@@ -33,9 +32,6 @@ export function AggRow(props: AggRowProps) {
   const lastSibling = last(props.siblings) as Metric;
 
   const { euiTheme } = useEuiTheme();
-  const aggRowChildrenCss = css`
-    padding-top: calc(${euiTheme.size.s} - 2px);
-  `;
 
   if (lastSibling.id === props.model.id) {
     iconType = 'eye';
@@ -53,7 +49,7 @@ export function AggRow(props: AggRowProps) {
         <EuiFlexItem grow={false}>
           <EuiIcon type={iconType} color={iconColor} style={{ marginTop: euiTheme.size.xs }} />
         </EuiFlexItem>
-        <EuiFlexItem css={aggRowChildrenCss}>{props.children}</EuiFlexItem>
+        <EuiFlexItem css={aggRowChildrenStyle(euiTheme)}>{props.children}</EuiFlexItem>
 
         <SeriesDragHandler
           dragHandleProps={props.dragHandleProps}

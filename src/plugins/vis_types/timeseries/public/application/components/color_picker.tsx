@@ -60,18 +60,18 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
         defaultMessage: 'Color picker, not accessible',
       });
 
-  const tvbColorPickerCss = css`
+  const tvbColorPickerStyle = css`
     display: flex;
     align-items: center;
     position: relative;
   `;
 
-  const tvbColorPickerClearCss = css`
+  const tvbColorPickerClearStyle = css`
     margin-left: ${euiTheme.size.xs};
   `;
 
   return (
-    <div css={tvbColorPickerCss} data-test-subj="tvbColorPicker">
+    <div css={tvbColorPickerStyle} data-test-subj="tvbColorPicker">
       <EuiColorPicker
         onChange={handleColorChange}
         color={color}
@@ -81,7 +81,7 @@ export function ColorPicker({ name, value, disableTrash = false, onChange }: Col
       />
       {!disableTrash && (
         <div
-          css={tvbColorPickerClearCss}
+          css={tvbColorPickerClearStyle}
           onClick={handleClear}
           data-test-subj="tvbColorPickerClear"
         >

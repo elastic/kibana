@@ -20,7 +20,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 
 import { KBN_FIELD_TYPES, Query } from '@kbn/data-plugin/public';
 import { getDataViewsStart } from '../../services';
@@ -42,6 +41,7 @@ import { IconSelect } from './icon_select/icon_select';
 
 import type { Annotation, IndexPatternValue } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
+import { aggRowChildrenStyle } from '../styles/common.styles';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
@@ -76,9 +76,6 @@ export const AnnotationRow = ({
   const [fetchedIndex, setFetchedIndex] = useState<IndexPatternSelectProps['fetchedIndex']>(null);
 
   const { euiTheme } = useEuiTheme();
-  const aggRowChildrenCss = css`
-    padding-top: calc(${euiTheme.size.s} - 2px);
-  `;
 
   useEffect(() => {
     const updateFetchedIndex = async (index: IndexPatternValue) => {
@@ -141,7 +138,7 @@ export const AnnotationRow = ({
           <ColorPicker disableTrash={true} onChange={onChange} name="color" value={model.color} />
         </EuiFlexItem>
 
-        <EuiFlexItem css={aggRowChildrenCss}>
+        <EuiFlexItem css={aggRowChildrenStyle(euiTheme)}>
           <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
             <EuiFlexItem>
               <IndexPatternSelect
