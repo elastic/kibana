@@ -260,20 +260,20 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [initIndexPattern, dataSourceRadioIdSelected]);
 
-  useEffect(() => {
-    // adding the && !isUpdateView to ensure we
-    // are not resetting the query bar if editing a rule
-    // I should figure how to make this work so that
-    // it only resets if the radioSelected changes state.
-    if (!isReadOnlyView && !isUpdateView) {
-      const { queryBar } = getFields();
-      const { queryBar: defaultQueryBar } = stepDefineDefaultValue;
-      queryBar.reset({
-        defaultValue: defaultQueryBar,
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataSourceRadioIdSelected]);
+  // useEffect(() => {
+  //   // adding the && !isUpdateView to ensure we
+  //   // are not resetting the query bar if editing a rule
+  //   // I should figure how to make this work so that
+  //   // it only resets if the radioSelected changes state.
+  //   if (!isReadOnlyView && !isUpdateView) {
+  //     const { queryBar } = getFields();
+  //     const { queryBar: defaultQueryBar } = stepDefineDefaultValue;
+  //     queryBar.reset({
+  //       defaultValue: defaultQueryBar,
+  //     });
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [dataSourceRadioIdSelected]);
 
   // Callback for when user toggles between Data Views and Index Patterns
   const onChangeDataSource = (optionId: string) => {
