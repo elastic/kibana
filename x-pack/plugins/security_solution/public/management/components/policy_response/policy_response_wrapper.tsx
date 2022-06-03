@@ -7,7 +7,7 @@
 import React, { memo, useEffect, useState } from 'react';
 import { EuiEmptyPrompt, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HostPolicyResponse } from '../../../../common/endpoint/types';
+import type { HostPolicyResponse } from '../../../../common/endpoint/types';
 import { PreferenceFormattedDateFromPrimitive } from '../../../common/components/formatted_date';
 import { useGetEndpointPolicyResponse } from '../../hooks/endpoint/use_get_endpoint_policy_response';
 import { PolicyResponse } from './policy_response';
