@@ -196,7 +196,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           expect(status).to.eql(200);
         });
 
-        describe.only('inspecting the body', () => {
+        describe('inspecting the body', () => {
           let allAnomalyTimeseries: ServiceAnomalyTimeseries[];
 
           let latencySeries: ServiceAnomalyTimeseries | undefined;
