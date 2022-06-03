@@ -27,8 +27,8 @@ export type { DynamicActionsState };
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
   readonly getLicense: () => ILicense;
-  readonly featureUsageSetup: LicensingPluginSetup['featureUsage'];
-  readonly getFeatureUsageStart: () => LicensingPluginStart['featureUsage'];
+  readonly featureUsageSetup?: LicensingPluginSetup['featureUsage'];
+  readonly getFeatureUsageStart: () => (LicensingPluginStart['featureUsage'] | undefined);
 }
 
 export class UiActionsServiceEnhancements

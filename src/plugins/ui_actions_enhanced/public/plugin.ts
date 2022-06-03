@@ -28,13 +28,13 @@ import { dynamicActionEnhancement } from './dynamic_actions/dynamic_action_enhan
 interface SetupDependencies {
   embeddable: EmbeddableSetup; // Embeddable are needed because they register basic triggers/actions.
   uiActions: UiActionsSetup;
-  licensing: LicensingPluginSetup;
+  licensing?: LicensingPluginSetup;
 }
 
 export interface StartDependencies {
   embeddable: EmbeddableStart;
   uiActions: UiActionsStart;
-  licensing: LicensingPluginStart;
+  licensing?: LicensingPluginStart;
 }
 
 export interface SetupContract
@@ -79,8 +79,8 @@ export class AdvancedUiActionsPublicPlugin
     const startServices = createStartServicesGetter(core.getStartServices);
     this.enhancements = new UiActionsServiceEnhancements({
       getLicense: () => this.getLicenseInfo(),
-      featureUsageSetup: licensing.featureUsage,
-      getFeatureUsageStart: () => startServices().plugins.licensing.featureUsage,
+      featureUsageSetup: licensing?.featureUsage,
+      getFeatureUsageStart: () => startServices().plugins.licensing?.featureUsage,
     });
     embeddable.registerEnhancement(dynamicActionEnhancement(this.enhancements));
     return {
@@ -90,7 +90,7 @@ export class AdvancedUiActionsPublicPlugin
   }
 
   public start(core: CoreStart, { uiActions, licensing }: StartDependencies): StartContract {
-    this.subs.push(licensing.license$.subscribe(this.licenseInfo));
+    if (licensing) this.subs.push(licensing.license$.subscribe(this.licenseInfo));
 
     const dateFormat = core.uiSettings.get('dateFormat') as string;
     const commonlyUsedRanges = core.uiSettings.get(

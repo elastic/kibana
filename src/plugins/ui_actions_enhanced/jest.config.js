@@ -8,10 +8,10 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
-  roots: ['<rootDir>/x-pack/plugins/ui_actions_enhanced'],
-  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/ui_actions_enhanced',
+  roots: ['<rootDir>/src/plugins/ui_actions_enhanced'],
+  coverageDirectory: '<rootDir>/target/kibana-coverage/jest/src/plugins/ui_actions_enhanced',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/plugins/ui_actions_enhanced/{common,public,server}/**/*.{ts,tsx}',
+    '<rootDir>/src/plugins/ui_actions_enhanced/{common,public,server}/**/*.{ts,tsx}',
   ],
 };

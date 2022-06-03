@@ -6,9 +6,10 @@
   },
   "description": "Extends UI Actions plugin with more functionality",
   "version": "kibana",
-  "configPath": ["xpack", "ui_actions_enhanced"],
+  "configPath": ["src", "ui_actions_enhanced"],
   "server": true,
   "ui": true,
-  "requiredPlugins": ["embeddable", "uiActions", "licensing"],
+  "requiredPlugins": ["embeddable", "uiActions"],
+  "optionalPlugins": ["licensing"],
   "requiredBundles": ["kibanaUtils", "kibanaReact", "data"]
 }
