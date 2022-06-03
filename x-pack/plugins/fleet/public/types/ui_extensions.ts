@@ -57,7 +57,7 @@ export interface PackagePolicyResponseExtensionComponentProps {
   /** The current agent to retrieve response from */
   agent: Agent;
   /** A callback function to set the `needs attention` state */
-  onShowNeedsAttentionButton?: (val: boolean) => void;
+  onShowNeedsAttentionBadge?: (val: boolean) => void;
 }
 
 /** Extension point registration contract for Integration Policy Edit views */

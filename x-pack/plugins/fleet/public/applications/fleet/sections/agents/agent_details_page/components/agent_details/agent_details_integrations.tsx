@@ -17,7 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiTreeView,
-  EuiButton,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -66,11 +66,6 @@ const StyledEuiLink = styled(EuiLink)`
   font-size: ${(props) => props.theme.eui.euiFontSizeS};
 `;
 
-const StyledEuiButton = styled(EuiButton)`
-  font-size: ${(props) => props.theme.eui.euiFontSizeXS};
-  height: 22px !important;
-`;
-
 const CollapsablePanel: React.FC<{ id: string; title: React.ReactNode }> = ({
   id,
   title,
@@ -97,7 +92,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
 }> = memo(({ agent, agentPolicy, packagePolicy }) => {
   const { getHref } = useLink();
 
-  const [showNeedsAttentionButton, setShowNeedsAttentionButton] = useState(false);
+  const [showNeedsAttentionBadge, setShowNeedsAttentionBadge] = useState(false);
   const extensionView = useUIExtension(
     packagePolicy.package?.name ?? '',
     'package-policy-response'
@@ -109,7 +104,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
         <ExtensionWrapper>
           <extensionView.Component
             agent={agent}
-            onShowNeedsAttentionButton={setShowNeedsAttentionButton} // TBD: don't really like this, I'm thinking about creating a new extension point for it with it's own api call
+            onShowNeedsAttentionBadge={setShowNeedsAttentionBadge}
           />
         </ExtensionWrapper>
       )
@@ -186,14 +181,14 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
                   {packagePolicy.name}
                 </EuiLink>
               </EuiFlexItem>
-              {showNeedsAttentionButton && (
+              {showNeedsAttentionBadge && (
                 <EuiFlexItem grow={false}>
-                  <StyledEuiButton iconType="alert" size="s" iconSize="s" color="danger" fill>
+                  <EuiBadge color="#BD271E" iconType="alert" iconSide="left">
                     <FormattedMessage
                       id="xpack.fleet.agentDetailsIntegrations.needsAttention.label"
                       defaultMessage="Needs attention"
                     />
-                  </StyledEuiButton>
+                  </EuiBadge>
                 </EuiFlexItem>
               )}
             </EuiFlexGroup>

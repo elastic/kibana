@@ -16,11 +16,11 @@ import { getFailedOrWarningActionCountFromPolicyResponse } from '../../pages/end
 export interface PolicyResponseWrapperProps {
   endpointId: string;
   showRevisionMessage?: boolean;
-  onShowNeedsAttentionButton?: (val: boolean) => void;
+  onShowNeedsAttentionBadge?: (val: boolean) => void;
 }
 
 export const PolicyResponseWrapper = memo<PolicyResponseWrapperProps>(
-  ({ endpointId, showRevisionMessage = true, onShowNeedsAttentionButton }) => {
+  ({ endpointId, showRevisionMessage = true, onShowNeedsAttentionBadge }) => {
     const { data, isLoading, isFetching, isError } = useGetEndpointPolicyResponse(endpointId);
 
     const [policyResponseConfig, setPolicyResponseConfig] =
@@ -47,16 +47,16 @@ export const PolicyResponseWrapper = memo<PolicyResponseWrapperProps>(
 
     // This is needed for the `needs attention` action button in fleet. Will callback `true` if any error in policy response
     useEffect(() => {
-      if (onShowNeedsAttentionButton) {
+      if (onShowNeedsAttentionBadge) {
         for (const count of policyResponseAttentionCount.values()) {
           if (count) {
             // When an error has found, callback to true and return for loop exit
-            onShowNeedsAttentionButton(true);
+            onShowNeedsAttentionBadge(true);
             return;
           }
         }
       }
-    }, [policyResponseAttentionCount, onShowNeedsAttentionButton]);
+    }, [policyResponseAttentionCount, onShowNeedsAttentionBadge]);
 
     return (
       <>

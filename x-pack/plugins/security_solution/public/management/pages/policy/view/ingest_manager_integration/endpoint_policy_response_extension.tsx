@@ -14,11 +14,11 @@ import { PolicyResponseWrapper } from '../../../../components/policy_response';
  * Exports Endpoint-specific package policy response
  */
 export const EndpointPolicyResponseExtension = memo<PackagePolicyResponseExtensionComponentProps>(
-  ({ agent, onShowNeedsAttentionButton }) => {
+  ({ agent, onShowNeedsAttentionBadge }) => {
     return (
       <PolicyResponseWrapper
         endpointId={agent.id}
-        onShowNeedsAttentionButton={onShowNeedsAttentionButton}
+        onShowNeedsAttentionBadge={onShowNeedsAttentionBadge}
         showRevisionMessage={false}
       />
     );
