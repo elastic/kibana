@@ -86,6 +86,7 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
         name: i18n.translate('xpack.ml.navMenu.anomalyDetectionTabLinkText', {
           defaultMessage: 'Anomaly Detection',
         }),
+        disabled: disableLinks,
         items: [
           {
             id: 'anomaly_detection',
