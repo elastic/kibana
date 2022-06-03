@@ -31,11 +31,10 @@ describe('ServiceNowActionConnectorFields renders', () => {
   const usesTableApiConnector = {
     id: 'test',
     actionTypeId: '.servicenow',
-    isPreconfigured: false,
     isDeprecated: true,
     name: 'SN',
     config: {
-      apiUrl: 'https://test/',
+      apiUrl: 'https://test.com',
       usesTableApi: true,
     },
     secrets: {
@@ -49,7 +48,26 @@ describe('ServiceNowActionConnectorFields renders', () => {
     isDeprecated: false,
     config: {
       ...usesTableApiConnector.config,
+      isOAuth: false,
       usesTableApi: false,
+    },
+  };
+
+  const usesImportSetApiConnectorOauth = {
+    ...usesTableApiConnector,
+    isDeprecated: false,
+    config: {
+      ...usesTableApiConnector.config,
+      isOAuth: true,
+      usesTableApi: false,
+      clientId: 'test-id',
+      userIdentifierValue: 'email',
+      jwtKeyId: 'test-id',
+    },
+    secrets: {
+      clientSecret: 'secret',
+      privateKey: 'secret-key',
+      privateKeyPassword: 'secret-pass',
     },
   };
 
@@ -344,6 +362,134 @@ describe('ServiceNowActionConnectorFields renders', () => {
       expect(
         within(getByTestId('updateConnectorForm')).getByTestId('snApplicationCallout')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('Validation', () => {
+    const onSubmit = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const basicAuthTests: Array<[string, string]> = [
+      ['credentialsApiUrlFromInput', 'not-valid'],
+      ['connector-servicenow-username-form-input', ''],
+      ['connector-servicenow-password-form-input', ''],
+    ];
+
+    const oauthTests: Array<[string, string]> = [
+      ['credentialsApiUrlFromInput', 'not-valid'],
+      ['connector-servicenow-client-id-form-input', ''],
+      ['connector-servicenow-user-identifier-form-input', ''],
+      ['connector-servicenow-jwt-key-id-form-input', ''],
+      ['connector-servicenow-client-secret-form-input', ''],
+      ['connector-servicenow-private-key-form-input', ''],
+    ];
+
+    it.each([[usesImportSetApiConnector], [usesImportSetApiConnectorOauth]])(
+      'connector validation succeeds when connector config is valid',
+      async (connector) => {
+        const { getByTestId } = render(
+          <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+            <ServiceNowConnectorFields
+              readOnly={false}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+            />
+          </ConnectorFormTestProvider>
+        );
+
+        await act(async () => {
+          userEvent.click(getByTestId('form-test-provide-submit'));
+        });
+
+        expect(onSubmit).toHaveBeenCalledWith({ data: { ...connector }, isValid: true });
+      }
+    );
+
+    it('submits if the private key password is empty', async () => {
+      const connector = {
+        ...usesImportSetApiConnectorOauth,
+        secrets: {
+          ...usesImportSetApiConnectorOauth.secrets,
+          clientSecret: 'secret',
+          privateKey: 'secret-key',
+          privateKeyPassword: '',
+        },
+      };
+
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <ServiceNowConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      const {
+        secrets: { clientSecret, privateKey },
+        ...rest
+      } = connector;
+
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: { ...rest, secrets: { clientSecret, privateKey } },
+        isValid: true,
+      });
+    });
+
+    it.each(basicAuthTests)('validates correctly %p', async (field, value) => {
+      const res = render(
+        <ConnectorFormTestProvider connector={usesImportSetApiConnector} onSubmit={onSubmit}>
+          <ServiceNowConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+          delay: 10,
+        });
+      });
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
+
+    it.each(oauthTests)('validates correctly %p', async (field, value) => {
+      const res = render(
+        <ConnectorFormTestProvider connector={usesImportSetApiConnectorOauth} onSubmit={onSubmit}>
+          <ServiceNowConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+          delay: 10,
+        });
+      });
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
     });
   });
 });

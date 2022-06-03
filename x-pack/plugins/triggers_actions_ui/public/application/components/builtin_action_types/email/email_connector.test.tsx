@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -512,7 +512,7 @@ describe('EmailActionConnectorFields', () => {
       });
     });
 
-    it('connector validation fails when for exchange service selected, but clientId, tenantId and clientSecrets were not defined', async () => {
+    it('connector validation fails when exchange service is selected, but clientId, tenantId and clientSecrets were not defined', async () => {
       const actionConnector = {
         secrets: {
           user: 'user',
@@ -533,11 +533,13 @@ describe('EmailActionConnectorFields', () => {
 
       const { getByTestId } = appMockRenderer.render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
-          <EmailActionConnectorFields
-            readOnly={false}
-            isEdit={false}
-            registerPreSubmitValidator={() => {}}
-          />
+          <Suspense fallback={null}>
+            <EmailActionConnectorFields
+              readOnly={false}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+            />
+          </Suspense>
         </ConnectorFormTestProvider>
       );
 

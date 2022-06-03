@@ -13,6 +13,8 @@ import { useGetApplication } from './use_get_application';
 import { applicationFields, mappings } from './mocks';
 import { ConnectorFormTestProvider } from '../test_utils';
 import { waitFor } from '@testing-library/dom';
+import userEvent from '@testing-library/user-event';
+import { render } from '@testing-library/react';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('./use_get_application');
@@ -280,5 +282,158 @@ describe('SwimlaneActionConnectorFields renders', () => {
     expect(
       wrapper.find('[data-test-subj="swimlaneDescriptionConfig"]').first().prop('options')
     ).toEqual(textOptions);
+  });
+
+  describe('Validation', () => {
+    const onSubmit = jest.fn();
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+      getApplication.mockResolvedValue({
+        fields: applicationFields,
+      });
+    });
+
+    const getConnector = (connectorType: string = 'all') => ({
+      actionTypeId: '.swimlane',
+      name: 'swimlane',
+      config: {
+        apiUrl: 'http://test.com',
+        appId: '1234567asbd32',
+        connectorType: 'all',
+        mappings,
+      },
+      secrets: {
+        apiToken: 'test',
+      },
+      isDeprecated: false,
+    });
+
+    const getConnectorWithEmptyMappings = (connectorType: string = 'all') => {
+      const actionConnector = getConnector(connectorType);
+      return {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          connectorType,
+          mappings: {},
+        },
+      };
+    };
+
+    const tests: Array<[string, string]> = [
+      ['swimlaneApiUrlInput', 'not-valid'],
+      ['swimlaneAppIdInput', ''],
+      ['swimlaneApiTokenInput', ''],
+    ];
+
+    it.each([['cases'], ['alerts']])(
+      'connector validation succeeds when connector config is valid for connectorType=%p',
+      async (connectorType) => {
+        const connector = getConnector(connectorType);
+        const { getByTestId } = render(
+          <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+            <SwimlaneActionConnectorFields
+              readOnly={false}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+            />
+          </ConnectorFormTestProvider>
+        );
+
+        await act(async () => {
+          userEvent.click(getByTestId('form-test-provide-submit'));
+        });
+
+        expect(onSubmit).toHaveBeenCalledWith({ data: { ...connector }, isValid: true });
+      }
+    );
+
+    it.each(tests)('validates correctly %p', async (field, value) => {
+      const connector = getConnector();
+      const res = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <SwimlaneActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        await userEvent.type(res.getByTestId(field), `{selectall}{backspace}${value}`, {
+          delay: 10,
+        });
+      });
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
+
+    it('connector validation succeeds when when connectorType=all with empty mappings', async () => {
+      const connector = getConnectorWithEmptyMappings();
+      const { getByTestId } = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <SwimlaneActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {
+          ...connector,
+          config: {
+            ...connector.config,
+            mappings: {
+              alertIdConfig: null,
+              caseIdConfig: null,
+              caseNameConfig: null,
+              commentsConfig: null,
+              descriptionConfig: null,
+              ruleNameConfig: null,
+              severityConfig: null,
+            },
+          },
+        },
+        isValid: true,
+      });
+    });
+
+    it.each([['cases'], ['alerts']])(
+      'validates correctly when when connectorType=%p',
+      async (connectorType) => {
+        const connector = getConnectorWithEmptyMappings(connectorType);
+
+        const { getByTestId } = render(
+          <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+            <SwimlaneActionConnectorFields
+              readOnly={false}
+              isEdit={false}
+              registerPreSubmitValidator={() => {}}
+            />
+          </ConnectorFormTestProvider>
+        );
+
+        await act(async () => {
+          userEvent.click(getByTestId('form-test-provide-submit'));
+        });
+
+        expect(onSubmit).toHaveBeenCalledWith({
+          data: {},
+          isValid: false,
+        });
+      }
+    );
   });
 });
