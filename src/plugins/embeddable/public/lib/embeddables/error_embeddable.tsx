@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiText, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiText, EuiIcon, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaThemeProvider, Markdown } from '@kbn/kibana-react-plugin/public';
@@ -28,7 +28,12 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
   public error: Error | string;
   private dom?: HTMLElement;
 
-  constructor(error: Error | string, input: EmbeddableInput, parent?: IContainer) {
+  constructor(
+    error: Error | string,
+    input: EmbeddableInput,
+    parent?: IContainer,
+    private compact: boolean = false
+  ) {
     super(input, {}, parent);
     this.error = error;
   }
@@ -44,16 +49,28 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
     } catch (err) {
       theme = {};
     }
-    const node = (
+    const errorMarkdown = (
+      <Markdown markdown={title} openLinksInNewTab={true} data-test-subj="errorMessageMarkdown" />
+    );
+
+    const node = this.compact ? (
+      <EuiFlexGroup
+        style={{ height: '100%', whiteSpace: 'nowrap' }}
+        gutterSize="none"
+        alignItems="center"
+        justifyContent="center"
+      >
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="alert" color="danger" />
+        </EuiFlexItem>
+        <EuiFlexItem>{errorMarkdown}</EuiFlexItem>
+      </EuiFlexGroup>
+    ) : (
       <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
         <EuiText color="subdued" size="xs">
           <EuiIcon type="alert" color="danger" />
           <EuiSpacer size="s" />
-          <Markdown
-            markdown={title}
-            openLinksInNewTab={true}
-            data-test-subj="errorMessageMarkdown"
-          />
+          {errorMarkdown}
         </EuiText>
       </div>
     );
