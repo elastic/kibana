@@ -13,6 +13,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { setupGetFieldSuggestions } from './field';
 import { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 import { coreMock } from '@kbn/core/public/mocks';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 
@@ -39,7 +40,9 @@ describe('Kuery field suggestions', () => {
       querySuggestionsArgs,
       mockKueryNode({ prefix, suffix })
     );
-    const filterableFields = indexPatternResponse.fields.filter(indexPatternsUtils.isFilterable);
+    const filterableFields = (indexPatternResponse.fields as DataViewField[]).filter(
+      indexPatternsUtils.isFilterable
+    );
 
     expect(suggestions.length).toBe(filterableFields.length);
   });
