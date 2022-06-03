@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React, { ChangeEvent } from 'react';
+import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { EuiRange } from '@elastic/eui';
+import { EuiFieldNumber } from '@elastic/eui';
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import { EuiFormRow } from '@elastic/eui';
 import { shallow, mount } from 'enzyme';
@@ -16,9 +16,9 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createMockedIndexPattern } from '../../mocks';
-import { percentileOperation } from '.';
+import { percentileRanksOperation } from '.';
 import { IndexPattern, IndexPatternLayer } from '../../types';
-import { PercentileIndexPatternColumn } from './percentile';
+import type { PercentileRanksIndexPatternColumn } from './percentile_ranks';
 import { TermsIndexPatternColumn } from './terms';
 
 jest.mock('lodash', () => {
@@ -52,9 +52,9 @@ const defaultProps = {
   layerId: '1',
 };
 
-describe('percentile', () => {
+describe('percentile ranks', () => {
   let layer: IndexPatternLayer;
-  const InlineOptions = percentileOperation.paramEditor!;
+  const InlineOptions = percentileRanksOperation.paramEditor!;
 
   beforeEach(() => {
     layer = {
@@ -74,15 +74,15 @@ describe('percentile', () => {
           sourceField: 'category',
         } as TermsIndexPatternColumn,
         col2: {
-          label: '23rd percentile of a',
+          label: 'Percentile (100) of a',
           dataType: 'number',
           isBucketed: false,
           sourceField: 'a',
-          operationType: 'percentile',
+          operationType: 'percentile_rank',
           params: {
-            percentile: 23,
+            value: 100,
           },
-        } as PercentileIndexPatternColumn,
+        } as PercentileRanksIndexPatternColumn,
       },
     };
   });
@@ -90,7 +90,7 @@ describe('percentile', () => {
   describe('getPossibleOperationForField', () => {
     it('should accept number', () => {
       expect(
-        percentileOperation.getPossibleOperationForField({
+        percentileRanksOperation.getPossibleOperationForField({
           name: 'bytes',
           displayName: 'bytes',
           type: 'number',
@@ -107,7 +107,7 @@ describe('percentile', () => {
 
     it('should accept histogram', () => {
       expect(
-        percentileOperation.getPossibleOperationForField({
+        percentileRanksOperation.getPossibleOperationForField({
           name: 'response_time',
           displayName: 'response_time',
           type: 'histogram',
@@ -124,7 +124,7 @@ describe('percentile', () => {
 
     it('should reject keywords', () => {
       expect(
-        percentileOperation.getPossibleOperationForField({
+        percentileRanksOperation.getPossibleOperationForField({
           name: 'origin',
           displayName: 'origin',
           type: 'string',
@@ -138,9 +138,9 @@ describe('percentile', () => {
 
   describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
-      const percentileColumn = layer.columns.col2 as PercentileIndexPatternColumn;
-      const esAggsFn = percentileOperation.toEsAggsFn(
-        percentileColumn,
+      const percentileRanksColumn = layer.columns.col2 as PercentileRanksIndexPatternColumn;
+      const esAggsFn = percentileRanksOperation.toEsAggsFn(
+        percentileRanksColumn,
         'col1',
         {} as IndexPattern,
         layer,
@@ -150,7 +150,7 @@ describe('percentile', () => {
       expect(esAggsFn).toEqual(
         expect.objectContaining({
           arguments: expect.objectContaining({
-            percentile: [23],
+            value: [100],
             field: ['a'],
           }),
         })
@@ -160,26 +160,26 @@ describe('percentile', () => {
 
   describe('onFieldChange', () => {
     it('should change correctly to new field', () => {
-      const oldColumn: PercentileIndexPatternColumn = {
-        operationType: 'percentile',
+      const oldColumn: PercentileRanksIndexPatternColumn = {
+        operationType: 'percentile_rank',
         sourceField: 'bytes',
-        label: '23rd percentile of bytes',
+        label: 'Percentile rank (100) of bytes',
         isBucketed: true,
         dataType: 'number',
         params: {
-          percentile: 23,
+          value: 100,
         },
       };
       const indexPattern = createMockedIndexPattern();
       const newNumberField = indexPattern.getFieldByName('memory')!;
-      const column = percentileOperation.onFieldChange(oldColumn, newNumberField);
+      const column = percentileRanksOperation.onFieldChange(oldColumn, newNumberField);
 
       expect(column).toEqual(
         expect.objectContaining({
           dataType: 'number',
           sourceField: 'memory',
           params: expect.objectContaining({
-            percentile: 23,
+            value: 100,
           }),
         })
       );
@@ -188,53 +188,53 @@ describe('percentile', () => {
   });
 
   describe('buildColumn', () => {
-    it('should set default percentile', () => {
+    it('should set default percentile rank', () => {
       const indexPattern = createMockedIndexPattern();
       const bytesField = indexPattern.fields.find(({ name }) => name === 'bytes')!;
       bytesField.displayName = 'test';
-      const percentileColumn = percentileOperation.buildColumn({
+      const percentileRanksColumn = percentileRanksOperation.buildColumn({
         indexPattern,
         field: bytesField,
         layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
-      expect(percentileColumn.dataType).toEqual('number');
-      expect(percentileColumn.params.percentile).toEqual(95);
-      expect(percentileColumn.label).toEqual('95th percentile of test');
+      expect(percentileRanksColumn.dataType).toEqual('number');
+      expect(percentileRanksColumn.params.value).toEqual(0);
+      expect(percentileRanksColumn.label).toEqual('Percentile rank (0) of test');
     });
 
-    it('should create a percentile from formula', () => {
+    it('should create a percentile rank from formula', () => {
       const indexPattern = createMockedIndexPattern();
       const bytesField = indexPattern.fields.find(({ name }) => name === 'bytes')!;
       bytesField.displayName = 'test';
-      const percentileColumn = percentileOperation.buildColumn(
+      const percentileRanksColumn = percentileRanksOperation.buildColumn(
         {
           indexPattern,
           field: bytesField,
           layer: { columns: {}, columnOrder: [], indexPatternId: '' },
         },
-        { percentile: 75 }
+        { value: 1024 }
       );
-      expect(percentileColumn.dataType).toEqual('number');
-      expect(percentileColumn.params.percentile).toEqual(75);
-      expect(percentileColumn.label).toEqual('75th percentile of test');
+      expect(percentileRanksColumn.dataType).toEqual('number');
+      expect(percentileRanksColumn.params.value).toEqual(1024);
+      expect(percentileRanksColumn.label).toEqual('Percentile rank (1024) of test');
     });
 
-    it('should create a percentile from formula with filter', () => {
+    it('should create a percentile rank from formula with filter', () => {
       const indexPattern = createMockedIndexPattern();
       const bytesField = indexPattern.fields.find(({ name }) => name === 'bytes')!;
       bytesField.displayName = 'test';
-      const percentileColumn = percentileOperation.buildColumn(
+      const percentileRanksColumn = percentileRanksOperation.buildColumn(
         {
           indexPattern,
           field: bytesField,
           layer: { columns: {}, columnOrder: [], indexPatternId: '' },
         },
-        { percentile: 75, kql: 'bytes > 100' }
+        { value: 1024, kql: 'bytes > 100' }
       );
-      expect(percentileColumn.dataType).toEqual('number');
-      expect(percentileColumn.params.percentile).toEqual(75);
-      expect(percentileColumn.filter).toEqual({ language: 'kuery', query: 'bytes > 100' });
-      expect(percentileColumn.label).toEqual('75th percentile of test');
+      expect(percentileRanksColumn.dataType).toEqual('number');
+      expect(percentileRanksColumn.params.value).toEqual(1024);
+      expect(percentileRanksColumn.filter).toEqual({ language: 'kuery', query: 'bytes > 100' });
+      expect(percentileRanksColumn.label).toEqual('Percentile rank (1024) of test');
     });
   });
 
@@ -249,15 +249,15 @@ describe('percentile', () => {
         aggregatable: true,
       });
       expect(
-        percentileOperation.isTransferable(
+        percentileRanksOperation.isTransferable(
           {
             label: '',
             sourceField: 'response_time',
             isBucketed: false,
             dataType: 'number',
-            operationType: 'percentile',
+            operationType: 'percentile_rank',
             params: {
-              percentile: 95,
+              value: 10,
             },
           },
           indexPattern,
@@ -268,7 +268,7 @@ describe('percentile', () => {
   });
 
   describe('param editor', () => {
-    it('should render current percentile', () => {
+    it('should render current percentile rank', () => {
       const updateLayerSpy = jest.fn();
       const instance = shallow(
         <InlineOptions
@@ -276,13 +276,13 @@ describe('percentile', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col2"
-          currentColumn={layer.columns.col2 as PercentileIndexPatternColumn}
+          currentColumn={layer.columns.col2 as PercentileRanksIndexPatternColumn}
         />
       );
 
-      const input = instance.find('[data-test-subj="lns-indexPattern-percentile-input"]');
+      const input = instance.find('[data-test-subj="lns-indexPattern-percentile_ranks-input"]');
 
-      expect(input.prop('value')).toEqual('23');
+      expect(input.prop('value')).toEqual('100');
     });
 
     it('should update state on change', () => {
@@ -293,19 +293,18 @@ describe('percentile', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col2"
-          currentColumn={layer.columns.col2 as PercentileIndexPatternColumn}
+          currentColumn={layer.columns.col2 as PercentileRanksIndexPatternColumn}
         />
       );
 
       const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiRange);
+        .find('[data-test-subj="lns-indexPattern-percentile_ranks-input"]')
+        .find(EuiFieldNumber);
 
       act(() => {
-        input.prop('onChange')!(
-          { currentTarget: { value: '27' } } as ChangeEvent<HTMLInputElement>,
-          true
-        );
+        input.prop('onChange')!({
+          currentTarget: { value: '103' },
+        } as React.ChangeEvent<HTMLInputElement>);
       });
 
       instance.update();
@@ -317,9 +316,9 @@ describe('percentile', () => {
           col2: {
             ...layer.columns.col2,
             params: {
-              percentile: 27,
+              value: 103,
             },
-            label: '27th percentile of a',
+            label: 'Percentile rank (103) of a',
           },
         },
       });
@@ -333,19 +332,18 @@ describe('percentile', () => {
           layer={layer}
           updateLayer={updateLayerSpy}
           columnId="col2"
-          currentColumn={layer.columns.col2 as PercentileIndexPatternColumn}
+          currentColumn={layer.columns.col2 as PercentileRanksIndexPatternColumn}
         />
       );
 
       const input = instance
-        .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-        .find(EuiRange);
+        .find('[data-test-subj="lns-indexPattern-percentile_ranks-input"]')
+        .find(EuiFieldNumber);
 
       act(() => {
-        input.prop('onChange')!(
-          { currentTarget: { value: '12.12' } } as ChangeEvent<HTMLInputElement>,
-          true
-        );
+        input.prop('onChange')!({
+          currentTarget: { value: 'miaou' },
+        } as React.ChangeEvent<HTMLInputElement>);
       });
 
       instance.update();
@@ -354,16 +352,16 @@ describe('percentile', () => {
 
       expect(
         instance
-          .find('[data-test-subj="lns-indexPattern-percentile-form"]')
+          .find('[data-test-subj="lns-indexPattern-percentile_ranks-form"]')
           .find(EuiFormRow)
           .prop('isInvalid')
       ).toEqual(true);
       expect(
         instance
-          .find('[data-test-subj="lns-indexPattern-percentile-input"]')
-          .find(EuiRange)
+          .find('[data-test-subj="lns-indexPattern-percentile_ranks-input"]')
+          .find(EuiFieldNumber)
           .prop('value')
-      ).toEqual('12.12');
+      ).toEqual('miaou');
     });
   });
 });
