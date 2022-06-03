@@ -111,6 +111,8 @@ if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
 fi
 
+buildkite-agent artifact upload 'target/kibana-coverage/functional/**/*'
+
 echo "--- FTR configs complete, result(s):"
 printf "%s\n" "${results[@]}"
 echo ""
