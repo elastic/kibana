@@ -40,6 +40,7 @@ describe('esaggs expression function - public', () => {
       abortSignal: jest.fn() as unknown as jest.Mocked<AbortSignal>,
       aggs: {
         aggs: [{ type: { name: 'terms', postFlightRequest: jest.fn().mockResolvedValue({}) } }],
+        partialRows: false,
         setTimeRange: jest.fn(),
         toDsl: jest.fn().mockReturnValue({ aggs: {} }),
         onSearchRequestStart: jest.fn(),
@@ -49,7 +50,6 @@ describe('esaggs expression function - public', () => {
       filters: undefined,
       indexPattern: { id: 'logstash-*' } as unknown as jest.Mocked<DataView>,
       inspectorAdapters: {},
-      partialRows: false,
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: searchSourceCommonMock,
@@ -147,7 +147,7 @@ describe('esaggs expression function - public', () => {
       mockParams.aggs,
       {},
       {
-        partialRows: mockParams.partialRows,
+        partialRows: mockParams.aggs.partialRows,
         timeRange: mockParams.timeRange,
       }
     );

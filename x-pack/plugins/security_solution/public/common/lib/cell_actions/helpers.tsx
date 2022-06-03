@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import * as i18n from './translations';
 import {
   EVENT_URL_FIELD_NAME,
@@ -17,6 +18,7 @@ import {
 import { INDICATOR_REFERENCE } from '../../../../common/cti/constants';
 import { IP_FIELD_TYPE } from '../../../network/components/ip';
 import { PORT_NAMES } from '../../../network/components/port/helpers';
+import { useKibana } from '../kibana';
 
 export const COLUMNS_WITH_LINKS = [
   {
@@ -87,3 +89,20 @@ export const getLinkColumnDefinition = (
       return false;
     }
   });
+
+/** a noop required by the filter in / out buttons */
+export const onFilterAdded = () => {};
+
+/** a hook to eliminate the verbose boilerplate required to use common services */
+export const useKibanaServices = () => {
+  const {
+    timelines,
+    data: {
+      query: { filterManager },
+    },
+  } = useKibana().services;
+
+  return { timelines, filterManager };
+};
+
+export const EmptyComponent = () => <></>;
