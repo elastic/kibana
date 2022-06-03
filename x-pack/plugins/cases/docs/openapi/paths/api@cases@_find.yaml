@@ -32,7 +32,7 @@ get:
       schema:
         type: string
       example: now-1d
-      x-preview: true
+      x-technical-preview: true
     - $ref: '../components/parameters/owner.yaml'
     - name: page
       in: query
@@ -119,7 +119,7 @@ get:
       schema:
         type: string
       example: now%2B1d
-      x-preview: true
+      x-technical-preview: true
   responses:
     '200':
       description: Indicates a successful call.
