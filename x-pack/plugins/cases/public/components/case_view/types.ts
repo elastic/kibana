@@ -31,7 +31,6 @@ export interface CaseViewPageProps extends CaseViewBaseProps {
   caseId: string;
   fetchCase: () => void;
   caseData: Case;
-  updateCase: (newCase: Case) => void;
 }
 
 export interface OnUpdateFields {

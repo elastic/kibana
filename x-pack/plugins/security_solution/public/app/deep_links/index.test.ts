@@ -160,5 +160,22 @@ describe('deepLinks', () => {
       });
       expect(findDeepLink(SecurityPageName.detectionAndResponse, deepLinks)).toBeTruthy();
     });
+
+    it('should return NO kubernetes link when enableExperimental.kubernetesEnabled === false', () => {
+      const deepLinks = getDeepLinks({
+        ...mockGlobalState.app.enableExperimental,
+        kubernetesEnabled: false,
+      });
+
+      expect(findDeepLink(SecurityPageName.kubernetes, deepLinks)).toBeFalsy();
+    });
+
+    it('should return kubernetes link when enableExperimental.kubernetesEnabled === true', () => {
+      const deepLinks = getDeepLinks({
+        ...mockGlobalState.app.enableExperimental,
+        kubernetesEnabled: true,
+      });
+      expect(findDeepLink(SecurityPageName.kubernetes, deepLinks)).toBeTruthy();
+    });
   });
 });

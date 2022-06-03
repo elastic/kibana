@@ -83,7 +83,12 @@ export function getRumDistributionConfig({ dataView }: ConfigProps): SeriesConfi
     ],
     definitionFields: [SERVICE_NAME, SERVICE_ENVIRONMENT],
     metricOptions: [
-      { label: PAGE_LOAD_TIME_LABEL, id: TRANSACTION_DURATION, field: TRANSACTION_DURATION },
+      {
+        label: PAGE_LOAD_TIME_LABEL,
+        id: TRANSACTION_DURATION,
+        field: TRANSACTION_DURATION,
+        showPercentileAnnotations: true,
+      },
       {
         label: BACKEND_TIME_LABEL,
         id: TRANSACTION_TIME_TO_FIRST_BYTE,
