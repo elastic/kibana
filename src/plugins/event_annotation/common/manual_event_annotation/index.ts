@@ -8,6 +8,8 @@
 
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { AvailableAnnotationIcons } from '../constants';
+
 import type {
   ManualRangeEventAnnotationArgs,
   ManualRangeEventAnnotationOutput,
@@ -65,6 +67,8 @@ export const manualPointEventAnnotation: ExpressionFunctionDefinition<
       help: i18n.translate('eventAnnotation.manualAnnotation.args.icon', {
         defaultMessage: 'An optional icon used for annotation lines',
       }),
+      options: [...Object.values(AvailableAnnotationIcons)],
+      strict: true,
     },
     textVisibility: {
       types: ['boolean'],

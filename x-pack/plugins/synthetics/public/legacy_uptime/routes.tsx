@@ -34,6 +34,7 @@ import {
   NotFoundPage,
   SettingsPage,
   MonitorManagementBottomBar,
+  APIKeysButton,
 } from './pages';
 import { CertificatesPage } from './pages/certificates';
 import { UptimePage, useUptimeTelemetry } from './hooks';
@@ -72,7 +73,7 @@ type RouteProps = {
   };
 } & EuiPageTemplateProps;
 
-const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
+const baseTitle = i18n.translate('xpack.synthetics.routes.legacyBaseTitle', {
   defaultMessage: 'Uptime - Kibana',
 });
 
@@ -272,7 +273,7 @@ const getRoutes = (): RouteProps[] => {
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
-        rightSideItems: [<AddMonitorBtn />],
+        rightSideItems: [<AddMonitorBtn />, <APIKeysButton />],
       },
     },
   ];

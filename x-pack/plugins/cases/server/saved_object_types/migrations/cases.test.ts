@@ -9,13 +9,14 @@ import { SavedObjectSanitizedDoc } from '@kbn/core/server';
 import {
   CaseAttributes,
   CaseFullExternalService,
+  CaseSeverity,
   ConnectorTypes,
   NONE_CONNECTOR_ID,
 } from '../../../common/api';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import { getNoneCaseConnector } from '../../common/utils';
 import { createExternalService, ESCaseConnectorWithId } from '../../services/test_utils';
-import { addDuration, caseConnectorIdMigration, removeCaseType } from './cases';
+import { addDuration, addSeverity, caseConnectorIdMigration, removeCaseType } from './cases';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 const create_7_14_0_case = ({
@@ -492,6 +493,47 @@ describe('case migrations', () => {
         attributes: {
           ...doc.attributes,
           duration: 0,
+        },
+      });
+    });
+  });
+
+  describe('add severity', () => {
+    it('adds the severity correctly when none is present', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          created_at: '2021-11-23T19:00:00Z',
+          closed_at: '2021-11-23T19:02:00Z',
+        },
+        type: 'abc',
+        references: [],
+      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+      expect(addSeverity(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          severity: CaseSeverity.LOW,
+        },
+      });
+    });
+
+    it('keeps the existing value if the field already exists', () => {
+      const doc = {
+        id: '123',
+        attributes: {
+          severity: CaseSeverity.CRITICAL,
+          created_at: '2021-11-23T19:00:00Z',
+          closed_at: '2021-11-23T19:02:00Z',
+        },
+        type: 'abc',
+        references: [],
+      } as unknown as SavedObjectSanitizedDoc<CaseAttributes>;
+      expect(addSeverity(doc)).toEqual({
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          severity: CaseSeverity.CRITICAL,
         },
       });
     });

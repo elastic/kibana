@@ -152,6 +152,9 @@ export const createCaseSavedObjectType = (
           },
         },
       },
+      severity: {
+        type: 'keyword',
+      },
     },
   },
   migrations: caseMigrations,

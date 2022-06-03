@@ -45,7 +45,7 @@ export const Actions = ({ id, name, onUpdate, isDisabled, errorSummaries, monito
         <EuiButtonIcon
           isDisabled={isDisabled}
           iconType="pencil"
-          href={`${basePath}/app/uptime/edit-monitor/${Buffer.from(id, 'utf8').toString('base64')}`}
+          href={`${basePath}/app/uptime/edit-monitor/${id}`}
           aria-label={EDIT_MONITOR_LABEL}
           data-test-subj="monitorManagementEditMonitor"
         />

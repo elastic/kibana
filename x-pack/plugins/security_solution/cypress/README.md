@@ -64,6 +64,18 @@ A headless browser is a browser simulation program that does not have a user int
 
 This is the configuration used by CI. It uses the FTR to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section), and then executes cypress against this stack. You can find this configuration in `x-pack/test/security_solution_cypress`
 
+Tests run on buildkite PR pipeline is parallelized(current value = 4 parallel jobs). It can be configured in [.buildkite/pipelines/pull_request/security_solution.yml](https://github.com/elastic/kibana/blob/main/.buildkite/pipelines/pull_request/security_solution.yml) with property `parallelism` 
+
+```yml
+    ...
+    agents:
+      queue: ci-group-6
+    depends_on: build
+    timeout_in_minutes: 120
+    parallelism: 4
+    ...
+```
+
 #### Custom Targets
 
 This configuration runs cypress tests against an arbitrary host.
@@ -203,7 +215,7 @@ yarn kbn bootstrap
 
 # load auditbeat data needed for test execution (which FTR normally does for us)
 cd x-pack/plugins/security_solution
-node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http(s)://<username>:<password>@<elsUrl> --kibana-url http(s)://<userName>:<password>@<kbnUrl>
+node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http(s)://<username>:<password>@<elsUrl> --kibana-url http(s)://<userName>:<password>@<kbnUrl>
 
 # launch the cypress test runner with overridden environment variables
 cd x-pack/plugins/security_solution
@@ -221,7 +233,7 @@ yarn kbn bootstrap
 
 # load auditbeat data needed for test execution (which FTR normally does for us)
 cd x-pack/plugins/security_solution
-node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http(s)://<username>:<password>@<elsUrl> --kibana-url http(s)://<userName>:<password>@<kbnUrl>
+node ../../../scripts/es_archiver load auditbeat --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http(s)://<username>:<password>@<elsUrl> --kibana-url http(s)://<userName>:<password>@<kbnUrl>
 
 # launch the cypress test runner with overridden environment variables
 cd x-pack/plugins/security_solution
@@ -344,13 +356,13 @@ We use es_archiver to manage the data that our Cypress tests need.
 3. When you are sure that you have all the data you need run the following command from: `x-pack/plugins/security_solution`
 
 ```sh
-node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
+node ../../../scripts/es_archiver save <nameOfTheFolderWhereDataIsSaved> <indexPatternsToBeSaved>  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://<elasticsearchUsername>:<elasticsearchPassword>@<elasticsearchHost>:<elasticsearchPort>
 ```
 
 Example:
 
 ```sh
-node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.js --es-url http://elastic:changeme@localhost:9220
+node ../../../scripts/es_archiver save custom_rules ".kibana",".siem-signal*"  --dir ../../test/security_solution_cypress/es_archives --config ../../../test/functional/config.base.js --es-url http://elastic:changeme@localhost:9220
 ```
 
 Note that the command will create the folder if it does not exist.

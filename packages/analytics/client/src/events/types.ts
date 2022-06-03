@@ -13,6 +13,18 @@ import type { ShipperName } from '../analytics_client';
  */
 export interface EventContext {
   /**
+   * The UUID of the cluster
+   */
+  cluster_uuid?: string;
+  /**
+   * The name of the cluster.
+   */
+  cluster_name?: string;
+  /**
+   * The license ID.
+   */
+  license_id?: string;
+  /**
    * The unique user ID.
    */
   userId?: string;
@@ -20,6 +32,10 @@ export interface EventContext {
    * The Cloud ID.
    */
   cloudId?: string;
+  /**
+   * `true` if the user is logged in via the Elastic Cloud authentication provider.
+   */
+  isElasticCloudUser?: boolean;
   /**
    * The product's version.
    */
@@ -36,7 +52,10 @@ export interface EventContext {
    * The current entity ID (dashboard ID, visualization ID, etc.).
    */
   entityId?: string;
-  // TODO: Extend with known keys
+
+  /**
+   * Additional keys are allowed.
+   */
   [key: string]: unknown;
 }
 

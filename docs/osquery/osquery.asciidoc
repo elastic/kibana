@@ -127,6 +127,8 @@ The Osquery Manager integration includes a set of prebuilt Osquery packs that yo
 
 You can modify the scheduled agent policies for a prebuilt pack, but you cannot edit queries in the pack. To edit the queries, you must first create a copy of the pack.
 
+For information about the prebuilt packs that are available, refer to <<prebuilt-packs>>.
+
 [float]
 [[load-prebuilt-packs]]
 === Load and activate prebuilt Elastic packs
@@ -310,3 +312,5 @@ https://osquery.readthedocs.io/en/stable/deployment/logging/#differential-logs[d
 include::manage-integration.asciidoc[]
 
 include::exported-fields-reference.asciidoc[]
+
+include::prebuilt-packs.asciidoc[]

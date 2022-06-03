@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const toasts = getService('toasts');
 
-  describe('Kibana spaces page meets a11y validations', () => {
+  describe('Kibana Spaces Accessibility', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/empty_kibana');
       await PageObjects.common.navigateToApp('home');

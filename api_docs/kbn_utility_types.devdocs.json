@@ -251,6 +251,22 @@
       },
       {
         "parentPluginId": "@kbn/utility-types",
+        "id": "def-server.AwaitedProperties",
+        "type": "Type",
+        "tags": [],
+        "label": "AwaitedProperties",
+        "description": [
+          "\nUnwrap all promise attributes of the given type"
+        ],
+        "signature": [
+          "{ [K in keyof T]: Awaited<T[K]>; }"
+        ],
+        "path": "packages/kbn-utility-types/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
         "id": "def-server.Class",
         "type": "Type",
         "tags": [
@@ -341,6 +357,22 @@
         ],
         "signature": [
           "{ [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never; }[keyof T]"
+        ],
+        "path": "packages/kbn-utility-types/src/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/utility-types",
+        "id": "def-server.OneOf",
+        "type": "Type",
+        "tags": [],
+        "label": "OneOf",
+        "description": [
+          "\nXOR for some properties applied to a type\n(XOR is one of these but not both or neither)\n\nUsage: OneOf<typeToExtend, one | but | not | multiple | of | these | are | required>\n\nTo require aria-label or aria-labelledby but not both\nExample: OneOf<Type, 'aria-label' | 'aria-labelledby'>"
+        ],
+        "signature": [
+          "Omit<T, K> & { [k in K]: Pick<Required<T>, k> & { [k1 in Exclude<K, k>]?: undefined; }; }[K]"
         ],
         "path": "packages/kbn-utility-types/src/index.ts",
         "deprecated": false,

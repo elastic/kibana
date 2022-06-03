@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import { CoreStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { ReactElement, ReactNode } from 'react';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
@@ -21,9 +21,8 @@ import {
   CasesByAlertId,
   CasesByAlertIDRequest,
   CasesFindRequest,
-  CasesResponse,
+  CasesMetricsRequest,
   CasesStatusRequest,
-  CasesStatusResponse,
   CommentRequestAlertType,
   CommentRequestUserType,
 } from '../common/api';
@@ -36,6 +35,8 @@ import type { GetCasesProps } from './client/ui/get_cases';
 import { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_selector_modal';
 import { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
 import { GetRecentCasesProps } from './client/ui/get_recent_cases';
+import { Cases, CasesStatus, CasesMetrics } from '../common/ui';
+import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 
 export interface CasesPluginSetup {
   security: SecurityPluginSetup;
@@ -76,8 +77,9 @@ export interface CasesUiStart {
   api: {
     getRelatedCases: (alertId: string, query: CasesByAlertIDRequest) => Promise<CasesByAlertId>;
     cases: {
-      find: (query: CasesFindRequest) => Promise<CasesResponse>;
-      getAllCasesMetrics: (query: CasesStatusRequest) => Promise<CasesStatusResponse>;
+      find: (query: CasesFindRequest, signal?: AbortSignal) => Promise<Cases>;
+      getCasesStatus: (query: CasesStatusRequest, signal?: AbortSignal) => Promise<CasesStatus>;
+      getCasesMetrics: (query: CasesMetricsRequest, signal?: AbortSignal) => Promise<CasesMetrics>;
     };
   };
   ui: {
@@ -128,8 +130,11 @@ export interface CasesUiStart {
      */
     canUseCases: (owners?: CasesOwners[]) => { crud: boolean; read: boolean };
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
+    groupAlertsByRule: typeof groupAlertsByRule;
   };
 }
 
 export type SupportedCaseAttachment = CommentRequestAlertType | CommentRequestUserType;
 export type CaseAttachments = SupportedCaseAttachment[];
+
+export type ServerError = IHttpFetchError<ResponseErrorBody>;

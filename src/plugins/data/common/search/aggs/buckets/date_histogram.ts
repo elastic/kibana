@@ -10,8 +10,8 @@ import { get, noop, find, every, omitBy, isNil } from 'lodash';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 
+import { DataViewFieldBase } from '@kbn/es-query';
 import { KBN_FIELD_TYPES, TimeRange, TimeRangeBounds, UI_SETTINGS } from '../../..';
-import { IFieldType } from '../../..';
 
 import { ExtendedBounds, extendedBoundsToAst, timerangeToAst } from '../../expressions';
 import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
@@ -59,7 +59,7 @@ export function isDateHistogramBucketAggConfig(agg: any): agg is IBucketDateHist
 }
 
 export interface AggParamsDateHistogram extends BaseAggParams {
-  field?: IFieldType | string;
+  field?: DataViewFieldBase | string;
   timeRange?: TimeRange;
   useNormalizedEsInterval?: boolean;
   scaleMetricValues?: boolean;
@@ -310,7 +310,11 @@ export const getDateHistogramBucketAgg = ({
             return;
           }
 
-          if (agg.params.extendToTimeRange && agg.buckets.hasBounds()) {
+          if (
+            agg.params.extendToTimeRange &&
+            agg.buckets.hasBounds() &&
+            !agg.aggConfigs.hasTimeShifts()
+          ) {
             const bucketBounds = agg.buckets.getBounds()!;
             output.params.extended_bounds = omitBy(
               {

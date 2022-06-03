@@ -36,7 +36,13 @@ export const createCspBenchmarkIntegrationFixture = ({
     name: chance.sentence(),
     agents: chance.integer({ min: 0 }),
   },
+  rules = {
+    all: chance.integer(),
+    enabled: chance.integer(),
+    disabled: chance.integer(),
+  },
 }: CreateCspBenchmarkIntegrationFixtureInput = {}): Benchmark => ({
   package_policy,
   agent_policy,
+  rules,
 });

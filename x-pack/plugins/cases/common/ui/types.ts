@@ -13,10 +13,14 @@ import {
   ActionConnector,
   CaseExternalServiceBasic,
   CaseUserActionResponse,
-  CaseMetricsResponse,
+  SingleCaseMetricsResponse,
   CommentResponse,
   CaseResponse,
   CommentResponseAlertsType,
+  CasesFindResponse,
+  CasesStatusResponse,
+  CasesMetricsResponse,
+  CaseSeverity,
 } from '../api';
 import { SnakeToCamelCase } from '../types';
 
@@ -24,7 +28,7 @@ type DeepRequired<T> = { [K in keyof T]: DeepRequired<T[K]> } & Required<T>;
 
 export interface CasesContextFeatures {
   alerts: { sync?: boolean; enabled?: boolean };
-  metrics: CaseMetricsFeature[];
+  metrics: SingleCaseMetricsFeature[];
 }
 
 export type CasesFeaturesAllRequired = DeepRequired<CasesContextFeatures>;
@@ -41,6 +45,9 @@ export const StatusAll = 'all' as const;
 export type StatusAllType = typeof StatusAll;
 
 export type CaseStatusWithAllStatus = CaseStatuses | StatusAllType;
+
+export const SeverityAll = 'all' as const;
+export type CaseSeverityWithAll = CaseSeverity | typeof SeverityAll;
 
 /**
  * The type for the `refreshRef` prop (a `React.Ref`) defined by the `CaseViewComponentProps`.
@@ -61,6 +68,9 @@ export type AlertComment = SnakeToCamelCase<CommentResponseAlertsType>;
 export type CaseUserActions = SnakeToCamelCase<CaseUserActionResponse>;
 export type CaseExternalService = SnakeToCamelCase<CaseExternalServiceBasic>;
 export type Case = Omit<SnakeToCamelCase<CaseResponse>, 'comments'> & { comments: Comment[] };
+export type Cases = Omit<SnakeToCamelCase<CasesFindResponse>, 'cases'> & { cases: Case[] };
+export type CasesStatus = SnakeToCamelCase<CasesStatusResponse>;
+export type CasesMetrics = SnakeToCamelCase<CasesMetricsResponse>;
 
 export interface ResolvedCase {
   case: Case;
@@ -78,27 +88,15 @@ export interface QueryParams {
 
 export interface FilterOptions {
   search: string;
+  severity: CaseSeverityWithAll;
   status: CaseStatusWithAllStatus;
   tags: string[];
   reporters: User[];
   owner: string[];
 }
 
-export interface CasesStatus {
-  countClosedCases: number | null;
-  countOpenCases: number | null;
-  countInProgressCases: number | null;
-}
-
-export interface AllCases extends CasesStatus {
-  cases: Case[];
-  page: number;
-  perPage: number;
-  total: number;
-}
-
-export type CaseMetrics = CaseMetricsResponse;
-export type CaseMetricsFeature =
+export type SingleCaseMetrics = SingleCaseMetricsResponse;
+export type SingleCaseMetricsFeature =
   | 'alerts.count'
   | 'alerts.users'
   | 'alerts.hosts'
@@ -151,14 +149,12 @@ export interface FieldMappings {
 
 export type UpdateKey = keyof Pick<
   CasePatchRequest,
-  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings'
+  'connector' | 'description' | 'status' | 'tags' | 'title' | 'settings' | 'severity'
 >;
 
 export interface UpdateByKey {
   updateKey: UpdateKey;
   updateValue: CasePatchRequest[UpdateKey];
-  fetchCaseUserActions?: (caseId: string, caseConnectorId: string) => void;
-  updateCase?: (newCase: Case) => void;
   caseData: Case;
   onSuccess?: () => void;
   onError?: () => void;

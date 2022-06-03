@@ -12,6 +12,7 @@ import { useNavLinkService } from '../../services';
 // @ts-expect-error
 import { shortcutManager } from '../../lib/shortcut_manager';
 import { CanvasRouter } from '../../routes';
+import { Flyouts } from '../flyouts';
 
 class ShortcutManagerContextWrapper extends React.Component {
   static childContextTypes = {
@@ -40,6 +41,7 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
     <ShortcutManagerContextWrapper>
       <div className="canvas canvasContainer">
         <CanvasRouter history={history} />
+        <Flyouts />
       </div>
     </ShortcutManagerContextWrapper>
   );

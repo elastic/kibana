@@ -135,6 +135,7 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
     : undefined;
 
   let resultAnnotations = [...inputAnnotations] as XYAnnotationLayerConfig['annotations'];
+
   if (!currentConfig) {
     resultAnnotations.push({
       label: defaultAnnotationLabel,

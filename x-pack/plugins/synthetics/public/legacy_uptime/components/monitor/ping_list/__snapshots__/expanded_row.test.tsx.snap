@@ -165,7 +165,7 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
                 Body size is 1MB.
               </div>
               <div
-                class="euiSpacer euiSpacer--s"
+                class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
               />
               <div
                 class="euiText euiText--medium"

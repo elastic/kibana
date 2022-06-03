@@ -2,7 +2,8 @@
   height: 100%;
 }
 
-.lnsTableCell {
+// only apply truncation inside of a table cell (not within popover)
+.lnsDataTableContainer .lnsTableCell {
   @include euiTextTruncate;
 }
 

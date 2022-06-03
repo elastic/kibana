@@ -69,6 +69,7 @@ describe('interpreter/functions#heatmap', () => {
           logDatatable: (name: string, datatable: Datatable) => {
             loggedTable = datatable;
           },
+          reset: () => {},
         },
       },
     };

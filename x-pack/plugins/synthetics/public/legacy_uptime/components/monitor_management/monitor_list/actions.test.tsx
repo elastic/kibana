@@ -19,7 +19,7 @@ describe('<Actions />', () => {
 
     expect(screen.getByLabelText('Edit monitor')).toHaveAttribute(
       'href',
-      '/app/uptime/edit-monitor/dGVzdC1pZA=='
+      '/app/uptime/edit-monitor/test-id'
     );
   });
 });

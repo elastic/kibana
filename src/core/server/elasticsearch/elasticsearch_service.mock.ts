@@ -25,6 +25,7 @@ import {
 } from './types';
 import { NodesVersionCompatibility } from './version_check/ensure_es_version';
 import { ServiceStatus, ServiceStatusLevels } from '../status';
+import type { ClusterInfo } from './get_cluster_info';
 
 type MockedElasticSearchServicePreboot = jest.Mocked<ElasticsearchServicePreboot>;
 
@@ -88,6 +89,11 @@ const createInternalSetupContractMock = () => {
       incompatibleNodes: [],
       warningNodes: [],
       kibanaVersion: '8.0.0',
+    }),
+    clusterInfo$: new BehaviorSubject<ClusterInfo>({
+      cluster_uuid: 'cluster-uuid',
+      cluster_name: 'cluster-name',
+      cluster_version: '8.0.0',
     }),
     status$: new BehaviorSubject<ServiceStatus<ElasticsearchStatusMeta>>({
       level: ServiceStatusLevels.available,

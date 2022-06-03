@@ -343,6 +343,7 @@ function getExpressionForLayer(
     return {
       type: 'expression',
       chain: [
+        { type: 'function', function: 'kibana', arguments: {} },
         buildExpressionFunction<EsaggsExpressionFunctionDefinition>('esaggs', {
           index: buildExpression([
             buildExpressionFunction<IndexPatternLoadExpressionFunctionDefinition>(

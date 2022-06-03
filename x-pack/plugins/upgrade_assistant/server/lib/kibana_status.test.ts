@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { deprecationsServiceMock } from '@kbn/core/server/mocks';
 import { DomainDeprecationDetails } from '@kbn/core/server/types';
 

@@ -1,7 +1,4 @@
 {
   "name": "bar",
-  "version": "1.0.0",
-  "dependencies": {
-    "foo": "link:../foo"
-  }
+  "version": "1.0.0"
 }

@@ -131,6 +131,7 @@ export const AlertsByStatus = ({ signalIndexName }: AlertsByStatusProps) => {
           <HeaderSection
             id={DETECTION_RESPONSE_ALERTS_BY_STATUS_ID}
             title={ALERTS_TEXT}
+            titleSize="s"
             subtitle={<LastUpdatedAt isUpdating={loading} updatedAt={updatedAt} />}
             inspectMultiple
             toggleStatus={toggleStatus}

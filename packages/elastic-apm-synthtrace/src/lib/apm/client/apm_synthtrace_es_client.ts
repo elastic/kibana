@@ -7,6 +7,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import { cleanWriteTargets } from '../../utils/clean_write_targets';
 import { getApmWriteTargets } from '../utils/get_apm_write_targets';
 import { Logger } from '../../utils/create_logger';
@@ -15,6 +16,7 @@ import { EntityIterable } from '../../entity_iterable';
 import { StreamProcessor } from '../../stream_processor';
 import { EntityStreams } from '../../entity_streams';
 import { Fields } from '../../entity';
+import { StreamAggregator } from '../../stream_aggregator';
 
 export interface StreamToBulkOptions<TFields extends Fields = ApmFields> {
   concurrency?: number;
@@ -57,7 +59,7 @@ export class ApmSynthtraceEsClient {
     return info.version.number;
   }
 
-  async clean() {
+  async clean(dataStreams?: string[]) {
     return this.getWriteTargets().then(async (writeTargets) => {
       const indices = Object.values(writeTargets);
       this.logger.info(`Attempting to clean: ${indices}`);
@@ -68,7 +70,7 @@ export class ApmSynthtraceEsClient {
           logger: this.logger,
         });
       }
-      for (const name of indices) {
+      for (const name of indices.concat(dataStreams ?? [])) {
         const dataStream = await this.client.indices.getDataStream({ name }, { ignore: [404] });
         if (dataStream.data_streams && dataStream.data_streams.length > 0) {
           this.logger.debug(`Deleting datastream: ${name}`);
@@ -149,7 +151,6 @@ export class ApmSynthtraceEsClient {
     streamProcessor?: StreamProcessor
   ) {
     const dataStream = Array.isArray(events) ? new EntityStreams(events) : events;
-
     const sp =
       streamProcessor != null
         ? streamProcessor
@@ -165,7 +166,7 @@ export class ApmSynthtraceEsClient {
       await this.logger.perf('enumerate_scenario', async () => {
         // @ts-ignore
         // We just want to enumerate
-        for await (item of sp.streamToDocumentAsync(sp.toDocument, dataStream)) {
+        for await (item of sp.streamToDocumentAsync((e) => sp.toDocument(e), dataStream)) {
           if (yielded === 0) {
             options.itemStartStopCallback?.apply(this, [item, false]);
             yielded++;
@@ -185,7 +186,7 @@ export class ApmSynthtraceEsClient {
       flushBytes: 500000,
       // TODO https://github.com/elastic/elasticsearch-js/issues/1610
       // having to map here is awkward, it'd be better to map just before serialization.
-      datasource: sp.streamToDocumentAsync(sp.toDocument, dataStream),
+      datasource: sp.streamToDocumentAsync((e) => sp.toDocument(e), dataStream),
       onDrop: (doc) => {
         this.logger.info(JSON.stringify(doc, null, 2));
       },
@@ -197,11 +198,12 @@ export class ApmSynthtraceEsClient {
           options?.itemStartStopCallback?.apply(this, [item, false]);
           yielded++;
         }
-        const index = options?.mapToIndex
-          ? options?.mapToIndex(item)
-          : !this.forceLegacyIndices
-          ? StreamProcessor.getDataStreamForEvent(item, writeTargets)
-          : StreamProcessor.getIndexForEvent(item, writeTargets);
+        let index = options?.mapToIndex ? options?.mapToIndex(item) : null;
+        if (!index) {
+          index = !this.forceLegacyIndices
+            ? sp.getDataStreamForEvent(item, writeTargets)
+            : StreamProcessor.getIndexForEvent(item, writeTargets);
+        }
         return { create: { _index: index } };
       },
     });
@@ -210,5 +212,66 @@ export class ApmSynthtraceEsClient {
     if (this.refreshAfterIndex) {
       await this.refresh();
     }
+  }
+
+  async createDataStream(aggregator: StreamAggregator) {
+    const datastreamName = aggregator.getDataStreamName();
+    const mappings = aggregator.getMappings();
+    const dimensions = aggregator.getDimensions();
+
+    const indexSettings: IndicesIndexSettings = { lifecycle: { name: 'metrics' } };
+    if (dimensions.length > 0) {
+      indexSettings.mode = 'time_series';
+      indexSettings.routing_path = dimensions;
+    }
+
+    await this.client.cluster.putComponentTemplate({
+      name: `${datastreamName}-mappings`,
+      template: {
+        mappings,
+      },
+      _meta: {
+        description: `Mappings for ${datastreamName}-*`,
+      },
+    });
+    this.logger.info(`Created mapping component template for ${datastreamName}-*`);
+
+    await this.client.cluster.putComponentTemplate({
+      name: `${datastreamName}-settings`,
+      template: {
+        settings: {
+          index: indexSettings,
+        },
+      },
+      _meta: {
+        description: `Settings for ${datastreamName}-*`,
+      },
+    });
+    this.logger.info(`Created settings component template for ${datastreamName}-*`);
+
+    await this.client.indices.putIndexTemplate({
+      name: `${datastreamName}-index_template`,
+      index_patterns: [`${datastreamName}-*`],
+      data_stream: {},
+      composed_of: [`${datastreamName}-mappings`, `${datastreamName}-settings`],
+      priority: 500,
+    });
+    this.logger.info(`Created index template for ${datastreamName}-*`);
+
+    const dataStreamWithNamespace = datastreamName + '-default';
+    const getDataStreamResponse = await this.client.indices.getDataStream(
+      {
+        name: dataStreamWithNamespace,
+      },
+      { ignore: [404] }
+    );
+    if (getDataStreamResponse.data_streams && getDataStreamResponse.data_streams.length === 0) {
+      await this.client.indices.createDataStream({ name: dataStreamWithNamespace });
+      this.logger.info(`Created data stream: ${dataStreamWithNamespace}.`);
+    } else {
+      this.logger.info(`Data stream: ${dataStreamWithNamespace} already exists.`);
+    }
+
+    await aggregator.bootstrapElasticsearch(this.client);
   }
 }

@@ -5,10 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import styled from 'styled-components';
-import { EuiSpacer, EuiCodeBlock, EuiButtonGroup, EuiCallOut } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiCodeBlock,
+  EuiButtonGroup,
+  EuiCallOut,
+  EuiButton,
+  EuiCopy,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { PLATFORM_TYPE } from '../hooks';
 import { PLATFORM_OPTIONS, usePlatform } from '../hooks';
@@ -20,6 +28,8 @@ interface Props {
   linuxDebCommand: string;
   linuxRpmCommand: string;
   isK8s: boolean;
+  fullCopyButton?: boolean;
+  onCopy?: () => void;
 }
 
 // Otherwise the copy button is over the text
@@ -36,8 +46,11 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   linuxDebCommand,
   linuxRpmCommand,
   isK8s,
+  fullCopyButton,
+  onCopy,
 }) => {
   const { platform, setPlatform } = usePlatform();
+  const [copyButtonClicked, setCopyButtonClicked] = useState(false);
 
   const systemPackageCallout = (
     <EuiCallOut
@@ -50,10 +63,26 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
+  const commandsByPlatform: Record<PLATFORM_TYPE, string> = {
+    linux: linuxCommand,
+    mac: macCommand,
+    windows: windowsCommand,
+    deb: linuxDebCommand,
+    rpm: linuxRpmCommand,
+  };
+  const onTextAreaClick = () => {
+    if (onCopy) onCopy();
+  };
+  const onCopyButtonClick = (copy: () => void) => {
+    copy();
+    setCopyButtonClicked(true);
+    if (onCopy) onCopy();
+  };
+
   return (
     <>
       {isK8s ? (
-        <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
+        <EuiCodeBlock fontSize="m" isCopyable={!fullCopyButton} paddingSize="m">
           <CommandCode>{K8S_COMMAND}</CommandCode>
         </EuiCodeBlock>
       ) : (
@@ -67,38 +96,48 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             })}
           />
           <EuiSpacer size="s" />
-          {platform === 'linux' && (
-            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{linuxCommand}</CommandCode>
-            </EuiCodeBlock>
-          )}
-          {platform === 'mac' && (
-            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{macCommand}</CommandCode>
-            </EuiCodeBlock>
-          )}
-          {platform === 'windows' && (
-            <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-              <CommandCode>{windowsCommand}</CommandCode>
-            </EuiCodeBlock>
-          )}
-          {platform === 'deb' && (
+          {(platform === 'deb' || platform === 'rpm') && (
             <>
               {systemPackageCallout}
               <EuiSpacer size="m" />
-              <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-                <CommandCode>{linuxDebCommand}</CommandCode>
-              </EuiCodeBlock>
             </>
           )}
-          {platform === 'rpm' && (
-            <>
-              {systemPackageCallout}
-              <EuiSpacer size="m" />
-              <EuiCodeBlock fontSize="m" isCopyable={true} paddingSize="m">
-                <CommandCode>{linuxRpmCommand}</CommandCode>
-              </EuiCodeBlock>
-            </>
+
+          <EuiCodeBlock
+            onClick={onTextAreaClick}
+            fontSize="m"
+            isCopyable={!fullCopyButton}
+            paddingSize="m"
+            css={`
+              max-width: 1100px;
+            `}
+          >
+            <CommandCode>{commandsByPlatform[platform]}</CommandCode>
+          </EuiCodeBlock>
+          <EuiSpacer size="s" />
+          {fullCopyButton && (
+            <EuiCopy textToCopy={commandsByPlatform[platform]}>
+              {(copy) => (
+                <EuiButton
+                  color="primary"
+                  iconType="copyClipboard"
+                  size="m"
+                  onClick={() => onCopyButtonClick(copy)}
+                >
+                  {copyButtonClicked ? (
+                    <FormattedMessage
+                      id="xpack.fleet.enrollmentInstructions.copyButtonClicked"
+                      defaultMessage="Copied"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.fleet.enrollmentInstructions.copyButton"
+                      defaultMessage="Copy to clipboard"
+                    />
+                  )}
+                </EuiButton>
+              )}
+            </EuiCopy>
           )}
         </>
       )}

@@ -588,20 +588,20 @@
             "path": "src/plugins/embeddable/public/lib/attribute_service/attribute_service.tsx"
           },
           {
-            "plugin": "presentationUtil",
-            "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
-          },
-          {
-            "plugin": "presentationUtil",
-            "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
-          },
-          {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
           },
           {
             "plugin": "discover",
             "path": "src/plugins/discover/public/application/main/components/top_nav/on_save_search.tsx"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
+          },
+          {
+            "plugin": "presentationUtil",
+            "path": "src/plugins/presentation_util/public/components/saved_object_save_modal_dashboard.tsx"
           },
           {
             "plugin": "dashboard",
@@ -1608,22 +1608,6 @@
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
           },
           {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/check_for_duplicate_title.ts"
-          },
-          {
-            "plugin": "visualizations",
-            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/check_for_duplicate_title.ts"
-          },
-          {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts"
           },
@@ -1638,6 +1622,22 @@
           {
             "plugin": "savedObjectsTaggingOss",
             "path": "src/plugins/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/display_duplicate_title_confirm_modal.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/check_for_duplicate_title.ts"
+          },
+          {
+            "plugin": "visualizations",
+            "path": "src/plugins/visualizations/public/utils/saved_objects_utils/check_for_duplicate_title.ts"
           },
           {
             "plugin": "dashboard",
@@ -3191,44 +3191,7 @@
           "path": "src/plugins/saved_objects/public/plugin.ts",
           "deprecated": true,
           "removeBy": "8.8.0",
-          "references": [
-            {
-              "plugin": "visualizations",
-              "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
-            },
-            {
-              "plugin": "visualizations",
-              "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx"
-            },
-            {
-              "plugin": "dashboard",
-              "path": "src/plugins/dashboard/public/application/listing/dashboard_listing.tsx"
-            },
-            {
-              "plugin": "maps",
-              "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
-            },
-            {
-              "plugin": "maps",
-              "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
-            },
-            {
-              "plugin": "maps",
-              "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
-            },
-            {
-              "plugin": "graph",
-              "path": "x-pack/plugins/graph/public/apps/listing_route.tsx"
-            },
-            {
-              "plugin": "graph",
-              "path": "x-pack/plugins/graph/public/apps/listing_route.tsx"
-            }
-          ]
+          "references": []
         }
       ],
       "lifecycle": "start",

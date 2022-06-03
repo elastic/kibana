@@ -289,6 +289,14 @@ exports[`XYChart component it renders area 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -297,6 +305,7 @@ exports[`XYChart component it renders area 1`] = `
       }
     }
     legendPosition="top"
+    legendSize={130}
     onBrushEnd={[Function]}
     onElementClick={[Function]}
     onPointerUpdate={[Function]}
@@ -315,14 +324,21 @@ exports[`XYChart component it renders area 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
       Object {
         "boundary": undefined,
+        "customTooltip": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -390,127 +406,447 @@ exports[`XYChart component it renders area 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <AreaSeries
-    areaSeriesStyle={
+  <DataLayers
+    chartHasMoreThanOneBarSeries={false}
+    defaultXScaleType="ordinal"
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }
+    }
+    formattedDatatables={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
         },
       }
     }
-    color={[Function]}
-    data={
+    layers={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerId": "first",
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "area",
+          "showLines": true,
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
         },
       ]
     }
-    enableHistogramMode={false}
-    fit={
+    paletteService={
       Object {
-        "endValue": undefined,
-        "type": "none",
+        "get": [Function],
+        "getAll": [Function],
       }
     }
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
+    shouldShowValueLabels={true}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <AreaSeries
-    areaSeriesStyle={
+    titles={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
         },
       }
     }
-    color={[Function]}
-    data={
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  1652034840000,
+                ],
+                Array [
+                  1652122440000,
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": 1652034840000,
+                },
+                Object {
+                  "type": "return",
+                  "value": 1652122440000,
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "scale": "linear",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": "first",
+            },
+            Object {
+              "accessor": "b",
+              "layer": "first",
+            },
+          ],
         },
       ]
     }
-    enableHistogramMode={false}
-    fit={
-      Object {
-        "endValue": undefined,
-        "type": "none",
-      }
-    }
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "b",
-      ]
-    }
-    yScaleType="linear"
   />
 </Chart>
 `;
@@ -524,6 +860,14 @@ exports[`XYChart component it renders bar 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -532,6 +876,7 @@ exports[`XYChart component it renders bar 1`] = `
       }
     }
     legendPosition="top"
+    legendSize={130}
     onBrushEnd={[Function]}
     onElementClick={[Function]}
     onPointerUpdate={[Function]}
@@ -550,14 +895,21 @@ exports[`XYChart component it renders bar 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
       Object {
         "boundary": undefined,
+        "customTooltip": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -625,139 +977,447 @@ exports[`XYChart component it renders bar 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <BarSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+  <DataLayers
+    chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
-      }
-    }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <BarSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
       }
     }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
+    formattedDatatables={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
         },
       }
     }
-    name={[Function]}
-    splitSeriesAccessors={
+    layers={
       Array [
-        "d",
+        Object {
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerId": "first",
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "bar",
+          "showLines": true,
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+        },
       ]
     }
-    stackAccessors={Array []}
+    paletteService={
+      Object {
+        "get": [Function],
+        "getAll": [Function],
+      }
+    }
+    shouldShowValueLabels={true}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
-        "b",
+        Object {
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  1652034840000,
+                ],
+                Array [
+                  1652122440000,
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": 1652034840000,
+                },
+                Object {
+                  "type": "return",
+                  "value": 1652122440000,
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "scale": "linear",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": "first",
+            },
+            Object {
+              "accessor": "b",
+              "layer": "first",
+            },
+          ],
+        },
       ]
     }
-    yScaleType="linear"
   />
 </Chart>
 `;
@@ -771,6 +1431,14 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -779,6 +1447,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
       }
     }
     legendPosition="top"
+    legendSize={130}
     onBrushEnd={[Function]}
     onElementClick={[Function]}
     onPointerUpdate={[Function]}
@@ -797,14 +1466,21 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
       Object {
         "boundary": undefined,
+        "customTooltip": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -872,139 +1548,447 @@ exports[`XYChart component it renders horizontal bar 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <BarSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+  <DataLayers
+    chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
-      }
-    }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <BarSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
       }
     }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
+    formattedDatatables={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
         },
       }
     }
-    name={[Function]}
-    splitSeriesAccessors={
+    layers={
       Array [
-        "d",
+        Object {
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerId": "first",
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "bar_horizontal",
+          "showLines": true,
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+        },
       ]
     }
-    stackAccessors={Array []}
+    paletteService={
+      Object {
+        "get": [Function],
+        "getAll": [Function],
+      }
+    }
+    shouldShowValueLabels={true}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
-        "b",
+        Object {
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  1652034840000,
+                ],
+                Array [
+                  1652122440000,
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": 1652034840000,
+                },
+                Object {
+                  "type": "return",
+                  "value": 1652122440000,
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "bottom",
+          "scale": "linear",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": "first",
+            },
+            Object {
+              "accessor": "b",
+              "layer": "first",
+            },
+          ],
+        },
       ]
     }
-    yScaleType="linear"
   />
 </Chart>
 `;
@@ -1018,6 +2002,14 @@ exports[`XYChart component it renders line 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -1026,6 +2018,7 @@ exports[`XYChart component it renders line 1`] = `
       }
     }
     legendPosition="top"
+    legendSize={130}
     onBrushEnd={[Function]}
     onElementClick={[Function]}
     onPointerUpdate={[Function]}
@@ -1044,14 +2037,21 @@ exports[`XYChart component it renders line 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
       Object {
         "boundary": undefined,
+        "customTooltip": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -1119,127 +2119,447 @@ exports[`XYChart component it renders line 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <LineSeries
-    areaSeriesStyle={
+  <DataLayers
+    chartHasMoreThanOneBarSeries={false}
+    defaultXScaleType="ordinal"
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }
+    }
+    formattedDatatables={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
         },
       }
     }
-    color={[Function]}
-    data={
+    layers={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerId": "first",
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "line",
+          "showLines": true,
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
         },
       ]
     }
-    enableHistogramMode={false}
-    fit={
+    paletteService={
       Object {
-        "endValue": undefined,
-        "type": "none",
+        "get": [Function],
+        "getAll": [Function],
       }
     }
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
+    shouldShowValueLabels={true}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <LineSeries
-    areaSeriesStyle={
+    titles={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
         },
       }
     }
-    color={[Function]}
-    data={
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  1652034840000,
+                ],
+                Array [
+                  1652122440000,
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": 1652034840000,
+                },
+                Object {
+                  "type": "return",
+                  "value": 1652122440000,
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "scale": "linear",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": "first",
+            },
+            Object {
+              "accessor": "b",
+              "layer": "first",
+            },
+          ],
         },
       ]
     }
-    enableHistogramMode={false}
-    fit={
-      Object {
-        "endValue": undefined,
-        "type": "none",
-      }
-    }
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={Array []}
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "b",
-      ]
-    }
-    yScaleType="linear"
   />
 </Chart>
 `;
@@ -1253,6 +2573,14 @@ exports[`XYChart component it renders stacked area 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -1261,6 +2589,7 @@ exports[`XYChart component it renders stacked area 1`] = `
       }
     }
     legendPosition="top"
+    legendSize={130}
     onBrushEnd={[Function]}
     onElementClick={[Function]}
     onPointerUpdate={[Function]}
@@ -1279,14 +2608,21 @@ exports[`XYChart component it renders stacked area 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
       Object {
         "boundary": undefined,
+        "customTooltip": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -1354,135 +2690,447 @@ exports[`XYChart component it renders stacked area 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <AreaSeries
-    areaSeriesStyle={
+  <DataLayers
+    chartHasMoreThanOneBarSeries={false}
+    defaultXScaleType="ordinal"
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }
+    }
+    formattedDatatables={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
         },
       }
     }
-    color={[Function]}
-    data={
+    layers={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerId": "first",
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "area_stacked",
+          "showLines": true,
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
         },
       ]
     }
-    enableHistogramMode={false}
-    fit={
+    paletteService={
       Object {
-        "endValue": undefined,
-        "type": "none",
+        "get": [Function],
+        "getAll": [Function],
       }
     }
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={
-      Array [
-        "c",
-      ]
-    }
+    shouldShowValueLabels={false}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <AreaSeries
-    areaSeriesStyle={
+    titles={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
         },
       }
     }
-    color={[Function]}
-    data={
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  1652034840000,
+                ],
+                Array [
+                  1652122440000,
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": 1652034840000,
+                },
+                Object {
+                  "type": "return",
+                  "value": 1652122440000,
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "scale": "linear",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": "first",
+            },
+            Object {
+              "accessor": "b",
+              "layer": "first",
+            },
+          ],
         },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
       ]
     }
-    enableHistogramMode={false}
-    fit={
-      Object {
-        "endValue": undefined,
-        "type": "none",
-      }
-    }
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={
-      Array [
-        "c",
-      ]
-    }
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "b",
-      ]
-    }
-    yScaleType="linear"
   />
 </Chart>
 `;
@@ -1496,6 +3144,14 @@ exports[`XYChart component it renders stacked bar 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -1504,6 +3160,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
       }
     }
     legendPosition="top"
+    legendSize={130}
     onBrushEnd={[Function]}
     onElementClick={[Function]}
     onPointerUpdate={[Function]}
@@ -1522,14 +3179,21 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
       Object {
         "boundary": undefined,
+        "customTooltip": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -1597,147 +3261,447 @@ exports[`XYChart component it renders stacked bar 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <BarSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+  <DataLayers
+    chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
-      }
-    }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    name={[Function]}
-    splitSeriesAccessors={
-      Array [
-        "d",
-      ]
-    }
-    stackAccessors={
-      Array [
-        "c",
-      ]
-    }
-    timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
-      Array [
-        "a",
-      ]
-    }
-    yScaleType="linear"
-  />
-  <BarSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
       }
     }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
+    formattedDatatables={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
         },
       }
     }
-    name={[Function]}
-    splitSeriesAccessors={
+    layers={
       Array [
-        "d",
+        Object {
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerId": "first",
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "bar_stacked",
+          "showLines": true,
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+        },
       ]
     }
-    stackAccessors={
-      Array [
-        "c",
-      ]
+    paletteService={
+      Object {
+        "get": [Function],
+        "getAll": [Function],
+      }
     }
+    shouldShowValueLabels={false}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
-        "b",
+        Object {
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  1652034840000,
+                ],
+                Array [
+                  1652122440000,
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": 1652034840000,
+                },
+                Object {
+                  "type": "return",
+                  "value": 1652122440000,
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "scale": "linear",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": "first",
+            },
+            Object {
+              "accessor": "b",
+              "layer": "first",
+            },
+          ],
+        },
       ]
     }
-    yScaleType="linear"
   />
 </Chart>
 `;
@@ -1751,6 +3715,14 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     ariaUseDefaultSummary={true}
     baseTheme={Object {}}
     debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
     legendAction={
       Object {
         "$$typeof": Symbol(react.memo),
@@ -1759,6 +3731,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
       }
     }
     legendPosition="top"
+    legendSize={130}
     onBrushEnd={[Function]}
     onElementClick={[Function]}
     onPointerUpdate={[Function]}
@@ -1777,14 +3750,21 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "maxLines": 0,
           },
         },
+        "markSizeRatio": undefined,
       }
     }
     tooltip={
       Object {
         "boundary": undefined,
+        "customTooltip": undefined,
         "headerFormatter": [Function],
+        "type": "vertical",
       }
     }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
   />
   <Component
     gridLine={
@@ -1852,147 +3832,2964 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
     darkMode={false}
     histogramMode={false}
   />
-  <BarSeries
-    areaSeriesStyle={
-      Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
-        },
-      }
-    }
-    color={[Function]}
-    data={
-      Array [
-        Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
-        },
-        Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
-        },
-      ]
-    }
-    displayValueSettings={
-      Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+  <DataLayers
+    chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+        ],
       }
     }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-a"
-    key="0-0"
-    lineSeriesStyle={
+    formattedDatatables={
       Object {
-        "point": Object {
-          "radius": 5,
-          "visible": false,
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
         },
       }
     }
-    name={[Function]}
-    splitSeriesAccessors={
+    layers={
       Array [
-        "d",
+        Object {
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerId": "first",
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "bar_horizontal_stacked",
+          "showLines": true,
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+        },
       ]
     }
-    stackAccessors={
-      Array [
-        "c",
-      ]
+    paletteService={
+      Object {
+        "get": [Function],
+        "getAll": [Function],
+      }
     }
+    shouldShowValueLabels={false}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
-        "a",
+        Object {
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  1652034840000,
+                ],
+                Array [
+                  1652122440000,
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": 1652034840000,
+                },
+                Object {
+                  "type": "return",
+                  "value": 1652122440000,
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "bottom",
+          "scale": "linear",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": "first",
+            },
+            Object {
+              "accessor": "b",
+              "layer": "first",
+            },
+          ],
+        },
       ]
     }
-    yScaleType="linear"
   />
-  <BarSeries
-    areaSeriesStyle={
+</Chart>
+`;
+
+exports[`XYChart component split chart should render split chart if both, splitRowAccessor and splitColumnAccessor are specified 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Settings
+    allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
+    baseTheme={Object {}}
+    debugState={false}
+    externalPointerEvents={
       Object {
-        "point": Object {
-          "radius": 5,
+        "tooltip": Object {
+          "placement": "right",
           "visible": false,
         },
       }
     }
-    color={[Function]}
-    data={
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
+    legendPosition="top"
+    legendSize={130}
+    onBrushEnd={[Function]}
+    onElementClick={[Function]}
+    onPointerUpdate={[Function]}
+    rotation={0}
+    showLegend={false}
+    showLegendExtra={false}
+    theme={
+      Object {
+        "background": Object {
+          "color": undefined,
+        },
+        "barSeriesStyle": Object {},
+        "chartMargins": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
+        "markSizeRatio": undefined,
+      }
+    }
+    tooltip={
+      Object {
+        "boundary": undefined,
+        "customTooltip": undefined,
+        "headerFormatter": [Function],
+        "type": "vertical",
+      }
+    }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
+  />
+  <Component
+    gridLine={
+      Object {
+        "strokeWidth": 1,
+        "visible": true,
+      }
+    }
+    hide={false}
+    id="x"
+    position="bottom"
+    style={
+      Object {
+        "axisTitle": Object {
+          "padding": undefined,
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "padding": undefined,
+          "rotation": 0,
+          "visible": true,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    timeAxisLayerCount={0}
+    title="c"
+  />
+  <SplitChart
+    columns={
       Array [
         Object {
-          "a": 1,
-          "b": 2,
-          "c": "I",
-          "d": "Foo",
+          "id": "a",
+          "meta": Object {
+            "params": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "type": "number",
+          },
+          "name": "a",
         },
         Object {
-          "a": 1,
-          "b": 5,
-          "c": "J",
-          "d": "Bar",
+          "id": "b",
+          "meta": Object {
+            "params": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+            "type": "number",
+          },
+          "name": "b",
+        },
+        Object {
+          "id": "c",
+          "meta": Object {
+            "field": "order_date",
+            "params": Object {
+              "id": "string",
+            },
+            "sourceParams": Object {
+              "params": Object {
+                "interval": "auto",
+              },
+              "type": "date-histogram",
+            },
+            "type": "date",
+          },
+          "name": "c",
+        },
+        Object {
+          "id": "d",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "ColD",
         },
       ]
     }
-    displayValueSettings={
+    fieldFormats={
       Object {
-        "isAlternatingValueLabel": false,
-        "isValueContainedInElement": false,
-        "overflowConstraints": Array [
-          "chartEdges",
-          "barGeometry",
+        "b": Object {
+          "id": "number",
+          "params": Object {
+            "pattern": "000,0",
+          },
+        },
+        "c": Object {
+          "id": "string",
+        },
+      }
+    }
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
         ],
-        "showValueLabel": false,
-        "valueFormatter": [Function],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+        ],
       }
     }
-    enableHistogramMode={false}
-    groupId="left"
-    id="d-b"
-    key="0-1"
-    lineSeriesStyle={
+    splitColumnAccessor="b"
+    splitRowAccessor="c"
+  />
+  <Component
+    domain={
       Object {
-        "point": Object {
-          "radius": 5,
+        "fit": false,
+        "includeDataFromIds": Array [],
+        "max": NaN,
+        "min": NaN,
+      }
+    }
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
+    groupId="left"
+    id="left"
+    key="left"
+    position="left"
+    style={
+      Object {
+        "axisTitle": Object {
+          "padding": undefined,
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "padding": undefined,
+          "rotation": -90,
           "visible": false,
         },
       }
     }
-    name={[Function]}
-    splitSeriesAccessors={
+    tickFormat={[Function]}
+    ticks={5}
+    title="a"
+  />
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
+  />
+  <DataLayers
+    chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }
+    }
+    formattedDatatables={
+      Object {
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+        },
+      }
+    }
+    layers={
       Array [
-        "d",
+        Object {
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerId": "first",
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "bar",
+          "showLines": true,
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+        },
       ]
     }
-    stackAccessors={
-      Array [
-        "c",
-      ]
+    paletteService={
+      Object {
+        "get": [Function],
+        "getAll": [Function],
+      }
     }
+    shouldShowValueLabels={true}
+    syncColors={false}
     timeZone="UTC"
-    xAccessor="c"
-    xScaleType="ordinal"
-    yAccessors={
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {
+            "b": "b",
+          },
+          "splitRowTitles": Object {
+            "c": "c",
+          },
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
+    valueLabels="hide"
+    yAxesConfiguration={
       Array [
-        "b",
+        Object {
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  1652034840000,
+                ],
+                Array [
+                  1652122440000,
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": 1652034840000,
+                },
+                Object {
+                  "type": "return",
+                  "value": 1652122440000,
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "scale": "linear",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": "first",
+            },
+            Object {
+              "accessor": "b",
+              "layer": "first",
+            },
+          ],
+        },
       ]
     }
-    yScaleType="linear"
+  />
+</Chart>
+`;
+
+exports[`XYChart component split chart should render split chart if splitColumnAccessor is specified 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Settings
+    allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
+    baseTheme={Object {}}
+    debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
+    legendPosition="top"
+    legendSize={130}
+    onBrushEnd={[Function]}
+    onElementClick={[Function]}
+    onPointerUpdate={[Function]}
+    rotation={0}
+    showLegend={false}
+    showLegendExtra={false}
+    theme={
+      Object {
+        "background": Object {
+          "color": undefined,
+        },
+        "barSeriesStyle": Object {},
+        "chartMargins": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
+        "markSizeRatio": undefined,
+      }
+    }
+    tooltip={
+      Object {
+        "boundary": undefined,
+        "customTooltip": undefined,
+        "headerFormatter": [Function],
+        "type": "vertical",
+      }
+    }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
+  />
+  <Component
+    gridLine={
+      Object {
+        "strokeWidth": 1,
+        "visible": true,
+      }
+    }
+    hide={false}
+    id="x"
+    position="bottom"
+    style={
+      Object {
+        "axisTitle": Object {
+          "padding": undefined,
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "padding": undefined,
+          "rotation": 0,
+          "visible": true,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    timeAxisLayerCount={0}
+    title="c"
+  />
+  <SplitChart
+    columns={
+      Array [
+        Object {
+          "id": "a",
+          "meta": Object {
+            "params": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "type": "number",
+          },
+          "name": "a",
+        },
+        Object {
+          "id": "b",
+          "meta": Object {
+            "params": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+            "type": "number",
+          },
+          "name": "b",
+        },
+        Object {
+          "id": "c",
+          "meta": Object {
+            "field": "order_date",
+            "params": Object {
+              "id": "string",
+            },
+            "sourceParams": Object {
+              "params": Object {
+                "interval": "auto",
+              },
+              "type": "date-histogram",
+            },
+            "type": "date",
+          },
+          "name": "c",
+        },
+        Object {
+          "id": "d",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "ColD",
+        },
+      ]
+    }
+    fieldFormats={
+      Object {
+        "b": Object {
+          "id": "number",
+          "params": Object {
+            "pattern": "000,0",
+          },
+        },
+      }
+    }
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }
+    }
+    splitColumnAccessor="b"
+  />
+  <Component
+    domain={
+      Object {
+        "fit": false,
+        "includeDataFromIds": Array [],
+        "max": NaN,
+        "min": NaN,
+      }
+    }
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
+    groupId="left"
+    id="left"
+    key="left"
+    position="left"
+    style={
+      Object {
+        "axisTitle": Object {
+          "padding": undefined,
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "padding": undefined,
+          "rotation": -90,
+          "visible": false,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    ticks={5}
+    title="a"
+  />
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
+  />
+  <DataLayers
+    chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }
+    }
+    formattedDatatables={
+      Object {
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+        },
+      }
+    }
+    layers={
+      Array [
+        Object {
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerId": "first",
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "bar",
+          "showLines": true,
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+        },
+      ]
+    }
+    paletteService={
+      Object {
+        "get": [Function],
+        "getAll": [Function],
+      }
+    }
+    shouldShowValueLabels={true}
+    syncColors={false}
+    timeZone="UTC"
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {
+            "b": "b",
+          },
+          "splitRowTitles": Object {},
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
+    valueLabels="hide"
+    yAxesConfiguration={
+      Array [
+        Object {
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  1652034840000,
+                ],
+                Array [
+                  1652122440000,
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": 1652034840000,
+                },
+                Object {
+                  "type": "return",
+                  "value": 1652122440000,
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "scale": "linear",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": "first",
+            },
+            Object {
+              "accessor": "b",
+              "layer": "first",
+            },
+          ],
+        },
+      ]
+    }
+  />
+</Chart>
+`;
+
+exports[`XYChart component split chart should render split chart if splitRowAccessor is specified 1`] = `
+<Chart
+  renderer="canvas"
+>
+  <Settings
+    allowBrushingLastHistogramBin={false}
+    ariaUseDefaultSummary={true}
+    baseTheme={Object {}}
+    debugState={false}
+    externalPointerEvents={
+      Object {
+        "tooltip": Object {
+          "placement": "right",
+          "visible": false,
+        },
+      }
+    }
+    legendAction={
+      Object {
+        "$$typeof": Symbol(react.memo),
+        "compare": null,
+        "type": [Function],
+      }
+    }
+    legendPosition="top"
+    legendSize={130}
+    onBrushEnd={[Function]}
+    onElementClick={[Function]}
+    onPointerUpdate={[Function]}
+    rotation={0}
+    showLegend={false}
+    showLegendExtra={false}
+    theme={
+      Object {
+        "background": Object {
+          "color": undefined,
+        },
+        "barSeriesStyle": Object {},
+        "chartMargins": Object {},
+        "legend": Object {
+          "labelOptions": Object {
+            "maxLines": 0,
+          },
+        },
+        "markSizeRatio": undefined,
+      }
+    }
+    tooltip={
+      Object {
+        "boundary": undefined,
+        "customTooltip": undefined,
+        "headerFormatter": [Function],
+        "type": "vertical",
+      }
+    }
+  />
+  <XYCurrentTime
+    enabled={false}
+    isDarkMode={false}
+  />
+  <Component
+    gridLine={
+      Object {
+        "strokeWidth": 1,
+        "visible": true,
+      }
+    }
+    hide={false}
+    id="x"
+    position="bottom"
+    style={
+      Object {
+        "axisTitle": Object {
+          "padding": undefined,
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "padding": undefined,
+          "rotation": 0,
+          "visible": true,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    timeAxisLayerCount={0}
+    title="c"
+  />
+  <SplitChart
+    columns={
+      Array [
+        Object {
+          "id": "a",
+          "meta": Object {
+            "params": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+            "type": "number",
+          },
+          "name": "a",
+        },
+        Object {
+          "id": "b",
+          "meta": Object {
+            "params": Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+            "type": "number",
+          },
+          "name": "b",
+        },
+        Object {
+          "id": "c",
+          "meta": Object {
+            "field": "order_date",
+            "params": Object {
+              "id": "string",
+            },
+            "sourceParams": Object {
+              "params": Object {
+                "interval": "auto",
+              },
+              "type": "date-histogram",
+            },
+            "type": "date",
+          },
+          "name": "c",
+        },
+        Object {
+          "id": "d",
+          "meta": Object {
+            "type": "string",
+          },
+          "name": "ColD",
+        },
+      ]
+    }
+    fieldFormats={
+      Object {
+        "b": Object {
+          "id": "number",
+          "params": Object {
+            "pattern": "000,0",
+          },
+        },
+      }
+    }
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }
+    }
+    splitRowAccessor="b"
+  />
+  <Component
+    domain={
+      Object {
+        "fit": false,
+        "includeDataFromIds": Array [],
+        "max": NaN,
+        "min": NaN,
+      }
+    }
+    gridLine={
+      Object {
+        "visible": false,
+      }
+    }
+    groupId="left"
+    id="left"
+    key="left"
+    position="left"
+    style={
+      Object {
+        "axisTitle": Object {
+          "padding": undefined,
+          "visible": true,
+        },
+        "tickLabel": Object {
+          "padding": undefined,
+          "rotation": -90,
+          "visible": false,
+        },
+      }
+    }
+    tickFormat={[Function]}
+    ticks={5}
+    title="a"
+  />
+  <XyEndzones
+    darkMode={false}
+    histogramMode={false}
+  />
+  <DataLayers
+    chartHasMoreThanOneBarSeries={true}
+    defaultXScaleType="ordinal"
+    formatFactory={
+      [MockFunction] {
+        "calls": Array [
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "000,0",
+              },
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "string",
+            },
+          ],
+          Array [
+            Object {
+              "id": "number",
+              "params": Object {
+                "pattern": "0,0.000",
+              },
+            },
+          ],
+        ],
+        "results": Array [
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+          Object {
+            "type": "return",
+            "value": Object {
+              "convert": [MockFunction] {
+                "calls": Array [
+                  Array [
+                    1652034840000,
+                  ],
+                  Array [
+                    1652122440000,
+                  ],
+                ],
+                "results": Array [
+                  Object {
+                    "type": "return",
+                    "value": 1652034840000,
+                  },
+                  Object {
+                    "type": "return",
+                    "value": 1652122440000,
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }
+    }
+    formattedDatatables={
+      Object {
+        "first": Object {
+          "formattedColumns": Object {
+            "c": true,
+          },
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+        },
+      }
+    }
+    layers={
+      Array [
+        Object {
+          "accessors": Array [
+            "a",
+            "b",
+          ],
+          "columnToLabel": "{\\"a\\": \\"Label A\\", \\"b\\": \\"Label B\\", \\"d\\": \\"Label D\\"}",
+          "isHistogram": false,
+          "layerId": "first",
+          "layerType": "data",
+          "palette": Object {
+            "name": "mock",
+            "params": Object {},
+            "type": "palette",
+          },
+          "seriesType": "bar",
+          "showLines": true,
+          "splitAccessor": "d",
+          "table": Object {
+            "columns": Array [
+              Object {
+                "id": "a",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "0,0.000",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "a",
+              },
+              Object {
+                "id": "b",
+                "meta": Object {
+                  "params": Object {
+                    "id": "number",
+                    "params": Object {
+                      "pattern": "000,0",
+                    },
+                  },
+                  "type": "number",
+                },
+                "name": "b",
+              },
+              Object {
+                "id": "c",
+                "meta": Object {
+                  "field": "order_date",
+                  "params": Object {
+                    "id": "string",
+                  },
+                  "sourceParams": Object {
+                    "params": Object {
+                      "interval": "auto",
+                    },
+                    "type": "date-histogram",
+                  },
+                  "type": "date",
+                },
+                "name": "c",
+              },
+              Object {
+                "id": "d",
+                "meta": Object {
+                  "type": "string",
+                },
+                "name": "ColD",
+              },
+            ],
+            "rows": Array [
+              Object {
+                "a": 1,
+                "b": 2,
+                "c": 1652034840000,
+                "d": "Foo",
+              },
+              Object {
+                "a": 1,
+                "b": 5,
+                "c": 1652122440000,
+                "d": "Bar",
+              },
+            ],
+            "type": "datatable",
+          },
+          "type": "dataLayer",
+          "xAccessor": "c",
+          "xScaleType": "ordinal",
+        },
+      ]
+    }
+    paletteService={
+      Object {
+        "get": [Function],
+        "getAll": [Function],
+      }
+    }
+    shouldShowValueLabels={true}
+    syncColors={false}
+    timeZone="UTC"
+    titles={
+      Object {
+        "first": Object {
+          "splitColumnTitles": Object {},
+          "splitRowTitles": Object {
+            "b": "b",
+          },
+          "splitSeriesTitles": Object {
+            "d": "ColD",
+          },
+          "xTitles": Object {
+            "c": "c",
+          },
+          "yTitles": Object {
+            "a": "a",
+            "b": "b",
+          },
+        },
+      }
+    }
+    valueLabels="hide"
+    yAxesConfiguration={
+      Array [
+        Object {
+          "formatter": Object {
+            "convert": [MockFunction] {
+              "calls": Array [
+                Array [
+                  1652034840000,
+                ],
+                Array [
+                  1652122440000,
+                ],
+              ],
+              "results": Array [
+                Object {
+                  "type": "return",
+                  "value": 1652034840000,
+                },
+                Object {
+                  "type": "return",
+                  "value": 1652122440000,
+                },
+              ],
+            },
+          },
+          "groupId": "left",
+          "position": "left",
+          "scale": "linear",
+          "series": Array [
+            Object {
+              "accessor": "a",
+              "layer": "first",
+            },
+            Object {
+              "accessor": "b",
+              "layer": "first",
+            },
+          ],
+        },
+      ]
+    }
   />
 </Chart>
 `;

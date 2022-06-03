@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   describe('single metric without datafeed start', function () {
-    this.tags(['mlqa']);
+    this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');

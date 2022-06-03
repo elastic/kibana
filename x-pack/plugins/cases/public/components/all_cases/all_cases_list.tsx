@@ -25,8 +25,9 @@ import { CasesTableFilters } from './table_filters';
 import { EuiBasicTableOnChange } from './types';
 
 import { CasesTable } from './table';
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { useCasesContext } from '../cases_context/use_cases_context';
+import { CasesMetrics } from './cases_metrics';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -54,8 +55,10 @@ export interface AllCasesListProps {
 export const AllCasesList = React.memo<AllCasesListProps>(
   ({ hiddenStatuses = [], isSelectorView = false, onRowClick, doRefresh }) => {
     const { owner, userCanCrud } = useCasesContext();
-    const hasOwner = !!owner.length;
     const availableSolutions = useAvailableCasesOwners();
+    const [refresh, setRefresh] = useState(0);
+
+    const hasOwner = !!owner.length;
 
     const firstAvailableStatus = head(difference(caseStatuses, hiddenStatuses));
     const initialFilterOptions = {
@@ -76,7 +79,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       setSelectedCases,
     } = useGetCases({ initialFilterOptions });
 
-    const { connectors } = useConnectors();
+    const { data: connectors = [] } = useGetConnectors();
 
     const sorting = useMemo(
       () => ({
@@ -104,8 +107,13 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const refreshCases = useCallback(
       (dataRefresh = true) => {
         deselectCases();
-        if (dataRefresh) refetchCases();
-        if (doRefresh) doRefresh();
+        if (dataRefresh) {
+          refetchCases();
+          setRefresh((currRefresh: number) => currRefresh + 1);
+        }
+        if (doRefresh) {
+          doRefresh();
+        }
         if (filterRefetch.current != null) {
           filterRefetch.current();
         }
@@ -206,6 +214,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           className="essentialAnimation"
           $isShow={(isCasesLoading || isLoading) && !isDataEmpty}
         />
+        {!isSelectorView ? <CasesMetrics refresh={refresh} /> : null}
         <CasesTableFilters
           countClosedCases={data.countClosedCases}
           countOpenCases={data.countOpenCases}
@@ -218,6 +227,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
             tags: filterOptions.tags,
             status: filterOptions.status,
             owner: filterOptions.owner,
+            severity: filterOptions.severity,
           }}
           setFilterRefetch={setFilterRefetch}
           hiddenStatuses={hiddenStatuses}

@@ -46,12 +46,13 @@ export const categoryExists = (category: string, categories: CategoryFacet[]) =>
 export const mapToCard = (
   getAbsolutePath: (p: string) => string,
   getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string,
-  item: CustomIntegration | PackageListItem
+  item: CustomIntegration | PackageListItem,
+  selectedCategory?: string
 ): IntegrationCardItem => {
   let uiInternalPathUrl;
 
   if (item.type === 'ui_link') {
-    uiInternalPathUrl = getAbsolutePath(item.uiInternalPath);
+    uiInternalPathUrl = item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
     let urlVersion = item.version;
 
@@ -80,6 +81,7 @@ export const mapToCard = (
     icons: !item.icons || !item.icons.length ? [] : item.icons,
     title: item.title,
     url: uiInternalPathUrl,
+    fromIntegrations: selectedCategory,
     integration: 'integration' in item ? item.integration || '' : '',
     name: 'name' in item ? item.name || '' : '',
     version: 'version' in item ? item.version || '' : '',

@@ -28,6 +28,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     'visualize',
     'dashboard',
     'timeToVisualize',
+    'unifiedSearch',
   ]);
 
   return logWrapper('lensPage', log, {
@@ -56,6 +57,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       fromTime = fromTime || PageObjects.timePicker.defaultStartTime;
       toTime = toTime || PageObjects.timePicker.defaultEndTime;
       await PageObjects.timePicker.setAbsoluteRange(fromTime, toTime);
+      // give some time for the update button tooltip to close
+      await PageObjects.common.sleep(500);
     },
 
     /**
@@ -96,6 +99,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return retry.try(async () => {
         await testSubjects.click(`visListingTitleLink-${title}`);
         await this.isLensPageOrFail();
+        await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       });
     },
 
@@ -121,8 +125,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       layerIndex = 0
     ) {
       await retry.try(async () => {
-        await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
-        await testSubjects.exists(`lns-indexPatternDimension-${opts.operation}`);
+        if (!(await testSubjects.exists('lns-indexPattern-dimensionContainerClose'))) {
+          await testSubjects.click(`lns-layerPanel-${layerIndex} > ${opts.dimension}`);
+        }
+        await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
       });
 
       if (opts.operation === 'formula') {
@@ -566,8 +572,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       // pressing Enter at this point may lead to auto-complete the queryInput with random stuff from the
       // dropdown which was not intended originally.
       // To close the Filter popover we need to move to the label input and then press Enter:
-      // solution is to press Tab 2 twice (first Tab will close the dropdown) instead of Enter to avoid
+      // solution is to press Tab 3 tims (first Tab will close the dropdown) instead of Enter to avoid
       // race condition with the dropdown
+      await PageObjects.common.pressTabKey();
       await PageObjects.common.pressTabKey();
       await PageObjects.common.pressTabKey();
       // Now it is safe to press Enter as we're in the label input
@@ -836,18 +843,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     /**
      * Changes the index pattern in the data panel
      */
-    async switchDataPanelIndexPattern(name: string) {
-      await testSubjects.click('indexPattern-switch-link');
-      await find.clickByCssSelector(`[title="${name}"]`);
+    async switchDataPanelIndexPattern(dataViewTitle: string) {
+      await PageObjects.unifiedSearch.switchDataView('lns-dataView-switch-link', dataViewTitle);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
     /**
      * Changes the index pattern for the first layer
      */
-    async switchFirstLayerIndexPattern(name: string) {
-      await testSubjects.click('lns_layerIndexPatternLabel');
-      await find.clickByCssSelector(`.lnsChangeIndexPatternPopover [title="${name}"]`);
+    async switchFirstLayerIndexPattern(dataViewTitle: string) {
+      await PageObjects.unifiedSearch.switchDataView('lns_layerIndexPatternLabel', dataViewTitle);
       await PageObjects.header.waitUntilLoadingHasFinished();
     },
 
@@ -855,7 +860,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * Returns the current index pattern of the data panel
      */
     async getDataPanelIndexPattern() {
-      return await (await testSubjects.find('indexPattern-switch-link')).getAttribute('title');
+      return await (await testSubjects.find('lns-dataView-switch-link')).getAttribute('title');
     },
 
     /**
@@ -1085,6 +1090,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.assertExactText('[data-test-subj="metric_value"]', count);
     },
 
+    async clickMetric() {
+      await testSubjects.click('metric_label');
+    },
+
     async setMetricDynamicColoring(coloringType: 'none' | 'labels' | 'background') {
       await testSubjects.click('lnsMetric_dynamicColoring_groups_' + coloringType);
     },
@@ -1128,6 +1137,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await PageObjects.dashboard.switchToEditMode();
       }
       await dashboardAddPanel.clickCreateNewLink();
+      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
       await this.goToTimeRange();
       await this.configureDimension({
         dimension: 'lnsXY_xDimensionPanel > lns-empty-dimension',
@@ -1200,7 +1210,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async clickAddField() {
-      await testSubjects.click('lnsIndexPatternActions');
+      await testSubjects.click('lns-dataView-switch-link');
       await testSubjects.existOrFail('indexPattern-add-field');
       await testSubjects.click('indexPattern-add-field');
     },
@@ -1371,9 +1381,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async closeSettingsMenu() {
-      if (!(await this.settingsMenuOpen())) return;
-
-      await testSubjects.click('lnsApp_settingsButton');
+      if (await this.settingsMenuOpen()) {
+        await testSubjects.click('lnsApp_settingsButton');
+      }
     },
 
     async enableAutoApply() {

@@ -6,9 +6,9 @@
  */
 
 import { buildEsQuery } from '@kbn/es-query';
-import { SavedObjectsClientContract, SimpleSavedObject, IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import { DataView, DataViewAttributes, DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 
 import { matchAllQuery } from '../../common';
 
@@ -16,57 +16,20 @@ import { isDataView } from '../../../../common/types/data_view';
 
 export type SavedSearchQuery = object;
 
-type DataViewId = string;
-
-let dataViewCache: Array<SimpleSavedObject<Record<string, any>>> = [];
-let fullDataViews;
-let currentDataView = null;
+let dataViewCache: DataView[] = [];
 
 export let refreshDataViews: () => Promise<unknown>;
 
-export function loadDataViews(
-  savedObjectsClient: SavedObjectsClientContract,
-  dataViews: DataViewsContract
-) {
-  fullDataViews = dataViews;
-  return savedObjectsClient
-    .find<DataViewAttributes>({
-      type: 'index-pattern',
-      fields: ['id', 'title', 'type', 'fields'],
-      perPage: 10000,
-    })
-    .then((response) => {
-      dataViewCache = response.savedObjects;
-
-      if (refreshDataViews === null) {
-        refreshDataViews = () => {
-          return new Promise((resolve, reject) => {
-            loadDataViews(savedObjectsClient, dataViews)
-              .then((resp) => {
-                resolve(resp);
-              })
-              .catch((error) => {
-                reject(error);
-              });
-          });
-        };
-      }
-
-      return dataViewCache;
-    });
+export async function loadDataViews(dataViewsContract: DataViewsContract) {
+  dataViewCache = await dataViewsContract.find('*', 10000);
+  return dataViewCache;
 }
 
 export function getDataViewIdByTitle(dataViewTitle: string): string | undefined {
-  return dataViewCache.find((d) => d?.attributes?.title === dataViewTitle)?.id;
+  return dataViewCache.find(({ title }) => title === dataViewTitle)?.id;
 }
 
 type CombinedQuery = Record<'bool', any> | object;
-
-export function loadCurrentDataView(dataViews: DataViewsContract, dataViewId: DataViewId) {
-  fullDataViews = dataViews;
-  currentDataView = fullDataViews.get(dataViewId);
-  return currentDataView;
-}
 
 export interface SearchItems {
   dataView: DataView;
