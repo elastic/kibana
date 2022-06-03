@@ -352,14 +352,6 @@ export enum DataViewType {
   ROLLUP = 'rollup',
 }
 
-/**
- * @deprecated Use DataViewType. All index pattern interfaces were renamed.
- */
-export enum IndexPatternType {
-  DEFAULT = DataViewType.DEFAULT,
-  ROLLUP = DataViewType.ROLLUP,
-}
-
 export type FieldSpecConflictDescriptions = Record<string, string[]>;
 
 /**
