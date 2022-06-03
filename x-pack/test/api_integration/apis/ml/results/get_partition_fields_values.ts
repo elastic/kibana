@@ -16,36 +16,46 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
-  // @ts-expect-error not full interface
-  const JOB_CONFIG: Job = {
-    job_id: `fq_multi_1_ae`,
-    description:
-      'mean/min/max(responsetime) partition=airline on farequote dataset with 1h bucket span',
-    groups: ['farequote', 'automated', 'multi-metric'],
-    analysis_config: {
-      bucket_span: '1h',
-      influencers: ['airline'],
-      detectors: [
-        { function: 'mean', field_name: 'responsetime', partition_field_name: 'airline' },
-        { function: 'min', field_name: 'responsetime', partition_field_name: 'airline' },
-        { function: 'max', field_name: 'responsetime', partition_field_name: 'airline' },
-      ],
-    },
-    data_description: { time_field: '@timestamp' },
-    analysis_limits: { model_memory_limit: '20mb' },
-    model_plot_config: { enabled: true },
-  };
+  function getJobConfig(jobId: string, enableModelPlot = true) {
+    return {
+      job_id: jobId,
+      description:
+        'mean/min/max(responsetime) partition=airline on farequote dataset with 1h bucket span',
+      groups: ['farequote', 'automated', 'multi-metric'],
+      analysis_config: {
+        bucket_span: '1h',
+        influencers: ['airline'],
+        detectors: [
+          { function: 'mean', field_name: 'responsetime', partition_field_name: 'airline' },
+          { function: 'min', field_name: 'responsetime', partition_field_name: 'airline' },
+          { function: 'max', field_name: 'responsetime', partition_field_name: 'airline' },
+        ],
+      },
+      data_description: { time_field: '@timestamp' },
+      analysis_limits: { model_memory_limit: '20mb' },
+      model_plot_config: { enabled: enableModelPlot },
+    } as Job;
+  }
 
-  // @ts-expect-error not full interface
-  const DATAFEED_CONFIG: Datafeed = {
-    datafeed_id: 'datafeed-fq_multi_1_ae',
-    indices: ['ft_farequote'],
-    job_id: 'fq_multi_1_ae',
-    query: { bool: { must: [{ match_all: {} }] } },
-  };
+  function getDatafeedConfig(jobId: string) {
+    return {
+      datafeed_id: `datafeed-${jobId}`,
+      indices: ['ft_farequote'],
+      job_id: jobId,
+      query: { bool: { must: [{ match_all: {} }] } },
+    } as Datafeed;
+  }
 
   async function createMockJobs() {
-    await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
+    await ml.api.createAndRunAnomalyDetectionLookbackJob(
+      getJobConfig('fq_multi_1_ae'),
+      getDatafeedConfig('fq_multi_1_ae')
+    );
+
+    await ml.api.createAndRunAnomalyDetectionLookbackJob(
+      getJobConfig('fq_multi_2_ae', false),
+      getDatafeedConfig('fq_multi_2_ae')
+    );
   }
 
   describe('GetAnomaliesTableData', function () {
@@ -61,7 +71,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch anomalous only field values within the time range with an empty search term sorting by anomaly score', async () => {
       const requestBody = {
-        jobId: JOB_CONFIG.job_id,
+        jobId: 'fq_multi_1_ae',
         criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
         earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
         latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
@@ -100,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch all values withing the time range sorting by name', async () => {
       const requestBody = {
-        jobId: JOB_CONFIG.job_id,
+        jobId: 'fq_multi_1_ae',
         criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
         earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
         latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
@@ -151,7 +161,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should fetch anomalous only field value applying the search term', async () => {
       const requestBody = {
-        jobId: JOB_CONFIG.job_id,
+        jobId: 'fq_multi_1_ae',
         criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
         earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
         latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
@@ -178,6 +188,60 @@ export default ({ getService }: FtrProviderContext) => {
       expect(body.partition_field.values.length).to.eql(1);
       expect(body.partition_field.values[0].value).to.eql('JBU');
       expect(body.partition_field.values[0].maxRecordScore).to.be.above(30);
+    });
+
+    describe('when model plot is disabled', () => {
+      it('should fetch results within the time range', async () => {
+        const requestBody = {
+          jobId: 'fq_multi_2_ae',
+          criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
+          earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
+          latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
+          searchTerm: {},
+          fieldsConfig: {
+            partition_field: {
+              applyTimeRange: true,
+              anomalousOnly: false,
+              sort: { by: 'name', order: 'asc' },
+            },
+          },
+        };
+
+        const { body, status } = await supertest
+          .post(`/api/ml/results/partition_fields_values`)
+          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+          .set(COMMON_REQUEST_HEADERS)
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(200, status, body);
+
+        expect(body.partition_field.values.length).to.eql(6);
+      });
+
+      it('should fetch results outside the time range', async () => {
+        const requestBody = {
+          jobId: 'fq_multi_2_ae',
+          criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
+          earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
+          latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
+          searchTerm: {},
+          fieldsConfig: {
+            partition_field: {
+              applyTimeRange: false,
+              anomalousOnly: false,
+              sort: { by: 'name', order: 'asc' },
+            },
+          },
+        };
+
+        const { body, status } = await supertest
+          .post(`/api/ml/results/partition_fields_values`)
+          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+          .set(COMMON_REQUEST_HEADERS)
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(200, status, body);
+
+        expect(body.partition_field.values.length).to.eql(19);
+      });
     });
   });
 };
