@@ -42,38 +42,55 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should be able to copy a column values to clipboard', async () => {
+      const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await dataGrid.clickCopyColumnValues('@timestamp');
-      const copiedTimestampData = await browser.getClipboardValue();
-      expect(
-        copiedTimestampData.startsWith(
-          '"\'@timestamp"\n"Sep 22, 2015 @ 23:50:13.253"\n"Sep 22, 2015 @ 23:43:58.175"'
-        )
-      ).to.be(true);
+
+      if (canReadClipboard) {
+        const copiedTimestampData = await browser.getClipboardValue();
+        expect(
+          copiedTimestampData.startsWith(
+            '"\'@timestamp"\n"Sep 22, 2015 @ 23:50:13.253"\n"Sep 22, 2015 @ 23:43:58.175"'
+          )
+        ).to.be(true);
+      }
+
       expect(await toasts.getToastCount()).to.be(1);
       await toasts.dismissAllToasts();
 
       await dataGrid.clickCopyColumnValues('_source');
-      const copiedSourceData = await browser.getClipboardValue();
-      expect(copiedSourceData.startsWith('"_source"\n{"@message":["238.171.34.42')).to.be(true);
-      expect(copiedSourceData.endsWith('}')).to.be(true);
+
+      if (canReadClipboard) {
+        const copiedSourceData = await browser.getClipboardValue();
+        expect(copiedSourceData.startsWith('"_source"\n{"@message":["238.171.34.42')).to.be(true);
+        expect(copiedSourceData.endsWith('}')).to.be(true);
+      }
+
       expect(await toasts.getToastCount()).to.be(1);
       await toasts.dismissAllToasts();
     });
 
     it('should be able to copy a column name to clipboard', async () => {
+      const canReadClipboard = await browser.checkBrowserPermission('clipboard-read');
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
       await dataGrid.clickCopyColumnName('@timestamp');
-      const copiedTimestampName = await browser.getClipboardValue();
-      expect(copiedTimestampName).to.be('"\'@timestamp"');
+      if (canReadClipboard) {
+        const copiedTimestampName = await browser.getClipboardValue();
+        expect(copiedTimestampName).to.be('"\'@timestamp"');
+      }
+
       expect(await toasts.getToastCount()).to.be(1);
       await toasts.dismissAllToasts();
 
       await dataGrid.clickCopyColumnName('_source');
-      const copiedSourceName = await browser.getClipboardValue();
-      expect(copiedSourceName).to.be('"_source"');
+
+      if (canReadClipboard) {
+        const copiedSourceName = await browser.getClipboardValue();
+        expect(copiedSourceName).to.be('"_source"');
+      }
+
       expect(await toasts.getToastCount()).to.be(1);
       await toasts.dismissAllToasts();
     });
