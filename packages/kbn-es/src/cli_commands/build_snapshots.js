@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+const dedent = require('dedent');
 const { resolve, basename } = require('path');
 const { createHash } = require('crypto');
 const { promisify } = require('util');
@@ -21,7 +22,16 @@ const pipelineAsync = promisify(pipeline);
 
 exports.description = 'Build and collect ES snapshots';
 
-exports.help = () => ``;
+exports.help = () => dedent`
+    Options:
+
+      --output          Path to create the built elasticsearch snapshots
+      --source-path     Path where the elasticsearch repository is checked out
+
+    Example:
+
+      es build_snapshots --source-path=/path/to/es/checked/repo --output=/tmp/es-built-snapshots
+  `;
 
 exports.run = async (defaults = {}) => {
   const argv = process.argv.slice(2);

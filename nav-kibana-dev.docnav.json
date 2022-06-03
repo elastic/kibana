@@ -206,7 +206,8 @@
             { "id": "kibDevDocsOpsAmbientUiTypes" },
             { "id": "kibDevDocsOpsTestSubjSelector" },
             { "id": "kibDevDocsOpsBazelRunner" },
-            { "id": "kibDevDocsOpsCliDevMode" }
+            { "id": "kibDevDocsOpsCliDevMode" },
+            { "id": "kibDevDocsOpsEs" }
           ]
         }
       ]
