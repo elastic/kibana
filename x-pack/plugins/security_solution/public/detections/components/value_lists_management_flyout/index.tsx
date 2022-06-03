@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ValueListsModal } from './modal';
+export { ValueListsFlyout } from './flyout';

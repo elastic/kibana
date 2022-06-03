@@ -30,7 +30,7 @@ import * as i18n from './translations';
 import { AllRulesUtilityBar } from '../utility_bar';
 import { AllExceptionListsColumns, getAllExceptionListsColumns } from './columns';
 import { useAllExceptionLists } from './use_all_exception_lists';
-import { ReferenceErrorModal } from '../../../../../components/value_lists_management_modal/reference_error_modal';
+import { ReferenceErrorModal } from '../../../../../components/value_lists_management_flyout/reference_error_modal';
 import { patchRule } from '../../../../../containers/detection_engine/rules/api';
 import { ExceptionsSearchBar } from './exceptions_search_bar';
 import { getSearchFilters } from '../helpers';

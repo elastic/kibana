@@ -17,7 +17,7 @@ import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { useUserData } from '../../../components/user_info';
 import { AllRules } from './all';
 import { ImportDataModal } from '../../../../common/components/import_data_modal';
-import { ValueListsModal } from '../../../components/value_lists_management_modal';
+import { ValueListsFlyout } from '../../../components/value_lists_management_flyout';
 import { UpdatePrePackagedRulesCallOut } from '../../../components/rules/pre_packaged_rules/update_callout';
 import {
   getPrePackagedRuleStatus,
@@ -40,7 +40,7 @@ import { useBoolState } from '../../../../common/hooks/use_bool_state';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
-  const [isValueListModalVisible, showValueListModal, hideValueListModal] = useBoolState();
+  const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
   const invalidateRules = useInvalidateRules();
 
@@ -146,7 +146,7 @@ const RulesPageComponent: React.FC = () => {
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
       <MlJobCompatibilityCallout />
-      <ValueListsModal showModal={isValueListModalVisible} onClose={hideValueListModal} />
+      <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
       <ImportDataModal
         checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
         closeModal={hideImportModal}
@@ -182,9 +182,9 @@ const RulesPageComponent: React.FC = () => {
                     data-test-subj="open-value-lists-modal-button"
                     iconType="importAction"
                     isDisabled={!canWriteListsIndex || !canUserCRUD || loading}
-                    onClick={showValueListModal}
+                    onClick={showValueListFlyout}
                   >
-                    {i18n.UPLOAD_VALUE_LISTS}
+                    {i18n.IMPORT_VALUE_LISTS}
                   </EuiButton>
                 </EuiToolTip>
               </EuiFlexItem>
