@@ -11,7 +11,7 @@ import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 
 const txtDismiss = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.containers.drilldownList.copyingNotification.dismiss',
+  'uiActionsEnhanced.drilldowns.containers.drilldownList.copyingNotification.dismiss',
   {
     defaultMessage: 'Dismiss',
     description: 'Dismiss button in cloning notification callout.',
@@ -20,7 +20,7 @@ const txtDismiss = i18n.translate(
 
 const txtBody = (count: number) =>
   i18n.translate(
-    'xpack.uiActionsEnhanced.drilldowns.containers.drilldownList.copyingNotification.body',
+    'uiActionsEnhanced.drilldowns.containers.drilldownList.copyingNotification.body',
     {
       defaultMessage: '{count, number} {count, plural, one {drilldown} other {drilldowns}} copied.',
       description: 'Title of notification show when one or more drilldowns were copied.',

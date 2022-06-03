@@ -12,20 +12,20 @@ import { i18n } from '@kbn/i18n';
 import { TriggerPicker, TriggerPickerProps } from '../trigger_picker';
 
 const txtNameOfDrilldown = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownForm.nameOfDrilldown',
+  'uiActionsEnhanced.components.DrilldownForm.nameOfDrilldown',
   {
     defaultMessage: 'Name',
   }
 );
 
 const txtUntitledDrilldown = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownForm.untitledDrilldown',
+  'uiActionsEnhanced.components.DrilldownForm.untitledDrilldown',
   {
     defaultMessage: 'Untitled drilldown',
   }
 );
 
-const txtTrigger = i18n.translate('xpack.uiActionsEnhanced.components.DrilldownForm.trigger', {
+const txtTrigger = i18n.translate('uiActionsEnhanced.components.DrilldownForm.trigger', {
   defaultMessage: 'Trigger',
 });
 

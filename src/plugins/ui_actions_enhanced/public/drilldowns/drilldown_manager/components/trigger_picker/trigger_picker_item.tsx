@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiSpacer, EuiText, EuiCheckableCard, EuiTextColor, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-const txtUnknown = i18n.translate('xpack.uiActionsEnhanced.components.TriggerPickerItem.unknown', {
+const txtUnknown = i18n.translate('uiActionsEnhanced.components.TriggerPickerItem.unknown', {
   defaultMessage: 'Unknown',
 });
 

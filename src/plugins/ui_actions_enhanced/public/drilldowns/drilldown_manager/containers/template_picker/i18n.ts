@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldownManager.containers.TemplatePicker.label',
+  'uiActionsEnhanced.drilldownManager.containers.TemplatePicker.label',
   {
     defaultMessage: 'Copy existing drilldown',
     description: 'Label above template picker table.',

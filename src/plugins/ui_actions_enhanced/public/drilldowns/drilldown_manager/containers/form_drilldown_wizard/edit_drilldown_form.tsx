@@ -15,7 +15,7 @@ import { DrilldownState } from '../../state';
 import { TriggerPickerProps } from '../../components/trigger_picker';
 
 export const txtDeleteDrilldownButtonLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.deleteDrilldownButtonLabel',
+  'uiActionsEnhanced.drilldowns.components.flyoutDrilldownWizard.deleteDrilldownButtonLabel',
   {
     defaultMessage: 'Delete drilldown',
   }

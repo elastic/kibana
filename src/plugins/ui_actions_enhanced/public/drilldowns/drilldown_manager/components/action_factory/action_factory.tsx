@@ -20,35 +20,35 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 const txtDrilldownAction = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownForm.drilldownAction',
+  'uiActionsEnhanced.components.DrilldownForm.drilldownAction',
   {
     defaultMessage: 'Action',
   }
 );
 
 const txtGetMoreActions = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownForm.getMoreActionsLinkLabel',
+  'uiActionsEnhanced.components.DrilldownForm.getMoreActionsLinkLabel',
   {
     defaultMessage: 'Get more actions',
   }
 );
 
 const txtBetaActionFactoryLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownForm.betaActionLabel',
+  'uiActionsEnhanced.components.DrilldownForm.betaActionLabel',
   {
     defaultMessage: `Beta`,
   }
 );
 
 const txtBetaActionFactoryTooltip = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownForm.betaActionTooltip',
+  'uiActionsEnhanced.components.DrilldownForm.betaActionTooltip',
   {
     defaultMessage: `This action is in beta and is subject to change. The design and code is less mature than official GA features and is being provided as-is with no warranties. Beta features are not subject to the support SLA of official GA features. Please help us by reporting bugs or providing other feedback.`,
   }
 );
 
 const txtChangeButton = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownForm.changeButton',
+  'uiActionsEnhanced.components.DrilldownForm.changeButton',
   {
     defaultMessage: 'Change',
   }

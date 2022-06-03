@@ -356,7 +356,7 @@ const ActionFactorySelector: React.FC<ActionFactorySelectorProps> = ({
               !actionFactory.isCompatibleLicense() && (
                 <FormattedMessage
                   defaultMessage="Insufficient license level"
-                  id="xpack.uiActionsEnhanced.components.actionWizard.insufficientLicenseLevelTooltip"
+                  id="uiActionsEnhanced.components.actionWizard.insufficientLicenseLevelTooltip"
                 />
               )
             }

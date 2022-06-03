@@ -97,7 +97,7 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
       <React.Fragment>
         <EuiModalHeader>
           <EuiModalHeaderTitle data-test-subj="customizePanelTitle">
-            {i18n.translate('xpack.uiActionsEnhanced.customizeTimeRange.modal.headerTitle', {
+            {i18n.translate('uiActionsEnhanced.customizeTimeRange.modal.headerTitle', {
               defaultMessage: 'Customize panel time range',
             })}
           </EuiModalHeaderTitle>
@@ -106,7 +106,7 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
         <EuiModalBody data-test-subj="customizePanelBody">
           <EuiFormRow
             label={i18n.translate(
-              'xpack.uiActionsEnhanced.customizePanelTimeRange.modal.optionsMenuForm.panelTitleFormRowLabel',
+              'uiActionsEnhanced.customizePanelTimeRange.modal.optionsMenuForm.panelTitleFormRowLabel',
               {
                 defaultMessage: 'Time range',
               }
@@ -143,7 +143,7 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
                   flush="left"
                 >
                   {i18n.translate(
-                    'xpack.uiActionsEnhanced.customizePanelTimeRange.modal.removeButtonTitle',
+                    'uiActionsEnhanced.customizePanelTimeRange.modal.removeButtonTitle',
                     {
                       defaultMessage: 'Remove',
                     }
@@ -154,7 +154,7 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={this.cancel} data-test-subj="cancelPerPanelTimeRangeButton">
                 {i18n.translate(
-                  'xpack.uiActionsEnhanced.customizePanelTimeRange.modal.cancelButtonTitle',
+                  'uiActionsEnhanced.customizePanelTimeRange.modal.cancelButtonTitle',
                   {
                     defaultMessage: 'Cancel',
                   }
@@ -165,13 +165,13 @@ export class CustomizeTimeRangeModal extends Component<CustomizeTimeRangeProps, 
               <EuiButton data-test-subj="addPerPanelTimeRangeButton" onClick={this.addToPanel} fill>
                 {this.state.inheritTimeRange
                   ? i18n.translate(
-                      'xpack.uiActionsEnhanced.customizePanelTimeRange.modal.addToPanelButtonTitle',
+                      'uiActionsEnhanced.customizePanelTimeRange.modal.addToPanelButtonTitle',
                       {
                         defaultMessage: 'Add to panel',
                       }
                     )
                   : i18n.translate(
-                      'xpack.uiActionsEnhanced.customizePanelTimeRange.modal.updatePanelTimeRangeButtonTitle',
+                      'uiActionsEnhanced.customizePanelTimeRange.modal.updatePanelTimeRangeButtonTitle',
                       {
                         defaultMessage: 'Update',
                       }

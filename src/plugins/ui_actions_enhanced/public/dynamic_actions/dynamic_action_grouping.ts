@@ -16,7 +16,7 @@ export const dynamicActionGrouping: PresentableGrouping<{
   {
     id: 'dynamicActions',
     getDisplayName: () =>
-      i18n.translate('xpack.uiActionsEnhanced.CustomActions', {
+      i18n.translate('uiActionsEnhanced.CustomActions', {
         defaultMessage: 'Custom actions',
       }),
     getIconType: () => 'symlink',

@@ -9,14 +9,14 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtSelectableMessage = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.selectableMessage',
+  'uiActionsEnhanced.components.DrilldownTemplateTable.selectableMessage',
   {
     defaultMessage: 'Select this template',
   }
 );
 
 export const txtNameColumnTitle = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.nameColumnTitle',
+  'uiActionsEnhanced.components.DrilldownTemplateTable.nameColumnTitle',
   {
     defaultMessage: 'Name',
     description: 'Title of the first column in drilldown template cloning table.',
@@ -24,7 +24,7 @@ export const txtNameColumnTitle = i18n.translate(
 );
 
 export const txtSourceColumnTitle = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.sourceColumnTitle',
+  'uiActionsEnhanced.components.DrilldownTemplateTable.sourceColumnTitle',
   {
     defaultMessage: 'Panel',
     description: 'Column title which describes from where the drilldown is cloned.',
@@ -32,21 +32,21 @@ export const txtSourceColumnTitle = i18n.translate(
 );
 
 export const txtActionColumnTitle = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.actionColumnTitle',
+  'uiActionsEnhanced.components.DrilldownTemplateTable.actionColumnTitle',
   {
     defaultMessage: 'Action',
   }
 );
 
 export const txtTriggerColumnTitle = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.triggerColumnTitle',
+  'uiActionsEnhanced.components.DrilldownTemplateTable.triggerColumnTitle',
   {
     defaultMessage: 'Trigger',
   }
 );
 
 export const txtSingleItemCopyActionLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.components.DrilldownTemplateTable.singleItemCopyAction',
+  'uiActionsEnhanced.components.DrilldownTemplateTable.singleItemCopyAction',
   {
     defaultMessage: 'Copy',
     description: '"Copy" action button label in drilldown template cloning table last column.',
@@ -54,7 +54,7 @@ export const txtSingleItemCopyActionLabel = i18n.translate(
 );
 
 export const txtCopyButtonLabel = (count: number) =>
-  i18n.translate('xpack.uiActionsEnhanced.components.DrilldownTemplateTable.copyButtonLabel', {
+  i18n.translate('uiActionsEnhanced.components.DrilldownTemplateTable.copyButtonLabel', {
     defaultMessage: 'Copy ({count})',
     description: 'Label of drilldown template table bottom copy button.',
     values: {

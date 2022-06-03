@@ -11,7 +11,7 @@ import { UrlDrilldownConfig, UrlDrilldownScope } from './types';
 import { compile } from './url_template';
 
 const generalFormatError = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatGeneralErrorMessage',
+  'uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatGeneralErrorMessage',
   {
     defaultMessage: 'Invalid format. Example: {exampleUrl}',
     values: {
@@ -22,7 +22,7 @@ const generalFormatError = i18n.translate(
 
 const formatError = (message: string) =>
   i18n.translate(
-    'xpack.uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatErrorMessage',
+    'uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatErrorMessage',
     {
       defaultMessage: 'Invalid format: {message}',
       values: {

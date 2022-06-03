@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtHelpText = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.components.DrilldownHelloBar.helpText',
+  'uiActionsEnhanced.drilldowns.components.DrilldownHelloBar.helpText',
   {
     defaultMessage:
       'Drilldowns enable you to define new behaviors for interacting with panels. You can add multiple actions and override the default filter.',
@@ -17,14 +17,14 @@ export const txtHelpText = i18n.translate(
 );
 
 export const txtViewDocsLinkLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.components.DrilldownHelloBar.viewDocsLinkLabel',
+  'uiActionsEnhanced.drilldowns.components.DrilldownHelloBar.viewDocsLinkLabel',
   {
     defaultMessage: 'View docs',
   }
 );
 
 export const txtHideHelpButtonLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.components.DrilldownHelloBar.hideHelpButtonLabel',
+  'uiActionsEnhanced.drilldowns.components.DrilldownHelloBar.hideHelpButtonLabel',
   {
     defaultMessage: 'Hide',
   }

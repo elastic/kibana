@@ -12,21 +12,21 @@ import { i18n } from '@kbn/i18n';
 import { TriggerPickerItemDescription, TriggerPickerItem } from './trigger_picker_item';
 
 const txtTriggerPickerLabel = i18n.translate(
-  'xpack.uiActionsEnhanced.components.actionWizard.triggerPickerLabel',
+  'uiActionsEnhanced.components.actionWizard.triggerPickerLabel',
   {
     defaultMessage: 'Show option on:',
   }
 );
 
 const txtTriggerPickerHelpText = i18n.translate(
-  'xpack.uiActionsEnhanced.components.actionWizard.triggerPickerHelpText',
+  'uiActionsEnhanced.components.actionWizard.triggerPickerHelpText',
   {
     defaultMessage: "What's this?",
   }
 );
 
 const txtTriggerPickerHelpTooltip = i18n.translate(
-  'xpack.uiActionsEnhanced.components.actionWizard.triggerPickerHelpTooltip',
+  'uiActionsEnhanced.components.actionWizard.triggerPickerHelpTooltip',
   {
     defaultMessage: 'Determines when the drilldown appears in context menu',
   }

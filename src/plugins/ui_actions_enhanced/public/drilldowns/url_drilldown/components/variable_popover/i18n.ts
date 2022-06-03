@@ -9,21 +9,21 @@
 import { i18n } from '@kbn/i18n';
 
 export const txtAddVariableButtonTitle = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.addVariableButtonTitle',
+  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.addVariableButtonTitle',
   {
     defaultMessage: 'Add variable',
   }
 );
 
 export const txtUrlTemplateVariablesHelpLinkText = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesHelpLinkText',
+  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesHelpLinkText',
   {
     defaultMessage: 'Help',
   }
 );
 
 export const txtUrlTemplateVariablesFilterPlaceholderText = i18n.translate(
-  'xpack.uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesFilterPlaceholderText',
+  'uiActionsEnhanced.drilldowns.urlDrilldownCollectConfig.urlTemplateVariablesFilterPlaceholderText',
   {
     defaultMessage: 'Filter variables',
   }
