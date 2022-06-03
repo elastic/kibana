@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import { LegacyUrlAlias, LEGACY_URL_ALIAS_TYPE } from '../../../object_types';
 import type { CreatePointInTimeFinderFn, PointInTimeFinder } from '../point_in_time_finder';

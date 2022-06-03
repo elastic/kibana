@@ -9,7 +9,7 @@ import { Type } from '@kbn/config-schema';
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { SecurityLicense, SecurityLicenseFeatures } from '../../../common/licensing';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';

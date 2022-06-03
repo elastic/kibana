@@ -7,7 +7,7 @@
  */
 
 import { FilterStateStore, buildFilter, FILTERS } from '@kbn/es-query';
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import { KibanaContext } from './kibana_context_type';
 
