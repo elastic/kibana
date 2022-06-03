@@ -8,14 +8,12 @@
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { KibanaRequest } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { getDecryptedAttributes, getFakeKibanaRequest, loadRule } from './rule_loader';
 import { TaskRunnerContext } from './task_runner_factory';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { rulesClientMock } from '../rules_client.mock';
-import { RulesClient } from '../rules_client';
-import { Rule } from '../types';
+import { Rule, RulesClientApi } from '../types';
 import { MONITORING_HISTORY_LIMIT, RuleExecutionStatusErrorReasons } from '../../common';
 import { getReasonFromError } from '../lib/error_with_reason';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
@@ -140,9 +138,7 @@ describe('rule_loader', () => {
     });
 
     test('throws when user cannot read rule', async () => {
-      context.getRulesClientWithRequest = function (
-        fakeRequest: unknown
-      ): PublicMethodsOf<RulesClient> {
+      context.getRulesClientWithRequest = function (fakeRequest: unknown): RulesClientApi {
         rulesClient.get.mockImplementation(async (args: unknown) => {
           throw new Error('rule-client-error: 1001');
         });

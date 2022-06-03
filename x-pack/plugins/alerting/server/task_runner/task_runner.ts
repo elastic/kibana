@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import apm from 'elastic-apm-node';
 import { cloneDeep, mapValues, omit, pickBy, without } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -36,6 +37,7 @@ import {
   RuleTaskState,
   RuleTypeRegistry,
   SanitizedRule,
+  RulesClientApi,
 } from '../types';
 import { asErr, asOk, map, promiseResult, resolveErr, Resultable } from '../lib/result_type';
 import { getExecutionDurationPercentiles, getExecutionSuccessRatio } from '../lib/monitoring';
@@ -70,7 +72,7 @@ import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { SearchMetrics } from '../lib/types';
-import { loadRule, getDecryptedAttributes, getFakeKibanaRequest } from './rule_loader';
+import { loadRule } from './rule_loader';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -249,6 +251,7 @@ export class TaskRunner<
 
   private async executeRule(
     fakeRequest: KibanaRequest,
+    rulesClient: RulesClientApi,
     rule: SanitizedRule<Params>,
     params: Params,
     executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
@@ -439,7 +442,7 @@ export class TaskRunner<
 
     const ruleIsSnoozed = isRuleSnoozed(rule);
     if (ruleIsSnoozed) {
-      this.markRuleAsSnoozed(rule.id);
+      this.markRuleAsSnoozed(rule.id, rulesClient);
     }
     if (!ruleIsSnoozed && this.shouldLogAndScheduleActionsForAlerts()) {
       const mutedAlertIdsSet = new Set(mutedInstanceIds);
@@ -520,6 +523,7 @@ export class TaskRunner<
 
   private async prepareAndExecuteRule(
     fakeRequest: KibanaRequest,
+    rulesClient: RulesClientApi,
     apiKey: RawRule['apiKey'],
     rule: SanitizedRule<Params>,
     validatedParams: Params
@@ -539,23 +543,17 @@ export class TaskRunner<
       rule.params,
       fakeRequest
     );
-    return this.executeRule(fakeRequest, rule, validatedParams, executionHandler, spaceId);
+    return this.executeRule(
+      fakeRequest,
+      rulesClient,
+      rule,
+      validatedParams,
+      executionHandler,
+      spaceId
+    );
   }
 
-  private async markRuleAsSnoozed(id: string) {
-    let apiKey: string | null;
-
-    const {
-      params: { alertId: ruleId, spaceId },
-    } = this.taskInstance;
-    try {
-      const decryptedAttributes = await getDecryptedAttributes(this.context, ruleId, spaceId);
-      apiKey = decryptedAttributes.apiKey;
-    } catch (err) {
-      throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Decrypt, err);
-    }
-    const fakeRequest = getFakeKibanaRequest(this.context, spaceId, apiKey);
-    const rulesClient = this.context.getRulesClientWithRequest(fakeRequest);
+  private async markRuleAsSnoozed(id: string, rulesClient: RulesClientApi) {
     await rulesClient.updateSnoozedUntilTime({ id });
   }
 
@@ -585,9 +583,10 @@ export class TaskRunner<
     }
 
     return {
+      rulesClient: asOk(rulesClient),
       monitoring: asOk(rule.monitoring),
       stateWithMetrics: await promiseResult<RuleTaskStateAndMetrics, Error>(
-        this.prepareAndExecuteRule(fakeRequest, apiKey, rule, validatedParams)
+        this.prepareAndExecuteRule(fakeRequest, rulesClient, apiKey, rule, validatedParams)
       ),
       schedule: asOk(
         // fetch the rule again to ensure we return the correct schedule as it may have
@@ -1052,6 +1051,7 @@ async function errorAsRuleTaskRunResult(
     return await future;
   } catch (e) {
     return {
+      rulesClient: asErr(e),
       stateWithMetrics: asErr(e),
       schedule: asErr(e),
       monitoring: asErr(e),
