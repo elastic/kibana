@@ -58,7 +58,7 @@ function normalizeDate(date) {
 }
 
 function normalizeObject(object) {
-  if (object !== null && typeof object === 'object' && object.hasOwnProperty('toJSON')) {
+  if (object !== null && typeof object === 'object' && 'toJSON' in object) {
     throw new Error('toJSON cannot be used as a property name');
   }
   const normalizedObject = JSON.parse(JSON.stringify(object));
