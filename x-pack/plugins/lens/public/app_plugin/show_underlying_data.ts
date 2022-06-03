@@ -11,7 +11,7 @@ import {
   DataViewBase,
   buildCustomFilter,
   buildEsQuery,
-  FilterStateStore
+  FilterStateStore,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
