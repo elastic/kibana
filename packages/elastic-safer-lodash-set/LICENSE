@@ -7,13 +7,6 @@ Copyright (c) JS Foundation and other contributors <https://js.foundation/>
 Lodash is based on Underscore.js, copyright Jeremy Ashkenas,
 DocumentCloud and Investigative Reporters & Editors <http://underscorejs.org/>
 
-This software consists of voluntary contributions made by many
-individuals. For exact contribution history, see the revision history
-available at the following locations:
- - https://github.com/lodash/lodash
- - https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/lodash
- - https://github.com/elastic/kibana/tree/main/packages/elastic-safer-lodash-set
-
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the
 "Software"), to deal in the Software without restriction, including
@@ -32,3 +25,10 @@ NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
 LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
 OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
 WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+This software consists of voluntary contributions made by many
+individuals. For exact contribution history, see the revision history
+available at the following locations:
+ - https://github.com/lodash/lodash
+ - https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/lodash
+ - https://github.com/elastic/kibana/tree/main/packages/elastic-safer-lodash-set
