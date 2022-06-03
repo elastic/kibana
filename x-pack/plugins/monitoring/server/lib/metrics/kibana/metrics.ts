@@ -326,7 +326,7 @@ export const metrics = {
     ),
     format: SMALL_FLOAT,
     metricAgg: 'max',
-    units: msTimeUnitLabel,
+    units: '',
     isNotSupportedInInternalCollection: true,
   }),
 
