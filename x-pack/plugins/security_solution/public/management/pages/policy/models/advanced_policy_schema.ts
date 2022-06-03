@@ -932,7 +932,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.cpu',
       {
         defaultMessage:
-          'The percentage of the aggregate system CPU to restrict Endpoint to.  Default: 100',
+          'The percentage of the aggregate system CPU to restrict Endpoint to.  Default: 50',
       }
     ),
   },
