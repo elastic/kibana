@@ -35,43 +35,41 @@
   flex: 1 1 1px;
 
   .ace_badge {
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 18px;
-    padding: 0 8px;
+    font-size: $euiFontSizeXS;
+    font-weight: $euiFontWeightMedium;
+    line-height: $euiLineHeight;
+    padding: 0 $euiSizeS;
     display: inline-block;
     text-decoration: none;
-    border-radius: 3px;
-    border: solid 1px transparent;
+    border-radius: $euiBorderRadius / 2;
     white-space: nowrap;
     vertical-align: middle;
     cursor: default;
     max-width: 100%;
-    text-align: left;
 
     &--success {
-      background-color: $euiColorSuccess;
-      color: chooseLightOrDarkText($euiColorSuccess);
+      background-color: $euiColorVis0_behindText;
+      color: chooseLightOrDarkText($euiColorVis0_behindText);
     }
 
     &--warning {
-      background-color: $euiColorWarning;
-      color: chooseLightOrDarkText($euiColorWarning);
+      background-color: $euiColorVis5_behindText;
+      color: chooseLightOrDarkText($euiColorVis5_behindText);
     }
 
     &--primary {
-      background-color: $euiColorPrimary;
-      color: chooseLightOrDarkText($euiColorPrimary);
+      background-color: $euiColorVis1_behindText;
+      color: chooseLightOrDarkText($euiColorVis1_behindText);
     }
 
     &--default {
-      background-color: $euiColorGhost;
-      color: chooseLightOrDarkText($euiColorGhost);
+      background-color: $euiColorLightShade;
+      color: chooseLightOrDarkText($euiColorLightShade);
     }
 
     &--danger {
-      background-color: $euiColorDanger;
-      color: chooseLightOrDarkText($euiColorDanger);
+      background-color: $euiColorVis9_behindText;
+      color: chooseLightOrDarkText($euiColorVis9_behindText);
     }
   }
 }
