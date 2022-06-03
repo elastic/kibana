@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import {
   TBT_FIELD,
   FCP_FIELD,
@@ -15,6 +16,59 @@ import {
 import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { getRumPageLoadTransactionsProjection } from './projections';
+
+export const DEFAULT_RANKS = [100, 0, 0];
+
+const getRanksPercentages = (ranks?: Record<string, number | null>) => {
+  if (!Array.isArray(ranks)) return null;
+  const ranksVal = ranks?.map(({ value }) => value?.toFixed(0) ?? 0) ?? [];
+  return [
+    Number(ranksVal?.[0]),
+    Number(ranksVal?.[1]) - Number(ranksVal?.[0]),
+    100 - Number(ranksVal?.[1]),
+  ];
+};
+
+export function transformCoreWebVitalsResponse<T>(
+  response?: ESSearchResponse<T, ReturnType<typeof coreWebVitalsQuery>>,
+  percentile = PERCENTILE_DEFAULT
+) {
+  if (!response) return response;
+  const {
+    lcp,
+    cls,
+    fid,
+    tbt,
+    fcp,
+    lcpRanks,
+    fidRanks,
+    clsRanks,
+    coreVitalPages,
+  } = response.aggregations ?? {};
+
+  const pkey = percentile.toFixed(1);
+
+  return {
+    coreVitalPages: coreVitalPages?.doc_count ?? 0,
+    /* Because cls is required in the type UXMetrics, and defined as number | null,
+     * we need to default to null in the case where cls is undefined in order to satisfy the UXMetrics type */
+    cls: cls?.values[pkey] ?? null,
+    fid: fid?.values[pkey],
+    lcp: lcp?.values[pkey],
+    tbt: tbt?.values[pkey] ?? 0,
+    fcp: fcp?.values[pkey],
+
+    lcpRanks: lcp?.values[pkey]
+      ? getRanksPercentages(lcpRanks?.values) ?? DEFAULT_RANKS
+      : DEFAULT_RANKS,
+    fidRanks: fid?.values[pkey]
+      ? getRanksPercentages(fidRanks?.values) ?? DEFAULT_RANKS
+      : DEFAULT_RANKS,
+    clsRanks: cls?.values[pkey]
+      ? getRanksPercentages(clsRanks?.values) ?? DEFAULT_RANKS
+      : DEFAULT_RANKS,
+  };
+}
 
 export const PERCENTILE_DEFAULT = 50;
 
