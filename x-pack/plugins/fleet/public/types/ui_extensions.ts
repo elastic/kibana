@@ -8,7 +8,7 @@
 import type { EuiStepProps } from '@elastic/eui';
 import type { ComponentType, LazyExoticComponent } from 'react';
 
-import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '.';
+import type { Agent, NewPackagePolicy, PackageInfo, PackagePolicy } from '.';
 
 /** Register a Fleet UI extension */
 export type UIExtensionRegistrationCallback = (extensionPoint: UIExtensionPoint) => void;
@@ -54,8 +54,10 @@ export type PackagePolicyResponseExtensionComponent =
   ComponentType<PackagePolicyResponseExtensionComponentProps>;
 
 export interface PackagePolicyResponseExtensionComponentProps {
-  /** The current host id to retrieve response from */
-  endpointId: string;
+  /** The current agent to retrieve response from */
+  agent: Agent;
+  /** A callback function to set the `needs attention` state */
+  onShowNeedsAttentionBadge?: (val: boolean) => void;
 }
 
 /** Extension point registration contract for Integration Policy Edit views */
