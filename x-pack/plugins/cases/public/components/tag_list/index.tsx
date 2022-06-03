@@ -21,7 +21,7 @@ import { isEqual } from 'lodash/fp';
 import * as i18n from './translations';
 import { Form, FormDataProvider, useForm, getUseField, Field } from '../../common/shared_imports';
 import { schema } from './schema';
-import { useGetTags } from '../../containers/use_get_tags';
+import { useFetchTags } from '../../containers/use_get_tags';
 
 import { Tags } from './tags';
 
@@ -71,10 +71,11 @@ export const TagList = React.memo(
       if (isValid && newData.tags) {
         onSubmit(newData.tags);
         setIsEditTags(false);
+        form.reset({ defaultValue: newData });
       }
-    }, [onSubmit, submit]);
+    }, [form, onSubmit, submit]);
 
-    const { tags: tagOptions } = useGetTags();
+    const { data: tagOptions = [] } = useFetchTags();
     const [options, setOptions] = useState(
       tagOptions.map((label) => ({
         label,

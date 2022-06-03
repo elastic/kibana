@@ -11,7 +11,6 @@ import { act } from '@testing-library/react';
 import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { TestProviders } from '../../common/mock';
-import { useGetTags } from '../../containers/use_get_tags';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useGetIncidentTypes } from '../connectors/resilient/use_get_incident_types';
 import { useGetSeverity } from '../connectors/resilient/use_get_severity';
@@ -29,6 +28,7 @@ import {
 } from './mock';
 import { CreateCase } from '.';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useFetchTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_tags');
@@ -43,7 +43,7 @@ jest.mock('../connectors/jira/use_get_issues');
 
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
-const useGetTagsMock = useGetTags as jest.Mock;
+const useGetTagsMock = useFetchTags as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;
@@ -85,8 +85,8 @@ describe('CreateCase case', () => {
     useGetIssueTypesMock.mockReturnValue(useGetIssueTypesResponse);
     useGetFieldsByIssueTypeMock.mockReturnValue(useGetFieldsByIssueTypeResponse);
     useGetTagsMock.mockImplementation(() => ({
-      tags: sampleTags,
-      fetchTags,
+      data: sampleTags,
+      refetch: fetchTags,
     }));
   });
 
