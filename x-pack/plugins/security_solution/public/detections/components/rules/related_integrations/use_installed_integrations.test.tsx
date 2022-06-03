@@ -52,7 +52,7 @@ describe('useInstalledIntegrations', () => {
       }
     );
 
-  it.skip('calls the API via fetchInstalledIntegrations', async () => {
+  it('calls the API via fetchInstalledIntegrations', async () => {
     const fetchInstalledIntegrations = jest.spyOn(api, 'fetchInstalledIntegrations');
 
     const { waitForNextUpdate } = render();
@@ -65,7 +65,7 @@ describe('useInstalledIntegrations', () => {
     );
   });
 
-  it.skip('fetches data from the API', async () => {
+  it('fetches data from the API', async () => {
     const { result, waitForNextUpdate } = render();
 
     // It starts from a loading state
@@ -80,39 +80,27 @@ describe('useInstalledIntegrations', () => {
     expect(result.current.isLoading).toEqual(false);
     expect(result.current.isSuccess).toEqual(true);
     expect(result.current.isError).toEqual(false);
-    expect(result.current.data).toEqual({
-      events: [
-        {
-          duration_ms: 3866,
-          es_search_duration_ms: 1236,
-          execution_uuid: '88d15095-7937-462c-8f21-9763e1387cad',
-          gap_duration_s: 0,
-          indexing_duration_ms: 95,
-          message:
-            "rule executed: siem.queryRule:fb1fc150-a292-11ec-a2cf-c1b28b0392b0: 'Lots of Execution Events'",
-          num_active_alerts: 0,
-          num_errored_actions: 0,
-          num_new_alerts: 0,
-          num_recovered_alerts: 0,
-          num_succeeded_actions: 1,
-          num_triggered_actions: 1,
-          schedule_delay_ms: -127535,
-          search_duration_ms: 1255,
-          security_message: 'succeeded',
-          security_status: 'succeeded',
-          status: 'success',
-          timed_out: false,
-          timestamp: '2022-03-13T06:04:05.838Z',
-          total_search_duration_ms: 0,
-        },
-      ],
-      total: 1,
-    });
+    expect(result.current.data).toEqual([
+      {
+        integration_name: 'audit',
+        integration_title: 'Audit Logs',
+        is_enabled: true,
+        package_name: 'atlassian_bitbucket',
+        package_title: 'Atlassian Bitbucket',
+        package_version: '1.0.1',
+      },
+      {
+        is_enabled: true,
+        package_name: 'system',
+        package_title: 'System',
+        package_version: '1.6.4',
+      },
+    ]);
   });
 
-  it.skip('handles exceptions from the API', async () => {
+  it('handles exceptions from the API', async () => {
     const exception = new Error('Boom!');
-    jest.spyOn(api, 'fetchRuleExecutionEvents').mockRejectedValue(exception);
+    jest.spyOn(api, 'fetchInstalledIntegrations').mockRejectedValue(exception);
 
     const { result, waitForNextUpdate } = render();
 
@@ -133,7 +121,7 @@ describe('useInstalledIntegrations', () => {
     // And shows a toast with the caught exception
     expect(useToasts().addError).toHaveBeenCalledTimes(1);
     expect(useToasts().addError).toHaveBeenCalledWith(exception, {
-      title: 'Failed to fetch rule execution events',
+      title: 'Failed to fetch installed integrations',
     });
   });
 });
