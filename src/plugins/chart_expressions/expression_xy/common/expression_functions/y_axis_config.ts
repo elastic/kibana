@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { strings } from '../i18n';
 import { Y_AXIS_CONFIG, AxisModes, AXIS_EXTENT_CONFIG, YScaleTypes } from '../constants';
 import { YAxisConfigFn } from '../types';
@@ -43,6 +44,7 @@ export const yAxisConfigFunction: YAxisConfigFn = {
     return {
       type: Y_AXIS_CONFIG,
       ...args,
+      position: args.position ?? Position.Left,
     };
   },
 };

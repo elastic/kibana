@@ -12,15 +12,15 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CommonXYReferenceLineLayerConfig, ReferenceLineConfig } from '../../../common/types';
-import { isReferenceLine, LayersAccessorsTitles } from '../../helpers';
+import { GroupsConfiguration, isReferenceLine, LayersAccessorsTitles } from '../../helpers';
 import { ReferenceLineLayer } from './reference_line_layer';
 import { ReferenceLine } from './reference_line';
 import { getNextValuesForReferenceLines } from './utils';
 
 export interface ReferenceLinesProps {
   layers: CommonXYReferenceLineLayerConfig[];
-  formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
-  axesMap: Record<'left' | 'right', boolean>;
+  xAxisFormatter: FieldFormat;
+  yAxesConfiguration: GroupsConfiguration;
   isHorizontal: boolean;
   paddingMap: Partial<Record<Position, number>>;
   titles?: LayersAccessorsTitles;

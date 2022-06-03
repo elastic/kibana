@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { strings } from '../i18n';
 import { XAxisConfigFn } from '../types';
 import { X_AXIS_CONFIG } from '../constants';
@@ -24,6 +25,7 @@ export const xAxisConfigFunction: XAxisConfigFn = {
     return {
       type: X_AXIS_CONFIG,
       ...args,
+      position: args.position ?? Position.Bottom,
     };
   },
 };

@@ -102,6 +102,7 @@ export interface ExtendedYConfig extends YConfig {
   fill?: FillStyle;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
+  position?: Position;
 }
 
 export interface YConfig {

@@ -2102,7 +2102,14 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
-          yLeftScale: 'sqrt',
+          axes: [
+            {
+              type: 'yAxisConfig',
+              position: 'left',
+              showLabels: true,
+              scaleType: 'sqrt',
+            },
+          ],
         }}
       />
     );
@@ -2167,6 +2174,7 @@ describe('XYChart component', () => {
       type: 'xAxisConfig',
       id: 'x',
       showLabels: false,
+      position: 'bottom',
     };
 
     const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -2227,6 +2235,7 @@ describe('XYChart component', () => {
       type: 'xAxisConfig',
       id: 'x',
       showLabels: true,
+      position: 'bottom',
     };
 
     const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -2261,6 +2270,7 @@ describe('XYChart component', () => {
       id: 'x',
       showLabels: true,
       labelsOrientation: -45,
+      position: 'bottom',
     };
 
     const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -2294,6 +2304,7 @@ describe('XYChart component', () => {
       type: 'xAxisConfig',
       id: 'x',
       showLabels: true,
+      position: 'bottom',
     };
 
     const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -2328,6 +2339,7 @@ describe('XYChart component', () => {
       id: 'x',
       showLabels: true,
       labelsOrientation: -45,
+      position: 'bottom',
     };
 
     const instance = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -2405,6 +2417,7 @@ describe('XYChart component', () => {
         showLabels: true,
         showGridLines: true,
         labelsOrientation: 0,
+        position: 'bottom',
       },
       markSizeRatio: 1,
       layers: [
@@ -2481,6 +2494,7 @@ describe('XYChart component', () => {
           showGridLines: false,
           showLabels: false,
           title: '',
+          scaleType: 'linear',
           extent: {
             mode: 'full',
             type: 'axisExtentConfig',
@@ -2492,6 +2506,7 @@ describe('XYChart component', () => {
           labelsOrientation: 0,
           showGridLines: false,
           showLabels: false,
+          scaleType: 'linear',
           title: '',
           extent: {
             mode: 'full',
@@ -2506,11 +2521,10 @@ describe('XYChart component', () => {
         showLabels: true,
         showGridLines: true,
         labelsOrientation: 0,
+        position: 'bottom',
       },
       showTooltip: true,
       markSizeRatio: 1,
-      yLeftScale: 'linear',
-      yRightScale: 'linear',
       layers: [
         {
           layerId: 'first',
@@ -2566,6 +2580,7 @@ describe('XYChart component', () => {
           showGridLines: false,
           showLabels: false,
           title: '',
+          scaleType: 'linear',
           extent: {
             mode: 'full',
             type: 'axisExtentConfig',
@@ -2577,6 +2592,7 @@ describe('XYChart component', () => {
           labelsOrientation: 0,
           showGridLines: false,
           showLabels: false,
+          scaleType: 'linear',
           title: '',
           extent: {
             mode: 'full',
@@ -2591,10 +2607,9 @@ describe('XYChart component', () => {
         showGridLines: true,
         labelsOrientation: 0,
         title: '',
+        position: 'bottom',
       },
       markSizeRatio: 1,
-      yLeftScale: 'linear',
-      yRightScale: 'linear',
       layers: [
         {
           layerId: 'first',
@@ -2782,6 +2797,7 @@ describe('XYChart component', () => {
       id: 'x',
       showLabels: true,
       title: 'My custom x-axis title',
+      position: 'bottom',
     };
 
     const component = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -2811,6 +2827,7 @@ describe('XYChart component', () => {
       showLabels: true,
       showTitle: false,
       title: 'My custom x-axis title',
+      position: 'bottom',
     };
 
     const component = shallow(<XYChart {...defaultProps} args={{ ...args }} />);
@@ -2846,6 +2863,7 @@ describe('XYChart component', () => {
       showLabels: true,
       showGridLines: true,
       title: 'My custom x-axis title',
+      position: 'bottom',
     };
 
     const component = shallow(<XYChart {...defaultProps} args={{ ...args }} />);

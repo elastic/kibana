@@ -115,8 +115,8 @@ export const hasAreaLayer = (layers: Array<DataLayerConfigResult | CommonXYDataL
 export const hasHistogramBarLayer = (
   layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
 ) =>
-  layers.filter(({ seriesType, isHistogram }) => seriesType.includes('bar') && isHistogram).length >
-  0;
+  layers.filter(({ seriesType, isHistogram }) => seriesType === SeriesTypes.BAR && isHistogram)
+    .length > 0;
 
 export const isValidExtentWithCustomMode = (extent: AxisExtentConfigResult) => {
   const isValidLowerBound =
@@ -131,7 +131,7 @@ export const validateExtentForDataBounds = (
   extent: AxisExtentConfigResult,
   layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>
 ) => {
-  const lineSeries = layers.filter(({ seriesType }) => seriesType.includes('line'));
+  const lineSeries = layers.filter(({ seriesType }) => seriesType === SeriesTypes.LINE);
   if (!lineSeries.length && extent.mode === AxisExtentModes.DATA_BOUNDS) {
     throw new Error(errors.dataBoundsForNotLineChartError());
   }
@@ -175,7 +175,7 @@ export const validateValueLabels = (
 };
 
 const isAreaOrLineChart = (seriesType: SeriesType) =>
-  seriesType.includes('line') || seriesType.includes('area');
+  seriesType === SeriesTypes.LINE || seriesType === SeriesTypes.AREA;
 
 export const validateAddTimeMarker = (
   dataLayers: Array<DataLayerConfigResult | ExtendedDataLayerConfigResult>,
@@ -190,7 +190,7 @@ export const validateMarkSizeForChartType = (
   markSizeAccessor: ExpressionValueVisDimension | string | undefined,
   seriesType: SeriesType
 ) => {
-  if (markSizeAccessor && !seriesType.includes('line') && !seriesType.includes('area')) {
+  if (markSizeAccessor && seriesType !== SeriesTypes.LINE && seriesType !== SeriesTypes.AREA) {
     throw new Error(errors.markSizeAccessorForNonLineOrAreaChartsError());
   }
 };
@@ -232,7 +232,7 @@ export const validateLinesVisibilityForChartType = (
   showLines: boolean | undefined,
   seriesType: SeriesType
 ) => {
-  if (showLines && !(seriesType.includes('line') || seriesType.includes('area'))) {
+  if (showLines && !(seriesType === SeriesTypes.LINE || seriesType === SeriesTypes.AREA)) {
     throw new Error(errors.linesVisibilityForNonLineChartError());
   }
 };

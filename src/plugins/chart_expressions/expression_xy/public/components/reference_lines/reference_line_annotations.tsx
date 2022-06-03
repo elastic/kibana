@@ -10,18 +10,16 @@ import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '
 import { euiLightVars } from '@kbn/ui-theme';
 import React, { FC } from 'react';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
-import { LINES_MARKER_SIZE } from '../../helpers';
+import { AxisConfiguration, LINES_MARKER_SIZE } from '../../helpers';
 import {
   AvailableReferenceLineIcon,
   FillStyle,
   IconPosition,
   LineStyle,
-  YAxisMode,
 } from '../../../common/types';
 import {
   getBaseIconPlacement,
   getBottomRect,
-  getGroupId,
   getHorizontalRect,
   getLineAnnotationProps,
   getSharedStyle,
@@ -38,7 +36,7 @@ export interface ReferenceLineAnnotationConfig {
   fill?: FillStyle;
   iconPosition?: IconPosition;
   textVisibility?: boolean;
-  axisMode?: YAxisMode;
+  axisGroup?: AxisConfiguration;
   color?: string;
 }
 
@@ -54,10 +52,10 @@ const getRectDataValue = (
   annotationConfig: ReferenceLineAnnotationConfig,
   formatter: FieldFormat | undefined
 ) => {
-  const { name, value, nextValue, fill, axisMode } = annotationConfig;
+  const { name, value, nextValue, fill, axisGroup } = annotationConfig;
   const isFillAbove = fill === 'above';
 
-  if (axisMode === 'bottom') {
+  if (axisGroup?.position === Position.Bottom) {
     return getBottomRect(name, isFillAbove, formatter, value, nextValue);
   }
 
@@ -71,13 +69,11 @@ export const ReferenceLineAnnotations: FC<Props> = ({
   paddingMap,
   isHorizontal,
 }) => {
-  const { id, axisMode, iconPosition, name, textVisibility, value, fill, color } = config;
+  const { id, axisGroup, iconPosition, name, textVisibility, value, fill, color } = config;
 
-  // Find the formatter for the given axis
-  const groupId = getGroupId(axisMode);
   const defaultColor = euiLightVars.euiColorDarkShade;
   // get the position for vertical chart
-  const markerPositionVertical = getBaseIconPlacement(iconPosition, axesMap, axisMode);
+  const markerPositionVertical = getBaseIconPlacement(iconPosition, axesMap, axisGroup?.position);
   // the padding map is built for vertical chart
   const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
 
@@ -89,7 +85,6 @@ export const ReferenceLineAnnotations: FC<Props> = ({
     },
     axesMap,
     paddingMap,
-    groupId,
     isHorizontal
   );
 
@@ -108,7 +103,9 @@ export const ReferenceLineAnnotations: FC<Props> = ({
       key={`${id}-line`}
       dataValues={[dataValues]}
       domainType={
-        axisMode === 'bottom' ? AnnotationDomainType.XDomain : AnnotationDomainType.YDomain
+        axisGroup?.position === Position.Bottom
+          ? AnnotationDomainType.XDomain
+          : AnnotationDomainType.YDomain
       }
       style={{ line: { ...sharedStyle, opacity: 1 } }}
     />

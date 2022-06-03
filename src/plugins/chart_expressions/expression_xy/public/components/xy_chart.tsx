@@ -47,7 +47,7 @@ import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import { isTimeChart } from '../../common/helpers';
 import type {
   CommonXYDataLayerConfig,
-  ExtendedYConfig,
+  ExtendedYConfigResult,
   ReferenceLineYConfig,
   XYChartProps,
 } from '../../common/types';
@@ -69,10 +69,15 @@ import {
   getLinesCausedPaddings,
   getAxisGroupConfig,
   validateExtent,
+  Series,
 } from '../helpers';
 import { getXDomain, XyEndzones } from './x_domain';
 import { getLegendAction } from './legend_action';
-import { ReferenceLines, computeChartMargins } from './reference_lines';
+import {
+  ReferenceLines,
+  computeChartMargins,
+  getAxisGroupForReferenceLine,
+} from './reference_lines';
 import { visualizationDefinitions } from '../definitions';
 import { CommonXYLayerConfig } from '../../common/types';
 import { SplitChart } from './split_chart';
@@ -235,11 +240,9 @@ export function XYChart({
   const yAxesConfiguration = getAxesConfiguration(
     dataLayers,
     shouldRotate,
-    axes,
     formatFactory,
     fieldFormats,
-    yLeftScale,
-    yRightScale
+    axes
   );
 
   const xTitle = xAxisConfig?.title || (xAxisColumn && xAxisColumn.name);
@@ -251,7 +254,7 @@ export function XYChart({
   const titles = getLayersTitles(
     dataLayers,
     { splitColumnAccessor, splitRowAccessor },
-    { xTitle: args.xTitle, yTitle: args.yTitle, yRightTitle: args.yRightTitle },
+    { xTitle },
     yAxesConfiguration
   );
 
@@ -284,24 +287,11 @@ export function XYChart({
     yRight: yAxesMap?.right?.showLabels ?? true,
   };
 
-  const getYAxesTitles = (axis: AxisConfiguration) => {
-    return (
-      axis.title ||
-      axis.series
-        .map(
-          (series) =>
-            filteredLayers
-              .find(({ layerId }) => series.layer === layerId)
-              ?.table.columns.find((column) => column.id === series.accessor)?.name
-        )
-        .filter((name) => Boolean(name))[0]
-    );
+  const getYAxesTitles = (axisSeries: Series[]) => {
+    return axisSeries
+      .map(({ layer, accessor }) => titles?.[layer]?.yTitles?.[accessor])
+      .filter((name) => Boolean(name))[0];
   };
-  // const getYAxesTitles = (axisSeries: Series[]) => {
-  //   return axisSeries
-  //     .map(({ layer, accessor }) => titles?.[layer]?.yTitles?.[accessor])
-  //     .filter((name) => Boolean(name))[0];
-  // };
 
   const referenceLineLayers = getReferenceLayers(layers);
 
@@ -321,12 +311,14 @@ export function XYChart({
   const rangeAnnotations = getRangeAnnotations(annotationsLayers);
 
   const visualConfigs = [
-    ...referenceLineLayers.flatMap<ExtendedYConfig | ReferenceLineYConfig | undefined>(
-      ({ yConfig }) => yConfig
-    ).map((config) => ({
-      ...config,
-      position: getAxisGroupConfig(yAxesConfiguration, config)?.position,
-    })),
+    ...referenceLineLayers
+      .flatMap<ExtendedYConfigResult | ReferenceLineYConfig | undefined>(({ yConfig }) => yConfig)
+      .map((config) => ({
+        ...config,
+        position: config
+          ? getAxisGroupForReferenceLine(yAxesConfiguration, config)?.position
+          : Position.Bottom,
+      })),
     ...groupedLineAnnotations,
   ].filter(Boolean);
 
@@ -399,7 +391,13 @@ export function XYChart({
         .flatMap((l) =>
           l.yConfig ? l.yConfig.map((yConfig) => ({ layerId: l.layerId, yConfig })) : []
         )
-        .filter(({ yConfig }) => axis.series.some((s) => s.accessor === yConfig.forAccessor))
+        .filter(({ yConfig }) => {
+          if (yConfig.axisId) {
+            return axis.groupId.includes(yConfig.axisId);
+          }
+
+          return axis.position === yConfig.position;
+        })
         .map(({ layerId, yConfig }) =>
           isReferenceLineYConfig(yConfig)
             ? `${layerId}-${yConfig.value}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
@@ -724,7 +722,7 @@ export function XYChart({
             id={axis.groupId}
             groupId={axis.groupId}
             position={axis.position}
-            title={getYAxesTitles(axis)}
+            title={getYAxesTitles(axis.series)}
             gridLine={{
               visible: axis.showGridLines,
             }}

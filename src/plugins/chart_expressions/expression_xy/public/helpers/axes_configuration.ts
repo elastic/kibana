@@ -10,6 +10,7 @@ import { Position } from '@elastic/charts';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
+import type { ReferenceLineYConfig } from '../../common/types';
 import {
   AxisExtentConfig,
   CommonXYDataLayerConfig,
@@ -19,6 +20,7 @@ import {
   ExtendedYConfigResult,
 } from '../../common';
 import { LayersFieldFormats } from './layers';
+import { isReferenceLineYConfig } from './visualization';
 
 export interface Series {
   layer: string;
@@ -53,7 +55,7 @@ export function isFormatterCompatible(
 export function groupAxesByType(
   layers: CommonXYDataLayerConfig[],
   fieldFormats: LayersFieldFormats,
-  axes?: YAxisConfig[],
+  axes?: YAxisConfig[]
 ) {
   const series: AxesSeries = {
     auto: [],
@@ -72,6 +74,9 @@ export function groupAxesByType(
       );
       const key = axisConfigById?.id || 'auto';
       const fieldFormat = fieldFormats[layerId].yAccessors[yAccessor]!;
+      if (!series[key]) {
+        series[key] = [];
+      }
       series[key].push({ layer: layer.layerId, accessor: yAccessor, fieldFormat });
     });
   });
@@ -144,9 +149,9 @@ function axisGlobalConfig(position: Position, axes?: YAxisConfig[]) {
 export function getAxesConfiguration(
   layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
-  axes?: YAxisConfig[],
   formatFactory: FormatFactory | undefined,
   fieldFormats: LayersFieldFormats,
+  axes?: YAxisConfig[]
 ): GroupsConfiguration {
   const series = groupAxesByType(layers, fieldFormats, axes);
 
@@ -158,11 +163,11 @@ export function getAxesConfiguration(
       position = getAxisPosition(axis.position || Position.Left, shouldRotate);
       axisGroups.push({
         groupId: `axis-${axis.id}`,
-        position,
         formatter: formatFactory?.(series[axis.id][0].fieldFormat),
         series: series[axis.id].map(({ fieldFormat, ...currentSeries }) => currentSeries),
         ...axisGlobalConfig(position, axes),
         ...axis,
+        position,
       });
     }
   });
@@ -171,10 +176,10 @@ export function getAxesConfiguration(
     position = shouldRotate ? 'bottom' : 'left';
     axisGroups.push({
       groupId: 'left',
-      position,
       formatter: formatFactory?.(series.left[0].fieldFormat),
       series: series.left.map(({ fieldFormat, ...currentSeries }) => currentSeries),
       ...axisGlobalConfig(position, axes),
+      position,
     });
   }
 
@@ -182,10 +187,10 @@ export function getAxesConfiguration(
     position = shouldRotate ? 'top' : 'right';
     axisGroups.push({
       groupId: 'right',
-      position,
       formatter: formatFactory?.(series.right[0].fieldFormat),
       series: series.right.map(({ fieldFormat, ...currentSeries }) => currentSeries),
       ...axisGlobalConfig(position, axes),
+      position,
     });
   }
 
@@ -208,11 +213,15 @@ export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig)
 
 export const getAxisGroupConfig = (
   axesGroup?: GroupsConfiguration,
-  yConfig?: ExtendedYConfigResult
+  yConfig?: ExtendedYConfigResult | ReferenceLineYConfig
 ) => {
-  return axesGroup?.find(
-    (axis) =>
-      (yConfig?.axisId && yConfig.axisId === axis.groupId) ||
-      axis.series.some(({ accessor }) => accessor === yConfig?.forAccessor)
-  );
+  return axesGroup?.find((axis) => {
+    if (yConfig?.axisId) {
+      return axis.groupId.includes(yConfig.axisId);
+    }
+
+    return yConfig && isReferenceLineYConfig(yConfig)
+      ? yConfig.position === axis.position
+      : axis.series.some(({ accessor }) => accessor === yConfig?.forAccessor);
+  });
 };

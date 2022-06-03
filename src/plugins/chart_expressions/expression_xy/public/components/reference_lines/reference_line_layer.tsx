@@ -11,24 +11,24 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { groupBy } from 'lodash';
 import { Position } from '@elastic/charts';
 import { ReferenceLineLayerConfig } from '../../../common/types';
-import { getGroupId } from './utils';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
-import { LayerAccessorsTitles } from '../../helpers';
+import { LayerAccessorsTitles, GroupsConfiguration } from '../../helpers';
+import { getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineLayerProps {
   layer: ReferenceLineLayerConfig;
-  formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
   paddingMap: Partial<Record<Position, number>>;
-  axesMap: Record<'left' | 'right', boolean>;
   isHorizontal: boolean;
   titles?: LayerAccessorsTitles;
+  xAxisFormatter: FieldFormat;
+  yAxesConfiguration: GroupsConfiguration;
 }
 
 export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   layer,
-  formatters,
+  yAxesConfiguration,
+  xAxisFormatter,
   paddingMap,
-  axesMap,
   isHorizontal,
   titles,
 }) => {
@@ -51,12 +51,9 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   }
 
   const referenceLineElements = yConfigByValue.flatMap((yConfig) => {
-    const { axisMode } = yConfig;
+    const axisGroup = getAxisGroupForReferenceLine(yAxesConfiguration, yConfig);
 
-    // Find the formatter for the given axis
-    const groupId = getGroupId(axisMode);
-
-    const formatter = formatters[groupId || 'bottom'];
+    const formatter = axisGroup?.formatter || xAxisFormatter;
     const name = columnToLabelMap[yConfig.forAccessor] ?? titles?.yTitles?.[yConfig.forAccessor];
     const value = row[yConfig.forAccessor];
     const yConfigsWithSameDirection = groupedByDirection[yConfig.fill!];
@@ -73,6 +70,11 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
     const { forAccessor, type, ...restAnnotationConfig } = yConfig;
     const id = `${layer.layerId}-${yConfig.forAccessor}`;
 
+    const axesMap = {
+      left: yAxesConfiguration.some((axes) => axes.position === 'left'),
+      right: yAxesConfiguration.some((axes) => axes.position === 'right'),
+    };
+
     return (
       <ReferenceLineAnnotations
         key={id}
@@ -82,9 +84,10 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
           nextValue,
           name,
           ...restAnnotationConfig,
+          axisGroup,
         }}
-        paddingMap={paddingMap}
         axesMap={axesMap}
+        paddingMap={paddingMap}
         formatter={formatter}
         isHorizontal={isHorizontal}
       />

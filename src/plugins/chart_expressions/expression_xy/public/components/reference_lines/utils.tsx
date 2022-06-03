@@ -11,9 +11,16 @@ import { Position } from '@elastic/charts';
 import { euiLightVars } from '@kbn/ui-theme';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { groupBy, orderBy } from 'lodash';
-import { IconPosition, ReferenceLineConfig, YAxisMode, FillStyle } from '../../../common/types';
+import {
+  IconPosition,
+  ReferenceLineConfig,
+  FillStyle,
+  ReferenceLineYConfig,
+  ExtendedYConfigResult,
+} from '../../../common/types';
 import { FillStyles } from '../../../common/constants';
 import {
+  GroupsConfiguration,
   LINES_MARKER_SIZE,
   mapVerticalToHorizontalPlacement,
   Marker,
@@ -27,14 +34,14 @@ import { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 export function getBaseIconPlacement(
   iconPosition: IconPosition | undefined,
   axesMap?: Record<string, unknown>,
-  axisMode?: YAxisMode
+  position?: Position
 ) {
   if (iconPosition === 'auto') {
-    if (axisMode === 'bottom') {
+    if (position === Position.Bottom) {
       return Position.Top;
     }
     if (axesMap) {
-      if (axisMode === 'left') {
+      if (position === Position.Left) {
         return axesMap.right ? Position.Left : Position.Right;
       }
       return axesMap.left ? Position.Right : Position.Left;
@@ -69,20 +76,19 @@ export const getLineAnnotationProps = (
   labels: { markerLabel?: string; markerBodyLabel?: string },
   axesMap: Record<'left' | 'right', boolean>,
   paddingMap: Partial<Record<Position, number>>,
-  groupId: 'left' | 'right' | undefined,
   isHorizontal: boolean
 ) => {
   // get the position for vertical chart
   const markerPositionVertical = getBaseIconPlacement(
     config.iconPosition,
     axesMap,
-    config.axisMode
+    config.axisGroup?.position
   );
   // the padding map is built for vertical chart
   const hasReducedPadding = paddingMap[markerPositionVertical] === LINES_MARKER_SIZE;
 
   return {
-    groupId,
+    groupId: config.axisGroup?.groupId || 'bottom',
     marker: (
       <Marker
         config={config}
@@ -95,8 +101,8 @@ export const getLineAnnotationProps = (
       <MarkerBody
         label={labels.markerBodyLabel}
         isHorizontal={
-          (!isHorizontal && config.axisMode === 'bottom') ||
-          (isHorizontal && config.axisMode !== 'bottom')
+          (!isHorizontal && config.axisGroup?.position === Position.Bottom) ||
+          (isHorizontal && config.axisGroup?.position !== Position.Bottom)
         }
       />
     ),
@@ -106,9 +112,6 @@ export const getLineAnnotationProps = (
       : markerPositionVertical,
   };
 };
-
-export const getGroupId = (axisMode: YAxisMode | undefined) =>
-  axisMode === 'bottom' ? undefined : axisMode === 'right' ? 'right' : 'left';
 
 export const getBottomRect = (
   headerLabel: string | undefined,
@@ -212,3 +215,14 @@ export const computeChartMargins = (
   }
   return result;
 };
+
+export function getAxisGroupForReferenceLine(
+  yAxesConfiguration: GroupsConfiguration,
+  yConfig: ReferenceLineYConfig | ExtendedYConfigResult
+) {
+  return yAxesConfiguration.find(
+    (axis) =>
+      (yConfig.axisId && axis.groupId.includes(yConfig.axisId)) ||
+      yConfig.position === axis.position
+  );
+}

@@ -14,7 +14,7 @@ import {
   ExtendedDataLayerArgs,
   DataLayerArgs,
 } from '../types';
-import { LayerTypes } from '../constants';
+import { LayerTypes, SeriesTypes } from '../constants';
 
 function isWithLayerId<T>(layer: T): layer is T & WithLayerId {
   return (layer as T & WithLayerId).layerId ? true : false;
@@ -35,7 +35,7 @@ export function appendLayerIds<T>(
 }
 
 export const getShowLines = (args: DataLayerArgs | ExtendedDataLayerArgs) =>
-  args.seriesType.includes('line') || args.seriesType.includes('area')
+  args.seriesType === SeriesTypes.LINE || args.seriesType !== SeriesTypes.AREA
     ? args.showLines ?? true
     : args.showLines;
 

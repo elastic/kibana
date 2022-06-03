@@ -10,22 +10,23 @@ import React, { FC } from 'react';
 import { Position } from '@elastic/charts';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { ReferenceLineConfig } from '../../../common/types';
-import { getGroupId } from './utils';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
+import { GroupsConfiguration } from '../../helpers';
+import { getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineProps {
   layer: ReferenceLineConfig;
   paddingMap: Partial<Record<Position, number>>;
-  formatters: Record<'left' | 'right' | 'bottom', FieldFormat | undefined>;
-  axesMap: Record<'left' | 'right', boolean>;
+  xAxisFormatter: FieldFormat;
+  yAxesConfiguration: GroupsConfiguration;
   isHorizontal: boolean;
   nextValue?: number;
 }
 
 export const ReferenceLine: FC<ReferenceLineProps> = ({
   layer,
-  axesMap,
-  formatters,
+  yAxesConfiguration,
+  xAxisFormatter,
   paddingMap,
   isHorizontal,
   nextValue,
@@ -38,17 +39,21 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
     return null;
   }
 
-  const { axisMode, value } = yConfig;
+  const { value } = yConfig;
 
-  // Find the formatter for the given axis
-  const groupId = getGroupId(axisMode);
+  const axisGroup = getAxisGroupForReferenceLine(yAxesConfiguration, yConfig);
 
-  const formatter = formatters[groupId || 'bottom'];
+  const formatter = axisGroup?.formatter || xAxisFormatter;
   const id = `${layer.layerId}-${value}`;
+
+  const axesMap = {
+    left: yAxesConfiguration.some((axes) => axes.position === 'left'),
+    right: yAxesConfiguration.some((axes) => axes.position === 'right'),
+  };
 
   return (
     <ReferenceLineAnnotations
-      config={{ id, ...yConfig, nextValue }}
+      config={{ id, ...yConfig, nextValue, axisGroup }}
       paddingMap={paddingMap}
       axesMap={axesMap}
       formatter={formatter}

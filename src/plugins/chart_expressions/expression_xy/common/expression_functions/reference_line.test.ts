@@ -15,6 +15,7 @@ describe('referenceLine', () => {
     const args: ReferenceLineArgs = {
       value: 100,
       fill: 'above',
+      position: 'bottom',
     };
 
     const result = referenceLineFunction.fn(null, args, createMockExecutionContext());
@@ -40,7 +41,7 @@ describe('referenceLine', () => {
       value: 100,
       icon: 'alert',
       iconPosition: 'below',
-      axisMode: 'bottom',
+      position: 'bottom',
       lineStyle: 'solid',
       lineWidth: 10,
       color: '#fff',
@@ -69,6 +70,7 @@ describe('referenceLine', () => {
       name: 'some name',
       value: 100,
       fill: 'none',
+      position: 'bottom',
     };
 
     const result = referenceLineFunction.fn(null, args, createMockExecutionContext());
@@ -93,6 +95,7 @@ describe('referenceLine', () => {
       value: 100,
       textVisibility: true,
       fill: 'none',
+      position: 'bottom',
     };
 
     const result = referenceLineFunction.fn(null, args, createMockExecutionContext());
@@ -119,6 +122,7 @@ describe('referenceLine', () => {
         name: 'some text',
         textVisibility,
         fill: 'none',
+        position: 'bottom',
       };
 
       const result = referenceLineFunction.fn(null, args, createMockExecutionContext());

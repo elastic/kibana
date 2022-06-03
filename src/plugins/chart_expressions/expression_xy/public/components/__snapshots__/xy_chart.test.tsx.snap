@@ -844,16 +844,13 @@ exports[`XYChart component it renders area 1`] = `
           "groupId": "left",
           "labelsOrientation": -90,
           "position": "left",
-          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
-              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
-              "axisId": undefined,
               "layer": "first",
             },
           ],
@@ -1433,16 +1430,13 @@ exports[`XYChart component it renders bar 1`] = `
           "groupId": "left",
           "labelsOrientation": -90,
           "position": "left",
-          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
-              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
-              "axisId": undefined,
               "layer": "first",
             },
           ],
@@ -2017,16 +2011,13 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           },
           "groupId": "left",
           "position": "bottom",
-          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
-              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
-              "axisId": undefined,
               "layer": "first",
             },
           ],
@@ -2601,16 +2592,13 @@ exports[`XYChart component it renders line 1`] = `
           "groupId": "left",
           "labelsOrientation": -90,
           "position": "left",
-          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
-              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
-              "axisId": undefined,
               "layer": "first",
             },
           ],
@@ -3190,16 +3178,13 @@ exports[`XYChart component it renders stacked area 1`] = `
           "groupId": "left",
           "labelsOrientation": -90,
           "position": "left",
-          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
-              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
-              "axisId": undefined,
               "layer": "first",
             },
           ],
@@ -3779,16 +3764,13 @@ exports[`XYChart component it renders stacked bar 1`] = `
           "groupId": "left",
           "labelsOrientation": -90,
           "position": "left",
-          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
-              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
-              "axisId": undefined,
               "layer": "first",
             },
           ],
@@ -4363,16 +4345,13 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           },
           "groupId": "left",
           "position": "bottom",
-          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
-              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
-              "axisId": undefined,
               "layer": "first",
             },
           ],
@@ -5219,16 +5198,13 @@ exports[`XYChart component split chart should render split chart if both, splitR
           "groupId": "left",
           "labelsOrientation": -90,
           "position": "left",
-          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
-              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
-              "axisId": undefined,
               "layer": "first",
             },
           ],
@@ -6074,16 +6050,13 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           "groupId": "left",
           "labelsOrientation": -90,
           "position": "left",
-          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
-              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
-              "axisId": undefined,
               "layer": "first",
             },
           ],
@@ -6929,16 +6902,13 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           "groupId": "left",
           "labelsOrientation": -90,
           "position": "left",
-          "scale": "linear",
           "series": Array [
             Object {
               "accessor": "a",
-              "axisId": undefined,
               "layer": "first",
             },
             Object {
               "accessor": "b",
-              "axisId": undefined,
               "layer": "first",
             },
           ],

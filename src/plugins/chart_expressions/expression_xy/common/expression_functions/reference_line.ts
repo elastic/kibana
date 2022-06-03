@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import {
   AvailableReferenceLineIcons,
@@ -15,7 +16,6 @@ import {
   LineStyles,
   REFERENCE_LINE,
   REFERENCE_LINE_Y_CONFIG,
-  YAxisModes,
 } from '../constants';
 import { ReferenceLineFn } from '../types';
 import { strings } from '../i18n';
@@ -36,12 +36,22 @@ export const referenceLineFunction: ReferenceLineFn = {
       help: strings.getReferenceLineValueHelp(),
       required: true,
     },
-    axisMode: {
+    position: {
       types: ['string'],
-      options: [...Object.values(YAxisModes)],
-      help: strings.getAxisModeHelp(),
-      default: YAxisModes.AUTO,
+      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      help: i18n.translate('expressionXY.referenceLine.axisId.help', {
+        defaultMessage:
+          'Position of axis (first axis of that position) to which the reference line belongs.',
+      }),
+      default: Position.Left,
       strict: true,
+    },
+    axisId: {
+      types: ['string'],
+      help: i18n.translate('expressionXY.referenceLine.axisId.help', {
+        defaultMessage:
+          'Id of axis to which the reference line belongs. Have more priority than "position"',
+      }),
     },
     color: {
       types: ['string'],

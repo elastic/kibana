@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import {
   AvailableReferenceLineIcons,
@@ -26,6 +27,16 @@ export const extendedYConfigFunction: ExtendedYConfigFn = {
   inputTypes: ['null'],
   args: {
     ...commonYConfigArgs,
+    position: {
+      types: ['string'],
+      options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
+      help: i18n.translate('expressionXY.referenceLine.axisId.help', {
+        defaultMessage:
+          'Position of axis (first axis of that position) to which the reference line belongs.',
+      }),
+      default: Position.Left,
+      strict: true,
+    },
     lineStyle: {
       types: ['string'],
       options: [...Object.values(LineStyles)],
