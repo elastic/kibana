@@ -70,10 +70,11 @@ export const TagList = React.memo(
       const { isValid, data: newData } = await submit();
       if (isValid && newData.tags) {
         onSubmit(newData.tags);
-        setIsEditTags(false);
         form.reset({ defaultValue: newData });
+        setIsEditTags(false);
       }
-    }, [form, onSubmit, submit]);
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [onSubmit, submit]);
 
     const { data: tagOptions = [] } = useGetTags();
     const [options, setOptions] = useState(
