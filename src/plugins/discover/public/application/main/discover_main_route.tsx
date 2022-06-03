@@ -39,9 +39,14 @@ interface DiscoverLandingParams {
   id: string;
 }
 
-export function DiscoverMainRoute() {
+interface Props {
+  isDev: boolean;
+}
+
+export function DiscoverMainRoute(props: Props) {
   const history = useHistory();
   const services = useDiscoverServices();
+  const { isDev } = props;
   const {
     core,
     chrome,
@@ -106,7 +111,7 @@ export function DiscoverMainRoute() {
         setError(e);
       }
     },
-    [config, data.dataViews, history, toastNotifications]
+    [config, data.dataViews, history, isDev, toastNotifications]
   );
 
   const loadSavedSearch = useCallback(async () => {

@@ -18,7 +18,15 @@ import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 
-export const discoverRouter = (services: DiscoverServices, history: History) => (
+export interface DiscoverRouterProps {
+  isDev: boolean;
+}
+
+export const discoverRouter = (
+  services: DiscoverServices,
+  history: History,
+  { isDev }: DiscoverRouterProps
+) => (
   <KibanaContextProvider services={services}>
     <EuiErrorBoundary>
       <Router history={history} data-test-subj="discover-react-router">
@@ -41,10 +49,10 @@ export const discoverRouter = (services: DiscoverServices, history: History) => 
             <ViewAlertRoute />
           </Route>
           <Route path="/view/:id">
-            <DiscoverMainRoute />
+            <DiscoverMainRoute isDev={isDev} />
           </Route>
           <Route path="/" exact>
-            <DiscoverMainRoute />
+            <DiscoverMainRoute isDev={isDev} />
           </Route>
           <NotFoundRoute />
         </Switch>
