@@ -9,6 +9,7 @@ import { EuiAccordion, EuiFlexItem, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import React, { FC, memo, useCallback, useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 
+import { useGetInstalledJob } from '../../../../common/components/ml/hooks/use_get_jobs';
 import {
   RuleStepProps,
   RuleStep,
@@ -96,7 +97,19 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   );
 
   const [severityValue, setSeverityValue] = useState<string>(initialState.severity.value);
-  const [indexPatternLoading, { indexPatterns }] = useFetchIndex(defineRuleData?.index ?? []);
+
+  const memoMlJobIds = useMemo(() => defineRuleData?.machineLearningJobId ?? [], [defineRuleData]);
+  const { jobs } = useGetInstalledJob(memoMlJobIds);
+
+  const memoRuleIndices = useMemo(() => {
+    if (jobs.length > 0) {
+      return jobs[0].results_index_name ? [`.ml-anomalies-${jobs[0].results_index_name}`] : [];
+    } else {
+      return defineRuleData?.index ?? [];
+    }
+  }, [jobs, defineRuleData]);
+
+  const [indexPatternLoading, { indexPatterns }] = useFetchIndex(memoRuleIndices);
 
   const { form } = useForm<AboutStepRule>({
     defaultValue: initialState,
