@@ -37,6 +37,7 @@ import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
+import { useUpdateCase } from '../../containers/use_update_case';
 
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_bulk_update_case');
@@ -53,6 +54,7 @@ jest.mock('../../common/navigation/hooks');
 jest.mock('../app/use_available_owners', () => ({
   useAvailableCasesOwners: () => ['securitySolution', 'observability'],
 }));
+jest.mock('../../containers/use_update_case');
 
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
@@ -65,6 +67,7 @@ const useGetReportersMock = useGetReporters as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+const useUpdateCaseMock = useUpdateCase as jest.Mock;
 
 const mockTriggersActionsUiService = triggersActionsUiMock.createStart();
 
@@ -80,7 +83,6 @@ const mockKibana = () => {
 describe('AllCasesListGeneric', () => {
   const dispatchResetIsDeleted = jest.fn();
   const dispatchResetIsUpdated = jest.fn();
-  const dispatchUpdateCaseProperty = jest.fn();
   const handleOnDeleteConfirm = jest.fn();
   const handleToggleModal = jest.fn();
   const refetchCases = jest.fn();
@@ -90,6 +92,8 @@ describe('AllCasesListGeneric', () => {
   const updateBulkStatus = jest.fn();
   const fetchCasesStatus = jest.fn();
   const onRowClick = jest.fn();
+  const updateCaseProperty = jest.fn();
+
   const emptyTag = getEmptyTagValue().props.children;
   useCreateAttachmentsMock.mockReturnValue({
     status: { isLoading: false },
@@ -98,7 +102,6 @@ describe('AllCasesListGeneric', () => {
 
   const defaultGetCases = {
     ...useGetCasesMockState,
-    dispatchUpdateCaseProperty,
     refetchCases,
     setFilters,
     setQueryParams,
@@ -146,7 +149,6 @@ describe('AllCasesListGeneric', () => {
       href: jest.fn(),
       onClick: jest.fn(),
     },
-    dispatchUpdateCaseProperty: jest.fn,
     filterStatus: CaseStatuses.open,
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
@@ -177,6 +179,7 @@ describe('AllCasesListGeneric', () => {
       fetchReporters: jest.fn(),
     });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
+    useUpdateCaseMock.mockReturnValue({ updateCaseProperty });
     mockKibana();
     moment.tz.setDefault('UTC');
   });
@@ -361,14 +364,12 @@ describe('AllCasesListGeneric', () => {
 
     await waitFor(() => {
       const firstCase = useGetCasesMockState.data.cases[0];
-      expect(dispatchUpdateCaseProperty.mock.calls[0][0]).toEqual(
-        expect.objectContaining({
-          caseId: firstCase.id,
-          updateKey: 'status',
-          updateValue: CaseStatuses.closed,
-          version: firstCase.version,
-        })
-      );
+      expect(updateCaseProperty).toHaveBeenCalledWith({
+        caseData: firstCase,
+        updateKey: 'status',
+        updateValue: CaseStatuses.closed,
+        onSuccess: expect.anything(),
+      });
     });
   });
 

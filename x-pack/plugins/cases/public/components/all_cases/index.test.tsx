@@ -34,7 +34,6 @@ const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 
 describe('AllCases', () => {
-  const dispatchUpdateCaseProperty = jest.fn();
   const refetchCases = jest.fn();
   const setFilters = jest.fn();
   const setQueryParams = jest.fn();
@@ -43,7 +42,6 @@ describe('AllCases', () => {
 
   const defaultGetCases = {
     ...useGetCasesMockState,
-    dispatchUpdateCaseProperty,
     refetchCases,
     setFilters,
     setQueryParams,

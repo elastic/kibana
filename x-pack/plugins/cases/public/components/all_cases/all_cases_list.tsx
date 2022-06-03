@@ -68,7 +68,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
 
     const {
       data,
-      dispatchUpdateCaseProperty,
       filterOptions,
       loading,
       queryParams,
@@ -167,7 +166,6 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const showActions = userCanCrud && !isSelectorView;
 
     const columns = useCasesColumns({
-      dispatchUpdateCaseProperty,
       filterStatus: filterOptions.status,
       handleIsLoading,
       isLoadingCases: loading,
