@@ -245,7 +245,7 @@ const RuleAdd = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <HealthContextProvider>
-          <HealthCheck inFlyout={true} waitForCheck={false}>
+          <HealthCheck inFlyout={true} waitForCheck={true}>
             <EuiFlyoutBody>
               <RuleForm
                 rule={rule}

@@ -108,12 +108,7 @@ export function AlertsPopover({
       name: 'Alerting',
       items: [
         {
-          name: (
-            <>
-              {SearchThresholdAlertFlyout}
-              {createSearchThresholdRuleLink}
-            </>
-          ),
+          name: <>{createSearchThresholdRuleLink}</>,
           icon: 'bell',
           disabled: !hasTimeFieldName,
         },
