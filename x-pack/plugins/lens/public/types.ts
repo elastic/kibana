@@ -14,7 +14,7 @@ import type {
 import type { PaletteOutput } from '@kbn/coloring';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
 import type { MutableRefObject } from 'react';
-import { Filter, TimeRange } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import type {
   ExpressionAstExpression,
   ExpressionRendererEvent,
@@ -22,7 +22,7 @@ import type {
   Datatable,
 } from '@kbn/expressions-plugin/public';
 import type { VisualizeEditorLayersContext } from '@kbn/visualizations-plugin/public';
-import type { Query } from '@kbn/data-plugin/public';
+import type { Query, TimeRange } from '@kbn/data-plugin/public';
 import type {
   UiActionsStart,
   RowClickContext,
