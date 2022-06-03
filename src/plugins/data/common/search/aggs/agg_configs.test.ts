@@ -805,7 +805,7 @@ describe('AggConfigs', () => {
     }
 
     it('should generate the `index` argument', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
 
       expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
         `"esaggs index={indexPatternLoad id=\\"logstash-*\\"}"`
@@ -813,7 +813,7 @@ describe('AggConfigs', () => {
     });
 
     it('should generate the `metricsAtAllLevels` if hierarchical', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       ac.hierarchical = true;
 
       expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
@@ -822,7 +822,7 @@ describe('AggConfigs', () => {
     });
 
     it('should generate the `partialRows` argument', () => {
-      const ac = new AggConfigs(indexPattern, [], { typesRegistry });
+      const ac = new AggConfigs(indexPattern, [], { typesRegistry }, jest.fn());
       ac.partialRows = true;
 
       expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(
@@ -844,10 +844,10 @@ describe('AggConfigs', () => {
         { enabled: true, type: 'max', schema: 'metric', params: { field: 'bytes' } },
       ];
 
-      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry });
+      const ac = new AggConfigs(indexPattern, configStates, { typesRegistry }, jest.fn());
 
       expect(toString(ac.toExpressionAst())).toMatchInlineSnapshot(`
-        "esaggs index={indexPatternLoad id=\\"logstash-*\\"} 
+        "esaggs index={indexPatternLoad id=\\"logstash-*\\"}
           aggs={aggDateHistogram field=\\"@timestamp\\" useNormalizedEsInterval=true extendToTimeRange=false scaleMetricValues=false interval=\\"10s\\" drop_partials=false min_doc_count=1 extended_bounds={extendedBounds} id=\\"1\\" enabled=true schema=\\"segment\\"}
           aggs={aggAvg field=\\"bytes\\" id=\\"2\\" enabled=true schema=\\"metric\\"}
           aggs={aggSum field=\\"bytes\\" emptyAsNull=false id=\\"3\\" enabled=true schema=\\"metric\\"}

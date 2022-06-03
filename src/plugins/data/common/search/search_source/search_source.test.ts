@@ -1424,7 +1424,8 @@ describe('SearchSource', () => {
       const aggConfigs = new AggConfigs(
         stubIndexPattern,
         [{ enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } }],
-        { typesRegistry }
+        { typesRegistry },
+        jest.fn()
       );
       searchSource.setField('aggs', aggConfigs);
 
@@ -1437,7 +1438,7 @@ describe('SearchSource', () => {
     test('should generate the `esaggs` function if there are aggregations configs', () => {
       const typesRegistry = mockAggTypesRegistry();
       searchSourceDependencies.aggs.createAggConfigs.mockImplementationOnce(
-        (dataView, configs) => new AggConfigs(dataView, configs, { typesRegistry })
+        (dataView, configs) => new AggConfigs(dataView, configs, { typesRegistry }, jest.fn())
       );
       searchSource.setField('index', stubIndexPattern);
       searchSource.setField('aggs', [
