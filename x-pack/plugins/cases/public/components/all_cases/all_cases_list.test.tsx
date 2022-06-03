@@ -36,7 +36,7 @@ import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
-import { useFetchTags } from '../../containers/use_get_tags';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_bulk_update_case');
@@ -60,7 +60,7 @@ const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
-const useGetTagsMock = useFetchTags as jest.Mock;
+const useGetTagsMock = useGetTags as jest.Mock;
 const useGetReportersMock = useGetReporters as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const useGetConnectorsMock = useGetConnectors as jest.Mock;

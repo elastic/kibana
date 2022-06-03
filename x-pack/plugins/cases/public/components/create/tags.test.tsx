@@ -14,12 +14,12 @@ import { useForm, Form, FormHook } from '../../common/shared_imports';
 import { Tags } from './tags';
 import { schema, FormProps } from './schema';
 import { TestProviders } from '../../common/mock';
-import { useFetchTags } from '../../containers/use_get_tags';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');
 
-const useGetTagsMock = useFetchTags as jest.Mock;
+const useGetTagsMock = useGetTags as jest.Mock;
 
 describe('Tags', () => {
   let globalForm: FormHook;

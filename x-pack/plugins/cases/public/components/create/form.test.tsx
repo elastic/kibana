@@ -18,7 +18,7 @@ import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
-import { useFetchTags } from '../../containers/use_get_tags';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
@@ -28,7 +28,7 @@ jest.mock('../app/use_available_owners', () => ({
   useAvailableCasesOwners: () => ['securitySolution', 'observability'],
 }));
 
-const useGetTagsMock = useFetchTags as jest.Mock;
+const useGetTagsMock = useGetTags as jest.Mock;
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 

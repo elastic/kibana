@@ -23,7 +23,7 @@ import { FilterPopover } from '../filter_popover';
 import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
 import { SeverityFilter } from './severity_filter';
-import { useFetchTags } from '../../containers/use_get_tags';
+import { useGetTags } from '../../containers/use_get_tags';
 import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
 
 interface CasesTableFiltersProps {
@@ -86,7 +86,7 @@ const CasesTableFiltersComponent = ({
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
   const [selectedOwner, setSelectedOwner] = useState(initial.owner);
-  const { data: tags = [], refetch: fetchTags } = useFetchTags(CASE_LIST_CACHE_KEY);
+  const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
   const { reporters, respReporters, fetchReporters } = useGetReporters();
 
   const refetch = useCallback(() => {

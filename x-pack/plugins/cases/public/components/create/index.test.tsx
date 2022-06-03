@@ -28,7 +28,7 @@ import {
 } from './mock';
 import { CreateCase } from '.';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
-import { useFetchTags } from '../../containers/use_get_tags';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_tags');
@@ -43,7 +43,7 @@ jest.mock('../connectors/jira/use_get_issues');
 
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
-const useGetTagsMock = useFetchTags as jest.Mock;
+const useGetTagsMock = useGetTags as jest.Mock;
 const useGetIncidentTypesMock = useGetIncidentTypes as jest.Mock;
 const useGetSeverityMock = useGetSeverity as jest.Mock;
 const useGetIssueTypesMock = useGetIssueTypes as jest.Mock;

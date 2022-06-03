@@ -15,7 +15,7 @@ import { useGetReporters } from '../../containers/use_get_reporters';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/use_get_cases';
 import { CasesTableFilters } from './table_filters';
 import userEvent from '@testing-library/user-event';
-import { useFetchTags } from '../../containers/use_get_tags';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
@@ -40,7 +40,7 @@ describe('CasesTableFilters ', () => {
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
     jest.clearAllMocks();
-    (useFetchTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch });
+    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch });
     (useGetReporters as jest.Mock).mockReturnValue({
       reporters: ['casetester'],
       respReporters: [{ username: 'casetester' }],

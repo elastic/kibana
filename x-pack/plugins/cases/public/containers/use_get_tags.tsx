@@ -13,7 +13,7 @@ import { getTags } from './api';
 import { CASE_TAGS_CACHE_KEY } from './constants';
 import * as i18n from './translations';
 
-export const useFetchTags = (cacheKey: string = '') => {
+export const useGetTags = (cacheKey: string = '') => {
   const toasts = useToasts();
   const { owner } = useCasesContext();
   return useQuery(

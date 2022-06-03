@@ -13,7 +13,7 @@ import { getFormMock } from '../__mock__/form';
 import { TestProviders } from '../../common/mock';
 import { waitFor } from '@testing-library/react';
 import { useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form';
-import { useFetchTags } from '../../containers/use_get_tags';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib/hooks/use_form');
 jest.mock('../../containers/use_get_tags');
@@ -47,7 +47,7 @@ describe('TagList ', () => {
     jest.resetAllMocks();
     (useForm as jest.Mock).mockImplementation(() => ({ form: formHookMock }));
 
-    (useFetchTags as jest.Mock).mockImplementation(() => ({
+    (useGetTags as jest.Mock).mockImplementation(() => ({
       data: sampleTags,
       refetch: fetchTags,
     }));

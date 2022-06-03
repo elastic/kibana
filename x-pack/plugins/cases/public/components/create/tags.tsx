@@ -8,7 +8,7 @@
 import React, { memo, useMemo } from 'react';
 
 import { Field, getUseField } from '../../common/shared_imports';
-import { useFetchTags } from '../../containers/use_get_tags';
+import { useGetTags } from '../../containers/use_get_tags';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -17,7 +17,7 @@ interface Props {
 }
 
 const TagsComponent: React.FC<Props> = ({ isLoading }) => {
-  const { data: tagOptions = [], isLoading: isLoadingTags } = useFetchTags();
+  const { data: tagOptions = [], isLoading: isLoadingTags } = useGetTags();
   const options = useMemo(
     () =>
       tagOptions.map((label) => ({

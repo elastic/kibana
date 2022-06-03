@@ -10,7 +10,7 @@ import { renderHook } from '@testing-library/react-hooks';
 import * as api from './api';
 import { TestProviders } from '../common/mock';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
-import { useFetchTags } from './use_get_tags';
+import { useGetTags } from './use_get_tags';
 import { useToasts } from '../common/lib/kibana';
 
 jest.mock('./api');
@@ -25,7 +25,7 @@ describe('useGetTags', () => {
 
   it('calls getTags api', async () => {
     const spyOnGetTags = jest.spyOn(api, 'getTags');
-    const { waitForNextUpdate } = renderHook(() => useFetchTags(), {
+    const { waitForNextUpdate } = renderHook(() => useGetTags(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
     await waitForNextUpdate();
@@ -39,7 +39,7 @@ describe('useGetTags', () => {
     spyOnGetTags.mockImplementation(() => {
       throw new Error('Something went wrong');
     });
-    const { waitForNextUpdate } = renderHook(() => useFetchTags(), {
+    const { waitForNextUpdate } = renderHook(() => useGetTags(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
     });
     await waitForNextUpdate();

@@ -18,7 +18,7 @@ import { casesStatus, connectorsMock, useGetCasesMockState } from '../../contain
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
-import { useFetchTags } from '../../containers/use_get_tags';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
@@ -64,7 +64,7 @@ describe('AllCases', () => {
   };
 
   beforeAll(() => {
-    (useFetchTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
+    (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
     (useGetReporters as jest.Mock).mockReturnValue({
       reporters: ['casetester'],
       respReporters: [{ username: 'casetester' }],

@@ -41,7 +41,7 @@ import userEvent from '@testing-library/user-event';
 import { connectorsMock } from '../../common/mock/connectors';
 import { CaseAttachments } from '../../types';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
-import { useFetchTags } from '../../containers/use_get_tags';
+import { useGetTags } from '../../containers/use_get_tags';
 
 const sampleId = 'case-id';
 
@@ -158,7 +158,7 @@ describe('Create case', () => {
       }
     );
 
-    (useFetchTags as jest.Mock).mockImplementation(() => ({
+    (useGetTags as jest.Mock).mockImplementation(() => ({
       data: sampleTags,
       refetch,
     }));
