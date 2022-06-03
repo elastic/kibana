@@ -98,9 +98,9 @@ export function telemetryTaskRunner(
       async run() {
         const esClient = await getEsClient();
         return Promise.all([
-          getTotalCount(esClient, kibanaIndex, preconfiguredActions),
-          getInUseTotalCount(esClient, kibanaIndex, undefined, preconfiguredActions),
-          getExecutionsPerDayCount(esClient, eventLogIndex),
+          getTotalCount(esClient, kibanaIndex, logger, preconfiguredActions),
+          getInUseTotalCount(esClient, kibanaIndex, logger, undefined, preconfiguredActions),
+          getExecutionsPerDayCount(esClient, eventLogIndex, logger),
         ])
           .then(([totalAggegations, totalInUse, totalExecutionsPerDay]) => {
             return {
@@ -137,5 +137,5 @@ export function telemetryTaskRunner(
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'd').startOf('d').toDate();
+  return moment().add(1, 'm').startOf('m').toDate();
 }
