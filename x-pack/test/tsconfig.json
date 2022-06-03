@@ -45,7 +45,7 @@
     { "path": "../../src/plugins/telemetry_management_section/tsconfig.json" },
     { "path": "../../src/plugins/telemetry/tsconfig.json" },
     { "path": "../../src/plugins/ui_actions/tsconfig.json" },
-    { "path": "../../src/ui_actions_enhanced/tsconfig.json" },
+    { "path": "../../src/plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "../../src/plugins/url_forwarding/tsconfig.json" },
     { "path": "../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../plugins/actions/tsconfig.json" },
