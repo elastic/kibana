@@ -118,9 +118,7 @@ export class KibanaMigrator {
    *    The promise resolves with an array of migration statuses, one for each
    *    elasticsearch index which was migrated.
    */
-  public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<
-    Array<{ status: string }>
-  > {
+  public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<MigrationResult[]> {
     if (this.migrationResult === undefined || rerun) {
       // Reruns are only used by CI / EsArchiver. Publishing status updates on reruns results in slowing down CI
       // unnecessarily, so we skip it in this case.
@@ -147,7 +145,7 @@ export class KibanaMigrator {
     return this.status$.asObservable();
   }
 
-  private runMigrationsInternal() {
+  private runMigrationsInternal(): Promise<MigrationResult[]> {
     const indexMap = createIndexMap({
       kibanaIndexName: this.kibanaIndex,
       indexMap: this.mappingProperties,
