@@ -919,7 +919,7 @@
     "jest-raw-loader": "^1.0.1",
     "jest-silent-reporter": "^0.5.0",
     "jest-snapshot": "^26.6.2",
-    "jest-specific-snapshot": "2.0.0",
+    "jest-specific-snapshot": "^4.0.0",
     "jest-styled-components": "^7.0.3",
     "jimp": "^0.14.0",
     "jsdom": "13.1.0",
