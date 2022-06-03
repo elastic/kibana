@@ -131,10 +131,10 @@ function getFieldObject(
     }>;
   };
 
-  return fieldNameAgg.buckets.length > 0
+  return Array.isArray(fieldNameAgg.buckets) && fieldNameAgg.buckets.length > 0
     ? {
         [fieldType]: {
-          name: Array.isArray(fieldNameAgg.buckets) ? fieldNameAgg.buckets[0].key : '',
+          name: fieldNameAgg.buckets[0].key,
           values: Array.isArray(fieldValueAgg.values.buckets)
             ? fieldValueAgg.values.buckets.map(({ key, maxRecordScore }) => ({
                 value: key,
