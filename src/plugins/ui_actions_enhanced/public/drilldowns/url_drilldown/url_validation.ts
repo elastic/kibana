@@ -21,15 +21,12 @@ const generalFormatError = i18n.translate(
 );
 
 const formatError = (message: string) =>
-  i18n.translate(
-    'uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatErrorMessage',
-    {
-      defaultMessage: 'Invalid format: {message}',
-      values: {
-        message,
-      },
-    }
-  );
+  i18n.translate('uiActionsEnhanced.drilldowns.urlDrilldownValidation.urlFormatErrorMessage', {
+    defaultMessage: 'Invalid format: {message}',
+    values: {
+      message,
+    },
+  });
 
 const SAFE_URL_PATTERN = /^(?:(?:https?|mailto):|[^&:/?#]*(?:[/?#]|$))/gi;
 export function validateUrl(url: string): { isValid: boolean; error?: string } {

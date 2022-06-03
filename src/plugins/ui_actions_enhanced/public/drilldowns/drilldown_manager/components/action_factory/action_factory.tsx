@@ -47,12 +47,9 @@ const txtBetaActionFactoryTooltip = i18n.translate(
   }
 );
 
-const txtChangeButton = i18n.translate(
-  'uiActionsEnhanced.components.DrilldownForm.changeButton',
-  {
-    defaultMessage: 'Change',
-  }
-);
+const txtChangeButton = i18n.translate('uiActionsEnhanced.components.DrilldownForm.changeButton', {
+  defaultMessage: 'Change',
+});
 
 const GET_MORE_ACTIONS_LINK = 'https://www.elastic.co/subscriptions';
 

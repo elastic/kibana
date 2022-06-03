@@ -134,16 +134,14 @@ export class ActionFactory<
 
   private notifyFeatureUsage(): void {
     if (!this.minimalLicense || !this.licenseFeatureName || !this.deps.getFeatureUsageStart) return;
-    const featureUsageStart = this.deps .getFeatureUsageStart();
+    const featureUsageStart = this.deps.getFeatureUsageStart();
     if (featureUsageStart) {
-      featureUsageStart
-        .notifyUsage(this.licenseFeatureName)
-        .catch(() => {
-          // eslint-disable-next-line no-console
-          console.warn(
-            `ActionFactory [actionFactory.id = ${this.def.id}] fail notify feature usage.`
-          );
-        });
+      featureUsageStart.notifyUsage(this.licenseFeatureName).catch(() => {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `ActionFactory [actionFactory.id = ${this.def.id}] fail notify feature usage.`
+        );
+      });
     }
   }
 

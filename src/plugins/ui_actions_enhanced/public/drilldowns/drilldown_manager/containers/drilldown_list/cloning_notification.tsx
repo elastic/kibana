@@ -19,16 +19,13 @@ const txtDismiss = i18n.translate(
 );
 
 const txtBody = (count: number) =>
-  i18n.translate(
-    'uiActionsEnhanced.drilldowns.containers.drilldownList.copyingNotification.body',
-    {
-      defaultMessage: '{count, number} {count, plural, one {drilldown} other {drilldowns}} copied.',
-      description: 'Title of notification show when one or more drilldowns were copied.',
-      values: {
-        count,
-      },
-    }
-  );
+  i18n.translate('uiActionsEnhanced.drilldowns.containers.drilldownList.copyingNotification.body', {
+    defaultMessage: '{count, number} {count, plural, one {drilldown} other {drilldowns}} copied.',
+    description: 'Title of notification show when one or more drilldowns were copied.',
+    values: {
+      count,
+    },
+  });
 
 export interface CloningNotificationProps {
   count?: number;

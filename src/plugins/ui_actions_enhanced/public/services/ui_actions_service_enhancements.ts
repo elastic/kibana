@@ -157,7 +157,10 @@ export class UiActionsServiceEnhancements
   private registerFeatureUsage = (definition: ActionFactoryDefinition): void => {
     if (!definition.minimalLicense || !definition.licenseFeatureName) return;
     if (this.deps.featureUsageSetup) {
-      this.deps.featureUsageSetup.register(definition.licenseFeatureName, definition.minimalLicense);
+      this.deps.featureUsageSetup.register(
+        definition.licenseFeatureName,
+        definition.minimalLicense
+      );
     }
   };
 

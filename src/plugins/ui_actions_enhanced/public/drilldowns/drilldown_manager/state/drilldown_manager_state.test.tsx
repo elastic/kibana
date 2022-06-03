@@ -51,7 +51,7 @@ const createDrilldownManagerState = () => {
         execute: async () => {},
       }),
     },
-    {getFeatureUsageStart: () => undefined}
+    { getFeatureUsageStart: () => undefined }
   );
   const factory2 = new ActionFactory(
     {
@@ -65,7 +65,7 @@ const createDrilldownManagerState = () => {
         execute: async () => {},
       }),
     },
-    {getFeatureUsageStart: () => undefined}
+    { getFeatureUsageStart: () => undefined }
   );
   const factory3 = new ActionFactory(
     {
@@ -79,7 +79,7 @@ const createDrilldownManagerState = () => {
         execute: async () => {},
       }),
     },
-    {getFeatureUsageStart: () => undefined}
+    { getFeatureUsageStart: () => undefined }
   );
   const trigger1: Trigger = {
     id: 'TRIGGER1',
