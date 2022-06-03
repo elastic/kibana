@@ -18,6 +18,7 @@ import {
   EuiText,
   EuiTreeView,
   EuiBadge,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -91,6 +92,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
   packagePolicy: PackagePolicy;
 }> = memo(({ agent, agentPolicy, packagePolicy }) => {
   const { getHref } = useLink();
+  const theme = useEuiTheme();
 
   const [showNeedsAttentionBadge, setShowNeedsAttentionBadge] = useState(false);
   const extensionView = useUIExtension(
@@ -195,7 +197,7 @@ export const AgentDetailsIntegration: React.FunctionComponent<{
               </EuiFlexItem>
               {showNeedsAttentionBadge && (
                 <EuiFlexItem grow={false}>
-                  <EuiBadge color="#BD271E" iconType="alert" iconSide="left">
+                  <EuiBadge color={theme.euiTheme.colors.danger} iconType="alert" iconSide="left">
                     <FormattedMessage
                       id="xpack.fleet.agentDetailsIntegrations.needsAttention.label"
                       defaultMessage="Needs attention"
