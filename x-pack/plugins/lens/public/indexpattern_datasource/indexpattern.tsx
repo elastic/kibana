@@ -381,6 +381,7 @@ export function getIndexPatternDatasource({
                 http={core.http}
                 data={data}
                 unifiedSearch={unifiedSearch}
+                dataViews={dataViews}
                 uniqueLabel={columnLabelMap[props.columnId]}
                 {...props}
               />
