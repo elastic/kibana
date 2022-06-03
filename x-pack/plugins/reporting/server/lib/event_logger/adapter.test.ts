@@ -7,23 +7,29 @@
 
 import { LogMeta } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { ReportingCore } from '../..';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { EcsLogAdapter } from './adapter';
 
 describe('EcsLogAdapter', () => {
+  let mockCore: ReportingCore;
   const logger = loggingSystemMock.createLogger();
-  beforeAll(() => {
+  beforeAll(async () => {
+    mockCore = await createMockReportingCore(createMockConfigSchema());
+  });
+
+  afterEach(async () => {
+    jest.clearAllMocks();
     jest
       .spyOn(global.Date, 'now')
       .mockImplementationOnce(() => new Date('2021-04-12T16:00:00.000Z').valueOf())
       .mockImplementationOnce(() => new Date('2021-04-12T16:02:00.000Z').valueOf());
   });
 
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('captures a log event', () => {
-    const eventLogger = new EcsLogAdapter(logger, { event: { provider: 'test-adapting' } });
+    const eventLogger = new EcsLogAdapter(mockCore, logger, {
+      event: { provider: 'test-adapting' },
+    });
 
     const event = { kibana: { reporting: { wins: 5000 } } } as object & LogMeta; // an object that extends LogMeta
     eventLogger.logEvent('hello world', event);
@@ -44,7 +50,9 @@ describe('EcsLogAdapter', () => {
   });
 
   it('captures timings between start and complete', () => {
-    const eventLogger = new EcsLogAdapter(logger, { event: { provider: 'test-adapting' } });
+    const eventLogger = new EcsLogAdapter(mockCore, logger, {
+      event: { provider: 'test-adapting' },
+    });
     eventLogger.startTiming();
 
     const event = { kibana: { reporting: { wins: 9000 } } } as object & LogMeta; // an object that extends LogMeta

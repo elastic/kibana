@@ -7,11 +7,14 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { ReportingCore } from '../..';
+import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
 import { BasePayload } from '../../types';
 import { Report } from '../store';
 import { ReportingEventLogger, reportingEventLoggerFactory } from './logger';
 
 describe('Event Logger', () => {
+  let mockCore: ReportingCore;
   const mockReport = new Report({
     _id: '12348',
     payload: { browserTimezone: 'UTC' } as BasePayload,
@@ -20,8 +23,12 @@ describe('Event Logger', () => {
 
   let factory: ReportingEventLogger;
 
+  beforeAll(async () => {
+    mockCore = await createMockReportingCore(createMockConfigSchema({}));
+  });
+
   beforeEach(() => {
-    factory = reportingEventLoggerFactory(loggingSystemMock.createLogger());
+    factory = reportingEventLoggerFactory(mockCore, loggingSystemMock.createLogger());
   });
 
   it(`should construct with an internal seed object`, () => {

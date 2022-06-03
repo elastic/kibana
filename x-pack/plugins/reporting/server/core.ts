@@ -392,8 +392,15 @@ export class ReportingCore {
     return this.executing.size;
   }
 
+  /**
+   * Provides an internal service that logs system events
+   *
+   * @param {IReport} report - definition of a report
+   * @param [task] - definition of a TM task
+   * @returns internal service
+   */
   public getEventLogger(report: IReport, task?: { id: string }) {
-    const ReportingEventLogger = reportingEventLoggerFactory(this.logger);
+    const ReportingEventLogger = reportingEventLoggerFactory(this, this.logger);
     return new ReportingEventLogger(report, task);
   }
 }

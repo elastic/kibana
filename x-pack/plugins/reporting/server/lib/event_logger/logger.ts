@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import deepMerge from 'deepmerge';
 import type { Logger, LogMeta } from '@kbn/core/server';
+import deepMerge from 'deepmerge';
+import { ActionType } from '.';
+import type { ReportingCore } from '../..';
 import { PLUGIN_ID } from '../../../common/constants';
 import type { TaskRunMetrics } from '../../../common/types';
 import { IReport } from '../store';
-import { ActionType } from '.';
 import { EcsLogAdapter } from './adapter';
 import {
   ClaimedTask,
@@ -47,8 +48,8 @@ export interface BaseEvent {
   user?: { name: string };
 }
 
-export function reportingEventLoggerFactory(logger: Logger) {
-  const genericLogger = new EcsLogAdapter(logger, { event: { provider: PLUGIN_ID } });
+export function reportingEventLoggerFactory(reporting: ReportingCore, logger: Logger) {
+  const genericLogger = new EcsLogAdapter(reporting, logger, { event: { provider: PLUGIN_ID } });
 
   return class ReportingEventLogger {
     readonly eventObj: BaseEvent;
@@ -71,7 +72,9 @@ export function reportingEventLoggerFactory(logger: Logger) {
       };
 
       // create a "complete" logger that will use EventLog helpers to calculate timings
-      this.completionLogger = new EcsLogAdapter(logger, { event: { provider: PLUGIN_ID } });
+      this.completionLogger = new EcsLogAdapter(reporting, logger, {
+        event: { provider: PLUGIN_ID },
+      });
     }
 
     logScheduleTask(): ScheduledTask {
