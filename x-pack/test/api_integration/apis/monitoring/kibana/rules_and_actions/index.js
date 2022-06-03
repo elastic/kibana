@@ -6,8 +6,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  // TODO: Unskip when https://github.com/elastic/kibana/pull/132853 is merged
-  describe.skip('Rules and Actions', () => {
+  describe('Rules and Actions', () => {
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./instance'));
   });

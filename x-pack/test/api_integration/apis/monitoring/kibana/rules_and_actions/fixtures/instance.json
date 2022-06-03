@@ -238,7 +238,7 @@
           "metricAgg": "max",
           "label": "Rule Failures Rate",
           "description": "Rate of rule executions for the Kibana instance.",
-          "units": "ms",
+          "units": "",
           "format": "0.[00]",
           "hasCalculation": false,
           "isDerivative": true
@@ -304,7 +304,7 @@
           "metricAgg": "max",
           "label": "Action Executions Rate",
           "description": "Rate of action executions for the Kibana instance.",
-          "units": "ms",
+          "units": "",
           "format": "0.[00]",
           "hasCalculation": false,
           "isDerivative": true
