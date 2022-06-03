@@ -68,6 +68,7 @@ Object {
         "max_connections": 0,
         "max_event_size": 307200,
         "max_header_size": 1048576,
+        "pprof.enabled": false,
         "read_timeout": "3600s",
         "response_headers": null,
         "rum": Object {
