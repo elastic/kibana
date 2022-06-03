@@ -104,7 +104,7 @@ describe('getSeries', () => {
         fieldName: 'document',
         isFullReference: true,
         params: {
-          formula: 'clamp(max(day_of_week_i), 0, max(day_of_week_i))',
+          formula: 'pick_max(max(day_of_week_i), 0)',
         },
       },
     ]);
