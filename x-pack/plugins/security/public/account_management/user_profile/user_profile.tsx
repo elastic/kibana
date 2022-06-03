@@ -18,7 +18,6 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiIconTip,
-  EuiPageTemplate,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -33,6 +32,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 
 import type { AuthenticatedUser, UserAvatar as IUserAvatar } from '../../../common';
 import {
@@ -161,10 +161,12 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
             />
           ) : null}
 
-          <EuiPageTemplate
+          <KibanaPageTemplate
             style={{ backgroundColor: euiTheme.colors.emptyShade }}
             className="eui-fullHeight"
+            pageContentBodyProps={{ style: { paddingLeft: 0, paddingRight: 0 } }}
             pageHeader={{
+              style: { paddingLeft: 0, paddingRight: 0 },
               bottomBorder: true,
               pageTitle: (
                 <FormattedMessage
@@ -191,7 +193,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
                       description: (
                         <span data-test-subj={item.testSubj}>
                           {item.description || (
-                            <EuiText color="subdued" size="s">
+                            <EuiText color={euiTheme.colors.disabled} size="s">
                               <FormattedMessage
                                 id="xpack.security.accountManagement.userProfile.noneProvided"
                                 defaultMessage="None provided"
@@ -531,7 +533,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
               ) : null}
             </Form>
             <EuiSpacer />
-          </EuiPageTemplate>
+          </KibanaPageTemplate>
         </Breadcrumb>
       </FormChangesProvider>
     </FormikProvider>
