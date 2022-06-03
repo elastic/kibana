@@ -24,8 +24,9 @@ export function wrapRunnableArgs(fn, lifecycle, handler) {
             },
 
             async handleError(target, thisArg, argumentsList, err) {
-              await handler(err, thisArg.test);
-              throw err;
+              // TODO-TRE: Trigger from env somehow, ignoring errs for CC
+              // await handler(err, thisArg.test);
+              // throw err;
             },
           });
         }
