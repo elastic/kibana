@@ -16,6 +16,7 @@ export interface UpgradeableConfigType {
   buildNum: number;
   defaultIndex?: string;
   isDefaultIndexMigrated?: boolean;
+  [key: string]: unknown;
 }
 
 /**
@@ -37,7 +38,6 @@ export async function getUpgradeableConfig({
     type: 'config',
     page: 1,
     perPage: 1000,
-    fields: ['buildNum', 'defaultIndex', 'isDefaultIndexMigrated'], // Optimization: we only need these type-level fields, don't return anything else
     sortField: 'buildNum',
     sortOrder: 'desc',
   });
