@@ -159,7 +159,7 @@ describe('UiActionsService', () => {
     });
 
     describe('registerFeature for licensing', () => {
-      const spy = jest.spyOn(deps.featureUsageSetup, 'register');
+      const spy = jest.spyOn(deps.featureUsageSetup!, 'register');
       beforeEach(() => {
         spy.mockClear();
       });

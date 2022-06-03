@@ -31,7 +31,7 @@ import type { ActionFactoryDefinition } from './action_factory_definition';
 
 export interface ActionFactoryDeps {
   readonly getLicense?: () => ILicense;
-  readonly getFeatureUsageStart?: () => LicensingPluginStart['featureUsage'];
+  readonly getFeatureUsageStart: () => LicensingPluginStart['featureUsage'] | undefined;
 }
 
 export class ActionFactory<
@@ -134,15 +134,17 @@ export class ActionFactory<
 
   private notifyFeatureUsage(): void {
     if (!this.minimalLicense || !this.licenseFeatureName || !this.deps.getFeatureUsageStart) return;
-    this.deps
-      .getFeatureUsageStart()
-      .notifyUsage(this.licenseFeatureName)
-      .catch(() => {
-        // eslint-disable-next-line no-console
-        console.warn(
-          `ActionFactory [actionFactory.id = ${this.def.id}] fail notify feature usage.`
-        );
-      });
+    const featureUsageStart = this.deps .getFeatureUsageStart();
+    if (featureUsageStart) {
+      featureUsageStart
+        .notifyUsage(this.licenseFeatureName)
+        .catch(() => {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `ActionFactory [actionFactory.id = ${this.def.id}] fail notify feature usage.`
+          );
+        });
+    }
   }
 
   public telemetry(

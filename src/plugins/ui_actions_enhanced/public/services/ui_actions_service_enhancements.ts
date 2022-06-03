@@ -27,7 +27,7 @@ export type { DynamicActionsState };
 
 export interface UiActionsServiceEnhancementsParams {
   readonly actionFactories?: ActionFactoryRegistry;
-  readonly getLicense: () => ILicense;
+  readonly getLicense?: () => ILicense;
   readonly featureUsageSetup?: LicensingPluginSetup['featureUsage'];
   readonly getFeatureUsageStart: () => LicensingPluginStart['featureUsage'] | undefined;
 }
@@ -156,7 +156,9 @@ export class UiActionsServiceEnhancements
 
   private registerFeatureUsage = (definition: ActionFactoryDefinition): void => {
     if (!definition.minimalLicense || !definition.licenseFeatureName) return;
-    this.deps.featureUsageSetup.register(definition.licenseFeatureName, definition.minimalLicense);
+    if (this.deps.featureUsageSetup) {
+      this.deps.featureUsageSetup.register(definition.licenseFeatureName, definition.minimalLicense);
+    }
   };
 
   public readonly telemetry = (
