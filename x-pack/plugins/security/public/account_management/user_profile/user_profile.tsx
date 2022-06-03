@@ -18,6 +18,7 @@ import {
   EuiFormRow,
   EuiIcon,
   EuiIconTip,
+  EuiPageTemplate,
   EuiSpacer,
   EuiText,
   useEuiTheme,
@@ -32,7 +33,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 
 import type { AuthenticatedUser, UserAvatar as IUserAvatar } from '../../../common';
 import {
@@ -161,7 +161,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
             />
           ) : null}
 
-          <KibanaPageTemplate
+          <EuiPageTemplate
             style={{ backgroundColor: euiTheme.colors.emptyShade }}
             className="eui-fullHeight"
             pageContentBodyProps={{ style: { paddingLeft: 0, paddingRight: 0 } }}
@@ -533,7 +533,7 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
               ) : null}
             </Form>
             <EuiSpacer />
-          </KibanaPageTemplate>
+          </EuiPageTemplate>
         </Breadcrumb>
       </FormChangesProvider>
     </FormikProvider>
