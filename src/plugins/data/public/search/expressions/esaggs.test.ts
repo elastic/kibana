@@ -10,7 +10,7 @@ import { omit } from 'lodash';
 import { of as mockOf } from 'rxjs';
 import type { MockedKeys } from '@kbn/utility-types/jest';
 import type { ExecutionContext } from '@kbn/expressions-plugin/public';
-import type { IndexPatternsContract } from '../../../common';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
   ISearchStartSearchSource,
   KibanaContext,
@@ -69,7 +69,7 @@ describe('esaggs expression function - public', () => {
       } as unknown as jest.Mocked<AggsStart>,
       indexPatterns: {
         create: jest.fn().mockResolvedValue({}),
-      } as unknown as jest.Mocked<IndexPatternsContract>,
+      } as unknown as jest.Mocked<DataViewsContract>,
       searchSource: {} as unknown as jest.Mocked<ISearchStartSearchSource>,
     };
     getStartDependencies = jest.fn().mockResolvedValue(startDependencies);
@@ -112,11 +112,11 @@ describe('esaggs expression function - public', () => {
       aggs: {
         foo: 'bar',
         hierarchical: true,
+        partialRows: args.partialRows,
       },
       filters: undefined,
       indexPattern: {},
       inspectorAdapters: mockHandlers.inspectorAdapters,
-      partialRows: args.partialRows,
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: startDependencies.searchSource,
