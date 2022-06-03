@@ -7,7 +7,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/server';
+import { CoreSetup } from 'kibana/server';
 import { CustomIntegrationRegistry } from '../custom_integration_registry';
 import { CustomIntegrationIcon, IntegrationCategory, PLUGIN_ID } from '../../common';
 
