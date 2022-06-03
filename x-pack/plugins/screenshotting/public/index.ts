@@ -12,4 +12,3 @@ export function plugin() {
 }
 
 export type { LayoutParams } from '../common';
-export { LayoutTypes } from '../common';

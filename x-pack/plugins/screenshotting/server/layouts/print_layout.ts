@@ -8,7 +8,6 @@
 import { PageOrientation, PredefinedPageSize } from 'pdfmake/interfaces';
 import type { Layout } from '.';
 import { DEFAULT_SELECTORS } from '.';
-import { LayoutTypes } from '../../common';
 import type { LayoutParams, LayoutSelectorDictionary } from '../../common/layout';
 import { DEFAULT_VIEWPORT } from '../browsers';
 import { BaseLayout } from './base_layout';
@@ -23,7 +22,7 @@ export class PrintLayout extends BaseLayout implements Layout {
   private zoom: number;
 
   constructor({ zoom = 1 }: Pick<LayoutParams, 'zoom'>) {
-    super(LayoutTypes.PRINT);
+    super('print');
 
     this.zoom = zoom;
   }

@@ -8,7 +8,7 @@
 import type { Headers } from '@kbn/core/server';
 import { defer, forkJoin, Observable, throwError } from 'rxjs';
 import { catchError, mergeMap, switchMapTo, timeoutWith } from 'rxjs/operators';
-import { errors, LayoutTypes } from '../../common';
+import { errors } from '../../common';
 import {
   Context,
   DEFAULT_VIEWPORT,
@@ -242,10 +242,7 @@ export class ScreenshotObservableHandler {
   }
 
   private shouldCapturePdf(): boolean {
-    return (
-      this.layout.id === LayoutTypes.PRINT &&
-      (this.options as PdfScreenshotOptions).format === 'pdf'
-    );
+    return this.layout.id === 'print' && (this.options as PdfScreenshotOptions).format === 'pdf';
   }
 
   public getScreenshots() {

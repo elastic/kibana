@@ -34,6 +34,16 @@ export abstract class ReportingError extends Error {
 }
 
 /**
+ * While validating the page layout parameters for a screenshot type report job
+ */
+export class InvalidLayoutParametersError extends ReportingError {
+  static code = 'invalid_layout_parameters_error' as const;
+  public get code() {
+    return InvalidLayoutParametersError.code;
+  }
+}
+
+/**
  * While performing some reporting action, like fetching data from ES, our
  * access token expired.
  */

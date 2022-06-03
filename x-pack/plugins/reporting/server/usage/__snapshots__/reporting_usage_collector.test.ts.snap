@@ -39,6 +39,9 @@ Object {
         "browser_unexpectedly_closed_error": Object {
           "type": "long",
         },
+        "invalid_layout_parameters_error": Object {
+          "type": "long",
+        },
         "kibana_shutting_down_error": Object {
           "type": "long",
         },
@@ -141,6 +144,9 @@ Object {
           "type": "long",
         },
         "browser_unexpectedly_closed_error": Object {
+          "type": "long",
+        },
+        "invalid_layout_parameters_error": Object {
           "type": "long",
         },
         "kibana_shutting_down_error": Object {
@@ -413,6 +419,9 @@ Object {
           "browser_unexpectedly_closed_error": Object {
             "type": "long",
           },
+          "invalid_layout_parameters_error": Object {
+            "type": "long",
+          },
           "kibana_shutting_down_error": Object {
             "type": "long",
           },
@@ -515,6 +524,9 @@ Object {
             "type": "long",
           },
           "browser_unexpectedly_closed_error": Object {
+            "type": "long",
+          },
+          "invalid_layout_parameters_error": Object {
             "type": "long",
           },
           "kibana_shutting_down_error": Object {
@@ -803,6 +815,9 @@ Object {
           "browser_unexpectedly_closed_error": Object {
             "type": "long",
           },
+          "invalid_layout_parameters_error": Object {
+            "type": "long",
+          },
           "kibana_shutting_down_error": Object {
             "type": "long",
           },
@@ -933,6 +948,9 @@ Object {
             "type": "long",
           },
           "browser_unexpectedly_closed_error": Object {
+            "type": "long",
+          },
+          "invalid_layout_parameters_error": Object {
             "type": "long",
           },
           "kibana_shutting_down_error": Object {
@@ -1540,6 +1558,9 @@ Object {
         "browser_unexpectedly_closed_error": Object {
           "type": "long",
         },
+        "invalid_layout_parameters_error": Object {
+          "type": "long",
+        },
         "kibana_shutting_down_error": Object {
           "type": "long",
         },
@@ -1670,6 +1691,9 @@ Object {
           "type": "long",
         },
         "browser_unexpectedly_closed_error": Object {
+          "type": "long",
+        },
+        "invalid_layout_parameters_error": Object {
           "type": "long",
         },
         "kibana_shutting_down_error": Object {

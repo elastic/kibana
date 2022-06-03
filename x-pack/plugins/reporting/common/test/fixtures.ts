@@ -8,7 +8,7 @@
 import type { ReportApiJSON } from '../types';
 import type { ReportMock } from './types';
 
-const buildMockReport = (baseObj: ReportMock) => ({
+const buildMockReport = (baseObj: ReportMock): ReportApiJSON => ({
   index: '.reporting-2020.04.12',
   migration_version: '7.15.0',
   max_attempts: 1,

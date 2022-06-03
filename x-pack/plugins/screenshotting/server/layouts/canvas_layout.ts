@@ -6,7 +6,6 @@
  */
 
 import type { LayoutSelectorDictionary, Size } from '../../common/layout';
-import { LayoutTypes } from '../../common';
 import { DEFAULT_SELECTORS } from '.';
 import type { Layout } from '.';
 import { BaseLayout } from './base_layout';
@@ -33,7 +32,7 @@ export class CanvasLayout extends BaseLayout implements Layout {
   public useReportingBranding: boolean = false;
 
   constructor(size: Size) {
-    super(LayoutTypes.CANVAS);
+    super('canvas');
     this.height = size.height;
     this.width = size.width;
     this.scaledHeight = size.height * ZOOM;
