@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useState } from 'react';
+import React, { FC, useCallback, useEffect, useState, useMemo } from 'react';
 import { PreloadedState } from '@reduxjs/toolkit';
 import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
@@ -226,6 +226,20 @@ export async function mountApp(
         },
         [props.history]
       );
+      const initialInput = useMemo(
+        () => getInitialInput(props.id, props.editByValue),
+        [props.editByValue, props.id]
+      );
+      const initCallback = useCallback(() => {
+        // Clear app-specific filters when navigating to Lens. Necessary because Lens
+        // can be loaded without a full page refresh. If the user navigates to Lens from Discover
+        // we keep the filters
+        if (!initialContext) {
+          data.query.filterManager.setAppFilters([]);
+        }
+        lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
+        lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
+      }, [initialInput, props.history, redirectCallback]);
       useEffect(() => {
         (async () => {
           const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
@@ -235,19 +249,10 @@ export async function mountApp(
             return;
           }
           setEditorState('data');
+          initCallback();
         })();
-      }, [props.history]);
+      }, [initCallback, initialInput, props.history, redirectCallback]);
       trackUiEvent('loaded');
-      const initialInput = getInitialInput(props.id, props.editByValue);
-
-      // Clear app-specific filters when navigating to Lens. Necessary because Lens
-      // can be loaded without a full page refresh. If the user navigates to Lens from Discover
-      // we keep the filters
-      if (!initialContext) {
-        data.query.filterManager.setAppFilters([]);
-      }
-      lensStore.dispatch(setState(getPreloadedState(storeDeps) as LensAppState));
-      lensStore.dispatch(loadInitial({ redirectCallback, initialInput, history: props.history }));
 
       if (editorState === 'loading') {
         return <EuiLoadingSpinner />;
@@ -264,6 +269,7 @@ export async function mountApp(
             <AnalyticsNoDataPage
               onDataViewCreated={() => {
                 setEditorState('data');
+                initCallback();
               }}
             />
             ;

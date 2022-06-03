@@ -178,6 +178,7 @@ function getViewUnderlyingDataArgs({
     activeDatasource,
     activeDatasourceState,
     activeData,
+    timeRange,
     capabilities
   );
 

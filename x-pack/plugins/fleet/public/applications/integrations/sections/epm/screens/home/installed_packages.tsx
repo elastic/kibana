@@ -143,7 +143,7 @@ export const InstalledPackages: React.FC = memo(() => {
 
   const cards = (
     selectedCategory === 'updates_available' ? updatablePackages : allInstalledPackages
-  ).map((item) => mapToCard(getAbsolutePath, getHref, item));
+  ).map((item) => mapToCard(getAbsolutePath, getHref, item, selectedCategory || 'installed'));
 
   const callout = selectedCategory === 'updates_available' ? null : <Callout />;
 
