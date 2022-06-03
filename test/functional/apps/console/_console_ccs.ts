@@ -18,7 +18,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Console App CCS', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
-      remoteEsArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await remoteEsArchiver.loadIfNeeded(
+        'test/functional/fixtures/es_archiver/logstash_functional'
+      );
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('console');
       await retry.try(async () => {
@@ -27,14 +29,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      remoteEsArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
+      await remoteEsArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    describe('with kbn: prefix in request', () => {
+    describe('Perform CCS Search in Console', () => {
       before(async () => {
         await PageObjects.console.clearTextArea();
       });
-      it('it should send successful request to Kibana API', async () => {
+      it('it should be able to access remote data', async () => {
         await PageObjects.console.enterRequest('\nGET ftr-remote:logstash-*/_search');
         await PageObjects.console.clickPlay();
         await retry.try(async () => {
