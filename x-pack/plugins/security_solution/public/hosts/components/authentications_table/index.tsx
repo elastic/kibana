@@ -11,11 +11,6 @@ import { useDispatch } from 'react-redux';
 
 import { AuthenticationsEdges } from '../../../../common/search_strategy/security_solution/hosts/authentications';
 
-import {
-  DragEffects,
-  DraggableWrapper,
-} from '../../../common/components/drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
 import { getEmptyTagValue } from '../../../common/components/empty_value';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import {
@@ -24,8 +19,6 @@ import {
   UserDetailsLink,
 } from '../../../common/components/links';
 import { Columns, ItemsPerRow, PaginatedTable } from '../../../common/components/paginated_table';
-import { IS_OPERATOR } from '../../../timelines/components/timeline/data_providers/data_provider';
-import { Provider } from '../../../timelines/components/timeline/data_providers/provider';
 import { getRowItemDraggables } from '../../../common/components/tables/helpers';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
@@ -165,82 +158,16 @@ const getAuthenticationColumns = (usersEnabled: boolean): AuthTableColumns => [
   },
   {
     name: i18n.SUCCESSES,
+    field: 'node.successes',
     truncateText: false,
     mobileOptions: { show: true },
-    render: ({ node }) => {
-      const id = escapeDataProviderId(
-        `authentications-table-${node._id}-node-successes-${node.successes}`
-      );
-      return (
-        <DraggableWrapper
-          key={id}
-          dataProvider={{
-            and: [],
-            enabled: true,
-            id,
-            name: 'authentication_success',
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field: 'event.type',
-              value: 'authentication_success',
-              operator: IS_OPERATOR,
-            },
-          }}
-          isAggregatable
-          fieldType="keyword"
-          render={(dataProvider, _, snapshot) =>
-            snapshot.isDragging ? (
-              <DragEffects>
-                <Provider dataProvider={dataProvider} />
-              </DragEffects>
-            ) : (
-              node.successes
-            )
-          }
-        />
-      );
-    },
     width: '8%',
   },
   {
     name: i18n.FAILURES,
+    field: 'node.failures',
     truncateText: false,
     mobileOptions: { show: true },
-    render: ({ node }) => {
-      const id = escapeDataProviderId(
-        `authentications-table-${node._id}-failures-${node.failures}`
-      );
-      return (
-        <DraggableWrapper
-          key={id}
-          dataProvider={{
-            and: [],
-            enabled: true,
-            id,
-            name: 'authentication_failure',
-            excluded: false,
-            kqlQuery: '',
-            queryMatch: {
-              field: 'event.type',
-              value: 'authentication_failure',
-              operator: IS_OPERATOR,
-            },
-          }}
-          isAggregatable
-          fieldType="keyword"
-          render={(dataProvider, _, snapshot) =>
-            snapshot.isDragging ? (
-              <DragEffects>
-                <Provider dataProvider={dataProvider} />
-              </DragEffects>
-            ) : (
-              node.failures
-            )
-          }
-        />
-      );
-    },
     width: '8%',
   },
   {
