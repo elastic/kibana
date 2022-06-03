@@ -32,11 +32,13 @@ export function useCoreWebVitalsQuery(uxQuery: ReturnType<typeof useUxQuery>) {
     [uxQuery, dataViewTitle],
     { name: 'UxCoreWebVitals' }
   );
-  const data = useMemo(() => {
-    transformCoreWebVitalsResponse(
-      esQueryResponse,
-      uxQuery?.percentile ? Number(uxQuery?.percentile) : PERCENTILE_DEFAULT
-    );
-  }, [esQueryResponse, uxQuery?.percentile]);
+  const data = useMemo(
+    () =>
+      transformCoreWebVitalsResponse(
+        esQueryResponse,
+        uxQuery?.percentile ? Number(uxQuery?.percentile) : PERCENTILE_DEFAULT
+      ),
+    [esQueryResponse, uxQuery?.percentile]
+  );
   return { data, loading };
 }
