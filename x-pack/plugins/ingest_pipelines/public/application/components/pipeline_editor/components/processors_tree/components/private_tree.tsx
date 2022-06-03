@@ -7,7 +7,9 @@
 
 import React, { FunctionComponent, MutableRefObject, useEffect, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { AutoSizer, List, WindowScroller } from 'react-virtualized';
+import { useVirtual } from 'react-virtual';
+import { VariableSizeList as List } from 'react-window';
+import AutoSizer from 'react-virtualized-auto-sizer';
 
 import { DropSpecialLocations } from '../../../constants';
 import { ProcessorInternal, ProcessorSelector } from '../../../types';
@@ -25,9 +27,6 @@ export interface PrivateProps {
   onAction: OnActionHandler;
   level: number;
   movingProcessor?: ProcessorInfo;
-  // Only passed into the top level list
-  windowScrollerRef?: MutableRefObject<WindowScroller | null>;
-  listRef?: MutableRefObject<List | null>;
 }
 
 const isDropZoneAboveDisabled = (processor: ProcessorInfo, selectedProcessor: ProcessorInfo) => {
@@ -63,9 +62,24 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   movingProcessor,
   onAction,
   level,
-  windowScrollerRef,
-  listRef,
 }) => {
+  const parentRef = React.useRef();
+
+  const rowVirtualizer = useVirtual({
+    size: processors.length,
+    parentRef,
+    estimateSize: React.useCallback(
+      (index) => {
+        const processor = processors[index];
+        return calculateItemHeight({
+          processor,
+          isFirstInArray: index === 0,
+        });
+      },
+      [processors]
+    ),
+  });
+
   const selectors: string[][] = useMemo(() => {
     return processors.map((_, idx) => selector.concat(String(idx)));
   }, [processors, selector]);
@@ -126,70 +140,120 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
     );
   };
 
-  useEffect(() => {
-    if (windowScrollerRef && windowScrollerRef.current) {
-      windowScrollerRef.current.updatePosition();
-    }
-    if (listRef && listRef.current) {
-      listRef.current.recomputeRowHeights();
-    }
-  }, [processors, listRef, windowScrollerRef, movingProcessor]);
+  console.error('assds');
 
-  // A list optimized to handle very many items.
   const renderVirtualList = () => {
     return (
-      <WindowScroller ref={windowScrollerRef} scrollElement={window}>
-        {({ height, registerChild, isScrolling, onChildScroll, scrollTop }: any) => {
-          return (
-            <AutoSizer disableHeight>
-              {({ width }) => {
-                return (
-                  <div style={{ width: '100%' }} ref={registerChild}>
-                    <List
-                      ref={listRef}
-                      autoHeight
-                      height={height}
-                      width={width}
-                      overScanRowCount={5}
-                      isScrolling={isScrolling}
-                      onChildScroll={onChildScroll}
-                      scrollTop={scrollTop}
-                      rowCount={processors.length}
-                      rowHeight={({ index }) => {
-                        const processor = processors[index];
-                        return calculateItemHeight({
-                          processor,
-                          isFirstInArray: index === 0,
-                        });
-                      }}
-                      rowRenderer={({ index: idx, style }) => {
-                        const processor = processors[idx];
-                        const above = processors[idx - 1];
-                        const below = processors[idx + 1];
-                        const info: ProcessorInfo = {
-                          id: processor.id,
-                          selector: selectors[idx],
-                          aboveId: above?.id,
-                          belowId: below?.id,
-                        };
-
-                        return (
-                          <div style={style} key={processor.id}>
-                            {renderRow({ processor, info, idx })}
-                          </div>
-                        );
-                      }}
-                      processors={processors}
-                    />
-                  </div>
-                );
-              }}
-            </AutoSizer>
-          );
+      <div
+        ref={parentRef}
+        className="List"
+        style={{
+          height: `auto`,
+          width: `100%`,
+          overflow: 'auto',
         }}
-      </WindowScroller>
+      >
+        <div
+          style={{
+            height: rowVirtualizer.totalSize,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {rowVirtualizer.virtualItems.map((virtualRow) => {
+            const idx = virtualRow.index;
+            const processor = processors[idx];
+            const above = processors[idx - 1];
+            const below = processors[idx + 1];
+            const info: ProcessorInfo = {
+              id: processor.id,
+              selector: selectors[idx],
+              aboveId: above?.id,
+              belowId: below?.id,
+            };
+
+            return (
+              <div
+                key={virtualRow.index}
+                ref={virtualRow.measureRef}
+                className={virtualRow.index % 2 ? 'ListItemOdd' : 'ListItemEven'}
+                style={{
+                  position: 'absolute',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  transform: `translateY(${virtualRow.start}px)`,
+                }}
+              >
+                <div style={{ height: processors[virtualRow.index] }}>
+                  {renderRow({ processor, info, idx })}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
     );
   };
+
+  // A list optimized to handle very many items.
+  // const renderVirtualList = () => {
+  //   return (
+  //     // <WindowScroller ref={windowScrollerRef} scrollElement={window}>
+  //     //   {({ height, registerChild, isScrolling, onChildScroll, scrollTop }: any) => {
+  //     //     return (
+  //     // <AutoSizer disableHeight>
+  //     //   {({ width }) => {
+  //     // return (
+  //     <div
+  //       style={{ width: '100%' }}
+  //       // ref={registerChild}
+  //     >
+  //       <List
+  //         ref={listRef}
+  //         // autoHeight
+  //         // height={height}
+  //         // width={width}
+  //         overScanRowCount={5}
+  //         // isScrolling={isScrolling}
+  //         // onChildScroll={onChildScroll}
+  //         // scrollTop={scrollTop}
+  //         rowCount={processors.length}
+  //         rowHeight={({ index }) => {
+  //           const processor = processors[index];
+  //           return calculateItemHeight({
+  //             processor,
+  //             isFirstInArray: index === 0,
+  //           });
+  //         }}
+  //         rowRenderer={({ index: idx, style }) => {
+  //           const processor = processors[idx];
+  //           const above = processors[idx - 1];
+  //           const below = processors[idx + 1];
+  //           const info: ProcessorInfo = {
+  //             id: processor.id,
+  //             selector: selectors[idx],
+  //             aboveId: above?.id,
+  //             belowId: below?.id,
+  //           };
+
+  //           return (
+  //             <div style={style} key={processor.id}>
+  //               {renderRow({ processor, info, idx })}
+  //             </div>
+  //           );
+  //         }}
+  //         processors={processors}
+  //       />
+  //     </div>
+  //     //     );
+  //     //   }}
+  //     // </AutoSizer>
+  //     //     );
+  //     //   }}
+  //     // </WindowScroller>
+  //   );
+  // };
 
   if (level === 1) {
     // Only render the optimised list for the top level list because that is the list

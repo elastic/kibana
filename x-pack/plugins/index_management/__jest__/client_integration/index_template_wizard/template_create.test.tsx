@@ -26,7 +26,7 @@ jest.mock('@elastic/eui', () => {
 
   return {
     ...original,
-    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
+    // Mocking EuiComboBox, as it utilizes "react-window" for rendering search suggestions,
     // which does not produce a valid component wrapper
     EuiComboBox: (props: any) => (
       <input
