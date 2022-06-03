@@ -6,3 +6,4 @@
  */
 
 export { IntegrationBreadcrumb } from './integration_breadcrumb';
+export * from './steps';
