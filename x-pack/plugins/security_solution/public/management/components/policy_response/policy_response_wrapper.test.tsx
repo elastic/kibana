@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, act } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { PolicyResponseWrapper, PolicyResponseWrapperProps } from './policy_response_wrapper';
 import { HostPolicyResponseActionStatus } from '../../../../common/search_strategy';
@@ -93,22 +93,16 @@ describe('when on the policy response', () => {
       mockedContext.render(<PolicyResponseWrapper endpointId="id" {...props} />);
     renderOpenedTree = async () => {
       const component = render();
-      act(() => {
-        fireEvent.click(component.getByTestId('endpointPolicyResponseTitle'));
-      });
+      userEvent.click(component.getByTestId('endpointPolicyResponseTitle'));
 
       const configs = await component.findAllByTestId('endpointPolicyResponseConfig');
       for (const config of configs) {
-        act(() => {
-          fireEvent.click(config);
-        });
+        userEvent.click(config);
       }
 
       const actions = await component.findAllByTestId('endpointPolicyResponseAction');
       for (const action of actions) {
-        act(() => {
-          fireEvent.click(action);
-        });
+        userEvent.click(action);
       }
       return component;
     };
