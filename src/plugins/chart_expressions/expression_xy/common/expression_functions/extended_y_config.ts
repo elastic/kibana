@@ -30,7 +30,7 @@ export const extendedYConfigFunction: ExtendedYConfigFn = {
     position: {
       types: ['string'],
       options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-      help: i18n.translate('expressionXY.referenceLine.axisId.help', {
+      help: i18n.translate('expressionXY.referenceLine.position.help', {
         defaultMessage:
           'Position of axis (first axis of that position) to which the reference line belongs.',
       }),
