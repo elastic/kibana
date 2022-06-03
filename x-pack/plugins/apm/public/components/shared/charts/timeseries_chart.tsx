@@ -113,6 +113,7 @@ export function TimeseriesChart({
   ]
     // Sorting series so that area type series are before line series
     // This is a workaround so that the legendSort works correctly
+    // Can be removed when https://github.com/elastic/elastic-charts/issues/1685 is resolved
     .sort(
       isComparingExpectedBounds
         ? (prev, curr) => prev.type.localeCompare(curr.type)

@@ -87,12 +87,12 @@ export async function getAnomalyTimeseries({
   // Expected bounds (aka ML model plots) are stored as points in time, in intervals of the predefined bucket_span,
   // so to query bounds that include start and end time
   // we need to append bucket size before and after the range
-  const rangeFrom = start - minBucketSize * 1000; // ms
-  const rangeTo = end + minBucketSize * 1000; // ms
+  const extendedStart = start - minBucketSize * 1000; // ms
+  const extendedEnd = end + minBucketSize * 1000; // ms
 
   const { intervalString } = getAnomalyResultBucketSize({
-    start: rangeFrom,
-    end: rangeTo,
+    start: extendedStart,
+    end: extendedEnd,
     // If the calculated bucketSize is smaller than the bucket span interval,
     // use the original job's bucket_span
     minBucketSize,
@@ -109,7 +109,7 @@ export async function getAnomalyTimeseries({
                 serviceName,
                 transactionType,
               }),
-              ...rangeQuery(rangeFrom, rangeTo, 'timestamp'),
+              ...rangeQuery(extendedStart, extendedEnd, 'timestamp'),
               ...apmMlJobsQuery(mlJobs),
             ],
           },
@@ -155,8 +155,8 @@ export async function getAnomalyTimeseries({
                   field: 'timestamp',
                   fixed_interval: intervalString,
                   extended_bounds: {
-                    min: rangeFrom,
-                    max: rangeTo,
+                    min: extendedStart,
+                    max: extendedEnd,
                   },
                 },
                 aggs: {
