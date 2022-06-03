@@ -99,3 +99,11 @@ export type { SavedObjectsValidationMap, SavedObjectsValidationSpec } from './va
 export { savedObjectsConfig, savedObjectsMigrationConfig } from './saved_objects_config';
 export { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 export type { ISavedObjectTypeRegistry } from './saved_objects_type_registry';
+export type {
+  SavedObjectEventsTypes,
+  PreGetEvent,
+  PostGetEvent,
+  PreCreateEvent,
+  PostCreateEvent,
+  SavedObjectEventStream,
+} from './saved_objects_stream_events';

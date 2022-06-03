@@ -6,25 +6,25 @@
  * Side Public License, v 1.
  */
 
-import { SavedObject } from '../../types';
-import { SavedObjectsClient, SavedObjectsBulkCreateObject } from '.';
+import { SavedObjectsBulkCreateObject } from '.';
+import {
+  PreGetEvent,
+  PostGetEvent,
+  PreCreateEvent,
+  PostCreateEvent,
+} from './saved_objects_stream_events';
 
 /** Handler to execute before fetching one or multiple saved object(s) */
-type PreGetHook = (...args: Parameters<SavedObjectsClient['bulkGet']>) => Promise<void>;
+type PreGetHook = (arg: PreGetEvent['data']) => Promise<void>;
 /** Handler to execute after fetching one or multiple saved object(s) */
-type PostGetHook = (
-  objects: SavedObject[],
-  options: Parameters<SavedObjectsClient['bulkGet']>[1]
-) => Promise<void>;
+type PostGetHook = (arg: PostGetEvent['data']) => Promise<void>;
 
 /** Handler to execute before creating one or multiple saved object(s) */
 type PreCreateHook = (
-  ...args: Parameters<SavedObjectsClient['bulkCreate']>
+  args: PreCreateEvent['data']
 ) => Promise<SavedObjectsBulkCreateObject[] | undefined>;
 /** Handler to execute after creating one or multiple saved object(s) */
-type PostCreateHook = (
-  objects: Array<Awaited<ReturnType<SavedObjectsClient['create']>>>
-) => Promise<void>;
+type PostCreateHook = (arg: PostCreateEvent['data']) => Promise<void>;
 
 /** Map of hooks to execute **before** API methods of the SavedObjectsClient */
 export interface PreHooks {

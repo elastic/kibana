@@ -135,7 +135,7 @@ export interface SavedObjectsBulkUpdateObject<T = unknown>
  * @public
  */
 export interface SavedObjectsBulkResponse<T = unknown> {
-  saved_objects: Array<SavedObject<T>>;
+  saved_objects: Array<SavedObject<T> | { type: string; id?: string; error: Payload }>;
 }
 
 /**
@@ -304,7 +304,7 @@ export interface SavedObjectsBulkGetObject {
  * @public
  */
 export interface SavedObjectsBulkResponse<T = unknown> {
-  saved_objects: Array<SavedObject<T>>;
+  saved_objects: Array<SavedObject<T> | { type: string; id?: string; error: Payload }>;
 }
 
 /**

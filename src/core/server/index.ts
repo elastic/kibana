@@ -382,6 +382,12 @@ export type {
   SavedObjectsImportWarning,
   SavedObjectsValidationMap,
   SavedObjectsValidationSpec,
+  PreGetEvent,
+  PostGetEvent,
+  PreCreateEvent,
+  PostCreateEvent,
+  SavedObjectEventStream,
+  SavedObjectEventsTypes,
 } from './saved_objects';
 
 export type {

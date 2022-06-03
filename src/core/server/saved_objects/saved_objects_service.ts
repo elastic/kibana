@@ -50,8 +50,10 @@ import { registerRoutes } from './routes';
 import { ServiceStatus } from '../status';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
+import { SavedObjectEvents } from './saved_objects_stream_events';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import { DocLinksServiceStart } from '../doc_links';
+import { eventStreams } from '../event_streams';
 
 const kibanaIndex = '.kibana';
 
@@ -169,6 +171,8 @@ export interface SavedObjectsServiceSetup {
   pre: SavedObjectsHooksRegistry['pre'];
   /** Register a "post" hook to execute after a SavedObject clients API method ("get", "create"...) */
   post: SavedObjectsHooksRegistry['post'];
+  /** Observable of saved object events */
+  eventStream$: Observable<SavedObjectEvents>;
 }
 
 /**
@@ -308,6 +312,8 @@ export class SavedObjectsService
   private migrator$ = new Subject<IKibanaMigrator>();
   private typeRegistry = new SavedObjectTypeRegistry();
   private hooksRegistry = new SavedObjectsHooksRegistry();
+  private savedObjectEventStream =
+    eventStreams.registerEventStream<SavedObjectEvents>('savedObjects');
   private started = false;
 
   constructor(private readonly coreContext: CoreContext) {
@@ -388,6 +394,7 @@ export class SavedObjectsService
       getKibanaIndex: () => kibanaIndex,
       pre: this.hooksRegistry.pre.bind(this.hooksRegistry),
       post: this.hooksRegistry.post.bind(this.hooksRegistry),
+      eventStream$: this.savedObjectEventStream.stream$,
     };
   }
 
@@ -467,6 +474,7 @@ export class SavedObjectsService
         migrator,
         this.typeRegistry,
         { preHooks, postHooks },
+        this.savedObjectEventStream,
         kibanaIndex,
         esClient,
         this.logger.get('repository'),

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { EMPTY } from 'rxjs';
 import { omit, isObject } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import * as esKuery from '@kbn/es-query';
@@ -67,6 +68,7 @@ import {
 import { SavedObjectsTypeValidator } from '../../validation';
 import { ISavedObjectTypeRegistry } from '../../saved_objects_type_registry';
 import { ISavedObjectsHooks, PreHooks } from '../../saved_objects_hooks_registry';
+import type { SavedObjectEventStream } from '../../saved_objects_stream_events';
 import { internalBulkResolve, InternalBulkResolveError } from './internal_bulk_resolve';
 import { validateConvertFilterToKueryNode } from './filter_utils';
 import { validateAndConvertAggregations } from './aggregations';
@@ -114,6 +116,7 @@ export interface SavedObjectsRepositoryOptions {
   client: ElasticsearchClient;
   typeRegistry: ISavedObjectTypeRegistry;
   hooks: ISavedObjectsHooks;
+  savedObjectEventStream: SavedObjectEventStream;
   serializer: SavedObjectsSerializer;
   migrator: IKibanaMigrator;
   allowedTypes: string[];
@@ -214,6 +217,7 @@ export class SavedObjectsRepository {
   private _mappings: IndexMapping;
   private _registry: ISavedObjectTypeRegistry;
   private _hooks: ISavedObjectsHooks;
+  private _savedObjectEventStream: SavedObjectEventStream;
   private _allowedTypes: string[];
   private readonly client: RepositoryEsClient;
   private _serializer: SavedObjectsSerializer;
@@ -231,6 +235,7 @@ export class SavedObjectsRepository {
     migrator: IKibanaMigrator,
     typeRegistry: ISavedObjectTypeRegistry,
     hooks: ISavedObjectsHooks,
+    savedObjectEventStream: SavedObjectEventStream,
     indexName: string,
     client: ElasticsearchClient,
     logger: Logger,
@@ -257,6 +262,7 @@ export class SavedObjectsRepository {
       mappings,
       typeRegistry,
       hooks,
+      savedObjectEventStream,
       serializer,
       allowedTypes,
       client,
@@ -280,6 +286,10 @@ export class SavedObjectsRepository {
           create: [],
         },
       },
+      savedObjectEventStream = {
+        publish: () => undefined,
+        stream$: EMPTY,
+      },
       serializer,
       migrator,
       allowedTypes = [],
@@ -298,6 +308,7 @@ export class SavedObjectsRepository {
     this._mappings = mappings;
     this._registry = typeRegistry;
     this._hooks = hooks;
+    this._savedObjectEventStream = savedObjectEventStream;
     this.client = createRepositoryEsClient(client);
     if (allowedTypes.length === 0) {
       throw new Error('Empty or missing types for saved object repository!');
@@ -344,9 +355,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createUnsupportedTypeError(type);
     }
 
-    // Run all the "Pre" create hooks which might update the attributes
-    const [{ attributes: updatedAttribues }] = await this.runPreCreateHooks<T>(
-      [...this._hooks.preHooks.create],
+    const [{ attributes: updatedAttribues }] = await this.onPreCreate<T>(
       [
         {
           ...options,
@@ -355,10 +364,7 @@ export class SavedObjectsRepository {
         },
       ],
       options
-    ).catch((e) => {
-      this._logger.error(e);
-      return [{ attributes }];
-    });
+    );
 
     const time = getCurrentTime();
     let savedObjectNamespace: string | undefined;
@@ -438,9 +444,7 @@ export class SavedObjectsRepository {
       ...body,
     });
 
-    await this.runPostCreateHooks([result], options).catch((e) => {
-      this._logger.error(e);
-    });
+    await this.onPostCreate([result], options);
 
     return result;
   }
@@ -458,14 +462,7 @@ export class SavedObjectsRepository {
     objects: Array<SavedObjectsBulkCreateObject<T>>,
     options: SavedObjectsCreateOptions = {}
   ): Promise<SavedObjectsBulkResponse<T>> {
-    const updatedObjects = await this.runPreCreateHooks(
-      [...this._hooks.preHooks.create],
-      objects,
-      options
-    ).catch((e) => {
-      this._logger.error(e);
-      return objects;
-    });
+    const updatedObjects = await this.onPreCreate(objects, options);
 
     const { overwrite = false, refresh = DEFAULT_REFRESH_SETTING } = options;
     const namespace = normalizeNamespace(options.namespace);
@@ -643,28 +640,32 @@ export class SavedObjectsRepository {
         })
       : undefined;
 
+    const savedObjects = expectedBulkResults.map((expectedResult) => {
+      if (isLeft(expectedResult)) {
+        return expectedResult.value;
+      }
+
+      const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
+      const rawResponse = Object.values(bulkResponse?.items[esRequestIndex] ?? {})[0] as any;
+
+      const error = getBulkOperationError(rawMigratedDoc._source.type, requestedId, rawResponse);
+      if (error) {
+        return { type: rawMigratedDoc._source.type, id: requestedId, error };
+      }
+
+      // When method == 'index' the bulkResponse doesn't include the indexed
+      // _source so we return rawMigratedDoc but have to spread the latest
+      // _seq_no and _primary_term values from the rawResponse.
+      return this._rawToSavedObject<T>({
+        ...rawMigratedDoc,
+        ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
+      });
+    });
+
+    await this.onPostCreate(savedObjects, options);
+
     return {
-      saved_objects: expectedBulkResults.map((expectedResult) => {
-        if (isLeft(expectedResult)) {
-          return expectedResult.value as any;
-        }
-
-        const { requestedId, rawMigratedDoc, esRequestIndex } = expectedResult.value;
-        const rawResponse = Object.values(bulkResponse?.items[esRequestIndex] ?? {})[0] as any;
-
-        const error = getBulkOperationError(rawMigratedDoc._source.type, requestedId, rawResponse);
-        if (error) {
-          return { type: rawMigratedDoc._source.type, id: requestedId, error };
-        }
-
-        // When method == 'index' the bulkResponse doesn't include the indexed
-        // _source so we return rawMigratedDoc but have to spread the latest
-        // _seq_no and _primary_term values from the rawResponse.
-        return this._rawToSavedObject({
-          ...rawMigratedDoc,
-          ...{ _seq_no: rawResponse._seq_no, _primary_term: rawResponse._primary_term },
-        });
-      }),
+      saved_objects: savedObjects,
     };
   }
 
@@ -1123,30 +1124,15 @@ export class SavedObjectsRepository {
     const { objectsToRegisterEventsFor, objectsToRegisterEventsForById } =
       this.getObjectsToRegisterEventsFor(objects);
 
-    if (options.eventMetadata?.registerEvent !== false) {
-      for (const preGetHook of this._hooks.preHooks.get) {
-        try {
-          await preGetHook(objectsToRegisterEventsFor, options);
-        } catch (e) {
-          this._logger.error(e);
-        }
-      }
-    }
+    await this.onPreGet(objectsToRegisterEventsFor, options);
+
     const namespace = normalizeNamespace(options.namespace);
 
     const onResponse = async (result: Array<SavedObject<T>>) => {
-      if (options.eventMetadata?.registerEvent !== false) {
-        for (const postGetHook of this._hooks.postHooks.get) {
-          try {
-            await postGetHook(
-              result.filter((obj) => objectsToRegisterEventsForById[obj.id]),
-              options
-            );
-          } catch (e) {
-            this._logger.error(e);
-          }
-        }
-      }
+      await this.onPostGet(
+        result.filter((obj) => objectsToRegisterEventsForById[obj.id]),
+        options
+      );
 
       return { saved_objects: result };
     };
@@ -1270,15 +1256,7 @@ export class SavedObjectsRepository {
     const { objectsToRegisterEventsFor, objectsToRegisterEventsForById } =
       this.getObjectsToRegisterEventsFor(objects);
 
-    if (options.eventMetadata?.registerEvent !== false) {
-      for (const preGetHook of this._hooks.preHooks.get) {
-        try {
-          await preGetHook(objectsToRegisterEventsFor, options);
-        } catch (e) {
-          this._logger.error(e);
-        }
-      }
-    }
+    await this.onPreGet(objectsToRegisterEventsFor, options);
 
     const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
       registry: this._registry,
@@ -1303,20 +1281,13 @@ export class SavedObjectsRepository {
       return result as SavedObjectsResolveResponse<T>;
     });
 
-    if (options.eventMetadata?.registerEvent !== false) {
-      for (const postGetHook of this._hooks.postHooks.get) {
-        try {
-          await postGetHook(
-            resolvedObjects
-              .filter((obj) => objectsToRegisterEventsForById[obj.saved_object.id])
-              .map(({ saved_object: savedObject }) => savedObject),
-            options
-          );
-        } catch (e) {
-          this._logger.error(e);
-        }
-      }
-    }
+    await this.onPostGet(
+      resolvedObjects
+        .filter((obj) => objectsToRegisterEventsForById[obj.saved_object.id])
+        .map(({ saved_object: savedObject }) => savedObject),
+      options
+    );
+
     return { resolved_objects: resolvedObjects };
   }
 
@@ -1338,15 +1309,7 @@ export class SavedObjectsRepository {
       throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     }
 
-    if (options.eventMetadata?.registerEvent) {
-      for (const preGetHook of this._hooks.preHooks.get) {
-        try {
-          await preGetHook([{ id, type }], options);
-        } catch (e) {
-          this._logger.error(e);
-        }
-      }
-    }
+    await this.onPreGet([{ id, type }], options);
 
     const namespace = normalizeNamespace(options.namespace);
     const { body, statusCode, headers } = await this.client.get<SavedObjectsRawDocSource>(
@@ -1373,15 +1336,7 @@ export class SavedObjectsRepository {
 
     const result = getSavedObjectFromSource<T>(this._registry, type, id, body);
 
-    if (options.eventMetadata?.registerEvent) {
-      for (const postGetHook of this._hooks.postHooks.get) {
-        try {
-          await postGetHook([result], options);
-        } catch (e) {
-          this._logger.error(e);
-        }
-      }
-    }
+    await this.onPostGet([result], options);
 
     return result;
   }
@@ -1400,15 +1355,7 @@ export class SavedObjectsRepository {
     id: string,
     options: SavedObjectsBaseOptions = {}
   ): Promise<SavedObjectsResolveResponse<T>> {
-    if (options.eventMetadata?.registerEvent) {
-      for (const preGetHook of this._hooks.preHooks.get) {
-        try {
-          await preGetHook([{ id, type }], options);
-        } catch (e) {
-          this._logger.error(e);
-        }
-      }
-    }
+    await this.onPreGet([{ id, type }], options);
 
     const { resolved_objects: bulkResults } = await internalBulkResolve<T>({
       registry: this._registry,
@@ -1425,15 +1372,7 @@ export class SavedObjectsRepository {
       throw (result as InternalBulkResolveError).error;
     }
 
-    if (options.eventMetadata?.registerEvent) {
-      for (const postGetHook of this._hooks.postHooks.get) {
-        try {
-          await postGetHook([(result as SavedObjectsResolveResponse<T>).saved_object], options);
-        } catch (e) {
-          this._logger.error(e);
-        }
-      }
-    }
+    await this.onPostGet([(result as SavedObjectsResolveResponse<T>).saved_object], options);
 
     return result as SavedObjectsResolveResponse<T>;
   }
@@ -2513,33 +2452,108 @@ export class SavedObjectsRepository {
     return { objectsToRegisterEventsFor, objectsToRegisterEventsForById };
   };
 
-  private runPreCreateHooks = async <T>(
-    hooks: PreHooks['create'],
-    updatedObjects: Array<SavedObjectsBulkCreateObject<T>>,
-    options: SavedObjectsCreateOptions = {}
-  ): Promise<Array<SavedObjectsBulkCreateObject<T>>> => {
-    if (hooks.length === 0 || !options.eventMetadata?.registerEvent) {
-      return updatedObjects;
-    }
+  private onPreGet = async (
+    objects: SavedObjectsBulkGetObject[],
+    options: SavedObjectsBaseOptions
+  ) => {
+    if (options.eventMetadata?.registerEvent !== false) {
+      if (objects.length > 0) {
+        const preEventData = { objects, options };
 
-    // Recursively call the the "pre" create hooks passing the
-    // updated saved objects
-    const [preCreateHook, ...restOfHooks] = hooks;
-    const result = (await preCreateHook(updatedObjects)) as Array<SavedObjectsBulkCreateObject<T>>;
-    if (restOfHooks.length) {
-      return await this.runPreCreateHooks<T>(restOfHooks, result!);
+        for (const preGetHook of this._hooks.preHooks.get) {
+          try {
+            await preGetHook(preEventData);
+          } catch (e) {
+            this._logger.error(e);
+          }
+        }
+
+        // Emit event on the stream
+        this._savedObjectEventStream.publish({ type: 'pre:get', data: preEventData });
+      }
     }
-    return result!;
   };
 
-  private runPostCreateHooks = async (
-    objects: SavedObject[],
+  private onPostGet = async <T>(
+    objects: Array<SavedObject<T>>,
+    options: SavedObjectsBaseOptions = {}
+  ) => {
+    if (options.eventMetadata?.registerEvent !== false) {
+      const postEventData = {
+        objects,
+        options,
+      };
+
+      for (const postGetHook of this._hooks.postHooks.get) {
+        try {
+          await postGetHook(postEventData);
+        } catch (e) {
+          this._logger.error(e);
+        }
+      }
+
+      this._savedObjectEventStream.publish({ type: 'post:get', data: postEventData });
+    }
+  };
+
+  private onPreCreate = async <T>(
+    objects: Array<SavedObjectsBulkCreateObject<T>>,
+    options: SavedObjectsCreateOptions = {}
+  ): Promise<Array<SavedObjectsBulkCreateObject<T>>> => {
+    if (!options.eventMetadata?.registerEvent) {
+      return objects;
+    }
+
+    const runPreCreateHooks = async (
+      hooks: PreHooks['create'],
+      updatedObjects: Array<SavedObjectsBulkCreateObject<T>>
+    ): Promise<Array<SavedObjectsBulkCreateObject<T>>> => {
+      if (hooks.length === 0) {
+        return updatedObjects;
+      }
+
+      const [preCreateHook, ...restOfHooks] = hooks;
+      const result = (await preCreateHook({ objects: updatedObjects, options }).catch((e) => {
+        this._logger.error(e);
+        return updatedObjects;
+      })) as Array<SavedObjectsBulkCreateObject<T>>;
+
+      if (restOfHooks.length) {
+        // Recursively call the the "pre" create hooks
+        return await runPreCreateHooks(restOfHooks, result!);
+      }
+
+      return result!;
+    };
+
+    const updatedObjects = await runPreCreateHooks([...this._hooks.preHooks.create], objects);
+
+    this._savedObjectEventStream.publish({
+      type: 'pre:create',
+      data: {
+        objects: updatedObjects,
+        options,
+      },
+    });
+
+    return updatedObjects;
+  };
+
+  private onPostCreate = async (
+    objects: SavedObjectsBulkResponse['saved_objects'],
     options: SavedObjectsCreateOptions
   ) => {
     if (options.eventMetadata?.registerEvent) {
       for (const postCreateHook of this._hooks.postHooks.create) {
-        await postCreateHook(objects);
+        await postCreateHook({ objects }).catch((e) => {
+          this._logger.error(e);
+        });
       }
+
+      this._savedObjectEventStream.publish({
+        type: 'post:create',
+        data: { objects },
+      });
     }
   };
 }

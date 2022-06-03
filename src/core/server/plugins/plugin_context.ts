@@ -217,6 +217,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       getKibanaIndex: deps.savedObjects.getKibanaIndex,
       pre: deps.savedObjects.pre,
       post: deps.savedObjects.post,
+      eventStream$: deps.savedObjects.eventStream$,
     },
     status: {
       core$: deps.status.core$,

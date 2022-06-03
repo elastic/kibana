@@ -11,6 +11,8 @@ import {
   SavedObjectsServiceSetup,
   SavedObjectsType,
   SavedObjectsTypeMappingDefinition,
+  PostGetEvent,
+  PostCreateEvent,
 } from '@kbn/core/server';
 
 import { defaultUserContentAttributes, userContentCommonMappings } from '../../common';
@@ -44,6 +46,14 @@ export class UserContentService {
     this.metadataEventsService = metadataEventService;
 
     this.registerSavedObjectsHooks();
+
+    this.savedObjects.eventStream$.subscribe((event) => {
+      if (event.type === 'post:get') {
+        this.onPostGetSavedObject(event.data);
+      } else if (event.type === 'post:create') {
+        this.onPostCreateSavedObject(event.data);
+      }
+    });
   }
 
   /**
@@ -74,54 +84,59 @@ export class UserContentService {
   }
 
   private registerSavedObjectsHooks() {
-    // Hook whenever user generated saved object(s) are accessed
-    this.savedObjects!.post('get', async (objects) => {
-      const registeredContents = this.userContentTypes;
-      const filteredToContentType = objects.filter(({ type }) => registeredContents.includes(type));
-
-      if (filteredToContentType.length > 0) {
-        this.metadataEventsService?.bulkRegisterEvents(
-          filteredToContentType.map(({ id: soId, type }) => ({
-            type: 'viewed:kibana',
-            data: {
-              so_id: soId,
-              so_type: type,
-            },
-          }))
-        );
-      }
-    });
-
     // Hook before saving a user generated saved object
-    this.savedObjects!.pre('create', async (objects) => {
+    this.savedObjects!.pre('create', async ({ objects }) => {
       if (!objects) {
         return;
       }
+
+      // Add common attributes to all user generated saved objects
       const updatedObject = objects.map((object) => {
         const { type, attributes } = object;
         if (!this.contents.has(type)) {
           return object;
         }
-        // Add common attributes to all user generated saved objects
+
         const updatedAttributes = this.addDefaultUserContentAttributes(attributes as object);
         return { ...object, attributes: updatedAttributes };
       });
+
       return updatedObject;
     });
+  }
 
-    // Hook after saving a user generated saved object
-    this.savedObjects!.post('create', async (objects) => {
+  private onPostGetSavedObject = (data: PostGetEvent['data']) => {
+    const registeredContents = this.userContentTypes;
+    const filteredToContentType = data.objects.filter(({ type }) =>
+      registeredContents.includes(type)
+    );
+
+    if (filteredToContentType.length > 0) {
       this.metadataEventsService?.bulkRegisterEvents(
-        objects.map(({ id: soId, type }) => ({
-          type: 'created:kibana',
+        filteredToContentType.map(({ id: soId, type }) => ({
+          type: 'viewed:kibana',
           data: {
             so_id: soId,
             so_type: type,
           },
         }))
       );
-    });
-  }
+    }
+  };
+
+  private onPostCreateSavedObject = (data: PostCreateEvent['data']) => {
+    this.metadataEventsService?.bulkRegisterEvents(
+      data.objects
+        .filter(({ id }) => id !== undefined)
+        .map(({ id: soId, type }) => ({
+          type: 'created:kibana',
+          data: {
+            so_id: soId!,
+            so_type: type,
+          },
+        }))
+    );
+  };
 
   /**
    * Merge user content common default attributes to the provided attibutes.
