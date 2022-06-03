@@ -849,7 +849,7 @@
     "css-loader": "^3.4.2",
     "cssnano": "^4.1.11",
     "csstype": "^3.0.2",
-    "cypress": "^9.6.1",
+    "cypress": "^10.0.2",
     "cypress-axe": "^0.14.0",
     "cypress-file-upload": "^5.0.8",
     "cypress-multi-reporters": "^1.6.0",
