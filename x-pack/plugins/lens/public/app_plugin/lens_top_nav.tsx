@@ -367,7 +367,7 @@ export const LensTopNavMenu = ({
       datasourceMap[activeDatasourceId],
       datasourceStates[activeDatasourceId].state,
       activeData,
-      data.query.timefilter.timefilter.getAbsoluteTime(),
+      data.query.timefilter.timefilter.getTime(),
       application.capabilities
     );
   }, [
