@@ -27,7 +27,7 @@ cd elastic-agent-${kibanaVersion}-darwin-x86_64
 sudo ./elastic-agent install ${enrollArgs}`;
 
   const windowsCommand = `$ProgressPreference = 'SilentlyContinue'
-wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
+Invoke-WebRequest -Uri https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip
 Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip -DestinationPath .
 cd elastic-agent-${kibanaVersion}-windows-x86_64
 .\\elastic-agent.exe install ${enrollArgs}`;
