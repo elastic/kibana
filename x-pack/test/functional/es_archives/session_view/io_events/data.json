@@ -1,0 +1,1438 @@
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-endpoint.events.process",
+    "id": "1",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:29.570Z",
+      "message": "only event.action: 'io' events should be returned in an io_events request",
+      "event": {
+        "action": "exec"
+      },
+      "process": {
+        "entity_id": "1",
+        "name": "bash",
+        "executable": "/bin/bash",
+        "entry_leader": {
+          "entity_id": "1"
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-endpoint.events.process",
+    "id": "1",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:29.570Z",
+      "message": "hello world security",
+      "event": {
+        "action": "io"
+      },
+      "process": {
+        "entity_id": "1",
+        "name": "bash",
+        "executable": "/bin/bash",
+        "entry_leader": {
+          "entity_id": "1"
+        },
+        "io": {
+          "data": [
+            {
+              "time": "0",
+              "value": "256"
+            },
+            {
+              "time": "1",
+              "value": ","
+            },
+            {
+              "time": "2",
+              "value": "                             Some Companies Puppet instance"
+            },
+            {
+              "time": "3",
+              "value": "             |  |    |       CentOS Stream release 8 on x86_64"
+            },
+            {
+              "time": "4",
+              "value": "  .=/ =  =  =| =| = === =    Load average: 1.23, 1.01, 0.63"
+            },
+            {
+              "time": "5",
+              "value": "  | || || || || || | | | |   "
+            },
+            {
+              "time": "6",
+              "value": "  /=  =  =  =' =' =' '  ='   Hostname ********"
+            },
+            {
+              "time": "7",
+              "value": "  \\                          Type       xyz"
+            },
+            {
+              "time": "8",
+              "value": "  o                          Datacenter ********"
+            },
+            {
+              "time": "9",
+              "value": "                             Cluster ********"
+            },
+            {
+              "time": "10",
+              "value": ""
+            },
+            {
+              "time": "11",
+              "value": ""
+            },
+            {
+              "time": "12",
+              "value": ""
+            },
+            {
+              "time": "13",
+              "value": ""
+            },
+            {
+              "time": "14",
+              "value": ",0 loaded units listed. Pass --all to see loaded but inactive units, too."
+            },
+            {
+              "time": "15",
+              "value": "To show all installed unit files use 'systemctl list-unit-files'."
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-endpoint.events.process",
+    "id": "2",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:30.570Z",
+      "message": "hello world security",
+      "event": {
+        "action": "io"
+      },
+      "process": {
+        "entity_id": "2",
+        "name": "vim",
+        "executable": "/bin/vi",
+        "entry_leader": {
+          "entity_id": "1"
+        },
+        "io": {
+          "data": [
+            {
+              "time": "16",
+              "value": ",\u001b[?2004h\u001b[?1049h\u001b[22;0;0t\u001b[?1h\u001b=\u001b[?2004h\u001b[1;59r\u001b[?12h\u001b[?12l\u001b[27m\u001b[29m\u001b[m\u001b[H\u001b[2J\u001b[?25l\u001b[59;1H\"/usr/local/bin/galera_traffic_start.sh\" [readonly] 14L, 397C\u001b[1;1H#!/bin/env bash"
+            },
+            {
+              "time": "17",
+              "value": "# Copyright (C) 2022, ********(R) Corporation. All rights reserved."
+            },
+            {
+              "time": "18",
+              "value": ""
+            },
+            {
+              "time": "19",
+              "value": "# Script for setting the reject of queries in Galera"
+            },
+            {
+              "time": "20",
+              "value": ""
+            },
+            {
+              "time": "21",
+              "value": "mysql -h127.0.0.1 -P6033 -uroot -e \"set global wsrep_reject_queries='NONE'\" 2>&1"
+            },
+            {
+              "time": "22",
+              "value": "RC=$?"
+            },
+            {
+              "time": "23",
+              "value": ""
+            },
+            {
+              "time": "24",
+              "value": "if [[ $RC != 0 ]]; then"
+            },
+            {
+              "time": "25",
+              "value": "  >&2 echo \"Failed to unset the reject of queries on Galera node, exiting.\""
+            },
+            {
+              "time": "26",
+              "value": "  exit $RC"
+            },
+            {
+              "time": "27",
+              "value": "else"
+            },
+            {
+              "time": "28",
+              "value": "  echo \"Successfully unset the reject of queries.\""
+            },
+            {
+              "time": "29",
+              "value": "fi"
+            },
+            {
+              "time": "30",
+              "value": "\u001b[94m~                                                                                                                                                                           \u001b[16;1H~                                                                                                                                                                           \u001b[17;1H~                                                                                                                                                                           \u001b[18;1H~                                                                                                                                                                           \u001b[19;1H~                                                                                                                                                                           \u001b[20;1H~                                                                                                                                                                           \u001b[21;1H~                                                                                                                                                                           \u001b[22;1H~                                                                                                                                                                           \u001b[23;1H~                                                                                                                                                                           \u001b[24;1H~                                                                                                                                                                           \u001b[25;1H~                                                                                                                                                                           \u001b[26;1H~                                                                                                                                                                           \u001b[27;1H~                                                                                                                                                                           \u001b[28;1H~                                                                                                                                                                           \u001b[29;1H~                                                                                                                                                                           \u001b[30;1H~                                                                                                                                                                           \u001b[31;1H~                                                                                                                                                                           \u001b[32;1H~                                                                                                                                                                           \u001b[33;1H~                                                                                                                                                                           \u001b[34;1H~                                                                                                                                                                           \u001b[35;1H~                                                                                                                                                                           \u001b[36;1H~                                                                                                                                                                           \u001b[37;1H~                                                                                                                                                                           \u001b[38;1H~                                                                                                                                                                           \u001b[39;1H~                                                                                                                                                                           \u001b[40;1H~                                                                                                                                                                           \u001b[41;1H~                                                                                                                                                                           \u001b[42;1H~                                                                                                                                                                           \u001b[43;1H~                                                                                                                                                                           \u001b[44;1H~                                                                                                                                                                           \u001b[45;1H~                                                                                                                                                                           \u001b[46;1H~                                                                                                                                                                           \u001b[47;1H~                                                                                                                                                                           \u001b[48;1H~                                                                                                                                                                           \u001b[49;1H~                                                                                                                                                                           \u001b[50;1H~                                                                                                                                                                           \u001b[51;1H~                                                                                                                                                                           \u001b[52;1H~                                                                                                                                                                           \u001b[53;1H~                                                                                                                                                                           \u001b[54;1H~                                                                                                                                                                           \u001b[55;1H~                                                                                                                                                                           \u001b[56;1H~                                                                                                                                                                           \u001b[57;1H~                                                                                                                                                                           \u001b[58;1H~                                                                                                                                                                           \u001b[1;1H\u001b[?25h\u0007\u001b[?25l\u001b[m\u001b[59;1H\u001b[K\u001b[59;1H:\u001b[?2004h\u001b[?25hq\r\u001b[?25l\u001b[?2004l\u001b[59;1H\u001b[K\u001b[59;1H\u001b[?2004l\u001b[?1l\u001b>\u001b[?25h\u001b[?1049l\u001b[23;0;0t,\u001b[?2004h\u001b[?1049h\u001b[22;0;0t\u001b[?1h\u001b=\u001b[?2004h\u001b[1;59r\u001b[?12h\u001b[?12l\u001b[27m\u001b[29m\u001b[m\u001b[H\u001b[2J\u001b[?25l\u001b[59;1H\"/usr/local/bin/galera_traffic_stop.sh\" [readonly] 115L, 3570C\u001b[1;1H#!/bin/env bash"
+            },
+            {
+              "time": "31",
+              "value": "# Copyright (C) 2022, ********(R) Corporation. All rights reserved."
+            },
+            {
+              "time": "32",
+              "value": ""
+            },
+            {
+              "time": "33",
+              "value": "# Script for rejecting connection on Galera cluster node, either gracefully or not,"
+            },
+            {
+              "time": "34",
+              "value": "# depending on supplied arguments."
+            },
+            {
+              "time": "35",
+              "value": ""
+            },
+            {
+              "time": "36",
+              "value": "function usage() {"
+            },
+            {
+              "time": "37",
+              "value": "  echo \""
+            },
+            {
+              "time": "38",
+              "value": "  This script disables DB connections to Galera node."
+            },
+            {
+              "time": "39",
+              "value": "  The default is to stop them gracefully."
+            },
+            {
+              "time": "40",
+              "value": ""
+            },
+            {
+              "time": "41",
+              "value": "  Usage: $0 [-h] [-w <wait_seconds>] [-s <sleep_seconds>] [-x]"
+            },
+            {
+              "time": "42",
+              "value": ""
+            },
+            {
+              "time": "43",
+              "value": "  Options:"
+            },
+            {
+              "time": "44",
+              "value": "    -h    Prints this help."
+            },
+            {
+              "time": "45",
+              "value": "    -w    Number of seconds for waiting to close the connections.\u001b[17;11HDefault value is to wait for mysql-wait_timeout."
+            },
+            {
+              "time": "46",
+              "value": "    -s    Sleep interval between connections checks."
+            },
+            {
+              "time": "47",
+              "value": "    -x    Kills all connections immediately. Other options are ignored.\""
+            },
+            {
+              "time": "48",
+              "value": "  exit"
+            },
+            {
+              "time": "49",
+              "value": "}"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-endpoint.events.process",
+    "id": "3",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:31.570Z",
+      "message": "hello world security",
+      "event": {
+        "action": "io"
+      },
+      "process": {
+        "entity_id": "2",
+        "name": "vim",
+        "executable": "/bin/vi",
+        "entry_leader": {
+          "entity_id": "1"
+        },
+        "io": {
+          "data": [
+            {
+              "time": "50",
+              "value": ""
+            },
+            {
+              "time": "51",
+              "value": "function get_number_db_connections() {"
+            },
+            {
+              "time": "52",
+              "value": "    # count current"
+            },
+            {
+              "time": "53",
+              "value": "    DB_CONNECTIONS_NUMBER=$(mysql -h127.0.0.1 -P6032 -uadmin -N --silent -e \"select count(1) from stats_mysql_processlist where user = '$DB_USER' and db like 'db\\_%' escapee\u001b[26;1H '\\'\")"
+            },
+            {
+              "time": "54",
+              "value": "}"
+            },
+            {
+              "time": "55",
+              "value": ""
+            },
+            {
+              "time": "56",
+              "value": "function set_number_grace_seconds() {"
+            },
+            {
+              "time": "57",
+              "value": "    local mysql_wait_timeout_ms=$(mysql -h127.0.0.1 -P6032 -uadmin -N --silent -e \"select variable_value from global_variables where variable_name = 'mysql-wait_timeout'\")"
+            },
+            {
+              "time": "58",
+              "value": "    GRACE_PERIOD=$((($mysql_wait_timeout_ms+1000-1)/1000))"
+            },
+            {
+              "time": "59",
+              "value": "}"
+            },
+            {
+              "time": "60",
+              "value": ""
+            },
+            {
+              "time": "61",
+              "value": "function wait_for_connections() {"
+            },
+            {
+              "time": "62",
+              "value": "    local number_of_loops=$(((($GRACE_PERIOD+$SLEEP_INTERVAL-1)/$SLEEP_INTERVAL)))\u001b[37;5Hecho \"Waiting for connections to close for up to $GRACE_PERIOD seconds\"\u001b[39;5Hfor i in $(seq 0 $number_of_loops); do\u001b[40;9Hget_number_db_connections\u001b[41;9Hif [[ $DB_CONNECTIONS_NUMBER -eq 0 ]]; then\u001b[42;13Hecho \"No connection found for user $DB_USER to this node\"\u001b[43;13Hbreak\u001b[44;9Helse\u001b[45;13Hecho \"$DB_CONNECTIONS_NUMBER connection(s) found, waiting for ${SLEEP_INTERVAL}s, round $i\"\u001b[46;13Hsleep $SLEEP_INTERVAL\u001b[47;9Hfi"
+            },
+            {
+              "time": "63",
+              "value": "    done"
+            },
+            {
+              "time": "64",
+              "value": "}"
+            },
+            {
+              "time": "65",
+              "value": ""
+            },
+            {
+              "time": "66",
+              "value": "function parse_args() {"
+            },
+            {
+              "time": "67",
+              "value": "    while getopts 'hs:w:x' opt; do\u001b[53;9Hcase \"$opt\" in\u001b[54;9Hh)\u001b[55;13Husage\u001b[56;13H;;\u001b[57;9Hs)\u001b[58;13Hif ! [[ $OPTARG =~ ^[0-9]+$ ]]; then\u001b[1;1H\u001b[?25h\u001b[?25l\u001b[59;1H\u001b[K\u001b[59;1H:\u001b[?2004h\u001b[?25hset number\r\u001b[?25l\u001b[1;1H\u001b[38;5;130m      1 \u001b[m#!/bin/env bash"
+            },
+            {
+              "time": "68",
+              "value": "\u001b[38;5;130m      2 \u001b[m# Copyright (C) 2022, ********(R) Corporation. All rights reserved."
+            },
+            {
+              "time": "69",
+              "value": "\u001b[38;5;130m      3 "
+            },
+            {
+              "time": "70",
+              "value": "      4 \u001b[m# Script for rejecting connection on Galera cluster node, either gracefully or not,"
+            },
+            {
+              "time": "71",
+              "value": "\u001b[38;5;130m      5 \u001b[m# depending on supplied arguments."
+            },
+            {
+              "time": "72",
+              "value": "\u001b[38;5;130m      6 "
+            },
+            {
+              "time": "73",
+              "value": "      7 \u001b[mfunction usage() {"
+            },
+            {
+              "time": "74",
+              "value": "\u001b[38;5;130m      8 \u001b[m  echo \""
+            },
+            {
+              "time": "75",
+              "value": "\u001b[38;5;130m      9 \u001b[m  This script disables DB connections to Galera node."
+            },
+            {
+              "time": "76",
+              "value": "\u001b[38;5;130m     10 \u001b[m  The default is to stop them gracefully."
+            },
+            {
+              "time": "77",
+              "value": "\u001b[38;5;130m     11 "
+            },
+            {
+              "time": "78",
+              "value": "     12 \u001b[m  Usage: $0 [-h] [-w <wait_seconds>] [-s <sleep_seconds>] [-x]"
+            },
+            {
+              "time": "79",
+              "value": "\u001b[38;5;130m     13 "
+            },
+            {
+              "time": "80",
+              "value": "     14 \u001b[m  Options:"
+            },
+            {
+              "time": "81",
+              "value": "\u001b[38;5;130m     15 \u001b[m    -h    Prints this help."
+            },
+            {
+              "time": "82",
+              "value": "\u001b[38;5;130m     16 \u001b[m    -w    Number of seconds for waiting to close the connections."
+            },
+            {
+              "time": "83",
+              "value": "\u001b[38;5;130m     17 \u001b[m          Default value is to wait for mysql-wait_timeout."
+            },
+            {
+              "time": "84",
+              "value": "\u001b[38;5;130m     18 \u001b[m    -s    Sleep interval between connections checks."
+            },
+            {
+              "time": "85",
+              "value": "\u001b[38;5;130m     19 \u001b[m    -x    Kills all connections immediately. Other options are ignored.\""
+            },
+            {
+              "time": "86",
+              "value": "\u001b[38;5;130m     20 \u001b[m  exit"
+            },
+            {
+              "time": "87",
+              "value": "\u001b[38;5;130m     21 \u001b[m}"
+            },
+            {
+              "time": "88",
+              "value": "\u001b[38;5;130m     22 "
+            },
+            {
+              "time": "89",
+              "value": "     23 \u001b[mfunction get_number_db_connections() {"
+            },
+            {
+              "time": "90",
+              "value": "\u001b[38;5;130m     24 \u001b[m    # count current"
+            },
+            {
+              "time": "91",
+              "value": "\u001b[38;5;130m     25 \u001b[m    DB_CONNECTIONS_NUMBER=$(mysql -h127.0.0.1 -P6032 -uadmin -N --silent -e \"select count(1) from stats_mysql_processlist where user = '$DB_USER' and db like 'db\\_%%\u001b[26;1H\u001b[38;5;130m        \u001b[m' escape '\\'\")"
+            },
+            {
+              "time": "92",
+              "value": "\u001b[38;5;130m     26 \u001b[m}"
+            },
+            {
+              "time": "93",
+              "value": "\u001b[38;5;130m     27 "
+            },
+            {
+              "time": "94",
+              "value": "     28 \u001b[mfunction set_number_grace_seconds() {"
+            },
+            {
+              "time": "95",
+              "value": "\u001b[38;5;130m     29 \u001b[m    local mysql_wait_timeout_ms=$(mysql -h127.0.0.1 -P6032 -uadmin -N --silent -e \"select variable_value from global_variables where variable_name = 'mysql-wait_timm\u001b[31;1H\u001b[38;5;130m        \u001b[meout'\")\u001b[31;16H\u001b[K\u001b[32;1H\u001b[38;5;130m     30 \u001b[m    GRACE_PERIOD=$((($mysql_wait_timeout_ms+1000-1)/1000))"
+            },
+            {
+              "time": "96",
+              "value": "\u001b[38;5;130m     31 \u001b[m}"
+            },
+            {
+              "time": "97",
+              "value": "\u001b[38;5;130m     32 \u001b[m\u001b[34;10H\u001b[K\u001b[35;1H\u001b[38;5;130m     33 \u001b[mfunction wait_for_connections() {\u001b[35;42H\u001b[K\u001b[36;1H\u001b[38;5;130m     34 \u001b[m    local number_of_loops=$(((($GRACE_PERIOD+$SLEEP_INTERVAL-1)/$SLEEP_INTERVAL)))"
+            },
+            {
+              "time": "98",
+              "value": "\u001b[38;5;130m     35 \u001b[m\u001b[37;10H\u001b[K\u001b[38;1H\u001b[38;5;130m     36 \u001b[m    echo \"Waiting for connections to close for up to $GRACE_PERIOD seconds\""
+            },
+            {
+              "time": "99",
+              "value": "\u001b[38;5;130m     37 \u001b[m\u001b[39;9H\u001b[K\u001b[40;1H\u001b[38;5;130m     38 \u001b[m    for i in $(seq 0 $number_of_loops); do"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-endpoint.events.process",
+    "id": "4",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:32.570Z",
+      "message": "hello world security",
+      "event": {
+        "action": "io"
+      },
+      "process": {
+        "entity_id": "2",
+        "name": "vim",
+        "executable": "/bin/vi",
+        "entry_leader": {
+          "entity_id": "1"
+        },
+        "io": {
+          "data": [
+            {
+              "time": "100",
+              "value": "\u001b[38;5;130m     39 \u001b[m        get_number_db_connections\u001b[41;42H\u001b[K\u001b[42;1H\u001b[38;5;130m     40 \u001b[m        if [[ $DB_CONNECTIONS_NUMBER -eq 0 ]]; then\u001b[42;60H\u001b[K\u001b[43;1H\u001b[38;5;130m     41 \u001b[m            echo \"No connection found for user $DB_USER to this node\""
+            },
+            {
+              "time": "101",
+              "value": "\u001b[38;5;130m     42 \u001b[m    \u001b[8Cbreak"
+            },
+            {
+              "time": "102",
+              "value": "\u001b[38;5;130m     43 \u001b[m        else\u001b[45;21H\u001b[K\u001b[46;1H\u001b[38;5;130m     44 \u001b[m            echo \"$DB_CONNECTIONS_NUMBER connection(s) found, waiting for ${SLEEP_INTERVAL}s, round $i\""
+            },
+            {
+              "time": "103",
+              "value": "\u001b[38;5;130m     45 \u001b[m  \u001b[10Csleep $SLEEP_INTERVAL"
+            },
+            {
+              "time": "104",
+              "value": "\u001b[38;5;130m     46 \u001b[m\u001b[8Cfi"
+            },
+            {
+              "time": "105",
+              "value": "\u001b[38;5;130m     47 \u001b[m    done"
+            },
+            {
+              "time": "106",
+              "value": "\u001b[38;5;130m     48 \u001b[m}"
+            },
+            {
+              "time": "107",
+              "value": "\u001b[38;5;130m     49 \u001b[m\u001b[51;10H\u001b[K\u001b[52;1H\u001b[38;5;130m     50 \u001b[mfunction parse_args() {\u001b[52;33H\u001b[K\u001b[53;1H\u001b[38;5;130m     51 \u001b[m    while getopts 'hs:w:x' opt; do"
+            },
+            {
+              "time": "108",
+              "value": "\u001b[38;5;130m     52 \u001b[m        case \"$opt\" in"
+            },
+            {
+              "time": "109",
+              "value": "\u001b[38;5;130m     53 \u001b[m        h)"
+            },
+            {
+              "time": "110",
+              "value": "\u001b[38;5;130m     54 \u001b[m            usage"
+            },
+            {
+              "time": "111",
+              "value": "\u001b[38;5;130m     55 \u001b[m  \u001b[10C;;"
+            },
+            {
+              "time": "112",
+              "value": "\u001b[38;5;130m     56 \u001b[m        s)\u001b[58;19H\u001b[K\u001b[1;9H\u001b[?25h\u001b[?25l\u001b[27m\u001b[29m\u001b[m\u001b[H\u001b[2J\u001b[1;1H\u001b[38;5;130m     58 \u001b[m\u001b[16C>&2 echo \"Sleep interval (-s) must be a number\""
+            },
+            {
+              "time": "113",
+              "value": "\u001b[38;5;130m     59 \u001b[m\u001b[16Cexit 1"
+            },
+            {
+              "time": "114",
+              "value": "\u001b[38;5;130m     60 \u001b[m\u001b[12Cfi"
+            },
+            {
+              "time": "115",
+              "value": "\u001b[38;5;130m     61 \u001b[m\u001b[12CARG_SLEEP_INTERVAL=\"$OPTARG\""
+            },
+            {
+              "time": "116",
+              "value": "\u001b[38;5;130m     62 \u001b[m\u001b[12C;;"
+            },
+            {
+              "time": "117",
+              "value": "\u001b[38;5;130m     63 \u001b[m\u001b[8Cw)"
+            },
+            {
+              "time": "118",
+              "value": "\u001b[38;5;130m     64 \u001b[m\u001b[12Cif ! [[ $OPTARG =~ ^[0-9]+$ ]]; then"
+            },
+            {
+              "time": "119",
+              "value": "\u001b[38;5;130m     65 \u001b[m\u001b[16C>&2 echo \"Wait timeout (-w) must be a number\""
+            },
+            {
+              "time": "120",
+              "value": "\u001b[38;5;130m     66 \u001b[m\u001b[16Cexit 1"
+            },
+            {
+              "time": "121",
+              "value": "\u001b[38;5;130m     67 \u001b[m\u001b[12Cfi"
+            },
+            {
+              "time": "122",
+              "value": "\u001b[38;5;130m     68 \u001b[m\u001b[12CARG_GRACE_PERIOD=\"$OPTARG\""
+            },
+            {
+              "time": "123",
+              "value": "\u001b[38;5;130m     69 \u001b[m\u001b[12C;;"
+            },
+            {
+              "time": "124",
+              "value": "\u001b[38;5;130m     70 \u001b[m\u001b[8Cx)"
+            },
+            {
+              "time": "125",
+              "value": "\u001b[38;5;130m     71 \u001b[m\u001b[12CARG_KILL_IMMEDIATELY=1"
+            },
+            {
+              "time": "126",
+              "value": "\u001b[38;5;130m     72 \u001b[m\u001b[12C;;"
+            },
+            {
+              "time": "127",
+              "value": "\u001b[38;5;130m     73 \u001b[m\u001b[8Cesac"
+            },
+            {
+              "time": "128",
+              "value": "\u001b[38;5;130m     74 \u001b[m    done"
+            },
+            {
+              "time": "129",
+              "value": "\u001b[38;5;130m     75 "
+            },
+            {
+              "time": "130",
+              "value": "     76 \u001b[m  GRACE_PERIOD=${ARG_GRACE_PERIOD:--1}"
+            },
+            {
+              "time": "131",
+              "value": "\u001b[38;5;130m     77 \u001b[m  SLEEP_INTERVAL=${ARG_SLEEP_INTERVAL:-30}"
+            },
+            {
+              "time": "132",
+              "value": "\u001b[38;5;130m     78 \u001b[m  KILL_IMMEDIATELY=${ARG_KILL_IMMEDIATELY:-0}"
+            },
+            {
+              "time": "133",
+              "value": "\u001b[38;5;130m     79 \u001b[m}"
+            },
+            {
+              "time": "134",
+              "value": "\u001b[38;5;130m     80 "
+            },
+            {
+              "time": "135",
+              "value": "     81 \u001b[mDB_USER=\"rolap01\""
+            },
+            {
+              "time": "136",
+              "value": "\u001b[38;5;130m     82 "
+            },
+            {
+              "time": "137",
+              "value": "     83 \u001b[mparse_args $@"
+            },
+            {
+              "time": "138",
+              "value": "\u001b[38;5;130m     84 "
+            },
+            {
+              "time": "139",
+              "value": "     85 \u001b[mif [[ $KILL_IMMEDIATELY == 1 ]]; then"
+            },
+            {
+              "time": "140",
+              "value": "\u001b[38;5;130m     86 \u001b[m    echo \"WARNING: Not waiting for connections to close gracefully\""
+            },
+            {
+              "time": "141",
+              "value": "\u001b[38;5;130m     87 \u001b[m    echo \"Press any key to continue... wsrep_reject_queries will be set to 'ALL_KILL'\""
+            },
+            {
+              "time": "142",
+              "value": "\u001b[38;5;130m     88 \u001b[m    read a"
+            },
+            {
+              "time": "143",
+              "value": "\u001b[38;5;130m     89 \u001b[m    mysql -h127.0.0.1 -P3306 -uroot -e \"set global wsrep_reject_queries='ALL_KILL'\""
+            },
+            {
+              "time": "144",
+              "value": "\u001b[38;5;130m     90 \u001b[melse"
+            },
+            {
+              "time": "145",
+              "value": "\u001b[38;5;130m     91 \u001b[m    # Stop accepting queries in mariadb, do not kill opened connections"
+            },
+            {
+              "time": "146",
+              "value": "\u001b[38;5;130m     92 \u001b[m    mysql -h127.0.0.1 -P3306 -uroot -e \"set global wsrep_reject_queries='ALL'\""
+            },
+            {
+              "time": "147",
+              "value": "\u001b[38;5;130m     93 \u001b[mfi"
+            },
+            {
+              "time": "148",
+              "value": "\u001b[38;5;130m     94 "
+            },
+            {
+              "time": "149",
+              "value": "     95 \u001b[mexit_code=$?"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-endpoint.events.process",
+    "id": "5",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:33.570Z",
+      "message": "hello world security",
+      "event": {
+        "action": "io"
+      },
+      "process": {
+        "entity_id": "2",
+        "name": "vim",
+        "executable": "/bin/vi",
+        "entry_leader": {
+          "entity_id": "1"
+        },
+        "io": {
+          "data": [
+            {
+              "time": "150",
+              "value": "\u001b[38;5;130m     96 \u001b[mif [[ $exit_code != 0 ]]; then"
+            },
+            {
+              "time": "151",
+              "value": "\u001b[38;5;130m     97 \u001b[m    >&2 echo \"Failed to set the reject of queries on Galera node, exiting.\""
+            },
+            {
+              "time": "152",
+              "value": "\u001b[38;5;130m     98 \u001b[m    exit $exit_code"
+            },
+            {
+              "time": "153",
+              "value": "\u001b[38;5;130m     99 \u001b[melse"
+            },
+            {
+              "time": "154",
+              "value": "\u001b[38;5;130m    100 \u001b[m    echo \"Successfully stopped accepting queries.\""
+            },
+            {
+              "time": "155",
+              "value": "\u001b[38;5;130m    101 \u001b[m    if [[ $KILL_IMMEDIATELY == 1 ]]; then"
+            },
+            {
+              "time": "156",
+              "value": "\u001b[38;5;130m    102 \u001b[m\u001b[8Cexit"
+            },
+            {
+              "time": "157",
+              "value": "\u001b[38;5;130m    103 \u001b[m    fi"
+            },
+            {
+              "time": "158",
+              "value": "\u001b[38;5;130m    104 \u001b[mfi"
+            },
+            {
+              "time": "159",
+              "value": "\u001b[38;5;130m    105 "
+            },
+            {
+              "time": "160",
+              "value": "    106 \u001b[mif [[ $GRACE_PERIOD == -1 ]]; then"
+            },
+            {
+              "time": "161",
+              "value": "\u001b[38;5;130m    107 \u001b[m    set_number_grace_seconds"
+            },
+            {
+              "time": "162",
+              "value": "\u001b[38;5;130m    108 \u001b[mfi"
+            },
+            {
+              "time": "163",
+              "value": "\u001b[38;5;130m    109 "
+            },
+            {
+              "time": "164",
+              "value": "    110 \u001b[mwait_for_connections"
+            },
+            {
+              "time": "165",
+              "value": "\u001b[38;5;130m    111 \u001b[mif [[ $DB_CONNECTIONS_NUMBER != 0 ]]; then"
+            },
+            {
+              "time": "166",
+              "value": "\u001b[38;5;130m    112 \u001b[m    get_number_db_connections"
+            },
+            {
+              "time": "167",
+              "value": "\u001b[38;5;130m    113 \u001b[m    >&2 echo \"ERROR: There are still $DB_CONNECTIONS_NUMBER opened DB connections.\""
+            },
+            {
+              "time": "168",
+              "value": "\u001b[38;5;130m    114 \u001b[m    exit 3"
+            },
+            {
+              "time": "169",
+              "value": "\u001b[38;5;130m    115 \u001b[mfi\b\b\u001b[?25h\u001b[?25l\u001b[27m\u001b[29m\u001b[m\u001b[H\u001b[2J\u001b[1;1H\u001b[38;5;130m      1 \u001b[m#!/bin/env bash"
+            },
+            {
+              "time": "170",
+              "value": "\u001b[38;5;130m      2 \u001b[m# Copyright (C) 2022, ********(R) Corporation. All rights reserved."
+            },
+            {
+              "time": "171",
+              "value": "\u001b[38;5;130m      3 "
+            },
+            {
+              "time": "172",
+              "value": "      4 \u001b[m# Script for rejecting connection on Galera cluster node, either gracefully or not,"
+            },
+            {
+              "time": "173",
+              "value": "\u001b[38;5;130m      5 \u001b[m# depending on supplied arguments."
+            },
+            {
+              "time": "174",
+              "value": "\u001b[38;5;130m      6 "
+            },
+            {
+              "time": "175",
+              "value": "      7 \u001b[mfunction usage() {"
+            },
+            {
+              "time": "176",
+              "value": "\u001b[38;5;130m      8 \u001b[m  echo \""
+            },
+            {
+              "time": "177",
+              "value": "\u001b[38;5;130m      9 \u001b[m  This script disables DB connections to Galera node."
+            },
+            {
+              "time": "178",
+              "value": "\u001b[38;5;130m     10 \u001b[m  The default is to stop them gracefully."
+            },
+            {
+              "time": "179",
+              "value": "\u001b[38;5;130m     11 "
+            },
+            {
+              "time": "180",
+              "value": "     12 \u001b[m  Usage: $0 [-h] [-w <wait_seconds>] [-s <sleep_seconds>] [-x]"
+            },
+            {
+              "time": "181",
+              "value": "\u001b[38;5;130m     13 "
+            },
+            {
+              "time": "182",
+              "value": "     14 \u001b[m  Options:"
+            },
+            {
+              "time": "183",
+              "value": "\u001b[38;5;130m     15 \u001b[m    -h    Prints this help."
+            },
+            {
+              "time": "184",
+              "value": "\u001b[38;5;130m     16 \u001b[m    -w    Number of seconds for waiting to close the connections."
+            },
+            {
+              "time": "185",
+              "value": "\u001b[38;5;130m     17 \u001b[m\u001b[10CDefault value is to wait for mysql-wait_timeout."
+            },
+            {
+              "time": "186",
+              "value": "\u001b[38;5;130m     18 \u001b[m    -s    Sleep interval between connections checks."
+            },
+            {
+              "time": "187",
+              "value": "\u001b[38;5;130m     19 \u001b[m    -x    Kills all connections immediately. Other options are ignored.\""
+            },
+            {
+              "time": "188",
+              "value": "\u001b[38;5;130m     20 \u001b[m  exit"
+            },
+            {
+              "time": "189",
+              "value": "\u001b[38;5;130m     21 \u001b[m}"
+            },
+            {
+              "time": "190",
+              "value": "\u001b[38;5;130m     22 "
+            },
+            {
+              "time": "191",
+              "value": "     23 \u001b[mfunction get_number_db_connections() {"
+            },
+            {
+              "time": "192",
+              "value": "\u001b[38;5;130m     24 \u001b[m    # count current"
+            },
+            {
+              "time": "193",
+              "value": "\u001b[38;5;130m     25 \u001b[m    DB_CONNECTIONS_NUMBER=$(mysql -h127.0.0.1 -P6032 -uadmin -N --silent -e \"select count(1) from stats_mysql_processlist where user = '$DB_USER' and db like 'db\\_%%\u001b[26;1H\u001b[38;5;130m        \u001b[m' escape '\\'\")"
+            },
+            {
+              "time": "194",
+              "value": "\u001b[38;5;130m     26 \u001b[m}"
+            },
+            {
+              "time": "195",
+              "value": "\u001b[38;5;130m     27 "
+            },
+            {
+              "time": "196",
+              "value": "     28 \u001b[mfunction set_number_grace_seconds() {"
+            },
+            {
+              "time": "197",
+              "value": "\u001b[38;5;130m     29 \u001b[m    local mysql_wait_timeout_ms=$(mysql -h127.0.0.1 -P6032 -uadmin -N --silent -e \"select variable_value from global_variables where variable_name = 'mysql-wait_timm\u001b[31;1H\u001b[38;5;130m        \u001b[meout'\")"
+            },
+            {
+              "time": "198",
+              "value": "\u001b[38;5;130m     30 \u001b[m    GRACE_PERIOD=$((($mysql_wait_timeout_ms+1000-1)/1000))"
+            },
+            {
+              "time": "199",
+              "value": "\u001b[38;5;130m     31 \u001b[m}"
+            },
+            {
+              "time": "200",
+              "value": "\u001b[38;5;130m     32 "
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-endpoint.events.process",
+    "id": "6",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:34.570Z",
+      "message": "hello world security",
+      "event": {
+        "action": "io"
+      },
+      "process": {
+        "entity_id": "2",
+        "name": "vim",
+        "executable": "/bin/vi",
+        "entry_leader": {
+          "entity_id": "1"
+        },
+        "io": {
+          "data": [
+            {
+              "time": "201",
+              "value": "     33 \u001b[mfunction wait_for_connections() {"
+            },
+            {
+              "time": "202",
+              "value": "\u001b[38;5;130m     34 \u001b[m    local number_of_loops=$(((($GRACE_PERIOD+$SLEEP_INTERVAL-1)/$SLEEP_INTERVAL)))"
+            },
+            {
+              "time": "203",
+              "value": "\u001b[38;5;130m     35 "
+            },
+            {
+              "time": "204",
+              "value": "     36 \u001b[m    echo \"Waiting for connections to close for up to $GRACE_PERIOD seconds\""
+            },
+            {
+              "time": "205",
+              "value": "\u001b[38;5;130m     37 "
+            },
+            {
+              "time": "206",
+              "value": "     38 \u001b[m    for i in $(seq 0 $number_of_loops); do"
+            },
+            {
+              "time": "207",
+              "value": "\u001b[38;5;130m     39 \u001b[m\u001b[8Cget_number_db_connections"
+            },
+            {
+              "time": "208",
+              "value": "\u001b[38;5;130m     40 \u001b[m\u001b[8Cif [[ $DB_CONNECTIONS_NUMBER -eq 0 ]]; then"
+            },
+            {
+              "time": "209",
+              "value": "\u001b[38;5;130m     41 \u001b[m\u001b[12Cecho \"No connection found for user $DB_USER to this node\""
+            },
+            {
+              "time": "210",
+              "value": "\u001b[38;5;130m     42 \u001b[m\u001b[12Cbreak"
+            },
+            {
+              "time": "211",
+              "value": "\u001b[38;5;130m     43 \u001b[m\u001b[8Celse"
+            },
+            {
+              "time": "212",
+              "value": "\u001b[38;5;130m     44 \u001b[m\u001b[12Cecho \"$DB_CONNECTIONS_NUMBER connection(s) found, waiting for ${SLEEP_INTERVAL}s, round $i\""
+            },
+            {
+              "time": "213",
+              "value": "\u001b[38;5;130m     45 \u001b[m\u001b[12Csleep $SLEEP_INTERVAL"
+            },
+            {
+              "time": "214",
+              "value": "\u001b[38;5;130m     46 \u001b[m\u001b[8Cfi"
+            },
+            {
+              "time": "215",
+              "value": "\u001b[38;5;130m     47 \u001b[m    done"
+            },
+            {
+              "time": "216",
+              "value": "\u001b[38;5;130m     48 \u001b[m}"
+            },
+            {
+              "time": "217",
+              "value": "\u001b[38;5;130m     49 "
+            },
+            {
+              "time": "218",
+              "value": "     50 \u001b[mfunction parse_args() {"
+            },
+            {
+              "time": "219",
+              "value": "\u001b[38;5;130m     51 \u001b[m    while getopts 'hs:w:x' opt; do"
+            },
+            {
+              "time": "220",
+              "value": "\u001b[38;5;130m     52 \u001b[m\u001b[8Ccase \"$opt\" in"
+            },
+            {
+              "time": "221",
+              "value": "\u001b[38;5;130m     53 \u001b[m\u001b[8Ch)"
+            },
+            {
+              "time": "222",
+              "value": "\u001b[38;5;130m     54 \u001b[m\u001b[12Cusage"
+            },
+            {
+              "time": "223",
+              "value": "\u001b[38;5;130m     55 \u001b[m\u001b[12C;;"
+            },
+            {
+              "time": "224",
+              "value": "\u001b[38;5;130m     56 \u001b[m\u001b[8Cs)\u001b[1;9H\u001b[?25h\u001b[?25l\u001b[27m\u001b[29m\u001b[m\u001b[H\u001b[2J\u001b[1;1H\u001b[38;5;130m     58 \u001b[m\u001b[16C>&2 echo \"Sleep interval (-s) must be a number\""
+            },
+            {
+              "time": "225",
+              "value": "\u001b[38;5;130m     59 \u001b[m\u001b[16Cexit 1"
+            },
+            {
+              "time": "226",
+              "value": "\u001b[38;5;130m     60 \u001b[m\u001b[12Cfi"
+            },
+            {
+              "time": "227",
+              "value": "\u001b[38;5;130m     61 \u001b[m\u001b[12CARG_SLEEP_INTERVAL=\"$OPTARG\""
+            },
+            {
+              "time": "228",
+              "value": "\u001b[38;5;130m     62 \u001b[m\u001b[12C;;"
+            },
+            {
+              "time": "229",
+              "value": "\u001b[38;5;130m     63 \u001b[m\u001b[8Cw)"
+            },
+            {
+              "time": "230",
+              "value": "\u001b[38;5;130m     64 \u001b[m\u001b[12Cif ! [[ $OPTARG =~ ^[0-9]+$ ]]; then"
+            },
+            {
+              "time": "231",
+              "value": "\u001b[38;5;130m     65 \u001b[m\u001b[16C>&2 echo \"Wait timeout (-w) must be a number\""
+            },
+            {
+              "time": "232",
+              "value": "\u001b[38;5;130m     66 \u001b[m\u001b[16Cexit 1"
+            },
+            {
+              "time": "233",
+              "value": "\u001b[38;5;130m     67 \u001b[m\u001b[12Cfi"
+            },
+            {
+              "time": "234",
+              "value": "\u001b[38;5;130m     68 \u001b[m\u001b[12CARG_GRACE_PERIOD=\"$OPTARG\""
+            },
+            {
+              "time": "235",
+              "value": "\u001b[38;5;130m     69 \u001b[m\u001b[12C;;"
+            },
+            {
+              "time": "236",
+              "value": "\u001b[38;5;130m     70 \u001b[m\u001b[8Cx)"
+            },
+            {
+              "time": "237",
+              "value": "\u001b[38;5;130m     71 \u001b[m\u001b[12CARG_KILL_IMMEDIATELY=1"
+            },
+            {
+              "time": "238",
+              "value": "\u001b[38;5;130m     72 \u001b[m\u001b[12C;;"
+            },
+            {
+              "time": "239",
+              "value": "\u001b[38;5;130m     73 \u001b[m\u001b[8Cesac"
+            },
+            {
+              "time": "240",
+              "value": "\u001b[38;5;130m     74 \u001b[m    done"
+            },
+            {
+              "time": "241",
+              "value": "\u001b[38;5;130m     75 "
+            },
+            {
+              "time": "242",
+              "value": "     76 \u001b[m  GRACE_PERIOD=${ARG_GRACE_PERIOD:--1}"
+            },
+            {
+              "time": "243",
+              "value": "\u001b[38;5;130m     77 \u001b[m  SLEEP_INTERVAL=${ARG_SLEEP_INTERVAL:-30}"
+            },
+            {
+              "time": "244",
+              "value": "\u001b[38;5;130m     78 \u001b[m  KILL_IMMEDIATELY=${ARG_KILL_IMMEDIATELY:-0}"
+            },
+            {
+              "time": "245",
+              "value": "\u001b[38;5;130m     79 \u001b[m}"
+            },
+            {
+              "time": "246",
+              "value": "\u001b[38;5;130m     80 "
+            },
+            {
+              "time": "247",
+              "value": "     81 \u001b[mDB_USER=\"rolap01\""
+            },
+            {
+              "time": "248",
+              "value": "\u001b[38;5;130m     82 "
+            },
+            {
+              "time": "249",
+              "value": "     83 \u001b[mparse_args $@"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-endpoint.events.process",
+    "id": "7",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:35.570Z",
+      "message": "hello world security",
+      "event": {
+        "action": "io"
+      },
+      "process": {
+        "entity_id": "2",
+        "name": "vim",
+        "executable": "/bin/vi",
+        "entry_leader": {
+          "entity_id": "1"
+        },
+        "io": {
+          "data": [
+            {
+              "time": "250",
+              "value": "\u001b[38;5;130m     84 "
+            },
+            {
+              "time": "251",
+              "value": "     85 \u001b[mif [[ $KILL_IMMEDIATELY == 1 ]]; then"
+            },
+            {
+              "time": "252",
+              "value": "\u001b[38;5;130m     86 \u001b[m    echo \"WARNING: Not waiting for connections to close gracefully\""
+            },
+            {
+              "time": "253",
+              "value": "\u001b[38;5;130m     87 \u001b[m    echo \"Press any key to continue... wsrep_reject_queries will be set to 'ALL_KILL'\""
+            },
+            {
+              "time": "254",
+              "value": "\u001b[38;5;130m     88 \u001b[m    read a"
+            },
+            {
+              "time": "255",
+              "value": "\u001b[38;5;130m     89 \u001b[m    mysql -h127.0.0.1 -P3306 -uroot -e \"set global wsrep_reject_queries='ALL_KILL'\""
+            },
+            {
+              "time": "256",
+              "value": "\u001b[38;5;130m     90 \u001b[melse"
+            },
+            {
+              "time": "257",
+              "value": "\u001b[38;5;130m     91 \u001b[m    # Stop accepting queries in mariadb, do not kill opened connections"
+            },
+            {
+              "time": "258",
+              "value": "\u001b[38;5;130m     92 \u001b[m    mysql -h127.0.0.1 -P3306 -uroot -e \"set global wsrep_reject_queries='ALL'\""
+            },
+            {
+              "time": "259",
+              "value": "\u001b[38;5;130m     93 \u001b[mfi"
+            },
+            {
+              "time": "260",
+              "value": "\u001b[38;5;130m     94 "
+            },
+            {
+              "time": "261",
+              "value": "     95 \u001b[mexit_code=$?"
+            },
+            {
+              "time": "262",
+              "value": "\u001b[38;5;130m     96 \u001b[mif [[ $exit_code != 0 ]]; then"
+            },
+            {
+              "time": "263",
+              "value": "\u001b[38;5;130m     97 \u001b[m    >&2 echo \"Failed to set the reject of queries on Galera node, exiting.\""
+            },
+            {
+              "time": "264",
+              "value": "\u001b[38;5;130m     98 \u001b[m    exit $exit_code"
+            },
+            {
+              "time": "265",
+              "value": "\u001b[38;5;130m     99 \u001b[melse"
+            },
+            {
+              "time": "266",
+              "value": "\u001b[38;5;130m    100 \u001b[m    echo \"Successfully stopped accepting queries.\""
+            },
+            {
+              "time": "267",
+              "value": "\u001b[38;5;130m    101 \u001b[m    if [[ $KILL_IMMEDIATELY == 1 ]]; then"
+            },
+            {
+              "time": "268",
+              "value": "\u001b[38;5;130m    102 \u001b[m\u001b[8Cexit"
+            },
+            {
+              "time": "269",
+              "value": "\u001b[38;5;130m    103 \u001b[m    fi"
+            },
+            {
+              "time": "270",
+              "value": "\u001b[38;5;130m    104 \u001b[mfi"
+            },
+            {
+              "time": "271",
+              "value": "\u001b[38;5;130m    105 "
+            },
+            {
+              "time": "272",
+              "value": "    106 \u001b[mif [[ $GRACE_PERIOD == -1 ]]; then"
+            },
+            {
+              "time": "273",
+              "value": "\u001b[38;5;130m    107 \u001b[m    set_number_grace_seconds"
+            },
+            {
+              "time": "274",
+              "value": "\u001b[38;5;130m    108 \u001b[mfi"
+            },
+            {
+              "time": "275",
+              "value": "\u001b[38;5;130m    109 "
+            },
+            {
+              "time": "276",
+              "value": "    110 \u001b[mwait_for_connections"
+            },
+            {
+              "time": "277",
+              "value": "\u001b[38;5;130m    111 \u001b[mif [[ $DB_CONNECTIONS_NUMBER != 0 ]]; then"
+            },
+            {
+              "time": "278",
+              "value": "\u001b[38;5;130m    112 \u001b[m    get_number_db_connections"
+            },
+            {
+              "time": "279",
+              "value": "\u001b[38;5;130m    113 \u001b[m    >&2 echo \"ERROR: There are still $DB_CONNECTIONS_NUMBER opened DB connections.\""
+            },
+            {
+              "time": "280",
+              "value": "\u001b[38;5;130m    114 \u001b[m    exit 3"
+            },
+            {
+              "time": "281",
+              "value": "\u001b[38;5;130m    115 \u001b[mfi\b\b\u001b[?25h\u001b[?25l"
+            },
+            {
+              "time": "282",
+              "value": "Type  :qa!  and press <Enter> to abandon all changes and exit Vim\u0007\u001b[58;9H\u001b[?25h\u0007\u001b[?25l\u001b[59;1H\u001b[K\u001b[59;1H:\u001b[?2004h\u001b[?25hqa!\r\u001b[?25l\u001b[?2004l\u001b[59;1H\u001b[K\u001b[59;1H\u001b[?2004l\u001b[?1l\u001b>\u001b[?25h\u001b[?1049l\u001b[23;0;0t,\u001bkroot@staging-host:~\u001b\\"
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": "logs-endpoint.events.process",
+    "id": "8",
+    "source": {
+      "@timestamp": "2020-12-16T15:16:36.570Z",
+      "message": "hello world security",
+      "event": {
+        "action": "io"
+      },
+      "process": {
+        "entity_id": "1",
+        "name": "bash",
+        "executable": "/bin/bash",
+        "entry_leader": {
+          "entity_id": "1"
+        },
+        "io": {
+          "data": [
+            {
+              "time": "283",
+              "value": "\u001bkroot@staging-host:~\u001b\\\b\b\b\b\u001b[1P\b\b\b\b\u001b[1P\b\b\b\b\u001b[1P\b\b\b\b\b\b\b\b\b"
+            },
+            {
+              "time": "284",
+              "value": "\u001bkroot@staging-host:~\u001b\\\b\u001b[K\b\u001b[K\b\u001b[K"
+            },
+            {
+              "time": "285",
+              "value": ","
+            },
+            {
+              "time": "286",
+              "value": "22/05/26 09:24:09 rack-na/cl_md (md), Cluster ********"
+            },
+            {
+              "time": "287",
+              "value": "[root@staging-host:~] vi -R /usr/local/bin/galera_traffic_start.sh\u0007"
+            },
+            {
+              "time": "288",
+              "value": "22/05/26 09:25:32 rack-na/cl_md (md), Cluster ********"
+            },
+            {
+              "time": "289",
+              "value": "[root@staging-host:~] vi -R /usr/local/bin/galera_traffic_start.sh.sh.sh.sho.shp.sh"
+            },
+            {
+              "time": "290",
+              "value": "22/05/26 09:30:08 rack-na/cl_md (md), Cluster ********"
+            },
+            {
+              "time": "291",
+              "value": "[root@staging-host:~] exi\u0007\u0007\u0007exitlogout"
+            },
+            {
+              "time": "292",
+              "value": ",\u001bec2-user@staging-host:~\u001b\\"
+            },
+            {
+              "time": "293",
+              "value": "\u001bec2-user@staging-host:~\u001b\\"
+            },
+            {
+              "time": "294",
+              "value": ","
+            },
+            {
+              "time": "295",
+              "value": "22/05/26 09:24:01 rack-na/cl_md (md), Cluster ********"
+            },
+            {
+              "time": "296",
+              "value": "[ec2-user@staging-host:~] sudo -i"
+            },
+            {
+              "time": "297",
+              "value": "22/05/26 10:11:37 rack-na/cl_md (md), Cluster ********"
+            },
+            {
+              "time": "298",
+              "value": "[ec2-user@staging-host:~] exitlogout"
+            },
+            {
+              "time": "299",
+              "value": ""
+            }
+          ]
+        }
+      }
+    }
+  }
+}

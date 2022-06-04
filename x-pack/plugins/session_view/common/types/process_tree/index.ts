@@ -21,7 +21,7 @@ export const enum EventAction {
   fork = 'fork',
   exec = 'exec',
   end = 'end',
-  output = 'output',
+  io = 'io',
 }
 
 export interface User {
@@ -62,6 +62,20 @@ export interface Teletype {
   };
 }
 
+export interface IOLine {
+  time?: string;
+  value?: string;
+
+  // the following is only set client side for caching purposes
+  process_name?: string;
+  process_entity_id?: string;
+  process_entity_cursor?: string;
+}
+
+export interface IOFields {
+  data?: IOLine[];
+}
+
 export interface ProcessFields {
   entity_id?: string;
   args?: string[];
@@ -91,6 +105,7 @@ export interface ProcessSelf extends ProcessFields {
   session_leader?: ProcessFields;
   entry_leader?: ProcessFields;
   group_leader?: ProcessFields;
+  io?: IOFields;
 }
 
 export interface ProcessEventHost {
