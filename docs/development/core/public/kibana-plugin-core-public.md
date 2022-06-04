@@ -46,7 +46,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeHelpExtensionMenuDiscussLink](./kibana-plugin-core-public.chromehelpextensionmenudiscusslink.md) |  |
 |  [ChromeHelpExtensionMenuDocumentationLink](./kibana-plugin-core-public.chromehelpextensionmenudocumentationlink.md) |  |
 |  [ChromeHelpExtensionMenuGitHubLink](./kibana-plugin-core-public.chromehelpextensionmenugithublink.md) |  |
-|  [ChromeHelpMenuActions](./kibana-plugin-core-public.chromehelpmenuactions.md) | List of actions in order to manipulate with the help menu from the help extensions content components. |
+|  [ChromeHelpMenuActions](./kibana-plugin-core-public.chromehelpmenuactions.md) |  |
 |  [ChromeNavControl](./kibana-plugin-core-public.chromenavcontrol.md) |  |
 |  [ChromeNavControls](./kibana-plugin-core-public.chromenavcontrols.md) | [APIs](./kibana-plugin-core-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
 |  [ChromeNavLink](./kibana-plugin-core-public.chromenavlink.md) |  |
