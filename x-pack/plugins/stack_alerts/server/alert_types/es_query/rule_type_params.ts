@@ -16,19 +16,19 @@ import { getComparatorSchemaType } from '../lib/comparator';
 
 export const ES_QUERY_MAX_HITS_PER_EXECUTION = 10000;
 
-// alert type parameters
-export type EsQueryAlertParams = TypeOf<typeof EsQueryAlertParamsSchema>;
-export interface EsQueryAlertState extends RuleTypeState {
+// rule type parameters
+export type EsQueryRuleParams = TypeOf<typeof EsQueryRuleParamsSchema>;
+export interface EsQueryRuleState extends RuleTypeState {
   latestTimestamp: string | undefined;
 }
 
-export type EsQueryAlertParamsExtractedParams = Omit<EsQueryAlertParams, 'searchConfiguration'> & {
+export type EsQueryRuleParamsExtractedParams = Omit<EsQueryRuleParams, 'searchConfiguration'> & {
   searchConfiguration: SerializedSearchSourceFields & {
     indexRefName: string;
   };
 };
 
-const EsQueryAlertParamsSchemaProperties = {
+const EsQueryRuleParamsSchemaProperties = {
   size: schema.number({ min: 0, max: ES_QUERY_MAX_HITS_PER_EXECUTION }),
   timeWindowSize: schema.number({ min: 1 }),
   timeWindowUnit: schema.string({ validate: validateTimeWindowUnits }),
@@ -37,14 +37,14 @@ const EsQueryAlertParamsSchemaProperties = {
   searchType: schema.oneOf([schema.literal('searchSource'), schema.literal('esQuery')], {
     defaultValue: 'esQuery',
   }),
-  // searchSource alert param only
+  // searchSource rule param only
   searchConfiguration: schema.conditional(
     schema.siblingRef('searchType'),
     schema.literal('searchSource'),
     schema.object({}, { unknowns: 'allow' }),
     schema.never()
   ),
-  // esQuery alert params only
+  // esQuery rule params only
   esQuery: schema.conditional(
     schema.siblingRef('searchType'),
     schema.literal('esQuery'),
@@ -65,7 +65,7 @@ const EsQueryAlertParamsSchemaProperties = {
   ),
 };
 
-export const EsQueryAlertParamsSchema = schema.object(EsQueryAlertParamsSchemaProperties, {
+export const EsQueryRuleParamsSchema = schema.object(EsQueryRuleParamsSchemaProperties, {
   validate: validateParams,
 });
 
@@ -73,7 +73,7 @@ const betweenComparators = new Set(['between', 'notBetween']);
 
 // using direct type not allowed, circular reference, so body is typed to any
 function validateParams(anyParams: unknown): string | undefined {
-  const { esQuery, thresholdComparator, threshold, searchType } = anyParams as EsQueryAlertParams;
+  const { esQuery, thresholdComparator, threshold, searchType } = anyParams as EsQueryRuleParams;
 
   if (betweenComparators.has(thresholdComparator) && threshold.length === 1) {
     return i18n.translate('xpack.stackAlerts.esQuery.invalidThreshold2ErrorMessage', {
