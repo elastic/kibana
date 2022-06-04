@@ -14,10 +14,41 @@ export const INTEGRATIONS_INSTALLED = i18n.translate(
   }
 );
 
+export const INTEGRATIONS_INSTALLED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.relatedIntegrations.installedTooltip',
+  {
+    defaultMessage:
+      'Integration is installed. Configure an integration policy and ensure Elastic Agents are assigned this policy to ingest compatible events.',
+  }
+);
+
 export const INTEGRATIONS_UNINSTALLED = i18n.translate(
   'xpack.securitySolution.detectionEngine.relatedIntegrations.uninstalledTitle',
   {
     defaultMessage: 'Uninstalled',
+  }
+);
+
+export const INTEGRATIONS_UNINSTALLED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.relatedIntegrations.uninstalledTooltip',
+  {
+    defaultMessage:
+      'Integration is uninstalled. Follow the integration link to install and configure the integration.',
+  }
+);
+
+export const INTEGRATIONS_ENABLED = i18n.translate(
+  'xpack.securitySolution.detectionEngine.relatedIntegrations.enabledTitle',
+  {
+    defaultMessage: 'Enabled',
+  }
+);
+
+export const INTEGRATIONS_ENABLED_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.detectionEngine.relatedIntegrations.enabledTooltip',
+  {
+    defaultMessage:
+      'An integration policy with the required configuration exists. Ensure Elastic Agents are assigned this policy to ingest compatible events.',
   }
 );
 

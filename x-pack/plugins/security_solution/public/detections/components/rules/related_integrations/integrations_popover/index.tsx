@@ -60,7 +60,6 @@ const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps
     allInstalledIntegrations
   );
 
-  // TODO: Add loader to installed integrations value
   const totalRelatedIntegrationsInstalled = integrationDetails.filter((i) => i.is_enabled).length;
   const badgeTitle =
     allInstalledIntegrations != null

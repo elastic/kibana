@@ -19,40 +19,25 @@ import {
 /**
  * Returns an `EuiLink` that will link to a given package/integration/version page within fleet
  *
- * @param integration either RelatedIntegration or InstalledIntegration
+ * @param integration IntegrationDetails describing a package/integrations installed state
  * @param basePath kbn basepath for composing the fleet URL
  */
-export const getIntegrationLink = (
-  integration: RelatedIntegration | InstalledIntegration,
-  basePath: string
-) => {
-  let packageName: string;
-  let integrationName: string | undefined;
-  let integrationTitle: string;
-  let version: string | null;
-
-  // InstalledIntegration
-  if ('package_name' in integration) {
-    packageName = integration.package_name;
-    integrationName = integration.integration_name;
-    integrationTitle = integration.integration_title ?? integration.package_title;
-    version = integration.package_version;
-  } else {
-    // RelatedIntegration
-    packageName = integration.package;
-    integrationName = integration.integration;
-    integrationTitle = `${capitalize(integration.package)} ${capitalize(integration.integration)}`;
-    version = semver.valid(semver.coerce(integration.version));
-  }
+export const getIntegrationLink = (integration: IntegrationDetails, basePath: string) => {
+  const packageName = integration.package_name;
+  const integrationName = integration.integration_name;
+  const integrationTitle = integration.integration_title ?? integration.package_title;
+  const version = integration.version_satisfied
+    ? integration.package_version
+    : integration.target_version;
 
   const integrationURL =
-    version != null
+    version !== ''
       ? `${basePath}/app/integrations/detail/${packageName}-${version}/overview${
           integrationName ? `?integration=${integrationName}` : ''
         }`
       : `${basePath}/app/integrations/detail/${packageName}`;
   return (
-    <EuiLink href={integrationURL} target="_blank">
+    <EuiLink href={integrationURL} target="_blank" data-test-subj={'integrationLink'}>
       {integrationTitle}
     </EuiLink>
   );
@@ -61,6 +46,7 @@ export const getIntegrationLink = (
 export interface IntegrationDetails extends InstalledIntegration {
   target_version: string;
   version_satisfied: boolean;
+  is_installed: boolean;
 }
 
 /**
@@ -81,6 +67,7 @@ export const getInstalledRelatedIntegrations = (
       (installed) =>
         installed.package_name === i.package && installed?.integration_name === i?.integration
     );
+
     if (match != null) {
       // Version check e.g. fleet match `1.2.3` satisfies rule dependency `~1.2.1`
       const versionSatisfied = semver.satisfies(match.package_version, i.version);
@@ -88,16 +75,23 @@ export const getInstalledRelatedIntegrations = (
         ...match,
         target_version: i.version,
         version_satisfied: versionSatisfied,
+        is_installed: true,
       });
     } else {
+      const packageVersion = semver.valid(semver.coerce(i.version)) ?? '';
+      // TODO: Add `title` to RelatedIntegration (or fetch from Fleet API) so we can accurately display the integration pretty name
+      const integrationTitle =
+        i.integration != null ? `${capitalize(i.package)} ${capitalize(i.integration)}` : undefined;
       integrationDetails.push({
         package_name: i.package,
-        // TODO: Add `title` to RelatedIntegration so we can accurately display the integration pretty name
         package_title: capitalize(i.package),
-        package_version: i.version,
-        target_version: i.version,
+        package_version: packageVersion,
+        integration_name: i.integration,
+        integration_title: integrationTitle,
+        target_version: packageVersion,
         version_satisfied: false,
         is_enabled: false,
+        is_installed: false,
       });
     }
   });
