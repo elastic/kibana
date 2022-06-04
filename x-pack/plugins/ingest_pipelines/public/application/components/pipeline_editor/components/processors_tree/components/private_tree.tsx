@@ -77,7 +77,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   const rowVirtualizer = useWindowVirtualizer({
     count: processors.length,
     debug: true,
-    overscan: 0,
+    overscan: 5,
     enableSmoothScroll: false,
     paddingStart: parentRef.current?.offsetTop,
     estimateSize,
@@ -146,6 +146,42 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
     [level, movingProcessor, onAction, processors.length, selector]
   );
 
+  const renderListRow = useCallback(
+    (virtualRow: {
+      index: number;
+      measureElement: React.LegacyRef<HTMLDivElement> | undefined;
+      start: any;
+    }) => {
+      const idx = virtualRow.index;
+      const processor = processors[idx];
+      const above = processors[idx - 1];
+      const below = processors[idx + 1];
+      const info: ProcessorInfo = {
+        id: processor.id,
+        selector: selectors[idx],
+        aboveId: above?.id,
+        belowId: below?.id,
+      };
+
+      return (
+        <div
+          key={info.id}
+          ref={virtualRow.measureElement}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: '100%',
+            transform: `translateY(${virtualRow.start}px)`,
+          }}
+        >
+          {renderRow({ processor, info, idx })}
+        </div>
+      );
+    },
+    [processors, renderRow, selectors]
+  );
+
   const renderVirtualList = useCallback(
     () => (
       <>
@@ -165,39 +201,12 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
               marginTop: `-${parentRef.current?.offsetTop}px`,
             }}
           >
-            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
-              const idx = virtualRow.index;
-              const processor = processors[idx];
-              const above = processors[idx - 1];
-              const below = processors[idx + 1];
-              const info: ProcessorInfo = {
-                id: processor.id,
-                selector: selectors[idx],
-                aboveId: above?.id,
-                belowId: below?.id,
-              };
-
-              return (
-                <div
-                  key={virtualRow.index}
-                  ref={virtualRow.measureElement}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    transform: `translateY(${virtualRow.start}px)`,
-                  }}
-                >
-                  {renderRow({ processor, info, idx })}
-                </div>
-              );
-            })}
+            {rowVirtualizer.getVirtualItems().map(renderListRow)}
           </div>
         </div>
       </>
     ),
-    [processors, renderRow, rowVirtualizer, selectors]
+    [renderListRow, rowVirtualizer]
   );
 
   if (level === 1) {
