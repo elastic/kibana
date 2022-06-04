@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, MutableRefObject, useEffect, useMemo } from 'react';
+import React, { FunctionComponent, useRef, useCallback, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { useVirtual } from 'react-virtual';
-import { VariableSizeList as List } from 'react-window';
-import AutoSizer from 'react-virtualized-auto-sizer';
+import { useWindowVirtualizer } from '@tanstack/react-virtual';
 
 import { DropSpecialLocations } from '../../../constants';
 import { ProcessorInternal, ProcessorSelector } from '../../../types';
@@ -49,7 +47,7 @@ const isDropZoneBelowDisabled = (processor: ProcessorInfo, selectedProcessor: Pr
  * Recursively rendering tree component for ingest pipeline processors.
  *
  * Note: this tree should start at level 1. It is the only level at
- * which we render the optimised virtual component. This gives a
+ * which we render the optimized virtual component. This gives a
  * massive performance boost to this component which can get very tall.
  *
  * The first level list also contains the outside click listener which
@@ -63,200 +61,147 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   onAction,
   level,
 }) => {
-  const parentRef = React.useRef();
+  const parentRef = useRef<HTMLDivElement>(null);
 
-  const rowVirtualizer = useVirtual({
-    size: processors.length,
-    parentRef,
-    estimateSize: React.useCallback(
-      (index) => {
-        const processor = processors[index];
-        return calculateItemHeight({
-          processor,
-          isFirstInArray: index === 0,
-        });
-      },
-      [processors]
-    ),
+  const estimateSize = useCallback(
+    (index) => {
+      const processor = processors[index];
+      return calculateItemHeight({
+        processor,
+        isFirstInArray: index === 0,
+      });
+    },
+    [processors]
+  );
+
+  const rowVirtualizer = useWindowVirtualizer({
+    count: processors.length,
+    debug: true,
+    overscan: 0,
+    enableSmoothScroll: false,
+    paddingStart: parentRef.current?.offsetTop,
+    estimateSize,
   });
 
-  const selectors: string[][] = useMemo(() => {
+  const selectors = useMemo(() => {
     return processors.map((_, idx) => selector.concat(String(idx)));
   }, [processors, selector]);
 
-  const renderRow = ({
-    idx,
-    info,
-    processor,
-  }: {
-    idx: number;
-    info: ProcessorInfo;
-    processor: ProcessorInternal;
-  }) => {
-    const stringifiedSelector = selectorToDataTestSubject(info.selector);
-    return (
-      <>
-        {idx === 0 ? (
+  const renderRow = useCallback(
+    ({
+      idx,
+      info,
+      processor,
+    }: {
+      idx: number;
+      info: ProcessorInfo;
+      processor: ProcessorInternal;
+    }) => {
+      const stringifiedSelector = selectorToDataTestSubject(info.selector);
+      return (
+        <>
+          {idx === 0 ? (
+            <DropZoneButton
+              data-test-subj={`dropButtonAbove-${stringifiedSelector}`}
+              onClick={(event) => {
+                event.preventDefault();
+                onAction({
+                  type: 'move',
+                  payload: {
+                    destination: selector.concat(DropSpecialLocations.top),
+                    source: movingProcessor!.selector,
+                  },
+                });
+              }}
+              isVisible={Boolean(movingProcessor)}
+              isDisabled={!movingProcessor || isDropZoneAboveDisabled(info, movingProcessor)}
+            />
+          ) : undefined}
+          <TreeNode
+            level={level}
+            processor={processor}
+            processorInfo={info}
+            onAction={onAction}
+            movingProcessor={movingProcessor}
+          />
           <DropZoneButton
-            data-test-subj={`dropButtonAbove-${stringifiedSelector}`}
+            compressed={level === 1 && idx + 1 === processors.length}
+            data-test-subj={`dropButtonBelow-${stringifiedSelector}`}
+            isVisible={Boolean(movingProcessor)}
+            isDisabled={!movingProcessor || isDropZoneBelowDisabled(info, movingProcessor)}
             onClick={(event) => {
               event.preventDefault();
               onAction({
                 type: 'move',
                 payload: {
-                  destination: selector.concat(DropSpecialLocations.top),
+                  destination: selector.concat(String(idx + 1)),
                   source: movingProcessor!.selector,
                 },
               });
             }}
-            isVisible={Boolean(movingProcessor)}
-            isDisabled={!movingProcessor || isDropZoneAboveDisabled(info, movingProcessor)}
           />
-        ) : undefined}
-        <TreeNode
-          level={level}
-          processor={processor}
-          processorInfo={info}
-          onAction={onAction}
-          movingProcessor={movingProcessor}
-        />
-        <DropZoneButton
-          compressed={level === 1 && idx + 1 === processors.length}
-          data-test-subj={`dropButtonBelow-${stringifiedSelector}`}
-          isVisible={Boolean(movingProcessor)}
-          isDisabled={!movingProcessor || isDropZoneBelowDisabled(info, movingProcessor)}
-          onClick={(event) => {
-            event.preventDefault();
-            onAction({
-              type: 'move',
-              payload: {
-                destination: selector.concat(String(idx + 1)),
-                source: movingProcessor!.selector,
-              },
-            });
-          }}
-        />
-      </>
-    );
-  };
+        </>
+      );
+    },
+    [level, movingProcessor, onAction, processors.length, selector]
+  );
 
-  console.error('assds');
-
-  const renderVirtualList = () => {
-    return (
-      <div
-        ref={parentRef}
-        className="List"
-        style={{
-          height: `auto`,
-          width: `100%`,
-          overflow: 'auto',
-        }}
-      >
+  const renderVirtualList = useCallback(
+    () => (
+      <>
         <div
+          ref={parentRef}
+          className="List"
           style={{
-            height: rowVirtualizer.totalSize,
-            width: '100%',
-            position: 'relative',
+            width: `100%`,
+            overflow: 'auto',
           }}
         >
-          {rowVirtualizer.virtualItems.map((virtualRow) => {
-            const idx = virtualRow.index;
-            const processor = processors[idx];
-            const above = processors[idx - 1];
-            const below = processors[idx + 1];
-            const info: ProcessorInfo = {
-              id: processor.id,
-              selector: selectors[idx],
-              aboveId: above?.id,
-              belowId: below?.id,
-            };
+          <div
+            style={{
+              height: rowVirtualizer.getTotalSize(),
+              width: '100%',
+              position: 'relative',
+              marginTop: `-${parentRef.current?.offsetTop}px`,
+            }}
+          >
+            {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+              const idx = virtualRow.index;
+              const processor = processors[idx];
+              const above = processors[idx - 1];
+              const below = processors[idx + 1];
+              const info: ProcessorInfo = {
+                id: processor.id,
+                selector: selectors[idx],
+                aboveId: above?.id,
+                belowId: below?.id,
+              };
 
-            return (
-              <div
-                key={virtualRow.index}
-                ref={virtualRow.measureRef}
-                className={virtualRow.index % 2 ? 'ListItemOdd' : 'ListItemEven'}
-                style={{
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  width: '100%',
-                  transform: `translateY(${virtualRow.start}px)`,
-                }}
-              >
-                <div style={{ height: processors[virtualRow.index] }}>
+              return (
+                <div
+                  key={virtualRow.index}
+                  ref={virtualRow.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
                   {renderRow({ processor, info, idx })}
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
-    );
-  };
-
-  // A list optimized to handle very many items.
-  // const renderVirtualList = () => {
-  //   return (
-  //     // <WindowScroller ref={windowScrollerRef} scrollElement={window}>
-  //     //   {({ height, registerChild, isScrolling, onChildScroll, scrollTop }: any) => {
-  //     //     return (
-  //     // <AutoSizer disableHeight>
-  //     //   {({ width }) => {
-  //     // return (
-  //     <div
-  //       style={{ width: '100%' }}
-  //       // ref={registerChild}
-  //     >
-  //       <List
-  //         ref={listRef}
-  //         // autoHeight
-  //         // height={height}
-  //         // width={width}
-  //         overScanRowCount={5}
-  //         // isScrolling={isScrolling}
-  //         // onChildScroll={onChildScroll}
-  //         // scrollTop={scrollTop}
-  //         rowCount={processors.length}
-  //         rowHeight={({ index }) => {
-  //           const processor = processors[index];
-  //           return calculateItemHeight({
-  //             processor,
-  //             isFirstInArray: index === 0,
-  //           });
-  //         }}
-  //         rowRenderer={({ index: idx, style }) => {
-  //           const processor = processors[idx];
-  //           const above = processors[idx - 1];
-  //           const below = processors[idx + 1];
-  //           const info: ProcessorInfo = {
-  //             id: processor.id,
-  //             selector: selectors[idx],
-  //             aboveId: above?.id,
-  //             belowId: below?.id,
-  //           };
-
-  //           return (
-  //             <div style={style} key={processor.id}>
-  //               {renderRow({ processor, info, idx })}
-  //             </div>
-  //           );
-  //         }}
-  //         processors={processors}
-  //       />
-  //     </div>
-  //     //     );
-  //     //   }}
-  //     // </AutoSizer>
-  //     //     );
-  //     //   }}
-  //     // </WindowScroller>
-  //   );
-  // };
+      </>
+    ),
+    [processors, renderRow, rowVirtualizer, selectors]
+  );
 
   if (level === 1) {
-    // Only render the optimised list for the top level list because that is the list
+    // Only render the optimized list for the top level list because that is the list
     // that will almost certainly be the tallest
     return renderVirtualList();
   }

@@ -5284,6 +5284,13 @@
   dependencies:
     defer-to-connect "^2.0.0"
 
+"@tanstack/react-virtual@^3.0.0-beta.1":
+  version "3.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/react-virtual/-/react-virtual-3.0.0-beta.1.tgz#2df8025b8f1c26e50ce28995e0d690020ab0290b"
+  integrity sha512-O2ZTfQvEed2lhjKgDHkHRrgvtuQM7alq5YiJrgU2SkwSckaqmoypw4JMfn0JQ2+XMkgWmBkiCLMYAinzDl3WAA==
+  dependencies:
+    "@reach/observe-rect" "^1.1.0"
+
 "@testim/chrome-version@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@testim/chrome-version/-/chrome-version-1.1.2.tgz#092005c5b77bd3bb6576a4677110a11485e11864"
@@ -24247,13 +24254,6 @@ react-use@^15.3.8:
     throttle-debounce "^2.1.0"
     ts-easing "^0.2.0"
     tslib "^2.0.0"
-
-react-virtual@^2.10.4:
-  version "2.10.4"
-  resolved "https://registry.yarnpkg.com/react-virtual/-/react-virtual-2.10.4.tgz#08712f0acd79d7d6f7c4726f05651a13b24d8704"
-  integrity sha512-Ir6+oPQZTVHfa6+JL9M7cvMILstFZH/H3jqeYeKI4MSUX+rIruVwFC6nGVXw9wqAw8L0Kg2KvfXxI85OvYQdpQ==
-  dependencies:
-    "@reach/observe-rect" "^1.1.0"
 
 react-virtualized-auto-sizer@^1.0.6:
   version "1.0.6"
