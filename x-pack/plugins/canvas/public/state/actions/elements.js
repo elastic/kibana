@@ -7,7 +7,7 @@
 
 import { createAction } from 'redux-actions';
 import immutable from 'object-path-immutable';
-import { get, pick, cloneDeep, without, last } from 'lodash';
+import { get, pick, cloneDeep, without, last, debounce } from 'lodash';
 import { toExpression, safeElementFromExpression } from '@kbn/interpreter';
 import { createThunk } from '../../lib/create_thunk';
 import {
@@ -69,50 +69,51 @@ export const setMultiplePositions = createAction('setMultiplePosition', (reposit
 export const flushContext = createAction('flushContext');
 export const flushContextAfterIndex = createAction('flushContextAfterIndex');
 
-export const fetchContext = createThunk(
-  'fetchContext',
-  ({ dispatch, getState }, index, element, fullRefresh = false, path) => {
-    const pathToTarget = [...path.split('.'), 'chain'];
-    const chain = get(element, pathToTarget);
-    const invalidIndex = chain ? index >= chain.length : true;
+const fetchContextFn = ({ dispatch, getState }, index, element, fullRefresh = false, path) => {
+  const pathToTarget = [...path.split('.'), 'chain'];
+  const chain = get(element, pathToTarget);
+  const invalidIndex = chain ? index >= chain.length : true;
 
-    if (!element || !chain || invalidIndex) {
-      throw new Error(strings.getInvalidArgIndexErrorMessage(index));
-    }
-
-    // cache context as the previous index
-    const contextIndex = index - 1;
-    const contextPath = [element.id, 'expressionContext', path, contextIndex];
-
-    // set context state to loading
-    dispatch(args.setLoading({ path: contextPath }));
-
-    // function to walk back up to find the closest context available
-    const getContext = () => getSiblingContext(getState(), element.id, contextIndex - 1, [path]);
-    const { index: prevContextIndex, context: prevContextValue } =
-      fullRefresh !== true ? getContext() : {};
-
-    // modify the ast chain passed to the interpreter
-    const astChain = chain.filter((exp, i) => {
-      if (prevContextValue != null) {
-        return i > prevContextIndex && i < index;
-      }
-      return i < index;
-    });
-
-    const variables = getWorkpadVariablesAsObject(getState());
-
-    const { expressions } = pluginServices.getServices();
-    const elementWithNewAst = set(element, pathToTarget, astChain);
-
-    // get context data from a partial AST
-    return expressions
-      .interpretAst(elementWithNewAst.ast, variables, prevContextValue)
-      .then((value) => {
-        dispatch(args.setValue({ path: contextPath, value }));
-      });
+  if (!element || !chain || invalidIndex) {
+    throw new Error(strings.getInvalidArgIndexErrorMessage(index));
   }
-);
+
+  // cache context as the previous index
+  const contextIndex = index - 1;
+  const contextPath = [element.id, 'expressionContext', path, contextIndex];
+
+  // set context state to loading
+  dispatch(args.setLoading({ path: contextPath }));
+
+  // function to walk back up to find the closest context available
+  const getContext = () => getSiblingContext(getState(), element.id, contextIndex - 1, [path]);
+  const { index: prevContextIndex, context: prevContextValue } =
+    fullRefresh !== true ? getContext() : {};
+
+  // modify the ast chain passed to the interpreter
+  const astChain = chain.filter((exp, i) => {
+    if (prevContextValue != null) {
+      return i > prevContextIndex && i < index;
+    }
+    return i < index;
+  });
+
+  const variables = getWorkpadVariablesAsObject(getState());
+
+  const { expressions } = pluginServices.getServices();
+  const elementWithNewAst = set(element, pathToTarget, astChain);
+
+  // get context data from a partial AST
+  return expressions
+    .interpretAst(elementWithNewAst.ast, variables, prevContextValue)
+    .then((value) => {
+      dispatch(args.setValue({ path: contextPath, value }));
+    });
+};
+
+const throttledFetchContextFn = debounce(fetchContextFn, 100);
+
+export const fetchContext = createThunk('fetchContext', throttledFetchContextFn);
 
 const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, context) => {
   const argumentPath = [element.id, 'expressionRenderable'];
@@ -130,6 +131,7 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
 
   const variables = getWorkpadVariablesAsObject(getState());
   const { expressions, notify } = pluginServices.getServices();
+
   return expressions
     .runInterpreter(ast, context, variables, { castToRender: true })
     .then((renderable) => {
@@ -141,9 +143,11 @@ const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, cont
     });
 };
 
+const fetchRenderableWithContextFnDebounced = debounce(fetchRenderableWithContextFn, 100);
+
 export const fetchRenderableWithContext = createThunk(
   'fetchRenderableWithContext',
-  fetchRenderableWithContextFn
+  fetchRenderableWithContextFnDebounced
 );
 
 export const fetchRenderable = createThunk('fetchRenderable', ({ dispatch }, element) => {
@@ -360,20 +364,20 @@ export const setAstAtIndex = createThunk(
  * @param {any} args.pageId - the workpad's page, where element is located.
  */
 export const setArgument = createThunk('setArgument', ({ dispatch, getState }, args) => {
-  const { argName, value, valueIndex, element, pageId, path } = args;
+  const { argName, value, valueIndex, elementId, pageId, path } = args;
   let selector = `${path}.${argName}`;
   if (valueIndex != null) {
     selector += '.' + valueIndex;
   }
-  const el = getElementById(getState(), element.id);
+  const element = getElementById(getState(), elementId);
 
-  const newElement = set(el, selector, value);
+  const newElement = set(element, selector, value);
   const pathTerms = path.split('.');
   const argumentChainPath = pathTerms.slice(0, 3);
   const argumnentChainIndex = last(argumentChainPath);
   const newAst = get(newElement, argumentChainPath);
 
-  dispatch(setAstAtIndex(argumnentChainIndex, newAst, el, pageId));
+  dispatch(setAstAtIndex(argumnentChainIndex, newAst, element, pageId));
 });
 
 /**
@@ -385,14 +389,14 @@ export const setArgument = createThunk('setArgument', ({ dispatch, getState }, a
  * @param {any} args.pageId - the workpad's page, where element is located.
  */
 export const addArgumentValue = createThunk('addArgumentValue', ({ dispatch, getState }, args) => {
-  const { argName, value, element, path } = args;
-  const el = getElementById(getState(), element.id);
-  const values = get(el, [...path.split('.'), argName], []);
+  const { argName, value, elementId, path } = args;
+  const element = getElementById(getState(), elementId);
+  const values = get(element, [...path.split('.'), argName], []);
   const newValue = values.concat(value);
   dispatch(
     setArgument({
       ...args,
-      element: el,
+      elementId,
       value: newValue,
     })
   );

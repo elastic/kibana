@@ -10,6 +10,8 @@ import PropTypes from 'prop-types';
 import { EuiSelect, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { sortBy } from 'lodash';
 import { getType } from '@kbn/interpreter';
+import usePrevious from 'react-use/lib/usePrevious';
+import deepEqual from 'react-fast-compare';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
 import { ArgumentStrings } from '../../../../i18n';
 import { SimpleMathFunction } from './simple_math_function';
@@ -46,7 +48,7 @@ const DatacolumnArgInput = ({
   typeInstance,
 }) => {
   const [mathValue, setMathValue] = useState(getMathValue(argValue, columns));
-
+  const prevMathValue = usePrevious(mathValue);
   const allowedTypes = typeInstance.options.allowedTypes || false;
   const onlyShowMathFunctions = typeInstance.options.onlyMath || false;
 
@@ -81,7 +83,12 @@ const DatacolumnArgInput = ({
   }, [argValue, columns]);
 
   useEffect(() => {
-    if (!mathValue.error && mathValue.column !== '' && !mathValue.isValidColumn) {
+    if (
+      !mathValue.error &&
+      mathValue.column !== '' &&
+      !mathValue.isValidColumn &&
+      !deepEqual(mathValue, prevMathValue)
+    ) {
       updateFunctionValue(mathValue.fn, columns[0].name);
     }
   }, [
@@ -91,6 +98,8 @@ const DatacolumnArgInput = ({
     updateFunctionValue,
     mathValue.error,
     mathValue.isValidColumn,
+    prevMathValue,
+    mathValue,
   ]);
 
   const onChangeFn = useCallback(
