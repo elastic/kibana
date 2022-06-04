@@ -7,7 +7,7 @@
 
 import React, { FunctionComponent, useRef, useCallback, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
-import { useWindowVirtualizer } from '@tanstack/react-virtual';
+import { useWindowVirtualizer, VirtualItem } from '@tanstack/react-virtual';
 
 import { DropSpecialLocations } from '../../../constants';
 import { ProcessorInternal, ProcessorSelector } from '../../../types';
@@ -147,11 +147,7 @@ export const PrivateTree: FunctionComponent<PrivateProps> = ({
   );
 
   const renderListRow = useCallback(
-    (virtualRow: {
-      index: number;
-      measureElement: React.LegacyRef<HTMLDivElement> | undefined;
-      start: any;
-    }) => {
+    (virtualRow: VirtualItem<{}>) => {
       const idx = virtualRow.index;
       const processor = processors[idx];
       const above = processors[idx - 1];

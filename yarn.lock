@@ -5291,6 +5291,13 @@
   dependencies:
     "@reach/observe-rect" "^1.1.0"
 
+"@tanstack/virtual-core@^3.0.0-beta.1":
+  version "3.0.0-beta.1"
+  resolved "https://registry.yarnpkg.com/@tanstack/virtual-core/-/virtual-core-3.0.0-beta.1.tgz#bb78a419e1d7da33859210104f0dbe498fcdf648"
+  integrity sha512-UQO6df0hwCHhpBi2vlNRxO6du1AA4op4iFAFkXtzA3T9fbFqhKJp7yVet9w5W2lEBZpRBbN3rZXaJcj0JlwpGA==
+  dependencies:
+    "@reach/observe-rect" "^1.1.0"
+
 "@testim/chrome-version@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@testim/chrome-version/-/chrome-version-1.1.2.tgz#092005c5b77bd3bb6576a4677110a11485e11864"
