@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export type { CoreContext } from './core_context';
-export type { CoreService, ServiceConfigDescriptor } from './services';
-export { CriticalError } from './errors';
+export { coreDeprecationProvider } from './deprecation';
+export { ensureValidConfiguration } from './ensure_valid_configuration';

@@ -5,7 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
-export type { CoreContext } from './core_context';
-export type { CoreService, ServiceConfigDescriptor } from './services';
-export { CriticalError } from './errors';
+export class CriticalError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+    public processExitCode: number,
+    public cause?: Error
+  ) {
+    super(message);
+    Object.setPrototypeOf(this, CriticalError.prototype);
+  }
+}

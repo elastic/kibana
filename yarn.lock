@@ -3004,6 +3004,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-config-server-internal@link:bazel-bin/packages/core/config/config-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-config-server-mocks@link:bazel-bin/packages/core/config/config-server-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal":
   version "0.0.0"
   uid ""
@@ -6299,6 +6307,14 @@
   uid ""
 
 "@types/kbn__core-common-internal-base@link:bazel-bin/packages/core/common/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-config-server-internal@link:bazel-bin/packages/core/config/config-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-config-server-mocks@link:bazel-bin/packages/core/config/config-server-mocks/npm_module_types":
   version "0.0.0"
   uid ""
 
