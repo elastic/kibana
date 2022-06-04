@@ -8,23 +8,23 @@ import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup, Logger } from '@kbn/core/server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
-import { addMessages, EsQueryAlertActionContext } from './action_context';
+import { addMessages, EsQueryRuleActionContext } from './action_context';
 import { ComparatorFns, getHumanReadableComparator } from '../lib';
-import { ExecutorOptions, OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
+import { ExecutorOptions, OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
 import { fetchEsQuery } from './lib/fetch_es_query';
-import { EsQueryAlertParams } from './alert_type_params';
+import { EsQueryRuleParams } from './rule_type_params';
 import { fetchSearchSourceQuery } from './lib/fetch_search_source_query';
 import { Comparator } from '../../../common/comparator_types';
-import { isEsQueryAlert } from './util';
+import { isEsQueryRule } from './util';
 
 export async function executor(
   logger: Logger,
   core: CoreSetup,
-  options: ExecutorOptions<EsQueryAlertParams>
+  options: ExecutorOptions<EsQueryRuleParams>
 ) {
-  const esQueryAlert = isEsQueryAlert(options.params.searchType);
-  const { alertId, name, services, params, state } = options;
+  const esQueryRule = isEsQueryRule(options.params.searchType);
+  const { alertId: ruleId, name, services, params, state, spaceId } = options;
   const { alertFactory, scopedClusterClient, searchSourceClient } = services;
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
@@ -35,51 +35,49 @@ export async function executor(
   }
   let latestTimestamp: string | undefined = tryToParseAsDate(state.latestTimestamp);
 
-  // During each alert execution, we run the configured query, get a hit count
+  // During each rule execution, we run the configured query, get a hit count
   // (hits.total) and retrieve up to params.size hits. We
   // evaluate the threshold condition using the value of hits.total. If the threshold
   // condition is met, the hits are counted toward the query match and we update
-  // the alert state with the timestamp of the latest hit. In the next execution
-  // of the alert, the latestTimestamp will be used to gate the query in order to
+  // the rule state with the timestamp of the latest hit. In the next execution
+  // of the rule, the latestTimestamp will be used to gate the query in order to
   // avoid counting a document multiple times.
 
-  const { numMatches, searchResult, dateStart, dateEnd } = esQueryAlert
-    ? await fetchEsQuery(alertId, name, params as OnlyEsQueryAlertParams, latestTimestamp, {
+  const { numMatches, searchResult, dateStart, dateEnd } = esQueryRule
+    ? await fetchEsQuery(ruleId, name, params as OnlyEsQueryRuleParams, latestTimestamp, {
         scopedClusterClient,
         logger,
       })
-    : await fetchSearchSourceQuery(
-        alertId,
-        params as OnlySearchSourceAlertParams,
-        latestTimestamp,
-        { searchSourceClient, logger }
-      );
+    : await fetchSearchSourceQuery(ruleId, params as OnlySearchSourceRuleParams, latestTimestamp, {
+        searchSourceClient,
+        logger,
+      });
 
-  // apply the alert condition
+  // apply the rule condition
   const conditionMet = compareFn(numMatches, params.threshold);
 
+  const base = publicBaseUrl;
+  const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
+  const link = esQueryRule
+    ? `${base}${spacePrefix}/app/management/insightsAndAlerting/triggersActions/rule/${ruleId}`
+    : `${base}${spacePrefix}/app/discover#/viewAlert/${ruleId}?from=${dateStart}&to=${dateEnd}&checksum=${getChecksum(
+        params as OnlyEsQueryRuleParams
+      )}`;
+  const baseContext: Omit<EsQueryRuleActionContext, 'conditions'> = {
+    title: name,
+    date: currentTimestamp,
+    value: numMatches,
+    hits: searchResult.hits.hits,
+    link,
+  };
+
   if (conditionMet) {
-    const base = publicBaseUrl;
-    const link = esQueryAlert
-      ? `${base}/app/management/insightsAndAlerting/triggersActions/rule/${alertId}`
-      : `${base}/app/discover#/viewAlert/${alertId}?from=${dateStart}&to=${dateEnd}&checksum=${getChecksum(
-          params
-        )}`;
+    const baseActiveContext: EsQueryRuleActionContext = {
+      ...baseContext,
+      conditions: getContextConditionsDescription(params.thresholdComparator, params.threshold),
+    } as EsQueryRuleActionContext;
 
-    const conditions = getContextConditionsDescription(
-      params.thresholdComparator,
-      params.threshold
-    );
-    const baseContext: EsQueryAlertActionContext = {
-      title: name,
-      date: currentTimestamp,
-      value: numMatches,
-      conditions,
-      hits: searchResult.hits.hits,
-      link,
-    };
-
-    const actionContext = addMessages(options, baseContext, params);
+    const actionContext = addMessages(options, baseActiveContext, params);
     const alertInstance = alertFactory.create(ConditionMetAlertInstanceId);
     alertInstance
       // store the params we would need to recreate the query that led to this alert instance
@@ -93,6 +91,20 @@ export async function executor(
     if (firstValidTimefieldSort) {
       latestTimestamp = firstValidTimefieldSort;
     }
+  }
+
+  const { getRecoveredAlerts } = alertFactory.done();
+  for (const alert of getRecoveredAlerts()) {
+    const baseRecoveryContext: EsQueryRuleActionContext = {
+      ...baseContext,
+      conditions: getContextConditionsDescription(
+        params.thresholdComparator,
+        params.threshold,
+        true
+      ),
+    } as EsQueryRuleActionContext;
+    const recoveryContext = addMessages(options, baseRecoveryContext, params, true);
+    alert.setContext(recoveryContext);
   }
 
   return { latestTimestamp };
@@ -116,7 +128,7 @@ function getInvalidQueryError(query: string) {
   });
 }
 
-export function getSearchParams(queryParams: OnlyEsQueryAlertParams) {
+export function getSearchParams(queryParams: OnlyEsQueryRuleParams) {
   const date = Date.now();
   const { esQuery, timeWindowSize, timeWindowUnit } = queryParams;
 
@@ -163,7 +175,7 @@ export function tryToParseAsDate(sortValue?: string | number | null): undefined 
   }
 }
 
-export function getChecksum(params: EsQueryAlertParams) {
+export function getChecksum(params: OnlyEsQueryRuleParams) {
   return sha256.create().update(JSON.stringify(params));
 }
 
@@ -176,12 +188,17 @@ export function getInvalidComparatorError(comparator: string) {
   });
 }
 
-export function getContextConditionsDescription(comparator: Comparator, threshold: number[]) {
+export function getContextConditionsDescription(
+  comparator: Comparator,
+  threshold: number[],
+  isRecovered: boolean = false
+) {
   return i18n.translate('xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription', {
-    defaultMessage: 'Number of matching documents is {thresholdComparator} {threshold}',
+    defaultMessage: 'Number of matching documents is {negation}{thresholdComparator} {threshold}',
     values: {
       thresholdComparator: getHumanReadableComparator(comparator),
       threshold: threshold.join(' and '),
+      negation: isRecovered ? 'NOT ' : '',
     },
   });
 }

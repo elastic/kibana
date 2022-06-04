@@ -27940,8 +27940,6 @@
     "xpack.stackAlerts.esQuery.actionVariableContextThresholdLabel": "用作阈值的值数组；“between”和“notBetween”需要两个值，其他则需要一个值。",
     "xpack.stackAlerts.esQuery.actionVariableContextTitleLabel": "告警的标题。",
     "xpack.stackAlerts.esQuery.actionVariableContextValueLabel": "满足阈值条件的值。",
-    "xpack.stackAlerts.esQuery.alertTypeContextConditionsDescription": "匹配文档的数目{thresholdComparator} {threshold}",
-    "xpack.stackAlerts.esQuery.alertTypeContextSubjectTitle": "告警“{name}”已匹配查询",
     "xpack.stackAlerts.esQuery.alertTypeTitle": "Elasticsearch 查询",
     "xpack.stackAlerts.esQuery.invalidComparatorErrorMessage": "指定的 thresholdComparator 无效：{comparator}",
     "xpack.stackAlerts.esQuery.invalidEsQueryErrorMessage": "[esQuery]：必须是有效的 JSON",

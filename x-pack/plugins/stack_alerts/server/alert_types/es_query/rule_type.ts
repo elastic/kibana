@@ -11,29 +11,29 @@ import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { RuleType } from '../../types';
 import { ActionContext } from './action_context';
 import {
-  EsQueryAlertParams,
-  EsQueryAlertParamsExtractedParams,
-  EsQueryAlertParamsSchema,
-  EsQueryAlertState,
-} from './alert_type_params';
+  EsQueryRuleParams,
+  EsQueryRuleParamsExtractedParams,
+  EsQueryRuleParamsSchema,
+  EsQueryRuleState,
+} from './rule_type_params';
 import { STACK_ALERTS_FEATURE_ID } from '../../../common';
 import { ExecutorOptions } from './types';
 import { ActionGroupId, ES_QUERY_ID } from './constants';
 import { executor } from './executor';
-import { isEsQueryAlert } from './util';
+import { isEsQueryRule } from './util';
 
-export function getAlertType(
+export function getRuleType(
   logger: Logger,
   core: CoreSetup
 ): RuleType<
-  EsQueryAlertParams,
-  EsQueryAlertParamsExtractedParams,
-  EsQueryAlertState,
+  EsQueryRuleParams,
+  EsQueryRuleParamsExtractedParams,
+  EsQueryRuleState,
   {},
   ActionContext,
   typeof ActionGroupId
 > {
-  const alertTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
+  const ruleTypeName = i18n.translate('xpack.stackAlerts.esQuery.alertTypeTitle', {
     defaultMessage: 'Elasticsearch query',
   });
 
@@ -137,11 +137,11 @@ export function getAlertType(
 
   return {
     id: ES_QUERY_ID,
-    name: alertTypeName,
+    name: ruleTypeName,
     actionGroups: [{ id: ActionGroupId, name: actionGroupName }],
     defaultActionGroupId: ActionGroupId,
     validate: {
-      params: EsQueryAlertParamsSchema,
+      params: EsQueryRuleParamsSchema,
     },
     actionVariables: {
       context: [
@@ -164,15 +164,15 @@ export function getAlertType(
     },
     useSavedObjectReferences: {
       extractReferences: (params) => {
-        if (isEsQueryAlert(params.searchType)) {
-          return { params: params as EsQueryAlertParamsExtractedParams, references: [] };
+        if (isEsQueryRule(params.searchType)) {
+          return { params: params as EsQueryRuleParamsExtractedParams, references: [] };
         }
         const [searchConfiguration, references] = extractReferences(params.searchConfiguration);
-        const newParams = { ...params, searchConfiguration } as EsQueryAlertParamsExtractedParams;
+        const newParams = { ...params, searchConfiguration } as EsQueryRuleParamsExtractedParams;
         return { params: newParams, references };
       },
       injectReferences: (params, references) => {
-        if (isEsQueryAlert(params.searchType)) {
+        if (isEsQueryRule(params.searchType)) {
           return params;
         }
         return {
@@ -183,9 +183,10 @@ export function getAlertType(
     },
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    executor: async (options: ExecutorOptions<EsQueryAlertParams>) => {
+    executor: async (options: ExecutorOptions<EsQueryRuleParams>) => {
       return await executor(logger, core, options);
     },
     producer: STACK_ALERTS_FEATURE_ID,
+    doesSetRecoveryContext: true,
   };
 }
