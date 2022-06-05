@@ -177,15 +177,7 @@ export const useAuthentications = ({
       }
       return prevRequest;
     });
-  }, [
-    activePage,
-    endDate,
-    filterQuery,
-    indexNames,
-    stackByField,
-    limit,
-    startDate,
-  ]);
+  }, [activePage, endDate, filterQuery, indexNames, stackByField, limit, startDate]);
 
   useEffect(() => {
     authenticationsSearch(authenticationsRequest);
