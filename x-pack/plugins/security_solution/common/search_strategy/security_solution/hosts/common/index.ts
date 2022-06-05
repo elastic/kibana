@@ -64,9 +64,10 @@ export interface HostBuckets {
   buckets: HostBucketItem[];
 }
 
-type HostOsFields = CommonFields & Partial<{
-  [Property in keyof OsEcs as `host.os.${Property}`]: unknown[];
-}>;
+type HostOsFields = CommonFields &
+  Partial<{
+    [Property in keyof OsEcs as `host.os.${Property}`]: unknown[];
+  }>;
 
 export interface HostOsHitsItem {
   hits: {
@@ -120,9 +121,10 @@ export interface HostAggEsData extends SearchHit {
   aggregations: HostAggEsItem;
 }
 
-type HostFields = CommonFields & Partial<{
-  [Property in keyof HostEcs as `host.${Property}`]: unknown[];
-}>;
+type HostFields = CommonFields &
+  Partial<{
+    [Property in keyof HostEcs as `host.${Property}`]: unknown[];
+  }>;
 
 export interface HostHit extends Hit {
   fields: HostFields;
