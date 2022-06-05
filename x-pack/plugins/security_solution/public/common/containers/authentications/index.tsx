@@ -18,7 +18,7 @@ import {
   UserAuthenticationsStrategyResponse,
   UsersQueries,
 } from '../../../../common/search_strategy/security_solution';
-import { PageInfoPaginated, DocValueFields, SortField } from '../../../../common/search_strategy';
+import { PageInfoPaginated, SortField } from '../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import { inputsModel } from '../../store';
@@ -43,7 +43,6 @@ export interface AuthenticationArgs {
 }
 
 interface UseAuthentications {
-  docValueFields?: DocValueFields[];
   filterQuery?: ESTermQuery | string;
   endDate: string;
   indexNames: string[];
@@ -55,7 +54,6 @@ interface UseAuthentications {
 }
 
 export const useAuthentications = ({
-  docValueFields,
   filterQuery,
   endDate,
   indexNames,
@@ -163,7 +161,6 @@ export const useAuthentications = ({
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
-        docValueFields: docValueFields ?? [],
         factoryQueryType: UsersQueries.authentications,
         filterQuery: createFilter(filterQuery),
         stackByField,
@@ -182,7 +179,6 @@ export const useAuthentications = ({
     });
   }, [
     activePage,
-    docValueFields,
     endDate,
     filterQuery,
     indexNames,
