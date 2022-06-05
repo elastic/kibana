@@ -64,9 +64,10 @@ export interface AllUsersAggEsItem {
   lastSeen?: { value_as_string: string };
 }
 
-type UserFields = CommonFields & Partial<{
-  [Property in keyof UserEcs as `user.${Property}`]: unknown[];
-}>;
+type UserFields = CommonFields &
+  Partial<{
+    [Property in keyof UserEcs as `user.${Property}`]: unknown[];
+  }>;
 
 interface UsersDomainHitsItem {
   hits: {

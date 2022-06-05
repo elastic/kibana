@@ -8,9 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import {
-  HostsUncommonProcessesEdges,
-} from '../../../../common/search_strategy';
+import { HostsUncommonProcessesEdges } from '../../../../common/search_strategy';
 import { hostsActions, hostsModel, hostsSelectors } from '../../store';
 import { defaultToEmptyTag, getEmptyValue } from '../../../common/components/empty_value';
 import { HostDetailsLink } from '../../../common/components/links';
