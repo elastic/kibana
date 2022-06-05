@@ -71,11 +71,13 @@ export interface AuthenticationHit extends Hit {
   sort: StringOrNumber[];
 }
 
-type AuthenticationFields = CommonFields & Partial<{
-  [Property in keyof SourceEcs as `source.${Property}`]: unknown[];
-}> & Partial<{
-  [Property in keyof HostEcs as `host.${Property}`]: unknown[];
-}>;
+type AuthenticationFields = CommonFields &
+  Partial<{
+    [Property in keyof SourceEcs as `source.${Property}`]: unknown[];
+  }> &
+  Partial<{
+    [Property in keyof HostEcs as `host.${Property}`]: unknown[];
+  }>;
 
 export interface AuthenticationBucket {
   key: string;
