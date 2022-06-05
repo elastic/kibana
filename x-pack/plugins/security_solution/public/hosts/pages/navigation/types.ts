@@ -13,7 +13,6 @@ import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { HostsTableType, HostsType } from '../../store/model';
 import { NavTab } from '../../../common/components/navigation/types';
 import { UpdateDateRange } from '../../../common/components/charts/common';
-import { DocValueFields } from '../../../common/containers/source';
 
 export type KeyHostsNavTabWithoutMlPermission = HostsTableType.hosts &
   HostsTableType.authentications &
@@ -35,7 +34,6 @@ export interface QueryTabBodyProps {
 
 export type HostsComponentsQueryProps = QueryTabBodyProps & {
   deleteQuery?: GlobalTimeArgs['deleteQuery'];
-  docValueFields?: DocValueFields[];
   indexNames: string[];
   pageFilters?: Filter[];
   skip: boolean;

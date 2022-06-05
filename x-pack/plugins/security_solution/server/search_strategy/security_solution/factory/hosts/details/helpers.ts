@@ -22,12 +22,11 @@ import { toObjectArrayOfStrings } from '../../../../../../common/utils/to_array'
 import { EndpointAppContext } from '../../../../../endpoint/types';
 import { getPendingActionCounts } from '../../../../../endpoint/services';
 
-export const HOST_FIELDS = [
+export const HOST_DETAILS_FIELDS = [
   '_id',
   'host.architecture',
   'host.id',
   'host.ip',
-  'host.id',
   'host.mac',
   'host.name',
   'host.os.family',
@@ -43,6 +42,7 @@ export const HOST_FIELDS = [
   'endpoint.policyStatus',
   'endpoint.sensorVersion',
   'agent.type',
+  'agent.id',
   'endpoint.id',
 ];
 
@@ -106,7 +106,7 @@ const getTermsAggregationTypeFromField = (field: string): AggregationRequest => 
 };
 
 export const formatHostItem = (bucket: HostAggEsItem): HostItem => {
-  return HOST_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
+  return HOST_DETAILS_FIELDS.reduce<HostItem>((flattenedFields, fieldName) => {
     const fieldValue = getHostFieldValue(fieldName, bucket);
     if (fieldValue != null) {
       if (fieldName === '_id') {
@@ -127,32 +127,10 @@ const getHostFieldValue = (fieldName: string, bucket: HostAggEsItem): string | s
     ? hostFieldsMap[fieldName].replace(/\./g, '_')
     : fieldName.replace(/\./g, '_');
 
-  if (
-    [
-      'host.ip',
-      'host.mac',
-      'cloud.instance.id',
-      'cloud.machine.type',
-      'cloud.provider',
-      'cloud.region',
-    ].includes(fieldName) &&
-    has(aggField, bucket)
-  ) {
-    const data: HostBuckets = get(aggField, bucket);
-    return data.buckets.map((obj) => obj.key);
-  } else if (has(`${aggField}.buckets`, bucket)) {
+  if (has(`${aggField}.buckets`, bucket)) {
     return getFirstItem(get(`${aggField}`, bucket));
-  } else if (['host.name', 'host.os.name', 'host.os.version', 'endpoint.id'].includes(fieldName)) {
-    switch (fieldName) {
-      case 'host.name':
-        return get('key', bucket) || null;
-      case 'host.os.name':
-        return get('os.hits.hits[0]._source.host.os.name', bucket) || null;
-      case 'host.os.version':
-        return get('os.hits.hits[0]._source.host.os.version', bucket) || null;
-      case 'endpoint.id':
-        return get('endpoint_id.value.buckets[0].key', bucket) || null;
-    }
+  } else if (fieldName === 'endpoint.id') {
+    return get('endpoint_id.value.buckets[0].key', bucket) || null;
   } else if (has(aggField, bucket)) {
     const valueObj: HostValue = get(aggField, bucket);
     return valueObj.value_as_string;

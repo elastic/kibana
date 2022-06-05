@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Maybe, RiskSeverity, SortField } from '../../..';
+import { CommonFields, Maybe, RiskSeverity, SortField } from '../../..';
 import { HostEcs } from '../../../../ecs/host';
 import { UserEcs } from '../../../../ecs/user';
 
@@ -64,10 +64,15 @@ export interface AllUsersAggEsItem {
   lastSeen?: { value_as_string: string };
 }
 
-export interface UsersDomainHitsItem {
+type UserFields = CommonFields &
+  Partial<{
+    [Property in keyof UserEcs as `user.${Property}`]: unknown[];
+  }>;
+
+interface UsersDomainHitsItem {
   hits: {
     hits: Array<{
-      fields: { user: { domain: Maybe<string[]> } };
+      fields: UserFields;
     }>;
   };
 }

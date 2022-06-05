@@ -22,7 +22,6 @@ export const mockOptions: HostFirstLastSeenRequestOptions = {
     'packetbeat-*',
     'winlogbeat-*',
   ],
-  docValueFields: [],
   factoryQueryType: HostsQueries.firstOrLastSeen,
   hostName: 'siem-kibana',
   order: Direction.asc,
@@ -44,9 +43,6 @@ export const mockSearchStrategyFirstSeenResponse = {
           _score: 0,
           _index: 'auditbeat-7.8.0-2021.02.17-000012',
           _id: 'nRIAs3cBX5UUcOOYANIW',
-          _source: {
-            '@timestamp': '2021-02-18T02:37:37.682Z',
-          },
           fields: {
             '@timestamp': ['2021-02-18T02:37:37.682Z'],
           },
@@ -76,9 +72,6 @@ export const mockSearchStrategyLastSeenResponse = {
           _score: 0,
           _index: 'auditbeat-7.8.0-2021.02.17-000012',
           _id: 'nRIAs3cBX5UUcOOYANIW',
-          _source: {
-            '@timestamp': '2021-02-18T02:37:37.682Z',
-          },
           fields: {
             '@timestamp': ['2021-02-18T02:37:37.682Z'],
           },
@@ -107,9 +100,6 @@ export const formattedSearchStrategyFirstResponse = {
           _index: 'auditbeat-7.8.0-2021.02.17-000012',
           _id: 'nRIAs3cBX5UUcOOYANIW',
           _score: 0,
-          _source: {
-            '@timestamp': '2021-02-18T02:37:37.682Z',
-          },
           fields: {
             '@timestamp': ['2021-02-18T02:37:37.682Z'],
           },
@@ -139,7 +129,13 @@ export const formattedSearchStrategyFirstResponse = {
           track_total_hits: false,
           body: {
             query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
-            _source: ['@timestamp'],
+            _source: false,
+            fields: [
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
             size: 1,
             sort: [
               {
@@ -173,9 +169,6 @@ export const formattedSearchStrategyLastResponse = {
           _index: 'auditbeat-7.8.0-2021.02.17-000012',
           _id: 'nRIAs3cBX5UUcOOYANIW',
           _score: 0,
-          _source: {
-            '@timestamp': '2021-02-18T02:37:37.682Z',
-          },
           fields: {
             '@timestamp': ['2021-02-18T02:37:37.682Z'],
           },
@@ -205,7 +198,13 @@ export const formattedSearchStrategyLastResponse = {
           track_total_hits: false,
           body: {
             query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
-            _source: ['@timestamp'],
+            _source: false,
+            fields: [
+              {
+                field: '@timestamp',
+                format: 'strict_date_optional_time',
+              },
+            ],
             size: 1,
             sort: [
               {
@@ -239,7 +238,13 @@ export const expectedDsl = {
   ignore_unavailable: true,
   track_total_hits: false,
   body: {
-    _source: ['@timestamp'],
+    _source: false,
+    fields: [
+      {
+        field: '@timestamp',
+        format: 'strict_date_optional_time',
+      },
+    ],
     query: { bool: { filter: [{ term: { 'host.name': 'siem-kibana' } }] } },
     size: 1,
     sort: [{ '@timestamp': { order: Direction.asc } }],

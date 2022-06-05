@@ -209,7 +209,6 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
             </Display>
 
             <HostDetailsTabs
-              docValueFields={docValueFields}
               indexNames={selectedPatterns}
               isInitializing={isInitializing}
               deleteQuery={deleteQuery}

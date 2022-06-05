@@ -57,6 +57,14 @@ export const buildHostsKpiHostsQuery = ({
           filter,
         },
       },
+      _source: false,
+      fields: [
+        'host.name',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
       size: 0,
     },
   };

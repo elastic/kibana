@@ -13,8 +13,6 @@ import { HostsQueryProps } from '../types';
 import { NavTab } from '../../../common/components/navigation/types';
 import { KeyHostsNavTabWithoutMlPermission } from '../navigation/types';
 import { hostsModel } from '../../store';
-import { DocValueFields } from '../../../common/containers/source';
-
 interface HostDetailsComponentReduxProps {
   query: Query;
   filters: Filter[];
@@ -58,7 +56,6 @@ export type HostDetailsNavTab = Record<KeyHostDetailsNavTab, NavTab>;
 
 export type HostDetailsTabsProps = HostBodyComponentDispatchProps &
   HostsQueryProps & {
-    docValueFields?: DocValueFields[];
     indexNames: string[];
     pageFilters?: Filter[];
     filterQuery?: string;

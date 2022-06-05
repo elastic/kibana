@@ -9,6 +9,7 @@ import { CloudEcs } from '../../../../ecs/cloud';
 import { HostEcs, OsEcs } from '../../../../ecs/host';
 import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
 import { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
+import { CommonFields } from '../..';
 
 export enum HostPolicyResponseActionStatus {
   success = 'success',
@@ -63,12 +64,17 @@ export interface HostBuckets {
   buckets: HostBucketItem[];
 }
 
+type HostOsFields = CommonFields &
+  Partial<{
+    [Property in keyof OsEcs as `host.os.${Property}`]: unknown[];
+  }>;
+
 export interface HostOsHitsItem {
   hits: {
     total: TotalValue | number;
     max_score: number | null;
     hits: Array<{
-      _source: { host: { os: Maybe<OsEcs> } };
+      fields: HostOsFields;
       sort?: [number];
       _index?: string;
       _type?: string;
@@ -115,11 +121,13 @@ export interface HostAggEsData extends SearchHit {
   aggregations: HostAggEsItem;
 }
 
+type HostFields = CommonFields &
+  Partial<{
+    [Property in keyof HostEcs as `host.${Property}`]: unknown[];
+  }>;
+
 export interface HostHit extends Hit {
-  _source: {
-    '@timestamp'?: string;
-    host: HostEcs;
-  };
+  fields: HostFields;
   cursor?: string;
   firstSeen?: string;
   sort?: StringOrNumber[];

@@ -21,6 +21,7 @@ import {
   TotalHit,
   StringOrNumber,
   Hits,
+  CommonFields,
 } from '../../..';
 
 export interface HostsUncommonProcessesRequestOptions extends RequestOptionsPaginated {
@@ -48,16 +49,21 @@ export interface HostsUncommonProcessItem {
   user?: Maybe<UserEcs>;
 }
 
+type ProcessUserFields = CommonFields &
+  Partial<{
+    [Property in keyof ProcessEcs as `process.${Property}`]: unknown[];
+  }> &
+  Partial<{
+    [Property in keyof UserEcs as `user.${Property}`]: unknown[];
+  }>;
+
 export interface HostsUncommonProcessHit extends Hit {
   total: TotalHit;
   host: Array<{
     id: string[] | undefined;
     name: string[] | undefined;
   }>;
-  _source: {
-    '@timestamp': string;
-    process: ProcessEcs;
-  };
+  fields: ProcessUserFields;
   cursor: string;
   sort: StringOrNumber[];
 }

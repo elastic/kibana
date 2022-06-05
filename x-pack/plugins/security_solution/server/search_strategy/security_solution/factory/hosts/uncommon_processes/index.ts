@@ -21,7 +21,7 @@ import { inspectStringifyObject } from '../../../../../utils/build_query';
 
 import { SecuritySolutionFactory } from '../../types';
 import { buildQuery } from './dsl/query.dsl';
-import { formatUncommonProcessesData, getHits, uncommonProcessesFields } from './helpers';
+import { formatUncommonProcessesData, getHits } from './helpers';
 
 export const uncommonProcesses: SecuritySolutionFactory<HostsQueries.uncommonProcesses> = {
   buildDsl: (options: HostsUncommonProcessesRequestOptions) => {
@@ -40,7 +40,7 @@ export const uncommonProcesses: SecuritySolutionFactory<HostsQueries.uncommonPro
     const hits = getHits(buckets);
 
     const uncommonProcessesEdges = hits.map((hit) =>
-      formatUncommonProcessesData(uncommonProcessesFields, hit, {
+      formatUncommonProcessesData(hit, {
         ...processFieldsMap,
         ...userFieldsMap,
       })

@@ -30,9 +30,6 @@ export const firstOrLastSeenHost: SecuritySolutionFactory<HostsQueries.firstOrLa
       'hits.hits[0].fields.@timestamp[0]',
       response.rawResponse
     );
-    // If it doesn't exist, fall back on _source as a last try.
-    const seen: string | null =
-      formattedField || getOr(null, 'hits.hits[0]._source.@timestamp', response.rawResponse);
 
     const inspect = {
       dsl: [inspectStringifyObject(buildFirstOrLastSeenHostQuery(options))],
@@ -42,13 +39,13 @@ export const firstOrLastSeenHost: SecuritySolutionFactory<HostsQueries.firstOrLa
       return {
         ...response,
         inspect,
-        firstSeen: seen,
+        firstSeen: formattedField,
       };
     } else {
       return {
         ...response,
         inspect,
-        lastSeen: seen,
+        lastSeen: formattedField,
       };
     }
   },
