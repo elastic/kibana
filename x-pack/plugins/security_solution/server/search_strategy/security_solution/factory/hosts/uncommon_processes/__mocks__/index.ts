@@ -1571,12 +1571,36 @@ export const formattedSearchStrategyResponse = {
                       size: 1,
                       sort: [{ '@timestamp': { order: 'desc' } }],
                       _source: false,
+                      fields: [
+                        'process.args',
+                        'process.name',
+                        'user.id',
+                        'user.name',
+                        {
+                          field: '@timestamp',
+                          format: 'strict_date_optional_time',
+                        },
+                      ],
                     },
                   },
                   host_count: { cardinality: { field: 'host.name' } },
                   hosts: {
                     terms: { field: 'host.name' },
-                    aggregations: { host: { top_hits: { size: 1, _source: false } } },
+                    aggregations: {
+                      host: {
+                        top_hits: {
+                          size: 1,
+                          _source: false,
+                          fields: [
+                            'host.name',
+                            {
+                              field: '@timestamp',
+                              format: 'strict_date_optional_time',
+                            },
+                          ],
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -1662,17 +1686,6 @@ export const formattedSearchStrategyResponse = {
               },
             },
             _source: false,
-            fields: [
-              'process.args',
-              'process.name',
-              'user.id',
-              'user.name',
-              'host.name',
-              {
-                field: '@timestamp',
-                format: 'strict_date_optional_time',
-              },
-            ],
           },
           size: 0,
           track_total_hits: false,
@@ -1718,12 +1731,36 @@ export const expectedDsl = {
               size: 1,
               sort: [{ '@timestamp': { order: 'desc' } }],
               _source: false,
+              fields: [
+                'process.args',
+                'process.name',
+                'user.id',
+                'user.name',
+                {
+                  field: '@timestamp',
+                  format: 'strict_date_optional_time',
+                },
+              ],
             },
           },
           host_count: { cardinality: { field: 'host.name' } },
           hosts: {
             terms: { field: 'host.name' },
-            aggregations: { host: { top_hits: { size: 1, _source: false } } },
+            aggregations: {
+              host: {
+                top_hits: {
+                  size: 1,
+                  _source: false,
+                  fields: [
+                    'host.name',
+                    {
+                      field: '@timestamp',
+                      format: 'strict_date_optional_time',
+                    },
+                  ],
+                },
+              },
+            },
           },
         },
       },
@@ -1809,17 +1846,6 @@ export const expectedDsl = {
       },
     },
     _source: false,
-    fields: [
-      'process.args',
-      'process.name',
-      'user.id',
-      'user.name',
-      'host.name',
-      {
-        field: '@timestamp',
-        format: 'strict_date_optional_time',
-      },
-    ],
   },
   size: 0,
   track_total_hits: false,

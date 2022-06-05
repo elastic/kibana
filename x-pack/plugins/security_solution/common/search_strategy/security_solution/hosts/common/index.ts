@@ -6,7 +6,7 @@
  */
 
 import { CloudEcs } from '../../../../ecs/cloud';
-import { HostEcs } from '../../../../ecs/host';
+import { HostEcs, OsEcs } from '../../../../ecs/host';
 import { Hit, Hits, Maybe, SearchHit, StringOrNumber, TotalValue } from '../../../common';
 import { EndpointPendingActions, HostStatus } from '../../../../endpoint/types';
 
@@ -63,17 +63,16 @@ export interface HostBuckets {
   buckets: HostBucketItem[];
 }
 
+type HostOsFields = {
+  [Property in keyof OsEcs as `host.os.${Property}`]: unknown[];
+};
+
 export interface HostOsHitsItem {
   hits: {
     total: TotalValue | number;
     max_score: number | null;
     hits: Array<{
-      fields: {
-        'host.os.name': string[];
-        'host.os.family': string[];
-        'host.os.version': string[];
-        'host.os.platform': string[];
-      };
+      fields: HostOsFields;
       sort?: [number];
       _index?: string;
       _type?: string;
@@ -120,11 +119,12 @@ export interface HostAggEsData extends SearchHit {
   aggregations: HostAggEsItem;
 }
 
+type HostFields = {
+  [Property in keyof HostEcs as `host.${Property}`]: unknown[];
+};
+
 export interface HostHit extends Hit {
-  fields: {
-    '@timestamp'?: string;
-    host: HostEcs;
-  };
+  fields: HostFields;
   cursor?: string;
   firstSeen?: string;
   sort?: StringOrNumber[];

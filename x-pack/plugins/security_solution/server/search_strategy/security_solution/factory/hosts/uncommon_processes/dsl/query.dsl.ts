@@ -76,6 +76,13 @@ export const buildQuery = ({
                 size: 1,
                 sort: [{ '@timestamp': { order: 'desc' as const } }],
                 _source: false,
+                fields: [
+                  ...processUserFields,
+                  {
+                    field: '@timestamp',
+                    format: 'strict_date_optional_time',
+                  },
+                ],
               },
             },
             host_count: {
@@ -92,6 +99,13 @@ export const buildQuery = ({
                   top_hits: {
                     size: 1,
                     _source: false,
+                    fields: [
+                      ...hostFields,
+                      {
+                        field: '@timestamp',
+                        format: 'strict_date_optional_time',
+                      },
+                    ],
                   },
                 },
               },
@@ -219,14 +233,6 @@ export const buildQuery = ({
         },
       },
       _source: false,
-      fields: [
-        ...processUserFields,
-        ...hostFields,
-        {
-          field: '@timestamp',
-          format: 'strict_date_optional_time',
-        },
-      ],
     },
     size: 0,
     track_total_hits: false,

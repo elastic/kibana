@@ -33,10 +33,8 @@ describe('helpers', () => {
                     _id: 'id-1',
                     _score: 0,
                     fields: {
-                      host: {
-                        name: ['host-1'],
-                        id: ['host-id-1'],
-                      },
+                      'host.id': ['host-id-1'],
+                      'host.name': ['host-1'],
                     },
                   },
                 ],
@@ -73,10 +71,8 @@ describe('helpers', () => {
                     _id: 'id-1',
                     _score: 0,
                     fields: {
-                      host: {
-                        name: ['host-1'],
-                        id: ['host-id-1'],
-                      },
+                      'host.id': ['host-id-1'],
+                      'host.name': ['host-1'],
                     },
                   },
                 ],
@@ -96,10 +92,8 @@ describe('helpers', () => {
                     _id: 'id-2',
                     _score: 0,
                     fields: {
-                      host: {
-                        name: ['host-2'],
-                        id: ['host-id-2'],
-                      },
+                      'host.id': ['host-id-2'],
+                      'host.name': ['host-2'],
                     },
                   },
                 ],
@@ -136,7 +130,6 @@ describe('helpers', () => {
                     _id: 'id-9',
                     _score: 0,
                     fields: {
-                      // @ts-expect-error ts doesn't like seeing the object written this way, but sometimes this is the data we get!
                       'host.id': ['host-id-9'],
                       'host.name': ['host-9'],
                     },
