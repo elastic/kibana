@@ -838,34 +838,9 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
       anomaliesData={null}
       contextID="test-query"
       data={Object {}}
-      docValueFields={
-        Array [
-          Object {
-            "field": "@timestamp",
-            "format": "date_time",
-          },
-          Object {
-            "field": "event.end",
-            "format": "date_time",
-          },
-        ]
-      }
       endDate="2020-07-08T08:20:18.966Z"
       hostName="woohoo!"
       id="hostsDetailsQuery"
-      indexNames={
-        Array [
-          "apm-*-transaction*",
-          "auditbeat-*",
-          "endgame-*",
-          "filebeat-*",
-          "logs-*",
-          "packetbeat-*",
-          "traces-apm*",
-          "winlogbeat-*",
-          "-*elastic-cloud-logs-*",
-        ]
-      }
       isDraggable={false}
       isInDetailsSidePanel={true}
       isLoadingAnomaliesData={false}
@@ -917,15 +892,19 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
                             "title": "Host ID",
                           },
                           Object {
-                            "description": <EmptyWrapper>
-                              —
-                            </EmptyWrapper>,
+                            "description": <Memo(FirstLastSeen)
+                              field="host.name"
+                              type="first-seen"
+                              value="woohoo!"
+                            />,
                             "title": "First seen",
                           },
                           Object {
-                            "description": <EmptyWrapper>
-                              —
-                            </EmptyWrapper>,
+                            "description": <Memo(FirstLastSeen)
+                              field="host.name"
+                              type="last-seen"
+                              value="woohoo!"
+                            />,
                             "title": "Last seen",
                           },
                         ]
@@ -948,15 +927,19 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
                                   "title": "Host ID",
                                 },
                                 Object {
-                                  "description": <EmptyWrapper>
-                                    —
-                                  </EmptyWrapper>,
+                                  "description": <Memo(FirstLastSeen)
+                                    field="host.name"
+                                    type="first-seen"
+                                    value="woohoo!"
+                                  />,
                                   "title": "First seen",
                                 },
                                 Object {
-                                  "description": <EmptyWrapper>
-                                    —
-                                  </EmptyWrapper>,
+                                  "description": <Memo(FirstLastSeen)
+                                    field="host.name"
+                                    type="last-seen"
+                                    value="woohoo!"
+                                  />,
                                   "title": "Last seen",
                                 },
                               ]
@@ -973,15 +956,19 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
                                     "title": "Host ID",
                                   },
                                   Object {
-                                    "description": <EmptyWrapper>
-                                      —
-                                    </EmptyWrapper>,
+                                    "description": <Memo(FirstLastSeen)
+                                      field="host.name"
+                                      type="first-seen"
+                                      value="woohoo!"
+                                    />,
                                     "title": "First seen",
                                   },
                                   Object {
-                                    "description": <EmptyWrapper>
-                                      —
-                                    </EmptyWrapper>,
+                                    "description": <Memo(FirstLastSeen)
+                                      field="host.name"
+                                      type="last-seen"
+                                      value="woohoo!"
+                                    />,
                                     "title": "Last seen",
                                   },
                                 ]
@@ -1029,13 +1016,19 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
                                   <dd
                                     className="euiDescriptionList__description"
                                   >
-                                    <EmptyWrapper>
-                                      <span
-                                        className="c3"
+                                    <FirstLastSeen
+                                      field="host.name"
+                                      type="first-seen"
+                                      value="woohoo!"
+                                    >
+                                      <EuiLoadingSpinner
+                                        size="m"
                                       >
-                                        —
-                                      </span>
-                                    </EmptyWrapper>
+                                        <span
+                                          className="euiLoadingSpinner euiLoadingSpinner--medium"
+                                        />
+                                      </EuiLoadingSpinner>
+                                    </FirstLastSeen>
                                   </dd>
                                 </EuiDescriptionListDescription>
                                 <EuiDescriptionListTitle
@@ -1053,13 +1046,19 @@ exports[`Details Panel Component DetailsPanel:HostDetails: rendering it should r
                                   <dd
                                     className="euiDescriptionList__description"
                                   >
-                                    <EmptyWrapper>
-                                      <span
-                                        className="c3"
+                                    <FirstLastSeen
+                                      field="host.name"
+                                      type="last-seen"
+                                      value="woohoo!"
+                                    >
+                                      <EuiLoadingSpinner
+                                        size="m"
                                       >
-                                        —
-                                      </span>
-                                    </EmptyWrapper>
+                                        <span
+                                          className="euiLoadingSpinner euiLoadingSpinner--medium"
+                                        />
+                                      </EuiLoadingSpinner>
+                                    </FirstLastSeen>
                                   </dd>
                                 </EuiDescriptionListDescription>
                               </dl>
@@ -2144,15 +2143,19 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
                     descriptionList={
                       Array [
                         Object {
-                          "description": <EmptyWrapper>
-                            —
-                          </EmptyWrapper>,
+                          "description": <Memo(FirstLastSeen)
+                            field="source.ip"
+                            type="first-seen"
+                            value="woohoo!"
+                          />,
                           "title": "First seen",
                         },
                         Object {
-                          "description": <EmptyWrapper>
-                            —
-                          </EmptyWrapper>,
+                          "description": <Memo(FirstLastSeen)
+                            field="source.ip"
+                            type="last-seen"
+                            value="woohoo!"
+                          />,
                           "title": "Last seen",
                         },
                       ]
@@ -2169,15 +2172,19 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
                           listItems={
                             Array [
                               Object {
-                                "description": <EmptyWrapper>
-                                  —
-                                </EmptyWrapper>,
+                                "description": <Memo(FirstLastSeen)
+                                  field="source.ip"
+                                  type="first-seen"
+                                  value="woohoo!"
+                                />,
                                 "title": "First seen",
                               },
                               Object {
-                                "description": <EmptyWrapper>
-                                  —
-                                </EmptyWrapper>,
+                                "description": <Memo(FirstLastSeen)
+                                  field="source.ip"
+                                  type="last-seen"
+                                  value="woohoo!"
+                                />,
                                 "title": "Last seen",
                               },
                             ]
@@ -2188,15 +2195,19 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
                             listItems={
                               Array [
                                 Object {
-                                  "description": <EmptyWrapper>
-                                    —
-                                  </EmptyWrapper>,
+                                  "description": <Memo(FirstLastSeen)
+                                    field="source.ip"
+                                    type="first-seen"
+                                    value="woohoo!"
+                                  />,
                                   "title": "First seen",
                                 },
                                 Object {
-                                  "description": <EmptyWrapper>
-                                    —
-                                  </EmptyWrapper>,
+                                  "description": <Memo(FirstLastSeen)
+                                    field="source.ip"
+                                    type="last-seen"
+                                    value="woohoo!"
+                                  />,
                                   "title": "Last seen",
                                 },
                               ]
@@ -2220,13 +2231,19 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
                                 <dd
                                   className="euiDescriptionList__description"
                                 >
-                                  <EmptyWrapper>
-                                    <span
-                                      className="c3"
+                                  <FirstLastSeen
+                                    field="source.ip"
+                                    type="first-seen"
+                                    value="woohoo!"
+                                  >
+                                    <EuiLoadingSpinner
+                                      size="m"
                                     >
-                                      —
-                                    </span>
-                                  </EmptyWrapper>
+                                      <span
+                                        className="euiLoadingSpinner euiLoadingSpinner--medium"
+                                      />
+                                    </EuiLoadingSpinner>
+                                  </FirstLastSeen>
                                 </dd>
                               </EuiDescriptionListDescription>
                               <EuiDescriptionListTitle
@@ -2244,13 +2261,19 @@ exports[`Details Panel Component DetailsPanel:NetworkDetails: rendering it shoul
                                 <dd
                                   className="euiDescriptionList__description"
                                 >
-                                  <EmptyWrapper>
-                                    <span
-                                      className="c3"
+                                  <FirstLastSeen
+                                    field="source.ip"
+                                    type="last-seen"
+                                    value="woohoo!"
+                                  >
+                                    <EuiLoadingSpinner
+                                      size="m"
                                     >
-                                      —
-                                    </span>
-                                  </EmptyWrapper>
+                                      <span
+                                        className="euiLoadingSpinner euiLoadingSpinner--medium"
+                                      />
+                                    </EuiLoadingSpinner>
+                                  </FirstLastSeen>
                                 </dd>
                               </EuiDescriptionListDescription>
                             </dl>

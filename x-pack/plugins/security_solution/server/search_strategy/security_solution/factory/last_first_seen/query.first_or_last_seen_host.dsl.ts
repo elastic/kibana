@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import { FirstLastSeenRequestOptions } from '../../../../../../common/search_strategy/security_solution/hosts';
+import { FirstLastSeenRequestOptions } from '../../../../../common/search_strategy/security_solution/first_last_seen';
 
 export const buildFirstOrLastSeenQuery = ({
   field,

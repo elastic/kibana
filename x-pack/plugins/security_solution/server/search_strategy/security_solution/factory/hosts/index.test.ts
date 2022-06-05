@@ -19,7 +19,6 @@ import { hostsKpiUniqueIps } from './kpi/unique_ips';
 jest.mock('./all');
 jest.mock('./details');
 jest.mock('./overview');
-jest.mock('./last_first_seen');
 jest.mock('./uncommon_processes');
 jest.mock('./kpi/authentications');
 jest.mock('./kpi/hosts');

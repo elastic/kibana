@@ -11,7 +11,7 @@ import { Inspect, Maybe, Direction } from '../../common';
 import { RequestBasicOptions } from '../..';
 
 export const FirstLastSeenQuery = 'firstlastseen';
-export interface FirstLastSeenRequestOptions extends RequestBasicOptions {
+export interface FirstLastSeenRequestOptions extends Partial<RequestBasicOptions> {
   order: Direction.asc | Direction.desc;
   field: string;
   value: string;

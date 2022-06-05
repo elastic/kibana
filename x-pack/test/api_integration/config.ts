@@ -14,7 +14,7 @@ export async function getApiIntegrationConfig({ readConfigFile }: FtrConfigProvi
   );
 
   return {
-    testFiles: [require.resolve('./apis')],
+    testFiles: [require.resolve('./apis/security_solution/hosts')],
     services,
     servers: xPackFunctionalTestsConfig.get('servers'),
     security: xPackFunctionalTestsConfig.get('security'),

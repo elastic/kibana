@@ -89,34 +89,9 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
       anomaliesData={null}
       contextID="text-context"
       data={Object {}}
-      docValueFields={
-        Array [
-          Object {
-            "field": "@timestamp",
-            "format": "date_time",
-          },
-          Object {
-            "field": "event.end",
-            "format": "date_time",
-          },
-        ]
-      }
       endDate="2020-07-08T08:20:18.966Z"
       hostName="testHostName"
       id="hostsDetailsQuery"
-      indexNames={
-        Array [
-          "apm-*-transaction*",
-          "auditbeat-*",
-          "endgame-*",
-          "filebeat-*",
-          "logs-*",
-          "packetbeat-*",
-          "traces-apm*",
-          "winlogbeat-*",
-          "-*elastic-cloud-logs-*",
-        ]
-      }
       isDraggable={false}
       isInDetailsSidePanel={true}
       isLoadingAnomaliesData={false}
@@ -168,15 +143,19 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                             "title": "Host ID",
                           },
                           Object {
-                            "description": <EmptyWrapper>
-                              —
-                            </EmptyWrapper>,
+                            "description": <Memo(FirstLastSeen)
+                              field="host.name"
+                              type="first-seen"
+                              value="testHostName"
+                            />,
                             "title": "First seen",
                           },
                           Object {
-                            "description": <EmptyWrapper>
-                              —
-                            </EmptyWrapper>,
+                            "description": <Memo(FirstLastSeen)
+                              field="host.name"
+                              type="last-seen"
+                              value="testHostName"
+                            />,
                             "title": "Last seen",
                           },
                         ]
@@ -199,15 +178,19 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   "title": "Host ID",
                                 },
                                 Object {
-                                  "description": <EmptyWrapper>
-                                    —
-                                  </EmptyWrapper>,
+                                  "description": <Memo(FirstLastSeen)
+                                    field="host.name"
+                                    type="first-seen"
+                                    value="testHostName"
+                                  />,
                                   "title": "First seen",
                                 },
                                 Object {
-                                  "description": <EmptyWrapper>
-                                    —
-                                  </EmptyWrapper>,
+                                  "description": <Memo(FirstLastSeen)
+                                    field="host.name"
+                                    type="last-seen"
+                                    value="testHostName"
+                                  />,
                                   "title": "Last seen",
                                 },
                               ]
@@ -224,15 +207,19 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                     "title": "Host ID",
                                   },
                                   Object {
-                                    "description": <EmptyWrapper>
-                                      —
-                                    </EmptyWrapper>,
+                                    "description": <Memo(FirstLastSeen)
+                                      field="host.name"
+                                      type="first-seen"
+                                      value="testHostName"
+                                    />,
                                     "title": "First seen",
                                   },
                                   Object {
-                                    "description": <EmptyWrapper>
-                                      —
-                                    </EmptyWrapper>,
+                                    "description": <Memo(FirstLastSeen)
+                                      field="host.name"
+                                      type="last-seen"
+                                      value="testHostName"
+                                    />,
                                     "title": "Last seen",
                                   },
                                 ]
@@ -280,13 +267,19 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   <dd
                                     className="euiDescriptionList__description"
                                   >
-                                    <EmptyWrapper>
-                                      <span
-                                        className="c3"
+                                    <FirstLastSeen
+                                      field="host.name"
+                                      type="first-seen"
+                                      value="testHostName"
+                                    >
+                                      <EuiLoadingSpinner
+                                        size="m"
                                       >
-                                        —
-                                      </span>
-                                    </EmptyWrapper>
+                                        <span
+                                          className="euiLoadingSpinner euiLoadingSpinner--medium"
+                                        />
+                                      </EuiLoadingSpinner>
+                                    </FirstLastSeen>
                                   </dd>
                                 </EuiDescriptionListDescription>
                                 <EuiDescriptionListTitle
@@ -304,13 +297,19 @@ exports[`Expandable Host Component ExpandableHostDetails: rendering it should re
                                   <dd
                                     className="euiDescriptionList__description"
                                   >
-                                    <EmptyWrapper>
-                                      <span
-                                        className="c3"
+                                    <FirstLastSeen
+                                      field="host.name"
+                                      type="last-seen"
+                                      value="testHostName"
+                                    >
+                                      <EuiLoadingSpinner
+                                        size="m"
                                       >
-                                        —
-                                      </span>
-                                    </EmptyWrapper>
+                                        <span
+                                          className="euiLoadingSpinner euiLoadingSpinner--medium"
+                                        />
+                                      </EuiLoadingSpinner>
+                                    </FirstLastSeen>
                                   </dd>
                                 </EuiDescriptionListDescription>
                               </dl>

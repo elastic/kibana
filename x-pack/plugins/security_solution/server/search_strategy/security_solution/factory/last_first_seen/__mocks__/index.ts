@@ -8,8 +8,8 @@
 import {
   Direction,
   FirstLastSeenRequestOptions,
-  HostsQueries,
-} from '../../../../../../../common/search_strategy';
+  FirstLastSeenQuery,
+} from '../../../../../../common/search_strategy';
 
 export const mockOptions: FirstLastSeenRequestOptions = {
   defaultIndex: [
@@ -23,8 +23,8 @@ export const mockOptions: FirstLastSeenRequestOptions = {
     'winlogbeat-*',
   ],
   docValueFields: [],
-  factoryQueryType: HostsQueries.firstOrLastSeen,
-  field: 'hostName',
+  factoryQueryType: FirstLastSeenQuery,
+  field: 'host.name',
   value: 'siem-kibana',
   order: Direction.asc,
 };
