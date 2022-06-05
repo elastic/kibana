@@ -58,8 +58,10 @@ jest.doMock('./ui_settings/ui_settings_service', () => ({
   UiSettingsService: jest.fn(() => mockUiSettingsService),
 }));
 
+const realKbnConfigServerInternal = jest.requireActual('@kbn/core-config-server-internal');
 export const mockEnsureValidConfiguration = jest.fn();
-jest.doMock('./config/ensure_valid_configuration', () => ({
+jest.doMock('@kbn/core-config-server-internal', () => ({
+  ...realKbnConfigServerInternal,
   ensureValidConfiguration: mockEnsureValidConfiguration,
 }));
 
