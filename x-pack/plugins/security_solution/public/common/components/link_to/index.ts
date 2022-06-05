@@ -15,6 +15,7 @@ import { SecurityPageName } from '../../../app/types';
 
 export { getDetectionEngineUrl, getRuleDetailsUrl } from './redirect_to_detection_engine';
 export { getHostDetailsUrl, getTabsOnHostDetailsUrl, getHostsUrl } from './redirect_to_hosts';
+export { getKubernetesUrl, getKubernetesDetailsUrl } from './redirect_to_kubernetes';
 export { getNetworkUrl, getNetworkDetailsUrl } from './redirect_to_network';
 export { getTimelineTabsUrl, getTimelineUrl } from './redirect_to_timelines';
 export {
@@ -48,7 +49,7 @@ export const useFormatUrl = (page: SecurityPageName) => {
   return { formatUrl, search };
 };
 
-type GetSecuritySolutionUrl = (param: {
+export type GetSecuritySolutionUrl = (param: {
   deepLinkId: SecurityPageName;
   path?: string;
   absolute?: boolean;
@@ -63,6 +64,7 @@ export const useGetSecuritySolutionUrl = () => {
     ({ deepLinkId, path = '', absolute = false, skipSearch = false }) => {
       const search = needsUrlState(deepLinkId) ? getUrlStateQueryString() : '';
       const formattedPath = formatPath(path, search, skipSearch);
+
       return getAppUrl({ deepLinkId, path: formattedPath, absolute });
     },
     [getAppUrl, getUrlStateQueryString]
@@ -89,7 +91,7 @@ function formatPath(path: string, search: string, skipSearch?: boolean) {
 function needsUrlState(pageId: SecurityPageName) {
   return (
     pageId !== SecurityPageName.dashboardsLanding &&
-    pageId !== SecurityPageName.threatHuntingLanding &&
+    pageId !== SecurityPageName.exploreLanding &&
     pageId !== SecurityPageName.administration &&
     pageId !== SecurityPageName.rules &&
     pageId !== SecurityPageName.exceptions &&
