@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiButton, EuiCard } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiScreenReaderOnly } from '@elastic/eui';
 
 import type { NoDataCardProps } from './types';
 import { NoDataCardStyles } from './no_data_card.styles';
@@ -21,7 +21,7 @@ const defaultDescription = i18n.translate(
 );
 
 export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
-  title,
+  title: titleProp,
   button,
   description,
   isDisabled,
@@ -39,9 +39,17 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
       return button;
     }
     // Default footer action is a button with the provided or default string
-    return <EuiButton fill>{button || title}</EuiButton>;
+    return <EuiButton fill>{button || titleProp}</EuiButton>;
   };
+
   const cardDescription = description || defaultDescription;
+
+  // Bad hack to fix the need for an a11y title even though the button exists
+  const title = titleProp ? (
+    <EuiScreenReaderOnly>
+      <span>{titleProp}</span>
+    </EuiScreenReaderOnly>
+  ) : null;
 
   return (
     <EuiCard
