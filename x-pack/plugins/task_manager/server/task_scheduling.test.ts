@@ -199,6 +199,19 @@ describe('TaskScheduling', () => {
       });
     });
 
+    test('should not update task if new interval is equal to previous', async () => {
+      const task = mockTask({ id, schedule: { interval: '3h' } });
+
+      mockTaskStore.fetch.mockResolvedValue({ docs: [task] });
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '3h' });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(0);
+    });
+
     test('should postpone task run if new interval is greater than previous', async () => {
       // task set to be run in 2 hrs from now
       const runInTwoHrs = new Date(Date.now() + moment.duration(2, 'hours').asMilliseconds());

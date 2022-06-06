@@ -162,16 +162,24 @@ export class TaskScheduling {
 
     const updatedTasks = tasks
       .flatMap(({ docs }) => docs)
-      .map((task) => {
+      .reduce<ConcreteTaskInstance[]>((acc, task) => {
+        // if task schedule interval is the same, no need to update it
+        if (task.schedule?.interval === schedule.interval) {
+          return acc;
+        }
+
         const oldIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
 
+        // computing new runAt using formula:
+        // newRunAt = oldRunAt - oldInterval + newInterval
         const newRunAtInMs = Math.max(
           Date.now(),
           task.runAt.getTime() - oldIntervalInMs + parseIntervalAsMillisecond(schedule.interval)
         );
 
-        return { ...task, schedule, runAt: new Date(newRunAtInMs) };
-      });
+        acc.push({ ...task, schedule, runAt: new Date(newRunAtInMs) });
+        return acc;
+      }, []);
 
     return (await this.store.bulkUpdate(updatedTasks)).reduce<BulkUpdateSchedulesResult>(
       (acc, task) => {
