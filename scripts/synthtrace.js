@@ -7,4 +7,5 @@
  */
 
 require('../src/setup_node_env/node_version_validator');
-require('@elastic/apm-synthtrace/bin/synthtrace');
+// eslint-disable-next-line @kbn/imports/uniform_imports
+require('../packages/elastic-apm-synthtrace/bin/synthtrace');
