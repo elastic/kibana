@@ -10,17 +10,15 @@ import { CoreSetup } from '@kbn/core/public';
 import dateMath from '@kbn/datemath';
 import { memoize } from 'lodash';
 import { UI_SETTINGS, ValueSuggestionsMethod } from '@kbn/data-plugin/common';
-// for replace IIndexPattern => DataView and IFieldType => DataViewField
-// need to fix the issue https://github.com/elastic/kibana/issues/131292
-import type { IIndexPattern, IFieldType } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import type { TimefilterSetup } from '@kbn/data-plugin/public';
 import { AutocompleteUsageCollector } from '../collectors';
 
 export type ValueSuggestionsGetFn = (args: ValueSuggestionsGetFnArgs) => Promise<any[]>;
 
 interface ValueSuggestionsGetFnArgs {
-  indexPattern: IIndexPattern;
-  field: IFieldType;
+  indexPattern: DataView;
+  field: DataViewField;
   query: string;
   useTimeRange?: boolean;
   boolFilter?: any[];
@@ -28,10 +26,7 @@ interface ValueSuggestionsGetFnArgs {
   method?: ValueSuggestionsMethod;
 }
 
-const getAutocompleteTimefilter = (
-  { timefilter }: TimefilterSetup,
-  indexPattern: IIndexPattern
-) => {
+const getAutocompleteTimefilter = ({ timefilter }: TimefilterSetup, indexPattern: DataView) => {
   const timeRange = timefilter.getTime();
 
   // Use a rounded timerange so that memoizing works properly
@@ -51,7 +46,7 @@ export const setupValueSuggestionProvider = (
     usageCollector,
   }: { timefilter: TimefilterSetup; usageCollector?: AutocompleteUsageCollector }
 ): ValueSuggestionsGetFn => {
-  function resolver(title: string, field: IFieldType, query: string, filters: any[]) {
+  function resolver(title: string, field: DataViewField, query: string, filters: any[]) {
     // Only cache results for a minute
     const ttl = Math.floor(Date.now() / 1000 / 60);
     return [ttl, query, title, field.name, JSON.stringify(filters)].join('|');
@@ -60,7 +55,7 @@ export const setupValueSuggestionProvider = (
   const requestSuggestions = memoize(
     <T = unknown>(
       index: string,
-      field: IFieldType,
+      field: DataViewField,
       query: string,
       filters: any = [],
       signal?: AbortSignal,

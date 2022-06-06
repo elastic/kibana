@@ -92,7 +92,7 @@ export default function Embeddable({
 
   let lensAttributes;
   try {
-    lensAttributes = new LensAttributes(layerConfigs);
+    lensAttributes = new LensAttributes(layerConfigs, reportType);
     // eslint-disable-next-line no-empty
   } catch (error) {}
 

@@ -2976,11 +2976,47 @@
   version "0.0.0"
   uid ""
 
+"@kbn/config-mocks@link:bazel-bin/packages/kbn-config-mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/config-schema@link:bazel-bin/packages/kbn-config-schema":
   version "0.0.0"
   uid ""
 
 "@kbn/config@link:bazel-bin/packages/kbn-config":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-common-internal@link:bazel-bin/packages/core/base/core-base-common-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-common@link:bazel-bin/packages/core/base/core-base-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-server-internal@link:bazel-bin/packages/core/base/core-base-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-browser-mocks@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-browser@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal":
   version "0.0.0"
   uid ""
 
@@ -3313,6 +3349,10 @@
   uid ""
 
 "@kbn/ui-theme@link:bazel-bin/packages/kbn-ui-theme":
+  version "0.0.0"
+  uid ""
+
+"@kbn/utility-types-jest@link:bazel-bin/packages/kbn-utility-types-jest":
   version "0.0.0"
   uid ""
 
@@ -4025,6 +4065,11 @@
   integrity sha512-s1zLBjWhdEI2zwaoSgyOFoKSl109CUcVBCc7biPJ3aAf6LGLU6szDvi31JPU7bxfla2lqfhjbbg/5DdFNxOwHw==
   dependencies:
     "@octokit/openapi-types" "^11.2.0"
+
+"@opentelemetry/api@^1.1.0":
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/api/-/api-1.1.0.tgz#563539048255bbe1a5f4f586a4a10a1bb737f44a"
+  integrity sha512-hf+3bwuBwtXsugA2ULBc95qxrOqP2pOekLz34BJhcAKawt94vfeNyUKpYc0lZQ/3sCP6LqRa7UAdHA7i5UODzQ==
 
 "@percy/agent@^0.28.6":
   version "0.28.6"
@@ -5694,12 +5739,12 @@
   resolved "https://registry.yarnpkg.com/@types/d3-path/-/d3-path-1.0.7.tgz#a0736fceed688a695f48265a82ff7a3369414b81"
   integrity sha512-U8dFRG+8WhkLJr2sxZ9Cw/5WeRgBnNqMxGdA1+Z0+ZG6tK0s75OQ4OXnxeyfKuh6E4wQPY8OAKr1+iNDx01BEQ==
 
-"@types/d3-scale@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@types/d3-scale/-/d3-scale-2.1.1.tgz#405e58771ec6ae7b8f7b4178ee1887620759e8f7"
-  integrity sha512-kNTkbZQ+N/Ip8oX9PByXfDLoCSaZYm+VUOasbmsa6KD850/ziMdYepg/8kLg2plHzoLANdMqPoYQbvExevLUHg==
+"@types/d3-scale@^2.2.6":
+  version "2.2.6"
+  resolved "https://registry.yarnpkg.com/@types/d3-scale/-/d3-scale-2.2.6.tgz#28540b4dfc99d978970e873e4138a6bea2ea6ab8"
+  integrity sha512-CHu34T5bGrJOeuhGxyiz9Xvaa9PlsIaQoOqjDg7zqeGj2x0rwPhGquiy03unigvcMxmvY0hEaAouT0LOFTLpIw==
   dependencies:
-    "@types/d3-time" "*"
+    "@types/d3-time" "^1"
 
 "@types/d3-shape@^1.3.1":
   version "1.3.1"
@@ -5713,7 +5758,7 @@
   resolved "https://registry.yarnpkg.com/@types/d3-time-format/-/d3-time-format-2.1.1.tgz#dd2c79ec4575f1355484ab6b10407824668eba42"
   integrity sha512-tJSyXta8ZyJ52wDDHA96JEsvkbL6jl7wowGmuf45+fAkj5Y+SQOnz0N7/H68OWmPshPsAaWMQh+GAws44IzH3g==
 
-"@types/d3-time@*", "@types/d3-time@^1.0.10":
+"@types/d3-time@^1", "@types/d3-time@^1.0.10":
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/@types/d3-time/-/d3-time-1.0.10.tgz#d338c7feac93a98a32aac875d1100f92c7b61f4f"
   integrity sha512-aKf62rRQafDQmSiv1NylKhIMmznsjRN+MnXRXTqHoqm0U/UZzVpdrtRnSIfdiLS616OuC1soYeX1dBg2n1u8Xw==
@@ -6217,11 +6262,67 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__config-mocks@link:bazel-bin/packages/kbn-config-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__config-schema@link:bazel-bin/packages/kbn-config-schema/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__config@link:bazel-bin/packages/kbn-config/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-browser@link:bazel-bin/packages/core/base/core-base-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-common-internal@link:bazel-bin/packages/core/base/core-base-common-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-common@link:bazel-bin/packages/core/base/core-base-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-server-internal@link:bazel-bin/packages/core/base/core-base-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-server@link:bazel-bin/packages/core/base/core-base-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-common-internal-base@link:bazel-bin/packages/core/common/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-browser-mocks@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-browser@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-public-internal-base@link:bazel-bin/packages/core/public/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-server-internal-base@link:bazel-bin/packages/core/server/internal-base/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -6502,6 +6603,10 @@
   uid ""
 
 "@types/kbn__ui-theme@link:bazel-bin/packages/kbn-ui-theme/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__utility-types-jest@link:bazel-bin/packages/kbn-utility-types-jest/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -11081,10 +11186,10 @@ core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.0.4, core-js@^3.22.5, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
-  version "3.22.5"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.22.5.tgz#a5f5a58e663d5c0ebb4e680cd7be37536fb2a9cf"
-  integrity sha512-VP/xYuvJ0MJWRAobcmQ8F2H6Bsn+s7zqAAjFaHGBMc5AQm7zaelhD1LGduFn2EehEcQcU+br6t+fwbpQ5d1ZWA==
+core-js@^3.0.4, core-js@^3.22.7, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
+  version "3.22.7"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.22.7.tgz#8d6c37f630f6139b8732d10f2c114c3f1d00024f"
+  integrity sha512-Jt8SReuDKVNZnZEzyEQT5eK6T2RRCXkfTq7Lo09kpm+fHjgGewSbNjV+Wt4yZMhPDdzz2x1ulI5z/w4nxpBseg==
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -11903,7 +12008,7 @@ d3-sankey@^0.7.1:
     d3-collection "1"
     d3-shape "^1.2.0"
 
-d3-scale@1.0.7, d3-scale@^1.0.5, d3-scale@^1.0.7:
+d3-scale@^1.0.5, d3-scale@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/d3-scale/-/d3-scale-1.0.7.tgz#fa90324b3ea8a776422bd0472afab0b252a0945d"
   integrity sha512-KvU92czp2/qse5tUfGms6Kjig0AhHOwkzXG0+PqIJB3ke0WUv088AHMZI0OssO9NCkXt4RP8yju9rpH8aGB7Lw==
@@ -11911,6 +12016,18 @@ d3-scale@1.0.7, d3-scale@^1.0.5, d3-scale@^1.0.7:
     d3-array "^1.2.0"
     d3-collection "1"
     d3-color "1"
+    d3-format "1"
+    d3-interpolate "1"
+    d3-time "1"
+    d3-time-format "2"
+
+d3-scale@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/d3-scale/-/d3-scale-2.2.2.tgz#4e880e0b2745acaaddd3ede26a9e908a9e17b81f"
+  integrity sha512-LbeEvGgIb8UMcAa0EATLNX0lelKWGYDQiPdHj+gLblGVhGLyNbaCn3EvrJf0A3Y/uOOU5aD6MTh5ZFCdEwGiCw==
+  dependencies:
+    d3-array "^1.2.0"
+    d3-collection "1"
     d3-format "1"
     d3-interpolate "1"
     d3-time "1"
@@ -13013,12 +13130,13 @@ elastic-apm-http-client@11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.33.0:
-  version "3.33.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.33.0.tgz#ad2850b005355299c3a9fdc631875162480ceb15"
-  integrity sha512-ZJKcRbYdEU87MWyB9CczGTLEERA595OWd0nqpxrDBkogogpxwpzCOialKZA+bekpNA0Oa4Sv18zRCdyqpV25Pw==
+elastic-apm-node@^3.34.0:
+  version "3.34.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.34.0.tgz#dfe5a08735b0cc46980dc75238444dd4a2390aea"
+  integrity sha512-LzVSXDmA3HzyOr3RvpRaOB34I0gXCfpaEEZ/OLFvVodS/1MCDM5ywEulWko6cveSdn/gklcT0vCHv1cHg8vLSg==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
+    "@opentelemetry/api" "^1.1.0"
     after-all-results "^2.0.0"
     async-cache "^1.1.0"
     async-value-promise "^1.1.1"
@@ -13040,7 +13158,6 @@ elastic-apm-node@^3.33.0:
     object-identity-map "^1.0.2"
     original-url "^1.2.3"
     pino "^6.11.2"
-    read-pkg-up "^7.0.1"
     relative-microtime "^2.0.0"
     require-in-the-middle "^5.0.3"
     semver "^6.3.0"
