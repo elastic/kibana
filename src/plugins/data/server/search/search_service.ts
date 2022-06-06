@@ -275,13 +275,15 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
       this.sessionService.start(core, { taskManager });
     }
 
+    const aggs = this.aggsService.start({
+      fieldFormats,
+      uiSettings,
+      indexPatterns,
+    });
+
     this.asScoped = this.asScopedProvider(core);
     return {
-      aggs: this.aggsService.start({
-        fieldFormats,
-        uiSettings,
-        indexPatterns,
-      }),
+      aggs,
       searchAsInternalUser: this.searchAsInternalUser,
       getSearchStrategy: this.getSearchStrategy,
       asScoped: this.asScoped,
@@ -294,6 +296,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
             esClient.asCurrentUser
           );
           const uiSettingsClient = uiSettings.asScopedToClient(savedObjectsClient);
+          const aggsStart = await aggs.asScopedToClient(savedObjectsClient, esClient.asCurrentUser);
 
           // cache ui settings, only including items which are explicitly needed by SearchSource
           const uiSettingsCache = pick(
@@ -302,6 +305,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
           );
 
           const searchSourceDependencies: SearchSourceDependencies = {
+            aggs: aggsStart,
             getConfig: <T = any>(key: string): T => uiSettingsCache[key],
             search: this.asScoped(request).search,
             onResponse: (req, res) => res,
