@@ -72,11 +72,14 @@ describe('TabbedAggResponseWriter class', () => {
       getFormatterForField: () => ({ toJSON: () => '' }),
     } as any;
 
-    return new TabbedAggResponseWriter(new AggConfigs(indexPattern, aggs, { typesRegistry }), {
-      metricsAtAllLevels: false,
-      partialRows: false,
-      ...opts,
-    });
+    return new TabbedAggResponseWriter(
+      new AggConfigs(indexPattern, aggs, { typesRegistry }, jest.fn()),
+      {
+        metricsAtAllLevels: false,
+        partialRows: false,
+        ...opts,
+      }
+    );
   };
 
   describe('Constructor', () => {
