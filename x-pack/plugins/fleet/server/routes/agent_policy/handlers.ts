@@ -141,16 +141,18 @@ export const createAgentPolicyHandler: FleetRequestHandler<
   }
 };
 
-export const updateAgentPolicyHandler: RequestHandler<
+export const updateAgentPolicyHandler: FleetRequestHandler<
   TypeOf<typeof UpdateAgentPolicyRequestSchema.params>,
   unknown,
   TypeOf<typeof UpdateAgentPolicyRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
+  const fleetContext = await context.fleet;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = await appContextService.getSecurity()?.authc.getCurrentUser(request);
   const { force, ...data } = request.body;
+  const spaceId = fleetContext.spaceId;
   try {
     const agentPolicy = await agentPolicyService.update(
       soClient,
@@ -160,6 +162,7 @@ export const updateAgentPolicyHandler: RequestHandler<
       {
         force,
         user: user || undefined,
+        spaceId,
       }
     );
     const body: UpdateAgentPolicyResponse = { item: agentPolicy };

@@ -18,6 +18,8 @@ import type {
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
   AGENTS_PREFIX,
@@ -40,6 +42,7 @@ import {
   AGENT_POLICY_INDEX,
   UUID_V5_NAMESPACE,
   FLEET_APM_PACKAGE,
+  FLEET_ELASTIC_AGENT_PACKAGE,
 } from '../../common';
 import type {
   DeleteAgentPolicyResponse,
@@ -59,7 +62,7 @@ import {
   elasticAgentManagedManifest,
 } from './elastic_agent_manifest';
 
-import { getPackageInfo } from './epm/packages';
+import { getPackageInfo, bulkInstallPackages } from './epm/packages';
 import { getAgentsByKuery } from './agents';
 import { packagePolicyService } from './package_policy';
 import { incrementPackagePolicyCopyName } from './package_policies';
@@ -350,7 +353,7 @@ class AgentPolicyService {
     esClient: ElasticsearchClient,
     id: string,
     agentPolicy: Partial<AgentPolicy>,
-    options?: { user?: AuthenticatedUser; force?: boolean }
+    options?: { user?: AuthenticatedUser; force?: boolean; spaceId?: string }
   ): Promise<AgentPolicy> {
     if (agentPolicy.name) {
       await this.requireUniqueName(soClient, {
@@ -373,6 +376,19 @@ class AgentPolicyService {
             throw new HostedAgentPolicyRestrictionRelatedError(`Cannot update ${key}`);
           }
         });
+    }
+    const { monitoring_enabled: monitoringEnabled } = agentPolicy;
+    const packagesToInstall = [];
+    if (!existingAgentPolicy.monitoring_enabled && monitoringEnabled?.length) {
+      packagesToInstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
+    }
+    if (packagesToInstall.length > 0) {
+      await bulkInstallPackages({
+        savedObjectsClient: soClient,
+        esClient,
+        packagesToInstall,
+        spaceId: options?.spaceId || DEFAULT_SPACE_ID,
+      });
     }
 
     return this._update(soClient, esClient, id, agentPolicy, options?.user);
