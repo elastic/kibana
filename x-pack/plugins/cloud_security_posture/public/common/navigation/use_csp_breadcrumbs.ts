@@ -9,10 +9,10 @@ import type { ChromeBreadcrumb, CoreStart } from '@kbn/core/public';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type RouteProps, useRouteMatch, useHistory } from 'react-router-dom';
-import type { CspNavigationItem } from './types';
-import { CLOUD_POSTURE } from './translations';
 import type { EuiBreadcrumb } from '@elastic/eui';
 import { string } from 'io-ts';
+import type { CspNavigationItem } from './types';
+import { CLOUD_POSTURE } from './translations';
 
 const getClickableBreadcrumb = (
   routeMatch: RouteProps['path'],
