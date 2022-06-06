@@ -125,16 +125,7 @@ export function TimeseriesChart({
   const timeZone = getTimeZone(core.uiSettings);
 
   const min = Math.min(...xValues);
-  const max = Math.max(
-    ...xValues,
-    // If the last data point of timeseries ends before (picked end time + bucket_span)
-    // we need to extend the x max domain to the last available data point for the expected bounds
-    // for the area chart to show up correctly
-    // See https://github.com/elastic/elastic-charts/issues/1685
-    isComparingExpectedBounds
-      ? anomalyChartTimeseries?.boundaries[0]?.data?.slice(-1)[0]?.x ?? 0
-      : -Infinity
-  );
+  const max = Math.max(...xValues);
   const xFormatter = niceTimeFormatter([min, max]);
 
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
@@ -142,6 +133,7 @@ export function TimeseriesChart({
   // Using custom legendSort here when comparing expected bounds
   // because by default elastic-charts will show legends for expected bounds first
   // but for consistency, we are making `Expected bounds` last
+  // See https://github.com/elastic/elastic-charts/issues/1685
   const legendSort = isComparingExpectedBounds
     ? (a: SeriesIdentifier, b: SeriesIdentifier) => {
         if ((a as XYChartSeriesIdentifier)?.specId === expectedBoundsTitle)

@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { compact, keyBy } from 'lodash';
+import { compact, keyBy, last, uniqBy } from 'lodash';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import { parseInterval } from '@kbn/data-plugin/common';
 import { Environment } from '../../../common/environment_rt';
@@ -31,18 +31,6 @@ function divide(value: number | null, divider: number) {
     return null;
   }
   return value / divider;
-}
-
-// Expected bounds are retrieved with bucket span interval padded to the time range
-// so we need to cut the excess bounds to just the start and end time
-// so that the chart show up correctly without the padded time
-function getBoundedX(value: number | null, start: number, end: number) {
-  if (value === null) {
-    return null;
-  }
-  if (value < start) return start;
-  if (value > end) return end;
-  return value;
 }
 
 export async function getAnomalyTimeseries({
@@ -208,6 +196,30 @@ export async function getAnomalyTimeseries({
       // ml failure rate is stored as 0-100, we calculate failure rate as 0-1
       const divider = type === ApmMlDetectorType.txFailureRate ? 100 : 1;
 
+      // Since there need to be a minimum of two data poinsts for area model bounds
+      // Add the final data point timestamp + next bucket span - 1
+      const bounds = bucket.timeseries.buckets.map((dateBucket) => {
+        return {
+          x: dateBucket.key,
+          y0: divide(dateBucket.model_lower.value, divider),
+          y1: divide(dateBucket.model_upper.value, divider),
+        };
+      });
+      const latestBucket = last(bucket.timeseries.buckets);
+      if (
+        latestBucket &&
+        (latestBucket?.key < end || bucket.timeseries.buckets.length === 1)
+      ) {
+        bounds.push({
+          x: Math.min(
+            end,
+            // @ts-expect-error bucket_span is not yet available in ES type
+            latestBucket.key + latestBucket.bucket_span * 1000 - 1
+          ),
+          y0: divide(latestBucket.model_lower.value, divider),
+          y1: divide(latestBucket.model_upper.value, divider),
+        });
+      }
       return {
         jobId,
         type,
@@ -230,13 +242,7 @@ export async function getAnomalyTimeseries({
             divider
           ),
         })),
-        bounds: bucket.timeseries.buckets.map((dateBucket) => {
-          return {
-            x: getBoundedX(dateBucket.key, start, end) as number,
-            y0: divide(dateBucket.model_lower.value, divider),
-            y1: divide(dateBucket.model_upper.value, divider),
-          };
-        }),
+        bounds: uniqBy(bounds, 'x'),
       };
     }) ?? [];
 
