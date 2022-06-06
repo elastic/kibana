@@ -17,7 +17,7 @@ import {
   ARIA_ROWINDEX_ATTRIBUTE,
   onKeyDownFocusHandler,
   getActionsColumnWidth,
-} from '@kbn/timelines-plugin/public';
+} from '../../../../../../timelines/public';
 import { CellValueElementProps } from '../cell_rendering';
 import { DEFAULT_COLUMN_MIN_WIDTH } from './constants';
 import {
