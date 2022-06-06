@@ -7,17 +7,13 @@
 import { keyBy, keys, merge } from 'lodash';
 import type { RequestHandler } from '@kbn/core/server';
 
-import type { TypeOf } from '@kbn/config-schema';
-
 import type { DataStream } from '../../types';
 import { KibanaSavedObjectType } from '../../../common';
 import type { GetDataStreamsResponse } from '../../../common';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
-import type { GetDataStreamsListRequestSchema } from '../../../common/constants/data_streams';
 
-import { getMetadataFromTermsEnum } from './get_metadata_from_terms_enum';
-import { getMetadataFromAggregations } from './get_metadata_from_aggregations';
+import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 
@@ -46,10 +42,6 @@ export const getListHandler: RequestHandler = async (context, request, response)
   // Query datastreams as the current user as the Kibana internal user may not have all the required permission
   const { savedObjects, elasticsearch } = await context.core;
   const esClient = elasticsearch.client.asCurrentUser;
-
-  const { use_terms_enum: useTermsEnum } = request.params as TypeOf<
-    typeof GetDataStreamsListRequestSchema['params']
-  >;
 
   const body: GetDataStreamsResponse = {
     data_streams: [],
@@ -137,9 +129,8 @@ export const getListHandler: RequestHandler = async (context, request, response)
         serviceDetails: null,
       };
 
-      const { maxIngested, namespace, dataset, type, serviceNames, environments } = useTermsEnum
-        ? await getMetadataFromTermsEnum({ dataStreamName: dataStream.name, esClient })
-        : await getMetadataFromAggregations({ dataStreamName: dataStream.name, esClient });
+      const { maxIngested, namespace, dataset, type, serviceNames, environments } =
+        await getDataStreamsQueryMetadata({ dataStreamName: dataStream.name, esClient });
 
       // some integrations e.g custom logs don't have event.ingested
       if (maxIngested) {
