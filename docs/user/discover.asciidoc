@@ -174,8 +174,7 @@ you can use to build a structured query.
 Search the ecommerce data for documents where the country matches US:
 
 . Enter `g`, and then select *geoip.country_iso_code*.
-. Select *:* for equals some value and *US*, and then click
-image:images/update-button.png[button at the end of the query bar for updating your search, width=24px].
+. Select *:* for equals some value and *US*, and then click *Refresh*.
 . For a more complex search, try:
 +
 ```ts
@@ -281,6 +280,12 @@ To share your findings with a larger audience, click *Share* in the *Discover* t
 * <<kuery-query, Learn more about the structure of a KQL query>>.
 
 * <<discover-search-for-relevance, Search for relevance>>.
+
+* <<alerting-getting-started, Create an alert from Discover>>.
+In the toolbar, click *Alerts*, and then
+click *Create search threshold rule*. Follow the prompts to
+create an alert that periodically checks when data goes above or below a certain
+threshold within a given time interval.
 
 * <<kibana-discover-settings, Configure Discover>> to better meet your needs.
 Go to **Advanced Settings** to configure the number of documents to show,
