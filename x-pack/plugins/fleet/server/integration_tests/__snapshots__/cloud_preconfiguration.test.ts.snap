@@ -68,6 +68,7 @@ Object {
         "max_connections": 0,
         "max_event_size": 307200,
         "max_header_size": 1048576,
+        "pprof.enabled": false,
         "read_timeout": "3600s",
         "response_headers": null,
         "rum": Object {
@@ -124,7 +125,15 @@ Object {
   ],
   "output_permissions": Object {
     "es-containerhost": Object {
-      "Elastic APM": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [],
+      },
+      "elastic-cloud-apm": Object {
         "cluster": Array [
           "cluster:monitor/main",
         ],
@@ -205,14 +214,6 @@ Object {
             ],
           },
         ],
-      },
-      "_elastic_agent_checks": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-      },
-      "_elastic_agent_monitoring": Object {
-        "indices": Array [],
       },
     },
   },

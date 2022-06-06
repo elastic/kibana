@@ -58,8 +58,6 @@ import {
   validateDataView,
 } from './data_views';
 
-export type { IndexPatternsService } from './data_views';
-
 // Index patterns namespace:
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
@@ -77,8 +75,6 @@ export const indexPatterns = {
 export type { DataViewsContract, TypeMeta } from './data_views';
 
 export type {
-  IFieldType,
-  IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,
