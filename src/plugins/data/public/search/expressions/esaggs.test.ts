@@ -8,7 +8,7 @@
 
 import { omit } from 'lodash';
 import { of as mockOf } from 'rxjs';
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { ExecutionContext } from '@kbn/expressions-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type {
@@ -112,11 +112,11 @@ describe('esaggs expression function - public', () => {
       aggs: {
         foo: 'bar',
         hierarchical: true,
+        partialRows: args.partialRows,
       },
       filters: undefined,
       indexPattern: {},
       inspectorAdapters: mockHandlers.inspectorAdapters,
-      partialRows: args.partialRows,
       query: undefined,
       searchSessionId: 'abc123',
       searchSourceService: startDependencies.searchSource,

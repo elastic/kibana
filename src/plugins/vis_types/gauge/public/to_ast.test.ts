@@ -34,13 +34,7 @@ describe('gauge vis toExpressionAst function', () => {
           },
         },
       },
-      data: {
-        indexPattern: { id: '123' } as any,
-        aggs: {
-          getResponseAggs: () => [],
-          aggs: [],
-        } as any,
-      },
+      data: {},
     } as unknown as Vis<GaugeVisParams>;
   });
 
