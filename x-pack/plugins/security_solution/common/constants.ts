@@ -242,6 +242,8 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
 
+export const DEV_TOOL_CONSOLE = `/internal/dev_tool/console` as const;
+
 /**
  * Internal detection engine routes
  */

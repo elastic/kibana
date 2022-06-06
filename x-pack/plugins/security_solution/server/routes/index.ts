@@ -70,6 +70,7 @@ import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/rou
 import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
 import { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
+import { readConsoleRoute } from '../lib/console/read_console_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -155,6 +156,8 @@ export const initRoutes = (
   createIndexRoute(router);
   readIndexRoute(router, ruleDataService);
   deleteIndexRoute(router);
+
+  readConsoleRoute(router);
 
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
   readTagsRoute(router, isRuleRegistryEnabled);
