@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
-export const GetDataStreamsListRequestSchema = {
-  params: schema.object({
-    use_terms_enum: schema.boolean({ defaultValue: false }),
-  }),
-};
+export function serializeApmGlobalLabels(obj: any) {
+  return Object.entries(obj)
+    .filter(([, v]) => !!v)
+    .reduce((acc, [k, v]) => (acc ? `${acc},${k}=${v}` : `${k}=${v}`), '');
+}
