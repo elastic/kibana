@@ -73,10 +73,6 @@ the hostname of the host that connects to this {kib} instance. *Default: `true`*
 [[elasticsearch-requestHeadersWhitelist]] `elasticsearch.requestHeadersWhitelist`::
 List of {kib} client-side headers to send to {es}. To send *no* client-side
 
-[[elasticsearch-pingTimeout]] `elasticsearch.pingTimeout`::
-Time in milliseconds to wait for {es} to respond to pings.
-*Default: the value of the <<elasticsearch-requestTimeout, `elasticsearch.requestTimeout`>> setting*
-
 `elasticsearch.shardTimeout`::
 Time in milliseconds for {es} to wait for responses from shards.
 Set to 0 to disable. *Default: `30000`*
