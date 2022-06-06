@@ -1047,7 +1047,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.only('8.3.0', () => {
+    describe('8.3.0', () => {
       const CASE_ID = '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c';
 
       before(async () => {
@@ -1104,7 +1104,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           });
         });
 
-        it('does NOT adds the severity field to the other user actions', async () => {
+        it('does NOT add the severity field to the other user actions', async () => {
           const userActions = await getCaseUserActions({
             supertest,
             caseID: CASE_ID,
