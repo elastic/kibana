@@ -103,19 +103,20 @@ export const updateAgentConfiguration = async (
   packagePolicy: PackagePolicy,
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  user?: AuthenticatedUser | null
+  userAuh: AuthenticatedUser | null
 ): Promise<PackagePolicy> => {
   const cspRules = await getCspRules(soClient, packagePolicy);
   const rulesConfig = createRulesConfig(cspRules);
   const dataYaml = convertRulesConfigToYaml(rulesConfig);
   const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
-
-  if (!!user) {
-    return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy, {
-      user,
-    });
-  }
-  return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy);
+  const options = { user: userAuh ? userAuh : undefined };
+  return packagePolicyService.update(
+    soClient,
+    esClient,
+    packagePolicy.id,
+    updatedPackagePolicy,
+    options
+  );
 };
 
 export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspAppContext): void =>
