@@ -921,7 +921,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.utilization_limits.cpu',
       {
         defaultMessage:
-          'The percentage of the aggregate system CPU to restrict Endpoint to.  Default: 100',
+          'The percentage of the aggregate system CPU to restrict Endpoint to. The range is 20-100%. Anything under 20 gets ignored and causes a policy warning.  Default: 100',
       }
     ),
   },
@@ -932,7 +932,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.utilization_limits.cpu',
       {
         defaultMessage:
-          'The percentage of the aggregate system CPU to restrict Endpoint to.  Default: 50',
+          'The percentage of the aggregate system CPU to restrict Endpoint to. The range is 20-100%. Anything under 20 gets ignored and causes a policy warning.  Default: 50',
       }
     ),
   },
