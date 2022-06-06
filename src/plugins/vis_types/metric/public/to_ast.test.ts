@@ -22,13 +22,7 @@ describe('metric vis toExpressionAst function', () => {
       params: {
         percentageMode: false,
       },
-      data: {
-        indexPattern: { id: '123' } as any,
-        aggs: {
-          getResponseAggs: () => [],
-          aggs: [],
-        } as any,
-      },
+      data: {},
     } as unknown as Vis<VisParams>;
   });
 

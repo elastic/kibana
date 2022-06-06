@@ -97,7 +97,9 @@ export const tableVisTypeDefinition: VisTypeDefinition<TableVisParams> = {
       },
     ],
   },
+  fetchDatatable: true,
   toExpressionAst,
+  hasPartialRows: (vis) => vis.params.showPartialRows,
   hierarchicalData: (vis) => vis.params.showPartialRows || vis.params.showMetricsAtAllLevels,
   requiresSearch: true,
 };
