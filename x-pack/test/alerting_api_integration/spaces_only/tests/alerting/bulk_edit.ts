@@ -24,7 +24,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ enabled: false, tags: ['default'] }));
+        .send(getTestRuleData({ enabled: true, tags: ['default'] }));
 
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -70,7 +70,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
             supertest
               .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
               .set('kbn-xsrf', 'foo')
-              .send(getTestRuleData({ enabled: false, tags: [`multiple-rules-edit`] }))
+              .send(getTestRuleData({ enabled: true, tags: [`multiple-rules-edit`] }))
               .expect(200)
           )
         )
@@ -122,7 +122,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ enabled: false, schedule: { interval: '10m' } }));
+        .send(getTestRuleData({ enabled: true, schedule: { interval: '10m' } }));
 
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -165,7 +165,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       const { body: createdRule } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
         .set('kbn-xsrf', 'foo')
-        .send(getTestRuleData({ enabled: false, tags: ['default'] }));
+        .send(getTestRuleData({ enabled: true, tags: ['default'] }));
 
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -187,82 +187,42 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         .expect(200, { rules: [], errors: [], total: 0 });
     });
 
-    // for test purpose only, will be removed
-    for (let i = 0; i < 200; i++) {
-      it(`should return mapped params after bulk edit #${i}`, async () => {
-        const { body: createdRule } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(
-            getTestRuleData({
-              enabled: false,
-              tags: ['default'],
-              params: { risk_score: 40, severity: 'medium' },
-            })
-          );
+    it('should return mapped params after bulk edit', async () => {
+      const { body: createdRule } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(
+          getTestRuleData({
+            enabled: true,
+            tags: ['default'],
+            params: { risk_score: 40, severity: 'medium' },
+          })
+        );
 
-        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
+      objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-        const payload = {
-          ids: [createdRule.id],
-          operations: [
-            {
-              operation: 'add',
-              field: 'tags',
-              value: ['tag-1'],
-            },
-          ],
-        };
+      const payload = {
+        ids: [createdRule.id],
+        operations: [
+          {
+            operation: 'add',
+            field: 'tags',
+            value: ['tag-1'],
+          },
+        ],
+      };
 
-        const bulkEditResponse = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
-          .set('kbn-xsrf', 'foo')
-          .send(payload);
+      const bulkEditResponse = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
+        .set('kbn-xsrf', 'foo')
+        .send(payload);
 
-        expect(bulkEditResponse.body.errors).to.have.length(0);
-        expect(bulkEditResponse.body.rules).to.have.length(1);
-        expect(bulkEditResponse.body.rules[0].mapped_params).to.eql({
-          risk_score: 40,
-          severity: '40-medium',
-        });
+      expect(bulkEditResponse.body.errors).to.have.length(0);
+      expect(bulkEditResponse.body.rules).to.have.length(1);
+      expect(bulkEditResponse.body.rules[0].mapped_params).to.eql({
+        risk_score: 40,
+        severity: '40-medium',
       });
-
-      it(`should return mapped params after bulk edit ENABLED #${i}`, async () => {
-        const { body: createdRule } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(
-            getTestRuleData({
-              tags: ['default'],
-              params: { risk_score: 40, severity: 'medium' },
-            })
-          );
-
-        objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
-
-        const payload = {
-          ids: [createdRule.id],
-          operations: [
-            {
-              operation: 'add',
-              field: 'tags',
-              value: ['tag-1'],
-            },
-          ],
-        };
-
-        const bulkEditResponse = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_bulk_edit`)
-          .set('kbn-xsrf', 'foo')
-          .send(payload);
-
-        expect(bulkEditResponse.body.errors).to.have.length(0);
-        expect(bulkEditResponse.body.rules).to.have.length(1);
-        expect(bulkEditResponse.body.rules[0].mapped_params).to.eql({
-          risk_score: 40,
-          severity: '40-medium',
-        });
-      });
-    }
+    });
   });
 }
