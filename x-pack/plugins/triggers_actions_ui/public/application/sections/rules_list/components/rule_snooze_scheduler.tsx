@@ -13,7 +13,6 @@ import {
   EuiDatePicker,
   EuiDatePickerRange,
   EuiPanel,
-  EuiContextMenuPanel,
   EuiComboBox,
   EuiFormRow,
   EuiHorizontalRule,
@@ -22,6 +21,9 @@ import {
   EuiSwitch,
   EuiSpacer,
   EuiButton,
+  EuiPopoverTitle,
+  EuiIcon,
+  EuiLink,
 } from '@elastic/eui';
 import { RecurrenceSchedule, SnoozeSchedule } from '../../../../types';
 import { RecurrenceScheduler } from './recurrence_scheduler';
@@ -48,8 +50,6 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
   hasTitle = true,
   ...rest
 }: ComponentOpts) => {
-  // We have to use refs for these things because setting state in an onFocus call re-renders and then blurs an EuiDatePicker input field
-
   const title =
     hasTitle &&
     (initialSchedule
@@ -61,9 +61,23 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
         }));
 
   return (
-    <EuiContextMenuPanel title={title} onClose={onClose}>
+    <>
+      {title && (
+        <EuiPopoverTitle>
+          <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="arrowLeft" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiLink color="text" style={{ fontWeight: 'bold' }} onClick={onClose}>
+                {title}
+              </EuiLink>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPopoverTitle>
+      )}
       <RuleSnoozeSchedulerPanel initialSchedule={initialSchedule} {...rest} />
-    </EuiContextMenuPanel>
+    </>
   );
 };
 

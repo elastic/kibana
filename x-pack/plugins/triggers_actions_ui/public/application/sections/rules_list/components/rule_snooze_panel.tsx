@@ -25,6 +25,7 @@ import {
   EuiButtonEmpty,
   EuiIcon,
   EuiConfirmModal,
+  EuiPopoverTitle,
 } from '@elastic/eui';
 import { parseInterval } from '../../../../../common';
 import type { RecurrenceSchedule, SnoozeSchedule } from '../../../../types';
@@ -272,16 +273,11 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
   return (
     <>
       {hasTitle && (
-        <>
-          <EuiTitle size="xxs">
-            <h5>
-              {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozePanelTitle', {
-                defaultMessage: 'Snooze notifications',
-              })}
-            </h5>
-          </EuiTitle>
-          <EuiHorizontalRule margin="xs" />
-        </>
+        <EuiPopoverTitle>
+          {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozePanelTitle', {
+            defaultMessage: 'Snooze notifications',
+          })}
+        </EuiPopoverTitle>
       )}
       <EuiSpacer size="s" />
       <EuiFlexGroup data-test-subj="snoozePanel" gutterSize="xs">

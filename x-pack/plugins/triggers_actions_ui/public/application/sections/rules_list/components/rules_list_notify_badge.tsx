@@ -196,7 +196,12 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   );
 
   return (
-    <EuiPopover isOpen={isOpen} closePopover={onClosePopover} button={buttonWithToolTip}>
+    <EuiPopover
+      isOpen={isOpen}
+      closePopover={onClosePopover}
+      button={buttonWithToolTip}
+      anchorPosition="rightCenter"
+    >
       <SnoozePanel
         snoozeRule={onApplySnooze}
         unsnoozeRule={onApplyUnsnooze}
