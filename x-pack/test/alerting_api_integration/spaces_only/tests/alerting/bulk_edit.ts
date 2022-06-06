@@ -24,7 +24,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData({ enabled: false, tags: ['default'] }));
+          .send(getTestRuleData({ enabled: true, tags: ['default'] }));
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -70,7 +70,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
               supertest
                 .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
                 .set('kbn-xsrf', 'foo')
-                .send(getTestRuleData({ enabled: false, tags: [`multiple-rules-edit`] }))
+                .send(getTestRuleData({ enabled: true, tags: [`multiple-rules-edit`] }))
                 .expect(200)
             )
           )
@@ -122,7 +122,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData({ enabled: false, schedule: { interval: '10m' } }));
+          .send(getTestRuleData({ enabled: true, schedule: { interval: '10m' } }));
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -165,7 +165,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
         const { body: createdRule } = await supertest
           .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData({ enabled: false, tags: ['default'] }));
+          .send(getTestRuleData({ enabled: true, tags: ['default'] }));
 
         objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
@@ -193,7 +193,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send(
             getTestRuleData({
-              enabled: false,
+              enabled: true,
               tags: ['default'],
               params: { risk_score: 40, severity: 'medium' },
             })
