@@ -128,7 +128,6 @@ export default function ({ getService }: FtrProviderContext) {
           _id: 'HCFxB2kBR346wHgnL4ik',
           instances: 1,
           process: {
-            args: [],
             name: ['kworker/u2:0'],
           },
           user: {
