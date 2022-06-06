@@ -48,7 +48,7 @@ export const INTEGRATIONS_ENABLED_TOOLTIP = i18n.translate(
   'xpack.securitySolution.detectionEngine.relatedIntegrations.enabledTooltip',
   {
     defaultMessage:
-      'Integration is installed. An integration policy with the required configuration exists. Ensure Elastic Agents are assigned this policy to ingest compatible events.',
+      'Integration is installed and an integration policy with the required configuration exists. Ensure Elastic Agents are assigned this policy to ingest compatible events.',
   }
 );
 
