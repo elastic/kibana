@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-require('../src/setup_node_env/node_version_validator');
-// eslint-disable-next-line @kbn/imports/uniform_imports
-require('../packages/elastic-apm-synthtrace/bin/synthtrace');
+require('@elastic/apm-synthtrace').runSynthtrace();
