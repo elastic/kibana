@@ -12,7 +12,7 @@ import { firstValueFrom, Subject } from 'rxjs';
 import { isPromise } from '@kbn/std';
 import { isConfigSchema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
-
+import { PluginType } from '@kbn/core-base-common';
 import {
   AsyncPlugin,
   Plugin,
@@ -21,7 +21,6 @@ import {
   PluginInitializerContext,
   PluginManifest,
   PluginOpaqueId,
-  PluginType,
   PrebootPlugin,
 } from './types';
 import { CorePreboot, CoreSetup, CoreStart } from '..';

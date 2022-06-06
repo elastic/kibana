@@ -7,7 +7,7 @@
  */
 
 import { take } from 'rxjs/operators';
-import { injectedMetadataServiceMock } from '../injected_metadata/injected_metadata_service.mock';
+import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { ThemeService } from './theme_service';
 
 describe('ThemeService', () => {
