@@ -15,12 +15,57 @@ import {
 import { schema } from '@kbn/config-schema';
 
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
+import { lastValueFrom } from 'rxjs';
 import { SERVER_SEARCH_ROUTE_PATH } from '../../common/constants';
 import { Feed } from '../../common/types/Feed';
 
 const AGGREGATION_NAME = 'feeds' as const;
 
-export function registerServerSearchRoute(router: IRouter<DataRequestHandlerContext>) {
+interface ThreatSourceBucket {
+  key: string;
+  last_seen: { value: number };
+}
+
+interface ThreatSourcesQueryResponse {
+  aggregations: {
+    [AGGREGATION_NAME]: {
+      buckets: ThreatSourceBucket[];
+    };
+  };
+}
+
+const bucketToFeed = (bucket: ThreatSourceBucket): Feed => ({
+  name: bucket.key,
+  lastSeen: new Date(bucket.last_seen.value),
+});
+
+const sourcesQuery = {
+  params: {
+    body: {
+      query: {
+        exists: {
+          field: 'threat',
+        },
+      },
+      aggs: {
+        [AGGREGATION_NAME]: {
+          terms: {
+            field: 'threat.feed.name',
+          },
+          aggs: {
+            last_seen: {
+              max: {
+                field: 'event.created',
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+};
+
+export function registerSourceSearchRoute(router: IRouter<DataRequestHandlerContext>) {
   router.get(
     {
       path: SERVER_SEARCH_ROUTE_PATH,
@@ -33,52 +78,28 @@ export function registerServerSearchRoute(router: IRouter<DataRequestHandlerCont
     },
     async (context, request, response) => {
       const search = await context.search;
-
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
-      const res = (await search
-        .search(
+      const {
+        rawResponse: {
+          aggregations: {
+            [AGGREGATION_NAME]: { buckets },
+          },
+        },
+      } = await lastValueFrom(
+        search.search<IEsSearchRequest, IKibanaSearchResponse<ThreatSourcesQueryResponse>>(
+          sourcesQuery,
           {
-            params: {
-              body: {
-                query: {
-                  exists: {
-                    field: 'threat',
-                  },
-                },
-                aggs: {
-                  [AGGREGATION_NAME]: {
-                    terms: {
-                      field: 'threat.feed.name',
-                    },
-                    aggs: {
-                      last_seen: {
-                        max: {
-                          field: 'event.created',
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          } as IEsSearchRequest,
-          { abortSignal }
+            abortSignal,
+          }
         )
-        .toPromise()) as IKibanaSearchResponse;
+      );
 
-      const buckets = res.rawResponse.aggregations[AGGREGATION_NAME].buckets;
-
-      const feeds: Feed[] = buckets.map((bucket: any) => ({
-        name: bucket.key,
-        lastSeen: new Date(bucket.last_seen.value),
-      }));
-
-      return response.ok({ body: feeds });
+      return response.ok({ body: buckets.map(bucketToFeed) });
     }
   );
 }
 
 export function registerRoutes(router: IRouter<DataRequestHandlerContext>) {
-  registerServerSearchRoute(router);
+  registerSourceSearchRoute(router);
 }
