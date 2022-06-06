@@ -163,4 +163,28 @@ export class ConsolePageObject extends FtrService {
       return lines.length === 1 && text.trim() === '';
     });
   }
+
+  public async selectAllRequests() {
+    const editor = await this.getEditorTextArea();
+    const selectionKey = Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'];
+    await editor.pressKeys([selectionKey, 'a']);
+  }
+
+  public async hasSuccessBadge() {
+    try {
+      const responseEditor = await this.testSubjects.find('response-editor');
+      return Boolean(await responseEditor.findByCssSelector('.ace_badge--success'));
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async hasWarningBadge() {
+    try {
+      const responseEditor = await this.testSubjects.find('response-editor');
+      return Boolean(await responseEditor.findByCssSelector('.ace_badge--warning'));
+    } catch (e) {
+      return false;
+    }
+  }
 }
