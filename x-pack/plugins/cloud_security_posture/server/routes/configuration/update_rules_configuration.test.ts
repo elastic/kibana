@@ -37,6 +37,7 @@ import {
 import { Chance } from 'chance';
 import { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import { mockAuthenticatedUser } from '@kbn/security-plugin/common/model/authenticated_user.mock';
 
 describe('Update rules configuration API', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -238,11 +239,14 @@ describe('Update rules configuration API', () => {
     const packagePolicyId1 = chance.guid();
     mockPackagePolicy.id = packagePolicyId1;
 
+    const userAuth = null;
+
     const updatePackagePolicy = await updateAgentConfiguration(
       mockPackagePolicyService,
       mockPackagePolicy,
       mockEsClient,
-      mockSoClient
+      mockSoClient,
+      userAuth
     );
 
     expect(updatePackagePolicy.vars!.dataYaml).toHaveProperty('value');
@@ -279,6 +283,7 @@ describe('Update rules configuration API', () => {
 
     const mockPackagePolicy = createPackagePolicyMock();
     const packagePolicyId1 = chance.guid();
+    const userAuth = null;
     mockPackagePolicy.id = packagePolicyId1;
     mockPackagePolicy.vars = { foo: {}, dataYaml: { type: 'yaml' } };
 
@@ -298,10 +303,44 @@ describe('Update rules configuration API', () => {
       mockPackagePolicyService,
       mockPackagePolicy,
       mockEsClient,
-      mockSoClient
+      mockSoClient,
+      userAuth
     );
 
     expect(mockPackagePolicyService.update).toBeCalledTimes(1);
     expect(updatedPackagePolicy.vars).toHaveProperty('foo');
+  });
+
+  it('validate updateAgentConfiguration passes userAuth to the package update method', async () => {
+    mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockSoClient = savedObjectsClientMock.create();
+
+    const mockPackagePolicyService = createPackagePolicyServiceMock();
+    const mockPackagePolicy = createPackagePolicyMock();
+    const userAuth = mockAuthenticatedUser();
+
+    mockSoClient.find.mockResolvedValueOnce({
+      page: 1,
+      per_page: 1000,
+      total: 2,
+      saved_objects: [
+        {
+          type: 'csp_rule',
+          rego_rule_id: '1.1.1',
+          attributes: { enabled: false, rego_rule_id: 'cis_1_1_1' },
+        },
+      ],
+    } as unknown as SavedObjectsFindResponse<CspRuleSchema>);
+
+    mockPackagePolicy.vars = { dataYaml: { type: 'yaml' } };
+
+    await updateAgentConfiguration(
+      mockPackagePolicyService,
+      mockPackagePolicy,
+      mockEsClient,
+      mockSoClient,
+      userAuth
+    );
+    expect(mockPackagePolicyService.update.mock.calls[0][4]).toMatchObject({ user: userAuth });
   });
 });
