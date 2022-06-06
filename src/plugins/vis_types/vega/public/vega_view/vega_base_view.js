@@ -48,7 +48,7 @@ const bypassToken = Symbol();
 function normalizeDate(date) {
   let normalizedDate = '';
   if (typeof date === 'number') {
-    normalizeDate = date;
+    normalizedDate = date;
   } else if (date instanceof Date) {
     normalizedDate = date;
   } else {
