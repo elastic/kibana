@@ -14,32 +14,29 @@ import {
   type CriteriaWithPagination,
   type EuiTableActionsColumnType,
 } from '@elastic/eui';
-import { extractErrorMessage } from '../../../../common/utils/helpers';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
 import type { CspFinding } from '../types';
-import type { CspFindingsResult } from './use_latest_findings';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import { getExpandColumn, getFindingsColumns } from '../layout/findings_layout';
 
 type TableProps = Required<EuiBasicTableProps<CspFinding>>;
 
-interface BaseFindingsTableProps {
+interface Props {
+  loading: boolean;
+  items: CspFinding[];
   pagination: Pagination;
   sorting: TableProps['sorting'];
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
 }
 
-type FindingsTableProps = CspFindingsResult & BaseFindingsTableProps;
-
 const FindingsTableComponent = ({
-  error,
-  data,
   loading,
+  items,
   pagination,
   sorting,
   setTableOptions,
-}: FindingsTableProps) => {
+}: Props) => {
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
   const columns: [
@@ -51,7 +48,7 @@ const FindingsTableComponent = ({
   );
 
   // Show "zero state"
-  if (!loading && !data?.page.length)
+  if (!loading && !items.length)
     // TODO: use our own logo
     return (
       <EuiEmptyPrompt
@@ -64,10 +61,9 @@ const FindingsTableComponent = ({
   return (
     <>
       <EuiBasicTable
-        data-test-subj={TEST_SUBJECTS.FINDINGS_TABLE}
         loading={loading}
-        error={error ? extractErrorMessage(error) : undefined}
-        items={data?.page || []}
+        data-test-subj={TEST_SUBJECTS.FINDINGS_TABLE}
+        items={items}
         columns={columns}
         pagination={pagination}
         sorting={sorting}

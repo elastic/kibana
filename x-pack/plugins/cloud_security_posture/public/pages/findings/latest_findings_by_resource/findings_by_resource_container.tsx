@@ -13,16 +13,25 @@ import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import type { FindingsBaseProps, FindingsBaseURLQuery } from '../types';
 import { FindingsByResourceQuery, useFindingsByResource } from './use_findings_by_resource';
 import { FindingsByResourceTable } from './findings_by_resource_table';
-import { getBaseQuery, getPaginationQuery, getPaginationTableParams } from '../utils';
+import {
+  getPaginationQuery,
+  getPaginationTableParams,
+  useBaseEsQuery,
+  usePersistedQuery,
+} from '../utils';
 import { PageTitle, PageTitleText, PageWrapper } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { findingsNavigation } from '../../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumbs';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
+import { ErrorCallout } from '../layout/error_callout';
 
-const getDefaultQuery = (): FindingsBaseURLQuery & FindingsByResourceQuery => ({
-  query: { language: 'kuery', query: '' },
-  filters: [],
+const getDefaultQuery = ({
+  query,
+  filters,
+}: FindingsBaseURLQuery): FindingsBaseURLQuery & FindingsByResourceQuery => ({
+  query,
+  filters,
   pageIndex: 0,
   pageSize: 10,
 });
@@ -43,11 +52,29 @@ export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => 
 
 const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_by_resource]);
-  const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
-  const findingsGroupByResource = useFindingsByResource({
-    ...getBaseQuery({ dataView, filters: urlQuery.filters, query: urlQuery.query }),
-    ...getPaginationQuery(urlQuery),
+
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
+  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+
+  /**
+   * Page URL query to ES query
+   */
+  const baseEsQuery = useBaseEsQuery({
+    dataView,
+    filters: urlQuery.filters,
+    query: urlQuery.query,
   });
+
+  /**
+   * Page ES query result
+   */
+  const findingsGroupByResource = useFindingsByResource({
+    ...getPaginationQuery(urlQuery),
+    query: baseEsQuery.query,
+    enabled: !baseEsQuery.error,
+  });
+
+  const error = findingsGroupByResource.error || baseEsQuery.error;
 
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
@@ -56,9 +83,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
         setQuery={(query) => {
           setUrlQuery({ ...query, pageIndex: 0 });
         }}
-        query={urlQuery.query}
-        filters={urlQuery.filters}
-        loading={findingsGroupByResource.isLoading}
+        loading={findingsGroupByResource.isFetching}
       />
       <PageWrapper>
         <PageTitle>
@@ -71,20 +96,25 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
             }
           />
         </PageTitle>
-        <FindingsGroupBySelector type="resource" />
-        <FindingsByResourceTable
-          data={findingsGroupByResource.data}
-          error={findingsGroupByResource.error}
-          loading={findingsGroupByResource.isLoading}
-          pagination={getPaginationTableParams({
-            pageSize: urlQuery.pageSize,
-            pageIndex: urlQuery.pageIndex,
-            totalItemCount: findingsGroupByResource.data?.total || 0,
-          })}
-          setTableOptions={({ page }) =>
-            setUrlQuery({ pageIndex: page.index, pageSize: page.size })
-          }
-        />
+        {error && <ErrorCallout error={error} />}
+
+        {!error && (
+          <>
+            <FindingsGroupBySelector type="resource" />
+            <FindingsByResourceTable
+              loading={findingsGroupByResource.isFetching}
+              items={findingsGroupByResource.data?.page || []}
+              pagination={getPaginationTableParams({
+                pageSize: urlQuery.pageSize,
+                pageIndex: urlQuery.pageIndex,
+                totalItemCount: findingsGroupByResource.data?.total || 0,
+              })}
+              setTableOptions={({ page }) =>
+                setUrlQuery({ pageIndex: page.index, pageSize: page.size })
+              }
+            />
+          </>
+        )}
       </PageWrapper>
     </div>
   );

@@ -6,7 +6,6 @@
  */
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
-import type { UseQueryResult } from 'react-query';
 
 export type FindingsGroupByKind = 'default' | 'resource';
 
@@ -23,12 +22,6 @@ export interface FindingsBaseEsQuery {
   query?: {
     bool: BoolQuery;
   };
-}
-
-export interface FindingsQueryResult<TData = unknown, TError = unknown> {
-  loading: UseQueryResult['isLoading'];
-  error: TError;
-  data: TData;
 }
 
 // TODO: this needs to be defined in a versioned schema
