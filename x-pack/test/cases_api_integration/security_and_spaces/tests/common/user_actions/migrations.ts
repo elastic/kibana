@@ -77,6 +77,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 fields: null,
                 id: 'none',
               },
+              severity: 'low',
               owner: 'securitySolution',
               settings: { syncAlerts: true },
             },
@@ -189,6 +190,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               settings: {
                 syncAlerts: true,
               },
+              severity: 'low',
               owner: 'securitySolution',
             },
             type: 'create_case',
@@ -295,6 +297,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               settings: {
                 syncAlerts: true,
               },
+              severity: 'low',
               owner: 'securitySolution',
             },
             type: 'create_case',
@@ -323,6 +326,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               settings: {
                 syncAlerts: true,
               },
+              severity: 'low',
             },
             type: 'create_case',
             action_id: 'b3094de0-005e-11ec-91f1-6daf2ab59fb5',
@@ -367,6 +371,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 syncAlerts: true,
               },
               owner: 'securitySolution',
+              severity: 'low',
             },
             type: 'create_case',
             action_id: 'e7882d70-005e-11ec-91f1-6daf2ab59fb5',
@@ -738,6 +743,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
               tags: ['user', 'actions'],
               title: 'User actions',
               owner: 'securitySolution',
+              severity: 'low',
             },
             type: 'create_case',
           },
