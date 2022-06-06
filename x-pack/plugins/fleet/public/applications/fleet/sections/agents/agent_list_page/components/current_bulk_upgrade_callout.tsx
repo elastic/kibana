@@ -94,7 +94,12 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" onClick={onClickAbortUpgrade} isLoading={isAborting}>
+          <EuiButton
+            size="s"
+            onClick={onClickAbortUpgrade}
+            isLoading={isAborting}
+            data-test-subj="abortUpgradeBtn"
+          >
             <FormattedMessage
               id="xpack.fleet.currentUpgrade.abortUpgradeButtom"
               defaultMessage="Abort upgrade"
