@@ -137,7 +137,7 @@ describe('non clusters', () => {
     expect(actions.length).toBe(0);
   });
 
-  test('should return "Filter by geometry" with action for non ES geojson sources', () => {
+  test('should return "Filter by geometry" with action for non ES geojson source', () => {
     const mockEsGeoGridSource = {
       getType: () => {
         return SOURCE_TYPES.EMS_FILE;

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`non clusters should return "Filter by geometry" with action for non ES geojson sources 1`] = `
+exports[`non clusters should return "Filter by geometry" with action for non ES geojson source 1`] = `
 <FeatureGeometryFilterForm
   addFilters={[Function]}
   geoFieldNames={
