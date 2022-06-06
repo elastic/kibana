@@ -14,29 +14,29 @@ import {
   AlertInstanceMock,
 } from '@kbn/alerting-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { getAlertType } from './alert_type';
-import { EsQueryAlertParams, EsQueryAlertState } from './alert_type_params';
+import { getRuleType } from './rule_type';
+import { EsQueryRuleParams, EsQueryRuleState } from './rule_type_params';
 import { ActionContext } from './action_context';
 import { ESSearchResponse, ESSearchRequest } from '@kbn/core/types/elasticsearch';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ActionGroupId, ConditionMetAlertInstanceId } from './constants';
-import { OnlyEsQueryAlertParams, OnlySearchSourceAlertParams } from './types';
+import { OnlyEsQueryRuleParams, OnlySearchSourceRuleParams } from './types';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { Comparator } from '../../../common/comparator_types';
 
 const logger = loggingSystemMock.create().get();
 const coreSetup = coreMock.createSetup();
-const alertType = getAlertType(logger, coreSetup);
+const ruleType = getRuleType(logger, coreSetup);
 
-describe('alertType', () => {
-  it('alert type creation structure is the expected value', async () => {
-    expect(alertType.id).toBe('.es-query');
-    expect(alertType.name).toBe('Elasticsearch query');
-    expect(alertType.actionGroups).toEqual([{ id: 'query matched', name: 'Query matched' }]);
+describe('ruleType', () => {
+  it('rule type creation structure is the expected value', async () => {
+    expect(ruleType.id).toBe('.es-query');
+    expect(ruleType.name).toBe('Elasticsearch query');
+    expect(ruleType.actionGroups).toEqual([{ id: 'query matched', name: 'Query matched' }]);
 
-    expect(alertType.actionVariables).toMatchInlineSnapshot(`
+    expect(ruleType.actionVariables).toMatchInlineSnapshot(`
       Object {
         "context": Array [
           Object {
@@ -101,7 +101,7 @@ describe('alertType', () => {
 
   describe('elasticsearch query', () => {
     it('validator succeeds with valid es query params', async () => {
-      const params: Partial<Writable<OnlyEsQueryAlertParams>> = {
+      const params: Partial<Writable<OnlyEsQueryRuleParams>> = {
         index: ['index-name'],
         timeField: 'time-field',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -113,14 +113,14 @@ describe('alertType', () => {
         searchType: 'esQuery',
       };
 
-      expect(alertType.validate?.params?.validate(params)).toBeTruthy();
+      expect(ruleType.validate?.params?.validate(params)).toBeTruthy();
     });
 
     it('validator fails with invalid es query params - threshold', async () => {
-      const paramsSchema = alertType.validate?.params;
+      const paramsSchema = ruleType.validate?.params;
       if (!paramsSchema) throw new Error('params validator not set');
 
-      const params: Partial<Writable<OnlyEsQueryAlertParams>> = {
+      const params: Partial<Writable<OnlyEsQueryRuleParams>> = {
         index: ['index-name'],
         timeField: 'time-field',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -137,8 +137,8 @@ describe('alertType', () => {
       );
     });
 
-    it('alert executor handles no documents returned by ES', async () => {
-      const params: OnlyEsQueryAlertParams = {
+    it('rule executor handles no documents returned by ES', async () => {
+      const params: OnlyEsQueryRuleParams = {
         index: ['index-name'],
         timeField: 'time-field',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -149,16 +149,16 @@ describe('alertType', () => {
         threshold: [0],
         searchType: 'esQuery',
       };
-      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
       );
 
-      const result = await invokeExecutor({ params, alertServices });
+      const result = await invokeExecutor({ params, ruleServices });
 
-      expect(alertServices.alertFactory.create).not.toHaveBeenCalled();
+      expect(ruleServices.alertFactory.create).not.toHaveBeenCalled();
 
       expect(result).toMatchInlineSnapshot(`
         Object {
@@ -167,8 +167,8 @@ describe('alertType', () => {
       `);
     });
 
-    it('alert executor returns the latestTimestamp of the newest detected document', async () => {
-      const params: OnlyEsQueryAlertParams = {
+    it('rule executor returns the latestTimestamp of the newest detected document', async () => {
+      const params: OnlyEsQueryRuleParams = {
         index: ['index-name'],
         timeField: 'time-field',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -179,7 +179,7 @@ describe('alertType', () => {
         threshold: [0],
         searchType: 'esQuery',
       };
-      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const newestDocumentTimestamp = Date.now();
 
@@ -194,14 +194,14 @@ describe('alertType', () => {
           'time-field': newestDocumentTimestamp - 2000,
         },
       ]);
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(searchResult)
       );
 
-      const result = await invokeExecutor({ params, alertServices });
+      const result = await invokeExecutor({ params, ruleServices });
 
-      expect(alertServices.alertFactory.create).toHaveBeenCalledWith(ConditionMetAlertInstanceId);
-      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      expect(ruleServices.alertFactory.create).toHaveBeenCalledWith(ConditionMetAlertInstanceId);
+      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
       expect(instance.replaceState).toHaveBeenCalledWith({
         latestTimestamp: undefined,
         dateStart: expect.any(String),
@@ -213,8 +213,8 @@ describe('alertType', () => {
       });
     });
 
-    it('alert executor correctly handles numeric time fields that were stored by legacy rules prior to v7.12.1', async () => {
-      const params: OnlyEsQueryAlertParams = {
+    it('rule executor correctly handles numeric time fields that were stored by legacy rules prior to v7.12.1', async () => {
+      const params: OnlyEsQueryRuleParams = {
         index: ['index-name'],
         timeField: 'time-field',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -225,12 +225,12 @@ describe('alertType', () => {
         threshold: [0],
         searchType: 'esQuery',
       };
-      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const previousTimestamp = Date.now();
       const newestDocumentTimestamp = previousTimestamp + 1000;
 
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateResults([
             {
@@ -242,14 +242,14 @@ describe('alertType', () => {
 
       const result = await invokeExecutor({
         params,
-        alertServices,
+        ruleServices,
         state: {
           // @ts-expect-error previousTimestamp is numeric, but should be string (this was a bug prior to v7.12.1)
           latestTimestamp: previousTimestamp,
         },
       });
 
-      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
       expect(instance.replaceState).toHaveBeenCalledWith({
         // ensure the invalid "latestTimestamp" in the state is stored as an ISO string going forward
         latestTimestamp: new Date(previousTimestamp).toISOString(),
@@ -262,8 +262,8 @@ describe('alertType', () => {
       });
     });
 
-    it('alert executor ignores previous invalid latestTimestamp values stored by legacy rules prior to v7.12.1', async () => {
-      const params: OnlyEsQueryAlertParams = {
+    it('rule executor ignores previous invalid latestTimestamp values stored by legacy rules prior to v7.12.1', async () => {
+      const params: OnlyEsQueryRuleParams = {
         index: ['index-name'],
         timeField: 'time-field',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -274,11 +274,11 @@ describe('alertType', () => {
         threshold: [0],
         searchType: 'esQuery',
       };
-      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const oldestDocumentTimestamp = Date.now();
 
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateResults([
             {
@@ -291,9 +291,9 @@ describe('alertType', () => {
         )
       );
 
-      const result = await invokeExecutor({ params, alertServices });
+      const result = await invokeExecutor({ params, ruleServices });
 
-      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
       expect(instance.replaceState).toHaveBeenCalledWith({
         latestTimestamp: undefined,
         dateStart: expect.any(String),
@@ -305,8 +305,8 @@ describe('alertType', () => {
       });
     });
 
-    it('alert executor carries over the queried latestTimestamp in the alert state', async () => {
-      const params: OnlyEsQueryAlertParams = {
+    it('rule executor carries over the queried latestTimestamp in the rule state', async () => {
+      const params: OnlyEsQueryRuleParams = {
         index: ['index-name'],
         timeField: 'time-field',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -317,11 +317,11 @@ describe('alertType', () => {
         threshold: [0],
         searchType: 'esQuery',
       };
-      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const oldestDocumentTimestamp = Date.now();
 
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateResults([
             {
@@ -331,9 +331,9 @@ describe('alertType', () => {
         )
       );
 
-      const result = await invokeExecutor({ params, alertServices });
+      const result = await invokeExecutor({ params, ruleServices });
 
-      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
       expect(instance.replaceState).toHaveBeenCalledWith({
         latestTimestamp: undefined,
         dateStart: expect.any(String),
@@ -345,7 +345,7 @@ describe('alertType', () => {
       });
 
       const newestDocumentTimestamp = oldestDocumentTimestamp + 5000;
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateResults([
             {
@@ -360,12 +360,12 @@ describe('alertType', () => {
 
       const secondResult = await invokeExecutor({
         params,
-        alertServices,
-        state: result as EsQueryAlertState,
+        ruleServices,
+        state: result as EsQueryRuleState,
       });
 
       const existingInstance: AlertInstanceMock =
-        alertServices.alertFactory.create.mock.results[1].value;
+        ruleServices.alertFactory.create.mock.results[1].value;
       expect(existingInstance.replaceState).toHaveBeenCalledWith({
         latestTimestamp: new Date(oldestDocumentTimestamp).toISOString(),
         dateStart: expect.any(String),
@@ -377,8 +377,8 @@ describe('alertType', () => {
       });
     });
 
-    it('alert executor ignores tie breaker sort values', async () => {
-      const params: OnlyEsQueryAlertParams = {
+    it('rule executor ignores tie breaker sort values', async () => {
+      const params: OnlyEsQueryRuleParams = {
         index: ['index-name'],
         timeField: 'time-field',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -389,11 +389,11 @@ describe('alertType', () => {
         threshold: [0],
         searchType: 'esQuery',
       };
-      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const oldestDocumentTimestamp = Date.now();
 
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateResults(
             [
@@ -409,9 +409,9 @@ describe('alertType', () => {
         )
       );
 
-      const result = await invokeExecutor({ params, alertServices });
+      const result = await invokeExecutor({ params, ruleServices });
 
-      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
       expect(instance.replaceState).toHaveBeenCalledWith({
         latestTimestamp: undefined,
         dateStart: expect.any(String),
@@ -423,8 +423,8 @@ describe('alertType', () => {
       });
     });
 
-    it('alert executor ignores results with no sort values', async () => {
-      const params: OnlyEsQueryAlertParams = {
+    it('rule executor ignores results with no sort values', async () => {
+      const params: OnlyEsQueryRuleParams = {
         index: ['index-name'],
         timeField: 'time-field',
         esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
@@ -435,11 +435,11 @@ describe('alertType', () => {
         threshold: [0],
         searchType: 'esQuery',
       };
-      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       const oldestDocumentTimestamp = Date.now();
 
-      alertServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
+      ruleServices.scopedClusterClient.asCurrentUser.search.mockResolvedValueOnce(
         elasticsearchClientMock.createSuccessTransportRequestPromise(
           generateResults(
             [
@@ -456,9 +456,9 @@ describe('alertType', () => {
         )
       );
 
-      const result = await invokeExecutor({ params, alertServices });
+      const result = await invokeExecutor({ params, ruleServices });
 
-      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
       expect(instance.replaceState).toHaveBeenCalledWith({
         latestTimestamp: undefined,
         dateStart: expect.any(String),
@@ -495,7 +495,7 @@ describe('alertType', () => {
         },
       ],
     };
-    const defaultParams: OnlySearchSourceAlertParams = {
+    const defaultParams: OnlySearchSourceRuleParams = {
       size: 100,
       timeWindowSize: 5,
       timeWindowUnit: 'm',
@@ -510,12 +510,12 @@ describe('alertType', () => {
     });
 
     it('validator succeeds with valid search source params', async () => {
-      expect(alertType.validate?.params?.validate(defaultParams)).toBeTruthy();
+      expect(ruleType.validate?.params?.validate(defaultParams)).toBeTruthy();
     });
 
     it('validator fails with invalid search source params - esQuery provided', async () => {
-      const paramsSchema = alertType.validate?.params!;
-      const params: Partial<Writable<EsQueryAlertParams>> = {
+      const paramsSchema = ruleType.validate?.params!;
+      const params: Partial<Writable<EsQueryRuleParams>> = {
         size: 100,
         timeWindowSize: 5,
         timeWindowUnit: 'm',
@@ -530,10 +530,10 @@ describe('alertType', () => {
       );
     });
 
-    it('alert executor handles no documents returned by ES', async () => {
+    it('rule executor handles no documents returned by ES', async () => {
       const params = defaultParams;
       const searchResult: ESSearchResponse<unknown, {}> = generateResults([]);
-      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
         if (name === 'index') {
@@ -542,14 +542,14 @@ describe('alertType', () => {
       });
       (searchSourceInstanceMock.fetch as jest.Mock).mockResolvedValueOnce(searchResult);
 
-      await invokeExecutor({ params, alertServices });
+      await invokeExecutor({ params, ruleServices });
 
-      expect(alertServices.alertFactory.create).not.toHaveBeenCalled();
+      expect(ruleServices.alertFactory.create).not.toHaveBeenCalled();
     });
 
-    it('alert executor throws an error when index does not have time field', async () => {
+    it('rule executor throws an error when index does not have time field', async () => {
       const params = defaultParams;
-      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
         if (name === 'index') {
@@ -557,14 +557,14 @@ describe('alertType', () => {
         }
       });
 
-      await expect(invokeExecutor({ params, alertServices })).rejects.toThrow(
+      await expect(invokeExecutor({ params, ruleServices })).rejects.toThrow(
         'Invalid data view without timeFieldName.'
       );
     });
 
-    it('alert executor schedule actions when condition met', async () => {
+    it('rule executor schedule actions when condition met', async () => {
       const params = { ...defaultParams, thresholdComparator: Comparator.GT_OR_EQ, threshold: [3] };
-      const alertServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
+      const ruleServices: RuleExecutorServicesMock = alertsMock.createRuleExecutorServices();
 
       (searchSourceInstanceMock.getField as jest.Mock).mockImplementationOnce((name: string) => {
         if (name === 'index') {
@@ -576,9 +576,9 @@ describe('alertType', () => {
         hits: { total: 3, hits: [{}, {}, {}] },
       });
 
-      await invokeExecutor({ params, alertServices });
+      await invokeExecutor({ params, ruleServices });
 
-      const instance: AlertInstanceMock = alertServices.alertFactory.create.mock.results[0].value;
+      const instance: AlertInstanceMock = ruleServices.alertFactory.create.mock.results[0].value;
       expect(instance.scheduleActions).toHaveBeenCalled();
     });
   });
@@ -625,24 +625,24 @@ function generateResults(
 
 async function invokeExecutor({
   params,
-  alertServices,
+  ruleServices,
   state,
 }: {
-  params: OnlySearchSourceAlertParams | OnlyEsQueryAlertParams;
-  alertServices: RuleExecutorServicesMock;
-  state?: EsQueryAlertState;
+  params: OnlySearchSourceRuleParams | OnlyEsQueryRuleParams;
+  ruleServices: RuleExecutorServicesMock;
+  state?: EsQueryRuleState;
 }) {
-  return await alertType.executor({
+  return await ruleType.executor({
     alertId: uuid.v4(),
     executionId: uuid.v4(),
     startedAt: new Date(),
     previousStartedAt: new Date(),
-    services: alertServices as unknown as RuleExecutorServices<
-      EsQueryAlertState,
+    services: ruleServices as unknown as RuleExecutorServices<
+      EsQueryRuleState,
       ActionContext,
       typeof ActionGroupId
     >,
-    params: params as EsQueryAlertParams,
+    params: params as EsQueryRuleParams,
     state: {
       latestTimestamp: undefined,
       ...state,

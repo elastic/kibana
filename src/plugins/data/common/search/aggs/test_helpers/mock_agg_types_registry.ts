@@ -45,7 +45,6 @@ export const mockAggTypesDependencies: AggTypesDependencies = {
   calculateBounds: jest.fn(),
   getFieldFormatsStart: mockGetFieldFormatsStart,
   getConfig: mockGetConfig,
-  isDefaultTimezone: () => true,
 };
 
 /**
