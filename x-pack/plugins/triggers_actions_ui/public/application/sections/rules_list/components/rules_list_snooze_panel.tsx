@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { RuleTableItem } from '../../../../types';
 import {
@@ -16,10 +16,14 @@ import {
   isRuleSnoozed,
 } from './rule_status_dropdown';
 
+const EMPTY_HANDLER = () => {};
+
 export interface RulesListSnoozePanelProps {
   rule: RuleTableItem;
   previousSnoozeInterval?: string | null;
-  onRuleChanged: () => void;
+  onLoading?: (isLoading: boolean) => void;
+  onRuleChanged: () => Promise<void>;
+  onClose: () => void;
   snoozeRule: (snoozeEndTime: string | -1, interval: string | null) => Promise<void>;
   unsnoozeRule: () => Promise<void>;
 }
@@ -29,11 +33,11 @@ export const RulesListSnoozePanel = (props: RulesListSnoozePanelProps) => {
     rule,
     previousSnoozeInterval: propsPreviousSnoozeInterval,
     onRuleChanged,
+    onClose,
     snoozeRule,
     unsnoozeRule,
+    onLoading = EMPTY_HANDLER,
   } = props;
-
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const { isSnoozedUntil } = rule;
 
@@ -57,7 +61,8 @@ export const RulesListSnoozePanel = (props: RulesListSnoozePanelProps) => {
 
   const onChangeSnooze = useCallback(
     async (value: number, unit?: SnoozeUnit) => {
-      setIsLoading(true);
+      onLoading(true);
+      onClose();
       try {
         if (value === -1) {
           await snoozeRuleAndStoreInterval(-1, null);
@@ -68,16 +73,15 @@ export const RulesListSnoozePanel = (props: RulesListSnoozePanelProps) => {
           await unsnoozeRule();
         }
       } finally {
-        setIsLoading(false);
-        onRuleChanged();
+        await onRuleChanged();
+        onLoading(false);
       }
     },
-    [onRuleChanged, snoozeRuleAndStoreInterval, unsnoozeRule, setIsLoading]
+    [onRuleChanged, snoozeRuleAndStoreInterval, unsnoozeRule, onLoading, onClose]
   );
 
   return (
     <SnoozePanel
-      isLoading={isLoading}
       applySnooze={onChangeSnooze}
       interval={futureTimeToInterval(isSnoozedUntil)}
       showCancel={isSnoozed}

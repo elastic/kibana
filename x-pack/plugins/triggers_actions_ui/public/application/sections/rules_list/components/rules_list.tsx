@@ -681,10 +681,11 @@ export const RulesList: React.FunctionComponent = () => {
         onEnableRule={onEnableRule}
         onSnoozeRule={onSnoozeRule}
         onUnsnoozeRule={onUnsnoozeRule}
-        renderCollapsedItemActions={(rule) => (
+        renderCollapsedItemActions={(rule, onLoading) => (
           <CollapsedItemActions
             key={rule.id}
             item={rule}
+            onLoading={onLoading}
             onRuleChanged={() => loadData()}
             setRulesToDelete={setRulesToDelete}
             onEditRule={() => onRuleEdit(rule)}

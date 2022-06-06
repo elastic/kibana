@@ -112,12 +112,15 @@ export interface RulesListTableProps {
   onTagClose?: (rule: RuleTableItem) => void;
   onSelectionChange?: (updatedSelectedItemsList: RuleTableItem[]) => void;
   onPercentileOptionsChange?: (options: EuiSelectableOption[]) => void;
-  onRuleChanged: () => void;
+  onRuleChanged: () => Promise<void>;
   onEnableRule: (rule: RuleTableItem) => Promise<void>;
   onDisableRule: (rule: RuleTableItem) => Promise<void>;
   onSnoozeRule: (rule: RuleTableItem, snoozeEndTime: string | -1) => Promise<void>;
   onUnsnoozeRule: (rule: RuleTableItem) => Promise<void>;
-  renderCollapsedItemActions?: (rule: RuleTableItem) => React.ReactNode;
+  renderCollapsedItemActions?: (
+    rule: RuleTableItem,
+    onLoading: (isLoading: boolean) => void
+  ) => React.ReactNode;
   renderRuleError?: (rule: RuleTableItem) => React.ReactNode;
 }
 
@@ -168,7 +171,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
     onManageLicenseClick = EMPTY_HANDLER,
     onSelectionChange = EMPTY_HANDLER,
     onPercentileOptionsChange = EMPTY_HANDLER,
-    onRuleChanged = EMPTY_HANDLER,
+    onRuleChanged,
     onEnableRule = EMPTY_HANDLER,
     onDisableRule = EMPTY_HANDLER,
     onSnoozeRule = EMPTY_HANDLER,
@@ -180,12 +183,21 @@ export const RulesListTable = (props: RulesListTableProps) => {
   const [tagPopoverOpenIndex, setTagPopoverOpenIndex] = useState<number>(-1);
   const [currentlyOpenNotify, setCurrentlyOpenNotify] = useState<string>();
 
+  const [isLoadingMap, setIsLoadingMap] = useState<Record<string, boolean>>({});
+
   const selectedPercentile = useMemo(() => {
     const selectedOption = percentileOptions.find((option) => option.checked === 'on');
     if (selectedOption) {
       return Percentiles[selectedOption.key as Percentiles];
     }
   }, [percentileOptions]);
+
+  const onLoading = (id: string, newIsLoading: boolean) => {
+    setIsLoadingMap((prevState) => ({
+      ...prevState,
+      [id]: newIsLoading,
+    }));
+  };
 
   const renderPercentileColumnName = () => {
     return (
@@ -403,7 +415,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiToolTip
             data-test-subj="rulesTableCell-notifyTooltip"
             content={i18n.translate(
-              'xpack-triggersActionUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
+              'xpack.triggersActionUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
               {
                 defaultMessage: 'Snooze notifications for a rule.',
               }
@@ -411,7 +423,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           >
             <span>
               {i18n.translate(
-                'xpack-triggersActionUI.sections.rulesList.rulesListTable.columns.notifyTitle',
+                'xpack.triggersActionUI.sections.rulesList.rulesListTable.columns.notifyTitle',
                 {
                   defaultMessage: 'Notify',
                 }
@@ -421,7 +433,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
             </span>
           </EuiToolTip>
         ),
-        width: '16%',
+        width: '14%',
         'data-test-subj': 'rulesTableCell-rulesListNotify',
         render: (rule: RuleTableItem) => {
           if (rule.ruleTypeId.startsWith('siem') || !rule.enabled) {
@@ -430,6 +442,8 @@ export const RulesListTable = (props: RulesListTableProps) => {
           return (
             <RulesListNotifyBadge
               rule={rule}
+              isLoading={!!isLoadingMap[rule.id]}
+              onLoading={(newIsLoading) => onLoading(rule.id, newIsLoading)}
               isOpen={currentlyOpenNotify === rule.id}
               onClick={() => setCurrentlyOpenNotify(rule.id)}
               onClose={() => setCurrentlyOpenNotify('')}
@@ -668,7 +682,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
                   ) : null}
                 </EuiFlexGroup>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>{renderCollapsedItemActions(rule)}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                {renderCollapsedItemActions(rule, (newIsLoading) =>
+                  onLoading(rule.id, newIsLoading)
+                )}
+              </EuiFlexItem>
             </EuiFlexGroup>
           );
         },

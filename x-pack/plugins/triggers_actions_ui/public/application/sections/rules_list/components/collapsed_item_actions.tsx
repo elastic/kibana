@@ -31,7 +31,8 @@ import './collapsed_item_actions.scss';
 
 export type ComponentOpts = {
   item: RuleTableItem;
-  onRuleChanged: () => void;
+  onRuleChanged: () => Promise<void>;
+  onLoading: (isLoading: boolean) => void;
   setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
   onEditRule: (item: RuleTableItem) => void;
   onUpdateAPIKey: (id: string[]) => void;
@@ -39,6 +40,7 @@ export type ComponentOpts = {
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   item,
+  onLoading,
   onRuleChanged,
   disableRule,
   enableRule,
@@ -56,11 +58,6 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     setIsDisabled(!item.enabled);
   }, [item.enabled]);
 
-  const onRuleChangedInternal = useCallback(() => {
-    setIsPopoverOpen(false);
-    onRuleChanged();
-  }, [onRuleChanged, setIsPopoverOpen]);
-
   const snoozeRuleInternal = useCallback(
     async (snoozeEndTime: string | -1, interval: string | null) => {
       await snoozeRule(item, snoozeEndTime);
@@ -71,6 +68,10 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   const unsnoozeRuleInternal = useCallback(async () => {
     await unsnoozeRule(item);
   }, [unsnoozeRule, item]);
+
+  const onClose = useCallback(() => {
+    setIsPopoverOpen(false);
+  }, [setIsPopoverOpen]);
 
   const isRuleTypeEditableInContext = ruleTypeRegistry.has(item.ruleTypeId)
     ? !ruleTypeRegistry.get(item.ruleTypeId).requiresAppContext
@@ -232,7 +233,9 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         <EuiPanel>
           <RulesListSnoozePanel
             rule={item}
-            onRuleChanged={onRuleChangedInternal}
+            onClose={onClose}
+            onLoading={onLoading}
+            onRuleChanged={onRuleChanged}
             snoozeRule={snoozeRuleInternal}
             unsnoozeRule={unsnoozeRuleInternal}
           />

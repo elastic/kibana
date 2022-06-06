@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo } from 'react';
 import moment from 'moment';
 import {
   EuiButton,
@@ -26,10 +26,12 @@ import { RulesListSnoozePanel } from './rules_list_snooze_panel';
 export interface RulesListNotifyBadgeProps {
   rule: RuleTableItem;
   isOpen: boolean;
+  isLoading: boolean;
   previousSnoozeInterval?: string | null;
   onClick: React.MouseEventHandler<HTMLButtonElement>;
   onClose: () => void;
-  onRuleChanged: () => void;
+  onLoading: (isLoading: boolean) => void;
+  onRuleChanged: () => Promise<void>;
   snoozeRule: (snoozeEndTime: string | -1, interval: string | null) => Promise<void>;
   unsnoozeRule: () => Promise<void>;
 }
@@ -41,11 +43,13 @@ const openSnoozePanelAriaLabel = i18n.translate(
 
 export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = (props) => {
   const {
+    isLoading = false,
     rule,
     isOpen,
     previousSnoozeInterval,
     onClick,
     onClose,
+    onLoading,
     onRuleChanged,
     snoozeRule,
     unsnoozeRule,
@@ -99,6 +103,8 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const snoozedButton = useMemo(() => {
     return (
       <EuiButton
+        isLoading={isLoading}
+        disabled={isLoading}
         data-test-subj="rulesListNotifyBadge"
         minWidth={85}
         iconType="bellSlash"
@@ -108,7 +114,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
       </EuiButton>
     );
-  }, [formattedSnoozeText, onClick]);
+  }, [formattedSnoozeText, isLoading, onClick]);
 
   const scheduledSnoozeButton = useMemo(() => {
     // TODO: Implement scheduled snooze button
@@ -128,20 +134,24 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const unsnoozedButton = useMemo(() => {
     return (
       <EuiButtonIcon
-        size="m"
+        isLoading={isLoading}
+        disabled={isLoading}
+        display={isLoading ? 'base' : 'empty'}
+        size="s"
         data-test-subj="rulesListNotifyBadge"
         aria-label={openSnoozePanelAriaLabel}
-        className={isOpen ? '' : 'ruleSidebarItem__action'}
-        color="accent"
-        iconType="bellSlash"
+        className={isOpen || isLoading ? '' : 'ruleSidebarItem__action'}
+        iconType="bell"
         onClick={onClick}
       />
     );
-  }, [isOpen, onClick]);
+  }, [isOpen, isLoading, onClick]);
 
   const indefiniteSnoozeButton = useMemo(() => {
     return (
       <EuiButtonIcon
+        isLoading={isLoading}
+        disabled={isLoading}
         display="base"
         size="m"
         data-test-subj="rulesListNotifyBadge"
@@ -150,7 +160,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
         onClick={onClick}
       />
     );
-  }, [onClick]);
+  }, [isLoading, onClick]);
 
   const button = useMemo(() => {
     if (isScheduled) {
@@ -180,11 +190,6 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     return <EuiToolTip content={snoozeTooltipText}>{button}</EuiToolTip>;
   }, [isOpen, button, snoozeTooltipText]);
 
-  const onRuleChangedInternal = useCallback(() => {
-    onRuleChanged();
-    onClose();
-  }, [onRuleChanged, onClose]);
-
   return (
     <EuiPopover isOpen={isOpen} closePopover={onClose} button={buttonWithToolTip}>
       <EuiPopoverTitle>
@@ -202,8 +207,10 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       </EuiPopoverTitle>
       <RulesListSnoozePanel
         rule={rule}
+        onClose={onClose}
+        onLoading={onLoading}
         previousSnoozeInterval={previousSnoozeInterval}
-        onRuleChanged={onRuleChangedInternal}
+        onRuleChanged={onRuleChanged}
         snoozeRule={snoozeRule}
         unsnoozeRule={unsnoozeRule}
       />
