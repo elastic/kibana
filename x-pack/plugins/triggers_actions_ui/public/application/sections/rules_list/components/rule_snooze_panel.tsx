@@ -251,7 +251,7 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
       <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            style={{ height: '1em' }}
+            size="s"
             iconType="refresh"
             data-test-subj="ruleSnoozePreviousButton"
             onClick={() => applySnooze(parsedPrevSnooze.value, parsedPrevSnooze.unit as SnoozeUnit)}
