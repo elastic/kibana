@@ -1,5 +1,5 @@
 [[update-connector-api]]
-=== Update connector API
+== Update connector API
 ++++
 <titleabbrev>Update connector</titleabbrev>
 ++++
@@ -7,14 +7,14 @@
 Updates the attributes for an existing connector.
 
 [[update-connector-api-request]]
-==== Request
+=== Request
 
 `PUT <kibana host>:<port>/api/actions/connector/<id>`
 
 `PUT <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
 
 [[update-connector-api-params]]
-==== Path parameters
+=== Path parameters
 
 `id`::
   (Required, string) The ID of the connector.
@@ -22,26 +22,40 @@ Updates the attributes for an existing connector.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[role="child_attributes"]
 [[update-connector-api-request-body]]
-==== Request body
+=== Request body
 
 `name`::
   (Required, string) The new name of the connector.
 
 `config`::
-  (Required, object) The new connector configuration. Configuration properties vary depending on the connector type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+(Required, object) The new connector configuration. Configuration properties
+vary depending on the connector type. For example:
++
+--
+include::create.asciidoc[tag=connector-config]
+--
 
 `secrets`::
-  (Required, object) The updated secrets configuration for the connector. Secrets properties vary depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+(Required^*^, object) The updated secrets configuration for the connector. Secrets
+properties vary depending on the connector type. For information about the
+secrets configuration properties, refer to
+<<action-types,Action and connector types>>.
++
+--
+include::create.asciidoc[tag=connector-secrets]
+--
+
 
 [[update-connector-api-codes]]
-==== Response code
+=== Response code
 
 `200`::
     Indicates a successful call.
 
 [[update-connector-api-example]]
-==== Example
+=== Example
 
 [source,sh]
 --------------------------------------------------
