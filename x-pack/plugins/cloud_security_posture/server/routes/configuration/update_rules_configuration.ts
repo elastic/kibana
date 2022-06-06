@@ -103,13 +103,13 @@ export const updateAgentConfiguration = async (
   packagePolicy: PackagePolicy,
   esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
-  userAuh: AuthenticatedUser | null
+  userAuth: AuthenticatedUser | null
 ): Promise<PackagePolicy> => {
   const cspRules = await getCspRules(soClient, packagePolicy);
   const rulesConfig = createRulesConfig(cspRules);
   const dataYaml = convertRulesConfigToYaml(rulesConfig);
   const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
-  const options = { user: userAuh ? userAuh : undefined };
+  const options = { user: userAuth ? userAuth : undefined };
   return packagePolicyService.update(
     soClient,
     esClient,

@@ -20,7 +20,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
