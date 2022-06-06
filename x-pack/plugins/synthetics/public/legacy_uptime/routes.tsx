@@ -6,7 +6,12 @@
  */
 
 import React, { FC, useEffect } from 'react';
-import { EuiPageTemplateProps, EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiPageTemplateProps_Deprecated,
+  EuiBetaBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import { Route, Switch } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -71,7 +76,7 @@ type RouteProps = {
     children?: JSX.Element;
     rightSideItems?: JSX.Element[];
   };
-} & EuiPageTemplateProps;
+} & EuiPageTemplateProps_Deprecated;
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.legacyBaseTitle', {
   defaultMessage: 'Uptime - Kibana',

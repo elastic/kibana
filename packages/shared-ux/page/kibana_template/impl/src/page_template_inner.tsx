@@ -8,7 +8,7 @@
 
 import React, { FC } from 'react';
 import classNames from 'classnames';
-import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 
 import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import { KibanaPageTemplateProps as Props } from '@kbn/shared-ux-page-kibana-template-types';

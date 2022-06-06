@@ -8,7 +8,7 @@
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
 import {
-  EuiPageTemplateProps,
+  EuiPageTemplateProps_Deprecated,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
@@ -57,7 +57,7 @@ type RouteProps = {
     children?: JSX.Element;
     rightSideItems?: JSX.Element[];
   };
-} & EuiPageTemplateProps;
+} & EuiPageTemplateProps_Deprecated;
 
 const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
   defaultMessage: 'Synthetics - Kibana',

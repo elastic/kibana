@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiPageTemplateProps } from '@elastic/eui';
+import { EuiPageTemplateProps_Deprecated } from '@elastic/eui';
 import { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 
 import {
@@ -19,7 +19,7 @@ export type KibanaPageTemplateKibanaDependencies = NoDataConfigPageKibanaDepende
 export type KibanaPageTemplateServices = NoDataConfigPageServices;
 export type { NoDataConfig } from '@kbn/shared-ux-page-no-data-config-types';
 
-export type KibanaPageTemplateProps = EuiPageTemplateProps & {
+export type KibanaPageTemplateProps = EuiPageTemplateProps_Deprecated & {
   /**
    * Changes the template type depending on other props provided.
    * With `pageHeader` only: Uses `centeredBody` and fills an EuiEmptyPrompt with `pageHeader` info.

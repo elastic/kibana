@@ -8,7 +8,7 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 
 import { withSolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import { NoDataPage } from '@kbn/shared-ux-page-no-data';
