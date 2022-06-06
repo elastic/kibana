@@ -36,6 +36,7 @@ import {
 } from '@kbn/core/server';
 import { Chance } from 'chance';
 import { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 describe('Update rules configuration API', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -55,6 +56,7 @@ describe('Update rules configuration API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
+      security: securityMock.createStart(),
     };
     defineUpdateRulesConfigRoute(router, cspContext);
 
@@ -70,6 +72,7 @@ describe('Update rules configuration API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
+      security: securityMock.createStart(),
     };
     defineUpdateRulesConfigRoute(router, cspContext);
     const [_, handler] = router.post.mock.calls[0];
@@ -94,6 +97,7 @@ describe('Update rules configuration API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
+      security: securityMock.createStart(),
     };
     defineUpdateRulesConfigRoute(router, cspContext);
     const [_, handler] = router.post.mock.calls[0];
