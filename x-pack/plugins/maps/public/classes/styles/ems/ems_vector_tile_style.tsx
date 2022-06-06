@@ -40,7 +40,10 @@ export class EMSVectorTileStyle implements IStyle {
     };
 
     return (
-      <EMSVectorTileStyleEditor color={this._descriptor.color} onEMSVectorTileColorChange={onEMSVectorTileColorChange} />
+      <EMSVectorTileStyleEditor
+        color={this._descriptor.color}
+        onEMSVectorTileColorChange={onEMSVectorTileColorChange}
+      />
     );
   }
 }
