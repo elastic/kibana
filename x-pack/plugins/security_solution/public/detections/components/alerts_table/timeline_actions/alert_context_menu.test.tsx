@@ -30,6 +30,9 @@ const ecsRowData: Ecs = {
       },
     },
   },
+  event: {
+    kind: ['signal'],
+  },
 };
 
 const props = {
