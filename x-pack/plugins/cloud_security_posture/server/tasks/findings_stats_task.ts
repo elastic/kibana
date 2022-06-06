@@ -69,7 +69,7 @@ export function setupFindingsStatsTask(
         createTaskRunner: taskRunner(coreStartServices, logger),
       },
     });
-    logger.info(`task: ${CSPM_FINDINGS_STATS_TASK_TYPE} registered successfully`);
+    logger.info(`Task: ${CSPM_FINDINGS_STATS_TASK_TYPE} registered successfully`);
   } catch (errMsg) {
     const error = transformError(errMsg);
     logger.error(`Failed to register task: ${CSPM_FINDINGS_STATS_TASK_TYPE}, ${error.message}`);
