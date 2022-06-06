@@ -25,6 +25,7 @@ import { ConfigService } from '@kbn/config';
 import { ContextProviderOpts } from '@kbn/analytics-client';
 import { CoreId } from '@kbn/core-base-common-internal';
 import { DetailedPeerCertificate } from 'tls';
+import { DiscoveredPlugin } from '@kbn/core-base-common';
 import type { DocLinks } from '@kbn/doc-links';
 import { Duration } from 'moment';
 import { Duration as Duration_2 } from 'moment-timezone';
@@ -56,6 +57,7 @@ import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
 import { PluginName } from '@kbn/core-base-common';
 import { PluginOpaqueId } from '@kbn/core-base-common';
+import { PluginType } from '@kbn/core-base-common';
 import { Readable } from 'stream';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
@@ -922,16 +924,7 @@ export interface DeprecationsServiceSetup {
 // @public
 export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
 
-// @public
-export interface DiscoveredPlugin {
-    readonly configPath: ConfigPath;
-    readonly enabledOnAnonymousPages?: boolean;
-    readonly id: PluginName;
-    readonly optionalPlugins: readonly PluginName[];
-    readonly requiredBundles: readonly PluginName[];
-    readonly requiredPlugins: readonly PluginName[];
-    readonly type: PluginType;
-}
+export { DiscoveredPlugin }
 
 // @public (undocumented)
 export interface DocLinksServiceSetup {
@@ -1816,11 +1809,7 @@ export interface PluginsServiceStart {
     contracts: Map<PluginName, unknown>;
 }
 
-// @public (undocumented)
-export enum PluginType {
-    preboot = "preboot",
-    standard = "standard"
-}
+export { PluginType }
 
 // @public (undocumented)
 export const pollEsNodesVersion: ({ internalClient, log, kibanaVersion, ignoreVersionMismatch, esVersionCheckInterval: healthCheckInterval, }: PollEsNodesVersionOptions) => Observable<NodesVersionCompatibility>;
@@ -3256,8 +3245,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:81:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:403:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:405:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:512:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:339:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:341:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:448:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```
