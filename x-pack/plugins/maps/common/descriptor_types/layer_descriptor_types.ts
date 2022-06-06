@@ -10,8 +10,8 @@
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import { Query } from '@kbn/data-plugin/public';
 import { Feature } from 'geojson';
-import type { blendMode } from '@elastic/ems-client';
 import {
+  EMSVectorTileStyleDescriptor,
   HeatmapStyleDescriptor,
   StyleDescriptor,
   VectorStyleDescriptor,
@@ -23,12 +23,6 @@ import { LAYER_TYPE } from '../constants';
 export type Attribution = {
   label: string;
   url: string;
-};
-
-export type ColorFilter = {
-  color?: string;
-  operation?: blendMode;
-  percentage?: number;
 };
 
 export type JoinDescriptor = {
@@ -67,7 +61,6 @@ export type LayerDescriptor = {
   alpha?: number;
   attribution?: Attribution;
   id: string;
-  colorFilter?: ColorFilter;
   label?: string | null;
   locale?: string | null;
   areLabelsOnTop?: boolean;
@@ -90,4 +83,9 @@ export type VectorLayerDescriptor = LayerDescriptor & {
 export type HeatmapLayerDescriptor = LayerDescriptor & {
   type: LAYER_TYPE.HEATMAP;
   style: HeatmapStyleDescriptor;
+};
+
+export type EMSVectorTileLayerDescriptor = LayerDescriptor & {
+  type: LAYER_TYPE.EMS_VECTOR_TILE;
+  style: EMSVectorTileStyleDescriptor;
 };

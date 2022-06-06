@@ -7,7 +7,6 @@
 
 import React, { ChangeEvent, Fragment } from 'react';
 import {
-  EuiColorPicker,
   EuiTitle,
   EuiPanel,
   EuiFormRow,
@@ -21,7 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
-import { Attribution, ColorFilter } from '../../../../common/descriptor_types';
+import { Attribution } from '../../../../common/descriptor_types';
 import { AUTOSELECT_EMS_LOCALE, NO_EMS_LOCALE, MAX_ZOOM } from '../../../../common/constants';
 import { AlphaSlider } from '../../../components/alpha_slider';
 import { ILayer } from '../../../classes/layers/layer';
@@ -31,7 +30,6 @@ export interface Props {
   layer: ILayer;
   clearLayerAttribution: (layerId: string) => void;
   setLayerAttribution: (id: string, attribution: Attribution) => void;
-  updateColorFilter: (layerId: string, colorFilter: ColorFilter) => void;
   updateLabel: (layerId: string, label: string) => void;
   updateLocale: (layerId: string, locale: string) => void;
   updateMinZoom: (layerId: string, minZoom: number) => void;
@@ -50,13 +48,6 @@ export function LayerSettings(props: Props) {
   const onLabelChange = (event: ChangeEvent<HTMLInputElement>) => {
     const label = event.target.value;
     props.updateLabel(layerId, label);
-  };
-
-  const onColorChange = (color: string) => {
-    // TODO default operation does not change when selecting new basemap style
-    // not sure how to resolve this?
-    const { operation, percentage } = props.layer.getDefaultColorOperation();
-    props.updateColorFilter(layerId, { color, operation, percentage });
   };
 
   const onLocaleChange = (event: ChangeEvent<HTMLSelectElement>) => {
@@ -171,34 +162,6 @@ export function LayerSettings(props: Props) {
     );
   };
 
-  const renderColorPicker = () => {
-    if (!props.layer.supportsColorFilter()) {
-      return null;
-    }
-
-    const { color } = props.layer.getColorFilter();
-
-    return (
-      <EuiFormRow
-        display="columnCompressed"
-        label={i18n.translate('xpack.maps.layerPanel.settingsPanel.colorFilterPickerLabel', {
-          defaultMessage: 'Color filter',
-        })}
-      >
-        <EuiColorPicker
-          compressed
-          aria-label="Color"
-          color={color}
-          onChange={onColorChange}
-          secondaryInputDisplay="top"
-          isClearable
-          format="hex"
-          placeholder="No filter"
-          aria-placeholder="No filter"
-        />
-      </EuiFormRow>
-    );
-  };
   const renderShowLocaleSelector = () => {
     if (!props.layer.supportsLabelLocales()) {
       return null;
@@ -268,8 +231,6 @@ export function LayerSettings(props: Props) {
         {renderZoomSliders()}
         <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
         {renderShowLabelsOnTop()}
-        <EuiSpacer size="m" />
-        {renderColorPicker()}
         <EuiSpacer size="m" />
         {renderShowLocaleSelector()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />

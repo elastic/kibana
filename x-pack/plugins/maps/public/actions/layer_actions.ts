@@ -53,7 +53,6 @@ import {
 import { updateTooltipStateForLayer } from './tooltip_actions';
 import {
   Attribution,
-  ColorFilter,
   JoinDescriptor,
   LayerDescriptor,
   StyleDescriptor,
@@ -461,15 +460,6 @@ function updateLayerType(layerId: string, newLayerType: string) {
       propName: 'type',
       newValue: newLayerType,
     });
-  };
-}
-
-export function updateLayerColorFilter(id: string, colorFilter: ColorFilter) {
-  return {
-    type: UPDATE_LAYER_PROP,
-    id,
-    propName: 'colorFilter',
-    newValue: colorFilter,
   };
 }
 

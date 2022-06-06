@@ -9,7 +9,6 @@
 
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { Query } from '@kbn/data-plugin/public';
-import type { blendMode } from '@elastic/ems-client';
 import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
@@ -27,7 +26,6 @@ import {
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import {
   Attribution,
-  ColorFilter,
   CustomIcon,
   LayerDescriptor,
   MapExtent,
@@ -54,7 +52,6 @@ export interface ILayer {
   supportsElasticsearchFilters(): boolean;
   supportsFitToBounds(): Promise<boolean>;
   getAttributions(): Promise<Attribution[]>;
-  getColorFilter(): ColorFilter;
   getLabel(): string;
   getLocale(): string | null;
   hasLegendDetails(): Promise<boolean>;
@@ -75,7 +72,6 @@ export interface ILayer {
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): string;
-  getDefaultColorOperation(): { operation?: blendMode; percentage?: number };
 
   /*
    * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
@@ -106,7 +102,6 @@ export interface ILayer {
   isPreviewLayer: () => boolean;
   areLabelsOnTop: () => boolean;
   supportsLabelsOnTop: () => boolean;
-  supportsColorFilter: () => boolean;
   supportsLabelLocales: () => boolean;
   isFittable(): Promise<boolean>;
   isIncludeInFitToBounds(): boolean;
@@ -343,10 +338,6 @@ export class AbstractLayer implements ILayer {
     return this._descriptor.query ? this._descriptor.query : null;
   }
 
-  getColorFilter(): ColorFilter {
-    return this._descriptor.colorFilter ?? {};
-  }
-
   async getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]> {
     const source = this.getSource();
     return await source.getImmutableProperties();
@@ -477,10 +468,6 @@ export class AbstractLayer implements ILayer {
   }
 
   supportsLabelsOnTop(): boolean {
-    return false;
-  }
-
-  supportsColorFilter(): boolean {
     return false;
   }
 

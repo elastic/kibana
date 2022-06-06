@@ -6,7 +6,7 @@
  */
 
 import type { Map as MbMap, LayerSpecification, StyleSpecification } from '@kbn/mapbox-gl';
-import { type EmsSpriteSheet, TMSService } from '@elastic/ems-client';
+import { type blendMode, type EmsSpriteSheet, TMSService } from '@elastic/ems-client';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 // @ts-expect-error
@@ -19,12 +19,12 @@ import {
   LAYER_TYPE,
   LAYER_STYLE_TYPE,
 } from '../../../../common/constants';
-import { ColorFilter, LayerDescriptor } from '../../../../common/descriptor_types';
+import { EMSVectorTileLayerDescriptor } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
 import { isRetina } from '../../../util';
 import { DataRequestContext } from '../../../actions';
 import { EMSTMSSource } from '../../sources/ems_tms_source';
-import { TileStyle } from '../../styles/tile/tile_style';
+import { EMSVectorTileStyle } from '../../styles/ems/ems_vector_tile_style';
 
 interface SourceRequestMeta {
   tileLayerId: string;
@@ -40,27 +40,31 @@ interface SourceRequestData {
 }
 
 export class EmsVectorTileLayer extends AbstractLayer {
-  static createDescriptor(options: Partial<LayerDescriptor>) {
-    const tileLayerDescriptor = super.createDescriptor(options);
-    tileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
-    tileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
-    tileLayerDescriptor.colorFilter = _.get(options, 'colorFilter', {});
-    tileLayerDescriptor.locale = _.get(options, 'locale', AUTOSELECT_EMS_LOCALE);
-    tileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.TILE };
-    return tileLayerDescriptor;
-  }
+  private readonly _style: EMSVectorTileStyle;
 
-  private readonly _style: TileStyle;
+  static createDescriptor(options: Partial<EMSVectorTileLayerDescriptor>) {
+    const emsVectorTileLayerDescriptor = super.createDescriptor(options);
+    emsVectorTileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
+    emsVectorTileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
+    emsVectorTileLayerDescriptor.locale = _.get(options, 'locale', AUTOSELECT_EMS_LOCALE);
+    emsVectorTileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.EMS_VECTOR_TILE };
+    return emsVectorTileLayerDescriptor;
+  }
 
   constructor({
     source,
     layerDescriptor,
   }: {
     source: EMSTMSSource;
-    layerDescriptor: LayerDescriptor;
+    layerDescriptor: EMSVectorTileLayerDescriptor;
   }) {
     super({ source, layerDescriptor });
-    this._style = new TileStyle();
+    if (!layerDescriptor.style) {
+      const defaultStyle = EMSVectorTileStyle.createDescriptor();
+      this._style = new EMSVectorTileStyle(defaultStyle);
+    } else {
+      this._style = new EMSVectorTileStyle(layerDescriptor.style);
+    }
   }
 
   isInitialDataLoadComplete(): boolean {
@@ -167,15 +171,6 @@ export class EmsVectorTileLayer extends AbstractLayer {
       return null;
     }
     return (sourceDataRequest.getData() as SourceRequestData)?.spriteSheetImageData;
-  }
-
-  getDefaultColorOperation() {
-    const { operation, percentage } = TMSService.colorOperationDefaults.find(
-      ({ style }) => style === this.getSource().getTileLayerId()
-    ) ?? {
-      operation: 'screen',
-    };
-    return { operation, percentage } as unknown as Partial<ColorFilter>;
   }
 
   getMbLayerIds() {
@@ -388,13 +383,23 @@ export class EmsVectorTileLayer extends AbstractLayer {
   }
 
   _setColorFilter(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
-    const { color, operation, percentage } = this.getColorFilter();
+    const color = this.getCurrentStyle().getColor();
 
-    const properties = TMSService.transformColorProperties(mbLayer, color, operation, percentage);
+    const colorOperation = TMSService.colorOperationDefaults.find(({ style }) => {
+      return style === this.getSource().getTileLayerId();
+    });
+    if (!colorOperation) return;
+    const { operation, percentage } = colorOperation;
+
+    const properties = TMSService.transformColorProperties(
+      mbLayer,
+      color,
+      operation as unknown as blendMode,
+      percentage
+    );
     for (const { property, color: newColor } of properties) {
       mbMap.setPaintProperty(mbLayerId, property, newColor);
     }
-    return;
   }
 
   _setOpacityForType(mbMap: MbMap, mbLayer: LayerSpecification, mbLayerId: string) {
@@ -463,10 +468,6 @@ export class EmsVectorTileLayer extends AbstractLayer {
   }
 
   supportsLabelsOnTop() {
-    return true;
-  }
-
-  supportsColorFilter(): boolean {
     return true;
   }
 
