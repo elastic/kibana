@@ -22,7 +22,10 @@ import { i18n } from '@kbn/i18n';
 // @ts-expect-error
 import { Shortcuts } from 'react-shortcuts';
 
-import { ExpressionInputEditorRef } from '@kbn/presentation-util-plugin/public';
+import {
+  ExpressionInputEditorRef,
+  OnExpressionInputEditorDidMount,
+} from '@kbn/presentation-util-plugin/public';
 import { ExpressionInput } from '../expression_input';
 import { ToolTipShortcut } from '../tool_tip_shortcut';
 import { ExpressionFunction } from '../../../types';
@@ -105,6 +108,16 @@ export const Expression: FC<Props> = ({
     }
   };
 
+  const onEditorDidMount: OnExpressionInputEditorDidMount = (editor) => {
+    // @ts-expect-error
+    editor?._standaloneKeybindingService.addDynamicKeybinding(
+      '-editor.action.insertLineAfter',
+      // eslint-disable-next-line no-bitwise
+      2048 /* CtrlCmd */ | 3 /* Enter */,
+      () => {}
+    );
+  };
+
   const expressionPanel = (
     <EuiPanel
       className={`canvasTray__panel canvasTray__panel--holdingExpression canvasExpression--${
@@ -126,6 +139,7 @@ export const Expression: FC<Props> = ({
         error={error ? error : `\u00A0`}
         expression={formState.expression}
         onChange={updateValue}
+        onEditorDidMount={onEditorDidMount}
         editorRef={refExpressionInput}
       />
       <div className="canvasExpression__settings">
