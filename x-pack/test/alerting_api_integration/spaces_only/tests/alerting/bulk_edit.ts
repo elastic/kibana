@@ -15,7 +15,7 @@ import { FtrProviderContext } from '../../../common/ftr_provider_context';
 export default function createUpdateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('bulkEdit', () => {
+  describe.only('bulkEdit', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     after(() => objectRemover.removeAll());
