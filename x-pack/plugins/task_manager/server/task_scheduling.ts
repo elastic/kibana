@@ -69,7 +69,7 @@ export interface BulkUpdateSchedulesResult {
   tasks: ConcreteTaskInstance[];
 
   /**
-   * list of failed tasks and error caused failure
+   * list of failed tasks and errors caused failure
    */
   errors: Array<{ task: ConcreteTaskInstance; error: Error }>;
 }
@@ -131,9 +131,9 @@ export class TaskScheduling {
   /**
    * Bulk updates schedules for tasks by ids.
    *
-   * @param taskIds string[] - list of task ids
-   * @param schedule IntervalSchedule - new schedule
-   * @returns {Promise<ConcreteTaskInstance[]>}
+   * @param {string[]} taskIds  - list of task ids
+   * @param {IntervalSchedule} schedule  - new schedule
+   * @returns {Promise<BulkUpdateSchedulesResult>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
@@ -162,16 +162,24 @@ export class TaskScheduling {
 
     const updatedTasks = tasks
       .flatMap(({ docs }) => docs)
-      .map((task) => {
+      .reduce<ConcreteTaskInstance[]>((acc, task) => {
+        // if task schedule interval is the same, no need to update it
+        if (task.schedule?.interval === schedule.interval) {
+          return acc;
+        }
+
         const oldIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
 
+        // computing new runAt using formula:
+        // newRunAt = oldRunAt - oldInterval + newInterval
         const newRunAtInMs = Math.max(
           Date.now(),
           task.runAt.getTime() - oldIntervalInMs + parseIntervalAsMillisecond(schedule.interval)
         );
 
-        return { ...task, schedule, runAt: new Date(newRunAtInMs) };
-      });
+        acc.push({ ...task, schedule, runAt: new Date(newRunAtInMs) });
+        return acc;
+      }, []);
 
     return (await this.store.bulkUpdate(updatedTasks)).reduce<BulkUpdateSchedulesResult>(
       (acc, task) => {

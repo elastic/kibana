@@ -43,6 +43,22 @@ const operationsSchema = schema.arrayOf(
       field: schema.literal('schedule'),
       value: scheduleSchema,
     }),
+    schema.object({
+      operation: schema.literal('set'),
+      field: schema.literal('throttle'),
+      value: schema.nullable(schema.string()),
+    }),
+    schema.object({
+      operation: schema.literal('set'),
+      field: schema.literal('notifyWhen'),
+      value: schema.nullable(
+        schema.oneOf([
+          schema.literal('onActionGroupChange'),
+          schema.literal('onActiveAlert'),
+          schema.literal('onThrottleInterval'),
+        ])
+      ),
+    }),
   ]),
   { minSize: 1 }
 );
