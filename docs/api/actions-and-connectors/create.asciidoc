@@ -48,17 +48,22 @@ condition was detected. The default value is `null`.
 (Optional, boolean) The {ref}/docs-refresh.html[refresh] policy for the write
 request. The default value is `false`.
 
+For more information, refer to
+{kibana-ref}/index-action-type.html[Index connector and action].
 ====
 +
-.Jira connectors
+.{jira} connectors
 [%collapsible%open]
 ====
 
 `apiUrl`::
-(Required, string) The Jira instance URL.
+(Required, string) The {jira} instance URL.
 
 `projectKey`::
-(Required, string) The Jira project key.
+(Required, string) The {jira} project key.
+
+For more information, refer to
+{kibana-ref}/jira-action-type.html[{jira} connector and action].
 ====
 +
 For more configuration properties, refer to <<action-types>>.
@@ -78,11 +83,11 @@ about the secrets configuration properties, refer to <<action-types>>.
 WARNING: Remember these values. You must provide them each time you call the <<update-connector-api, update>> API.
 --
 +
-.Jira connectors
+.{jira} connectors
 [%collapsible%open]
 ====
 `apiToken`::
-(Required, string) The Jira API authentication token for HTTP basic
+(Required, string) The {jira} API authentication token for HTTP basic
 authentication.
 
 `email`::
