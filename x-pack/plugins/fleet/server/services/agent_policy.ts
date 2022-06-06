@@ -17,7 +17,8 @@ import type {
 } from 'src/core/server';
 
 import type { AuthenticatedUser } from '../../../security/server';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import { DEFAULT_SPACE_ID } from '../../../spaces/common/constants';
 
 import {
   AGENT_POLICY_SAVED_OBJECT_TYPE,
