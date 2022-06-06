@@ -13,7 +13,7 @@ import type { GetDataStreamsResponse } from '../../../common';
 import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { defaultIngestErrorHandler } from '../../errors';
 
-import { getMetadataFromTermsEnum } from './get_metadata_from_terms_enum';
+import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*';
 
@@ -130,7 +130,7 @@ export const getListHandler: RequestHandler = async (context, request, response)
       };
 
       const { maxIngested, namespace, dataset, type, serviceNames, environments } =
-        await getMetadataFromTermsEnum({ dataStreamName: dataStream.name, esClient });
+        await getDataStreamsQueryMetadata({ dataStreamName: dataStream.name, esClient });
 
       // some integrations e.g custom logs don't have event.ingested
       if (maxIngested) {
