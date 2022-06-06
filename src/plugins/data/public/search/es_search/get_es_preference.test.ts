@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { getEsPreference } from './get_es_preference';
 import { CoreStart } from '../../../../../core/public';
 import { coreMock } from '../../../../../core/public/mocks';
