@@ -11,6 +11,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type RouteProps, useRouteMatch, useHistory } from 'react-router-dom';
 import type { CspNavigationItem } from './types';
 import { CLOUD_POSTURE } from './translations';
+import type { EuiBreadcrumb } from '@elastic/eui';
+import { string } from 'io-ts';
 
 const getClickableBreadcrumb = (
   routeMatch: RouteProps['path'],
@@ -27,7 +29,7 @@ const getClickableBreadcrumb = (
 export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
   const {
     services: {
-      chrome: { setBreadcrumbs },
+      chrome: { setBreadcrumbs, docTitle },
       application: { getUrlForApp },
     },
   } = useKibana<CoreStart>();
@@ -49,15 +51,21 @@ export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
       };
     });
 
-    setBreadcrumbs([
+    const nextBreadcrumbs = [
       {
         text: CLOUD_POSTURE,
-        onClick: (e) => {
+        onClick: (e: React.MouseEvent<HTMLAnchorElement>) => {
           e.preventDefault();
           history.push(`/`);
         },
       },
       ...additionalBreadCrumbs,
-    ]);
-  }, [match.path, getUrlForApp, setBreadcrumbs, breadcrumbs, history]);
+    ];
+
+    setBreadcrumbs(nextBreadcrumbs);
+    docTitle.change(getTextBreadcrumbs(nextBreadcrumbs));
+  }, [match.path, getUrlForApp, setBreadcrumbs, breadcrumbs, history, docTitle]);
 };
+
+const getTextBreadcrumbs = (breakcrumbs: EuiBreadcrumb[]) =>
+  breakcrumbs.map((breadcrumb) => breadcrumb.text).filter(string.is);
