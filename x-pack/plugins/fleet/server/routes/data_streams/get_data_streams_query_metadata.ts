@@ -6,7 +6,7 @@
  */
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-export async function getMetadataFromTermsEnum({
+export async function getDataStreamsQueryMetadata({
   dataStreamName,
   esClient,
 }: {

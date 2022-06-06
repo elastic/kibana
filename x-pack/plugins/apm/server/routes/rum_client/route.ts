@@ -9,7 +9,6 @@ import { Logger } from '@kbn/core/server';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
 import { getClientMetrics } from './get_client_metrics';
-import { getJSErrors } from './get_js_errors';
 import { getLongTaskMetrics } from './get_long_task_metrics';
 import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getPageViewTrends } from './get_page_view_trends';
@@ -279,48 +278,6 @@ const rumLongTaskMetrics = createApmServerRoute({
   },
 });
 
-const rumJSErrors = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/js-errors',
-  params: t.type({
-    query: t.intersection([
-      uiFiltersRt,
-      rangeRt,
-      t.type({ pageSize: t.string, pageIndex: t.string }),
-      t.partial({ urlQuery: t.string }),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    totalErrorPages: number;
-    totalErrors: number;
-    totalErrorGroups: number;
-    items:
-      | Array<{
-          count: number;
-          errorGroupId: string | number;
-          errorMessage: string;
-        }>
-      | undefined;
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { pageSize, pageIndex, urlQuery, start, end },
-    } = resources.params;
-
-    return getJSErrors({
-      setup,
-      urlQuery,
-      pageSize: Number(pageSize),
-      pageIndex: Number(pageIndex),
-      start,
-      end,
-    });
-  },
-});
-
 const rumHasDataRoute = createApmServerRoute({
   endpoint: 'GET /api/apm/observability_overview/has_rum_data',
   params: t.partial({
@@ -383,6 +340,5 @@ export const rumRouteRepository = {
   ...rumVisitorsBreakdownRoute,
   ...rumWebCoreVitals,
   ...rumLongTaskMetrics,
-  ...rumJSErrors,
   ...rumHasDataRoute,
 };
