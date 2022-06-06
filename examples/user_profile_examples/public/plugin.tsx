@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 import { AvatarDemo } from './avatar_demo';
 import { PopoverDemo } from './popover_demo';
 import { SelectableDemo } from './selectable_demo';

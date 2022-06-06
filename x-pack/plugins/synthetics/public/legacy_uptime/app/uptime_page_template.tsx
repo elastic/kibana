@@ -7,7 +7,7 @@
 
 import React, { useEffect, useMemo } from 'react';
 import styled from 'styled-components';
-import { EuiPageHeaderProps, EuiPageTemplateProps } from '@elastic/eui';
+import { EuiPageHeaderProps, EuiPageTemplateProps_Deprecated } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useInspectorContext } from '@kbn/observability-plugin/public';
 import { CERTIFICATES_ROUTE, OVERVIEW_ROUTE } from '../../../common/constants';
@@ -29,7 +29,7 @@ const mobileCenteredHeader = `
   }
 `;
 
-export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps> = ({
+export const UptimePageTemplateComponent: React.FC<Props & EuiPageTemplateProps_Deprecated> = ({
   path,
   pageHeader,
   children,

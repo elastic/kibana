@@ -11,7 +11,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 // imports from elastic packages
-import { EuiEmptyPrompt, EuiPageTemplate } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiPageTemplate_Deprecated as EuiPageTemplate } from '@elastic/eui';
 
 // imports from immediate files
 import { KibanaPageTemplateInner } from './page_template_inner';

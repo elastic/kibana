@@ -8,7 +8,7 @@
 
 import React, { ComponentType, useState } from 'react';
 import classNames from 'classnames';
-import { useIsWithinBreakpoints, EuiPageTemplateProps } from '@elastic/eui';
+import { useIsWithinBreakpoints, EuiPageTemplateProps_Deprecated } from '@elastic/eui';
 import { SolutionNav, SolutionNavProps } from './solution_nav';
 
 import './with_solution_nav.scss';
@@ -19,7 +19,7 @@ function getDisplayName(Component: ComponentType<any>) {
 }
 
 type TemplateProps = Pick<
-  EuiPageTemplateProps,
+  EuiPageTemplateProps_Deprecated,
   'pageSideBar' | 'pageSideBarProps' | 'template' | 'children'
 >;
 

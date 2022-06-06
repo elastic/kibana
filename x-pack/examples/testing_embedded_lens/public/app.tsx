@@ -13,7 +13,7 @@ import {
   EuiSelect,
   EuiText,
   EuiSpacer,
-  EuiPageTemplate,
+  EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiPanel,
   EuiCallOut,
 } from '@elastic/eui';
