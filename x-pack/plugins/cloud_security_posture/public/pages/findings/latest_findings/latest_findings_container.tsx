@@ -26,6 +26,7 @@ import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumb
 import { findingsNavigation } from '../../../common/navigation/constants';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { ErrorCallout } from '../layout/error_callout';
+import { EuiSpacer } from '@elastic/eui';
 
 export const getDefaultQuery = ({
   query,
@@ -76,10 +77,10 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
       />
       <PageWrapper>
         <LatestFindingsPageTitle />
-        <FindingsGroupBySelector type="default" />
         {error && <ErrorCallout error={error} />}
         {!error && (
           <>
+            <FindingsGroupBySelector type="default" />
             {findingsGroupByNone.isSuccess && (
               <FindingsDistributionBar
                 {...{
@@ -94,6 +95,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
                 }}
               />
             )}
+            <EuiSpacer />
             <FindingsTable
               loading={findingsGroupByNone.isFetching}
               items={findingsGroupByNone.data?.page || []}

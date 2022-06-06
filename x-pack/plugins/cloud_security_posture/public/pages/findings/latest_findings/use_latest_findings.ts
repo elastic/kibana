@@ -87,16 +87,16 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
     notifications: { toasts },
   } = useKibana().services;
   const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
-  const pitId = pitIdRef.current;
+  const params = { ...options, pitId: pitIdRef.current };
 
   return useQuery(
-    ['csp_findings', { options }],
+    ['csp_findings', { params }],
     async () => {
       const {
         rawResponse: { hits, aggregations, pit_id: newPitId },
       } = await lastValueFrom(
         data.search.search<LatestFindingsRequest, LatestFindingsResponse>({
-          params: getFindingsQuery({ ...options, pitId }),
+          params: getFindingsQuery(params),
         })
       );
 

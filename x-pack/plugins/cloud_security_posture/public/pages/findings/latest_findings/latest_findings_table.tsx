@@ -11,7 +11,7 @@ import {
   EuiBasicTableColumn,
   type Pagination,
   type EuiBasicTableProps,
-  type Criteria,
+  type CriteriaWithPagination,
   type EuiTableActionsColumnType,
 } from '@elastic/eui';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -27,7 +27,7 @@ interface Props {
   items: CspFinding[];
   pagination: Pagination;
   sorting: TableProps['sorting'];
-  setTableOptions(options: Required<Criteria<CspFinding>>): void;
+  setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
 }
 
 const FindingsTableComponent = ({
@@ -67,7 +67,7 @@ const FindingsTableComponent = ({
         columns={columns}
         pagination={pagination}
         sorting={sorting}
-        onChange={({ page, sort }) => !!sort && setTableOptions({ page, sort })}
+        onChange={setTableOptions}
         hasActions
       />
       {selectedFinding && (

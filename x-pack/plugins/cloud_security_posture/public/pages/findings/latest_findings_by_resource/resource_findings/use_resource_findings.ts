@@ -58,14 +58,14 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
   } = useKibana().services;
 
   const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
-  const pitId = pitIdRef.current;
+  const params = { ...options, pitId: pitIdRef.current };
 
   return useQuery(
-    ['csp_resource_findings', { options }],
+    ['csp_resource_findings', { params }],
     () =>
       lastValueFrom(
         data.search.search({
-          params: getResourceFindingsQuery({ ...options, pitId }),
+          params: getResourceFindingsQuery(params),
         })
       ),
     {

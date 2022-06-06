@@ -123,16 +123,16 @@ export const useFindingsByResource = (options: UseFindingsByResourceOptions) => 
   } = useKibana().services;
 
   const { pitIdRef, setPitId } = useContext(FindingsEsPitContext);
-  const pitId = pitIdRef.current;
+  const params = { ...options, pitId: pitIdRef.current };
 
   return useQuery(
-    ['csp_findings_resource', { options }],
+    ['csp_findings_resource', { params }],
     async () => {
       const {
         rawResponse: { aggregations, pit_id: newPitId },
       } = await lastValueFrom(
         data.search.search<FindingsAggRequest, FindingsAggResponse>({
-          params: getFindingsByResourceAggQuery({ ...options, pitId }),
+          params: getFindingsByResourceAggQuery(params),
         })
       );
 

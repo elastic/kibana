@@ -34,7 +34,6 @@ export const FindingsDistributionBar = (props: Props) => (
     <Counters {...props} />
     <EuiSpacer size="s" />
     {<DistributionBar {...props} />}
-    <EuiSpacer />
   </div>
 );
 
