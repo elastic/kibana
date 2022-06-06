@@ -13,6 +13,18 @@ Executes a connector by ID.
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>/_execute`
 
+[discrete]
+=== {api-prereq-title}
+
+You must have `read` privileges for the *Actions and Connectors* feature in the
+*Management* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
+If you use an index connector, you must also have `all`, `create`, `index`, or
+`write` {ref}/security-privileges.html[indices privileges].
+
+index,write,all
+
 [[execute-connector-api-params]]
 ==== {api-path-parms-title}
 
@@ -38,9 +50,11 @@ Executes a connector by ID.
 [[execute-connector-api-example]]
 ==== {api-examples-title}
 
+Run an index connector:
+
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad/_execute  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+POST api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad/_execute
 {
   "params": {
     "documents": [
@@ -51,7 +65,7 @@ $ curl -X POST api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad/_execu
       }
     ]
   }
-}'
+}
 --------------------------------------------------
 // KIBANA
 
@@ -62,7 +76,7 @@ The API returns the following:
 {
   "status": "ok",
   "data": {
-    "took": 197,
+    "took": 10,
     "errors": false,
     "items": [
       {
@@ -76,7 +90,7 @@ The API returns the following:
             "successful": 1,
             "failed": 0
           },
-          "_seq_no": 0,
+          "_seq_no": 7,
           "_primary_term": 1,
           "status": 201
         }
