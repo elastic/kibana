@@ -256,3 +256,6 @@ export interface DocValueFieldsInput {
 
   format: string;
 }
+export interface CommonFields {
+  '@timestamp'?: string[];
+}
