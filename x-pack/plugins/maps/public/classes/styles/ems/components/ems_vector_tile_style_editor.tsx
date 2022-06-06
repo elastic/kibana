@@ -16,9 +16,9 @@ interface Props {
 }
 
 export function EMSVectorTileStyleEditor({ color, onEMSVectorTileColorChange }: Props) {
-  const onColorChange = (color: string) => {
+  const onColorChange = (selectedColor: string) => {
     onEMSVectorTileColorChange({
-      color: color,
+      color: selectedColor,
     });
   };
   return (
