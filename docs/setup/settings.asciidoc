@@ -157,7 +157,7 @@ The password that decrypts the keystore specified via
 as blank. If the keystore has an empty password, set this to
 `""`.
 
-`elasticsearch.ssl.truststore.path`::
+[[elasticsearch-ssl-truststore-path]] `elasticsearch.ssl.truststore.path`::
 Path to a PKCS#12 trust store that contains one or more X.509 certificate
 authority (CA) certificates, which make up a trusted certificate chain for
 {es}. This chain is used by {kib} to establish trust when making outbound
