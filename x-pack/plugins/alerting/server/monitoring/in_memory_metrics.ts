@@ -6,9 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { MeterProvider } from '@opentelemetry/sdk-metrics-base';
-import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
-import { Attributes, Counter } from '@opentelemetry/api-metrics';
+import { Attributes, Counter, Meter } from '@opentelemetry/api-metrics';
 
 export enum IN_MEMORY_METRICS {
   RULE_EXECUTIONS = 'ruleExecutions',
@@ -24,7 +22,7 @@ export class InMemoryMetrics {
     [IN_MEMORY_METRICS.RULE_TIMEOUTS]: 0,
   };
 
-  private readonly otelMetrics?: {
+  private otelMetrics?: {
     [IN_MEMORY_METRICS.RULE_EXECUTIONS]: Counter;
     [IN_MEMORY_METRICS.RULE_FAILURES]: Counter;
     [IN_MEMORY_METRICS.RULE_TIMEOUTS]: Counter;
@@ -32,20 +30,6 @@ export class InMemoryMetrics {
 
   constructor(logger: Logger) {
     this.logger = logger;
-
-    if (process.env.OTEL_EXPORTER_OTLP_ENDPOINT) {
-      const provider = new MeterProvider({
-        exporter: new OTLPMetricExporter(),
-        interval: 10000,
-      });
-
-      const meter = provider.getMeter('alerting-meter');
-      this.otelMetrics = {
-        [IN_MEMORY_METRICS.RULE_EXECUTIONS]: meter.createCounter(IN_MEMORY_METRICS.RULE_EXECUTIONS),
-        [IN_MEMORY_METRICS.RULE_FAILURES]: meter.createCounter(IN_MEMORY_METRICS.RULE_FAILURES),
-        [IN_MEMORY_METRICS.RULE_TIMEOUTS]: meter.createCounter(IN_MEMORY_METRICS.RULE_TIMEOUTS),
-      };
-    }
   }
 
   public increment(metric: IN_MEMORY_METRICS, attributes?: Attributes) {
@@ -76,5 +60,13 @@ export class InMemoryMetrics {
 
   public getAllInMemoryMetrics() {
     return this.inMemoryMetrics;
+  }
+
+  public registerMeter(meter: Meter) {
+    this.otelMetrics = {
+      [IN_MEMORY_METRICS.RULE_EXECUTIONS]: meter.createCounter(IN_MEMORY_METRICS.RULE_EXECUTIONS),
+      [IN_MEMORY_METRICS.RULE_FAILURES]: meter.createCounter(IN_MEMORY_METRICS.RULE_FAILURES),
+      [IN_MEMORY_METRICS.RULE_TIMEOUTS]: meter.createCounter(IN_MEMORY_METRICS.RULE_TIMEOUTS),
+    };
   }
 }

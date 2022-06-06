@@ -15,6 +15,9 @@ export function registerNodeCollector({
   monitoringCollection: MonitoringCollectionSetup;
   inMemoryMetrics: InMemoryMetrics;
 }) {
+  const meter = monitoringCollection.getMeter('alerting-meter');
+  inMemoryMetrics.registerMeter(meter);
+
   monitoringCollection.registerMetric({
     type: 'node_rules',
     schema: {
