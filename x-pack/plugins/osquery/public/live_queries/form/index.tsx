@@ -16,7 +16,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation } from 'react-query';
-import deepMerge from 'deepmerge';
 
 import { pickBy, isEmpty, map } from 'lodash';
 import { convertECSMappingToObject } from '../../../common/schemas/common/utils';
@@ -102,8 +101,12 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
     options: {
       stripEmptyFields: false,
     },
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    serializer: ({ savedQueryId, ecs_mapping, ...formData }) =>
+    serializer: ({
+      savedQueryId,
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      ecs_mapping,
+      ...formData
+    }) =>
       pickBy(
         {
           ...formData,
@@ -112,20 +115,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
         },
         (value) => !isEmpty(value)
       ),
-    defaultValue: deepMerge(
-      {
-        agentSelection: {
-          agents: [],
-          allAgentsSelected: false,
-          platformsSelected: [],
-          policiesSelected: [],
-        },
-        query: '',
-        savedQueryId: null,
-        ecs_mapping: [],
-      },
-      defaultValue ?? {}
-    ),
   });
 
   const { updateFieldValues, setFieldValue, submit, isSubmitting } = form;
@@ -248,6 +237,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
                 />
               </>
             )}
+            <UseField path="savedQueryId" component={GhostFormField} />
             <UseField
               path="query"
               component={LiveQueryQueryField}
@@ -377,7 +367,6 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           <EuiFlexItem>{queryFieldStepContent}</EuiFlexItem>
           <EuiFlexItem>{resultsStepContent}</EuiFlexItem>
         </EuiFlexGroup>
-        <UseField path="savedQueryId" component={GhostFormField} />
       </Form>
       {showSavedQueryFlyout ? (
         <SavedQueryFlyout

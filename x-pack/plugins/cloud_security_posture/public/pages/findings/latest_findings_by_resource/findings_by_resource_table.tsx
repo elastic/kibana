@@ -18,46 +18,42 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
 import { Link, generatePath } from 'react-router-dom';
-import { extractErrorMessage } from '../../../../common/utils/helpers';
+import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import * as TEST_SUBJECTS from '../test_subjects';
 import * as TEXT from '../translations';
-import type { CspFindingsByResourceResult } from './use_findings_by_resource';
+import type { FindingsByResourcePage } from './use_findings_by_resource';
 import { findingsNavigation } from '../../../common/navigation/constants';
 
 export const formatNumber = (value: number) =>
   value < 1000 ? value : numeral(value).format('0.0a');
 
-export type CspFindingsByResource = NonNullable<
-  CspFindingsByResourceResult['data']
->['page'][number];
-
-interface Props extends CspFindingsByResourceResult {
+interface Props {
+  items: FindingsByResourcePage[];
+  loading: boolean;
   pagination: Pagination;
-  setTableOptions(options: CriteriaWithPagination<CspFindingsByResource>): void;
+  setTableOptions(options: CriteriaWithPagination<FindingsByResourcePage>): void;
 }
 
-export const getResourceId = (resource: CspFindingsByResource) =>
+export const getResourceId = (resource: FindingsByResourcePage) =>
   [resource.resource_id, ...resource.cis_sections].join('/');
 
 const FindingsByResourceTableComponent = ({
-  error,
-  data,
+  items,
   loading,
   pagination,
   setTableOptions,
 }: Props) => {
-  const getRowProps = (row: CspFindingsByResource) => ({
+  const getRowProps = (row: FindingsByResourcePage) => ({
     'data-test-subj': TEST_SUBJECTS.getFindingsByResourceTableRowTestId(getResourceId(row)),
   });
 
-  if (!loading && !data?.page.length)
+  if (!loading && !items.length)
     return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
 
   return (
     <EuiBasicTable
       loading={loading}
-      error={error ? extractErrorMessage(error) : undefined}
-      items={data?.page || []}
+      items={items}
       columns={columns}
       rowProps={getRowProps}
       pagination={pagination}
@@ -66,16 +62,21 @@ const FindingsByResourceTableComponent = ({
   );
 };
 
-const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
+const columns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = [
   {
     field: 'resource_id',
     name: (
-      <FormattedMessage
-        id="xpack.csp.findings.groupByResourceTable.resourceIdColumnLabel"
-        defaultMessage="Resource ID"
+      <ColumnNameWithTooltip
+        columnName={TEXT.RESOURCE_ID}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.resourceTable.resourceTableColumn.resourceIdColumnTooltipLabel',
+          {
+            defaultMessage: 'Custom Elastic Resource ID',
+          }
+        )}
       />
     ),
-    render: (resourceId: CspFindingsByResource['resource_id']) => (
+    render: (resourceId: FindingsByResourcePage['resource_id']) => (
       <Link to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}>
         {resourceId}
       </Link>
@@ -113,6 +114,21 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
     render: (sections: string[]) => sections.join(', '),
   },
   {
+    field: 'cluster_id',
+    name: (
+      <ColumnNameWithTooltip
+        columnName={TEXT.CLUSTER_ID}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.resourceTable.resourceTableColumn.clusterIdColumnTooltipLabel',
+          {
+            defaultMessage: 'Kube-System Namespace ID',
+          }
+        )}
+      />
+    ),
+    truncateText: true,
+  },
+  {
     field: 'failed_findings',
     width: '150px',
     truncateText: true,
@@ -122,7 +138,7 @@ const columns: Array<EuiTableFieldDataColumnType<CspFindingsByResource>> = [
         defaultMessage="Failed Findings"
       />
     ),
-    render: (failedFindings: CspFindingsByResource['failed_findings']) => (
+    render: (failedFindings: FindingsByResourcePage['failed_findings']) => (
       <EuiToolTip
         content={i18n.translate('xpack.csp.findings.groupByResourceTable.failedFindingsToolTip', {
           defaultMessage: '{failed} out of {total}',

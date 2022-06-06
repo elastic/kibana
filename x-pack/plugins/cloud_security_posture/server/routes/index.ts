@@ -9,6 +9,7 @@ import { defineGetComplianceDashboardRoute } from './compliance_dashboard/compli
 import { defineGetBenchmarksRoute } from './benchmarks/benchmarks';
 import { defineUpdateRulesConfigRoute } from './configuration/update_rules_configuration';
 import { defineGetCspSetupStatusRoute } from './setup_status/setup_status';
+import { defineEsPitRoute } from './es_pit/es_pit';
 import { CspAppContext } from '../plugin';
 import { CspRouter } from '../types';
 
@@ -17,4 +18,5 @@ export function defineRoutes(router: CspRouter, cspContext: CspAppContext) {
   defineGetBenchmarksRoute(router, cspContext);
   defineUpdateRulesConfigRoute(router, cspContext);
   defineGetCspSetupStatusRoute(router, cspContext);
+  defineEsPitRoute(router, cspContext);
 }

@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
-import { UseQueryResult } from 'react-query';
 
 export type FindingsGroupByKind = 'default' | 'resource';
 
@@ -14,17 +14,14 @@ export interface FindingsBaseURLQuery {
   filters: Filter[];
 }
 
+export interface FindingsBaseProps {
+  dataView: DataView;
+}
+
 export interface FindingsBaseEsQuery {
-  index: string;
   query?: {
     bool: BoolQuery;
   };
-}
-
-export interface FindingsQueryResult<TData = unknown, TError = unknown> {
-  loading: UseQueryResult['isLoading'];
-  error: TError;
-  data: TData;
 }
 
 // TODO: this needs to be defined in a versioned schema
@@ -97,4 +94,9 @@ interface CspFindingAgent {
   id: string;
   name: string;
   type: string;
+}
+
+export interface CspFindingsQueryData {
+  page: CspFinding[];
+  total: number;
 }

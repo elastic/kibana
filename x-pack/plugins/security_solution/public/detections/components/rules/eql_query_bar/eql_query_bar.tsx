@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, ChangeEvent, useEffect, useState } from 'react';
+import React, { FC, useCallback, ChangeEvent, useEffect, useState, useRef } from 'react';
+import { Subscription } from 'rxjs';
 import styled from 'styled-components';
-import { EuiFormRow, EuiTextArea } from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
+import { EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
+import type { DataViewBase, Filter, Query } from '@kbn/es-query';
+import { FilterManager } from '@kbn/data-plugin/public';
 
 import { FieldHook } from '../../../../shared_imports';
+import { FilterBar } from '../../../../common/components/filter_bar';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import * as i18n from './translations';
@@ -20,6 +25,7 @@ import {
   EqlOptionsSelected,
   FieldsEqlOptions,
 } from '../../../../../common/search_strategy';
+import { useKibana } from '../../../../common/lib/kibana';
 
 const TextArea = styled(EuiTextArea)`
   display: block;
@@ -29,9 +35,18 @@ const TextArea = styled(EuiTextArea)`
   min-height: ${({ theme }) => theme.eui.euiFormControlHeight};
 `;
 
+export interface FieldValueQueryBar {
+  filters: Filter[];
+  query: Query;
+  saved_id?: string;
+}
+
 export interface EqlQueryBarProps {
   dataTestSubj: string;
   field: FieldHook<DefineStepRule['queryBar']>;
+  isLoading: boolean;
+  indexPattern: DataViewBase;
+  showFilterBar?: boolean;
   idAria?: string;
   optionsData?: EqlOptionsData;
   optionsSelected?: EqlOptionsSelected;
@@ -44,6 +59,9 @@ export interface EqlQueryBarProps {
 export const EqlQueryBar: FC<EqlQueryBarProps> = ({
   dataTestSubj,
   field,
+  isLoading = false,
+  indexPattern,
+  showFilterBar,
   idAria,
   optionsData,
   optionsSelected,
@@ -54,9 +72,11 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
 }) => {
   const { addError } = useAppToasts();
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
-  const { isValidating, setValue } = field;
+  const { isValidating, value: fieldValue, setValue: setFieldValue } = field;
   const { isValid, message, messages, error } = getValidationResults(field);
-  const fieldValue = field.value.query.query as string;
+
+  const { uiSettings } = useKibana().services;
+  const filterManager = useRef<FilterManager>(new FilterManager(uiSettings));
 
   // Bubbles up field validity to parent.
   // Using something like form `getErrors` does
@@ -83,6 +103,39 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
     }
   }, [isValidating, onValiditingChange]);
 
+  useEffect(() => {
+    let isSubscribed = true;
+    const subscriptions = new Subscription();
+    filterManager.current.setFilters([]);
+
+    subscriptions.add(
+      filterManager.current.getUpdates$().subscribe({
+        next: () => {
+          if (isSubscribed) {
+            const newFilters = filterManager.current.getFilters();
+            const { filters } = fieldValue;
+
+            if (!deepEqual(filters, newFilters)) {
+              setFieldValue({ ...fieldValue, filters: newFilters });
+            }
+          }
+        },
+      })
+    );
+
+    return () => {
+      isSubscribed = false;
+      subscriptions.unsubscribe();
+    };
+  }, [fieldValue, filterManager, setFieldValue]);
+
+  useEffect(() => {
+    const { filters } = fieldValue;
+    if (!deepEqual(filters, filterManager.current.getFilters())) {
+      filterManager.current.setFilters(filters);
+    }
+  }, [fieldValue, filterManager]);
+
   const handleChange = useCallback(
     (e: ChangeEvent<HTMLTextAreaElement>) => {
       const newQuery = e.target.value;
@@ -90,15 +143,16 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
         onValiditingChange(true);
       }
       setErrorMessages([]);
-      setValue({
-        filters: [],
+      setFieldValue({
+        filters: fieldValue.filters,
         query: {
           query: newQuery,
           language: 'eql',
         },
+        saved_id: null,
       });
     },
-    [setValue, onValiditingChange]
+    [fieldValue, setFieldValue, onValiditingChange]
   );
 
   return (
@@ -117,7 +171,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           data-test-subj="eqlQueryBarTextInput"
           fullWidth
           isInvalid={!isValid && !isValidating}
-          value={fieldValue}
+          value={fieldValue.query.query as string}
           onChange={handleChange}
         />
         <EqlQueryBarFooter
@@ -128,6 +182,21 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
           optionsSelected={optionsSelected}
           onOptionsChange={onOptionsChange}
         />
+        {showFilterBar && (
+          <>
+            <EuiSpacer size="s" />
+            <FilterBar
+              data-test-subj="eqlFilterBar"
+              indexPattern={indexPattern}
+              isLoading={isLoading}
+              isRefreshPaused={false}
+              filterQuery={fieldValue.query}
+              filterManager={filterManager.current}
+              filters={filterManager.current.getFilters() || []}
+              displayStyle="inPage"
+            />
+          </>
+        )}
       </>
     </EuiFormRow>
   );

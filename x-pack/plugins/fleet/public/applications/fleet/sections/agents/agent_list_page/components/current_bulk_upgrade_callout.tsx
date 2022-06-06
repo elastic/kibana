@@ -71,7 +71,7 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
   ) : (
     <FormattedMessage
       id="xpack.fleet.currentUpgrade.calloutTitle"
-      defaultMessage="Upgrading {nbAgents} agents to version {version}"
+      defaultMessage="Upgrading {nbAgents, plural, one {# agent} other {# agents}} to version {version}"
       values={{
         nbAgents: currentUpgrade.nbAgents - currentUpgrade.nbAgentsAck,
         version: currentUpgrade.version,
@@ -94,7 +94,12 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
           </div>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" onClick={onClickAbortUpgrade} isLoading={isAborting}>
+          <EuiButton
+            size="s"
+            onClick={onClickAbortUpgrade}
+            isLoading={isAborting}
+            data-test-subj="abortUpgradeBtn"
+          >
             <FormattedMessage
               id="xpack.fleet.currentUpgrade.abortUpgradeButtom"
               defaultMessage="Abort upgrade"

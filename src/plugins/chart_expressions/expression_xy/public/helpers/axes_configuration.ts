@@ -16,8 +16,7 @@ import {
   YConfig,
   YScaleType,
 } from '../../common';
-import { isDataLayer } from './visualization';
-import { getFormat } from './format';
+import { LayersFieldFormats } from './layers';
 
 export interface Series {
   layer: string;
@@ -40,10 +39,13 @@ export function isFormatterCompatible(
   formatter1: SerializedFieldFormat,
   formatter2: SerializedFieldFormat
 ) {
-  return formatter1.id === formatter2.id;
+  return formatter1?.id === formatter2?.id;
 }
 
-export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
+export function groupAxesByType(
+  layers: CommonXYDataLayerConfig[],
+  fieldFormats: LayersFieldFormats
+) {
   const series: {
     auto: FormattedMetric[];
     left: FormattedMetric[];
@@ -57,32 +59,14 @@ export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
   };
 
   layers.forEach((layer) => {
-    const { table } = layer;
+    const { layerId, table } = layer;
     layer.accessors.forEach((accessor) => {
       const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
-      const yAccessor = getAccessorByDimension(accessor, table?.columns || []);
+      const yAccessor = getAccessorByDimension(accessor, table.columns);
       const mode =
-        yConfig?.find((yAxisConfig) => yAxisConfig.forAccessor === yAccessor)?.axisMode || 'auto';
-      let formatter: SerializedFieldFormat = getFormat(table.columns, accessor) || {
-        id: 'number',
-      };
-      if (
-        isDataLayer(layer) &&
-        layer.seriesType.includes('percentage') &&
-        formatter.id !== 'percent'
-      ) {
-        formatter = {
-          id: 'percent',
-          params: {
-            pattern: '0.[00]%',
-          },
-        };
-      }
-      series[mode].push({
-        layer: layer.layerId,
-        accessor: yAccessor,
-        fieldFormat: formatter,
-      });
+        yConfig?.find(({ forAccessor }) => forAccessor === yAccessor)?.axisMode || 'auto';
+      const fieldFormat = fieldFormats[layerId].yAccessors[yAccessor]!;
+      series[mode].push({ layer: layer.layerId, accessor: yAccessor, fieldFormat });
     });
   });
 
@@ -117,11 +101,12 @@ export function groupAxesByType(layers: CommonXYDataLayerConfig[]) {
 export function getAxesConfiguration(
   layers: CommonXYDataLayerConfig[],
   shouldRotate: boolean,
-  formatFactory?: FormatFactory,
+  formatFactory: FormatFactory | undefined,
+  fieldFormats: LayersFieldFormats,
   yLeftScale?: YScaleType,
   yRightScale?: YScaleType
 ): GroupsConfiguration {
-  const series = groupAxesByType(layers);
+  const series = groupAxesByType(layers, fieldFormats);
 
   const axisGroups: GroupsConfiguration = [];
 
