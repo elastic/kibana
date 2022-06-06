@@ -512,7 +512,7 @@ describe('XYChart component', () => {
           {...defaultProps}
           args={{
             ...args,
-            axes: [
+            yAxisConfigs: [
               {
                 type: 'yAxisConfig',
                 position: 'left',
@@ -541,7 +541,7 @@ describe('XYChart component', () => {
           {...defaultProps}
           args={{
             ...args,
-            axes: [
+            yAxisConfigs: [
               {
                 type: 'yAxisConfig',
                 position: 'left',
@@ -568,7 +568,7 @@ describe('XYChart component', () => {
           {...defaultProps}
           args={{
             ...args,
-            axes: [
+            yAxisConfigs: [
               {
                 type: 'yAxisConfig',
                 position: 'left',
@@ -601,7 +601,7 @@ describe('XYChart component', () => {
           {...defaultProps}
           args={{
             ...args,
-            axes: [
+            yAxisConfigs: [
               {
                 type: 'yAxisConfig',
                 position: 'left',
@@ -1661,7 +1661,7 @@ describe('XYChart component', () => {
             table: dataWithoutFormats,
           },
         ],
-        axes: [
+        yAxisConfigs: [
           {
             type: 'yAxisConfig',
             id: '1',
@@ -1727,7 +1727,7 @@ describe('XYChart component', () => {
             table: dataWithoutFormats,
           },
         ],
-        axes: [
+        yAxisConfigs: [
           {
             type: 'yAxisConfig',
             id: '1',
@@ -2102,7 +2102,7 @@ describe('XYChart component', () => {
         {...defaultProps}
         args={{
           ...args,
-          axes: [
+          yAxisConfigs: [
             {
               type: 'yAxisConfig',
               position: 'left',
@@ -2157,7 +2157,7 @@ describe('XYChart component', () => {
   test('it should set the tickLabel visibility on the x axis if the tick labels is hidden', () => {
     const { args } = sampleArgs();
 
-    args.axes = [
+    args.yAxisConfigs = [
       {
         type: 'yAxisConfig',
         position: 'left',
@@ -2191,7 +2191,7 @@ describe('XYChart component', () => {
   test('it should set the tickLabel visibility on the y axis if the tick labels is hidden', () => {
     const { args } = sampleArgs();
 
-    args.axes = [
+    args.yAxisConfigs = [
       {
         type: 'yAxisConfig',
         position: 'left',
@@ -2218,7 +2218,7 @@ describe('XYChart component', () => {
   test('it should set the tickLabel visibility on the x axis if the tick labels is shown', () => {
     const { args } = sampleArgs();
 
-    args.axes = [
+    args.yAxisConfigs = [
       {
         type: 'yAxisConfig',
         position: 'left',
@@ -2252,7 +2252,7 @@ describe('XYChart component', () => {
   test('it should set the tickLabel orientation on the x axis', () => {
     const { args } = sampleArgs();
 
-    args.axes = [
+    args.yAxisConfigs = [
       {
         type: 'yAxisConfig',
         position: 'left',
@@ -2287,7 +2287,7 @@ describe('XYChart component', () => {
   test('it should set the tickLabel visibility on the y axis if the tick labels is shown', () => {
     const { args } = sampleArgs();
 
-    args.axes = [
+    args.yAxisConfigs = [
       {
         type: 'yAxisConfig',
         position: 'left',
@@ -2321,7 +2321,7 @@ describe('XYChart component', () => {
   test('it should set the tickLabel orientation on the y axis', () => {
     const { args } = sampleArgs();
 
-    args.axes = [
+    args.yAxisConfigs = [
       {
         type: 'yAxisConfig',
         position: 'left',
@@ -2384,7 +2384,7 @@ describe('XYChart component', () => {
       showTooltip: true,
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
-      axes: [
+      yAxisConfigs: [
         {
           type: 'yAxisConfig',
           position: 'left',
@@ -2486,7 +2486,7 @@ describe('XYChart component', () => {
     const args: XYProps = {
       legend: { type: 'legendConfig', isVisible: false, position: Position.Top },
       valueLabels: 'hide',
-      axes: [
+      yAxisConfigs: [
         {
           type: 'yAxisConfig',
           position: 'left',
@@ -2572,7 +2572,7 @@ describe('XYChart component', () => {
       showTooltip: true,
       legend: { type: 'legendConfig', isVisible: true, position: Position.Top },
       valueLabels: 'hide',
-      axes: [
+      yAxisConfigs: [
         {
           type: 'yAxisConfig',
           position: 'left',
@@ -2808,7 +2808,7 @@ describe('XYChart component', () => {
   test('it should hide the X axis title if the corresponding switch is off', () => {
     const { args } = sampleArgs();
 
-    args.axes = [
+    args.yAxisConfigs = [
       {
         type: 'yAxisConfig',
         position: 'left',
@@ -2844,7 +2844,7 @@ describe('XYChart component', () => {
   test('it should show the X axis gridlines if the setting is on', () => {
     const { args } = sampleArgs();
 
-    args.axes = [
+    args.yAxisConfigs = [
       {
         type: 'yAxisConfig',
         position: 'left',

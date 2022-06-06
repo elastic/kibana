@@ -221,7 +221,7 @@ describe('axes_configuration', () => {
     },
   };
 
-  const axes: AxisConfig[] = [
+  const yAxisConfigs: AxisConfig[] = [
     {
       id: '1',
       position: 'right',
@@ -308,7 +308,7 @@ describe('axes_configuration', () => {
       false,
       formatFactory,
       fieldFormats,
-      axes
+      yAxisConfigs
     );
     expect(groups.length).toEqual(1);
     expect(groups[0].position).toEqual('right');
@@ -329,7 +329,7 @@ describe('axes_configuration', () => {
       false,
       formatFactory,
       fieldFormats,
-      axes
+      yAxisConfigs
     );
     expect(groups.length).toEqual(2);
     expect(groups[0].position).toEqual('right');
@@ -354,7 +354,7 @@ describe('axes_configuration', () => {
       false,
       formatFactory,
       fieldFormats,
-      axes
+      yAxisConfigs
     );
     expect(formatFactory).toHaveBeenCalledTimes(2);
     expect(formatFactory).toHaveBeenCalledWith({ id: 'number', params: {} });

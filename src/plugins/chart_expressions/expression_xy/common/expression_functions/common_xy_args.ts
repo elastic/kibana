@@ -78,9 +78,9 @@ export const commonXYArgs: CommonXYFn['args'] = {
     types: [X_AXIS_CONFIG],
     help: strings.getXAxisConfigHelp(),
   },
-  axes: {
+  yAxisConfigs: {
     types: [Y_AXIS_CONFIG],
-    help: strings.getAxesHelp(),
+    help: strings.getyAxisConfigsHelp(),
     multi: true,
   },
   detailedTooltip: {

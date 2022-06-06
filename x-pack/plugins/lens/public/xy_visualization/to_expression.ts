@@ -199,7 +199,7 @@ export const buildExpression = (
     yConfig?.some((config) => config.axisMode === 'right')
   );
 
-  const axes: YAxisConfig[] = [
+  const yAxisConfigs: YAxisConfig[] = [
     {
       position: 'left',
       extent: state?.yLeftExtent ? { ...state?.yLeftExtent, type: 'axisExtentConfig' } : undefined,
@@ -225,14 +225,14 @@ export const buildExpression = (
   ];
 
   if (isLeftAxis) {
-    axes.push({
+    yAxisConfigs.push({
       id: 'left',
       position: 'left',
     });
   }
 
   if (isRightAxis) {
-    axes.push({
+    yAxisConfigs.push({
       id: 'right',
       position: 'right',
     });
@@ -296,7 +296,7 @@ export const buildExpression = (
           valueLabels: [state?.valueLabels || 'hide'],
           hideEndzones: [state?.hideEndzones || false],
           valuesInLegend: [state?.valuesInLegend || false],
-          axes: [...axesToExpression(axes, validDataLayers)],
+          yAxisConfigs: [...yAxisConfigsToExpression(yAxisConfigs, validDataLayers)],
           xAxisConfig: [
             {
               type: 'expression',
@@ -321,7 +321,7 @@ export const buildExpression = (
             ...validDataLayers.map((layer) =>
               dataLayerToExpression(
                 layer,
-                axes,
+                yAxisConfigs,
                 datasourceLayers[layer.layerId],
                 metadata,
                 paletteService,
@@ -331,7 +331,7 @@ export const buildExpression = (
             ...validReferenceLayers.map((layer) =>
               referenceLineLayerToExpression(
                 layer,
-                axes,
+                yAxisConfigs,
                 datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId],
                 datasourceExpressionsByLayers[layer.layerId]
               )
@@ -346,11 +346,11 @@ export const buildExpression = (
   };
 };
 
-const axesToExpression = (
-  axes: YAxisConfig[],
+const yAxisConfigsToExpression = (
+  yAxisConfigs: YAxisConfig[],
   validDataLayers: ValidXYDataLayerConfig[]
 ): Ast[] => {
-  return axes.map((axis) => ({
+  return yAxisConfigs.map((axis) => ({
     type: 'expression',
     chain: [
       {
@@ -373,7 +373,7 @@ const axesToExpression = (
 
 const referenceLineLayerToExpression = (
   layer: XYReferenceLineLayerConfig,
-  axes: YAxisConfig[],
+  yAxisConfigs: YAxisConfig[],
   datasourceLayer: DatasourcePublicAPI,
   datasourceExpression: Ast
 ): Ast => {
@@ -387,7 +387,7 @@ const referenceLineLayerToExpression = (
           layerId: [layer.layerId],
           yConfig: layer.yConfig
             ? layer.yConfig.map((yConfig) =>
-                extendedYConfigToExpression(yConfig, axes, defaultReferenceLineColor)
+                extendedYConfigToExpression(yConfig, yAxisConfigs, defaultReferenceLineColor)
               )
             : [],
           accessors: layer.accessors,
@@ -423,7 +423,7 @@ const annotationLayerToExpression = (
 
 const dataLayerToExpression = (
   layer: ValidXYDataLayerConfig,
-  axes: YAxisConfig[],
+  yAxisConfigs: YAxisConfig[],
   datasourceLayer: DatasourcePublicAPI,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   paletteService: PaletteRegistry,
@@ -463,7 +463,7 @@ const dataLayerToExpression = (
           isHorizontal: isHorizontal ? [isHorizontal] : [],
           splitAccessor: layer.collapseFn || !layer.splitAccessor ? [] : [layer.splitAccessor],
           yConfig: layer.yConfig
-            ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig, axes))
+            ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig, yAxisConfigs))
             : [],
           seriesType: [seriesType],
           accessors: layer.accessors,
@@ -524,8 +524,12 @@ const dataLayerToExpression = (
   };
 };
 
-const yConfigToExpression = (yConfig: YConfig, axes: YAxisConfig[], defaultColor?: string): Ast => {
-  const axisId = axes.find((axis) => axis.id && axis.position === yConfig.axisMode)?.id;
+const yConfigToExpression = (
+  yConfig: YConfig,
+  yAxisConfigs: YAxisConfig[],
+  defaultColor?: string
+): Ast => {
+  const axisId = yAxisConfigs.find((axis) => axis.id && axis.position === yConfig.axisMode)?.id;
   return {
     type: 'expression',
     chain: [
@@ -544,10 +548,10 @@ const yConfigToExpression = (yConfig: YConfig, axes: YAxisConfig[], defaultColor
 
 const extendedYConfigToExpression = (
   yConfig: YConfig,
-  axes: YAxisConfig[],
+  yAxisConfigs: YAxisConfig[],
   defaultColor?: string
 ): Ast => {
-  const axisId = axes.find((axis) => axis.id && axis.position === yConfig.axisMode)?.id;
+  const axisId = yAxisConfigs.find((axis) => axis.id && axis.position === yConfig.axisMode)?.id;
   return {
     type: 'expression',
     chain: [

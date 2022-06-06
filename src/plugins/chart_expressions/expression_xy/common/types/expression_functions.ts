@@ -220,7 +220,7 @@ export interface XYArgs extends DataLayerArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
-  axes?: YAxisConfigResult[];
+  yAxisConfigs?: YAxisConfigResult[];
   xAxisConfig?: XAxisConfigResult;
   addTimeMarker?: boolean;
   markSizeRatio?: number;
@@ -244,7 +244,7 @@ export interface LayeredXYArgs {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
-  axes?: YAxisConfigResult[];
+  yAxisConfigs?: YAxisConfigResult[];
   xAxisConfig?: XAxisConfigResult;
   detailedTooltip?: boolean;
   addTimeMarker?: boolean;
@@ -266,7 +266,7 @@ export interface XYProps {
   hideEndzones?: boolean;
   valuesInLegend?: boolean;
   ariaLabel?: string;
-  axes?: YAxisConfigResult[];
+  yAxisConfigs?: YAxisConfigResult[];
   xAxisConfig?: XAxisConfigResult;
   addTimeMarker?: boolean;
   markSizeRatio?: number;

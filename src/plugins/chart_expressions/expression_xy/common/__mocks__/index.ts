@@ -103,7 +103,7 @@ export const createArgsWithLayers = (
     showTitle: true,
     title: '',
   },
-  axes: [
+  yAxisConfigs: [
     {
       type: 'yAxisConfig',
       position: 'right',

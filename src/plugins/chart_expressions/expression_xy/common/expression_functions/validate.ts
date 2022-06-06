@@ -104,6 +104,12 @@ export const errors = {
         defaultMessage: '`minTimeBarInterval` argument is applicable only for time bar charts.',
       }
     ),
+  axisIsNotAssignedError: (axisId: string) =>
+    i18n.translate('expressionXY.reusable.function.xyVis.errors.axisIsNotAssignedError', {
+      defaultMessage:
+        'Axis with id: "{axisId}" is not assigned to any accessor. Please assign axis using the following construction: `yConfig=\\{yConfig forAccessor="your-accessor" axisId="{axisId}"\\}`',
+      values: { axisId },
+    }),
 };
 
 export const hasBarLayer = (layers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>) =>
@@ -140,9 +146,9 @@ export const validateExtentForDataBounds = (
 export const validateExtents = (
   dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>,
   hasBarOrArea: boolean,
-  axes?: YAxisConfigResult[]
+  yAxisConfigs?: YAxisConfigResult[]
 ) => {
-  axes?.forEach((axis) => {
+  yAxisConfigs?.forEach((axis) => {
     if (!axis.extent) {
       return;
     }
@@ -155,6 +161,22 @@ export const validateExtents = (
     }
 
     validateExtentForDataBounds(axis.extent, dataLayers);
+  });
+};
+
+export const validateAxes = (
+  dataLayers: Array<DataLayerConfigResult | CommonXYDataLayerConfig>,
+  yAxisConfigs?: YAxisConfigResult[]
+) => {
+  yAxisConfigs?.forEach((axis) => {
+    if (
+      axis.id &&
+      dataLayers.every(
+        (layer) => !layer.yConfig || layer.yConfig?.every((config) => config.axisId !== axis.id)
+      )
+    ) {
+      throw new Error(errors.axisIsNotAssignedError(axis.id));
+    }
   });
 };
 

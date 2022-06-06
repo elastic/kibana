@@ -33,6 +33,7 @@ import {
   validateLineWidthForChartType,
   validatePointsRadiusForChartType,
   validateLinesVisibilityForChartType,
+  validateAxes,
 } from './validate';
 
 const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult => {
@@ -126,7 +127,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   const hasBar = hasBarLayer(dataLayers);
   const hasArea = hasAreaLayer(dataLayers);
 
-  validateExtents(dataLayers, hasBar || hasArea, args.axes);
+  validateExtents(dataLayers, hasBar || hasArea, args.yAxisConfigs);
   validateFillOpacity(args.fillOpacity, hasArea);
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
@@ -139,6 +140,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateLineWidthForChartType(lineWidth, args.seriesType);
   validateShowPointsForChartType(showPoints, args.seriesType);
   validatePointsRadiusForChartType(pointsRadius, args.seriesType);
+  validateAxes(dataLayers, args.yAxisConfigs);
 
   return {
     type: 'render',

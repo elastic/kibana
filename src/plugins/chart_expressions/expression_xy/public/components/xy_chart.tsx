@@ -180,7 +180,7 @@ export function XYChart({
     valueLabels,
     hideEndzones,
     valuesInLegend,
-    axes,
+    yAxisConfigs,
     xAxisConfig,
     splitColumnAccessor,
     splitRowAccessor,
@@ -241,7 +241,7 @@ export function XYChart({
     shouldRotate,
     formatFactory,
     fieldFormats,
-    axes
+    yAxisConfigs
   );
 
   const xTitle = xAxisConfig?.title || (xAxisColumn && xAxisColumn.name);

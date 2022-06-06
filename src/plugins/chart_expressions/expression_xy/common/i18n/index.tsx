@@ -81,8 +81,8 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.xAxisConfig.help', {
       defaultMessage: 'Specifies x-axis config',
     }),
-  getAxesHelp: () =>
-    i18n.translate('expressionXY.xyVis.axes.help', {
+  getyAxisConfigsHelp: () =>
+    i18n.translate('expressionXY.xyVis.yAxisConfigs.help', {
       defaultMessage: 'Specifies y-axes configs',
     }),
   getDetailedTooltipHelp: () =>
