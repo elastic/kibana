@@ -39,8 +39,7 @@ export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
-  IndexPatternsService,
-  IndexPatternsService as IndexPatternsCommonService,
+  DataViewsService as DataViewsCommonService,
   DataView,
 } from '../common';
 
