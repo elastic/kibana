@@ -178,7 +178,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
       return null;
     }
 
-    const tsvbEditorStyle = css`
+    const tsvbEditorStyles = css`
       overflow-y: auto;
       overflow-x: hidden;
       flex: 1;
@@ -193,7 +193,7 @@ export class VisEditor extends Component<TimeseriesEditorProps, TimeseriesEditor
           ...getCoreStart(),
         }}
       >
-        <div css={tsvbEditorStyle} data-test-subj="tvbVisEditor">
+        <div css={tsvbEditorStyles} data-test-subj="tvbVisEditor">
           {!this.props.vis.params.use_kibana_indexes && <UseIndexPatternModeCallout />}
           <div className="tvbEditor--hideForReporting">
             <VisPicker currentVisType={model.type} onChange={this.handleChange} />

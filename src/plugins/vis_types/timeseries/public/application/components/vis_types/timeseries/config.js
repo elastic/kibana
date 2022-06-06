@@ -35,7 +35,7 @@ import { getCharts } from '../../../../services';
 import { checkIfNumericMetric } from '../../lib/check_if_numeric_metric';
 import { isPercentDisabled } from '../../lib/stacked';
 import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
-import { tsvbEditorRowStyle } from '../../../styles/common.styles';
+import { tsvbEditorRowStyles } from '../../../styles/common.styles';
 
 export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
@@ -370,7 +370,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
   };
 
   return (
-    <div css={tsvbEditorRowStyle(euiTheme)}>
+    <div css={tsvbEditorRowStyles(euiTheme)}>
       <EuiFlexGroup gutterSize="s">
         <DataFormatPicker
           formatterValue={model.formatter}

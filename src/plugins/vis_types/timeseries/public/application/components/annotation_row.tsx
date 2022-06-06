@@ -41,7 +41,7 @@ import { IconSelect } from './icon_select/icon_select';
 
 import type { Annotation, IndexPatternValue } from '../../../common/types';
 import type { VisFields } from '../lib/fetch_fields';
-import { aggRowChildrenStyle } from '../styles/common.styles';
+import { aggRowChildrenStyles } from '../styles/common.styles';
 
 const RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
@@ -138,7 +138,7 @@ export const AnnotationRow = ({
           <ColorPicker disableTrash={true} onChange={onChange} name="color" value={model.color} />
         </EuiFlexItem>
 
-        <EuiFlexItem css={aggRowChildrenStyle(euiTheme)}>
+        <EuiFlexItem css={aggRowChildrenStyles(euiTheme)}>
           <EuiFlexGroup responsive={false} wrap={true} gutterSize="m">
             <EuiFlexItem>
               <IndexPatternSelect

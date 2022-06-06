@@ -25,7 +25,7 @@ import { Split } from '../../split';
 import { SeriesDragHandler } from '../../series_drag_handler';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { Aggs } from '../../aggs/aggs';
-import { tsvbEditorRowStyle } from '../../../styles/common.styles';
+import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
 
 function GaugeSeriesUi(props) {
   const {
@@ -68,7 +68,7 @@ function GaugeSeriesUi(props) {
             uiRestrictions={uiRestrictions}
             dragHandleProps={props.dragHandleProps}
           />
-          <div css={tsvbEditorRowStyle(euiTheme)} style={{ paddingLeft: euiTheme.size.xl }}>
+          <div css={[tsvbEditorRowStyles(euiTheme), aggRowSplitStyles(euiTheme)]}>
             <Split
               onChange={props.onChange}
               fields={fields}

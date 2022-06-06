@@ -17,7 +17,8 @@ import { EuiFieldText, EuiFlexGroup, EuiFlexItem, withEuiTheme } from '@elastic/
 import { injectI18n } from '@kbn/i18n-react';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { QueryBarWrapper } from '../query_bar_wrapper';
-import { tsvbEditorRowStyle } from '../../styles/common.styles';
+import { tsvbEditorRowStyles } from '../../styles/common.styles';
+
 class FilterItemsUi extends Component {
   constructor(props) {
     super(props);
@@ -59,7 +60,7 @@ class FilterItemsUi extends Component {
     return (
       <EuiFlexGroup
         gutterSize="s"
-        css={tsvbEditorRowStyle(theme.euiTheme)}
+        css={tsvbEditorRowStyles(theme.euiTheme)}
         alignItems="center"
         key={model.id}
       >

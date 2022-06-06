@@ -25,7 +25,7 @@ import { TimeseriesConfig as SeriesConfig } from './config';
 import { SeriesDragHandler } from '../../series_drag_handler';
 import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
-import { tsvbEditorRowStyle } from '../../../styles/common.styles';
+import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
 
 const TimeseriesSeriesUI = injectI18n(function (props) {
   const {
@@ -72,7 +72,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
             uiRestrictions={uiRestrictions}
             dragHandleProps={props.dragHandleProps}
           />
-          <div css={tsvbEditorRowStyle(euiTheme)} style={{ paddingLeft: euiTheme.size.xl }}>
+          <div css={[tsvbEditorRowStyles(euiTheme), aggRowSplitStyles(euiTheme)]}>
             <Split
               onChange={props.onChange}
               fields={fields}

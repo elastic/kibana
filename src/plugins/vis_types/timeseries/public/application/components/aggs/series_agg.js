@@ -19,12 +19,12 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { AggSelect } from './agg_select';
 import { AggRow } from './agg_row';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { titleStyles } from '../../styles/common.styles';
 
 function SeriesAggUi(props) {
   const { panel, model, intl } = props;
@@ -35,9 +35,6 @@ function SeriesAggUi(props) {
   const htmlId = htmlIdGenerator();
 
   const { euiTheme } = useEuiTheme();
-  const titleStyles = css`
-    margin-top: -${euiTheme.size.xs};
-  `;
 
   const functionOptions = [
     {
@@ -125,7 +122,7 @@ function SeriesAggUi(props) {
         siblings={props.siblings}
         dragHandleProps={props.dragHandleProps}
       >
-        <EuiTitle size="xxxs" css={titleStyles}>
+        <EuiTitle size="xxxs" css={titleStyles(euiTheme)}>
           <span>
             <FormattedMessage
               id="visTypeTimeseries.seriesAgg.seriesAggIsNotCompatibleLabel"

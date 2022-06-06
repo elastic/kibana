@@ -38,7 +38,7 @@ import { QueryBarWrapper } from '../../query_bar_wrapper';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { isConfigurationFeatureEnabled } from '../../../../../common/check_ui_restrictions';
 import { filterCannotBeAppliedErrorMessage } from '../../../../../common/errors';
-import { tsvbEditorRowStyle } from '../../../styles/common.styles';
+import { tsvbEditorRowStyles } from '../../../styles/common.styles';
 
 class TableSeriesConfigUi extends Component {
   UNSAFE_componentWillMount() {
@@ -131,7 +131,7 @@ class TableSeriesConfigUi extends Component {
       model.filter?.query && !isConfigurationFeatureEnabled('filter', this.props.uiRestrictions);
 
     return (
-      <div css={tsvbEditorRowStyle(this.props.theme.euiTheme)}>
+      <div css={tsvbEditorRowStyles(this.props.theme.euiTheme)}>
         <EuiFlexGroup gutterSize="s">
           <DataFormatPicker
             formatterValue={model.formatter}

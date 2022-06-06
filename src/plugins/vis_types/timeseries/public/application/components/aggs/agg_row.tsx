@@ -12,7 +12,7 @@ import { EuiIcon, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AddDeleteButtons } from '../add_delete_buttons';
 import { SeriesDragHandler } from '../series_drag_handler';
-import { tsvbEditorRowStyle, aggRowChildrenStyle } from '../../styles/common.styles';
+import { tsvbEditorRowStyles, aggRowChildrenStyles } from '../../styles/common.styles';
 import type { Metric } from '../../../../common/types';
 import { DragHandleProps } from '../../../types';
 
@@ -39,7 +39,7 @@ export function AggRow(props: AggRowProps) {
   }
 
   return (
-    <div css={tsvbEditorRowStyle(euiTheme)}>
+    <div css={tsvbEditorRowStyles(euiTheme)}>
       <EuiFlexGroup
         data-test-subj="aggRow"
         gutterSize="s"
@@ -49,7 +49,7 @@ export function AggRow(props: AggRowProps) {
         <EuiFlexItem grow={false}>
           <EuiIcon type={iconType} color={iconColor} style={{ marginTop: euiTheme.size.xs }} />
         </EuiFlexItem>
-        <EuiFlexItem css={aggRowChildrenStyle(euiTheme)}>{props.children}</EuiFlexItem>
+        <EuiFlexItem css={aggRowChildrenStyles(euiTheme)}>{props.children}</EuiFlexItem>
 
         <SeriesDragHandler
           dragHandleProps={props.dragHandleProps}

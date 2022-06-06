@@ -24,7 +24,7 @@ import { Split } from '../../split';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { Aggs } from '../../aggs/aggs';
 import { SeriesDragHandler } from '../../series_drag_handler';
-import { tsvbEditorRowStyle } from '../../../styles/common.styles';
+import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
 
 function MarkdownSeriesUi(props) {
   const {
@@ -67,7 +67,7 @@ function MarkdownSeriesUi(props) {
             uiRestrictions={uiRestrictions}
             dragHandleProps={props.dragHandleProps}
           />
-          <div css={tsvbEditorRowStyle(euiTheme)} style={{ paddingLeft: euiTheme.size.xl }}>
+          <div css={[tsvbEditorRowStyles(euiTheme), aggRowSplitStyles(euiTheme)]}>
             <Split
               onChange={props.onChange}
               fields={fields}

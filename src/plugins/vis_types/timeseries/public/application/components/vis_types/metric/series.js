@@ -21,7 +21,7 @@ import {
 import { ColorPicker } from '../../color_picker';
 import { AddDeleteButtons } from '../../add_delete_buttons';
 import { SeriesConfig } from '../../series_config';
-import { tsvbEditorRowStyle } from '../../../styles/common.styles';
+import { tsvbEditorRowStyles, aggRowSplitStyles } from '../../../styles/common.styles';
 import { Split } from '../../split';
 import { SeriesDragHandler } from '../../series_drag_handler';
 import { createTextHandler } from '../../lib/create_text_handler';
@@ -68,7 +68,7 @@ function MetricSeriesUi(props) {
             uiRestrictions={uiRestrictions}
             dragHandleProps={props.dragHandleProps}
           />
-          <div css={tsvbEditorRowStyle(euiTheme)} style={{ paddingLeft: euiTheme.size.xl }}>
+          <div css={[tsvbEditorRowStyles(euiTheme), aggRowSplitStyles(euiTheme)]}>
             <Split
               onChange={props.onChange}
               fields={fields}

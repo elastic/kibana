@@ -27,7 +27,7 @@ import { YesNo } from './yes_no';
 import { IndexPattern } from './index_pattern';
 import { SeriesConfigQueryBarWithIgnoreGlobalFilter } from './series_config_query_bar_with_ignore_global_filter';
 import { DATA_FORMATTERS } from '../../../common/enums';
-import { tsvbEditorRowStyle } from '../styles/common.styles';
+import { tsvbEditorRowStyles } from '../styles/common.styles';
 
 export const SeriesConfig = (props) => {
   const defaults = { offset_time: '', value_template: '{{value}}' };
@@ -60,7 +60,7 @@ export const SeriesConfig = (props) => {
   const { euiTheme } = useEuiTheme();
 
   return (
-    <div css={tsvbEditorRowStyle(euiTheme)}>
+    <div css={tsvbEditorRowStyles(euiTheme)}>
       <EuiFlexGroup gutterSize="s">
         <DataFormatPicker
           formatterValue={model.formatter}

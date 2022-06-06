@@ -26,7 +26,7 @@ import { collectionActions } from './lib/collection_actions';
 import { ColorPicker, ColorPickerProps } from './color_picker';
 import { TimeseriesVisParams } from '../../types';
 import { Operator } from '../../../common/operators_utils';
-import { tsvbEditorRowStyle } from '../styles/common.styles';
+import { tsvbEditorRowStyles } from '../styles/common.styles';
 
 export interface ColorRulesProps extends WithEuiThemeProps {
   name: keyof TimeseriesVisParams;
@@ -187,7 +187,7 @@ class ColorRulesUI extends Component<ColorRulesProps> {
         gutterSize="s"
         key={model.id}
         alignItems="center"
-        css={tsvbEditorRowStyle(this.props.theme.euiTheme)}
+        css={tsvbEditorRowStyles(this.props.theme.euiTheme)}
       >
         <EuiFlexItem grow={false}>
           <EuiFormLabel style={labelStyle}>

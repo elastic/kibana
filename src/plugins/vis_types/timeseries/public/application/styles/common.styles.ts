@@ -9,12 +9,20 @@
 import { css } from '@emotion/react';
 import { EuiThemeComputed } from '@elastic/eui';
 
-export const tsvbEditorRowStyle = (theme: EuiThemeComputed) => css`
+export const tsvbEditorRowStyles = (theme: EuiThemeComputed) => css`
   background-color: ${theme.colors.lightestShade};
   padding: ${theme.size.s};
   margin-bottom: ${theme.size.s};
 `;
 
-export const aggRowChildrenStyle = (theme: EuiThemeComputed) => css`
+export const aggRowChildrenStyles = (theme: EuiThemeComputed) => css`
   padding-top: calc(${theme.size.s} - 2px);
+`;
+
+export const titleStyles = (theme: EuiThemeComputed) => css`
+  margin-top: -${theme.size.xs};
+`;
+
+export const aggRowSplitStyles = (theme: EuiThemeComputed) => css`
+  padding-left: ${theme.size.xl};
 `;

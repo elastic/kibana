@@ -18,18 +18,15 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
 import { createSelectHandler } from '../lib/create_select_handler';
 import { GroupBySelect } from './group_by_select';
+import { titleStyles } from '../../styles/common.styles';
 
 export const SplitUnsupported = (props) => {
   const { onChange, model, uiRestrictions } = props;
   const htmlId = htmlIdGenerator();
   const handleSelectChange = createSelectHandler(onChange);
   const { euiTheme } = useEuiTheme();
-  const titleStyles = css`
-    margin-top: -${euiTheme.size.xs};
-  `;
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
@@ -50,7 +47,7 @@ export const SplitUnsupported = (props) => {
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiTitle size="xxxs" css={titleStyles}>
+        <EuiTitle size="xxxs" css={titleStyles(euiTheme)}>
           <span>
             <FormattedMessage
               id="visTypeTimeseries.unsupportedSplit.splitIsUnsupportedDescription"
