@@ -8,6 +8,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import uuid from 'uuid';
 import {
   EuiDatePicker,
@@ -43,6 +44,12 @@ export interface ComponentOpts extends PanelOpts {
 }
 
 const TIMEZONE_OPTIONS = moment.tz?.names().map((n) => ({ label: n })) ?? [{ label: 'UTC' }];
+
+const useDefaultTimzezone = () => {
+  const kibanaTz: string = useUiSetting('dateFormat:tz');
+  if (!kibanaTz || kibanaTz === 'Browser') return moment.tz?.guess() ?? 'UTC';
+  return kibanaTz;
+};
 
 export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
   onClose,
@@ -108,6 +115,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
     [initialSchedule]
   );
 
+  const defaultTz = useDefaultTimzezone();
   const initialState = useMemo(() => {
     if (!initialSchedule) {
       return {
@@ -115,7 +123,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
         endDT: moment().add('48', 'h'),
         isRecurring: false,
         recurrenceSchedule: null,
-        selectedTimezone: [{ label: moment.tz.guess() }],
+        selectedTimezone: [{ label: defaultTz }],
       };
     }
 
@@ -135,7 +143,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       recurrenceSchedule,
       selectedTimezone: [{ label: initialSchedule.rRule.tzid }],
     };
-  }, [initialSchedule]);
+  }, [initialSchedule, defaultTz]);
 
   const [startDT, setStartDT] = useState<Moment | null>(initialState.startDT);
   const [endDT, setEndDT] = useState<Moment | null>(initialState.endDT);
@@ -210,7 +218,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
       id: initialSchedule?.id ?? uuid.v4(),
       rRule: {
         dtstart: startDT.toISOString(),
-        tzid: selectedTimezone[0].label ?? moment.tz.guess(),
+        tzid: selectedTimezone[0].label ?? defaultTz,
         ...recurrence,
       },
       duration: endDT.valueOf() - startDT.valueOf(),
@@ -223,6 +231,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
     isRecurring,
     recurrenceSchedule,
     initialSchedule,
+    defaultTz,
   ]);
 
   const onCancelSchedule = useCallback(() => {
