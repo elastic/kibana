@@ -386,7 +386,7 @@ export class FleetPlugin
     registerSettingsRoutes(fleetAuthzRouter);
     registerDataStreamRoutes(fleetAuthzRouter);
     registerPreconfigurationRoutes(fleetAuthzRouter);
-    registerHintAPIRoutes(fleetAuthzRouter);
+    registerHintAPIRoutes(fleetAuthzRouter, config);
 
     // Conditional config routes
     if (config.agents.enabled) {

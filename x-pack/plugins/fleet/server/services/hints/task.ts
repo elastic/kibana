@@ -28,12 +28,13 @@ import { incrementPackageName } from '../package_policies';
 import { generatePackagePolicy } from './generate_package_policy';
 
 import type { Hint, ParsedAnnotations } from './types';
-import { setHintsAsReceived, setHintsAsComplete, getNewHints } from './crud';
+import { setHintsAsReceived, setHintsAsComplete, getNewHints, getHints } from './crud';
 const FLEET_POLL_HINTS_INDEX_TASK_ID = 'FLEET:sync-task';
 const FLEET_POLL_HINTS_INDEX_TASK_TYPE = 'FLEET:poll-hints-index';
 const POLL_INTERVAL = '5s';
 const POLICY_NAME_PREFIX = 'autodiscover-';
 const ANNOTATION_PREFIX = 'elastic-co-hints/';
+const CONTAINER_ID_FIELD = 'kubernetes.container.id';
 const VALID_HINTS = Object.freeze(['host', 'hosts', 'package']);
 const SUPPORTED_PACKAGES = ['nginx', 'redis', 'apache'];
 interface HintTaskDeps {
@@ -205,8 +206,21 @@ const processHints = async (params: HintTaskDeps & { logger?: Logger }) => {
 
   if (!annotatedHints.length) return;
 
+  const [startHints, stopHints] = partition(
+    annotatedHints,
+    (hint) => hint?.type?.toLowerCase() === 'start'
+  );
+
+  if (stopHints.length) {
+    logger?.warn(`Ignoring stop events for hints ${stopHints.map((h) => h._id)}`);
+  }
+
+  if (!startHints.length) return;
+
+  const hintsToProcess = startHints;
+
   const results = await Promise.all(
-    annotatedHints.map(async (hint) => {
+    hintsToProcess.map(async (hint) => {
       const parsedAnnotations = parseAnnotations(hint);
 
       if (!parsedAnnotations.package) {
@@ -237,6 +251,34 @@ const processHints = async (params: HintTaskDeps & { logger?: Logger }) => {
 
       if (!packageInfo) {
         logger?.info(`No package found ${parsedAnnotations.package}`);
+        return;
+      }
+
+      const containerId = get(hint, CONTAINER_ID_FIELD);
+      if (!containerId) {
+        logger?.warn(
+          `Hint ${hint._id} has no container ID at ${CONTAINER_ID_FIELD}, unable to process.`
+        );
+        return;
+      }
+      const previousHintsForContainer = await getHints(
+        esClient,
+        {},
+        {
+          bool: {
+            must: [
+              { term: { [CONTAINER_ID_FIELD]: containerId } },
+              { term: { type: 'Start' } },
+              { exists: { field: 'result.package_policy_id' } },
+            ],
+          },
+        }
+      );
+
+      if (previousHintsForContainer.length) {
+        logger?.info(
+          `Hint ${hint._id}, container ${containerId} has been previously processed, exiting early.`
+        );
         return;
       }
 

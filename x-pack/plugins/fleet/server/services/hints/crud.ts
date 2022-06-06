@@ -6,6 +6,8 @@
  */
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+
 import type { ListWithKuery } from '../../types';
 
 import type { Hint, CreatePackagePolicyResult } from './types';
@@ -13,14 +15,16 @@ import { HINTS_INDEX_NAME } from './constants';
 
 export const getHints = async (
   esClient: ElasticsearchClient,
-  options: ListWithKuery
+  options: ListWithKuery,
+  query?: QueryDslQueryContainer
 ): Promise<Hint[]> => {
-  const { page = 1, perPage = 20, sortField = 'received_at', sortOrder = 'desc', kuery } = options;
+  const { page = 1, perPage = 20, sortField = 'received_at', sortOrder = 'desc' } = options;
   const { hits } = await esClient.search({
     index: HINTS_INDEX_NAME,
     from: (page - 1) * perPage,
     size: perPage,
     sort: sortField + ':' + sortOrder,
+    query,
   });
 
   if (!hits.hits.length) return [];
