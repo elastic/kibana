@@ -22,13 +22,18 @@ export default ({ getService }: FtrProviderContext) => {
   const testCalendarsConfigs = [
     {
       calendar_id: `test_get_cal_1`,
-      job_ids: [MULTI_METRIC_JOB_CONFIG.job_id, 'multi-metric'],
+      job_ids: ['multi-metric'],
       description: `Test calendar 1`,
     },
     {
       calendar_id: `test_get_cal_2`,
-      job_ids: ['brand-new-group'],
+      job_ids: [MULTI_METRIC_JOB_CONFIG.job_id, 'multi-metric'],
       description: `Test calendar 2`,
+    },
+    {
+      calendar_id: `test_get_cal_3`,
+      job_ids: ['brand-new-group'],
+      description: `Test calendar 3`,
     },
   ];
 
@@ -51,7 +56,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       id: 'brand-new-group',
       jobIds: [],
-      calendarIds: ['test_get_cal_2'],
+      calendarIds: ['test_get_cal_3'],
     },
     {
       id: 'farequote',
@@ -61,7 +66,7 @@ export default ({ getService }: FtrProviderContext) => {
     {
       id: 'multi-metric',
       jobIds: [MULTI_METRIC_JOB_CONFIG.job_id],
-      calendarIds: ['test_get_cal_1'],
+      calendarIds: ['test_get_cal_1', 'test_get_cal_2'],
     },
     {
       id: 'single-metric',
