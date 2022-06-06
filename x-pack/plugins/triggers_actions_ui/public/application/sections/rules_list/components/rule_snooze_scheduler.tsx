@@ -341,14 +341,9 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
           <EuiHorizontalRule margin="s" />
           <EuiFlexGroup>
             <EuiFlexItem grow>
-              <EuiButton
-                isLoading={isLoading}
-                color="danger"
-                onClick={onCancelSchedule}
-                data-test-subj="ruleSnoozeCancel"
-              >
-                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.cancelSnooze', {
-                  defaultMessage: 'Cancel snooze',
+              <EuiButton isLoading={isLoading} color="danger" onClick={onCancelSchedule}>
+                {i18n.translate('xpack.triggersActionsUI.sections.rulesList.deleteSchedule', {
+                  defaultMessage: 'Delete schedule',
                 })}
               </EuiButton>
             </EuiFlexItem>
