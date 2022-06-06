@@ -124,5 +124,10 @@ describe('monitoring_collection plugin', () => {
       );
       expect(metrics).toBeUndefined();
     });
+
+    it('should provide an opentelemetry meter', async () => {
+      const { getMeter } = plugin.setup(coreSetup);
+      expect(getMeter('monitoring-collection-plugin-test')).toBeDefined();
+    });
   });
 });

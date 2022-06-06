@@ -9,11 +9,16 @@ import { JsonObject } from '@kbn/utility-types';
 import { CoreSetup, Plugin, PluginInitializerContext, Logger } from '@kbn/core/server';
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { ServiceStatus } from '@kbn/core/server';
+import { Meter } from '@opentelemetry/api-metrics';
+import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
+import { MeterProvider } from '@opentelemetry/sdk-metrics-base';
+import { MonitoringCollectionConfig } from './config';
 import { registerDynamicRoute } from './routes';
 import { TYPE_ALLOWLIST } from './constants';
 
 export interface MonitoringCollectionSetup {
   registerMetric: <T>(metric: Metric<T>) => void;
+  getMeter: (name: string) => Meter;
 }
 
 export type MetricResult<T> = T & JsonObject;
@@ -27,12 +32,15 @@ export interface Metric<T> {
 export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSetup, void, {}, {}> {
   private readonly initializerContext: PluginInitializerContext;
   private readonly logger: Logger;
+  private readonly config: MonitoringCollectionConfig;
+  private meterProvider?: MeterProvider;
 
   private metrics: Record<string, Metric<any>> = {};
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: PluginInitializerContext<MonitoringCollectionConfig>) {
     this.initializerContext = initializerContext;
     this.logger = initializerContext.logger.get();
+    this.config = initializerContext.config.get();
   }
 
   async getMetric(type: string) {
@@ -66,6 +74,17 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       },
     });
 
+    const oltpConfig = this.config.opentelemetry?.metrics?.oltp;
+    if (oltpConfig) {
+      this.logger.debug(`Registering OpenTelemetry metrics exporter to ${oltpConfig.url}`);
+      this.meterProvider = new MeterProvider({
+        exporter: new OTLPMetricExporter(oltpConfig),
+        interval: 10000,
+      });
+    } else {
+      this.meterProvider = new MeterProvider({});
+    }
+
     return {
       registerMetric: <T>(metric: Metric<T>) => {
         if (this.metrics.hasOwnProperty(metric.type)) {
@@ -82,6 +101,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         }
         this.metrics[metric.type] = metric;
       },
+      getMeter: this.meterProvider.getMeter.bind(this.meterProvider),
     };
   }
 
