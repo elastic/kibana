@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { StepCtx } from '../../services/performance';
 
-export default function flightDashboard({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   describe('flight_dashboard', () => {
     it('flight_dashboard', async () => {
       const performance = getService('performance');
