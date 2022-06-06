@@ -71,7 +71,7 @@ export interface BasicFields {
   _id: string;
   _index: string;
 }
-export interface EcsFieldsResponse extends BasicFields {
+export type EcsFieldsResponse = {
   [Property in EcsFields]: string[];
-}
+} & BasicFields;
 export type RuleRegistrySearchResponse = IEsSearchResponse<EcsFieldsResponse>;
