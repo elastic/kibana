@@ -156,30 +156,33 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
       <SetPageChrome />
       <SendTelemetry action="viewed" metric="overview" />
       <TrialCallout />
-      <EuiText textAlign="center">
-        <KibanaPageTemplateSolutionNavAvatar
-          name="Enterprise Search"
-          iconType="logoEnterpriseSearch"
-          size="xxl"
-        />
-
-        <EuiSpacer />
-
-        <h1>
-          {i18n.translate('xpack.enterpriseSearch.overview.heading', {
-            defaultMessage: 'Welcome to Elastic Enterprise Search',
-          })}
-        </h1>
-        <p>
-          {config.host
-            ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
-                defaultMessage: 'Add search to your app or organization.',
-              })
-            : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
-                defaultMessage: 'Choose a product to set up and get started.',
+      <EuiFlexGroup responsive={false} alignItems="center">
+        <EuiFlexItem grow={false}>
+          <KibanaPageTemplateSolutionNavAvatar
+            name="Enterprise Search"
+            iconType="logoEnterpriseSearch"
+            size="xxl"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiText>
+            <h1>
+              {i18n.translate('xpack.enterpriseSearch.overview.heading', {
+                defaultMessage: 'Welcome to Elastic Enterprise Search',
               })}
-        </p>
-      </EuiText>
+            </h1>
+            <p>
+              {config.host
+                ? i18n.translate('xpack.enterpriseSearch.overview.subheading', {
+                    defaultMessage: 'Add search to your app or organization.',
+                  })
+                : i18n.translate('xpack.enterpriseSearch.overview.setupHeading', {
+                    defaultMessage: 'Choose a product to set up and get started.',
+                  })}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+      </EuiFlexGroup>
       <EuiSpacer size="xxl" />
       {shouldShowEnterpriseSearchCards ? productCards : insufficientAccessMessage}
       <Chat />

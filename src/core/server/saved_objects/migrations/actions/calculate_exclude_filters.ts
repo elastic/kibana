@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { withTimeout } from '@kbn/std';
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import { RetryableEsClientError } from '.';
-import { ElasticsearchClient } from '../../../elasticsearch';
-import { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../../types';
+import type { RetryableEsClientError } from '.';
+import type { ElasticsearchClient } from '../../../elasticsearch';
+import type { SavedObjectTypeExcludeFromUpgradeFilterHook } from '../../types';
 import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors';
 
 export interface CalculateExcludeFiltersParams {
@@ -22,8 +22,8 @@ export interface CalculateExcludeFiltersParams {
 }
 
 export interface CalculatedExcludeFilter {
-  /** Composite filter of all calculated filters */
-  excludeFilter: estypes.QueryDslQueryContainer;
+  /** Array with all the clauses that must be bool.must_not'ed */
+  mustNotClauses: QueryDslQueryContainer[];
   /** Any errors that were encountered during filter calculation, keyed by the type name */
   errorsByType: Record<string, Error>;
 }
@@ -39,7 +39,7 @@ export const calculateExcludeFilters =
   > =>
   () => {
     return Promise.all<
-      | Either.Right<estypes.QueryDslQueryContainer>
+      | Either.Right<QueryDslQueryContainer>
       | Either.Left<{ soType: string; error: Error | RetryableEsClientError }>
     >(
       Object.entries(excludeFromUpgradeFilterHooks).map(([soType, hook]) =>
@@ -91,22 +91,17 @@ export const calculateExcludeFilters =
       }
 
       const errorsByType: Array<[string, Error]> = [];
-      const filters: estypes.QueryDslQueryContainer[] = [];
+      const mustNotClauses: QueryDslQueryContainer[] = [];
 
       // Loop through all results and collect successes and errors
       results.forEach((r) =>
         Either.isRight(r)
-          ? filters.push(r.right)
+          ? mustNotClauses.push(r.right)
           : Either.isLeft(r) && errorsByType.push([r.left.soType, r.left.error as Error])
       );
 
-      // Composite filter from all calculated filters that successfully executed
-      const excludeFilter: estypes.QueryDslQueryContainer = {
-        bool: { must_not: filters },
-      };
-
       return Either.right({
-        excludeFilter,
+        mustNotClauses,
         errorsByType: Object.fromEntries(errorsByType),
       });
     });
