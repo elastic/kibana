@@ -17,19 +17,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
 
-  describe('discover doc table newline handling', function describeIndexTests() {
+  describe.only('discover doc table newline handling', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_message_with_newline']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/message_with_newline');
+      await kibanaServer.importExport.load(
+        'test/functional/fixtures/kbn_archiver/message_with_newline.json'
+      );
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'newline-test',
         'doc_table:legacy': true,
       });
       await PageObjects.common.navigateToApp('discover');
     });
+
     after(async () => {
       await security.testUser.restoreDefaults();
-      await esArchiver.unload('test/functional/fixtures/es_archiver/message_with_newline');
+      await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.uiSettings.unset('defaultIndex');
       await kibanaServer.uiSettings.unset('doc_table:legacy');
     });
