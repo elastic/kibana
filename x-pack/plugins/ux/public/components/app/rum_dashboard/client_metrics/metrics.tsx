@@ -62,6 +62,7 @@ export function Metrics() {
     <ClFlexGroup wrap responsive={false}>
       <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
+          data-test-subj={'uxClientMetrics-totalPageLoad'}
           titleSize="l"
           title={formatTitle('ms', data?.totalPageLoadDuration?.value)}
           description={
@@ -78,6 +79,7 @@ export function Metrics() {
       </EuiFlexItem>
       <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
+          data-test-subj={'uxClientMetrics-backend'}
           titleSize="l"
           title={formatTitle('ms', data?.backEnd?.value)}
           description={
@@ -94,6 +96,7 @@ export function Metrics() {
       </EuiFlexItem>
       <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
+          data-test-subj={'uxClientMetrics-frontend'}
           titleSize="l"
           title={formatTitle('ms', data?.frontEnd?.value)}
           description={
@@ -110,6 +113,7 @@ export function Metrics() {
       </EuiFlexItem>
       <EuiFlexItem style={STAT_STYLE}>
         <EuiStat
+          data-test-subj={'uxClientMetrics-pageViews'}
           titleSize="l"
           title={<PageViewsTotalTitle pageViews={data?.pageViews?.value} />}
           description={I18LABELS.pageViews}
