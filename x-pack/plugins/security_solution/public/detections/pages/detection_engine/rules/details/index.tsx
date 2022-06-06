@@ -480,24 +480,6 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     [isExistingRule, ruleDetailTab, setRuleDetailTab, pageTabs]
   );
 
-  const [ruleIndices, setRuleIndices] = useState<string[]>(rule?.index ?? DEFAULT_INDEX_PATTERN);
-
-  useEffect(() => {
-    if (rule != null && rule.index != null && rule.index.length > 0) setRuleIndices(rule.index);
-  }, [rule]);
-
-  // TODO: Revisit this logic. I think we can remove the await data
-  useEffect(() => {
-    const fetchDataViews = async () => {
-      if (rule?.data_view_id != null && rule?.data_view_id !== '') {
-        const dataView = await data.dataViews.get(rule?.data_view_id);
-        setRuleIndices(dataView.title.split(','));
-      }
-    };
-
-    fetchDataViews();
-  }, [rule?.index, rule?.data_view_id, data]);
-
   const lastExecution = rule?.execution_summary?.last_execution;
   const lastExecutionStatus = lastExecution?.status;
   const lastExecutionDate = lastExecution?.date ?? '';
@@ -861,7 +843,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                 <ExceptionsViewer
                   ruleId={ruleId ?? ''}
                   ruleName={rule?.name ?? ''}
-                  ruleIndices={ruleIndices}
+                  ruleIndices={rule?.index ?? DEFAULT_INDEX_PATTERN}
                   dataViewId={rule?.data_view_id}
                   availableListTypes={exceptionLists.allowedExceptionListTypes}
                   commentsAccordionId={'ruleDetailsTabExceptions'}

@@ -173,6 +173,7 @@ const savedQuerySpecificRuleParams = t.type({
   // if the saved object gets deleted for some reason
   language: nonEqlLanguages,
   index: indexOrUndefined,
+  dataViewId: dataViewIdOrUndefined,
   query: queryOrUndefined,
   filters: filtersOrUndefined,
   savedId: saved_id,

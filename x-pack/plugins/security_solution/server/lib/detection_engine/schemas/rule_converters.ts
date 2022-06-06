@@ -102,6 +102,7 @@ export const typeSpecificSnakeToCamel = (params: CreateTypeSpecific): TypeSpecif
         query: params.query,
         filters: params.filters,
         savedId: params.saved_id,
+        dataViewId: params.data_view_id,
       };
     }
     case 'threshold': {

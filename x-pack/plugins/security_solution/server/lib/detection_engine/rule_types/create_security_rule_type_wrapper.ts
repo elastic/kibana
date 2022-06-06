@@ -21,10 +21,6 @@ import {
   hasReadIndexPrivileges,
   hasTimestampFields,
   isMachineLearningParams,
-  isEqlParams,
-  isQueryParams,
-  isThresholdParams,
-  isThreatParams,
 } from '../signals/utils';
 import { DEFAULT_MAX_SIGNALS, DEFAULT_SEARCH_AFTER_PAGE_SIZE } from '../../../../common/constants';
 import { CreateSecurityRuleTypeWrapper } from './types';
@@ -164,13 +160,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                 version,
                 logger,
                 ruleId: params.ruleId,
-                dataViewId:
-                  isEqlParams(params) ||
-                  isQueryParams(params) ||
-                  isThresholdParams(params) ||
-                  isThreatParams(params)
-                    ? params.dataViewId
-                    : undefined,
+                dataViewId: params.dataViewId,
               });
 
               inputIndex = index ?? [];

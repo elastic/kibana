@@ -343,6 +343,7 @@ const ExceptionsViewerComponent = ({
             ruleName={ruleName}
             ruleId={ruleId}
             ruleIndices={ruleIndices}
+            dataViewId={dataViewId}
             exceptionListType={exceptionListTypeToEdit}
             exceptionItem={exceptionToEdit}
             onCancel={handleOnCancelExceptionModal}
