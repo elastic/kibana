@@ -13,6 +13,8 @@ export enum CONSTANTS {
   filters = 'filters',
   hostsDetails = 'hosts.details',
   hostsPage = 'hosts.page',
+  kubernetesDetails = 'kubernetes.details',
+  kubernetesPage = 'kubernetes.page',
   management = 'management',
   networkDetails = 'network.details',
   networkPage = 'network.page',
@@ -35,6 +37,7 @@ export type UrlStateType =
   | 'host'
   | 'users'
   | 'network'
+  | 'kubernetes'
   | 'overview'
   | 'rules'
   | 'timeline'

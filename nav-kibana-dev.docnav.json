@@ -69,6 +69,7 @@
     {
       "label": "Contributors Newsletters",
       "items": [
+        { "id": "kibMay2022ContributorNewsletter" },
         { "id": "kibApril2022ContributorNewsletter" },
         { "id": "kibMarch2022ContributorNewsletter" },
         { "id": "kibFebruary2022ContributorNewsletter" },
@@ -182,6 +183,7 @@
             { "id": "kibDevDocsOpsBabelPreset" },
             { "id": "kibDevDocsOpsTypeSummarizer" },
             { "id": "kibDevDocsOpsBabelPluginSyntheticPackages" },
+            { "id": "kibDevDocsOpsUiSharedDepsNpm" },
             { "id": "kibDevDocsOpsUiSharedDepsSrc" }
           ]
         },
@@ -202,7 +204,10 @@
             { "id": "kibDevDocsOpsExpect" },
             { "id": "kibDevDocsOpsAmbientStorybookTypes" },
             { "id": "kibDevDocsOpsAmbientUiTypes" },
-            { "id": "kibDevDocsOpsTestSubjSelector" }
+            { "id": "kibDevDocsOpsTestSubjSelector" },
+            { "id": "kibDevDocsOpsBazelRunner" },
+            { "id": "kibDevDocsOpsCliDevMode" },
+            { "id": "kibDevDocsOpsEs" }
           ]
         }
       ]

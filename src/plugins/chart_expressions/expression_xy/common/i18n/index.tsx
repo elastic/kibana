@@ -121,6 +121,18 @@ export const strings = {
     i18n.translate('expressionXY.xyVis.ariaLabel.help', {
       defaultMessage: 'Specifies the aria label of the xy chart',
     }),
+  getDetailedTooltipHelp: () =>
+    i18n.translate('expressionXY.xyVis.detailedTooltip.help', {
+      defaultMessage: 'Show detailed tooltip',
+    }),
+  getShowTooltipHelp: () =>
+    i18n.translate('expressionXY.xyVis.showTooltip.help', {
+      defaultMessage: 'Show tooltip',
+    }),
+  getOrderBucketsBySum: () =>
+    i18n.translate('expressionXY.xyVis.orderBucketsBySum.help', {
+      defaultMessage: 'Order buckets by sum',
+    }),
   getAddTimeMakerHelp: () =>
     i18n.translate('expressionXY.xyVis.addTimeMaker.help', {
       defaultMessage: 'Show time marker',
