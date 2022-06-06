@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const security = getService('security');
 
-  describe.only('discover doc table newline handling', function describeIndexTests() {
+  describe('discover doc table newline handling', function describeIndexTests() {
     before(async function () {
       await security.testUser.setRoles(['kibana_admin', 'kibana_message_with_newline']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/message_with_newline');
