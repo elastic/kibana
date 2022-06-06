@@ -32,14 +32,18 @@ export const IntegrationDescriptionComponent: React.FC<{ integration: Integratio
   integration,
 }) => {
   const basePath = useBasePath();
-  const badgeInstalledColor = '#E0E5EE';
-  const badgeUninstalledColor = 'accent';
+  const badgeInstalledColor = 'success';
+  const badgeUninstalledColor = '#E0E5EE';
   const badgeColor = integration.is_installed ? badgeInstalledColor : badgeUninstalledColor;
   const badgeTooltip = integration.is_installed
-    ? i18n.INTEGRATIONS_INSTALLED_TOOLTIP
+    ? integration.is_enabled
+      ? i18n.INTEGRATIONS_ENABLED_TOOLTIP
+      : i18n.INTEGRATIONS_INSTALLED_TOOLTIP
     : i18n.INTEGRATIONS_UNINSTALLED_TOOLTIP;
   const badgeText = integration.is_installed
-    ? i18n.INTEGRATIONS_INSTALLED
+    ? integration.is_enabled
+      ? i18n.INTEGRATIONS_ENABLED
+      : i18n.INTEGRATIONS_INSTALLED
     : i18n.INTEGRATIONS_UNINSTALLED;
 
   return (
@@ -48,11 +52,6 @@ export const IntegrationDescriptionComponent: React.FC<{ integration: Integratio
       <EuiToolTip content={badgeTooltip}>
         <PaddedBadge color={badgeColor}>{badgeText}</PaddedBadge>
       </EuiToolTip>
-      {integration.is_enabled && (
-        <EuiToolTip content={i18n.INTEGRATIONS_ENABLED_TOOLTIP}>
-          <PaddedBadge color={'success'}>{i18n.INTEGRATIONS_ENABLED}</PaddedBadge>
-        </EuiToolTip>
-      )}
       {integration.is_installed && !integration.version_satisfied && (
         <VersionWarningIcon
           type={'alert'}
