@@ -12,6 +12,7 @@ import { ServiceStatus } from '@kbn/core/server';
 import { Meter } from '@opentelemetry/api-metrics';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { MeterProvider } from '@opentelemetry/sdk-metrics-base';
+import { Resource } from '@opentelemetry/resources';
 import { MonitoringCollectionConfig } from './config';
 import { registerDynamicRoute } from './routes';
 import { TYPE_ALLOWLIST } from './constants';
@@ -79,6 +80,9 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       this.logger.debug(`Registering OpenTelemetry metrics exporter to ${oltpConfig.url}`);
       this.meterProvider = new MeterProvider({
         exporter: new OTLPMetricExporter(oltpConfig),
+        resource: new Resource({
+          'service.name': 'kibana',
+        }),
         interval: 10000,
       });
     } else {

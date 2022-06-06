@@ -220,6 +220,7 @@
     "@mapbox/vector-tile": "1.3.1",
     "@opentelemetry/api-metrics": "0.27.0",
     "@opentelemetry/exporter-metrics-otlp-grpc": "^0.27.0",
+    "@opentelemetry/resources": "^1.0.1",
     "@opentelemetry/sdk-metrics-base": "^0.27.0",
     "@reduxjs/toolkit": "^1.6.1",
     "@slack/webhook": "^5.0.4",
