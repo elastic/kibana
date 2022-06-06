@@ -6,12 +6,15 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { FullAgentPolicyOutputPermissions, RegistryDataStreamPrivileges } from '../../common';
-import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../constants';
+import type {
+  FullAgentPolicyOutputPermissions,
+  RegistryDataStreamPrivileges,
+} from '../../../common';
+import { PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES } from '../../constants';
 
-import type { PackagePolicy } from '../types';
+import type { PackagePolicy } from '../../types';
 
-import { getPackageInfo } from './epm/packages';
+import { getPackageInfo } from '../epm/packages';
 
 export const DEFAULT_CLUSTER_PERMISSIONS = ['monitor'];
 
@@ -120,7 +123,7 @@ export async function storedPackagePoliciesToAgentPermissions(
       }
 
       return [
-        packagePolicy.name,
+        packagePolicy.id,
         {
           indices: dataStreamsForPermissions.map((ds) =>
             getDataStreamPrivileges(ds, packagePolicy.namespace)

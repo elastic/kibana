@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-jest.mock('./epm/packages');
+jest.mock('../epm/packages');
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import type { PackagePolicy, RegistryDataStream } from '../types';
+import type { PackagePolicy, RegistryDataStream } from '../../types';
+import { getPackageInfo } from '../epm/packages';
 
-import { getPackageInfo } from './epm/packages';
 import {
   getDataStreamPrivileges,
   storedPackagePoliciesToAgentPermissions,
@@ -108,7 +108,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
     const packagePolicies: PackagePolicy[] = [
       {
-        id: '12345',
+        id: 'package-policy-uuid-test-123',
         name: 'test-policy',
         namespace: 'test',
         enabled: true,
@@ -149,7 +149,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
     const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
     expect(permissions).toMatchObject({
-      'test-policy': {
+      'package-policy-uuid-test-123': {
         indices: [
           {
             names: ['logs-some-logs-test'],
@@ -213,7 +213,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
     const packagePolicies: PackagePolicy[] = [
       {
-        id: '12345',
+        id: 'package-policy-uuid-test-123',
         name: 'test-policy',
         namespace: 'test',
         enabled: true,
@@ -244,7 +244,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
     const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
     expect(permissions).toMatchObject({
-      'test-policy': {
+      'package-policy-uuid-test-123': {
         indices: [
           {
             names: ['logs-compiled-test'],
@@ -308,7 +308,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
     const packagePolicies: PackagePolicy[] = [
       {
-        id: '12345',
+        id: 'package-policy-uuid-test-123',
         name: 'test-policy',
         namespace: 'test',
         enabled: true,
@@ -344,7 +344,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
     const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
     expect(permissions).toMatchObject({
-      'test-policy': {
+      'package-policy-uuid-test-123': {
         indices: [
           {
             names: ['logs-compiled-test'],
@@ -422,7 +422,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
     const packagePolicies: PackagePolicy[] = [
       {
-        id: '12345',
+        id: 'package-policy-uuid-test-123',
         name: 'test-policy',
         namespace: 'test',
         enabled: true,
@@ -453,7 +453,7 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
 
     const permissions = await storedPackagePoliciesToAgentPermissions(soClient, packagePolicies);
     expect(permissions).toMatchObject({
-      'test-policy': {
+      'package-policy-uuid-test-123': {
         indices: [
           {
             names: ['logs-osquery_manager.result-test'],
