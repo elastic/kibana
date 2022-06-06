@@ -96,21 +96,24 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
             }
           />
         </PageTitle>
-        <FindingsGroupBySelector type="resource" />
         {error && <ErrorCallout error={error} />}
+
         {!error && (
-          <FindingsByResourceTable
-            loading={findingsGroupByResource.isFetching}
-            items={findingsGroupByResource.data?.page || []}
-            pagination={getPaginationTableParams({
-              pageSize: urlQuery.pageSize,
-              pageIndex: urlQuery.pageIndex,
-              totalItemCount: findingsGroupByResource.data?.total || 0,
-            })}
-            setTableOptions={({ page }) =>
-              setUrlQuery({ pageIndex: page.index, pageSize: page.size })
-            }
-          />
+          <>
+            <FindingsGroupBySelector type="resource" />
+            <FindingsByResourceTable
+              loading={findingsGroupByResource.isFetching}
+              items={findingsGroupByResource.data?.page || []}
+              pagination={getPaginationTableParams({
+                pageSize: urlQuery.pageSize,
+                pageIndex: urlQuery.pageIndex,
+                totalItemCount: findingsGroupByResource.data?.total || 0,
+              })}
+              setTableOptions={({ page }) =>
+                setUrlQuery({ pageIndex: page.index, pageSize: page.size })
+              }
+            />
+          </>
         )}
       </PageWrapper>
     </div>
