@@ -15074,7 +15074,7 @@
     "xpack.infra.logs.logEntryRate.setupDescription": "Pour activer les anomalies de logs, configurer une tâche de Machine Learning",
     "xpack.infra.logs.logEntryRate.setupTitle": "Configurer l'analyse d'anomalies de logs",
     "xpack.infra.logs.logEntryRate.showAnalysisSetupButtonLabel": "Configuration ML",
-    "xpack.infra.logs.noDataConfig.beatsCard.description": "Utilisez Elastic Agent ou Beats pour envoyer des logs à Elasticsearch. Nous facilitons les choses avec des intégrations pour de nombreux systèmes et applications populaires.",
+    "xpack.infra.logs.noDataConfig.beatsCard.description": "Utilisez Elastic Agent ou Beats pour envoyer des logs à Elasticsearch. Nous facilitons les choses avec des intégrations pour de nombreux systèmes et applications populaires.",
     "xpack.infra.logs.noDataConfig.beatsCard.title": "Ajouter une intégration au logging",
     "xpack.infra.logs.noDataConfig.solutionName": "Observabilité",
     "xpack.infra.logs.pluginTitle": "Logs",
