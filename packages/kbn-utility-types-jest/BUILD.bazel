@@ -2,12 +2,11 @@ load("@npm//@bazel/typescript:index.bzl", "ts_config")
 load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
 load("//src/dev/bazel:index.bzl", "jsts_transpiler", "pkg_npm", "pkg_npm_types", "ts_project")
 
-PKG_BASE_NAME = "kbn-utility-types"
-PKG_REQUIRE_NAME = "@kbn/utility-types"
+PKG_BASE_NAME = "kbn-utility-types-jest"
+PKG_REQUIRE_NAME = "@kbn/utility-types-jest"
 
 SOURCE_FILES = glob([
-  "src/serializable/**",
-  "src/index.ts"
+  "src/index.ts",
 ])
 
 SRCS = SOURCE_FILES
@@ -21,13 +20,11 @@ NPM_MODULE_EXTRA_FILES = [
   "package.json",
 ]
 
-RUNTIME_DEPS = [
-  "@npm//utility-types",
-]
+RUNTIME_DEPS = []
 
 TYPES_DEPS = [
-  "@npm//utility-types",
-  "@npm//@types/node"
+  "@npm//@types/node",
+  "@npm//@types/jest",
 ]
 
 jsts_transpiler(

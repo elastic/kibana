@@ -32,7 +32,6 @@ import { TimelineId } from '../../../common/types';
 export const HostsTabs = memo<HostsTabsProps>(
   ({
     deleteQuery,
-    docValueFields,
     filterQuery,
     pageFilters,
     from,
@@ -86,10 +85,10 @@ export const HostsTabs = memo<HostsTabsProps>(
     return (
       <Switch>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.hosts})`}>
-          <HostsQueryTabBody docValueFields={docValueFields} {...tabProps} />
+          <HostsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.authentications})`}>
-          <AuthenticationsQueryTabBody docValueFields={docValueFields} {...tabProps} />
+          <AuthenticationsQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${HOSTS_PATH}/:tabName(${HostsTableType.risk})`}>
           <HostRiskScoreQueryTabBody {...tabProps} />
