@@ -42,6 +42,13 @@ export function RumHome() {
               title: i18n.translate('xpack.ux.overview.beatsCard.title', {
                 defaultMessage: 'Add RUM data',
               }),
+              description: i18n.translate(
+                'xpack.ux.overview.beatsCard.description',
+                {
+                  defaultMessage:
+                    'Enable RUM with the APM agent to collect user experience data.',
+                }
+              ),
               href: http.basePath.prepend(`/app/home#/tutorial/apm`),
             },
           },

@@ -44,6 +44,10 @@ export const LogsPageTemplate: React.FC<LogsPageTemplateProps> = ({
             title: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.title', {
               defaultMessage: 'Add a logging integration',
             }),
+            description: i18n.translate('xpack.infra.logs.noDataConfig.beatsCard.description', {
+              defaultMessage:
+                'Use the Elastic Agent or Beats to send logs to Elasticsearch. We make it easy with integrations for many popular systems and apps.',
+            }),
             href: basePath + `/app/integrations/browse`,
           },
         },

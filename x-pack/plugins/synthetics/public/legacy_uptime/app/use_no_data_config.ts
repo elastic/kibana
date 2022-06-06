@@ -34,6 +34,10 @@ export function useNoDataConfig(): KibanaPageTemplateProps['noDataConfig'] {
           title: i18n.translate('xpack.synthetics.noDataConfig.beatsCard.title', {
             defaultMessage: 'Add monitors with Heartbeat',
           }),
+          description: i18n.translate('xpack.synthetics.noDataConfig.beatsCard.description', {
+            defaultMessage:
+              'Proactively monitor the availability of your sites and services. Receive alerts and resolve issues faster to optimize your users experience.',
+          }),
           href: basePath + `/app/home#/tutorial/uptimeMonitors`,
         },
       },

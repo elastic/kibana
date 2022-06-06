@@ -40,6 +40,10 @@ export const MetricsPageTemplate: React.FC<MetricsPageTemplateProps> = ({
             title: i18n.translate('xpack.infra.metrics.noDataConfig.beatsCard.title', {
               defaultMessage: 'Add a metrics integration',
             }),
+            description: i18n.translate('xpack.infra.metrics.noDataConfig.beatsCard.description', {
+              defaultMessage:
+                'Use Beats to send metrics data to Elasticsearch. We make it easy with modules for many popular systems and apps.',
+            }),
           },
         },
         docsLink: docLinks.links.observability.guide,
