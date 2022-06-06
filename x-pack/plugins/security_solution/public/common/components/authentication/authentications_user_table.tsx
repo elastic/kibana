@@ -28,7 +28,6 @@ import { AuthenticationsUserTableProps } from './types';
 const TABLE_QUERY_ID = 'authenticationsUsersTableQuery';
 
 const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps> = ({
-  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -53,7 +52,6 @@ const AuthenticationsUserTableComponent: React.FC<AuthenticationsUserTableProps>
     loading,
     { authentications, totalCount, pageInfo, loadPage, inspect, isInspected, refetch },
   ] = useAuthentications({
-    docValueFields,
     endDate,
     filterQuery,
     indexNames,
