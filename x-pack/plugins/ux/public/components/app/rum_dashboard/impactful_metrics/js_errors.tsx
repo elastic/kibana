@@ -19,9 +19,8 @@ import {
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { FETCH_STATUS } from '@kbn/observability-plugin/public';
+import { useJsErrorsQuery } from '../../../../hooks/use_js_errors_query';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { I18LABELS } from '../translations';
 import { CsmSharedContext } from '../csm_shared_context';
@@ -35,34 +34,13 @@ interface JSErrorItem {
 export function JSErrors() {
   const { http } = useKibanaServices();
   const basePath = http.basePath.get();
-  const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
-
-  const { start, end, serviceName, searchTerm } = urlParams;
+  const {
+    urlParams: { serviceName },
+  } = useLegacyUrlParams();
 
   const [pagination, setPagination] = useState({ pageIndex: 0, pageSize: 5 });
 
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (start && end && serviceName) {
-        return callApmApi('GET /internal/apm/ux/js-errors', {
-          params: {
-            query: {
-              start,
-              end,
-              urlQuery: searchTerm || undefined,
-              uiFilters: JSON.stringify(uxUiFilters),
-              pageSize: String(pagination.pageSize),
-              pageIndex: String(pagination.pageIndex),
-            },
-          },
-        });
-      }
-      return Promise.resolve(null);
-    },
-    // `rangeId` acts as a cache buster for stable ranges like "Today"
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [start, end, serviceName, uxUiFilters, pagination, searchTerm, rangeId]
-  );
+  const { data, loading } = useJsErrorsQuery(pagination);
 
   const {
     sharedData: { totalPageViews },
@@ -130,16 +108,16 @@ export function JSErrors() {
               )
             }
             description={I18LABELS.totalErrors}
-            isLoading={status === FETCH_STATUS.LOADING}
+            isLoading={!!loading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiBasicTable
         data-test-subj={'uxJsErrorTable'}
-        loading={status === FETCH_STATUS.LOADING}
+        loading={!!loading}
         error={
-          status === FETCH_STATUS.FAILURE
+          !loading && !data
             ? i18n.translate('xpack.ux.jsErrorsTable.errorMessage', {
                 defaultMessage: 'Failed to fetch',
               })
