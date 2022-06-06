@@ -382,7 +382,7 @@
     "react-hook-form": "^7.30.0",
     "react-intl": "^2.8.0",
     "react-is": "^16.13.1",
-    "react-markdown": "^4.3.1",
+    "react-markdown": "^6.0.3",
     "react-moment-proptypes": "^1.7.0",
     "react-monaco-editor": "^0.41.2",
     "react-popper-tooltip": "^2.10.1",
