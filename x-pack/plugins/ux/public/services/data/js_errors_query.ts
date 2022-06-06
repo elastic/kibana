@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { mergeProjection } from '../../projections/util/merge_projection';
-import { SetupUX } from './route';
-import { getRumErrorsProjection } from '../../projections/rum_page_load_transactions';
+import { mergeProjection } from '../../../common/utils/merge_projection';
+import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import {
   ERROR_EXC_MESSAGE,
   ERROR_EXC_TYPE,
@@ -16,22 +15,17 @@ import {
   TRANSACTION_TYPE,
 } from '../../../common/elasticsearch_fieldnames';
 import { TRANSACTION_PAGE_LOAD } from '../../../common/transaction_types';
+import { getRumErrorsProjection } from './projections';
 
-export async function getJSErrors({
-  setup,
-  pageSize,
-  pageIndex,
-  urlQuery,
-  start,
-  end,
-}: {
-  setup: SetupUX;
-  pageSize: number;
-  pageIndex: number;
-  urlQuery?: string;
-  start: number;
-  end: number;
-}) {
+export function jsErrorsQuery(
+  start: number,
+  end: number,
+  pageSize: number,
+  pageIndex: number,
+  urlQuery?: string,
+  uiFilters?: UxUIFilters
+) {
+  const setup: SetupUX = { uiFilters: uiFilters ? uiFilters : {} };
   const projection = getRumErrorsProjection({
     setup,
     urlQuery,
@@ -98,27 +92,5 @@ export async function getJSErrors({
     },
   });
 
-  const { apmEventClient } = setup;
-
-  const response = await apmEventClient.search('get_js_errors', params);
-
-  const { totalErrorGroups, totalErrorPages, errors } =
-    response.aggregations ?? {};
-
-  return {
-    totalErrorPages: totalErrorPages?.value ?? 0,
-    totalErrors: response.hits.total.value ?? 0,
-    totalErrorGroups: totalErrorGroups?.value ?? 0,
-    items: errors?.buckets.map(({ sample, key, impactedPages }) => {
-      return {
-        count: impactedPages.pageCount.value,
-        errorGroupId: key,
-        errorMessage: (
-          sample.hits.hits[0]._source as {
-            error: { exception: Array<{ message: string }> };
-          }
-        ).error.exception?.[0].message,
-      };
-    }),
-  };
+  return params;
 }
