@@ -226,6 +226,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
         },
         {
           openInNewTab: true,
+          skipAppLeave: true,
         }
       );
     },
