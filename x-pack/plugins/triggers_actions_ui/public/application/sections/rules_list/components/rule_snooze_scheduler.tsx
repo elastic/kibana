@@ -64,7 +64,7 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
     <>
       {title && (
         <EuiPopoverTitle>
-          <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="xs">
+          <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiIcon type="arrowLeft" />
             </EuiFlexItem>
@@ -111,8 +111,8 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
   const initialState = useMemo(() => {
     if (!initialSchedule) {
       return {
-        startDT: null,
-        endDT: null,
+        startDT: moment().add('24', 'h'),
+        endDT: moment().add('48', 'h'),
         isRecurring: false,
         recurrenceSchedule: null,
         selectedTimezone: [{ label: moment.tz.guess() }],

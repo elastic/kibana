@@ -274,9 +274,16 @@ const BaseSnoozePanel: React.FunctionComponent<BaseSnoozePanelProps> = ({
     <>
       {hasTitle && (
         <EuiPopoverTitle>
-          {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozePanelTitle', {
-            defaultMessage: 'Snooze notifications',
-          })}
+          <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="bellSlash" />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {i18n.translate('xpack.triggersActionsUI.sections.rulesList.snoozePanelTitle', {
+                defaultMessage: 'Snooze notifications',
+              })}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiPopoverTitle>
       )}
       <EuiSpacer size="s" />
