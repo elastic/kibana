@@ -5,87 +5,6 @@ Object {
   "chain": Array [
     Object {
       "arguments": Object {
-        "axes": Array [
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "extent": Array [],
-                  "id": Array [],
-                  "labelsOrientation": Array [
-                    -90,
-                  ],
-                  "position": Array [
-                    "left",
-                  ],
-                  "showGridLines": Array [
-                    true,
-                  ],
-                  "showLabels": Array [
-                    true,
-                  ],
-                  "showTitle": Array [
-                    true,
-                  ],
-                  "title": Array [],
-                },
-                "function": "yAxisConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-          Object {
-            "chain": Array [
-              Object {
-                "arguments": Object {
-                  "extent": Array [
-                    Object {
-                      "chain": Array [
-                        Object {
-                          "arguments": Object {
-                            "lowerBound": Array [
-                              123,
-                            ],
-                            "mode": Array [
-                              "custom",
-                            ],
-                            "upperBound": Array [
-                              456,
-                            ],
-                          },
-                          "function": "axisExtentConfig",
-                          "type": "function",
-                        },
-                      ],
-                      "type": "expression",
-                    },
-                  ],
-                  "id": Array [],
-                  "labelsOrientation": Array [
-                    -45,
-                  ],
-                  "position": Array [
-                    "right",
-                  ],
-                  "showGridLines": Array [
-                    true,
-                  ],
-                  "showLabels": Array [
-                    true,
-                  ],
-                  "showTitle": Array [
-                    true,
-                  ],
-                  "title": Array [],
-                },
-                "function": "yAxisConfig",
-                "type": "function",
-              },
-            ],
-            "type": "expression",
-          },
-        ],
         "curveType": Array [
           "LINEAR",
         ],
@@ -234,6 +153,87 @@ Object {
                   ],
                 },
                 "function": "xAxisConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
+        "yAxisConfigs": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "extent": Array [],
+                  "id": Array [],
+                  "labelsOrientation": Array [
+                    -90,
+                  ],
+                  "position": Array [
+                    "left",
+                  ],
+                  "showGridLines": Array [
+                    true,
+                  ],
+                  "showLabels": Array [
+                    true,
+                  ],
+                  "showTitle": Array [
+                    true,
+                  ],
+                  "title": Array [],
+                },
+                "function": "yAxisConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "extent": Array [
+                    Object {
+                      "chain": Array [
+                        Object {
+                          "arguments": Object {
+                            "lowerBound": Array [
+                              123,
+                            ],
+                            "mode": Array [
+                              "custom",
+                            ],
+                            "upperBound": Array [
+                              456,
+                            ],
+                          },
+                          "function": "axisExtentConfig",
+                          "type": "function",
+                        },
+                      ],
+                      "type": "expression",
+                    },
+                  ],
+                  "id": Array [],
+                  "labelsOrientation": Array [
+                    -45,
+                  ],
+                  "position": Array [
+                    "right",
+                  ],
+                  "showGridLines": Array [
+                    true,
+                  ],
+                  "showLabels": Array [
+                    true,
+                  ],
+                  "showTitle": Array [
+                    true,
+                  ],
+                  "title": Array [],
+                },
+                "function": "yAxisConfig",
                 "type": "function",
               },
             ],

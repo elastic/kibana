@@ -156,13 +156,13 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect((expression.chain[0].arguments.axes[0] as Ast).chain[0].arguments).toEqual(
+    expect((expression.chain[0].arguments.yAxisConfigs[0] as Ast).chain[0].arguments).toEqual(
       expect.objectContaining({
         showTitle: [true],
         position: ['left'],
       })
     );
-    expect((expression.chain[0].arguments.axes[1] as Ast).chain[0].arguments).toEqual(
+    expect((expression.chain[0].arguments.yAxisConfigs[1] as Ast).chain[0].arguments).toEqual(
       expect.objectContaining({
         showTitle: [true],
         position: ['right'],
@@ -283,13 +283,13 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect((expression.chain[0].arguments.axes[0] as Ast).chain[0].arguments).toEqual(
+    expect((expression.chain[0].arguments.yAxisConfigs[0] as Ast).chain[0].arguments).toEqual(
       expect.objectContaining({
         showLabels: [true],
         position: ['left'],
       })
     );
-    expect((expression.chain[0].arguments.axes[1] as Ast).chain[0].arguments).toEqual(
+    expect((expression.chain[0].arguments.yAxisConfigs[1] as Ast).chain[0].arguments).toEqual(
       expect.objectContaining({
         showLabels: [true],
         position: ['right'],
@@ -323,13 +323,13 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect((expression.chain[0].arguments.axes[0] as Ast).chain[0].arguments).toEqual(
+    expect((expression.chain[0].arguments.yAxisConfigs[0] as Ast).chain[0].arguments).toEqual(
       expect.objectContaining({
         labelsOrientation: [0],
         position: ['left'],
       })
     );
-    expect((expression.chain[0].arguments.axes[1] as Ast).chain[0].arguments).toEqual(
+    expect((expression.chain[0].arguments.yAxisConfigs[1] as Ast).chain[0].arguments).toEqual(
       expect.objectContaining({
         labelsOrientation: [0],
         position: ['right'],
@@ -363,13 +363,13 @@ describe('#toExpression', () => {
       undefined,
       datasourceExpressionsByLayers
     ) as Ast;
-    expect((expression.chain[0].arguments.axes[0] as Ast).chain[0].arguments).toEqual(
+    expect((expression.chain[0].arguments.yAxisConfigs[0] as Ast).chain[0].arguments).toEqual(
       expect.objectContaining({
         showGridLines: [true],
         position: ['left'],
       })
     );
-    expect((expression.chain[0].arguments.axes[1] as Ast).chain[0].arguments).toEqual(
+    expect((expression.chain[0].arguments.yAxisConfigs[1] as Ast).chain[0].arguments).toEqual(
       expect.objectContaining({
         showGridLines: [true],
         position: ['right'],
