@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { isArray } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -412,7 +412,8 @@ export function insertTimeShiftSplit(
   aggConfigs: AggConfigs,
   config: AggConfig,
   timeShifts: Record<string, moment.Duration>,
-  dslLvlCursor: Record<string, any>
+  dslLvlCursor: Record<string, any>,
+  defaultTimeZone: string
 ) {
   if ('splitForTimeShift' in config.type && !config.type.splitForTimeShift(config, aggConfigs)) {
     return dslLvlCursor;
@@ -436,8 +437,14 @@ export function insertTimeShiftSplit(
         range: {
           [timeField]: {
             format: 'strict_date_optional_time',
-            gte: moment(timeFilter.query.range[timeField].gte).subtract(shift).toISOString(),
-            lte: moment(timeFilter.query.range[timeField].lte).subtract(shift).toISOString(),
+            gte: moment
+              .tz(timeFilter.query.range[timeField].gte, defaultTimeZone)
+              .subtract(shift)
+              .toISOString(),
+            lte: moment
+              .tz(timeFilter.query.range[timeField].lte, defaultTimeZone)
+              .subtract(shift)
+              .toISOString(),
           },
         },
       };

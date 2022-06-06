@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { Assign } from '@kbn/utility-types';
@@ -28,6 +28,7 @@ import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
 import { IAggType } from './agg_type';
 import { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
+import { AggTypesDependencies, GetConfigFn, getUserTimeZone } from '../..';
 import { TimeRange, getTime, calculateBounds } from '../..';
 import { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
@@ -58,6 +59,7 @@ function parseParentAggs(dslLvlCursor: any, dsl: any) {
 export interface AggConfigsOptions {
   typesRegistry: AggTypesRegistryStart;
   hierarchical?: boolean;
+  aggExecutionContext?: AggTypesDependencies['aggExecutionContext'];
   partialRows?: boolean;
 }
 
@@ -82,31 +84,29 @@ export type GenericBucket = estypes.AggregationsBuckets<any> & {
 export type IAggConfigs = AggConfigs;
 
 export class AggConfigs {
-  public indexPattern: DataView;
   public timeRange?: TimeRange;
   public timeFields?: string[];
   public forceNow?: Date;
-  public hierarchical?: boolean = false;
-  public partialRows?: boolean = false;
-
-  private readonly typesRegistry: AggTypesRegistryStart;
-
-  aggs: IAggConfig[];
+  public aggs: IAggConfig[] = [];
+  public partialRows?: boolean;
+  public hierarchical?: boolean;
+  public readonly timeZone: string;
 
   constructor(
-    indexPattern: DataView,
+    public indexPattern: DataView,
     configStates: CreateAggConfigParams[] = [],
-    opts: AggConfigsOptions
+    private opts: AggConfigsOptions,
+    private getConfig: GetConfigFn
   ) {
-    this.typesRegistry = opts.typesRegistry;
+    this.hierarchical = opts.hierarchical ?? false;
+    this.partialRows = opts.partialRows ?? false;
+
+    this.timeZone = getUserTimeZone(
+      this.getConfig,
+      opts?.aggExecutionContext?.shouldDetectTimeZone
+    );
 
     configStates = AggConfig.ensureIds(configStates);
-
-    this.aggs = [];
-    this.indexPattern = indexPattern;
-    this.hierarchical = opts.hierarchical;
-    this.partialRows = opts.partialRows;
-
     configStates.forEach((params: any) => this.createAggConfig(params));
   }
 
@@ -155,11 +155,16 @@ export class AggConfigs {
       return agg.enabled;
     };
 
-    const aggConfigs = new AggConfigs(this.indexPattern, this.aggs.filter(filterAggs), {
-      typesRegistry: this.typesRegistry,
-    });
-
-    return aggConfigs;
+    return new AggConfigs(
+      this.indexPattern,
+      this.aggs.filter(filterAggs),
+      {
+        ...this.opts,
+        hierarchical: this.hierarchical,
+        partialRows: this.partialRows,
+      },
+      this.getConfig
+    );
   }
 
   createAggConfig = <T extends AggConfig = AggConfig>(
@@ -168,7 +173,7 @@ export class AggConfigs {
   ) => {
     const { type } = params;
     const getType = (t: string) => {
-      const typeFromRegistry = this.typesRegistry.get(t);
+      const typeFromRegistry = this.opts.typesRegistry.get(t);
 
       if (!typeFromRegistry) {
         throw new Error(
@@ -262,7 +267,7 @@ export class AggConfigs {
       }
 
       if (hasMultipleTimeShifts) {
-        dslLvlCursor = insertTimeShiftSplit(this, config, timeShifts, dslLvlCursor);
+        dslLvlCursor = insertTimeShiftSplit(this, config, timeShifts, dslLvlCursor, this.timeZone);
       }
 
       if (config.type.hasNoDsl) {
@@ -414,8 +419,14 @@ export class AggConfigs {
                       range: {
                         [field]: {
                           format: 'strict_date_optional_time',
-                          gte: moment(filter?.query.range[field].gte).subtract(shift).toISOString(),
-                          lte: moment(filter?.query.range[field].lte).subtract(shift).toISOString(),
+                          gte: moment
+                            .tz(filter?.query.range[field].gte, this.timeZone)
+                            .subtract(shift)
+                            .toISOString(),
+                          lte: moment
+                            .tz(filter?.query.range[field].lte, this.timeZone)
+                            .subtract(shift)
+                            .toISOString(),
                         },
                       },
                     })),

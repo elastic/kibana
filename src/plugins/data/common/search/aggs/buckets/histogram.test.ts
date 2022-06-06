@@ -48,7 +48,8 @@ describe('Histogram Agg', () => {
       ],
       {
         typesRegistry: mockAggTypesRegistry(aggTypesDependencies),
-      }
+      },
+      jest.fn()
     );
   };
 

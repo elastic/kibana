@@ -17,8 +17,8 @@ import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import {
-  AggsCommonService,
   AggConfigs,
+  AggsCommonService,
   AggTypesDependencies,
   aggsRequiredUiSettings,
   calculateBounds,
@@ -70,29 +70,27 @@ export class AggsService {
         const getConfig = <T = any>(key: string): T => {
           return uiSettingsCache[key];
         };
-        const isDefaultTimezone = () => getConfig('dateFormat:tz') === 'Browser';
+
+        const aggExecutionContext: AggTypesDependencies['aggExecutionContext'] = {
+          shouldDetectTimeZone: false,
+        };
 
         const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
           getConfig,
+          aggExecutionContext,
           getIndexPattern: (
             await indexPatterns.dataViewsServiceFactory(savedObjectsClient, elasticsearchClient)
           ).get,
-          isDefaultTimezone,
         });
 
         const aggTypesDependencies: AggTypesDependencies = {
           calculateBounds: this.calculateBounds,
+          aggExecutionContext,
           getConfig,
           getFieldFormatsStart: () => ({
             deserialize: formats.deserialize,
             getDefaultInstance: formats.getDefaultInstance,
           }),
-          /**
-           * Date histogram and date range need to know whether we are using the
-           * default timezone, but `isDefault` is not currently offered on the
-           * server, so we need to manually check for the default value.
-           */
-          isDefaultTimezone,
         };
 
         const typesRegistry = {
@@ -114,9 +112,13 @@ export class AggsService {
 
         return {
           calculateAutoTimeExpression,
-          createAggConfigs: (indexPattern, configStates = []) => {
-            return new AggConfigs(indexPattern, configStates, { typesRegistry });
-          },
+          createAggConfigs: (indexPattern, configStates = []) =>
+            new AggConfigs(
+              indexPattern,
+              configStates,
+              { typesRegistry, aggExecutionContext },
+              getConfig
+            ),
           types: typesRegistry,
         };
       },

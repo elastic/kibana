@@ -42,7 +42,8 @@ describe('AggTypeMetricSinglePercentileRankProvider class', () => {
       ],
       {
         typesRegistry,
-      }
+      },
+      jest.fn()
     );
   });
 
@@ -142,7 +143,8 @@ describe('AggTypeMetricSinglePercentileRankProvider class', () => {
       ],
       {
         typesRegistry,
-      }
+      },
+      jest.fn()
     );
 
     expect(aggConfigs.toDsl().single_percentile_rank.percentile_ranks.script.source).toEqual(

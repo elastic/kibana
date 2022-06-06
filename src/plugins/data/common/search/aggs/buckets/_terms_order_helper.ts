@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { IBucketAggConfig, BucketAggParam } from './bucket_agg_type';
 
 export const termsAggFilter = [
@@ -77,10 +77,12 @@ export const termsOrderAggParamDefinition: Partial<BucketAggParam<IBucketAggConf
                       query: {
                         range: {
                           [aggs.timeFields![0]]: {
-                            gte: moment(aggs.timeRange.from)
+                            gte: moment
+                              .tz(aggs.timeRange.from, aggs.timeZone)
                               .subtract(shift || 0)
                               .toISOString(),
-                            lte: moment(aggs.timeRange.to)
+                            lte: moment
+                              .tz(aggs.timeRange.to, aggs.timeZone)
                               .subtract(shift || 0)
                               .toISOString(),
                           },

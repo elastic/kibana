@@ -8,20 +8,20 @@
 
 import { Subscription } from 'rxjs';
 
-import { IUiSettingsClient } from '@kbn/core/public';
-import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core/public';
+import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { calculateBounds, TimeRange } from '../../../common';
 import {
+  AggConfigs,
   aggsRequiredUiSettings,
   AggsCommonStartDependencies,
   AggsCommonService,
-  AggConfigs,
   AggTypesDependencies,
 } from '../../../common/search/aggs';
-import { AggsSetup, AggsStart } from './types';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { AggsSetup, AggsStart } from './types';
+import type { NowProviderInternalContract } from '../../now_provider';
 
 /**
  * Aggs needs synchronous access to specific uiSettings. Since settings can change
@@ -88,13 +88,15 @@ export class AggsService {
     return this.aggsCommonService.setup({ registerFunction });
   }
 
-  public start({ fieldFormats, uiSettings, indexPatterns }: AggsStartDependencies): AggsStart {
-    const isDefaultTimezone = () => uiSettings.isDefault('dateFormat:tz');
+  public start({ fieldFormats, indexPatterns }: AggsStartDependencies): AggsStart {
+    const aggExecutionContext: AggTypesDependencies['aggExecutionContext'] = {
+      shouldDetectTimeZone: true,
+    };
 
     const { calculateAutoTimeExpression, types } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
       getIndexPattern: indexPatterns.get,
-      isDefaultTimezone,
+      aggExecutionContext,
     });
 
     const aggTypesDependencies: AggTypesDependencies = {
@@ -104,7 +106,7 @@ export class AggsService {
         deserialize: fieldFormats.deserialize,
         getDefaultInstance: fieldFormats.getDefaultInstance,
       }),
-      isDefaultTimezone,
+      aggExecutionContext,
     };
 
     // initialize each agg type and store in memory
@@ -136,7 +138,12 @@ export class AggsService {
     return {
       calculateAutoTimeExpression,
       createAggConfigs: (indexPattern, configStates = []) => {
-        return new AggConfigs(indexPattern, configStates, { typesRegistry });
+        return new AggConfigs(
+          indexPattern,
+          configStates,
+          { typesRegistry, aggExecutionContext },
+          this.getConfig!
+        );
       },
       types: typesRegistry,
     };

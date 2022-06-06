@@ -50,7 +50,8 @@ describe('createFilter', () => {
           params,
         },
       ],
-      { typesRegistry }
+      { typesRegistry },
+      jest.fn()
     );
   };
 

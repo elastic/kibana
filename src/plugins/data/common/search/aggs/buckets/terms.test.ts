@@ -66,7 +66,8 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() }
+        { typesRegistry: mockAggTypesRegistry() },
+        jest.fn()
       );
     };
 
@@ -285,7 +286,8 @@ describe('Terms Agg', () => {
             type: BUCKET_TYPES.TERMS,
           },
         ],
-        { typesRegistry: mockAggTypesRegistry() }
+        { typesRegistry: mockAggTypesRegistry() },
+        jest.fn()
       );
       const { [BUCKET_TYPES.TERMS]: params } = aggConfigs.aggs[0].toDsl();
 
