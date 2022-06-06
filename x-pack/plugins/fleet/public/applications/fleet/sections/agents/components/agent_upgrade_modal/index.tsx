@@ -7,7 +7,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import {
   EuiConfirmModal,
   EuiComboBox,
@@ -38,6 +37,7 @@ import {
 } from '../../../../hooks';
 
 import { FALLBACK_VERSIONS, MAINTAINANCE_VALUES } from './constants';
+import { useScheduleDateTime } from './hooks';
 
 export interface AgentUpgradeAgentModalProps {
   onClose: () => void;
@@ -107,8 +107,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     isSmallBatch ? maintainanceOptions[0] : maintainanceOptions[1],
   ]);
 
-  const initialDatetime = useMemo(() => moment(), []);
-  const [startDatetime, setStartDatetime] = useState<moment.Moment>(initialDatetime);
+  const { startDatetime, onChangeStartDateTime, initialDatetime, minTime, maxTime } =
+    useScheduleDateTime();
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
@@ -341,7 +341,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               showTimeSelect
               selected={startDatetime}
               minDate={initialDatetime}
-              onChange={(date) => setStartDatetime(date as moment.Moment)}
+              minTime={minTime}
+              maxTime={maxTime}
+              onChange={onChangeStartDateTime}
             />
           </EuiFormRow>
         </>
