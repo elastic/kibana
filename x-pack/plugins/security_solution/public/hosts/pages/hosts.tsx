@@ -228,7 +228,6 @@ const HostsComponent = () => {
 
             <HostsTabs
               deleteQuery={deleteQuery}
-              docValueFields={docValueFields}
               to={to}
               filterQuery={tabsFilterQuery || ''}
               isInitializing={isInitializing}
