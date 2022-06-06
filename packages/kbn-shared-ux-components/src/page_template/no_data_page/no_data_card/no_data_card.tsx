@@ -44,7 +44,7 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
 
   const cardDescription = description || defaultDescription;
 
-  // Bad hack to fix the need for an a11y title even though the button exists
+  // Fix the need for an a11y title even though the button exists by setting to screen reader only
   const title = titleProp ? (
     <EuiScreenReaderOnly>
       <span>{titleProp}</span>
