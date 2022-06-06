@@ -69,7 +69,7 @@ export interface BulkUpdateSchedulesResult {
   tasks: ConcreteTaskInstance[];
 
   /**
-   * list of failed tasks and error caused failure
+   * list of failed tasks and errors caused failure
    */
   errors: Array<{ task: ConcreteTaskInstance; error: Error }>;
 }
@@ -131,9 +131,9 @@ export class TaskScheduling {
   /**
    * Bulk updates schedules for tasks by ids.
    *
-   * @param taskIds string[] - list of task ids
-   * @param schedule IntervalSchedule - new schedule
-   * @returns {Promise<ConcreteTaskInstance[]>}
+   * @param {string[]} taskIds  - list of task ids
+   * @param {IntervalSchedule} schedule  - new schedule
+   * @returns {Promise<BulkUpdateSchedulesResult>}
    */
   public async bulkUpdateSchedules(
     taskIds: string[],
