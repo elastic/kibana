@@ -7,14 +7,14 @@
 Updates the attributes for an existing connector.
 
 [[update-connector-api-request]]
-==== Request
+==== {api-request-title}
 
 `PUT <kibana host>:<port>/api/actions/connector/<id>`
 
 `PUT <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
 
 [[update-connector-api-params]]
-==== Path parameters
+==== {api-path-parms-title}
 
 `id`::
   (Required, string) The ID of the connector.
@@ -23,7 +23,7 @@ Updates the attributes for an existing connector.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[update-connector-api-request-body]]
-==== Request body
+==== {api-request-body-title}
 
 `name`::
   (Required, string) The new name of the connector.
@@ -35,13 +35,13 @@ Updates the attributes for an existing connector.
   (Required, object) The updated secrets configuration for the connector. Secrets properties vary depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
 
 [[update-connector-api-codes]]
-==== Response code
+==== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[update-connector-api-example]]
-==== Example
+==== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------

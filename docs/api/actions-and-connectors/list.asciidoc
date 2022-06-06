@@ -7,26 +7,26 @@
 Retrieves a list of all connector types.
 
 [[list-connector-types-api-request]]
-==== Request
+==== {api-request-title}
 
 `GET <kibana host>:<port>/api/actions/connector_types`
 
 `GET <kibana host>:<port>/s/<space_id>/api/actions/connector_types`
 
 [[list-connector-types-api-path-params]]
-==== Path parameters
+==== {api-path-parms-title}
 
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[list-connector-types-api-codes]]
-==== Response code
+==== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[list-connector-types-api-example]]
-==== Example
+==== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
