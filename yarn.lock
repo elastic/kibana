@@ -23633,7 +23633,7 @@ re-resizable@^6.1.1:
   dependencies:
     fast-memoize "^2.5.1"
 
-re2@^1.17.4:
+re2@1.17.4:
   version "1.17.4"
   resolved "https://registry.yarnpkg.com/re2/-/re2-1.17.4.tgz#7bf29290bdde963014e77bd2c2e799a6d788386e"
   integrity sha512-xyZ4h5PqE8I9tAxTh3G0UttcK5ufrcUxReFjGzfX61vtanNbS1XZHjnwRSyPcLgChI4KLxVgOT/ioZXnUAdoTA==
