@@ -119,7 +119,7 @@ You can add a runtime field to your {data-source} from inside of **Discover**,
 and then use that field for analysis and visualizations,
 the same way you do with other fields.
 
-. Click *Add a field*.
+. Open the data view menu, and then click *Add a field to this data view*.
 
 . In the *Create field* form, enter `hello` for the name.
 
@@ -194,7 +194,7 @@ and more.
 Exclude documents where day of week is not Wednesday:
 
 . Click image:images/add-icon.png[Add icon] to the left of the query bar.
-. In the *Add filer** popover, set **Field** to *day_of_week*, **Operator** to *is not*, and **Value** to *Wednesday*.
+. In the *Add filter* pop-up, set *Field* to *day_of_week*, *Operator* to *is not*, and *Value* to *Wednesday*.
 +
 [role="screenshot"]
 image:images/discover-add-filter.png[Add filter dialog in Discover]
