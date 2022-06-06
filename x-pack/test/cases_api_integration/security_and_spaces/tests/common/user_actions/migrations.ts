@@ -1047,18 +1047,18 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('8.3.0', () => {
-      const CASE_ID = '0215ff30-6e39-11ec-8e5f-bf82b2955cf8';
+    describe.only('8.3.0', () => {
+      const CASE_ID = '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c';
 
       before(async () => {
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.1.0/status_changes.json'
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
         );
       });
 
       after(async () => {
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.1.0/status_changes.json'
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.0.0/cases.json'
         );
         await deleteAllCaseItems(es);
       });
@@ -1073,14 +1073,14 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           const createUserAction = userActions[0];
           expect(createUserAction).to.eql({
             action: 'create',
-            action_id: '02b350a0-6e39-11ec-8e5f-bf82b2955cf8',
-            case_id: '0215ff30-6e39-11ec-8e5f-bf82b2955cf8',
+            action_id: '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c',
+            case_id: '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c',
             comment_id: null,
-            created_at: '2022-01-05T15:06:07.914Z',
+            created_at: '2021-12-16T14:34:48.709Z',
             created_by: {
-              email: null,
-              full_name: null,
-              username: 'j@j.com',
+              email: '',
+              full_name: '',
+              username: 'elastic',
             },
             owner: 'securitySolution',
             payload: {
@@ -1090,19 +1090,29 @@ export default function createGetTests({ getService }: FtrProviderContext) {
                 name: 'none',
                 type: '.none',
               },
-              description: 'asdf',
-              owner: 'securitySolution',
+              description: 'migrating user actions',
               settings: {
                 syncAlerts: true,
               },
-              severity: 'low',
               status: 'open',
-              tags: [],
-              title: 'Jon case',
-              type: 'individual',
+              tags: ['user', 'actions'],
+              title: 'User actions',
+              owner: 'securitySolution',
+              severity: 'low',
             },
             type: 'create_case',
           });
+        });
+
+        it('does NOT adds the severity field to the other user actions', async () => {
+          const userActions = await getCaseUserActions({
+            supertest,
+            caseID: CASE_ID,
+          });
+
+          for (const userAction of userActions.slice(1)) {
+            expect(userAction.payload).not.to.have.property('severity');
+          }
         });
       });
     });

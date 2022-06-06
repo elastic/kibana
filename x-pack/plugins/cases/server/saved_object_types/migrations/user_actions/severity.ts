@@ -6,11 +6,15 @@
  */
 
 import { SavedObjectUnsanitizedDoc, SavedObjectSanitizedDoc } from '@kbn/core/server';
-import { CaseSeverity, CreateCaseUserAction } from '../../../../common/api';
+import { ActionTypes, CaseSeverity, CreateCaseUserAction } from '../../../../common/api';
 
 export const addSeverityToCreateUserAction = (
   doc: SavedObjectUnsanitizedDoc<CreateCaseUserAction>
 ): SavedObjectSanitizedDoc<CreateCaseUserAction> => {
+  if (doc.attributes.type !== ActionTypes.create_case) {
+    return { ...doc, references: doc.references ?? [] };
+  }
+
   const payload = {
     ...doc.attributes.payload,
     severity: doc?.attributes?.payload?.severity ?? CaseSeverity.LOW,
