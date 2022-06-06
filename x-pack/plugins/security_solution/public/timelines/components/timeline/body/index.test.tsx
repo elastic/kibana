@@ -22,14 +22,14 @@ import { Sort } from './sort';
 import { getDefaultControlColumn } from './control_columns';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
 import { timelineActions } from '../../../store/timeline';
-import { ColumnHeaderOptions, TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineTabs } from '../../../../../common/types/timeline';
 import { defaultRowRenderers } from './renderers';
 
 jest.mock('../../../../common/lib/kibana/hooks');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/lib/kibana', () => {
   const originalModule = jest.requireActual('../../../../common/lib/kibana');
-  const mockCasesContract = jest.requireActual('../../../../../../cases/public/mocks');
+  const mockCasesContract = jest.requireActual('@kbn/cases-plugin/public/mocks');
   return {
     ...originalModule,
     useKibana: jest.fn().mockReturnValue({
