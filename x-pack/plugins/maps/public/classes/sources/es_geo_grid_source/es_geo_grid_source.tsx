@@ -84,6 +84,10 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     this._descriptor = sourceDescriptor;
   }
 
+  isHex() {
+    return this._descriptor.requestType === RENDER_AS.HEX;
+  }
+
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> {
     return (
       <UpdateSourceEditor
@@ -174,7 +178,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     // zoomX and zoomX + 1 may result in the same hexagon resolution.
     // To avoid FINE and MOST_FINE providing potenitally the same resolution,
     // use 3 level resolution system that increases zoom + 3 per resolution step.
-    if (this._descriptor.requestType === RENDER_AS.HEX) {
+    if (this.isHex()) {
       if (this._descriptor.resolution === GRID_RESOLUTION.COARSE) {
         return 2;
       }

@@ -44,6 +44,12 @@ export type GeoFilter = Filter & {
     distance: string;
     [geoFieldName: string]: Position | { lat: number; lon: number } | string;
   };
+  geo_grid?: {
+    [geoFieldName: string]: {
+      geohex?: string;
+      geotile?: string;
+    };
+  };
   geo_shape?: GeoShapeQuery;
 };
 

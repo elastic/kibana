@@ -7,7 +7,6 @@
 
 import _ from 'lodash';
 import React, { Component } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   LngLat,
   Map as MbMap,
@@ -20,18 +19,13 @@ import uuid from 'uuid/v4';
 import { Geometry } from 'geojson';
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { GEO_JSON_TYPE, LON_INDEX, RawValue } from '../../../../common/constants';
-import {
-  GEOMETRY_FILTER_ACTION,
-  TooltipFeature,
-  TooltipFeatureAction,
-  TooltipState,
-} from '../../../../common/descriptor_types';
+import { LON_INDEX, RawValue } from '../../../../common/constants';
+import { TooltipFeature, TooltipState } from '../../../../common/descriptor_types';
 import { TooltipPopover } from './tooltip_popover';
-import { FeatureGeometryFilterForm } from './features_tooltip';
 import { ILayer } from '../../../classes/layers/layer';
 import { IVectorLayer, isVectorLayer } from '../../../classes/layers/vector_layer';
 import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
+import { getFeatureActions } from './get_feature_actions';
 
 function justifyAnchorLocation(
   mbLngLat: LngLat,
@@ -135,68 +129,6 @@ export class TooltipControl extends Component<Props, {}> {
     }) as IVectorLayer;
   }
 
-  _loadPreIndexedShape = async ({
-    layerId,
-    featureId,
-  }: {
-    layerId: string;
-    featureId?: string | number;
-  }) => {
-    const tooltipLayer = this._findLayerById(layerId);
-    if (!tooltipLayer || typeof featureId === 'undefined') {
-      return null;
-    }
-
-    const targetFeature = tooltipLayer.getFeatureById(featureId);
-    if (!targetFeature) {
-      return null;
-    }
-
-    return await tooltipLayer.getSource().getPreIndexedShape(targetFeature.properties);
-  };
-
-  _getFeatureActions({
-    layerId,
-    featureId,
-    tooltipId,
-  }: {
-    layerId: string;
-    featureId?: string | number;
-    tooltipId: string;
-  }): TooltipFeatureAction[] {
-    const actions = [];
-
-    const geometry = this._getFeatureGeometry({ layerId, featureId });
-    const isPolygon =
-      geometry &&
-      (geometry.type === GEO_JSON_TYPE.POLYGON || geometry.type === GEO_JSON_TYPE.MULTI_POLYGON);
-    if (isPolygon && this.props.geoFieldNames.length && this.props.addFilters) {
-      actions.push({
-        label: i18n.translate('xpack.maps.tooltip.action.filterByGeometryLabel', {
-          defaultMessage: 'Filter by geometry',
-        }),
-        id: GEOMETRY_FILTER_ACTION as typeof GEOMETRY_FILTER_ACTION,
-        form: (
-          <FeatureGeometryFilterForm
-            onClose={() => {
-              this.props.closeOnClickTooltip(tooltipId);
-            }}
-            geometry={geometry!}
-            geoFieldNames={this.props.geoFieldNames}
-            addFilters={this.props.addFilters}
-            getFilterActions={this.props.getFilterActions}
-            getActionContext={this.props.getActionContext}
-            loadPreIndexedShape={async () => {
-              return this._loadPreIndexedShape({ layerId, featureId });
-            }}
-          />
-        ),
-      });
-    }
-
-    return actions;
-  }
-
   _getTooltipFeatures(
     mbFeatures: MapGeoJSONFeature[],
     isLocked: boolean,
@@ -228,8 +160,19 @@ export class TooltipControl extends Component<Props, {}> {
           ...(mbFeature.properties ? mbFeature.properties : {}),
           ...(mbFeature.state ? mbFeature.state : {}),
         };
-        const actions: TooltipFeatureAction[] = isLocked
-          ? this._getFeatureActions({ layerId, featureId, tooltipId })
+        const actions = isLocked
+          ? getFeatureActions({
+              addFilters: this.props.addFilters,
+              featureId,
+              geoFieldNames: this.props.geoFieldNames,
+              getFilterActions: this.props.getFilterActions,
+              getActionContext: this.props.getActionContext,
+              layer,
+              mbFeature,
+              onClose: () => {
+                this.props.closeOnClickTooltip(tooltipId);
+              },
+            })
           : [];
 
         const hasActions = isLocked && actions.length;

@@ -750,6 +750,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     };
   }
 
+  // Returns geo_shape indexed_shape context for spatial quering by pre-indexed shapes
   async getPreIndexedShape(properties: GeoJsonProperties): Promise<PreIndexedShape | null> {
     if (properties === null) {
       return null;
