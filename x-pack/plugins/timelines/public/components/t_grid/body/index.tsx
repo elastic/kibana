@@ -584,7 +584,7 @@ export const BodyComponent = React.memo<StatefulBodyProps>(
       direction: 'asc' | 'desc';
     }> = useMemo(
       () =>
-        sort?.map((x) => ({
+        sort.map((x) => ({
           id: x.columnId,
           direction: mapSortDirectionToDirection(x.sortDirection),
         })),
