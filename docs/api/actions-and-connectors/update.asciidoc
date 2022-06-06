@@ -26,9 +26,6 @@ Updates the attributes for an existing connector.
 [[update-connector-api-request-body]]
 === Request body
 
-`name`::
-  (Required, string) The new name of the connector.
-
 `config`::
 (Required, object) The new connector configuration. Configuration properties
 vary depending on the connector type. For example:
@@ -36,6 +33,9 @@ vary depending on the connector type. For example:
 --
 include::create.asciidoc[tag=connector-config]
 --
+
+`name`::
+(Required, string) The new name of the connector.
 
 `secrets`::
 (Required^*^, object) The updated secrets configuration for the connector. Secrets
