@@ -125,7 +125,15 @@ Object {
   ],
   "output_permissions": Object {
     "es-containerhost": Object {
-      "Elastic APM": Object {
+      "_elastic_agent_checks": Object {
+        "cluster": Array [
+          "monitor",
+        ],
+      },
+      "_elastic_agent_monitoring": Object {
+        "indices": Array [],
+      },
+      "elastic-cloud-apm": Object {
         "cluster": Array [
           "cluster:monitor/main",
         ],
@@ -206,14 +214,6 @@ Object {
             ],
           },
         ],
-      },
-      "_elastic_agent_checks": Object {
-        "cluster": Array [
-          "monitor",
-        ],
-      },
-      "_elastic_agent_monitoring": Object {
-        "indices": Array [],
       },
     },
   },

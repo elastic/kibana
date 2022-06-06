@@ -70,7 +70,8 @@ describe('Top hit metric', () => {
           params,
         },
       ],
-      { typesRegistry }
+      { typesRegistry },
+      jest.fn()
     );
 
     // Grab the aggConfig off the vis (we don't actually use the vis for anything else)
