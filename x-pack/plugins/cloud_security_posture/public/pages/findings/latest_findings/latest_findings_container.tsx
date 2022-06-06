@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiSpacer } from '@elastic/eui';
 import type { FindingsBaseProps } from '../types';
 import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
@@ -26,7 +27,6 @@ import { useCspBreadcrumbs } from '../../../common/navigation/use_csp_breadcrumb
 import { findingsNavigation } from '../../../common/navigation/constants';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { ErrorCallout } from '../layout/error_callout';
-import { EuiSpacer } from '@elastic/eui';
 
 export const getDefaultQuery = ({
   query,
