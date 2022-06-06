@@ -2,7 +2,7 @@
 [[drilldowns]]
 == Make dashboards interactive
 
-:keywords: administrator, analyst, concept, task, analyze, dashboard, controls, drilldowns
+:keywords: administrator, analyst, concept, task, analyze, dashboard, controls, range slider, options list, author, drilldowns
 :description: Add interactive capabilities to your dashboard, such as controls that allow \
 you to apply dashboard-level filters, and drilldowns that allow you to navigate to other \
 dashboards and external websites.
@@ -26,7 +26,7 @@ data-type="inline"
 [[add-controls]]
 === Filter dashboard data with controls
 
-experimental[] *Controls* are interactive panels you add to your dashboards to filter and display only the data you want to explore.
+*Controls* are interactive panels you add to your dashboards to filter and display only the data you want to explore.
 
 deprecated::[8.3.0, "link:https://www.elastic.co/guide/en/kibana/8.1/drilldowns.html#add-controls[*Input controls*] are deprecated in 8.3.0, and will be removed in a future release. To prepare for the removal of input controls, add the new controls to your dashboards."]
 
@@ -54,9 +54,9 @@ To add interactive filters, create controls, then add them to your dashboard.
 
 . Open or create a new dashboard. 
 
-.. If you are adding a *Control* to an existing dashboard, click *Edit*, then click *Add control* on the dashboard.
+* If you are adding a *Control* to an existing dashboard, click *Edit*, click *Controls* in the dashboard toolbar, then select *Add control*.
 
-.. If you are adding a *Control* to a new dashboard, click *Controls* in the dashboard toolbar, then select *Add control*.
+* If you are adding a *Control* to a new dashboard, click *Controls* in the dashboard toolbar, then select *Add control*.
 
 . From the *Data view* dropdown, select the data view with the field you want to appear in the *Control*.
 
@@ -66,9 +66,17 @@ The *Control type* is automatically applied for the field you selected.
 
 . In the *Label* field, enter a clear and self-explanatory label.
 
-. Select the *Minimum width*, or select *Expand width to fit available space*.
+. Select the control width:
 
-. If you are creating an *Options list*, specify if you want to *Allow multiple selections in dropdown* and *Run past timeout*.
+* To specify the control size, select the *Minimum width*.
+
+* To expand the width of the control to fit the available space on the dashboard, select *Expand width to fit available space*.
+
+. If you are creating an *Options list*, specify the options.
+
+.. To allow the ability to select multiple options in the dropdown, select *Allow multiple selections in dropdown*.
+
+.. To populate the entire list of options, even when the Options list takes longer to populate than expected, select *Run past timeout*.
 
 . Click *Save and close*.
 
@@ -112,7 +120,7 @@ The dashboard displays only the data for the range of values you specified.
 
 * *Validate user selections* &mdash; When selected, any selected option that results in no data is ignored.
 
-* *Chain controls* &mdash; When selected, any selected options in one control narrow the available options in the next control.
+* *Chain controls* &mdash; When selected, any selected options in one control narrows the available options in the next control.
 
 * To remove all controls from the dashboard, click *Delete all*.
 
