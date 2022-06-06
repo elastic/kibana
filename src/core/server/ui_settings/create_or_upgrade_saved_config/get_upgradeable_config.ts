@@ -7,16 +7,15 @@
  */
 
 import { SavedObjectsClientContract } from '../../saved_objects/types';
+import type { ConfigAttributes } from '../saved_objects';
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
 /**
  * This contains a subset of `config` object attributes that are relevant for upgrading it.
  */
-export interface UpgradeableConfigType {
-  buildNum: number;
+export interface UpgradeableConfigAttributes extends ConfigAttributes {
   defaultIndex?: string;
   isDefaultIndexMigrated?: boolean;
-  [key: string]: unknown;
 }
 
 /**
@@ -34,13 +33,14 @@ export async function getUpgradeableConfig({
   version: string;
 }) {
   // attempt to find a config we can upgrade
-  const { saved_objects: savedConfigs } = await savedObjectsClient.find<UpgradeableConfigType>({
-    type: 'config',
-    page: 1,
-    perPage: 1000,
-    sortField: 'buildNum',
-    sortOrder: 'desc',
-  });
+  const { saved_objects: savedConfigs } =
+    await savedObjectsClient.find<UpgradeableConfigAttributes>({
+      type: 'config',
+      page: 1,
+      perPage: 1000,
+      sortField: 'buildNum',
+      sortOrder: 'desc',
+    });
 
   // try to find a config that we can upgrade
   const findResult = savedConfigs.find((savedConfig) =>

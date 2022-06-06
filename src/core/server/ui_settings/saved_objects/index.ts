@@ -6,5 +6,7 @@
  * Side Public License, v 1.
  */
 
+export type { ConfigAttributes } from './ui_settings';
 export { uiSettingsType } from './ui_settings';
-export { transformDefaultIndex } from './transforms';
+export type { TransformConfigFn } from './transforms';
+export { transforms } from './transforms';

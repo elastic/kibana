@@ -9,11 +9,12 @@
 import { defaults } from 'lodash';
 
 import type { Logger, LogMeta } from '@kbn/logging';
+import { asyncForEach } from '@kbn/std';
 import { SavedObjectsClientContract } from '../../saved_objects/types';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 
 import { getUpgradeableConfig } from './get_upgradeable_config';
-import { transformDefaultIndex } from '../saved_objects';
+import { transforms } from '../saved_objects';
 
 interface ConfigLogMeta extends LogMeta {
   kibana: {
@@ -40,15 +41,20 @@ export async function createOrUpgradeSavedConfig(
     version,
   });
 
+  let transformDefaults = {};
+  await asyncForEach(transforms, async (transformFn) => {
+    const result = await transformFn({
+      savedObjectsClient,
+      configAttributes: upgradeableConfig?.attributes,
+    });
+    transformDefaults = { ...transformDefaults, ...result };
+  });
+
   // default to the attributes of the upgradeableConfig if available
   const attributes = defaults(
     {
       buildNum,
-      // If there is an upgradeableConfig, attempt to transform the defaultIndex attribute to ensure it is set properly in 8.3.1+
-      ...(await transformDefaultIndex({
-        savedObjectsClient,
-        configAttributes: upgradeableConfig?.attributes,
-      })),
+      ...transformDefaults, // Any defaults that should be applied from transforms
     },
     upgradeableConfig?.attributes
   );

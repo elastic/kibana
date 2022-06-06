@@ -7,7 +7,7 @@
  */
 
 import {
-  mockTransformDefaultIndex,
+  mockTransform,
   mockGetUpgradeableConfig,
 } from './create_or_upgrade_saved_config.test.mock';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
@@ -118,7 +118,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
           defaultIndex: 'some-index',
         },
       });
-      mockTransformDefaultIndex.mockResolvedValue({
+      mockTransform.mockResolvedValue({
         defaultIndex: 'another-index',
         isDefaultIndexMigrated: true,
       });
@@ -126,7 +126,7 @@ describe('uiSettings/createOrUpgradeSavedConfig', function () {
       await run();
 
       expect(mockGetUpgradeableConfig).toHaveBeenCalledTimes(1);
-      expect(mockTransformDefaultIndex).toHaveBeenCalledTimes(1);
+      expect(mockTransform).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.create).toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.create).toHaveBeenCalledWith(
         'config',

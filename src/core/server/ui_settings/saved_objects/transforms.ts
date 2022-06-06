@@ -8,12 +8,12 @@
 
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import type { SavedObjectsClientContract } from '../../types';
-import type { UpgradeableConfigType } from '../create_or_upgrade_saved_config';
+import type { UpgradeableConfigAttributes } from '../create_or_upgrade_saved_config';
 
 interface Params {
   savedObjectsClient: SavedObjectsClientContract;
   configAttributes:
-    | Pick<UpgradeableConfigType, 'defaultIndex' | 'isDefaultIndexMigrated'>
+    | Pick<UpgradeableConfigAttributes, 'defaultIndex' | 'isDefaultIndexMigrated'>
     | undefined;
 }
 
@@ -23,16 +23,26 @@ interface ReturnType {
   defaultIndex?: string;
 }
 
+export type TransformConfigFn = (params: Params) => Promise<ReturnType>;
+
 /**
- * This is applied during `createOrUpgradeSavedConfig` to optionally transform the `defaultIndex` attribute of a config saved object. The
- * `defaultIndex` attribute points to a data view ID, but those saved object IDs were regenerated in the 8.0 upgrade. That resulted in a bug
- * where the `defaultIndex` would be broken in custom spaces.
+ * Any transforms that should be applied during `createOrUpgradeSavedConfig` need to be included in this array.
+ */
+export const transforms: TransformConfigFn[] = [transformDefaultIndex];
+
+/**
+ * This optionally transforms the `defaultIndex` attribute of a config saved object. The `defaultIndex` attribute points to a data view ID,
+ * but those saved object IDs were regenerated in the 8.0 upgrade. That resulted in a bug where the `defaultIndex` would be broken in custom
+ * spaces.
  *
- * We are fixing this bug after the fact, and we can't retroactively change a saved object that's already been migrated, so we use this
- * transformation instead to ensure that the `defaultIndex` attributeis not broken.
+ * We are fixing this bug after the fact in 8.3, and we can't retroactively change a saved object that's already been migrated, so we use
+ * this transformation instead to ensure that the `defaultIndex` attribute is not broken.
  *
  * Note that what used to be called "index patterns" prior to 8.0 have been renamed to "data views", but the object type cannot be changed,
  * so that type remains `index-pattern`.
+ *
+ * Note also that this function is only exported for unit testing. It is also included in the `transforms` export above, which is how it is
+ * applied during `createOrUpgradeSavedConfig`.
  */
 export async function transformDefaultIndex(params: Params): Promise<ReturnType> {
   const { savedObjectsClient, configAttributes } = params;
