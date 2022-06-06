@@ -8,7 +8,10 @@
 
 import React, { FC, useContext } from 'react';
 import { Observable } from 'rxjs';
-import { NoDataViewsPromptProvider } from '@kbn/shared-ux-prompt-no-data-views';
+import {
+  NoDataViewsPromptProvider,
+  NoDataViewsPromptKibanaProvider,
+} from '@kbn/shared-ux-prompt-no-data-views';
 
 import { LegacyServicesProvider, getLegacyServices } from './legacy_services';
 
@@ -45,14 +48,15 @@ interface DataViewEditorOptions {
  * own packages, (and `@kbn/shared-ux-services` is removed).
  */
 export interface KibanaNoDataPageServices {
+  hasESData: () => Promise<boolean>;
+  hasUserDataView: () => Promise<boolean>;
+  // Provided to Legacy Services
   addBasePath: (url: string) => string;
   canAccessFleet: boolean;
   canCreateNewDataView: boolean;
   currentAppId$: Observable<string | undefined>;
   dataViewsDocLink: string;
   hasDataView: () => Promise<boolean>;
-  hasESData: () => Promise<boolean>;
-  hasUserDataView: () => Promise<boolean>;
   navigateToUrl: (url: string) => Promise<void>;
   openDataViewEditor: (options: DataViewEditorOptions) => () => void;
   setIsFullscreen: (isFullscreen: boolean) => void;
@@ -143,7 +147,11 @@ export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependenci
   };
 
   return (
-    <KibanaNoDataPageContext.Provider value={value}>{children}</KibanaNoDataPageContext.Provider>
+    <KibanaNoDataPageContext.Provider value={value}>
+      <NoDataViewsPromptKibanaProvider {...dependencies}>
+        <LegacyServicesProvider {...getLegacyServices(value)}>{children}</LegacyServicesProvider>
+      </NoDataViewsPromptKibanaProvider>
+    </KibanaNoDataPageContext.Provider>
   );
 };
 
