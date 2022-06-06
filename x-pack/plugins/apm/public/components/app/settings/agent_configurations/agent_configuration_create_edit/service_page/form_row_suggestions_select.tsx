@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { SuggestionsSelect } from '../../../../../shared/suggestions_select';
 import { ENVIRONMENT_ALL } from '../../../../../../../common/environment_filter_values';
+import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
 
 interface Props {
   title: string;
@@ -41,7 +42,7 @@ export function FormRowSuggestionsSelect({
       <EuiFormRow label={fieldLabel}>
         <SuggestionsSelect
           customOptions={allowAll ? [ENVIRONMENT_ALL] : undefined}
-          defaultValue={value}
+          defaultValue={value ? getOptionLabel(value) : undefined}
           fieldName={fieldName}
           onChange={onChange}
           isClearable={false}
