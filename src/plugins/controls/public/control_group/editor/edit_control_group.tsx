@@ -19,12 +19,14 @@ import { setFlyoutRef } from '../embeddable/control_group_container';
 
 export interface EditControlGroupButtonProps {
   controlGroupContainer: ControlGroupContainer;
-  closePopover: () => void;
+  onClick?: () => void;
+  onFlyoutClose?: () => void;
 }
 
 export const EditControlGroup = ({
   controlGroupContainer,
-  closePopover,
+  onClick,
+  onFlyoutClose,
 }: EditControlGroupButtonProps) => {
   const { overlays } = pluginServices.getServices();
   const { openConfirm, openFlyout } = overlays;
@@ -44,6 +46,7 @@ export const EditControlGroup = ({
             controlGroupContainer.removeEmbeddable(panelId)
           );
         ref.close();
+        onFlyoutClose?.();
       });
     };
 
@@ -55,7 +58,10 @@ export const EditControlGroup = ({
             updateInput={(changes) => controlGroupContainer.updateInput(changes)}
             controlCount={Object.keys(controlGroupContainer.getInput().panels ?? {}).length}
             onDeleteAll={() => onDeleteAll(flyoutInstance)}
-            onClose={() => flyoutInstance.close()}
+            onClose={() => {
+              flyoutInstance.close();
+              onFlyoutClose?.();
+            }}
           />
         </PresentationUtilProvider>
       ),
@@ -64,6 +70,7 @@ export const EditControlGroup = ({
         onClose: () => {
           flyoutInstance.close();
           setFlyoutRef(undefined);
+          onFlyoutClose?.();
         },
       }
     );
@@ -74,7 +81,7 @@ export const EditControlGroup = ({
     key: 'manageControls',
     onClick: () => {
       editControlGroup();
-      closePopover();
+      onClick?.();
     },
     icon: 'gear',
     'data-test-subj': 'controls-settings-button',

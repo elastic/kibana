@@ -110,13 +110,14 @@ export class ControlGroupContainer extends Container<
   /**
    * Returns a button that allows controls to be created externally using the embeddable
    * @param buttonType Controls the button styling
-   * @param closePopover Closes the create control menu popover when flyout opens - only necessary if `buttonType === 'toolbar'`
+   * @param onClick Optional parameter that controls what secondary actions should happen when the "create control" button is clicked
    * @return If `buttonType == 'toolbar'`, returns `EuiContextMenuPanel` with input control types as items.
    *         Otherwise, if `buttonType == 'callout'` returns `EuiButton` with popover containing input control types.
    */
   public getCreateControlButton = (
     buttonType: CreateControlButtonTypes,
-    closePopover?: () => void
+    onClick?: () => void,
+    onClose?: () => void
   ) => {
     return (
       <CreateControlButton
@@ -128,22 +129,31 @@ export class ControlGroupContainer extends Container<
           this.updateInput({ defaultControlGrow })
         }
         addNewEmbeddable={(type, input) => this.addNewEmbeddable(type, input)}
-        closePopover={closePopover}
+        onClick={onClick}
+        onFlyoutClose={onClose}
         getRelevantDataViewId={() => this.getMostRelevantDataViewId()}
         setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
       />
     );
   };
 
-  private getEditControlGroupButton = (closePopover: () => void) => {
-    return <EditControlGroup controlGroupContainer={this} closePopover={closePopover} />;
+  private getEditControlGroupButton = (onClick: () => void, onClose?: () => void) => {
+    return (
+      <EditControlGroup controlGroupContainer={this} onClick={onClick} onFlyoutClose={onClose} />
+    );
   };
 
   /**
    * Returns the toolbar button that is used for creating controls and managing control settings
    * @return `SolutionToolbarPopover` button for input controls
    */
-  public getToolbarButtons = () => {
+  public getToolbarButtons = ({
+    onClick,
+    onClose,
+  }: {
+    onClick?: () => void;
+    onClose?: () => void;
+  }) => {
     return (
       <SolutionToolbarPopover
         ownFocus
@@ -156,8 +166,21 @@ export class ControlGroupContainer extends Container<
         {({ closePopover }: { closePopover: () => void }) => (
           <EuiContextMenuPanel
             items={[
-              this.getCreateControlButton('toolbar', closePopover),
-              this.getEditControlGroupButton(closePopover),
+              this.getCreateControlButton(
+                'toolbar',
+                () => {
+                  closePopover();
+                  onClick?.();
+                },
+                () => onClose?.()
+              ),
+              this.getEditControlGroupButton(
+                () => {
+                  closePopover();
+                  onClick?.();
+                },
+                () => onClose?.()
+              ),
             ]}
           />
         )}

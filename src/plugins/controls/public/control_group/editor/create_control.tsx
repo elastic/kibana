@@ -31,7 +31,8 @@ export interface CreateControlButtonProps {
   setLastUsedDataViewId?: (newDataViewId: string) => void;
   getRelevantDataViewId?: () => string | undefined;
   buttonType: CreateControlButtonTypes;
-  closePopover?: () => void;
+  onClick?: () => void;
+  onFlyoutClose?: () => void;
 }
 
 interface CreateControlResult {
@@ -44,7 +45,8 @@ export const CreateControlButton = ({
   defaultControlWidth,
   defaultControlGrow,
   addNewEmbeddable,
-  closePopover,
+  onClick,
+  onFlyoutClose,
   getRelevantDataViewId,
   setLastUsedDataViewId,
   updateDefaultWidth,
@@ -76,6 +78,7 @@ export const CreateControlButton = ({
           if (confirmed) {
             reject();
             ref.close();
+            onFlyoutClose?.();
           }
         });
       };
@@ -93,6 +96,7 @@ export const CreateControlButton = ({
         }
         resolve({ type, controlInput: inputToReturn });
         ref.close();
+        onFlyoutClose?.();
       };
 
       const flyoutInstance = openFlyout(
@@ -140,9 +144,7 @@ export const CreateControlButton = ({
     key: 'addControl',
     onClick: () => {
       createNewControl();
-      if (closePopover) {
-        closePopover();
-      }
+      onClick?.();
     },
     'data-test-subj': 'controls-create-button',
     'aria-label': ControlGroupStrings.management.getManageButtonTitle(),

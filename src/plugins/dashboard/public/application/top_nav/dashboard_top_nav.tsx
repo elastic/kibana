@@ -643,7 +643,14 @@ export function DashboardTopNav({
                   onClick={addFromLibrary}
                   data-test-subj="dashboardAddPanelButton"
                 />,
-                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons(),
+                dashboardAppState.dashboardContainer.controlGroup?.getToolbarButtons({
+                  onClick: () => {
+                    setTourVisibility(false);
+                  },
+                  onClose: () => {
+                    setTourVisibility(true);
+                  },
+                }),
               ],
             }}
           </SolutionToolbar>

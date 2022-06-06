@@ -141,7 +141,7 @@ export const DashboardEditTourProvider: React.FC<{ viewMode: boolean; editMode: 
 
   return (
     <DashboardTourContext.Provider value={contextValue}>
-      {stepVisible && (
+      {stepVisible && (viewMode || editMode) && (
         <>
           {isViewTourActive ? (
             <EuiTourStep
