@@ -60,6 +60,16 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
   const [recurrenceEndDate, setRecurrenceEndDate] = useState(endDate);
   const [occurrences, setOccurrrences] = useState(1);
 
+  const disableDailyOption = useMemo(() => {
+    if (!startDate || !endDate) return false;
+    return Math.abs(startDate.diff(endDate, 'hours')) >= 24;
+  }, [startDate, endDate]);
+
+  useEffect(() => {
+    if (disableDailyOption && frequency === RRuleFrequency.DAILY)
+      setFrequency(RRuleFrequency.WEEKLY);
+  }, [disableDailyOption, frequency]);
+
   useEffect(() => {
     if (initialState && !hasInitialized) {
       const isCustomFrequency =
@@ -95,6 +105,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
             defaultMessage: 'Daily',
           }),
           value: RRuleFrequency.DAILY,
+          disabled: disableDailyOption,
         },
         {
           text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurWeeklyOnWeekday', {
@@ -142,7 +153,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
         },
       },
     };
-  }, [startDate]);
+  }, [startDate, disableDailyOption]);
 
   const compiledRecurrenceSchedule: RecurrenceSchedule = useMemo(() => {
     const recurrenceEndProps =
