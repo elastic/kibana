@@ -154,6 +154,7 @@ describe('TelemetryEventsSender', () => {
           'X-Elastic-Cluster-Name': 'name',
           'X-Elastic-Stack-Version': '8.0.0',
         },
+        timeout: 5000,
       };
       const event1 = { 'event.kind': '1', ...licenseMock };
       const event2 = { 'event.kind': '2', ...licenseMock };
