@@ -29,14 +29,16 @@ export async function getTotalCount(
       // Reduce script is executed across all clusters, so we need to add up all the total from each cluster
       // This also needs to account for having no data
       reduce_script: `
-        Map result = [:];
-        for (Map m : states.toArray()) {
-          if (m !== null) {
-            for (String k : m.keySet()) {
-              result.put(k, result.containsKey(k) ? result.get(k) + m.get(k) : m.get(k));
-            }
+        HashMap result = new HashMap();
+        HashMap combinedTypes = new HashMap();
+        for (state in states) {
+          for (String type : state.types.keySet()) {
+            int typeCount = combinedTypes.containsKey(type) ? combinedTypes.get(type) + state.types.get(type) : state.types.get(type);
+            combinedTypes.put(type, typeCount);
           }
         }
+
+        result.types = combinedTypes;
         return result;
       `,
     },
