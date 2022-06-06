@@ -67,7 +67,7 @@ function normalizeObject(object) {
 }
 
 function normalizeString(string) {
-  return String(normalizeObject(string));
+  return string ? String(normalizeObject(string)) : undefined;
 }
 
 export function bypassExternalUrlCheck(url) {
