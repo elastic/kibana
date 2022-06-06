@@ -1,0 +1,26 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`non clusters should return "Filter by geometry" with action for non ES geojson sources 1`] = `
+<FeatureGeometryFilterForm
+  addFilters={[Function]}
+  geoFieldNames={
+    Array [
+      "location",
+    ]
+  }
+  onClose={[Function]}
+/>
+`;
+
+exports[`non clusters should return Pre-Indexed Shape "Filter by geometry" with action for ESSearchSource source 1`] = `
+<FeatureGeometryFilterForm
+  addFilters={[Function]}
+  geoFieldNames={
+    Array [
+      "location",
+    ]
+  }
+  loadPreIndexedShape={[Function]}
+  onClose={[Function]}
+/>
+`;

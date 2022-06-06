@@ -146,6 +146,9 @@ export class TooltipControl extends Component<Props, {}> {
       }
 
       const featureId = layer.getFeatureId(mbFeature);
+      if (featureId === undefined) {
+        break;
+      }
       const layerId = layer.getId();
       let match = false;
       for (let j = 0; j < uniqueFeatures.length; j++) {
@@ -163,7 +166,7 @@ export class TooltipControl extends Component<Props, {}> {
         const actions = isLocked
           ? getFeatureActions({
               addFilters: this.props.addFilters,
-              featureId,
+              featureId: featureId + '',
               geoFieldNames: this.props.geoFieldNames,
               getFilterActions: this.props.getFilterActions,
               getActionContext: this.props.getActionContext,

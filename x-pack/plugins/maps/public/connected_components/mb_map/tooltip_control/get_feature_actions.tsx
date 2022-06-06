@@ -34,7 +34,7 @@ export function getFeatureActions({
   onClose,
 }: {
   addFilters: ((filters: Filter[], actionId: string) => Promise<void>) | null;
-  featureId?: string | number;
+  featureId: string;
   geoFieldNames: string[];
   getActionContext?: () => ActionExecutionContext;
   getFilterActions?: () => Promise<Action[]>;
@@ -47,7 +47,7 @@ export function getFeatureActions({
   }
 
   const source = layer.getSource();
-  if (source.getType() === SOURCE_TYPES.ES_GEO_GRID && featureId !== undefined) {
+  if (source.getType() === SOURCE_TYPES.ES_GEO_GRID) {
     return [
       {
         label: i18n.translate('xpack.maps.tooltip.action.filterByClusterLabel', {
@@ -57,7 +57,7 @@ export function getFeatureActions({
         onClick: () => {
           const geoGridFilter = buildGeoGridFilter({
             geoFieldNames,
-            gridId: featureId as string, // featureId is grid id for ES_GEO_GRID source
+            gridId: featureId, // featureId is grid id for ES_GEO_GRID source
             isHex: (source as ESGeoGridSource).isHex(),
           });
           addFilters([geoGridFilter], ACTION_GLOBAL_APPLY_FILTER);
@@ -103,7 +103,7 @@ export function getFeatureActions({
     return [];
   }
 
-  const geojsonFeature = layer.getFeatureById(featureId as string);
+  const geojsonFeature = layer.getFeatureById(featureId);
   return geojsonFeature
     ? [
         {
