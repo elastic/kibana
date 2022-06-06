@@ -7,7 +7,6 @@
 
 import { journey, step, expect, before, Page } from '@elastic/synthetics';
 import { syntheticsAppPageProvider } from '../../page_objects/synthetics_app';
-import { byTestId } from '../utils';
 
 journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: any }) => {
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
@@ -34,9 +33,13 @@ journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: a
     expect(await invalid.isVisible()).toBeFalsy();
   });
 
-  step('shows validation error on touch', async () => {
-    await page.click(byTestId('urls-input'));
-    await page.click(byTestId('comboBoxInput'));
+  step('enable monitor management', async () => {
+    await syntheticsApp.enableMonitorManagement(true);
+  });
+
+  step('shows validation error on submit', async () => {
+    await page.click('text=Create monitor');
+
     expect(await page.isVisible('text=URL is required')).toBeTruthy();
   });
 
