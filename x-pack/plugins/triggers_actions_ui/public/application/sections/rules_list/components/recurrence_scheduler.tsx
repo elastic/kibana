@@ -20,6 +20,7 @@ import {
   EuiFormControlLayoutDelimited,
   EuiHorizontalRule,
 } from '@elastic/eui';
+import { i18nMonthDayDate } from '../../../lib/i18n_month_day_date';
 import { RRuleFrequency, RecurrenceSchedule } from '../../../../types';
 
 const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
@@ -122,7 +123,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
           text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurYearlyOnDay', {
             defaultMessage: 'Yearly on {date}',
             values: {
-              date: i18nShortDate(startDate),
+              date: i18nMonthDayDate(startDate),
             },
           }),
           value: RRuleFrequency.YEARLY,
@@ -516,11 +517,7 @@ export const recurrenceSummary = ({
       ? i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.bymonthSummary', {
           defaultMessage: 'on {date}',
           values: {
-            date: i18nShortDate(
-              moment()
-                .month(bymonth[0] - 1)
-                .date(bymonthday[0])
-            ),
+            date: i18nMonthDayDate(moment().month(bymonth[0]).date(bymonthday[0])),
           },
         })
       : null;
@@ -557,15 +554,6 @@ export const recurrenceSummary = ({
 
   return every;
 };
-
-const i18nShortDate = (date: Moment) =>
-  date
-    .format('LL')
-    // We want to produce the local equivalent of DD MMM (e.g. MMM DD in most non-US countries)
-    // but Moment doesn't let us format just DD MMM according to locale, only DD MM(,?) YYYY,
-    // so regex replace the year and any commas from the LL formatted string
-    .replace(new RegExp(`(${date.format('YYYY')}|,)`, 'g'), '')
-    .trim();
 
 const i18nFreqSummary = (interval: number) => ({
   [RRuleFrequency.DAILY]: i18n.translate(

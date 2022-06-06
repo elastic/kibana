@@ -9,6 +9,8 @@ import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { EuiButton, EuiButtonIcon, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { RuleSnooze, RuleSnoozeSchedule } from '@kbn/alerting-plugin/common';
+import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../lib/i18n_month_day_date';
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
 import { SnoozePanel, futureTimeToInterval } from './rule_snooze_panel';
 
@@ -33,6 +35,17 @@ const isRuleSnoozed = (rule: { isSnoozedUntil?: Date | null; muteAll: boolean })
     (rule.isSnoozedUntil && new Date(rule.isSnoozedUntil).getTime() > Date.now()) || rule.muteAll
   );
 
+const getNextRuleSnoozeSchedule = (rule: { snoozeSchedule?: RuleSnooze }) => {
+  if (!rule.snoozeSchedule || rule.snoozeSchedule.length === 0) return null;
+  const nextSchedule = rule.snoozeSchedule.reduce(
+    (a: RuleSnoozeSchedule, b: RuleSnoozeSchedule) => {
+      if (moment(b.rRule.dtstart).isBefore(moment(a.rRule.dtstart))) return b;
+      return a;
+    }
+  );
+  return nextSchedule;
+};
+
 export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeProps> = (props) => {
   const { rule, isOpen, onClick, onClose, onRuleChanged, snoozeRule, unsnoozeRule } = props;
 
@@ -44,17 +57,20 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     return isRuleSnoozed(rule);
   }, [rule]);
 
+  const nextScheduledSnooze = useMemo(() => getNextRuleSnoozeSchedule(rule), [rule]);
+
   const isScheduled = useMemo(() => {
-    // TODO: Implement scheduled check
-    return false;
-  }, []);
+    return !isSnoozed && Boolean(nextScheduledSnooze);
+  }, [nextScheduledSnooze, isSnoozed]);
 
   const formattedSnoozeText = useMemo(() => {
     if (!isSnoozedUntil) {
+      if (nextScheduledSnooze)
+        return i18nAbbrMonthDayDate(moment(nextScheduledSnooze.rRule.dtstart));
       return '';
     }
-    return moment(isSnoozedUntil).format('MMM D');
-  }, [isSnoozedUntil]);
+    return i18nAbbrMonthDayDate(moment(isSnoozedUntil));
+  }, [isSnoozedUntil, nextScheduledSnooze]);
 
   const snoozeTooltipText = useMemo(() => {
     if (isSnoozedIndefinitely) {
@@ -64,8 +80,15 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       );
     }
     if (isScheduled) {
-      return '';
-      // TODO: Implement scheduled tooltip
+      return i18n.translate(
+        'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozeScheduledTooltip',
+        {
+          defaultMessage: 'Notifications scheduled to snooze starting {schedStart}',
+          values: {
+            schedStart: i18nMonthDayDate(moment(nextScheduledSnooze!.rRule.dtstart)),
+          },
+        }
+      );
     }
     if (isSnoozed) {
       return i18n.translate(
@@ -79,7 +102,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
       );
     }
     return '';
-  }, [isSnoozedIndefinitely, isScheduled, isSnoozed, isSnoozedUntil]);
+  }, [isSnoozedIndefinitely, isScheduled, isSnoozed, isSnoozedUntil, nextScheduledSnooze]);
 
   const snoozedButton = useMemo(() => {
     return (
