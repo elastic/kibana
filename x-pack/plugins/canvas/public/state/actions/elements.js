@@ -111,9 +111,9 @@ const fetchContextFn = ({ dispatch, getState }, index, element, fullRefresh = fa
     });
 };
 
-const throttledFetchContextFn = debounce(fetchContextFn, 100);
+const fetchContextFnDebounced = debounce(fetchContextFn, 100);
 
-export const fetchContext = createThunk('fetchContext', throttledFetchContextFn);
+export const fetchContext = createThunk('fetchContext', fetchContextFnDebounced);
 
 const fetchRenderableWithContextFn = ({ dispatch, getState }, element, ast, context) => {
   const argumentPath = [element.id, 'expressionRenderable'];
