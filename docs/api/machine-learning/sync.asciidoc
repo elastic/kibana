@@ -74,7 +74,7 @@ Retrieve the list of {ml} saved objects that require synchronization:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X GET api/ml/saved_objects/sync?simulate=true
+GET api/ml/saved_objects/sync?simulate=true
 --------------------------------------------------
 // KIBANA
 
