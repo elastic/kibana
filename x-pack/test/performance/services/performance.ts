@@ -37,6 +37,10 @@ export class PerformanceTestingService extends FtrService {
 
   constructor(ctx: FtrProviderContext) {
     super(ctx);
+
+    ctx.getService('lifecycle').cleanup.add(async () => {
+      await this.shutdownBrowser();
+    });
   }
 
   private getKibanaUrl() {
@@ -173,7 +177,7 @@ export class PerformanceTestingService extends FtrService {
     }
   }
 
-  public async shutdownBrowser() {
+  private async shutdownBrowser() {
     if (this.browser) {
       await (await this.getBrowserInstance()).close();
     }

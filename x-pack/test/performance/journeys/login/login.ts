@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { StepCtx } from '../../services/performance';
 
-export default function ecommerceDashboard({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   describe('login', () => {
     it('login', async () => {
       const inputDelays = getService('inputDelays');

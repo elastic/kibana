@@ -246,3 +246,9 @@ enabled:
   - x-pack/test/ui_capabilities/spaces_only/config.ts
   - x-pack/test/upgrade_assistant_integration/config.js
   - x-pack/test/usage_collection/config.ts
+  - x-pack/test/performance/journeys/ecommerce_dashboard/config.ts
+  - x-pack/test/performance/journeys/flight_dashboard/config.ts
+  - x-pack/test/performance/journeys/login/config.ts
+  - x-pack/test/performance/journeys/many_fields_discover/config.ts
+  - x-pack/test/performance/journeys/promotion_tracking_dashboard/config.ts
+  - x-pack/test/performance/journeys/web_logs_dashboard/config.ts

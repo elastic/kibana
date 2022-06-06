@@ -7,7 +7,7 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { StepCtx } from '../../services/performance';
 
-export default function weblogDashboard({ getService }: FtrProviderContext) {
+export default function ({ getService }: FtrProviderContext) {
   describe('weblogs_dashboard', () => {
     it('weblogs_dashboard', async () => {
       const performance = getService('performance');

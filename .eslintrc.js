@@ -657,6 +657,7 @@ module.exports = {
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
+        'x-pack/test/performance/**/*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
