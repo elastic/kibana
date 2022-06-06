@@ -213,7 +213,7 @@ describe('TaskScheduling', () => {
 
       expect(bulkUpdatePayload).toHaveLength(1);
       expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '5h' });
-      // if we update rule with schedule of '5h' and prev interval was 3h, task will be run in 2 hours later
+      // if tasks updated with schedule interval of '5h' and previous interval was 3h, task will be scheduled to run in 2 hours later
       expect(bulkUpdatePayload[0].runAt.getTime() - runInTwoHrs.getTime()).toBe(
         moment.duration(2, 'hours').asMilliseconds()
       );
@@ -232,14 +232,14 @@ describe('TaskScheduling', () => {
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
 
       expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '2h' });
-      // if we update rule with schedule of '2h' and prev interval was 3h, task will be run in 1 hour sooner
+      // if tasks updated with schedule interval of '2h' and previous interval was 3h, task will be scheduled to run in 1 hour sooner
       expect(runInTwoHrs.getTime() - bulkUpdatePayload[0].runAt.getTime()).toBe(
         moment.duration(1, 'hour').asMilliseconds()
       );
     });
 
     test('should set task run to now if time that passed from last run is greater than new interval', async () => {
-      // task set to be run in one 1hr from now
+      // task set to be run in one 1hr from now. With interval of '2h', it means last run happened 1 hour ago
       const runInOneHr = new Date(Date.now() + moment.duration(1, 'hour').asMilliseconds());
       const task = mockTask({ id, schedule: { interval: '2h' }, runAt: runInOneHr });
 
@@ -252,7 +252,7 @@ describe('TaskScheduling', () => {
 
       expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '30m' });
 
-      // if time that passed from last rule task is greater than new interval, task should be set to run at now time
+      // if time that passed from last task run is greater than new interval, task should be set to run at now time
       expect(bulkUpdatePayload[0].runAt.getTime()).toBeLessThanOrEqual(Date.now());
     });
   });
