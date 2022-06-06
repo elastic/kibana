@@ -95,7 +95,6 @@ const requiredArchivePackageProps: readonly RequiredPackageProp[] = [
   'description',
   'title',
   'format_version',
-  'release',
   'owner',
 ] as const;
 
@@ -110,6 +109,7 @@ const optionalArchivePackageProps: readonly OptionalPackageProp[] = [
   'screenshots',
   'icons',
   'policy_templates',
+  'release',
 ] as const;
 
 const registryInputProps = Object.values(RegistryInputKeys);
