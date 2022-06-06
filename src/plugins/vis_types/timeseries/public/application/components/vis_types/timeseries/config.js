@@ -13,6 +13,7 @@ import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { DATA_FORMATTERS } from '../../../../../common/enums';
 import { DataFormatPicker } from '../../data_format_picker';
 import { createSelectHandler } from '../../lib/create_select_handler';
+import { createNumberHandler } from '../../lib/create_number_handler';
 import { YesNo } from '../../yes_no';
 import { createTextHandler } from '../../lib/create_text_handler';
 import { IndexPattern } from '../../index_pattern';
@@ -38,11 +39,12 @@ import { STACKED_OPTIONS } from '../../../visualizations/constants/chart';
 export const TimeseriesConfig = injectI18n(function (props) {
   const handleSelectChange = createSelectHandler(props.onChange);
   const handleTextChange = createTextHandler(props.onChange);
+  const handleNumberChange = createNumberHandler(props.onChange);
   const defaults = {
     value_template: '{{value}}',
     offset_time: '',
-    axis_min: '',
-    axis_max: '',
+    axis_min: undefined,
+    axis_max: undefined,
     stacked: STACKED_OPTIONS.NONE,
     steps: 0,
   };
@@ -491,16 +493,10 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            {/*
-              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-              It accepts a null value, but is passed a empty string.
-            */}
-            <input
-              className="tvbAgg__input"
-              type="number"
-              disabled={disableSeparateYaxis}
-              onChange={handleTextChange('axis_min')}
+            <EuiFieldNumber
+              onChange={handleNumberChange('axis_min', { isClearable: true })}
               value={model.axis_min}
+              disabled={disableSeparateYaxis}
             />
           </EuiFormRow>
         </EuiFlexItem>
@@ -514,15 +510,10 @@ export const TimeseriesConfig = injectI18n(function (props) {
               />
             }
           >
-            {/*
-              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-              It accepts a null value, but is passed a empty string.
-            */}
-            <input
-              className="tvbAgg__input"
-              disabled={disableSeparateYaxis}
-              onChange={handleTextChange('axis_max')}
+            <EuiFieldNumber
+              onChange={handleNumberChange('axis_max', { isClearable: true })}
               value={model.axis_max}
+              disabled={disableSeparateYaxis}
             />
           </EuiFormRow>
         </EuiFlexItem>

@@ -23,6 +23,7 @@ import {
   EuiHorizontalRule,
   EuiCode,
   EuiText,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -90,6 +91,13 @@ export class TablePanelConfig extends Component<
   handleTextChange =
     (name: keyof TimeseriesVisParams) => (e: React.ChangeEvent<HTMLInputElement>) =>
       this.props.onChange({ [name]: e.target.value });
+
+  handleNumberChange =
+    (name: keyof TimeseriesVisParams, isClearable: boolean) =>
+    (e: React.ChangeEvent<HTMLInputElement>) =>
+      this.props.onChange({
+        [name]: isClearable && !e.target.value ? undefined : Number(e.target.value),
+      });
 
   render() {
     const { selectedTab } = this.state;
@@ -172,15 +180,9 @@ export class TablePanelConfig extends Component<
                       />
                     }
                   >
-                    {/*
-                      EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-                      Should it be number or string?
-                    */}
-                    <input
-                      className="tvbAgg__input"
-                      type="number"
-                      onChange={this.handleTextChange('pivot_rows')}
-                      value={model.pivot_rows ?? ''}
+                    <EuiFieldNumber
+                      onChange={this.handleNumberChange('pivot_rows', true)}
+                      value={model.pivot_rows}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>

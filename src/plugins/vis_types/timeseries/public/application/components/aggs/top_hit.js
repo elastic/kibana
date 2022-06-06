@@ -13,7 +13,7 @@ import { FieldSelect } from './field_select';
 import { i18n } from '@kbn/i18n';
 import { createChangeHandler } from '../lib/create_change_handler';
 import { createSelectHandler } from '../lib/create_select_handler';
-import { createTextHandler } from '../lib/create_text_handler';
+import { createNumberHandler } from '../lib/create_number_handler';
 import {
   htmlIdGenerator,
   EuiFlexGroup,
@@ -22,6 +22,7 @@ import {
   EuiComboBox,
   EuiSpacer,
   EuiFormRow,
+  EuiFieldNumber,
 } from '@elastic/eui';
 import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
@@ -118,7 +119,7 @@ const TopHitAggUi = (props) => {
 
   const handleChange = createChangeHandler(props.onChange, model);
   const handleSelectChange = createSelectHandler(handleChange);
-  const handleTextChange = createTextHandler(handleChange);
+  const handleNumberChange = createNumberHandler(handleChange);
   const fieldsSelector = getIndexPatternKey(indexPattern);
   const field = fields?.[fieldsSelector]?.find((f) => f.name === model.field);
   const aggWithOptions = getAggWithOptions(field, aggWithOptionsRestrictFields);
@@ -199,14 +200,10 @@ const TopHitAggUi = (props) => {
               <FormattedMessage id="visTypeTimeseries.topHit.sizeLabel" defaultMessage="Size" />
             }
           >
-            {/*
-              EUITODO: The following input couldn't be converted to EUI because of type mis-match.
-              Should it be text or number?
-            */}
-            <input
-              className="tvbAgg__input"
+            <EuiFieldNumber
+              onChange={handleNumberChange('size', { isClearable: true })}
               value={model.size}
-              onChange={handleTextChange('size')}
+              min={1}
             />
           </EuiFormRow>
         </EuiFlexItem>
