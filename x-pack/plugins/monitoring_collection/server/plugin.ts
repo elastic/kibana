@@ -75,11 +75,11 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       },
     });
 
-    const oltpConfig = this.config.opentelemetry?.metrics?.oltp;
-    if (oltpConfig) {
-      this.logger.debug(`Registering OpenTelemetry metrics exporter to ${oltpConfig.url}`);
+    const otlpConfig = this.config.opentelemetry?.metrics?.otlp;
+    if (otlpConfig) {
+      this.logger.debug(`Registering OpenTelemetry metrics exporter to ${otlpConfig.url}`);
       this.meterProvider = new MeterProvider({
-        exporter: new OTLPMetricExporter(oltpConfig),
+        exporter: new OTLPMetricExporter(otlpConfig),
         resource: new Resource({
           'service.name': 'kibana',
         }),

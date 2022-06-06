@@ -11,7 +11,7 @@ export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
   opentelemetry: schema.object({
     metrics: schema.object({
-      oltp: schema.object({
+      otlp: schema.object({
         url: schema.maybe(schema.string()),
       }),
     }),
