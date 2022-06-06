@@ -23,8 +23,6 @@ You must have `read` privileges for the *Actions and Connectors* feature in the
 If you use an index connector, you must also have `all`, `create`, `index`, or
 `write` {ref}/security-privileges.html[indices privileges].
 
-index,write,all
-
 [[execute-connector-api-params]]
 ==== {api-path-parms-title}
 

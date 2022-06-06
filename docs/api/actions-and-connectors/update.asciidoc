@@ -39,7 +39,7 @@ You must have `all` privileges for the *Actions and Connectors* feature in the
   (Required, object) The new connector configuration. Configuration properties vary depending on the connector type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
 
 `secrets`::
-  (Required^*, object) The updated secrets configuration for the connector. Secrets properties vary depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+  (Required^*^, object) The updated secrets configuration for the connector. Secrets properties vary depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
 
 [[update-connector-api-codes]]
 ==== {api-response-codes-title}
