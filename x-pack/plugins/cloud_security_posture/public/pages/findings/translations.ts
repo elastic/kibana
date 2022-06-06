@@ -268,3 +268,8 @@ export const FINDINGS_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.csp.findings.searchBar.searchPlaceholder',
   { defaultMessage: 'Search findings (eg. rule.section.keyword : "API Server" )' }
 );
+
+export const PAGE_SEARCH_ERROR_MESSAGE = i18n.translate(
+  'xpack.csp.findings.errorCallout.pageSearchErrorTitle',
+  { defaultMessage: 'We encountered an error retrieving search results' }
+);
