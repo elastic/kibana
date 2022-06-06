@@ -11,7 +11,7 @@ import {
   mockRawDocExistsInNamespaces,
 } from './preflight_check_for_create.test.mock';
 
-import type { DeeplyMockedKeys } from '@kbn/utility-types/jest';
+import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 
 import type { ElasticsearchClient } from '../../../elasticsearch';
 import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
