@@ -60,6 +60,7 @@ export function getFunctionDefinition({
         );
 
         aggConfigs.hierarchical = args.metricsAtAllLevels;
+        aggConfigs.partialRows = args.partialRows;
 
         return { aggConfigs, indexPattern, searchSource };
       }).pipe(
@@ -70,7 +71,6 @@ export function getFunctionDefinition({
             filters: get(input, 'filters', undefined),
             indexPattern,
             inspectorAdapters,
-            partialRows: args.partialRows,
             query: get(input, 'query', undefined) as any,
             searchSessionId: getSearchSessionId(),
             searchSourceService: searchSource,
