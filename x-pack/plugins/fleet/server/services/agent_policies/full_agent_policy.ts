@@ -17,10 +17,6 @@ import type {
 } from '../../types';
 import { agentPolicyService } from '../agent_policy';
 import { outputService } from '../output';
-import {
-  storedPackagePoliciesToAgentPermissions,
-  DEFAULT_CLUSTER_PERMISSIONS,
-} from '../package_policies_to_agent_permissions';
 import { dataTypes, outputType } from '../../../common';
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { getSettings } from '../settings';
@@ -28,6 +24,10 @@ import { DEFAULT_OUTPUT } from '../../constants';
 
 import { getMonitoringPermissions } from './monitoring_permissions';
 import { storedPackagePoliciesToAgentInputs } from '.';
+import {
+  storedPackagePoliciesToAgentPermissions,
+  DEFAULT_CLUSTER_PERMISSIONS,
+} from './package_policies_to_agent_permissions';
 
 export async function getFullAgentPolicy(
   soClient: SavedObjectsClientContract,
