@@ -178,6 +178,8 @@ rules:
       - services
       - configmaps
       - serviceaccounts
+      - persistentvolumes
+      - persistentvolumeclaims
     verbs: ["get", "list", "watch"]
   # Enable this rule only if planing to use kubernetes_secrets provider
   #- apiGroups: [""]
@@ -193,6 +195,7 @@ rules:
       - statefulsets
       - deployments
       - replicasets
+      - daemonsets
     verbs: ["get", "list", "watch"]
   - apiGroups: ["batch"]
     resources:
@@ -441,6 +444,8 @@ rules:
       - services
       - configmaps
       - serviceaccounts
+      - persistentvolumes
+      - persistentvolumeclaims
     verbs: ["get", "list", "watch"]
   # Enable this rule only if planing to use kubernetes_secrets provider
   #- apiGroups: [""]
@@ -456,6 +461,7 @@ rules:
       - statefulsets
       - deployments
       - replicasets
+      - daemonsets
     verbs: ["get", "list", "watch"]
   - apiGroups:
       - ""

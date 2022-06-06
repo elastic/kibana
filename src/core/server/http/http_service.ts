@@ -10,14 +10,14 @@ import { Observable, Subscription, combineLatest, firstValueFrom } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { pick } from '@kbn/std';
 
-import type { Logger } from '@kbn/logging';
+import { Logger } from '@kbn/logging';
+import { Env } from '@kbn/config';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+
 import type { RequestHandlerContext } from '..';
 import type { InternalExecutionContextSetup } from '../execution_context';
-import { CoreService } from '../../types';
 import { ContextSetup, InternalContextPreboot } from '../context';
-import { Env } from '../config';
-import { CoreContext } from '../core_context';
-import { PluginOpaqueId } from '../plugins';
 import { CspConfigType, config as cspConfig } from '../csp';
 
 import { Router } from './router';

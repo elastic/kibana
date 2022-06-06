@@ -20,11 +20,9 @@ import { APP_UI_ID } from '../../../../../common/constants';
 import { useDeepEqualSelector } from '../../../hooks/use_selector';
 import { useIsGroupedNavigationEnabled } from '../helpers';
 import { navTabs } from '../../../../app/home/home_navigations';
-import { getAppLinks } from '../../../links/app_links';
-import { allowedExperimentalValues } from '../../../../../common/experimental_features';
-import { StartPlugins } from '../../../../types';
-import { coreMock } from '@kbn/core/public/mocks';
+import { links } from '../../../links/app_links';
 import { updateAppLinks } from '../../../links';
+import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 
 jest.mock('../../../hooks/use_selector');
 
@@ -163,9 +161,8 @@ const manageBreadcrumbs = {
 };
 
 describe('Navigation Breadcrumbs', () => {
-  beforeAll(async () => {
-    const appLinks = await getAppLinks(coreMock.createStart(), {} as StartPlugins);
-    updateAppLinks(appLinks, {
+  beforeAll(() => {
+    updateAppLinks(links, {
       experimentalFeatures: allowedExperimentalValues,
       capabilities: {
         navLinks: {},
