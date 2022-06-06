@@ -186,7 +186,9 @@ export class AggConfig {
         return;
       }
       const resolvedBounds = this.aggConfigs.getResolvedTimeRange()!;
-      return moment.duration(moment(resolvedBounds.max).diff(resolvedBounds.min));
+      return moment.duration(
+        moment.tz(resolvedBounds.max, this.aggConfigs.timeZone).diff(resolvedBounds.min)
+      );
     }
     return parsedTimeShift;
   }
