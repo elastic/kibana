@@ -1046,6 +1046,66 @@ export default function createGetTests({ getService }: FtrProviderContext) {
         ]);
       });
     });
+
+    describe('8.3.0', () => {
+      const CASE_ID = '0215ff30-6e39-11ec-8e5f-bf82b2955cf8';
+
+      before(async () => {
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.1.0/status_changes.json'
+        );
+      });
+
+      after(async () => {
+        await kibanaServer.importExport.unload(
+          'x-pack/test/functional/fixtures/kbn_archiver/cases/8.1.0/status_changes.json'
+        );
+        await deleteAllCaseItems(es);
+      });
+
+      describe('add severity', () => {
+        it('adds the severity field to the create case user action', async () => {
+          const userActions = await getCaseUserActions({
+            supertest,
+            caseID: CASE_ID,
+          });
+
+          const createUserAction = userActions[0];
+          expect(createUserAction).to.eql({
+            action: 'create',
+            action_id: '02b350a0-6e39-11ec-8e5f-bf82b2955cf8',
+            case_id: '0215ff30-6e39-11ec-8e5f-bf82b2955cf8',
+            comment_id: null,
+            created_at: '2022-01-05T15:06:07.914Z',
+            created_by: {
+              email: null,
+              full_name: null,
+              username: 'j@j.com',
+            },
+            owner: 'securitySolution',
+            payload: {
+              connector: {
+                fields: null,
+                id: 'none',
+                name: 'none',
+                type: '.none',
+              },
+              description: 'asdf',
+              owner: 'securitySolution',
+              settings: {
+                syncAlerts: true,
+              },
+              severity: 'low',
+              status: 'open',
+              tags: [],
+              title: 'Jon case',
+              type: 'individual',
+            },
+            type: 'create_case',
+          });
+        });
+      });
+    });
   });
 }
 
