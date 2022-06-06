@@ -424,7 +424,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '16%',
         'data-test-subj': 'rulesTableCell-rulesListNotify',
         render: (rule: RuleTableItem) => {
-          if (rule.ruleTypeId.startsWith('siem')) {
+          if (rule.ruleTypeId.startsWith('siem') || !rule.enabled) {
             return null;
           }
           return (
