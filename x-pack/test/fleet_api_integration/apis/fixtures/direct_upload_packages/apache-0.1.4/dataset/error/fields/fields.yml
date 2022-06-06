@@ -1,0 +1,7 @@
+- name: apache.error
+  type: group
+  fields:
+  - name: module
+    type: keyword
+    description: |
+      The module producing the logged message.

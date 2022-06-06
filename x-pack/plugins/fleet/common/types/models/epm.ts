@@ -149,7 +149,7 @@ interface RegistryOverridePropertyValue {
   screenshots?: RegistryImage[];
 }
 
-export type RegistryRelease = PackageSpecManifest['release'];
+export type RegistryRelease = NonNullable<PackageSpecManifest['release']>;
 export interface RegistryImage extends PackageSpecIcon {
   path: string;
 }

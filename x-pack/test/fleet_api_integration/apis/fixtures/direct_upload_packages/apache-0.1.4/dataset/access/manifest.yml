@@ -1,0 +1,19 @@
+title: Apache access logs
+release: experimental
+type: logs
+streams:
+- input: logfile
+  vars:
+  - name: paths
+    type: text
+    title: Paths
+    multi: true
+    required: true
+    show_user: true
+    default:
+    - /var/log/apache2/access.log*
+    - /var/log/apache2/other_vhosts_access.log*
+    - /var/log/httpd/access_log*
+  template_path: log.yml.hbs
+  title: Apache access logs
+  description: Collect Apache access logs
