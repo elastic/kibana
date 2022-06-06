@@ -26,6 +26,6 @@ steps:
     depends_on:
       - jest
       - jest-integration
-      - ftr-configs
+#      - ftr-configs
     timeout_in_minutes: 30
     key: ingest
