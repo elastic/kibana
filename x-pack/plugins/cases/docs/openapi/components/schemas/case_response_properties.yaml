@@ -44,7 +44,11 @@ description:
   example: "A case description."
 duration:
   type: integer
-  description: The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.
+  description: >
+    The elapsed time from the creation of the case to its closure (in seconds).
+    If the case has not been closed, the duration is set to null. If the case
+    was closed after less than half a second, the duration is rounded down to
+    zero.
   example: 120
 external_service:
   type: object
