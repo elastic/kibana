@@ -14,5 +14,5 @@ export type { SharedUxUserPermissionsService } from './permissions';
 export type { SharedUxPlatformService } from './platform';
 export type { SharedUxDataService } from './data';
 
-export { mockServicesFactory, mockServiceFactories } from './mock';
+export { mockServicesFactory, mockServiceFactories, MockServicesFactoryParams } from './mock';
 export { stubServicesFactory, stubServiceFactories } from './stub';

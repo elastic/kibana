@@ -6,4 +6,13 @@
  * Side Public License, v 1.
  */
 
+export type { KibanaNoDataPageServices, KibanaNoDataPageKibanaDependencies } from './services';
+
 export { KibanaNoDataPage } from './kibana_no_data_page';
+export { KibanaNoDataPageKibanaProvider, KibanaNoDataPageProvider } from './services';
+
+export {
+  getStoryArgTypes as getKibanaNoDataPageStoryArgTypes,
+  getStoryServices as getKibanaNoDataPageStoryMock,
+  getJestServices as getKibanaNoDataPageJestServices,
+} from './mocks';

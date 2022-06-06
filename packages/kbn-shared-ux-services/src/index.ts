@@ -32,6 +32,7 @@ export {
 export {
   mockServiceFactories,
   mockServicesFactory,
+  MockServicesFactoryParams,
   stubServiceFactories,
   stubServicesFactory,
 } from './services';

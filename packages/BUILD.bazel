@@ -123,6 +123,7 @@ filegroup(
     "//packages/shared-ux/button/exit_full_screen:build",
     "//packages/shared-ux/link/redirect_app:build",
     "//packages/shared-ux/page/analytics_no_data:build",
+    "//packages/shared-ux/page/kibana_no_data:build",
     "//packages/shared-ux/prompt/no_data_views:build",
   ],
 )
@@ -230,6 +231,7 @@ filegroup(
     "//packages/shared-ux/button/exit_full_screen:build_types",
     "//packages/shared-ux/link/redirect_app:build_types",
     "//packages/shared-ux/page/analytics_no_data:build_types",
+    "//packages/shared-ux/page/kibana_no_data:build_types",
     "//packages/shared-ux/prompt/no_data_views:build_types",
   ],
 )
