@@ -48,8 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       }
 
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
-        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
+        await filterBar.addFilter(columnName, 'is', value);
       }
     });
 
@@ -70,9 +69,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const firstDiscoverTimestamp = await getTimestamp();
 
       // check the anchor timestamp in the context view
-      await retry.waitFor('selected document timestamp matches anchor timestamp ', async () => {
+      await retry.waitFor('selected document timestamp matches anchor timestamp', async () => {
         // navigate to the context view
         await dataGrid.clickRowToggle({ rowIndex: 0 });
+
         const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
         await rowActions[1].click();
         await PageObjects.context.waitUntilContextLoadingHasFinished();
@@ -83,7 +83,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.waitFor('next anchor timestamp matches previous anchor timestamp', async () => {
         // get the timestamp of the first row
         const firstContextTimestamp = await getTimestamp(false);
-        await dataGrid.clickRowToggle({ rowIndex: 0 });
+        await dataGrid.clickRowToggle({ isAnchorRow: true });
+
         const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
         await rowActions[1].click();
         await PageObjects.context.waitUntilContextLoadingHasFinished();
@@ -109,7 +110,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should navigate to the first document and then back to discover', async () => {
       await PageObjects.context.waitUntilContextLoadingHasFinished();
-      await dataGrid.clickRowToggle({ isAnchorRow: true });
 
       // click the open action
       await retry.try(async () => {

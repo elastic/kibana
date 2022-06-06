@@ -133,14 +133,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('navigates to doc view from embeddable', async () => {
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.saveSearch('my search');
+      await PageObjects.discover.saveSearch('my classic search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
 
-      await dashboardAddPanel.addSavedSearch('my search');
+      await dashboardAddPanel.addSavedSearch('my classic search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await docTable.clickRowToggle({ rowIndex: 0 });

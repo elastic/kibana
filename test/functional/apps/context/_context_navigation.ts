@@ -36,8 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
-        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
+        await filterBar.addFilter(columnName, 'is', value);
       }
     });
 
