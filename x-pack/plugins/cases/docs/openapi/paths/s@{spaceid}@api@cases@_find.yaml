@@ -112,7 +112,7 @@ get:
           - type: array
             items:
               type: string
-      example: phishing
+      example: tag-1
     - name: to
       in: query
       description: >

@@ -85,7 +85,7 @@ delete:
       required: true
       schema:
         type: string
-      example: 'd4e7abb0-b462-11ec-9a8d-698504725a43'
+      example: d4e7abb0-b462-11ec-9a8d-698504725a43
   responses:
     '204':
       description: Indicates a successful call.
