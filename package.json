@@ -414,6 +414,7 @@
     "redux-thunk": "^2.3.0",
     "redux-thunks": "^1.0.0",
     "regenerator-runtime": "^0.13.3",
+    "remark-gfm": "^1.0.0",
     "remark-parse": "^8.0.3",
     "remark-stringify": "^8.0.3",
     "require-in-the-middle": "^5.1.0",

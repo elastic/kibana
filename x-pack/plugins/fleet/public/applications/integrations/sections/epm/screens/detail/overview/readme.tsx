@@ -8,10 +8,11 @@
 import { EuiLoadingContent, EuiText } from '@elastic/eui';
 import React, { Fragment, useEffect, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 import { useLinks, sendGetFileByPath } from '../../../../../hooks';
 
-import { markdownRenderers } from './markdown_renderers';
+import { markdownComponents } from './markdown_components';
 
 export function Readme({
   readmePath,
@@ -43,11 +44,15 @@ export function Readme({
   return (
     <Fragment>
       {markdown !== undefined ? (
-        <ReactMarkdown
-          transformImageUri={handleImageUri}
-          renderers={markdownRenderers}
-          source={markdown}
-        />
+        <EuiText grow={true}>
+          <ReactMarkdown
+            transformImageUri={handleImageUri}
+            components={markdownComponents}
+            remarkPlugins={[remarkGfm]}
+          >
+            {markdown}
+          </ReactMarkdown>
+        </EuiText>
       ) : (
         <EuiText>
           {/* simulates a long page of text loading */}

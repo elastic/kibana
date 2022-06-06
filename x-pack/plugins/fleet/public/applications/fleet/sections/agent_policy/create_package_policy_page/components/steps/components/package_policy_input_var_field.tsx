@@ -143,7 +143,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
           </EuiText>
         ) : null
       }
-      helpText={<ReactMarkdown source={description} />}
+      helpText={description && <ReactMarkdown>{description}</ReactMarkdown>}
     >
       {field}
     </EuiFormRow>
