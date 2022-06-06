@@ -3004,6 +3004,22 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-browser-mocks@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-browser@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/crypto@link:bazel-bin/packages/kbn-crypto":
   version "0.0.0"
   uid ""
@@ -3333,6 +3349,10 @@
   uid ""
 
 "@kbn/ui-theme@link:bazel-bin/packages/kbn-ui-theme":
+  version "0.0.0"
+  uid ""
+
+"@kbn/utility-types-jest@link:bazel-bin/packages/kbn-utility-types-jest":
   version "0.0.0"
   uid ""
 
@@ -6282,6 +6302,22 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-browser-mocks@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-browser@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-public-internal-base@link:bazel-bin/packages/core/public/internal-base/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6567,6 +6603,10 @@
   uid ""
 
 "@types/kbn__ui-theme@link:bazel-bin/packages/kbn-ui-theme/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__utility-types-jest@link:bazel-bin/packages/kbn-utility-types-jest/npm_module_types":
   version "0.0.0"
   uid ""
 
