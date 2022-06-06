@@ -732,7 +732,7 @@ export class AnomalyTimelineStateService extends StateService {
 
   public getSwimLaneBucketInterval$(): Observable<TimeBucketsInterval> {
     return this._swimLaneBucketInterval$.pipe(
-      filter((v): v is TimeBucketsInterval => !v),
+      filter((v): v is TimeBucketsInterval => !!v),
       distinctUntilChanged((prev, curr) => {
         return prev.asSeconds() === curr.asSeconds();
       })
