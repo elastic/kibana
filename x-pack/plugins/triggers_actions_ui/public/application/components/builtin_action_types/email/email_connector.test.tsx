@@ -259,13 +259,12 @@ describe('EmailActionConnectorFields', () => {
   describe('Validation', () => {
     let appMockRenderer: AppMockRenderer;
     const onSubmit = jest.fn();
+    const validateEmailAddresses = jest.fn();
 
     beforeEach(() => {
       jest.clearAllMocks();
       appMockRenderer = createAppMockRenderer();
-      useKibanaMock().services.actions.validateEmailAddresses = jest
-        .fn()
-        .mockReturnValue([{ valid: true }]);
+      validateEmailAddresses.mockReturnValue([{ valid: true }]);
     });
 
     it('submits the connector', async () => {
@@ -290,7 +289,11 @@ describe('EmailActionConnectorFields', () => {
       };
 
       const { getByTestId } = appMockRenderer.render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          connectorServices={{ validateEmailAddresses }}
+        >
           <EmailActionConnectorFields
             readOnly={false}
             isEdit={false}
@@ -350,7 +353,11 @@ describe('EmailActionConnectorFields', () => {
       };
 
       const { getByTestId } = appMockRenderer.render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          connectorServices={{ validateEmailAddresses }}
+        >
           <EmailActionConnectorFields
             readOnly={false}
             isEdit={false}
@@ -405,7 +412,11 @@ describe('EmailActionConnectorFields', () => {
       };
 
       const { getByTestId } = appMockRenderer.render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          connectorServices={{ validateEmailAddresses }}
+        >
           <EmailActionConnectorFields
             readOnly={false}
             isEdit={false}
@@ -449,7 +460,11 @@ describe('EmailActionConnectorFields', () => {
       };
 
       const { getByTestId } = appMockRenderer.render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          connectorServices={{ validateEmailAddresses }}
+        >
           <EmailActionConnectorFields
             readOnly={false}
             isEdit={false}
@@ -491,7 +506,11 @@ describe('EmailActionConnectorFields', () => {
       };
 
       const { getByTestId } = appMockRenderer.render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          connectorServices={{ validateEmailAddresses }}
+        >
           <EmailActionConnectorFields
             readOnly={false}
             isEdit={false}
@@ -532,7 +551,11 @@ describe('EmailActionConnectorFields', () => {
       };
 
       const { getByTestId } = appMockRenderer.render(
-        <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
+        <ConnectorFormTestProvider
+          connector={actionConnector}
+          onSubmit={onSubmit}
+          connectorServices={{ validateEmailAddresses }}
+        >
           <Suspense fallback={null}>
             <EmailActionConnectorFields
               readOnly={false}

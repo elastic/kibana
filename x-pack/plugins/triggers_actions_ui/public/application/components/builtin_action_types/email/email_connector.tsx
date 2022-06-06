@@ -31,6 +31,7 @@ import { getEmailServices } from './email';
 import { useEmailConfig } from './use_email_config';
 import { PasswordField } from '../../password_field';
 import * as i18n from './translations';
+import { useConnectorContext } from '../../../context/use_connector_context';
 
 const { emptyField } = fieldValidators;
 
@@ -77,12 +78,14 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
   readOnly,
 }) => {
   const {
-    actions: { validateEmailAddresses },
     docLinks,
     http,
     isCloud,
     notifications: { toasts },
   } = useKibana().services;
+  const {
+    services: { validateEmailAddresses },
+  } = useConnectorContext();
 
   const form = useFormContext();
   const { updateFieldValues } = form;

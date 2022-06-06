@@ -16,15 +16,18 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
+import { ConnectorServices } from '../../../types';
 import { TriggersAndActionsUiServices } from '../../..';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { ConnectorFormSchema } from '../../sections/action_connector_form/types';
 import { ConnectorFormFieldsGlobal } from '../../sections/action_connector_form/connector_form_fields_global';
+import { ConnectorProvider } from '../../context/connector_context';
 
 interface FormTestProviderProps {
   children: React.ReactNode;
   defaultValue?: Record<string, unknown>;
   onSubmit?: ({ data, isValid }: { data: FormData; isValid: boolean }) => Promise<void>;
+  connectorServices?: ConnectorServices;
 }
 
 type ConnectorFormTestProviderProps = Omit<FormTestProviderProps, 'defaultValue'> & {
@@ -35,9 +38,14 @@ const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProp
   children,
   connector,
   onSubmit,
+  connectorServices,
 }) => {
   return (
-    <FormTestProviderComponent defaultValue={connector} onSubmit={onSubmit}>
+    <FormTestProviderComponent
+      defaultValue={connector}
+      onSubmit={onSubmit}
+      connectorServices={connectorServices}
+    >
       <ConnectorFormFieldsGlobal canSave={true} />
       {children}
     </FormTestProviderComponent>
@@ -51,6 +59,7 @@ const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
   children,
   defaultValue,
   onSubmit,
+  connectorServices = { validateEmailAddresses: jest.fn() },
 }) => {
   const { form } = useForm({ defaultValue });
   const { submit } = form;
@@ -64,10 +73,10 @@ const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
 
   return (
     <I18nProvider>
-      <>
+      <ConnectorProvider value={{ services: connectorServices }}>
         <Form form={form}>{children}</Form>
         <EuiButton data-test-subj="form-test-provide-submit" onClick={onClick} />
-      </>
+      </ConnectorProvider>
     </I18nProvider>
   );
 };

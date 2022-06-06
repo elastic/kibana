@@ -44,6 +44,7 @@ import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/c
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React from 'react';
+import { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
@@ -433,3 +434,7 @@ export enum AlertsTableFlyoutState {
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
+
+export interface ConnectorServices {
+  validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
+}

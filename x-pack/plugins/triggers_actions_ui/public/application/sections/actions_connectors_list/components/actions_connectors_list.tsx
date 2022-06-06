@@ -51,6 +51,7 @@ import {
 } from '../../../../common/connectors_selection';
 import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';
+import { ConnectorProvider } from '../../../context/connector_context';
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
   return (
@@ -78,6 +79,7 @@ const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) =
 
 const ActionsConnectorsList: React.FunctionComponent = () => {
   const {
+    actions: { validateEmailAddresses },
     http,
     notifications: { toasts },
     application: { capabilities },
@@ -442,44 +444,47 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
         )}
         setIsLoadingState={(isLoading: boolean) => setIsLoadingActionTypes(isLoading)}
       />
-      <EuiSpacer size="m" />
-      {/* Render the view based on if there's data or if they can save */}
-      {(isLoadingActions || isLoadingActionTypes) && <CenterJustifiedSpinner />}
-      {actionConnectorTableItems.length !== 0 && table}
-      {actionConnectorTableItems.length === 0 &&
-        canSave &&
-        !isLoadingActions &&
-        !isLoadingActionTypes && (
-          <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
-        )}
-      {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
-      {addFlyoutVisible ? (
-        <CreateConnectorFlyout
-          onClose={() => {
-            setAddFlyoutVisibility(false);
-          }}
-          onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
-          onConnectorCreated={loadActions}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      ) : null}
-      {editConnectorProps.initialConnector ? (
-        <EditConnectorFlyout
-          key={`${editConnectorProps.initialConnector.id}${
-            editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
-          }`}
-          connector={editConnectorProps.initialConnector}
-          tab={editConnectorProps.tab}
-          onClose={() => {
-            setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
-          }}
-          onConnectorUpdated={(connector) => {
-            setEditConnectorProps({ initialConnector: connector });
-            loadActions();
-          }}
-          actionTypeRegistry={actionTypeRegistry}
-        />
-      ) : null}
+
+      <ConnectorProvider value={{ services: { validateEmailAddresses } }}>
+        <EuiSpacer size="m" />
+        {/* Render the view based on if there's data or if they can save */}
+        {(isLoadingActions || isLoadingActionTypes) && <CenterJustifiedSpinner />}
+        {actionConnectorTableItems.length !== 0 && table}
+        {actionConnectorTableItems.length === 0 &&
+          canSave &&
+          !isLoadingActions &&
+          !isLoadingActionTypes && (
+            <EmptyConnectorsPrompt onCTAClicked={() => setAddFlyoutVisibility(true)} />
+          )}
+        {actionConnectorTableItems.length === 0 && !canSave && <NoPermissionPrompt />}
+        {addFlyoutVisible ? (
+          <CreateConnectorFlyout
+            onClose={() => {
+              setAddFlyoutVisibility(false);
+            }}
+            onTestConnector={(connector) => editItem(connector, EditConnectorTabs.Test)}
+            onConnectorCreated={loadActions}
+            actionTypeRegistry={actionTypeRegistry}
+          />
+        ) : null}
+        {editConnectorProps.initialConnector ? (
+          <EditConnectorFlyout
+            key={`${editConnectorProps.initialConnector.id}${
+              editConnectorProps.tab ? `:${editConnectorProps.tab}` : ``
+            }`}
+            connector={editConnectorProps.initialConnector}
+            tab={editConnectorProps.tab}
+            onClose={() => {
+              setEditConnectorProps(omit(editConnectorProps, 'initialConnector'));
+            }}
+            onConnectorUpdated={(connector) => {
+              setEditConnectorProps({ initialConnector: connector });
+              loadActions();
+            }}
+            actionTypeRegistry={actionTypeRegistry}
+          />
+        ) : null}
+      </ConnectorProvider>
     </section>
   );
 };

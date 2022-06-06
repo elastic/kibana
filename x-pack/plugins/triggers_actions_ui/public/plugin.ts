@@ -36,6 +36,7 @@ import { getRuleStatusFilterLazy } from './common/get_rule_status_filter';
 import { getRuleTagBadgeLazy } from './common/get_rule_tag_badge';
 import { getRuleEventLogListLazy } from './common/get_rule_event_log_list';
 import { getRulesListLazy } from './common/get_rules_list';
+import { getActionFormLazy } from './common/get_action_form';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
 import {
   ExperimentalFeatures,
@@ -56,12 +57,14 @@ import type {
   AlertsTableConfigurationRegistry,
   CreateConnectorFlyoutProps,
   EditConnectorFlyoutProps,
+  ConnectorServices,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
 import { registerAlertsTableConfiguration } from './application/sections/alerts_table/alerts_page/register_alerts_table_configuration';
 import { PLUGIN_ID } from './common/constants';
 import type { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
+import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
 
 export interface TriggersAndActionsUIPublicPluginSetup {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
@@ -73,6 +76,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
   actionTypeRegistry: TypeRegistry<ActionTypeModel>;
   ruleTypeRegistry: TypeRegistry<RuleTypeModel<any>>;
   alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  getActionForm: (
+    props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>
+  ) => ReactElement<ActionAccordionFormProps>;
   getAddConnectorFlyout: (
     props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<CreateConnectorFlyoutProps>;
@@ -126,6 +132,7 @@ export class Plugin
   private ruleTypeRegistry: TypeRegistry<RuleTypeModel>;
   private alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
   private config: TriggersActionsUiConfigType;
+  private connectorServices?: ConnectorServices;
   readonly experimentalFeatures: ExperimentalFeatures;
 
   constructor(ctx: PluginInitializerContext) {
@@ -140,6 +147,9 @@ export class Plugin
     const actionTypeRegistry = this.actionTypeRegistry;
     const ruleTypeRegistry = this.ruleTypeRegistry;
     const alertsTableConfigurationRegistry = this.alertsTableConfigurationRegistry;
+    this.connectorServices = {
+      validateEmailAddresses: plugins.actions.validateEmailAddresses,
+    };
 
     ExperimentalFeaturesService.init({ experimentalFeatures: this.experimentalFeatures });
 
@@ -236,13 +246,25 @@ export class Plugin
       actionTypeRegistry: this.actionTypeRegistry,
       ruleTypeRegistry: this.ruleTypeRegistry,
       alertsTableConfigurationRegistry: this.alertsTableConfigurationRegistry,
+      getActionForm: (props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>) => {
+        return getActionFormLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          connectorServices: this.connectorServices!,
+        });
+      },
       getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
-        return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry: this.actionTypeRegistry });
+        return getAddConnectorFlyoutLazy({
+          ...props,
+          actionTypeRegistry: this.actionTypeRegistry,
+          connectorServices: this.connectorServices!,
+        });
       },
       getEditConnectorFlyout: (props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>) => {
         return getEditConnectorFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
+          connectorServices: this.connectorServices!,
         });
       },
       getAddAlertFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {

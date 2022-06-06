@@ -33,22 +33,29 @@ import { getAlertsTableStateLazy } from './common/get_alerts_table_state';
 import { AlertsTableStateProps } from './application/sections/alerts_table/alerts_table_state';
 import { CreateConnectorFlyoutProps } from './application/sections/action_connector_form/create_connector_flyout';
 import { EditConnectorFlyoutProps } from './application/sections/action_connector_form/edit_connector_flyout';
+import { getActionFormLazy } from './common/get_action_form';
+import { ActionAccordionFormProps } from './application/sections/action_connector_form/action_form';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
   const alertsTableConfigurationRegistry = new TypeRegistry<AlertsTableConfigurationRegistry>();
+  const connectorServices = { validateEmailAddresses: jest.fn() };
   return {
     actionTypeRegistry,
     ruleTypeRegistry,
     alertsTableConfigurationRegistry,
+    getActionForm: (props: Omit<ActionAccordionFormProps, 'actionTypeRegistry'>) => {
+      return getActionFormLazy({ ...props, actionTypeRegistry, connectorServices });
+    },
     getAddConnectorFlyout: (props: Omit<CreateConnectorFlyoutProps, 'actionTypeRegistry'>) => {
-      return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry });
+      return getAddConnectorFlyoutLazy({ ...props, actionTypeRegistry, connectorServices });
     },
     getEditConnectorFlyout: (props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>) => {
       return getEditConnectorFlyoutLazy({
         ...props,
         actionTypeRegistry,
+        connectorServices,
       });
     },
     getAddAlertFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {

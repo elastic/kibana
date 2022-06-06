@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { ConnectorProvider } from '../application/context/connector_context';
-import { EditConnectorFlyout } from '../application/sections/action_connector_form';
-import { EditConnectorFlyoutProps } from '../application/sections/action_connector_form/edit_connector_flyout';
+import { ActionForm } from '../application/sections';
+import { ActionAccordionFormProps } from '../application/sections/action_connector_form/action_form';
 import { ConnectorServices } from '../types';
 
-export const getEditConnectorFlyoutLazy = (
-  props: EditConnectorFlyoutProps & { connectorServices: ConnectorServices }
+export const getActionFormLazy = (
+  props: ActionAccordionFormProps & { connectorServices: ConnectorServices }
 ) => {
   return (
     <ConnectorProvider value={{ services: props.connectorServices }}>
-      <EditConnectorFlyout {...props} />
+      <ActionForm {...props} />
     </ConnectorProvider>
   );
 };
