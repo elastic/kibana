@@ -10,7 +10,7 @@ import { MonitoringCollectionSetup } from '.';
 const createSetupMock = (): jest.Mocked<MonitoringCollectionSetup> => {
   const mock = {
     registerMetric: jest.fn(),
-    getMetrics: jest.fn(),
+    getMeter: jest.fn(),
   };
   return mock;
 };
