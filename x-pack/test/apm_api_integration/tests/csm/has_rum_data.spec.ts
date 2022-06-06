@@ -14,12 +14,15 @@ export default function rumHasDataApiTests({ getService }: FtrProviderContext) {
 
   registry.when('has_rum_data without data', { config: 'trial', archives: [] }, () => {
     it('returns empty list', async () => {
+      const start = new Date('2020-09-07T00:00:00.000Z').getTime();
+      const end = new Date('2020-09-14T00:00:00.000Z').getTime() - 1;
+
       const response = await apmApiClient.readUser({
         endpoint: 'GET /api/apm/observability_overview/has_rum_data',
         params: {
           query: {
-            start: '2020-09-07T20%3A35%3A54.654Z&',
-            end: '2020-09-14T20%3A35%3A54.654Z',
+            start: new Date(start).toISOString(),
+            end: new Date(end).toISOString(),
           },
         },
       });
@@ -39,12 +42,15 @@ export default function rumHasDataApiTests({ getService }: FtrProviderContext) {
     { config: 'trial', archives: ['8.0.0', 'rum_8.0.0'] },
     () => {
       it('returns that it has data and service name with most traffic', async () => {
+        const start = new Date('2020-09-07T00:00:00.000Z').getTime();
+        const end = new Date('2020-09-16T00:00:00.000Z').getTime() - 1;
+
         const response = await apmApiClient.readUser({
           endpoint: 'GET /api/apm/observability_overview/has_rum_data',
           params: {
             query: {
-              start: '2020-09-07T20%3A35%3A54.654Z&',
-              end: '2020-09-16T20%3A35%3A54.654Z',
+              start: new Date(start).toISOString(),
+              end: new Date(end).toISOString(),
             },
           },
         });
