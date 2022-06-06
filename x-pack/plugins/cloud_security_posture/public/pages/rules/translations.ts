@@ -87,5 +87,5 @@ export const REMEDIATION = i18n.translate('xpack.csp.rules.ruleFlyout.tabs.remed
 
 export const DATA_UPDATE_INFO = i18n.translate('xpack.csp.rules.dataUpdateInfoCallout', {
   defaultMessage:
-    'Please note, any changes to your benchmark rules will take effect the next time your resources are evaluated again. This can take up to ~5 hours',
+    'Please note, any changes to your benchmark rules will take effect the next time your resources are evaluated. This can take up to ~5 hours',
 });
