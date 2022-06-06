@@ -27,7 +27,7 @@ import './alerts_table.scss';
 export const ACTIVE_ROW_CLASS = 'alertsTableActiveRow';
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const GridStyles: EuiDataGridStyle = {
-  border: 'horizontal',
+  border: 'none',
   header: 'underline',
 };
 
