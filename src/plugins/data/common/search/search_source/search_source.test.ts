@@ -9,7 +9,7 @@
 import { lastValueFrom, of, throwError } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildExpression, ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import { SearchSource, SearchSourceDependencies, SortDirection } from '.';
 import { AggConfigs, AggTypesRegistryStart } from '../..';
 import { mockAggTypesRegistry } from '../aggs/test_helpers';
@@ -135,9 +135,14 @@ describe('SearchSource', () => {
     test('sets the value for the property with AggConfigs', () => {
       const typesRegistry = mockAggTypesRegistry();
 
-      const ac = new AggConfigs(indexPattern3, [{ type: 'avg', params: { field: 'field1' } }], {
-        typesRegistry,
-      });
+      const ac = new AggConfigs(
+        indexPattern3,
+        [{ type: 'avg', params: { field: 'field1' } }],
+        {
+          typesRegistry,
+        },
+        jest.fn()
+      );
 
       searchSource.setField('aggs', ac);
       const request = searchSource.getSearchRequestBody();
@@ -1154,7 +1159,8 @@ describe('SearchSource', () => {
           ],
           {
             typesRegistry,
-          }
+          },
+          jest.fn()
         );
       }
 
@@ -1239,7 +1245,8 @@ describe('SearchSource', () => {
           ],
           {
             typesRegistry,
-          }
+          },
+          jest.fn()
         );
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1274,7 +1281,8 @@ describe('SearchSource', () => {
           ],
           {
             typesRegistry,
-          }
+          },
+          jest.fn()
         );
 
         searchSource = new SearchSource({}, searchSourceDependencies);
@@ -1416,20 +1424,21 @@ describe('SearchSource', () => {
       const aggConfigs = new AggConfigs(
         stubIndexPattern,
         [{ enabled: true, type: 'avg', schema: 'metric', params: { field: 'bytes' } }],
-        { typesRegistry }
+        { typesRegistry },
+        jest.fn()
       );
       searchSource.setField('aggs', aggConfigs);
 
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context
-        | esaggs index={indexPatternLoad id=\\"logstash-*\\"} aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
+        | esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=false aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
       `);
     });
 
     test('should generate the `esaggs` function if there are aggregations configs', () => {
       const typesRegistry = mockAggTypesRegistry();
       searchSourceDependencies.aggs.createAggConfigs.mockImplementationOnce(
-        (dataView, configs) => new AggConfigs(dataView, configs, { typesRegistry })
+        (dataView, configs) => new AggConfigs(dataView, configs, { typesRegistry }, jest.fn())
       );
       searchSource.setField('index', stubIndexPattern);
       searchSource.setField('aggs', [
@@ -1438,7 +1447,7 @@ describe('SearchSource', () => {
 
       expect(toString(searchSource.toExpressionAst())).toMatchInlineSnapshot(`
         "kibana_context
-        | esaggs index={indexPatternLoad id=\\"logstash-*\\"} aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
+        | esaggs index={indexPatternLoad id=\\"logstash-*\\"} metricsAtAllLevels=false partialRows=false aggs={aggAvg field=\\"bytes\\" id=\\"1\\" enabled=true schema=\\"metric\\"}"
       `);
     });
 
