@@ -35,8 +35,8 @@ describe('TopN data from Elasticsearch', () => {
   });
 
   describe('when fetching Stack Traces', () => {
-    it('should search first then mget', async () => {
-      await topNElasticSearchQuery(
+    it('should search first then skip mget', async () => {
+      const response = await topNElasticSearchQuery(
         client,
         logger,
         index,
@@ -47,8 +47,14 @@ describe('TopN data from Elasticsearch', () => {
         'StackTraceID',
         kibanaResponseFactory
       );
+
+      // Calls to mget are skipped since data doesn't exist
       expect(client.search).toHaveBeenCalledTimes(2);
-      expect(client.mget).toHaveBeenCalledTimes(2);
+      expect(client.mget).toHaveBeenCalledTimes(0);
+
+      expect(response.status).toEqual(200);
+      expect(response.payload).toHaveProperty('TopN');
+      expect(response.payload).toHaveProperty('Metadata');
     });
   });
 });
