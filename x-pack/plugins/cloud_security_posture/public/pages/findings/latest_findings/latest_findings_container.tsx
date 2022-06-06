@@ -6,9 +6,9 @@
  */
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import type { DataView } from '@kbn/data-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { number } from 'io-ts';
+import type { FindingsBaseProps } from '../types';
 import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
@@ -32,7 +32,7 @@ export const getDefaultQuery = (): FindingsBaseURLQuery & FindingsGroupByNoneQue
   pageSize: 10,
 });
 
-export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) => {
+export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_default]);
   const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
 
@@ -61,7 +61,9 @@ export const LatestFindingsContainer = ({ dataView }: { dataView: DataView }) =>
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
       <FindingsSearchBar
         dataView={dataView}
-        setQuery={setUrlQuery}
+        setQuery={(query) => {
+          setUrlQuery({ ...query, pageIndex: 0 });
+        }}
         query={urlQuery.query}
         filters={urlQuery.filters}
         loading={findingsCount.isFetching}

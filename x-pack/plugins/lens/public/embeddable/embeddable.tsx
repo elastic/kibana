@@ -178,6 +178,7 @@ function getViewUnderlyingDataArgs({
     activeDatasource,
     activeDatasourceState,
     activeData,
+    timeRange,
     capabilities
   );
 
@@ -798,6 +799,10 @@ export class Embeddable
   public getDescription() {
     // mind that savedViz is loaded in async way here
     return this.savedVis && this.savedVis.description;
+  }
+
+  public getSavedVis(): Readonly<Document | undefined> {
+    return this.savedVis;
   }
 
   destroy() {

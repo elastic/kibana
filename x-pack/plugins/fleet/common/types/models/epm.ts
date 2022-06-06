@@ -372,7 +372,6 @@ export interface EpmPackageAdditions {
   title: string;
   latestVersion: string;
   assets: AssetsGroupedByServiceByType;
-  removable?: boolean;
   notice?: string;
   keepPoliciesUpToDate?: boolean;
 }
@@ -398,6 +397,7 @@ export interface IntegrationCardItem {
   integration: string;
   id: string;
   categories: string[];
+  fromIntegrations?: string;
 }
 
 export type PackagesGroupedByStatus = Record<ValueOf<InstallationStatus>, PackageList>;

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   BLOCKLIST_PATH,
@@ -17,6 +18,7 @@ import {
   RULES_CREATE_PATH,
   RULES_PATH,
   SecurityPageName,
+  SERVER_APP_ID,
   TRUSTED_APPS_PATH,
 } from '../../common/constants';
 import {
@@ -31,8 +33,8 @@ import {
   RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
-import { NavigationCategories } from '../common/components/navigation/types';
-import { FEATURE, LinkItem } from '../common/links/types';
+import { LinkItem } from '../common/links/types';
+import { StartPlugins } from '../types';
 
 import { IconBlocklist } from './icons/blocklist';
 import { IconEndpoints } from './icons/endpoints';
@@ -43,6 +45,28 @@ import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
 
+const categories = [
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.siem', {
+      defaultMessage: 'SIEM',
+    }),
+    linkIds: [SecurityPageName.rules, SecurityPageName.exceptions],
+  },
+  {
+    label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
+      defaultMessage: 'ENDPOINTS',
+    }),
+    linkIds: [
+      SecurityPageName.endpoints,
+      SecurityPageName.policies,
+      SecurityPageName.trustedApps,
+      SecurityPageName.eventFilters,
+      SecurityPageName.hostIsolationExceptions,
+      SecurityPageName.blocklist,
+    ],
+  },
+];
+
 export const links: LinkItem = {
   id: SecurityPageName.administration,
   title: MANAGE,
@@ -50,12 +74,13 @@ export const links: LinkItem = {
   skipUrlState: true,
   hideTimeline: true,
   globalNavEnabled: false,
-  features: [FEATURE.general],
+  capabilities: [`${SERVER_APP_ID}.show`],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.manage', {
       defaultMessage: 'Manage',
     }),
   ],
+  categories,
   links: [
     {
       id: SecurityPageName.rules,
@@ -73,7 +98,6 @@ export const links: LinkItem = {
           defaultMessage: 'Rules',
         }),
       ],
-      globalSearchEnabled: true,
       links: [
         {
           id: SecurityPageName.rulesCreate,
@@ -99,7 +123,6 @@ export const links: LinkItem = {
           defaultMessage: 'Exception lists',
         }),
       ],
-      globalSearchEnabled: true,
     },
     {
       id: SecurityPageName.endpoints,
@@ -109,7 +132,7 @@ export const links: LinkItem = {
       landingIcon: IconEndpoints,
       globalNavEnabled: true,
       title: ENDPOINTS,
-      globalNavOrder: 9006,
+      globalNavOrder: 9008,
       path: ENDPOINTS_PATH,
       skipUrlState: true,
       hideTimeline: true,
@@ -178,24 +201,10 @@ export const links: LinkItem = {
   ],
 };
 
-export const navigationCategories: NavigationCategories = [
-  {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.siem', {
-      defaultMessage: 'SIEM',
-    }),
-    linkIds: [SecurityPageName.rules, SecurityPageName.exceptions],
-  },
-  {
-    label: i18n.translate('xpack.securitySolution.appLinks.category.endpoints', {
-      defaultMessage: 'ENDPOINTS',
-    }),
-    linkIds: [
-      SecurityPageName.endpoints,
-      SecurityPageName.policies,
-      SecurityPageName.trustedApps,
-      SecurityPageName.eventFilters,
-      SecurityPageName.blocklist,
-      SecurityPageName.hostIsolationExceptions,
-    ],
-  },
-] as const;
+export const getManagementFilteredLinks = async (
+  core: CoreStart,
+  plugins: StartPlugins
+): Promise<LinkItem> => {
+  // TODO: implement async logic to exclude links
+  return links;
+};
