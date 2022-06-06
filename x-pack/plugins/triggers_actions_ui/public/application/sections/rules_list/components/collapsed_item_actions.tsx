@@ -7,8 +7,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { asyncScheduler } from 'rxjs';
-import React, { useEffect, useState } from 'react';
-import { EuiButtonIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import moment from 'moment';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import {
+  EuiButtonIcon,
+  EuiPopover,
+  EuiContextMenu,
+  EuiPanel,
+  EuiIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { useKibana } from '../../../../common/lib/kibana';
 import { RuleTableItem } from '../../../../types';
@@ -16,6 +25,8 @@ import {
   ComponentOpts as BulkOperationsComponentOpts,
   withBulkRuleOperations,
 } from '../../common/components/with_bulk_rule_api_operations';
+import { RulesListSnoozePanel } from './rules_list_snooze_panel';
+import { isRuleSnoozed } from './rule_status_dropdown';
 import './collapsed_item_actions.scss';
 
 export type ComponentOpts = {
@@ -24,28 +35,42 @@ export type ComponentOpts = {
   setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
   onEditRule: (item: RuleTableItem) => void;
   onUpdateAPIKey: (id: string[]) => void;
-} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'unmuteRule' | 'muteRule'>;
+} & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'snoozeRule' | 'unsnoozeRule'>;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   item,
   onRuleChanged,
   disableRule,
   enableRule,
-  unmuteRule,
-  muteRule,
   setRulesToDelete,
   onEditRule,
   onUpdateAPIKey,
+  snoozeRule,
+  unsnoozeRule,
 }: ComponentOpts) => {
   const { ruleTypeRegistry } = useKibana().services;
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
   const [isDisabled, setIsDisabled] = useState<boolean>(!item.enabled);
-  const [isMuted, setIsMuted] = useState<boolean>(item.muteAll);
   useEffect(() => {
     setIsDisabled(!item.enabled);
-    setIsMuted(item.muteAll);
-  }, [item.enabled, item.muteAll]);
+  }, [item.enabled]);
+
+  const onRuleChangedInternal = useCallback(() => {
+    setIsPopoverOpen(false);
+    onRuleChanged();
+  }, [onRuleChanged, setIsPopoverOpen]);
+
+  const snoozeRuleInternal = useCallback(
+    async (snoozeEndTime: string | -1, interval: string | null) => {
+      await snoozeRule(item, snoozeEndTime);
+    },
+    [snoozeRule, item]
+  );
+
+  const unsnoozeRuleInternal = useCallback(async () => {
+    await unsnoozeRule(item);
+  }, [unsnoozeRule, item]);
 
   const isRuleTypeEditableInContext = ruleTypeRegistry.has(item.ruleTypeId)
     ? !ruleTypeRegistry.get(item.ruleTypeId).requiresAppContext
@@ -65,36 +90,62 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     />
   );
 
+  const isSnoozed = useMemo(() => {
+    return isRuleSnoozed(item);
+  }, [item]);
+
+  const snoozedButtonText = useMemo(() => {
+    if (item.muteAll) {
+      return i18n.translate(
+        'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.snoozedIndefinitely',
+        {
+          defaultMessage: 'Snoozed indefinitely',
+        }
+      );
+    }
+    if (isSnoozed) {
+      return i18n.translate(
+        'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.snoozedUntil',
+        {
+          defaultMessage: 'Snoozed until {snoozeTime}',
+          values: {
+            snoozeTime: moment(item.isSnoozedUntil).format('MMM D'),
+          },
+        }
+      );
+    }
+    return i18n.translate(
+      'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.snooze',
+      {
+        defaultMessage: 'Snooze',
+      }
+    );
+  }, [isSnoozed, item]);
+
+  const snoozePanelItem = useMemo(() => {
+    if (isDisabled || item.ruleTypeId.startsWith('siem')) {
+      return [];
+    }
+
+    return [
+      {
+        disabled: !item.isEditable || !item.enabledInLicense,
+        'data-test-subj': 'snoozeButton',
+        icon: 'bellSlash',
+        name: snoozedButtonText,
+        panel: 1,
+      },
+    ];
+  }, [isDisabled, item, snoozedButtonText]);
+
   const panels = [
     {
       id: 0,
       hasFocus: false,
       items: [
+        ...snoozePanelItem,
         {
-          disabled: !(item.isEditable && !isDisabled) || !item.enabledInLicense,
-          'data-test-subj': 'muteButton',
-          onClick: async () => {
-            const muteAll = isMuted;
-            asyncScheduler.schedule(async () => {
-              if (muteAll) {
-                await unmuteRule({ ...item, muteAll });
-              } else {
-                await muteRule({ ...item, muteAll });
-              }
-              onRuleChanged();
-            }, 10);
-            setIsMuted(!isMuted);
-            setIsPopoverOpen(!isPopoverOpen);
-          },
-          name: isMuted
-            ? i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.unmuteTitle',
-                { defaultMessage: 'Unmute' }
-              )
-            : i18n.translate(
-                'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.muteTitle',
-                { defaultMessage: 'Mute' }
-              ),
+          isSeparator: true as const,
         },
         {
           disabled: !item.isEditable || !item.enabledInLicense,
@@ -160,6 +211,33 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
           ),
         },
       ],
+    },
+    {
+      id: 1,
+      title: (
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="bellSlash" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.collapsedItemActons.snoozeActions',
+              { defaultMessage: 'Snooze actions' }
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      width: 500,
+      content: (
+        <EuiPanel>
+          <RulesListSnoozePanel
+            rule={item}
+            onRuleChanged={onRuleChangedInternal}
+            snoozeRule={snoozeRuleInternal}
+            unsnoozeRule={unsnoozeRuleInternal}
+          />
+        </EuiPanel>
+      ),
     },
   ];
 

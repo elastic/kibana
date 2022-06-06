@@ -19,9 +19,9 @@ const onEditRule = jest.fn();
 const setRulesToDelete = jest.fn();
 const disableRule = jest.fn();
 const enableRule = jest.fn();
-const unmuteRule = jest.fn();
-const muteRule = jest.fn();
 const onUpdateAPIKey = jest.fn();
+const snoozeRule = jest.fn();
+const unsnoozeRule = jest.fn();
 
 export const tick = (ms = 0) =>
   new Promise((resolve) => {
@@ -90,9 +90,9 @@ describe('CollapsedItemActions', () => {
       setRulesToDelete,
       disableRule,
       enableRule,
-      unmuteRule,
-      muteRule,
       onUpdateAPIKey,
+      snoozeRule,
+      unsnoozeRule,
     };
   };
 
@@ -116,7 +116,6 @@ describe('CollapsedItemActions', () => {
 
     expect(wrapper.find('[data-test-subj="selectActionButton"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="collapsedActionPanel"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="muteButton"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="editRule"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="deleteRule"]').exists()).toBeFalsy();
@@ -129,7 +128,6 @@ describe('CollapsedItemActions', () => {
     });
 
     expect(wrapper.find('[data-test-subj="collapsedActionPanel"]').exists()).toBeTruthy();
-    expect(wrapper.find('[data-test-subj="muteButton"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="editRule"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="deleteRule"]').exists()).toBeTruthy();
@@ -139,8 +137,6 @@ describe('CollapsedItemActions', () => {
       wrapper.find('[data-test-subj="selectActionButton"]').first().props().disabled
     ).toBeFalsy();
 
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
     expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
@@ -148,22 +144,6 @@ describe('CollapsedItemActions', () => {
     expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
     expect(wrapper.find(`[data-test-subj="updateApiKey"] button`).text()).toEqual('Update API key');
-  });
-
-  test('handles case when rule is unmuted and enabled and mute is clicked', async () => {
-    await setup();
-    const wrapper = mountWithIntl(<CollapsedItemActions {...getPropsWithRule()} />);
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    wrapper.find('button[data-test-subj="muteButton"]').simulate('click');
-    await act(async () => {
-      await tick(10);
-      wrapper.update();
-    });
-    expect(muteRule).toHaveBeenCalled();
   });
 
   test('handles case when rule is unmuted and enabled and disable is clicked', async () => {
@@ -180,24 +160,6 @@ describe('CollapsedItemActions', () => {
       wrapper.update();
     });
     expect(disableRule).toHaveBeenCalled();
-  });
-
-  test('handles case when rule is muted and enabled and unmute is clicked', async () => {
-    await setup();
-    const wrapper = mountWithIntl(
-      <CollapsedItemActions {...getPropsWithRule({ muteAll: true })} />
-    );
-    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-    wrapper.find('button[data-test-subj="muteButton"]').simulate('click');
-    await act(async () => {
-      await tick(10);
-      wrapper.update();
-    });
-    expect(unmuteRule).toHaveBeenCalled();
   });
 
   test('handles case when rule is unmuted and disabled and enable is clicked', async () => {
@@ -261,8 +223,6 @@ describe('CollapsedItemActions', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Enable');
     expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
@@ -298,8 +258,6 @@ describe('CollapsedItemActions', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeTruthy();
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
     expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
@@ -319,8 +277,6 @@ describe('CollapsedItemActions', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Unmute');
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
     expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
@@ -338,8 +294,6 @@ describe('CollapsedItemActions', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).prop('disabled')).toBeFalsy();
-    expect(wrapper.find(`[data-test-subj="muteButton"] button`).text()).toEqual('Mute');
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
     expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeTruthy();

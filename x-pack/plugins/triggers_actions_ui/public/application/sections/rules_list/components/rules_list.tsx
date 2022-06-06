@@ -541,7 +541,7 @@ export const RulesList: React.FunctionComponent = () => {
       <EuiSpacer size="m" />
       <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="baseline" gutterSize="none">
+          <EuiFlexGroup alignItems="center" gutterSize="none">
             <EuiFlexItem grow={false}>
               <EuiText size="s" color="subdued" data-test-subj="totalRulesCount">
                 <FormattedMessage

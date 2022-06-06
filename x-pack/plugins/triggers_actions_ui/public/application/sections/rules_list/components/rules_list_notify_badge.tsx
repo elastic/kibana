@@ -5,18 +5,23 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import moment from 'moment';
-import { EuiButton, EuiButtonIcon, EuiPopover, EuiText, EuiToolTip } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonIcon,
+  EuiPopover,
+  EuiText,
+  EuiToolTip,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPopoverTitle,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isRuleSnoozed } from './rule_status_dropdown';
 import { RuleTableItem } from '../../../../types';
-import {
-  SnoozePanel,
-  futureTimeToInterval,
-  usePreviousSnoozeInterval,
-  SnoozeUnit,
-} from './rule_status_dropdown';
+import { RulesListSnoozePanel } from './rules_list_snooze_panel';
 
 export interface RulesListNotifyBadgeProps {
   rule: RuleTableItem;
@@ -38,7 +43,7 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const {
     rule,
     isOpen,
-    previousSnoozeInterval: propsPreviousSnoozeInterval,
+    previousSnoozeInterval,
     onClick,
     onClose,
     onRuleChanged,
@@ -47,12 +52,6 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   } = props;
 
   const { isSnoozedUntil, muteAll } = rule;
-
-  const [previousSnoozeInterval, setPreviousSnoozeInterval] = usePreviousSnoozeInterval(
-    propsPreviousSnoozeInterval
-  );
-
-  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const isSnoozedIndefinitely = muteAll;
 
@@ -181,43 +180,32 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     return <EuiToolTip content={snoozeTooltipText}>{button}</EuiToolTip>;
   }, [isOpen, button, snoozeTooltipText]);
 
-  const snoozeRuleAndStoreInterval = useCallback(
-    (newSnoozeEndTime: string | -1, interval: string | null) => {
-      if (interval) {
-        setPreviousSnoozeInterval(interval);
-      }
-      return snoozeRule(newSnoozeEndTime, interval);
-    },
-    [setPreviousSnoozeInterval, snoozeRule]
-  );
-
-  const onChangeSnooze = useCallback(
-    async (value: number, unit?: SnoozeUnit) => {
-      setIsLoading(true);
-      try {
-        if (value === -1) {
-          await snoozeRuleAndStoreInterval(-1, null);
-        } else if (value !== 0) {
-          const newSnoozeEndTime = moment().add(value, unit).toISOString();
-          await snoozeRuleAndStoreInterval(newSnoozeEndTime, `${value}${unit}`);
-        } else await unsnoozeRule();
-        onRuleChanged();
-      } finally {
-        onClose();
-        setIsLoading(false);
-      }
-    },
-    [onRuleChanged, onClose, snoozeRuleAndStoreInterval, unsnoozeRule, setIsLoading]
-  );
+  const onRuleChangedInternal = useCallback(() => {
+    onRuleChanged();
+    onClose();
+  }, [onRuleChanged, onClose]);
 
   return (
     <EuiPopover isOpen={isOpen} closePopover={onClose} button={buttonWithToolTip}>
-      <SnoozePanel
-        isLoading={isLoading}
-        applySnooze={onChangeSnooze}
-        interval={futureTimeToInterval(isSnoozedUntil)}
-        showCancel={isSnoozed}
+      <EuiPopoverTitle>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="bellSlash" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            {i18n.translate(
+              'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.snoozeActions',
+              { defaultMessage: 'Snooze actions' }
+            )}
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPopoverTitle>
+      <RulesListSnoozePanel
+        rule={rule}
         previousSnoozeInterval={previousSnoozeInterval}
+        onRuleChanged={onRuleChangedInternal}
+        snoozeRule={snoozeRule}
+        unsnoozeRule={unsnoozeRule}
       />
     </EuiPopover>
   );

@@ -399,10 +399,34 @@ export const RulesListTable = (props: RulesListTableProps) => {
         },
       },
       {
-        name: 'Notify',
+        name: (
+          <EuiToolTip
+            data-test-subj="rulesTableCell-notifyTooltip"
+            content={i18n.translate(
+              'xpack-triggersActionUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
+              {
+                defaultMessage: 'Snooze notifications for a rule.',
+              }
+            )}
+          >
+            <span>
+              {i18n.translate(
+                'xpack-triggersActionUI.sections.rulesList.rulesListTable.columns.notifyTitle',
+                {
+                  defaultMessage: 'Notify',
+                }
+              )}
+              &nbsp;
+              <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            </span>
+          </EuiToolTip>
+        ),
         width: '16%',
         'data-test-subj': 'rulesTableCell-rulesListNotify',
         render: (rule: RuleTableItem) => {
+          if (rule.ruleTypeId.startsWith('siem')) {
+            return null;
+          }
           return (
             <RulesListNotifyBadge
               rule={rule}
