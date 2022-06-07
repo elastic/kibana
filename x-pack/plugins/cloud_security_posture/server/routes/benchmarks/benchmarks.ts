@@ -80,7 +80,7 @@ export const getAgentPolicies = async (
   return agentPolicies;
 };
 
-const addRunningAgentToAgentPolicy = async (
+export const addRunningAgentToAgentPolicy = async (
   agentService: AgentService,
   agentPolicies: AgentPolicy[]
 ): Promise<GetAgentPoliciesResponseItem[]> => {
