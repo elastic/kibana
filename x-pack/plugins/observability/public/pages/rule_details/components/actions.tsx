@@ -35,7 +35,8 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
       toasts.addDanger({ title: errorActionConnectors });
     }
   }, [errorActionConnectors, toasts]);
-  if (ruleActions && ruleActions.length <= 0)
+
+  if (!actionConnectors || actionConnectors.length <= 0)
     return (
       <EuiFlexItem>
         <EuiText size="s">
