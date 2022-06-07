@@ -799,6 +799,11 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     return finalResults;
   }
 
+  const { getAnomalyChartsData, getRecordsForCriteria } = anomalyChartsDataProvider(
+    mlClient,
+    client!
+  );
+
   return {
     getAnomaliesTableData,
     getCategoryDefinition,
@@ -809,6 +814,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     getCategorizerStats,
     getCategoryStoppedPartitions,
     getDatafeedResultsChartData,
-    getAnomalyChartsData: anomalyChartsDataProvider(mlClient, client!),
+    getAnomalyChartsData,
+    getRecordsForCriteria,
   };
 }

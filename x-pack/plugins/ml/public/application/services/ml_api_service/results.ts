@@ -7,6 +7,7 @@
 
 // Service for obtaining data for the ML Results dashboards.
 import type { ESSearchRequest, ESSearchResponse } from '@kbn/core/types/elasticsearch';
+import type { CriteriaField } from '../results_service';
 import { HttpService } from '../http_service';
 import { basePath } from '.';
 import { JOB_ID, PARTITION_FIELD_VALUE } from '../../../../common/constants/anomalies';
@@ -17,7 +18,7 @@ import type {
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import type { PartitionFieldsDefinition } from '../results_service/result_service_rx';
 import type { PartitionFieldsConfig } from '../../../../common/types/storage';
-import type { MLAnomalyDoc } from '../../../../common/types/anomalies';
+import type { AnomalyRecordDoc, MLAnomalyDoc } from '../../../../common/types/anomalies';
 import type { EntityField } from '../../../../common/util/anomaly_utils';
 import type { InfluencersFilterQuery } from '../../../../common/types/es_client';
 import type { ExplorerChartsData } from '../../../../common/types/results';
@@ -189,6 +190,31 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
     return httpService.http$<ExplorerChartsData>({
       path: `${basePath()}/results/anomaly_charts`,
+      method: 'POST',
+      body,
+    });
+  },
+
+  getAnomalyRecords$(
+    jobIds: string[],
+    criteriaFields: CriteriaField[],
+    severity: number,
+    earliestMs: number | null,
+    latestMs: number | null,
+    interval: string,
+    functionDescription?: string
+  ) {
+    const body = JSON.stringify({
+      jobIds,
+      criteriaFields,
+      threshold: severity,
+      earliestMs,
+      latestMs,
+      interval,
+      functionDescription,
+    });
+    return httpService.http$<{ success: boolean; records: AnomalyRecordDoc[] }>({
+      path: `${basePath()}/results/anomaly_records`,
       method: 'POST',
       body,
     });

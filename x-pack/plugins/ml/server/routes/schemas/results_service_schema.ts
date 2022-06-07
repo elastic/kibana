@@ -136,3 +136,12 @@ export const getAnomalyChartsSchema = schema.object({
     max: schema.maybe(schema.number()),
   }),
 });
+
+export const getAnomalyRecordsSchema = schema.object({
+  jobIds: schema.arrayOf(schema.string()),
+  threshold: schema.number({ defaultValue: 0, min: 0, max: 99 }),
+  earliestMs: schema.number(),
+  latestMs: schema.number(),
+  criteriaFields: schema.arrayOf(schema.any()),
+  interval: schema.string(),
+});
