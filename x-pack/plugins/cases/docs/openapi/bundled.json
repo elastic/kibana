@@ -3279,18 +3279,8 @@
                 "createCaseRequest": {
                   "$ref": "#/components/examples/create_case_request"
                 }
-              ]
-            },
-            "example": "tag-1"
-          },
-          {
-            "name": "to",
-            "in": "query",
-            "description": "[preview] Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression. This functionality is in technical preview and may be changed or removed in a future release. Elastic will apply best effort to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.\n",
-            "schema": {
-              "type": "string"
-            },
-            "example": "now+1d"
+              }
+            }
           }
         },
         "responses": {
@@ -3450,11 +3440,11 @@
                     },
                     "description": {
                       "type": "string",
-                      "example": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
+                      "example": "A case description."
                     },
                     "duration": {
                       "type": "integer",
-                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.",
+                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
                       "example": 120
                     },
                     "external_service": {
@@ -3525,14 +3515,12 @@
                         "type": "string"
                       },
                       "example": [
-                        "phishing",
-                        "social engineering",
-                        "bubblegum"
+                        "tag-1"
                       ]
                     },
                     "title": {
                       "type": "string",
-                      "example": "This case will self-destruct in 5 seconds"
+                      "example": "Case title 1"
                     },
                     "totalAlerts": {
                       "type": "integer",
@@ -3954,11 +3942,11 @@
                     },
                     "description": {
                       "type": "string",
-                      "example": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
+                      "example": "A case description."
                     },
                     "duration": {
                       "type": "integer",
-                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.",
+                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
                       "example": 120
                     },
                     "external_service": {
@@ -4029,14 +4017,12 @@
                         "type": "string"
                       },
                       "example": [
-                        "phishing",
-                        "social engineering",
-                        "bubblegum"
+                        "tag-1"
                       ]
                     },
                     "title": {
                       "type": "string",
-                      "example": "This case will self-destruct in 5 seconds"
+                      "example": "Case title 1"
                     },
                     "totalAlerts": {
                       "type": "integer",
@@ -4266,7 +4252,7 @@
                 }
               ]
             },
-            "example": "phishing"
+            "example": "tag-1"
           },
           {
             "name": "to",
@@ -4440,11 +4426,11 @@
                           },
                           "description": {
                             "type": "string",
-                            "example": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
+                            "example": "A case description."
                           },
                           "duration": {
                             "type": "integer",
-                            "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.",
+                            "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
                             "example": 120
                           },
                           "external_service": {
@@ -4515,14 +4501,12 @@
                               "type": "string"
                             },
                             "example": [
-                              "phishing",
-                              "social engineering",
-                              "bubblegum"
+                              "tag-1"
                             ]
                           },
                           "title": {
                             "type": "string",
-                            "example": "This case will self-destruct in 5 seconds"
+                            "example": "Case title 1"
                           },
                           "totalAlerts": {
                             "type": "integer",
@@ -4720,25 +4704,15 @@
                                 "description": "The type of issue for Jira connectors.",
                                 "type": "string"
                               },
-                              "username": {
-                                "type": "string",
-                                "example": "elastic"
-                              }
-                            }
-                          },
-                          "description": {
-                            "type": "string",
-                            "example": "A case description."
-                          },
-                          "duration": {
-                            "type": "integer",
-                            "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
-                            "example": 120
-                          },
-                          "external_service": {
-                            "type": "object",
-                            "properties": {
-                              "connector_id": {
+                              "issueTypes": {
+                                "description": "The type of incident for IBM Resilient connectors.",
+                                "type": "array",
+                                "items": {
+                                  "type": "number"
+                                }
+                              },
+                              "malwareHash": {
+                                "description": "A comma-separated list of malware hashes for ServiceNow SecOps connectors.",
                                 "type": "string"
                               },
                               "malwareUrl": {
@@ -4779,39 +4753,12 @@
                           "id": {
                             "description": "The identifier for the connector. To create a case without a connector, use `none`.",
                             "type": "string",
-                            "example": "66b9aa00-94fa-11ea-9f74-e7e108796192"
-                          },
-                          "owner": {
-                            "$ref": "#/components/schemas/owners"
-                          },
-                          "settings": {
-                            "type": "object",
-                            "properties": {
-                              "syncAlerts": {
-                                "type": "boolean",
-                                "example": true
-                              }
-                            }
-                          },
-                          "severity": {
-                            "$ref": "#/components/schemas/severity_property"
-                          },
-                          "status": {
-                            "$ref": "#/components/schemas/status"
-                          },
-                          "tags": {
-                            "type": "array",
-                            "items": {
-                              "type": "string"
-                            },
-                            "example": [
-                              "tag-1"
-                            ]
+                            "example": "none"
                           },
                           "name": {
                             "description": "The name of the connector. To create a case without a connector, use `none`.",
                             "type": "string",
-                            "example": "Case title 1"
+                            "example": "none"
                           },
                           "type": {
                             "$ref": "#/components/schemas/connector_types"
@@ -5794,11 +5741,11 @@
                     },
                     "description": {
                       "type": "string",
-                      "example": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
+                      "example": "A case description."
                     },
                     "duration": {
                       "type": "integer",
-                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.",
+                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
                       "example": 120
                     },
                     "external_service": {
@@ -5869,14 +5816,12 @@
                         "type": "string"
                       },
                       "example": [
-                        "phishing",
-                        "social engineering",
-                        "bubblegum"
+                        "tag-1"
                       ]
                     },
                     "title": {
                       "type": "string",
-                      "example": "This case will self-destruct in 5 seconds"
+                      "example": "Case title 1"
                     },
                     "totalAlerts": {
                       "type": "integer",
@@ -6152,11 +6097,11 @@
                     },
                     "description": {
                       "type": "string",
-                      "example": "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
+                      "example": "A case description."
                     },
                     "duration": {
                       "type": "integer",
-                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null.",
+                      "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
                       "example": 120
                     },
                     "external_service": {
@@ -6227,14 +6172,12 @@
                         "type": "string"
                       },
                       "example": [
-                        "phishing",
-                        "social engineering",
-                        "bubblegum"
+                        "tag-1"
                       ]
                     },
                     "title": {
                       "type": "string",
-                      "example": "This case will self-destruct in 5 seconds"
+                      "example": "Case title 1"
                     },
                     "totalAlerts": {
                       "type": "integer",
