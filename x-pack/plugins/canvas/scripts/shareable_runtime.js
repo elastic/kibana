@@ -12,6 +12,7 @@ const { promisify } = require('util');
 
 const del = require('del');
 const { run } = require('@kbn/dev-cli-runner');
+const { CiStatsReporter } = require('@kbn/ci-stats-reporter');
 const execa = require('execa');
 
 const asyncPipeline = promisify(pipeline);
@@ -103,6 +104,18 @@ run(
       }
     );
     log.success('...runtime built!');
+
+    const ciStats = CiStatsReporter.fromEnv();
+    if (ciStats.isEnabled()) {
+      await ciStats.metrics([
+        {
+          group: 'Canvas Sharable Runtime',
+          id: 'total size',
+          value: fs.statSync(SHAREABLE_RUNTIME_FILE).size,
+          limit: 8_200_000,
+        },
+      ]);
+    }
   },
   {
     description: `
