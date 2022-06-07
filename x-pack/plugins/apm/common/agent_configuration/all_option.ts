@@ -6,17 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ENVIRONMENT_ALL } from '../environment_filter_values';
 export const ALL_OPTION_VALUE = 'ALL_OPTION_VALUE';
 
 // human-readable label for service and environment. The "All" option should be translated.
 // Everything else should be returned verbatim
 export function getOptionLabel(value: string | undefined) {
-  if (
-    value === undefined ||
-    value === ALL_OPTION_VALUE ||
-    value === ENVIRONMENT_ALL.value
-  ) {
+  if (value === undefined || value === ALL_OPTION_VALUE) {
     return i18n.translate('xpack.apm.agentConfig.allOptionLabel', {
       defaultMessage: 'All',
     });
@@ -29,7 +24,7 @@ export function omitAllOption(value?: string) {
   return value === ALL_OPTION_VALUE ? undefined : value;
 }
 
-export const SERVICE_ALL = {
+export const ALL_OPTION = {
   value: ALL_OPTION_VALUE,
   label: getOptionLabel(ALL_OPTION_VALUE),
 };

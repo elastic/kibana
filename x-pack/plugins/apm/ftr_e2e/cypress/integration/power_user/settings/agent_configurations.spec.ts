@@ -104,7 +104,7 @@ describe('Agent configuration', () => {
   it('displays All label when selecting all option', () => {
     cy.intercept(
       'GET',
-      '/api/apm/settings/agent-configuration/environments?serviceName=ENVIRONMENT_ALL'
+      '/api/apm/settings/agent-configuration/environments'
     ).as('serviceEnvironmentApi');
     cy.contains('Create configuration').click();
     cy.get('[data-test-subj="serviceNameComboBox"]')
