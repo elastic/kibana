@@ -17,7 +17,7 @@ export function BackendOperationDetailLink(query: Query) {
 
   const { spanName } = query;
 
-  const link = router.link('/backend/operation', {
+  const link = router.link('/backends/operation', {
     query,
   });
 

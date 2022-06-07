@@ -35,17 +35,21 @@ export interface SpanMetricGroup {
   throughput: number | null;
   failureRate: number | null;
   impact: number | null;
-  currentStats?: {
-    latency: Coordinate[];
-    throughput: Coordinate[];
-    failureRate: Coordinate[];
-  };
-  previousStats?: {
-    latency: Coordinate[];
-    throughput: Coordinate[];
-    failureRate: Coordinate[];
-    impact: number;
-  };
+  currentStats:
+    | {
+        latency: Coordinate[];
+        throughput: Coordinate[];
+        failureRate: Coordinate[];
+      }
+    | undefined;
+  previousStats:
+    | {
+        latency: Coordinate[];
+        throughput: Coordinate[];
+        failureRate: Coordinate[];
+        impact: number;
+      }
+    | undefined;
 }
 
 export function getSpanMetricColumns({
