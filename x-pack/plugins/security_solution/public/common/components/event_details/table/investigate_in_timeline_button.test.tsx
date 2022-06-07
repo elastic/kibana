@@ -46,20 +46,6 @@ const hostIpData: EventFieldsData = {
   values: ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'],
 };
 
-const agentStatusFieldFromBrowserField: BrowserField = {
-  aggregatable: true,
-  category: 'agent',
-  description: 'Agent status.',
-  fields: {},
-  format: '',
-  indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-  name: AGENT_STATUS_FIELD_NAME,
-  readFromDocValues: false,
-  searchable: true,
-  type: 'string',
-  example: 'status',
-};
-
 describe('InvestigateInTimelineButton', () => {
   describe('When all props are provided', () => {
     test('it should display the add to timeline button', () => {
