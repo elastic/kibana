@@ -96,7 +96,7 @@ const CompactEmbeddableError = ({ children }: { children?: React.ReactNode }) =>
   const popoverButton = (
     <EuiLink onClick={() => setPopoverOpen((open) => !open)}>
       {i18n.translate('embeddableApi.panel.errorEmbeddable.learnMore', {
-        defaultMessage: 'learn more',
+        defaultMessage: 'Learn more.',
       })}
     </EuiLink>
   );
