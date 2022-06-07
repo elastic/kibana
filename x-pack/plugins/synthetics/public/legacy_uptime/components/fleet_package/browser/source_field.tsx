@@ -283,7 +283,6 @@ export const SourceField = ({
       'data-test-subj': `syntheticsSourceTab__inline`,
       content: (
         <EuiFormRow
-          style={{ minWidth: 600 }}
           isInvalid={isSourceInlineInvalid}
           error={
             <FormattedMessage
