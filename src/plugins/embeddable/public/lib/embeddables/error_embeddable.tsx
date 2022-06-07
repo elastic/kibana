@@ -6,10 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { EuiText, EuiIcon, EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React from 'react';
+import {
+  EuiText,
+  EuiIcon,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiLink,
+} from '@elastic/eui';
+import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaThemeProvider, Markdown } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { Embeddable } from './embeddable';
 import { EmbeddableInput, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { IContainer } from '../containers';
@@ -54,17 +63,7 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
     );
 
     const node = this.compact ? (
-      <EuiFlexGroup
-        style={{ height: '100%', whiteSpace: 'nowrap' }}
-        gutterSize="none"
-        alignItems="center"
-        justifyContent="center"
-      >
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="alert" color="danger" />
-        </EuiFlexItem>
-        <EuiFlexItem>{errorMarkdown}</EuiFlexItem>
-      </EuiFlexGroup>
+      <CompactEmbeddableError>{errorMarkdown}</CompactEmbeddableError>
     ) : (
       <div className="embPanel__error embPanel__content" data-test-subj="embeddableStackError">
         <EuiText color="subdued" size="xs">
@@ -90,3 +89,46 @@ export class ErrorEmbeddable extends Embeddable<EmbeddableInput, EmbeddableOutpu
     }
   }
 }
+
+const CompactEmbeddableError = ({ children }: { children?: React.ReactNode }) => {
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+
+  const popoverButton = (
+    <EuiLink onClick={() => setPopoverOpen((open) => !open)}>
+      {i18n.translate('embeddableApi.panel.errorEmbeddable.learnMore', {
+        defaultMessage: 'learn more',
+      })}
+    </EuiLink>
+  );
+
+  return (
+    <EuiFlexGroup
+      style={{ height: '100%', whiteSpace: 'nowrap' }}
+      gutterSize="none"
+      alignItems="center"
+      justifyContent="center"
+    >
+      <EuiFlexItem grow={false}>
+        <EuiIcon type="alert" color="danger" />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText>
+          <p>
+            {i18n.translate('embeddableApi.panel.errorEmbeddable.errorText', {
+              defaultMessage: 'A fatal error has occurred.',
+            })}
+          </p>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiPopover
+          button={popoverButton}
+          isOpen={isPopoverOpen}
+          closePopover={() => setPopoverOpen(false)}
+        >
+          {children}
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
