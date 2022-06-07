@@ -24,24 +24,20 @@ for i in "${journeys[@]}"; do
     echo "JOURNEY[${i}] is running"
 
     export TEST_PERFORMANCE_PHASE=WARMUP
-    export ELASTIC_APM_ACTIVE=false
     export JOURNEY_NAME="${i}"
 
     checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: WARMUP)" \
       node scripts/functional_tests \
-      --config x-pack/test/performance/config.playwright.ts \
-      --include "x-pack/test/performance/tests/playwright/${i}.ts" \
+      --config "x-pack/test/performance/journeys/${i}/config.ts" \
       --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
       --debug \
       --bail
 
     export TEST_PERFORMANCE_PHASE=TEST
-    export ELASTIC_APM_ACTIVE=true
 
     checks-reporter-with-killswitch "Run Performance Tests with Playwright Config (Journey:${i},Phase: TEST)" \
       node scripts/functional_tests \
-      --config x-pack/test/performance/config.playwright.ts \
-      --include "x-pack/test/performance/tests/playwright/${i}.ts" \
+      --config "x-pack/test/performance/journeys/${i}/config.ts" \
       --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
       --debug \
       --bail
