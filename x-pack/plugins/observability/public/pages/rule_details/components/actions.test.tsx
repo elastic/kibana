@@ -17,11 +17,11 @@ jest.mock('../../../utils/kibana_react', () => ({
   useKibana: jest.fn(() => mockUseKibanaReturnValue),
 }));
 
-jest.mock('../../../hooks/use_fetch_rule_actions', () => ({
+jest.mock('../../../hooks/use_fetch_rule_action_connectors', () => ({
   useFetchRuleActions: jest.fn(),
 }));
 
-const { useFetchRuleActions } = jest.requireMock('../../../hooks/use_fetch_rule_actions');
+const { useFetchRuleActions } = jest.requireMock('../../../hooks/use_fetch_rule_action_connectors');
 
 describe('Actions', () => {
   let wrapper: ReactWrapper<any>;
