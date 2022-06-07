@@ -1,5 +1,6 @@
-# Uploading scripts
-PUT _scripts/ml_hostriskscore_levels_script_{{space_name}}
+# Upload scripts
+# Script to assign risk level based on risk score
+PUT _scripts/ml_hostriskscore_levels_script
 {
   "script": {
     "lang": "painless",
@@ -7,7 +8,8 @@ PUT _scripts/ml_hostriskscore_levels_script_{{space_name}}
   }
 }
 
-PUT _scripts/ml_hostriskscore_map_script_{{space_name}}
+# Map script for the Host Risk Score transform 
+PUT _scripts/ml_hostriskscore_map_script
 {
   "script": {
     "lang": "painless",
@@ -15,7 +17,8 @@ PUT _scripts/ml_hostriskscore_map_script_{{space_name}}
   }
 }
 
-PUT _scripts/ml_hostriskscore_reduce_script_{{space_name}}
+# Reduce script for the Host Risk Score transform 
+PUT _scripts/ml_hostriskscore_reduce_script
 {
   "script": {
     "lang": "painless",
@@ -23,7 +26,8 @@ PUT _scripts/ml_hostriskscore_reduce_script_{{space_name}}
   }
 }
 
-PUT _scripts/ml_hostriskscore_init_script_{{space_name}}
+# Script to setup initial state for the Host Risk Score scripted metric aggregation
+PUT _scripts/ml_hostriskscore_init_script
 {
   "script": {
     "lang": "painless",
@@ -31,8 +35,9 @@ PUT _scripts/ml_hostriskscore_init_script_{{space_name}}
   }
 }
 
-# Upload ingest pipeline
-PUT _ingest/pipeline/ml_hostriskscore_ingest_pipeline_{{space_name}}
+# Upload the ingest pipeline
+# Ingest pipeline to add ingest timestamp and risk level to documents
+PUT _ingest/pipeline/ml_hostriskscore_ingest_pipeline
 {
   "processors": [
     {
@@ -53,7 +58,7 @@ PUT _ingest/pipeline/ml_hostriskscore_ingest_pipeline_{{space_name}}
     },
     {
       "script": {
-        "id": "ml_hostriskscore_levels_script_{{space_name}}",
+        "id": "ml_hostriskscore_levels_script",
         "params": {
           "risk_score": "risk_stats.risk_score"
         }
@@ -62,7 +67,7 @@ PUT _ingest/pipeline/ml_hostriskscore_ingest_pipeline_{{space_name}}
   ]
 }
 
-# Create the mappings for destination index of pivot transform
+# Create mappings for the destination index of the Host Risk Score pivot transform
 PUT ml_host_risk_score_{{space_name}}
 {
   "mappings":{
@@ -90,12 +95,13 @@ PUT ml_host_risk_score_{{space_name}}
   }
 }
 
-# Upload the pivot transform
+# Upload the Host Risk Score pivot transform
+# This transform runs hourly and calculates a risk score and risk level for hosts in a Kibana space
 PUT _transform/ml_hostriskscore_pivot_transform_{{space_name}}
 {
   "dest": {
     "index": "ml_host_risk_score_{{space_name}}",
-    "pipeline": "ml_hostriskscore_ingest_pipeline_{{space_name}}"
+    "pipeline": "ml_hostriskscore_ingest_pipeline"
   },
   "frequency": "1h",
   "pivot": {
@@ -109,10 +115,10 @@ PUT _transform/ml_hostriskscore_pivot_transform_{{space_name}}
         "scripted_metric": {
           "combine_script": "return state",
           "init_script": {
-            "id": "ml_hostriskscore_init_script_{{space_name}}"
+            "id": "ml_hostriskscore_init_script"
           },
           "map_script": {
-            "id": "ml_hostriskscore_map_script_{{space_name}}"
+            "id": "ml_hostriskscore_map_script"
           },
           "params": {
             "lookback_time": 72,
@@ -140,7 +146,7 @@ PUT _transform/ml_hostriskscore_pivot_transform_{{space_name}}
             "zeta_constant": 2.612
           },
           "reduce_script": {
-            "id": "ml_hostriskscore_reduce_script_{{space_name}}"
+            "id": "ml_hostriskscore_reduce_script"
           }
         }
       }
@@ -155,7 +161,7 @@ PUT _transform/ml_hostriskscore_pivot_transform_{{space_name}}
   },
   "source": {
     "index": [
-      "-*elastic-cloud-logs-*,.alerts-security.alerts-{{space_name}},apm-*-transaction*,auditbeat-*,endgame-*,filebeat-*,logs-*,packetbeat-*,traces-apm*,winlogbeat-*"
+      ".alerts-security.alerts-{{space_name}}"
     ],
     "query": {
       "bool": {
@@ -183,7 +189,7 @@ PUT _transform/ml_hostriskscore_pivot_transform_{{space_name}}
 POST _transform/ml_hostriskscore_pivot_transform_{{space_name}}/_start
 
 
-# Create the mappings for destination index of latest transform
+# Create mappings for the destination index of the Host Risk Score latest transform
 PUT ml_host_risk_score_latest_{{space_name}}
 {
   "mappings":{
@@ -212,6 +218,7 @@ PUT ml_host_risk_score_latest_{{space_name}}
 }
 
 # Upload the latest transform
+# This transform gets the latest risk information about hosts in a Kibana space
 PUT _transform/ml_hostriskscore_latest_transform_{{space_name}}
 {
   "dest": {
