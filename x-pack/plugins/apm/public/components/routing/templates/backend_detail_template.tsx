@@ -20,6 +20,7 @@ import {
   getKueryBarBoolFilter,
   kueryBarPlaceholder,
 } from '../../../../common/backends';
+import { useOperationBreakdownEnabledSetting } from '../../../hooks/use_operations_breakdown_enabled_setting';
 
 interface Props {
   children: React.ReactNode;
@@ -36,6 +37,9 @@ export function BackendDetailTemplate({ children }: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const path = useApmRoutePath();
+
+  const isOperationsBreakdownFeatureEnabled =
+    useOperationBreakdownEnabledSetting();
 
   const kueryBarBoolFilter = getKueryBarBoolFilter({
     environment,
@@ -63,28 +67,30 @@ export function BackendDetailTemplate({ children }: Props) {
 
   const { data: { metadata } = {} } = backendMetadataFetch;
 
-  const tabs = [
-    {
-      key: 'overview',
-      href: router.link('/backends/overview', {
-        query,
-      }),
-      label: i18n.translate('xpack.apm.backendDetailOverview.title', {
-        defaultMessage: 'Overview',
-      }),
-      isSelected: path === '/backends/overview',
-    },
-    {
-      key: 'operations',
-      href: router.link('/backends/operations', {
-        query,
-      }),
-      label: i18n.translate('xpack.apm.backendDetailOperations.title', {
-        defaultMessage: 'Operations',
-      }),
-      isSelected: path === '/backends/operations',
-    },
-  ];
+  const tabs = isOperationsBreakdownFeatureEnabled
+    ? [
+        {
+          key: 'overview',
+          href: router.link('/backends/overview', {
+            query,
+          }),
+          label: i18n.translate('xpack.apm.backendDetailOverview.title', {
+            defaultMessage: 'Overview',
+          }),
+          isSelected: path === '/backends/overview',
+        },
+        {
+          key: 'operations',
+          href: router.link('/backends/operations', {
+            query,
+          }),
+          label: i18n.translate('xpack.apm.backendDetailOperations.title', {
+            defaultMessage: 'Operations',
+          }),
+          isSelected: path === '/backends/operations',
+        },
+      ]
+    : [];
 
   return (
     <ApmMainTemplate
