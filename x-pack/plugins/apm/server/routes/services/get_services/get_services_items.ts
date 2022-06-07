@@ -28,6 +28,7 @@ export async function getServicesItems({
   start,
   end,
   serviceGroup,
+  seed,
 }: {
   environment: string;
   kuery: string;
@@ -38,6 +39,7 @@ export async function getServicesItems({
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
+  seed?: number;
 }) {
   return withApmSpan('get_services_items', async () => {
     const params = {
@@ -50,6 +52,7 @@ export async function getServicesItems({
       start,
       end,
       serviceGroup,
+      seed,
     };
 
     const [

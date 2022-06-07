@@ -42,6 +42,7 @@ interface AggregationParams {
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
+  seed?: number;
 }
 
 export async function getServiceTransactionStats({
@@ -54,6 +55,7 @@ export async function getServiceTransactionStats({
   start,
   end,
   serviceGroup,
+  seed,
 }: AggregationParams) {
   const { apmEventClient } = setup;
 
@@ -93,9 +95,7 @@ export async function getServiceTransactionStats({
         },
         aggs: {
           sample: {
-            random_sampler: {
-              probability,
-            },
+            random_sampler: { probability, ...(seed ? { seed } : {}) },
             aggs: {
               services: {
                 terms: {

@@ -27,6 +27,7 @@ export async function getServicesFromErrorAndMetricDocuments({
   start,
   end,
   serviceGroup,
+  seed,
 }: {
   setup: Setup;
   environment: string;
@@ -36,6 +37,7 @@ export async function getServicesFromErrorAndMetricDocuments({
   start: number;
   end: number;
   serviceGroup: ServiceGroup | null;
+  seed?: number;
 }) {
   const { apmEventClient } = setup;
 
@@ -59,9 +61,7 @@ export async function getServicesFromErrorAndMetricDocuments({
         },
         aggs: {
           sample: {
-            random_sampler: {
-              probability,
-            },
+            random_sampler: { probability, ...(seed ? { seed } : {}) },
             aggs: {
               services: {
                 terms: {

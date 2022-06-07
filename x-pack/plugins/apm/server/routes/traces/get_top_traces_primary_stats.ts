@@ -47,8 +47,9 @@ interface TopTracesParams {
   start: number;
   end: number;
   setup: Setup;
+  seed?: number;
 }
-export function getTopTracesPrimaryStats({
+export async function getTopTracesPrimaryStats({
   environment,
   kuery,
   probability,
@@ -57,6 +58,7 @@ export function getTopTracesPrimaryStats({
   start,
   end,
   setup,
+  seed,
 }: TopTracesParams) {
   return withApmSpan('get_top_traces_primary_stats', async () => {
     const response = await setup.apmEventClient.search(
@@ -104,7 +106,7 @@ export function getTopTracesPrimaryStats({
           },
           aggs: {
             sample: {
-              random_sampler: { probability },
+              random_sampler: { probability, ...(seed ? { seed } : {}) },
               aggs: {
                 transaction_groups: {
                   composite: {

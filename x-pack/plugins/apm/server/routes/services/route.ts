@@ -53,6 +53,7 @@ import { getSortedAndFilteredServices } from './get_services/get_sorted_and_filt
 import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
+import { getRandomSamplerSeed } from '../../lib/helpers/get_random_sampler_seed';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
@@ -104,7 +105,14 @@ const servicesRoute = createApmServerRoute({
       }
     >;
   }> {
-    const { context, params, logger } = resources;
+    const {
+      context,
+      params,
+      logger,
+      request,
+      plugins: { security },
+    } = resources;
+
     const {
       environment,
       kuery,
@@ -127,6 +135,8 @@ const servicesRoute = createApmServerRoute({
       start,
       end,
     });
+
+    const seed = await getRandomSamplerSeed({ security, request });
     return getServices({
       environment,
       kuery,
@@ -137,6 +147,7 @@ const servicesRoute = createApmServerRoute({
       start,
       end,
       serviceGroup,
+      seed,
     });
   },
 });
@@ -192,7 +203,12 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
     }>;
   }> => {
     const setup = await setupRequest(resources);
-    const { params } = resources;
+    const {
+      params,
+      request,
+      plugins: { security },
+    } = resources;
+
     const {
       environment,
       kuery,
@@ -213,6 +229,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       throw Boom.badRequest(`serviceNames cannot be empty`);
     }
 
+    const seed = await getRandomSamplerSeed({ security, request });
     return getServicesDetailedStatistics({
       environment,
       kuery,
@@ -223,6 +240,7 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       start,
       end,
       probability,
+      seed,
     });
   },
 });

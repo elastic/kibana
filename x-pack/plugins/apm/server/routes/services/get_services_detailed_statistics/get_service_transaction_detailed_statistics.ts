@@ -40,6 +40,7 @@ export async function getServiceTransactionDetailedStatistics({
   start,
   end,
   probability,
+  seed,
 }: {
   serviceNames: string[];
   environment: string;
@@ -50,6 +51,7 @@ export async function getServiceTransactionDetailedStatistics({
   start: number;
   end: number;
   probability: number;
+  seed?: number;
 }) {
   const { apmEventClient } = setup;
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
@@ -94,9 +96,7 @@ export async function getServiceTransactionDetailedStatistics({
         },
         aggs: {
           sample: {
-            random_sampler: {
-              probability,
-            },
+            random_sampler: { probability, ...(seed ? { seed } : {}) },
             aggs: {
               services: {
                 terms: {
