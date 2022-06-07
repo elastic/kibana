@@ -37,5 +37,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     loadTestFile(require.resolve('./classic/_filters'));
     loadTestFile(require.resolve('./_size'));
     loadTestFile(require.resolve('./classic/_size'));
+    loadTestFile(require.resolve('./_date_nanos'));
+    loadTestFile(require.resolve('./_date_nanos_custom_timestamp'));
   });
 }
