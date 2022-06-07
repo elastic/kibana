@@ -12221,8 +12221,6 @@
     "xpack.fleet.agentBulkActions.selectAll": "Tout sélectionner sur toutes les pages",
     "xpack.fleet.agentBulkActions.totalAgents": "Affichage {count, plural, one {d'# agent} other {de # agents}}",
     "xpack.fleet.agentBulkActions.totalAgentsWithLimit": "Affichage de {count} agent(s) sur {total}",
-    "xpack.fleet.agentBulkActions.unenrollAgents": "Désinscrire les agents",
-    "xpack.fleet.agentBulkActions.upgradeAgents": "Mettre à niveau les agents",
     "xpack.fleet.agentDetails.actionsButton": "Actions",
     "xpack.fleet.agentDetails.agentDetailsTitle": "Agent \"{id}\"",
     "xpack.fleet.agentDetails.agentNotFoundErrorDescription": "Impossible de trouver l'ID d'agent {agentId}",
