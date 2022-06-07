@@ -17,8 +17,8 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
   const artifactMap: Record<PLATFORM_TYPE, { downloadCommand: string }> = {
     linux: {
       downloadCommand: [
-        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-linux-x86_64.zip`,
-        `tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.zip`,
+        `curl -L -O ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz`,
+        `tar xzvf elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz`,
         `cd elastic-agent-${kibanaVersion}-linux-x86_64`,
       ].join(`\n`),
     },
@@ -31,8 +31,8 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
     },
     windows: {
       downloadCommand: [
-        `wget ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-windows-x86_64.tar.gz -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.tar.gz`,
-        `Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.tar.gz`,
+        `wget ${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-windows-x86_64.zip -OutFile elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
+        `Expand-Archive .\\elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
         `cd elastic-agent-${kibanaVersion}-windows-x86_64`,
       ].join(`\n`),
     },
