@@ -11,8 +11,8 @@
  * 2.0.
  */
 
-import { ENDPOINTS_ACTIONS_LOG_ROUTE } from '../../../../common/endpoint/constants';
-import { AgentsActionsLogRequestSchema } from '../../../../common/endpoint/schema/actions';
+import { ENDPOINTS_ACTION_LIST_ROUTE } from '../../../../common/endpoint/constants';
+import { EndpointActionListRequestSchema } from '../../../../common/endpoint/schema/actions';
 import { actionListHandler } from './list_handler';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
@@ -28,12 +28,12 @@ export function registerActionListRoutes(
 ) {
   router.get(
     {
-      path: ENDPOINTS_ACTIONS_LOG_ROUTE,
-      validate: AgentsActionsLogRequestSchema,
+      path: ENDPOINTS_ACTION_LIST_ROUTE,
+      validate: EndpointActionListRequestSchema,
       options: { authRequired: true, tags: ['access:securitySolution'] },
     },
     withEndpointAuthz(
-      { all: ['canIsolateHost'] },
+      { all: ['canAccessEndpointManagement'] },
       endpointContext.logFactory.get('endpointActionsLog'),
       actionListHandler(endpointContext)
     )

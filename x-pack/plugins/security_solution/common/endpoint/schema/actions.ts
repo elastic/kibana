@@ -49,23 +49,22 @@ export const ActionDetailsRequestSchema = {
   }),
 };
 
-export const AgentsActionsLogRequestSchema = {
+export const EndpointActionListRequestSchema = {
   query: schema.object({
-    action_types: schema.maybe(
+    agentIds: schema.maybe(
+      schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 })
+    ),
+    actionTypes: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 10 })
     ),
-    page: schema.number({ defaultValue: 1, min: 1 }),
-    page_size: schema.number({ defaultValue: 10, min: 1, max: 100 }),
-    start_date: schema.string(),
-    end_date: schema.string(),
-    user_ids: schema.maybe(
+    page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
+    pageSize: schema.maybe(schema.number({ defaultValue: 10, min: 1, max: 100 })),
+    startDate: schema.maybe(schema.string()),
+    endDate: schema.maybe(schema.string()),
+    userIds: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 20 })
     ),
   }),
-  params: schema.object({
-    agent_ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1, maxSize: 50 }),
-  }),
 };
 
-export type AgentsActionsLogRequestParams = TypeOf<typeof AgentsActionsLogRequestSchema.params>;
-export type AgentsActionsLogRequestQuery = TypeOf<typeof AgentsActionsLogRequestSchema.query>;
+export type EndpointActionListRequestQuery = TypeOf<typeof EndpointActionListRequestSchema.query>;

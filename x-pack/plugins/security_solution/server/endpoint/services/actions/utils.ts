@@ -60,7 +60,6 @@ export const mapToNormalizedActionRequest = (
   actionRequest: EndpointAction | LogsEndpointAction
 ): NormalizedActionRequest => {
   const type = 'ACTION_REQUEST';
-
   if (isLogsEndpointAction(actionRequest)) {
     return {
       agents: Array.isArray(actionRequest.agent.id)
@@ -261,11 +260,21 @@ const getAgentIdFromActionResponse = (
 };
 
 // common helpers used by old and new log API
-export const getDateFilters = ({ startDate, endDate }: { startDate: string; endDate: string }) => {
-  return [
-    { range: { '@timestamp': { gte: startDate } } },
-    { range: { '@timestamp': { lte: endDate } } },
-  ];
+export const getDateFilters = ({
+  startDate,
+  endDate,
+}: {
+  startDate?: string;
+  endDate?: string;
+}) => {
+  const dateFilters = [];
+  if (startDate) {
+    dateFilters.push({ range: { '@timestamp': { gte: startDate } } });
+  }
+  if (endDate) {
+    dateFilters.push({ range: { '@timestamp': { lte: endDate } } });
+  }
+  return dateFilters;
 };
 
 export const getUniqueLogData = (activityLogEntries: ActivityLogEntry[]): ActivityLogEntry[] => {

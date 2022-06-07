@@ -12,10 +12,7 @@
  */
 
 import { RequestHandler } from '@kbn/core/server';
-import type {
-  AgentsActionsLogRequestParams,
-  AgentsActionsLogRequestQuery,
-} from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
 import { getActionList } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';
@@ -23,23 +20,23 @@ import type { EndpointAppContext } from '../../types';
 export const actionListHandler = (
   endpointContext: EndpointAppContext
 ): RequestHandler<
-  AgentsActionsLogRequestParams,
-  AgentsActionsLogRequestQuery,
+  unknown,
+  EndpointActionListRequestQuery,
   unknown,
   SecuritySolutionRequestHandlerContext
 > => {
-  const logger = endpointContext.logFactory.get('actions_log');
+  const logger = endpointContext.logFactory.get('action_list');
 
   return async (context, req, res) => {
     const {
-      params: { agent_ids: elasticAgentIds },
       query: {
+        agentIds: elasticAgentIds,
         page,
-        page_size: pageSize,
-        start_date: startDate,
-        end_date: endDate,
-        user_ids: userIds,
-        action_types: actionTypes,
+        pageSize,
+        startDate,
+        endDate,
+        userIds,
+        actionTypes,
       },
     } = req;
 

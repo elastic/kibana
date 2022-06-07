@@ -222,10 +222,10 @@ export interface ActionDetailsApiResponse {
   data: ActionDetails;
 }
 export interface ActionListApiResponse {
-  page: number;
-  pageSize: number;
-  startDate: string;
-  endDate: string;
+  page: number | undefined;
+  pageSize: number | undefined;
+  startDate: string | undefined;
+  endDate: string | undefined;
   userIds: string[] | undefined; // users that requested the actions
   commands: string[] | undefined; // type of actions, should have at least one always
   data: ActionDetails[];

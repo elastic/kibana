@@ -7,185 +7,163 @@
 
 import uuid from 'uuid';
 
-import { AgentsActionsLogRequestSchema } from '../../../../common/endpoint/schema/actions';
+import { EndpointActionListRequestSchema } from '../../../../common/endpoint/schema/actions';
 
 describe('Agents actions log API', () => {
   describe('Schema', () => {
-    it('should require agent_ids', () => {
+    it('should work without any query keys ', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.params.validate({}); // no agent_ids provided
-      }).toThrow();
+        EndpointActionListRequestSchema.query.validate({}); // no agent_ids provided
+      }).not.toThrow();
     });
 
     it('should require at least 1 agent ID', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.params.validate({ agent_ids: [] }); // no agent_ids provided
+        EndpointActionListRequestSchema.query.validate({ agentIds: [] }); // no agent_ids provided
       }).toThrow();
     });
 
-    it('should not accept a single agent ID if not in an array', () => {
+    it('should not accept an agent ID if not in an array', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.params.validate({ agent_ids: uuid.v4() });
+        EndpointActionListRequestSchema.query.validate({ agentIds: uuid.v4() });
       }).toThrow();
     });
 
-    it('should accept a single agent ID in an array', () => {
+    it('should accept an agent ID in an array', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.params.validate({ agent_ids: [uuid.v4()] });
+        EndpointActionListRequestSchema.query.validate({ agentIds: [uuid.v4()] });
       }).not.toThrow();
     });
 
     it('should accept multiple agent IDs in an array', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.params.validate({
-          agent_ids: [uuid.v4(), uuid.v4(), uuid.v4()],
+        EndpointActionListRequestSchema.query.validate({
+          agentIds: [uuid.v4(), uuid.v4(), uuid.v4()],
         });
       }).not.toThrow();
     });
 
     it('should limit multiple agent IDs in an array to 50', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.params.validate({
-          agent_ids: Array(51).fill(uuid.v4()),
+        EndpointActionListRequestSchema.query.validate({
+          agentIds: Array(51)
+            .fill(1)
+            .map(() => uuid.v4()),
         });
-      }).toThrow();
-    });
-
-    it('should not work when no query params', () => {
-      expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({});
       }).toThrow();
     });
 
     it('should work with all required query params', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({
+        EndpointActionListRequestSchema.query.validate({
           page: 10,
-          page_size: 100,
-          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
-          end_date: new Date().toISOString(), // today
+          pageSize: 100,
+          startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+          endDate: new Date().toISOString(), // today
         });
       }).not.toThrow();
     });
 
-    it('should not work without endDate', () => {
+    it('should not work without allowed page and pageSize params', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({
-          page: 1,
-          page_size: 100,
-          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
-        });
-      }).toThrow();
-    });
-
-    it('should not work without startDate', () => {
-      expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({
-          page: 1,
-          page_size: 100,
-          end_date: new Date().toISOString(), // today
-        });
-      }).toThrow();
-    });
-
-    it('should not work without allowed page and page_size params', () => {
-      expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({ page_size: 101 });
+        EndpointActionListRequestSchema.query.validate({ pageSize: 101 });
       }).toThrow();
     });
 
     it('should not work without valid userIds', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({
+        EndpointActionListRequestSchema.query.validate({
           page: 10,
-          page_size: 100,
-          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
-          end_date: new Date().toISOString(), // today
-          user_ids: [],
+          pageSize: 100,
+          startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+          endDate: new Date().toISOString(), // today
+          userIds: [],
         });
       }).toThrow();
     });
 
     it('should work with a single userIds query params', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({
+        EndpointActionListRequestSchema.query.validate({
           page: 10,
-          page_size: 100,
-          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
-          end_date: new Date().toISOString(), // today
-          user_ids: ['elastic'],
+          pageSize: 100,
+          startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+          endDate: new Date().toISOString(), // today
+          userIds: ['elastic'],
         });
       }).not.toThrow();
     });
 
     it('should work with multiple userIds query params', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({
+        EndpointActionListRequestSchema.query.validate({
           page: 10,
-          page_size: 100,
-          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
-          end_date: new Date().toISOString(), // today
-          user_ids: ['elastic', 'fleet'],
+          pageSize: 100,
+          startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+          endDate: new Date().toISOString(), // today
+          userIds: ['elastic', 'fleet'],
         });
       }).not.toThrow();
     });
 
     it('should limit multiple userIds to 20', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({
+        EndpointActionListRequestSchema.query.validate({
           page: 10,
-          page_size: 100,
-          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
-          end_date: new Date().toISOString(), // today
-          user_ids: Array(21).fill(uuid.v4()),
+          pageSize: 100,
+          startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+          endDate: new Date().toISOString(), // today
+          userIds: Array(21)
+            .fill(1)
+            .map(() => uuid.v4()),
         });
       }).toThrow();
     });
 
-    it('should work with action_type query params with a single action type', () => {
+    it('should work with actionType query params with a single action type', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({
+        EndpointActionListRequestSchema.query.validate({
           page: 10,
-          page_size: 100,
-          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
-          end_date: new Date().toISOString(), // today
-          action_types: ['isolate'],
+          pageSize: 100,
+          startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+          endDate: new Date().toISOString(), // today
+          actionTypes: ['isolate'],
         });
       }).not.toThrow();
     });
 
-    it('should not work with action_type query params with empty array', () => {
+    it('should not work with actionType query params with empty array', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({
+        EndpointActionListRequestSchema.query.validate({
           page: 10,
-          page_size: 100,
-          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
-          end_date: new Date().toISOString(), // today
-          action_types: [],
+          pageSize: 100,
+          startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+          endDate: new Date().toISOString(), // today
+          actionTypes: [],
         });
       }).toThrow();
     });
 
-    it('should work with action_type query params with multiple types', () => {
+    it('should work with actionType query params with multiple types', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({
+        EndpointActionListRequestSchema.query.validate({
           page: 10,
-          page_size: 100,
-          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
-          end_date: new Date().toISOString(), // today
-          action_types: ['isolate', 'unisolate'],
+          pageSize: 100,
+          startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+          endDate: new Date().toISOString(), // today
+          actionTypes: ['isolate', 'unisolate'],
         });
       }).not.toThrow();
     });
 
-    it('should limit action_type query params to a max of 10', () => {
+    it('should limit actionType query params to a max of 10', () => {
       expect(() => {
-        AgentsActionsLogRequestSchema.query.validate({
+        EndpointActionListRequestSchema.query.validate({
           page: 10,
-          page_size: 100,
-          start_date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
-          end_date: new Date().toISOString(), // today
-          action_types: [
+          pageSize: 100,
+          startDate: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), // yesterday
+          endDate: new Date().toISOString(), // today
+          actionTypes: [
             'isolate',
             'unisolate',
             'three',

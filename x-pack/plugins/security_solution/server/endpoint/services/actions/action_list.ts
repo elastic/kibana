@@ -22,28 +22,31 @@ import {
   mapToNormalizedActionRequest,
 } from './utils';
 
+interface GetActionListParam {
+  actionTypes?: string[];
+  context: SecuritySolutionRequestHandlerContext;
+  elasticAgentIds?: string[];
+  endDate?: string;
+  logger: Logger;
+  page?: number;
+  pageSize?: number;
+  startDate?: string;
+  userIds?: string[];
+}
+
 export const getActionList = async ({
   actionTypes,
   context,
   elasticAgentIds,
   endDate,
   logger,
-  page,
+  page: _page,
   pageSize,
   startDate,
   userIds,
-}: {
-  actionTypes?: string[];
-  context: SecuritySolutionRequestHandlerContext;
-  elasticAgentIds: string[];
-  endDate: string;
-  logger: Logger;
-  page: number;
-  pageSize: number;
-  startDate: string;
-  userIds?: string[];
-}): Promise<ActionListApiResponse> => {
-  const size = Math.floor(pageSize / 2);
+}: GetActionListParam): Promise<ActionListApiResponse> => {
+  const size = Math.floor(pageSize ?? 50 / 2);
+  const page = _page ?? 1;
   const from = page <= 1 ? 0 : page * size - size + 1;
 
   const data = await getActionDetailsList({
@@ -69,6 +72,10 @@ export const getActionList = async ({
   };
 };
 
+export interface GetActionDetailsListParam extends GetActionListParam {
+  from?: number;
+  size?: number;
+}
 const getActionDetailsList = async ({
   actionTypes,
   context,
@@ -79,17 +86,7 @@ const getActionDetailsList = async ({
   size,
   startDate,
   userIds,
-}: {
-  actionTypes?: string[];
-  context: SecuritySolutionRequestHandlerContext;
-  elasticAgentIds: string[];
-  endDate: string;
-  from: number;
-  logger: Logger;
-  size: number;
-  startDate: string;
-  userIds?: string[];
-}): Promise<ActionDetails[]> => {
+}: GetActionDetailsListParam): Promise<ActionDetails[]> => {
   let actions;
   let actionReqIds;
 
@@ -120,7 +117,7 @@ const getActionDetailsList = async ({
 
   // categorize actions as fleet and endpoint actions
   const categorizedActions = categorizeActionResults({
-    results: actions.body.hits.hits,
+    results: actions?.body?.hits?.hits,
   });
 
   // normalized actions with a flat structure to access relevant values
@@ -137,7 +134,7 @@ const getActionDetailsList = async ({
 
   // categorize responses as fleet and endpoint responses
   const categorizedResponses = categorizeResponseResults({
-    results: actionResponses.body.hits.hits,
+    results: actionResponses?.body?.hits?.hits,
   });
 
   // compute action details list for each action id

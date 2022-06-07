@@ -10,6 +10,7 @@ import { Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
+import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { EndpointError } from '../../../common/endpoint/errors';
 import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import type {
@@ -26,6 +27,9 @@ import {
 } from '../services/actions/constants';
 import { getDateFilters, logsEndpointActionsRegex } from '../services/actions/utils';
 import { catchAndWrapError } from './wrap_errors';
+import { doesLogsEndpointActionsIndexExist } from './yes_no_data_stream';
+import { GetActionDetailsListParam } from '../services/actions/action_list';
+import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 
 const queryOptions = {
   headers: {
@@ -50,17 +54,7 @@ export const getActionsForAgents = async ({
   size,
   startDate,
   userIds,
-}: {
-  actionTypes?: string[];
-  context: SecuritySolutionRequestHandlerContext;
-  logger: Logger;
-  elasticAgentIds: string[];
-  endDate: string;
-  from: number;
-  size: number;
-  startDate: string;
-  userIds?: string[];
-}): Promise<{
+}: GetActionDetailsListParam): Promise<{
   actionIds: string[];
   actionRequests: TransportResult<
     estypes.SearchResponse<EndpointAction | LogsEndpointAction>,
@@ -75,20 +69,27 @@ export const getActionsForAgents = async ({
       },
     });
   }
-  if (userIds && userIds.length) {
+  if (userIds?.length) {
     additionalFilters.push({ terms: { user_id: userIds } });
+  }
+  if (elasticAgentIds?.length) {
+    additionalFilters.push({ terms: { agents: elasticAgentIds } });
   }
 
   const dateFilters = getDateFilters({ startDate, endDate });
   const baseActionFilters = [
-    { terms: { agents: elasticAgentIds } },
     { term: { input_type: 'endpoint' } },
     { term: { type: 'INPUT_ACTION' } },
   ];
   const actionsFilters = [...baseActionFilters, ...dateFilters];
 
+  const hasLogsEndpointActionsIndex = await doesLogsEndpointActionsIndexExist({
+    context,
+    logger,
+    indexName: ENDPOINT_ACTIONS_INDEX,
+  });
   const actionsSearchQuery: SearchRequest = {
-    index: ACTION_REQUEST_INDICES,
+    index: hasLogsEndpointActionsIndex ? ACTION_REQUEST_INDICES : AGENT_ACTIONS_RESULTS_INDEX,
     size,
     from,
     body: {
@@ -141,7 +142,7 @@ export const getActionResponses = async ({
 }: {
   context: SecuritySolutionRequestHandlerContext;
   logger: Logger;
-  elasticAgentIds: string[];
+  elasticAgentIds?: string[];
   actionIds: string[];
 }): Promise<
   TransportResult<
@@ -149,6 +150,12 @@ export const getActionResponses = async ({
     unknown
   >
 > => {
+  const filter = [];
+  if (elasticAgentIds?.length) {
+    filter.push({ terms: { agent_id: elasticAgentIds } });
+  }
+  filter.push({ terms: { action_id: actionIds } });
+
   const responsesSearchQuery: SearchRequest = {
     index: ACTION_RESPONSE_INDICES,
     size: ACTIONS_SEARCH_PAGE_SIZE,
@@ -156,7 +163,7 @@ export const getActionResponses = async ({
     body: {
       query: {
         bool: {
-          filter: [{ terms: { action_id: actionIds } }, { terms: { agent_id: elasticAgentIds } }],
+          filter,
         },
       },
     },
