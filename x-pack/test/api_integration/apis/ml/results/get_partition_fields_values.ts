@@ -102,17 +102,17 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.partition_field.name).to.eql('airline');
         expect(body.partition_field.values.length).to.eql(6);
         expect(body.partition_field.values[0].value).to.eql('ACA');
-        expect(body.partition_field.values[0].maxRecordScore).to.be.above(50);
+        expect(body.partition_field.values[0].maxRecordScore).to.be.above(0);
         expect(body.partition_field.values[1].value).to.eql('JBU');
-        expect(body.partition_field.values[1].maxRecordScore).to.be.above(30);
+        expect(body.partition_field.values[1].maxRecordScore).to.be.above(0);
         expect(body.partition_field.values[2].value).to.eql('SWR');
-        expect(body.partition_field.values[2].maxRecordScore).to.be.above(25);
+        expect(body.partition_field.values[2].maxRecordScore).to.be.above(0);
         expect(body.partition_field.values[3].value).to.eql('BAW');
-        expect(body.partition_field.values[3].maxRecordScore).to.be.above(10);
+        expect(body.partition_field.values[3].maxRecordScore).to.be.above(0);
         expect(body.partition_field.values[4].value).to.eql('TRS');
-        expect(body.partition_field.values[4].maxRecordScore).to.be.above(7);
+        expect(body.partition_field.values[4].maxRecordScore).to.be.above(0);
         expect(body.partition_field.values[5].value).to.eql('EGF');
-        expect(body.partition_field.values[5].maxRecordScore).to.be.above(2);
+        expect(body.partition_field.values[5].maxRecordScore).to.be.above(0);
       });
 
       it('should fetch all values withing the time range sorting by name', async () => {
@@ -184,7 +184,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body.partition_field.name).to.eql('airline');
         expect(body.partition_field.values.length).to.eql(1);
         expect(body.partition_field.values[0].value).to.eql('JBU');
-        expect(body.partition_field.values[0].maxRecordScore).to.be.above(30);
+        expect(body.partition_field.values[0].maxRecordScore).to.be.above(0);
       });
     });
 
