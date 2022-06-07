@@ -15,7 +15,6 @@ import { EventFieldsData } from '../types';
 import { TimelineId } from '../../../../../common/types';
 
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { AGENT_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 
 jest.mock('../../../lib/kibana');
 
