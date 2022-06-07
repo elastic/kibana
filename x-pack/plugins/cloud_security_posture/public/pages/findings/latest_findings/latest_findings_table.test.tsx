@@ -68,8 +68,7 @@ describe('<FindingsTable />', () => {
   it('renders the zero state when status success and data has a length of zero ', async () => {
     const props: TableProps = {
       loading: false,
-      data: { page: [], total: 0 },
-      error: null,
+      items: [],
       sorting: { sort: { field: '@timestamp', direction: 'desc' } },
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
       setTableOptions: jest.fn(),
@@ -90,8 +89,7 @@ describe('<FindingsTable />', () => {
 
     const props: TableProps = {
       loading: false,
-      data: { page: data, total: 10 },
-      error: null,
+      items: data,
       sorting: { sort: { field: '@timestamp', direction: 'desc' } },
       pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
       setTableOptions: jest.fn(),
