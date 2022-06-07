@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-export * from './ccs';
-export * from './cluster';
-export * from './literal_value';
-export * from './pagination';
-export * from './query_string_boolean';
-export * from './query_string_number';
-export * from './sorting';
-export * from './time_range';
+import { actionLicenses } from '../mock';
+
+export const useGetActionLicense = () => {
+  return {
+    data: actionLicenses[0],
+    isLoading: false,
+    isError: false,
+    isFetching: false,
+  };
+};
