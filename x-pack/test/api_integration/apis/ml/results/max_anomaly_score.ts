@@ -54,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
     return { body, status };
   }
 
-  describe('GetAnomaliesTableData', function () {
+  describe('MaxAnomalyScore', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -86,7 +86,7 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(200, status, body);
       expect(body.maxScore).to.be.above(50);
     });
-    it('should response with an error when job with provided id does not exist', async () => {
+    it('should respond with an error when job with provided id does not exist', async () => {
       const requestBody = {
         jobIds: ['i_am_not_found'],
       };
