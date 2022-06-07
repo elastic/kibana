@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { parseJsonIfString } from '../helpers/parsers';
 import { TLSFields, ConfigKey } from '../types';
 import { Normalizer } from '../common/normalizers';
 import { defaultTLSFields } from '../contexts';
@@ -41,4 +42,4 @@ export const tlsNormalizers: TLSNormalizerMap = {
 export const tlsStringToObjectNormalizer = (value: string = '', key: keyof TLSFields) =>
   value ?? defaultTLSFields[key];
 export const tlsJsonToObjectNormalizer = (value: string = '', key: keyof TLSFields) =>
-  value ? JSON.parse(value) : defaultTLSFields[key];
+  value ? parseJsonIfString(value) : defaultTLSFields[key];
