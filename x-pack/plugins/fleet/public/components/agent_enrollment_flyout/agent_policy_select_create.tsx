@@ -14,7 +14,7 @@ import {
 } from '../../applications/fleet/sections/agents/components';
 import { AgentPolicyCreateInlineForm } from '../../applications/fleet/sections/agent_policy/components';
 import type { AgentPolicy } from '../../types';
-import { incrementPolicyName } from '../../services';
+import { incrementPolicyName, policyHasFleetServer } from '../../services';
 
 import { AgentPolicySelection } from '.';
 
@@ -47,6 +47,18 @@ export const SelectCreateAgentPolicy: React.FC<Props> = ({
         policy && !policy.is_managed && (!excludeFleetServer || !policy.is_default_fleet_server)
     );
   }, [agentPolicies, excludeFleetServer]);
+
+  useEffect(() => {
+    // Select default value if policy has no fleet server
+    if (
+      regularAgentPolicies.length === 1 &&
+      !selectedPolicyId &&
+      excludeFleetServer !== false &&
+      !policyHasFleetServer(regularAgentPolicies[0])
+    ) {
+      setSelectedPolicyId(regularAgentPolicies[0].id);
+    }
+  }, [regularAgentPolicies, selectedPolicyId, setSelectedPolicyId, excludeFleetServer]);
 
   const onAgentPolicyChange = useCallback(
     async (key?: string, policy?: AgentPolicy) => {
