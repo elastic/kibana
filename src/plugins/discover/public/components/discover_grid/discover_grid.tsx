@@ -48,9 +48,10 @@ import {
 import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import { ElasticSearchHit } from '../../types';
+import type { ElasticSearchHit, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
+import { convertValueToString } from '../../utils/convert_value_to_string';
 
 interface SortObj {
   id: string;
@@ -237,6 +238,21 @@ export const DiscoverGrid = ({
     });
   }, [displayedRows, indexPattern]);
 
+  const valueToStringConverter: ValueToStringConverter = useCallback(
+    (rowIndex, columnId, options) => {
+      return convertValueToString({
+        rowIndex,
+        rows: displayedRows,
+        rowsFlattened: displayedRowsFlattened,
+        dataView: indexPattern,
+        columnId,
+        services,
+        options,
+      });
+    },
+    [displayedRows, displayedRowsFlattened, indexPattern, services]
+  );
+
   /**
    * Pagination
    */
@@ -319,15 +335,28 @@ export const DiscoverGrid = ({
 
   const euiGridColumns = useMemo(
     () =>
-      getEuiGridColumns(
-        displayedColumns,
+      getEuiGridColumns({
+        columns: displayedColumns,
+        rowsCount: displayedRows.length,
         settings,
         indexPattern,
         showTimeCol,
         defaultColumns,
-        isSortEnabled
-      ),
-    [displayedColumns, indexPattern, showTimeCol, settings, defaultColumns, isSortEnabled]
+        isSortEnabled,
+        services,
+        valueToStringConverter,
+      }),
+    [
+      displayedColumns,
+      displayedRows,
+      indexPattern,
+      showTimeCol,
+      settings,
+      defaultColumns,
+      isSortEnabled,
+      services,
+      valueToStringConverter,
+    ]
   );
 
   const hideTimeColumn = useMemo(
@@ -452,6 +481,7 @@ export const DiscoverGrid = ({
             setIsFilterActive(false);
           }
         },
+        valueToStringConverter,
       }}
     >
       <span
