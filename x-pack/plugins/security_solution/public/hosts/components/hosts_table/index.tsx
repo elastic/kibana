@@ -7,6 +7,8 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { EuiButtonIcon } from '@elastic/eui';
 
 import {
   Columns,
@@ -31,6 +33,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { SecurityPageName } from '../../../../common/constants';
 import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../common/lib/kibana/hooks';
+import { StartServices } from '../../../types';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -69,6 +72,19 @@ const getSorting = (sortField: HostsFields, direction: Direction): SortingBasicT
   field: getNodeField(sortField),
   direction,
 });
+
+const useTypedKibana = () => useKibana<StartServices>();
+
+const useKibanaServices = () => {
+  const {
+    timelines,
+    data: {
+      query: { filterManager },
+    },
+  } = useTypedKibana().services;
+
+  return { timelines, filterManager };
+};
 
 const HostsTableComponent: React.FC<HostsTableProps> = ({
   data,
@@ -157,29 +173,48 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
 
+  const { timelines, filterManager } = useKibanaServices();
+  const filterForButton = useMemo(
+    () => timelines.getHoverActions().getFilterForValueButton,
+    [timelines]
+  );
+  const filterForProps = useMemo(() => {
+    return {
+      Component: () => <EuiButtonIcon iconType="arrowRight" aria-label="Next" />,
+      field: 'host.name',
+      filterManager,
+      onFilterAdded: () => {},
+      ownFocus: false,
+      showTooltip: false,
+      value: ['ubuntu-impish'],
+    };
+  }, [filterManager]);
   return (
-    <PaginatedTable
-      activePage={activePage}
-      columns={hostsColumns}
-      dataTestSubj={`table-${tableType}`}
-      headerCount={totalCount}
-      headerTitle={i18n.HOSTS}
-      headerUnit={i18n.UNIT(totalCount)}
-      id={id}
-      isInspect={isInspect}
-      itemsPerRow={rowItems}
-      limit={limit}
-      loading={loading}
-      loadPage={loadPage}
-      onChange={onChange}
-      pageOfItems={data}
-      setQuerySkip={setQuerySkip}
-      showMorePagesIndicator={showMorePagesIndicator}
-      sorting={sorting}
-      totalCount={fakeTotalCount}
-      updateLimitPagination={updateLimitPagination}
-      updateActivePage={updateActivePage}
-    />
+    <>
+      {<>{filterForButton(filterForProps)}</>}
+      <PaginatedTable
+        activePage={activePage}
+        columns={hostsColumns}
+        dataTestSubj={`table-${tableType}`}
+        headerCount={totalCount}
+        headerTitle={i18n.HOSTS}
+        headerUnit={i18n.UNIT(totalCount)}
+        id={id}
+        isInspect={isInspect}
+        itemsPerRow={rowItems}
+        limit={limit}
+        loading={loading}
+        loadPage={loadPage}
+        onChange={onChange}
+        pageOfItems={data}
+        setQuerySkip={setQuerySkip}
+        showMorePagesIndicator={showMorePagesIndicator}
+        sorting={sorting}
+        totalCount={fakeTotalCount}
+        updateLimitPagination={updateLimitPagination}
+        updateActivePage={updateActivePage}
+      />
+    </>
   );
 };
 
