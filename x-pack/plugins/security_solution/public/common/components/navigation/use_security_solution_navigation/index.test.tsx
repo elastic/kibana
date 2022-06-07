@@ -118,8 +118,7 @@ describe('useSecuritySolutionNavigation', () => {
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
-
-    expect(result?.current?.items?.[2].items?.[2].id).toEqual(SecurityPageName.users);
+    expect(result?.current?.items?.[3].items?.[2].id).toEqual(SecurityPageName.users);
   });
 
   // TODO: [kubernetes] remove when no longer experimental
@@ -129,7 +128,7 @@ describe('useSecuritySolutionNavigation', () => {
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
-    expect(result?.current?.items?.[2].items?.[3].id).toEqual(SecurityPageName.kubernetes);
+    expect(result?.current?.items?.[1].items?.[2].id).toEqual(SecurityPageName.kubernetes);
   });
 
   it('should omit host isolation exceptions if hook reports false', () => {
@@ -163,18 +162,7 @@ describe('useSecuritySolutionNavigation', () => {
         const caseNavItem = (result.current?.items || [])[3].items?.find(
           (item) => item['data-test-subj'] === 'navigation-cases'
         );
-        expect(caseNavItem).toMatchInlineSnapshot(`
-          Object {
-            "data-href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-            "data-test-subj": "navigation-cases",
-            "disabled": false,
-            "href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
-            "id": "cases",
-            "isSelected": false,
-            "name": "Cases",
-            "onClick": [Function],
-          }
-        `);
+        expect(caseNavItem).toMatchInlineSnapshot(`undefined`);
       });
 
       it('should not display the cases navigation item when the user does not have read permissions', () => {
