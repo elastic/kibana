@@ -21,7 +21,7 @@ describe('AnalyticsNoDataPageComponent', () => {
         kibanaGuideDocLink={'http://www.test.com'}
       />
     );
-    expect(component.render()).toMatchSnapshot();
+    expect(component).toMatchSnapshot();
 
     expect(component.find(KibanaNoDataPage).length).toBe(1);
 
