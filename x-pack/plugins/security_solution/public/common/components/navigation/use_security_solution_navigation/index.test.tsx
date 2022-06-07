@@ -118,6 +118,7 @@ describe('useSecuritySolutionNavigation', () => {
       () => useSecuritySolutionNavigation(),
       { wrapper: TestProviders }
     );
+
     expect(result?.current?.items?.[3].items?.[2].id).toEqual(SecurityPageName.users);
   });
 
@@ -159,10 +160,21 @@ describe('useSecuritySolutionNavigation', () => {
           { wrapper: TestProviders }
         );
 
-        const caseNavItem = (result.current?.items || [])[3].items?.find(
+        const caseNavItem = (result.current?.items || [])[4].items?.find(
           (item) => item['data-test-subj'] === 'navigation-cases'
         );
-        expect(caseNavItem).toMatchInlineSnapshot(`undefined`);
+        expect(caseNavItem).toMatchInlineSnapshot(`
+          Object {
+            "data-href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "data-test-subj": "navigation-cases",
+            "disabled": false,
+            "href": "securitySolutionUI/cases?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+            "id": "cases",
+            "isSelected": false,
+            "name": "Cases",
+            "onClick": [Function],
+          }
+        `);
       });
 
       it('should not display the cases navigation item when the user does not have read permissions', () => {
