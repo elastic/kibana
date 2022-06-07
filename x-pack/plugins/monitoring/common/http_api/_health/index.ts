@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import * as rt from 'io-ts';
+import { numberFromStringRT, timestampFromStringRT } from '../shared';
 
-export const GetDataStreamsListRequestSchema = {
-  params: schema.object({
-    use_terms_enum: schema.boolean({ defaultValue: false }),
-  }),
-};
+export const getHealthRequestQueryRT = rt.partial({
+  min: timestampFromStringRT,
+  max: timestampFromStringRT,
+  timeout: numberFromStringRT,
+});
