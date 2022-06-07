@@ -10,7 +10,7 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css as emotion } from '@emotion/css';
 
-import svg from './data_view_illustration.svg';
+import svg from '!raw-loader!./data_view_illustration.svg';
 
 export const DataViewIllustration = () => {
   const { euiTheme } = useEuiTheme();
@@ -25,5 +25,6 @@ export const DataViewIllustration = () => {
     }
   `;
 
-  return <img src={svg} css={css} alt="Data view illustration" />;
+  /* eslint-disable react/no-danger */
+  return <span css={css} dangerouslySetInnerHTML={{ __html: svg }} />;
 };
