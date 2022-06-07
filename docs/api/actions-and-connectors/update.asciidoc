@@ -1,5 +1,5 @@
 [[update-connector-api]]
-=== Update connector API
+== Update connector API
 ++++
 <titleabbrev>Update connector</titleabbrev>
 ++++
@@ -7,7 +7,7 @@
 Updates the attributes for a connector.
 
 [[update-connector-api-request]]
-==== {api-request-title}
+=== {api-request-title}
 
 `PUT <kibana host>:<port>/api/actions/connector/<id>`
 
@@ -21,7 +21,7 @@ You must have `all` privileges for the *Actions and Connectors* feature in the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 
 [[update-connector-api-params]]
-==== {api-path-parms-title}
+=== {api-path-parms-title}
 
 `id`::
   (Required, string) The ID of the connector.
@@ -29,26 +29,39 @@ You must have `all` privileges for the *Actions and Connectors* feature in the
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[role="child_attributes"]
 [[update-connector-api-request-body]]
-==== {api-request-body-title}
-
-`name`::
-  (Required, string) The new name of the connector.
+=== {api-request-body-title}
 
 `config`::
-  (Required, object) The new connector configuration. Configuration properties vary depending on the connector type. For information about the configuration properties, refer to <<action-types,Action and connector types>>.
+(Required, object) The new connector configuration. Configuration properties
+vary depending on the connector type. For example:
++
+--
+include::create.asciidoc[tag=connector-config]
+--
+
+`name`::
+(Required, string) The new name of the connector.
 
 `secrets`::
-  (Required^*^, object) The updated secrets configuration for the connector. Secrets properties vary depending on the connector type. For information about the secrets configuration properties, refer to <<action-types,Action and connector types>>.
+(Required^*^, object) The updated secrets configuration for the connector. Secrets
+properties vary depending on the connector type. For information about the
+secrets configuration properties, refer to
+<<action-types,Action and connector types>>.
++
+--
+include::create.asciidoc[tag=connector-secrets]
+--
 
 [[update-connector-api-codes]]
-==== {api-response-codes-title}
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[update-connector-api-example]]
-==== {api-examples-title}
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
