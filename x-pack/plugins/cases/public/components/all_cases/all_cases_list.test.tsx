@@ -133,12 +133,6 @@ describe('AllCasesListGeneric', () => {
     updateBulkStatus,
   };
 
-  const defaultActionLicense = {
-    data: null,
-    isLoading: false,
-    isError: false,
-  };
-
   const defaultColumnArgs = {
     caseDetailsNavigation: {
       href: jest.fn(),
