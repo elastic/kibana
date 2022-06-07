@@ -36,7 +36,7 @@ export interface FetchRuleSummaryProps {
   ruleId: string;
   http: HttpSetup;
 }
-export interface FetchRuleActionsConnectorsProps {
+export interface FetchRuleActionConnectorsProps {
   http: HttpSetup;
   ruleActions: any[];
 }

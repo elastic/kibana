@@ -17,7 +17,7 @@ import {
 import { suspendedComponentWithProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ActionsProps } from '../types';
-import { useFetchRuleActionsConnectors } from '../../../hooks/use_fetch_rule_actions_connectors';
+import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
 import { useKibana } from '../../../utils/kibana_react';
 
 export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
@@ -25,16 +25,16 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const { isLoadingActionsConnectors, actionsConnectors, errorActionsConnectors } =
-    useFetchRuleActionsConnectors({
+  const { isLoadingActionConnectors, actionConnectors, errorActionConnectors } =
+    useFetchRuleActionConnectors({
       http,
       ruleActions,
     });
   useEffect(() => {
-    if (errorActionsConnectors) {
-      toasts.addDanger({ title: errorActionsConnectors });
+    if (errorActionConnectors) {
+      toasts.addDanger({ title: errorActionConnectors });
     }
-  }, [errorActionsConnectors, toasts]);
+  }, [errorActionConnectors, toasts]);
   if (ruleActions && ruleActions.length <= 0)
     return (
       <EuiFlexItem>
@@ -52,10 +52,10 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
       ? actionGroup?.iconClass
       : suspendedComponentWithProps(actionGroup?.iconClass as React.ComponentType);
   }
-  if (isLoadingActionsConnectors) return <EuiLoadingSpinner size="s" />;
+  if (isLoadingActionConnectors) return <EuiLoadingSpinner size="s" />;
   return (
     <EuiFlexGroup direction="column">
-      {actionsConnectors.map(({ actionTypeId, name }) => (
+      {actionConnectors.map(({ actionTypeId, name }) => (
         <React.Fragment key={actionTypeId}>
           <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
             <EuiFlexItem grow={false}>
