@@ -20,6 +20,15 @@ import { EuiColorPicker } from '@elastic/eui';
 import { layerTypes } from '../../../common';
 import { act } from 'react-dom/test-utils';
 
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
+
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
 
@@ -345,6 +354,7 @@ describe('XY Config panels', () => {
       expect(component.find(EuiColorPicker).prop('color')).toEqual('red');
     });
     test('does not apply incorrect color', () => {
+      const setState = jest.fn()
       const state = {
         ...testState(),
         layers: [
@@ -373,7 +383,7 @@ describe('XY Config panels', () => {
               },
             },
           }}
-          setState={jest.fn()}
+          setState={setState}
           accessor="bar"
           groupId="left"
           state={state}
@@ -390,6 +400,16 @@ describe('XY Config panels', () => {
       });
       component.update()
       expect(component.find(EuiColorPicker).prop('color')).toEqual('INCORRECT_COLOR');
+      expect(setState).not.toHaveBeenCalled();
+
+      act(() => {
+        component.find('input[data-test-subj="euiColorPickerAnchor indexPattern-dimension-colorPicker"]').simulate('change', {
+          target: { value: '666666' },
+        });
+      });
+      component.update()
+      expect(component.find(EuiColorPicker).prop('color')).toEqual('666666');
+      expect(setState).toHaveBeenCalled();
     });
   });
 });
