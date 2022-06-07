@@ -72,7 +72,6 @@ export const formatTopLevelObject = (
         formatter.convert(val, 'html', {
           field,
           hit: row,
-          indexPattern,
         })
       )
       .join(', ');

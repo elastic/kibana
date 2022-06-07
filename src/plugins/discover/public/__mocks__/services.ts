@@ -95,4 +95,8 @@ export const discoverServiceMock = {
   },
   storage: new LocalStorageMock({}) as unknown as Storage,
   addBasePath: jest.fn(),
+  toastNotifications: {
+    addInfo: jest.fn(),
+    addWarning: jest.fn(),
+  },
 } as unknown as DiscoverServices;

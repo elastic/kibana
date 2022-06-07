@@ -9,3 +9,11 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export type ElasticSearchHit<T = unknown> = estypes.SearchHit<T>;
+
+export type HitsFlattened = Array<Record<string, unknown>>;
+
+export type ValueToStringConverter = (
+  rowIndex: number,
+  columnId: string,
+  options?: { disableMultiline?: boolean }
+) => { formattedString: string; withFormula: boolean };

@@ -3035,7 +3035,6 @@
     "discover.fieldNameIcons.unknownFieldAriaLabel": "未知字段",
     "discover.fieldNameIcons.versionFieldAriaLabel": "版本字段",
     "discover.goToDiscoverMainViewButtonText": "前往 Discover 主视图",
-    "discover.grid.copyToClipBoardButton": "复制到剪贴板",
     "discover.grid.documentHeader": "文档",
     "discover.grid.filterFor": "筛留",
     "discover.grid.filterForAria": "筛留此 {value}",
