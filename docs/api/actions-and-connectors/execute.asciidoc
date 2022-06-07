@@ -13,12 +13,14 @@ Runs a connector by ID.
 
 `POST <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>/_execute`
 
-[discrete]
+[[execute-connector-api-desc]]
 === {api-description-title}
 
-You can use this API to test an <<alerting-concepts-actions,action>>.
+You can use this API to test an <<alerting-concepts-actions,action>> that 
+involves interaction with Kibana services or integrations with third-party
+systems.
 
-[[execute-connector-api-params]]
+[[execute-connector-api-prereq]]
 === {api-prereq-title}
 
 You must have `read` privileges for the *Actions and Connectors* feature in the
