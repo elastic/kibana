@@ -69,7 +69,7 @@ export const getAllSyntheticsMonitorRoute: UMRestApiRouteFactory = () => ({
       type: syntheticsMonitorType,
       perPage,
       page,
-      sortField,
+      sortField: sortField === 'schedule.keyword' ? 'schedule.number' : sortField,
       sortOrder,
       filter: query || (search ? `${syntheticsMonitorType}.attributes.name: ${search}` : ''),
     });

@@ -56,6 +56,13 @@ export const syntheticsMonitor: SavedObjectsType = {
       custom_heartbeat_id: {
         type: 'keyword',
       },
+      schedule: {
+        properties: {
+          number: {
+            type: 'integer',
+          },
+        },
+      },
     },
   },
   management: {
