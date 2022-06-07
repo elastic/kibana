@@ -10,7 +10,7 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css as emotion } from '@emotion/css';
 
-import svg from '!raw-loader!./data_view_illustration.svg';
+import svg from '!!raw-loader!./data_view_illustration.svg';
 
 export const DataViewIllustration = () => {
   const { euiTheme } = useEuiTheme();
