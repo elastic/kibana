@@ -302,6 +302,7 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
                 })}
               >
                 <EuiComboBox
+                  compressed
                   singleSelection={{ asPlainText: true }}
                   options={TIMEZONE_OPTIONS}
                   selectedOptions={selectedTimezone}
