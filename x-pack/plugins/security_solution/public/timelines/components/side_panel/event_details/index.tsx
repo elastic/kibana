@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { some } from 'lodash/fp';
 import { EuiSpacer } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 
 import deepEqual from 'fast-deep-equal';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -16,11 +15,11 @@ import { BrowserFields, DocValueFields } from '../../../../common/containers/sou
 import { ExpandableEvent, ExpandableEventTitle } from './expandable_event';
 import { useTimelineEventsDetails } from '../../../containers/details';
 import { TimelineTabs } from '../../../../../common/types/timeline';
-import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
 import { buildHostNamesFilter } from '../../../../../common/search_strategy';
 import { useHostRiskScore, HostRisk } from '../../../../risk_score/containers';
 import { useHostIsolationTools } from './use_host_isolation_tools';
 import { FlyoutBody, FlyoutHeader, FlyoutFooter } from './flyout';
+import { useBasicDataFromDetailsData } from './helpers';
 
 interface EventDetailsPanelProps {
   browserFields: BrowserFields;
@@ -73,27 +72,8 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     showHostIsolationPanel,
   } = useHostIsolationTools();
 
-  const isAlert = some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, detailsData);
-
-  const ruleName = useMemo(
-    () => getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.name' }, detailsData),
-    [detailsData]
-  );
-
-  const alertId = useMemo(
-    () => getFieldValue({ category: '_id', field: '_id' }, detailsData),
-    [detailsData]
-  );
-
-  const hostName = useMemo(
-    () => getFieldValue({ category: 'host', field: 'host.name' }, detailsData),
-    [detailsData]
-  );
-
-  const timestamp = useMemo(
-    () => getFieldValue({ category: 'base', field: '@timestamp' }, detailsData),
-    [detailsData]
-  );
+  const { alertId, isAlert, hostName, ruleName, timestamp } =
+    useBasicDataFromDetailsData(detailsData);
 
   const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
     filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,

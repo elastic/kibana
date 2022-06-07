@@ -6,7 +6,7 @@
  */
 import type { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { EntityType, TimelineId } from '@kbn/timelines-plugin/common';
-import { noop, some } from 'lodash/fp';
+import { noop } from 'lodash/fp';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { buildHostNamesFilter } from '../../../../../../common/search_strategy';
@@ -18,7 +18,7 @@ import { FlyoutFooter } from './footer';
 import { useTimelineEventsDetails } from '../../../../containers/details';
 import { useSourcererDataView } from '../../../../../common/containers/sourcerer';
 import { SourcererScopeName } from '../../../../../common/store/sourcerer/model';
-import { getFieldValue } from '../../../../../detections/components/host_isolation/helpers';
+import { useBasicDataFromDetailsData } from '../helpers';
 
 export { FlyoutBody } from './body';
 export { FlyoutHeader } from './header';
@@ -44,27 +44,8 @@ export const useToGetInternalFlyout = () => {
     }
   );
 
-  const isAlert = some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, detailsData);
-
-  const ruleName = useMemo(
-    () => getFieldValue({ category: 'kibana', field: 'kibana.alert.rule.name' }, detailsData),
-    [detailsData]
-  );
-
-  const alertId = useMemo(
-    () => getFieldValue({ category: '_id', field: '_id' }, detailsData),
-    [detailsData]
-  );
-
-  const hostName = useMemo(
-    () => getFieldValue({ category: 'host', field: 'host.name' }, detailsData),
-    [detailsData]
-  );
-
-  const timestamp = useMemo(
-    () => getFieldValue({ category: 'base', field: '@timestamp' }, detailsData),
-    [detailsData]
-  );
+  const { alertId, isAlert, hostName, ruleName, timestamp } =
+    useBasicDataFromDetailsData(detailsData);
 
   const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
     filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
