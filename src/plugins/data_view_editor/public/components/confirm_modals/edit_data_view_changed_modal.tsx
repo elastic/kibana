@@ -24,9 +24,9 @@ export const editDataViewModal = ({ dataViewName, overlays, onEdit }: EditDataVi
       }),
       {
         confirmButtonText: i18n.translate(
-          'indexPatternEditor.editDataView.editConfirmationModal.editButton',
+          'indexPatternEditor.editDataView.editConfirmationModal.confirmButton',
           {
-            defaultMessage: 'Edit',
+            defaultMessage: 'Confirm',
           }
         ),
         title: i18n.translate('indexPatternEditor.editDataView.editConfirmationModal.editHeader', {

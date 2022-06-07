@@ -127,11 +127,13 @@ export class DataView implements DataViewBase {
    * Map of runtime field definitions by field name
    */
   private runtimeFieldMap: Record<string, RuntimeFieldSpec>;
-
   /**
    * Prevents errors when index pattern exists before indices
    */
   public readonly allowNoIndex: boolean = false;
+  /**
+   * Name of the data view. Human readable name used to differentiate data view.
+   */
   public name: string = '';
 
   /**

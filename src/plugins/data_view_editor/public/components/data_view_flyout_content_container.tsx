@@ -27,24 +27,24 @@ const IndexPatternFlyoutContentContainer = ({
 
   const onSaveClick = async (dataViewSpec: DataViewSpec) => {
     try {
-      let indexPattern;
+      let saveResponse;
       if (editData) {
         const { name = '', timeFieldName, title = '' } = dataViewSpec;
         editData.title = title;
         editData.name = name;
         editData.timeFieldName = timeFieldName;
-        indexPattern = await dataViews.updateSavedObject(editData);
+        saveResponse = await dataViews.updateSavedObject(editData);
       } else {
-        indexPattern = await dataViews.createAndSave(dataViewSpec);
+        saveResponse = await dataViews.createAndSave(dataViewSpec);
       }
 
-      if (indexPattern && !(indexPattern instanceof Error)) {
+      if (saveResponse && !(saveResponse instanceof Error)) {
         const message = i18n.translate('indexPatternEditor.saved', {
           defaultMessage: "Saved '{indexPatternName}'",
-          values: { indexPatternName: indexPattern.getName() },
+          values: { indexPatternName: saveResponse.getName() },
         });
         notifications.toasts.addSuccess(message);
-        await onSave(indexPattern);
+        await onSave(saveResponse);
       }
     } catch (e) {
       const title = i18n.translate('indexPatternEditor.dataView.unableSaveLabel', {
