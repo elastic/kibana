@@ -9,11 +9,11 @@
 import { constant, trimEnd, trimStart, get } from 'lodash';
 import { FieldFormat } from './field_format';
 import { asPrettyString } from './utils';
-import { FieldFormatParams } from './types';
+import { FieldFormatParams, TextContextTypeOptions } from './types';
 
 const getTestFormat = (
   _params?: FieldFormatParams,
-  textConvert = (val: string) => asPrettyString(val),
+  textConvert = (val: string, options?: TextContextTypeOptions) => asPrettyString(val, options),
   htmlConvert?: (val: string) => string
 ) =>
   new (class TestFormat extends FieldFormat {
