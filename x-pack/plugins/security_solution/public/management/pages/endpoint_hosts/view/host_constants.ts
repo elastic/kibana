@@ -19,6 +19,17 @@ export const HOST_STATUS_TO_BADGE_COLOR = Object.freeze<{
   [HostStatus.UNENROLLED]: 'default',
 });
 
+export const HOST_STATUS_TO_HEALTH_COLOR = Object.freeze<{
+  [key in HostStatus]: string;
+}>({
+  [HostStatus.HEALTHY]: 'success',
+  [HostStatus.UNHEALTHY]: 'warning',
+  [HostStatus.UPDATING]: 'primary',
+  [HostStatus.OFFLINE]: 'subdued',
+  [HostStatus.INACTIVE]: 'subdued',
+  [HostStatus.UNENROLLED]: 'subdued',
+});
+
 export const POLICY_STATUS_TO_HEALTH_COLOR = Object.freeze<{
   [key in keyof typeof HostPolicyResponseActionStatus]: string;
 }>({
