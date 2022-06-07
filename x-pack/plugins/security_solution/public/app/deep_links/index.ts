@@ -137,6 +137,7 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
         defaultMessage: 'Detection & Response',
       }),
     ],
+    searchable: true,
   },
   {
     id: SecurityPageName.detections,
