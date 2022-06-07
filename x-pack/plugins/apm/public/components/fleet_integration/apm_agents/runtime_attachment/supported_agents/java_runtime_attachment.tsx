@@ -98,7 +98,9 @@ export function JavaRuntimeAttachment({ newPolicy, onChange }: Props) {
         ({ type }) => type === 'apm'
       );
       onChange({
-        isValid: validateVersion(runtimeAttachmentSettings.version),
+        isValid:
+          !runtimeAttachmentSettings.enabled ||
+          validateVersion(runtimeAttachmentSettings.version),
         updatedPolicy: {
           ...newPolicy,
           inputs: [
