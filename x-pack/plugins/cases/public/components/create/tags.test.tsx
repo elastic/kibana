@@ -11,10 +11,10 @@ import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { waitFor } from '@testing-library/react';
 
 import { useForm, Form, FormHook } from '../../common/shared_imports';
-import { useGetTags } from '../../containers/use_get_tags';
 import { Tags } from './tags';
 import { schema, FormProps } from './schema';
 import { TestProviders } from '../../common/mock';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');
@@ -43,7 +43,7 @@ describe('Tags', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useGetTagsMock.mockReturnValue({ tags: ['test'] });
+    useGetTagsMock.mockReturnValue({ data: ['test'] });
   });
 
   it('it renders', async () => {

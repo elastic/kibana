@@ -18,12 +18,13 @@ import {
 } from '../../../common/ui/types';
 import { CaseStatuses } from '../../../common/api';
 import { FilterOptions } from '../../containers/types';
-import { useGetTags } from '../../containers/use_get_tags';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { FilterPopover } from '../filter_popover';
 import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
 import { SeverityFilter } from './severity_filter';
+import { useGetTags } from '../../containers/use_get_tags';
+import { CASE_LIST_CACHE_KEY } from '../../containers/constants';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -85,7 +86,7 @@ const CasesTableFiltersComponent = ({
   const [search, setSearch] = useState(initial.search);
   const [selectedTags, setSelectedTags] = useState(initial.tags);
   const [selectedOwner, setSelectedOwner] = useState(initial.owner);
-  const { tags, fetchTags } = useGetTags();
+  const { data: tags = [], refetch: fetchTags } = useGetTags(CASE_LIST_CACHE_KEY);
   const { reporters, respReporters, fetchReporters } = useGetReporters();
 
   const refetch = useCallback(() => {
