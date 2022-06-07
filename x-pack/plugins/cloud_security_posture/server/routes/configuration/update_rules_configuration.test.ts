@@ -57,7 +57,7 @@ describe('Update rules configuration API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
-      security: securityMock.createStart(),
+      security: securityMock.createSetup(),
     };
     defineUpdateRulesConfigRoute(router, cspContext);
 
@@ -73,7 +73,7 @@ describe('Update rules configuration API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
-      security: securityMock.createStart(),
+      security: securityMock.createSetup(),
     };
     defineUpdateRulesConfigRoute(router, cspContext);
     const [_, handler] = router.post.mock.calls[0];
@@ -98,7 +98,7 @@ describe('Update rules configuration API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
-      security: securityMock.createStart(),
+      security: securityMock.createSetup(),
     };
     defineUpdateRulesConfigRoute(router, cspContext);
     const [_, handler] = router.post.mock.calls[0];

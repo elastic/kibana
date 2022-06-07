@@ -85,7 +85,7 @@ describe('benchmarks API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
-      security: securityMock.createStart(),
+      security: securityMock.createSetup(),
     };
     defineGetBenchmarksRoute(router, cspContext);
 
@@ -101,7 +101,7 @@ describe('benchmarks API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
-      security: securityMock.createStart(),
+      security: securityMock.createSetup(),
     };
     defineGetBenchmarksRoute(router, cspContext);
     const [_, handler] = router.get.mock.calls[0];
@@ -126,7 +126,7 @@ describe('benchmarks API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
-      security: securityMock.createStart(),
+      security: securityMock.createSetup(),
     };
     defineGetBenchmarksRoute(router, cspContext);
     const [_, handler] = router.get.mock.calls[0];

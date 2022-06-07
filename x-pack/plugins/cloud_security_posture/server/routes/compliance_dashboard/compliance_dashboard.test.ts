@@ -30,7 +30,7 @@ describe('compliance dashboard permissions API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
-      security: securityMock.createStart(),
+      security: securityMock.createSetup(),
     };
     defineGetComplianceDashboardRoute(router, cspContext);
     const [_, handler] = router.get.mock.calls[0];
@@ -55,7 +55,7 @@ describe('compliance dashboard permissions API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
-      security: securityMock.createStart(),
+      security: securityMock.createSetup(),
     };
     defineGetComplianceDashboardRoute(router, cspContext);
     const [_, handler] = router.get.mock.calls[0];

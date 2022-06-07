@@ -31,7 +31,7 @@ describe('CspSetupStatus route', () => {
   const cspContext: CspAppContext = {
     logger,
     service: cspAppContextService,
-    security: securityMock.createStart(),
+    security: securityMock.createSetup(),
   };
 
   beforeEach(() => {

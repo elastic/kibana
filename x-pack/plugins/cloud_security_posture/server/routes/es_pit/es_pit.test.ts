@@ -27,7 +27,7 @@ describe('ES Point in time API endpoint', () => {
     const cspContext: CspAppContext = {
       logger: loggingSystemMock.createLogger(),
       service: new CspAppService(),
-      security: securityMock.createStart(),
+      security: securityMock.createSetup(),
     };
 
     defineEsPitRoute(router, cspContext);
@@ -41,7 +41,7 @@ describe('ES Point in time API endpoint', () => {
     const cspContext: CspAppContext = {
       logger: loggingSystemMock.createLogger(),
       service: new CspAppService(),
-      security: securityMock.createStart(),
+      security: securityMock.createSetup(),
     };
 
     defineEsPitRoute(router, cspContext);
@@ -65,7 +65,7 @@ describe('ES Point in time API endpoint', () => {
     const cspContext: CspAppContext = {
       logger: loggingSystemMock.createLogger(),
       service: new CspAppService(),
-      security: securityMock.createStart(),
+      security: securityMock.createSetup(),
     };
 
     defineEsPitRoute(router, cspContext);
@@ -89,7 +89,7 @@ describe('ES Point in time API endpoint', () => {
     const cspContext: CspAppContext = {
       logger: loggingSystemMock.createLogger(),
       service: new CspAppService(),
-      security: securityMock.createStart(),
+      security: securityMock.createSetup(),
     };
 
     defineEsPitRoute(router, cspContext);
