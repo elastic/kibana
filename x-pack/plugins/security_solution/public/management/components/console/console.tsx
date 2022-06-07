@@ -115,6 +115,7 @@ export const Console = memo<ConsoleProps>(
       <ConsoleStateProvider
         commands={commands}
         scrollToBottom={scrollToBottom}
+        managedKey={managedKey}
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
       >

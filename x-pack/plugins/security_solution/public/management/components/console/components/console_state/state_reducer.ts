@@ -13,23 +13,34 @@ import { getBuiltinCommands } from '../../service/builtin_commands';
 
 export type InitialStateInterface = Pick<
   ConsoleDataState,
-  'commands' | 'scrollToBottom' | 'dataTestSubj' | 'HelpComponent'
+  'commands' | 'scrollToBottom' | 'dataTestSubj' | 'HelpComponent' | 'managedKey'
 >;
 
-export const initiateState = ({
-  commands,
-  scrollToBottom,
-  dataTestSubj,
-  HelpComponent,
-}: InitialStateInterface): ConsoleDataState => {
-  return {
+export const initiateState = (
+  { commands, scrollToBottom, dataTestSubj, HelpComponent, managedKey }: InitialStateInterface,
+  managedConsolePriorState?: ConsoleDataState
+): ConsoleDataState => {
+  const state = managedConsolePriorState ?? {
     commands: getBuiltinCommands().concat(commands),
     scrollToBottom,
     HelpComponent,
     dataTestSubj,
+    managedKey,
     commandHistory: [],
     sidePanel: { show: null },
   };
+
+  if (managedConsolePriorState) {
+    Object.assign(state, {
+      commands: getBuiltinCommands().concat(commands),
+      scrollToBottom,
+      HelpComponent,
+      dataTestSubj,
+      managedKey,
+    });
+  }
+
+  return state;
 };
 
 export const stateDataReducer: ConsoleStoreReducer = (state, action) => {

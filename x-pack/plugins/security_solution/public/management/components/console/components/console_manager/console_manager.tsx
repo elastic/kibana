@@ -262,28 +262,43 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     <ConsoleManagerContext.Provider value={consoleManageContextClients}>
       {children}
 
-      <ConsolePageOverlay
-        onHide={handleOnHide}
-        runningConsoles={runningConsoles}
-        isHidden={!visibleConsole}
-        pageTitle={
-          visibleConsole &&
-          visibleConsole.TitleComponent && (
-            <visibleConsole.TitleComponent meta={visibleConsoleMeta} />
-          )
-        }
-        body={
-          visibleConsole &&
-          visibleConsole.BodyComponent && <visibleConsole.BodyComponent meta={visibleConsoleMeta} />
-        }
-        actions={
-          visibleConsole &&
-          visibleConsole.ActionComponents &&
-          visibleConsole.ActionComponents.map((ActionComponent) => {
-            return <ActionComponent meta={visibleConsoleMeta} />;
-          })
-        }
-      />
+      {visibleConsole && (
+        <ConsolePageOverlay
+          onHide={handleOnHide}
+          // runningConsoles={runningConsoles}
+          runningConsoles={
+            visibleConsole
+              ? [
+                  <Console
+                    {...visibleConsole.consoleProps}
+                    managedKey={visibleConsole.key}
+                    key={visibleConsole.client.id}
+                  />,
+                ]
+              : []
+          }
+          isHidden={!visibleConsole}
+          pageTitle={
+            visibleConsole &&
+            visibleConsole.TitleComponent && (
+              <visibleConsole.TitleComponent meta={visibleConsoleMeta} />
+            )
+          }
+          body={
+            visibleConsole &&
+            visibleConsole.BodyComponent && (
+              <visibleConsole.BodyComponent meta={visibleConsoleMeta} />
+            )
+          }
+          actions={
+            visibleConsole &&
+            visibleConsole.ActionComponents &&
+            visibleConsole.ActionComponents.map((ActionComponent) => {
+              return <ActionComponent meta={visibleConsoleMeta} />;
+            })
+          }
+        />
+      )}
     </ConsoleManagerContext.Provider>
   );
 });

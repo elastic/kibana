@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { useReducer, memo, createContext, PropsWithChildren, useContext } from 'react';
+import React, {
+  useReducer,
+  memo,
+  createContext,
+  PropsWithChildren,
+  useContext,
+  useEffect,
+} from 'react';
+import { useWithManagedConsole } from '../console_manager/console_manager';
 import { InitialStateInterface, initiateState, stateDataReducer } from './state_reducer';
 import { ConsoleStore } from './types';
 
@@ -17,12 +25,20 @@ type ConsoleStateProviderProps = PropsWithChildren<{}> & InitialStateInterface;
  * A Console wide data store for internal state management between inner components
  */
 export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
-  ({ commands, scrollToBottom, HelpComponent, dataTestSubj, children }) => {
+  ({ commands, scrollToBottom, HelpComponent, dataTestSubj, managedKey, children }) => {
+    const managedConsole = useWithManagedConsole(managedKey);
+
     const [state, dispatch] = useReducer(
       stateDataReducer,
       { commands, scrollToBottom, HelpComponent, dataTestSubj },
-      initiateState
+      (...args) => initiateState(...args, managedConsole?.consoleState)
     );
+
+    useEffect(() => {
+      if (managedConsole) {
+        managedConsole.consoleState = state;
+      }
+    }, [managedConsole, state]);
 
     return (
       <ConsoleStateContext.Provider value={{ state, dispatch }}>
