@@ -255,7 +255,6 @@ export class AbstractVectorSource extends AbstractSource implements IVectorSourc
 
   getFeatureActions({
     addFilters,
-    featureId,
     geoFieldNames,
     getActionContext,
     getFilterActions,

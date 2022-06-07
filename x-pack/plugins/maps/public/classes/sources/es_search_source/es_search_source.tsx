@@ -930,11 +930,9 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
   getFeatureActions({
     addFilters,
-    featureId,
     geoFieldNames,
     getActionContext,
     getFilterActions,
-    getGeojsonGeometry,
     mbFeature,
     onClose,
   }: GetFeatureActionsArgs): TooltipFeatureAction[] {
