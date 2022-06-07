@@ -20,6 +20,7 @@ import type {
 import type { JobMessage } from '../../../../common/types/audit_message';
 import type { JobAction } from '../../../../common/constants/job_actions';
 import type { AggFieldNamePair, RuntimeMappings } from '../../../../common/types/fields';
+import type { Group } from '../../../../common/types/groups';
 import type { ExistingJobsAndGroups } from '../job_service';
 import type {
   CategorizationAnalyzer,
@@ -83,7 +84,7 @@ export const jobsApiProvider = (httpService: HttpService) => ({
   },
 
   groups() {
-    return httpService.http<any>({
+    return httpService.http<Group[]>({
       path: `${ML_BASE_PATH}/jobs/groups`,
       method: 'GET',
     });
