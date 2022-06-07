@@ -13,11 +13,12 @@ import { getTags } from './api';
 import { CASE_TAGS_CACHE_KEY } from './constants';
 import * as i18n from './translations';
 
-export const useGetTags = (cacheKey: string = '') => {
+export const useGetTags = (cacheKey?: string) => {
   const toasts = useToasts();
   const { owner } = useCasesContext();
+  const key = [...(cacheKey ? [cacheKey] : []), CASE_TAGS_CACHE_KEY];
   return useQuery(
-    [cacheKey, CASE_TAGS_CACHE_KEY],
+    key,
     () => {
       const abortCtrl = new AbortController();
       return getTags(abortCtrl.signal, owner);
