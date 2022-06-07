@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { UsersKpiAuthenticationsStrategyResponse } from '@kbn/security-solution-plugin/common/search_strategy';
+import {
+  UsersKpiAuthenticationsStrategyResponse,
+  UsersQueries,
+} from '@kbn/security-solution-plugin/common/search_strategy';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
