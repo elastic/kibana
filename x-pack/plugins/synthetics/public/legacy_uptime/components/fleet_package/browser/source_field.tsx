@@ -84,31 +84,20 @@ export const SourceField = ({
     getDefaultTab(defaultConfig, isZipUrlSourceEnabled)
   );
   const [config, setConfig] = useState<SourceConfig>(defaultConfig);
-  const [touchedFields, setTouchedFields] = useState<Record<string, boolean>>({});
-
-  const isInlineInvalid = validate?.[ConfigKey.SOURCE_INLINE]?.({
-    [ConfigKey.SOURCE_INLINE]: config.inlineScript,
-  });
 
   useEffect(() => {
     onChange(config);
   }, [config, onChange]);
 
-  const onFieldTouched = (field: ConfigKey) => {
-    if (!touchedFields[field]) {
-      setTouchedFields((existing) => ({ ...existing, [field]: true }));
-    }
+  const isSourceInlineInvalid =
+    validate?.[ConfigKey.SOURCE_INLINE]?.({
+      [ConfigKey.SOURCE_INLINE]: config.inlineScript,
+    }) ?? false;
 
-    onFieldBlur(field);
-  };
-
-  const isWithInUptime = window.location.pathname.includes('/app/uptime');
-  const isZipUrlInvalid = isWithInUptime
-    ? touchedFields[ConfigKey.SOURCE_ZIP_URL] && !config.zipUrl
-    : !config.zipUrl;
-  const isScriptInvalid = isWithInUptime
-    ? touchedFields[ConfigKey.SOURCE_INLINE] || isInlineInvalid
-    : !config.inlineScript;
+  const isZipUrlInvalid =
+    validate?.[ConfigKey.SOURCE_ZIP_URL]?.({
+      [ConfigKey.SOURCE_ZIP_URL]: config.zipUrl,
+    }) ?? false;
 
   const zipUrlLabel = (
     <FormattedMessage
@@ -146,7 +135,7 @@ export const SourceField = ({
               onChange={({ target: { value } }) =>
                 setConfig((prevConfig) => ({ ...prevConfig, zipUrl: value }))
               }
-              onBlur={() => onFieldTouched(ConfigKey.SOURCE_ZIP_URL)}
+              onBlur={() => onFieldBlur(ConfigKey.SOURCE_ZIP_URL)}
               value={config.zipUrl}
               data-test-subj="syntheticsBrowserZipUrl"
             />
@@ -295,7 +284,7 @@ export const SourceField = ({
       content: (
         <EuiFormRow
           style={{ minWidth: 600 }}
-          isInvalid={isScriptInvalid}
+          isInvalid={isSourceInlineInvalid}
           error={
             <FormattedMessage
               id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.error"
@@ -320,7 +309,7 @@ export const SourceField = ({
             languageId={MonacoEditorLangId.JAVASCRIPT}
             onChange={(code) => {
               setConfig((prevConfig) => ({ ...prevConfig, inlineScript: code }));
-              onFieldTouched(ConfigKey.SOURCE_INLINE);
+              onFieldBlur(ConfigKey.SOURCE_INLINE);
             }}
             value={config.inlineScript}
           />
