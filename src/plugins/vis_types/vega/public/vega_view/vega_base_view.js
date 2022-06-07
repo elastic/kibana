@@ -62,7 +62,9 @@ function checkObjectForToJsonProperty(object) {
   if (object !== null && typeof object === 'object' && 'toJSON' in object) {
     return true;
   }
-
+  if (!object) {
+    return false;
+  }
   const hasProperty = Object.keys(object).some((key) => {
     if (object[key] !== null && typeof object[key] === 'object') {
       return checkObjectForToJsonProperty(object[key]);
