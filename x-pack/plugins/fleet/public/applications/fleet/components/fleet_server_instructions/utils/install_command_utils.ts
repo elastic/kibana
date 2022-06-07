@@ -64,6 +64,7 @@ export function getInstallCommandForPlatform(
   const downloadCommand =
     platform === 'windows'
       ? [
+          "$ProgressPreference = 'SilentlyContinue'",
           `wget ${artifact.fullUrl} -OutFile ${artifact.filename}`,
           `Expand-Archive .\\${artifact.filename}`,
           `cd ${artifact.unpackedDir}`,
