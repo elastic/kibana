@@ -18,6 +18,10 @@ import type {
 
 import type { PersistableFilter } from '@kbn/lens-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import {
+  FieldFormatParams as BaseFieldFormatParams,
+  SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
 
 export const ReportViewTypes = {
   dist: 'data-distribution',
@@ -121,11 +125,10 @@ export interface ConfigProps {
 
 export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
 
-type FormatType = 'duration' | 'number' | 'bytes' | 'percent';
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
 type OutputFormat = 'asSeconds' | 'asMilliseconds' | 'humanize' | 'humanizePrecise';
 
-export interface FieldFormatParams {
+export interface FieldFormatParams extends BaseFieldFormatParams {
   inputFormat?: InputFormat;
   outputFormat?: OutputFormat;
   outputPrecision?: number;
@@ -135,10 +138,7 @@ export interface FieldFormatParams {
 
 export interface FieldFormat {
   field: string;
-  format: {
-    id: FormatType;
-    params: FieldFormatParams;
-  };
+  format: SerializedFieldFormat<FieldFormatParams>;
 }
 
 export interface BuilderItem {

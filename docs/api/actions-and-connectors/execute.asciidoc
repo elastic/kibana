@@ -7,7 +7,7 @@
 Runs a connector by ID.
 
 [[execute-connector-api-request]]
-=== Request
+=== {api-request-title}
 
 `POST <kibana host>:<port>/api/actions/connector/<id>/_execute`
 
@@ -19,7 +19,17 @@ Runs a connector by ID.
 You can use this API to test an <<alerting-concepts-actions,action>>.
 
 [[execute-connector-api-params]]
-=== Path parameters
+=== {api-prereq-title}
+
+You must have `read` privileges for the *Actions and Connectors* feature in the
+*Management* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
+If you use an index connector, you must also have `all`, `create`, `index`, or
+`write` {ref}/security-privileges.html[indices privileges].
+
+[[execute-connector-api-params]]
+=== {api-path-parms-title}
 
 `id`::
   (Required, string) The ID of the connector.
@@ -28,24 +38,26 @@ You can use this API to test an <<alerting-concepts-actions,action>>.
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 [[execute-connector-api-request-body]]
-=== Request body
+=== {api-request-body-title}
 
 `params`::
   (Required, object) The parameters of the connector. Parameter properties vary depending on
   the connector type. For information about the parameter properties, refer to <<action-types,Action and connector types>>.
 
 [[execute-connector-api-codes]]
-=== Response code
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[execute-connector-api-example]]
-=== Example
+=== {api-examples-title}
+
+Run an index connector:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad/_execute  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+POST api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad/_execute
 {
   "params": {
     "documents": [
@@ -56,7 +68,7 @@ $ curl -X POST api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad/_execu
       }
     ]
   }
-}'
+}
 --------------------------------------------------
 // KIBANA
 
@@ -67,7 +79,7 @@ The API returns the following:
 {
   "status": "ok",
   "data": {
-    "took": 197,
+    "took": 10,
     "errors": false,
     "items": [
       {
@@ -81,7 +93,7 @@ The API returns the following:
             "successful": 1,
             "failed": 0
           },
-          "_seq_no": 0,
+          "_seq_no": 7,
           "_primary_term": 1,
           "status": 201
         }

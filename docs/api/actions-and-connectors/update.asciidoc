@@ -4,17 +4,24 @@
 <titleabbrev>Update connector</titleabbrev>
 ++++
 
-Updates the attributes for an existing connector.
+Updates the attributes for a connector.
 
 [[update-connector-api-request]]
-=== Request
+=== {api-request-title}
 
 `PUT <kibana host>:<port>/api/actions/connector/<id>`
 
 `PUT <kibana host>:<port>/s/<space_id>/api/actions/connector/<id>`
 
+[discrete]
+=== {api-prereq-title}
+
+You must have `all` privileges for the *Actions and Connectors* feature in the
+*Management* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
 [[update-connector-api-params]]
-=== Path parameters
+=== {api-path-parms-title}
 
 `id`::
   (Required, string) The ID of the connector.
@@ -24,7 +31,7 @@ Updates the attributes for an existing connector.
 
 [role="child_attributes"]
 [[update-connector-api-request-body]]
-=== Request body
+=== {api-request-body-title}
 
 `config`::
 (Required, object) The new connector configuration. Configuration properties
@@ -47,25 +54,24 @@ secrets configuration properties, refer to
 include::create.asciidoc[tag=connector-secrets]
 --
 
-
 [[update-connector-api-codes]]
-=== Response code
+=== {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[update-connector-api-example]]
-=== Example
+=== {api-examples-title}
 
 [source,sh]
 --------------------------------------------------
-$ curl -X PUT api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+PUT api/actions/connector/c55b6eb0-6bad-11eb-9f3b-611eebc6c3ad
 {
   "name": "updated-connector",
   "config": {
     "index": "updated-index"
   }
-}'
+}
 --------------------------------------------------
 // KIBANA
 
