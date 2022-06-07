@@ -40,7 +40,7 @@ export function DataViewsList({
       singleSelection="always"
       options={dataViewsList?.map(({ title, id, name }) => ({
         key: id,
-        label: name ? name : title,
+        label: name ?? title,
         value: id,
         checked: id === currentDataViewId ? 'on' : undefined,
       }))}
