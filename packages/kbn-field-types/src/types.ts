@@ -23,6 +23,7 @@ export enum ES_FIELD_TYPES {
 
   STRING = 'string',
   TEXT = 'text',
+  MATCH_ONLY_TEXT = 'match_only_text',
   KEYWORD = 'keyword',
   VERSION = 'version',
 
