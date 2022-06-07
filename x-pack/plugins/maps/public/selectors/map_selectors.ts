@@ -42,6 +42,7 @@ import {
   DataRequestDescriptor,
   CustomIcon,
   DrawState,
+  EMSVectorTileLayerDescriptor,
   EditState,
   Goto,
   HeatmapLayerDescriptor,
@@ -79,7 +80,10 @@ export function createLayerInstance(
     case LAYER_TYPE.RASTER_TILE:
       return new RasterTileLayer({ layerDescriptor, source: source as ITMSSource });
     case LAYER_TYPE.EMS_VECTOR_TILE:
-      return new EmsVectorTileLayer({ layerDescriptor, source: source as EMSTMSSource });
+      return new EmsVectorTileLayer({
+        layerDescriptor: layerDescriptor as EMSVectorTileLayerDescriptor,
+        source: source as EMSTMSSource,
+      });
     case LAYER_TYPE.HEATMAP:
       return new HeatmapLayer({
         layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,

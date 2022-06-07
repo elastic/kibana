@@ -256,6 +256,10 @@ export type HeatmapStyleDescriptor = StyleDescriptor & {
   colorRampName: string;
 };
 
+export type EMSVectorTileStyleDescriptor = StyleDescriptor & {
+  color: string;
+};
+
 export type StylePropertyOptions =
   | LabelBorderSizeOptions
   | SymbolizeAsOptions
