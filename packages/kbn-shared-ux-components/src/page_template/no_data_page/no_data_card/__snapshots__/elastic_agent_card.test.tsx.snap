@@ -231,7 +231,13 @@ exports[`ElasticAgentCard renders 1`] = `
                       />
                     }
                     paddingSize="l"
-                    title="Add Elastic Agent"
+                    title={
+                      <EuiScreenReaderOnly>
+                        <span>
+                          Add Elastic Agent
+                        </span>
+                      </EuiScreenReaderOnly>
+                    }
                   >
                     <EuiPanel
                       css="unknown styles"
@@ -366,7 +372,13 @@ exports[`ElasticAgentCard renders 1`] = `
                                   href="/app/integrations/browse"
                                   rel="noreferrer"
                                 >
-                                  Add Elastic Agent
+                                  <EuiScreenReaderOnly>
+                                    <span
+                                      className="euiScreenReaderOnly"
+                                    >
+                                      Add Elastic Agent
+                                    </span>
+                                  </EuiScreenReaderOnly>
                                 </a>
                               </span>
                             </EuiTitle>
