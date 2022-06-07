@@ -9,5 +9,5 @@ Custom content to occur below the list of links
 <b>Signature:</b>
 
 ```typescript
-content?: (element: HTMLDivElement) => () => void;
+content?: (element: HTMLDivElement, menuActions: ChromeHelpMenuActions) => () => void;
 ```
