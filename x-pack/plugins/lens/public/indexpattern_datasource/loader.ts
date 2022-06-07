@@ -85,7 +85,7 @@ export function convertDataViewIntoLensIndexPattern(dataView: DataView): IndexPa
   return {
     id: dataView.id!, // id exists for sure because we got index patterns by id
     title,
-    name: name ?? title,
+    name: name ? name : title,
     timeFieldName,
     fieldFormatMap:
       fieldFormatMap &&
