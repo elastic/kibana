@@ -112,14 +112,19 @@ export const eqlExecutor = async ({
       );
     }
 
+    result.success = true;
+
     if (newSignals?.length) {
       const insertResult = await bulkCreate(newSignals);
       result.bulkCreateTimes.push(insertResult.bulkCreateDuration);
       result.createdSignalsCount += insertResult.createdItemsCount;
       result.createdSignals = insertResult.createdItems;
+      if (insertResult.errors.length > 0) {
+        result.errors = insertResult.errors;
+        result.success = false;
+      }
     }
 
-    result.success = true;
     return result;
   });
 };

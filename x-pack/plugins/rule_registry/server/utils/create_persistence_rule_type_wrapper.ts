@@ -11,6 +11,14 @@ import { ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
+import { WRITING_DISABLED_ERROR_MSG } from './translations';
+
+const writingDisabledErrorResult = {
+  createdAlerts: [],
+  errors: {
+    [WRITING_DISABLED_ERROR_MSG]: { count: 1, statusCode: 500 },
+  },
+};
 
 export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper =
   ({ logger, ruleDataClient }) =>
@@ -103,6 +111,12 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                   });
 
                 if (response == null) {
+                  if (!ruleDataClient.isWriteEnabled()) {
+                    // It was not possible to initialize the writter and writing was disabled.
+                    // In this case, bilk() call will always fail to write any data.
+                    logger.debug('Writing is disabled.');
+                    return writingDisabledErrorResult;
+                  }
                   return { createdAlerts: [], errors: {} };
                 }
 
@@ -119,8 +133,10 @@ export const createPersistenceRuleTypeWrapper: CreatePersistenceRuleTypeWrapper 
                     .filter((_, idx) => response.body.items[idx].create?.status === 201),
                   errors: errorAggregator(response.body, [409]),
                 };
-              } else {
+              } else if (!ruleDataClient.isWriteEnabled()) {
                 logger.debug('Writing is disabled.');
+                return writingDisabledErrorResult;
+              } else {
                 return { createdAlerts: [], errors: {} };
               }
             },
