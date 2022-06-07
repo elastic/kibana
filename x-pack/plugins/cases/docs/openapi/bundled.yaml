@@ -19,11 +19,11 @@ servers:
 paths:
   /api/cases:
     post:
+      summary: Creates a case.
       description: >
-        Creates a case. You must have all privileges for the **Cases** feature
-        in the **Management**, **Observability**, or **Security** section of the
-        Kibana feature privileges, depending on the owner of the case you're
-        creating.
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're creating.
       tags:
         - cases
         - kibana
@@ -407,11 +407,11 @@ paths:
       servers:
         - url: https://localhost:5601
     delete:
+      summary: Deletes one or more cases.
       description: >
-        Deletes one or more cases. You must have all privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the cases you're deleting.
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're deleting.
       tags:
         - cases
         - kibana
@@ -432,11 +432,11 @@ paths:
       servers:
         - url: https://localhost:5601
     patch:
+      summary: Updates one or more cases.
       description: >
-        Updates one or more cases. You must have all privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the case you're updating.
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're updating.
       tags:
         - cases
         - kibana
@@ -831,11 +831,11 @@ paths:
       - url: https://localhost:5601
   /api/cases/_find:
     get:
+      summary: Retrieves a paginated subset of cases.
       description: >
-        Retrieves a paginated subset of cases. You must have read privileges for
-        the **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the cases you're seeking.
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
       tags:
         - cases
         - kibana
@@ -1218,11 +1218,11 @@ paths:
       - url: https://localhost:5601
   /api/cases/alerts/{alertId}:
     get:
+      summary: Returns the cases associated with a specific alert.
       description: >
-        Returns the cases associated with a specific alert. You must have read
-        privileges for the **Cases** feature in the **Management**,
-        **Observability**, or **Security** section of the Kibana feature
-        privileges, depending on the owner of the cases you're seeking.
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
       x-technical-preview: true
       tags:
         - cases
@@ -1255,12 +1255,13 @@ paths:
       - url: https://localhost:5601
   /api/cases/configure:
     get:
-      description: >
+      summary: >-
         Retrieves external connection details, such as the closure type and
-        default connector for cases. You must have read privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the case configuration.
+        default connector for cases.
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case configuration.
       tags:
         - cases
         - kibana
@@ -1440,17 +1441,18 @@ paths:
       servers:
         - url: https://localhost:5601
     post:
-      description: >
+      summary: >-
         Sets external connection details, such as the closure type and default
-        connector for cases. You must have all privileges for the **Cases**
-        feature in the **Management**, **Observability**, or **Security**
-        section of the Kibana feature privileges, depending on the owner of the
-        case configuration. Connectors are used to interface with external
-        systems. You must create a connector before you can use it in your
-        cases. Refer to the add connectors API. If you set a default connector,
-        it is automatically selected when you create cases in Kibana. If you use
-        the create case API, however, you must still specify all of the
-        connector details.
+        connector for cases.
+      description: >
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case configuration.
+        Connectors are used to interface with external systems. You must create
+        a connector before you can use it in your cases. Refer to the add
+        connectors API. If you set a default connector, it is automatically
+        selected when you create cases in Kibana. If you use the create case
+        API, however, you must still specify all of the connector details.
       tags:
         - cases
         - kibana
@@ -1760,14 +1762,16 @@ paths:
       - url: https://localhost:5601
   /api/cases/configure/{configurationId}:
     patch:
-      description: >
+      summary: >-
         Updates external connection details, such as the closure type and
-        default connector for cases. You must have all privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the case configuration. Connectors are used to interface with
-        external systems. You must create a connector before you can it in your
-        cases. Refer to the add connectors API.
+        default connector for cases.
+      description: >
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case configuration.
+        Connectors are used to interface with external systems. You must create
+        a connector before you can use it in your cases. Refer to the add
+        connectors API.
       tags:
         - cases
         - kibana
@@ -2120,10 +2124,11 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases:
     post:
+      summary: Creates a case.
       description: >
-        Creates a case. You must have all privileges for the **Cases** feature
-        in the **Management**, **Observability**, or **Security** section of the
-        Kibana feature privileges, depending on the owner of the case you're
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the
+        Kibana  feature privileges, depending on the owner of the case you're
         creating.
       tags:
         - cases
@@ -2509,11 +2514,12 @@ paths:
       servers:
         - url: https://localhost:5601
     delete:
+      summary: Deletes one or more cases.
       description: >
-        Deletes one or more cases. You must have all privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the cases you're deleting.
+        You must have `all` privileges for the **Cases** feature in the 
+        **Management**, **Observability**, or **Security** section of the
+        Kibana  feature privileges, depending on the owner of the cases you're
+        deleting.
       tags:
         - cases
         - kibana
@@ -2535,11 +2541,12 @@ paths:
       servers:
         - url: https://localhost:5601
     patch:
+      summary: Updates one or more cases.
       description: >
-        Updates one or more cases. You must have all privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the case you're updating.
+        You must have `all` privileges for the **Cases** feature in the 
+        **Management**, **Observability**, or **Security** section of the
+        Kibana  feature privileges, depending on the owner of the case you're
+        updating.
       tags:
         - cases
         - kibana
@@ -2935,11 +2942,11 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/_find:
     get:
+      summary: Retrieves a paginated subset of cases.
       description: >
-        Retrieves a paginated subset of cases. You must have read privileges for
-        the **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the cases you're seeking.
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
       tags:
         - cases
         - kibana
@@ -3325,11 +3332,11 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/alerts/{alertId}:
     get:
+      summary: Returns the cases associated with a specific alert.
       description: >
-        Returns the cases associated with a specific alert. You must have read
-        privileges for the **Cases** feature in the **Management**,
-        **Observability**, or **Security** section of the Kibana feature
-        privileges, depending on the owner of the cases you're seeking.
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're seeking.
       x-technical-preview: true
       tags:
         - cases
@@ -3363,12 +3370,13 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure:
     get:
-      description: >
+      summary: >-
         Retrieves external connection details, such as the closure type and
-        default connector for cases. You must have read privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the case configuration.
+        default connector for cases.
+      description: >
+        You must have `read` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case configuration.
       tags:
         - cases
         - kibana
@@ -3549,17 +3557,18 @@ paths:
       servers:
         - url: https://localhost:5601
     post:
-      description: >
+      summary: >-
         Sets external connection details, such as the closure type and default
-        connector for cases. You must have all privileges for the **Cases**
-        feature in the **Management**, **Observability**, or **Security**
-        section of the Kibana feature privileges, depending on the owner of the
-        case configuration. Connectors are used to interface with external
-        systems. You must create a connector before you can use it in your
-        cases. Refer to the add connectors API. If you set a default connector,
-        it is automatically selected when you create cases in Kibana. If you use
-        the create case API, however, you must still specify all of the
-        connector details.
+        connector for cases.
+      description: >
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case configuration.
+        Connectors are used to interface with external systems. You must create
+        a connector before you can use it in your cases. Refer to the add
+        connectors API. If you set a default connector, it is automatically
+        selected when you create cases in Kibana. If you use the create case
+        API, however, you must still specify all of the connector details.
       tags:
         - cases
         - kibana
@@ -3870,14 +3879,16 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/configure/{configurationId}:
     patch:
-      description: >
+      summary: >-
         Updates external connection details, such as the closure type and
-        default connector for cases. You must have all privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the case configuration. Connectors are used to interface with
-        external systems. You must create a connector before you can it in your
-        cases. Refer to the add connectors API.
+        default connector for cases.
+      description: >
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case configuration.
+        Connectors are used to interface with external systems. You must create
+        a connector before you can use it in your cases. Refer to the add
+        connectors API.
       tags:
         - cases
         - kibana
