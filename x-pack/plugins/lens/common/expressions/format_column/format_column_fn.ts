@@ -67,7 +67,7 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
         };
         // Some parent formatters are multi-fields and wrap the custom format into a "paramsPerField"
         // property. Here the format is passed to this property to make it work properly
-        if (col.meta.params?.params?.paramsPerField?.length) {
+        if ((col.meta.params?.params?.paramsPerField as SerializedFieldFormat[])?.length) {
           return withParams(col, {
             id: parentFormatId,
             params: {
@@ -77,13 +77,13 @@ export const formatColumnFn: FormatColumnExpressionFunction['fn'] = (
               // some wrapper formatters require params to be flatten out (i.e. terms) while others
               // require them to be in the params property (i.e. ranges)
               // so for now duplicate
-              paramsPerField: col.meta.params?.params?.paramsPerField.map(
-                (f: { id: string | undefined; params: Record<string, unknown> | undefined }) => ({
-                  ...f,
-                  params: { ...f.params, ...customParams },
-                  ...customParams,
-                })
-              ),
+              paramsPerField: (
+                col.meta.params?.params?.paramsPerField as SerializedFieldFormat[]
+              ).map((f) => ({
+                ...f,
+                params: { ...f.params, ...customParams },
+                ...customParams,
+              })),
             },
           });
         }

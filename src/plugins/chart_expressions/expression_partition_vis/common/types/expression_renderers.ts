@@ -24,7 +24,7 @@ export interface Dimension {
   accessor: number;
   format: {
     id?: string;
-    params?: SerializedFieldFormat<object>;
+    params?: SerializedFieldFormat;
   };
 }
 
@@ -129,7 +129,7 @@ export enum LegendDisplay {
 export interface BucketColumns extends DatatableColumn {
   format?: {
     id?: string;
-    params?: SerializedFieldFormat<object>;
+    params?: SerializedFieldFormat;
   };
 }
 

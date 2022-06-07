@@ -148,7 +148,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
     const { formatParams, format } = this.props;
     const { error, samples, sampleConverterType } = this.state;
 
-    const urlType = formatParams.type ?? format.getParamDefaults().type;
+    const urlType = formatParams.type ?? `${format.getParamDefaults().type}`;
     return (
       <Fragment>
         <EuiFormRow

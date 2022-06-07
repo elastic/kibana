@@ -11,11 +11,7 @@ import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { EuiDataGrid } from '@elastic/eui';
 import { IAggType } from '@kbn/data-plugin/public';
-import {
-  FieldFormatParams,
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '@kbn/field-formats-plugin/common';
+import { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { VisualizationContainer } from '../../visualization_container';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { LensIconChartDatatable } from '../../assets/chart_datatable';
@@ -110,7 +106,7 @@ describe('DatatableComponent', () => {
         <DatatableComponent
           data={data}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
+          formatFactory={(x) => x as unknown as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
@@ -130,7 +126,7 @@ describe('DatatableComponent', () => {
         <DatatableComponent
           data={data}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
+          formatFactory={(x) => x as unknown as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           rowHasRowClickTriggerActions={[true, true, true]}
@@ -151,7 +147,7 @@ describe('DatatableComponent', () => {
         <DatatableComponent
           data={data}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
+          formatFactory={(x) => x as unknown as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           rowHasRowClickTriggerActions={[false, false, false]}
@@ -729,7 +725,7 @@ describe('DatatableComponent', () => {
         <DatatableComponent
           data={data}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
+          formatFactory={(x) => x as unknown as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
@@ -764,7 +760,7 @@ describe('DatatableComponent', () => {
         <DatatableComponent
           data={data}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
+          formatFactory={(x) => x as unknown as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
@@ -789,7 +785,7 @@ describe('DatatableComponent', () => {
 
       const defaultProps = {
         data,
-        formatFactory: (x?: SerializedFieldFormat<FieldFormatParams>) => x as IFieldFormat,
+        formatFactory: (x?: SerializedFieldFormat) => x as unknown as IFieldFormat,
         dispatchEvent: onDispatchEvent,
         getType: jest.fn(),
         paletteService: chartPluginMock.createPaletteRegistry(),
@@ -825,7 +821,7 @@ describe('DatatableComponent', () => {
         <DatatableComponent
           data={data}
           args={args}
-          formatFactory={(x) => x as IFieldFormat}
+          formatFactory={(x) => x as unknown as IFieldFormat}
           dispatchEvent={onDispatchEvent}
           getType={jest.fn()}
           paletteService={chartPluginMock.createPaletteRegistry()}
