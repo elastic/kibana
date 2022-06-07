@@ -87,8 +87,8 @@ export class CiStatsPlugin {
 
       await ciStats.metrics([
         {
-          group: `canvas sharable runtime size`,
-          id: 'total',
+          group: `canvas sharable runtime`,
+          id: 'total size',
           value: entry.size,
           limit: 8_200_000,
           limitConfigPath: normalizePath(
@@ -96,12 +96,12 @@ export class CiStatsPlugin {
           ),
         },
         {
-          group: `canvas sharable runtime size`,
+          group: `canvas sharable runtime`,
           id: 'misc asset size',
           value: assets.filter((a) => a !== entry).reduce((acc: number, a) => acc + a.size, 0),
         },
         {
-          group: `canvas sharable runtime size`,
+          group: `canvas sharable runtime`,
           id: 'module count',
           value: moduleCount,
         },
