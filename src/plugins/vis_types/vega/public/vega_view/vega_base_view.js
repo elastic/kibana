@@ -59,11 +59,11 @@ function normalizeDate(date) {
 
 // recursive function to check a nested object for the 'toJSON' property
 function checkObjectForToJsonProperty(object) {
-  if (object !== null && typeof object === 'object' && 'toJSON' in object) {
-    return true;
-  }
   if (!object) {
     return false;
+  }
+  if (object !== null && typeof object === 'object' && 'toJSON' in object) {
+    return true;
   }
   const hasProperty = Object.keys(object).some((key) => {
     if (object[key] !== null && typeof object[key] === 'object') {
