@@ -84,7 +84,7 @@ export async function getTopBackendOperations({
     failure: {
       filter: {
         term: {
-          [EVENT_OUTCOME]: EventOutcome.success,
+          [EVENT_OUTCOME]: EventOutcome.failure,
         },
       },
     },
@@ -161,8 +161,12 @@ export async function getTopBackendOperations({
           timeseries.failureRate.push({
             x,
             y:
-              dateBucket.failure.doc_count /
-              (dateBucket.successful.doc_count + dateBucket.failure.doc_count),
+              dateBucket.failure.doc_count > 0 ||
+              dateBucket.successful.doc_count > 0
+                ? dateBucket.failure.doc_count /
+                  (dateBucket.successful.doc_count +
+                    dateBucket.failure.doc_count)
+                : null,
           });
         });
 
@@ -175,8 +179,10 @@ export async function getTopBackendOperations({
             value: bucket.doc_count,
           }),
           failureRate:
-            bucket.failure.doc_count /
-            (bucket.successful.doc_count + bucket.failure.doc_count),
+            bucket.failure.doc_count > 0 || bucket.successful.doc_count > 0
+              ? bucket.failure.doc_count /
+                (bucket.successful.doc_count + bucket.failure.doc_count)
+              : null,
           impact: getImpact(bucket.total_time.value ?? 0),
           timeseries,
         };
