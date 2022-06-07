@@ -17,7 +17,9 @@ closed_by:
 comments:
   type: array
   items: 
-    type: string
+    oneOf:
+      - $ref: 'alert_comment_response_properties.yaml'
+      - $ref: 'user_comment_response_properties.yaml'
   example: []
 connector: 
   type: object
@@ -26,19 +28,19 @@ connector:
 created_at:
   type: string
   format: date-time
-  example: "2022-05-13T09:16:17.416Z"
+  example: 2022-05-13T09:16:17.416Z
 created_by:
   type: object
   properties:
     email:
       type: string
-      example: "ahunley@imf.usa.gov"
+      example: null
     full_name:
       type: string
-      example: "Alan Hunley"
+      example: null
     username: 
       type: string
-      example: "ahunley"
+      example: elastic
 description:
   type: string
   example: "James Bond clicked on a highly suspicious email banner advertising cheap holidays for underpaid civil servants. Operation bubblegum is active. Repeat - operation bubblegum is now active"
@@ -75,7 +77,7 @@ external_service:
       example: null
 id:
   type: string
-  example: "66b9aa00-94fa-11ea-9f74-e7e108796192"
+  example: 66b9aa00-94fa-11ea-9f74-e7e108796192
 owner:
   $ref: 'owners.yaml'
 settings:
@@ -95,7 +97,7 @@ tags:
   example: ["phishing","social engineering","bubblegum"]
 title:
   type: string
-  example: "This case will self-destruct in 5 seconds"
+  example: This case will self-destruct in 5 seconds
 totalAlerts:
   type: integer
   example: 0
@@ -120,4 +122,4 @@ updated_by:
   example: null
 version:
   type: string
-  example: "WzUzMiwxXQ=="
+  example: WzUzMiwxXQ==
