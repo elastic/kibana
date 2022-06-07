@@ -44,7 +44,7 @@ export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTempla
       'kbnPageTemplate__pageSideBar',
       {
         'kbnPageTemplate__pageSideBar--shrink':
-          isMediumBreakpoint || (isLargerBreakpoint && !isSideNavOpenOnDesktop && canBeCollapsed),
+          isMediumBreakpoint || (canBeCollapsed && isLargerBreakpoint && !isSideNavOpenOnDesktop),
       },
       props.pageSideBarProps?.className
     );
