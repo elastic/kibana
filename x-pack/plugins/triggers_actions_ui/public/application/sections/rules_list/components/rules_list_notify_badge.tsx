@@ -103,9 +103,11 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const snoozedButton = useMemo(() => {
     return (
       <EuiButton
+        size="s"
         isLoading={isLoading}
         disabled={isLoading}
-        data-test-subj="rulesListNotifyBadge"
+        data-test-subj="rulesListNotifyBadge rulesListNotifyBadge-snoozed"
+        aria-label={openSnoozePanelAriaLabel}
         minWidth={85}
         iconType="bellSlash"
         color="accent"
@@ -120,10 +122,12 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     // TODO: Implement scheduled snooze button
     return (
       <EuiButton
-        data-test-subj="rulesListNotifyBadge"
+        size="s"
+        data-test-subj="rulesListNotifyBadge rulesListNotifyBadge-scheduled"
         minWidth={85}
         iconType="calendar"
         color="text"
+        aria-label={openSnoozePanelAriaLabel}
         onClick={onClick}
       >
         <EuiText size="xs">{formattedSnoozeText}</EuiText>
@@ -134,11 +138,11 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const unsnoozedButton = useMemo(() => {
     return (
       <EuiButtonIcon
+        size="s"
         isLoading={isLoading}
         disabled={isLoading}
         display={isLoading ? 'base' : 'empty'}
-        size="s"
-        data-test-subj="rulesListNotifyBadge"
+        data-test-subj="rulesListNotifyBadge rulesListNotifyBadge-unsnoozed"
         aria-label={openSnoozePanelAriaLabel}
         className={isOpen || isLoading ? '' : 'ruleSidebarItem__action'}
         iconType="bell"
@@ -150,11 +154,12 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
   const indefiniteSnoozeButton = useMemo(() => {
     return (
       <EuiButtonIcon
+        size="s"
         isLoading={isLoading}
         disabled={isLoading}
         display="base"
-        size="m"
-        data-test-subj="rulesListNotifyBadge"
+        data-test-subj="rulesListNotifyBadge rulesListNotifyBadge-snoozedIndefinitely"
+        aria-label={openSnoozePanelAriaLabel}
         iconType="bellSlash"
         color="accent"
         onClick={onClick}

@@ -415,7 +415,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           <EuiToolTip
             data-test-subj="rulesTableCell-notifyTooltip"
             content={i18n.translate(
-              'xpack.triggersActionUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
+              'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTooltip',
               {
                 defaultMessage: 'Snooze notifications for a rule.',
               }
@@ -423,7 +423,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
           >
             <span>
               {i18n.translate(
-                'xpack.triggersActionUI.sections.rulesList.rulesListTable.columns.notifyTitle',
+                'xpack.triggersActionsUI.sections.rulesList.rulesListTable.columns.notifyTitle',
                 {
                   defaultMessage: 'Notify',
                 }

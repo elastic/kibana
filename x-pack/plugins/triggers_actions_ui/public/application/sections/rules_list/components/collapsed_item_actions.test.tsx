@@ -5,7 +5,7 @@
  * 2.0.
  */
 import * as React from 'react';
-
+import moment from 'moment';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { CollapsedItemActions } from './collapsed_item_actions';
 import { act } from 'react-dom/test-utils';
@@ -22,6 +22,7 @@ const enableRule = jest.fn();
 const onUpdateAPIKey = jest.fn();
 const snoozeRule = jest.fn();
 const unsnoozeRule = jest.fn();
+const onLoading = jest.fn();
 
 export const tick = (ms = 0) =>
   new Promise((resolve) => {
@@ -93,6 +94,7 @@ describe('CollapsedItemActions', () => {
       onUpdateAPIKey,
       snoozeRule,
       unsnoozeRule,
+      onLoading,
     };
   };
 
@@ -116,6 +118,7 @@ describe('CollapsedItemActions', () => {
 
     expect(wrapper.find('[data-test-subj="selectActionButton"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="collapsedActionPanel"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="snoozeButton"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="editRule"]').exists()).toBeFalsy();
     expect(wrapper.find('[data-test-subj="deleteRule"]').exists()).toBeFalsy();
@@ -128,6 +131,7 @@ describe('CollapsedItemActions', () => {
     });
 
     expect(wrapper.find('[data-test-subj="collapsedActionPanel"]').exists()).toBeTruthy();
+    expect(wrapper.find('[data-test-subj="snoozeButton"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="disableButton"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="editRule"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="deleteRule"]').exists()).toBeTruthy();
@@ -139,6 +143,7 @@ describe('CollapsedItemActions', () => {
 
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
+    expect(wrapper.find(`[data-test-subj="snoozeButton"] button`).text()).toEqual('Snooze');
     expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
     expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
@@ -223,6 +228,7 @@ describe('CollapsedItemActions', () => {
       wrapper.update();
     });
 
+    expect(wrapper.find(`[data-test-subj="snoozeButton"] button`).exists()).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Enable');
     expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
@@ -258,6 +264,7 @@ describe('CollapsedItemActions', () => {
       wrapper.update();
     });
 
+    expect(wrapper.find(`[data-test-subj="snoozeButton"] button`).prop('disabled')).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeTruthy();
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
     expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
@@ -277,6 +284,9 @@ describe('CollapsedItemActions', () => {
       wrapper.update();
     });
 
+    expect(wrapper.find('[data-test-subj="snoozeButton"] button').text()).toEqual(
+      'Snoozed indefinitely'
+    );
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="disableButton"] button`).text()).toEqual('Disable');
     expect(wrapper.find(`[data-test-subj="editRule"] button`).prop('disabled')).toBeFalsy();
@@ -300,5 +310,35 @@ describe('CollapsedItemActions', () => {
     expect(wrapper.find(`[data-test-subj="editRule"] button`).text()).toEqual('Edit rule');
     expect(wrapper.find(`[data-test-subj="deleteRule"] button`).prop('disabled')).toBeFalsy();
     expect(wrapper.find(`[data-test-subj="deleteRule"] button`).text()).toEqual('Delete rule');
+  });
+
+  test('renders snooze text correctly if the rule is snoozed', async () => {
+    jest.useFakeTimers('modern').setSystemTime(moment('1990-01-01').toDate());
+    await setup();
+    const wrapper = mountWithIntl(
+      <CollapsedItemActions
+        {...getPropsWithRule({ isSnoozedUntil: moment('1990-02-01').format() })}
+      />
+    );
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    await act(async () => {
+      jest.runOnlyPendingTimers();
+    });
+    expect(wrapper.find('[data-test-subj="snoozeButton"] button').text()).toEqual(
+      'Snoozed until Feb 1'
+    );
+  });
+
+  test('snooze is disabled for SIEM rules', async () => {
+    await setup();
+    const wrapper = mountWithIntl(
+      <CollapsedItemActions
+        {...getPropsWithRule({
+          ruleTypeId: 'siem.threshold',
+        })}
+      />
+    );
+    wrapper.find('[data-test-subj="selectActionButton"]').first().simulate('click');
+    expect(wrapper.find('[data-test-subj="snoozeButton"]').exists()).toBeFalsy();
   });
 });
