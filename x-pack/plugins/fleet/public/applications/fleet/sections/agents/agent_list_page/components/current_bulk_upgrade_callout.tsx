@@ -41,43 +41,47 @@ export const CurrentBulkUpgradeCallout: React.FunctionComponent<CurrentBulkUpgra
   }, [currentUpgrade, abortUpgrade]);
 
   const isScheduled = useMemo(() => {
+    if (!currentUpgrade.startTime) {
+      return false;
+    }
     const now = Date.now();
     const startDate = new Date(currentUpgrade.startTime).getTime();
 
     return startDate > now;
   }, [currentUpgrade]);
 
-  const calloutTitle = isScheduled ? (
-    <FormattedMessage
-      id="xpack.fleet.currentUpgrade.scheduleCalloutTitle"
-      defaultMessage="{nbAgents} agents scheduled to upgrade to version {version} on {date}"
-      values={{
-        nbAgents: currentUpgrade.nbAgents - currentUpgrade.nbAgentsAck,
-        version: currentUpgrade.version,
-        date: (
-          <>
-            <FormattedDate
-              value={currentUpgrade.startTime}
-              year="numeric"
-              month="short"
-              day="2-digit"
-            />
-            &nbsp;
-            <FormattedTime value={currentUpgrade.startTime} />
-          </>
-        ),
-      }}
-    />
-  ) : (
-    <FormattedMessage
-      id="xpack.fleet.currentUpgrade.calloutTitle"
-      defaultMessage="Upgrading {nbAgents, plural, one {# agent} other {# agents}} to version {version}"
-      values={{
-        nbAgents: currentUpgrade.nbAgents - currentUpgrade.nbAgentsAck,
-        version: currentUpgrade.version,
-      }}
-    />
-  );
+  const calloutTitle =
+    isScheduled && currentUpgrade.startTime ? (
+      <FormattedMessage
+        id="xpack.fleet.currentUpgrade.scheduleCalloutTitle"
+        defaultMessage="{nbAgents} agents scheduled to upgrade to version {version} on {date}"
+        values={{
+          nbAgents: currentUpgrade.nbAgents - currentUpgrade.nbAgentsAck,
+          version: currentUpgrade.version,
+          date: (
+            <>
+              <FormattedDate
+                value={currentUpgrade.startTime}
+                year="numeric"
+                month="short"
+                day="2-digit"
+              />
+              &nbsp;
+              <FormattedTime value={currentUpgrade.startTime} />
+            </>
+          ),
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="xpack.fleet.currentUpgrade.calloutTitle"
+        defaultMessage="Upgrading {nbAgents, plural, one {# agent} other {# agents}} to version {version}"
+        values={{
+          nbAgents: currentUpgrade.nbAgents - currentUpgrade.nbAgentsAck,
+          version: currentUpgrade.version,
+        }}
+      />
+    );
   return (
     <EuiCallOut color="primary">
       <EuiFlexGroup
