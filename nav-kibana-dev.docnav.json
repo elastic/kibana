@@ -184,7 +184,8 @@
             { "id": "kibDevDocsOpsTypeSummarizer" },
             { "id": "kibDevDocsOpsBabelPluginSyntheticPackages" },
             { "id": "kibDevDocsOpsUiSharedDepsNpm" },
-            { "id": "kibDevDocsOpsUiSharedDepsSrc" }
+            { "id": "kibDevDocsOpsUiSharedDepsSrc" },
+            { "id": "kibDevDocsOpsPluginDiscovery" }
           ]
         },
         {
