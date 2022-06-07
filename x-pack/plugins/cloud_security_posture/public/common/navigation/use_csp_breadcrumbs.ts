@@ -67,5 +67,5 @@ export const useCspBreadcrumbs = (breadcrumbs: CspNavigationItem[]) => {
   }, [match.path, getUrlForApp, setBreadcrumbs, breadcrumbs, history, docTitle]);
 };
 
-const getTextBreadcrumbs = (breakcrumbs: EuiBreadcrumb[]) =>
-  breakcrumbs.map((breadcrumb) => breadcrumb.text).filter(string.is);
+const getTextBreadcrumbs = (breadcrumbs: EuiBreadcrumb[]) =>
+  breadcrumbs.map((breadcrumb) => breadcrumb.text).filter(string.is);
