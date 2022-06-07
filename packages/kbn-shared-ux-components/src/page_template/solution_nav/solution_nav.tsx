@@ -167,34 +167,22 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
     );
   }, [children, headingID, isCustomSideNav, isHidden, items, rest]);
 
-  const collapsibleNavGroup = canBeCollapsed ? (
-    <EuiCollapsibleNavGroup
-      className={sideNavClasses}
-      paddingSize="m"
-      background="none"
-      title={titleText}
-      titleElement="span"
-      isCollapsible={true}
-      initialIsOpen={false}
-    >
-      {sideNavContent}
-    </EuiCollapsibleNavGroup>
-  ) : (
-    // @ts-expect-error pending EUI update including https://github.com/elastic/eui/pull/5935
-    <EuiCollapsibleNavGroup
-      className={sideNavClasses}
-      background="none"
-      title={titleText}
-      titleElement="span"
-      isCollapsible={false}
-    >
-      {sideNavContent}
-    </EuiCollapsibleNavGroup>
-  );
-
   return (
     <>
-      {isSmallerBreakpoint && collapsibleNavGroup}
+      {isSmallerBreakpoint && (
+        // @ts-expect-error
+        <EuiCollapsibleNavGroup
+          className={sideNavClasses}
+          paddingSize="m"
+          background="none"
+          title={titleText}
+          titleElement="span"
+          isCollapsible={canBeCollapsed}
+          initialIsOpen={false}
+        >
+          {sideNavContent}
+        </EuiCollapsibleNavGroup>
+      )}
       {isMediumBreakpoint && (
         <>
           {(isSideNavOpenOnMobile || !canBeCollapsed) && (
@@ -215,10 +203,12 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
               </div>
             </EuiFlyout>
           )}
-          <KibanaPageTemplateSolutionNavCollapseButton
-            isCollapsed={true}
-            onClick={toggleOpenOnMobile}
-          />
+          {canBeCollapsed && (
+            <KibanaPageTemplateSolutionNavCollapseButton
+              isCollapsed={true}
+              onClick={toggleOpenOnMobile}
+            />
+          )}
         </>
       )}
       {isLargerBreakpoint && (
