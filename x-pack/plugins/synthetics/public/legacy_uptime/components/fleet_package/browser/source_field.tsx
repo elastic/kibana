@@ -48,7 +48,7 @@ interface Props {
   onChange: (sourceConfig: SourceConfig) => void;
   onFieldBlur: (field: ConfigKey) => void;
   defaultConfig?: SourceConfig;
-  validate: Validation;
+  validate?: Validation;
 }
 
 export const defaultValues = {
