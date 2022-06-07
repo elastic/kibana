@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Feature, Geometry, Polygon, Position } from 'geojson';
+import { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
 import { FilterMeta, FILTERS } from '@kbn/es-query';
@@ -105,7 +105,7 @@ export function buildGeoShapeFilter({
   relation = ES_SPATIAL_RELATIONS.INTERSECTS,
 }: {
   preIndexedShape?: PreIndexedShape | null;
-  geometry?: Polygon;
+  geometry?: MultiPolygon | Polygon;
   geometryLabel: string;
   geoFieldNames: string[];
   relation?: ES_SPATIAL_RELATIONS;

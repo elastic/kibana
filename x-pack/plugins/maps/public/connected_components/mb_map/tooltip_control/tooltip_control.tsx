@@ -25,7 +25,6 @@ import { TooltipPopover } from './tooltip_popover';
 import { ILayer } from '../../../classes/layers/layer';
 import { IVectorLayer, isVectorLayer } from '../../../classes/layers/vector_layer';
 import { RenderToolTipContent } from '../../../classes/tooltips/tooltip_property';
-import { getFeatureActions } from './get_feature_actions';
 
 function justifyAnchorLocation(
   mbLngLat: LngLat,
@@ -164,13 +163,16 @@ export class TooltipControl extends Component<Props, {}> {
           ...(mbFeature.state ? mbFeature.state : {}),
         };
         const actions = isLocked
-          ? getFeatureActions({
+          ? layer.getSource().getFeatureActions({
               addFilters: this.props.addFilters,
               featureId: featureId + '',
               geoFieldNames: this.props.geoFieldNames,
               getFilterActions: this.props.getFilterActions,
               getActionContext: this.props.getActionContext,
-              layer,
+              getGeojsonGeometry: () => {
+                const geojsonFeature = layer.getFeatureById(featureId);
+                return geojsonFeature ? geojsonFeature.geometry : null;
+              },
               mbFeature,
               onClose: () => {
                 this.props.closeOnClickTooltip(tooltipId);

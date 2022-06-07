@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 
 import { Filter } from '@kbn/es-query';
 import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
-import { Polygon } from 'geojson';
+import { MultiPolygon, Polygon } from 'geojson';
 import rison, { RisonObject } from 'rison-node';
 import { URL_MAX_LENGTH } from '@kbn/core/public';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
@@ -23,7 +23,7 @@ const META_OVERHEAD = 100;
 
 interface Props {
   onClose: () => void;
-  geometry?: Polygon;
+  geometry?: MultiPolygon | Polygon;
   addFilters: (filters: Filter[], actionId: string) => Promise<void>;
   getFilterActions?: () => Promise<Action[]>;
   getActionContext?: () => ActionExecutionContext;

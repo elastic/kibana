@@ -36,6 +36,7 @@ import {
   DEFAULT_MAX_BUCKETS_LIMIT,
   ES_GEO_FIELD_TYPE,
   FIELD_ORIGIN,
+  GEO_JSON_TYPE,
   GIS_API_PATH,
   MVT_GETTILE_API_PATH,
   SCALING_TYPES,
@@ -52,11 +53,17 @@ import {
   DataRequestMeta,
   ESSearchSourceDescriptor,
   Timeslice,
+  TooltipFeatureAction,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
-import { GeoJsonWithMeta, IMvtVectorSource, SourceStatus } from '../vector_source';
+import {
+  GetFeatureActionsArgs,
+  GeoJsonWithMeta,
+  IMvtVectorSource,
+  SourceStatus,
+} from '../vector_source';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
@@ -69,6 +76,7 @@ import {
   getMatchingIndexes,
 } from './util/feature_edit';
 import { makePublicExecutionContext } from '../../../util';
+import { FeatureGeometryFilterForm } from '../../../connected_components/mb_map/tooltip_control/features_tooltip';
 
 type ESSearchSourceSyncMeta = Pick<
   ESSearchSourceDescriptor,
@@ -918,6 +926,48 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       })
     );
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
+  }
+
+  getFeatureActions({
+    addFilters,
+    featureId,
+    geoFieldNames,
+    getActionContext,
+    getFilterActions,
+    getGeojsonGeometry,
+    mbFeature,
+    onClose,
+  }: GetFeatureActionsArgs): TooltipFeatureAction[] {
+    if (geoFieldNames.length === 0 || addFilters === null) {
+      return [];
+    }
+
+    const isPolygon =
+      mbFeature.geometry.type === GEO_JSON_TYPE.POLYGON ||
+      mbFeature.geometry.type === GEO_JSON_TYPE.MULTI_POLYGON;
+
+    return isPolygon
+      ? [
+          {
+            label: i18n.translate('xpack.maps.tooltip.action.filterByGeometryLabel', {
+              defaultMessage: 'Filter by geometry',
+            }),
+            id: 'FILTER_BY_PRE_INDEXED_SHAPE_ACTION',
+            form: (
+              <FeatureGeometryFilterForm
+                onClose={onClose}
+                geoFieldNames={geoFieldNames}
+                addFilters={addFilters}
+                getFilterActions={getFilterActions}
+                getActionContext={getActionContext}
+                loadPreIndexedShape={async () => {
+                  return this.getPreIndexedShape(mbFeature.properties);
+                }}
+              />
+            ),
+          },
+        ]
+      : [];
   }
 }
 
