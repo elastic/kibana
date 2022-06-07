@@ -16,6 +16,16 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { DocumentationLink } from './documentation_link';
 
+// Load this illustration lazily
+const Illustration = withSuspense(
+  React.lazy(() =>
+    import('./data_view_illustration').then(({ DataViewIllustration }) => {
+      return { default: DataViewIllustration };
+    })
+  ),
+  <EuiPanel color="subdued" style={{ width: 226, height: 206 }} />
+);
+
 export interface Props {
   canCreateNewDataView: boolean;
   onClickCreate?: () => void;
@@ -88,17 +98,6 @@ export const NoDataViewsPrompt = ({
   );
 
   const footer = dataViewsDocLink ? <DocumentationLink href={dataViewsDocLink} /> : undefined;
-
-  // Load this illustration lazily
-  const Illustration = withSuspense(
-    React.lazy(() =>
-      import('./data_view_illustration').then(({ DataViewIllustration }) => {
-        return { default: DataViewIllustration };
-      })
-    ),
-    <EuiPanel color="subdued" style={{ width: 226, height: 206 }} />
-  );
-
   const icon = <Illustration />;
 
   return (
