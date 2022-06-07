@@ -22,7 +22,11 @@ import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
-jest.mock('../../containers/use_get_action_license');
+jest.mock('../../containers/use_get_action_license', () => {
+  return {
+    useGetActionLicense: jest.fn(),
+  };
+});
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/api');
 jest.mock('../../containers/use_get_cases');

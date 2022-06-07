@@ -34,7 +34,6 @@ import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
-import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 
@@ -59,7 +58,6 @@ const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;
-const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetReportersMock = useGetReporters as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -167,7 +165,6 @@ describe('AllCasesListGeneric', () => {
     useDeleteCasesMock.mockReturnValue(defaultDeleteCases);
     useGetCasesStatusMock.mockReturnValue(defaultCasesStatus);
     useGetCasesMetricsMock.mockReturnValue(defaultCasesMetrics);
-    useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
     useGetReportersMock.mockReturnValue({
       reporters: ['casetester'],
