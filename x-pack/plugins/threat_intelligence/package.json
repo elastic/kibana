@@ -1,0 +1,8 @@
+{
+  "author": "Elastic",
+  "name": "threat_intelligence",
+  "scripts": {
+    "cypress": "../../../node_modules/.bin/cypress",
+    "cypress:open": "yarn cypress open --config-file ./cypress/cypress.json"
+  }
+}
