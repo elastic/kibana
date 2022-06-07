@@ -12,6 +12,7 @@ import { EuiFieldNumber, EuiRange, EuiButtonEmpty, EuiLink, EuiText } from '@ela
 import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import type { IndexPatternLayer, IndexPattern } from '../../../types';
 import { rangeOperation } from '..';
@@ -53,6 +54,7 @@ jest.mock('lodash', () => {
 
 const dataPluginMockValue = dataPluginMock.createStartContract();
 const unifiedSearchPluginMockValue = unifiedSearchPluginMock.createStartContract();
+const dataViewsPluginMockValue = dataViewPluginMocks.createStartContract();
 // need to overwrite the formatter field first
 dataPluginMockValue.fieldFormats.deserialize = jest.fn().mockImplementation(({ id, params }) => {
   return {
@@ -87,6 +89,7 @@ const defaultOptions = {
   },
   data: dataPluginMockValue,
   unifiedSearch: unifiedSearchPluginMockValue,
+  dataViews: dataViewsPluginMockValue,
   http: {} as HttpSetup,
   indexPattern: {
     id: '1',

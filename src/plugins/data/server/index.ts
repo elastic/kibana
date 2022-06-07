@@ -29,29 +29,17 @@ export const exporters = {
 };
 
 /*
- * Field Formats:
- */
-
-export { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
-
-/*
  * Index patterns:
  */
 
-export type { FieldDescriptor, IndexPatternsServiceStart } from './data_views';
-export {
-  IndexPatternsFetcher,
-  shouldReadFieldFromDocValues,
-  getCapabilitiesForRollupIndices,
-} from './data_views';
+export type { FieldDescriptor, DataViewsServerPluginStart } from './data_views';
+export { IndexPatternsFetcher, getCapabilitiesForRollupIndices } from './data_views';
 
-export type { IndexPatternAttributes } from '../common';
 export {
   ES_FIELD_TYPES,
   KBN_FIELD_TYPES,
   UI_SETTINGS,
-  IndexPatternsService,
-  IndexPatternsService as IndexPatternsCommonService,
+  DataViewsService as DataViewsCommonService,
   DataView,
 } from '../common';
 

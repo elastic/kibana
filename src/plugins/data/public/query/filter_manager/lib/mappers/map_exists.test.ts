@@ -8,7 +8,8 @@
 
 import { mapExists } from './map_exists';
 import { mapQueryString } from './map_query_string';
-import { IFieldType, buildExistsFilter, buildEmptyFilter } from '../../../../../common';
+import { buildExistsFilter, buildEmptyFilter } from '../../../../../common';
+import { DataViewFieldBase } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 describe('filter manager utilities', () => {
@@ -22,7 +23,7 @@ describe('filter manager utilities', () => {
     });
 
     test('should return the key and value for matching filters', async () => {
-      const filter = buildExistsFilter({ name: '_type' } as IFieldType, indexPattern);
+      const filter = buildExistsFilter({ name: '_type' } as DataViewFieldBase, indexPattern);
       const result = mapExists(filter);
 
       expect(result).toHaveProperty('key', '_type');

@@ -58,6 +58,17 @@ describe('ElasticAgentCard', () => {
     });
   });
 
+  describe('description', () => {
+    test('renders custom description if provided', () => {
+      const component = mount(
+        <ElasticAgentCard description="Build seamless search experiences faster." />
+      );
+      expect(component.find(ElasticAgentCardComponent).props().description).toBe(
+        'Build seamless search experiences faster.'
+      );
+    });
+  });
+
   describe('canAccessFleet', () => {
     test('passes in the right parameter', () => {
       const component = mount(<ElasticAgentCard />);

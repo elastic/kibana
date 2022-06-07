@@ -36,7 +36,11 @@ exports[`ElasticAgentCard renders 1`] = `
           href="/app/integrations/browse"
           rel="noreferrer"
         >
-          Add Elastic Agent
+          <span
+            class="euiScreenReaderOnly"
+          >
+            Add Elastic Agent
+          </span>
         </a>
       </span>
       <div
