@@ -136,13 +136,14 @@ export const enrichSignalThreatMatches = async (
   ];
   const matchedThreats = await getMatchedThreats(matchedThreatIds);
 
-  const enrichmentsWithoutAtomic = signalMatches.map((signalMatch) =>
-    buildEnrichments({
+  const enrichmentsWithoutAtomic: { [key: string]: ThreatEnrichment[] } = {};
+  signalMatches.forEach((signalMatch) => {
+    enrichmentsWithoutAtomic[signalMatch.signalId] = buildEnrichments({
       indicatorPath,
       queries: signalMatch.queries,
       threats: matchedThreats,
-    })
-  );
+    });
+  });
 
   const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit, i) => {
     const threat = get(signalHit._source, 'threat') ?? {};
@@ -155,7 +156,7 @@ export const enrichSignalThreatMatches = async (
     // new issues.
     const existingEnrichmentValue = get(signalHit._source, 'threat.enrichments') ?? [];
     const existingEnrichments = [existingEnrichmentValue].flat(); // ensure enrichments is an array
-    const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[i];
+    const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[signalHit._id] ?? [];
     const newEnrichments = newEnrichmentsWithoutAtomic.map((enrichment) => ({
       ...enrichment,
       matched: {

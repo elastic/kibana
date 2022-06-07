@@ -30,7 +30,6 @@ const TABLE_QUERY_ID = 'authenticationsHostsTableQuery';
 const tableType = hostsModel.HostsTableType.authentications;
 
 const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = ({
-  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -56,7 +55,6 @@ const AuthenticationsHostTableComponent: React.FC<HostsComponentsQueryProps> = (
     loading,
     { authentications, totalCount, pageInfo, loadPage, inspect, isInspected, refetch },
   ] = useAuthentications({
-    docValueFields,
     endDate,
     filterQuery,
     indexNames,

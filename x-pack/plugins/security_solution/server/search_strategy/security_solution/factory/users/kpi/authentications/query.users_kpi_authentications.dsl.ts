@@ -95,6 +95,15 @@ export const buildUsersKpiAuthenticationsQuery = ({
         },
       },
       size: 0,
+      _source: false,
+      fields: [
+        'event.outcome',
+        'event.category',
+        {
+          field: '@timestamp',
+          format: 'strict_date_optional_time',
+        },
+      ],
     },
   };
 
