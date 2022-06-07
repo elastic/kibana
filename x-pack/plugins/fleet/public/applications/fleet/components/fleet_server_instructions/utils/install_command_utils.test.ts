@@ -51,7 +51,8 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
+        "$ProgressPreference = 'SilentlyContinue'
+        wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
         Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
         cd elastic-agent--windows-x86_64
         .\\\\elastic-agent.exe install  \`
@@ -167,7 +168,8 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
+        "$ProgressPreference = 'SilentlyContinue'
+        wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
         Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
         cd elastic-agent--windows-x86_64
         .\\\\elastic-agent.exe install  \`
@@ -280,7 +282,8 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
+        "$ProgressPreference = 'SilentlyContinue'
+        wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
         Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
         cd elastic-agent--windows-x86_64
         .\\\\elastic-agent.exe install --url=http://fleetserver:8220 \`
