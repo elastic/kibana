@@ -10,8 +10,7 @@ import { AggConfigs } from '../agg_configs';
 import { METRIC_TYPES } from '../metrics';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import type { DataViewField } from '../../..';
-import { DataView } from '../../..';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 describe('Multi Terms Agg', () => {
   const getAggConfigs = (params: Record<string, any> = {}) => {
@@ -66,7 +65,8 @@ describe('Multi Terms Agg', () => {
           type: BUCKET_TYPES.MULTI_TERMS,
         },
       ],
-      { typesRegistry: mockAggTypesRegistry() }
+      { typesRegistry: mockAggTypesRegistry() },
+      jest.fn()
     );
   };
 
@@ -186,7 +186,8 @@ describe('Multi Terms Agg', () => {
           type: BUCKET_TYPES.MULTI_TERMS,
         },
       ],
-      { typesRegistry: mockAggTypesRegistry() }
+      { typesRegistry: mockAggTypesRegistry() },
+      jest.fn()
     );
     const { [BUCKET_TYPES.MULTI_TERMS]: params } = aggConfigs.aggs[0].toDsl();
     expect(params.order).toEqual({ 'test-orderAgg.50': 'desc' });

@@ -13,12 +13,11 @@ import {
   OTHER_BUCKET_SEPARATOR as SEP,
   constructSingleTermOtherFilter,
 } from './_terms_other_bucket_helper';
+import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
 import { AggConfigs, CreateAggConfigParams } from '../agg_configs';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import { IBucketAggConfig } from './bucket_agg_type';
 import { mockAggTypesRegistry } from '../test_helpers';
-import type { DataViewField } from '../../..';
-import { DataView } from '../../..';
 
 const indexPattern = {
   id: '1234',
@@ -283,7 +282,7 @@ describe('Terms Agg Other bucket helper', () => {
   const typesRegistry = mockAggTypesRegistry();
 
   const getAggConfigs = (aggs: CreateAggConfigParams[] = []) => {
-    return new AggConfigs(indexPattern, [...aggs], { typesRegistry });
+    return new AggConfigs(indexPattern, [...aggs], { typesRegistry }, jest.fn());
   };
 
   describe('buildOtherBucketAgg', () => {
