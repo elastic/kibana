@@ -4,7 +4,6 @@ set -euo pipefail
 
 cat << EOF > src/dev/code_coverage/www/index_partial_2.html
         <a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/jest-combined/index.html">Latest Jest</a>
-        <a class="nav-link" href="https://kibana-coverage.elastic.dev/${TIME_STAMP}/functional-combined/index.html">Latest FTR</a>
       </nav>
     </div>
   </header>

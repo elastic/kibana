@@ -112,7 +112,7 @@ get:
           - type: array
             items:
               type: string
-      example: phishing
+      example: tag-1
     - name: to
       in: query
       description: Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression.

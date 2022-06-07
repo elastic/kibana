@@ -19,8 +19,8 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
     { fullUrl: string; filename: string; unpackedDir: string }
   > = {
     linux: {
-      fullUrl: `${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-linux-x86_64.zip`,
-      filename: `elastic-agent-${kibanaVersion}-linux-x86_64.zip`,
+      fullUrl: `${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz`,
+      filename: `elastic-agent-${kibanaVersion}-linux-x86_64.tar.gz`,
       unpackedDir: `elastic-agent-${kibanaVersion}-linux-x86_64`,
     },
     mac: {
@@ -29,8 +29,8 @@ function getArtifact(platform: PLATFORM_TYPE, kibanaVersion: string) {
       unpackedDir: `elastic-agent-${kibanaVersion}-darwin-x86_64`,
     },
     windows: {
-      fullUrl: `${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-windows-x86_64.tar.gz`,
-      filename: `elastic-agent-${kibanaVersion}-windows-x86_64.tar.gz`,
+      fullUrl: `${ARTIFACT_BASE_URL}/elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
+      filename: `elastic-agent-${kibanaVersion}-windows-x86_64.zip`,
       unpackedDir: `elastic-agent-${kibanaVersion}-windows-x86_64`,
     },
     deb: {
@@ -64,6 +64,7 @@ export function getInstallCommandForPlatform(
   const downloadCommand =
     platform === 'windows'
       ? [
+          "$ProgressPreference = 'SilentlyContinue'",
           `wget ${artifact.fullUrl} -OutFile ${artifact.filename}`,
           `Expand-Archive .\\${artifact.filename}`,
           `cd ${artifact.unpackedDir}`,

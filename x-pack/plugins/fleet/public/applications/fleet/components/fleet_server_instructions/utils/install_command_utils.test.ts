@@ -17,8 +17,8 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.zip
-        tar xzvf elastic-agent--linux-x86_64.zip
+        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
+        tar xzvf elastic-agent--linux-x86_64.tar.gz
         cd elastic-agent--linux-x86_64
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
@@ -51,8 +51,9 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.tar.gz -OutFile elastic-agent--windows-x86_64.tar.gz
-        Expand-Archive .\\\\elastic-agent--windows-x86_64.tar.gz
+        "$ProgressPreference = 'SilentlyContinue'
+        wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
+        Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
         cd elastic-agent--windows-x86_64
         .\\\\elastic-agent.exe install  \`
           --fleet-server-es=http://elasticsearch:9200 \`
@@ -106,8 +107,8 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.zip
-        tar xzvf elastic-agent--linux-x86_64.zip
+        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
+        tar xzvf elastic-agent--linux-x86_64.tar.gz
         cd elastic-agent--linux-x86_64
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
@@ -127,8 +128,8 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.zip
-        tar xzvf elastic-agent--linux-x86_64.zip
+        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
+        tar xzvf elastic-agent--linux-x86_64.tar.gz
         cd elastic-agent--linux-x86_64
         sudo ./elastic-agent install \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
@@ -165,8 +166,9 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.tar.gz -OutFile elastic-agent--windows-x86_64.tar.gz
-        Expand-Archive .\\\\elastic-agent--windows-x86_64.tar.gz
+        "$ProgressPreference = 'SilentlyContinue'
+        wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
+        Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
         cd elastic-agent--windows-x86_64
         .\\\\elastic-agent.exe install  \`
           --fleet-server-es=http://elasticsearch:9200 \`
@@ -226,8 +228,8 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.zip
-        tar xzvf elastic-agent--linux-x86_64.zip
+        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
+        tar xzvf elastic-agent--linux-x86_64.tar.gz
         cd elastic-agent--linux-x86_64
         sudo ./elastic-agent install--url=http://fleetserver:8220 \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
@@ -276,8 +278,9 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.tar.gz -OutFile elastic-agent--windows-x86_64.tar.gz
-        Expand-Archive .\\\\elastic-agent--windows-x86_64.tar.gz
+        "$ProgressPreference = 'SilentlyContinue'
+        wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
+        Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
         cd elastic-agent--windows-x86_64
         .\\\\elastic-agent.exe install --url=http://fleetserver:8220 \`
           --fleet-server-es=http://elasticsearch:9200 \`
