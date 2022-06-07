@@ -32,7 +32,7 @@ get:
       schema:
         type: string
       example: now-1d
-      x-preview: true
+      x-technical-preview: true
     - $ref: '../components/parameters/owner.yaml'
     - name: page
       in: query
@@ -112,14 +112,14 @@ get:
           - type: array
             items:
               type: string
-      example: phishing
+      example: tag-1
     - name: to
       in: query
       description: Returns only cases that were created before a specific date. The date must be specified as a KQL data range or date match expression.
       schema:
         type: string
       example: now%2B1d
-      x-preview: true
+      x-technical-preview: true
   responses:
     '200':
       description: Indicates a successful call.

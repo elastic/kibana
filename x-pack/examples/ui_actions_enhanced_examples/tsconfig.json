@@ -19,8 +19,8 @@
     { "path": "../../../src/plugins/discover/tsconfig.json" },
     { "path": "../../../src/plugins/dashboard/tsconfig.json" },
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
+    { "path": "../../../src/plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "../../../examples/developer_examples/tsconfig.json" },
     { "path": "../../plugins/dashboard_enhanced/tsconfig.json" },
-    { "path": "../../plugins/ui_actions_enhanced/tsconfig.json" },
   ]
 }

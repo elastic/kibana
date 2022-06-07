@@ -35,6 +35,7 @@ export const lineVisTypeDefinition = {
   description: i18n.translate('visTypeXy.line.lineDescription', {
     defaultMessage: 'Display data as a series of points.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   updateVisTypeOnParamsChange: getVisTypeFromParams,

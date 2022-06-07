@@ -18,6 +18,11 @@ post:
               type: object
               properties:
                 $ref: '../components/schemas/connector_properties.yaml'
+              required:
+                - fields
+                - id
+                - name
+                - type
             description:
               description: The description for the case.
               type: string
@@ -80,7 +85,7 @@ delete:
       required: true
       schema:
         type: string
-      example: 'd4e7abb0-b462-11ec-9a8d-698504725a43'
+      example: d4e7abb0-b462-11ec-9a8d-698504725a43
   responses:
     '204':
       description: Indicates a successful call.
@@ -112,6 +117,11 @@ patch:
                     type: object
                     properties:
                       $ref: '../components/schemas/connector_properties.yaml'
+                    required:
+                      - fields
+                      - id
+                      - name
+                      - type
                   description:
                     description: The description for the case.
                     type: string
