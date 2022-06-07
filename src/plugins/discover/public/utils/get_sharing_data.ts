@@ -96,7 +96,10 @@ export async function getSharingData(
        */
       const useFieldsApi = !config.get(SEARCH_FIELDS_FROM_SOURCE);
       if (useFieldsApi && columns.length) {
-        searchSource.setField('fields', columns);
+        searchSource.setField(
+          'fields',
+          columns.map((field) => ({ field, include_unmapped: 'true' }))
+        );
       }
       return searchSource.getSerializedFields(true);
     },

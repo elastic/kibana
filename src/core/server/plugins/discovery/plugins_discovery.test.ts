@@ -17,10 +17,10 @@ import { firstValueFrom, from } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';
 import { resolve } from 'path';
 import { ConfigService, Env } from '@kbn/config';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { PluginsConfig, PluginsConfigType, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
-import { CoreContext } from '../../core_context';
 import { PluginType } from '../types';
 
 const KIBANA_ROOT = process.cwd();

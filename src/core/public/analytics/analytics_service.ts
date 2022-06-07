@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 import { createAnalytics } from '@kbn/analytics-client';
-import { of } from 'rxjs';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
+import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import { trackClicks } from './track_clicks';
-import { InjectedMetadataSetup } from '../injected_metadata';
-import { CoreContext } from '../core_system';
 import { getSessionId } from './get_session_id';
 import { createLogger } from './logger';
 
@@ -33,7 +33,7 @@ export type AnalyticsServiceStart = Pick<
 
 /** @internal */
 export interface AnalyticsServiceSetupDeps {
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
 }
 
 export class AnalyticsService {
@@ -173,7 +173,7 @@ export class AnalyticsService {
    * @param injectedMetadata The injected metadata service.
    * @private
    */
-  private registerElasticsearchInfoContext(injectedMetadata: InjectedMetadataSetup) {
+  private registerElasticsearchInfoContext(injectedMetadata: InternalInjectedMetadataSetup) {
     this.analyticsClient.registerContextProvider({
       name: 'elasticsearch info',
       context$: of(injectedMetadata.getElasticsearchInfo()),
