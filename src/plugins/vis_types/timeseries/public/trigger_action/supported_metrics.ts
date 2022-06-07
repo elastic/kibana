@@ -93,7 +93,7 @@ export const SUPPORTED_METRICS: { [key: string]: AggOptions } = {
     isFullReference: true,
   },
   positive_only: {
-    name: 'clamp',
+    name: 'pick_max',
     isFullReference: true,
   },
   static: {
