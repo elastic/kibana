@@ -11,7 +11,8 @@ import type { ConfigAttributes } from '../saved_objects';
 import { isConfigVersionUpgradeable } from './is_config_version_upgradeable';
 
 /**
- * This contains a subset of `config` object attributes that are relevant for upgrading it.
+ * This contains a subset of `config` object attributes that are relevant for upgrading it using transform functions.
+ * It is a superset of all the attributes needed for all of the transform functions defined in `transforms.ts`.
  */
 export interface UpgradeableConfigAttributes extends ConfigAttributes {
   defaultIndex?: string;

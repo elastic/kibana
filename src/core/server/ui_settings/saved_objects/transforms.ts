@@ -10,20 +10,32 @@ import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import type { SavedObjectsClientContract } from '../../types';
 import type { UpgradeableConfigAttributes } from '../create_or_upgrade_saved_config';
 
-interface Params {
+/**
+ * The params needed to execute each transform function.
+ */
+interface TransformParams {
   savedObjectsClient: SavedObjectsClientContract;
-  configAttributes:
-    | Pick<UpgradeableConfigAttributes, 'defaultIndex' | 'isDefaultIndexMigrated'>
-    | undefined;
+  configAttributes: UpgradeableConfigAttributes | undefined;
 }
 
-/** The resulting parameters that should be used when upgrading the config object. */
-interface ReturnType {
+/**
+ * The resulting attributes that should be used when upgrading the config object.
+ * This should be a union of all transform function return types (A | B | C | ...).
+ */
+type TransformReturnType = TransformDefaultIndexReturnType;
+
+/**
+ * The return type for `transformDefaultIndex`.
+ * If this config object has already been upgraded, it returns `null` because it doesn't need to set different default attributes.
+ * Otherwise, it always sets a default for the `isDefaultIndexMigrated` attribute, and it optionally sets the `defaultIndex` attribute
+ * depending on the outcome.
+ */
+type TransformDefaultIndexReturnType = {
   isDefaultIndexMigrated: boolean;
   defaultIndex?: string;
-}
+} | null;
 
-export type TransformConfigFn = (params: Params) => Promise<ReturnType>;
+export type TransformConfigFn = (params: TransformParams) => Promise<TransformReturnType>;
 
 /**
  * Any transforms that should be applied during `createOrUpgradeSavedConfig` need to be included in this array.
@@ -44,15 +56,22 @@ export const transforms: TransformConfigFn[] = [transformDefaultIndex];
  * Note also that this function is only exported for unit testing. It is also included in the `transforms` export above, which is how it is
  * applied during `createOrUpgradeSavedConfig`.
  */
-export async function transformDefaultIndex(params: Params): Promise<ReturnType> {
+export async function transformDefaultIndex(
+  params: TransformParams
+): Promise<TransformDefaultIndexReturnType> {
   const { savedObjectsClient, configAttributes } = params;
-  if (!configAttributes || !configAttributes.defaultIndex) {
-    // If configAttributes is undefined (there's no config object being upgraded), set isDefaultIndexMigrated to true and return.
-    // If configAttributes is defined but the defaultIndex attribute is not set, set isDefaultIndexMigrated to true and return.
+  if (configAttributes?.isDefaultIndexMigrated) {
+    // This config object has already been migrated, return null because we don't need to set different defaults for the new config object.
+    return null;
+  }
+  if (!configAttributes?.defaultIndex) {
+    // If configAttributes is undefined (there's no config object being upgraded), OR if configAttributes is defined but the defaultIndex
+    // attribute is not set, set isDefaultIndexMigrated to true and return. This means there was no defaultIndex to upgrade, so we will just
+    // avoid attempting to transform this again in the future.
     return { isDefaultIndexMigrated: true };
   }
 
-  let defaultIndex = configAttributes.defaultIndex!; // Retain the existing defaultIndex attribute in case we run into a resolve error
+  let defaultIndex = configAttributes.defaultIndex; // Retain the existing defaultIndex attribute in case we run into a resolve error
   let isDefaultIndexMigrated: boolean;
   try {
     // The defaultIndex for this config object was created prior to 8.3, and it might refer to a data view ID that is no longer valid.

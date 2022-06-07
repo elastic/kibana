@@ -9,13 +9,27 @@
 import { savedObjectsClientMock } from '../../mocks';
 import { SavedObjectsErrorHelpers } from '../../saved_objects';
 import { SavedObject } from '../../types';
+import type { UpgradeableConfigAttributes } from '../create_or_upgrade_saved_config';
 import { transformDefaultIndex } from './transforms';
 
+/**
+ * Test each transform function individually, not the entire exported `transforms` array.
+ */
 describe('#transformDefaultIndex', () => {
   const savedObjectsClient = savedObjectsClientMock.create();
 
   beforeEach(() => {
     jest.resetAllMocks();
+  });
+
+  it('should return early if the config object has already been transformed', async () => {
+    const result = await transformDefaultIndex({
+      savedObjectsClient,
+      configAttributes: { isDefaultIndexMigrated: true } as UpgradeableConfigAttributes, // We don't care about the other attributes
+    });
+
+    expect(savedObjectsClient.resolve).not.toHaveBeenCalled();
+    expect(result).toEqual(null); // This is the only time we expect a null result
   });
 
   it('should return early if configAttributes is undefined', async () => {
@@ -28,7 +42,7 @@ describe('#transformDefaultIndex', () => {
   it('should return early if the defaultIndex attribute is undefined', async () => {
     const result = await transformDefaultIndex({
       savedObjectsClient,
-      configAttributes: { defaultIndex: undefined },
+      configAttributes: { defaultIndex: undefined } as UpgradeableConfigAttributes, // We don't care about the other attributes
     });
 
     expect(savedObjectsClient.resolve).not.toHaveBeenCalled();
@@ -44,7 +58,7 @@ describe('#transformDefaultIndex', () => {
       });
       const result = await transformDefaultIndex({
         savedObjectsClient,
-        configAttributes: { defaultIndex: 'some-index' },
+        configAttributes: { defaultIndex: 'some-index' } as UpgradeableConfigAttributes, // We don't care about the other attributes
       });
 
       expect(savedObjectsClient.resolve).toHaveBeenCalledTimes(1);
@@ -61,7 +75,7 @@ describe('#transformDefaultIndex', () => {
         });
         const result = await transformDefaultIndex({
           savedObjectsClient,
-          configAttributes: { defaultIndex: 'some-index' },
+          configAttributes: { defaultIndex: 'some-index' } as UpgradeableConfigAttributes, // We don't care about the other attributes
         });
 
         expect(savedObjectsClient.resolve).toHaveBeenCalledTimes(1);
@@ -76,7 +90,7 @@ describe('#transformDefaultIndex', () => {
       );
       const result = await transformDefaultIndex({
         savedObjectsClient,
-        configAttributes: { defaultIndex: 'some-index' },
+        configAttributes: { defaultIndex: 'some-index' } as UpgradeableConfigAttributes, // We don't care about the other attributes
       });
 
       expect(savedObjectsClient.resolve).toHaveBeenCalledTimes(1);
@@ -90,7 +104,7 @@ describe('#transformDefaultIndex', () => {
       );
       const result = await transformDefaultIndex({
         savedObjectsClient,
-        configAttributes: { defaultIndex: 'some-index' },
+        configAttributes: { defaultIndex: 'some-index' } as UpgradeableConfigAttributes, // We don't care about the other attributes
       });
 
       expect(savedObjectsClient.resolve).toHaveBeenCalledTimes(1);
