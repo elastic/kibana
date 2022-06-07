@@ -12,10 +12,11 @@ import React, {
   PropsWithChildren,
   useContext,
   useEffect,
+  useCallback,
 } from 'react';
-import { useWithManagedConsole } from '../console_manager/console_manager';
+import { useWithManagedConsoleState } from '../console_manager/console_manager';
 import { InitialStateInterface, initiateState, stateDataReducer } from './state_reducer';
-import { ConsoleStore } from './types';
+import { ConsoleDataState, ConsoleStore } from './types';
 
 const ConsoleStateContext = createContext<null | ConsoleStore>(null);
 
@@ -26,19 +27,29 @@ type ConsoleStateProviderProps = PropsWithChildren<{}> & InitialStateInterface;
  */
 export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
   ({ commands, scrollToBottom, HelpComponent, dataTestSubj, managedKey, children }) => {
-    const managedConsole = useWithManagedConsole(managedKey);
+    const [getConsoleState, storeConsoleState] = useWithManagedConsoleState(managedKey);
+
+    const stateInitializer = useCallback(
+      (stateInit: InitialStateInterface): ConsoleDataState => {
+        return initiateState(stateInit, getConsoleState ? getConsoleState() : undefined);
+      },
+      [getConsoleState]
+    );
 
     const [state, dispatch] = useReducer(
       stateDataReducer,
       { commands, scrollToBottom, HelpComponent, dataTestSubj },
-      (...args) => initiateState(...args, managedConsole?.consoleState)
+      stateInitializer
     );
 
+    // Anytime `state` changes and the console is under ConsoleManager's control, then
+    // store the console's state to ConsoleManager. This is what enables a console to be
+    // closed/re-opened while maintaining the console's content
     useEffect(() => {
-      if (managedConsole) {
-        managedConsole.consoleState = state;
+      if (storeConsoleState) {
+        storeConsoleState(state);
       }
-    }, [managedConsole, state]);
+    }, [state, storeConsoleState]);
 
     return (
       <ConsoleStateContext.Provider value={{ state, dispatch }}>
