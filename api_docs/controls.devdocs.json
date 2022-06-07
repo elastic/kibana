@@ -3397,13 +3397,7 @@
           " | undefined; filters?: ",
           "Filter",
           "[] | undefined; timeRange?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           " | undefined; controlStyle?: ",
           "ControlStyle",
           " | undefined; ignoreParentSettings?: ",
@@ -4339,7 +4333,9 @@
         "type": "Type",
         "tags": [],
         "label": "PersistableControlGroupInput",
-        "description": [],
+        "description": [
+          "\nOnly parts of the Control Group Input should be persisted"
+        ],
         "signature": [
           "{ controlStyle: ",
           "ControlStyle",
@@ -4392,6 +4388,44 @@
             "text": "PersistableControlGroupInput"
           },
           ", \"ignoreParentSettings\" | \"panels\"> & { ignoreParentSettingsJSON: string; panelsJSON: string; }"
+        ],
+        "path": "src/plugins/controls/common/control_group/types.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.SerializableControlGroupInput",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializableControlGroupInput",
+        "description": [
+          "\nSome use cases need the Persistable Control Group Input to conform to the SerializableRecord format which requires string index signatures in any objects"
+        ],
+        "signature": [
+          "Omit<",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.PersistableControlGroupInput",
+            "text": "PersistableControlGroupInput"
+          },
+          ", \"ignoreParentSettings\" | \"panels\"> & { panels: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.ControlsPanels",
+            "text": "ControlsPanels"
+          },
+          " & ",
+          "SerializableRecord",
+          "; ignoreParentSettings: ",
+          "ParentIgnoreSettings",
+          " & ",
+          "SerializableRecord",
+          "; }"
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,

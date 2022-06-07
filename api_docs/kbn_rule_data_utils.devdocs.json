@@ -855,7 +855,7 @@
         "label": "AlertConsumers",
         "description": [],
         "signature": [
-          "\"logs\" | \"apm\" | \"observability\" | \"uptime\" | \"infrastructure\" | \"siem\""
+          "\"logs\" | \"apm\" | \"infrastructure\" | \"observability\" | \"uptime\" | \"siem\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -1037,7 +1037,7 @@
         "label": "ValidFeatureId",
         "description": [],
         "signature": [
-          "\"logs\" | \"apm\" | \"observability\" | \"uptime\" | \"infrastructure\" | \"siem\""
+          "\"logs\" | \"apm\" | \"infrastructure\" | \"observability\" | \"uptime\" | \"siem\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,

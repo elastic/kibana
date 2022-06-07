@@ -4,21 +4,7 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [
-      {
-        "parentPluginId": "screenshotting",
-        "id": "def-public.LayoutTypes",
-        "type": "Enum",
-        "tags": [],
-        "label": "LayoutTypes",
-        "description": [
-          "\nSupported layout types."
-        ],
-        "path": "x-pack/plugins/screenshotting/common/layout.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "screenshotting",
@@ -134,8 +120,8 @@
                 "pluginId": "screenshotting",
                 "scope": "common",
                 "docId": "kibScreenshottingPluginApi",
-                "section": "def-common.LayoutTypes",
-                "text": "LayoutTypes"
+                "section": "def-common.LayoutType",
+                "text": "LayoutType"
               },
               " | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
@@ -270,15 +256,7 @@
             "label": "layout",
             "description": [],
             "signature": [
-              "{ id?: ",
-              {
-                "pluginId": "screenshotting",
-                "scope": "common",
-                "docId": "kibScreenshottingPluginApi",
-                "section": "def-common.LayoutTypes",
-                "text": "LayoutTypes"
-              },
-              ".PRESERVE_LAYOUT | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
+              "{ id?: \"preserve_layout\" | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
               "LayoutSelectorDictionary",
               "> | undefined; zoom?: number | undefined; } | undefined"
             ],
@@ -478,21 +456,7 @@
     "classes": [],
     "functions": [],
     "interfaces": [],
-    "enums": [
-      {
-        "parentPluginId": "screenshotting",
-        "id": "def-common.LayoutTypes",
-        "type": "Enum",
-        "tags": [],
-        "label": "LayoutTypes",
-        "description": [
-          "\nSupported layout types."
-        ],
-        "path": "x-pack/plugins/screenshotting/common/layout.ts",
-        "deprecated": false,
-        "initialIsOpen": false
-      }
-    ],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "screenshotting",
@@ -513,6 +477,22 @@
           " & { id?: Id | undefined; dimensions?: { width: number; height: number; } | undefined; selectors?: Partial<",
           "LayoutSelectorDictionary",
           "> | undefined; zoom?: number | undefined; } : never"
+        ],
+        "path": "x-pack/plugins/screenshotting/common/layout.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "screenshotting",
+        "id": "def-common.LayoutType",
+        "type": "Type",
+        "tags": [],
+        "label": "LayoutType",
+        "description": [
+          "\nSupported layout types."
+        ],
+        "signature": [
+          "\"canvas\" | \"preserve_layout\" | \"print\""
         ],
         "path": "x-pack/plugins/screenshotting/common/layout.ts",
         "deprecated": false,

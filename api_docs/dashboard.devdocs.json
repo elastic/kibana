@@ -1855,7 +1855,15 @@
               },
               "; serialize: () => { searchSourceJSON: string; references: ",
               "SavedObjectReference",
-              "[]; }; }"
+              "[]; }; toExpressionAst: ({ asDatatable }?: ExpressionAstOptions) => ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionAstExpression",
+                "text": "ExpressionAstExpression"
+              },
+              "; }"
             ],
             "path": "src/plugins/dashboard/public/saved_dashboards/saved_dashboard.ts",
             "deprecated": false
@@ -2043,13 +2051,7 @@
         ],
         "signature": [
           "{ dashboardId?: string | undefined; timeRange?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
+          "TimeRange",
           " | undefined; refreshInterval?: ",
           {
             "pluginId": "data",
@@ -2080,6 +2082,14 @@
           },
           "[] | undefined; savedQuery?: string | undefined; options?: ",
           "DashboardOptions",
+          " | undefined; controlGroupInput?: ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.SerializableControlGroupInput",
+            "text": "SerializableControlGroupInput"
+          },
           " | undefined; }"
         ],
         "path": "src/plugins/dashboard/public/locator.ts",

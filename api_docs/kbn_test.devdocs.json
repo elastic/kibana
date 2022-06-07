@@ -1979,6 +1979,22 @@
       },
       {
         "parentPluginId": "@kbn/test",
+        "id": "def-server.runCheckFtrConfigsCli",
+        "type": "Function",
+        "tags": [],
+        "label": "runCheckFtrConfigsCli",
+        "description": [],
+        "signature": [
+          "() => Promise<void>"
+        ],
+        "path": "packages/kbn-test/src/functional_test_runner/lib/config/run_check_ftr_configs_cli.ts",
+        "deprecated": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/test",
         "id": "def-server.runCheckJestConfigsCli",
         "type": "Function",
         "tags": [],

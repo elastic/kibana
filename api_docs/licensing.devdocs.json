@@ -323,7 +323,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
+              "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
@@ -636,7 +636,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
+          "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,
@@ -2025,7 +2025,7 @@
               "\nThe state of checking the results of a license type meeting the license minimum."
             ],
             "signature": [
-              "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
+              "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
             ],
             "path": "x-pack/plugins/licensing/common/types.ts",
             "deprecated": false
@@ -2429,7 +2429,7 @@
         "label": "LicenseCheckState",
         "description": [],
         "signature": [
-          "\"valid\" | \"invalid\" | \"unavailable\" | \"expired\""
+          "\"invalid\" | \"unavailable\" | \"valid\" | \"expired\""
         ],
         "path": "x-pack/plugins/licensing/common/types.ts",
         "deprecated": false,

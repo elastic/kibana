@@ -374,6 +374,21 @@
           },
           {
             "parentPluginId": "@kbn/analytics-client",
+            "id": "def-common.EventContext.isElasticCloudUser",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isElasticCloudUser",
+            "description": [
+              "\n`true` if the user is logged in via the Elastic Cloud authentication provider."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/analytics/client/src/events/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "@kbn/analytics-client",
             "id": "def-common.EventContext.version",
             "type": "string",
             "tags": [],
@@ -1238,7 +1253,9 @@
             "type": "string",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "The type must be an array"
+            ],
             "signature": [
               "\"array\""
             ],
@@ -1251,7 +1268,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "items",
-            "description": [],
+            "description": [
+              "The schema of the items in the array is defined in the `items` property"
+            ],
             "signature": [
               "{ type: \"pass_through\"; _meta: { description: string; } & ",
               {
@@ -1331,7 +1350,9 @@
         "type": "Interface",
         "tags": [],
         "label": "SchemaChildValue",
-        "description": [],
+        "description": [
+          "\nSchema to define a primitive value"
+        ],
         "signature": [
           {
             "pluginId": "@kbn/analytics-client",
@@ -1351,7 +1372,9 @@
             "type": "Uncategorized",
             "tags": [],
             "label": "type",
-            "description": [],
+            "description": [
+              "The type of the value"
+            ],
             "signature": [
               "NonNullable<Value> extends string | Date ? ",
               {
@@ -1387,7 +1410,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "_meta",
-            "description": [],
+            "description": [
+              "Meta properties of the value: description and is optional"
+            ],
             "signature": [
               "{ description: string; } & ",
               {
@@ -1433,7 +1458,9 @@
             "type": "CompoundType",
             "tags": [],
             "label": "_meta",
-            "description": [],
+            "description": [
+              "Meta properties of the pass through: description and is optional"
+            ],
             "signature": [
               "({ description?: string | undefined; } & ",
               {
@@ -1487,7 +1514,9 @@
             "type": "Object",
             "tags": [],
             "label": "properties",
-            "description": [],
+            "description": [
+              "\nThe schemas of the keys of the object are defined in the `properties` object."
+            ],
             "signature": [
               "{ [Key in keyof Required<Value>]: ",
               {
@@ -1725,7 +1754,7 @@
           "Types matching number values"
         ],
         "signature": [
-          "\"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
+          "\"date\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
@@ -1757,7 +1786,7 @@
           "\nPossible type values in the schema"
         ],
         "signature": [
-          "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"double\""
+          "\"boolean\" | \"keyword\" | \"text\" | \"date\" | \"long\" | \"double\" | \"short\" | \"float\" | \"integer\" | \"byte\""
         ],
         "path": "packages/analytics/client/src/schema/types.ts",
         "deprecated": false,
