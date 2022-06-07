@@ -15,7 +15,6 @@ const HISTOGRAM_QUERY_ID = 'authenticationsHistogramQuery';
 
 const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> = ({
   deleteQuery,
-  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -45,7 +44,6 @@ const AuthenticationsQueryTabBodyComponent: React.FC<HostsComponentsQueryProps> 
         startDate={startDate}
         type={type}
         skip={skip}
-        docValueFields={docValueFields}
       />
     </>
   );
