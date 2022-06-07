@@ -123,6 +123,10 @@ export interface ConfigProps {
   series?: SeriesUrl;
 }
 
+interface FormatType extends SerializedFieldFormat<FieldFormatParams> {
+  id: 'duration' | 'number' | 'bytes' | 'percent';
+}
+
 export type AppDataType = 'synthetics' | 'ux' | 'infra_logs' | 'infra_metrics' | 'apm' | 'mobile';
 
 type InputFormat = 'microseconds' | 'milliseconds' | 'seconds';
@@ -138,7 +142,7 @@ export interface FieldFormatParams extends BaseFieldFormatParams {
 
 export interface FieldFormat {
   field: string;
-  format: SerializedFieldFormat<FieldFormatParams>;
+  format: FormatType;
 }
 
 export interface BuilderItem {
