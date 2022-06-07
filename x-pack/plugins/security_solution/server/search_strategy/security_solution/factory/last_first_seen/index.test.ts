@@ -6,7 +6,7 @@
  */
 
 // this file would need to be updated further along with mock data file names
-import * as buildQuery from './query.first_or_last_seen_host.dsl';
+import * as buildQuery from './query.first_or_last_seen.dsl';
 import { firstOrLastSeen } from '.';
 import {
   mockOptions,

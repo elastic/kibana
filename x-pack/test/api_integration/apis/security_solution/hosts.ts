@@ -145,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
       });
     });
-    it.only('Make sure that we get First Seen for a Host without docValueFields', async () => {
+    it('Make sure that we get First Seen for a Host without docValueFields', async () => {
       const firstLastSeenHost = await bsearch.send<FirstLastSeenStrategyResponse>({
         supertest,
         options: {
@@ -168,7 +168,8 @@ export default function ({ getService }: FtrProviderContext) {
           factoryQueryType: FirstLastSeenQuery,
           defaultIndex: ['auditbeat-*'],
           docValueFields: [],
-          hostName: 'zeek-sensor-san-francisco',
+          field: 'host.name',
+          value: 'zeek-sensor-san-francisco',
           order: 'desc',
         },
         strategy: 'securitySolutionSearchStrategy',
@@ -183,7 +184,8 @@ export default function ({ getService }: FtrProviderContext) {
           factoryQueryType: FirstLastSeenQuery,
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           docValueFields: [{ field: '@timestamp', format: 'epoch_millis' }],
-          hostName: 'zeek-sensor-san-francisco',
+          field: 'host.name',
+          value: 'zeek-sensor-san-francisco',
           order: 'asc',
         },
         strategy: 'securitySolutionSearchStrategy',
@@ -198,7 +200,8 @@ export default function ({ getService }: FtrProviderContext) {
           factoryQueryType: FirstLastSeenQuery,
           defaultIndex: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
           docValueFields: [{ field: '@timestamp', format: 'epoch_millis' }],
-          hostName: 'zeek-sensor-san-francisco',
+          value: 'zeek-sensor-san-francisco',
+          field: 'host.name',
           order: 'desc',
         },
         strategy: 'securitySolutionSearchStrategy',

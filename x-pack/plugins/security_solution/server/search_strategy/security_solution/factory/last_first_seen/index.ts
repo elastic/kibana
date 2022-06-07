@@ -9,14 +9,15 @@ import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import {
+  FactoryQueryTypes,
   FirstLastSeenStrategyResponse,
   FirstLastSeenQuery,
   FirstLastSeenRequestOptions,
-} from '../../../../../common/search_strategy/security_solution/first_last_seen';
+} from '../../../../../common/search_strategy/security_solution';
 
 import { inspectStringifyObject } from '../../../../utils/build_query';
 import { SecuritySolutionFactory } from '../types';
-import { buildFirstOrLastSeenQuery } from './query.first_or_last_seen_host.dsl';
+import { buildFirstOrLastSeenQuery } from './query.first_or_last_seen.dsl';
 
 export const firstOrLastSeen: SecuritySolutionFactory<typeof FirstLastSeenQuery> = {
   buildDsl: (options: FirstLastSeenRequestOptions) => buildFirstOrLastSeenQuery(options),
@@ -52,4 +53,11 @@ export const firstOrLastSeen: SecuritySolutionFactory<typeof FirstLastSeenQuery>
       };
     }
   },
+};
+
+export const firstLastSeenFactory: Record<
+  typeof FirstLastSeenQuery,
+  SecuritySolutionFactory<FactoryQueryTypes>
+> = {
+  [FirstLastSeenQuery]: firstOrLastSeen,
 };

@@ -17,9 +17,9 @@ import * as i18n from './translations';
 import {
   Direction,
   DocValueFields,
+  FirstLastSeenQuery,
   FirstLastSeenRequestOptions,
   FirstLastSeenStrategyResponse,
-  HostsQueries,
 } from '../../../../common/search_strategy';
 
 const ID = 'firstLastSeenHostQuery';
@@ -54,7 +54,7 @@ export const useFirstLastSeen = ({
   const [firstLastSeenRequest, setFirstLastSeenRequest] = useState<FirstLastSeenRequestOptions>({
     defaultIndex: indexNames,
     docValueFields: docValueFields ?? [],
-    factoryQueryType: HostsQueries.firstOrLastSeen,
+    factoryQueryType: FirstLastSeenQuery,
     field,
     value,
     order,
