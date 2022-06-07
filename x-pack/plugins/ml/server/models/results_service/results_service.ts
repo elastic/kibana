@@ -793,9 +793,10 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       finalResults.modelSnapshotResultsLine.push({
         dataValue: timestamp,
         details: modelSnapshot.description,
+        modelSnapshot,
       });
     });
-
+    
     return finalResults;
   }
 

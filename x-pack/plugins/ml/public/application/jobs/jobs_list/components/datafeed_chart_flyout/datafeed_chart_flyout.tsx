@@ -42,10 +42,12 @@ import {
   ScaleType,
   Settings,
   timeFormatter,
+  RectAnnotationEvent,
+  LineAnnotationEvent,
 } from '@elastic/charts';
 
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
-import { CombinedJobWithStats } from '../../../../../../common/types/anomaly_detection_jobs';
+import { CombinedJobWithStats, ModelSnapshot } from '../../../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../../../common/types/audit_message';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useMlApiContext } from '../../../../contexts/kibana';
@@ -63,6 +65,9 @@ interface DatafeedChartFlyoutProps {
   jobId: string;
   end: number;
   onClose: () => void;
+  onModelSnapshotAnnotationClick: (
+    modelSnapshot: ModelSnapshot
+  ) => void;
 }
 
 function setLineAnnotationHeader(lineDatum: LineAnnotationDatum) {
@@ -78,7 +83,12 @@ const customTooltip: CustomAnnotationTooltip = ({ details, datum }) => (
   </div>
 );
 
-export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, onClose }) => {
+export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
+  jobId,
+  end,
+  onClose,
+  onModelSnapshotAnnotationClick,
+}) => {
   const [data, setData] = useState<{
     datafeedConfig: CombinedJobWithStats['datafeed_config'] | undefined;
     bucketSpan: string | undefined;
@@ -323,6 +333,22 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                         <Settings
                           showLegend
                           legendPosition={Position.Bottom}
+                          onAnnotationClick={(annotations: {
+                            rects: RectAnnotationEvent[];
+                            lines: LineAnnotationEvent[];
+                          }) => {
+                            // If it's not a line annotation or if it's not a model snapshot annotation then do nothing
+                            if (
+                              annotations.lines?.length === 0 ||
+                              (annotations.lines && annotations.lines[0].id !== 'Model snapshots')
+                            )
+                              return;
+
+                            onModelSnapshotAnnotationClick(
+                              // @ts-expect-error property 'modelSnapshot' does not exist on type
+                              annotations.lines[0].datum.modelSnapshot
+                            );
+                          }}
                           // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
                           theme={{
                             lineSeriesStyle: {
