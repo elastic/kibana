@@ -52,6 +52,10 @@ export function asFiltersByRuleTypeAndConsumer(
         ),
       ];
 
+      while (andNodes.length && andNodes[andNodes.length - 1] == null) {
+        andNodes.pop();
+      }
+
       if (opts.fieldNames.spaceIds != null && spaceId != null) {
         andNodes.push(nodeBuilder.is(opts.fieldNames.spaceIds, spaceId));
       }
