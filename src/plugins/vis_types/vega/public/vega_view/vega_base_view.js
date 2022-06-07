@@ -59,23 +59,20 @@ function normalizeDate(date) {
 
 // recursive function to check a nested object for the 'toJSON' property
 function checkObjectForToJsonProperty(object) {
-  let objHasToJsonProperty = false;
-  Object.keys(object).forEach((key) => {
-    if (typeof object[key] === 'object') {
-      const hasToJsonProperty = checkObjectForToJsonProperty(object[key]);
-      if (hasToJsonProperty) {
-        objHasToJsonProperty = true;
-      }
-    }
-    if ('toJSON' in object) {
-      objHasToJsonProperty = true;
+  if (object !== null && typeof object === 'object' && 'toJSON' in object) {
+    return true;
+  }
+
+  const hasProperty = Object.keys(object).some((key) => {
+    if (object[key] !== null && typeof object[key] === 'object') {
+      return checkObjectForToJsonProperty(object[key]);
     }
   });
-  return objHasToJsonProperty;
+  return hasProperty;
 }
 
 function normalizeObject(object) {
-  if (object !== null && typeof object === 'object' && checkObjectForToJsonProperty(object)) {
+  if (checkObjectForToJsonProperty(object)) {
     throw new Error('toJSON cannot be used as a property name');
   }
   const normalizedObject = JSON.parse(JSON.stringify(object));
