@@ -152,7 +152,13 @@ export class AggConfigs {
   }
 
   // clone method will reuse existing AggConfig in the list (will not create new instances)
-  clone({ enabledOnly = true } = {}) {
+  clone({
+    enabledOnly = true,
+    opts,
+  }: {
+    enabledOnly?: boolean;
+    opts?: Partial<AggConfigsOptions>;
+  } = {}) {
     const filterAggs = (agg: AggConfig) => {
       if (!enabledOnly) return true;
       return agg.enabled;
@@ -163,6 +169,7 @@ export class AggConfigs {
       this.aggs.filter(filterAggs),
       {
         ...this.opts,
+        ...opts,
       },
       this.getConfig
     );
