@@ -9,6 +9,7 @@ import { invert, mapValues } from 'lodash';
 import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   EuiDatePicker,
   EuiPanel,
@@ -198,6 +199,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
             onChange={(e) =>
               setFrequency(e.target.value === 'CUSTOM' ? 'CUSTOM' : Number(e.target.value))
             }
+            compressed
           />
         </EuiFormRow>
         {frequency === 'CUSTOM' && (
@@ -216,6 +218,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
           })}
         >
           <EuiButtonGroup
+            buttonSize="compressed"
             isFullWidth
             type="single"
             legend="Recurrence ends"
@@ -250,6 +253,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
             fullWidth
           >
             <EuiFormControlLayout
+              compressed
               prepend={i18n.translate(
                 'xpack.triggersActionsUI.ruleSnoozeScheduler.afterOccurrencesLabel',
                 {
@@ -265,6 +269,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
               )}
             >
               <EuiFieldNumber
+                compressed
                 min={1}
                 value={occurrences}
                 onChange={(e) => setOccurrrences(Number(e.target.value))}
@@ -360,8 +365,9 @@ const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps> = ({
 
   return (
     <>
-      <EuiFormRow style={{ alignItems: 'center' }} fullWidth label=" ">
+      <EuiFormRowWithDelimitedFixer style={{ alignItems: 'center' }} fullWidth label=" ">
         <EuiFormControlLayoutDelimited
+          compressed
           fullWidth
           delimiter=""
           prepend={i18n.translate(
@@ -414,7 +420,7 @@ const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps> = ({
             />
           }
         />
-      </EuiFormRow>
+      </EuiFormRowWithDelimitedFixer>
       {frequency === RRuleFrequency.WEEKLY && (
         <EuiFormRow
           fullWidth
@@ -426,6 +432,7 @@ const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps> = ({
           )}
         >
           <EuiButtonGroup
+            buttonSize="compressed"
             isFullWidth
             type="multi"
             legend="Repeat on weekday"
@@ -438,6 +445,7 @@ const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps> = ({
       {frequency === RRuleFrequency.MONTHLY && startDate && (
         <EuiFormRow fullWidth>
           <EuiButtonGroup
+            buttonSize="compressed"
             isFullWidth
             type="single"
             legend="Repeat on weekday or month day"
@@ -465,6 +473,13 @@ const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps> = ({
     </>
   );
 };
+
+// FIXME https://github.com/elastic/eui/issues/5958
+const EuiFormRowWithDelimitedFixer = euiStyled(EuiFormRow)`
+  & .euiFormControlLayout__childrenWrapper {
+    height: 100%;
+  }
+`;
 
 export const recurrenceSummary = ({
   freq,
