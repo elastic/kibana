@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.waitForDocTableLoadingComplete();
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await filterBar.addFilter(columnName, 'is', value);
       }
@@ -58,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.context.clickSuccessorLoadMoreButton();
         await PageObjects.context.waitUntilContextLoadingHasFinished();
         await browser.goBack();
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.waitForDocTableLoadingComplete();
         const hitCount = await PageObjects.discover.getHitCount();
         return initialHitCount === hitCount;
       });
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.context.waitUntilContextLoadingHasFinished();
 
           await find.clickByCssSelector(`[data-test-subj="breadcrumb first"]`);
-          await PageObjects.discover.waitUntilSearchingHasFinished();
+          await PageObjects.discover.waitForDocTableLoadingComplete();
 
           for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
             expect(await filterBar.hasFilter(columnName, value)).to.eql(true);
