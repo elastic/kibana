@@ -64,29 +64,44 @@ const fields = [
   },
 ] as DataView['fields'];
 
-fields.getByName = (name: string) => {
-  return fields.find((field) => field.name === name);
+export const buildDataViewMock = ({
+  name,
+  fields: definedFields,
+  timeFieldName,
+}: {
+  name: string;
+  fields: DataView['fields'];
+  timeFieldName?: string;
+}): DataView => {
+  const dataViewFields = [...definedFields] as DataView['fields'];
+
+  dataViewFields.getByName = (fieldName: string) => {
+    return dataViewFields.find((field) => field.name === fieldName);
+  };
+
+  dataViewFields.getAll = () => {
+    return dataViewFields;
+  };
+
+  const dataView = {
+    id: `${name}-id`,
+    title: `${name}-title`,
+    name,
+    metaFields: ['_index', '_score'],
+    fields: dataViewFields,
+    getName: () => name,
+    getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
+    getSourceFiltering: () => ({}),
+    getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),
+    timeFieldName: timeFieldName || '',
+    docvalueFields: [],
+    getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
+    isTimeNanosBased: () => false,
+  } as unknown as DataView;
+
+  dataView.isTimeBased = () => !!timeFieldName;
+
+  return dataView;
 };
 
-fields.getAll = () => {
-  return fields;
-};
-
-const indexPattern = {
-  id: 'the-index-pattern-id',
-  title: 'the-index-pattern-title',
-  name: 'The Index Pattern Name',
-  metaFields: ['_index', '_score'],
-  fields,
-  getName: () => 'The Index Pattern Name',
-  getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
-  getSourceFiltering: () => ({}),
-  getFieldByName: jest.fn(() => ({})),
-  timeFieldName: '',
-  docvalueFields: [],
-  getFormatterForField: jest.fn(() => ({ convert: (value: unknown) => value })),
-} as unknown as DataView;
-
-indexPattern.isTimeBased = () => !!indexPattern.timeFieldName;
-
-export const indexPatternMock = indexPattern;
+export const indexPatternMock = buildDataViewMock({ name: 'the-index-pattern', fields });
