@@ -29,12 +29,6 @@ export const exporters = {
 };
 
 /*
- * Field Formats:
- */
-
-export { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
-
-/*
  * Index patterns:
  */
 
