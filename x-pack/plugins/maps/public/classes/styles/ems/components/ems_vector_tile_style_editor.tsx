@@ -12,12 +12,12 @@ import { i18n } from '@kbn/i18n';
 
 interface Props {
   color: string;
-  onEMSVectorTileColorChange: ({ color }: { color: string }) => void;
+  onColorChange: ({ color }: { color: string }) => void;
 }
 
-export function EMSVectorTileStyleEditor({ color, onEMSVectorTileColorChange }: Props) {
-  const onColorChange = (selectedColor: string) => {
-    onEMSVectorTileColorChange({
+export function EMSVectorTileStyleEditor({ color, onColorChange }: Props) {
+  const onChange = (selectedColor: string) => {
+    onColorChange({
       color: selectedColor,
     });
   };
@@ -32,7 +32,7 @@ export function EMSVectorTileStyleEditor({ color, onEMSVectorTileColorChange }: 
         compressed
         aria-label="Color"
         color={color}
-        onChange={onColorChange}
+        onChange={onChange}
         secondaryInputDisplay="top"
         isClearable
         format="hex"

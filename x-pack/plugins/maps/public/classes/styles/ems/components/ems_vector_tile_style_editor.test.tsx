@@ -13,7 +13,7 @@ import { EMSVectorTileStyleEditor } from './ems_vector_tile_style_editor';
 describe('EMSVectorTileStyleEditor', () => {
   test('is rendered', () => {
     const component = shallow(
-      <EMSVectorTileStyleEditor color="#4A412A" onEMSVectorTileColorChange={() => {}} />
+      <EMSVectorTileStyleEditor color="#4A412A" onColorChange={() => {}} />
     );
 
     expect(component).toMatchSnapshot();

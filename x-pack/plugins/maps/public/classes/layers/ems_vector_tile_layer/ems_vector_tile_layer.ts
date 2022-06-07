@@ -17,7 +17,6 @@ import {
   NO_EMS_LOCALE,
   SOURCE_DATA_REQUEST_ID,
   LAYER_TYPE,
-  LAYER_STYLE_TYPE,
 } from '../../../../common/constants';
 import { EMSVectorTileLayerDescriptor } from '../../../../common/descriptor_types';
 import { DataRequest } from '../../util/data_request';
@@ -42,12 +41,16 @@ interface SourceRequestData {
 export class EmsVectorTileLayer extends AbstractLayer {
   private readonly _style: EMSVectorTileStyle;
 
-  static createDescriptor(options: Partial<EMSVectorTileLayerDescriptor>) {
-    const emsVectorTileLayerDescriptor = super.createDescriptor(options);
+  static createDescriptor(
+    options: Partial<EMSVectorTileLayerDescriptor>
+  ): EMSVectorTileLayerDescriptor {
+    const emsVectorTileLayerDescriptor = super.createDescriptor(
+      options
+    ) as EMSVectorTileLayerDescriptor;
     emsVectorTileLayerDescriptor.type = LAYER_TYPE.EMS_VECTOR_TILE;
     emsVectorTileLayerDescriptor.alpha = _.get(options, 'alpha', 1);
     emsVectorTileLayerDescriptor.locale = _.get(options, 'locale', AUTOSELECT_EMS_LOCALE);
-    emsVectorTileLayerDescriptor.style = { type: LAYER_STYLE_TYPE.EMS_VECTOR_TILE };
+    emsVectorTileLayerDescriptor.style = EMSVectorTileStyle.createDescriptor();
     return emsVectorTileLayerDescriptor;
   }
 

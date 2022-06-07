@@ -231,7 +231,6 @@ export function LayerSettings(props: Props) {
         {renderZoomSliders()}
         <AlphaSlider alpha={props.layer.getAlpha()} onChange={onAlphaChange} />
         {renderShowLabelsOnTop()}
-        <EuiSpacer size="m" />
         {renderShowLocaleSelector()}
         <AttributionFormRow layer={props.layer} onChange={onAttributionChange} />
         {renderIncludeInFitToBounds()}

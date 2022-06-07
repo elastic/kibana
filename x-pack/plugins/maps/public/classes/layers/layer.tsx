@@ -402,10 +402,6 @@ export class AbstractLayer implements ILayer {
     // no-op by default
   }
 
-  getDefaultColorOperation() {
-    return {};
-  }
-
   getMbLayerIds(): string[] {
     throw new Error('Should implement AbstractLayer#getMbLayerIds');
   }

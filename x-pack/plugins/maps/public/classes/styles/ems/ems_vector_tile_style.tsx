@@ -34,13 +34,13 @@ export class EMSVectorTileStyle implements IStyle {
   }
 
   renderEditor(onStyleDescriptorChange: (styleDescriptor: StyleDescriptor) => void) {
-    const onEMSVectorTileColorChange = ({ color }: { color: string }) => {
+    const onColorChange = ({ color }: { color: string }) => {
       const styleDescriptor = EMSVectorTileStyle.createDescriptor(color);
       onStyleDescriptorChange(styleDescriptor);
     };
 
     return (
-      <EMSVectorTileStyleEditor color={this._descriptor.color} onEMSVectorTileColorChange={onEMSVectorTileColorChange} />
+      <EMSVectorTileStyleEditor color={this._descriptor.color} onColorChange={onColorChange} />
     );
   }
 }
