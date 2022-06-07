@@ -101,9 +101,9 @@ describe('KibanaPageTemplateSolutionNav', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('accepts isForceOpenOnDesktop prop', () => {
+  test('accepts canBeCollapsed prop', () => {
     const component = shallow(
-      <KibanaPageTemplateSolutionNav name="Solution" isForceOpenOnDesktop={true} items={items} />
+      <KibanaPageTemplateSolutionNav name="Solution" canBeCollapsed={true} items={items} />
     );
     expect(component).toMatchSnapshot();
   });

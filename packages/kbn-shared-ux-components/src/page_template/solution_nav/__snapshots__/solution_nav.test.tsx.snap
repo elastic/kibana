@@ -95,7 +95,7 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
 </Fragment>
 `;
 
-exports[`KibanaPageTemplateSolutionNav accepts isForceOpenOnDesktop prop 1`] = `
+exports[`KibanaPageTemplateSolutionNav accepts canBeCollapsed prop 1`] = `
 <Fragment>
   <EuiCollapsibleNavGroup
     background="none"
