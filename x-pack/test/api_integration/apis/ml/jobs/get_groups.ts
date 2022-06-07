@@ -91,7 +91,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
     });
 
     it('returns expected list of groups', async () => {
