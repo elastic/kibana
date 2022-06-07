@@ -63,7 +63,6 @@ export default function catalogueTests({ getService }: FtrProviderContext) {
             const exceptions = [
               'monitoring',
               'enterpriseSearch',
-              'enterpriseSearchContent',
               'elasticsearch',
               'appSearch',
               'workplaceSearch',
