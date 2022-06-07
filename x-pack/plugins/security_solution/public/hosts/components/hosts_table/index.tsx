@@ -7,8 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { EuiButtonIcon } from '@elastic/eui';
+import { useKibana } from '../../../common/lib/kibana';
 
 import {
   Columns,
@@ -33,7 +32,6 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import { SecurityPageName } from '../../../../common/constants';
 import { HostsTableType } from '../../store/model';
 import { useNavigateTo } from '../../../common/lib/kibana/hooks';
-import { StartServices } from '../../../types';
 
 const tableType = hostsModel.HostsTableType.hosts;
 
@@ -72,19 +70,6 @@ const getSorting = (sortField: HostsFields, direction: Direction): SortingBasicT
   field: getNodeField(sortField),
   direction,
 });
-
-const useTypedKibana = () => useKibana<StartServices>();
-
-const useKibanaServices = () => {
-  const {
-    timelines,
-    data: {
-      query: { filterManager },
-    },
-  } = useTypedKibana().services;
-
-  return { timelines, filterManager };
-};
 
 const HostsTableComponent: React.FC<HostsTableProps> = ({
   data,
@@ -173,25 +158,41 @@ const HostsTableComponent: React.FC<HostsTableProps> = ({
 
   const sorting = useMemo(() => getSorting(sortField, direction), [sortField, direction]);
 
-  const { timelines, filterManager } = useKibanaServices();
-  const filterForButton = useMemo(
-    () => timelines.getHoverActions().getFilterForValueButton,
-    [timelines]
+  const kibana = useKibana();
+  const { timelines } = kibana.services;
+  const { getFilterForValueButton, getFilterOutValueButton } = timelines.getHoverActions();
+
+  const filterManager = useMemo(
+    () => kibana.services.data.query.filterManager,
+    [kibana.services.data.query.filterManager]
   );
-  const filterForProps = useMemo(() => {
-    return {
-      Component: () => <EuiButtonIcon iconType="arrowRight" aria-label="Next" />,
-      field: 'host.name',
-      filterManager,
-      onFilterAdded: () => {},
-      ownFocus: false,
-      showTooltip: false,
-      value: ['ubuntu-impish'],
-    };
-  }, [filterManager]);
+
   return (
     <>
-      {<>{filterForButton(filterForProps)}</>}
+      {
+        <>
+          {getFilterForValueButton({
+            field: 'host.name',
+            filterManager,
+            // keyboardEvent: stKeyboardEvent,
+            onClick: () => {},
+            onFilterAdded: () => {},
+            ownFocus: false,
+            showTooltip: true,
+            value: ['ubuntu-impish'],
+          })}
+          {getFilterOutValueButton({
+            field: 'host.name',
+            filterManager,
+            // keyboardEvent: stKeyboardEvent,
+            onClick: () => {},
+            onFilterAdded: () => {},
+            ownFocus: false,
+            showTooltip: true,
+            value: ['ubuntu-impish'],
+          })}
+        </>
+      }
       <PaginatedTable
         activePage={activePage}
         columns={hostsColumns}
