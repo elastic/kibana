@@ -47,7 +47,10 @@ import {
 } from '@elastic/charts';
 
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
-import { CombinedJobWithStats, ModelSnapshot } from '../../../../../../common/types/anomaly_detection_jobs';
+import {
+  CombinedJobWithStats,
+  ModelSnapshot,
+} from '../../../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../../../common/types/audit_message';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useMlApiContext } from '../../../../contexts/kibana';
@@ -65,9 +68,7 @@ interface DatafeedChartFlyoutProps {
   jobId: string;
   end: number;
   onClose: () => void;
-  onModelSnapshotAnnotationClick: (
-    modelSnapshot: ModelSnapshot
-  ) => void;
+  onModelSnapshotAnnotationClick: (modelSnapshot: ModelSnapshot) => void;
 }
 
 function setLineAnnotationHeader(lineDatum: LineAnnotationDatum) {

@@ -796,7 +796,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
         modelSnapshot,
       });
     });
-    
+
     return finalResults;
   }
 
