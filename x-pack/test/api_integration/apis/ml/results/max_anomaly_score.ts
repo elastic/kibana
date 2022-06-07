@@ -45,17 +45,17 @@ export default ({ getService }: FtrProviderContext) => {
     await ml.api.createAndRunAnomalyDetectionLookbackJob(JOB_CONFIG, DATAFEED_CONFIG);
   }
 
-  async function runRequest(requestBody: any) {
+  async function runRequest(requestBody: object) {
     const { body, status } = await supertest
       .post(`/api/ml/results/max_anomaly_score`)
       .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
       .set(COMMON_REQUEST_HEADERS)
       .send(requestBody);
-    ml.api.assertResponseStatusCode(200, status, body);
-    return body;
+    return { body, status };
   }
 
   describe('GetAnomaliesTableData', function () {
+    this.tags(['dima']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
@@ -73,8 +73,8 @@ export default ({ getService }: FtrProviderContext) => {
         latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT
       };
 
-      const body = await runRequest(requestBody);
-
+      const { body, status } = await runRequest(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
       expect(body).to.eql({ maxScore: 0 });
     });
 
@@ -83,8 +83,18 @@ export default ({ getService }: FtrProviderContext) => {
         jobIds: [JOB_CONFIG.job_id],
       };
 
-      const body = await runRequest(requestBody);
+      const { body, status } = await runRequest(requestBody);
+      ml.api.assertResponseStatusCode(200, status, body);
       expect(body.maxScore).to.be.above(50);
+    });
+    it('should response with an error when job with provided id does not exist', async () => {
+      const requestBody = {
+        jobIds: ['i_am_not_found'],
+      };
+
+      const { body, status } = await runRequest(requestBody);
+      ml.api.assertResponseStatusCode(404, status, body);
+      expect(body.message).to.eql('i_am_not_found missing');
     });
   });
 };
