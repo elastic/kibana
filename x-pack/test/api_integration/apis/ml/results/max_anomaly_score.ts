@@ -55,7 +55,6 @@ export default ({ getService }: FtrProviderContext) => {
   }
 
   describe('GetAnomaliesTableData', function () {
-    this.tags(['dima']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
