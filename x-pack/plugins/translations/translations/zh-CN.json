@@ -12341,8 +12341,6 @@
     "xpack.fleet.agentBulkActions.selectAll": "选择所有页面上的所有内容",
     "xpack.fleet.agentBulkActions.totalAgents": "正在显示 {count, plural, other {# 个代理}}",
     "xpack.fleet.agentBulkActions.totalAgentsWithLimit": "正在显示 {count} 个代理（共 {total} 个）",
-    "xpack.fleet.agentBulkActions.unenrollAgents": "取消注册代理",
-    "xpack.fleet.agentBulkActions.upgradeAgents": "升级代理",
     "xpack.fleet.agentDetails.actionsButton": "操作",
     "xpack.fleet.agentDetails.agentDetailsTitle": "代理“{id}”",
     "xpack.fleet.agentDetails.agentNotFoundErrorDescription": "找不到代理 ID {agentId}",
