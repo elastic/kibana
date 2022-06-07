@@ -176,16 +176,18 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   return (
     <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
       <Suspense fallback={null}>
-        <AlertsFlyout
-          alert={flyoutAlertIndex > -1 ? alerts[flyoutAlertIndex] : null}
-          alertsCount={alertsCount}
-          state={props.flyoutState}
-          onClose={handleFlyoutClose}
-          alertsTableConfiguration={props.alertsTableConfiguration}
-          flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
-          onPaginate={onPaginateFlyout}
-          isLoading={isLoading}
-        />
+        {flyoutAlertIndex > -1 && (
+          <AlertsFlyout
+            alert={alerts[flyoutAlertIndex]}
+            alertsCount={alertsCount}
+            state={props.flyoutState}
+            onClose={handleFlyoutClose}
+            alertsTableConfiguration={props.alertsTableConfiguration}
+            flyoutIndex={flyoutAlertIndex + pagination.pageIndex * pagination.pageSize}
+            onPaginate={onPaginateFlyout}
+            isLoading={isLoading}
+          />
+        )}
       </Suspense>
       <EuiDataGrid
         aria-label="Alerts table"
