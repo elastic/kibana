@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartTheme } from '@kbn/observability-plugin/public';
+import { last } from 'lodash';
 import { isExpectedBoundsComparison } from '../time_comparison/get_comparison_options';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
@@ -125,7 +126,15 @@ export function TimeseriesChart({
   const timeZone = getTimeZone(core.uiSettings);
 
   const min = Math.min(...xValues);
-  const max = Math.max(...xValues);
+  const max = Math.max(
+    ...xValues,
+    // If the last data point of timeseries ends before (picked end time + bucket_span)
+    // we need to extend the x max domain to the last available data point for the expected bounds
+    // for the area chart to show up correctly
+    isComparingExpectedBounds
+      ? last(anomalyChartTimeseries?.boundaries[0]?.data)?.x ?? 0
+      : 0
+  );
   const xFormatter = niceTimeFormatter([min, max]);
 
   const xDomain = isEmpty ? { min: 0, max: 1 } : { min, max };
