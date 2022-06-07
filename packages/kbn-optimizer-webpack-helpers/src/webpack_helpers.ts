@@ -7,7 +7,7 @@
  */
 
 import webpack from 'webpack';
-// @ts-ignore
+// @ts-expect-error module is not typed
 import Stats from 'webpack/lib/Stats';
 
 export function isFailureStats(stats: webpack.Stats) {
@@ -168,3 +168,4 @@ export function getModulePath(module: WebpackNormalModule) {
   const queryIndex = module.resource.indexOf('?');
   return queryIndex === -1 ? module.resource : module.resource.slice(0, queryIndex);
 }
+//

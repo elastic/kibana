@@ -3144,6 +3144,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/optimizer-webpack-helpers@link:bazel-bin/packages/kbn-optimizer-webpack-helpers":
+  version "0.0.0"
+  uid ""
+
 "@kbn/optimizer@link:bazel-bin/packages/kbn-optimizer":
   version "0.0.0"
   uid ""
@@ -6427,6 +6431,10 @@
   uid ""
 
 "@types/kbn__monaco@link:bazel-bin/packages/kbn-monaco/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__optimizer-webpack-helpers@link:bazel-bin/packages/kbn-optimizer-webpack-helpers/npm_module_types":
   version "0.0.0"
   uid ""
 
