@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { PartitionFieldValueResponse } from '@kbn/ml-plugin/server/models/results_service/get_partition_fields_values';
 import { USER } from '../../../../functional/services/ml/security_common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
@@ -58,6 +59,16 @@ export default ({ getService }: FtrProviderContext) => {
     );
   }
 
+  async function runRequest(requestBody: object): Promise<PartitionFieldValueResponse> {
+    const { body, status } = await supertest
+      .post(`/api/ml/results/partition_fields_values`)
+      .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+      .set(COMMON_REQUEST_HEADERS)
+      .send(requestBody);
+    ml.api.assertResponseStatusCode(200, status, body);
+    return body;
+  }
+
   describe('GetAnomaliesTableData', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
@@ -86,12 +97,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
 
-        const { body, status } = await supertest
-          .post(`/api/ml/results/partition_fields_values`)
-          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody);
-        ml.api.assertResponseStatusCode(200, status, body);
+        const body = await runRequest(requestBody);
 
         expect(body.partition_field.name).to.eql('airline');
         expect(body.partition_field.values.length).to.eql(6);
@@ -125,12 +131,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
 
-        const { body, status } = await supertest
-          .post(`/api/ml/results/partition_fields_values`)
-          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody);
-        ml.api.assertResponseStatusCode(200, status, body);
+        const body = await runRequest(requestBody);
 
         expect(body).to.eql({
           partition_field: {
@@ -178,12 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
 
-        const { body, status } = await supertest
-          .post(`/api/ml/results/partition_fields_values`)
-          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody);
-        ml.api.assertResponseStatusCode(200, status, body);
+        const body = await runRequest(requestBody);
 
         expect(body.partition_field.name).to.eql('airline');
         expect(body.partition_field.values.length).to.eql(1);
@@ -209,13 +205,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
 
-        const { body, status } = await supertest
-          .post(`/api/ml/results/partition_fields_values`)
-          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody);
-        ml.api.assertResponseStatusCode(200, status, body);
-
+        const body = await runRequest(requestBody);
         expect(body.partition_field.values.length).to.eql(6);
       });
 
@@ -235,13 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
 
-        const { body, status } = await supertest
-          .post(`/api/ml/results/partition_fields_values`)
-          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS)
-          .send(requestBody);
-        ml.api.assertResponseStatusCode(200, status, body);
-
+        const body = await runRequest(requestBody);
         expect(body.partition_field.values.length).to.eql(19);
       });
     });
