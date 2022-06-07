@@ -15,6 +15,7 @@ import {
   EuiToolTip,
   EuiIcon,
   euiPaletteColorBlind,
+  useColorPickerState,
 } from '@elastic/eui';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { VisualizationDimensionEditorProps } from '../../types';
@@ -104,6 +105,7 @@ export const ColorPicker = ({
   ]);
 
   const [color, setColor] = useState(currentColor);
+  const [isColorValid, setIsColorValid] = useState(true);
 
   useEffect(() => {
     setColor(currentColor);
@@ -111,6 +113,7 @@ export const ColorPicker = ({
 
   const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
     setColor(text);
+    setIsColorValid(output.isValid);
     if (output.isValid || text === '') {
       const newColor = text === '' ? undefined : output.hex;
       setConfig({ color: newColor });
@@ -123,10 +126,12 @@ export const ColorPicker = ({
       defaultMessage: 'Series color',
     });
 
-  const currentColorAlpha = color ? chroma(color).alpha() : 1;
+
+  const currentColorAlpha =  (color && isColorValid) ? chroma(color).alpha() : 1;
 
   const colorPicker = (
     <EuiColorPicker
+      isInvalid={!isColorValid}
       fullWidth
       data-test-subj="indexPattern-dimension-colorPicker"
       compressed
@@ -162,7 +167,6 @@ export const ColorPicker = ({
             {inputLabel}
             {!disableHelpTooltip && (
               <>
-                {''}
                 <EuiIcon
                   type="questionInCircle"
                   color="subdued"
