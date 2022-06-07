@@ -5,17 +5,8 @@
  * 2.0.
  */
 import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
-  type EuiBasicTable,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
+import { type EuiBasicTable, EuiPanel, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { cspRuleAssetSavedObjectType } from '../../../common/constants';
 import { extractErrorMessage, isNonNullable } from '../../../common/utils/helpers';
 import { RulesTable } from './rules_table';
@@ -30,7 +21,7 @@ import {
 } from './use_csp_rules';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleFlyout } from './rules_flyout';
-import { useKibana } from '../../common/hooks/use_kibana';
+import { DATA_UPDATE_INFO } from './translations';
 
 interface RulesPageData {
   rules_page: RuleSavedObject[];
@@ -112,7 +103,7 @@ export const RulesContainer = () => {
     filter: `${cspRuleAssetSavedObjectType}.attributes.policy_id: "${params.policyId}" and ${cspRuleAssetSavedObjectType}.attributes.package_policy_id: "${params.packagePolicyId}"`,
     search: '',
     page: 0,
-    perPage: 25,
+    perPage: 10,
   });
 
   const { data, status, error, refetch } = useFindCspRules({
@@ -178,7 +169,7 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <ManageIntegrationButton {...params} />
+      <EuiCallOut size="m" title={DATA_UPDATE_INFO} iconType="iInCircle" />
       <EuiSpacer />
       <EuiPanel hasBorder hasShadow={false}>
         <RulesTableHeader
@@ -231,32 +222,5 @@ export const RulesContainer = () => {
         />
       )}
     </div>
-  );
-};
-
-const ManageIntegrationButton = ({ policyId, packagePolicyId }: PageUrlParams) => {
-  const { http } = useKibana().services;
-  return (
-    <EuiFlexGroup>
-      <EuiFlexItem grow={1} style={{ alignItems: 'flex-end' }}>
-        <EuiButtonEmpty
-          href={http.basePath.prepend(
-            pagePathGetters
-              .edit_integration({
-                policyId,
-                packagePolicyId,
-              })
-              .join('')
-          )}
-          iconType="gear"
-          size="xs"
-        >
-          <FormattedMessage
-            id="xpack.csp.rules.manageIntegrationButtonLabel"
-            defaultMessage="Manage Integration"
-          />
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-    </EuiFlexGroup>
   );
 };

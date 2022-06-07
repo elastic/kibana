@@ -1483,10 +1483,10 @@
     "@elastic/transport" "^8.0.2"
     tslib "^2.3.0"
 
-"@elastic/ems-client@8.3.2":
-  version "8.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.3.2.tgz#a12eafcfd9ac8d3068da78a5a77503ea8a89f67c"
-  integrity sha512-81u+Z7+4Y2Fu+sTl9QOKdG3SVeCzzpfyCsHFR8X0V2WFCpQa+SU4sSN9WhdLHz/pe9oi6Gtt5eFMF90TOO/ckg==
+"@elastic/ems-client@8.3.3":
+  version "8.3.3"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.3.3.tgz#16ddd582e1029055a5a77e7bebbc5b57b3246ff7"
+  integrity sha512-vcgPwnAw7QjcR68IddErobZqwJdH0T4h/6U4swUR3XEF+9jojNZnxBkvM3mEV9Z7QLQxDprebJJu04d37lzlUw==
   dependencies:
     "@types/geojson" "^7946.0.7"
     "@types/lru-cache" "^5.1.0"
@@ -2988,6 +2988,38 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-common-internal@link:bazel-bin/packages/core/base/core-base-common-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-common@link:bazel-bin/packages/core/base/core-base-common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-server-internal@link:bazel-bin/packages/core/base/core-base-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-browser-mocks@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-browser@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal":
+  version "0.0.0"
+  uid ""
+
 "@kbn/crypto@link:bazel-bin/packages/kbn-crypto":
   version "0.0.0"
   uid ""
@@ -3317,6 +3349,10 @@
   uid ""
 
 "@kbn/ui-theme@link:bazel-bin/packages/kbn-ui-theme":
+  version "0.0.0"
+  uid ""
+
+"@kbn/utility-types-jest@link:bazel-bin/packages/kbn-utility-types-jest":
   version "0.0.0"
   uid ""
 
@@ -5703,12 +5739,12 @@
   resolved "https://registry.yarnpkg.com/@types/d3-path/-/d3-path-1.0.7.tgz#a0736fceed688a695f48265a82ff7a3369414b81"
   integrity sha512-U8dFRG+8WhkLJr2sxZ9Cw/5WeRgBnNqMxGdA1+Z0+ZG6tK0s75OQ4OXnxeyfKuh6E4wQPY8OAKr1+iNDx01BEQ==
 
-"@types/d3-scale@^2.1.1":
-  version "2.1.1"
-  resolved "https://registry.yarnpkg.com/@types/d3-scale/-/d3-scale-2.1.1.tgz#405e58771ec6ae7b8f7b4178ee1887620759e8f7"
-  integrity sha512-kNTkbZQ+N/Ip8oX9PByXfDLoCSaZYm+VUOasbmsa6KD850/ziMdYepg/8kLg2plHzoLANdMqPoYQbvExevLUHg==
+"@types/d3-scale@^2.2.6":
+  version "2.2.6"
+  resolved "https://registry.yarnpkg.com/@types/d3-scale/-/d3-scale-2.2.6.tgz#28540b4dfc99d978970e873e4138a6bea2ea6ab8"
+  integrity sha512-CHu34T5bGrJOeuhGxyiz9Xvaa9PlsIaQoOqjDg7zqeGj2x0rwPhGquiy03unigvcMxmvY0hEaAouT0LOFTLpIw==
   dependencies:
-    "@types/d3-time" "*"
+    "@types/d3-time" "^1"
 
 "@types/d3-shape@^1.3.1":
   version "1.3.1"
@@ -5722,7 +5758,7 @@
   resolved "https://registry.yarnpkg.com/@types/d3-time-format/-/d3-time-format-2.1.1.tgz#dd2c79ec4575f1355484ab6b10407824668eba42"
   integrity sha512-tJSyXta8ZyJ52wDDHA96JEsvkbL6jl7wowGmuf45+fAkj5Y+SQOnz0N7/H68OWmPshPsAaWMQh+GAws44IzH3g==
 
-"@types/d3-time@*", "@types/d3-time@^1.0.10":
+"@types/d3-time@^1", "@types/d3-time@^1.0.10":
   version "1.0.10"
   resolved "https://registry.yarnpkg.com/@types/d3-time/-/d3-time-1.0.10.tgz#d338c7feac93a98a32aac875d1100f92c7b61f4f"
   integrity sha512-aKf62rRQafDQmSiv1NylKhIMmznsjRN+MnXRXTqHoqm0U/UZzVpdrtRnSIfdiLS616OuC1soYeX1dBg2n1u8Xw==
@@ -6238,6 +6274,58 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-base-browser-internal@link:bazel-bin/packages/core/base/core-base-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-browser@link:bazel-bin/packages/core/base/core-base-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-common-internal@link:bazel-bin/packages/core/base/core-base-common-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-common@link:bazel-bin/packages/core/base/core-base-common/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-server-internal@link:bazel-bin/packages/core/base/core-base-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-base-server@link:bazel-bin/packages/core/base/core-base-server/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-common-internal-base@link:bazel-bin/packages/core/common/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-browser-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-browser-mocks@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-browser@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-injected-metadata-common-internal@link:bazel-bin/packages/core/injected-metadata/core-injected-metadata-common-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-public-internal-base@link:bazel-bin/packages/core/public/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-server-internal-base@link:bazel-bin/packages/core/server/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__crypto@link:bazel-bin/packages/kbn-crypto/npm_module_types":
   version "0.0.0"
   uid ""
@@ -6515,6 +6603,10 @@
   uid ""
 
 "@types/kbn__ui-theme@link:bazel-bin/packages/kbn-ui-theme/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__utility-types-jest@link:bazel-bin/packages/kbn-utility-types-jest/npm_module_types":
   version "0.0.0"
   uid ""
 
@@ -7139,10 +7231,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.0.tgz#b23ba7e7f4f59069529c57f0cbb7f5fba74affe7"
-  integrity sha512-ehqwZemosqiWVe+W0f5GqcLH7NgtjMBmcknmeaPG6YZHc7EZ69XbD7VVNZcT/L8lyMIL/KG99MsGcvDuFWo3Yw==
+"@types/selenium-webdriver@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.1.tgz#aefb038f0462fd880f9c9581b8b3b71ce385719c"
+  integrity sha512-NxxZZek50ylIACiXebKQYHD3D4One3WXOasEXWazL6aTfYbZob7ClNKxUpg8I4/oWArX87oPWvj1cHKqfel3Hg==
   dependencies:
     "@types/ws" "*"
 
@@ -11094,10 +11186,10 @@ core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.0.4, core-js@^3.22.5, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
-  version "3.22.5"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.22.5.tgz#a5f5a58e663d5c0ebb4e680cd7be37536fb2a9cf"
-  integrity sha512-VP/xYuvJ0MJWRAobcmQ8F2H6Bsn+s7zqAAjFaHGBMc5AQm7zaelhD1LGduFn2EehEcQcU+br6t+fwbpQ5d1ZWA==
+core-js@^3.0.4, core-js@^3.22.7, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
+  version "3.22.7"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.22.7.tgz#8d6c37f630f6139b8732d10f2c114c3f1d00024f"
+  integrity sha512-Jt8SReuDKVNZnZEzyEQT5eK6T2RRCXkfTq7Lo09kpm+fHjgGewSbNjV+Wt4yZMhPDdzz2x1ulI5z/w4nxpBseg==
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
@@ -11916,7 +12008,7 @@ d3-sankey@^0.7.1:
     d3-collection "1"
     d3-shape "^1.2.0"
 
-d3-scale@1.0.7, d3-scale@^1.0.5, d3-scale@^1.0.7:
+d3-scale@^1.0.5, d3-scale@^1.0.7:
   version "1.0.7"
   resolved "https://registry.yarnpkg.com/d3-scale/-/d3-scale-1.0.7.tgz#fa90324b3ea8a776422bd0472afab0b252a0945d"
   integrity sha512-KvU92czp2/qse5tUfGms6Kjig0AhHOwkzXG0+PqIJB3ke0WUv088AHMZI0OssO9NCkXt4RP8yju9rpH8aGB7Lw==
@@ -11924,6 +12016,18 @@ d3-scale@1.0.7, d3-scale@^1.0.5, d3-scale@^1.0.7:
     d3-array "^1.2.0"
     d3-collection "1"
     d3-color "1"
+    d3-format "1"
+    d3-interpolate "1"
+    d3-time "1"
+    d3-time-format "2"
+
+d3-scale@^2.2.2:
+  version "2.2.2"
+  resolved "https://registry.yarnpkg.com/d3-scale/-/d3-scale-2.2.2.tgz#4e880e0b2745acaaddd3ede26a9e908a9e17b81f"
+  integrity sha512-LbeEvGgIb8UMcAa0EATLNX0lelKWGYDQiPdHj+gLblGVhGLyNbaCn3EvrJf0A3Y/uOOU5aD6MTh5ZFCdEwGiCw==
+  dependencies:
+    d3-array "^1.2.0"
+    d3-collection "1"
     d3-format "1"
     d3-interpolate "1"
     d3-time "1"
@@ -25556,10 +25660,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.1.2.tgz#d463b4335632d2ea41a9e988e435a55dc41f5314"
-  integrity sha512-e4Ap8vQvhipgBB8Ry9zBiKGkU6kHKyNnWiavGGLKkrdW81Zv7NVMtFOL/j3yX0G8QScM7XIXijKssNd4EUxSOw==
+selenium-webdriver@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.2.0.tgz#d3c9704735c6228e09580eb4613932b30bdb4d27"
+  integrity sha512-gPPXYSz4jJBM2kANRQ9cZW6KFBzR/ptxqGLtyC75eXtdgOsWWRRRyZz5F2pqdnwNmAjrCSFMMXfisJaZeWVejg==
   dependencies:
     jszip "^3.6.0"
     tmp "^0.2.1"
