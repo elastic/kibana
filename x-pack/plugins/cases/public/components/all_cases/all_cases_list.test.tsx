@@ -86,7 +86,6 @@ describe('AllCasesListGeneric', () => {
   const handleOnDeleteConfirm = jest.fn();
   const handleToggleModal = jest.fn();
   const refetchCases = jest.fn();
-  const setQueryParams = jest.fn();
   const updateBulkStatus = jest.fn();
   const fetchCasesStatus = jest.fn();
   const onRowClick = jest.fn();

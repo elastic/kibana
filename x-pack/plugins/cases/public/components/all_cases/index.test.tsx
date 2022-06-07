@@ -13,12 +13,11 @@ import { AllCases } from '.';
 import { TestProviders } from '../../common/mock';
 import { useGetReporters } from '../../containers/use_get_reporters';
 import { useGetActionLicense } from '../../containers/use_get_action_license';
-import { CaseStatuses } from '../../../common/api';
 import { casesStatus, connectorsMock, useGetCasesMockState } from '../../containers/mock';
-import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesStatus } from '../../containers/use_get_cases_status';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
+import { useFetchCases } from '../../containers/use_get_cases';
 
 jest.mock('../../containers/use_get_reporters');
 jest.mock('../../containers/use_get_tags');
@@ -29,7 +28,7 @@ jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_cases_status');
 
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
-const useGetCasesMock = useGetCases as jest.Mock;
+const useGetCasesMock = useFetchCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetActionLicenseMock = useGetActionLicense as jest.Mock;
 
@@ -83,7 +82,6 @@ describe('AllCases', () => {
   it('should render the stats', async () => {
     useGetCasesMock.mockReturnValue({
       ...defaultGetCases,
-      filterOptions: { ...defaultGetCases.filterOptions, status: CaseStatuses.closed },
     });
 
     const wrapper = mount(
