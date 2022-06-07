@@ -64,7 +64,7 @@ export class CiStatsPlugin {
           return true;
         });
 
-      const entry = assets.find((a) => a.name === entryName);
+      const entry = assets.find((a) => a.name === `${entryName}.js`);
       if (!entry) {
         throw new Error(`Unable to find bundle entry named [${entryName}]`);
       }
