@@ -39,6 +39,7 @@ export const withSolutionNav = (WrappedComponent: ComponentType<KibanaPageTempla
       localStorage.setItem(SOLUTION_NAV_COLLAPSED_KEY, JSON.stringify(isSideNavOpenOnDesktop));
     };
 
+    // Default navigation to allow collapsing
     const { canBeCollapsed = true } = solutionNav;
     const sideBarClasses = classNames(
       'kbnPageTemplate__pageSideBar',
