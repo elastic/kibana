@@ -31,6 +31,10 @@ PureComponent.argTypes = {
     control: 'boolean',
     defaultValue: true,
   },
+  description: {
+    control: 'text',
+    defaultValue: '',
+  },
 };
 
 export const ConnectedComponent = () => {
