@@ -58,6 +58,10 @@ export type KibanaPageTemplateSolutionNavProps = Omit<
    */
   isOpenOnDesktop?: boolean;
   onCollapse?: () => void;
+  /**
+   * Allows hiding of the navigation by the user.
+   * If false, forces all breakpoint versions into the open state without the ability to hide.
+   */
   canBeCollapsed?: boolean;
 };
 
