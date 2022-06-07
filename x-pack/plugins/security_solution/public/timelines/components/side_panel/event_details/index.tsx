@@ -90,6 +90,11 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
     [detailsData]
   );
 
+  const timestamp = useMemo(
+    () => getFieldValue({ category: 'base', field: '@timestamp' }, detailsData),
+    [detailsData]
+  );
+
   const [hostRiskLoading, { data, isModuleEnabled }] = useHostRiskScore({
     filterQuery: hostName ? buildHostNamesFilter([hostName]) : undefined,
     pagination: {
@@ -105,11 +110,6 @@ const EventDetailsPanelComponent: React.FC<EventDetailsPanelProps> = ({
         result: data,
       }
     : null;
-
-  const timestamp = useMemo(
-    () => getFieldValue({ category: 'base', field: '@timestamp' }, detailsData),
-    [detailsData]
-  );
 
   if (!expandedEvent?.eventId) {
     return null;

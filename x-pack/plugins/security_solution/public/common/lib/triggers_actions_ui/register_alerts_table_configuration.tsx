@@ -15,7 +15,7 @@ import { APP_ID } from '../../../../common/constants';
 import { getTimelinesInStorageByIds } from '../../../timelines/containers/local_storage';
 import { TimelineId } from '../../../../common/types';
 import { columns } from '../../../detections/configurations/security_solution_detections';
-import { getRenderCellValue } from '../../../detections/configurations/security_solution_detections/render_cell_value';
+import { useRenderCellValue } from '../../../detections/configurations/security_solution_detections/render_cell_value';
 import { useToGetInternalFlyout } from '../../../timelines/components/side_panel/event_details/flyout';
 
 const registerAlertsTableConfiguration = (
@@ -33,7 +33,7 @@ const registerAlertsTableConfiguration = (
   registry.register({
     id: APP_ID,
     columns: alertColumns,
-    getRenderCellValue: getRenderCellValue as GetRenderCellValue,
+    getRenderCellValue: useRenderCellValue as GetRenderCellValue,
     useInternalFlyout: () => {
       const { header, body, footer } = useToGetInternalFlyout();
       return { header, body, footer };

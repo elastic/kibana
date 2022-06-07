@@ -63,9 +63,13 @@ export const RenderCellValue: React.FC<
   />
 );
 
-export const getRenderCellValue =
-  ({ setFlyoutAlert }: { setFlyoutAlert?: (data: never) => void }) =>
-  ({
+export const useRenderCellValue = ({
+  setFlyoutAlert,
+}: {
+  setFlyoutAlert?: (data: never) => void;
+}) => {
+  const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
+  return ({
     columnId,
     colIndex,
     data,
@@ -83,7 +87,6 @@ export const getRenderCellValue =
     setCellProps,
     truncate = true,
   }: CellValueElementProps) => {
-    const { browserFields } = useSourcererDataView(SourcererScopeName.detections);
     const splitColumnId = columnId.split('.');
     let myHeader = header ?? { id: columnId };
     if (splitColumnId.length > 1 && browserFields[splitColumnId[0]]) {
@@ -117,3 +120,4 @@ export const getRenderCellValue =
       />
     );
   };
+};
