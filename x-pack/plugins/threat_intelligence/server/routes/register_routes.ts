@@ -16,7 +16,7 @@ import { schema } from '@kbn/config-schema';
 
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
-import { SERVER_SEARCH_ROUTE_PATH } from '../../common/constants';
+import { API_ROUTE_SOURCES } from '../../common/constants';
 import { Feed } from '../../common/types/Feed';
 
 const AGGREGATION_NAME = 'feeds' as const;
@@ -68,7 +68,7 @@ const sourcesQuery = {
 export function registerSourceSearchRoute(router: IRouter<DataRequestHandlerContext>) {
   router.get(
     {
-      path: SERVER_SEARCH_ROUTE_PATH,
+      path: API_ROUTE_SOURCES,
       validate: {
         query: schema.object({
           index: schema.maybe(schema.string()),

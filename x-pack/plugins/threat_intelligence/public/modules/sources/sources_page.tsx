@@ -11,7 +11,7 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import { DefaultPageLayout } from '../../components/layout/layout';
 import { SourcesTable } from './sources_table';
 
-import { SERVER_SEARCH_ROUTE_PATH } from '../../../common/constants';
+import { API_ROUTE_SOURCES } from '../../../common/constants';
 import { useCore } from '../../context/core_start';
 import { Feed } from '../../../common/types/Feed';
 
@@ -27,7 +27,7 @@ export const SourcesPage: VFC<RouteComponentProps> = () => {
     setAbortController(abortController);
     setIsLoading(true);
     try {
-      const res = await http.get<Feed[]>(SERVER_SEARCH_ROUTE_PATH, {
+      const res = await http.get<Feed[]>(API_ROUTE_SOURCES, {
         signal: abortController.signal,
       });
 
