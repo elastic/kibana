@@ -14,11 +14,10 @@ import {
   IconType,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { intersectionBy } from 'lodash';
 import { suspendedComponentWithProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ActionsProps } from '../types';
-import { useFetchRuleActions } from '../../../hooks/use_fetch_rule_actions';
+import { useFetchRuleActionsConnectors } from '../../../hooks/use_fetch_rule_actions_connectors';
 import { useKibana } from '../../../utils/kibana_react';
 
 export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
@@ -26,12 +25,16 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const { isLoadingActions, allActions, errorActions } = useFetchRuleActions({ http });
+  const { isLoadingActionsConnectors, actionsConnectors, errorActionsConnectors } =
+    useFetchRuleActionsConnectors({
+      http,
+      ruleActions,
+    });
   useEffect(() => {
-    if (errorActions) {
-      toasts.addDanger({ title: errorActions });
+    if (errorActionsConnectors) {
+      toasts.addDanger({ title: errorActionsConnectors });
     }
-  }, [errorActions, toasts]);
+  }, [errorActionsConnectors, toasts]);
   if (ruleActions && ruleActions.length <= 0)
     return (
       <EuiFlexItem>
@@ -49,11 +52,10 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
       ? actionGroup?.iconClass
       : suspendedComponentWithProps(actionGroup?.iconClass as React.ComponentType);
   }
-  const actions = intersectionBy(allActions, ruleActions, 'actionTypeId');
-  if (isLoadingActions) return <EuiLoadingSpinner size="s" />;
+  if (isLoadingActionsConnectors) return <EuiLoadingSpinner size="s" />;
   return (
     <EuiFlexGroup direction="column">
-      {actions.map(({ actionTypeId, name }) => (
+      {actionsConnectors.map(({ actionTypeId, name }) => (
         <React.Fragment key={actionTypeId}>
           <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
             <EuiFlexItem grow={false}>
