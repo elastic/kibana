@@ -45,6 +45,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             action_id: 'action1',
             agents: ['agent1', 'agent2', 'agent3'],
+            start_time: moment().toISOString(),
             expiration: moment().add(1, 'day').toISOString(),
           },
         });
@@ -57,6 +58,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             action_id: 'action2',
             agents: ['agent1', 'agent2', 'agent3'],
+            start_time: moment().toISOString(),
             expiration: moment().add(1, 'day').toISOString(),
           },
         });
@@ -68,6 +70,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             action_id: 'action2',
             agents: ['agent4', 'agent5'],
+            start_time: moment().toISOString(),
             expiration: moment().add(1, 'day').toISOString(),
           },
         });
@@ -79,6 +82,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             action_id: 'action3',
             agents: ['agent1', 'agent2'],
+            start_time: moment().toISOString(),
             expiration: moment().add(1, 'day').toISOString(),
           },
         });
@@ -129,6 +133,7 @@ export default function (providerContext: FtrProviderContext) {
             type: 'UPGRADE',
             action_id: 'action5',
             agents: ['agent1', 'agent2', 'agent3'],
+            start_time: moment().toISOString(),
             expiration: moment().add(1, 'day').toISOString(),
           },
         });
@@ -145,13 +150,26 @@ export default function (providerContext: FtrProviderContext) {
             },
           },
         });
+
+        // Action 6 1 agent with not start time
+        await es.index({
+          refresh: 'wait_for',
+          index: AGENT_ACTIONS_INDEX,
+          document: {
+            type: 'UPGRADE',
+            action_id: 'action6',
+            agents: ['agent1'],
+            expiration: moment().add(1, 'day').toISOString(),
+          },
+        });
       });
       it('should respond 200 and the current upgrades', async () => {
         const res = await supertest.get(`/api/fleet/agents/current_upgrades`).expect(200);
         const actionIds = res.body.items.map((item: any) => item.actionId);
-        expect(actionIds).length(2);
+        expect(actionIds).length(3);
         expect(actionIds).contain('action1');
         expect(actionIds).contain('action2');
+        expect(actionIds).contain('action6');
       });
     });
   });

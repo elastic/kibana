@@ -26,10 +26,10 @@ export const IMPORT_RULE = i18n.translate(
   }
 );
 
-export const UPLOAD_VALUE_LISTS = i18n.translate(
-  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButton',
+export const IMPORT_VALUE_LISTS = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton',
   {
-    defaultMessage: 'Upload value lists',
+    defaultMessage: 'Import value lists',
   }
 );
 
@@ -261,10 +261,10 @@ export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   }
 );
 
-export const BULK_EDIT_FLYOUT_FORM_CLOSE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.closeButtonLabel',
+export const BULK_EDIT_FLYOUT_FORM_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.cancelButtonLabel',
   {
-    defaultMessage: 'Close',
+    defaultMessage: 'Cancel',
   }
 );
 
@@ -1083,5 +1083,55 @@ export const RULES_BULK_EDIT_FAILURE_DESCRIPTION = (rulesCount: number) =>
     {
       values: { rulesCount },
       defaultMessage: '{rulesCount, plural, =1 {# rule} other {# rules}} failed to update.',
+    }
+  );
+
+export const INTEGRATIONS_BADGE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.integrations.badgeTitle',
+  {
+    defaultMessage: 'integrations',
+  }
+);
+
+export const INTEGRATIONS_POPOVER_TITLE = (integrationsCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverTitle',
+    {
+      values: { integrationsCount },
+      defaultMessage:
+        'You have [{integrationsCount}] related {integrationsCount, plural, =1 {integration} other {integrations}} to your prebuilt rule',
+    }
+  );
+
+export const INTEGRATIONS_POPOVER_DESCRIPTION_INSTALLED = (installedCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverDescriptionInstalledTitle',
+    {
+      values: { installedCount },
+      defaultMessage:
+        'You have [{installedCount}] related {installedCount, plural, =1 {integration} other {integrations}} installed, click the link below to view the integration:',
+    }
+  );
+
+export const INTEGRATIONS_POPOVER_DESCRIPTION_UNINSTALLED = (uninstalledCount: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverDescriptionUninstalledTitle',
+    {
+      values: { uninstalledCount },
+      defaultMessage:
+        'You have [{uninstalledCount}] related {uninstalledCount, plural, =1 {integration} other {integrations}} uninstalled, click the link to add integration:',
+    }
+  );
+
+export const INTEGRATIONS_INSTALLED_VERSION_TOOLTIP = (
+  installedVersion: string,
+  targetVersion: string
+) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.rules.allRules.integrations.popoverDescriptionInstalledVersionTooltip',
+    {
+      values: { installedVersion, targetVersion },
+      defaultMessage:
+        'Version mismatch -- please resolve! Installed version `{installedVersion}` when target version `{targetVersion}`',
     }
   );

@@ -226,6 +226,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
         },
         {
           openInNewTab: true,
+          skipAppLeave: true,
         }
       );
     },
@@ -355,7 +356,12 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 
   return (
     <EuiToolTip content={VIEW_IN_DISCOVER}>
-      <EuiButtonIcon iconType="discoverApp" href={discoverUrl} aria-label={VIEW_IN_DISCOVER} />
+      <EuiButtonIcon
+        iconType="discoverApp"
+        aria-label={VIEW_IN_DISCOVER}
+        href={discoverUrl}
+        target="_blank"
+      />
     </EuiToolTip>
   );
 };

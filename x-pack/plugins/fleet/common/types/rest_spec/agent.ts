@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { SearchHit } from '@kbn/core/types/elasticsearch';
+
 import type { Agent, AgentAction, CurrentUpgrade, NewAgentAction } from '../models';
 
 import type { ListResult, ListWithKuery } from './common';
@@ -90,6 +92,7 @@ export interface PostBulkAgentUpgradeRequest {
     source_uri?: string;
     version: string;
     rollout_duration_seconds?: number;
+    start_time?: string;
   };
 }
 
@@ -166,6 +169,7 @@ export interface GetAgentStatusResponse {
 export interface GetAgentIncomingDataRequest {
   query: {
     agentsIds: string[];
+    previewData?: boolean;
   };
 }
 
@@ -174,6 +178,7 @@ export interface IncomingDataList {
 }
 export interface GetAgentIncomingDataResponse {
   items: IncomingDataList[];
+  dataPreview: SearchHit[];
 }
 
 export interface GetCurrentUpgradesResponse {

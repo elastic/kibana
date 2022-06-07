@@ -17,6 +17,12 @@ Object {
           "name": "Get started",
           "onClick": [Function],
         },
+      ],
+      "name": "",
+    },
+    Object {
+      "id": "dashboards",
+      "items": Array [
         Object {
           "data-href": "securitySolutionUI/overview?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
           "data-test-subj": "navigation-overview",
@@ -27,8 +33,18 @@ Object {
           "name": "Overview",
           "onClick": [Function],
         },
+        Object {
+          "data-href": "securitySolutionUI/detection_response?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+          "data-test-subj": "navigation-detection_response",
+          "disabled": false,
+          "href": "securitySolutionUI/detection_response?query=(language:kuery,query:'host.name:%22security-solution-es%22')&sourcerer=()&timerange=(global:(linkTo:!(timeline),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)),timeline:(linkTo:!(global),timerange:(from:'2020-07-07T08:20:18.966Z',fromStr:now-24h,kind:relative,to:'2020-07-08T08:20:18.966Z',toStr:now)))",
+          "id": "detection_response",
+          "isSelected": false,
+          "name": "Detection & Response",
+          "onClick": [Function],
+        },
       ],
-      "name": "",
+      "name": "Dashboards",
     },
     Object {
       "id": "detect",

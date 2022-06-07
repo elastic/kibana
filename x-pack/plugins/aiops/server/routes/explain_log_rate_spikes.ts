@@ -9,14 +9,14 @@ import { firstValueFrom } from 'rxjs';
 
 import type { IRouter, Logger } from '@kbn/core/server';
 import type { DataRequestHandlerContext, IEsSearchRequest } from '@kbn/data-plugin/server';
+import { streamFactory } from '@kbn/aiops-utils';
 
 import {
   aiopsExplainLogRateSpikesSchema,
   addFieldsAction,
+  AiopsExplainLogRateSpikesApiAction,
 } from '../../common/api/explain_log_rate_spikes';
 import { API_ENDPOINT } from '../../common/api';
-
-import { streamFactory } from '../lib/stream_factory';
 
 export const defineExplainLogRateSpikesRoute = (
   router: IRouter<DataRequestHandlerContext>,
@@ -60,9 +60,9 @@ export const defineExplainLogRateSpikesRoute = (
       const doc = res.rawResponse.hits.hits.pop();
       const fields = Object.keys(doc?._source ?? {});
 
-      const { end, push, responseWithHeaders } = streamFactory<
-        typeof API_ENDPOINT.EXPLAIN_LOG_RATE_SPIKES
-      >(logger, request.headers);
+      const { end, push, responseWithHeaders } = streamFactory<AiopsExplainLogRateSpikesApiAction>(
+        request.headers
+      );
 
       async function pushField() {
         setTimeout(() => {
@@ -79,7 +79,9 @@ export const defineExplainLogRateSpikesRoute = (
           } else {
             end();
           }
-        }, Math.random() * 1000);
+          // This is just exemplary demo code so we're adding a random timout of 0-250ms to each
+          // stream push to simulate string chunks appearing on the client with some randomness.
+        }, Math.random() * 250);
       }
 
       pushField();
