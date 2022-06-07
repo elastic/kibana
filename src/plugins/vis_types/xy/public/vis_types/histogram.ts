@@ -37,6 +37,7 @@ export const histogramVisTypeDefinition = {
   description: i18n.translate('visTypeXy.histogram.histogramDescription', {
     defaultMessage: 'Present data in vertical bars on an axis.',
   }),
+  fetchDatatable: true,
   toExpressionAst,
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
   updateVisTypeOnParamsChange: getVisTypeFromParams,
