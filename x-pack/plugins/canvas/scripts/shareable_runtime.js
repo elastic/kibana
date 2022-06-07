@@ -12,7 +12,6 @@ const { promisify } = require('util');
 
 const del = require('del');
 const { run } = require('@kbn/dev-cli-runner');
-const { CiStatsReporter } = require('@kbn/ci-stats-reporter');
 const execa = require('execa');
 
 const asyncPipeline = promisify(pipeline);
