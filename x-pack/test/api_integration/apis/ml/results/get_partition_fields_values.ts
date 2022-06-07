@@ -69,125 +69,127 @@ export default ({ getService }: FtrProviderContext) => {
       await ml.api.cleanMlIndices();
     });
 
-    it('should fetch anomalous only field values within the time range with an empty search term sorting by anomaly score', async () => {
-      const requestBody = {
-        jobId: 'fq_multi_1_ae',
-        criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
-        earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
-        latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
-        searchTerm: {},
-        fieldsConfig: {
-          partition_field: {
-            applyTimeRange: true,
-            anomalousOnly: true,
-            sort: { by: 'anomaly_score', order: 'desc' },
+    describe('when model plot is enabled', () => {
+      it('should fetch anomalous only field values within the time range with an empty search term sorting by anomaly score', async () => {
+        const requestBody = {
+          jobId: 'fq_multi_1_ae',
+          criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
+          earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
+          latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
+          searchTerm: {},
+          fieldsConfig: {
+            partition_field: {
+              applyTimeRange: true,
+              anomalousOnly: true,
+              sort: { by: 'anomaly_score', order: 'desc' },
+            },
           },
-        },
-      };
+        };
 
-      const { body, status } = await supertest
-        .post(`/api/ml/results/partition_fields_values`)
-        .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody);
-      ml.api.assertResponseStatusCode(200, status, body);
+        const { body, status } = await supertest
+          .post(`/api/ml/results/partition_fields_values`)
+          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+          .set(COMMON_REQUEST_HEADERS)
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(200, status, body);
 
-      expect(body.partition_field.name).to.eql('airline');
-      expect(body.partition_field.values.length).to.eql(6);
-      expect(body.partition_field.values[0].value).to.eql('ACA');
-      expect(body.partition_field.values[0].maxRecordScore).to.be.above(50);
-      expect(body.partition_field.values[1].value).to.eql('JBU');
-      expect(body.partition_field.values[1].maxRecordScore).to.be.above(30);
-      expect(body.partition_field.values[2].value).to.eql('SWR');
-      expect(body.partition_field.values[2].maxRecordScore).to.be.above(25);
-      expect(body.partition_field.values[3].value).to.eql('BAW');
-      expect(body.partition_field.values[3].maxRecordScore).to.be.above(10);
-      expect(body.partition_field.values[4].value).to.eql('TRS');
-      expect(body.partition_field.values[4].maxRecordScore).to.be.above(7);
-      expect(body.partition_field.values[5].value).to.eql('EGF');
-      expect(body.partition_field.values[5].maxRecordScore).to.be.above(2);
-    });
-
-    it('should fetch all values withing the time range sorting by name', async () => {
-      const requestBody = {
-        jobId: 'fq_multi_1_ae',
-        criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
-        earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
-        latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
-        searchTerm: {},
-        fieldsConfig: {
-          partition_field: {
-            applyTimeRange: true,
-            anomalousOnly: false,
-            sort: { by: 'name', order: 'asc' },
-          },
-        },
-      };
-
-      const { body, status } = await supertest
-        .post(`/api/ml/results/partition_fields_values`)
-        .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody);
-      ml.api.assertResponseStatusCode(200, status, body);
-
-      expect(body).to.eql({
-        partition_field: {
-          name: 'airline',
-          values: [
-            { value: 'AAL' },
-            { value: 'ACA' },
-            { value: 'AMX' },
-            { value: 'ASA' },
-            { value: 'AWE' },
-            { value: 'BAW' },
-            { value: 'DAL' },
-            { value: 'EGF' },
-            { value: 'FFT' },
-            { value: 'JAL' },
-            { value: 'JBU' },
-            { value: 'JZA' },
-            { value: 'KLM' },
-            { value: 'NKS' },
-            { value: 'SWA' },
-            { value: 'SWR' },
-            { value: 'TRS' },
-            { value: 'UAL' },
-            { value: 'VRD' },
-          ],
-        },
+        expect(body.partition_field.name).to.eql('airline');
+        expect(body.partition_field.values.length).to.eql(6);
+        expect(body.partition_field.values[0].value).to.eql('ACA');
+        expect(body.partition_field.values[0].maxRecordScore).to.be.above(50);
+        expect(body.partition_field.values[1].value).to.eql('JBU');
+        expect(body.partition_field.values[1].maxRecordScore).to.be.above(30);
+        expect(body.partition_field.values[2].value).to.eql('SWR');
+        expect(body.partition_field.values[2].maxRecordScore).to.be.above(25);
+        expect(body.partition_field.values[3].value).to.eql('BAW');
+        expect(body.partition_field.values[3].maxRecordScore).to.be.above(10);
+        expect(body.partition_field.values[4].value).to.eql('TRS');
+        expect(body.partition_field.values[4].maxRecordScore).to.be.above(7);
+        expect(body.partition_field.values[5].value).to.eql('EGF');
+        expect(body.partition_field.values[5].maxRecordScore).to.be.above(2);
       });
-    });
 
-    it('should fetch anomalous only field value applying the search term', async () => {
-      const requestBody = {
-        jobId: 'fq_multi_1_ae',
-        criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
-        earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
-        latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
-        searchTerm: {
-          partition_field: 'JB',
-        },
-        fieldsConfig: {
-          partition_field: {
-            applyTimeRange: true,
-            anomalousOnly: true,
-            sort: { by: 'anomaly_score', order: 'asc' },
+      it('should fetch all values withing the time range sorting by name', async () => {
+        const requestBody = {
+          jobId: 'fq_multi_1_ae',
+          criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
+          earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
+          latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
+          searchTerm: {},
+          fieldsConfig: {
+            partition_field: {
+              applyTimeRange: true,
+              anomalousOnly: false,
+              sort: { by: 'name', order: 'asc' },
+            },
           },
-        },
-      };
+        };
 
-      const { body, status } = await supertest
-        .post(`/api/ml/results/partition_fields_values`)
-        .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-        .set(COMMON_REQUEST_HEADERS)
-        .send(requestBody);
-      ml.api.assertResponseStatusCode(200, status, body);
+        const { body, status } = await supertest
+          .post(`/api/ml/results/partition_fields_values`)
+          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+          .set(COMMON_REQUEST_HEADERS)
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(200, status, body);
 
-      expect(body.partition_field.name).to.eql('airline');
-      expect(body.partition_field.values.length).to.eql(1);
-      expect(body.partition_field.values[0].value).to.eql('JBU');
-      expect(body.partition_field.values[0].maxRecordScore).to.be.above(30);
+        expect(body).to.eql({
+          partition_field: {
+            name: 'airline',
+            values: [
+              { value: 'AAL' },
+              { value: 'ACA' },
+              { value: 'AMX' },
+              { value: 'ASA' },
+              { value: 'AWE' },
+              { value: 'BAW' },
+              { value: 'DAL' },
+              { value: 'EGF' },
+              { value: 'FFT' },
+              { value: 'JAL' },
+              { value: 'JBU' },
+              { value: 'JZA' },
+              { value: 'KLM' },
+              { value: 'NKS' },
+              { value: 'SWA' },
+              { value: 'SWR' },
+              { value: 'TRS' },
+              { value: 'UAL' },
+              { value: 'VRD' },
+            ],
+          },
+        });
+      });
+
+      it('should fetch anomalous only field value applying the search term', async () => {
+        const requestBody = {
+          jobId: 'fq_multi_1_ae',
+          criteriaFields: [{ fieldName: 'detector_index', fieldValue: 0 }],
+          earliestMs: 1454889600000, // February 8, 2016 12:00:00 AM GMT
+          latestMs: 1454976000000, // February 9, 2016 12:00:00 AM GMT,
+          searchTerm: {
+            partition_field: 'JB',
+          },
+          fieldsConfig: {
+            partition_field: {
+              applyTimeRange: true,
+              anomalousOnly: true,
+              sort: { by: 'anomaly_score', order: 'asc' },
+            },
+          },
+        };
+
+        const { body, status } = await supertest
+          .post(`/api/ml/results/partition_fields_values`)
+          .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
+          .set(COMMON_REQUEST_HEADERS)
+          .send(requestBody);
+        ml.api.assertResponseStatusCode(200, status, body);
+
+        expect(body.partition_field.name).to.eql('airline');
+        expect(body.partition_field.values.length).to.eql(1);
+        expect(body.partition_field.values[0].value).to.eql('JBU');
+        expect(body.partition_field.values[0].maxRecordScore).to.be.above(30);
+      });
     });
 
     describe('when model plot is disabled', () => {
