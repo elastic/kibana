@@ -12,7 +12,13 @@ import { FIELD_CONFIG, StepKey } from '../form/config';
 import { Field } from '../form/field';
 import { FormMonitorType } from '../types';
 
-export const StepFields = ({ description, stepKey }: { description: string; stepKey: StepKey }) => {
+export const StepFields = ({
+  description,
+  stepKey,
+}: {
+  description: React.ReactNode;
+  stepKey: StepKey;
+}) => {
   const {
     watch,
     formState: { errors },

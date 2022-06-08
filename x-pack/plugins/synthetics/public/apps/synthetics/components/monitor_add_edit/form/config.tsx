@@ -110,14 +110,17 @@ export type StepMap = Record<FormMonitorType, Step[]>;
 const MONITOR_TYPE_STEP: Step = {
   title: 'Select a monitor type',
   children: (
-    <StepFields description="Choose a monitor that best fits your use case" stepKey="step1" />
+    <StepFields
+      description={<p>Choose a monitor that best fits your use case</p>}
+      stepKey="step1"
+    />
   ),
 };
 const MONITOR_DETAILS_STEP: Step = {
   title: 'Monitor details',
   children: (
     <StepFields
-      description="Provide some details about how your monitor should run"
+      description={<p>Provide some details about how your monitor should run</p>}
       stepKey="step2"
     />
   ),

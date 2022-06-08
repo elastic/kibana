@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 
 interface Props {
-  description: string;
+  description: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -17,9 +17,7 @@ export const Step = ({ description, children }: Props) => {
   return (
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem>
-        <EuiText>
-          <p>{description}</p>
-        </EuiText>
+        <EuiText>{description}</EuiText>
       </EuiFlexItem>
       <EuiFlexItem>{children}</EuiFlexItem>
     </EuiFlexGroup>

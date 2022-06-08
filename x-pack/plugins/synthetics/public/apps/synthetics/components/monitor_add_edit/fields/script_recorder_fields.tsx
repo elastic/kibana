@@ -43,15 +43,8 @@ export function ScriptRecorderFields({ onChange, script, fileName, isEditable }:
   return (
     <>
       <EuiSpacer size="m" />
-      <EuiLink href="https://github.com/elastic/synthetics-recorder/releases/" target="_blank">
-        <FormattedMessage
-          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.zipUrl.recorderLink"
-          defaultMessage="Download the Elastic Synthetics Recorder"
-        />
-      </EuiLink>
-      <EuiSpacer size="m" />
       {isEditable && script ? (
-        <EuiFormRow label="Testing script" fullWidth>
+        <EuiFormRow aria-label="Testing script" fullWidth>
           <EuiText size="s">
             <strong>{fileName}</strong>
           </EuiText>
