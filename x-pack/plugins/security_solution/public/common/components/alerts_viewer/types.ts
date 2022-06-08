@@ -9,7 +9,7 @@ import type { Filter } from '@kbn/es-query';
 import type { EntityType } from '@kbn/timelines-plugin/common';
 import { TimelineIdLiteral } from '../../../../common/types/timeline';
 import { HostsComponentsQueryProps } from '../../../hosts/pages/navigation/types';
-import { NetworkComponentQueryProps } from '../../../network/pages/navigation/types';
+import { NetworkComponentQueryProps } from '../../../network/components/query_tabs/types';
 import { MatrixHistogramOption } from '../matrix_histogram/types';
 
 type CommonQueryProps = HostsComponentsQueryProps | NetworkComponentQueryProps;

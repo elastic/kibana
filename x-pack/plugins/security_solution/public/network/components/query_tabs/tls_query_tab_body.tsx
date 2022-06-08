@@ -8,47 +8,49 @@
 import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { useNetworkUsers, ID } from '../../containers/users';
-import { NetworkComponentsQueryProps } from './types';
-import { UsersTable } from '../../components/users_table';
+import { useNetworkTls, ID } from '../../containers/tls';
+import { TlsTable } from '../tls_table';
+import { FTQueryTabBodyProps } from './types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
-const UsersTableManage = manageQuery(UsersTable);
+const TlsTableManage = manageQuery(TlsTable);
 
-export const UsersQueryTable = ({
+const TlsQueryTabBodyComponent: React.FC<FTQueryTabBodyProps> = ({
   endDate,
   filterQuery,
   flowTarget,
-  ip,
+  indexNames,
+  ip = '',
   setQuery,
   skip,
   startDate,
   type,
-}: NetworkComponentsQueryProps) => {
-  const { toggleStatus } = useQueryToggle(ID);
+}) => {
+  const queryId = `${ID}-${type}`;
+  const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
-  const [
-    loading,
-    { id, inspect, isInspected, networkUsers, totalCount, pageInfo, loadPage, refetch },
-  ] = useNetworkUsers({
-    endDate,
-    filterQuery,
-    flowTarget,
-    ip,
-    skip: querySkip,
-    startDate,
-  });
+  const [loading, { id, inspect, isInspected, tls, totalCount, pageInfo, loadPage, refetch }] =
+    useNetworkTls({
+      endDate,
+      filterQuery,
+      flowTarget,
+      id: queryId,
+      indexNames,
+      ip,
+      skip: querySkip,
+      startDate,
+      type,
+    });
 
   return (
-    <UsersTableManage
-      data={networkUsers}
+    <TlsTableManage
+      data={tls}
       id={id}
       inspect={inspect}
       isInspect={isInspected}
-      flowTarget={flowTarget}
       fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       loading={loading}
       loadPage={loadPage}
@@ -62,4 +64,6 @@ export const UsersQueryTable = ({
   );
 };
 
-UsersQueryTable.displayName = 'UsersQueryTable';
+TlsQueryTabBodyComponent.displayName = 'TlsQueryTabBodyComponent';
+
+export const TlsQueryTabBody = React.memo(TlsQueryTabBodyComponent);

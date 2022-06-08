@@ -7,62 +7,61 @@
 
 import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
-
-import { NetworkTopNFlowTable } from '../../components/network_top_n_flow_table';
-import { ID, useNetworkTopNFlow } from '../../containers/network_top_n_flow';
-import { networkModel } from '../../store';
 import { manageQuery } from '../../../common/components/page/manage_query';
-
-import { IPsQueryTabBodyProps } from './types';
+import { useNetworkUsers, ID } from '../../containers/users';
+import { IPQueryTabBodyProps } from './types';
+import { UsersTable } from '../users_table';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
-const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
+const UsersTableManage = manageQuery(UsersTable);
 
-export const IPsQueryTabBody = ({
+export const UsersQueryTabBody = ({
   endDate,
   filterQuery,
-  indexNames,
+  flowTarget,
+  ip,
+  setQuery,
   skip,
   startDate,
-  setQuery,
-  flowTarget,
-}: IPsQueryTabBodyProps) => {
-  const { toggleStatus } = useQueryToggle(`${ID}-${flowTarget}`);
+  type,
+}: IPQueryTabBodyProps) => {
+  const queryId = `${ID}-${type}`;
+  const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
   const [
     loading,
-    { id, inspect, isInspected, loadPage, networkTopNFlow, pageInfo, refetch, totalCount },
-  ] = useNetworkTopNFlow({
+    { id, inspect, isInspected, networkUsers, totalCount, pageInfo, loadPage, refetch },
+  ] = useNetworkUsers({
     endDate,
-    flowTarget,
     filterQuery,
-    indexNames,
+    flowTarget,
+    id: queryId,
+    ip,
     skip: querySkip,
     startDate,
-    type: networkModel.NetworkType.page,
   });
 
   return (
-    <NetworkTopNFlowTableManage
-      data={networkTopNFlow}
-      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-      flowTargeted={flowTarget}
+    <UsersTableManage
+      data={networkUsers}
       id={id}
       inspect={inspect}
       isInspect={isInspected}
+      flowTarget={flowTarget}
+      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       loading={loading}
       loadPage={loadPage}
+      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
-      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
-      type={networkModel.NetworkType.page}
+      type={type}
     />
   );
 };
 
-IPsQueryTabBody.displayName = 'IPsQueryTabBody';
+UsersQueryTabBody.displayName = 'UsersQueryTable';

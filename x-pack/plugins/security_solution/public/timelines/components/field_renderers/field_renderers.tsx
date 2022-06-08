@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { HostEcs } from '../../../../common/ecs/host';
 import {
   AutonomousSystem,
-  FlowTarget,
+  FlowTargetSourceDest,
   NetworkDetailsStrategyResponse,
 } from '../../../../common/search_strategy';
 import { escapeDataProviderId } from '../../../common/components/drag_and_drop/helpers';
@@ -75,7 +75,7 @@ export const dateRenderer = (timestamp?: string | null): React.ReactElement => (
 
 export const autonomousSystemRenderer = (
   as: AutonomousSystem,
-  flowTarget: FlowTarget,
+  flowTarget: FlowTargetSourceDest,
   contextID?: string,
   isDraggable?: boolean
 ): React.ReactElement =>

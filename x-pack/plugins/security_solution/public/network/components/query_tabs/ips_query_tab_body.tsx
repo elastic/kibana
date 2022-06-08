@@ -5,28 +5,31 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
+import { getOr } from 'lodash/fp';
+
+import { NetworkTopNFlowTable } from '../network_top_n_flow_table';
+import { ID, useNetworkTopNFlow } from '../../containers/network_top_n_flow';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { NetworkTopNFlowTable } from '../../components/network_top_n_flow_table';
-import { useNetworkTopNFlow, ID } from '../../containers/network_top_n_flow';
-import { NetworkWithIndexComponentsQueryTableProps } from './types';
+
+import { IPsQueryTabBodyProps } from './types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
 
-export const NetworkTopNFlowQueryTable = ({
+export const IPsQueryTabBody = ({
   endDate,
   filterQuery,
   flowTarget,
-  ip,
   indexNames,
+  ip,
   setQuery,
   skip,
   startDate,
   type,
-}: NetworkWithIndexComponentsQueryTableProps) => {
-  const { toggleStatus } = useQueryToggle(`${ID}-${flowTarget}`);
+}: IPsQueryTabBodyProps) => {
+  const queryId = `${ID}-${flowTarget}-${type}`;
+  const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
@@ -36,8 +39,9 @@ export const NetworkTopNFlowQueryTable = ({
     { id, inspect, isInspected, loadPage, networkTopNFlow, pageInfo, refetch, totalCount },
   ] = useNetworkTopNFlow({
     endDate,
-    filterQuery,
     flowTarget,
+    filterQuery,
+    id: queryId,
     indexNames,
     ip,
     skip: querySkip,
@@ -65,4 +69,4 @@ export const NetworkTopNFlowQueryTable = ({
   );
 };
 
-NetworkTopNFlowQueryTable.displayName = 'NetworkTopNFlowQueryTable';
+IPsQueryTabBody.displayName = 'IPsQueryTabBody';

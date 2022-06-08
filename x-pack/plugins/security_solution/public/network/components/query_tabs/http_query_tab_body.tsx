@@ -7,52 +7,49 @@
 
 import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
+
+import { NetworkHttpTable } from '../network_http_table';
+import { ID, useNetworkHttp } from '../../containers/network_http';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { NetworkWithIndexComponentsQueryTableProps } from './types';
-import { useNetworkTopCountries, ID } from '../../containers/network_top_countries';
-import { NetworkTopCountriesTable } from '../../components/network_top_countries_table';
+
+import { HttpQueryTabBodyProps } from './types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
-const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
+const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
 
-export const NetworkTopCountriesQueryTable = ({
+export const HttpQueryTabBody = ({
   endDate,
   filterQuery,
-  flowTarget,
   indexNames,
-  ip,
-  setQuery,
   skip,
   startDate,
+  setQuery,
   type,
-  indexPattern,
-}: NetworkWithIndexComponentsQueryTableProps) => {
-  const { toggleStatus } = useQueryToggle(`${ID}-${flowTarget}`);
+}: HttpQueryTabBodyProps) => {
+  const queryId = `${ID}-${type}`;
+  const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
   const [
     loading,
-    { id, inspect, isInspected, loadPage, networkTopCountries, pageInfo, refetch, totalCount },
-  ] = useNetworkTopCountries({
+    { id, inspect, isInspected, loadPage, networkHttp, pageInfo, refetch, totalCount },
+  ] = useNetworkHttp({
     endDate,
-    flowTarget,
     filterQuery,
+    id: queryId,
     indexNames,
-    ip,
     skip: querySkip,
     startDate,
     type,
   });
 
   return (
-    <NetworkTopCountriesTableManage
-      data={networkTopCountries}
+    <NetworkHttpTableManage
+      data={networkHttp}
       fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-      flowTargeted={flowTarget}
       id={id}
-      indexPattern={indexPattern}
       inspect={inspect}
       isInspect={isInspected}
       loading={loading}
@@ -67,4 +64,4 @@ export const NetworkTopCountriesQueryTable = ({
   );
 };
 
-NetworkTopCountriesQueryTable.displayName = 'NetworkTopCountriesQueryTable';
+HttpQueryTabBody.displayName = 'HttpQueryTabBody';

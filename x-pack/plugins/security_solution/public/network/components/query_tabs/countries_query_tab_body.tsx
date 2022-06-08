@@ -8,46 +8,55 @@
 import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
 
-import { NetworkHttpTable } from '../../components/network_http_table';
-import { ID, useNetworkHttp } from '../../containers/network_http';
-import { networkModel } from '../../store';
+import { NetworkTopCountriesTable } from '../network_top_countries_table';
+import { useNetworkTopCountries, ID } from '../../containers/network_top_countries';
 import { manageQuery } from '../../../common/components/page/manage_query';
 
-import { HttpQueryTabBodyProps } from './types';
+import { IPsQueryTabBodyProps as CountriesQueryTabBodyProps } from './types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
-const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
+const NetworkTopCountriesTableManage = manageQuery(NetworkTopCountriesTable);
 
-export const HttpQueryTabBody = ({
+export const CountriesQueryTabBody = ({
   endDate,
   filterQuery,
+  flowTarget,
   indexNames,
+  indexPattern,
+  ip,
+  setQuery,
   skip,
   startDate,
-  setQuery,
-}: HttpQueryTabBodyProps) => {
-  const { toggleStatus } = useQueryToggle(ID);
+  type,
+}: CountriesQueryTabBodyProps) => {
+  const queryId = `${ID}-${flowTarget}-${type}`;
+  const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
   const [
     loading,
-    { id, inspect, isInspected, loadPage, networkHttp, pageInfo, refetch, totalCount },
-  ] = useNetworkHttp({
+    { id, inspect, isInspected, loadPage, networkTopCountries, pageInfo, refetch, totalCount },
+  ] = useNetworkTopCountries({
     endDate,
+    flowTarget,
     filterQuery,
+    id: queryId,
     indexNames,
+    ip,
     skip: querySkip,
     startDate,
-    type: networkModel.NetworkType.page,
+    type,
   });
 
   return (
-    <NetworkHttpTableManage
-      data={networkHttp}
+    <NetworkTopCountriesTableManage
+      data={networkTopCountries}
       fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+      flowTargeted={flowTarget}
       id={id}
+      indexPattern={indexPattern}
       inspect={inspect}
       isInspect={isInspected}
       loading={loading}
@@ -57,9 +66,9 @@ export const HttpQueryTabBody = ({
       setQuerySkip={setQuerySkip}
       showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
-      type={networkModel.NetworkType.page}
+      type={type}
     />
   );
 };
 
-HttpQueryTabBody.displayName = 'HttpQueryTabBody';
+CountriesQueryTabBody.displayName = 'CountriesQueryTabBody';
