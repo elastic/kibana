@@ -17,9 +17,7 @@ import React from 'react';
 import '../../common/mock/match_media';
 import { CaseViewProps } from './types';
 import {
-  basicCase,
   caseUserActions,
-  alertComment,
   getAlertUserAction,
   basicCaseMetrics,
   connectorsMock,
@@ -30,8 +28,6 @@ import { UseGetCase, useGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
-import { ConnectorTypes } from '../../../common/api';
-import { Case } from '../../../common/ui';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
@@ -43,6 +39,7 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { act } from '@testing-library/react-hooks';
 import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
+import { alertsHit, caseData, caseViewProps } from './mocks';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -70,64 +67,6 @@ const spacesUiApiMock = {
   redirectLegacyUrl: jest.fn().mockResolvedValue(undefined),
   components: {
     getLegacyUrlConflict: jest.fn().mockReturnValue(<div data-test-subj="conflict-component" />),
-  },
-};
-
-const alertsHit = [
-  {
-    _id: 'alert-id-1',
-    _index: 'alert-index-1',
-    _source: {
-      signal: {
-        rule: {
-          id: 'rule-id-1',
-          name: 'Awesome rule',
-        },
-      },
-    },
-  },
-  {
-    _id: 'alert-id-2',
-    _index: 'alert-index-2',
-    _source: {
-      signal: {
-        rule: {
-          id: 'rule-id-2',
-          name: 'Awesome rule 2',
-        },
-      },
-    },
-  },
-];
-
-export const caseViewProps: CaseViewProps = {
-  onComponentInitialized: jest.fn(),
-  actionsNavigation: {
-    href: jest.fn(),
-    onClick: jest.fn(),
-  },
-  ruleDetailsNavigation: {
-    href: jest.fn(),
-    onClick: jest.fn(),
-  },
-  showAlertDetails: jest.fn(),
-  useFetchAlertData: () => [
-    false,
-    {
-      'alert-id-1': alertsHit[0],
-      'alert-id-2': alertsHit[1],
-    },
-  ],
-};
-
-export const caseData: Case = {
-  ...basicCase,
-  comments: [...basicCase.comments, alertComment],
-  connector: {
-    id: 'resilient-2',
-    name: 'Resilient',
-    type: ConnectorTypes.resilient,
-    fields: null,
   },
 };
 
