@@ -752,8 +752,6 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
       }),
       mlClient.getModelSnapshots({
         job_id: jobId,
-        start: String(start),
-        end: String(end),
       }),
     ]);
 
@@ -788,7 +786,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
 
     const modelSnapshots = modelSnapshotsResp?.model_snapshots ?? [];
     modelSnapshots.forEach((modelSnapshot) => {
-      const timestamp = Number(modelSnapshot?.timestamp);
+      const timestamp = Number(modelSnapshot?.latest_record_time_stamp);
 
       finalResults.modelSnapshotResultsLine.push({
         dataValue: timestamp,
