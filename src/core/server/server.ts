@@ -11,6 +11,7 @@ import { config as pathConfig } from '@kbn/utils';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { DocLinksService } from '@kbn/core-doc-links-server-internal';
 import { coreDeprecationProvider, ensureValidConfiguration } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
@@ -28,7 +29,6 @@ import { EnvironmentService, config as pidConfig } from './environment';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
 import { ExecutionContextService } from './execution_context';
-import { DocLinksService } from './doc_links';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';

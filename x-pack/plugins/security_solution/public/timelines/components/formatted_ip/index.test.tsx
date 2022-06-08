@@ -106,7 +106,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
+    wrapper.find('[data-test-subj="network-details"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
       expect(toggleExpandedDetail).not.toHaveBeenCalled();
@@ -128,7 +128,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
+    wrapper.find('[data-test-subj="network-details"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'networkDetail',
@@ -157,7 +157,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
+    wrapper.find('[data-test-subj="network-details"]').last().simulate('click');
     await waitFor(() => {
       expect(toggleExpandedDetail).toHaveBeenCalledWith({
         panelView: 'networkDetail',
@@ -184,7 +184,7 @@ describe('FormattedIp', () => {
       </TestProviders>
     );
 
-    wrapper.find('[data-test-subj="network-details"]').first().simulate('click');
+    wrapper.find('[data-test-subj="network-details"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
         panelView: 'networkDetail',
