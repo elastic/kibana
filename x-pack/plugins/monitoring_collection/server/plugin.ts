@@ -14,6 +14,7 @@ import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics-base';
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
+import * as grpc from '@grpc/grpc-js';
 import { MonitoringCollectionConfig } from './config';
 import { registerDynamicRoute } from './routes';
 import { TYPE_ALLOWLIST } from './constants';
@@ -75,26 +76,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       },
     });
 
-    this.meterProvider = new MeterProvider({
-      resource: new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: 'kibana',
-      }),
-    });
-
-    metrics.setGlobalMeterProvider(this.meterProvider);
-
-    const opentelemetryMetrics = this.config.opentelemetry?.metrics;
-    if (opentelemetryMetrics.otlp.url) {
-      this.logger.debug(
-        `Registering OpenTelemetry metrics exporter to ${opentelemetryMetrics.otlp.url}`
-      );
-      this.meterProvider.addMetricReader(
-        new PeriodicExportingMetricReader({
-          exporter: new OTLPMetricExporter(opentelemetryMetrics.otlp),
-          exportIntervalMillis: opentelemetryMetrics.exportIntervalMillis,
-        })
-      );
-    }
+    this.configureOpentelemetryMetrics();
 
     return {
       registerMetric: <T>(metric: Metric<T>) => {
@@ -113,6 +95,34 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         this.metrics[metric.type] = metric;
       },
     };
+  }
+
+  private configureOpentelemetryMetrics() {
+    this.meterProvider = new MeterProvider({
+      resource: new Resource({
+        [SemanticResourceAttributes.SERVICE_NAME]: 'kibana',
+      }),
+    });
+
+    metrics.setGlobalMeterProvider(this.meterProvider);
+
+    const url = this.config.opentelemetry.metrics.otlp.url;
+    if (url) {
+      this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
+      let credentials: grpc.ChannelCredentials;
+      if (url.startsWith('https://')) {
+        credentials = grpc.credentials.createSsl();
+      } else {
+        credentials = grpc.credentials.createInsecure();
+      }
+
+      this.meterProvider.addMetricReader(
+        new PeriodicExportingMetricReader({
+          exporter: new OTLPMetricExporter({ url, credentials }),
+          exportIntervalMillis: this.config.opentelemetry.metrics.exportIntervalMillis,
+        })
+      );
+    }
   }
 
   start() {}
