@@ -149,6 +149,7 @@ export const ImportDataModalComponent = ({
 
             <EuiSpacer size="s" />
             <EuiFilePicker
+              accept=".ndjson"
               id="rule-file-picker"
               initialPromptText={subtitle}
               onChange={(files: FileList | null) => {
