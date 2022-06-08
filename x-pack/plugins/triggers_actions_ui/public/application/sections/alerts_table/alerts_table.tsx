@@ -174,7 +174,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   );
 
   return (
-    <section className='alertsTableResponseOps' style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
+    <section
+      className="alertsTableResponseOps"
+      style={{ width: '100%' }}
+      data-test-subj={props['data-test-subj']}
+    >
       <Suspense fallback={null}>
         {flyoutAlertIndex > -1 && (
           <AlertsFlyout
