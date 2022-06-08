@@ -6,7 +6,7 @@
  */
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import styled from 'styled-components';
 
 import * as i18n from './translations';
@@ -32,10 +32,6 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
   loading = false,
   userHasPermissions = false,
 }) => {
-  const handlePreBuiltCreation = useCallback(() => {
-    createPrePackagedRules();
-  }, [createPrePackagedRules]);
-
   const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey, canUserCRUD, hasIndexWrite }] =
     useUserData();
 
@@ -51,11 +47,11 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
     () =>
       getLoadPrebuiltRulesAndTemplatesButton({
         isDisabled: !userHasPermissions || loading,
-        onClick: handlePreBuiltCreation,
+        onClick: createPrePackagedRules,
         fill: true,
         'data-test-subj': 'load-prebuilt-rules',
       }),
-    [getLoadPrebuiltRulesAndTemplatesButton, handlePreBuiltCreation, userHasPermissions, loading]
+    [getLoadPrebuiltRulesAndTemplatesButton, createPrePackagedRules, userHasPermissions, loading]
   );
 
   return (

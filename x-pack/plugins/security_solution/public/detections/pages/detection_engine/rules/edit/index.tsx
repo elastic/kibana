@@ -57,6 +57,8 @@ import { ruleStepsOrder } from '../utils';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { APP_UI_ID } from '../../../../../../common/constants';
 import { HeaderPage } from '../../../../../common/components/header_page';
+import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
 
@@ -227,6 +229,8 @@ const EditRulePageComponent: FC = () => {
     ]
   );
 
+  const { startTransaction } = useStartTransaction();
+
   const onSubmit = useCallback(async () => {
     const activeStepData = await formHooks.current[activeStep]();
     if (activeStepData?.data != null) {
@@ -243,6 +247,7 @@ const EditRulePageComponent: FC = () => {
       stepIsValid(schedule) &&
       stepIsValid(actions)
     ) {
+      startTransaction({ name: SINGLE_RULE_ACTIONS.SAVE });
       setRule({
         ...formatRule<UpdateRulesSchema>(
           define.data,
@@ -265,6 +270,7 @@ const EditRulePageComponent: FC = () => {
     scheduleStep,
     setRule,
     setStepData,
+    startTransaction,
   ]);
 
   useEffect(() => {

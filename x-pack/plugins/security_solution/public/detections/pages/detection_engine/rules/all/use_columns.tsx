@@ -46,6 +46,7 @@ import {
   RuleExecutionSummary,
 } from '../../../../../../common/detection_engine/schemas/common';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
+import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 
 export type TableColumn = EuiBasicTableColumn<Rule> | EuiTableActionsColumnType<Rule>;
 
@@ -73,7 +74,6 @@ const useEnabledColumn = ({ hasPermissions }: ColumnsProps): TableColumn => {
           content={getToolTipContent(rule, hasMlPermissions, hasActionsPrivileges)}
         >
           <RuleSwitch
-            data-test-subj="enabled"
             id={rule.id}
             enabled={rule.enabled}
             isDisabled={
@@ -178,6 +178,7 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
   const hasActionsPrivileges = useHasActionsPrivileges();
   const toasts = useAppToasts();
   const { reFetchRules, setLoadingRules } = useRulesTableContext().actions;
+  const { startTransaction } = useStartTransaction();
 
   return useMemo(
     () => ({
@@ -186,11 +187,12 @@ const useActionsColumn = (): EuiTableActionsColumnType<Rule> => {
         navigateToApp,
         reFetchRules,
         hasActionsPrivileges,
-        setLoadingRules
+        setLoadingRules,
+        startTransaction
       ),
       width: '40px',
     }),
-    [hasActionsPrivileges, navigateToApp, reFetchRules, setLoadingRules, toasts]
+    [hasActionsPrivileges, navigateToApp, reFetchRules, setLoadingRules, startTransaction, toasts]
   );
 };
 

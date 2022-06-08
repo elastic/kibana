@@ -22,6 +22,7 @@ describe('getRulesTableActions', () => {
   const toasts = useAppToastsMock.create();
   const invalidateRules = jest.fn();
   const setLoadingRules = jest.fn();
+  const startTransaction = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -39,7 +40,8 @@ describe('getRulesTableActions', () => {
       navigateToApp,
       invalidateRules,
       true,
-      setLoadingRules
+      setLoadingRules,
+      startTransaction
     )[1];
     const duplicateRulesActionHandler = duplicateRulesActionObject.onClick;
     expect(duplicateRulesActionHandler).toBeDefined();
@@ -59,7 +61,8 @@ describe('getRulesTableActions', () => {
       navigateToApp,
       invalidateRules,
       true,
-      setLoadingRules
+      setLoadingRules,
+      startTransaction
     )[3];
     const deleteRuleActionHandler = deleteRulesActionObject.onClick;
     expect(deleteRuleActionHandler).toBeDefined();

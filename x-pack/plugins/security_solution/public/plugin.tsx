@@ -124,10 +124,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     const startServices: Promise<StartServices> = (async () => {
       const [coreStart, startPlugins] = await core.getStartServices();
+      const { apm } = await import('@elastic/apm-rum');
 
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
+        apm,
         storage: this.storage,
         security: plugins.security,
       };

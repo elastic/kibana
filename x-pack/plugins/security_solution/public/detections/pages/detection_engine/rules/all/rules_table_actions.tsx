@@ -20,6 +20,8 @@ import { Rule } from '../../../../containers/detection_engine/rules';
 import * as i18n from '../translations';
 import { executeRulesBulkAction, goToRuleEditPage } from './actions';
 import { RulesTableActions } from './rules_table/rules_table_context';
+import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { SINGLE_RULE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 
 type NavigateToApp = (appId: string, options?: NavigateToAppOptions | undefined) => Promise<void>;
 
@@ -30,7 +32,8 @@ export const getRulesTableActions = (
   navigateToApp: NavigateToApp,
   invalidateRules: () => void,
   actionsPrivileges: boolean,
-  setLoadingRules: RulesTableActions['setLoadingRules']
+  setLoadingRules: RulesTableActions['setLoadingRules'],
+  startTransaction: ReturnType<typeof useStartTransaction>['startTransaction']
 ): Array<DefaultItemAction<Rule>> => [
   {
     type: 'icon',
@@ -61,6 +64,7 @@ export const getRulesTableActions = (
     ),
     enabled: (rule: Rule) => canEditRuleWithActions(rule, actionsPrivileges),
     onClick: async (rule: Rule) => {
+      startTransaction({ name: SINGLE_RULE_ACTIONS.DUPLICATE });
       const result = await executeRulesBulkAction({
         action: BulkAction.duplicate,
         setLoadingRules,
@@ -81,14 +85,16 @@ export const getRulesTableActions = (
     description: i18n.EXPORT_RULE,
     icon: 'exportAction',
     name: i18n.EXPORT_RULE,
-    onClick: (rule: Rule) =>
-      executeRulesBulkAction({
+    onClick: async (rule: Rule) => {
+      startTransaction({ name: SINGLE_RULE_ACTIONS.EXPORT });
+      await executeRulesBulkAction({
         action: BulkAction.export,
         setLoadingRules,
         visibleRuleIds: [rule.id],
         toasts,
         search: { ids: [rule.id] },
-      }),
+      });
+    },
     enabled: (rule: Rule) => !rule.immutable,
   },
   {
@@ -98,6 +104,7 @@ export const getRulesTableActions = (
     icon: 'trash',
     name: i18n.DELETE_RULE,
     onClick: async (rule: Rule) => {
+      startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
       await executeRulesBulkAction({
         action: BulkAction.delete,
         setLoadingRules,
