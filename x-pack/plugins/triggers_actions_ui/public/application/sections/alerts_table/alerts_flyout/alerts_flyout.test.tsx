@@ -38,6 +38,7 @@ const props = {
     },
     useInternalFlyout: () => ({
       body: () => <h3>Internal flyout body</h3>,
+      header: null,
       footer: () => null,
     }),
     getRenderCellValue: () =>
