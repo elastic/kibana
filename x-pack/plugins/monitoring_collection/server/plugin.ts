@@ -76,8 +76,6 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       },
     });
 
-    this.configureOpentelemetryMetrics();
-
     return {
       registerMetric: <T>(metric: Metric<T>) => {
         if (this.metrics.hasOwnProperty(metric.type)) {
