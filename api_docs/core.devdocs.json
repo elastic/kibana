@@ -651,6 +651,9 @@
         "description": [
           "\r\nAnalytics client's public APIs"
         ],
+        "signature": [
+          "AnalyticsClient"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -1366,20 +1369,16 @@
             "parentPluginId": "core",
             "id": "def-public.CoreSetup.injectedMetadata",
             "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "injectedMetadata",
             "description": [
-              "\nexposed temporarily until https://github.com/elastic/kibana/issues/41990 done\nuse *only* to retrieve config values. There is no way to set injected values\nin the new platform."
+              "{@link InjectedMetadataSetup}"
             ],
             "signature": [
-              "{ getInjectedVar: (name: string, defaultValue?: any) => unknown; }"
+              "InjectedMetadataSetup"
             ],
             "path": "src/core/public/index.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "references": []
+            "deprecated": false
           },
           {
             "parentPluginId": "core",
@@ -1740,25 +1739,16 @@
             "parentPluginId": "core",
             "id": "def-public.CoreStart.injectedMetadata",
             "type": "Object",
-            "tags": [
-              "deprecated"
-            ],
+            "tags": [],
             "label": "injectedMetadata",
             "description": [
-              "\nexposed temporarily until https://github.com/elastic/kibana/issues/41990 done\nuse *only* to retrieve config values. There is no way to set injected values\nin the new platform."
+              "{@link InjectedMetadataStart}"
             ],
             "signature": [
-              "{ getInjectedVar: (name: string, defaultValue?: any) => unknown; }"
+              "InjectedMetadataStart"
             ],
             "path": "src/core/public/index.ts",
-            "deprecated": true,
-            "removeBy": "8.8.0",
-            "references": [
-              {
-                "plugin": "monitoring",
-                "path": "x-pack/plugins/monitoring/public/legacy_shims.ts"
-              }
-            ]
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -1987,6 +1977,9 @@
         "tags": [],
         "label": "EnvironmentMode",
         "description": [],
+        "signature": [
+          "EnvironmentMode"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -2166,6 +2159,9 @@
         "description": [
           "\r\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
         ],
+        "signature": [
+          "EventContext"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -2240,6 +2236,21 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-public.EventContext.isElasticCloudUser",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isElasticCloudUser",
+            "description": [
+              "\r\n`true` if the user is logged in via the Elastic Cloud authentication provider."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -2779,6 +2790,9 @@
         "label": "IShipper",
         "description": [
           "\r\nBasic structure of a Shipper"
+        ],
+        "signature": [
+          "IShipper"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -3658,6 +3672,9 @@
         "label": "OptInConfig",
         "description": [
           "\r\n"
+        ],
+        "signature": [
+          "OptInConfig"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -4945,6 +4962,9 @@
         "tags": [],
         "label": "PackageInfo",
         "description": [],
+        "signature": [
+          "PackageInfo"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -5723,51 +5743,6 @@
             "tags": [],
             "label": "type",
             "description": [],
-            "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-            "deprecated": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "core",
-        "id": "def-public.SavedObjectsBulkResolveResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "SavedObjectsBulkResolveResponse",
-        "description": [
-          "\n"
-        ],
-        "signature": [
-          {
-            "pluginId": "core",
-            "scope": "server",
-            "docId": "kibCoreSavedObjectsPluginApi",
-            "section": "def-server.SavedObjectsBulkResolveResponse",
-            "text": "SavedObjectsBulkResolveResponse"
-          },
-          "<T>"
-        ],
-        "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
-        "deprecated": false,
-        "children": [
-          {
-            "parentPluginId": "core",
-            "id": "def-public.SavedObjectsBulkResolveResponse.resolved_objects",
-            "type": "Array",
-            "tags": [],
-            "label": "resolved_objects",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCoreSavedObjectsPluginApi",
-                "section": "def-server.SavedObjectsResolveResponse",
-                "text": "SavedObjectsResolveResponse"
-              },
-              "<T>[]"
-            ],
             "path": "src/core/server/saved_objects/service/saved_objects_client.ts",
             "deprecated": false
           }
@@ -7080,6 +7055,9 @@
         "description": [
           "\r\nShape of the events emitted by the telemetryCounter$ observable"
         ],
+        "signature": [
+          "TelemetryCounter"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -7585,6 +7563,9 @@
         "description": [
           "\r\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
         ],
+        "signature": [
+          "TelemetryCounterType"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -8007,7 +7988,7 @@
         "signature": [
           "symbol"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -8164,7 +8145,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"hidden\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
+          ", \"children\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"hidden\" | \"lang\" | \"onError\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -8221,7 +8202,7 @@
         "signature": [
           "Pick<",
           "Toast",
-          ", \"children\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"hidden\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
+          ", \"children\" | \"color\" | \"className\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"security\" | \"defaultValue\" | \"hidden\" | \"lang\" | \"onError\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"style\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"role\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-label\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"toastLifeTimeMs\" | \"iconType\" | \"onClose\" | \"data-test-subj\"> & { title?: string | ",
           {
             "pluginId": "core",
             "scope": "public",
@@ -9179,6 +9160,9 @@
         "description": [
           "\r\nAnalytics client's public APIs"
         ],
+        "signature": [
+          "AnalyticsClient"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -9839,7 +9823,7 @@
               "corrective action needed to fix this deprecation."
             ],
             "signature": [
-              "{ api?: { path: string; method: \"PUT\" | \"POST\"; body?: { [key: string]: any; } | undefined; omitContextFromBody?: boolean | undefined; } | undefined; manualSteps: string[]; }"
+              "{ api?: { path: string; method: \"POST\" | \"PUT\"; body?: { [key: string]: any; } | undefined; omitContextFromBody?: boolean | undefined; } | undefined; manualSteps: string[]; }"
             ],
             "path": "src/core/server/deprecations/types.ts",
             "deprecated": false
@@ -10131,6 +10115,9 @@
         "description": [
           "\r\nDeprecation context provided to {@link ConfigDeprecation | config deprecations}\r\n"
         ],
+        "signature": [
+          "ConfigDeprecationContext"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -10237,6 +10224,9 @@
         "label": "ConfigDeprecationFactory",
         "description": [
           "\r\nProvides helpers to generates the most commonly used {@link ConfigDeprecation}\r\nwhen invoking a {@link ConfigDeprecationProvider}.\r\n\r\nSee methods documentation for more detailed examples.\r\n"
+        ],
+        "signature": [
+          "ConfigDeprecationFactory"
         ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
@@ -11855,9 +11845,12 @@
         "tags": [],
         "label": "DiscoveredPlugin",
         "description": [
-          "\nSmall container object used to expose information about discovered plugins that may\nor may not have been started."
+          "\r\nSmall container object used to expose information about discovered plugins that may\r\nor may not have been started."
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "signature": [
+          "DiscoveredPlugin"
+        ],
+        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "children": [
           {
@@ -11867,9 +11860,9 @@
             "tags": [],
             "label": "id",
             "description": [
-              "\nIdentifier of the plugin."
+              "\r\nIdentifier of the plugin."
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -11879,12 +11872,12 @@
             "tags": [],
             "label": "configPath",
             "description": [
-              "\nRoot configuration path used by the plugin, defaults to \"id\" in snake_case format."
+              "\r\nRoot configuration path used by the plugin, defaults to \"id\" in snake_case format."
             ],
             "signature": [
               "string | string[]"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -11894,18 +11887,12 @@
             "tags": [],
             "label": "type",
             "description": [
-              "\nType of the plugin, defaults to `standard`."
+              "\r\nType of the plugin, defaults to `standard`."
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.PluginType",
-                "text": "PluginType"
-              }
+              "PluginType"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -11915,12 +11902,12 @@
             "tags": [],
             "label": "requiredPlugins",
             "description": [
-              "\nAn optional list of the other plugins that **must be** installed and enabled\nfor this plugin to function properly."
+              "\r\nAn optional list of the other plugins that **must be** installed and enabled\r\nfor this plugin to function properly."
             ],
             "signature": [
               "readonly string[]"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -11930,12 +11917,12 @@
             "tags": [],
             "label": "optionalPlugins",
             "description": [
-              "\nAn optional list of the other plugins that if installed and enabled **may be**\nleveraged by this plugin for some additional functionality but otherwise are\nnot required for this plugin to work properly."
+              "\r\nAn optional list of the other plugins that if installed and enabled **may be**\r\nleveraged by this plugin for some additional functionality but otherwise are\r\nnot required for this plugin to work properly."
             ],
             "signature": [
               "readonly string[]"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -11945,12 +11932,12 @@
             "tags": [],
             "label": "requiredBundles",
             "description": [
-              "\nList of plugin ids that this plugin's UI code imports modules from that are\nnot in `requiredPlugins`.\n"
+              "\r\nList of plugin ids that this plugin's UI code imports modules from that are\r\nnot in `requiredPlugins`.\r\n"
             ],
             "signature": [
               "readonly string[]"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
           },
           {
@@ -11960,12 +11947,12 @@
             "tags": [],
             "label": "enabledOnAnonymousPages",
             "description": [
-              "\nSpecifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when\nconfigured, etc.) Default is false."
+              "\r\nSpecifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when\r\nconfigured, etc.) Default is false."
             ],
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/core/server/plugins/types.ts",
+            "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
             "deprecated": false
           }
         ],
@@ -12448,6 +12435,9 @@
         "tags": [],
         "label": "EnvironmentMode",
         "description": [],
+        "signature": [
+          "EnvironmentMode"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -12568,6 +12558,9 @@
         "description": [
           "\r\nDefinition of the context that can be appended to the events through the {@link IAnalyticsClient.registerContextProvider}."
         ],
+        "signature": [
+          "EventContext"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -12642,6 +12635,21 @@
             ],
             "signature": [
               "string | undefined"
+            ],
+            "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "core",
+            "id": "def-server.EventContext.isElasticCloudUser",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isElasticCloudUser",
+            "description": [
+              "\r\n`true` if the user is logged in via the Elastic Cloud authentication provider."
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
             "deprecated": false
@@ -18676,6 +18684,9 @@
         "description": [
           "\r\nBasic structure of a Shipper"
         ],
+        "signature": [
+          "IShipper"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -19141,6 +19152,9 @@
         "description": [
           "\r\nLogger exposes all the necessary methods to log any type of information and\r\nthis is the interface used by the logging consumers including plugins.\r\n"
         ],
+        "signature": [
+          "Logger"
+        ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
         "children": [
@@ -19567,6 +19581,9 @@
         "label": "LoggerFactory",
         "description": [
           "\r\nThe single purpose of `LoggerFactory` interface is to define a way to\r\nretrieve a context-based logger instance.\r\n"
+        ],
+        "signature": [
+          "LoggerFactory"
         ],
         "path": "node_modules/@types/kbn__logging/index.d.ts",
         "deprecated": false,
@@ -20260,6 +20277,9 @@
         "description": [
           "\r\n"
         ],
+        "signature": [
+          "OptInConfig"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -20305,6 +20325,9 @@
         "tags": [],
         "label": "PackageInfo",
         "description": [],
+        "signature": [
+          "PackageInfo"
+        ],
         "path": "node_modules/@types/kbn__config/index.d.ts",
         "deprecated": false,
         "children": [
@@ -20778,13 +20801,7 @@
               "\nType of the plugin, defaults to `standard`."
             ],
             "signature": [
-              {
-                "pluginId": "core",
-                "scope": "server",
-                "docId": "kibCorePluginApi",
-                "section": "def-server.PluginType",
-                "text": "PluginType"
-              }
+              "PluginType"
             ],
             "path": "src/core/server/plugins/types.ts",
             "deprecated": false
@@ -23452,6 +23469,9 @@
         "description": [
           "\r\nShape of the events emitted by the telemetryCounter$ observable"
         ],
+        "signature": [
+          "TelemetryCounter"
+        ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
         "children": [
@@ -24174,7 +24194,10 @@
         "tags": [],
         "label": "PluginType",
         "description": [],
-        "path": "src/core/server/plugins/types.ts",
+        "signature": [
+          "PluginType"
+        ],
+        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -24186,6 +24209,9 @@
         "label": "TelemetryCounterType",
         "description": [
           "\r\nTypes of the Telemetry Counter: It allows to differentiate what happened to the events"
+        ],
+        "signature": [
+          "TelemetryCounterType"
         ],
         "path": "node_modules/@types/kbn__analytics-client/index.d.ts",
         "deprecated": false,
@@ -27037,12 +27063,12 @@
         "tags": [],
         "label": "PluginName",
         "description": [
-          "\nDedicated type for plugin name/id that is supposed to make Map/Set/Arrays\nthat use it as a key or value more obvious.\n"
+          "\r\nDedicated type for plugin name/id that is supposed to make Map/Set/Arrays\r\nthat use it as a key or value more obvious.\r\n"
         ],
         "signature": [
           "string"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -27056,7 +27082,7 @@
         "signature": [
           "symbol"
         ],
-        "path": "src/core/server/plugins/types.ts",
+        "path": "node_modules/@types/kbn__core-base-common/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
       },

@@ -23,6 +23,7 @@ export type StaticPage =
 export type DynamicPage =
   | 'integrations_all'
   | 'integrations_installed'
+  | 'integrations_installed_updates_available'
   | 'integration_details_overview'
   | 'integration_details_policies'
   | 'integration_details_assets'
@@ -78,6 +79,7 @@ export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
   integrations_all: '/browse/:category?',
   integrations_installed: '/installed/:category?',
+  integrations_installed_updates_available: '/installed/updates_available/:category?',
   integration_details: '/detail/:pkgkey/:panel?',
   integration_details_overview: '/detail/:pkgkey/overview',
   integration_details_policies: '/detail/:pkgkey/policies',
@@ -105,6 +107,17 @@ export const pagePathGetters: {
     const categoryPath = category ? `/${category}` : ``;
     const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
     return [INTEGRATIONS_BASE_PATH, `/installed${categoryPath}${queryParams}`];
+  },
+  integrations_installed_updates_available: ({
+    query,
+    category,
+  }: {
+    query?: string;
+    category?: string;
+  }) => {
+    const categoryPath = category ? `/${category}` : ``;
+    const queryParams = query ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${query}` : ``;
+    return [INTEGRATIONS_BASE_PATH, `/installed/updates_available${categoryPath}${queryParams}`];
   },
   integration_details_overview: ({ pkgkey, integration }) => [
     INTEGRATIONS_BASE_PATH,

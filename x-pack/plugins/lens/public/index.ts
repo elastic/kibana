@@ -29,6 +29,7 @@ export type {
   VisualizationSuggestion,
 } from './types';
 export type {
+  MetricState,
   ValueLabelConfig,
   PieVisualizationState,
   PieLayerState,
@@ -56,6 +57,7 @@ export type {
   SumIndexPatternColumn,
   MedianIndexPatternColumn,
   PercentileIndexPatternColumn,
+  PercentileRanksIndexPatternColumn,
   CountIndexPatternColumn,
   LastValueIndexPatternColumn,
   CumulativeSumIndexPatternColumn,
