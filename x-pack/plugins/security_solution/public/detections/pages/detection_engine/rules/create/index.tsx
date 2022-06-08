@@ -98,9 +98,13 @@ const CreateRulePageComponent: React.FC = () => {
   const [activeStep, setActiveStep] = useState<RuleStep>(RuleStep.defineRule);
   const getNextStep = (step: RuleStep): RuleStep | undefined =>
     ruleStepsOrder[ruleStepsOrder.indexOf(step) + 1];
+  // @ts-expect-error forwardRef
   const defineRuleRef = useRef<EuiAccordion | null>(null);
+  // @ts-expect-error forwardRef
   const aboutRuleRef = useRef<EuiAccordion | null>(null);
+  // @ts-expect-error forwardRef
   const scheduleRuleRef = useRef<EuiAccordion | null>(null);
+  // @ts-expect-error forwardRef
   const ruleActionsRef = useRef<EuiAccordion | null>(null);
   const formHooks = useRef<RuleStepsFormHooks>({
     [RuleStep.defineRule]: formHookNoop,
