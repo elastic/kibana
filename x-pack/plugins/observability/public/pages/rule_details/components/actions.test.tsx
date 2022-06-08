@@ -7,9 +7,6 @@
 import React from 'react';
 import { mount } from 'enzyme';
 import { nextTick } from '@kbn/test-jest-helpers';
-
-// import { nextTick } from '@kbn/test-jest-helpers';
-
 import { act } from 'react-dom/test-utils';
 import { Actions } from './actions';
 import { observabilityPublicPluginsStartMock } from '../../../observability_public_plugins_start.mock';
