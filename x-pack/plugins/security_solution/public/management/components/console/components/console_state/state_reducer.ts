@@ -17,11 +17,18 @@ export type InitialStateInterface = Pick<
 >;
 
 export const initiateState = (
-  { commands, scrollToBottom, dataTestSubj, HelpComponent, managedKey }: InitialStateInterface,
+  {
+    commands: commandList,
+    scrollToBottom,
+    dataTestSubj,
+    HelpComponent,
+    managedKey,
+  }: InitialStateInterface,
   managedConsolePriorState?: ConsoleDataState
 ): ConsoleDataState => {
+  const commands = getBuiltinCommands().concat(commandList);
   const state = managedConsolePriorState ?? {
-    commands: getBuiltinCommands().concat(commands),
+    commands,
     scrollToBottom,
     HelpComponent,
     dataTestSubj,
@@ -32,7 +39,7 @@ export const initiateState = (
 
   if (managedConsolePriorState) {
     Object.assign(state, {
-      commands: getBuiltinCommands().concat(commands),
+      commands,
       scrollToBottom,
       HelpComponent,
       dataTestSubj,

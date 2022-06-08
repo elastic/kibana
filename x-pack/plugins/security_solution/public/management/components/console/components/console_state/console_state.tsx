@@ -42,7 +42,7 @@ export const ConsoleStateProvider = memo<ConsoleStateProviderProps>(
       stateInitializer
     );
 
-    // Anytime `state` changes and the console is under ConsoleManager's control, then
+    // Anytime `state` changes AND the console is under ConsoleManager's control, then
     // store the console's state to ConsoleManager. This is what enables a console to be
     // closed/re-opened while maintaining the console's content
     useEffect(() => {
