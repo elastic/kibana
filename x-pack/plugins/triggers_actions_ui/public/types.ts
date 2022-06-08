@@ -445,9 +445,9 @@ export interface AlertsTableConfigurationRegistry {
     footer?: AlertTableFlyoutComponent;
   };
   useInternalFlyout?: () => {
-    header: AlertTableFlyoutComponent;
-    body: AlertTableFlyoutComponent;
-    footer: AlertTableFlyoutComponent;
+    header?: AlertTableFlyoutComponent;
+    body?: AlertTableFlyoutComponent;
+    footer?: AlertTableFlyoutComponent;
   };
   sort?: SortCombinations[];
   getRenderCellValue?: GetRenderCellValue;

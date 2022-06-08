@@ -76,8 +76,8 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
       break;
     case AlertsTableFlyoutState.internal:
       Header = internalHeader ?? AlertsFlyoutHeader;
-      Body = internalBody;
-      Footer = internalFooter;
+      Body = internalBody ?? null;
+      Footer = internalFooter ?? null;
       break;
   }
 
@@ -109,7 +109,7 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
     [Footer, passedProps]
   );
 
-  const getFlyoutBody = useCallback(() => {
+  const FlyoutBodyMemo = useMemo(() => {
     if (FlyoutBody) {
       if (state === AlertsTableFlyoutState.external) {
         return (
@@ -122,7 +122,7 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
     }
   }, [FlyoutBody, state]);
 
-  const getFlyoutFooter = useCallback(() => {
+  const FlyoutFooterMemo = useCallback(() => {
     if (FlyoutFooter) {
       if (state === AlertsTableFlyoutState.external) {
         return (
@@ -160,8 +160,8 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutHeader>
-      {getFlyoutBody()}
-      {getFlyoutFooter()}
+      {FlyoutBodyMemo}
+      {FlyoutFooterMemo}
     </EuiFlyout>
   );
 };
