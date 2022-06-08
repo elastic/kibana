@@ -127,12 +127,8 @@ experimental[] {kib} offers a preconfigured index connector to facilitate indexi
 
 [WARNING]
 ==================================================
-<<<<<<< HEAD
-This functionality is experimental and may be changed or removed completely in a future release.
-=======
 This functionality is in technical preview and may be changed or removed 
 completely in a future release.
->>>>>>> a8cef96515e ([DOCS] Fixes variable names in Index connector docs. (#133725))
 ==================================================
 
 To use this connector, set the 
