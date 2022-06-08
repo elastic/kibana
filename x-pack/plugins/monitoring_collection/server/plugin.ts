@@ -35,7 +35,6 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   private readonly initializerContext: PluginInitializerContext;
   private readonly logger: Logger;
   private readonly config: MonitoringCollectionConfig;
-  private meterProvider?: MeterProvider;
 
   private metrics: Record<string, Metric<any>> = {};
 
@@ -43,6 +42,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     this.initializerContext = initializerContext;
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get();
+    this.configureOpentelemetryMetrics();
   }
 
   async getMetric(type: string) {
@@ -98,13 +98,13 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   }
 
   private configureOpentelemetryMetrics() {
-    this.meterProvider = new MeterProvider({
+    const meterProvider = new MeterProvider({
       resource: new Resource({
         [SemanticResourceAttributes.SERVICE_NAME]: 'kibana',
       }),
     });
 
-    metrics.setGlobalMeterProvider(this.meterProvider);
+    metrics.setGlobalMeterProvider(meterProvider);
 
     const url = this.config.opentelemetry.metrics.otlp.url;
     if (url) {
@@ -116,7 +116,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         credentials = grpc.credentials.createInsecure();
       }
 
-      this.meterProvider.addMetricReader(
+      meterProvider.addMetricReader(
         new PeriodicExportingMetricReader({
           exporter: new OTLPMetricExporter({ url, credentials }),
           exportIntervalMillis: this.config.opentelemetry.metrics.exportIntervalMillis,
