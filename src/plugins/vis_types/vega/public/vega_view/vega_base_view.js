@@ -46,18 +46,17 @@ for (const funcName of Object.keys(vegaFunctions)) {
 const bypassToken = Symbol();
 
 function normalizeDate(date) {
-  let normalizedDate = '';
-  if (typeof date === 'number') {
-    normalizedDate = date;
+  if (typeof date === 'number' && !isNaN(date)) {
+    return date;
   } else if (date instanceof Date) {
-    normalizedDate = date;
+    return date;
   } else {
-    normalizedDate = String(normalizeObject(date));
+    return String(normalizeObject(date));
   }
-  return normalizedDate;
 }
-
-// recursive function to check a nested object for a function property
+/*
+Recursive function to check a nested object for a function property
+*/
 function checkObjectForFunctionProperty(object) {
   if (object === null || object === undefined) {
     return false;
@@ -65,14 +64,20 @@ function checkObjectForFunctionProperty(object) {
   if (typeof object === 'function') {
     return true;
   }
-  const hasFnProperty = Object.keys(object).some((key) => {
-    if (typeof object[key] === 'function') {
-      return checkObjectForFunctionProperty(object[key]);
+  const hasFnProperty = Object.values(object).some((value) => {
+    if (typeof value === 'function') {
+      return checkObjectForFunctionProperty(value);
     }
   });
   return hasFnProperty;
 }
-
+/*
+We want to be strict here when an object is passed to a Vega function
+- NaN (will be converted to null)
+- undefined (key will be removed)
+- Date (will be replaced by its toString value)
+- will throw an error when a function is found
+*/
 function normalizeObject(object) {
   if (checkObjectForFunctionProperty(object)) {
     throw new Error('a function cannot be used as a property name');
