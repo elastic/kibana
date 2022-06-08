@@ -101,6 +101,6 @@ export function getVizEditorOriginatingAppUrl(history: History) {
   return `#/${history.location.pathname}${history.location.search}`;
 }
 
-export function isFallbackDataView(dataView: DataView) {
-  return !Object.keys(dataView.getOriginalSavedObjectBody() ?? {}).length;
+export function isFallbackDataView(dataView?: DataView): dataView is DataView {
+  return Boolean(dataView && !Object.keys(dataView.getOriginalSavedObjectBody() ?? {}).length);
 }

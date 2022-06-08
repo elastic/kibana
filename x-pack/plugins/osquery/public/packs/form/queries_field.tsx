@@ -143,7 +143,7 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({
               pickBy(
                 {
                   id: newQueryId,
-                  interval: newQuery.interval ?? parsedContent.interval,
+                  interval: newQuery.interval ?? parsedContent.interval ?? '3600',
                   query: newQuery.query,
                   version: newQuery.version ?? parsedContent.version,
                   platform: getSupportedPlatforms(newQuery.platform ?? parsedContent.platform),

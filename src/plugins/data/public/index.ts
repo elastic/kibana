@@ -23,7 +23,6 @@ export {
   getDisplayValueFromFilter,
   getFieldDisplayValueFromFilter,
   generateFilters,
-  extractTimeRange,
   getIndexPatternFromFilter,
 } from './query';
 
@@ -59,8 +58,6 @@ import {
   validateDataView,
 } from './data_views';
 
-export type { IndexPatternsService } from './data_views';
-
 // Index patterns namespace:
 export const indexPatterns = {
   ILLEGAL_CHARACTERS_KEY,
@@ -75,13 +72,9 @@ export const indexPatterns = {
   validate: validateDataView,
 };
 
-export type { IndexPatternsContract, DataViewsContract, TypeMeta } from './data_views';
-export { IndexPattern, IndexPatternField } from './data_views';
+export type { DataViewsContract, TypeMeta } from './data_views';
 
 export type {
-  IIndexPattern,
-  IFieldType,
-  IndexPatternAttributes,
   AggregationRestrictions as IndexPatternAggRestrictions,
   IndexPatternLoadExpressionFunctionDefinition,
   GetFieldsOptions,
@@ -265,7 +258,7 @@ export {
 } from './query';
 
 export { NowProvider } from './now_provider';
-export type { NowProviderInternalContract } from './now_provider';
+export type { NowProviderInternalContract, NowProviderPublicContract } from './now_provider';
 
 export type {
   QueryState,

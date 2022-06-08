@@ -2223,7 +2223,7 @@
             }
           }
         },
-        "enterpriseSearchContent": {
+        "elasticsearch": {
           "properties": {
             "appId": {
               "type": "keyword",

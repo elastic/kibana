@@ -26,10 +26,10 @@ export const IMPORT_RULE = i18n.translate(
   }
 );
 
-export const UPLOAD_VALUE_LISTS = i18n.translate(
-  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButton',
+export const IMPORT_VALUE_LISTS = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton',
   {
-    defaultMessage: 'Upload value lists',
+    defaultMessage: 'Import value lists',
   }
 );
 
@@ -261,10 +261,10 @@ export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   }
 );
 
-export const BULK_EDIT_FLYOUT_FORM_CLOSE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.closeButtonLabel',
+export const BULK_EDIT_FLYOUT_FORM_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.cancelButtonLabel',
   {
-    defaultMessage: 'Close',
+    defaultMessage: 'Cancel',
   }
 );
 

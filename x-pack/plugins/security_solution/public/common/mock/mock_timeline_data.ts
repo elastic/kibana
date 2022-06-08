@@ -640,6 +640,7 @@ export const mockTimelineData: TimelineItem[] = [
       { field: '@timestamp', value: ['2019-03-13T05:42:11.815Z'] },
       { field: 'event.category', value: ['audit-rule'] },
       { field: 'host.name', value: ['zeek-sanfran'] },
+      { field: 'process.args', value: ['gpgconf', '--list-dirs', 'agent-socket'] },
     ],
     ecs: {
       _id: '20',

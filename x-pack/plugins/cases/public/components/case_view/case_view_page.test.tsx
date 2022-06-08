@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { act, waitFor } from '@testing-library/react';
+import { waitFor } from '@testing-library/dom';
+import { act } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import { mount } from 'enzyme';
 import React from 'react';
@@ -13,25 +14,31 @@ import { ConnectorTypes } from '../../../common/api';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import '../../common/mock/match_media';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
-import { useConnectors } from '../../containers/configure/use_connectors';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
 import {
+  alertComment,
+  basicCase,
   basicCaseClosed,
   basicCaseMetrics,
   caseUserActions,
   connectorsMock,
   getAlertUserAction,
 } from '../../containers/mock';
+import { Case } from '../../containers/types';
+import { useGetCase, UseGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
+import { useGetTags } from '../../containers/use_get_tags';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { CaseViewPage } from './case_view_page';
-import { caseData, caseViewProps } from './index.test';
-import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
+import { CaseViewPageProps, CaseViewProps, CASE_VIEW_PAGE_TABS } from './types';
 
+jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
 jest.mock('../../containers/use_get_case_metrics');
 jest.mock('../../containers/use_get_case_user_actions');
+jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/configure/use_connectors');
 jest.mock('../../containers/use_post_push_to_service');
@@ -39,20 +46,100 @@ jest.mock('../user_actions/timestamp');
 jest.mock('../../common/navigation/hooks');
 jest.mock('../../common/hooks');
 
+const useFetchCaseMock = useGetCase as jest.Mock;
 const useUrlParamsMock = useUrlParams as jest.Mock;
 const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
 const useUpdateCaseMock = useUpdateCase as jest.Mock;
-const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
-const useConnectorsMock = useConnectors as jest.Mock;
+const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
+const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
+const useGetTagsMock = useGetTags as jest.Mock;
+
+const alertsHit = [
+  {
+    _id: 'alert-id-1',
+    _index: 'alert-index-1',
+    _source: {
+      signal: {
+        rule: {
+          id: 'rule-id-1',
+          name: 'Awesome rule',
+        },
+      },
+    },
+  },
+  {
+    _id: 'alert-id-2',
+    _index: 'alert-index-2',
+    _source: {
+      signal: {
+        rule: {
+          id: 'rule-id-2',
+          name: 'Awesome rule 2',
+        },
+      },
+    },
+  },
+];
+
+export const caseViewProps: CaseViewProps = {
+  onComponentInitialized: jest.fn(),
+  actionsNavigation: {
+    href: jest.fn(),
+    onClick: jest.fn(),
+  },
+  ruleDetailsNavigation: {
+    href: jest.fn(),
+    onClick: jest.fn(),
+  },
+  showAlertDetails: jest.fn(),
+  useFetchAlertData: () => [
+    false,
+    {
+      'alert-id-1': alertsHit[0],
+      'alert-id-2': alertsHit[1],
+    },
+  ],
+};
+
+export const caseData: Case = {
+  ...basicCase,
+  comments: [...basicCase.comments, alertComment],
+  connector: {
+    id: 'resilient-2',
+    name: 'Resilient',
+    type: ConnectorTypes.resilient,
+    fields: null,
+  },
+};
+const defaultGetCase = {
+  isLoading: false,
+  isError: false,
+  data: {
+    case: caseData,
+    outcome: 'exactMatch',
+  },
+  refetch: jest.fn(),
+};
+
+const mockGetCase = (props: Partial<UseGetCase> = {}) => {
+  const data = {
+    ...defaultGetCase.data,
+    ...props.data,
+  };
+  useFetchCaseMock.mockReturnValue({
+    ...defaultGetCase,
+    ...props,
+    data,
+  });
+};
 
 export const caseProps: CaseViewPageProps = {
   ...caseViewProps,
   caseId: caseData.id,
   caseData,
   fetchCase: jest.fn(),
-  updateCase: jest.fn(),
 };
 
 export const caseClosedProps: CaseViewPageProps = {
@@ -76,31 +163,35 @@ describe('CaseViewPage', () => {
   };
 
   const defaultUseGetCaseUserActions = {
-    caseUserActions: [...caseUserActions, getAlertUserAction()],
-    caseServices: {},
-    fetchCaseUserActions,
-    firstIndexPushToService: -1,
-    hasDataToPush: false,
+    data: {
+      caseUserActions: [...caseUserActions, getAlertUserAction()],
+      caseServices: {},
+      hasDataToPush: false,
+      participants: [data.createdBy],
+    },
+    refetch: fetchCaseUserActions,
     isLoading: false,
     isError: false,
-    lastIndexPushToService: -1,
-    participants: [data.createdBy],
   };
 
   const defaultGetCaseMetrics = {
     isLoading: false,
     isError: false,
-    metrics: basicCaseMetrics,
-    fetchCaseMetrics,
+    data: {
+      metrics: basicCaseMetrics,
+    },
+    refetch: fetchCaseMetrics,
   };
 
   beforeEach(() => {
+    mockGetCase();
     jest.clearAllMocks();
     useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
     useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
     useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
-    useConnectorsMock.mockReturnValue({ connectors: connectorsMock, loading: false });
+    useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
+    useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
   });
 
   it('should render CaseViewPage', async () => {
@@ -120,7 +211,7 @@ describe('CaseViewPage', () => {
       'Open'
     );
 
-    expect(wrapper.find(`[data-test-subj="case-view-metrics"]`).exists()).toBeFalsy();
+    expect(wrapper.find(`[data-test-subj="case-view-metrics"]`).exists()).toBeTruthy();
 
     expect(
       wrapper
@@ -300,7 +391,10 @@ describe('CaseViewPage', () => {
   it('should push updates on button click', async () => {
     useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
+      data: {
+        ...defaultUseGetCaseUserActions.data,
+        hasDataToPush: true,
+      },
     }));
 
     const wrapper = mount(
@@ -322,11 +416,6 @@ describe('CaseViewPage', () => {
   });
 
   it('should disable the push button when connector is invalid', async () => {
-    useGetCaseUserActionsMock.mockImplementation(() => ({
-      ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
-    }));
-
     const wrapper = mount(
       <TestProviders>
         <CaseViewPage
@@ -448,15 +537,13 @@ describe('CaseViewPage', () => {
     });
   });
 
-  it('should show loading content when loading alerts', async () => {
+  it('should show loading content when loading user actions', async () => {
     const useFetchAlertData = jest.fn().mockReturnValue([true]);
     useGetCaseUserActionsMock.mockReturnValue({
-      caseServices: {},
-      caseUserActions: [],
-      hasDataToPush: false,
+      data: undefined,
       isError: false,
       isLoading: true,
-      participants: [],
+      isFetching: true,
     });
 
     const wrapper = mount(
@@ -526,10 +613,13 @@ describe('CaseViewPage', () => {
   });
 
   it('should show the correct connector name on the push button', async () => {
-    useConnectorsMock.mockImplementation(() => ({ connectors: connectorsMock, loading: false }));
+    useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     useGetCaseUserActionsMock.mockImplementation(() => ({
       ...defaultUseGetCaseUserActions,
-      hasDataToPush: true,
+      data: {
+        ...defaultUseGetCaseUserActions.data,
+        hasDataToPush: true,
+      },
     }));
 
     const wrapper = mount(
@@ -551,7 +641,7 @@ describe('CaseViewPage', () => {
 
   describe('Callouts', () => {
     it('it shows the danger callout when a connector has been deleted', async () => {
-      useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: false }));
+      useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: false }));
       const wrapper = mount(
         <TestProviders>
           <CaseViewPage {...caseProps} />
@@ -565,7 +655,7 @@ describe('CaseViewPage', () => {
     });
 
     it('it does NOT shows the danger callout when connectors are loading', async () => {
-      useConnectorsMock.mockImplementation(() => ({ connectors: [], loading: true }));
+      useGetConnectorsMock.mockImplementation(() => ({ data: [], isLoading: true }));
       const wrapper = mount(
         <TestProviders>
           <CaseViewPage {...caseProps} />
