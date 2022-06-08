@@ -8,6 +8,8 @@
 import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import React, { memo } from 'react';
+import { SecurityPageName } from '../../../../common/constants';
+import { useLinkExists } from '../../../common/links/links';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
 import { HostIsolationExceptionsList } from './view/host_isolation_exceptions_list';
@@ -16,13 +18,18 @@ import { HostIsolationExceptionsList } from './view/host_isolation_exceptions_li
  * Provides the routing container for the hosts related views
  */
 export const HostIsolationExceptionsContainer = memo(() => {
+  const canAccessHostIsolationExceptionsLink = useLinkExists(
+    SecurityPageName.hostIsolationExceptions
+  );
   return (
     <Switch>
-      <Route
-        path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
-        exact
-        component={HostIsolationExceptionsList}
-      />
+      {canAccessHostIsolationExceptionsLink && (
+        <Route
+          path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
+          exact
+          component={HostIsolationExceptionsList}
+        />
+      )}
       <Route path="*" component={NotFoundPage} />
     </Switch>
   );

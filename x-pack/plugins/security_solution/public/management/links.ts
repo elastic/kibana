@@ -7,6 +7,7 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import {
   BLOCKLIST_PATH,
   ENDPOINTS_PATH,
@@ -33,6 +34,7 @@ import {
   RULES,
   TRUSTED_APPLICATIONS,
 } from '../app/translations';
+import { licenseService } from '../common/hooks/use_license';
 import { LinkItem } from '../common/links/types';
 import { StartPlugins } from '../types';
 
@@ -44,6 +46,7 @@ import { IconExceptionLists } from './icons/exception_lists';
 import { IconHostIsolation } from './icons/host_isolation';
 import { IconSiemRules } from './icons/siem_rules';
 import { IconTrustedApplications } from './icons/trusted_applications';
+import { HostIsolationExceptionsApiClient } from './pages/host_isolation_exceptions/host_isolation_exceptions_api_client';
 
 const categories = [
   {
@@ -205,6 +208,27 @@ export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
 ): Promise<LinkItem> => {
-  // TODO: implement async logic to exclude links
+  licenseService.start(plugins.licensing.license$);
+
+  const currentUserResponse = await plugins.security.authc.getCurrentUser();
+  const privileges = calculateEndpointAuthz(
+    licenseService,
+    plugins.fleet?.authz,
+    currentUserResponse.roles
+  );
+  const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
+    core.http
+  );
+
+  if (!privileges.canIsolateHost) {
+    const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
+    if (!summaryResponse.total) {
+      return {
+        ...links,
+        links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
+      };
+    }
+  }
+
   return links;
 };
