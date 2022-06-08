@@ -188,7 +188,7 @@ describe('Update rules configuration API', () => {
     expect(updatedPackagePolicy.vars).toEqual({ dataYaml: { type: 'yaml', value: dataYaml } });
   });
 
-  it('validate adding new datYaml to package policy instance when it not exists on source', async () => {
+  it('validate adding new dataYaml to package policy instance when it not exists on source', async () => {
     const packagePolicy = createPackagePolicyMock();
 
     const dataYaml = 'data_yaml:\n  activated_rules:\n  cis_k8s:\n    - 1.1.1\n    - 1.1.2\n';
