@@ -8,7 +8,10 @@
 import React, { useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
+import {
+  isAlertFromEndpointEvent,
+  isTimelineEventItemAnAlert,
+} from '../../../common/utils/endpoint_alert_check';
 import { ResponderContextMenuItem } from './responder_context_menu_item';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getFieldValue } from '../host_isolation/helpers';
@@ -22,6 +25,10 @@ export const useResponderActionItem = (
   );
   const { loading: isAuthzLoading, canAccessEndpointManagement } =
     useUserPrivileges().endpointPrivileges;
+
+  const isAlert = useMemo(() => {
+    return isTimelineEventItemAnAlert(eventDetailsData || []);
+  }, [eventDetailsData]);
 
   const isEndpointAlert = useMemo(() => {
     return isAlertFromEndpointEvent({ data: eventDetailsData || [] });
@@ -39,7 +46,7 @@ export const useResponderActionItem = (
       isResponseActionsConsoleEnabled &&
       !isAuthzLoading &&
       canAccessEndpointManagement &&
-      isEndpointAlert
+      isAlert
     ) {
       actions.push(
         <ResponderContextMenuItem
@@ -53,6 +60,7 @@ export const useResponderActionItem = (
   }, [
     canAccessEndpointManagement,
     endpointId,
+    isAlert,
     isAuthzLoading,
     isEndpointAlert,
     isResponseActionsConsoleEnabled,
