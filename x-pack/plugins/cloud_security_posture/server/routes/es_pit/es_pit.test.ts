@@ -12,6 +12,7 @@ import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/se
 import { DEFAULT_PIT_KEEP_ALIVE, defineEsPitRoute, esPitInputSchema } from './es_pit';
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 describe('ES Point in time API endpoint', () => {
   const chance = new Chance();
@@ -26,6 +27,7 @@ describe('ES Point in time API endpoint', () => {
     const cspContext: CspAppContext = {
       logger: loggingSystemMock.createLogger(),
       service: new CspAppService(),
+      security: securityMock.createSetup(),
     };
 
     defineEsPitRoute(router, cspContext);
@@ -39,6 +41,7 @@ describe('ES Point in time API endpoint', () => {
     const cspContext: CspAppContext = {
       logger: loggingSystemMock.createLogger(),
       service: new CspAppService(),
+      security: securityMock.createSetup(),
     };
 
     defineEsPitRoute(router, cspContext);
@@ -62,6 +65,7 @@ describe('ES Point in time API endpoint', () => {
     const cspContext: CspAppContext = {
       logger: loggingSystemMock.createLogger(),
       service: new CspAppService(),
+      security: securityMock.createSetup(),
     };
 
     defineEsPitRoute(router, cspContext);
@@ -85,6 +89,7 @@ describe('ES Point in time API endpoint', () => {
     const cspContext: CspAppContext = {
       logger: loggingSystemMock.createLogger(),
       service: new CspAppService(),
+      security: securityMock.createSetup(),
     };
 
     defineEsPitRoute(router, cspContext);

@@ -39,6 +39,7 @@ import { AgentPolicy } from '@kbn/fleet-plugin/common';
 
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 export const getMockCspContext = (mockEsClient: ElasticsearchClientMock): KibanaRequest => {
   return {
@@ -84,6 +85,7 @@ describe('benchmarks API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
+      security: securityMock.createSetup(),
     };
     defineGetBenchmarksRoute(router, cspContext);
 
@@ -99,6 +101,7 @@ describe('benchmarks API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
+      security: securityMock.createSetup(),
     };
     defineGetBenchmarksRoute(router, cspContext);
     const [_, handler] = router.get.mock.calls[0];
@@ -123,6 +126,7 @@ describe('benchmarks API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
+      security: securityMock.createSetup(),
     };
     defineGetBenchmarksRoute(router, cspContext);
     const [_, handler] = router.get.mock.calls[0];
