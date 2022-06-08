@@ -7,9 +7,9 @@
 import { useQuery } from 'react-query';
 import {
   type CopyAgentPolicyResponse,
+  type GetOnePackagePolicyResponse,
   packagePolicyRouteService,
   agentPolicyRouteService,
-  GetOnePackagePolicyResponse,
 } from '@kbn/fleet-plugin/common';
 import { type PageUrlParams } from './rules_container';
 import { useKibana } from '../../common/hooks/use_kibana';
