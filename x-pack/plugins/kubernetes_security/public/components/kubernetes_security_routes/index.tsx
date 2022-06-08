@@ -11,35 +11,22 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiLoadingContent,
   EuiSpacer,
+  EuiText,
   EuiTextColor,
 } from '@elastic/eui';
-import { CSSObject } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { KUBERNETES_PATH } from '../../../common/constants';
 import { KubernetesWidget } from '../kubernetes_widget';
+import { PercentCompareWidget } from '../percent_compare_widget';
 import { KubernetesSecurityDeps } from '../../types';
-
-const widgetBadge: CSSObject = {
-  position: 'absolute',
-  bottom: '16px',
-  left: '16px',
-  width: 'calc(100% - 32px)',
-  fontSize: '12px',
-  lineHeight: '18px',
-  padding: '4px 8px',
-  display: 'flex',
-};
-
-const treeViewContainer: CSSObject = {
-  position: 'relative',
-  border: '1px solid #D3DAE6',
-  borderRadius: '6px',
-  padding: '16px',
-  height: '500px',
-};
+import { useStyles } from './styles';
 
 const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) => {
+  const styles = useStyles();
   return (
     <Switch>
       <Route strict exact path={KUBERNETES_PATH}>
@@ -58,7 +45,7 @@ const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) =
                 href="#"
                 target="blank"
                 css={{
-                  ...widgetBadge,
+                  ...styles.widgetBadge,
                   '.euiBadge__content': {
                     width: '100%',
                     '.euiBadge__text': {
@@ -77,7 +64,7 @@ const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) =
           </EuiFlexItem>
           <EuiFlexItem>
             <KubernetesWidget title="Pods" icon="package" iconColor="warning" data={775}>
-              <EuiBadge css={{ ...widgetBadge, justifyContent: 'center' }}>
+              <EuiBadge css={{ ...styles.widgetBadge, justifyContent: 'center' }}>
                 <EuiTextColor css={{ marginRight: '16px' }} color="success">
                   <span css={{ fontWeight: 700 }}>1000</span>
                   {' live'}
@@ -89,7 +76,71 @@ const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) =
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiSpacer size="m" />
-        <div css={treeViewContainer}>
+        <EuiFlexGroup css={styles.percentageWidgets}>
+          <EuiFlexItem>
+            <PercentCompareWidget
+              title={
+                <>
+                  <EuiText size="xs" css={styles.percentageChartTitle}>
+                    <FormattedMessage
+                      id="xpack.kubernetesSecurity.sessionsChart.title"
+                      defaultMessage="Sessions"
+                    />
+                  </EuiText>
+                  <EuiIconTip content="Sessions icon tip placeholder" />
+                </>
+              }
+              data={[
+                {
+                  name: 'Interactive',
+                  value: 280,
+                  fieldName: 'process.entry_leader.interactive',
+                  fieldValue: true,
+                  color: euiThemeVars.euiColorVis0,
+                },
+                {
+                  name: 'Non-interactive',
+                  value: 780,
+                  fieldName: 'process.entry_leader.interactive',
+                  fieldValue: false,
+                  color: euiThemeVars.euiColorVis1,
+                },
+              ]}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <PercentCompareWidget
+              title={
+                <>
+                  <EuiText size="xs" css={styles.percentageChartTitle}>
+                    <FormattedMessage
+                      id="xpack.kubernetesSecurity.userLoginChart.title"
+                      defaultMessage="Sessions with login root users"
+                    />
+                  </EuiText>
+                  <EuiIconTip content="Sessions login root icon tip placeholder" />
+                </>
+              }
+              data={[
+                {
+                  name: 'Root',
+                  value: 480,
+                  fieldName: 'process.entry_leader.interactive',
+                  fieldValue: true,
+                  color: euiThemeVars.euiColorVis2,
+                },
+                {
+                  name: 'Non-root',
+                  value: 780,
+                  fieldName: 'process.entry_leader.interactive',
+                  fieldValue: false,
+                  color: euiThemeVars.euiColorVis3,
+                },
+              ]}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <div css={styles.treeViewContainer}>
           <EuiLoadingContent lines={3} />
           <EuiLoadingContent lines={3} />
         </div>
