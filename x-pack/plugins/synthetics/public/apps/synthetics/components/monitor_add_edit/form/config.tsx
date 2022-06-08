@@ -31,7 +31,9 @@ import {
   HTTPMethod,
   MonacoEditorLangId,
   MonitorFields,
+  MonitorServiceLocations,
   ScreenshotOption,
+  ServiceLocations,
   TLSVersion,
   VerificationMode,
 } from '../types';
@@ -54,6 +56,7 @@ export interface FieldMeta {
     value: any;
     setValue: UseFormReturn['setValue'];
     reset: UseFormReturn['reset'];
+    locations: ServiceLocations;
   }) => Record<string, any>;
   controlled?: boolean;
   required?: boolean;
@@ -295,6 +298,46 @@ export const FIELD: Record<string, FieldMeta> = {
         },
       ],
     }),
+  },
+  [ConfigKey.LOCATIONS]: {
+    fieldKey: ConfigKey.LOCATIONS,
+    required: true,
+    controlled: true,
+    component: EuiComboBox,
+    label: 'Locations',
+    helpText:
+      'Where do you want to run this test from? Additional locations will increase your total cost.',
+    props: ({
+      value,
+      setValue,
+      locations,
+    }: {
+      value: ServiceLocations;
+      setValue: UseFormReturn['setValue'];
+      locations: ServiceLocations;
+    }) => {
+      return {
+        options: Object.values(locations).map((location) => ({
+          label: locations?.find((loc) => location.id === loc.id)?.label,
+          id: location.id,
+          isServiceManaged: location.isServiceManaged,
+        })),
+        selectedOptions: Object.values(value).map((location) => ({
+          label: locations?.find((loc) => location.id === loc.id)?.label,
+          id: location.id,
+          isServiceManaged: location.isServiceManaged,
+        })),
+        onChange: (updatedValues: ServiceLocations) => {
+          setValue(
+            ConfigKey.LOCATIONS,
+            updatedValues.map((location) => ({
+              id: location.id,
+              isServiceManaged: location.isServiceManaged,
+            })) as MonitorServiceLocations
+          );
+        },
+      };
+    },
   },
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
@@ -747,6 +790,7 @@ export const FIELD_CONFIG: FieldConfig = {
     step2: [
       FIELD[`${ConfigKey.URLS}__http`],
       FIELD[ConfigKey.NAME],
+      FIELD[ConfigKey.LOCATIONS],
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.MAX_REDIRECTS],
       FIELD[ConfigKey.TIMEOUT],
@@ -764,6 +808,7 @@ export const FIELD_CONFIG: FieldConfig = {
     step2: [
       FIELD[`${ConfigKey.HOSTS}__tcp`],
       FIELD[ConfigKey.NAME],
+      FIELD[ConfigKey.LOCATIONS],
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.TIMEOUT],
     ],
@@ -776,7 +821,7 @@ export const FIELD_CONFIG: FieldConfig = {
   },
   [FormMonitorType.MULTISTEP]: {
     step1: [FIELD[ConfigKey.MONITOR_TYPE]],
-    step2: [FIELD[ConfigKey.NAME], FIELD[ConfigKey.SCHEDULE]],
+    step2: [FIELD[ConfigKey.NAME], FIELD[ConfigKey.LOCATIONS], FIELD[ConfigKey.SCHEDULE]],
     step3: [FIELD[ConfigKey.SOURCE_INLINE]],
     advanced: [
       {
@@ -792,7 +837,12 @@ export const FIELD_CONFIG: FieldConfig = {
   },
   [FormMonitorType.SINGLE]: {
     step1: [FIELD[ConfigKey.MONITOR_TYPE]],
-    step2: [FIELD[`${ConfigKey.URLS}__single`], FIELD[ConfigKey.NAME], FIELD[ConfigKey.SCHEDULE]],
+    step2: [
+      FIELD[`${ConfigKey.URLS}__single`],
+      FIELD[ConfigKey.NAME],
+      FIELD[ConfigKey.LOCATIONS],
+      FIELD[ConfigKey.SCHEDULE],
+    ],
     advanced: [
       {
         ...DEFAULT_DATA_OPTIONS,
@@ -810,6 +860,7 @@ export const FIELD_CONFIG: FieldConfig = {
     step2: [
       FIELD[`${ConfigKey.HOSTS}__icmp`],
       FIELD[ConfigKey.NAME],
+      FIELD[ConfigKey.LOCATIONS],
       FIELD[ConfigKey.SCHEDULE],
       FIELD[ConfigKey.WAIT],
       FIELD[ConfigKey.TIMEOUT],

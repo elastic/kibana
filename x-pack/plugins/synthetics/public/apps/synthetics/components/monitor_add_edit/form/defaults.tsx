@@ -9,10 +9,6 @@ import { DEFAULT_FIELDS } from '../constants';
 import { DataStream, FormMonitorType } from '../types';
 
 export const DEFAULT_FORM_FIELDS: Record<FormMonitorType, Record<string, any>> = {
-  [FormMonitorType.SINGLE]: {
-    ...DEFAULT_FIELDS[DataStream.BROWSER],
-    formMonitorType: FormMonitorType.SINGLE,
-  },
   [FormMonitorType.MULTISTEP]: {
     ...DEFAULT_FIELDS[DataStream.BROWSER],
     'source.inline': {
@@ -21,6 +17,10 @@ export const DEFAULT_FORM_FIELDS: Record<FormMonitorType, Record<string, any>> =
       fileName: '',
     },
     formMonitorType: FormMonitorType.MULTISTEP,
+  },
+  [FormMonitorType.SINGLE]: {
+    ...DEFAULT_FIELDS[DataStream.BROWSER],
+    formMonitorType: FormMonitorType.SINGLE,
   },
   [FormMonitorType.HTTP]: {
     ...DEFAULT_FIELDS[DataStream.HTTP],

@@ -17,7 +17,7 @@ export const MonitorForm: React.FC = ({ children }) => {
   const methods = useFormWrapped({
     mode: 'onTouched',
     reValidateMode: 'onChange',
-    defaultValues: DEFAULT_FORM_FIELDS[FormMonitorType.SINGLE],
+    defaultValues: DEFAULT_FORM_FIELDS[FormMonitorType.MULTISTEP],
     shouldFocusError: true,
   });
   const {

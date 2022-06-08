@@ -39,7 +39,6 @@ type RouteProps = {
   component: React.FC;
   dataTestSubj: string;
   title: string;
-  telemetryId: SyntheticsPage;
   hideWhenNoData?: boolean;
   pageHeader?: {
     pageTitle: string | JSX.Element;
@@ -83,7 +82,6 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
       path: OVERVIEW_ROUTE,
       component: () => <OverviewPage />,
       dataTestSubj: 'syntheticsOverviewPage',
-      telemetryId: SyntheticsPage.Overview,
       hideWhenNoData: true,
       pageHeader: {
         pageTitle: (
@@ -173,7 +171,6 @@ const getRoutes = (euiTheme: EuiThemeComputed): RouteProps[] => {
         </ServiceAllowedWrapper>
       ),
       dataTestSubj: 'syntheticsMonitorEditPage',
-      telemetryId: SyntheticsPage.MonitorAdd,
       pageHeader: {
         pageTitle: (
           <FormattedMessage

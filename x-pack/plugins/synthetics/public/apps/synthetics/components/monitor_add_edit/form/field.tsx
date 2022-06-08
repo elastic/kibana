@@ -5,8 +5,10 @@
  * 2.0.
  */
 import React, { memo } from 'react';
+import { useSelector } from 'react-redux';
 import { Controller, useFormContext, FieldError } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
+import { selectServiceLocationsState } from '../../../state';
 import { ControlledField } from './controlled_field';
 import { OptionalLabel } from '../fields/optional_label';
 import { FieldMeta } from './config';
@@ -32,6 +34,7 @@ export const Field = memo<Props>(
     customHook,
   }: Props) => {
     const { register, watch, control, setValue, reset } = useFormContext();
+    const { locations } = useSelector(selectServiceLocationsState);
     let show = true;
     let dependenciesValues = [];
     if (showWhen) {
@@ -91,7 +94,7 @@ export const Field = memo<Props>(
             required,
             ...(validation ? validation(dependenciesValues) : {}),
           })}
-          {...(props ? props({ value: '', setValue, reset }) : {})}
+          {...(props ? props({ value: '', setValue, reset, locations }) : {})}
           isInvalid={Boolean(fieldError)}
           fullWidth
         />

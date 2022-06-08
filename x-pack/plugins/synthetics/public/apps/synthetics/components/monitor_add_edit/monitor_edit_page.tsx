@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { getServiceLocations } from '../../state';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
@@ -16,6 +18,11 @@ export const MonitorEditPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor' });
   useTrackPageview({ app: 'synthetics', path: 'edit-monitor', delay: 15000 });
   useMonitorAddEditBreadcrumbs();
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getServiceLocations());
+  }, [dispatch]);
 
   return (
     <MonitorForm>

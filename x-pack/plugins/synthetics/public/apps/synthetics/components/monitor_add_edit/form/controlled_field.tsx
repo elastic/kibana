@@ -6,12 +6,14 @@
  */
 import React from 'react';
 import { EuiFormRow, EuiFormRowProps } from '@elastic/eui';
+import { useSelector } from 'react-redux';
 import {
   UseFormReturn,
   ControllerRenderProps,
   ControllerFieldState,
   useFormContext,
 } from 'react-hook-form';
+import { selectServiceLocationsState } from '../../../state';
 import { FieldMeta } from './config';
 
 interface Props {
@@ -47,13 +49,14 @@ export const ControlledField = ({
   const noop = () => {};
   let hook: Function = noop;
   let hookProps;
+  const { locations } = useSelector(selectServiceLocationsState);
   if (customHook) {
     hookProps = customHook(field.value);
     hook = hookProps.func;
   }
   const { [hookProps?.fieldKey as string]: hookResult } = hook(hookProps?.params) || {};
   const onChange = useSetValue ? setFieldValue(fieldKey, setValue) : field.onChange;
-  const generatedProps = props ? props({ value: field.value, setValue, reset }) : {};
+  const generatedProps = props ? props({ value: field.value, setValue, reset, locations }) : {};
   return (
     <EuiFormRow
       {...formRowProps}
