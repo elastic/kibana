@@ -11,7 +11,7 @@ import { EuiButton, EuiCallOut, EuiText, EuiSpacer } from '@elastic/eui';
 import { HostPolicyResponseActionStatus } from '../../../../common/endpoint/types';
 
 const StyledEuiCallout = styled(EuiCallOut)`
-  padding: ${({ theme }) => theme.eui.paddingSizes.s};
+  padding: ${({ theme }) => theme.eui.euiSizeS};
   .action-message {
     white-space: break-spaces;
     text-align: left;

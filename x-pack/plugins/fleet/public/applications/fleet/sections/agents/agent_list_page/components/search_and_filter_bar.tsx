@@ -65,7 +65,7 @@ const statusFilters = [
 ];
 
 const ClearAllTagsFilterItem = styled(EuiFilterSelectItem)`
-  padding: ${(props) => props.theme.eui.paddingSizes.s};
+  padding: ${(props) => props.theme.eui.euiSizeS};
 `;
 
 export const SearchAndFilterBar: React.FunctionComponent<{

@@ -27,7 +27,7 @@ export enum SelectedPolicyTab {
 
 const StyledEuiTabbedContent = styled(EuiTabbedContent)`
   [role='tabpanel'] {
-    padding-top: ${(props) => props.theme.eui.paddingSizes.m};
+    padding-top: ${(props) => props.theme.eui.euiSizeM};
   }
 `;
 
