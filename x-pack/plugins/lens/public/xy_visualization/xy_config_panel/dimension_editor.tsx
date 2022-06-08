@@ -14,7 +14,7 @@ import type { VisualizationDimensionEditorProps } from '../../types';
 import { State, XYState, XYDataLayerConfig } from '../types';
 import { FormatFactory } from '../../../common';
 import { isHorizontalChart } from '../state_helpers';
-import { ColorPicker } from './color_picker';
+import { ColorPicker2 } from './color_picker';
 import { PalettePicker, useDebouncedValue } from '../../shared_components';
 import { isAnnotationsLayer, isReferenceLayer } from '../visualization_helpers';
 import { ReferenceLinePanel } from './reference_line_config_panel';
@@ -112,7 +112,7 @@ export function DimensionEditor(
 
   return (
     <>
-      <ColorPicker
+      <ColorPicker2
         {...props}
         disabled={Boolean(!localLayer.collapseFn && localLayer.splitAccessor)}
         setConfig={setConfig}
