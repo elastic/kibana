@@ -28,9 +28,9 @@ const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const { http } = useKibana().services;
-  const rulesInfo = useCspIntegrationInfo(params);
+  const integrationInfo = useCspIntegrationInfo(params);
 
-  const [packageInfo, agentInfo] = rulesInfo.data || [];
+  const [packageInfo, agentInfo] = integrationInfo.data || [];
 
   const breadcrumbs = useMemo(
     // TODO: make benchmark breadcrumb navigable
@@ -95,7 +95,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
   return (
     <CspPageTemplate
       {...pageProps}
-      query={rulesInfo}
+      query={integrationInfo}
       errorRender={(error) => <RulesErrorPrompt error={extractErrorBodyMessage(error)} />}
     >
       <RulesContainer />
