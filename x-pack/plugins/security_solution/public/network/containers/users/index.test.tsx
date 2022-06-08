@@ -7,7 +7,7 @@
 
 import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
-import { useNetworkUsers } from '.';
+import { ID, useNetworkUsers } from '.';
 import { NetworkType } from '../../store/model';
 import { FlowTarget } from '../../../../common/search_strategy';
 
@@ -16,6 +16,7 @@ describe('useNetworkUsers', () => {
     const abortSpy = jest.spyOn(AbortController.prototype, 'abort');
     const localProps = {
       docValueFields: [],
+      id: `${ID}-${NetworkType.page}`,
       ip: '1.1.1.1',
       flowTarget: FlowTarget.source,
       startDate: '2020-07-07T08:20:18.966Z',
