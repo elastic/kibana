@@ -31,6 +31,5 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('should not show draw controls', async () => {
       await PageObjects.maps.expectMissingToolsControl();
     });
-
   });
 }
