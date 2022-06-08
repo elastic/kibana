@@ -45,9 +45,11 @@ import {
   DETECTION_ENGINE_INDEX_URL,
   SERVER_APP_ID,
   SOURCERER_API_URL,
+  ENABLE_GROUPED_NAVIGATION,
 } from '../common/constants';
 
-import { getDeepLinks } from './app/deep_links';
+import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
+import { AppLinkItems, LinksPermissions, subscribeAppLinks, updateAppLinks } from './common/links';
 import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
@@ -57,6 +59,7 @@ import { ExperimentalFeaturesService } from './common/experimental_features_serv
 import { getLazyEndpointPolicyEditExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_edit_extension';
 import { LazyEndpointPolicyCreateExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_create_extension';
 import { getLazyEndpointPackageCustomExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_package_custom_extension';
+import { getLazyEndpointPolicyResponseExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_policy_response_extension';
 import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
@@ -140,7 +143,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       searchable: true,
       updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
-      deepLinks: getDeepLinks(this.experimentalFeatures),
       mount: async (params: AppMountParameters) => {
         // required to show the alert table inside cases
         const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
@@ -171,7 +173,15 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       navLinkStatus: 3,
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
-        manageOldSiemRoutes(coreStart);
+
+        const subscription = subscribeAppLinks((links: AppLinkItems) => {
+          // It has to be called once after deep links are initialized
+          if (links.length > 0) {
+            manageOldSiemRoutes(coreStart);
+            subscription.unsubscribe();
+          }
+        });
+
         return () => true;
       },
     });
@@ -202,6 +212,14 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         Component: getLazyEndpointPolicyEditExtension(core, plugins),
       });
 
+      if (this.experimentalFeatures.policyResponseInFleetEnabled) {
+        registerExtension({
+          package: 'endpoint',
+          view: 'package-policy-response',
+          Component: getLazyEndpointPolicyResponseExtension(core, plugins),
+        });
+      }
+
       registerExtension({
         package: 'endpoint',
         view: 'package-policy-create',
@@ -220,35 +238,9 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         Component: LazyEndpointCustomAssetsExtension,
       });
     }
-    licenseService.start(plugins.licensing.license$);
-    const licensing = licenseService.getLicenseInformation$();
 
-    /**
-     * Register deepLinks and pass an appUpdater for each subPlugin, to change deepLinks as needed when licensing changes.
-     */
-    if (licensing !== null) {
-      this.licensingSubscription = licensing.subscribe((currentLicense) => {
-        if (currentLicense.type !== undefined) {
-          this.appUpdater$.next(() => ({
-            navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-            deepLinks: getDeepLinks(
-              this.experimentalFeatures,
-              currentLicense.type,
-              core.application.capabilities
-            ),
-          }));
-        }
-      });
-    } else {
-      this.appUpdater$.next(() => ({
-        navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-        deepLinks: getDeepLinks(
-          this.experimentalFeatures,
-          undefined,
-          core.application.capabilities
-        ),
-      }));
-    }
+    // Not using await to prevent blocking start execution
+    this.registerAppLinks(core, plugins);
 
     return {};
   }
@@ -296,8 +288,19 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      * See https://webpack.js.org/api/module-methods/#magic-comments
      */
     return import(
-      /* webpackChunkName: "lazy_sub_plugins" */
+      /* webpackChunkName: "lazy_register_alerts_table_configuration" */
       './common/lib/triggers_actions_ui/register_alerts_table_configuration'
+    );
+  }
+
+  private lazyApplicationLinks() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazy_app_links" */
+      './common/links/app_links'
     );
   }
 
@@ -315,6 +318,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         hosts: new subPluginClasses.Hosts(),
         users: new subPluginClasses.Users(),
         network: new subPluginClasses.Network(),
+        kubernetes: new subPluginClasses.Kubernetes(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -343,6 +347,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       users: subPlugins.users.start(storage),
       network: subPlugins.network.start(storage),
       timelines: subPlugins.timelines.start(),
+      kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
     };
@@ -452,5 +457,71 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       startPlugins.timelines.setTGridEmbeddedStore(this._store);
     }
     return this._store;
+  }
+
+  /**
+   * Register deepLinks and appUpdater for all app links, to change deepLinks as needed when licensing changes.
+   */
+  async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
+    licenseService.start(plugins.licensing.license$);
+    const licensing = licenseService.getLicenseInformation$();
+
+    const newNavEnabled = core.uiSettings.get(ENABLE_GROUPED_NAVIGATION, false);
+    if (newNavEnabled) {
+      registerDeepLinksUpdater(this.appUpdater$);
+    }
+
+    const { links, getFilteredLinks } = await this.lazyApplicationLinks();
+
+    const linksPermissions: LinksPermissions = {
+      experimentalFeatures: this.experimentalFeatures,
+      capabilities: core.application.capabilities,
+    };
+
+    if (licensing == null) {
+      // update without license (defaults to "basic")
+      updateAppLinks(links, linksPermissions);
+
+      if (!newNavEnabled) {
+        // TODO: remove block when nav flag no longer needed
+        this.appUpdater$.next(() => ({
+          navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+          deepLinks: getDeepLinks(
+            this.experimentalFeatures,
+            undefined,
+            core.application.capabilities
+          ),
+        }));
+      }
+
+      // async links filtering
+      updateAppLinks(await getFilteredLinks(core, plugins), linksPermissions);
+
+      return;
+    }
+
+    this.licensingSubscription = licensing.subscribe(async (currentLicense) => {
+      if (currentLicense.type !== undefined) {
+        linksPermissions.license = currentLicense;
+      }
+
+      // set initial links to not block rendering
+      updateAppLinks(links, linksPermissions);
+
+      if (!newNavEnabled) {
+        // TODO: remove block when nav flag no longer needed
+        this.appUpdater$.next(() => ({
+          navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+          deepLinks: getDeepLinks(
+            this.experimentalFeatures,
+            currentLicense.type,
+            core.application.capabilities
+          ),
+        }));
+      }
+
+      // async links filtering
+      updateAppLinks(await getFilteredLinks(core, plugins), linksPermissions);
+    });
   }
 }

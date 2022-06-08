@@ -8,7 +8,8 @@
 
 import SimpleGit from 'simple-git/promise';
 
-import { run, combineErrors, createFlagError } from '@kbn/dev-utils';
+import { run } from '@kbn/dev-cli-runner';
+import { createFlagError, combineErrors } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/utils';
 import * as Eslint from './eslint';
 import * as Stylelint from './stylelint';

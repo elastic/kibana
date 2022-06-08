@@ -829,27 +829,19 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
   }
 
   if (numActiveAlerts) {
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_active_alerts).to.be(
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.active).to.be(
       numActiveAlerts
     );
   }
 
   if (numRecoveredAlerts) {
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_recovered_alerts).to.be(
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.recovered).to.be(
       numRecoveredAlerts
     );
   }
 
   if (numNewAlerts) {
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.number_of_new_alerts).to.be(
-      numNewAlerts
-    );
-  }
-
-  if (numActiveAlerts && numRecoveredAlerts) {
-    expect(event?.kibana?.alert?.rule?.execution?.metrics?.total_number_of_alerts).to.be(
-      numActiveAlerts + numRecoveredAlerts
-    );
+    expect(event?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.new).to.be(numNewAlerts);
   }
 
   expect(event?.kibana?.alert?.rule?.rule_type_id).to.be(ruleTypeId);

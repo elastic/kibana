@@ -23,7 +23,7 @@ import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/p
 
 import {
   APP_SEARCH_PLUGIN,
-  ENTERPRISE_SEARCH_CONTENT_PLUGIN,
+  ELASTICSEARCH_PLUGIN,
   ENTERPRISE_SEARCH_OVERVIEW_PLUGIN,
   WORKPLACE_SEARCH_PLUGIN,
 } from '../common/constants';
@@ -90,25 +90,23 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
-      id: ENTERPRISE_SEARCH_CONTENT_PLUGIN.ID,
-      title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
-      euiIconType: ENTERPRISE_SEARCH_CONTENT_PLUGIN.LOGO,
-      appRoute: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL,
+      id: ELASTICSEARCH_PLUGIN.ID,
+      title: ELASTICSEARCH_PLUGIN.NAME,
+      euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
+      appRoute: ELASTICSEARCH_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAME);
+        chrome.docTitle.change(ELASTICSEARCH_PLUGIN.NAME);
 
         await this.getInitialData(http);
         const pluginData = this.getPluginData();
 
         const { renderApp } = await import('./applications');
-        const { EnterpriseSearchContent } = await import(
-          './applications/enterprise_search_content'
-        );
+        const { Elasticsearch } = await import('./applications/elasticsearch');
 
-        return renderApp(EnterpriseSearchContent, kibanaDeps, pluginData);
+        return renderApp(Elasticsearch, kibanaDeps, pluginData);
       },
     });
 
@@ -173,6 +171,16 @@ export class EnterpriseSearchPlugin implements Plugin {
         icon: 'appSearchApp',
         description: APP_SEARCH_PLUGIN.DESCRIPTION,
         path: APP_SEARCH_PLUGIN.URL,
+        category: 'data',
+        showOnHomePage: false,
+      });
+
+      plugins.home.featureCatalogue.register({
+        id: ELASTICSEARCH_PLUGIN.ID,
+        title: ELASTICSEARCH_PLUGIN.NAME,
+        icon: 'appElasticsearch',
+        description: ELASTICSEARCH_PLUGIN.DESCRIPTION,
+        path: ELASTICSEARCH_PLUGIN.URL,
         category: 'data',
         showOnHomePage: false,
       });

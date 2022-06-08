@@ -94,6 +94,22 @@ const SAFER_LODASH_SET_DEFINITELYTYPED_HEADER = `
  */
 `;
 
+const KBN_HANDLEBARS_HEADER = `
+/*
+ * Elasticsearch B.V licenses this file to you under the MIT License.
+ * See \`packages/kbn-handlebars/LICENSE\` for more information.
+ */
+`;
+
+const KBN_HANDLEBARS_HANDLEBARS_HEADER = `
+/*
+  * This file is forked from the handlebars project (https://github.com/handlebars-lang/handlebars.js),
+  * and may include modifications made by Elasticsearch B.V.
+  * Elasticsearch B.V. licenses this file to you under the MIT License.
+  * See \`packages/kbn-handlebars/LICENSE\` for more information.
+  */
+`;
+
 const packagePkgJsons = globby.sync('*/package.json', {
   cwd: Path.resolve(__dirname, 'packages'),
   absolute: true,
@@ -293,6 +309,8 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -325,6 +343,8 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -364,6 +384,8 @@ module.exports = {
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -393,6 +415,8 @@ module.exports = {
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -418,6 +442,8 @@ module.exports = {
               OLD_ELASTIC_LICENSE_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
               SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -443,6 +469,66 @@ module.exports = {
               OLD_DUAL_LICENSE_HEADER,
               SAFER_LODASH_SET_HEADER,
               SAFER_LODASH_SET_LODASH_HEADER,
+              KBN_HANDLEBARS_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+
+    /**
+     * @kbn/handlebars package requires special license headers
+     */
+    {
+      files: ['packages/kbn-handlebars/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: KBN_HANDLEBARS_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HANDLEBARS_HEADER,
+            ],
+          },
+        ],
+      },
+    },
+    {
+      files: ['packages/kbn-handlebars/src/upstream/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        '@kbn/eslint/require-license-header': [
+          'error',
+          {
+            license: KBN_HANDLEBARS_HANDLEBARS_HEADER,
+          },
+        ],
+        '@kbn/eslint/disallow-license-headers': [
+          'error',
+          {
+            licenses: [
+              APACHE_2_0_LICENSE_HEADER,
+              DUAL_LICENSE_HEADER,
+              ELASTIC_LICENSE_HEADER,
+              OLD_DUAL_LICENSE_HEADER,
+              OLD_ELASTIC_LICENSE_HEADER,
+              SAFER_LODASH_SET_HEADER,
+              SAFER_LODASH_SET_LODASH_HEADER,
+              SAFER_LODASH_SET_DEFINITELYTYPED_HEADER,
+              KBN_HANDLEBARS_HEADER,
             ],
           },
         ],
@@ -571,6 +657,7 @@ module.exports = {
         'x-pack/test/*/*config.*ts',
         'x-pack/test/saved_object_api_integration/*/apis/**/*',
         'x-pack/test/ui_capabilities/*/tests/**/*',
+        'x-pack/test/performance/**/*.ts',
       ],
       rules: {
         'import/no-default-export': 'off',
@@ -956,6 +1043,13 @@ module.exports = {
             // to help deprecation and prevent accidental re-use/continued use of code we plan on removing. If you are
             // finding yourself turning this off a lot for "new code" consider renaming the file and functions if it is has valid uses.
             patterns: ['*legacy*'],
+            paths: [
+              {
+                name: 'react-router-dom',
+                importNames: ['Route'],
+                message: "import { Route } from '@kbn/kibana-react-plugin/public'",
+              },
+            ],
           },
         ],
       },

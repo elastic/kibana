@@ -19,6 +19,11 @@ post:
               type: object
               properties:
                 $ref: '../components/schemas/connector_properties.yaml'
+              required:
+                - fields
+                - id
+                - name
+                - type
             description:
               description: The description for the case.
               type: string
@@ -31,6 +36,8 @@ post:
                 syncAlerts:
                   description: Turns alert syncing on or off.
                   type: boolean
+            severity:
+              $ref: '../components/schemas/severity_property.yaml'
             tags:
               description: The words and phrases that help categorize cases. It can be an empty array.
               type: array
@@ -80,7 +87,7 @@ delete:
       required: true
       schema:
         type: string
-      example: 'd4e7abb0-b462-11ec-9a8d-698504725a43'
+      example: d4e7abb0-b462-11ec-9a8d-698504725a43
   responses:
     '204':
       description: Indicates a successful call.
@@ -113,6 +120,11 @@ patch:
                     type: object
                     properties:
                       $ref: '../components/schemas/connector_properties.yaml'
+                    required:
+                      - fields
+                      - id
+                      - name
+                      - type
                   description:
                     description: The description for the case.
                     type: string
@@ -126,6 +138,8 @@ patch:
                       syncAlerts:
                         description: Turns alert syncing on or off.
                         type: boolean
+                  severity:
+                    $ref: '../components/schemas/severity_property.yaml' 
                   status:
                     $ref: '../components/schemas/status.yaml'
                   tags:

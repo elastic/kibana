@@ -101,7 +101,7 @@
           },
           "; }, baseHref: string, appId: string) => string"
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
         "deprecated": false,
         "children": [
           {
@@ -111,7 +111,7 @@
             "tags": [],
             "label": "{ reportType, allSeries }",
             "description": [],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
             "deprecated": false,
             "children": [
               {
@@ -122,9 +122,9 @@
                 "label": "reportType",
                 "description": [],
                 "signature": [
-                  "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\""
+                  "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
                 ],
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
                 "deprecated": false
               },
               {
@@ -144,7 +144,7 @@
                   },
                   "[]"
                 ],
-                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+                "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
                 "deprecated": false
               }
             ]
@@ -159,7 +159,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
             "deprecated": false,
             "isRequired": true
           },
@@ -173,7 +173,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/utils.ts",
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/exploratory_view_url.ts",
             "deprecated": false,
             "isRequired": true
           }
@@ -205,7 +205,7 @@
             "section": "def-public.ObservabilityRuleTypeFormatter",
             "text": "ObservabilityRuleTypeFormatter"
           },
-          " | undefined; } & { getFormatter: () => () => string; registerFormatter: () => void; }"
+          " | undefined; list: () => string[]; } & { getFormatter: () => () => string; registerFormatter: () => void; }"
         ],
         "path": "x-pack/plugins/observability/public/rules/observability_rule_type_registry_mock.ts",
         "deprecated": false,
@@ -363,7 +363,7 @@
         "label": "ExploratoryViewContextProvider",
         "description": [],
         "signature": [
-          "({\n  children,\n  reportTypes,\n  dataTypes,\n  dataViews,\n  reportConfigMap,\n  setHeaderActionMenu,\n  theme$,\n}: { children: JSX.Element; } & ExploratoryViewContextValue) => JSX.Element"
+          "({\n  children,\n  reportTypes,\n  dataTypes,\n  dataViews,\n  reportConfigMap,\n  setHeaderActionMenu,\n  asPanel = true,\n  theme$,\n}: { children: JSX.Element; } & ExploratoryViewContextValue) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/contexts/exploratory_view_config.tsx",
         "deprecated": false,
@@ -373,7 +373,7 @@
             "id": "def-public.ExploratoryViewContextProvider.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  children,\n  reportTypes,\n  dataTypes,\n  dataViews,\n  reportConfigMap,\n  setHeaderActionMenu,\n  theme$,\n}",
+            "label": "{\n  children,\n  reportTypes,\n  dataTypes,\n  dataViews,\n  reportConfigMap,\n  setHeaderActionMenu,\n  asPanel = true,\n  theme$,\n}",
             "description": [],
             "signature": [
               "{ children: JSX.Element; } & ExploratoryViewContextValue"
@@ -676,11 +676,11 @@
             "section": "def-public.ObservabilityRuleTypeFormatter",
             "text": "ObservabilityRuleTypeFormatter"
           },
-          " | undefined; }; selectedAlertId?: string | undefined; } & ",
+          " | undefined; list: () => string[]; }; selectedAlertId?: string | undefined; } & ",
           "CommonProps",
-          " & { as?: \"div\" | undefined; } & _EuiFlyoutProps & Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof _EuiFlyoutProps> & Omit<Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, \"key\" | \"css\" | keyof React.HTMLAttributes<HTMLDivElement>> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }, \"children\" | \"color\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"id\" | \"security\" | \"defaultValue\" | \"hidden\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"as\" | keyof ",
+          " & { as?: \"div\" | undefined; } & _EuiFlyoutProps & Omit<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, keyof _EuiFlyoutProps> & Omit<Pick<React.DetailedHTMLProps<React.HTMLAttributes<HTMLDivElement>, HTMLDivElement>, \"key\" | \"css\" | keyof React.HTMLAttributes<HTMLDivElement>> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }, \"children\" | \"color\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"id\" | \"security\" | \"defaultValue\" | \"hidden\" | \"lang\" | \"onError\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"as\" | keyof ",
           "CommonProps",
-          " | keyof React.ClassAttributes<HTMLDivElement> | keyof _EuiFlyoutProps>, \"children\" | \"alert\" | \"color\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"key\" | \"id\" | \"css\" | \"security\" | \"defaultValue\" | \"hidden\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"lang\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onError\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"as\" | keyof ",
+          " | keyof React.ClassAttributes<HTMLDivElement> | keyof _EuiFlyoutProps>, \"children\" | \"alert\" | \"color\" | \"title\" | \"onChange\" | \"onKeyDown\" | \"onClick\" | \"key\" | \"id\" | \"css\" | \"security\" | \"defaultValue\" | \"hidden\" | \"lang\" | \"onError\" | \"defaultChecked\" | \"suppressContentEditableWarning\" | \"suppressHydrationWarning\" | \"accessKey\" | \"contentEditable\" | \"contextMenu\" | \"dir\" | \"draggable\" | \"placeholder\" | \"slot\" | \"spellCheck\" | \"tabIndex\" | \"translate\" | \"radioGroup\" | \"about\" | \"datatype\" | \"inlist\" | \"prefix\" | \"property\" | \"resource\" | \"typeof\" | \"vocab\" | \"autoCapitalize\" | \"autoCorrect\" | \"autoSave\" | \"itemProp\" | \"itemScope\" | \"itemType\" | \"itemID\" | \"itemRef\" | \"results\" | \"unselectable\" | \"inputMode\" | \"is\" | \"aria-activedescendant\" | \"aria-atomic\" | \"aria-autocomplete\" | \"aria-busy\" | \"aria-checked\" | \"aria-colcount\" | \"aria-colindex\" | \"aria-colspan\" | \"aria-controls\" | \"aria-current\" | \"aria-describedby\" | \"aria-details\" | \"aria-disabled\" | \"aria-dropeffect\" | \"aria-errormessage\" | \"aria-expanded\" | \"aria-flowto\" | \"aria-grabbed\" | \"aria-haspopup\" | \"aria-hidden\" | \"aria-invalid\" | \"aria-keyshortcuts\" | \"aria-labelledby\" | \"aria-level\" | \"aria-live\" | \"aria-modal\" | \"aria-multiline\" | \"aria-multiselectable\" | \"aria-orientation\" | \"aria-owns\" | \"aria-placeholder\" | \"aria-posinset\" | \"aria-pressed\" | \"aria-readonly\" | \"aria-relevant\" | \"aria-required\" | \"aria-roledescription\" | \"aria-rowcount\" | \"aria-rowindex\" | \"aria-rowspan\" | \"aria-selected\" | \"aria-setsize\" | \"aria-sort\" | \"aria-valuemax\" | \"aria-valuemin\" | \"aria-valuenow\" | \"aria-valuetext\" | \"dangerouslySetInnerHTML\" | \"onCopy\" | \"onCopyCapture\" | \"onCut\" | \"onCutCapture\" | \"onPaste\" | \"onPasteCapture\" | \"onCompositionEnd\" | \"onCompositionEndCapture\" | \"onCompositionStart\" | \"onCompositionStartCapture\" | \"onCompositionUpdate\" | \"onCompositionUpdateCapture\" | \"onFocus\" | \"onFocusCapture\" | \"onBlur\" | \"onBlurCapture\" | \"onChangeCapture\" | \"onBeforeInput\" | \"onBeforeInputCapture\" | \"onInput\" | \"onInputCapture\" | \"onReset\" | \"onResetCapture\" | \"onSubmit\" | \"onSubmitCapture\" | \"onInvalid\" | \"onInvalidCapture\" | \"onLoad\" | \"onLoadCapture\" | \"onErrorCapture\" | \"onKeyDownCapture\" | \"onKeyPress\" | \"onKeyPressCapture\" | \"onKeyUp\" | \"onKeyUpCapture\" | \"onAbort\" | \"onAbortCapture\" | \"onCanPlay\" | \"onCanPlayCapture\" | \"onCanPlayThrough\" | \"onCanPlayThroughCapture\" | \"onDurationChange\" | \"onDurationChangeCapture\" | \"onEmptied\" | \"onEmptiedCapture\" | \"onEncrypted\" | \"onEncryptedCapture\" | \"onEnded\" | \"onEndedCapture\" | \"onLoadedData\" | \"onLoadedDataCapture\" | \"onLoadedMetadata\" | \"onLoadedMetadataCapture\" | \"onLoadStart\" | \"onLoadStartCapture\" | \"onPause\" | \"onPauseCapture\" | \"onPlay\" | \"onPlayCapture\" | \"onPlaying\" | \"onPlayingCapture\" | \"onProgress\" | \"onProgressCapture\" | \"onRateChange\" | \"onRateChangeCapture\" | \"onSeeked\" | \"onSeekedCapture\" | \"onSeeking\" | \"onSeekingCapture\" | \"onStalled\" | \"onStalledCapture\" | \"onSuspend\" | \"onSuspendCapture\" | \"onTimeUpdate\" | \"onTimeUpdateCapture\" | \"onVolumeChange\" | \"onVolumeChangeCapture\" | \"onWaiting\" | \"onWaitingCapture\" | \"onAuxClick\" | \"onAuxClickCapture\" | \"onClickCapture\" | \"onContextMenu\" | \"onContextMenuCapture\" | \"onDoubleClick\" | \"onDoubleClickCapture\" | \"onDrag\" | \"onDragCapture\" | \"onDragEnd\" | \"onDragEndCapture\" | \"onDragEnter\" | \"onDragEnterCapture\" | \"onDragExit\" | \"onDragExitCapture\" | \"onDragLeave\" | \"onDragLeaveCapture\" | \"onDragOver\" | \"onDragOverCapture\" | \"onDragStart\" | \"onDragStartCapture\" | \"onDrop\" | \"onDropCapture\" | \"onMouseDown\" | \"onMouseDownCapture\" | \"onMouseEnter\" | \"onMouseLeave\" | \"onMouseMove\" | \"onMouseMoveCapture\" | \"onMouseOut\" | \"onMouseOutCapture\" | \"onMouseOver\" | \"onMouseOverCapture\" | \"onMouseUp\" | \"onMouseUpCapture\" | \"onSelect\" | \"onSelectCapture\" | \"onTouchCancel\" | \"onTouchCancelCapture\" | \"onTouchEnd\" | \"onTouchEndCapture\" | \"onTouchMove\" | \"onTouchMoveCapture\" | \"onTouchStart\" | \"onTouchStartCapture\" | \"onPointerDown\" | \"onPointerDownCapture\" | \"onPointerMove\" | \"onPointerMoveCapture\" | \"onPointerUp\" | \"onPointerUpCapture\" | \"onPointerCancel\" | \"onPointerCancelCapture\" | \"onPointerEnter\" | \"onPointerEnterCapture\" | \"onPointerLeave\" | \"onPointerLeaveCapture\" | \"onPointerOver\" | \"onPointerOverCapture\" | \"onPointerOut\" | \"onPointerOutCapture\" | \"onGotPointerCapture\" | \"onGotPointerCaptureCapture\" | \"onLostPointerCapture\" | \"onLostPointerCaptureCapture\" | \"onScroll\" | \"onScrollCapture\" | \"onWheel\" | \"onWheelCapture\" | \"onAnimationStart\" | \"onAnimationStartCapture\" | \"onAnimationEnd\" | \"onAnimationEndCapture\" | \"onAnimationIteration\" | \"onAnimationIterationCapture\" | \"onTransitionEnd\" | \"onTransitionEndCapture\" | \"as\" | keyof ",
           "CommonProps",
           " | \"alerts\" | keyof _EuiFlyoutProps | \"isInApp\" | \"observabilityRuleTypeRegistry\" | \"selectedAlertId\"> & { ref?: React.RefObject<HTMLDivElement> | ((instance: HTMLDivElement | null) => void) | null | undefined; }> & { readonly _result: ({ alert, alerts, isInApp, observabilityRuleTypeRegistry, onClose, selectedAlertId, }: AlertsFlyoutProps) => JSX.Element | null; }"
         ],
@@ -1704,7 +1704,8 @@
                 "docId": "kibDataViewsPluginApi",
                 "section": "def-common.DataView",
                 "text": "DataView"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
             "deprecated": false
@@ -1750,7 +1751,7 @@
             "label": "unsafe",
             "description": [],
             "signature": [
-              "{ alertingExperience: { enabled: boolean; }; rules: { enabled: boolean; }; cases: { enabled: boolean; }; overviewNext: { enabled: boolean; }; }"
+              "{ alertingExperience: { enabled: boolean; }; rules: { enabled: boolean; }; cases: { enabled: boolean; }; }"
             ],
             "path": "x-pack/plugins/observability/public/index.ts",
             "deprecated": false
@@ -2152,7 +2153,7 @@
             "label": "reportType",
             "description": [],
             "signature": [
-              "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\""
+              "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\" | \"single-metric\""
             ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false
@@ -3137,6 +3138,25 @@
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsSetup.usageCollection",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCollection",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "public",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-public.UsageCollectionSetup",
+                "text": "UsageCollectionSetup"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false
           }
         ],
         "initialIsOpen": false
@@ -3151,6 +3171,25 @@
         "path": "x-pack/plugins/observability/public/plugin.ts",
         "deprecated": false,
         "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ObservabilityPublicPluginsStart.usageCollection",
+            "type": "Object",
+            "tags": [],
+            "label": "usageCollection",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "usageCollection",
+                "scope": "public",
+                "docId": "kibUsageCollectionPluginApi",
+                "section": "def-public.UsageCollectionSetup",
+                "text": "UsageCollectionSetup"
+              }
+            ],
+            "path": "x-pack/plugins/observability/public/plugin.ts",
+            "deprecated": false
+          },
           {
             "parentPluginId": "observability",
             "id": "def-public.ObservabilityPublicPluginsStart.cases",
@@ -3255,7 +3294,13 @@
             "label": "dataViews",
             "description": [],
             "signature": [
-              "DataViewsServicePublic"
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false
@@ -3456,13 +3501,10 @@
           {
             "parentPluginId": "observability",
             "id": "def-public.SeriesConfig.reportType",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "reportType",
             "description": [],
-            "signature": [
-              "\"data-distribution\" | \"kpi-over-time\" | \"core-web-vitals\" | \"device-data-distribution\""
-            ],
             "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
             "deprecated": false
           },
@@ -3714,8 +3756,8 @@
                 "pluginId": "expressionXY",
                 "scope": "common",
                 "docId": "kibExpressionXYPluginApi",
-                "section": "def-common.YConfig",
-                "text": "YConfig"
+                "section": "def-common.ExtendedYConfig",
+                "text": "ExtendedYConfig"
               },
               "[] | undefined"
             ],
@@ -3891,6 +3933,19 @@
             "type": "CompoundType",
             "tags": [],
             "label": "hidden",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/types.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.SeriesUrl.showPercentileAnnotations",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "showPercentileAnnotations",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -4335,6 +4390,9 @@
         "tags": [],
         "label": "METRIC_TYPE",
         "description": [],
+        "signature": [
+          "METRIC_TYPE"
+        ],
         "path": "node_modules/@types/kbn__analytics/index.d.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -4403,7 +4461,7 @@
         "signature": [
           "\"ALL_VALUES\""
         ],
-        "path": "x-pack/plugins/observability/public/components/shared/field_value_suggestions/field_value_combobox.tsx",
+        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/url_constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4450,6 +4508,9 @@
         "tags": [],
         "label": "DropResult",
         "description": [],
+        "signature": [
+          "DropResult"
+        ],
         "path": "x-pack/plugins/observability/public/typings/eui_draggable/index.ts",
         "deprecated": false,
         "initialIsOpen": false
@@ -4491,6 +4552,20 @@
         "description": [],
         "signature": [
           "\"observability:enableInspectEsQueries\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.enableNewSyntheticsView",
+        "type": "string",
+        "tags": [],
+        "label": "enableNewSyntheticsView",
+        "description": [],
+        "signature": [
+          "\"observability:enableNewSyntheticsView\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
@@ -4552,6 +4627,20 @@
             "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.FILTER_RECORDS",
+        "type": "string",
+        "tags": [],
+        "label": "FILTER_RECORDS",
+        "description": [],
+        "signature": [
+          "\"FILTER_RECORDS\""
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "deprecated": false,
         "initialIsOpen": false
       },
       {
@@ -4719,9 +4808,23 @@
             "section": "def-public.ObservabilityRuleTypeFormatter",
             "text": "ObservabilityRuleTypeFormatter"
           },
-          " | undefined; }"
+          " | undefined; list: () => string[]; }"
         ],
         "path": "x-pack/plugins/observability/public/rules/create_observability_rule_type_registry.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.OPERATION_COLUMN",
+        "type": "string",
+        "tags": [],
+        "label": "OPERATION_COLUMN",
+        "description": [],
+        "signature": [
+          "\"operation\""
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
         "deprecated": false,
         "initialIsOpen": false
       },
@@ -4820,6 +4923,20 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.TERMS_COLUMN",
+        "type": "string",
+        "tags": [],
+        "label": "TERMS_COLUMN",
+        "description": [],
+        "signature": [
+          "\"TERMS_COLUMN\""
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.TrackMetricOptions",
         "type": "Type",
         "tags": [],
@@ -4883,6 +5000,20 @@
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.USE_BREAK_DOWN_COLUMN",
+        "type": "string",
+        "tags": [],
+        "label": "USE_BREAK_DOWN_COLUMN",
+        "description": [],
+        "signature": [
+          "\"USE_BREAK_DOWN_COLUMN\""
+        ],
+        "path": "x-pack/plugins/observability/public/components/shared/exploratory_view/configurations/constants/constants.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "objects": [],
@@ -4926,7 +5057,7 @@
           "section": "def-public.ObservabilityRuleTypeFormatter",
           "text": "ObservabilityRuleTypeFormatter"
         },
-        " | undefined; }; isAlertingExperienceEnabled: () => boolean; navigation: { registerSections: (sections$: ",
+        " | undefined; list: () => string[]; }; isAlertingExperienceEnabled: () => boolean; navigation: { registerSections: (sections$: ",
         "Observable",
         "<",
         "NavigationSection",
@@ -7270,6 +7401,20 @@
         "description": [],
         "signature": [
           "\"observability:apmServiceInventoryOptimizedSorting\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.apmTraceExplorerTab",
+        "type": "string",
+        "tags": [],
+        "label": "apmTraceExplorerTab",
+        "description": [],
+        "signature": [
+          "\"observability:apmTraceExplorerTab\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,

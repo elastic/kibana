@@ -3,11 +3,12 @@
 exports[`NoDataPage render 1`] = `
 <div
   className="kbnNoDataPageContents"
+  data-test-subj="kbnNoDataPage"
 >
   <EuiText
     textAlign="center"
   >
-    <ForwardRef
+    <KibanaSolutionAvatar
       iconType="logoKibana"
       name="Analytics"
       size="xxl"
@@ -29,6 +30,7 @@ exports[`NoDataPage render 1`] = `
             Object {
               "link": <EuiLink
                 href="test"
+                target="_blank"
               >
                 <FormattedMessage
                   defaultMessage="learn more"

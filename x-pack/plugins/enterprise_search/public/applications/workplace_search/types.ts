@@ -62,6 +62,7 @@ export interface Configuration {
   needsBaseUrl: boolean;
   needsSubdomain?: boolean;
   needsConfiguration?: boolean;
+  needsCredentials?: boolean;
   hasOauthRedirect: boolean;
   baseUrlTitle?: string;
   documentationUrl: string;
@@ -239,6 +240,7 @@ export interface Connector {
   serviceType: string;
   name: string;
   configured: boolean;
+  externalConnectorServiceDescribed?: boolean;
   supportedByLicense: boolean;
   accountContextOnly: boolean;
 }

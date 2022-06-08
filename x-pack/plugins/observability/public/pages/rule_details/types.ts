@@ -6,7 +6,12 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import { Rule, RuleSummary, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  Rule,
+  RuleSummary,
+  RuleType,
+  ActionTypeRegistryContract,
+} from '@kbn/triggers-actions-ui-plugin/public';
 
 export interface RuleDetailsPathParams {
   ruleId: string;
@@ -31,8 +36,14 @@ export interface FetchRuleSummaryProps {
   ruleId: string;
   http: HttpSetup;
 }
-export interface FetchRuleActionsProps {
+export interface FetchRuleActionConnectorsProps {
   http: HttpSetup;
+  ruleActions: any[];
+}
+
+export interface FetchRuleExecutionLogProps {
+  http: HttpSetup;
+  ruleId: string;
 }
 
 export interface FetchRuleSummary {
@@ -63,6 +74,7 @@ export interface ItemValueRuleSummaryProps {
 }
 export interface ActionsProps {
   ruleActions: any[];
+  actionTypeRegistry: ActionTypeRegistryContract;
 }
 
 export const EVENT_LOG_LIST_TAB = 'rule_event_log_list';

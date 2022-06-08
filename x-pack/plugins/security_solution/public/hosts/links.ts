@@ -8,10 +8,15 @@ import { i18n } from '@kbn/i18n';
 import { HOSTS_PATH, SecurityPageName } from '../../common/constants';
 import { HOSTS } from '../app/translations';
 import { LinkItem } from '../common/links/types';
+import hostsPageImg from '../common/images/hosts_page.png';
 
 export const links: LinkItem = {
   id: SecurityPageName.hosts,
   title: HOSTS,
+  landingImage: hostsPageImg,
+  description: i18n.translate('xpack.securitySolution.landing.threatHunting.hostsDescription', {
+    defaultMessage: 'A comprehensive overview of all hosts and host-related security events.',
+  }),
   path: HOSTS_PATH,
   globalNavEnabled: true,
   globalSearchKeywords: [
@@ -19,7 +24,6 @@ export const links: LinkItem = {
       defaultMessage: 'Hosts',
     }),
   ],
-  globalSearchEnabled: true,
   globalNavOrder: 9002,
   links: [
     {

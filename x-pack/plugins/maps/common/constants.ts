@@ -195,6 +195,7 @@ export enum LAYER_STYLE_TYPE {
   VECTOR = 'VECTOR',
   HEATMAP = 'HEATMAP',
   TILE = 'TILE',
+  EMS_VECTOR_TILE = 'EMS_VECTOR_TILE',
 }
 
 export enum COLOR_MAP_TYPE {
@@ -288,6 +289,7 @@ export enum DATA_MAPPING_FUNCTION {
   INTERPOLATE = 'INTERPOLATE',
   PERCENTILES = 'PERCENTILES',
 }
+
 export const DEFAULT_PERCENTILES = [50, 75, 90, 95, 99];
 
 export type RawValue = string | string[] | number | boolean | undefined | null;
@@ -298,6 +300,8 @@ export const MAPS_NEW_VECTOR_LAYER_META_CREATED_BY = 'maps-new-vector-layer';
 
 export const MAX_DRAWING_SIZE_BYTES = 10485760; // 10MB
 
+export const NO_EMS_LOCALE = 'none';
+export const AUTOSELECT_EMS_LOCALE = 'autoselect';
 export const emsWorldLayerId = 'world_countries';
 
 export enum WIZARD_ID {

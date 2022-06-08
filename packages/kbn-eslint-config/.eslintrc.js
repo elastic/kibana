@@ -102,6 +102,11 @@ module.exports = {
           to: '@kbn/test-jest-helpers',
           disallowedMessage: `import from @kbn/test-jest-helpers instead`
         },
+        {
+          from: '@kbn/utility-types/jest',
+          to: '@kbn/utility-types-jest',
+          disallowedMessage: `import from @kbn/utility-types-jest instead`
+        },
       ],
     ],
 
@@ -185,6 +190,44 @@ module.exports = {
         toPackage: '@kbn/sort-package-json',
         exportNames: [
           'sortPackageJson',
+        ]
+      },
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/dev-cli-runner',
+        exportNames: [
+          'run',
+          'Command',
+          'RunWithCommands',
+          'CleanupTask',
+          'Command',
+          'CommandRunFn',
+          'FlagOptions',
+          'Flags',
+          'RunContext',
+          'RunFn',
+          'RunOptions',
+          'RunWithCommands',
+          'RunWithCommandsOptions',
+          'getFlags',
+          'mergeFlagOptions'
+        ]
+      },
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/dev-cli-errors',
+        exportNames: [
+          'createFailError',
+          'createFlagError',
+          'isFailError',
+        ]
+      },
+      {
+        fromPackage: '@kbn/dev-utils',
+        toPackage: '@kbn/dev-proc-runner',
+        exportNames: [
+          'withProcRunner',
+          'ProcRunner',
         ]
       },
     ]],
