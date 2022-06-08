@@ -57,6 +57,9 @@ export const ManagementApp = ({ dependencies, history, theme$ }: ManagementAppPr
         ...(item.href ? reactRouterNavigate(scopedHistory, item.href) : {}),
       });
 
+      // Clicking the Management breadcrumb to navigate back to the "root" only
+      // makes sense if there's a management app open. So when one isn't open
+      // this breadcrumb shouldn't be a clickable link.
       const managementBreadcrumb = crumbs.length
         ? MANAGEMENT_BREADCRUMB
         : MANAGEMENT_BREADCRUMB_NO_HREF;
