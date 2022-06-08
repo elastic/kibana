@@ -16,6 +16,7 @@ import { SharedUxServicesProvider } from '@kbn/shared-ux-services';
 import type { SharedUXPluginStart } from '@kbn/shared-ux-plugin/public';
 import { KibanaPageTemplate, KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import type { NavigationSection } from '../../../services/navigation_registry';
+import { ObservabilityOverviewTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 
 export type WrappedPageTemplateProps = Pick<
@@ -90,6 +91,7 @@ export function ObservabilityPageTemplate({
             ),
             href,
             isSelected,
+            'data-nav-id': entry.label.toLowerCase().split(' ').join('_'),
             onClick: (event) => {
               if (entry.onClick) {
                 entry.onClick(event);
@@ -137,7 +139,9 @@ export function ObservabilityPageTemplate({
             : undefined
         }
       >
-        {children}
+        <ObservabilityOverviewTour navigateToApp={navigateToApp}>
+          {children}
+        </ObservabilityOverviewTour>
       </KibanaPageTemplate>
     </SharedUxServicesProvider>
   );

@@ -310,6 +310,7 @@ function PageHeader({
         <EuiButton
           // @ts-expect-error the EUI verson that kibana uses right now doesn't have the correct types
           buttonRef={buttonRef}
+          id="guidedSetupButton"
           color="text"
           iconType="wrench"
           onClick={handleGuidedSetupClick}
