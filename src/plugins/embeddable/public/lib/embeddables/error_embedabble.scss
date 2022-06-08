@@ -1,0 +1,10 @@
+.errorEmbeddable__popoverAnchor {
+  max-width: 100%;
+}
+
+.errorEmbeddable__button {
+  padding-left: 0 !important;
+  .euiIcon {
+    margin-right: $euiSizeXS * .5;
+  }
+}
