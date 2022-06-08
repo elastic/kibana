@@ -7,7 +7,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import {
   EuiConfirmModal,
   EuiComboBox,
@@ -26,6 +25,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
+import semverValid from 'semver/functions/valid';
 
 import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
 import type { Agent } from '../../../../types';
@@ -37,8 +37,9 @@ import {
 } from '../../../../hooks';
 
 import { FALLBACK_VERSIONS, MAINTAINANCE_VALUES } from './constants';
+import { useScheduleDateTime } from './hooks';
 
-interface Props {
+export interface AgentUpgradeAgentModalProps {
   onClose: () => void;
   agents: Agent[] | string;
   agentCount: number;
@@ -47,7 +48,7 @@ interface Props {
 
 const getVersion = (version: Array<EuiComboBoxOptionOption<string>>) => version[0]?.value as string;
 
-export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
+export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentModalProps> = ({
   onClose,
   agents,
   agentCount,
@@ -59,17 +60,23 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   const [errors, setErrors] = useState<string | undefined>();
 
   const isSingleAgent = Array.isArray(agents) && agents.length === 1;
-  const isSmallBatch = Array.isArray(agents) && agents.length > 1 && agents.length <= 10;
+  const isSmallBatch = agentCount <= 10;
   const isAllAgents = agents === '';
 
-  const fallbackVersions = [kibanaVersion].concat(FALLBACK_VERSIONS);
+  const fallbackVersions = useMemo(
+    () => [kibanaVersion].concat(FALLBACK_VERSIONS),
+    [kibanaVersion]
+  );
 
   const minVersion = useMemo(() => {
+    if (!Array.isArray(agents)) {
+      return getMinVersion(fallbackVersions);
+    }
     const versions = (agents as Agent[]).map(
       (agent) => agent.local_metadata?.elastic?.agent?.version
     );
     return getMinVersion(versions);
-  }, [agents]);
+  }, [agents, fallbackVersions]);
 
   const versionOptions: Array<EuiComboBoxOptionOption<string>> = useMemo(() => {
     const displayVersions = minVersion
@@ -81,9 +88,7 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
     }));
   }, [fallbackVersions, minVersion]);
 
-  const maintainanceWindows =
-    isSmallBatch && !isScheduled ? [0].concat(MAINTAINANCE_VALUES) : MAINTAINANCE_VALUES;
-  const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = maintainanceWindows.map(
+  const maintainanceOptions: Array<EuiComboBoxOptionOption<number>> = MAINTAINANCE_VALUES.map(
     (option) => ({
       label:
         option === 0
@@ -99,11 +104,11 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   );
   const [selectedVersion, setSelectedVersion] = useState([versionOptions[0]]);
   const [selectedMantainanceWindow, setSelectedMantainanceWindow] = useState([
-    maintainanceOptions[0],
+    isSmallBatch ? maintainanceOptions[0] : maintainanceOptions[1],
   ]);
 
-  const initialDatetime = useMemo(() => moment(), []);
-  const [startDatetime, setStartDatetime] = useState<moment.Moment>(initialDatetime);
+  const { startDatetime, onChangeStartDateTime, initialDatetime, minTime, maxTime } =
+    useScheduleDateTime();
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
@@ -195,6 +200,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
   }
 
   const onCreateOption = (searchValue: string) => {
+    if (!semverValid(searchValue)) {
+      return;
+    }
+
     const agentVersionNumber = semverCoerce(searchValue);
     if (
       agentVersionNumber?.version &&
@@ -293,8 +302,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           fullWidth
           singleSelection={{ asPlainText: true }}
           options={versionOptions}
+          isClearable={false}
           selectedOptions={selectedVersion}
           onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
+            if (!selected.length) {
+              return;
+            }
             setSelectedVersion(selected);
           }}
           onCreateOption={onCreateOption}
@@ -328,7 +341,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
               showTimeSelect
               selected={startDatetime}
               minDate={initialDatetime}
-              onChange={(date) => setStartDatetime(date as moment.Moment)}
+              minTime={minTime}
+              maxTime={maxTime}
+              onChange={onChangeStartDateTime}
             />
           </EuiFormRow>
         </>
@@ -365,10 +380,14 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<Props> = ({
           <EuiComboBox
             data-test-subj="agentUpgradeModal.MaintainanceCombobox"
             fullWidth
+            isClearable={false}
             singleSelection={{ asPlainText: true }}
             options={maintainanceOptions}
             selectedOptions={selectedMantainanceWindow}
             onChange={(selected: Array<EuiComboBoxOptionOption<number>>) => {
+              if (!selected.length) {
+                return;
+              }
               setSelectedMantainanceWindow(selected);
             }}
           />

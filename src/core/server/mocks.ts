@@ -10,7 +10,8 @@ import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { isPromise } from '@kbn/std';
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import type {
   PluginInitializerContext,
   CoreSetup,
@@ -39,7 +40,6 @@ import { i18nServiceMock } from './i18n/i18n_service.mock';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 import { prebootServiceMock } from './preboot/preboot_service.mock';
-import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { analyticsServiceMock } from './analytics/analytics_service.mock';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
@@ -64,7 +64,7 @@ export { coreUsageDataServiceMock } from './core_usage_data/core_usage_data_serv
 export { i18nServiceMock } from './i18n/i18n_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
 export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
-export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
+export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 export { analyticsServiceMock } from './analytics/analytics_service.mock';
 
 export type {

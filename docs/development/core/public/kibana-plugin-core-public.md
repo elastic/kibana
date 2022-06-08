@@ -46,7 +46,7 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [ChromeHelpExtensionMenuDiscussLink](./kibana-plugin-core-public.chromehelpextensionmenudiscusslink.md) |  |
 |  [ChromeHelpExtensionMenuDocumentationLink](./kibana-plugin-core-public.chromehelpextensionmenudocumentationlink.md) |  |
 |  [ChromeHelpExtensionMenuGitHubLink](./kibana-plugin-core-public.chromehelpextensionmenugithublink.md) |  |
-|  [ChromeHelpMenuActions](./kibana-plugin-core-public.chromehelpmenuactions.md) | List of actions in order to manipulate with the help menu from the help extensions content components. |
+|  [ChromeHelpMenuActions](./kibana-plugin-core-public.chromehelpmenuactions.md) |  |
 |  [ChromeNavControl](./kibana-plugin-core-public.chromenavcontrol.md) |  |
 |  [ChromeNavControls](./kibana-plugin-core-public.chromenavcontrols.md) | [APIs](./kibana-plugin-core-public.chromenavcontrols.md) for registering new controls to be displayed in the navigation bar. |
 |  [ChromeNavLink](./kibana-plugin-core-public.chromenavlink.md) |  |
@@ -59,7 +59,6 @@ The plugin integrates with the core system via lifecycle events: `setup`<!-- -->
 |  [CoreStart](./kibana-plugin-core-public.corestart.md) | Core services exposed to the <code>Plugin</code> start lifecycle |
 |  [CoreTheme](./kibana-plugin-core-public.coretheme.md) | Contains all the required information to apply Kibana's theme at the various levels it can be used. |
 |  [DeprecationsServiceStart](./kibana-plugin-core-public.deprecationsservicestart.md) | DeprecationsService provides methods to fetch domain deprecation details from the Kibana server. |
-|  [DocLinksStart](./kibana-plugin-core-public.doclinksstart.md) |  |
 |  [ErrorToastOptions](./kibana-plugin-core-public.errortoastoptions.md) | Options available for [IToasts](./kibana-plugin-core-public.itoasts.md) error APIs. |
 |  [ExecutionContextSetup](./kibana-plugin-core-public.executioncontextsetup.md) | Kibana execution context. Used to provide execution context to Elasticsearch, reporting, performance monitoring, etc. |
 |  [FatalErrorInfo](./kibana-plugin-core-public.fatalerrorinfo.md) | Represents the <code>message</code> and <code>stack</code> of a fatal Error |

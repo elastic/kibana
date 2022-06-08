@@ -118,23 +118,26 @@ paths:
                             The extent to which the incident resolution can be
                             delayed for ServiceNow ITSM connectors.
                           type: string
-                      required:
-                        - fields
-                        - id
-                        - name
-                        - type
+                      example: null
                     id:
                       description: >-
                         The identifier for the connector. To create a case
                         without a connector, use `none`.
                       type: string
+                      example: none
                     name:
                       description: >-
                         The name of the connector. To create a case without a
                         connector, use `none`.
                       type: string
+                      example: none
                     type:
                       $ref: '#/components/schemas/connector_types'
+                  required:
+                    - fields
+                    - id
+                    - name
+                    - type
                 description:
                   description: The description for the case.
                   type: string
@@ -280,21 +283,19 @@ paths:
                               The extent to which the incident resolution can be
                               delayed for ServiceNow ITSM connectors.
                             type: string
-                        required:
-                          - fields
-                          - id
-                          - name
-                          - type
+                        example: null
                       id:
                         description: >-
                           The identifier for the connector. To create a case
                           without a connector, use `none`.
                         type: string
+                        example: none
                       name:
                         description: >-
                           The name of the connector. To create a case without a
                           connector, use `none`.
                         type: string
+                        example: none
                       type:
                         $ref: '#/components/schemas/connector_types'
                   created_at:
@@ -306,26 +307,23 @@ paths:
                     properties:
                       email:
                         type: string
-                        example: ahunley@imf.usa.gov
+                        example: null
                       full_name:
                         type: string
-                        example: Alan Hunley
+                        example: null
                       username:
                         type: string
-                        example: ahunley
+                        example: elastic
                   description:
                     type: string
-                    example: >-
-                      James Bond clicked on a highly suspicious email banner
-                      advertising cheap holidays for underpaid civil servants.
-                      Operation bubblegum is active. Repeat - operation
-                      bubblegum is now active
+                    example: A case description.
                   duration:
                     type: integer
-                    description: >-
+                    description: >
                       The elapsed time from the creation of the case to its
                       closure (in seconds). If the case has not been closed, the
-                      duration is set to null.
+                      duration is set to null. If the case was closed after less
+                      than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
                     type: object
@@ -374,12 +372,10 @@ paths:
                     items:
                       type: string
                     example:
-                      - phishing
-                      - social engineering
-                      - bubblegum
+                      - tag-1
                   title:
                     type: string
-                    example: This case will self-destruct in 5 seconds
+                    example: Case title 1
                   totalAlerts:
                     type: integer
                     example: 0
@@ -543,23 +539,26 @@ paths:
                                   The extent to which the incident resolution
                                   can be delayed for ServiceNow ITSM connectors.
                                 type: string
-                            required:
-                              - fields
-                              - id
-                              - name
-                              - type
+                            example: null
                           id:
                             description: >-
                               The identifier for the connector. To create a case
                               without a connector, use `none`.
                             type: string
+                            example: none
                           name:
                             description: >-
                               The name of the connector. To create a case
                               without a connector, use `none`.
                             type: string
+                            example: none
                           type:
                             $ref: '#/components/schemas/connector_types'
+                        required:
+                          - fields
+                          - id
+                          - name
+                          - type
                       description:
                         description: The description for the case.
                         type: string
@@ -705,21 +704,19 @@ paths:
                               The extent to which the incident resolution can be
                               delayed for ServiceNow ITSM connectors.
                             type: string
-                        required:
-                          - fields
-                          - id
-                          - name
-                          - type
+                        example: null
                       id:
                         description: >-
                           The identifier for the connector. To create a case
                           without a connector, use `none`.
                         type: string
+                        example: none
                       name:
                         description: >-
                           The name of the connector. To create a case without a
                           connector, use `none`.
                         type: string
+                        example: none
                       type:
                         $ref: '#/components/schemas/connector_types'
                   created_at:
@@ -731,26 +728,23 @@ paths:
                     properties:
                       email:
                         type: string
-                        example: ahunley@imf.usa.gov
+                        example: null
                       full_name:
                         type: string
-                        example: Alan Hunley
+                        example: null
                       username:
                         type: string
-                        example: ahunley
+                        example: elastic
                   description:
                     type: string
-                    example: >-
-                      James Bond clicked on a highly suspicious email banner
-                      advertising cheap holidays for underpaid civil servants.
-                      Operation bubblegum is active. Repeat - operation
-                      bubblegum is now active
+                    example: A case description.
                   duration:
                     type: integer
-                    description: >-
+                    description: >
                       The elapsed time from the creation of the case to its
                       closure (in seconds). If the case has not been closed, the
-                      duration is set to null.
+                      duration is set to null. If the case was closed after less
+                      than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
                     type: object
@@ -799,12 +793,10 @@ paths:
                     items:
                       type: string
                     example:
-                      - phishing
-                      - social engineering
-                      - bubblegum
+                      - tag-1
                   title:
                     type: string
-                    example: This case will self-destruct in 5 seconds
+                    example: Case title 1
                   totalAlerts:
                     type: integer
                     example: 0
@@ -874,7 +866,7 @@ paths:
           schema:
             type: string
           example: now-1d
-          x-preview: true
+          x-technical-preview: true
         - $ref: '#/components/parameters/owner'
         - name: page
           in: query
@@ -956,7 +948,7 @@ paths:
               - type: array
                 items:
                   type: string
-          example: phishing
+          example: tag-1
         - name: to
           in: query
           description: >-
@@ -965,7 +957,7 @@ paths:
           schema:
             type: string
           example: now%2B1d
-          x-preview: true
+          x-technical-preview: true
       responses:
         '200':
           description: Indicates a successful call.
@@ -1086,21 +1078,19 @@ paths:
                                     can be delayed for ServiceNow ITSM
                                     connectors.
                                   type: string
-                              required:
-                                - fields
-                                - id
-                                - name
-                                - type
+                              example: null
                             id:
                               description: >-
                                 The identifier for the connector. To create a
                                 case without a connector, use `none`.
                               type: string
+                              example: none
                             name:
                               description: >-
                                 The name of the connector. To create a case
                                 without a connector, use `none`.
                               type: string
+                              example: none
                             type:
                               $ref: '#/components/schemas/connector_types'
                         created_at:
@@ -1112,26 +1102,24 @@ paths:
                           properties:
                             email:
                               type: string
-                              example: ahunley@imf.usa.gov
+                              example: null
                             full_name:
                               type: string
-                              example: Alan Hunley
+                              example: null
                             username:
                               type: string
-                              example: ahunley
+                              example: elastic
                         description:
                           type: string
-                          example: >-
-                            James Bond clicked on a highly suspicious email
-                            banner advertising cheap holidays for underpaid
-                            civil servants. Operation bubblegum is active.
-                            Repeat - operation bubblegum is now active
+                          example: A case description.
                         duration:
                           type: integer
-                          description: >-
+                          description: >
                             The elapsed time from the creation of the case to
                             its closure (in seconds). If the case has not been
-                            closed, the duration is set to null.
+                            closed, the duration is set to null. If the case was
+                            closed after less than half a second, the duration
+                            is rounded down to zero.
                           example: 120
                         external_service:
                           type: object
@@ -1180,12 +1168,10 @@ paths:
                           items:
                             type: string
                           example:
-                            - phishing
-                            - social engineering
-                            - bubblegum
+                            - tag-1
                         title:
                           type: string
-                          example: This case will self-destruct in 5 seconds
+                          example: Case title 1
                         totalAlerts:
                           type: integer
                           example: 0
@@ -1226,6 +1212,858 @@ paths:
               examples:
                 findCaseResponse:
                   $ref: '#/components/examples/find_case_response'
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/alerts/{alertId}:
+    get:
+      description: >
+        Returns the cases associated with a specific alert. You must have read
+        privileges for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're seeking.
+      x-technical-preview: true
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/alert_id'
+        - $ref: '#/components/parameters/owner'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: The case identifier.
+                    title:
+                      type: string
+                      description: The case title.
+                example:
+                  - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
+                    title: security_case
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/configure:
+    get:
+      description: >
+        Retrieves external connection details, such as the closure type and
+        default connector for cases. You must have read privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the case configuration.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/owner'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    closure_type:
+                      $ref: '#/components/schemas/closure_types'
+                    connector:
+                      type: object
+                      properties:
+                        fields:
+                          description: >-
+                            An object containing the connector fields. To create
+                            a case without a connector, specify null. If you
+                            want to omit any individual field, specify null as
+                            its value.
+                          nullable: true
+                          type: object
+                          properties:
+                            caseId:
+                              description: The case identifier for Swimlane connectors.
+                              type: string
+                            category:
+                              description: >-
+                                The category of the incident for ServiceNow ITSM
+                                and ServiceNow SecOps connectors.
+                              type: string
+                            destIp:
+                              description: >-
+                                A comma-separated list of destination IPs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            impact:
+                              description: >-
+                                The effect an incident had on business for
+                                ServiceNow ITSM connectors.
+                              type: string
+                            issueType:
+                              description: The type of issue for Jira connectors.
+                              type: string
+                            issueTypes:
+                              description: >-
+                                The type of incident for IBM Resilient
+                                connectors.
+                              type: array
+                              items:
+                                type: number
+                            malwareHash:
+                              description: >-
+                                A comma-separated list of malware hashes for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            malwareUrl:
+                              description: >-
+                                A comma-separated list of malware URLs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            parent:
+                              description: >-
+                                The key of the parent issue, when the issue type
+                                is sub-task for Jira connectors.
+                              type: string
+                            priority:
+                              description: >-
+                                The priority of the issue for Jira and
+                                ServiceNow SecOps connectors.
+                              type: string
+                            severity:
+                              description: >-
+                                The severity of the incident for ServiceNow ITSM
+                                connectors.
+                              type: string
+                            severityCode:
+                              description: >-
+                                The severity code of the incident for IBM
+                                Resilient connectors.
+                              type: number
+                            sourceIp:
+                              description: >-
+                                A comma-separated list of source IPs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            subcategory:
+                              description: >-
+                                The subcategory of the incident for ServiceNow
+                                ITSM connectors.
+                              type: string
+                            urgency:
+                              description: >-
+                                The extent to which the incident resolution can
+                                be delayed for ServiceNow ITSM connectors.
+                              type: string
+                          example: null
+                        id:
+                          description: >-
+                            The identifier for the connector. To create a case
+                            without a connector, use `none`.
+                          type: string
+                          example: none
+                        name:
+                          description: >-
+                            The name of the connector. To create a case without
+                            a connector, use `none`.
+                          type: string
+                          example: none
+                        type:
+                          $ref: '#/components/schemas/connector_types'
+                    created_at:
+                      type: string
+                      format: date-time
+                      example: '2022-06-01T17:07:17.767Z'
+                    created_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                        full_name:
+                          type: string
+                          example: null
+                        username:
+                          type: string
+                          example: elastic
+                    error:
+                      type: string
+                      example: null
+                    id:
+                      type: string
+                      example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                    mappings:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          action_type:
+                            type: string
+                            example: overwrite
+                          source:
+                            type: string
+                            example: title
+                          target:
+                            type: string
+                            example: summary
+                    owner:
+                      $ref: '#/components/schemas/owners'
+                    updated_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      example: '2022-06-01T19:58:48.169Z'
+                    updated_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                        full_name:
+                          type: string
+                          example: null
+                        username:
+                          type: string
+                          example: elastic
+                      nullable: true
+                    version:
+                      type: string
+                      example: WzIwNzMsMV0=
+      servers:
+        - url: https://localhost:5601
+    post:
+      description: >
+        Sets external connection details, such as the closure type and default
+        connector for cases. You must have all privileges for the **Cases**
+        feature in the **Management**, **Observability**, or **Security**
+        section of the Kibana feature privileges, depending on the owner of the
+        case configuration. Connectors are used to interface with external
+        systems. You must create a connector before you can use it in your
+        cases. Refer to the add connectors API. If you set a default connector,
+        it is automatically selected when you create cases in Kibana. If you use
+        the create case API, however, you must still specify all of the
+        connector details.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                closure_type:
+                  $ref: '#/components/schemas/closure_types'
+                connector:
+                  description: An object that contains the connector configuration.
+                  type: object
+                  properties:
+                    fields:
+                      description: >-
+                        An object containing the connector fields. To create a
+                        case without a connector, specify null. If you want to
+                        omit any individual field, specify null as its value.
+                      nullable: true
+                      type: object
+                      properties:
+                        caseId:
+                          description: The case identifier for Swimlane connectors.
+                          type: string
+                        category:
+                          description: >-
+                            The category of the incident for ServiceNow ITSM and
+                            ServiceNow SecOps connectors.
+                          type: string
+                        destIp:
+                          description: >-
+                            A comma-separated list of destination IPs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        impact:
+                          description: >-
+                            The effect an incident had on business for
+                            ServiceNow ITSM connectors.
+                          type: string
+                        issueType:
+                          description: The type of issue for Jira connectors.
+                          type: string
+                        issueTypes:
+                          description: The type of incident for IBM Resilient connectors.
+                          type: array
+                          items:
+                            type: number
+                        malwareHash:
+                          description: >-
+                            A comma-separated list of malware hashes for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        malwareUrl:
+                          description: >-
+                            A comma-separated list of malware URLs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        parent:
+                          description: >-
+                            The key of the parent issue, when the issue type is
+                            sub-task for Jira connectors.
+                          type: string
+                        priority:
+                          description: >-
+                            The priority of the issue for Jira and ServiceNow
+                            SecOps connectors.
+                          type: string
+                        severity:
+                          description: >-
+                            The severity of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        severityCode:
+                          description: >-
+                            The severity code of the incident for IBM Resilient
+                            connectors.
+                          type: number
+                        sourceIp:
+                          description: >-
+                            A comma-separated list of source IPs for ServiceNow
+                            SecOps connectors.
+                          type: string
+                        subcategory:
+                          description: >-
+                            The subcategory of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        urgency:
+                          description: >-
+                            The extent to which the incident resolution can be
+                            delayed for ServiceNow ITSM connectors.
+                          type: string
+                      example: null
+                    id:
+                      description: >-
+                        The identifier for the connector. To create a case
+                        without a connector, use `none`.
+                      type: string
+                      example: none
+                    name:
+                      description: >-
+                        The name of the connector. To create a case without a
+                        connector, use `none`.
+                      type: string
+                      example: none
+                    type:
+                      $ref: '#/components/schemas/connector_types'
+                  required:
+                    - fields
+                    - id
+                    - name
+                    - type
+                owner:
+                  $ref: '#/components/schemas/owners'
+                settings:
+                  description: An object that contains the case settings.
+                  type: object
+                  properties:
+                    syncAlerts:
+                      description: Turns alert syncing on or off.
+                      type: boolean
+                      example: true
+                  required:
+                    - syncAlerts
+              required:
+                - closure_type
+                - connector
+                - owner
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    closure_type:
+                      $ref: '#/components/schemas/closure_types'
+                    connector:
+                      type: object
+                      properties:
+                        fields:
+                          description: >-
+                            An object containing the connector fields. To create
+                            a case without a connector, specify null. If you
+                            want to omit any individual field, specify null as
+                            its value.
+                          nullable: true
+                          type: object
+                          properties:
+                            caseId:
+                              description: The case identifier for Swimlane connectors.
+                              type: string
+                            category:
+                              description: >-
+                                The category of the incident for ServiceNow ITSM
+                                and ServiceNow SecOps connectors.
+                              type: string
+                            destIp:
+                              description: >-
+                                A comma-separated list of destination IPs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            impact:
+                              description: >-
+                                The effect an incident had on business for
+                                ServiceNow ITSM connectors.
+                              type: string
+                            issueType:
+                              description: The type of issue for Jira connectors.
+                              type: string
+                            issueTypes:
+                              description: >-
+                                The type of incident for IBM Resilient
+                                connectors.
+                              type: array
+                              items:
+                                type: number
+                            malwareHash:
+                              description: >-
+                                A comma-separated list of malware hashes for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            malwareUrl:
+                              description: >-
+                                A comma-separated list of malware URLs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            parent:
+                              description: >-
+                                The key of the parent issue, when the issue type
+                                is sub-task for Jira connectors.
+                              type: string
+                            priority:
+                              description: >-
+                                The priority of the issue for Jira and
+                                ServiceNow SecOps connectors.
+                              type: string
+                            severity:
+                              description: >-
+                                The severity of the incident for ServiceNow ITSM
+                                connectors.
+                              type: string
+                            severityCode:
+                              description: >-
+                                The severity code of the incident for IBM
+                                Resilient connectors.
+                              type: number
+                            sourceIp:
+                              description: >-
+                                A comma-separated list of source IPs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            subcategory:
+                              description: >-
+                                The subcategory of the incident for ServiceNow
+                                ITSM connectors.
+                              type: string
+                            urgency:
+                              description: >-
+                                The extent to which the incident resolution can
+                                be delayed for ServiceNow ITSM connectors.
+                              type: string
+                          example: null
+                        id:
+                          description: >-
+                            The identifier for the connector. To create a case
+                            without a connector, use `none`.
+                          type: string
+                          example: none
+                        name:
+                          description: >-
+                            The name of the connector. To create a case without
+                            a connector, use `none`.
+                          type: string
+                          example: none
+                        type:
+                          $ref: '#/components/schemas/connector_types'
+                    created_at:
+                      type: string
+                      format: date-time
+                      example: '2022-06-01T17:07:17.767Z'
+                    created_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                        full_name:
+                          type: string
+                          example: null
+                        username:
+                          type: string
+                          example: elastic
+                    error:
+                      type: string
+                      example: null
+                    id:
+                      type: string
+                      example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                    mappings:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          action_type:
+                            type: string
+                            example: overwrite
+                          source:
+                            type: string
+                            example: title
+                          target:
+                            type: string
+                            example: summary
+                    owner:
+                      $ref: '#/components/schemas/owners'
+                    updated_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      example: '2022-06-01T19:58:48.169Z'
+                    updated_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                        full_name:
+                          type: string
+                          example: null
+                        username:
+                          type: string
+                          example: elastic
+                      nullable: true
+                    version:
+                      type: string
+                      example: WzIwNzMsMV0=
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /api/cases/configure/{configurationId}:
+    patch:
+      description: >
+        Updates external connection details, such as the closure type and
+        default connector for cases. You must have all privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the case configuration. Connectors are used to interface with
+        external systems. You must create a connector before you can it in your
+        cases. Refer to the add connectors API.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/configuration_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                closure_type:
+                  $ref: '#/components/schemas/closure_types'
+                connector:
+                  description: An object that contains the connector configuration.
+                  type: object
+                  properties:
+                    fields:
+                      description: >-
+                        An object containing the connector fields. To create a
+                        case without a connector, specify null. If you want to
+                        omit any individual field, specify null as its value.
+                      nullable: true
+                      type: object
+                      properties:
+                        caseId:
+                          description: The case identifier for Swimlane connectors.
+                          type: string
+                        category:
+                          description: >-
+                            The category of the incident for ServiceNow ITSM and
+                            ServiceNow SecOps connectors.
+                          type: string
+                        destIp:
+                          description: >-
+                            A comma-separated list of destination IPs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        impact:
+                          description: >-
+                            The effect an incident had on business for
+                            ServiceNow ITSM connectors.
+                          type: string
+                        issueType:
+                          description: The type of issue for Jira connectors.
+                          type: string
+                        issueTypes:
+                          description: The type of incident for IBM Resilient connectors.
+                          type: array
+                          items:
+                            type: number
+                        malwareHash:
+                          description: >-
+                            A comma-separated list of malware hashes for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        malwareUrl:
+                          description: >-
+                            A comma-separated list of malware URLs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        parent:
+                          description: >-
+                            The key of the parent issue, when the issue type is
+                            sub-task for Jira connectors.
+                          type: string
+                        priority:
+                          description: >-
+                            The priority of the issue for Jira and ServiceNow
+                            SecOps connectors.
+                          type: string
+                        severity:
+                          description: >-
+                            The severity of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        severityCode:
+                          description: >-
+                            The severity code of the incident for IBM Resilient
+                            connectors.
+                          type: number
+                        sourceIp:
+                          description: >-
+                            A comma-separated list of source IPs for ServiceNow
+                            SecOps connectors.
+                          type: string
+                        subcategory:
+                          description: >-
+                            The subcategory of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        urgency:
+                          description: >-
+                            The extent to which the incident resolution can be
+                            delayed for ServiceNow ITSM connectors.
+                          type: string
+                      example: null
+                    id:
+                      description: >-
+                        The identifier for the connector. To create a case
+                        without a connector, use `none`.
+                      type: string
+                      example: none
+                    name:
+                      description: >-
+                        The name of the connector. To create a case without a
+                        connector, use `none`.
+                      type: string
+                      example: none
+                    type:
+                      $ref: '#/components/schemas/connector_types'
+                  required:
+                    - fields
+                    - id
+                    - name
+                    - type
+                version:
+                  description: >
+                    The version of the connector. To retrieve the version value,
+                    use the get configuration API.
+                  type: string
+                  example: WzIwMiwxXQ==
+              required:
+                - version
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    closure_type:
+                      $ref: '#/components/schemas/closure_types'
+                    connector:
+                      type: object
+                      properties:
+                        fields:
+                          description: >-
+                            An object containing the connector fields. To create
+                            a case without a connector, specify null. If you
+                            want to omit any individual field, specify null as
+                            its value.
+                          nullable: true
+                          type: object
+                          properties:
+                            caseId:
+                              description: The case identifier for Swimlane connectors.
+                              type: string
+                            category:
+                              description: >-
+                                The category of the incident for ServiceNow ITSM
+                                and ServiceNow SecOps connectors.
+                              type: string
+                            destIp:
+                              description: >-
+                                A comma-separated list of destination IPs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            impact:
+                              description: >-
+                                The effect an incident had on business for
+                                ServiceNow ITSM connectors.
+                              type: string
+                            issueType:
+                              description: The type of issue for Jira connectors.
+                              type: string
+                            issueTypes:
+                              description: >-
+                                The type of incident for IBM Resilient
+                                connectors.
+                              type: array
+                              items:
+                                type: number
+                            malwareHash:
+                              description: >-
+                                A comma-separated list of malware hashes for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            malwareUrl:
+                              description: >-
+                                A comma-separated list of malware URLs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            parent:
+                              description: >-
+                                The key of the parent issue, when the issue type
+                                is sub-task for Jira connectors.
+                              type: string
+                            priority:
+                              description: >-
+                                The priority of the issue for Jira and
+                                ServiceNow SecOps connectors.
+                              type: string
+                            severity:
+                              description: >-
+                                The severity of the incident for ServiceNow ITSM
+                                connectors.
+                              type: string
+                            severityCode:
+                              description: >-
+                                The severity code of the incident for IBM
+                                Resilient connectors.
+                              type: number
+                            sourceIp:
+                              description: >-
+                                A comma-separated list of source IPs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            subcategory:
+                              description: >-
+                                The subcategory of the incident for ServiceNow
+                                ITSM connectors.
+                              type: string
+                            urgency:
+                              description: >-
+                                The extent to which the incident resolution can
+                                be delayed for ServiceNow ITSM connectors.
+                              type: string
+                          example: null
+                        id:
+                          description: >-
+                            The identifier for the connector. To create a case
+                            without a connector, use `none`.
+                          type: string
+                          example: none
+                        name:
+                          description: >-
+                            The name of the connector. To create a case without
+                            a connector, use `none`.
+                          type: string
+                          example: none
+                        type:
+                          $ref: '#/components/schemas/connector_types'
+                    created_at:
+                      type: string
+                      format: date-time
+                      example: '2022-06-01T17:07:17.767Z'
+                    created_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                        full_name:
+                          type: string
+                          example: null
+                        username:
+                          type: string
+                          example: elastic
+                    error:
+                      type: string
+                      example: null
+                    id:
+                      type: string
+                      example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                    mappings:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          action_type:
+                            type: string
+                            example: overwrite
+                          source:
+                            type: string
+                            example: title
+                          target:
+                            type: string
+                            example: summary
+                    owner:
+                      $ref: '#/components/schemas/owners'
+                    updated_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      example: '2022-06-01T19:58:48.169Z'
+                    updated_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                        full_name:
+                          type: string
+                          example: null
+                        username:
+                          type: string
+                          example: elastic
+                      nullable: true
+                    version:
+                      type: string
+                      example: WzIwNzMsMV0=
       servers:
         - url: https://localhost:5601
     servers:
@@ -1332,23 +2170,26 @@ paths:
                             The extent to which the incident resolution can be
                             delayed for ServiceNow ITSM connectors.
                           type: string
-                      required:
-                        - fields
-                        - id
-                        - name
-                        - type
+                      example: null
                     id:
                       description: >-
                         The identifier for the connector. To create a case
                         without a connector, use `none`.
                       type: string
+                      example: none
                     name:
                       description: >-
                         The name of the connector. To create a case without a
                         connector, use `none`.
                       type: string
+                      example: none
                     type:
                       $ref: '#/components/schemas/connector_types'
+                  required:
+                    - fields
+                    - id
+                    - name
+                    - type
                 description:
                   description: The description for the case.
                   type: string
@@ -1494,21 +2335,19 @@ paths:
                               The extent to which the incident resolution can be
                               delayed for ServiceNow ITSM connectors.
                             type: string
-                        required:
-                          - fields
-                          - id
-                          - name
-                          - type
+                        example: null
                       id:
                         description: >-
                           The identifier for the connector. To create a case
                           without a connector, use `none`.
                         type: string
+                        example: none
                       name:
                         description: >-
                           The name of the connector. To create a case without a
                           connector, use `none`.
                         type: string
+                        example: none
                       type:
                         $ref: '#/components/schemas/connector_types'
                   created_at:
@@ -1520,26 +2359,23 @@ paths:
                     properties:
                       email:
                         type: string
-                        example: ahunley@imf.usa.gov
+                        example: null
                       full_name:
                         type: string
-                        example: Alan Hunley
+                        example: null
                       username:
                         type: string
-                        example: ahunley
+                        example: elastic
                   description:
                     type: string
-                    example: >-
-                      James Bond clicked on a highly suspicious email banner
-                      advertising cheap holidays for underpaid civil servants.
-                      Operation bubblegum is active. Repeat - operation
-                      bubblegum is now active
+                    example: A case description.
                   duration:
                     type: integer
-                    description: >-
+                    description: >
                       The elapsed time from the creation of the case to its
                       closure (in seconds). If the case has not been closed, the
-                      duration is set to null.
+                      duration is set to null. If the case was closed after less
+                      than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
                     type: object
@@ -1588,12 +2424,10 @@ paths:
                     items:
                       type: string
                     example:
-                      - phishing
-                      - social engineering
-                      - bubblegum
+                      - tag-1
                   title:
                     type: string
-                    example: This case will self-destruct in 5 seconds
+                    example: Case title 1
                   totalAlerts:
                     type: integer
                     example: 0
@@ -1759,23 +2593,26 @@ paths:
                                   The extent to which the incident resolution
                                   can be delayed for ServiceNow ITSM connectors.
                                 type: string
-                            required:
-                              - fields
-                              - id
-                              - name
-                              - type
+                            example: null
                           id:
                             description: >-
                               The identifier for the connector. To create a case
                               without a connector, use `none`.
                             type: string
+                            example: none
                           name:
                             description: >-
                               The name of the connector. To create a case
                               without a connector, use `none`.
                             type: string
+                            example: none
                           type:
                             $ref: '#/components/schemas/connector_types'
+                        required:
+                          - fields
+                          - id
+                          - name
+                          - type
                       description:
                         description: The description for the case.
                         type: string
@@ -1921,21 +2758,19 @@ paths:
                               The extent to which the incident resolution can be
                               delayed for ServiceNow ITSM connectors.
                             type: string
-                        required:
-                          - fields
-                          - id
-                          - name
-                          - type
+                        example: null
                       id:
                         description: >-
                           The identifier for the connector. To create a case
                           without a connector, use `none`.
                         type: string
+                        example: none
                       name:
                         description: >-
                           The name of the connector. To create a case without a
                           connector, use `none`.
                         type: string
+                        example: none
                       type:
                         $ref: '#/components/schemas/connector_types'
                   created_at:
@@ -1947,26 +2782,23 @@ paths:
                     properties:
                       email:
                         type: string
-                        example: ahunley@imf.usa.gov
+                        example: null
                       full_name:
                         type: string
-                        example: Alan Hunley
+                        example: null
                       username:
                         type: string
-                        example: ahunley
+                        example: elastic
                   description:
                     type: string
-                    example: >-
-                      James Bond clicked on a highly suspicious email banner
-                      advertising cheap holidays for underpaid civil servants.
-                      Operation bubblegum is active. Repeat - operation
-                      bubblegum is now active
+                    example: A case description.
                   duration:
                     type: integer
-                    description: >-
+                    description: >
                       The elapsed time from the creation of the case to its
                       closure (in seconds). If the case has not been closed, the
-                      duration is set to null.
+                      duration is set to null. If the case was closed after less
+                      than half a second, the duration is rounded down to zero.
                     example: 120
                   external_service:
                     type: object
@@ -2015,12 +2847,10 @@ paths:
                     items:
                       type: string
                     example:
-                      - phishing
-                      - social engineering
-                      - bubblegum
+                      - tag-1
                   title:
                     type: string
-                    example: This case will self-destruct in 5 seconds
+                    example: Case title 1
                   totalAlerts:
                     type: integer
                     example: 0
@@ -2172,7 +3002,7 @@ paths:
               - type: array
                 items:
                   type: string
-          example: phishing
+          example: tag-1
         - name: to
           in: query
           description: >
@@ -2305,21 +3135,19 @@ paths:
                                     can be delayed for ServiceNow ITSM
                                     connectors.
                                   type: string
-                              required:
-                                - fields
-                                - id
-                                - name
-                                - type
+                              example: null
                             id:
                               description: >-
                                 The identifier for the connector. To create a
                                 case without a connector, use `none`.
                               type: string
+                              example: none
                             name:
                               description: >-
                                 The name of the connector. To create a case
                                 without a connector, use `none`.
                               type: string
+                              example: none
                             type:
                               $ref: '#/components/schemas/connector_types'
                         created_at:
@@ -2331,26 +3159,24 @@ paths:
                           properties:
                             email:
                               type: string
-                              example: ahunley@imf.usa.gov
+                              example: null
                             full_name:
                               type: string
-                              example: Alan Hunley
+                              example: null
                             username:
                               type: string
-                              example: ahunley
+                              example: elastic
                         description:
                           type: string
-                          example: >-
-                            James Bond clicked on a highly suspicious email
-                            banner advertising cheap holidays for underpaid
-                            civil servants. Operation bubblegum is active.
-                            Repeat - operation bubblegum is now active
+                          example: A case description.
                         duration:
                           type: integer
-                          description: >-
+                          description: >
                             The elapsed time from the creation of the case to
                             its closure (in seconds). If the case has not been
-                            closed, the duration is set to null.
+                            closed, the duration is set to null. If the case was
+                            closed after less than half a second, the duration
+                            is rounded down to zero.
                           example: 120
                         external_service:
                           type: object
@@ -2399,12 +3225,10 @@ paths:
                           items:
                             type: string
                           example:
-                            - phishing
-                            - social engineering
-                            - bubblegum
+                            - tag-1
                         title:
                           type: string
-                          example: This case will self-destruct in 5 seconds
+                          example: Case title 1
                         totalAlerts:
                           type: integer
                           example: 0
@@ -2449,6 +3273,862 @@ paths:
         - url: https://localhost:5601
     servers:
       - url: https://localhost:5601
+  /s/{spaceId}/api/cases/alerts/{alertId}:
+    get:
+      description: >
+        Returns the cases associated with a specific alert. You must have read
+        privileges for the **Cases** feature in the **Management**,
+        **Observability**, or **Security** section of the Kibana feature
+        privileges, depending on the owner of the cases you're seeking.
+      x-technical-preview: true
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/alert_id'
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/owner'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: The case identifier.
+                    title:
+                      type: string
+                      description: The case title.
+                example:
+                  - id: 06116b80-e1c3-11ec-be9b-9b1838238ee6
+                    title: security_case
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/configure:
+    get:
+      description: >
+        Retrieves external connection details, such as the closure type and
+        default connector for cases. You must have read privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the case configuration.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/space_id'
+        - $ref: '#/components/parameters/owner'
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    closure_type:
+                      $ref: '#/components/schemas/closure_types'
+                    connector:
+                      type: object
+                      properties:
+                        fields:
+                          description: >-
+                            An object containing the connector fields. To create
+                            a case without a connector, specify null. If you
+                            want to omit any individual field, specify null as
+                            its value.
+                          nullable: true
+                          type: object
+                          properties:
+                            caseId:
+                              description: The case identifier for Swimlane connectors.
+                              type: string
+                            category:
+                              description: >-
+                                The category of the incident for ServiceNow ITSM
+                                and ServiceNow SecOps connectors.
+                              type: string
+                            destIp:
+                              description: >-
+                                A comma-separated list of destination IPs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            impact:
+                              description: >-
+                                The effect an incident had on business for
+                                ServiceNow ITSM connectors.
+                              type: string
+                            issueType:
+                              description: The type of issue for Jira connectors.
+                              type: string
+                            issueTypes:
+                              description: >-
+                                The type of incident for IBM Resilient
+                                connectors.
+                              type: array
+                              items:
+                                type: number
+                            malwareHash:
+                              description: >-
+                                A comma-separated list of malware hashes for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            malwareUrl:
+                              description: >-
+                                A comma-separated list of malware URLs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            parent:
+                              description: >-
+                                The key of the parent issue, when the issue type
+                                is sub-task for Jira connectors.
+                              type: string
+                            priority:
+                              description: >-
+                                The priority of the issue for Jira and
+                                ServiceNow SecOps connectors.
+                              type: string
+                            severity:
+                              description: >-
+                                The severity of the incident for ServiceNow ITSM
+                                connectors.
+                              type: string
+                            severityCode:
+                              description: >-
+                                The severity code of the incident for IBM
+                                Resilient connectors.
+                              type: number
+                            sourceIp:
+                              description: >-
+                                A comma-separated list of source IPs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            subcategory:
+                              description: >-
+                                The subcategory of the incident for ServiceNow
+                                ITSM connectors.
+                              type: string
+                            urgency:
+                              description: >-
+                                The extent to which the incident resolution can
+                                be delayed for ServiceNow ITSM connectors.
+                              type: string
+                          example: null
+                        id:
+                          description: >-
+                            The identifier for the connector. To create a case
+                            without a connector, use `none`.
+                          type: string
+                          example: none
+                        name:
+                          description: >-
+                            The name of the connector. To create a case without
+                            a connector, use `none`.
+                          type: string
+                          example: none
+                        type:
+                          $ref: '#/components/schemas/connector_types'
+                    created_at:
+                      type: string
+                      format: date-time
+                      example: '2022-06-01T17:07:17.767Z'
+                    created_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                        full_name:
+                          type: string
+                          example: null
+                        username:
+                          type: string
+                          example: elastic
+                    error:
+                      type: string
+                      example: null
+                    id:
+                      type: string
+                      example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                    mappings:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          action_type:
+                            type: string
+                            example: overwrite
+                          source:
+                            type: string
+                            example: title
+                          target:
+                            type: string
+                            example: summary
+                    owner:
+                      $ref: '#/components/schemas/owners'
+                    updated_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      example: '2022-06-01T19:58:48.169Z'
+                    updated_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                        full_name:
+                          type: string
+                          example: null
+                        username:
+                          type: string
+                          example: elastic
+                      nullable: true
+                    version:
+                      type: string
+                      example: WzIwNzMsMV0=
+      servers:
+        - url: https://localhost:5601
+    post:
+      description: >
+        Sets external connection details, such as the closure type and default
+        connector for cases. You must have all privileges for the **Cases**
+        feature in the **Management**, **Observability**, or **Security**
+        section of the Kibana feature privileges, depending on the owner of the
+        case configuration. Connectors are used to interface with external
+        systems. You must create a connector before you can use it in your
+        cases. Refer to the add connectors API. If you set a default connector,
+        it is automatically selected when you create cases in Kibana. If you use
+        the create case API, however, you must still specify all of the
+        connector details.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                closure_type:
+                  $ref: '#/components/schemas/closure_types'
+                connector:
+                  description: An object that contains the connector configuration.
+                  type: object
+                  properties:
+                    fields:
+                      description: >-
+                        An object containing the connector fields. To create a
+                        case without a connector, specify null. If you want to
+                        omit any individual field, specify null as its value.
+                      nullable: true
+                      type: object
+                      properties:
+                        caseId:
+                          description: The case identifier for Swimlane connectors.
+                          type: string
+                        category:
+                          description: >-
+                            The category of the incident for ServiceNow ITSM and
+                            ServiceNow SecOps connectors.
+                          type: string
+                        destIp:
+                          description: >-
+                            A comma-separated list of destination IPs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        impact:
+                          description: >-
+                            The effect an incident had on business for
+                            ServiceNow ITSM connectors.
+                          type: string
+                        issueType:
+                          description: The type of issue for Jira connectors.
+                          type: string
+                        issueTypes:
+                          description: The type of incident for IBM Resilient connectors.
+                          type: array
+                          items:
+                            type: number
+                        malwareHash:
+                          description: >-
+                            A comma-separated list of malware hashes for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        malwareUrl:
+                          description: >-
+                            A comma-separated list of malware URLs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        parent:
+                          description: >-
+                            The key of the parent issue, when the issue type is
+                            sub-task for Jira connectors.
+                          type: string
+                        priority:
+                          description: >-
+                            The priority of the issue for Jira and ServiceNow
+                            SecOps connectors.
+                          type: string
+                        severity:
+                          description: >-
+                            The severity of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        severityCode:
+                          description: >-
+                            The severity code of the incident for IBM Resilient
+                            connectors.
+                          type: number
+                        sourceIp:
+                          description: >-
+                            A comma-separated list of source IPs for ServiceNow
+                            SecOps connectors.
+                          type: string
+                        subcategory:
+                          description: >-
+                            The subcategory of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        urgency:
+                          description: >-
+                            The extent to which the incident resolution can be
+                            delayed for ServiceNow ITSM connectors.
+                          type: string
+                      example: null
+                    id:
+                      description: >-
+                        The identifier for the connector. To create a case
+                        without a connector, use `none`.
+                      type: string
+                      example: none
+                    name:
+                      description: >-
+                        The name of the connector. To create a case without a
+                        connector, use `none`.
+                      type: string
+                      example: none
+                    type:
+                      $ref: '#/components/schemas/connector_types'
+                  required:
+                    - fields
+                    - id
+                    - name
+                    - type
+                owner:
+                  $ref: '#/components/schemas/owners'
+                settings:
+                  description: An object that contains the case settings.
+                  type: object
+                  properties:
+                    syncAlerts:
+                      description: Turns alert syncing on or off.
+                      type: boolean
+                      example: true
+                  required:
+                    - syncAlerts
+              required:
+                - closure_type
+                - connector
+                - owner
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    closure_type:
+                      $ref: '#/components/schemas/closure_types'
+                    connector:
+                      type: object
+                      properties:
+                        fields:
+                          description: >-
+                            An object containing the connector fields. To create
+                            a case without a connector, specify null. If you
+                            want to omit any individual field, specify null as
+                            its value.
+                          nullable: true
+                          type: object
+                          properties:
+                            caseId:
+                              description: The case identifier for Swimlane connectors.
+                              type: string
+                            category:
+                              description: >-
+                                The category of the incident for ServiceNow ITSM
+                                and ServiceNow SecOps connectors.
+                              type: string
+                            destIp:
+                              description: >-
+                                A comma-separated list of destination IPs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            impact:
+                              description: >-
+                                The effect an incident had on business for
+                                ServiceNow ITSM connectors.
+                              type: string
+                            issueType:
+                              description: The type of issue for Jira connectors.
+                              type: string
+                            issueTypes:
+                              description: >-
+                                The type of incident for IBM Resilient
+                                connectors.
+                              type: array
+                              items:
+                                type: number
+                            malwareHash:
+                              description: >-
+                                A comma-separated list of malware hashes for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            malwareUrl:
+                              description: >-
+                                A comma-separated list of malware URLs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            parent:
+                              description: >-
+                                The key of the parent issue, when the issue type
+                                is sub-task for Jira connectors.
+                              type: string
+                            priority:
+                              description: >-
+                                The priority of the issue for Jira and
+                                ServiceNow SecOps connectors.
+                              type: string
+                            severity:
+                              description: >-
+                                The severity of the incident for ServiceNow ITSM
+                                connectors.
+                              type: string
+                            severityCode:
+                              description: >-
+                                The severity code of the incident for IBM
+                                Resilient connectors.
+                              type: number
+                            sourceIp:
+                              description: >-
+                                A comma-separated list of source IPs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            subcategory:
+                              description: >-
+                                The subcategory of the incident for ServiceNow
+                                ITSM connectors.
+                              type: string
+                            urgency:
+                              description: >-
+                                The extent to which the incident resolution can
+                                be delayed for ServiceNow ITSM connectors.
+                              type: string
+                          example: null
+                        id:
+                          description: >-
+                            The identifier for the connector. To create a case
+                            without a connector, use `none`.
+                          type: string
+                          example: none
+                        name:
+                          description: >-
+                            The name of the connector. To create a case without
+                            a connector, use `none`.
+                          type: string
+                          example: none
+                        type:
+                          $ref: '#/components/schemas/connector_types'
+                    created_at:
+                      type: string
+                      format: date-time
+                      example: '2022-06-01T17:07:17.767Z'
+                    created_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                        full_name:
+                          type: string
+                          example: null
+                        username:
+                          type: string
+                          example: elastic
+                    error:
+                      type: string
+                      example: null
+                    id:
+                      type: string
+                      example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                    mappings:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          action_type:
+                            type: string
+                            example: overwrite
+                          source:
+                            type: string
+                            example: title
+                          target:
+                            type: string
+                            example: summary
+                    owner:
+                      $ref: '#/components/schemas/owners'
+                    updated_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      example: '2022-06-01T19:58:48.169Z'
+                    updated_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                        full_name:
+                          type: string
+                          example: null
+                        username:
+                          type: string
+                          example: elastic
+                      nullable: true
+                    version:
+                      type: string
+                      example: WzIwNzMsMV0=
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
+  /s/{spaceId}/api/cases/configure/{configurationId}:
+    patch:
+      description: >
+        Updates external connection details, such as the closure type and
+        default connector for cases. You must have all privileges for the
+        **Cases** feature in the **Management**, **Observability**, or
+        **Security** section of the Kibana feature privileges, depending on the
+        owner of the case configuration. Connectors are used to interface with
+        external systems. You must create a connector before you can it in your
+        cases. Refer to the add connectors API.
+      tags:
+        - cases
+        - kibana
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+        - $ref: '#/components/parameters/configuration_id'
+        - $ref: '#/components/parameters/space_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                closure_type:
+                  $ref: '#/components/schemas/closure_types'
+                connector:
+                  description: An object that contains the connector configuration.
+                  type: object
+                  properties:
+                    fields:
+                      description: >-
+                        An object containing the connector fields. To create a
+                        case without a connector, specify null. If you want to
+                        omit any individual field, specify null as its value.
+                      nullable: true
+                      type: object
+                      properties:
+                        caseId:
+                          description: The case identifier for Swimlane connectors.
+                          type: string
+                        category:
+                          description: >-
+                            The category of the incident for ServiceNow ITSM and
+                            ServiceNow SecOps connectors.
+                          type: string
+                        destIp:
+                          description: >-
+                            A comma-separated list of destination IPs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        impact:
+                          description: >-
+                            The effect an incident had on business for
+                            ServiceNow ITSM connectors.
+                          type: string
+                        issueType:
+                          description: The type of issue for Jira connectors.
+                          type: string
+                        issueTypes:
+                          description: The type of incident for IBM Resilient connectors.
+                          type: array
+                          items:
+                            type: number
+                        malwareHash:
+                          description: >-
+                            A comma-separated list of malware hashes for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        malwareUrl:
+                          description: >-
+                            A comma-separated list of malware URLs for
+                            ServiceNow SecOps connectors.
+                          type: string
+                        parent:
+                          description: >-
+                            The key of the parent issue, when the issue type is
+                            sub-task for Jira connectors.
+                          type: string
+                        priority:
+                          description: >-
+                            The priority of the issue for Jira and ServiceNow
+                            SecOps connectors.
+                          type: string
+                        severity:
+                          description: >-
+                            The severity of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        severityCode:
+                          description: >-
+                            The severity code of the incident for IBM Resilient
+                            connectors.
+                          type: number
+                        sourceIp:
+                          description: >-
+                            A comma-separated list of source IPs for ServiceNow
+                            SecOps connectors.
+                          type: string
+                        subcategory:
+                          description: >-
+                            The subcategory of the incident for ServiceNow ITSM
+                            connectors.
+                          type: string
+                        urgency:
+                          description: >-
+                            The extent to which the incident resolution can be
+                            delayed for ServiceNow ITSM connectors.
+                          type: string
+                      example: null
+                    id:
+                      description: >-
+                        The identifier for the connector. To create a case
+                        without a connector, use `none`.
+                      type: string
+                      example: none
+                    name:
+                      description: >-
+                        The name of the connector. To create a case without a
+                        connector, use `none`.
+                      type: string
+                      example: none
+                    type:
+                      $ref: '#/components/schemas/connector_types'
+                  required:
+                    - fields
+                    - id
+                    - name
+                    - type
+                version:
+                  description: >
+                    The version of the connector. To retrieve the version value,
+                    use the get configuration API.
+                  type: string
+                  example: WzIwMiwxXQ==
+              required:
+                - version
+      responses:
+        '200':
+          description: Indicates a successful call.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    closure_type:
+                      $ref: '#/components/schemas/closure_types'
+                    connector:
+                      type: object
+                      properties:
+                        fields:
+                          description: >-
+                            An object containing the connector fields. To create
+                            a case without a connector, specify null. If you
+                            want to omit any individual field, specify null as
+                            its value.
+                          nullable: true
+                          type: object
+                          properties:
+                            caseId:
+                              description: The case identifier for Swimlane connectors.
+                              type: string
+                            category:
+                              description: >-
+                                The category of the incident for ServiceNow ITSM
+                                and ServiceNow SecOps connectors.
+                              type: string
+                            destIp:
+                              description: >-
+                                A comma-separated list of destination IPs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            impact:
+                              description: >-
+                                The effect an incident had on business for
+                                ServiceNow ITSM connectors.
+                              type: string
+                            issueType:
+                              description: The type of issue for Jira connectors.
+                              type: string
+                            issueTypes:
+                              description: >-
+                                The type of incident for IBM Resilient
+                                connectors.
+                              type: array
+                              items:
+                                type: number
+                            malwareHash:
+                              description: >-
+                                A comma-separated list of malware hashes for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            malwareUrl:
+                              description: >-
+                                A comma-separated list of malware URLs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            parent:
+                              description: >-
+                                The key of the parent issue, when the issue type
+                                is sub-task for Jira connectors.
+                              type: string
+                            priority:
+                              description: >-
+                                The priority of the issue for Jira and
+                                ServiceNow SecOps connectors.
+                              type: string
+                            severity:
+                              description: >-
+                                The severity of the incident for ServiceNow ITSM
+                                connectors.
+                              type: string
+                            severityCode:
+                              description: >-
+                                The severity code of the incident for IBM
+                                Resilient connectors.
+                              type: number
+                            sourceIp:
+                              description: >-
+                                A comma-separated list of source IPs for
+                                ServiceNow SecOps connectors.
+                              type: string
+                            subcategory:
+                              description: >-
+                                The subcategory of the incident for ServiceNow
+                                ITSM connectors.
+                              type: string
+                            urgency:
+                              description: >-
+                                The extent to which the incident resolution can
+                                be delayed for ServiceNow ITSM connectors.
+                              type: string
+                          example: null
+                        id:
+                          description: >-
+                            The identifier for the connector. To create a case
+                            without a connector, use `none`.
+                          type: string
+                          example: none
+                        name:
+                          description: >-
+                            The name of the connector. To create a case without
+                            a connector, use `none`.
+                          type: string
+                          example: none
+                        type:
+                          $ref: '#/components/schemas/connector_types'
+                    created_at:
+                      type: string
+                      format: date-time
+                      example: '2022-06-01T17:07:17.767Z'
+                    created_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                        full_name:
+                          type: string
+                          example: null
+                        username:
+                          type: string
+                          example: elastic
+                    error:
+                      type: string
+                      example: null
+                    id:
+                      type: string
+                      example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+                    mappings:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          action_type:
+                            type: string
+                            example: overwrite
+                          source:
+                            type: string
+                            example: title
+                          target:
+                            type: string
+                            example: summary
+                    owner:
+                      $ref: '#/components/schemas/owners'
+                    updated_at:
+                      type: string
+                      format: date-time
+                      nullable: true
+                      example: '2022-06-01T19:58:48.169Z'
+                    updated_by:
+                      type: object
+                      properties:
+                        email:
+                          type: string
+                          example: null
+                        full_name:
+                          type: string
+                          example: null
+                        username:
+                          type: string
+                          example: elastic
+                      nullable: true
+                    version:
+                      type: string
+                      example: WzIwNzMsMV0=
+      servers:
+        - url: https://localhost:5601
+    servers:
+      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:
@@ -2468,7 +4148,7 @@ components:
     owner:
       in: query
       name: owner
-      description: >-
+      description: >
         A filter to limit the response to a specific set of applications. If
         this parameter is omitted, the response contains information about all
         the cases that the user has access to read.
@@ -2490,6 +4170,22 @@ components:
           - high
           - low
           - medium
+    alert_id:
+      in: path
+      name: alertId
+      description: An identifier for the alert.
+      required: true
+      schema:
+        type: string
+        example: 09f0c261e39e36351d75995b78bb83673774d1bc2cca9df2d15f0e5c0a99a540
+    configuration_id:
+      in: path
+      name: configurationId
+      description: An identifier for the configuration.
+      required: true
+      schema:
+        type: string
+        example: 3297a0f0-b5ec-11ec-b141-0fdb20a7f9a9
     space_id:
       in: path
       name: spaceId
@@ -2509,13 +4205,17 @@ components:
         - .servicenow
         - .servicenow-sir
         - .swimlane
+      example: .none
     owners:
       type: string
-      description: Owner apps
+      description: >
+        The application that owns the cases: Stack Management, Observability, or
+        Elastic Security.
       enum:
         - cases
         - observability
         - securitySolution
+      example: cases
     severity_property:
       type: string
       description: The severity of the case.
@@ -2532,17 +4232,24 @@ components:
         - closed
         - in-progress
         - open
+    closure_types:
+      type: string
+      description: >-
+        Indicates whether a case is automatically closed when it is pushed to
+        external systems (`close-by-pushing`) or not automatically closed
+        (`close-by-user`).
+      enum:
+        - close-by-pushing
+        - close-by-user
+      example: close-by-user
   examples:
     create_case_request:
       summary: Create a security case that uses a Jira connector.
       value:
-        description: >-
-          James Bond clicked on a highly suspicious email banner advertising
-          cheap holidays for underpaid civil servants.
-        title: This case will self-destruct in 5 seconds
+        description: A case description.
+        title: Case title 1
         tags:
-          - phishing
-          - social engineering
+          - tag-1
         connector:
           id: 131d4448-abe0-4789-939d-8ef60680b498
           name: My connector
@@ -2553,7 +4260,7 @@ components:
             parent: null
         settings:
           syncAlerts: true
-        owner: securitySolution
+        owner: cases
     create_case_response:
       summary: >-
         The create case API returns a JSON object that includes the user who
@@ -2564,27 +4271,22 @@ components:
         comments: []
         totalComment: 0
         totalAlerts: 0
-        title: This case will self-destruct in 5 seconds
+        title: Case title 1
         tags:
-          - phishing
-          - social engineering
-          - bubblegum
+          - tag-1
         settings:
           syncAlerts: true
-        owner: securitySolution
-        description: >-
-          James Bond clicked on a highly suspicious email banner advertising
-          cheap holidays for underpaid civil servants. Operation bubblegum is
-          active. Repeat - operation bubblegum is now active
+        owner: cases
+        description: A case description.
         duration: null
         severity: low
         closed_at: null
         closed_by: null
         created_at: '2022-05-13T09:16:17.416Z'
         created_by:
-          email: ahunley@imf.usa.gov
-          full_name: Alan Hunley
-          username: ahunley
+          email: null
+          full_name: null
+          username: elastic
         status: open
         updated_at: null
         updated_by: null
@@ -2611,14 +4313,9 @@ components:
                 issueType: '10006'
                 priority: null
                 parent: null
-            description: >-
-              James Bond clicked on a highly suspicious email banner advertising
-              cheap holidays for underpaid civil servants. Operation bubblegum
-              is active. Repeat - operation bubblegum is now active!
+            description: A case description.
             tags:
-              - phishing
-              - social engineering
-              - bubblegum
+              - tag-1
             settings:
               syncAlerts: true
     update_case_response:
@@ -2631,33 +4328,28 @@ components:
           comments: []
           totalComment: 0
           totalAlerts: 0
-          title: This case will self-destruct in 5 seconds
+          title: Case title 1
           tags:
-            - phishing
-            - social engineering
-            - bubblegum
+            - tag-1
           settings:
             syncAlerts: true
-          owner: securitySolution
-          description: >-
-            James Bond clicked on a highly suspicious email banner advertising
-            cheap holidays for underpaid civil servants. Operation bubblegum is
-            active. Repeat - operation bubblegum is now active!
+          owner: cases
+          description: A case description.
           duration: null
           severity: low
           closed_at: null
           closed_by: null
           created_at: '2022-05-13T09:16:17.416Z'
           created_by:
-            email: ahunley@imf.usa.gov
-            full_name: Alan Hunley
-            username: ahunley
+            email: null
+            full_name: null
+            username: elastic
           status: open
           updated_at: '2022-05-13T09:48:33.043Z'
           updated_by:
-            email: classified@hms.oo.gov.uk
-            full_name: Classified
-            username: M
+            email: null
+            full_name: null
+            username: elastic
           connector:
             id: 131d4448-abe0-4789-939d-8ef60680b498
             name: My connector
@@ -2669,9 +4361,9 @@ components:
           external_service:
             external_title: IS-4
             pushed_by:
-              full_name: Classified
-              email: classified@hms.oo.gov.uk
-              username: M
+              full_name: null
+              email: null
+              username: elastic
             external_url: https://hms.atlassian.net/browse/IS-4
             pushed_at: '2022-05-13T09:20:40.672Z'
             connector_id: 05da469f-1fde-4058-99a3-91e4807e2de8
@@ -2679,8 +4371,8 @@ components:
             connector_name: Jira
     find_case_response:
       summary: >-
-        Retrieve the first five cases with the `phishing` tag, in ascending
-        order by last update time.
+        Retrieve the first five cases with the `tag-1` tag, in ascending order
+        by last update time.
       value:
         page: 1
         per_page: 5
@@ -2693,26 +4385,26 @@ components:
             totalAlerts: 0
             title: Case title
             tags:
-              - phishing
+              - tag-1
             description: Case description
             settings:
               syncAlerts: true
-            owner: securitySolution
+            owner: cases
             duration: null
             severity: low
             closed_at: null
             closed_by: null
             created_at: '2022-05-12T00:16:36.371Z'
             created_by:
-              email: jdoe@email.com
-              full_name: Jane Doe
-              username: jdoe
+              email: null
+              full_name: null
+              username: elastic
             status: open
             updated_at: '2022-05-12T00:27:58.162Z'
             updated_by:
-              email: jsmith@email.com
-              full_name: Joe Smith
-              username: jsmith
+              email: null
+              full_name: null
+              username: elastic
             connector:
               id: none
               name: none

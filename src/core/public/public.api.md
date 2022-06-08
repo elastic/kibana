@@ -9,10 +9,9 @@
 import { Action } from 'history';
 import { AnalyticsClient } from '@kbn/analytics-client';
 import type { ButtonColor } from '@elastic/eui';
-import type { ConfigPath } from '@kbn/config';
 import { ContextProviderOpts } from '@kbn/analytics-client';
 import { CoreContext } from '@kbn/core-base-browser-internal';
-import type { DocLinks } from '@kbn/doc-links';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { EnvironmentMode } from '@kbn/config';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -28,6 +27,9 @@ import { EventTypeOpts } from '@kbn/analytics-client';
 import { History as History_2 } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
+import { InjectedMetadataParams } from '@kbn/core-injected-metadata-browser-internal';
+import type { InjectedMetadataSetup } from '@kbn/core-injected-metadata-browser';
+import type { InjectedMetadataStart } from '@kbn/core-injected-metadata-browser';
 import { IShipper } from '@kbn/analytics-client';
 import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
@@ -36,7 +38,6 @@ import { Observable } from 'rxjs';
 import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
-import { PluginName } from '@kbn/core-base-common';
 import { PluginOpaqueId } from '@kbn/core-base-common';
 import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
@@ -44,7 +45,6 @@ import * as Rx from 'rxjs';
 import { ShipperClassConstructor } from '@kbn/analytics-client';
 import { TelemetryCounter } from '@kbn/analytics-client';
 import { TelemetryCounterType } from '@kbn/analytics-client';
-import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { TransitionPromptHook } from 'history';
 import { Type } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
@@ -407,10 +407,10 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
     http: HttpSetup;
-    // @deprecated
-    injectedMetadata: {
-        getInjectedVar: (name: string, defaultValue?: any) => unknown;
-    };
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "InjectedMetadataSetup"
+    //
+    // (undocumented)
+    injectedMetadata: InjectedMetadataSetup;
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
@@ -429,6 +429,8 @@ export interface CoreStart {
     chrome: ChromeStart;
     // (undocumented)
     deprecations: DeprecationsServiceStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     docLinks: DocLinksStart;
     // (undocumented)
@@ -439,10 +441,10 @@ export interface CoreStart {
     http: HttpStart;
     // (undocumented)
     i18n: I18nStart;
-    // @deprecated
-    injectedMetadata: {
-        getInjectedVar: (name: string, defaultValue?: any) => unknown;
-    };
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "InjectedMetadataStart"
+    //
+    // (undocumented)
+    injectedMetadata: InjectedMetadataStart;
     // (undocumented)
     notifications: NotificationsStart;
     // (undocumented)
@@ -492,15 +494,7 @@ export interface DeprecationsServiceStart {
     resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;
 }
 
-// @public (undocumented)
-export interface DocLinksStart {
-    // (undocumented)
-    readonly DOC_LINK_VERSION: string;
-    // (undocumented)
-    readonly ELASTIC_WEBSITE_URL: string;
-    // (undocumented)
-    readonly links: DocLinks;
-}
+export { DocLinksStart }
 
 // Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
 //
