@@ -9,26 +9,33 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import { EuiFlexGroup, EuiIcon, EuiIconProps, EuiText } from '@elastic/eui';
 import classnames from 'classnames';
-import type { IconPosition, ExtendedYConfig, CollectiveConfig } from '../../common/types';
+import type {
+  IconPosition,
+  ReferenceLineDecorationConfig,
+  CollectiveConfig,
+} from '../../common/types';
 import { getBaseIconPlacement } from '../components';
 import { hasIcon, iconSet } from './icon';
 
 export const LINES_MARKER_SIZE = 20;
 
-type PartialExtendedYConfig = Pick<ExtendedYConfig, 'icon' | 'iconPosition' | 'textVisibility'> & {
+type PartialReferenceLineDecorationConfig = Pick<
+  ReferenceLineDecorationConfig,
+  'icon' | 'iconPosition' | 'textVisibility'
+> & {
   position?: Position;
 };
 
 type PartialCollectiveConfig = Pick<CollectiveConfig, 'position' | 'icon' | 'textVisibility'>;
 
-const isExtendedYConfig = (
-  config: PartialExtendedYConfig | PartialCollectiveConfig | undefined
-): config is PartialExtendedYConfig =>
-  (config as PartialExtendedYConfig)?.iconPosition ? true : false;
+const isExtendedDecorationConfig = (
+  config: PartialReferenceLineDecorationConfig | PartialCollectiveConfig | undefined
+): config is PartialReferenceLineDecorationConfig =>
+  (config as PartialReferenceLineDecorationConfig)?.iconPosition ? true : false;
 
 // Note: it does not take into consideration whether the reference line is in view or not
 export const getLinesCausedPaddings = (
-  visualConfigs: Array<PartialExtendedYConfig | PartialCollectiveConfig | undefined>,
+  visualConfigs: Array<PartialReferenceLineDecorationConfig | PartialCollectiveConfig | undefined>,
   axesMap: Record<'left' | 'right', unknown>
 ) => {
   // collect all paddings for the 4 axis: if any text is detected double it.
@@ -39,7 +46,7 @@ export const getLinesCausedPaddings = (
       return;
     }
     const { position, icon, textVisibility } = config;
-    const iconPosition = isExtendedYConfig(config) ? config.iconPosition : undefined;
+    const iconPosition = isExtendedDecorationConfig(config) ? config.iconPosition : undefined;
 
     if (position && (hasIcon(icon) || textVisibility)) {
       const placement = getBaseIconPlacement(iconPosition, axesMap, position);

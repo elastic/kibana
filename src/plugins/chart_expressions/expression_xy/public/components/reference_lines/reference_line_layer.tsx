@@ -32,43 +32,45 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
   isHorizontal,
   titles,
 }) => {
-  if (!layer.yConfig) {
+  if (!layer.decorations) {
     return null;
   }
 
-  const { columnToLabel, yConfig: yConfigs, table } = layer;
+  const { columnToLabel, decorations, table } = layer;
   const columnToLabelMap: Record<string, string> = columnToLabel ? JSON.parse(columnToLabel) : {};
 
   const row = table.rows[0];
 
-  const yConfigByValue = yConfigs.sort(
+  const decorationConfigsByValue = decorations.sort(
     ({ forAccessor: idA }, { forAccessor: idB }) => row[idA] - row[idB]
   );
 
-  const groupedByDirection = groupBy(yConfigByValue, 'fill');
+  const groupedByDirection = groupBy(decorationConfigsByValue, 'fill');
   if (groupedByDirection.below) {
     groupedByDirection.below.reverse();
   }
 
-  const referenceLineElements = yConfigByValue.flatMap((yConfig) => {
-    const axisGroup = getAxisGroupForReferenceLine(yAxesConfiguration, yConfig);
+  const referenceLineElements = decorationConfigsByValue.flatMap((decorationConfig) => {
+    const axisGroup = getAxisGroupForReferenceLine(yAxesConfiguration, decorationConfig);
 
     const formatter = axisGroup?.formatter || xAxisFormatter;
-    const name = columnToLabelMap[yConfig.forAccessor] ?? titles?.yTitles?.[yConfig.forAccessor];
-    const value = row[yConfig.forAccessor];
-    const yConfigsWithSameDirection = groupedByDirection[yConfig.fill!];
-    const indexFromSameType = yConfigsWithSameDirection.findIndex(
-      ({ forAccessor }) => forAccessor === yConfig.forAccessor
+    const name =
+      columnToLabelMap[decorationConfig.forAccessor] ??
+      titles?.yTitles?.[decorationConfig.forAccessor];
+    const value = row[decorationConfig.forAccessor];
+    const yDecorationsWithSameDirection = groupedByDirection[decorationConfig.fill!];
+    const indexFromSameType = yDecorationsWithSameDirection.findIndex(
+      ({ forAccessor }) => forAccessor === decorationConfig.forAccessor
     );
 
-    const shouldCheckNextReferenceLine = indexFromSameType < yConfigsWithSameDirection.length - 1;
+    const shouldCheckNextReferenceLine = indexFromSameType < yDecorationsWithSameDirection.length - 1;
 
     const nextValue = shouldCheckNextReferenceLine
-      ? row[yConfigsWithSameDirection[indexFromSameType + 1].forAccessor]
+      ? row[yDecorationsWithSameDirection[indexFromSameType + 1].forAccessor]
       : undefined;
 
-    const { forAccessor, type, ...restAnnotationConfig } = yConfig;
-    const id = `${layer.layerId}-${yConfig.forAccessor}`;
+    const { forAccessor, type, ...restAnnotationConfig } = decorationConfig;
+    const id = `${layer.layerId}-${decorationConfig.forAccessor}`;
 
     const axesMap = {
       left: yAxesConfiguration.some((axes) => axes.position === 'left'),

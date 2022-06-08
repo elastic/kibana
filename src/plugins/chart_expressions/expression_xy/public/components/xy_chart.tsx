@@ -47,8 +47,8 @@ import type { FilterEvent, BrushEvent, FormatFactory } from '../types';
 import { isTimeChart } from '../../common/helpers';
 import type {
   CommonXYDataLayerConfig,
-  ExtendedYConfigResult,
-  ReferenceLineYConfig,
+  ReferenceLineDecorationConfig,
+  ExtendedReferenceLineDecorationConfig,
   XYChartProps,
 } from '../../common/types';
 import {
@@ -60,7 +60,7 @@ import {
   getFormattedTablesByLayers,
   getLayersFormats,
   getLayersTitles,
-  isReferenceLineYConfig,
+  isReferenceLineDecorationConfig,
   getFilteredLayers,
   getReferenceLayers,
   isDataLayer,
@@ -311,7 +311,9 @@ export function XYChart({
 
   const visualConfigs = [
     ...referenceLineLayers
-      .flatMap<ExtendedYConfigResult | ReferenceLineYConfig | undefined>(({ yConfig }) => yConfig)
+      .flatMap<ReferenceLineDecorationConfig | ExtendedReferenceLineDecorationConfig | undefined>(
+        ({ decorations }) => decorations
+      )
       .map((config) => ({
         ...config,
         position: config
@@ -388,19 +390,21 @@ export function XYChart({
       padding,
       includeDataFromIds: referenceLineLayers
         .flatMap((l) =>
-          l.yConfig ? l.yConfig.map((yConfig) => ({ layerId: l.layerId, yConfig })) : []
+          l.decorations
+            ? l.decorations.map((decoration) => ({ layerId: l.layerId, decoration }))
+            : []
         )
-        .filter(({ yConfig }) => {
-          if (yConfig.axisId) {
-            return axis.groupId.includes(yConfig.axisId);
+        .filter(({ decoration }) => {
+          if (decoration.axisId) {
+            return axis.groupId.includes(decoration.axisId);
           }
 
-          return axis.position === yConfig.position;
+          return axis.position === decoration.position;
         })
-        .map(({ layerId, yConfig }) =>
-          isReferenceLineYConfig(yConfig)
-            ? `${layerId}-${yConfig.value}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
-            : `${layerId}-${yConfig.forAccessor}-${yConfig.fill !== 'none' ? 'rect' : 'line'}`
+        .map(({ layerId, decoration }) =>
+          isReferenceLineDecorationConfig(decoration)
+            ? `${layerId}-${decoration.value}-${decoration.fill !== 'none' ? 'rect' : 'line'}`
+            : `${layerId}-${decoration.forAccessor}-${decoration.fill !== 'none' ? 'rect' : 'line'}`
         ),
     };
   };

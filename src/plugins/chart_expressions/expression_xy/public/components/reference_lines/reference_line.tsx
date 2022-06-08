@@ -32,16 +32,16 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
   nextValue,
 }) => {
   const {
-    yConfig: [yConfig],
+    decorations: [decorationConfig],
   } = layer;
 
-  if (!yConfig) {
+  if (!decorationConfig) {
     return null;
   }
 
-  const { value } = yConfig;
+  const { value } = decorationConfig;
 
-  const axisGroup = getAxisGroupForReferenceLine(yAxesConfiguration, yConfig);
+  const axisGroup = getAxisGroupForReferenceLine(yAxesConfiguration, decorationConfig);
 
   const formatter = axisGroup?.formatter || xAxisFormatter;
   const id = `${layer.layerId}-${value}`;
@@ -53,7 +53,7 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
 
   return (
     <ReferenceLineAnnotations
-      config={{ id, ...yConfig, nextValue, axisGroup }}
+      config={{ id, ...decorationConfig, nextValue, axisGroup }}
       paddingMap={paddingMap}
       axesMap={axesMap}
       formatter={formatter}

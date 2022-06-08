@@ -10,17 +10,17 @@ import { Position } from '@elastic/charts';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { getAccessorByDimension } from '@kbn/visualizations-plugin/common/utils';
 import { FormatFactory } from '../types';
-import type { ReferenceLineYConfig } from '../../common/types';
+import type { ExtendedReferenceLineDecorationConfig } from '../../common/types';
 import {
   AxisExtentConfig,
   CommonXYDataLayerConfig,
-  ExtendedYConfig,
-  YConfig,
+  DataDecorationConfig,
   YAxisConfig,
-  ExtendedYConfigResult,
+  ReferenceLineDecorationConfig,
+  ReferenceLineDecorationConfigResult,
 } from '../../common';
 import { LayersFieldFormats } from './layers';
-import { isReferenceLineYConfig } from './visualization';
+import { isReferenceLineDecorationConfig } from './visualization';
 
 export interface Series {
   layer: string;
@@ -66,11 +66,16 @@ export function groupAxesByType(
   layers.forEach((layer) => {
     const { layerId, table } = layer;
     layer.accessors.forEach((accessor) => {
-      const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer.yConfig;
+      const dataDecorations:
+        | Array<DataDecorationConfig | ReferenceLineDecorationConfig>
+        | undefined = layer.decorations;
       const yAccessor = getAccessorByDimension(accessor, table.columns);
-      const yConfigByAccessor = yConfig?.find((config) => config.forAccessor === yAccessor);
+      const decorationByAccessor = dataDecorations?.find(
+        (decorationConfig) => decorationConfig.forAccessor === yAccessor
+      );
       const axisConfigById = yAxisConfigs?.find(
-        (axis) => yConfigByAccessor?.axisId && axis.id && axis.id === yConfigByAccessor?.axisId
+        (axis) =>
+          decorationByAccessor?.axisId && axis.id && axis.id === decorationByAccessor?.axisId
       );
       const key = axisConfigById?.id || 'auto';
       const fieldFormat = fieldFormats[layerId].yAccessors[yAccessor]!;
@@ -213,15 +218,15 @@ export function validateExtent(hasBarOrArea: boolean, extent?: AxisExtentConfig)
 
 export const getAxisGroupConfig = (
   axesGroup?: GroupsConfiguration,
-  yConfig?: ExtendedYConfigResult | ReferenceLineYConfig
+  decoration?: ReferenceLineDecorationConfigResult | ExtendedReferenceLineDecorationConfig
 ) => {
   return axesGroup?.find((axis) => {
-    if (yConfig?.axisId) {
-      return axis.groupId.includes(yConfig.axisId);
+    if (decoration?.axisId) {
+      return axis.groupId.includes(decoration.axisId);
     }
 
-    return yConfig && isReferenceLineYConfig(yConfig)
-      ? yConfig.position === axis.position
-      : axis.series.some(({ accessor }) => accessor === yConfig?.forAccessor);
+    return decoration && isReferenceLineDecorationConfig(decoration)
+      ? decoration.position === axis.position
+      : axis.series.some(({ accessor }) => accessor === decoration?.forAccessor);
   });
 };

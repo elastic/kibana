@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { CommonXYLayerConfig, ExtendedYConfig, YConfig } from '../../common';
+import type {
+  CommonXYLayerConfig,
+  ReferenceLineDecorationConfig,
+  DataDecorationConfig,
+} from '../../common';
 import { getDataLayers, isAnnotationsLayer, isDataLayer, isReferenceLine } from './visualization';
 
 export function isHorizontalChart(layers: CommonXYLayerConfig[]) {
@@ -21,6 +25,10 @@ export const getSeriesColor = (layer: CommonXYLayerConfig, accessor: string) => 
   ) {
     return null;
   }
-  const yConfig: Array<YConfig | ExtendedYConfig> | undefined = layer?.yConfig;
-  return yConfig?.find((yConf) => yConf.forAccessor === accessor)?.color || null;
+  const decorations: Array<DataDecorationConfig | ReferenceLineDecorationConfig> | undefined =
+    layer?.decorations;
+  return (
+    decorations?.find((decorationConfig) => decorationConfig.forAccessor === accessor)?.color ||
+    null
+  );
 };

@@ -24,9 +24,9 @@ describe('referenceLine', () => {
       type: 'referenceLine',
       layerType: 'referenceLine',
       lineLength: 0,
-      yConfig: [
+      decorations: [
         {
-          type: 'referenceLineYConfig',
+          type: 'extendedReferenceLineDecorationConfig',
           ...args,
           textVisibility: false,
         },
@@ -55,9 +55,9 @@ describe('referenceLine', () => {
       type: 'referenceLine',
       layerType: 'referenceLine',
       lineLength: 0,
-      yConfig: [
+      decorations: [
         {
-          type: 'referenceLineYConfig',
+          type: 'extendedReferenceLineDecorationConfig',
           ...args,
         },
       ],
@@ -79,9 +79,9 @@ describe('referenceLine', () => {
       type: 'referenceLine',
       layerType: 'referenceLine',
       lineLength: 0,
-      yConfig: [
+      decorations: [
         {
-          type: 'referenceLineYConfig',
+          type: 'extendedReferenceLineDecorationConfig',
           ...args,
           textVisibility: true,
         },
@@ -104,9 +104,9 @@ describe('referenceLine', () => {
       type: 'referenceLine',
       layerType: 'referenceLine',
       lineLength: 0,
-      yConfig: [
+      decorations: [
         {
-          type: 'referenceLineYConfig',
+          type: 'extendedReferenceLineDecorationConfig',
           ...args,
           textVisibility: false,
         },
@@ -131,9 +131,9 @@ describe('referenceLine', () => {
         type: 'referenceLine',
         layerType: 'referenceLine',
         lineLength: 0,
-        yConfig: [
+        decorations: [
           {
-            type: 'referenceLineYConfig',
+            type: 'extendedReferenceLineDecorationConfig',
             ...args,
             textVisibility,
           },

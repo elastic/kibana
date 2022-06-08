@@ -8,11 +8,11 @@
 
 export const XY_VIS = 'xyVis';
 export const LAYERED_XY_VIS = 'layeredXyVis';
-export const Y_CONFIG = 'yConfig';
+export const DATA_DECORATION_CONFIG = 'dataDecorationConfig';
+export const REFERENCE_LINE_DECORATION_CONFIG = 'referenceLineDecorationConfig';
+export const EXTENDED_REFERENCE_LINE_DECORATION_CONFIG = 'extendedReferenceLineDecorationConfig';
 export const X_AXIS_CONFIG = 'xAxisConfig';
 export const Y_AXIS_CONFIG = 'yAxisConfig';
-export const REFERENCE_LINE_Y_CONFIG = 'referenceLineYConfig';
-export const EXTENDED_Y_CONFIG = 'extendedYConfig';
 export const DATA_LAYER = 'dataLayer';
 export const EXTENDED_DATA_LAYER = 'extendedDataLayer';
 export const LEGEND_CONFIG = 'legendConfig';

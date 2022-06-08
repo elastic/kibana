@@ -7,7 +7,7 @@
  */
 
 import { ArgumentType } from '@kbn/expressions-plugin/common';
-import { SeriesTypes, XScaleTypes, Y_CONFIG } from '../constants';
+import { SeriesTypes, XScaleTypes, DATA_DECORATION_CONFIG } from '../constants';
 import { strings } from '../i18n';
 import { DataLayerArgs, ExtendedDataLayerArgs } from '../types';
 
@@ -74,9 +74,9 @@ export const commonDataLayerArgs: Omit<
     types: ['boolean'],
     help: strings.getShowLinesHelp(),
   },
-  yConfig: {
-    types: [Y_CONFIG],
-    help: strings.getYConfigHelp(),
+  decorations: {
+    types: [DATA_DECORATION_CONFIG],
+    help: strings.getDecorationsHelp(),
     multi: true,
   },
   columnToLabel: {

@@ -19,6 +19,7 @@ import type {
   LineStyle,
   IconPosition,
   FillStyle,
+  YAxisConfig,
 } from '@kbn/expression-xy-plugin/common';
 import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { LensIconChartArea } from '../assets/chart_area';
@@ -61,6 +62,10 @@ export interface AxesSettingsConfig {
   x: boolean;
   yRight: boolean;
   yLeft: boolean;
+}
+
+export interface AxisConfig extends Omit<YAxisConfig, 'extent'> {
+  extent?: AxisExtentConfig;
 }
 
 export interface LabelsOrientationConfig {

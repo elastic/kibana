@@ -15,8 +15,8 @@ import {
   IconPosition,
   ReferenceLineConfig,
   FillStyle,
-  ReferenceLineYConfig,
-  ExtendedYConfigResult,
+  ExtendedReferenceLineDecorationConfig,
+  ReferenceLineDecorationConfig,
 } from '../../../common/types';
 import { FillStyles } from '../../../common/constants';
 import {
@@ -150,13 +150,16 @@ export const getHorizontalRect = (
 const sortReferenceLinesByGroup = (referenceLines: ReferenceLineConfig[], group: FillStyle) => {
   if (group === FillStyles.ABOVE || group === FillStyles.BELOW) {
     const order = group === FillStyles.ABOVE ? 'asc' : 'desc';
-    return orderBy(referenceLines, ({ yConfig: [{ value }] }) => value, [order]);
+    return orderBy(referenceLines, ({ decorations: [{ value }] }) => value, [order]);
   }
   return referenceLines;
 };
 
 export const getNextValuesForReferenceLines = (referenceLines: ReferenceLineConfig[]) => {
-  const grouppedReferenceLines = groupBy(referenceLines, ({ yConfig: [yConfig] }) => yConfig.fill);
+  const grouppedReferenceLines = groupBy(
+    referenceLines,
+    ({ decorations: [decorationConfig] }) => decorationConfig.fill
+  );
   const groups = Object.keys(grouppedReferenceLines) as FillStyle[];
 
   return groups.reduce<Record<FillStyle, Record<string, number | undefined>>>(
@@ -167,8 +170,8 @@ export const getNextValuesForReferenceLines = (referenceLines: ReferenceLineConf
         (nextValues, referenceLine, index, lines) => {
           let nextValue: number | undefined;
           if (index < lines.length - 1) {
-            const [yConfig] = lines[index + 1].yConfig;
-            nextValue = yConfig.value;
+            const [decorationConfig] = lines[index + 1].decorations;
+            nextValue = decorationConfig.value;
           }
 
           return { ...nextValues, [referenceLine.layerId]: nextValue };
@@ -218,11 +221,11 @@ export const computeChartMargins = (
 
 export function getAxisGroupForReferenceLine(
   yAxesConfiguration: GroupsConfiguration,
-  yConfig: ReferenceLineYConfig | ExtendedYConfigResult
+  decorationConfig: ReferenceLineDecorationConfig | ExtendedReferenceLineDecorationConfig
 ) {
   return yAxesConfiguration.find(
     (axis) =>
-      (yConfig.axisId && axis.groupId.includes(yConfig.axisId)) ||
-      yConfig.position === axis.position
+      (decorationConfig.axisId && axis.groupId.includes(decorationConfig.axisId)) ||
+      decorationConfig.position === axis.position
   );
 }

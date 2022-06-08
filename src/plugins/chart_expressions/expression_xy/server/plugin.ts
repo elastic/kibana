@@ -12,10 +12,10 @@ import { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
 import {
   xyVisFunction,
   legendConfigFunction,
-  yConfigFunction,
+  dataDecorationConfigFunction,
   xAxisConfigFunction,
   yAxisConfigFunction,
-  extendedYConfigFunction,
+  referenceLineDecorationConfigFunction,
   axisExtentConfigFunction,
   annotationLayerFunction,
   referenceLineFunction,
@@ -31,9 +31,9 @@ export class ExpressionXyPlugin
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps) {
     expressions.registerFunction(yAxisConfigFunction);
-    expressions.registerFunction(yConfigFunction);
+    expressions.registerFunction(dataDecorationConfigFunction);
     expressions.registerFunction(xAxisConfigFunction);
-    expressions.registerFunction(extendedYConfigFunction);
+    expressions.registerFunction(referenceLineDecorationConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);

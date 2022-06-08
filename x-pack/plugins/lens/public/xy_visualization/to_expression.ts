@@ -9,7 +9,7 @@ import { Ast, AstFunction } from '@kbn/interpreter';
 import { ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import type { YAxisConfig, AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
+import type { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
 import {
   State,
@@ -17,6 +17,7 @@ import {
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   XYAnnotationLayerConfig,
+  AxisConfig,
 } from './types';
 import type { ValidXYDataLayerConfig } from './types';
 import { OperationMetadata, DatasourcePublicAPI, DatasourceLayers } from '../types';
@@ -190,19 +191,17 @@ export const buildExpression = (
     return null;
   }
 
-  const validLayersWithYConfig = [...validDataLayers, ...validReferenceLayers];
-
-  const isLeftAxis = validLayersWithYConfig.some(({ yConfig }) =>
+  const isLeftAxis = validDataLayers.some(({ yConfig }) =>
     yConfig?.some((config) => config.axisMode === 'left')
   );
-  const isRightAxis = validLayersWithYConfig.some(({ yConfig }) =>
+  const isRightAxis = validDataLayers.some(({ yConfig }) =>
     yConfig?.some((config) => config.axisMode === 'right')
   );
 
-  const yAxisConfigs: YAxisConfig[] = [
+  const yAxisConfigs: AxisConfig[] = [
     {
       position: 'left',
-      extent: state?.yLeftExtent ? { ...state?.yLeftExtent, type: 'axisExtentConfig' } : undefined,
+      extent: state?.yLeftExtent,
       showTitle: state?.axisTitlesVisibilitySettings?.yLeft ?? true,
       title: state.yTitle || '',
       showLabels: state?.tickLabelsVisibilitySettings?.yLeft ?? true,
@@ -212,9 +211,7 @@ export const buildExpression = (
     },
     {
       position: 'right',
-      extent: state?.yRightExtent
-        ? { ...state?.yRightExtent, type: 'axisExtentConfig' }
-        : undefined,
+      extent: state?.yRightExtent,
       showTitle: state?.axisTitlesVisibilitySettings?.yRight ?? true,
       title: state.yRightTitle || '',
       showLabels: state?.tickLabelsVisibilitySettings?.yRight ?? true,
@@ -228,6 +225,8 @@ export const buildExpression = (
     yAxisConfigs.push({
       id: 'left',
       position: 'left',
+      // we need also settings from global config here so that default's doesn't override it
+      ...yAxisConfigs[0],
     });
   }
 
@@ -235,6 +234,8 @@ export const buildExpression = (
     yAxisConfigs.push({
       id: 'right',
       position: 'right',
+      // we need also settings from global config here so that default's doesn't override it
+      ...yAxisConfigs[1],
     });
   }
 
@@ -331,7 +332,6 @@ export const buildExpression = (
             ...validReferenceLayers.map((layer) =>
               referenceLineLayerToExpression(
                 layer,
-                yAxisConfigs,
                 datasourceLayers[(layer as XYReferenceLineLayerConfig).layerId],
                 datasourceExpressionsByLayers[layer.layerId]
               )
@@ -347,7 +347,7 @@ export const buildExpression = (
 };
 
 const yAxisConfigsToExpression = (
-  yAxisConfigs: YAxisConfig[],
+  yAxisConfigs: AxisConfig[],
   validDataLayers: ValidXYDataLayerConfig[]
 ): Ast[] => {
   return yAxisConfigs.map((axis) => ({
@@ -360,10 +360,10 @@ const yAxisConfigsToExpression = (
           id: axis.id ? [axis.id] : [],
           position: axis.position ? [axis.position] : [],
           extent: axis.extent ? [axisExtentConfigToExpression(axis.extent, validDataLayers)] : [],
-          showTitle: axis.showTitle ? [axis.showTitle] : [],
-          title: axis.title ? [axis.title] : [],
-          showLabels: axis.showLabels ? [axis.showLabels] : [],
-          showGridLines: axis.showGridLines ? [axis.showGridLines] : [],
+          showTitle: [axis.showTitle ?? true],
+          title: axis.title !== undefined ? [axis.title] : [],
+          showLabels: [axis.showLabels ?? true],
+          showGridLines: [axis.showGridLines ?? true],
           labelsOrientation: axis.labelsOrientation !== undefined ? [axis.labelsOrientation] : [],
         },
       },
@@ -373,7 +373,6 @@ const yAxisConfigsToExpression = (
 
 const referenceLineLayerToExpression = (
   layer: XYReferenceLineLayerConfig,
-  yAxisConfigs: YAxisConfig[],
   datasourceLayer: DatasourcePublicAPI,
   datasourceExpression: Ast
 ): Ast => {
@@ -385,9 +384,9 @@ const referenceLineLayerToExpression = (
         function: 'referenceLineLayer',
         arguments: {
           layerId: [layer.layerId],
-          yConfig: layer.yConfig
+          decorations: layer.yConfig
             ? layer.yConfig.map((yConfig) =>
-                extendedYConfigToExpression(yConfig, yAxisConfigs, defaultReferenceLineColor)
+                extendedYConfigToRLDecorationConfigExpression(yConfig, defaultReferenceLineColor)
               )
             : [],
           accessors: layer.accessors,
@@ -423,7 +422,7 @@ const annotationLayerToExpression = (
 
 const dataLayerToExpression = (
   layer: ValidXYDataLayerConfig,
-  yAxisConfigs: YAxisConfig[],
+  yAxisConfigs: AxisConfig[],
   datasourceLayer: DatasourcePublicAPI,
   metadata: Record<string, Record<string, OperationMetadata | null>>,
   paletteService: PaletteRegistry,
@@ -445,6 +444,7 @@ const dataLayerToExpression = (
   const isPercentage = dataFromType.includes('percentage');
   const isStacked = dataFromType.includes('stacked');
   const isHorizontal = dataFromType.includes('horizontal');
+  debugger;
 
   return {
     type: 'expression',
@@ -462,8 +462,10 @@ const dataLayerToExpression = (
           isStacked: isStacked ? [isStacked] : [],
           isHorizontal: isHorizontal ? [isHorizontal] : [],
           splitAccessor: layer.collapseFn || !layer.splitAccessor ? [] : [layer.splitAccessor],
-          yConfig: layer.yConfig
-            ? layer.yConfig.map((yConfig) => yConfigToExpression(yConfig, yAxisConfigs))
+          decorations: layer.yConfig
+            ? layer.yConfig.map((yConfig) =>
+                yConfigToDataDecorationConfigExpression(yConfig, yAxisConfigs)
+              )
             : [],
           seriesType: [seriesType],
           accessors: layer.accessors,
@@ -524,9 +526,9 @@ const dataLayerToExpression = (
   };
 };
 
-const yConfigToExpression = (
+const yConfigToDataDecorationConfigExpression = (
   yConfig: YConfig,
-  yAxisConfigs: YAxisConfig[],
+  yAxisConfigs: AxisConfig[],
   defaultColor?: string
 ): Ast => {
   const axisId = yAxisConfigs.find((axis) => axis.id && axis.position === yConfig.axisMode)?.id;
@@ -535,7 +537,7 @@ const yConfigToExpression = (
     chain: [
       {
         type: 'function',
-        function: 'yConfig',
+        function: 'dataDecorationConfig',
         arguments: {
           axisId: axisId ? [axisId] : [],
           forAccessor: [yConfig.forAccessor],
@@ -546,21 +548,19 @@ const yConfigToExpression = (
   };
 };
 
-const extendedYConfigToExpression = (
+const extendedYConfigToRLDecorationConfigExpression = (
   yConfig: YConfig,
-  yAxisConfigs: YAxisConfig[],
   defaultColor?: string
 ): Ast => {
-  const axisId = yAxisConfigs.find((axis) => axis.id && axis.position === yConfig.axisMode)?.id;
   return {
     type: 'expression',
     chain: [
       {
         type: 'function',
-        function: 'extendedYConfig',
+        function: 'referenceLineDecorationConfig',
         arguments: {
           forAccessor: [yConfig.forAccessor],
-          axisId: axisId ? [axisId] : [],
+          position: yConfig.axisMode ? [yConfig.axisMode] : [],
           color: yConfig.color ? [yConfig.color] : defaultColor ? [defaultColor] : [],
           lineStyle: [yConfig.lineStyle || 'solid'],
           lineWidth: [yConfig.lineWidth || 1],

@@ -107,7 +107,7 @@ export const errors = {
   axisIsNotAssignedError: (axisId: string) =>
     i18n.translate('expressionXY.reusable.function.xyVis.errors.axisIsNotAssignedError', {
       defaultMessage:
-        'Axis with id: "{axisId}" is not assigned to any accessor. Please assign axis using the following construction: `yConfig=\\{yConfig forAccessor="your-accessor" axisId="{axisId}"\\}`',
+        'Axis with id: "{axisId}" is not assigned to any accessor. Please assign axis using the following construction: `decorations=\\{dataDecorationConfig forAccessor="your-accessor" axisId="{axisId}"\\}`',
       values: { axisId },
     }),
 };
@@ -172,7 +172,9 @@ export const validateAxes = (
     if (
       axis.id &&
       dataLayers.every(
-        (layer) => !layer.yConfig || layer.yConfig?.every((config) => config.axisId !== axis.id)
+        (layer) =>
+          !layer.decorations ||
+          layer.decorations?.every((decorationConfig) => decorationConfig.axisId !== axis.id)
       )
     ) {
       throw new Error(errors.axisIsNotAssignedError(axis.id));

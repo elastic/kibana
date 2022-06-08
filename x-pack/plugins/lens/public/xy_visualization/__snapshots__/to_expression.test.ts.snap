@@ -35,6 +35,7 @@ Object {
                   "columnToLabel": Array [
                     "{\\"b\\":\\"col_b\\",\\"c\\":\\"col_c\\",\\"d\\":\\"col_d\\"}",
                   ],
+                  "decorations": Array [],
                   "hide": Array [
                     false,
                   ],
@@ -81,7 +82,6 @@ Object {
                   "xScaleType": Array [
                     "linear",
                   ],
-                  "yConfig": Array [],
                 },
                 "function": "extendedDataLayer",
                 "type": "function",
@@ -181,7 +181,9 @@ Object {
                   "showTitle": Array [
                     true,
                   ],
-                  "title": Array [],
+                  "title": Array [
+                    "",
+                  ],
                 },
                 "function": "yAxisConfig",
                 "type": "function",
@@ -231,7 +233,9 @@ Object {
                   "showTitle": Array [
                     true,
                   ],
-                  "title": Array [],
+                  "title": Array [
+                    "",
+                  ],
                 },
                 "function": "yAxisConfig",
                 "type": "function",

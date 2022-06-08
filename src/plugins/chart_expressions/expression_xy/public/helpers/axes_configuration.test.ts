@@ -302,7 +302,7 @@ describe('axes_configuration', () => {
       [
         {
           ...sampleLayer,
-          yConfig: [{ type: 'yConfig', forAccessor: 'yAccessorId', axisId: '1' }],
+          decorations: [{ type: 'dataDecorationConfig', forAccessor: 'yAccessorId', axisId: '1' }],
         },
       ],
       false,
@@ -323,7 +323,7 @@ describe('axes_configuration', () => {
         {
           ...sampleLayer,
           accessors: ['yAccessorId', 'yAccessorId3', 'yAccessorId4'],
-          yConfig: [{ type: 'yConfig', forAccessor: 'yAccessorId', axisId: '1' }],
+          decorations: [{ type: 'dataDecorationConfig', forAccessor: 'yAccessorId', axisId: '1' }],
         },
       ],
       false,
@@ -348,7 +348,7 @@ describe('axes_configuration', () => {
         {
           ...sampleLayer,
           accessors: ['yAccessorId', 'yAccessorId3', 'yAccessorId4'],
-          yConfig: [{ type: 'yConfig', forAccessor: 'yAccessorId', axisId: '1' }],
+          decorations: [{ type: 'dataDecorationConfig', forAccessor: 'yAccessorId', axisId: '1' }],
         },
       ],
       false,

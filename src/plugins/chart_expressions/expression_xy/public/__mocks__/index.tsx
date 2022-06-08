@@ -201,8 +201,12 @@ export function sampleArgsWithReferenceLine(value: number = 150) {
         type: 'referenceLineLayer',
         layerType: LayerTypes.REFERENCELINE,
         accessors: ['referenceLine-a'],
-        yConfig: [
-          { forAccessor: 'referenceLine-a', type: 'extendedYConfig', position: Position.Left },
+        decorations: [
+          {
+            forAccessor: 'referenceLine-a',
+            type: 'referenceLineDecorationConfig',
+            position: Position.Left,
+          },
         ],
         table: data,
       },

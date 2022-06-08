@@ -11,7 +11,6 @@ export const PLUGIN_NAME = 'expressionXy';
 
 export type {
   XYArgs,
-  YConfig,
   EndValue,
   XYRender,
   LayerType,
@@ -34,7 +33,6 @@ export type {
   AxisExtentMode,
   DataLayerConfig,
   FittingFunction,
-  ExtendedYConfig,
   AxisExtentConfig,
   CollectiveConfig,
   LegendConfigResult,
@@ -42,8 +40,8 @@ export type {
   XAxisConfigResult,
   YAxisConfigResult,
   CommonXYLayerConfig,
+  DataDecorationConfig,
   AnnotationLayerArgs,
-  ExtendedYConfigResult,
   DataLayerConfigResult,
   AxisExtentConfigResult,
   ReferenceLineLayerArgs,
@@ -55,6 +53,8 @@ export type {
   ExtendedDataLayerConfigResult,
   CommonXYDataLayerConfigResult,
   ReferenceLineLayerConfigResult,
+  ReferenceLineDecorationConfig,
   CommonXYReferenceLineLayerConfig,
+  ReferenceLineDecorationConfigResult,
   CommonXYReferenceLineLayerConfigResult,
 } from './types';

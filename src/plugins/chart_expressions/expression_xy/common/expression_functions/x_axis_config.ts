@@ -20,6 +20,12 @@ export const xAxisConfigFunction: XAxisConfigFn = {
   inputTypes: ['null'],
   args: {
     ...commonAxisConfigArgs,
+    position: {
+      types: ['string'],
+      options: [Position.Top, Position.Bottom],
+      help: strings.getAxisPositionHelp(),
+      strict: true,
+    },
   },
   fn(input, args) {
     return {

@@ -28,7 +28,8 @@ import {
   YScaleTypes,
   AxisModes,
   REFERENCE_LINE,
-  Y_CONFIG,
+  DATA_DECORATION_CONFIG,
+  REFERENCE_LINE_DECORATION_CONFIG,
   LEGEND_CONFIG,
   DATA_LAYER,
   AXIS_EXTENT_CONFIG,
@@ -38,12 +39,11 @@ import {
   EndValues,
   X_AXIS_CONFIG,
   Y_AXIS_CONFIG,
-  EXTENDED_Y_CONFIG,
   AvailableReferenceLineIcons,
   XY_VIS,
   LAYERED_XY_VIS,
   EXTENDED_ANNOTATION_LAYER,
-  REFERENCE_LINE_Y_CONFIG,
+  EXTENDED_REFERENCE_LINE_DECORATION_CONFIG,
 } from '../constants';
 import { XYRender } from './expression_renderers';
 
@@ -95,7 +95,7 @@ export interface YAxisConfig extends AxisConfig {
   scaleType?: YScaleType;
 }
 
-export interface ExtendedYConfig extends YConfig {
+export interface ReferenceLineDecorationConfig extends DataDecorationConfig {
   icon?: AvailableReferenceLineIcon;
   lineWidth?: number;
   lineStyle?: LineStyle;
@@ -105,7 +105,7 @@ export interface ExtendedYConfig extends YConfig {
   position?: Position;
 }
 
-export interface YConfig {
+export interface DataDecorationConfig {
   forAccessor: string;
   color?: string;
   axisId?: string;
@@ -129,7 +129,7 @@ export interface DataLayerArgs {
   isStacked: boolean;
   isHorizontal: boolean;
   palette: PaletteOutput;
-  yConfig?: YConfigResult[];
+  decorations?: DataDecorationConfigResult[];
 }
 
 export interface ValidLayer extends DataLayerConfigResult {
@@ -156,7 +156,7 @@ export interface ExtendedDataLayerArgs {
   isHorizontal: boolean;
   palette: PaletteOutput;
   // palette will always be set on the expression
-  yConfig?: YConfigResult[];
+  decorations?: DataDecorationConfigResult[];
   table?: Datatable;
 }
 
@@ -297,7 +297,8 @@ export type ExtendedAnnotationLayerConfigResult = ExtendedAnnotationLayerArgs & 
   layerType: typeof LayerTypes.ANNOTATIONS;
 };
 
-export interface ReferenceLineArgs extends Omit<ExtendedYConfig, 'forAccessor' | 'fill'> {
+export interface ReferenceLineArgs
+  extends Omit<ReferenceLineDecorationConfig, 'forAccessor' | 'fill'> {
   name?: string;
   value: number;
   fill: FillStyle;
@@ -307,7 +308,7 @@ export interface ReferenceLineLayerArgs {
   layerId?: string;
   accessors: string[];
   columnToLabel?: string;
-  yConfig?: ExtendedYConfigResult[];
+  decorations?: ReferenceLineDecorationConfigResult[];
   table?: Datatable;
 }
 
@@ -323,15 +324,15 @@ export type XYExtendedLayerConfigResult =
   | ReferenceLineLayerConfigResult
   | ExtendedAnnotationLayerConfigResult;
 
-export interface ReferenceLineYConfig extends ReferenceLineArgs {
-  type: typeof REFERENCE_LINE_Y_CONFIG;
+export interface ExtendedReferenceLineDecorationConfig extends ReferenceLineArgs {
+  type: typeof EXTENDED_REFERENCE_LINE_DECORATION_CONFIG;
 }
 
 export interface ReferenceLineConfigResult {
   type: typeof REFERENCE_LINE;
   layerType: typeof LayerTypes.REFERENCELINE;
   lineLength: number;
-  yConfig: [ReferenceLineYConfig];
+  decorations: [ExtendedReferenceLineDecorationConfig];
 }
 
 export type ReferenceLineLayerConfigResult = ReferenceLineLayerArgs & {
@@ -366,8 +367,12 @@ export type ExtendedDataLayerConfigResult = Omit<ExtendedDataLayerArgs, 'palette
   table: Datatable;
 };
 
-export type YConfigResult = YConfig & { type: typeof Y_CONFIG };
-export type ExtendedYConfigResult = ExtendedYConfig & { type: typeof EXTENDED_Y_CONFIG };
+export type DataDecorationConfigResult = DataDecorationConfig & {
+  type: typeof DATA_DECORATION_CONFIG;
+};
+export type ReferenceLineDecorationConfigResult = ReferenceLineDecorationConfig & {
+  type: typeof REFERENCE_LINE_DECORATION_CONFIG;
+};
 
 export type XAxisConfigResult = AxisConfig & { type: typeof X_AXIS_CONFIG };
 export type YAxisConfigResult = YAxisConfig & { type: typeof Y_AXIS_CONFIG };
@@ -419,12 +424,17 @@ export type ReferenceLineLayerFn = ExpressionFunctionDefinition<
   Promise<ReferenceLineLayerConfigResult>
 >;
 
-export type YConfigFn = ExpressionFunctionDefinition<typeof Y_CONFIG, null, YConfig, YConfigResult>;
-export type ExtendedYConfigFn = ExpressionFunctionDefinition<
-  typeof EXTENDED_Y_CONFIG,
+export type DataDecorationConfigFn = ExpressionFunctionDefinition<
+  typeof DATA_DECORATION_CONFIG,
   null,
-  ExtendedYConfig,
-  ExtendedYConfigResult
+  DataDecorationConfig,
+  DataDecorationConfigResult
+>;
+export type ReferenceLineDecorationConfigFn = ExpressionFunctionDefinition<
+  typeof REFERENCE_LINE_DECORATION_CONFIG,
+  null,
+  ReferenceLineDecorationConfig,
+  ReferenceLineDecorationConfigResult
 >;
 
 export type LegendConfigFn = ExpressionFunctionDefinition<

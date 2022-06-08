@@ -6,43 +6,54 @@
  * Side Public License, v 1.
  */
 
+import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import {
   AvailableReferenceLineIcons,
-  EXTENDED_Y_CONFIG,
+  REFERENCE_LINE_DECORATION_CONFIG,
   FillStyles,
   IconPositions,
   LineStyles,
 } from '../constants';
 import { strings } from '../i18n';
-import { ExtendedYConfigFn } from '../types';
-import { commonYConfigArgs } from './common_y_config_args';
+import { ReferenceLineDecorationConfigFn } from '../types';
+import { commonDecorationConfigArgs } from './common_y_config_args';
 
-export const extendedYAxisConfigFunction: ExtendedYConfigFn = {
-  name: EXTENDED_Y_CONFIG,
+export const referenceLineDecorationConfigFunction: ReferenceLineDecorationConfigFn = {
+  name: REFERENCE_LINE_DECORATION_CONFIG,
   aliases: [],
-  type: EXTENDED_Y_CONFIG,
-  help: strings.getYConfigFnHelp(),
+  type: REFERENCE_LINE_DECORATION_CONFIG,
+  help: strings.getDecorationsHelp(),
   inputTypes: ['null'],
   args: {
-    ...commonYConfigArgs,
+    ...commonDecorationConfigArgs,
+    position: {
+      types: ['string'],
+      options: [Position.Right, Position.Left],
+      help: i18n.translate('expressionXY.referenceLine.position.help', {
+        defaultMessage:
+          'Position of axis (first axis of that position) to which the reference line belongs.',
+      }),
+      default: Position.Left,
+      strict: true,
+    },
     lineStyle: {
       types: ['string'],
       options: [...Object.values(LineStyles)],
-      help: i18n.translate('expressionXY.yConfig.lineStyle.help', {
+      help: i18n.translate('expressionXY.decorationConfig.lineStyle.help', {
         defaultMessage: 'The style of the reference line',
       }),
       strict: true,
     },
     lineWidth: {
       types: ['number'],
-      help: i18n.translate('expressionXY.yConfig.lineWidth.help', {
+      help: i18n.translate('expressionXY.decorationConfig.lineWidth.help', {
         defaultMessage: 'The width of the reference line',
       }),
     },
     icon: {
       types: ['string'],
-      help: i18n.translate('expressionXY.yConfig.icon.help', {
+      help: i18n.translate('expressionXY.decorationConfig.icon.help', {
         defaultMessage: 'An optional icon used for reference lines',
       }),
       options: [...Object.values(AvailableReferenceLineIcons)],
@@ -51,21 +62,21 @@ export const extendedYAxisConfigFunction: ExtendedYConfigFn = {
     iconPosition: {
       types: ['string'],
       options: [...Object.values(IconPositions)],
-      help: i18n.translate('expressionXY.yConfig.iconPosition.help', {
+      help: i18n.translate('expressionXY.decorationConfig.iconPosition.help', {
         defaultMessage: 'The placement of the icon for the reference line',
       }),
       strict: true,
     },
     textVisibility: {
       types: ['boolean'],
-      help: i18n.translate('expressionXY.yConfig.textVisibility.help', {
+      help: i18n.translate('expressionXY.decorationConfig.textVisibility.help', {
         defaultMessage: 'Visibility of the label on the reference line',
       }),
     },
     fill: {
       types: ['string'],
       options: [...Object.values(FillStyles)],
-      help: i18n.translate('expressionXY.yConfig.fill.help', {
+      help: i18n.translate('expressionXY.decorationConfig.fill.help', {
         defaultMessage: 'Fill',
       }),
       strict: true,
@@ -73,7 +84,7 @@ export const extendedYAxisConfigFunction: ExtendedYConfigFn = {
   },
   fn(input, args) {
     return {
-      type: EXTENDED_Y_CONFIG,
+      type: REFERENCE_LINE_DECORATION_CONFIG,
       ...args,
     };
   },

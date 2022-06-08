@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Position } from '@elastic/charts';
 import { strings } from '../i18n';
 import { XAxisConfigFn, YAxisConfigFn } from '../types';
 
@@ -23,12 +22,6 @@ export const commonAxisConfigArgs: Omit<
   id: {
     types: ['string'],
     help: strings.getAxisIdHelp(),
-  },
-  position: {
-    types: ['string'],
-    options: [Position.Top, Position.Right, Position.Bottom, Position.Left],
-    help: strings.getAxisPositionHelp(),
-    strict: true,
   },
   hide: {
     types: ['boolean'],

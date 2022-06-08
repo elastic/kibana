@@ -1646,14 +1646,14 @@ describe('XYChart component', () => {
           {
             ...layer,
             accessors: ['a', 'b'],
-            yConfig: [
+            decorations: [
               {
-                type: 'yConfig',
+                type: 'dataDecorationConfig',
                 forAccessor: 'a',
                 axisId: '1',
               },
               {
-                type: 'yConfig',
+                type: 'dataDecorationConfig',
                 forAccessor: 'b',
                 axisId: '2',
               },
@@ -1712,14 +1712,14 @@ describe('XYChart component', () => {
           {
             ...layer,
             accessors: ['c', 'd'],
-            yConfig: [
+            decorations: [
               {
-                type: 'yConfig',
+                type: 'dataDecorationConfig',
                 forAccessor: 'c',
                 axisId: '1',
               },
               {
-                type: 'yConfig',
+                type: 'dataDecorationConfig',
                 forAccessor: 'd',
                 axisId: '1',
               },
@@ -1755,14 +1755,14 @@ describe('XYChart component', () => {
             type: 'extendedDataLayer',
             accessors: ['a', 'b'],
             splitAccessor: undefined,
-            yConfig: [
+            decorations: [
               {
-                type: 'yConfig',
+                type: 'dataDecorationConfig',
                 forAccessor: 'a',
                 color: '#550000',
               },
               {
-                type: 'yConfig',
+                type: 'dataDecorationConfig',
                 forAccessor: 'b',
                 color: '#FFFF00',
               },
@@ -1774,9 +1774,9 @@ describe('XYChart component', () => {
             type: 'extendedDataLayer',
             accessors: ['c'],
             splitAccessor: undefined,
-            yConfig: [
+            decorations: [
               {
-                type: 'yConfig',
+                type: 'dataDecorationConfig',
                 forAccessor: 'c',
                 color: '#FEECDF',
               },
@@ -1807,16 +1807,16 @@ describe('XYChart component', () => {
         })
       ).toEqual('#FEECDF');
     });
-    test('color is not applied to chart when splitAccessor is defined or when yConfig is not configured', () => {
+    test('color is not applied to chart when splitAccessor is defined or when decorations is not configured', () => {
       const newArgs: XYProps = {
         ...args,
         layers: [
           {
             ...layer,
             accessors: ['a'],
-            yConfig: [
+            decorations: [
               {
-                type: 'yConfig',
+                type: 'dataDecorationConfig',
                 forAccessor: 'a',
                 color: '#550000',
               },

@@ -18,16 +18,16 @@ import {
   xyVisFunction,
   layeredXyVisFunction,
   extendedDataLayerFunction,
-  yConfigFunction,
+  dataDecorationConfigFunction,
   xAxisConfigFunction,
   yAxisConfigFunction,
-  extendedYConfigFunction,
   legendConfigFunction,
   axisExtentConfigFunction,
   referenceLineFunction,
   referenceLineLayerFunction,
   annotationLayerFunction,
   extendedAnnotationLayerFunction,
+  referenceLineDecorationConfigFunction,
 } from '../common/expression_functions';
 import { GetStartDepsFn, getXyChartRenderer } from './expression_renderers';
 
@@ -53,8 +53,8 @@ export class ExpressionXyPlugin {
     { expressions, charts }: SetupDeps
   ): ExpressionXyPluginSetup {
     expressions.registerFunction(yAxisConfigFunction);
-    expressions.registerFunction(yConfigFunction);
-    expressions.registerFunction(extendedYConfigFunction);
+    expressions.registerFunction(dataDecorationConfigFunction);
+    expressions.registerFunction(referenceLineDecorationConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);

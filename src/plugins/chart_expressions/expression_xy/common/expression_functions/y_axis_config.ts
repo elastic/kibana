@@ -39,6 +39,12 @@ export const yAxisConfigFunction: YAxisConfigFn = {
       help: strings.getAxisScaleTypeHelp(),
       default: YScaleTypes.LINEAR,
     },
+    position: {
+      types: ['string'],
+      options: [Position.Right, Position.Left],
+      help: strings.getAxisPositionHelp(),
+      strict: true,
+    },
   },
   fn(input, args) {
     return {

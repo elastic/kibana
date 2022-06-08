@@ -36,13 +36,13 @@ export const ReferenceLines = ({ layers, titles = {}, ...rest }: ReferenceLinesP
   return (
     <>
       {layers.flatMap((layer) => {
-        if (!layer.yConfig) {
+        if (!layer.decorations) {
           return null;
         }
 
         const key = `referenceLine-${layer.layerId}`;
         if (isReferenceLine(layer)) {
-          const nextValue = referenceLinesNextValues[layer.yConfig[0].fill][layer.layerId];
+          const nextValue = referenceLinesNextValues[layer.decorations[0].fill][layer.layerId];
           return <ReferenceLine key={key} layer={layer} {...rest} nextValue={nextValue} />;
         }
 

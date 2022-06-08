@@ -185,9 +185,9 @@ export const strings = {
     i18n.translate('expressionXY.dataLayer.showLines.help', {
       defaultMessage: 'Show lines between points',
     }),
-  getYConfigHelp: () =>
-    i18n.translate('expressionXY.dataLayer.yConfig.help', {
-      defaultMessage: 'Additional configuration for y axes',
+  getDecorationsHelp: () =>
+    i18n.translate('expressionXY.dataLayer.decorations.help', {
+      defaultMessage: 'Additional decoration for data',
     }),
   getColumnToLabelHelp: () =>
     i18n.translate('expressionXY.layer.columnToLabel.help', {
@@ -209,28 +209,24 @@ export const strings = {
     i18n.translate('expressionXY.referenceLineLayer.accessors.help', {
       defaultMessage: 'The columns to display on the y axis.',
     }),
-  getRLYConfigHelp: () =>
-    i18n.translate('expressionXY.referenceLineLayer.yConfig.help', {
-      defaultMessage: 'Additional configuration for y axes',
+  getRLDecorationConfigHelp: () =>
+    i18n.translate('expressionXY.referenceLineLayer.decorationConfig.help', {
+      defaultMessage: 'Additional decoration for reference line',
     }),
   getRLHelp: () =>
     i18n.translate('expressionXY.referenceLineLayer.help', {
       defaultMessage: `Configure a reference line in the xy chart`,
     }),
-  getYConfigFnHelp: () =>
-    i18n.translate('expressionXY.yConfig.help', {
-      defaultMessage: `Configure the behavior of a xy chart's y axis metric`,
-    }),
   getForAccessorHelp: () =>
-    i18n.translate('expressionXY.yConfig.forAccessor.help', {
+    i18n.translate('expressionXY.decorationConfig.forAccessor.help', {
       defaultMessage: 'The accessor this configuration is for',
     }),
   getColorHelp: () =>
-    i18n.translate('expressionXY.yConfig.color.help', {
+    i18n.translate('expressionXY.decorationConfig.color.help', {
       defaultMessage: 'The color of the series',
     }),
   getAxisIdHelp: () =>
-    i18n.translate('expressionXY.yConfig.axisId.help', {
+    i18n.translate('expressionXY.decorationConfig.axisId.help', {
       defaultMessage: 'Id of axis',
     }),
   getAnnotationLayerFnHelp: () =>

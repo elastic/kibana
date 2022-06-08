@@ -7,11 +7,11 @@
  */
 
 import { strings } from '../i18n';
-import { YConfigFn, ExtendedYConfigFn } from '../types';
+import { DataDecorationConfigFn, ReferenceLineDecorationConfigFn } from '../types';
 
-type CommonYConfigFn = YConfigFn | ExtendedYConfigFn;
+type CommonDecorationConfigFn = DataDecorationConfigFn | ReferenceLineDecorationConfigFn;
 
-export const commonYConfigArgs: CommonYConfigFn['args'] = {
+export const commonDecorationConfigArgs: CommonDecorationConfigFn['args'] = {
   forAccessor: {
     types: ['string'],
     help: strings.getForAccessorHelp(),
