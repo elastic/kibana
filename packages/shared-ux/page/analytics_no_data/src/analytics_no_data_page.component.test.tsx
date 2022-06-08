@@ -14,14 +14,15 @@ import { KibanaNoDataPage } from '@kbn/shared-ux-page-kibana-no-data';
 
 import { AnalyticsNoDataPage } from './analytics_no_data_page.component';
 import { AnalyticsNoDataPageProvider } from './services';
-import { getJestServices } from './mocks';
+import { getMockServices } from './mocks';
 
 describe('AnalyticsNoDataPageComponent', () => {
-  const services = getJestServices();
+  const services = getMockServices();
   const onDataViewCreated = jest.fn();
 
   it('renders correctly', async () => {
     const component = mountWithIntl(
+      // Include context so composed components will have access to their services.
       <AnalyticsNoDataPageProvider {...services}>
         <AnalyticsNoDataPage
           onDataViewCreated={onDataViewCreated}

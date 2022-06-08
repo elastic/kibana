@@ -35,7 +35,7 @@ export const getStoryArgTypes = () => ({
   },
 });
 
-export const getJestServices = (params?: Params) => {
+export const getMockServices = (params?: Params) => {
   const { canCreateNewDataView, dataViewsDocLink } = params || {};
 
   const services: NoDataViewsPromptServices = {

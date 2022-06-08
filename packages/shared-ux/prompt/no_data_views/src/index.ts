@@ -12,7 +12,7 @@ export { NoDataViewsPromptKibanaProvider, NoDataViewsPromptProvider } from './se
 export type { NoDataViewsPromptKibanaServices, NoDataViewsPromptServices } from './services';
 
 export {
-  getJestServices as getNoDataViewsPromptJestServices,
+  getMockServices as getNoDataViewsPromptJestServices,
   getStoryArgTypes as getNoDataViewsPromptStoryArgTypes,
   getStoryServices as getNoDataViewsPromptStorybookServices,
 } from './mocks';

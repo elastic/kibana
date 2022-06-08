@@ -13,12 +13,12 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { AnalyticsNoDataPageProvider } from './services';
 import { AnalyticsNoDataPage as Component } from './analytics_no_data_page.component';
 import { AnalyticsNoDataPage } from './analytics_no_data_page';
-import { getJestServices } from './mocks';
+import { getMockServices } from './mocks';
 
 describe('AnalyticsNoDataPage', () => {
   const onDataViewCreated = jest.fn();
 
-  const services = getJestServices();
+  const services = getMockServices();
 
   afterAll(() => {
     jest.resetAllMocks();

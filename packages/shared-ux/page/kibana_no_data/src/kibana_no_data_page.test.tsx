@@ -16,7 +16,7 @@ import { NoDataConfigPage } from '@kbn/shared-ux-components';
 
 import { KibanaNoDataPage } from './kibana_no_data_page';
 import { KibanaNoDataPageProvider } from './services';
-import { getJestServices } from './mocks';
+import { getMockServices } from './mocks';
 
 describe('Kibana No Data Page', () => {
   const noDataConfig = {
@@ -42,7 +42,7 @@ describe('Kibana No Data Page', () => {
   });
 
   test('renders NoDataConfigPage', async () => {
-    const services = getJestServices({ config: { ...config, hasESData: false } });
+    const services = getMockServices({ config: { ...config, hasESData: false } });
     const component = mountWithIntl(
       <KibanaNoDataPageProvider {...services}>
         <KibanaNoDataPage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />
@@ -57,7 +57,7 @@ describe('Kibana No Data Page', () => {
   });
 
   test('renders NoDataViews', async () => {
-    const services = getJestServices({ config: { ...config, hasESData: true } });
+    const services = getMockServices({ config: { ...config, hasESData: true } });
     const component = mountWithIntl(
       <KibanaNoDataPageProvider {...services}>
         <KibanaNoDataPage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />
@@ -75,7 +75,7 @@ describe('Kibana No Data Page', () => {
     // Simulate loading with a Promise that doesn't resolve.
     const dataCheck = () => new Promise<boolean>(() => {});
     const services = {
-      ...getJestServices(),
+      ...getMockServices(),
       data: {
         hasESData: dataCheck,
         hasUserDataView: dataCheck,

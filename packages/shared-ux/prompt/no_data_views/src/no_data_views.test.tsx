@@ -14,14 +14,14 @@ import { EuiButton } from '@elastic/eui';
 
 import { NoDataViewsPrompt } from './no_data_views';
 import { NoDataViewsPromptServices, NoDataViewsPromptProvider } from './services';
-import { getJestServices } from './mocks';
+import { getMockServices } from './mocks';
 
 describe('<NoDataViewsPromptTest />', () => {
   let services: NoDataViewsPromptServices;
   let mount: (element: JSX.Element) => ReactWrapper;
 
   beforeEach(() => {
-    services = getJestServices();
+    services = getMockServices();
     mount = (element: JSX.Element) =>
       mountWithIntl(<NoDataViewsPromptProvider {...services}>{element}</NoDataViewsPromptProvider>);
   });

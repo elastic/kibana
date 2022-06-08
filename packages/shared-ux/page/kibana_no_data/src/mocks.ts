@@ -20,8 +20,14 @@ import { KibanaNoDataPageServices } from './services';
 // dependency has not been converted to its own package yet.  As with `AnalyticsNoDataPage`,
 // this file will be significantly simplified when that happens.
 
+/**
+ * Parameters drawn from the Storybook arguments collection that customize a component story.
+ */
 export type StoryParams = Record<keyof ReturnType<typeof getStoryArgTypes>, any>;
 
+/**
+ * Returns Storybook-compatible service abstractions for the `KibanaNoDataPage` Provider.
+ */
 export const getStoryServices = (params: StoryParams) => {
   const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor } =
     getNoDataViewsPromptStorybookServices(params);
@@ -46,6 +52,10 @@ export const getStoryServices = (params: StoryParams) => {
   return services;
 };
 
+/**
+ * Returns the Storybook arguments for `KibanaNoDataPage`, for its stories for and for
+ * consuming component stories.
+ */
 export const getStoryArgTypes = () => ({
   solution: {
     control: 'text',
@@ -67,7 +77,10 @@ export const getStoryArgTypes = () => ({
   ...getNoDataViewsPromptStoryArgTypes(),
 });
 
-export const getJestServices = (params?: MockServicesFactoryParams) => {
+/**
+ * Returns the Jest-compatible service abstractions for the `KibanaNoDataPage` Provider.
+ */
+export const getMockServices = (params?: MockServicesFactoryParams) => {
   const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor } =
     getNoDataViewsPromptJestServices();
 

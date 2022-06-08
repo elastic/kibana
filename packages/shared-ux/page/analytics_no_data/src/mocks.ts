@@ -17,7 +17,9 @@ import { AnalyticsNoDataPageServices } from './services';
 export type Params = Record<keyof ReturnType<typeof getStoryArgTypes>, any>;
 
 export const getStoryServices = (params: Params) => {
-  // Solution and Logo do not apply, as they are defaulted in this component;
+  // While `solution` and `logo` are props on `KibanaNoDataPage`, they are set by `AnalyticsNoDataPage` internally.
+  // So calls to `getStoryArgTypes` for `AnalyticsNoDataPage` need to remove them for any of its stories, (as they'll
+  // have no effect).
   const services: AnalyticsNoDataPageServices = {
     ...getKibanaNoDataPageStoryMock({ ...params, solution: 'Analytics', logo: 'logoKibana' }),
     kibanaGuideDocLink: 'Kibana guide',
@@ -38,7 +40,7 @@ export const getStoryArgTypes = () => {
   };
 };
 
-export const getJestServices = (params?: Params) => {
+export const getMockServices = (params?: Params) => {
   const services: AnalyticsNoDataPageServices = {
     ...getKibanaNoDataPageJestServices(),
     kibanaGuideDocLink: 'Kibana guide',

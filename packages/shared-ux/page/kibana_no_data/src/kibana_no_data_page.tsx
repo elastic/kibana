@@ -12,6 +12,9 @@ import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
 
 import { useServices } from './services';
 
+/**
+ * Props for `KibanaNoDataPage`.
+ */
 export interface Props {
   /** Handler for successfully creating a new data view. */
   onDataViewCreated: (dataView: unknown) => void;
