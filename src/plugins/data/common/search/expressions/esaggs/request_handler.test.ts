@@ -7,7 +7,7 @@
  */
 
 import { from } from 'rxjs';
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { Filter } from '../../../es_query';
 import type { IndexPattern } from '../../..';
 import type { IAggConfigs } from '../../aggs';

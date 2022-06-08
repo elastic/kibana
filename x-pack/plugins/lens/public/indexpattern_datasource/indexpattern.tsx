@@ -16,7 +16,7 @@ import { isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { DataPublicPluginStart, ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { DataPublicPluginStart, ES_FIELD_TYPES, TimeRange } from '@kbn/data-plugin/public';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
@@ -532,8 +532,14 @@ export function getIndexPatternDatasource({
           return null;
         },
         getSourceId: () => layer.indexPatternId,
-        getFilters: (activeData: FramePublicAPI['activeData']) =>
-          getFiltersInLayer(layer, visibleColumnIds, activeData?.[layerId]),
+        getFilters: (activeData: FramePublicAPI['activeData'], timeRange?: TimeRange) =>
+          getFiltersInLayer(
+            layer,
+            visibleColumnIds,
+            activeData?.[layerId],
+            state.indexPatterns[layer.indexPatternId],
+            timeRange
+          ),
         getVisualDefaults: () => getVisualDefaultsForLayer(layer),
       };
     },

@@ -131,13 +131,13 @@ export const securitySolutionsDeepLinks: SecuritySolutionDeepLink[] = [
     title: DETECTION_RESPONSE,
     path: DETECTION_RESPONSE_PATH,
     navLinkStatus: AppNavLinkStatus.hidden,
-    experimentalKey: 'detectionResponseEnabled',
     features: [FEATURE.general],
     keywords: [
       i18n.translate('xpack.securitySolution.search.detectionAndResponse', {
         defaultMessage: 'Detection & Response',
       }),
     ],
+    searchable: true,
   },
   {
     id: SecurityPageName.detections,

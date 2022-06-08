@@ -76,13 +76,13 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
             {
               id: 'main',
               name: '',
+              items: [navTabs[SecurityPageName.landing]],
+            },
+            {
+              ...securityNavGroup[SecurityNavGroupKey.dashboards],
               items: [
-                navTabs[SecurityPageName.landing],
                 navTabs[SecurityPageName.overview],
-                // Temporary check for detectionAndResponse while page is feature flagged
-                ...(navTabs[SecurityPageName.detectionAndResponse] != null
-                  ? [navTabs[SecurityPageName.detectionAndResponse]]
-                  : []),
+                navTabs[SecurityPageName.detectionAndResponse],
               ],
             },
             {

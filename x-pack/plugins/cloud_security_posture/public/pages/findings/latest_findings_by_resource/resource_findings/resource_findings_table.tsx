@@ -13,25 +13,19 @@ import {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
 } from '@elastic/eui';
-import { extractErrorMessage } from '../../../../../common/utils/helpers';
 import * as TEXT from '../../translations';
-import type { ResourceFindingsResult } from './use_resource_findings';
 import { getExpandColumn, getFindingsColumns } from '../../layout/findings_layout';
 import type { CspFinding } from '../../types';
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
 
-interface Props extends ResourceFindingsResult {
+interface Props {
+  items: CspFinding[];
+  loading: boolean;
   pagination: Pagination;
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
 }
 
-const ResourceFindingsTableComponent = ({
-  error,
-  data,
-  loading,
-  pagination,
-  setTableOptions,
-}: Props) => {
+const ResourceFindingsTableComponent = ({ items, loading, pagination, setTableOptions }: Props) => {
   const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
 
   const columns: [
@@ -41,16 +35,14 @@ const ResourceFindingsTableComponent = ({
     () => [getExpandColumn<CspFinding>({ onClick: setSelectedFinding }), ...getFindingsColumns()],
     []
   );
-
-  if (!loading && !data?.page.length)
+  if (!loading && !items.length)
     return <EuiEmptyPrompt iconType="logoKibana" title={<h2>{TEXT.NO_FINDINGS}</h2>} />;
 
   return (
     <>
       <EuiBasicTable
         loading={loading}
-        error={error ? extractErrorMessage(error) : undefined}
-        items={data?.page || []}
+        items={items}
         columns={columns}
         onChange={setTableOptions}
         pagination={pagination}
