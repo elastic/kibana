@@ -7,7 +7,7 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { FC } from 'react';
-
+import { i18n } from '@kbn/i18n';
 import { NerInference } from './models/ner';
 import { QuestionAnsweringInference } from './models/question_answering';
 
@@ -41,39 +41,90 @@ export const SelectedModel: FC<Props> = ({ model }) => {
   if (model.model_type === TRAINED_MODEL_TYPE.PYTORCH) {
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.NER) {
       const inferrer = new NerInference(trainedModels, model);
-      return <InferenceInputForm inferrer={inferrer} />;
+      const intro = i18n.translate('xpack.ml.trainedModels.testModelsFlyout.ner.intro', {
+        defaultMessage: 'Try out named entity recognition with {modelId}',
+        values: {
+          modelId: model.model_id,
+        },
+      });
+      return <InferenceInputForm inferrer={inferrer} intro={intro} />;
     }
 
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.TEXT_CLASSIFICATION) {
       const inferrer = new TextClassificationInference(trainedModels, model);
-      return <InferenceInputForm inferrer={inferrer} />;
+      const intro = i18n.translate(
+        'xpack.ml.trainedModels.testModelsFlyout.textClassification.intro',
+        {
+          defaultMessage: 'Try out text classification with {modelId}',
+          values: {
+            modelId: model.model_id,
+          },
+        }
+      );
+      return <InferenceInputForm inferrer={inferrer} intro={intro} />;
     }
 
     if (
       Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION
     ) {
       const inferrer = new ZeroShotClassificationInference(trainedModels, model);
-      return <InferenceInputForm inferrer={inferrer} />;
+      const intro = i18n.translate(
+        'xpack.ml.trainedModels.testModelsFlyout.zeroShotClassification.intro',
+        {
+          defaultMessage: 'Try out zero shot classification with {modelId}',
+          values: {
+            modelId: model.model_id,
+          },
+        }
+      );
+      return <InferenceInputForm inferrer={inferrer} intro={intro} />;
     }
 
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.TEXT_EMBEDDING) {
       const inferrer = new TextEmbeddingInference(trainedModels, model);
-      return <InferenceInputForm inferrer={inferrer} />;
+      const intro = i18n.translate('xpack.ml.trainedModels.testModelsFlyout.textEmbedding.intro', {
+        defaultMessage: 'Try out text embedding with {modelId}',
+        values: {
+          modelId: model.model_id,
+        },
+      });
+      return <InferenceInputForm inferrer={inferrer} intro={intro} />;
     }
 
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.FILL_MASK) {
       const inferrer = new FillMaskInference(trainedModels, model);
-      return <InferenceInputForm inferrer={inferrer} />;
+      const intro = i18n.translate('xpack.ml.trainedModels.testModelsFlyout.fillMask.intro', {
+        defaultMessage: 'Try out fill mask with {modelId}',
+        values: {
+          modelId: model.model_id,
+        },
+      });
+      return <InferenceInputForm inferrer={inferrer} intro={intro} />;
     }
 
     if (Object.keys(model.inference_config)[0] === SUPPORTED_PYTORCH_TASKS.QUESTION_ANSWERING) {
       const inferrer = new QuestionAnsweringInference(trainedModels, model);
-      return <InferenceInputForm inferrer={inferrer} />;
+      const intro = i18n.translate(
+        'xpack.ml.trainedModels.testModelsFlyout.questionAnswering.intro',
+        {
+          defaultMessage: 'Try out question answering with {modelId}',
+          values: {
+            modelId: model.model_id,
+          },
+        }
+      );
+      return <InferenceInputForm inferrer={inferrer} intro={intro} />;
     }
   }
   if (model.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
     const inferrer = new LangIdentInference(trainedModels, model);
-    return <InferenceInputForm inferrer={inferrer} />;
+    const intro = i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.intro', {
+      defaultMessage: 'Try out language identification with {modelId}',
+      values: {
+        modelId: model.model_id,
+      },
+    });
+    return <InferenceInputForm inferrer={inferrer} intro={intro} />;
   }
 
   return null;

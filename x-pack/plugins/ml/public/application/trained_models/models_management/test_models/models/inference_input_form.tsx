@@ -9,7 +9,7 @@ import React, { FC, useState, useMemo } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiButton, EuiTabs, EuiTab } from '@elastic/eui';
+import { EuiSpacer, EuiButton, EuiTabs, EuiTab, EuiTitle } from '@elastic/eui';
 import { extractErrorMessage } from '../../../../../../common/util/errors';
 import { ErrorMessage } from '../inference_error';
 import { OutputLoadingContent } from '../output_loading';
@@ -19,6 +19,7 @@ import type { InferrerType } from '.';
 
 interface Props {
   inferrer: InferrerType;
+  intro: string;
 }
 
 enum TAB {
@@ -26,7 +27,7 @@ enum TAB {
   RAW,
 }
 
-export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
+export const InferenceInputForm: FC<Props> = ({ inferrer, intro }) => {
   const [selectedTab, setSelectedTab] = useState(TAB.TEXT);
   const [errorText, setErrorText] = useState<string | null>(null);
 
@@ -46,6 +47,11 @@ export const InferenceInputForm: FC<Props> = ({ inferrer }) => {
 
   return (
     <>
+      <EuiTitle size="xs">
+        <h4>{intro}</h4>
+      </EuiTitle>
+
+      <EuiSpacer size="m" />
       <>{inputComponent}</>
       <EuiSpacer size="m" />
       <div>
