@@ -23,12 +23,14 @@ export interface ServiceLocationsState {
   throttling: ThrottlingOptions | null;
   loading: boolean;
   error: Error | null;
+  locationsLoaded?: boolean;
 }
 
 const initialState: ServiceLocationsState = {
   locations: [],
   throttling: DEFAULT_THROTTLING,
   loading: false,
+  locationsLoaded: false,
   error: null,
 };
 
@@ -36,6 +38,7 @@ export const serviceLocationsReducer = createReducer(initialState, (builder) => 
   builder
     .addCase(getServiceLocations, (state) => {
       state.loading = true;
+      state.locationsLoaded = true;
     })
     .addCase(getServiceLocationsSuccess, (state, action) => {
       state.loading = false;
