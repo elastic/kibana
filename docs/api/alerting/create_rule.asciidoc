@@ -1,5 +1,5 @@
 [[create-rule-api]]
-=== Create rule API
+== Create rule API
 ++++
 <titleabbrev>Create rule</titleabbrev>
 ++++
@@ -7,13 +7,25 @@
 Create {kib} rules.
 
 [[create-rule-api-request]]
-==== Request
+=== Request
 
 `POST <kibana host>:<port>/api/alerting/rule/<id>`
 
 `POST <kibana host>:<port>/s/<space_id>/api/alerting/rule/<id>`
 
-==== {api-description-title}
+
+=== {api-prereq-title}
+
+You must have `all` privileges for the *Management* > *Stack Rules*,
+*{observability}* > *APM and User Experience*, *Logs*, *Metrics*, or
+*Synthetics and Uptime*, *Analytics* > *{ml-app}*, or *Security* >
+*Security* features in the
+<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
+`consumer` of the rule you're creating. If the rule has `actions`, you must also
+have `read` privileges for the *Management* > *Actions and Connectors* feature.
+
+
+=== {api-description-title}
 
 [WARNING]
 ====
@@ -25,7 +37,7 @@ If a user with different privileges updates the rule, its behavior might change.
 ====
 
 [[create-rule-api-path-params]]
-==== Path parameters
+=== Path parameters
 
 `<id>`::
   (Optional, string) Specifies a UUID v1 or v4 to use instead of a randomly generated ID.
@@ -33,8 +45,9 @@ If a user with different privileges updates the rule, its behavior might change.
 `space_id`::
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
+[role="child_attributes"]
 [[create-rule-api-request-body]]
-==== Request body
+=== Request body
 
 `name`::
   (Required, string) A name to reference and search.
@@ -92,17 +105,19 @@ There are plans to support multiple other schedule formats in the near future.
 
 
 [[create-rule-api-request-codes]]
-==== Response code
+=== Response code
 
 `200`::
     Indicates a successful call.
 
 [[create-rule-api-example]]
-==== Example
+=== Example
+
+Create a rule that has actions associated with a server log connector:
 
 [source,sh]
 --------------------------------------------------
-$ curl -X POST api/alerting/rule  -H 'kbn-xsrf: true' -H 'Content-Type: application/json' -d '
+POST api/alerting/rule
 {
   "params":{
       "aggType":"avg",
@@ -141,7 +156,7 @@ $ curl -X POST api/alerting/rule  -H 'kbn-xsrf: true' -H 'Content-Type: applicat
    ],
    "notify_when":"onActionGroupChange",
    "name":"my alert"
-}'
+}
 --------------------------------------------------
 // KIBANA
 
@@ -151,7 +166,12 @@ The API returns the following:
 --------------------------------------------------
 {
   "id": "41893910-6bca-11eb-9e0d-85d233e3ee35",
-  "notify_when": "onActionGroupChange",
+  "consumer": "alerts",
+  "tags": ["cpu"],
+  "name": "my alert",
+  "enabled": true,
+  "throttle": null,
+  "schedule": {"interval": "1m"},
   "params": {
     "aggType": "avg",
     "termSize": 6,
@@ -159,49 +179,37 @@ The API returns the following:
     "timeWindowSize": 5,
     "timeWindowUnit": "m",
     "groupBy": "top",
-    "threshold": [
-      1000
-    ],
-    "index": [
-      ".kibana"
-    ],
+    "threshold": [1000],
+    "index": [".test-index"],
     "timeField": "@timestamp",
     "aggField": "sheet.version",
     "termField": "name.keyword"
   },
-  "consumer": "alerts",
   "rule_type_id": ".index-threshold",
-  "schedule": {
-    "interval": "1m"
-  },
+  "scheduled_task_id": "425b0800-6bca-11eb-9e0d-85d233e3ee35",
+  "snooze_schedule":[],
+  "created_by": "elastic",
+  "updated_by": "elastic",
+  "created_at": "2022-06-08T17:20:31.632Z",
+  "updated_at": "2022-06-08T17:20:31.632Z",
+  "api_key_owner": "elastic",
+  "notify_when": "onActionGroupChange",
+  "mute_all": false,
+  "muted_alert_ids": [],
+  "execution_status": {
+    "last_execution_date": "2022-06-08T17:20:31.632Z",
+    "status": "pending"
+  }
   "actions": [
     {
-      "connector_type_id": ".server-log",
       "group": "threshold met",
+      "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2",
       "params": {
         "level": "info",
         "message": "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
       },
-      "id": "dceeb5d0-6b41-11eb-802b-85b0c1bc8ba2"
+      "connector_type_id": ".server-log"
     }
-  ],
-  "tags": [
-    "cpu"
-  ],
-  "name": "my alert",
-  "enabled": true,
-  "throttle": null,
-  "api_key_owner": "elastic",
-  "created_by": "elastic",
-  "updated_by": "elastic",
-  "mute_all": false,
-  "muted_alert_ids": [],
-  "updated_at": "2021-02-10T18:03:19.961Z",
-  "created_at": "2021-02-10T18:03:19.961Z",
-  "scheduled_task_id": "425b0800-6bca-11eb-9e0d-85d233e3ee35",
-  "execution_status": {
-    "last_execution_date": "2021-02-10T18:03:19.966Z",
-    "status": "pending"
-  }
+  ]
 }
 --------------------------------------------------
