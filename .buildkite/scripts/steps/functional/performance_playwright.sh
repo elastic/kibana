@@ -5,6 +5,8 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 .buildkite/scripts/bootstrap.sh
+# These tests are running on static workers so we have to make sure we delete previous build of Kibana
+rm -rf "$KIBANA_BUILD_LOCATION"
 .buildkite/scripts/download_build_artifacts.sh
 
 echo --- Run Performance Tests with Playwright config
