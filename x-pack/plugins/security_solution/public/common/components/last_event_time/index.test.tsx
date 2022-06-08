@@ -41,9 +41,8 @@ describe('Last Event Time Stat', () => {
         <LastEventTime docValueFields={[]} indexKey={LastEventIndexKey.hosts} indexNames={[]} />
       </TestProviders>
     );
-    expect(wrapper.find(LastEventTime).html()).toBe(
-      '<span class="euiLoadingSpinner euiLoadingSpinner--medium"></span>'
-    );
+    // Removed strict equality as the EuiLoader has been converted to Emotion and will no longer have the euiLoadingSpinner--medium class
+    expect(wrapper.find(LastEventTime).html()).toContain('<span class="euiLoadingSpinner ');
   });
   test('Last seen', async () => {
     (useTimelineLastEventTime as jest.Mock).mockReturnValue([

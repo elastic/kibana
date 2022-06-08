@@ -1319,7 +1319,7 @@ exports[`Storyshots shareables/Canvas component 1`] = `
                 }
               >
                 <a
-                  className="euiLink euiLink--primary"
+                  className="euiLink css-102pf9n-euiLink-primary"
                   href="https://www.elastic.co"
                   rel=""
                   title="Powered by Elastic.co"
@@ -2809,7 +2809,7 @@ exports[`Storyshots shareables/Canvas contextual: austin 1`] = `
                 }
               >
                 <a
-                  className="euiLink euiLink--primary"
+                  className="euiLink css-102pf9n-euiLink-primary"
                   href="https://www.elastic.co"
                   rel=""
                   title="Powered by Elastic.co"
@@ -3115,7 +3115,7 @@ exports[`Storyshots shareables/Canvas contextual: hello 1`] = `
                 }
               >
                 <a
-                  className="euiLink euiLink--primary"
+                  className="euiLink css-102pf9n-euiLink-primary"
                   href="https://www.elastic.co"
                   rel=""
                   title="Powered by Elastic.co"

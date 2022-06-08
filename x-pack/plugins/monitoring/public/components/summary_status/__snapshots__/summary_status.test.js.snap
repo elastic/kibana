@@ -27,7 +27,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title css-7xv8go-euiTitle-xxxs"
         >
           Status: 
           <span
@@ -57,7 +57,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title css-7xv8go-euiTitle-xxxs"
         >
           127.0.0.1:9300
         </p>
@@ -87,7 +87,7 @@ exports[`Summary Status Component should allow label to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title css-7xv8go-euiTitle-xxxs"
         >
           24.8k
         </p>
@@ -133,7 +133,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title css-7xv8go-euiTitle-xxxs"
         >
           173.9 GB
         </p>
@@ -163,7 +163,7 @@ exports[`Summary Status Component should allow status to be optional 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title css-7xv8go-euiTitle-xxxs"
         >
           24.8k
         </p>
@@ -205,7 +205,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title css-7xv8go-euiTitle-xxxs"
         >
           Status: 
           <span
@@ -237,7 +237,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title css-7xv8go-euiTitle-xxxs"
         >
           173.9 GB
         </p>
@@ -267,7 +267,7 @@ exports[`Summary Status Component should render metrics in a summary bar 1`] = `
         </div>
         <p
           aria-hidden="true"
-          class="euiTitle euiTitle--xxxsmall euiStat__title"
+          class="euiTitle euiStat__title css-7xv8go-euiTitle-xxxs"
         >
           24.8k
         </p>

@@ -3,7 +3,7 @@
 exports[`ExplainPluginEnabled should explain about xpack.monitoring.enabled setting 1`] = `
 Array [
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle css-1bexacr-euiTitle-l"
   >
     You need to make some adjustments
   </h2>,
@@ -19,7 +19,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-ilegow-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText euiText--medium"

@@ -340,7 +340,11 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       expect(wrapper.find('[data-test-subj="update-connector-btn"]').exists()).toBeTruthy();
-      wrapper.find('[data-test-subj="update-connector-btn"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="update-connector-btn"]')
+        .first()
+        .find('button')
+        .simulate('click');
       expect(wrapper.find('[data-test-subj="updateConnectorForm"]').exists()).toBeTruthy();
 
       await act(async () => {
@@ -387,7 +391,11 @@ describe('ServiceNowActionConnectorFields renders', () => {
       );
 
       expect(wrapper.find('[data-test-subj="update-connector-btn"]').exists()).toBeTruthy();
-      wrapper.find('[data-test-subj="update-connector-btn"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="update-connector-btn"]')
+        .first()
+        .find('button')
+        .simulate('click');
       expect(wrapper.find('[data-test-subj="updateConnectorForm"]').exists()).toBeTruthy();
 
       // The async is needed so the act will finished before asserting for the callout

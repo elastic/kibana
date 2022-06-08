@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiStepsHorizontal } from '@elastic/eui';
+import { EuiStepsHorizontal, EuiStepStatus } from '@elastic/eui';
 import { useServices } from '../../app_context';
 
 interface Props {
@@ -29,8 +29,11 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       title: i18n.translate('xpack.snapshotRestore.policyForm.navigation.stepLogisticsName', {
         defaultMessage: 'Logistics',
       }),
-      isComplete: maxCompletedStep >= 1,
-      isSelected: currentStep === 1,
+      status: (currentStep === 1
+        ? 'selected'
+        : maxCompletedStep >= 1
+        ? 'complete'
+        : 'incomplete') as EuiStepStatus,
       disabled: !isFormValid && currentStep !== 1,
       onClick: () => updateCurrentStep(1),
     },
@@ -38,8 +41,11 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       title: i18n.translate('xpack.snapshotRestore.policyForm.navigation.stepSettingsName', {
         defaultMessage: 'Snapshot settings',
       }),
-      isComplete: maxCompletedStep >= 2,
-      isSelected: currentStep === 2,
+      status: (currentStep === 2
+        ? 'selected'
+        : maxCompletedStep >= 2
+        ? 'complete'
+        : 'incomplete') as EuiStepStatus,
       disabled: maxCompletedStep < 1 || (!isFormValid && currentStep !== 2),
       onClick: () => updateCurrentStep(2),
     },
@@ -47,8 +53,11 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       title: i18n.translate('xpack.snapshotRestore.policyForm.navigation.stepRetentionName', {
         defaultMessage: 'Snapshot retention',
       }),
-      isComplete: maxCompletedStep >= 3,
-      isSelected: currentStep === 3,
+      status: (currentStep === 3
+        ? 'selected'
+        : maxCompletedStep >= 3
+        ? 'complete'
+        : 'incomplete') as EuiStepStatus,
       disabled: maxCompletedStep < 2 || (!isFormValid && currentStep !== 3),
       onClick: () => updateCurrentStep(3),
     },
@@ -56,8 +65,11 @@ export const PolicyNavigation: React.FunctionComponent<Props> = ({
       title: i18n.translate('xpack.snapshotRestore.policyForm.navigation.stepReviewName', {
         defaultMessage: 'Review',
       }),
-      isComplete: maxCompletedStep >= 3,
-      isSelected: currentStep === 4,
+      status: (currentStep === 4
+        ? 'selected'
+        : maxCompletedStep >= 3
+        ? 'complete'
+        : 'incomplete') as EuiStepStatus,
       disabled: maxCompletedStep < 3 || (!isFormValid && currentStep !== 4),
       onClick: () => updateCurrentStep(4),
     },

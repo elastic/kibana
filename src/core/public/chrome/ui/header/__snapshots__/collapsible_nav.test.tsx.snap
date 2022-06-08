@@ -54,7 +54,7 @@ Array [
       </div>
     </div>
     <hr
-      class="euiHorizontalRule euiHorizontalRule--full css-pnauuy-euiHorizontalRule-full"
+      class="euiHorizontalRule euiHorizontalRule--full css-1470ivo-euiHorizontalRule-full"
     />
     <div
       class="euiFlexItem euiFlexItem--flexGrowZero"
@@ -123,7 +123,7 @@ Array [
                 class="euiFlexItem"
               >
                 <h3
-                  class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                  class="euiTitle euiCollapsibleNavGroup__title css-1po7voc-euiTitle-xxs"
                   id="generated-id__title"
                 >
                   Recently viewed
@@ -212,7 +212,7 @@ Array [
       </div>
     </div>
     <hr
-      class="euiHorizontalRule euiHorizontalRule--full css-pnauuy-euiHorizontalRule-full"
+      class="euiHorizontalRule euiHorizontalRule--full css-1470ivo-euiHorizontalRule-full"
     />
     <div
       class="euiFlexItem eui-yScroll"
@@ -248,7 +248,7 @@ Array [
                   class="euiFlexItem"
                 >
                   <h3
-                    class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                    class="euiTitle euiCollapsibleNavGroup__title css-1po7voc-euiTitle-xxs"
                     id="generated-id__title"
                   >
                     Analytics
@@ -380,7 +380,7 @@ Array [
                   class="euiFlexItem"
                 >
                   <h3
-                    class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                    class="euiTitle euiCollapsibleNavGroup__title css-1po7voc-euiTitle-xxs"
                     id="generated-id__title"
                   >
                     Observability
@@ -495,7 +495,7 @@ Array [
                   class="euiFlexItem"
                 >
                   <h3
-                    class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                    class="euiTitle euiCollapsibleNavGroup__title css-1po7voc-euiTitle-xxs"
                     id="generated-id__title"
                   >
                     Security
@@ -593,7 +593,7 @@ Array [
                   class="euiFlexItem"
                 >
                   <h3
-                    class="euiTitle euiTitle--xxsmall euiCollapsibleNavGroup__title"
+                    class="euiTitle euiCollapsibleNavGroup__title css-1po7voc-euiTitle-xxs"
                     id="generated-id__title"
                   >
                     Management

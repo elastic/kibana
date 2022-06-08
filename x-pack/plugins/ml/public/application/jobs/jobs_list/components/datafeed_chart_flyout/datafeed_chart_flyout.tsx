@@ -235,7 +235,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({ jobId, end, 
                 showTimeSelect
                 selected={endDate}
                 onChange={handleChange}
-                popoverPlacement="left-start"
+                popoverPlacement="leftUp"
               />
             </EuiFlexItem>
           </EuiFlexGroup>

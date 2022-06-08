@@ -142,6 +142,7 @@ exports[`#start() returns \`Context\` component 1`] = `
           "euiLink.external.ariaLabel": "External link",
           "euiLink.newTarget.screenReaderOnlyText": "(opens in a new tab or window)",
           "euiLoadingChart.ariaLabel": "Loading",
+          "euiLoadingStrings.ariaLabel": "Loading",
           "euiMark.highlightEnd": "highlight end",
           "euiMark.highlightStart": "highlight start",
           "euiMarkdownEditorFooter.closeButton": "Close",

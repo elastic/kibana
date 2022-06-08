@@ -22,15 +22,15 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         data-euiicon-type="monitoringApp"
       />
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <h2
-        class="euiTitle euiTitle--large"
+        class="euiTitle css-1bexacr-euiTitle-l"
       >
         No monitoring data found
       </h2>
       <hr
-        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-ilegow-euiHorizontalRule-half-l"
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
       />
       <div
         class="euiText euiText--medium"
@@ -43,7 +43,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         </p>
       </div>
       <div
-        class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+        class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -69,7 +69,7 @@ exports[`NoData should show a default message if reason is unknown 1`] = `
         </div>
       </div>
       <hr
-        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-ilegow-euiHorizontalRule-half-l"
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
       />
       <button
         class="euiButtonEmpty euiButtonEmpty--primary"
@@ -117,15 +117,15 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         data-euiicon-type="monitoringApp"
       />
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <h2
-        class="euiTitle euiTitle--large"
+        class="euiTitle css-1bexacr-euiTitle-l"
       >
         No monitoring data found
       </h2>
       <hr
-        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-ilegow-euiHorizontalRule-half-l"
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
       />
       <div
         class="euiText euiText--medium"
@@ -138,7 +138,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         </p>
       </div>
       <div
-        class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+        class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
       />
       <div
         class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -164,7 +164,7 @@ exports[`NoData should show text next to the spinner while checking a setting 1`
         </div>
       </div>
       <hr
-        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-ilegow-euiHorizontalRule-half-l"
+        class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
       />
       <button
         class="euiButtonEmpty euiButtonEmpty--primary"

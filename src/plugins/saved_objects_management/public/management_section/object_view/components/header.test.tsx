@@ -40,7 +40,7 @@ describe('Intro component', () => {
     const mounted = mountHeader({
       ...defaultProps,
     });
-    expect(mounted).toMatchSnapshot();
+    expect(mounted.render()).toMatchSnapshot();
   });
 
   it('displays correct title if one is provided', () => {

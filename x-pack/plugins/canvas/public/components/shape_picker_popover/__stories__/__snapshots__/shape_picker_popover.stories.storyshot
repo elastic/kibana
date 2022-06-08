@@ -11,7 +11,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover default 1`] = `
       className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow"
     >
       <button
-        className="euiLink euiLink--primary"
+        className="euiLink css-102pf9n-euiLink-primary"
         disabled={false}
         onClick={[Function]}
         style={
@@ -41,7 +41,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover interactive 1`] = `
       className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow"
     >
       <button
-        className="euiLink euiLink--primary"
+        className="euiLink css-102pf9n-euiLink-primary"
         disabled={false}
         onClick={[Function]}
         style={
@@ -85,7 +85,7 @@ exports[`Storyshots components/Shapes/ShapePickerPopover shape selected 1`] = `
       className="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusMedium euiPanel--plain euiPanel--noShadow"
     >
       <button
-        className="euiLink euiLink--primary"
+        className="euiLink css-102pf9n-euiLink-primary"
         disabled={false}
         onClick={[Function]}
         style={

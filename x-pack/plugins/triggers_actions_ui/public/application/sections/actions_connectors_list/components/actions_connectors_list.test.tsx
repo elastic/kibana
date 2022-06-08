@@ -265,7 +265,7 @@ describe('actions_connectors_list component with items', () => {
 
   test('if select item for edit should render ConnectorEditFlyout', async () => {
     await setup();
-    await wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
+    await wrapper.find('[data-test-subj="edit1"]').first().find('button').simulate('click');
 
     const edit = await wrapper.find('ConnectorEditFlyout');
     expect(edit).toHaveLength(1);

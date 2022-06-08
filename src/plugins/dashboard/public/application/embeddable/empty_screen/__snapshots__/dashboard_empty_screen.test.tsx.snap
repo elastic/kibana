@@ -10,15 +10,15 @@ exports[`DashboardEmptyScreen renders correctly with edit mode 1`] = `
     data-euiicon-type="visAreaStacked"
   />
   <div
-    class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
   <h3
-    class="euiTitle euiTitle--xsmall"
+    class="euiTitle css-1c9cwui-euiTitle-xs"
   >
     Add your first visualization
   </h3>
   <div
-    class="euiSpacer euiSpacer--s css-i2qclb-euiSpacer-s"
+    class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
   <div
     class="euiText euiText--small"
@@ -111,7 +111,7 @@ exports[`DashboardEmptyScreen renders correctly with view mode 1`] = `
         </p>
       </div>
       <div
-        class="euiSpacer euiSpacer--m css-hg1jdf-euiSpacer-m"
+        class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
       />
       <div
         class="dshStartScreen__panelDesc"

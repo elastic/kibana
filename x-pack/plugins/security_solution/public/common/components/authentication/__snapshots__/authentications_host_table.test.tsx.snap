@@ -107,7 +107,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
                     class="euiFlexItem"
                   >
                     <h4
-                      class="euiTitle euiTitle--medium"
+                      class="euiTitle css-1w464ad-euiTitle-m"
                       data-test-subj="header-section-title"
                     >
                       <span

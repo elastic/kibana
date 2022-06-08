@@ -258,7 +258,7 @@ exports[`<Settings /> can navigate Autoplay Settings 2`] = `
                   </span>
                 </div>
                 <hr
-                  class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium css-l0kn38-euiHorizontalRule-full-m"
+                  class="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium css-1y0qta5-euiHorizontalRule-full-m"
                 />
                 <form>
                   <div

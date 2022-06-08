@@ -77,15 +77,22 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<
       {
         title: i18n.SW_CONFIGURE_CONNECTION_LABEL,
         isSelected: currentStep === 1,
-        isComplete: currentStep === 2,
+        status: (currentStep === 1
+          ? 'selected'
+          : currentStep === 2
+          ? 'complete'
+          : 'incomplete') as EuiStepStatus,
         onClick: () => updateCurrentStep(1),
       },
       {
         title: i18n.SW_MAPPING_TITLE_TEXT_FIELD_LABEL,
         disabled: hasConfigurationErrors || isLoadingApplication,
-        isSelected: currentStep === 2,
         onClick: onNextStep,
-        status: hasMappingErrors ? ('danger' as EuiStepStatus) : undefined,
+        status: (hasMappingErrors
+          ? 'danger'
+          : currentStep === 2
+          ? 'selected'
+          : 'incomplete') as EuiStepStatus,
       },
     ],
     [

@@ -182,7 +182,7 @@ describe('Stat Items Component', () => {
     });
 
     test('should handle multiple titles', () => {
-      expect(wrapper.find('[data-test-subj="stat-title"]')).toHaveLength(2);
+      expect(wrapper.find('[data-test-subj="stat-title"]').find('p')).toHaveLength(2);
     });
 
     test('should render kpi icons', () => {

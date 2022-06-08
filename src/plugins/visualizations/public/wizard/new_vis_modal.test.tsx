@@ -244,7 +244,7 @@ describe('NewVisModal', () => {
       );
       const aggBasedGroupCard = wrapper
         .find('[data-test-subj="visGroupAggBasedExploreLink"]')
-        .at(0);
+        .last();
       aggBasedGroupCard.simulate('click');
       expect(wrapper.find('[data-test-subj="visType-visWithSearch"]').exists()).toBe(true);
     });

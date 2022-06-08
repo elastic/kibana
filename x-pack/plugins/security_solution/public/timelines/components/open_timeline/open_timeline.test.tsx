@@ -313,7 +313,11 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    wrapper
+      .find('[data-test-subj="utility-bar-action"]')
+      .find('EuiLink')
+      .find('button')
+      .simulate('click');
     await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
@@ -333,7 +337,11 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    wrapper
+      .find('[data-test-subj="utility-bar-action"]')
+      .find('EuiLink')
+      .find('button')
+      .simulate('click');
     await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
@@ -353,7 +361,11 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    wrapper
+      .find('[data-test-subj="utility-bar-action"]')
+      .find('EuiLink')
+      .find('button')
+      .simulate('click');
     await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="export-timeline-action"]').first().prop('disabled')
@@ -373,7 +385,11 @@ describe('OpenTimeline', () => {
       </ThemeProvider>
     );
 
-    wrapper.find('[data-test-subj="utility-bar-action"]').find('EuiLink').simulate('click');
+    wrapper
+      .find('[data-test-subj="utility-bar-action"]')
+      .find('EuiLink')
+      .find('button')
+      .simulate('click');
     await waitFor(() => {
       expect(
         wrapper.find('[data-test-subj="delete-timeline-action"]').first().prop('disabled')
