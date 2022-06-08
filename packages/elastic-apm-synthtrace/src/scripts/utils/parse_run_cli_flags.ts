@@ -20,15 +20,18 @@ function getParsedFile(flags: RunCliFlags) {
     throw new Error('Please specify a scenario to run');
   }
 
-  const result = [
+  const filepath = [
     path.resolve(parsedFile),
     path.resolve(`${parsedFile}.ts`),
     path.resolve(__dirname, '../../scenarios', parsedFile),
     path.resolve(__dirname, '../../scenarios', `${parsedFile}.ts`),
-  ].find((filepath) => existsSync(filepath));
+    path.resolve(__dirname, '../../scenarios', `${parsedFile}.js`),
+  ].find((p) => existsSync(p));
 
-  if (result) {
-    return result;
+  if (filepath) {
+    // eslint-disable-next-line no-console
+    console.log(`Loading scenario from ${filepath}`);
+    return filepath;
   }
 
   throw new Error(`Could not find scenario file: "${parsedFile}"`);
