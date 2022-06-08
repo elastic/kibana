@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+/* x-pack/plugins/cases/public/components/case_view/index.test.tsx
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import React from 'react';
-import { mount } from 'enzyme';
-import { act, waitFor } from '@testing-library/react';
 
 import '../../common/mock/match_media';
-import { CaseView } from '.';
 import { CaseViewProps } from './types';
 import {
   basicCase,
@@ -20,7 +24,6 @@ import {
   basicCaseMetrics,
   connectorsMock,
 } from '../../containers/mock';
-import { TestProviders } from '../../common/mock';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { UseGetCase, useGetCase } from '../../containers/use_get_case';
@@ -31,11 +34,19 @@ import { ConnectorTypes } from '../../../common/api';
 import { Case } from '../../../common/ui';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { TestProviders } from '../../common/mock';
+import CaseView from '.';
+import { mount } from 'enzyme';
+import { waitFor } from '@testing-library/dom';
+import { useGetTags } from '../../containers/use_get_tags';
+import { QueryClient, QueryClientProvider } from 'react-query';
+import { act } from '@testing-library/react-hooks';
+import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
 
+jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
+jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_case_user_actions');
 jest.mock('../../containers/use_get_case');
 jest.mock('../../containers/use_get_case_metrics');
@@ -53,6 +64,7 @@ const useGetCaseUserActionsMock = useGetCaseUserActions as jest.Mock;
 const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
+const useGetTagsMock = useGetTags as jest.Mock;
 
 const spacesUiApiMock = {
   redirectLegacyUrl: jest.fn().mockResolvedValue(undefined),
@@ -184,6 +196,7 @@ describe('CaseView', () => {
     useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
+    useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
     useKibanaMock().services.spaces = { ui: spacesUiApiMock } as unknown as SpacesApi;
   });
 

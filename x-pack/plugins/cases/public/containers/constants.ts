@@ -15,3 +15,4 @@ export const CASE_CONFIGURATION_CACHE_KEY = 'case-configuration';
 export const CASE_LIST_CACHE_KEY = 'case-list';
 export const CASE_CONNECTORS_CACHE_KEY = 'case-connectors';
 export const CASE_LICENSE_CACHE_KEY = 'case-license-action';
+export const CASE_TAGS_CACHE_KEY = 'case-tags';
