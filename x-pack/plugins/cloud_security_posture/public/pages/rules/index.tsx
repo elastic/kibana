@@ -17,7 +17,7 @@ import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
 import { CspNavigationItem } from '../../common/navigation/types';
 import { extractErrorMessage } from '../../../common/utils/helpers';
-import { useCspIntegration } from './use_csp_integration';
+import { useCspIntegrationInfo } from './use_csp_integration';
 import { CspPageTemplate } from '../../components/csp_page_template';
 import { useKibana } from '../../common/hooks/use_kibana';
 
@@ -28,11 +28,14 @@ const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
   const { http } = useKibana().services;
-  const integrationInfo = useCspIntegration(params);
+  const integrationInfo = useCspIntegrationInfo(params);
+
+  const [packageInfo, agentInfo] = integrationInfo.data || [];
+
   const breadcrumbs = useMemo(
     // TODO: make benchmark breadcrumb navigable
-    () => getRulesBreadcrumbs(integrationInfo.data?.name),
-    [integrationInfo.data?.name]
+    () => getRulesBreadcrumbs(packageInfo?.name),
+    [packageInfo?.name]
   );
 
   useCspBreadcrumbs(breadcrumbs);
@@ -67,38 +70,36 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
               id="xpack.csp.rules.rulePageHeader.pageHeaderTitle"
               defaultMessage="Rules - {integrationName}"
               values={{
-                integrationName: integrationInfo.data?.name,
+                integrationName: packageInfo?.name,
               }}
             />
           </EuiFlexGroup>
         ),
-        description: integrationInfo.data && integrationInfo.data.package && (
+        description: packageInfo?.package && agentInfo?.name && (
           <EuiTextColor color="subdued">
             <FormattedMessage
               id="xpack.csp.rules.rulePageHeader.pageDescriptionTitle"
               defaultMessage="{integrationType}, {agentPolicyName}"
               values={{
-                integrationType: integrationInfo.data.package.title,
-                agentPolicyName: integrationInfo.data.name,
+                integrationType: packageInfo.package.title,
+                agentPolicyName: agentInfo.name,
               }}
             />
           </EuiTextColor>
         ),
       },
     }),
-    [http.basePath, integrationInfo.data, params]
+    [agentInfo?.name, http.basePath, packageInfo?.name, packageInfo?.package, params]
   );
 
   return (
-    <>
-      <CspPageTemplate
-        {...pageProps}
-        query={integrationInfo}
-        errorRender={(error) => <RulesErrorPrompt error={extractErrorBodyMessage(error)} />}
-      >
-        {integrationInfo.status === 'success' && <RulesContainer />}
-      </CspPageTemplate>
-    </>
+    <CspPageTemplate
+      {...pageProps}
+      query={integrationInfo}
+      errorRender={(error) => <RulesErrorPrompt error={extractErrorBodyMessage(error)} />}
+    >
+      <RulesContainer />
+    </CspPageTemplate>
   );
 };
 
