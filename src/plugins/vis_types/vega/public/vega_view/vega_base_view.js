@@ -16,11 +16,11 @@ import { Utils } from '../data_model/utils';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { buildQueryFilter, compareFilters } from '@kbn/es-query';
-import { ensureNoUnsafeProperties } from '@kbn/std';
 import { TooltipHandler } from './vega_tooltip';
 
 import { getEnableExternalUrls, getDataViews } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
+import { normalizeDate, normalizeString, normalizeObject } from './utils';
 
 scheme('elastic', euiPaletteColorBlind());
 
@@ -44,55 +44,6 @@ for (const funcName of Object.keys(vegaFunctions)) {
 }
 
 const bypassToken = Symbol();
-
-function normalizeDate(date) {
-  if (typeof date === 'number') {
-    return !isNaN(date) ? date : null;
-  } else if (date instanceof Date) {
-    return date;
-  } else {
-    return String(normalizeObject(date));
-  }
-}
-/*
-Recursive function to check a nested object for a function property
-This function should run after JSON.stringify to ensure that functions such as toJSON
-are not invoked. We dont use the replacer function as it doesnt catch the toJSON function
-*/
-function checkObjectForFunctionProperty(object) {
-  if (object === null || object === undefined) {
-    return false;
-  }
-  if (typeof object === 'function') {
-    return true;
-  }
-  if (object && typeof object === 'object') {
-    return Object.values(object).some(
-      (value) => typeof value === 'function' || checkObjectForFunctionProperty(value)
-    );
-  }
-
-  return false;
-}
-/*
-We want to be strict here when an object is passed to a Vega function
-- NaN (will be converted to null)
-- undefined (key will be removed)
-- Date (will be replaced by its toString value)
-- will throw an error when a function is found
-*/
-function normalizeObject(object) {
-  if (checkObjectForFunctionProperty(object)) {
-    throw new Error('a function cannot be used as a property name');
-  }
-  const normalizedObject = JSON.parse(JSON.stringify(object));
-  ensureNoUnsafeProperties(normalizedObject);
-  return normalizedObject;
-}
-
-function normalizeString(string) {
-  return typeof string === 'string' ? string : undefined;
-}
 
 export function bypassExternalUrlCheck(url) {
   // processed in the  loader.sanitize  below
