@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
 import {
+  categorizeActionResults,
+  categorizeResponseResults,
   getUniqueLogData,
   getActionCompletionInfo,
   isLogsEndpointAction,
@@ -17,10 +20,15 @@ import {
 import type {
   ActivityLogAction,
   ActivityLogActionResponse,
+  EndpointAction,
+  EndpointActionResponse,
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
+  LogsEndpointAction,
+  LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
 import uuid from 'uuid';
+import { mockAuditLogSearchResult, Results } from '../../routes/actions/mocks';
 
 describe('When using Actions service utilities', () => {
   let fleetActionGenerator: FleetActionGenerator;
@@ -433,6 +441,105 @@ describe('When using Actions service utilities', () => {
     it('should include endpoint action when no fleet response but endpoint response with error', () => {
       const uniqueData = getUniqueLogData([...errorActionRequests, ...errorResponses]);
       expect(uniqueData.length).toEqual(5);
+    });
+  });
+
+  describe('#categorizeActionResults() and #categorizeResponseResults()', () => {
+    let fleetActions: Results[];
+    let endpointActions: Results[];
+    let fleetResponses: Results[];
+    let endpointResponses: Results[];
+
+    beforeEach(() => {
+      const agents = ['agent-id'];
+      const actionIds = [uuid.v4(), uuid.v4()];
+
+      fleetActions = actionIds.map((id) => {
+        return {
+          _index: '.fleet-actions-7',
+          _source: fleetActionGenerator.generate({
+            agents,
+            action_id: id,
+          }),
+        };
+      });
+
+      endpointActions = actionIds.map((id) => {
+        return {
+          _index: '.ds-.logs-endpoint.actions-default-2021.19.10-000001',
+          _source: endpointActionGenerator.generate({
+            agent: { id: agents[0] },
+            EndpointActions: {
+              action_id: id,
+            },
+          }),
+        };
+      });
+
+      fleetResponses = actionIds.map((id) => {
+        return {
+          _index: '.ds-.fleet-actions-results-2021.19.10-000001',
+          _source: fleetActionGenerator.generate({
+            agents,
+            action_id: id,
+          }),
+        };
+      });
+
+      endpointResponses = actionIds.map((id) => {
+        return {
+          _index: '.ds-.logs-endpoint.action.responses-default-2021.19.10-000001',
+          _source: endpointActionGenerator.generate({
+            agent: { id: agents[0] },
+            EndpointActions: {
+              action_id: id,
+            },
+          }),
+        };
+      });
+    });
+
+    it('should correctly categorize fleet actions and endpoint actions', () => {
+      const actionResults = mockAuditLogSearchResult([...fleetActions, ...endpointActions]);
+      const categorized = categorizeActionResults({
+        results: actionResults.body.hits.hits as Array<
+          estypes.SearchHit<EndpointAction | LogsEndpointAction>
+        >,
+      });
+      const categorizedActions = categorized.filter((e) => e.type === 'action');
+      const categorizedFleetActions = categorized.filter((e) => e.type === 'fleetAction');
+      expect(categorizedActions.length).toEqual(2);
+      expect(categorizedFleetActions.length).toEqual(2);
+      expect(
+        (categorizedActions as EndpointActivityLogAction[]).map(
+          (e) => 'EndpointActions' in e.item.data
+        )[0]
+      ).toBeTruthy();
+      expect(
+        (categorizedFleetActions as ActivityLogAction[]).map((e) => 'data' in e.item.data)[0]
+      ).toBeTruthy();
+    });
+    it('should correctly categorize fleet responses and endpoint responses', () => {
+      const actionResponses = mockAuditLogSearchResult([...fleetResponses, ...endpointResponses]);
+      const categorized = categorizeResponseResults({
+        results: actionResponses.body.hits.hits as Array<
+          estypes.SearchHit<EndpointActionResponse | LogsEndpointActionResponse>
+        >,
+      });
+      const categorizedResponses = categorized.filter((e) => e.type === 'response');
+      const categorizedFleetResponses = categorized.filter((e) => e.type === 'fleetResponse');
+      expect(categorizedResponses.length).toEqual(2);
+      expect(categorizedFleetResponses.length).toEqual(2);
+      expect(
+        (categorizedResponses as EndpointActivityLogActionResponse[]).map(
+          (e) => 'EndpointActions' in e.item.data
+        )[0]
+      ).toBeTruthy();
+      expect(
+        (categorizedFleetResponses as ActivityLogActionResponse[]).map(
+          (e) => 'data' in e.item.data
+        )[0]
+      ).toBeTruthy();
     });
   });
 });

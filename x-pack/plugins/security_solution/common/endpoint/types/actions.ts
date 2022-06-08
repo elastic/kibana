@@ -227,6 +227,7 @@ export interface ActionListApiResponse {
   startDate: string | undefined;
   endDate: string | undefined;
   userIds: string[] | undefined; // users that requested the actions
-  commands: string[] | undefined; // type of actions, should have at least one always
+  commands: string[] | undefined; // type of actions
   data: ActionDetails[];
+  total: number;
 }

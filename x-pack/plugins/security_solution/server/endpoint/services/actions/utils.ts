@@ -6,7 +6,11 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { failedFleetActionErrorCode } from '../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTIONS_DS,
+  ENDPOINT_ACTION_RESPONSES_DS,
+  failedFleetActionErrorCode,
+} from '../../../../common/endpoint/constants';
 import type {
   ActivityLogAction,
   ActivityLogActionResponse,
@@ -342,19 +346,13 @@ export const hasNoFleetResponse = ({
   );
 };
 
-export const logsEndpointActionsRegex = new RegExp(`(^\.ds-\.logs-endpoint\.actions-default-).+`);
-// matches index names like .ds-.logs-endpoint.action.responses-name_space---suffix-2022.01.25-000001
-export const logsEndpointResponsesRegex = new RegExp(
-  `(^\.ds-\.logs-endpoint\.action\.responses-\\w+-).+`
-);
-
-const matchesIndexPattern = ({
-  regexPattern,
+const matchesDsNamePattern = ({
+  dataStreamName,
   index,
 }: {
-  regexPattern: RegExp;
+  dataStreamName: string;
   index: string;
-}): boolean => regexPattern.test(index);
+}): boolean => index.includes(dataStreamName);
 
 export const categorizeResponseResults = ({
   results,
@@ -363,8 +361,8 @@ export const categorizeResponseResults = ({
 }): Array<ActivityLogActionResponse | EndpointActivityLogActionResponse> => {
   return results?.length
     ? results?.map((e) => {
-        const isResponseDoc: boolean = matchesIndexPattern({
-          regexPattern: logsEndpointResponsesRegex,
+        const isResponseDoc: boolean = matchesDsNamePattern({
+          dataStreamName: ENDPOINT_ACTION_RESPONSES_DS,
           index: e._index,
         });
         return isResponseDoc
@@ -387,8 +385,8 @@ export const categorizeActionResults = ({
 }): Array<ActivityLogAction | EndpointActivityLogAction> => {
   return results?.length
     ? results?.map((e) => {
-        const isActionDoc: boolean = matchesIndexPattern({
-          regexPattern: logsEndpointActionsRegex,
+        const isActionDoc: boolean = matchesDsNamePattern({
+          dataStreamName: ENDPOINT_ACTIONS_DS,
           index: e._index,
         });
         return isActionDoc

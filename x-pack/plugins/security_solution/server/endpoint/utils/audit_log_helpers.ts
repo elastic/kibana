@@ -12,6 +12,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
+  ENDPOINT_ACTIONS_DS,
   ENDPOINT_ACTIONS_INDEX,
   ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
 } from '../../../common/endpoint/constants';
@@ -22,7 +23,7 @@ import type {
   LogsEndpointAction,
 } from '../../../common/endpoint/types';
 import { doesLogsEndpointActionsIndexExist } from './yes_no_data_stream';
-import { getDateFilters, logsEndpointActionsRegex } from '../services/actions/utils';
+import { getDateFilters } from '../services/actions/utils';
 import { ACTION_REQUEST_INDICES, ACTION_RESPONSE_INDICES } from '../services/actions/constants';
 
 const queryOptions = {
@@ -97,7 +98,7 @@ export const getActionRequestsResult = async ({
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     actionRequests = await esClient.search(actionsSearchQuery, { ...queryOptions, meta: true });
     const actionIds = actionRequests?.body?.hits?.hits?.map((e) => {
-      return logsEndpointActionsRegex.test(e._index)
+      return e._index.includes(ENDPOINT_ACTIONS_DS)
         ? (e._source as LogsEndpointAction).EndpointActions.action_id
         : (e._source as EndpointAction).action_id;
     });

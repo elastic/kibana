@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { EndpointError } from '../../../../common/endpoint/errors';
 import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
-import type { SecuritySolutionRequestHandlerContext } from '../../../types';
+import { wrapErrorIfNeeded } from '../../utils';
+import { NotFoundError } from '../../errors';
 
 import {
-  getActionsForAgents,
+  getActions,
   getActionResponses,
-  getTimeSortedActionDetails,
+  getTimeSortedActionListLogEntries,
 } from '../../utils/action_list_helpers';
 
 import {
@@ -22,12 +24,10 @@ import {
   mapToNormalizedActionRequest,
 } from './utils';
 
-interface GetActionListParam {
-  actionTypes?: string[];
-  context: SecuritySolutionRequestHandlerContext;
+interface OptionalFilterParams {
+  commands?: string[];
   elasticAgentIds?: string[];
   endDate?: string;
-  logger: Logger;
   page?: number;
   pageSize?: number;
   startDate?: string;
@@ -35,24 +35,27 @@ interface GetActionListParam {
 }
 
 export const getActionList = async ({
-  actionTypes,
-  context,
+  commands,
   elasticAgentIds,
+  esClient,
   endDate,
   logger,
   page: _page,
   pageSize,
   startDate,
   userIds,
-}: GetActionListParam): Promise<ActionListApiResponse> => {
-  const size = Math.floor(pageSize ?? 50 / 2);
+}: OptionalFilterParams & {
+  esClient: ElasticsearchClient;
+  logger: Logger;
+}): Promise<ActionListApiResponse> => {
+  const size = pageSize ?? 10;
   const page = _page ?? 1;
   const from = page <= 1 ? 0 : page * size - size + 1;
 
   const data = await getActionDetailsList({
-    actionTypes,
-    context,
+    commands,
     elasticAgentIds,
+    esClient,
     endDate,
     from,
     logger,
@@ -67,19 +70,22 @@ export const getActionList = async ({
     startDate,
     endDate,
     userIds,
-    commands: actionTypes,
+    commands,
     data,
+    total: data.length,
   };
 };
 
-export interface GetActionDetailsListParam extends GetActionListParam {
+export type GetActionDetailsListParam = OptionalFilterParams & {
+  esClient: ElasticsearchClient;
   from?: number;
+  logger: Logger;
   size?: number;
-}
+};
 const getActionDetailsList = async ({
-  actionTypes,
-  context,
+  commands,
   elasticAgentIds,
+  esClient,
   endDate,
   from,
   logger,
@@ -91,14 +97,14 @@ const getActionDetailsList = async ({
   let actionReqIds;
 
   try {
-    // fetch actions with matching agent_id
-    const { actionIds, actionRequests } = await getActionsForAgents({
-      actionTypes,
-      context,
-      logger,
+    // fetch actions with matching agent_ids if any
+    const { actionIds, actionRequests } = await getActions({
+      commands,
+      esClient,
       elasticAgentIds,
       startDate,
       endDate,
+      logger,
       from,
       size,
       userIds,
@@ -106,13 +112,27 @@ const getActionDetailsList = async ({
     actions = actionRequests;
     actionReqIds = actionIds;
   } catch (error) {
-    logger.error(error);
-    throw error;
+    const err = wrapErrorIfNeeded(error);
+    logger.error(err);
+    throw err;
   }
 
   if (actions?.statusCode !== 200) {
-    logger.error(`Error fetching actions log for agent_ids ${elasticAgentIds}`);
-    throw new Error(`Error fetching actions log for agent_ids ${elasticAgentIds}`);
+    let errorMessage;
+    let newError;
+    // not found or index not found error
+    if (actions?.statusCode === 404) {
+      errorMessage = `Action list not found for agentIds ${elasticAgentIds}`;
+      const error = new Error(errorMessage);
+      newError = new NotFoundError(errorMessage, error);
+    } else {
+      // all else errors
+      errorMessage = `Error fetching action list for agentIds ${elasticAgentIds}`;
+      const error = new Error(errorMessage);
+      newError = new EndpointError(errorMessage, error);
+    }
+    logger.error(errorMessage);
+    throw newError;
   }
 
   // categorize actions as fleet and endpoint actions
@@ -126,10 +146,10 @@ const getActionDetailsList = async ({
 
   // get all responses for given action Ids and agent Ids
   const actionResponses = await getActionResponses({
-    context,
-    logger,
-    elasticAgentIds,
     actionIds: actionReqIds,
+    elasticAgentIds,
+    esClient,
+    logger,
   });
 
   // categorize responses as fleet and endpoint responses
@@ -140,16 +160,16 @@ const getActionDetailsList = async ({
   // compute action details list for each action id
   const actionDetails: ActionDetails[] = normalizedActionRequests.map((action) => {
     // pick only those actions that match the current action id
-    const matchedActions = categorizedActions.filter((ac) =>
-      ac.type === 'action'
-        ? ac.item.data.EndpointActions.action_id === action.id
-        : ac.item.data.action_id === action.id
+    const matchedActions = categorizedActions.filter((categorizedAction) =>
+      categorizedAction.type === 'action'
+        ? categorizedAction.item.data.EndpointActions.action_id === action.id
+        : categorizedAction.item.data.action_id === action.id
     );
     // pick only those responses that match the current action id
-    const matchedResponses = categorizedResponses.filter((re) =>
-      re.type === 'response'
-        ? re.item.data.EndpointActions.action_id === action.id
-        : re.item.data.action_id === action.id
+    const matchedResponses = categorizedResponses.filter((categorizedResponse) =>
+      categorizedResponse.type === 'response'
+        ? categorizedResponse.item.data.EndpointActions.action_id === action.id
+        : categorizedResponse.item.data.action_id === action.id
     );
 
     // find the specific response's details using that set of matching responses
@@ -163,7 +183,8 @@ const getActionDetailsList = async ({
       agents: action.agents,
       command: action.command,
       startedAt: action.createdAt,
-      logEntries: [...matchedActions, ...matchedResponses],
+      // sort the list by @timestamp in desc order, newest first
+      logEntries: getTimeSortedActionListLogEntries([...matchedActions, ...matchedResponses]),
       isCompleted,
       completedAt,
       wasSuccessful,
@@ -172,8 +193,5 @@ const getActionDetailsList = async ({
     };
   });
 
-  // sort the list by startedAt in desc order, newest first
-  const sortedData = getTimeSortedActionDetails(actionDetails);
-
-  return sortedData;
+  return actionDetails;
 };

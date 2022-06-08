@@ -16,6 +16,7 @@ import type { EndpointActionListRequestQuery } from '../../../../common/endpoint
 import { getActionList } from '../../services';
 import type { SecuritySolutionRequestHandlerContext } from '../../../types';
 import type { EndpointAppContext } from '../../types';
+import { errorHandler } from '../error_handler';
 
 export const actionListHandler = (
   endpointContext: EndpointAppContext
@@ -29,30 +30,27 @@ export const actionListHandler = (
 
   return async (context, req, res) => {
     const {
-      query: {
-        agentIds: elasticAgentIds,
+      query: { agentIds: elasticAgentIds, page, pageSize, startDate, endDate, userIds, commands },
+    } = req;
+    const esClient = (await context.core).elasticsearch.client.asInternalUser;
+
+    try {
+      const body = await getActionList({
+        commands,
+        esClient,
+        elasticAgentIds,
         page,
         pageSize,
         startDate,
         endDate,
         userIds,
-        actionTypes,
-      },
-    } = req;
-
-    const body = await getActionList({
-      actionTypes,
-      elasticAgentIds,
-      page,
-      pageSize,
-      startDate,
-      endDate,
-      userIds,
-      context,
-      logger,
-    });
-    return res.ok({
-      body,
-    });
+        logger,
+      });
+      return res.ok({
+        body,
+      });
+    } catch (error) {
+      return errorHandler(endpointContext.logFactory.get('EndpointActionList'), res, error);
+    }
   };
 };

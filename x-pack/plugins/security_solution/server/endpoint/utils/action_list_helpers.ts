@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+
+import { ENDPOINT_ACTIONS_DS, ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 import { EndpointError } from '../../../common/endpoint/errors';
-import type { SecuritySolutionRequestHandlerContext } from '../../types';
 import type {
   EndpointAction,
   LogsEndpointAction,
@@ -20,34 +20,33 @@ import type {
   EndpointActionResponse,
   LogsEndpointActionResponse,
 } from '../../../common/endpoint/types';
-import {
-  ACTIONS_SEARCH_PAGE_SIZE,
-  ACTION_REQUEST_INDICES,
-  ACTION_RESPONSE_INDICES,
-} from '../services/actions/constants';
-import { getDateFilters, logsEndpointActionsRegex } from '../services/actions/utils';
+import { ACTIONS_SEARCH_PAGE_SIZE, ACTION_RESPONSE_INDICES } from '../services/actions/constants';
+import { getDateFilters } from '../services/actions/utils';
 import { catchAndWrapError } from './wrap_errors';
-import { doesLogsEndpointActionsIndexExist } from './yes_no_data_stream';
 import { GetActionDetailsListParam } from '../services/actions/action_list';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 
-const queryOptions = {
+const queryOptions = Object.freeze({
   headers: {
     'X-elastic-product-origin': 'fleet',
   },
   ignore: [404],
+});
+
+// This is same as the one for audit log
+// but we want to deprecate audit log at some point
+// thus creating this one for sorting action list log entries
+export const getTimeSortedActionListLogEntries = (
+  data: ActionListApiResponse['data'][number]['logEntries']
+): ActionListApiResponse['data'][number]['logEntries'] => {
+  return data.sort((a, b) =>
+    new Date(b.item.data['@timestamp']) > new Date(a.item.data['@timestamp']) ? 1 : -1
+  );
 };
 
-export const getTimeSortedActionDetails = (
-  data: ActionListApiResponse['data']
-): ActionListApiResponse['data'] => {
-  return data.sort((a, b) => (new Date(b.startedAt) > new Date(a.startedAt) ? 1 : -1));
-};
-
-export const getActionsForAgents = async ({
-  actionTypes,
-  context,
+export const getActions = async ({
+  commands,
   elasticAgentIds,
+  esClient,
   endDate,
   from,
   logger,
@@ -62,10 +61,10 @@ export const getActionsForAgents = async ({
   >;
 }> => {
   const additionalFilters = [];
-  if (actionTypes?.length) {
+  if (commands?.length) {
     additionalFilters.push({
       terms: {
-        'data.command': actionTypes,
+        'data.command': commands,
       },
     });
   }
@@ -83,13 +82,8 @@ export const getActionsForAgents = async ({
   ];
   const actionsFilters = [...baseActionFilters, ...dateFilters];
 
-  const hasLogsEndpointActionsIndex = await doesLogsEndpointActionsIndexExist({
-    context,
-    logger,
-    indexName: ENDPOINT_ACTIONS_INDEX,
-  });
   const actionsSearchQuery: SearchRequest = {
-    index: hasLogsEndpointActionsIndex ? ACTION_REQUEST_INDICES : AGENT_ACTIONS_RESULTS_INDEX,
+    index: ENDPOINT_ACTIONS_INDEX,
     size,
     from,
     body: {
@@ -115,15 +109,15 @@ export const getActionsForAgents = async ({
     unknown
   >;
   try {
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     actionRequests = await esClient
       .search<EndpointAction | LogsEndpointAction>(actionsSearchQuery, {
         ...queryOptions,
         meta: true,
       })
       .catch(catchAndWrapError);
+
     const actionIds = actionRequests?.body?.hits?.hits?.map((e) => {
-      return logsEndpointActionsRegex.test(e._index)
+      return e._index.includes(ENDPOINT_ACTIONS_DS)
         ? (e._source as LogsEndpointAction).EndpointActions.action_id
         : (e._source as EndpointAction).action_id;
     });
@@ -135,15 +129,15 @@ export const getActionsForAgents = async ({
 };
 
 export const getActionResponses = async ({
-  context,
-  logger,
-  elasticAgentIds,
   actionIds,
+  elasticAgentIds,
+  esClient,
+  logger,
 }: {
-  context: SecuritySolutionRequestHandlerContext;
-  logger: Logger;
-  elasticAgentIds?: string[];
   actionIds: string[];
+  elasticAgentIds?: string[];
+  esClient: ElasticsearchClient;
+  logger: Logger;
 }): Promise<
   TransportResult<
     estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>,
@@ -174,7 +168,6 @@ export const getActionResponses = async ({
     unknown
   >;
   try {
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     actionResponses = await esClient
       .search<EndpointActionResponse | LogsEndpointActionResponse>(responsesSearchQuery, {
         ...queryOptions,
