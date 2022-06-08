@@ -156,18 +156,30 @@ export const AllCasesList = React.memo<AllCasesListProps>(
     const onFilterChangedCallback = useCallback(
       (newFilterOptions: Partial<FilterOptions>) => {
         if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.closed) {
-          setQueryParams({ ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.closedAt });
+          setQueryParams((prevQueryParams) => ({
+            ...prevQueryParams,
+            sortField: SortFieldCase.closedAt,
+          }));
         } else if (newFilterOptions.status && newFilterOptions.status === CaseStatuses.open) {
-          setQueryParams({ ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.createdAt });
+          setQueryParams((prevQueryParams) => ({
+            ...prevQueryParams,
+            sortField: SortFieldCase.createdAt,
+          }));
         } else if (
           newFilterOptions.status &&
           newFilterOptions.status === CaseStatuses['in-progress']
         ) {
-          setQueryParams({ ...DEFAULT_QUERY_PARAMS, sortField: SortFieldCase.createdAt });
+          setQueryParams((prevQueryParams) => ({
+            ...prevQueryParams,
+            sortField: SortFieldCase.createdAt,
+          }));
         }
 
         deselectCases();
-        setFilterOptions({ ...DEFAULT_FILTER_OPTIONS, ...newFilterOptions });
+        setFilterOptions((prevFilterOptions) => ({
+          ...prevFilterOptions,
+          ...newFilterOptions,
+        }));
         refreshCases(false);
       },
       [deselectCases, setFilterOptions, refreshCases, setQueryParams]
