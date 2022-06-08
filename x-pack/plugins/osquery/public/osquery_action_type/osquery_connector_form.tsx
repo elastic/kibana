@@ -13,6 +13,7 @@ import { QueryClientProvider } from 'react-query';
 import { isEmpty, map, pickBy } from 'lodash';
 import { EuiAccordionProps, EuiSpacer } from '@elastic/eui';
 import { isDeepEqual } from 'react-use/lib/util';
+import uuid from 'uuid';
 import { ECSMapping } from '../../common/schemas/common';
 import { StyledEuiAccordion } from '../components/accordion';
 import { ECSMappingEditorField } from '../packs/queries/lazy_ecs_mapping_editor_field';
@@ -138,6 +139,7 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
         alerts: `[{{context.alerts}}]`,
         query: formDataRef.current.query,
         ecs_mapping: formDataRef.current.ecs_mapping,
+        id: uuid.v4(),
       },
       index
     );

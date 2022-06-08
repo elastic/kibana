@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export { getLazyOsqueryResults } from './lazy_osquery_results';
 export { getLazyOsqueryAction } from './lazy_osquery_action';
 export { useIsOsqueryAvailableSimple } from './osquery_action/use_is_osquery_available_simple';

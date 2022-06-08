@@ -21,9 +21,6 @@ export const getOsqueryActionType = (osqueryContext: OsqueryAppContext) => ({
   id: '.osquery',
   name: 'Osquery',
   minimumLicenseRequired: 'gold' as const,
-  // validate: {
-  //   params: ParamsSchema,
-  // },
   iconClass: 'logoOsquery',
   selectMessage: i18n.translate(
     'xpack.triggersActionsUI.components.builtinActionTypes.exampleAction.selectMessageText',
@@ -45,7 +42,8 @@ export const getOsqueryActionType = (osqueryContext: OsqueryAppContext) => ({
 // @ts-expect-error update types
 async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<unknown>> {
   // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { query, ecs_mapping, alerts } = execOptions.params.message;
+  const { query, ecs_mapping, alerts, id } = execOptions.params.message;
+
   const parsedAlerts: IAlert[] = JSON.parse(alerts);
 
   const agentIds = uniq(parsedAlerts.map((alert) => alert.agent?.id));
@@ -60,6 +58,7 @@ async function executor(payload, execOptions): Promise<ActionTypeExecutorResult<
     {
       agents: agentIds,
       query: {
+        id,
         query,
         ecs_mapping,
       },

@@ -9,24 +9,28 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AgentsRequestOptions } from '../../../../../../common/search_strategy';
-// import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
+import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
 
 export const buildActionsQuery = ({
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   filterQuery,
   sort,
   pagination: { cursorStart, querySize },
 }: AgentsRequestOptions): ISearchRequestParams => {
-  // const filter = [...createQueryFilterClauses(filterQuery)];
+  const filter = [...createQueryFilterClauses(filterQuery)];
 
   const dslQuery = {
     allow_no_indices: true,
     index: '.fleet-actions',
     ignore_unavailable: true,
     body: {
-      // query: { bool: { filter } },
+      runtime_mappings: {
+        'data.id': {
+          type: 'keyword',
+        },
+      },
       query: {
         bool: {
+          filter,
           must: [
             {
               term: {

@@ -42,7 +42,7 @@ import { useActionDetails } from '../actions/use_action_details';
 
 const DataContext = createContext<ResultEdges>([]);
 
-interface ResultsTableComponentProps {
+export interface ResultsTableComponentProps {
   actionId: string;
   selectedAgent?: string;
   agentIds?: string[];

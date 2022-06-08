@@ -17,11 +17,13 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { getLazyOsqueryAction } from './shared_components';
+import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface OsqueryPluginSetup {}
 export interface OsqueryPluginStart {
   OsqueryAction?: ReturnType<typeof getLazyOsqueryAction>;
+  OsqueryResults?: ReturnType<typeof getLazyOsqueryResults>;
   isOsqueryAvailable: (props: { agentId: string }) => boolean;
 }
 

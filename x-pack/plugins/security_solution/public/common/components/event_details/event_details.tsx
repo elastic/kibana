@@ -20,6 +20,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
 
+import { OsqueryView } from './osquery_view';
 import { EventFieldsBrowser } from './event_fields_browser';
 import { JsonView } from './json_view';
 import { ThreatSummaryView } from './cti_details/threat_summary_view';
@@ -49,12 +50,15 @@ export type EventViewId =
   | EventsViewType.tableView
   | EventsViewType.jsonView
   | EventsViewType.summaryView
-  | EventsViewType.threatIntelView;
+  | EventsViewType.threatIntelView
+  | EventsViewType.osqueryView;
+
 export enum EventsViewType {
   tableView = 'table-view',
   jsonView = 'json-view',
   summaryView = 'summary-view',
   threatIntelView = 'threat-intel-view',
+  osqueryView = 'osquery-results-view',
 }
 
 interface Props {
@@ -89,10 +93,12 @@ const StyledEuiTabbedContent = styled(EuiTabbedContent)`
     flex-direction: column;
     overflow: hidden;
     overflow-y: auto;
+
     ::-webkit-scrollbar {
       -webkit-appearance: none;
       width: 7px;
     }
+
     ::-webkit-scrollbar-thumb {
       border-radius: 4px;
       background-color: rgba(0, 0, 0, 0.5);
@@ -328,11 +334,43 @@ const EventDetailsComponent: React.FC<Props> = ({
     [rawEventData]
   );
 
+  const osqueryTab = useMemo(
+    () => ({
+      id: EventsViewType.osqueryView,
+      'data-test-subj': 'osqueryViewTab',
+      name: (
+        <EuiFlexGroup
+          direction="row"
+          alignItems={'center'}
+          justifyContent={'spaceAround'}
+          gutterSize="xs"
+        >
+          <EuiFlexItem>
+            <span>{i18n.OSQUERY_VIEW}</span>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiNotificationBadge data-test-subj="osquery-actions-notification">
+              {rawEventData?.fields['kibana.alert.rule.actions.id'].length}
+            </EuiNotificationBadge>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+      content: (
+        <>
+          <TabContentWrapper data-test-subj="jsonViewWrapper">
+            <OsqueryView rawEventData={rawEventData} />
+          </TabContentWrapper>
+        </>
+      ),
+    }),
+    [rawEventData]
+  );
+
   const tabs = useMemo(() => {
-    return [summaryTab, threatIntelTab, tableTab, jsonTab].filter(
+    return [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab].filter(
       (tab: EventViewTab | undefined): tab is EventViewTab => !!tab
     );
-  }, [summaryTab, threatIntelTab, tableTab, jsonTab]);
+  }, [summaryTab, threatIntelTab, tableTab, jsonTab, osqueryTab]);
 
   const selectedTab = useMemo(
     () => tabs.find((tab) => tab.id === selectedTabId) ?? tabs[0],
