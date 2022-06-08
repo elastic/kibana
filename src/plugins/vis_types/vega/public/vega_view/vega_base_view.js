@@ -52,7 +52,7 @@ function normalizeDate(date) {
   } else if (date instanceof Date) {
     normalizedDate = date;
   } else {
-    normalizedDate = normalizeString(date);
+    normalizedDate = String(normalizeObject(date));
   }
   return normalizedDate;
 }
@@ -83,7 +83,7 @@ function normalizeObject(object) {
 }
 
 function normalizeString(string) {
-  return string ? String(normalizeObject(string)) : undefined;
+  return typeof string === 'string' ? string : undefined;
 }
 
 export function bypassExternalUrlCheck(url) {
