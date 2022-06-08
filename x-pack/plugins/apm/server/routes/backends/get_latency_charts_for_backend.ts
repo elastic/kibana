@@ -114,7 +114,9 @@ export async function getLatencyChartsForBackend({
     response.aggregations?.timeseries.buckets.map((bucket) => {
       return {
         x: bucket.key + offsetInMs,
-        y: (bucket.latency_sum.value ?? 0) / (bucket.latency_count?.value ?? 1),
+        y:
+          (bucket.latency_sum.value ?? 0) /
+          (bucket.latency_count?.value ?? bucket.doc_count),
       };
     }) ?? []
   );

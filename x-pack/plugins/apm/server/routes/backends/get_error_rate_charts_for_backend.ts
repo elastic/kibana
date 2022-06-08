@@ -132,8 +132,9 @@ export async function getErrorRateChartsForBackend({
 
   return (
     response.aggregations?.timeseries.buckets.map((bucket) => {
-      const totalCount = bucket.total_count?.value ?? 1;
-      const failureCount = bucket.failures.total_count?.value ?? 1;
+      const totalCount = bucket.total_count?.value ?? bucket.doc_count;
+      const failureCount =
+        bucket.failures.total_count?.value ?? bucket.failures.doc_count;
 
       return {
         x: bucket.key + offsetInMs,
