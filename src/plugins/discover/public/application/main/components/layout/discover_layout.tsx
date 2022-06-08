@@ -213,6 +213,11 @@ export function DiscoverLayout({
     [onChangeIndexPattern]
   );
 
+  const savedSearchTitle = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    savedSearchTitle.current?.focus();
+  }, []);
+
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <TopNavMemoized
@@ -236,7 +241,13 @@ export function DiscoverLayout({
           spaces={spaces}
           history={history}
         />
-        <h1 id="savedSearchTitle" className="euiScreenReaderOnly">
+        <h1
+          id="savedSearchTitle"
+          className="euiScreenReaderOnly"
+          data-test-subj="discoverSavedSearchTitle"
+          tabIndex={-1}
+          ref={savedSearchTitle}
+        >
           {savedSearch.title
             ? i18n.translate('discover.pageTitleWithSavedSearch', {
                 defaultMessage: 'Discover - {savedSearchTitle}',
