@@ -1786,9 +1786,12 @@ describe('Task Runner', () => {
 
     return taskRunner.run().catch((ex) => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
-      expect(logger.debug).toHaveBeenCalledWith(
-        `Executing Rule foo:test:1 has resulted in Error: Saved object [alert/1] not found`
-      );
+      const executeRuleDebugLogger = logger.debug.mock.calls[3][0];
+      expect(
+        (executeRuleDebugLogger as string).startsWith(
+          `Executing Rule foo:test:1 has resulted in Error: Saved object [alert/1] not found -\nStack trace:`
+        )
+      ).toBeTruthy();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
         1,
@@ -1866,9 +1869,12 @@ describe('Task Runner', () => {
 
     return taskRunner.run().catch((ex) => {
       expect(ex.toString()).toEqual(`Error: Saved object [alert/1] not found`);
-      expect(logger.debug).toHaveBeenCalledWith(
-        `Executing Rule test space:test:1 has resulted in Error: Saved object [alert/1] not found`
-      );
+      const ruleExecuteDebugLog = logger.debug.mock.calls[3][0];
+      expect(
+        (ruleExecuteDebugLog as string).startsWith(
+          `Executing Rule test space:test:1 has resulted in Error: Saved object [alert/1] not found -\nStack trace:`
+        )
+      ).toBeTruthy();
       expect(logger.warn).toHaveBeenCalledTimes(1);
       expect(logger.warn).nthCalledWith(
         1,
