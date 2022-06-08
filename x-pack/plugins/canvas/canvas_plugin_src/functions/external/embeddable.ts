@@ -59,11 +59,8 @@ export function embeddableFunctionFactory({
         const embeddableInput = decode(state.arguments.config[0] as string);
 
         const embeddableType = state.arguments.type[0];
-        
-        if (
-          embeddableInput.explicitInput.attributes ||
-          embeddableInput.explicitInput.savedVis
-        ) {
+
+        if (embeddableInput.explicitInput.attributes || embeddableInput.explicitInput.savedVis) {
           const migratedInput = migrateFn({ ...embeddableInput, type: embeddableType });
           state.arguments.config[0] = encode(migratedInput);
           state.arguments.type[0] = migratedInput.type as string;
