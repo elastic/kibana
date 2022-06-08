@@ -71,6 +71,7 @@ import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/
 import { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
 import { readConsoleRoute } from '../lib/console/read_console_route';
+import { createDashboardsRoute } from '../lib/timeline/routes/console/create_dashboards';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -158,7 +159,7 @@ export const initRoutes = (
   deleteIndexRoute(router);
 
   readConsoleRoute(router);
-
+  createDashboardsRoute(router, security);
   // Detection Engine tags routes that have the REST endpoints of /api/detection_engine/tags
   readTagsRoute(router, isRuleRegistryEnabled);
 

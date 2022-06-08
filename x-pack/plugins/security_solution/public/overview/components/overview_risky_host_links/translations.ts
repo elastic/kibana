@@ -43,6 +43,13 @@ export const DANGER_BUTTON = i18n.translate(
   }
 );
 
+export const LEARN_MORE = i18n.translate(
+  'xpack.securitySolution.overview.riskyHostsDashboardLearnMoreButton',
+  {
+    defaultMessage: 'Learn More',
+  }
+);
+
 export const LINK_COPY = i18n.translate('xpack.securitySolution.overview.riskyHostsSource', {
   defaultMessage: 'Source',
 });

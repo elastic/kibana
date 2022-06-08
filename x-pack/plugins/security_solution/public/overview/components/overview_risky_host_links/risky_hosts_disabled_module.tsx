@@ -18,7 +18,7 @@ export const RISKY_HOSTS_DOC_LINK =
 export const RiskyHostsDisabledModuleComponent = () => (
   <DisabledLinkPanel
     bodyCopy={i18n.DANGER_BODY}
-    buttonCopy={i18n.DANGER_BUTTON}
+    buttonCopy={i18n.LEARN_MORE}
     dataTestSubjPrefix="risky-hosts"
     docLink={RISKY_HOSTS_DOC_LINK}
     listItems={[]}

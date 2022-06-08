@@ -7,6 +7,7 @@
 
 import path, { join, resolve } from 'path';
 import fs from 'fs';
+import { schema } from '@kbn/config-schema';
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
@@ -16,6 +17,7 @@ import {
 import { DEV_TOOL_CONSOLE } from '../../../common/constants';
 
 import { SecuritySolutionPluginRouter } from '../../types';
+import { mappings } from './mappings';
 
 export const getReadables = (dataPath: string): Promise<string> =>
   new Promise((resolved, reject) => {
@@ -58,34 +60,43 @@ export class ConsoleResponseFactory {
 export const buildConsoleResponse = (response: KibanaResponseFactory) =>
   new ConsoleResponseFactory(response);
 
+export const ReadConsoleRequestSchema = {
+  params: schema.object({
+    space_id: schema.string(),
+    console_id: schema.string(),
+  }),
+};
+
 export const readConsoleRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
     {
       path: DEV_TOOL_CONSOLE,
-      validate: false,
+      validate: ReadConsoleRequestSchema,
       options: {
         tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
       const siemResponse = buildConsoleResponse(response);
-      const rulesClient = context.alerting?.getRulesClient();
+      const { space_id: spaceId, console_id: consoleId } = request.params;
 
-      if (!rulesClient) {
-        return siemResponse.error({ statusCode: 404 });
+      const fileName = mappings[consoleId] ?? null;
+
+      if (!fileName) {
+        return siemResponse.error({ statusCode: 500, body: 'No such file or directory' });
       }
-      const fileName = 'test.console';
+
       const filePath = './';
       const dir = resolve(
         join(__dirname, filePath ?? '../../../../detection_engine/rules/prepackaged_timelines')
       );
-      const file = fileName ?? 'index.ndjson';
-      const dataPath = path.join(dir, file);
+
+      const dataPath = path.join(dir, fileName);
       let res = '';
       try {
         res = await getReadables(dataPath);
         const regex = /{{space_name}}/g;
-        return response.ok({ body: res.replace(regex, 'MySpaceName') });
+        return response.ok({ body: res.replace(regex, spaceId) });
       } catch (err) {
         const error = transformError(err);
         return siemResponse.error({
