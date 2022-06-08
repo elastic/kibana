@@ -60,13 +60,11 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
     header: internalHeader,
     body: internalBody,
     footer: internalFooter,
-  } = alertsTableConfiguration?.useInternalFlyout != null
-    ? alertsTableConfiguration?.useInternalFlyout()
-    : {
-        header: null,
-        body: null,
-        footer: null,
-      };
+  } = alertsTableConfiguration?.useInternalFlyout?.() ?? {
+    header: null,
+    body: null,
+    footer: null,
+  };
 
   switch (state) {
     case AlertsTableFlyoutState.external:
@@ -122,7 +120,7 @@ export const AlertsFlyout: React.FunctionComponent<AlertsFlyoutProps> = ({
     }
   }, [FlyoutBody, state]);
 
-  const FlyoutFooterMemo = useCallback(() => {
+  const FlyoutFooterMemo = useMemo(() => {
     if (FlyoutFooter) {
       if (state === AlertsTableFlyoutState.external) {
         return (
