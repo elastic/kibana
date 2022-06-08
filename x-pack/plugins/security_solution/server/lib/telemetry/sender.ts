@@ -304,6 +304,7 @@ export class TelemetryEventsSender implements ITelemetryEventsSender {
           'X-Elastic-Stack-Version': clusterVersionNumber ? clusterVersionNumber : '8.0.0',
           ...(licenseId ? { 'X-Elastic-License-ID': licenseId } : {}),
         },
+        timeout: 5000,
       });
       this.telemetryUsageCounter?.incrementCounter({
         counterName: createUsageCounterLabel(usageLabelPrefix.concat(['payloads', channel])),
