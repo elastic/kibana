@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { ObservabilityOverviewTour } from './tour';
+export { ObservabilityTour } from './tour';

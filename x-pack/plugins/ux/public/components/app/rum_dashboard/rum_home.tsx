@@ -64,6 +64,7 @@ export function RumHome() {
         <PageTemplateComponent
           noDataConfig={isLoading ? undefined : noDataConfig}
           pageHeader={{ children: <PageHeader /> }}
+          isPageDataLoaded={isLoading === false}
         >
           {isLoading && <EmptyStateLoading />}
           <div style={{ visibility: isLoading ? 'hidden' : 'initial' }}>

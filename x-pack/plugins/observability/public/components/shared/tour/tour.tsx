@@ -22,7 +22,6 @@ import {
 import { useLocation } from 'react-router-dom';
 import { ApplicationStart } from '@kbn/core/public';
 import { observabilityAppId } from '../../../../common';
-import { useHasData } from '../../../hooks/use_has_data';
 
 import './tour.scss';
 
@@ -242,17 +241,19 @@ const getInitialTourState = (prevTourState: string | null): TourState => {
 
   return {
     activeStep: 1,
-    // TODO this will default to false once we added the workflow landing page and localStorage is set there
+    // TODO This will default to `false` once we add the workflow landing page and localStorage is set there
     isTourActive: true,
   };
 };
 
-export function ObservabilityOverviewTour({
+export function ObservabilityTour({
   children,
   navigateToApp,
+  isPageDataLoaded,
 }: {
   children: ReactNode;
   navigateToApp: ApplicationStart['navigateToApp'];
+  isPageDataLoaded: boolean;
 }) {
   const prevTourState = localStorage.getItem(observabilityTourStorageKey);
   const { activeStep: initialActiveStep, isTourActive: initialIsTourActive } =
@@ -261,7 +262,6 @@ export function ObservabilityOverviewTour({
   const [isTourActive, setIsTourActive] = useState(initialIsTourActive);
   const [activeStep, setActiveStep] = useState(initialActiveStep);
 
-  const { hasAnyData, isAllRequestsComplete } = useHasData();
   const { pathname: currentPath } = useLocation();
 
   const isOverviewPage = currentPath === overviewPath;
@@ -273,13 +273,7 @@ export function ObservabilityOverviewTour({
 
   const endTour = useCallback(() => setIsTourActive(false), []);
 
-  const shouldShowTour = useCallback(() => {
-    if (isOverviewPage) {
-      // We must wait for data to load on the overview page in order for the last step in the tour to render correctly
-      return Boolean(isTourActive && isAllRequestsComplete && hasAnyData);
-    }
-    return isTourActive;
-  }, [hasAnyData, isAllRequestsComplete, isOverviewPage, isTourActive]);
+  const showTour = isTourActive && isPageDataLoaded; // The tour may not render correctly unless the page data has finished loading
 
   useEffect(() => {
     localStorage.setItem(observabilityTourStorageKey, JSON.stringify({ isTourActive, activeStep }));
@@ -297,7 +291,7 @@ export function ObservabilityOverviewTour({
   return (
     <>
       {children}
-      {shouldShowTour() && (
+      {showTour && (
         <>
           {getSteps({ activeStep, incrementStep, endTour })}
           {showOverlay && (
