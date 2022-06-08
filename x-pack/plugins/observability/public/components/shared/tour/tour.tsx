@@ -238,8 +238,7 @@ const getInitialTourState = (prevTourState: string | null): TourState => {
 
   return {
     activeStep: 1,
-    // TODO This will default to `false` once we add the workflow landing page and localStorage is set there
-    isTourActive: true,
+    isTourActive: false,
   };
 };
 
