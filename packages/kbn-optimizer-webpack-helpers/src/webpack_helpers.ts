@@ -7,7 +7,7 @@
  */
 
 import webpack from 'webpack';
-// @ts-ignore
+// @ts-expect-error module is not typed
 import Stats from 'webpack/lib/Stats';
 
 export function isFailureStats(stats: webpack.Stats) {
