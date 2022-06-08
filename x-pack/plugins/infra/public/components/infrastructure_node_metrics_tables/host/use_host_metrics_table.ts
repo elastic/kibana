@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { useMemo, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
@@ -53,6 +54,11 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
     direction: 'desc',
   });
 
+  const hostsFilterClauseDsl = useMemo(
+    (): QueryDslQueryContainer => addEventModuleFilter(filterClauseDsl),
+    [filterClauseDsl]
+  );
+
   const {
     isLoading,
     nodes: hosts,
@@ -60,7 +66,7 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
   } = useInfrastructureNodeMetrics<HostNodeMetricsRow>({
     metricsExplorerOptions: hostMetricsOptions,
     timerange,
-    filterClauseDsl,
+    filterClauseDsl: hostsFilterClauseDsl,
     transform: seriesToHostNodeMetricsRow,
     sortState,
     currentPageIndex,
@@ -75,6 +81,25 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
     setCurrentPageIndex,
     sortState,
     setSortState,
+  };
+}
+
+function addEventModuleFilter(
+  filterClauseDsl: QueryDslQueryContainer | undefined
+): QueryDslQueryContainer {
+  return {
+    bool: {
+      filter: [
+        {
+          term: {
+            'event.module': 'system',
+          },
+        },
+        {
+          ...filterClauseDsl,
+        },
+      ],
+    },
   };
 }
 

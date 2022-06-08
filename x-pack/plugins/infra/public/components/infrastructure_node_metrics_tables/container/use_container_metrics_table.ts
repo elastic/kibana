@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useState } from 'react';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { useMemo, useState } from 'react';
 import type {
   MetricsExplorerRow,
   MetricsExplorerSeries,
@@ -56,6 +57,11 @@ export function useContainerMetricsTable({
     direction: 'desc',
   });
 
+  const containersFilterClauseDsl = useMemo(
+    () => addEventModuleFilter(filterClauseDsl),
+    [filterClauseDsl]
+  );
+
   const {
     isLoading,
     nodes: containers,
@@ -63,7 +69,7 @@ export function useContainerMetricsTable({
   } = useInfrastructureNodeMetrics<ContainerNodeMetricsRow>({
     metricsExplorerOptions: containerMetricsOptions,
     timerange,
-    filterClauseDsl,
+    filterClauseDsl: containersFilterClauseDsl,
     transform: seriesToContainerNodeMetricsRow,
     sortState,
     currentPageIndex,
@@ -78,6 +84,25 @@ export function useContainerMetricsTable({
     setCurrentPageIndex,
     sortState,
     setSortState,
+  };
+}
+
+function addEventModuleFilter(
+  filterClauseDsl: QueryDslQueryContainer | undefined
+): QueryDslQueryContainer {
+  return {
+    bool: {
+      filter: [
+        {
+          term: {
+            'event.module': 'kubernetes',
+          },
+        },
+        {
+          ...filterClauseDsl,
+        },
+      ],
+    },
   };
 }
 
