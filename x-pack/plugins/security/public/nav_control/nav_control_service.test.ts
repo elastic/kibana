@@ -102,7 +102,9 @@ describe('SecurityNavControlService', () => {
                     class="euiHeaderSectionItemButton__content"
                   >
                     <span
-                      class="euiLoadingSpinner euiLoadingSpinner--medium"
+                      aria-label="Loading"
+                      class="euiLoadingSpinner css-155ohbx-euiLoadingSpinner-m"
+                      role="progressbar"
                     />
                   </span>
                 </span>
