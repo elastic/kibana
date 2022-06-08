@@ -55,7 +55,7 @@ export function usePodMetricsTable({ timerange, filterClauseDsl }: UseNodeMetric
   });
 
   const podsFilterClauseDsl = useMemo(
-    (): QueryDslQueryContainer => addEventModuleFilter(filterClauseDsl),
+    () => addEventModuleFilter(filterClauseDsl),
     [filterClauseDsl]
   );
 

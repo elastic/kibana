@@ -55,7 +55,7 @@ export function useHostMetricsTable({ timerange, filterClauseDsl }: UseNodeMetri
   });
 
   const hostsFilterClauseDsl = useMemo(
-    (): QueryDslQueryContainer => addEventModuleFilter(filterClauseDsl),
+    () => addEventModuleFilter(filterClauseDsl),
     [filterClauseDsl]
   );
 
