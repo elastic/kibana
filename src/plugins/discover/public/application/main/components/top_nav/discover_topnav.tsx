@@ -174,7 +174,7 @@ export const DiscoverTopNav = ({
 
   const dataViewPickerProps = {
     trigger: {
-      label: indexPattern?.title || '',
+      label: indexPattern?.getName() || '',
       'data-test-subj': 'discover-dataView-switch-link',
       title: indexPattern?.title || '',
     },

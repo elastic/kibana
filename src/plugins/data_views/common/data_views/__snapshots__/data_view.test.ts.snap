@@ -801,6 +801,7 @@ Object {
     },
   },
   "id": "test-pattern",
+  "name": "Name",
   "runtimeFieldMap": Object {
     "runtime_field": Object {
       "script": Object {

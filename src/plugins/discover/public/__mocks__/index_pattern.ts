@@ -86,8 +86,10 @@ export const buildDataViewMock = ({
   const dataView = {
     id: `${name}-id`,
     title: `${name}-title`,
+    name,
     metaFields: ['_index', '_score'],
     fields: dataViewFields,
+    getName: () => name,
     getComputedFields: () => ({ docvalueFields: [], scriptFields: {}, storedFields: ['*'] }),
     getSourceFiltering: () => ({}),
     getFieldByName: jest.fn((fieldName: string) => dataViewFields.getByName(fieldName)),

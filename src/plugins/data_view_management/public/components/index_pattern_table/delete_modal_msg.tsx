@@ -34,7 +34,7 @@ const tableTitle = i18n.translate('indexPatternManagement.dataViewTable.tableTit
 export const deleteModalMsg = (views: RemoveDataViewProps[], hasSpaces: boolean) => {
   const columns: Array<EuiTableFieldDataColumnType<any>> = [
     {
-      field: 'title',
+      field: 'name',
       name: dataViewColumnName,
       sortable: true,
     },
@@ -50,6 +50,7 @@ export const deleteModalMsg = (views: RemoveDataViewProps[], hasSpaces: boolean)
     });
   }
 
+  views.forEach((view) => (view.name = view.getName()));
   return (
     <div>
       <EuiCallOut

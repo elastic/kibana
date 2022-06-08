@@ -22,6 +22,7 @@ export const getSavedObjects = (): SavedObject[] => [
       runtimeFieldMap: '{}',
       timeFieldName: 'order_date',
       title: 'kibana_sample_data_ecommerce',
+      name: 'Kibana Sample Data eCommerce',
       typeMeta: '{}',
     },
     coreMigrationVersion: '8.0.0',

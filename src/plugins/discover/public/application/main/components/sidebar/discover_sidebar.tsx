@@ -323,7 +323,7 @@ export function DiscoverSidebarComponent({
             onAddField={editField}
             onDataViewCreated={createNewDataView}
             trigger={{
-              label: selectedIndexPattern?.title || '',
+              label: selectedIndexPattern?.getName() || '',
               'data-test-subj': 'indexPattern-switch-link',
               title: selectedIndexPattern?.title || '',
               fullWidth: true,

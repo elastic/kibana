@@ -222,7 +222,7 @@ export const ControlEditor = ({
               }}
               trigger={{
                 label:
-                  state.selectedDataView?.title ??
+                  state.selectedDataView?.getName() ??
                   ControlGroupStrings.manageControl.getSelectDataViewMessage(),
               }}
             />
