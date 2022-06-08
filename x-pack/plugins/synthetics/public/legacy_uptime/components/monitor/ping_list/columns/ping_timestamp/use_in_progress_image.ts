@@ -6,7 +6,7 @@
  */
 
 import { useRouteMatch } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import {
   ScreenshotImageBlob,
@@ -14,7 +14,8 @@ import {
 } from '../../../../../../../common/runtime_types';
 import { getJourneyScreenshot } from '../../../../../state/api/journey';
 import { MONITOR_ADD_ROUTE, MONITOR_EDIT_ROUTE } from '../../../../../../../common/constants';
-import { useUptimeRefreshContext } from '../../../../../contexts/uptime_refresh_context';
+
+const NUMBER_OF_RETRIES = 20;
 
 export const useInProgressImage = ({
   stepStatus,
@@ -30,7 +31,7 @@ export const useInProgressImage = ({
   const isAddRoute = useRouteMatch(MONITOR_ADD_ROUTE);
   const isEditRoute = useRouteMatch(MONITOR_EDIT_ROUTE);
 
-  const { lastRefresh, refreshApp } = useUptimeRefreshContext();
+  const [retryLoading, setRetryLoading] = useState(0);
 
   const skippedStep = stepStatus === 'skipped';
 
@@ -42,23 +43,20 @@ export const useInProgressImage = ({
     }
 
     if (hasIntersected && !hasImage) return getJourneyScreenshot(imgPath);
-  }, [hasIntersected, imgPath, skippedStep, lastRefresh]);
+  }, [hasIntersected, imgPath, skippedStep, retryLoading]);
 
   useEffect(() => {
     if (!loading && !hasImage && (isAddRoute?.isExact || isEditRoute?.isExact) && !skippedStep) {
       setTimeout(() => {
-        refreshApp();
+        setRetryLoading((prevState) => {
+          if (prevState < 20) {
+            return prevState + 1;
+          }
+          return prevState;
+        });
       }, 5 * 1000);
     }
-  }, [
-    hasImage,
-    loading,
-    refreshApp,
-    lastRefresh,
-    isAddRoute?.isExact,
-    isEditRoute?.isExact,
-    skippedStep,
-  ]);
+  }, [hasImage, loading, isAddRoute?.isExact, isEditRoute?.isExact, skippedStep]);
 
   return {
     data,
