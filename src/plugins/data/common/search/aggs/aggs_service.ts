@@ -8,7 +8,7 @@
 
 import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { CreateAggConfigParams, UI_SETTINGS } from '../..';
+import { CreateAggConfigParams, UI_SETTINGS, AggTypesDependencies } from '../..';
 import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
@@ -39,7 +39,7 @@ export interface AggsCommonSetupDependencies {
 export interface AggsCommonStartDependencies {
   getConfig: GetConfigFn;
   getIndexPattern(id: string): Promise<DataView>;
-  isDefaultTimezone: () => boolean;
+  aggExecutionContext?: AggTypesDependencies['aggExecutionContext'];
 }
 
 /**
@@ -67,14 +67,20 @@ export class AggsCommonService {
     };
   }
 
-  public start({ getConfig }: AggsCommonStartDependencies): AggsCommonStart {
+  public start({ getConfig, aggExecutionContext }: AggsCommonStartDependencies): AggsCommonStart {
     const aggTypesStart = this.aggTypesRegistry.start();
     const calculateAutoTimeExpression = getCalculateAutoTimeExpression(getConfig);
 
     const createAggConfigs = (indexPattern: DataView, configStates?: CreateAggConfigParams[]) => {
-      return new AggConfigs(indexPattern, configStates, {
-        typesRegistry: aggTypesStart,
-      });
+      return new AggConfigs(
+        indexPattern,
+        configStates,
+        {
+          typesRegistry: aggTypesStart,
+          aggExecutionContext,
+        },
+        getConfig
+      );
     };
 
     return {
