@@ -10,8 +10,6 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['canvas', 'common', 'maps']);
-  const find = getService('find');
-  const browser = getService('browser');
   const retry = getService('retry');
 
   describe('Map embeddable in canvas', () => {
