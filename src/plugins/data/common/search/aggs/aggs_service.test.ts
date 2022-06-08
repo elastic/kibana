@@ -23,7 +23,6 @@ describe('Aggs service', () => {
     calculateBounds: jest.fn(),
     getFieldFormatsStart: jest.fn(),
     getConfig: jest.fn(),
-    isDefaultTimezone: () => true,
   };
 
   beforeEach(() => {
@@ -34,7 +33,6 @@ describe('Aggs service', () => {
     startDeps = {
       getConfig: jest.fn(),
       getIndexPattern: jest.fn(),
-      isDefaultTimezone: jest.fn(),
     };
   });
 

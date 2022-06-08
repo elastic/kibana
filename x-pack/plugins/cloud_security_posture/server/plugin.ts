@@ -20,6 +20,7 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { CspAppService } from './lib/csp_app_services';
 import type {
   CspServerPluginSetup,
@@ -51,6 +52,7 @@ import {
 export interface CspAppContext {
   logger: Logger;
   service: CspAppService;
+  security: SecurityPluginSetup;
 }
 
 export class CspPlugin
@@ -77,6 +79,7 @@ export class CspPlugin
     const cspAppContext: CspAppContext = {
       logger: this.logger,
       service: this.CspAppService,
+      security: plugins.security,
     };
 
     core.savedObjects.registerType(cspRuleAssetType);
@@ -114,7 +117,7 @@ export class CspPlugin
         async (
           packagePolicy: PackagePolicy,
           context: RequestHandlerContext,
-          _: KibanaRequest
+          request: KibanaRequest
         ): Promise<PackagePolicy> => {
           if (packagePolicy.package?.name === CLOUD_SECURITY_POSTURE_PACKAGE_NAME) {
             await this.initialize(core, plugins.taskManager);
@@ -122,12 +125,13 @@ export class CspPlugin
             const soClient = (await context.core).savedObjects.client;
             const esClient = (await context.core).elasticsearch.client.asCurrentUser;
             await onPackagePolicyPostCreateCallback(this.logger, packagePolicy, soClient);
-
+            const userAuth = await plugins.security.authc.getCurrentUser(request);
             const updatedPackagePolicy = await updateAgentConfiguration(
               plugins.fleet.packagePolicyService,
               packagePolicy,
               esClient,
-              soClient
+              soClient,
+              userAuth
             );
             return updatedPackagePolicy;
           }
