@@ -106,7 +106,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
 
     metrics.setGlobalMeterProvider(meterProvider);
 
-    const url = this.config.opentelemetry.metrics.otlp.url;
+    const url = this.config.opentelemetry?.metrics.otlp.url;
     if (url) {
       this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
       let credentials: grpc.ChannelCredentials;
