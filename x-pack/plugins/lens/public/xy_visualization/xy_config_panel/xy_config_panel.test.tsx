@@ -354,7 +354,7 @@ describe('XY Config panels', () => {
       expect(component.find(EuiColorPicker).prop('color')).toEqual('red');
     });
     test('does not apply incorrect color', () => {
-      const setState = jest.fn()
+      const setState = jest.fn();
       const state = {
         ...testState(),
         layers: [
@@ -394,20 +394,24 @@ describe('XY Config panels', () => {
       );
 
       act(() => {
-        component.find('input[data-test-subj="euiColorPickerAnchor indexPattern-dimension-colorPicker"]').simulate('change', {
-          target: { value: 'INCORRECT_COLOR' },
-        });
+        component
+          .find('input[data-test-subj="euiColorPickerAnchor indexPattern-dimension-colorPicker"]')
+          .simulate('change', {
+            target: { value: 'INCORRECT_COLOR' },
+          });
       });
-      component.update()
+      component.update();
       expect(component.find(EuiColorPicker).prop('color')).toEqual('INCORRECT_COLOR');
       expect(setState).not.toHaveBeenCalled();
 
       act(() => {
-        component.find('input[data-test-subj="euiColorPickerAnchor indexPattern-dimension-colorPicker"]').simulate('change', {
-          target: { value: '666666' },
-        });
+        component
+          .find('input[data-test-subj="euiColorPickerAnchor indexPattern-dimension-colorPicker"]')
+          .simulate('change', {
+            target: { value: '666666' },
+          });
       });
-      component.update()
+      component.update();
       expect(component.find(EuiColorPicker).prop('color')).toEqual('666666');
       expect(setState).toHaveBeenCalled();
     });
