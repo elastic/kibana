@@ -20,6 +20,7 @@ export const DoesNotExist = React.memo(({ caseId }: Props) => {
 
   return (
     <EuiEmptyPrompt
+      data-test-subj="case-view-does-not-exist"
       iconColor="default"
       iconType="casesApp"
       title={<h2>{i18n.DOES_NOT_EXIST_TITLE}</h2>}
