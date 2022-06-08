@@ -20,6 +20,7 @@ export type {
   XYAnnotationLayerConfig,
   YAxisMode,
   SeriesType,
+  YConfig,
 } from './xy_visualization/types';
 export type {
   DatasourcePublicAPI,
@@ -76,7 +77,6 @@ export type {
 } from './indexpattern_datasource/types';
 export type {
   XYArgs,
-  ExtendedYConfig,
   XYRender,
   LayerType,
   LineStyle,
@@ -88,7 +88,6 @@ export type {
   XYChartProps,
   LegendConfig,
   IconPosition,
-  ExtendedYConfigResult,
   DataLayerArgs,
   ValueLabelMode,
   AxisExtentMode,
