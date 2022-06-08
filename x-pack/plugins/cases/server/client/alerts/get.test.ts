@@ -101,4 +101,38 @@ describe('getAlerts', () => {
       },
     ]);
   });
+
+  it('filters docs without _source correctly', async () => {
+    esClient.mget.mockResolvedValue({
+      docs: [
+        ...docs,
+        {
+          _index: '.internal.alerts-security.alerts-default-000002',
+          _id: 'd3869d546717e8c581add9cbf7d24578f34cd3e72cbc8d8b8e9a9330a899f70f',
+          found: true,
+        },
+      ],
+    });
+    const clientArgs = { alertsService } as unknown as CasesClientArgs;
+
+    const res = await getAlerts(
+      [
+        {
+          index: '.internal.alerts-security.alerts-default-000001',
+          id: 'c3869d546717e8c581add9cbf7d24578f34cd3e72cbc8d8b8e9a9330a899f70f',
+        },
+      ],
+      clientArgs
+    );
+
+    expect(res).toEqual([
+      {
+        index: '.internal.alerts-security.alerts-default-000001',
+        id: 'c3869d546717e8c581add9cbf7d24578f34cd3e72cbc8d8b8e9a9330a899f70f',
+        destination: { mac: 'ff:ff:ff:ff:ff:ff' },
+        source: { bytes: 444, mac: '11:1f:1e:13:15:14', packets: 6 },
+        ecs: { version: '8.0.0' },
+      },
+    ]);
+  });
 });

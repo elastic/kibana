@@ -11,8 +11,10 @@ import { CasesClientArgs } from '..';
 import { AlertInfo } from '../../common/types';
 import { Alert } from '../../services/alerts';
 
-function isAlert(doc?: MgetResponseItem<unknown>): doc is GetGetResult<Alert> {
-  return Boolean(doc && !('error' in doc));
+function isAlert(
+  doc?: MgetResponseItem<unknown>
+): doc is Omit<GetGetResult<Alert>, '_source'> & { _source: Alert } {
+  return Boolean(doc && !('error' in doc) && '_source' in doc);
 }
 
 export const getAlerts = async (
