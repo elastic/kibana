@@ -14,6 +14,7 @@ import {
   EuiCollapsibleNavGroup,
   EuiFlyout,
   EuiFlyoutProps,
+  EuiPanel,
   EuiSideNav,
   EuiSideNavItemType,
   EuiSideNavProps,
@@ -173,14 +174,16 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
         // @ts-expect-error
         <EuiCollapsibleNavGroup
           className={sideNavClasses}
-          paddingSize="m"
+          paddingSize="none"
           background="none"
           title={titleText}
           titleElement="span"
           isCollapsible={canBeCollapsed}
           initialIsOpen={false}
         >
-          {sideNavContent}
+          <EuiPanel color="transparent" paddingSize="m">
+            {sideNavContent}
+          </EuiPanel>
         </EuiCollapsibleNavGroup>
       )}
       {isMediumBreakpoint && (
