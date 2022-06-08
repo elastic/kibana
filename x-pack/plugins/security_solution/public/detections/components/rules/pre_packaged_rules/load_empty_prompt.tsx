@@ -104,7 +104,7 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
           </EuiFlexItem>
           {isUpgradeModalVisible && (
             <MlJobUpgradeModal
-              jobs={jobs}
+              jobs={legacyJobsInstalled}
               onCancel={() => setIsUpgradeModalVisible(false)}
               onConfirm={mlJobUpgradeModalConfirm}
             />
