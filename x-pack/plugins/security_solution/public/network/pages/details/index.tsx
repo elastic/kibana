@@ -17,7 +17,7 @@ import {
   IPsQueryTabBody,
   TlsQueryTabBody,
   UsersQueryTabBody,
-} from '../../components/query_tabs';
+} from '../navigation';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import { FlowTargetSourceDest, LastEventIndexKey } from '../../../../common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';

@@ -7,63 +7,61 @@
 
 import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
+
+import { NetworkHttpTable } from '../../components/network_http_table';
+import { ID, useNetworkHttp } from '../../containers/network_http';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { useNetworkTls, ID } from '../../containers/tls';
-import { TlsTable } from '../tls_table';
-import { FTQueryTabBodyProps } from './types';
+
+import { HttpQueryTabBodyProps } from './types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
-const TlsTableManage = manageQuery(TlsTable);
+const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
 
-const TlsQueryTabBodyComponent: React.FC<FTQueryTabBodyProps> = ({
+export const HttpQueryTabBody = ({
   endDate,
   filterQuery,
-  flowTarget,
   indexNames,
-  ip = '',
-  setQuery,
   skip,
   startDate,
+  setQuery,
   type,
-}) => {
+}: HttpQueryTabBodyProps) => {
   const queryId = `${ID}-${type}`;
   const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
-  const [loading, { id, inspect, isInspected, tls, totalCount, pageInfo, loadPage, refetch }] =
-    useNetworkTls({
-      endDate,
-      filterQuery,
-      flowTarget,
-      id: queryId,
-      indexNames,
-      ip,
-      skip: querySkip,
-      startDate,
-      type,
-    });
+  const [
+    loading,
+    { id, inspect, isInspected, loadPage, networkHttp, pageInfo, refetch, totalCount },
+  ] = useNetworkHttp({
+    endDate,
+    filterQuery,
+    id: queryId,
+    indexNames,
+    skip: querySkip,
+    startDate,
+    type,
+  });
 
   return (
-    <TlsTableManage
-      data={tls}
+    <NetworkHttpTableManage
+      data={networkHttp}
+      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       id={id}
       inspect={inspect}
       isInspect={isInspected}
-      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       loading={loading}
       loadPage={loadPage}
-      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
+      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}
     />
   );
 };
 
-TlsQueryTabBodyComponent.displayName = 'TlsQueryTabBodyComponent';
-
-export const TlsQueryTabBody = React.memo(TlsQueryTabBodyComponent);
+HttpQueryTabBody.displayName = 'HttpQueryTabBody';

@@ -8,7 +8,7 @@
 import React, { useEffect, useCallback, useMemo, useState } from 'react';
 import { getOr } from 'lodash/fp';
 
-import { NetworkDnsTable } from '../network_dns_table';
+import { NetworkDnsTable } from '../../components/network_dns_table';
 import { useNetworkDns, ID } from '../../containers/network_dns';
 import { manageQuery } from '../../../common/components/page/manage_query';
 

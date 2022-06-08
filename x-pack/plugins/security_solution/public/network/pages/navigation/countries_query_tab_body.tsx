@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
 
-import { NetworkTopCountriesTable } from '../network_top_countries_table';
+import { NetworkTopCountriesTable } from '../../components/network_top_countries_table';
 import { useNetworkTopCountries, ID } from '../../containers/network_top_countries';
 import { manageQuery } from '../../../common/components/page/manage_query';
 

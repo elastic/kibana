@@ -20,7 +20,7 @@ import {
   IPsQueryTabBody,
   NetworkAlertsQueryTabBody,
   TlsQueryTabBody,
-} from '../../components/query_tabs';
+} from '.';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { AnomaliesNetworkTable } from '../../../common/components/ml/tables/anomalies_network_table';
 import { ConditionalFlexGroup } from './conditional_flex_group';

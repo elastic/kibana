@@ -15,6 +15,36 @@ import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { SetAbsoluteRangeDatePicker } from '../types';
 import { DocValueFields } from '../../../common/containers/source';
 
+interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
+  endDate: string;
+  filterQuery?: string | ESTermQuery;
+  indexNames: string[];
+  ip?: string;
+  narrowDateRange?: NarrowDateRange;
+  skip: boolean;
+  startDate: string;
+  type: networkModel.NetworkType;
+}
+
+export type NetworkComponentQueryProps = QueryTabBodyProps & {
+  docValueFields?: DocValueFields[];
+};
+
+export type IPsQueryTabBodyProps = QueryTabBodyProps & {
+  flowTarget: FlowTargetSourceDest;
+  indexPattern: DataViewBase;
+};
+
+export type FTQueryTabBodyProps = QueryTabBodyProps & {
+  flowTarget: FlowTargetSourceDest;
+};
+
+export type IPQueryTabBodyProps = FTQueryTabBodyProps & {
+  ip: string;
+};
+
+export type HttpQueryTabBodyProps = QueryTabBodyProps;
+
 export type NetworkRoutesProps = GlobalTimeArgs & {
   docValueFields: DocValueFields[];
   type: networkModel.NetworkType;

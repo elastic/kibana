@@ -7,25 +7,24 @@
 
 import React, { useEffect, useState } from 'react';
 import { getOr } from 'lodash/fp';
-
-import { NetworkHttpTable } from '../network_http_table';
-import { ID, useNetworkHttp } from '../../containers/network_http';
 import { manageQuery } from '../../../common/components/page/manage_query';
-
-import { HttpQueryTabBodyProps } from './types';
+import { useNetworkUsers, ID } from '../../containers/users';
+import { IPQueryTabBodyProps } from './types';
+import { UsersTable } from '../../components/users_table';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
-const NetworkHttpTableManage = manageQuery(NetworkHttpTable);
+const UsersTableManage = manageQuery(UsersTable);
 
-export const HttpQueryTabBody = ({
+export const UsersQueryTabBody = ({
   endDate,
   filterQuery,
-  indexNames,
+  flowTarget,
+  ip,
+  setQuery,
   skip,
   startDate,
-  setQuery,
   type,
-}: HttpQueryTabBodyProps) => {
+}: IPQueryTabBodyProps) => {
   const queryId = `${ID}-${type}`;
   const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
@@ -34,34 +33,35 @@ export const HttpQueryTabBody = ({
   }, [skip, toggleStatus]);
   const [
     loading,
-    { id, inspect, isInspected, loadPage, networkHttp, pageInfo, refetch, totalCount },
-  ] = useNetworkHttp({
+    { id, inspect, isInspected, networkUsers, totalCount, pageInfo, loadPage, refetch },
+  ] = useNetworkUsers({
     endDate,
     filterQuery,
+    flowTarget,
     id: queryId,
-    indexNames,
+    ip,
     skip: querySkip,
     startDate,
-    type,
   });
 
   return (
-    <NetworkHttpTableManage
-      data={networkHttp}
-      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
+    <UsersTableManage
+      data={networkUsers}
       id={id}
       inspect={inspect}
       isInspect={isInspected}
+      flowTarget={flowTarget}
+      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       loading={loading}
       loadPage={loadPage}
+      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
-      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}
     />
   );
 };
 
-HttpQueryTabBody.displayName = 'HttpQueryTabBody';
+UsersQueryTabBody.displayName = 'UsersQueryTable';
