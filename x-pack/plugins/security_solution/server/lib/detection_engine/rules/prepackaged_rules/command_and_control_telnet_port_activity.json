@@ -73,5 +73,5 @@
   "timeline_title": "Comprehensive Network Timeline",
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 10
+  "version": 12
 }

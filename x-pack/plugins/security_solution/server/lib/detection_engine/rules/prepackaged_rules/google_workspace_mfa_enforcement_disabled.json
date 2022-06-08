@@ -33,5 +33,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 11
+  "version": 13
 }

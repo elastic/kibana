@@ -25,9 +25,27 @@
     "Elastic",
     "Host",
     "Linux",
-    "Threat Detection"
+    "Threat Detection",
+    "Discovery"
+  ],
+  "threat": [
+    {
+      "framework": "MITRE ATT&CK",
+      "tactic": {
+        "id": "TA0007",
+        "name": "Discovery",
+        "reference": "https://attack.mitre.org/tactics/TA0007/"
+      },
+      "technique": [
+        {
+          "id": "T1082",
+          "name": "System Information Discovery",
+          "reference": "https://attack.mitre.org/techniques/T1082/"
+        }
+      ]
+    }
   ],
   "timestamp_override": "event.ingested",
   "type": "query",
-  "version": 7
+  "version": 8
 }

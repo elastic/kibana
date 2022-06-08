@@ -12,7 +12,7 @@
   "license": "Elastic License v2",
   "name": "Tampering of Bash Command-Line History",
   "note": "## Config\n\nIf enabling an EQL rule on a non-elastic-agent index (such as beats) for versions <8.2, events will not define `event.ingested` and default fallback for EQL rules was not added until 8.2, so you will need to add a custom pipeline to populate `event.ingested` to @timestamp for this rule to work.\n",
-  "query": "process where event.type in (\"start\", \"process_started\") and\n (\n  (process.args : (\"rm\", \"echo\") and process.args : (\".bash_history\", \"/root/.bash_history\", \"/home/*/.bash_history\")) or\n  (process.name : \"history\" and process.args : \"-c\") or\n  (process.args : \"export\" and process.args : (\"HISTFILE=/dev/null\", \"HISTFILESIZE=0\")) or\n  (process.args : \"unset\" and process.args : \"HISTFILE\") or\n  (process.args : \"set\" and process.args : \"history\" and process.args : \"+o\")\n )\n",
+  "query": "process where event.type in (\"start\", \"process_started\") and\n (\n  ((process.args : (\"rm\", \"echo\") or\n    (process.args : \"ln\" and process.args : \"-sf\" and process.args : \"/dev/null\") or\n    (process.args : \"truncate\" and process.args : \"-s0\"))\n    and process.args : (\".bash_history\", \"/root/.bash_history\", \"/home/*/.bash_history\",\"/Users/.bash_history\", \"/Users/*/.bash_history\",\n                        \".zsh_history\", \"/root/.zsh_history\", \"/home/*/.zsh_history\", \"/Users/.zsh_history\", \"/Users/*/.zsh_history\")) or\n  (process.name : \"history\" and process.args : \"-c\") or\n  (process.args : \"export\" and process.args : (\"HISTFILE=/dev/null\", \"HISTFILESIZE=0\")) or\n  (process.args : \"unset\" and process.args : \"HISTFILE\") or\n  (process.args : \"set\" and process.args : \"history\" and process.args : \"+o\")\n )\n",
   "risk_score": 47,
   "rule_id": "7bcbb3ac-e533-41ad-a612-d6c3bf666aba",
   "severity": "medium",
@@ -20,6 +20,7 @@
     "Elastic",
     "Host",
     "Linux",
+    "macOS",
     "Threat Detection",
     "Defense Evasion"
   ],
@@ -49,5 +50,5 @@
   ],
   "timestamp_override": "event.ingested",
   "type": "eql",
-  "version": 7
+  "version": 8
 }
