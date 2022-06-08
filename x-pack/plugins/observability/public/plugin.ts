@@ -27,6 +27,7 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { SharedUXPluginStart } from '@kbn/shared-ux-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
@@ -68,6 +69,7 @@ export interface ObservabilityPublicPluginsStart {
   discover: DiscoverStart;
   features: FeaturesPluginStart;
   kibanaFeatures: KibanaFeature[];
+  sharedUX: SharedUXPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -148,6 +150,7 @@ export class Plugin
       const { renderApp } = await import('./application');
       // Get start services
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
+
       // Register alerts metadata
       const { registerAlertsTableConfiguration } = await import(
         './config/register_alerts_table_configuration'
@@ -293,6 +296,7 @@ export class Plugin
       getUrlForApp: application.getUrlForApp,
       navigateToApp: application.navigateToApp,
       navigationSections$: this.navigationRegistry.sections$,
+      getSharedUXContext: pluginsStart.sharedUX.getContextServices,
     });
 
     return {
