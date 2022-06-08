@@ -14,6 +14,7 @@ export const configSchema = schema.object({
       otlp: schema.object({
         url: schema.maybe(schema.string()),
       }),
+      exportIntervalMillis: schema.number({ defaultValue: 10000 }),
     }),
   }),
 });

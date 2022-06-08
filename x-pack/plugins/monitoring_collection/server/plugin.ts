@@ -9,17 +9,17 @@ import { JsonObject } from '@kbn/utility-types';
 import { CoreSetup, Plugin, PluginInitializerContext, Logger } from '@kbn/core/server';
 import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
 import { ServiceStatus } from '@kbn/core/server';
-import { Meter } from '@opentelemetry/api-metrics';
+import { metrics } from '@opentelemetry/api-metrics';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
-import { MeterProvider } from '@opentelemetry/sdk-metrics-base';
-// import { Resource } from '@opentelemetry/resources';
+import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics-base';
+import { Resource } from '@opentelemetry/resources';
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import { MonitoringCollectionConfig } from './config';
 import { registerDynamicRoute } from './routes';
 import { TYPE_ALLOWLIST } from './constants';
 
 export interface MonitoringCollectionSetup {
   registerMetric: <T>(metric: Metric<T>) => void;
-  getMeter: (name: string) => Meter;
 }
 
 export type MetricResult<T> = T & JsonObject;
@@ -75,18 +75,25 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       },
     });
 
-    const otlpConfig = this.config.opentelemetry?.metrics?.otlp;
-    if (otlpConfig) {
-      this.logger.debug(`Registering OpenTelemetry metrics exporter to ${otlpConfig.url}`);
-      this.meterProvider = new MeterProvider({
-        exporter: new OTLPMetricExporter(otlpConfig),
-        // resource: new Resource({
-        //   'service.name': 'kibana',
-        // }),
-        interval: 10000,
-      });
-    } else {
-      this.meterProvider = new MeterProvider({});
+    this.meterProvider = new MeterProvider({
+      resource: new Resource({
+        [SemanticResourceAttributes.SERVICE_NAME]: 'kibana',
+      }),
+    });
+
+    metrics.setGlobalMeterProvider(this.meterProvider);
+
+    const opentelemetryMetrics = this.config.opentelemetry?.metrics;
+    if (opentelemetryMetrics.otlp.url) {
+      this.logger.debug(
+        `Registering OpenTelemetry metrics exporter to ${opentelemetryMetrics.otlp.url}`
+      );
+      this.meterProvider.addMetricReader(
+        new PeriodicExportingMetricReader({
+          exporter: new OTLPMetricExporter(opentelemetryMetrics.otlp),
+          exportIntervalMillis: opentelemetryMetrics.exportIntervalMillis,
+        })
+      );
     }
 
     return {
@@ -105,7 +112,6 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
         }
         this.metrics[metric.type] = metric;
       },
-      getMeter: this.meterProvider.getMeter.bind(this.meterProvider),
     };
   }
 

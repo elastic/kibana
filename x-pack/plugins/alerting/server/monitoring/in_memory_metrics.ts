@@ -6,7 +6,7 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { Attributes, Counter, Meter } from '@opentelemetry/api-metrics';
+import { MetricAttributes, Counter, Meter, metrics } from '@opentelemetry/api-metrics';
 
 export enum IN_MEMORY_METRICS {
   RULE_EXECUTIONS = 'ruleExecutions',
@@ -22,17 +22,22 @@ export class InMemoryMetrics {
     [IN_MEMORY_METRICS.RULE_TIMEOUTS]: 0,
   };
 
-  private otelMetrics?: {
-    [IN_MEMORY_METRICS.RULE_EXECUTIONS]: Counter;
-    [IN_MEMORY_METRICS.RULE_FAILURES]: Counter;
-    [IN_MEMORY_METRICS.RULE_TIMEOUTS]: Counter;
-  };
+  private readonly meter: Meter;
+  private readonly metrics: Record<IN_MEMORY_METRICS, Counter>;
 
   constructor(logger: Logger) {
     this.logger = logger;
+    this.meter = metrics.getMeter('kibana.alerting');
+    this.metrics = {
+      [IN_MEMORY_METRICS.RULE_EXECUTIONS]: this.meter.createCounter(
+        IN_MEMORY_METRICS.RULE_EXECUTIONS
+      ),
+      [IN_MEMORY_METRICS.RULE_FAILURES]: this.meter.createCounter(IN_MEMORY_METRICS.RULE_FAILURES),
+      [IN_MEMORY_METRICS.RULE_TIMEOUTS]: this.meter.createCounter(IN_MEMORY_METRICS.RULE_TIMEOUTS),
+    };
   }
 
-  public increment(metric: IN_MEMORY_METRICS, attributes?: Attributes) {
+  public increment(metric: IN_MEMORY_METRICS, attributes?: MetricAttributes) {
     if (this.inMemoryMetrics[metric] === null) {
       this.logger.info(
         `Metric ${metric} is null because the counter ran over the max safe integer value, skipping increment.`
@@ -49,9 +54,7 @@ export class InMemoryMetrics {
       (this.inMemoryMetrics[metric] as number)++;
     }
 
-    if (this.otelMetrics) {
-      this.otelMetrics[metric].add(1, attributes);
-    }
+    this.metrics[metric].add(1, attributes);
   }
 
   public getInMemoryMetric(metric: IN_MEMORY_METRICS) {
@@ -60,13 +63,5 @@ export class InMemoryMetrics {
 
   public getAllInMemoryMetrics() {
     return this.inMemoryMetrics;
-  }
-
-  public registerMeter(meter: Meter) {
-    this.otelMetrics = {
-      [IN_MEMORY_METRICS.RULE_EXECUTIONS]: meter.createCounter(IN_MEMORY_METRICS.RULE_EXECUTIONS),
-      [IN_MEMORY_METRICS.RULE_FAILURES]: meter.createCounter(IN_MEMORY_METRICS.RULE_FAILURES),
-      [IN_MEMORY_METRICS.RULE_TIMEOUTS]: meter.createCounter(IN_MEMORY_METRICS.RULE_TIMEOUTS),
-    };
   }
 }
