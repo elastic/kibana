@@ -11,7 +11,7 @@ import { ALERT_UUID, VERSION } from '@kbn/rule-data-utils';
 import { getCommonAlertFields } from './get_common_alert_fields';
 import { CreatePersistenceRuleTypeWrapper } from './persistence_types';
 import { errorAggregator } from './utils';
-import { WRITING_DISABLED_ERROR_MSG } from './translations';
+import { WRITING_DISABLED_ERROR_MSG } from '../translations';
 
 const writingDisabledErrorResult = {
   createdAlerts: [],

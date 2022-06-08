@@ -45,6 +45,7 @@
     "xpack.remoteClusters": "plugins/remote_clusters",
     "xpack.reporting": ["plugins/reporting"],
     "xpack.rollupJobs": ["plugins/rollup"],
+    "xpack.ruleRegistry": "plugins/rule_registry",
     "xpack.runtimeFields": "plugins/runtime_fields",
     "xpack.screenshotting": "plugins/screenshotting",
     "xpack.searchProfiler": "plugins/searchprofiler",
