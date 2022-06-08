@@ -46,8 +46,8 @@ for (const funcName of Object.keys(vegaFunctions)) {
 const bypassToken = Symbol();
 
 function normalizeDate(date) {
-  if (typeof date === 'number' && !isNaN(date)) {
-    return date;
+  if (typeof date === 'number') {
+    return !isNaN(date) ? date : null;
   } else if (date instanceof Date) {
     return date;
   } else {
