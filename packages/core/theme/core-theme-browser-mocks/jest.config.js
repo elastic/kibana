@@ -6,5 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { DEFAULT_APP_CATEGORIES } from './default_app_categories';
-export { APP_WRAPPER_CLASS } from './app_wrapper_class';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/core/theme/core-theme-browser-mocks'],
+};

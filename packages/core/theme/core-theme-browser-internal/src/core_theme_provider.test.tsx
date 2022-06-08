@@ -13,8 +13,8 @@ import { of, BehaviorSubject } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import type { CoreTheme } from '@kbn/core-theme-browser';
 import { CoreThemeProvider } from './core_theme_provider';
-import type { CoreTheme } from './types';
 
 describe('CoreThemeProvider', () => {
   let euiTheme: UseEuiTheme | undefined;

@@ -8,7 +8,7 @@
 
 import { COLOR_MODES_STANDARD } from '@elastic/eui';
 import type { EuiThemeSystem, EuiThemeColorModeStandard } from '@elastic/eui';
-import type { CoreTheme } from './types';
+import type { CoreTheme } from '@kbn/core-theme-browser';
 
 /** @internal */
 export interface EuiTheme {
