@@ -27,8 +27,10 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/syncResponse'
+                $ref: '#/components/schemas/syncResponse'
+              examples:
+                syncExample:
+                  $ref: '#/components/examples/syncExample'
   /api/ml/saved_objects/sync:
     get:
       description: >
@@ -43,8 +45,10 @@ paths:
           content:
             application/json:
               schema:
-                items:
-                  $ref: '#/components/schemas/syncResponse'
+                $ref: '#/components/schemas/syncResponse'
+              examples:
+                syncExample:
+                  $ref: '#/components/examples/syncExample'
 components:
  parameters:
   spaceParam:
@@ -142,5 +146,20 @@ components:
                   success:
                     type: boolean
                     example: true
+ examples:
+   syncExample:
+     summary: Two anomaly detection jobs required synchronization in this example.
+     value:
+       {
+         "savedObjectsCreated": {
+           "anomaly_detector": {
+             "myjob1": { "success":true },
+             "myjob2":{ "success":true }
+           }
+          },
+          "savedObjectsDeleted": {},
+          "datafeedsAdded":{},
+          "datafeedsRemoved":{}
+        }
 security:
   - basicAuth: []
