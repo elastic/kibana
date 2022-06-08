@@ -12,7 +12,7 @@ import RecentCases, { RecentCasesProps } from '.';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
 import { useGetCasesMockState } from '../../containers/mock';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
-import { useFetchCases } from '../../containers/use_get_cases';
+import { useGetCases } from '../../containers/use_get_cases';
 
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../common/lib/kibana/hooks');
@@ -27,7 +27,7 @@ const mockData = {
   ...useGetCasesMockState,
 };
 
-const useGetCasesMock = useFetchCases as jest.Mock;
+const useGetCasesMock = useGetCases as jest.Mock;
 const useCurrentUserMock = useCurrentUser as jest.Mock;
 
 describe('RecentCases', () => {

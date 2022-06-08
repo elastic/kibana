@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS, useFetchCases } from './use_get_cases';
+import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS, useGetCases } from './use_get_cases';
 import * as api from './api';
 import { AppMockRenderer, createAppMockRenderer } from '../common/mock';
 import { useToasts } from '../common/lib/kibana';
@@ -28,7 +28,7 @@ describe('useGetCases', () => {
 
   it('calls getCases with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getCases');
-    const { waitForNextUpdate } = renderHook(() => useFetchCases(), {
+    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
     await waitForNextUpdate();
@@ -47,7 +47,7 @@ describe('useGetCases', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    const { waitForNextUpdate } = renderHook(() => useFetchCases(), {
+    const { waitForNextUpdate } = renderHook(() => useGetCases(), {
       wrapper: appMockRender.AppWrapper,
     });
 
