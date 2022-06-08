@@ -1901,8 +1901,8 @@ ace.define(
         reset(i + upTo.length);
         return text.substring(currentAt, i);
       },
-      peek = function (c) {
-        return text.substr(at, c.length) === c; // nocommit - double check
+      peek = function (offs) {
+        return text.charAt(at + offs);
       },
       number = function () {
         let number,
@@ -1948,7 +1948,8 @@ ace.define(
           uffff;
 
         if (ch === '"') {
-          if (peek('""')) {
+          let c = '""';
+          if (text.substr(at, c.length) === c) {
             // literal
             next('"');
             next('"');
@@ -1984,8 +1985,26 @@ ace.define(
         error('Bad string');
       },
       white = function () {
-        while (ch && ch <= ' ') {
-          next();
+        while (ch) {
+          // Skip whitespace.
+          while (ch && ch <= ' ') {
+            next();
+          }
+          if (ch === '#' || ch === '/' && peek(0) === '/') {
+            while (ch && ch !== '\n') {
+              next();
+            }
+          } else if (ch === '/' && peek(0) === '*') {
+            next();
+            next();
+            while (ch && !(ch === '*' && peek(0) === '/')) {
+              next();
+            }
+            if (ch) {
+              next();
+              next();
+            }
+          } else break;
         }
       },
       strictWhite = function () {

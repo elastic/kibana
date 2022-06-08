@@ -82,4 +82,46 @@ describe('Utils class', () => {
       'e", f"',
     ]);
   });
+
+  describe('formatRequestBodyDoc', function () {
+    const tests = [
+      {
+        source: ['{\n  "test": {}\n}'],
+        indent: false,
+        assert: ['{"test":{}}'],
+      },
+      {
+        source: ['{"test":{}}'],
+        indent: true,
+        assert: ['{\n  "test": {}\n}'],
+      },
+      {
+        source: ['{\n  "test": """a\n  b"""\n}'],
+        indent: false,
+        assert: ['{"test":"a\\n  b"}'],
+      },
+      {
+        source: ['{"test":"a\\n  b"}'],
+        indent: true,
+        assert: ['{\n  "test": """a\n  b"""\n}'],
+      },
+      {
+        source: ['{ /* "test": {} */ "f1": 1,"f2": 2,"f3": 3}'],
+        indent: true,
+        assert: ['{\n /* "test": {} */\n  "f1": 1,\n  "f2": 2,\n  "f3": 3\n}'],
+      },
+      {
+        source: ['{\n  // "test": {}\n  "f1": 1,"f2": 2 }'],
+        indent: true,
+        assert: ['{\n  // "test": {}\n  "f1": 1,\n  "f2": 2\n}'],
+      },
+    ];
+
+    tests.forEach(({ source, indent, assert }, id) => {
+      test(`Test ${id}`, () => {
+        const formattedData = utils.formatRequestBodyDoc(source, indent);
+        expect(formattedData.data).toEqual(assert);
+      });
+    });
+  });
 });

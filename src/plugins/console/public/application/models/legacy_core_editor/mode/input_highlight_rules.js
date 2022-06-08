@@ -39,7 +39,7 @@ export function InputHighlightRules() {
     start: mergeTokens(
       [
         { token: 'warning', regex: '#!.*$' },
-        { token: 'comment', regex: /^#.*$/ },
+        { include: 'comments' },
         { token: 'paren.lparen', regex: '{', next: 'json', push: true },
       ],
       addEOL(['method'], /([a-zA-Z]+)/, 'start', 'method_sep'),
@@ -88,9 +88,35 @@ export function InputHighlightRules() {
       addEOL(['url.param'], /([^&=]+)/, 'start-sql'),
       addEOL(['url.amp'], /(&)/, 'start-sql')
     ),
+    comments: [
+      {
+        token: ['comment.punctuation', 'comment.line'],
+        regex: /(#)(.*$)/,
+      },
+      {
+        token: 'comment.punctuation',
+        regex: /\/\*/,
+        push: [
+          {
+            token: 'comment.punctuation',
+            regex: /\*\//,
+            next: 'pop',
+          },
+          {
+            defaultToken: 'comment.block',
+          },
+        ],
+      },
+      {
+        token: ['comment.punctuation', 'comment.line'],
+        regex: /(\/\/)(.*$)/,
+      },
+    ],
   };
 
   addXJsonToRules(this);
+  // Add comment rules to json rule set
+  this.$rules.json.unshift({ include: 'comments' });
 
   if (this.constructor === InputHighlightRules) {
     this.normalizeRules();
