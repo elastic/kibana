@@ -431,7 +431,8 @@
     "transport_address": "tsullivan.local:5601",
     "uuid": "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9",
     "version": "7.0.0-alpha1",
-    "availability": false,
+    "lastSeenTimestamp": "2017-08-29T17:25:43.192Z",
+    "statusIsStale": true,
     "os_memory_free": 1645989888,
     "uptime": 200102
   }

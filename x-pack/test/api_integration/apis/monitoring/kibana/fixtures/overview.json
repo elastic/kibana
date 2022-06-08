@@ -7,7 +7,12 @@
     "response_time_max": 2203,
     "memory_size": 230227968,
     "memory_limit": 1501560832,
-    "count": 1
+    "count": 1,
+    "status": "green",
+    "some_status_is_stale": true,
+    "uuids": [
+      "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9"
+    ]
   },
   "metrics": {
     "kibana_cluster_requests": [

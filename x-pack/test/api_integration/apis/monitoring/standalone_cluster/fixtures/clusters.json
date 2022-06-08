@@ -59,6 +59,7 @@
     },
     "kibana": {
       "status": "green",
+      "some_status_is_stale": true,
       "requests_total": 42,
       "concurrent_connections": 0,
       "response_time_max": 864,
@@ -149,6 +150,7 @@
     },
     "kibana": {
       "status": null,
+      "some_status_is_stale": true,
       "requests_total": 0,
       "concurrent_connections": 0,
       "response_time_max": 0,

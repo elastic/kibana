@@ -387,6 +387,10 @@ const buildEqlDataProviderOrFilter = (
   return { filters: [], dataProviders: [] };
 };
 
+interface MightHaveFilters {
+  filters?: Filter[];
+}
+
 const createThresholdTimeline = async (
   ecsData: Ecs,
   createTimeline: ({ from, timeline, to }: CreateTimelineProps) => void,
@@ -416,7 +420,10 @@ const createThresholdTimeline = async (
 
     const alertDoc = formattedAlertData[0];
     const params = getField(alertDoc, ALERT_RULE_PARAMETERS);
-    const filters: Filter[] = params.filters ?? alertDoc.signal?.rule?.filters;
+    const filters: Filter[] =
+      (params as MightHaveFilters).filters ??
+      (alertDoc.signal?.rule as MightHaveFilters)?.filters ??
+      [];
     // https://github.com/elastic/kibana/issues/126574 - if the provided filter has no `meta` field
     // we expect an empty object to be inserted before calling `createTimeline`
     const augmentedFilters = filters.map((filter) => {

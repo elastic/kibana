@@ -48,9 +48,9 @@ describe('FirstLastSeen Component', () => {
         type={FirstLastSeenHostType.FIRST_SEEN}
       />
     );
-    expect(getByTestId('test-render-output').innerHTML).toBe(
-      '<span class="euiLoadingSpinner euiLoadingSpinner--medium"></span>'
-    );
+
+    // Removed strict equality as the EuiLoader has been converted to Emotion and will no longer have the euiLoadingSpinner--medium class
+    expect(getByTestId('test-render-output').innerHTML).toContain('<span class="euiLoadingSpinner');
   });
 
   test('First Seen', async () => {
