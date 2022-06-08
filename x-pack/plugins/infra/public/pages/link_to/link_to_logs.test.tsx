@@ -10,7 +10,8 @@ import { createMemoryHistory } from 'history';
 import React from 'react';
 import { Route, Router, Switch } from 'react-router-dom';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { KibanaContextProvider, KibanaPageTemplate } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { useLogView } from '../../hooks/use_log_view';
 import {
   createLoadedUseLogViewMock,

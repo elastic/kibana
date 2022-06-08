@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiTitle, EuiFlexItem } from '@elastic/eui';
-import { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { KibanaPageTemplateProps } from '@kbn/shared-ux-components';
 import { CsmSharedContextProvider } from './csm_shared_context';
 import { WebApplicationSelect } from './panels/web_application_select';
 import { UserPercentile } from './user_percentile';
@@ -37,7 +37,7 @@ export function RumHome() {
           solution: i18n.translate('xpack.ux.overview.solutionName', {
             defaultMessage: 'Observability',
           }),
-          actions: {
+          action: {
             elasticAgent: {
               title: i18n.translate('xpack.ux.overview.beatsCard.title', {
                 defaultMessage: 'Add RUM data',
