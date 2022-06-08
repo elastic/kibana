@@ -118,8 +118,7 @@ const tourStepsConfig: TourStep[] = [
     content: (
       <EuiText>
         {i18n.translate('xpack.observability.tour.alertsStep.tourContent', {
-          defaultMessage:
-            'Configure how you want to be notified when a problem occurs.',
+          defaultMessage: 'Configure how you want to be notified when a problem occurs.',
         })}
       </EuiText>
     ),
