@@ -10,9 +10,9 @@ import { configure } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import RecentCases, { RecentCasesProps } from '.';
 import { AppMockRenderer, createAppMockRenderer, TestProviders } from '../../common/mock';
-import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCasesMockState } from '../../containers/mock';
 import { useCurrentUser } from '../../common/lib/kibana/hooks';
+import { useGetCases } from '../../containers/use_get_cases';
 
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../common/lib/kibana/hooks');
@@ -23,10 +23,8 @@ const defaultProps: RecentCasesProps = {
   maxCasesToShow: 10,
 };
 
-const setFilters = jest.fn();
 const mockData = {
   ...useGetCasesMockState,
-  setFilters,
 };
 
 const useGetCasesMock = useGetCases as jest.Mock;
@@ -45,10 +43,10 @@ describe('RecentCases', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('is good at loading', () => {
+  it('shows a loading status', () => {
     useGetCasesMock.mockImplementation(() => ({
       ...mockData,
-      loading: 'cases',
+      isLoading: true,
     }));
 
     const { getAllByTestId } = appMockRender.render(
@@ -59,7 +57,7 @@ describe('RecentCases', () => {
     expect(getAllByTestId('loadingPlaceholders')).toHaveLength(3);
   });
 
-  it('is good at rendering cases', () => {
+  it('render cases', () => {
     const { getAllByTestId } = appMockRender.render(
       <TestProviders>
         <RecentCases {...defaultProps} />
@@ -68,43 +66,50 @@ describe('RecentCases', () => {
     expect(getAllByTestId('case-details-link')).toHaveLength(7);
   });
 
-  it('is good at rendering max cases', () => {
+  it('render max cases correctly', () => {
     appMockRender.render(
       <TestProviders>
         <RecentCases {...{ ...defaultProps, maxCasesToShow: 2 }} />
       </TestProviders>
     );
-    expect(useGetCasesMock).toBeCalledWith({
-      initialQueryParams: { perPage: 2 },
+    expect(useGetCasesMock).toHaveBeenCalledWith({
+      filterOptions: { reporters: [] },
+      queryParams: { perPage: 2 },
     });
   });
 
-  it('updates filters', () => {
+  it('sets the reporter filters correctly', () => {
     const { getByTestId } = appMockRender.render(
       <TestProviders>
         <RecentCases {...defaultProps} />
       </TestProviders>
     );
 
-    const element = getByTestId('myRecentlyReported');
-    userEvent.click(element);
-    expect(setFilters).toHaveBeenCalled();
-  });
+    expect(useGetCasesMock).toHaveBeenCalledWith({
+      filterOptions: { reporters: [] },
+      queryParams: { perPage: 10 },
+    });
 
-  it('it resets the reporters when changing from my recently reported cases to recent cases', () => {
-    const { getByTestId } = appMockRender.render(
-      <TestProviders>
-        <RecentCases {...defaultProps} />
-      </TestProviders>
-    );
-
+    // apply the filter
     const myRecentCasesElement = getByTestId('myRecentlyReported');
-    const recentCasesElement = getByTestId('recentlyCreated');
     userEvent.click(myRecentCasesElement);
+
+    expect(useGetCasesMock).toHaveBeenLastCalledWith({
+      filterOptions: {
+        reporters: [{ email: undefined, full_name: undefined, username: undefined }],
+      },
+      queryParams: { perPage: 10 },
+    });
+
+    // remove the filter
+    const recentCasesElement = getByTestId('recentlyCreated');
     userEvent.click(recentCasesElement);
 
-    const mockCalls = setFilters.mock.calls;
-    expect(mockCalls[0][0].reporters.length).toBeGreaterThan(0);
-    expect(mockCalls[1][0]).toEqual({ reporters: [] });
+    expect(useGetCasesMock).toHaveBeenLastCalledWith({
+      filterOptions: {
+        reporters: [],
+      },
+      queryParams: { perPage: 10 },
+    });
   });
 });

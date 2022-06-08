@@ -57,7 +57,7 @@ const dataFetchReducer = (state: NewCaseState, action: Action): NewCaseState => 
 export interface UseUpdateCase extends NewCaseState {
   updateCaseProperty: (updates: UpdateByKey) => void;
 }
-export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => {
+export const useUpdateCase = (): UseUpdateCase => {
   const [state, dispatch] = useReducer(dataFetchReducer, {
     isLoading: false,
     isError: false,
@@ -77,7 +77,7 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
         dispatch({ type: 'FETCH_INIT', payload: updateKey });
 
         const response = await patchCase(
-          caseId,
+          caseData.id,
           { [updateKey]: updateValue },
           caseData.version,
           abortCtrlRef.current.signal
@@ -110,7 +110,7 @@ export const useUpdateCase = ({ caseId }: { caseId: string }): UseUpdateCase => 
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [caseId]
+    []
   );
 
   useEffect(
