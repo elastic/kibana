@@ -44,7 +44,7 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
   const loadFrom = spaceId
     ? `${protocol}//${hostname}:${port}${devToolConsoleUrl(spaceId, consoleId)}`
     : null;
-  const [statue, setStatus] = useState('idle');
+  const [status, setStatus] = useState('idle');
   const [error, setError] = useState(undefined);
 
   const [response, setResponse] = useState(null);
@@ -57,7 +57,7 @@ const DisabledLinkPanelComponent: React.FC<DisabledLinkPanelProps> = ({
     setStatus('loading');
 
     try {
-      const res = await importFile(http);
+      const res = await importFile(http, spaceId);
       setResponse(res);
       toasts.addSuccess(
         response.data.createDashboards.message.saved_objects

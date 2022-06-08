@@ -70,8 +70,8 @@ import { legacyCreateLegacyNotificationRoute } from '../lib/detection_engine/rou
 import { createSourcererDataViewRoute, getSourcererDataViewRoute } from '../lib/sourcerer/routes';
 import { ITelemetryReceiver } from '../lib/telemetry/receiver';
 import { telemetryDetectionRulesPreviewRoute } from '../lib/detection_engine/routes/telemetry/telemetry_detection_rules_preview_route';
-import { readConsoleRoute } from '../lib/console/read_console_route';
-import { createDashboardsRoute } from '../lib/timeline/routes/console/create_dashboards';
+import { readConsoleRoute } from '../lib/console/routes/read_console_route';
+import { createDashboardsRoute } from '../lib/prebuilt_saved_objects/routes/create_dashboards';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,

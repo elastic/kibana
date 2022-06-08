@@ -13,13 +13,13 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   CustomHttpResponseOptions,
   KibanaResponseFactory,
-} from '../../../../../../src/core/server';
-import { DEV_TOOL_CONSOLE } from '../../../common/constants';
+} from '../../../../../../../src/core/server';
+import { DEV_TOOL_CONSOLE } from '../../../../common/constants';
 
-import { SecuritySolutionPluginRouter } from '../../types';
-import { mappings } from './mappings';
+import { SecuritySolutionPluginRouter } from '../../../types';
+import { mappings } from '../mappings';
 
-export const getReadables = (dataPath: string): Promise<string> =>
+const getReadables = (dataPath: string): Promise<string> =>
   new Promise((resolved, reject) => {
     let contents = '';
     const readable = fs.createReadStream(dataPath, { encoding: 'utf-8' });
@@ -37,7 +37,7 @@ export const getReadables = (dataPath: string): Promise<string> =>
     });
   });
 
-export class ConsoleResponseFactory {
+class ConsoleResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
   error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
@@ -57,10 +57,10 @@ export class ConsoleResponseFactory {
   }
 }
 
-export const buildConsoleResponse = (response: KibanaResponseFactory) =>
+const buildConsoleResponse = (response: KibanaResponseFactory) =>
   new ConsoleResponseFactory(response);
 
-export const ReadConsoleRequestSchema = {
+const ReadConsoleRequestSchema = {
   params: schema.object({
     space_id: schema.string(),
     console_id: schema.string(),
@@ -86,10 +86,8 @@ export const readConsoleRoute = (router: SecuritySolutionPluginRouter) => {
         return siemResponse.error({ statusCode: 500, body: 'No such file or directory' });
       }
 
-      const filePath = './';
-      const dir = resolve(
-        join(__dirname, filePath ?? '../../../../detection_engine/rules/prepackaged_timelines')
-      );
+      const filePath = '../';
+      const dir = resolve(join(__dirname, filePath));
 
       const dataPath = path.join(dir, fileName);
       let res = '';

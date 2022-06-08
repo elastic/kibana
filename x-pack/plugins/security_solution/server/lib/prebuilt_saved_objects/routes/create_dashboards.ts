@@ -6,20 +6,24 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { schema } from '@kbn/config-schema';
 
-import { CREATE_DASHBOARD_ROUTE } from '../../../../../common/constants';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 
-import { SetupPlugins } from '../../../../plugin';
-import { buildRouteValidationWithExcess } from '../../../../utils/build_validation/route_validation';
-import { ConfigType } from '../../../..';
+import { CREATE_DASHBOARD_ROUTE } from '../../../../common/constants';
 
-import { buildSiemResponse } from '../../../detection_engine/routes/utils';
+import { SetupPlugins } from '../../../plugin';
 
-import { buildFrameworkRequest } from '../../utils/common';
-import { persistNoteSchema } from '../../schemas/notes';
-import { persistNote } from '../../saved_object/notes';
-import { createDashboards } from '../../saved_object/console';
+import { buildSiemResponse } from '../../detection_engine/routes/utils';
+
+import { buildFrameworkRequest } from '../../timeline/utils/common';
+import { createDashboards } from '../../timeline/saved_object/console';
+
+const createDashboardsRouteSchema = {
+  query: schema.object({
+    space_id: schema.string(),
+  }),
+};
 
 export const createDashboardsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -28,19 +32,21 @@ export const createDashboardsRoute = (
   router.post(
     {
       path: CREATE_DASHBOARD_ROUTE,
-      validate: false,
+      validate: createDashboardsRouteSchema,
       options: {
         tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
+      const { space_id: spaceId } = request.query;
 
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);
 
         const res = await createDashboards({
           request: frameworkRequest,
+          spaceId,
         });
 
         return response.ok({
