@@ -18,15 +18,7 @@ import { NotFoundRoute } from './not_found';
 import { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 
-export interface DiscoverRouterProps {
-  isDev: boolean;
-}
-
-export const discoverRouter = (
-  services: DiscoverServices,
-  history: History,
-  { isDev }: DiscoverRouterProps
-) => (
+export const discoverRouter = (services: DiscoverServices, history: History, isDev: boolean) => (
   <KibanaContextProvider services={services}>
     <EuiErrorBoundary>
       <Router history={history} data-test-subj="discover-react-router">

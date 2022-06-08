@@ -80,9 +80,10 @@ export function DiscoverMainRoute(props: Props) {
           .hasUserDataView()
           .catch(() => false);
 
-        const hasESDataValue = await data.dataViews.hasData.hasESData().catch(() => false);
+        const hasESDataValue =
+          isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
         setHasUserDataView(hasUserDataViewValue);
-        setHasESData(isDev ? true : hasESDataValue);
+        setHasESData(hasESDataValue);
 
         if (!hasUserDataViewValue || !hasESDataValue) {
           setShowNoDataPage(true);

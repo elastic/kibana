@@ -25,11 +25,8 @@ export const renderApp = (element: HTMLElement, services: DiscoverServices, isDe
       iconType: 'glasses',
     });
   }
-  const props = {
-    isDev,
-  };
   const unmount = toMountPoint(
-    wrapWithTheme(discoverRouter(services, history, props), core.theme.theme$)
+    wrapWithTheme(discoverRouter(services, history, isDev), core.theme.theme$)
   )(element);
 
   return () => {

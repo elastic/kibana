@@ -188,11 +188,10 @@ export class DiscoverPlugin
   private docViewsRegistry: DocViewsRegistry | null = null;
   private stopUrlTracking: (() => void) | undefined = undefined;
   private locator?: DiscoverAppLocator;
-  private isDev = false;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
-    this.isDev = this.initializerContext.env.mode.dev;
+    const isDev = this.initializerContext.env.mode.dev;
     if (plugins.share) {
       this.locator = plugins.share.url.locators.create(
         new DiscoverAppLocatorDefinition({
@@ -292,7 +291,7 @@ export class DiscoverPlugin
         // FIXME: Temporarily hide overflow-y in Discover app when Field Stats table is shown
         // due to EUI bug https://github.com/elastic/eui/pull/5152
         params.element.classList.add('dscAppWrapper');
-        const unmount = renderApp(params.element, services, this.isDev);
+        const unmount = renderApp(params.element, services, isDev);
         return () => {
           unlistenParentHistory();
           unmount();

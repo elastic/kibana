@@ -18,9 +18,7 @@ import { ContextAppRoute } from './context';
 const pathMap: Record<string, never> = {};
 
 describe('Discover router', () => {
-  const props = {
-    isDev: false,
-  };
+  const isDev: false;
   beforeAll(() => {
     const { history } = createSearchSessionMock();
     const component = shallow(discoverRouter(mockDiscoverServices, history, props));
