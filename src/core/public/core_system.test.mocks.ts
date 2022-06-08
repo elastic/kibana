@@ -7,6 +7,7 @@
  */
 
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
@@ -16,7 +17,6 @@ import { notificationServiceMock } from './notifications/notifications_service.m
 import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { pluginsServiceMock } from './plugins/plugins_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
-import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { renderingServiceMock } from './rendering/rendering_service.mock';
 import { integrationsServiceMock } from './integrations/integrations_service.mock';
 import { coreAppMock } from './core_app/core_app.mock';
@@ -108,7 +108,7 @@ jest.doMock('./application', () => ({
 
 export const MockDocLinksService = docLinksServiceMock.create();
 export const DocLinksServiceConstructor = jest.fn().mockImplementation(() => MockDocLinksService);
-jest.doMock('./doc_links', () => ({
+jest.doMock('@kbn/core-doc-links-browser-internal', () => ({
   DocLinksService: DocLinksServiceConstructor,
 }));
 
