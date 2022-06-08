@@ -2082,12 +2082,11 @@ paths:
       - url: https://localhost:5601
   /api/cases/{caseId}/comments:
     post:
-      summary: Adds a comment to a case.
+      summary: Adds a comment or alert to a case.
       description: >
-        Adds a comment to a case. You must have all privileges for the **Cases**
-        feature in the **Management**, **Observability**, or **Security**
-        section of the Kibana feature privileges, depending on the owner of the
-        case you're creating.
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're creating.
       tags:
         - cases
         - kibana
@@ -2343,11 +2342,11 @@ paths:
       servers:
         - url: https://localhost:5601
     delete:
+      summary: Deletes all comments and alerts from a case.
       description: >
-        Deletes one or all comments from a case. You must have all privileges
-        for the **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the cases you're deleting.
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're deleting.
       tags:
         - cases
         - kibana
@@ -2360,12 +2359,12 @@ paths:
       servers:
         - url: https://localhost:5601
     patch:
+      summary: Updates a comment or alert in a case.
       description: >
-        Updates a comment in a case. You must have all privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the case you're updating. NOTE: You cannot change the comment
-        type or the owner of a comment.
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're updating.
+        NOTE: You cannot change the comment type or the owner of a comment.
       tags:
         - cases
         - kibana
@@ -4697,11 +4696,11 @@ paths:
       - url: https://localhost:5601
   /s/{spaceId}/api/cases/{caseId}/comments:
     post:
+      summary: Adds a comment or alert to a case.
       description: >
-        Adds a comment to a case. You must have all privileges for the **Cases**
-        feature in the **Management**, **Observability**, or **Security**
-        section of the Kibana feature privileges, depending on the owner of the
-        case you're creating.
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're creating.
       tags:
         - cases
         - kibana
@@ -4958,11 +4957,11 @@ paths:
       servers:
         - url: https://localhost:5601
     delete:
+      summary: Deletes all comments and alerts from a case.
       description: >
-        Deletes one or all comments from a case. You must have all privileges
-        for the **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the cases you're deleting.
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the cases you're deleting.
       tags:
         - cases
         - kibana
@@ -4976,12 +4975,12 @@ paths:
       servers:
         - url: https://localhost:5601
     patch:
+      summary: Updates a comment or alert in a case.
       description: >
-        Updates a comment in a case. You must have all privileges for the
-        **Cases** feature in the **Management**, **Observability**, or
-        **Security** section of the Kibana feature privileges, depending on the
-        owner of the case you're updating. NOTE: You cannot change the comment
-        type or the owner of a comment.
+        You must have `all` privileges for the **Cases** feature in the
+        **Management**, **Observability**, or **Security** section of the Kibana
+        feature privileges, depending on the owner of the case you're updating.
+        NOTE: You cannot change the comment type or the owner of a comment.
       tags:
         - cases
         - kibana

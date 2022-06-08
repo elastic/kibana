@@ -2437,8 +2437,8 @@
     },
     "/api/cases/{caseId}/comments": {
       "post": {
-        "summary": "Adds a comment to a case.",
-        "description": "Adds a comment to a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.\n",
+        "summary": "Adds a comment or alert to a case.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.\n",
         "tags": [
           "cases",
           "kibana"
@@ -2763,7 +2763,8 @@
         ]
       },
       "delete": {
-        "description": "Deletes one or all comments from a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "summary": "Deletes all comments and alerts from a case.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
         "tags": [
           "cases",
           "kibana"
@@ -2788,7 +2789,8 @@
         ]
       },
       "patch": {
-        "description": "Updates a comment in a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. NOTE: You cannot change the comment type or the owner of a comment.\n",
+        "summary": "Updates a comment or alert in a case.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. NOTE: You cannot change the comment type or the owner of a comment.\n",
         "tags": [
           "cases",
           "kibana"
@@ -5548,7 +5550,8 @@
     },
     "/s/{spaceId}/api/cases/{caseId}/comments": {
       "post": {
-        "description": "Adds a comment to a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.\n",
+        "summary": "Adds a comment or alert to a case.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're creating.\n",
         "tags": [
           "cases",
           "kibana"
@@ -5876,7 +5879,8 @@
         ]
       },
       "delete": {
-        "description": "Deletes one or all comments from a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
+        "summary": "Deletes all comments and alerts from a case.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're deleting.\n",
         "tags": [
           "cases",
           "kibana"
@@ -5904,7 +5908,8 @@
         ]
       },
       "patch": {
-        "description": "Updates a comment in a case. You must have all privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. NOTE: You cannot change the comment type or the owner of a comment.\n",
+        "summary": "Updates a comment or alert in a case.",
+        "description": "You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. NOTE: You cannot change the comment type or the owner of a comment.\n",
         "tags": [
           "cases",
           "kibana"
