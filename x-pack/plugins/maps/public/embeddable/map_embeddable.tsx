@@ -384,7 +384,9 @@ export class MapEmbeddable
       ) : (
         <MapContainer
           onSingleValueTrigger={this.onSingleValueTrigger}
-          addFilters={this.input.hideFilterActions || this.input.disableTriggers ? null : this.addFilters}
+          addFilters={
+            this.input.hideFilterActions || this.input.disableTriggers ? null : this.addFilters
+          }
           getFilterActions={this.getFilterActions}
           getActionContext={this.getActionContext}
           renderTooltipContent={this._renderTooltipContent}
