@@ -154,7 +154,6 @@ describe('When using isolate action from response actions console', () => {
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(2);
 
-      await consoleManagerMockAccess.hideOpenedConsole();
       await consoleManagerMockAccess.openRunningConsole();
 
       await waitFor(() => {
@@ -167,7 +166,6 @@ describe('When using isolate action from response actions console', () => {
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
 
-      await consoleManagerMockAccess.hideOpenedConsole();
       await consoleManagerMockAccess.openRunningConsole();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);

@@ -63,14 +63,18 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
      * @param atIndex
      */
     openRunningConsole: async (atIndex: number = 0) => {
+      const runningConsoleShowButton = renderResult.queryAllByTestId('showRunningConsole')[atIndex];
+
+      if (!runningConsoleShowButton) {
+        throw new Error(`No registered console found at index [${atIndex}]`);
+      }
+
       act(() => {
-        userEvent.click(renderResult.queryAllByTestId('showRunningConsole')[atIndex]);
+        userEvent.click(runningConsoleShowButton);
       });
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('consolePageOverlay').classList.contains('is-hidden')).toBe(
-          false
-        );
+        expect(renderResult.getByTestId('consolePageOverlay'));
       });
     },
 
