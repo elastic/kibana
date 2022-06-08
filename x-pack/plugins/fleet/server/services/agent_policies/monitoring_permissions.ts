@@ -8,7 +8,6 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
 import { getPackageInfo, getInstallation } from '../epm/packages';
-import { getDataStreamPrivileges } from '../package_policies_to_agent_permissions';
 import {
   PACKAGE_POLICY_DEFAULT_INDEX_PRIVILEGES,
   AGENT_POLICY_DEFAULT_MONITORING_DATASETS,
@@ -16,6 +15,8 @@ import {
 import type { FullAgentPolicyOutputPermissions } from '../../../common';
 import { FLEET_ELASTIC_AGENT_PACKAGE } from '../../../common';
 import { dataTypes } from '../../../common';
+
+import { getDataStreamPrivileges } from './package_policies_to_agent_permissions';
 
 function buildDefault(enabled: { logs: boolean; metrics: boolean }, namespace: string) {
   let names: string[] = [];
