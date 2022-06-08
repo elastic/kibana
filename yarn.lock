@@ -1483,10 +1483,10 @@
     "@elastic/transport" "^8.0.2"
     tslib "^2.3.0"
 
-"@elastic/ems-client@8.3.2":
-  version "8.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.3.2.tgz#a12eafcfd9ac8d3068da78a5a77503ea8a89f67c"
-  integrity sha512-81u+Z7+4Y2Fu+sTl9QOKdG3SVeCzzpfyCsHFR8X0V2WFCpQa+SU4sSN9WhdLHz/pe9oi6Gtt5eFMF90TOO/ckg==
+"@elastic/ems-client@8.3.3":
+  version "8.3.3"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.3.3.tgz#16ddd582e1029055a5a77e7bebbc5b57b3246ff7"
+  integrity sha512-vcgPwnAw7QjcR68IddErobZqwJdH0T4h/6U4swUR3XEF+9jojNZnxBkvM3mEV9Z7QLQxDprebJJu04d37lzlUw==
   dependencies:
     "@types/geojson" "^7946.0.7"
     "@types/lru-cache" "^5.1.0"
@@ -7231,10 +7231,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.0":
-  version "4.1.0"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.0.tgz#b23ba7e7f4f59069529c57f0cbb7f5fba74affe7"
-  integrity sha512-ehqwZemosqiWVe+W0f5GqcLH7NgtjMBmcknmeaPG6YZHc7EZ69XbD7VVNZcT/L8lyMIL/KG99MsGcvDuFWo3Yw==
+"@types/selenium-webdriver@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.1.tgz#aefb038f0462fd880f9c9581b8b3b71ce385719c"
+  integrity sha512-NxxZZek50ylIACiXebKQYHD3D4One3WXOasEXWazL6aTfYbZob7ClNKxUpg8I4/oWArX87oPWvj1cHKqfel3Hg==
   dependencies:
     "@types/ws" "*"
 
@@ -25660,10 +25660,10 @@ select-hose@^2.0.0:
   resolved "https://registry.yarnpkg.com/select-hose/-/select-hose-2.0.0.tgz#625d8658f865af43ec962bfc376a37359a4994ca"
   integrity sha1-Yl2GWPhlr0Psliv8N2o3NZpJlMo=
 
-selenium-webdriver@^4.1.2:
-  version "4.1.2"
-  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.1.2.tgz#d463b4335632d2ea41a9e988e435a55dc41f5314"
-  integrity sha512-e4Ap8vQvhipgBB8Ry9zBiKGkU6kHKyNnWiavGGLKkrdW81Zv7NVMtFOL/j3yX0G8QScM7XIXijKssNd4EUxSOw==
+selenium-webdriver@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/selenium-webdriver/-/selenium-webdriver-4.2.0.tgz#d3c9704735c6228e09580eb4613932b30bdb4d27"
+  integrity sha512-gPPXYSz4jJBM2kANRQ9cZW6KFBzR/ptxqGLtyC75eXtdgOsWWRRRyZz5F2pqdnwNmAjrCSFMMXfisJaZeWVejg==
   dependencies:
     jszip "^3.6.0"
     tmp "^0.2.1"
