@@ -50,7 +50,7 @@ export const mapToCard = (
   let uiInternalPathUrl;
 
   if (item.type === 'ui_link') {
-    uiInternalPathUrl = getAbsolutePath(item.uiInternalPath);
+    uiInternalPathUrl = item.uiExternalLink || getAbsolutePath(item.uiInternalPath);
   } else {
     let urlVersion = item.version;
 

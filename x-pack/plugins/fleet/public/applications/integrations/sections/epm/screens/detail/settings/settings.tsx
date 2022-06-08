@@ -39,6 +39,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   KEEP_POLICIES_UP_TO_DATE_PACKAGES,
   AUTO_UPGRADE_POLICIES_PACKAGES,
+  SO_SEARCH_LIMIT,
 } from '../../../../../constants';
 
 import { KeepPoliciesUpToDateSwitch } from '../components';
@@ -102,7 +103,7 @@ export const SettingsPage: React.FC<Props> = memo(({ packageInfo, theme$ }: Prop
   const [isUpgradingPackagePolicies, setIsUpgradingPackagePolicies] = useState<boolean>(false);
   const getPackageInstallStatus = useGetPackageInstallStatus();
   const { data: packagePoliciesData } = useGetPackagePolicies({
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
     page: 1,
     kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${name}`,
   });

@@ -25,8 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     defaultIndex: 'logstash-*',
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/130694
-  describe.skip('discover test', function describeIndexTests() {
+  describe('discover test', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
@@ -96,8 +95,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(time.start).to.be('Sep 21, 2015 @ 12:00:00.000');
         expect(time.end).to.be('Sep 21, 2015 @ 15:00:00.000');
         await retry.waitForWithTimeout(
-          'doc table to contain the right search result',
-          1000,
+          'table to contain the right search result',
+          3000,
           async () => {
             const rowData = await PageObjects.discover.getDocTableField(1);
             log.debug(`The first timestamp value in doc table: ${rowData}`);
