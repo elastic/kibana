@@ -33,7 +33,7 @@ import {
   DEFAULT_FILTER_OPTIONS,
   DEFAULT_QUERY_PARAMS,
   initialData,
-  useFetchCases,
+  useGetCases,
 } from '../../containers/use_get_cases';
 
 const ProgressLoader = styled(EuiProgress)`
@@ -83,7 +83,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       data = initialData,
       isFetching: isLoadingCases,
       refetch: refetchCases,
-    } = useFetchCases({
+    } = useGetCases({
       filterOptions,
       queryParams,
     });

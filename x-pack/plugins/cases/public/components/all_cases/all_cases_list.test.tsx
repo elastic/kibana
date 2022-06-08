@@ -36,7 +36,7 @@ import { useGetCasesMetrics } from '../../containers/use_get_cases_metrics';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useUpdateCase } from '../../containers/use_update_case';
-import { useFetchCases } from '../../containers/use_get_cases';
+import { useGetCases } from '../../containers/use_get_cases';
 
 jest.mock('../../containers/use_create_attachments');
 jest.mock('../../containers/use_bulk_update_case');
@@ -56,7 +56,7 @@ jest.mock('../app/use_available_owners', () => ({
 jest.mock('../../containers/use_update_case');
 
 const useDeleteCasesMock = useDeleteCases as jest.Mock;
-const useGetCasesMock = useFetchCases as jest.Mock;
+const useGetCasesMock = useGetCases as jest.Mock;
 const useGetCasesStatusMock = useGetCasesStatus as jest.Mock;
 const useGetCasesMetricsMock = useGetCasesMetrics as jest.Mock;
 const useUpdateCasesMock = useUpdateCases as jest.Mock;

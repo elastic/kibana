@@ -39,7 +39,7 @@ export const initialData: Cases = {
   total: 0,
 };
 
-export const useFetchCases = (
+export const useGetCases = (
   params: {
     queryParams?: Partial<QueryParams>;
     filterOptions?: Partial<FilterOptions>;

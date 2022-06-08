@@ -17,7 +17,7 @@ import { NoCases } from './no_cases';
 import { MarkdownRenderer } from '../markdown_editor';
 import { FilterOptions } from '../../containers/types';
 import { TruncatedText } from '../truncated_text';
-import { initialData as initialGetCasesData, useFetchCases } from '../../containers/use_get_cases';
+import { initialData as initialGetCasesData, useGetCases } from '../../containers/use_get_cases';
 
 const MarkdownContainer = styled.div`
   max-height: 150px;
@@ -31,7 +31,7 @@ export interface RecentCasesProps {
 }
 
 export const RecentCasesComp = ({ filterOptions, maxCasesToShow }: RecentCasesProps) => {
-  const { data = initialGetCasesData, isLoading: isLoadingCases } = useFetchCases({
+  const { data = initialGetCasesData, isLoading: isLoadingCases } = useGetCases({
     queryParams: { perPage: maxCasesToShow },
     filterOptions,
   });
