@@ -29,6 +29,14 @@ export function useFetchRuleActionConnectors({
 
   const fetchRuleActionConnectors = useCallback(async () => {
     try {
+      if (!ruleActions || ruleActions.length <= 0) {
+        setActionConnector((oldState: FetchActionConnectors) => ({
+          ...oldState,
+          isLoadingActionConnectors: false,
+          actionConnectors: [],
+        }));
+        return;
+      }
       const allActions = await loadAllActions({
         http,
       });
