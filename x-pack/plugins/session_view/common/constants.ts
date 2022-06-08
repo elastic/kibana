@@ -20,9 +20,10 @@ export const ALERT_STATUS = {
   CLOSED: 'closed',
 };
 
-export const PROCESS_EVENTS_PER_PAGE = 200;
-export const ALERTS_PER_PROCESS_EVENTS_PAGE = 600;
+export const PROCESS_EVENTS_PER_PAGE = 500;
+export const ALERTS_PER_PROCESS_EVENTS_PAGE = 1500;
 export const ALERTS_PER_PAGE = 100;
+export const ALERTS_IN_FIRST_PAGE = 8;
 
 // when showing the count of alerts in details panel tab, if the number
 // exceeds ALERT_COUNT_THRESHOLD we put a + next to it, e.g  500+
