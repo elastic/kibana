@@ -75,17 +75,9 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
     },
 
     hideOpenedConsole: async () => {
-      const hideConsoleButton = renderResult.queryByTestId('consolePopupHideButton');
-
-      if (!hideConsoleButton) {
-        return;
-      }
-
-      userEvent.click(hideConsoleButton);
+      act(() => userEvent.click(renderResult.getByTestId('consolePageOverlay-doneButton')));
       await waitFor(() => {
-        expect(renderResult.getByTestId('consolePageOverlay').classList.contains('is-hidden')).toBe(
-          true
-        );
+        expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();
       });
     },
   };

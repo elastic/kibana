@@ -272,7 +272,10 @@ export const PageOverlay = memo<PageOverlayProps>(
         }
       }
 
-      return () => unSetDocumentBodyLock();
+      return () => {
+        unSetDocumentBodyLock();
+        unSetDocumentBodyOverlayIsVisible();
+      };
     }, [isHidden, isMounted, lockDocumentBody]);
 
     return (
