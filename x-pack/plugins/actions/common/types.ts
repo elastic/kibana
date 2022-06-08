@@ -48,6 +48,7 @@ export interface ActionTypeExecutorResult<Data> {
   serviceMessage?: string;
   data?: Data;
   retry?: null | boolean | Date;
+  stack?: unknown;
 }
 
 export function isActionTypeExecutorResult(

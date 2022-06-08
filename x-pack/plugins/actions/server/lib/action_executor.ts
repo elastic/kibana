@@ -231,6 +231,7 @@ export class ActionExecutor {
               status: 'error',
               message: 'an error occurred while running the action',
               serviceMessage: err.message,
+              stack: err?.stack ?? err,
               retry: false,
             };
           }
@@ -404,6 +405,10 @@ function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string
     message = `${message}; retry at ${result.retry.toISOString()}`;
   } else if (result.retry) {
     message = `${message}; retry: ${JSON.stringify(result.retry)}`;
+  }
+
+  if (result.stack) {
+    message = `${message} -\nStack track: ${result.stack}`;
   }
 
   return message;
