@@ -145,6 +145,10 @@ export class MonitoringPlugin
       ['showLicenseExpiration', monitoring.ui.show_license_expiration],
       ['showCgroupMetricsElasticsearch', monitoring.ui.container.elasticsearch.enabled],
       ['showCgroupMetricsLogstash', monitoring.ui.container.logstash.enabled],
+      [
+        'staleStatusThresholdSeconds',
+        monitoring.ui.kibana.reporting.stale_status_threshold_seconds,
+      ],
     ];
   }
 

@@ -130,6 +130,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'monitoring.kibana.collection.enabled (boolean)',
         'monitoring.kibana.collection.interval (number)',
         'monitoring.ui.ccs.enabled (boolean)',
+        'monitoring.ui.kibana.reporting.stale_status_threshold_seconds (number)',
         'monitoring.ui.container.apm.enabled (boolean)',
         'monitoring.ui.container.elasticsearch.enabled (boolean)',
         'monitoring.ui.container.logstash.enabled (boolean)',

@@ -16,7 +16,7 @@ export function MonitoringKibanaInstanceProvider({ getService }) {
   const SUBJ_SUMMARY_OS_FREE_MEMORY = `${SUBJ_SUMMARY} > osFreeMemory`;
   const SUBJ_SUMMARY_VERSION = `${SUBJ_SUMMARY} > version`;
   const SUBJ_SUMMARY_UPTIME = `${SUBJ_SUMMARY} > uptime`;
-  const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} > statusIcon`;
+  const SUBJ_SUMMARY_HEALTH = `${SUBJ_SUMMARY} > status`;
 
   return new (class KibanaInstance {
     async isOnInstance() {
@@ -30,7 +30,7 @@ export function MonitoringKibanaInstanceProvider({ getService }) {
         osFreeMemory: await testSubjects.getVisibleText(SUBJ_SUMMARY_OS_FREE_MEMORY),
         version: await testSubjects.getVisibleText(SUBJ_SUMMARY_VERSION),
         uptime: await testSubjects.getVisibleText(SUBJ_SUMMARY_UPTIME),
-        health: await testSubjects.getAttribute(SUBJ_SUMMARY_HEALTH, 'alt'),
+        health: await testSubjects.getVisibleText(SUBJ_SUMMARY_HEALTH),
       };
     }
   })();

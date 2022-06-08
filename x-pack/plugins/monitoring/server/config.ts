@@ -35,6 +35,11 @@ export const configSchema = schema.object({
     }),
     max_bucket_size: schema.number({ defaultValue: 10000 }),
     elasticsearch: monitoringElasticsearchConfigSchema,
+    kibana: schema.object({
+      reporting: schema.object({
+        stale_status_threshold_seconds: schema.number({ defaultValue: 120 }),
+      }),
+    }),
     container: schema.object({
       elasticsearch: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
