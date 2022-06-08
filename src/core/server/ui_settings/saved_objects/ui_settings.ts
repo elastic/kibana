@@ -9,6 +9,14 @@
 import { SavedObjectsType } from '../../saved_objects';
 import { migrations } from './migrations';
 
+/**
+ * The `config` object type contains many attributes that are defined by consumers.
+ */
+export interface ConfigAttributes {
+  buildNum: number;
+  [key: string]: unknown;
+}
+
 export const uiSettingsType: SavedObjectsType = {
   name: 'config',
   hidden: false,
