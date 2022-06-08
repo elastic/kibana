@@ -9,7 +9,6 @@ import {
   Criteria,
   EuiButtonEmpty,
   EuiSwitch,
-  EuiToolTip,
   EuiTableFieldDataColumnType,
   EuiBasicTable,
   EuiBasicTableProps,
@@ -142,15 +141,13 @@ const getColumns = ({
     field: 'attributes.enabled',
     name: TEXT.ENABLED,
     render: (enabled, rule) => (
-      <EuiToolTip content={enabled ? TEXT.DEACTIVATE : TEXT.ACTIVATE}>
-        <EuiSwitch
-          showLabel={false}
-          label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
-          checked={enabled}
-          onChange={() => toggleRule(rule)}
-          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
-        />
-      </EuiToolTip>
+      <EuiSwitch
+        showLabel={false}
+        label={enabled ? TEXT.DISABLE : TEXT.ENABLE}
+        checked={enabled}
+        onChange={() => toggleRule(rule)}
+        data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
+      />
     ),
     width: '10%',
   },

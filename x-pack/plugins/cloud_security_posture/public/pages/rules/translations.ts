@@ -57,14 +57,6 @@ export const ENABLE = i18n.translate('xpack.csp.rules.enableLabel', {
   defaultMessage: 'Enable',
 });
 
-export const DEACTIVATE = i18n.translate('xpack.csp.rules.deactivateLabel', {
-  defaultMessage: 'Deactivate',
-});
-
-export const ACTIVATE = i18n.translate('xpack.csp.rules.activateLabel', {
-  defaultMessage: 'Activate',
-});
-
 export const ACTIVATED = i18n.translate('xpack.csp.rules.activatedLabel', {
   defaultMessage: 'Activated',
 });
