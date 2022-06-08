@@ -11,7 +11,7 @@ import { UpdateDateRange } from '../../../components/charts/common';
 import { GlobalTimeArgs } from '../../use_global_time';
 import { HostsType } from '../../../../hosts/store/model';
 import { NetworkType } from '../../../../network/store/model';
-import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { FlowTarget } from '../../../../../common/search_strategy';
 import { UsersType } from '../../../../users/store/model';
 
 interface QueryTabBodyProps {
@@ -25,7 +25,7 @@ export type AnomaliesQueryTabBodyProps = QueryTabBodyProps & {
   AnomaliesTableComponent: React.NamedExoticComponent<any>;
   deleteQuery?: ({ id }: { id: string }) => void;
   endDate: GlobalTimeArgs['to'];
-  flowTarget?: FlowTargetSourceDest;
+  flowTarget?: FlowTarget;
   indexNames: string[];
   narrowDateRange: NarrowDateRange;
   setQuery: GlobalTimeArgs['setQuery'];
