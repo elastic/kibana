@@ -208,8 +208,6 @@ export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
 ): Promise<LinkItem> => {
-  licenseService.start(plugins.licensing.license$);
-
   const currentUserResponse = await plugins.security.authc.getCurrentUser();
   const privileges = calculateEndpointAuthz(
     licenseService,
