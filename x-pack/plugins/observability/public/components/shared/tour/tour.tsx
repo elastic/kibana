@@ -70,8 +70,7 @@ const tourStepsConfig: TourStep[] = [
     content: (
       <EuiText>
         {i18n.translate('xpack.observability.tour.streamStep.tourContent', {
-          defaultMessage:
-            'Reprehenderit aute laborum ea amet proident voluptate minim do cillum anim.',
+          defaultMessage: 'Verify your data is flowing correctly.',
         })}
       </EuiText>
     ),
@@ -87,8 +86,7 @@ const tourStepsConfig: TourStep[] = [
     content: (
       <EuiText>
         {i18n.translate('xpack.observability.tour.metricsExplorerStep.tourContent', {
-          defaultMessage:
-            'Reprehenderit aute laborum ea amet proident voluptate minim do cillum anim.',
+          defaultMessage: 'Check the health of your infrastructure.',
         })}
       </EuiText>
     ),
@@ -104,8 +102,7 @@ const tourStepsConfig: TourStep[] = [
     content: (
       <EuiText>
         {i18n.translate('xpack.observability.tour.tracesStep.tourContent', {
-          defaultMessage:
-            'Reprehenderit aute laborum ea amet proident voluptate minim do cillum anim.',
+          defaultMessage: 'Track down any issues affecting your infrastructure.',
         })}
       </EuiText>
     ),
@@ -122,7 +119,7 @@ const tourStepsConfig: TourStep[] = [
       <EuiText>
         {i18n.translate('xpack.observability.tour.alertsStep.tourContent', {
           defaultMessage:
-            'Reprehenderit aute laborum ea amet proident voluptate minim do cillum anim.',
+            'Configure how you want to be notified when a problem occurs.',
         })}
       </EuiText>
     ),
