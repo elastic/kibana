@@ -62,7 +62,7 @@ describe('ScopedHistory', () => {
       const h = new ScopedHistory(gh, '/app/wow'); // ['']
       h.push('/first-page'); // ['', '/first-page']
       h.push('/second-page'); // ['', '/first-page', '/second-page']
-      h.goBack(); // ['', '/first-page', '/second-page']
+      h.back(); // ['', '/first-page', '/second-page']
       h.replace('/first-page-replacement', { some: 'state' }); // ['', '/first-page-replacement', '/second-page']
       expect(replaceSpy).toHaveBeenCalledWith('/app/wow/first-page-replacement', { some: 'state' });
       expect(h.length).toBe(3);
@@ -90,13 +90,13 @@ describe('ScopedHistory', () => {
       expect(h.location.pathname).toEqual('/new-page');
 
       // Test first back
-      h.goBack();
+      h.back();
       expect(h.length).toBe(2);
       expect(h.location.pathname).toEqual('');
       expect(gh.location.pathname).toEqual('/app/wow');
 
       // Second back should be no-op
-      h.goBack();
+      h.back();
       expect(h.length).toBe(2);
       expect(h.location.pathname).toEqual('');
       expect(gh.location.pathname).toEqual('/app/wow');
@@ -112,19 +112,19 @@ describe('ScopedHistory', () => {
       expect(h.length).toBe(2);
 
       // Go back so we can go forward
-      h.goBack();
+      h.back();
       expect(h.length).toBe(2);
       expect(h.location.pathname).toEqual('');
       expect(gh.location.pathname).toEqual('/app/wow');
 
       // Going forward should increase length and return to /new-page
-      h.goForward();
+      h.forward();
       expect(h.length).toBe(2);
       expect(h.location.pathname).toEqual('/new-page');
       expect(gh.location.pathname).toEqual('/app/wow/new-page');
 
       // Second forward should be no-op
-      h.goForward();
+      h.forward();
       expect(h.length).toBe(2);
       expect(h.location.pathname).toEqual('/new-page');
       expect(gh.location.pathname).toEqual('/app/wow/new-page');
@@ -137,17 +137,17 @@ describe('ScopedHistory', () => {
       h.push('/page-1');
       h.push('/page-2');
 
-      gh.goBack();
+      gh.back();
       expect(h.location.pathname).toEqual('/page-1');
       expect(h.length).toBe(3);
 
-      gh.goForward();
+      gh.forward();
       expect(h.location.pathname).toEqual('/page-2');
       expect(h.length).toBe(3);
 
       // Go back to /app/wow and push a new location
-      gh.goBack();
-      gh.goBack();
+      gh.back();
+      gh.back();
       gh.push('/app/wow/page-3');
       expect(h.location.pathname).toEqual('/page-3');
       expect(h.length).toBe(2); // ['', '/page-3']
@@ -169,15 +169,15 @@ describe('ScopedHistory', () => {
       expect(h.length).toBe(5);
       h.push('/page5');
       expect(h.length).toBe(6);
-      h.goBack(); // back/forward should not reduce the length
+      h.back(); // back/forward should not reduce the length
       expect(h.length).toBe(6);
-      h.goBack();
+      h.back();
       expect(h.length).toBe(6);
       h.push('/page6'); // length should only change if a new location is pushed from a point further back in the history
       expect(h.length).toBe(5);
-      h.goBack();
+      h.back();
       expect(h.length).toBe(5);
-      h.goBack();
+      h.back();
       expect(h.length).toBe(5);
       h.push('/page7');
       expect(h.length).toBe(4);
@@ -196,8 +196,8 @@ describe('ScopedHistory', () => {
       );
       expect(() => h.push('/new-page')).toThrow();
       expect(() => h.replace('/new-page')).toThrow();
-      expect(() => h.goBack()).toThrow();
-      expect(() => h.goForward()).toThrow();
+      expect(() => h.back()).toThrow();
+      expect(() => h.forward()).toThrow();
     });
   });
 
@@ -212,7 +212,7 @@ describe('ScopedHistory', () => {
       h.push('/second-page');
       h.push('/third-page');
       h.go(-2);
-      h.goForward();
+      h.forward();
       expect(listenPaths).toEqual([
         '/first-page',
         '/second-page',
@@ -233,7 +233,7 @@ describe('ScopedHistory', () => {
       h.push('/second-page');
       h.push('/third-page');
       h.go(-2);
-      h.goForward();
+      h.forward();
       expect(listenPaths).toEqual(['/first-page']);
     });
 
@@ -248,7 +248,7 @@ describe('ScopedHistory', () => {
       gh.push('/second-page');
       gh.push('/third-page');
       gh.go(-2);
-      gh.goForward();
+      gh.forward();
       expect(listenPaths).toEqual(['/first-page']);
     });
   });
@@ -291,7 +291,7 @@ describe('ScopedHistory', () => {
       const gh = createMemoryHistory();
       gh.push('/app/wow');
       gh.push('/alpha');
-      gh.goBack();
+      gh.back();
       const h = new ScopedHistory(gh, '/app/wow');
       expect(h.action).toBe('POP');
       gh.push('/app/wow/page-1');

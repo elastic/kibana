@@ -7,10 +7,10 @@
  */
 
 import React, { Component, ComponentType } from 'react';
-import { MemoryRouter, Route, withRouter } from 'react-router-dom';
-import { History, LocationDescriptor } from 'history';
+import { MemoryRouter, Route } from 'react-router-dom';
+import { History, Location, To, InitialEntry } from 'history';
 
-const stringifyPath = (path: LocationDescriptor): string => {
+const stringifyPath = (path: To): string => {
   if (typeof path === 'string') {
     return path;
   }
@@ -18,20 +18,12 @@ const stringifyPath = (path: LocationDescriptor): string => {
   return path.pathname || '/';
 };
 
-const locationDescriptorToRoutePath = (
-  paths: LocationDescriptor | LocationDescriptor[]
-): string | string[] => {
-  if (Array.isArray(paths)) {
-    return paths.map((path: LocationDescriptor) => {
-      return stringifyPath(path);
-    });
-  }
-
+const locationDescriptorToRoutePath = (paths: To): string => {
   return stringifyPath(paths);
 };
 
 export const WithMemoryRouter =
-  (initialEntries: LocationDescriptor[] = ['/'], initialIndex: number = 0) =>
+  (initialEntries: InitialEntry[] = ['/'], initialIndex: number = 0) =>
   (WrappedComponent: ComponentType) =>
   (props: any) =>
     (
@@ -41,13 +33,12 @@ export const WithMemoryRouter =
     );
 
 export const WithRoute =
-  (
-    componentRoutePath: LocationDescriptor | LocationDescriptor[] = ['/'],
-    onRouter = (router: any) => {}
-  ) =>
+  (componentRoutePath: InitialEntry = '/', onRouter = (router: any) => {}) =>
   (WrappedComponent: ComponentType) => {
     // Create a class component that will catch the router
     // and forward it to our "onRouter()" handler.
+    // TODO: withRouter is no longer a thing, need to use FC/hooks instead AND stop accessing history or router
+    //       as those are no longer exported by react-router-dom
     const CatchRouter = withRouter(
       class extends Component<any> {
         componentDidMount() {
@@ -63,36 +54,37 @@ export const WithRoute =
     );
 
     return (props: any) => (
-      <Route
-        path={locationDescriptorToRoutePath(componentRoutePath)}
-        render={(routerProps) => <CatchRouter {...routerProps} {...props} />}
-      />
+      <Route path={locationDescriptorToRoutePath(componentRoutePath)}>
+        <CatchRouter {...props} />
+      </Route>
     );
   };
 
 interface Router {
   history: Partial<History>;
   route: {
-    location: LocationDescriptor;
+    location: Location;
   };
 }
 
 export const reactRouterMock: Router = {
   history: {
     push: () => {},
-    createHref: (location) => location.pathname!,
+    createHref: (location) => (typeof location === 'string' ? location : location.pathname!),
     location: {
+      key: 'default',
       pathname: '',
       search: '',
-      state: '',
+      state: {},
       hash: '',
     },
   },
   route: {
     location: {
+      key: 'default',
       pathname: '',
       search: '',
-      state: '',
+      state: {},
       hash: '',
     },
   },

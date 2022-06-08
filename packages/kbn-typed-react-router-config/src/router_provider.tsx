@@ -7,7 +7,7 @@
  */
 import { History } from 'history';
 import React from 'react';
-import { Router as ReactRouter } from 'react-router-dom';
+import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom';
 import { RouteMap, Router } from './types';
 import { RouterContextProvider } from './use_router';
 
@@ -21,8 +21,8 @@ export function RouterProvider({
   children: React.ReactNode;
 }) {
   return (
-    <ReactRouter history={history}>
+    <HistoryRouter history={history}>
       <RouterContextProvider router={router}>{children}</RouterContextProvider>
-    </ReactRouter>
+    </HistoryRouter>
   );
 }

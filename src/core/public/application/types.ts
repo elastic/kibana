@@ -7,7 +7,7 @@
  */
 import type { ButtonColor } from '@elastic/eui';
 import { Observable } from 'rxjs';
-import { History } from 'history';
+import { History, State } from 'history';
 import { RecursiveReadonly } from '@kbn/utility-types';
 
 import { MountPoint } from '../types';
@@ -105,7 +105,7 @@ export type AppUpdater = (app: App) => Partial<AppUpdatableFields> | undefined;
 /**
  * @public
  */
-export interface App<HistoryLocationState = unknown> extends AppNavOptions {
+export interface App<HistoryLocationState extends State = State> extends AppNavOptions {
   /**
    * The unique identifier of the application.
    *
@@ -345,7 +345,7 @@ export type PublicAppInfo = Omit<
  *
  * @public
  */
-export type AppMount<HistoryLocationState = unknown> = (
+export type AppMount<HistoryLocationState extends State = State> = (
   params: AppMountParameters<HistoryLocationState>
 ) => AppUnmount | Promise<AppUnmount>;
 
@@ -356,7 +356,7 @@ export type AppMount<HistoryLocationState = unknown> = (
 export type AppUnmount = () => void;
 
 /** @public */
-export interface AppMountParameters<HistoryLocationState = unknown> {
+export interface AppMountParameters<HistoryLocationState extends State = State> {
   /**
    * The container element to render the application into.
    */
@@ -669,7 +669,7 @@ export interface ApplicationSetup {
    * @param app - an {@link App}
    * @typeParam HistoryLocationState - shape of the `History` state on {@link AppMountParameters.history}, defaults to `unknown`.
    */
-  register<HistoryLocationState = unknown>(app: App<HistoryLocationState>): void;
+  register<HistoryLocationState extends State = State>(app: App<HistoryLocationState>): void;
 
   /**
    * Register an application updater that can be used to change the {@link AppUpdatableFields} fields
@@ -708,7 +708,7 @@ export interface InternalApplicationSetup extends Pick<ApplicationSetup, 'regist
    * @param plugin - opaque ID of the plugin that registers this application
    * @param app
    */
-  register<HistoryLocationState = unknown>(
+  register<HistoryLocationState extends State = State>(
     plugin: PluginOpaqueId,
     app: App<HistoryLocationState>
   ): void;
@@ -867,5 +867,5 @@ export interface InternalApplicationStart extends ApplicationStart {
    * The global history instance, exposed only to Core.
    * @internal
    */
-  history: History<unknown>;
+  history: History<State>;
 }
