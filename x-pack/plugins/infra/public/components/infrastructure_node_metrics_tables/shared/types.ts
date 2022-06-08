@@ -21,3 +21,5 @@ export interface SourceProviderProps {
 export type IntegratedNodeMetricsTableProps = UseNodeMetricsTableOptions &
   SourceProviderProps &
   CoreProvidersProps;
+
+export type MetricsIndicesStatus = 'available' | 'empty' | 'missing' | 'unknown';

@@ -32,6 +32,57 @@ export default {
     decorateWithGlobalStorybookThemeProviders,
   ],
   component: HostMetricsTable,
+  args: {
+    indicesStatus: 'available',
+    isLoading: false,
+    hosts: [
+      {
+        name: 'gke-edge-oblt-pool-1-9a60016d-lgg1',
+        cpuCount: 2,
+        averageCpuUsagePercent: 99,
+        totalMemoryMegabytes: 1024,
+        averageMemoryUsagePercent: 34,
+      },
+      {
+        name: 'gke-edge-oblt-pool-1-9a60016d-lgg2',
+        cpuCount: 4,
+        averageCpuUsagePercent: 74,
+        totalMemoryMegabytes: 2450,
+        averageMemoryUsagePercent: 13,
+      },
+      {
+        name: 'gke-edge-oblt-pool-1-9a60016d-lgg3',
+        cpuCount: 8,
+        averageCpuUsagePercent: 56,
+        totalMemoryMegabytes: 4810,
+        averageMemoryUsagePercent: 74,
+      },
+      {
+        name: 'gke-edge-oblt-pool-1-9a60016d-lgg4',
+        cpuCount: 16,
+        averageCpuUsagePercent: 34,
+        totalMemoryMegabytes: 8123,
+        averageMemoryUsagePercent: 56,
+      },
+      {
+        name: 'gke-edge-oblt-pool-1-9a60016d-lgg5',
+        cpuCount: 32,
+        averageCpuUsagePercent: 13,
+        totalMemoryMegabytes: 16792,
+        averageMemoryUsagePercent: 99,
+      },
+    ],
+    currentPageIndex: 0,
+    pageCount: 10,
+    sortState: {
+      direction: 'desc',
+      field: 'averageCpuUsagePercent',
+    },
+    timerange: {
+      from: 'now-15m',
+      to: 'now',
+    },
+  },
   argTypes: {
     setSortState: {
       action: 'Sort field or direction changed',
@@ -39,61 +90,52 @@ export default {
     setCurrentPageIndex: {
       action: 'Page changed',
     },
+    indicesStatus: {
+      options: ['available', 'empty', 'missing', 'unknown'],
+      control: {
+        type: 'select',
+      },
+    },
   },
-} as Meta;
+} as Meta<HostMetricsTableProps>;
 
-const storyArgs: Omit<HostMetricsTableProps, 'setSortState' | 'setCurrentPageIndex'> = {
-  isLoading: false,
-  hosts: [
-    {
-      name: 'gke-edge-oblt-pool-1-9a60016d-lgg1',
-      cpuCount: 2,
-      averageCpuUsagePercent: 99,
-      totalMemoryMegabytes: 1024,
-      averageMemoryUsagePercent: 34,
-    },
-    {
-      name: 'gke-edge-oblt-pool-1-9a60016d-lgg2',
-      cpuCount: 4,
-      averageCpuUsagePercent: 74,
-      totalMemoryMegabytes: 2450,
-      averageMemoryUsagePercent: 13,
-    },
-    {
-      name: 'gke-edge-oblt-pool-1-9a60016d-lgg3',
-      cpuCount: 8,
-      averageCpuUsagePercent: 56,
-      totalMemoryMegabytes: 4810,
-      averageMemoryUsagePercent: 74,
-    },
-    {
-      name: 'gke-edge-oblt-pool-1-9a60016d-lgg4',
-      cpuCount: 16,
-      averageCpuUsagePercent: 34,
-      totalMemoryMegabytes: 8123,
-      averageMemoryUsagePercent: 56,
-    },
-    {
-      name: 'gke-edge-oblt-pool-1-9a60016d-lgg5',
-      cpuCount: 32,
-      averageCpuUsagePercent: 13,
-      totalMemoryMegabytes: 16792,
-      averageMemoryUsagePercent: 99,
-    },
-  ],
-  currentPageIndex: 0,
-  pageCount: 10,
-  sortState: {
-    direction: 'desc',
-    field: 'averageCpuUsagePercent',
-  },
-  timerange: {
-    from: 'now-15m',
-    to: 'now',
-  },
-};
-
-export const Demo = (args: HostMetricsTableProps) => {
+export const Basic = (args: HostMetricsTableProps) => {
   return <HostMetricsTable {...args} />;
 };
-Demo.args = storyArgs;
+
+export const Loading = (args: HostMetricsTableProps) => {
+  return <HostMetricsTable {...args} />;
+};
+Loading.args = {
+  currentPageIndex: 0,
+  hosts: [],
+  isLoading: true,
+  pageCount: 1,
+};
+
+export const Reloading = (args: HostMetricsTableProps) => {
+  return <HostMetricsTable {...args} />;
+};
+Reloading.args = {
+  isLoading: true,
+};
+
+export const MissingIndices = (args: HostMetricsTableProps) => {
+  return <HostMetricsTable {...args} />;
+};
+MissingIndices.args = {
+  currentPageIndex: 0,
+  hosts: [],
+  indicesStatus: 'missing',
+  pageCount: 1,
+};
+
+export const EmptyIndices = (args: HostMetricsTableProps) => {
+  return <HostMetricsTable {...args} />;
+};
+EmptyIndices.args = {
+  currentPageIndex: 0,
+  hosts: [],
+  indicesStatus: 'empty',
+  pageCount: 1,
+};

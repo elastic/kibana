@@ -10,16 +10,16 @@ import type {
   EuiBasicTableColumn,
   EuiTableSortingType,
 } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import { MetricsNodeDetailsLink, NumberCell, StepwisePagination } from '../shared';
 import type { SortState } from '../shared';
+import {
+  MetricsIndicesStatus,
+  MetricsNodeDetailsLink,
+  NumberCell,
+  StepwisePagination,
+} from '../shared';
+import { MetricsTableNoDataContent } from '../shared/components/no_data_content';
 import type { HostNodeMetricsRow } from './use_host_metrics_table';
 
 export interface HostMetricsTableProps {
@@ -27,6 +27,7 @@ export interface HostMetricsTableProps {
     from: string;
     to: string;
   };
+  indicesStatus: MetricsIndicesStatus;
   isLoading: boolean;
   hosts: HostNodeMetricsRow[];
   pageCount: number;
@@ -38,14 +39,15 @@ export interface HostMetricsTableProps {
 
 export const HostMetricsTable = (props: HostMetricsTableProps) => {
   const {
-    timerange,
-    isLoading,
-    hosts,
-    pageCount,
     currentPageIndex,
+    hosts,
+    indicesStatus,
+    isLoading,
+    pageCount,
     setCurrentPageIndex,
-    sortState,
     setSortState,
+    sortState,
+    timerange,
   } = props;
 
   const columns = useMemo(() => hostMetricsColumns(timerange), [timerange]);
@@ -67,14 +69,6 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
     [setSortState, setCurrentPageIndex]
   );
 
-  if (isLoading) {
-    return (
-      <EuiFlexGroup alignItems="center" justifyContent="center" direction="column">
-        <EuiLoadingSpinner size="xl" data-test-subj="hostMetricsTableLoader" />
-      </EuiFlexGroup>
-    );
-  }
-
   return (
     <>
       <EuiBasicTable
@@ -83,6 +77,10 @@ export const HostMetricsTable = (props: HostMetricsTableProps) => {
         columns={columns}
         sorting={sortSettings}
         onChange={onTableSortChange}
+        loading={isLoading}
+        noItemsMessage={
+          <MetricsTableNoDataContent indicesStatus={indicesStatus} isLoading={isLoading} />
+        }
         data-test-subj="hostMetricsTable"
       />
       <EuiSpacer size="s" />

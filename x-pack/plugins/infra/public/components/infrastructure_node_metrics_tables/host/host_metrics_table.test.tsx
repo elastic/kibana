@@ -46,7 +46,7 @@ describe('HostMetricsTable', () => {
 
       render(<LazyHostMetricsTable timerange={timerange} filterClauseDsl={filterClauseDsl} />);
 
-      expect(screen.queryByTestId('hostMetricsTableLoader')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('metricsTableLoadingContent')).not.toBeInTheDocument();
       expect(screen.queryByTestId('hostMetricsTable')).not.toBeInTheDocument();
 
       // Using longer time out since resolving dynamic import can be slow
@@ -55,7 +55,7 @@ describe('HostMetricsTable', () => {
         timeout: 10000,
       });
 
-      expect(screen.queryByTestId('hostMetricsTableLoader')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('metricsTableLoadingContent')).not.toBeInTheDocument();
       expect(screen.queryByTestId('hostMetricsTable')).toBeInTheDocument();
     }, 10000);
   });

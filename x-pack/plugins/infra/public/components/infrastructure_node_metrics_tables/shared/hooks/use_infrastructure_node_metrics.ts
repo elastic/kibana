@@ -19,6 +19,7 @@ import type {
   MetricsExplorerTimeOptions,
 } from '../../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
+import { MetricsIndicesStatus } from '../types';
 
 export interface SortState<T> {
   field: keyof T;
@@ -59,10 +60,11 @@ export const useInfrastructureNodeMetrics = <T>(
 
   const [transformedNodes, setTransformedNodes] = useState<T[]>([]);
   const fetch = useKibanaHttpFetch();
-  const { source, isLoadingSource } = useSourceContext();
+  const { source, isLoadingSource, loadSourceFailureMessage, metricIndicesExist } =
+    useSourceContext();
   const timerangeWithInterval = useTimerangeWithInterval(timerange);
 
-  const [{ state: promiseState }, fetchNodes] = useTrackedPromise(
+  const [fetchNodesRequest, fetchNodes] = useTrackedPromise(
     {
       createPromise: (): Promise<MetricsExplorerResponse> => {
         if (!source) {
@@ -95,7 +97,25 @@ export const useInfrastructureNodeMetrics = <T>(
     },
     [source, metricsExplorerOptions, timerangeWithInterval, filterClauseDsl]
   );
-  const isLoadingNodes = promiseState === 'pending' || promiseState === 'uninitialized';
+
+  const isLoadingNodes =
+    fetchNodesRequest.state === 'pending' || fetchNodesRequest.state === 'uninitialized';
+  const isLoading = isLoadingSource || isLoadingNodes;
+
+  const indicesStatus = useMemo<MetricsIndicesStatus>(
+    () =>
+      metricIndicesExist == null
+        ? 'unknown'
+        : !metricIndicesExist
+        ? 'missing'
+        : transformedNodes.length <= 0
+        ? 'empty'
+        : 'available',
+    [metricIndicesExist, transformedNodes.length]
+  );
+
+  const fetchNodesFailureMessage =
+    fetchNodesRequest.state === 'rejected' ? fetchNodesRequest.value : undefined;
 
   useEffect(() => {
     fetchNodes();
@@ -118,7 +138,8 @@ export const useInfrastructureNodeMetrics = <T>(
   const pageCount = useMemo(() => Math.ceil(top100Nodes.length / TABLE_PAGE_SIZE), [top100Nodes]);
 
   return {
-    isLoading: isLoadingSource || isLoadingNodes,
+    indicesStatus,
+    isLoading,
     nodes,
     pageCount,
   };
