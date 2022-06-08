@@ -14,11 +14,11 @@
 // x-pack/plugins/ml/server/models/data_recognizer/modules/security_windows/manifest.json)
 // allows us to make this determination from a single API call.
 //
-// Note: In 8.2 the V3 ML modules were released and a large portion of the V1/V2
-// jobs were removed or Replaced. We're leveraging this same upgrade callout
-// to inform users of this change and any actions that must be taken before
-// updating their Detection Rules to ensure continued functionality if they
-// still need to run the V1/V2 jobs
+// Note: In 8.3 the V3 ML modules were released (#131166) and a large portion of the V1/V2
+// jobs were removed or replaced. We'll use this same list of affectedJobIds to show a modal
+// before updating their Detection Rules to inform users of this change and any actions that
+// must be taken before updating  to ensure continued functionality if they still need to run
+// the V1/V2 jobs
 // For details see: https://github.com/elastic/kibana/issues/128121
 export const affectedJobIds: string[] = [
   // security_linux module

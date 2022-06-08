@@ -6,7 +6,10 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { MlJobUpgradeModal } from '../../../components/modals/ml_job_upgrade_modal';
+import { affectedJobIds } from '../../../components/callouts/ml_job_compatibility_callout/affected_job_ids';
+import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 
 import { usePrePackagedRules, importRules } from '../../../containers/detection_engine/rules';
 import { useListsConfig } from '../../../containers/detection_engine/lists/use_lists_config';
@@ -43,6 +46,10 @@ const RulesPageComponent: React.FC = () => {
   const [isValueListFlyoutVisible, showValueListFlyout, hideValueListFlyout] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
   const invalidateRules = useInvalidateRules();
+
+  const { loading: loadingJobs, jobs } = useInstalledSecurityJobs();
+  const legacyJobsInstalled = jobs.filter((job) => affectedJobIds.includes(job.id));
+  const [isUpgradeModalVisible, setIsUpgradeModalVisible] = useState(false);
 
   const [
     {
@@ -100,6 +107,21 @@ const RulesPageComponent: React.FC = () => {
     }
   }, [createPrePackagedRules, invalidateRules]);
 
+  // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
+  // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121
+  const mlJobUpgradeModalConfirm = useCallback(async () => {
+    setIsUpgradeModalVisible(false);
+    await handleCreatePrePackagedRules();
+  }, [handleCreatePrePackagedRules, setIsUpgradeModalVisible]);
+
+  const showMlJobUpgradeModal = useCallback(async () => {
+    if (legacyJobsInstalled.length > 0) {
+      setIsUpgradeModalVisible(true);
+    } else {
+      await handleCreatePrePackagedRules();
+    }
+  }, [handleCreatePrePackagedRules, legacyJobsInstalled.length]);
+
   const handleRefetchPrePackagedRulesStatus = useCallback(() => {
     if (refetchPrePackagedRulesStatus != null) {
       return refetchPrePackagedRulesStatus();
@@ -111,19 +133,31 @@ const RulesPageComponent: React.FC = () => {
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getLoadPrebuiltRulesAndTemplatesButton({
-        isDisabled: !userHasPermissions(canUserCRUD) || loading,
-        onClick: handleCreatePrePackagedRules,
+        isDisabled: !userHasPermissions(canUserCRUD) || loading || loadingJobs,
+        onClick: showMlJobUpgradeModal,
       }),
-    [canUserCRUD, getLoadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
+    [
+      canUserCRUD,
+      getLoadPrebuiltRulesAndTemplatesButton,
+      showMlJobUpgradeModal,
+      loading,
+      loadingJobs,
+    ]
   );
 
   const reloadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getReloadPrebuiltRulesAndTemplatesButton({
-        isDisabled: !userHasPermissions(canUserCRUD) || loading,
-        onClick: handleCreatePrePackagedRules,
+        isDisabled: !userHasPermissions(canUserCRUD) || loading || loadingJobs,
+        onClick: showMlJobUpgradeModal,
       }),
-    [canUserCRUD, getReloadPrebuiltRulesAndTemplatesButton, handleCreatePrePackagedRules, loading]
+    [
+      canUserCRUD,
+      getReloadPrebuiltRulesAndTemplatesButton,
+      showMlJobUpgradeModal,
+      loading,
+      loadingJobs,
+    ]
   );
 
   if (
@@ -146,6 +180,13 @@ const RulesPageComponent: React.FC = () => {
       <NeedAdminForUpdateRulesCallOut />
       <MissingPrivilegesCallOut />
       <MlJobCompatibilityCallout />
+      {isUpgradeModalVisible && (
+        <MlJobUpgradeModal
+          jobs={legacyJobsInstalled}
+          onCancel={() => setIsUpgradeModalVisible(false)}
+          onConfirm={mlJobUpgradeModalConfirm}
+        />
+      )}
       <ValueListsFlyout showFlyout={isValueListFlyoutVisible} onClose={hideValueListFlyout} />
       <ImportDataModal
         checkBoxLabel={i18n.OVERWRITE_WITH_SAME_NAME}
@@ -218,7 +259,7 @@ const RulesPageComponent: React.FC = () => {
               loading={loadingCreatePrePackagedRules}
               numberOfUpdatedRules={rulesNotUpdated ?? 0}
               numberOfUpdatedTimelines={timelinesNotUpdated ?? 0}
-              updateRules={handleCreatePrePackagedRules}
+              updateRules={showMlJobUpgradeModal}
             />
           )}
           <AllRules
