@@ -90,7 +90,7 @@ export const SimulateTemplate = React.memo(({ template, filters }: Props) => {
   }
 
   return isEmpty ? null : (
-    <EuiCodeBlock lang="json" data-test-subj="simulateTemplatePreview">
+    <EuiCodeBlock language="json" data-test-subj="simulateTemplatePreview">
       {templatePreview}
     </EuiCodeBlock>
   );
