@@ -9,13 +9,12 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { BrowserField } from '../../../containers/source';
-import { AddToTimelineCellRenderer } from './add_to_timeline_cell';
+import { InvestigateInTimelineButton } from './investigate_in_timeline_button';
 import { TestProviders } from '../../../mock';
 import { EventFieldsData } from '../types';
 import { TimelineId } from '../../../../../common/types';
 
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../../detections/components/alerts_table/translations';
-import { AGENT_STATUS_FIELD_NAME } from '../../../../timelines/components/timeline/body/renderers/constants';
 
 jest.mock('../../../lib/kibana');
 
@@ -46,43 +45,12 @@ const hostIpData: EventFieldsData = {
   values: ['127.0.0.1', '::1', '10.1.2.3', '2001:0DB8:AC10:FE01::'],
 };
 
-const agentStatusFieldFromBrowserField: BrowserField = {
-  aggregatable: true,
-  category: 'agent',
-  description: 'Agent status.',
-  fields: {},
-  format: '',
-  indexes: ['auditbeat-*', 'filebeat-*', 'logs-*', 'winlogbeat-*'],
-  name: AGENT_STATUS_FIELD_NAME,
-  readFromDocValues: false,
-  searchable: true,
-  type: 'string',
-  example: 'status',
-};
-
-const agentStatusData: EventFieldsData = {
-  field: AGENT_STATUS_FIELD_NAME,
-  format: '',
-  type: '',
-  aggregatable: false,
-  description: '',
-  example: '',
-  category: '',
-  fields: {},
-  indexes: [],
-  name: AGENT_STATUS_FIELD_NAME,
-  searchable: false,
-  readFromDocValues: false,
-  isObjectArray: false,
-  values: ['status'],
-};
-
-describe('AddToTimelineCellRenderer', () => {
+describe('InvestigateInTimelineButton', () => {
   describe('When all props are provided', () => {
     test('it should display the add to timeline button', () => {
       render(
         <TestProviders>
-          <AddToTimelineCellRenderer
+          <InvestigateInTimelineButton
             data={hostIpData}
             eventId={eventId}
             fieldFromBrowserField={hostIpFieldFromBrowserField}
@@ -100,31 +68,13 @@ describe('AddToTimelineCellRenderer', () => {
     test('it should not render', () => {
       render(
         <TestProviders>
-          <AddToTimelineCellRenderer
+          <InvestigateInTimelineButton
             data={hostIpData}
             eventId={eventId}
             fieldFromBrowserField={undefined}
             linkValue={undefined}
             timelineId={TimelineId.test}
             values={hostIpData.values}
-          />
-        </TestProviders>
-      );
-      expect(screen.queryByLabelText(ACTION_INVESTIGATE_IN_TIMELINE)).not.toBeInTheDocument();
-    });
-  });
-
-  describe('When the field is the host status field', () => {
-    test('it should not render', () => {
-      render(
-        <TestProviders>
-          <AddToTimelineCellRenderer
-            data={agentStatusData}
-            eventId={eventId}
-            fieldFromBrowserField={agentStatusFieldFromBrowserField}
-            linkValue={undefined}
-            timelineId={TimelineId.test}
-            values={agentStatusData.values}
           />
         </TestProviders>
       );
