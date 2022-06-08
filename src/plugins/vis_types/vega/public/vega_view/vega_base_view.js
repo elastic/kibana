@@ -56,6 +56,8 @@ function normalizeDate(date) {
 }
 /*
 Recursive function to check a nested object for a function property
+This function should run after JSON.stringify to ensure that functions such as toJSON
+are not invoked. We dont use the replacer function as it doesnt catch the toJSON function
 */
 function checkObjectForFunctionProperty(object) {
   if (object === null || object === undefined) {
@@ -64,12 +66,13 @@ function checkObjectForFunctionProperty(object) {
   if (typeof object === 'function') {
     return true;
   }
-  const hasFnProperty = Object.values(object).some((value) => {
-    if (typeof value === 'function') {
-      return checkObjectForFunctionProperty(value);
-    }
-  });
-  return hasFnProperty;
+  if (object && typeof object === 'object') {
+    return Object.values(object).some(
+      (value) => typeof value === 'function' || checkObjectForFunctionProperty(value)
+    );
+  }
+
+  return false;
 }
 /*
 We want to be strict here when an object is passed to a Vega function
