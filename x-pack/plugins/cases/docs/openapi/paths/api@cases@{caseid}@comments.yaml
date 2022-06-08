@@ -1,4 +1,5 @@
 post:
+  summary: Adds a comment to a case.
   description: >
     Adds a comment to a case.
     You must have all privileges for the **Cases** feature in the **Management**,
