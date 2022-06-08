@@ -54,7 +54,7 @@ const HostRiskSummaryComponent: React.FC<{
       {hostRisk.isModuleEnabled && hostRisk.result && hostRisk.result.length > 0 && (
         <>
           <EnrichedDataRow
-            field={'host.risk.keyword'}
+            field={i18n.HOST_RISK_CLASSIFICATION}
             value={
               <RiskScore severity={hostRisk.result[0].risk as RiskSeverity} hideBackgroundColor />
             }
