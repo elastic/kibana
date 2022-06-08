@@ -5,13 +5,12 @@
  * 2.0.
  */
 
+const proxySetup = require('proxy');
+
 import { readFileSync as fsReadFileSync } from 'fs';
 import { resolve as pathResolve, join as pathJoin } from 'path';
-import tls from 'tls';
-import net from 'net';
 import http from 'http';
 import https from 'https';
-import httpProxy from 'http-proxy';
 import axios from 'axios';
 import { duration as momentDuration } from 'moment';
 import { schema } from '@kbn/config-schema';
@@ -27,18 +26,22 @@ import {
   ActionsConfigurationUtilities,
   getActionsConfigurationUtilities,
 } from '../../actions_config';
+import { resolveCustomHosts } from '../../lib/custom_host_settings';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
 const CERT_DIR = '../../../../../../../packages/kbn-dev-utils/certs';
 
-const KB_CRT_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.crt'));
-const KB_KEY_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.key'));
-const CA_CRT_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'ca.crt'));
+const KIBANA_CRT_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.crt'));
+const KIBANA_KEY_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'kibana.key'));
+const CA_FILE = pathResolve(__filename, pathJoin(CERT_DIR, 'ca.crt'));
 
-const KB_CRT = fsReadFileSync(KB_CRT_FILE, 'utf8');
-const KB_KEY = fsReadFileSync(KB_KEY_FILE, 'utf8');
-const CA_CRT = fsReadFileSync(CA_CRT_FILE, 'utf8');
+const KIBANA_KEY = fsReadFileSync(KIBANA_KEY_FILE, 'utf8');
+const KIBANA_CRT = fsReadFileSync(KIBANA_CRT_FILE, 'utf8');
+const CA = fsReadFileSync(CA_FILE, 'utf8');
+
+const Auth = 'elastic:changeme';
+const AuthB64 = Buffer.from(Auth).toString('base64');
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const AxiosDefaultsAadapter = require('axios/lib/adapters/http');
@@ -68,7 +71,7 @@ describe('axios connections', () => {
     testServer = null;
   });
 
-  describe.skip('http', () => {
+  describe('http', () => {
     test('it works', async () => {
       const { url, server } = await createServer({ useHttps: false });
       testServer = server;
@@ -79,7 +82,7 @@ describe('axios connections', () => {
     });
   });
 
-  describe.skip('https', () => {
+  describe('https', () => {
     test('it fails with self-signed cert and no overrides', async () => {
       const { url, server } = await createServer({ useHttps: true });
       testServer = server;
@@ -118,7 +121,7 @@ describe('axios connections', () => {
       testServer = server;
 
       const configurationUtilities = getACUfromConfig({
-        customHostSettings: [{ url, ssl: { certificateAuthoritiesData: CA_CRT } }],
+        customHostSettings: [{ url, ssl: { certificateAuthoritiesData: CA } }],
       });
       const res = await request({ axios, url, logger, configurationUtilities });
       expect(res.status).toBe(200);
@@ -129,7 +132,7 @@ describe('axios connections', () => {
       testServer = server;
 
       const configurationUtilities = getACUfromConfig({
-        customHostSettings: [{ url, ssl: { certificateAuthoritiesData: KB_CRT } }],
+        customHostSettings: [{ url, ssl: { certificateAuthoritiesData: KIBANA_CRT } }],
       });
       const fn = async () => await request({ axios, url, logger, configurationUtilities });
       await expect(fn()).rejects.toThrow('certificate');
@@ -144,7 +147,7 @@ describe('axios connections', () => {
           {
             url,
             ssl: {
-              certificateAuthoritiesData: CA_CRT,
+              certificateAuthoritiesData: CA,
               verificationMode: 'none',
             },
           },
@@ -166,7 +169,7 @@ describe('axios connections', () => {
           {
             url,
             ssl: {
-              certificateAuthoritiesData: CA_CRT,
+              certificateAuthoritiesData: CA,
             },
           },
         ],
@@ -212,49 +215,359 @@ describe('axios connections', () => {
   });
 
   describe(`proxy`, () => {
-    for (const targetProto of ['https']) {
-      for (const proxyProto of ['https']) {
-        test(`target: ${targetProto}, proxy: ${proxyProto}`, async () => {
-          await runProxyTest(targetProto, false, proxyProto, false);
-        });
+    for (const targetHttps of [true, false]) {
+      for (const targetAuth of [false, true]) {
+        // why no `true`? see: https://github.com/delvedor/hpagent/issues/69
+        for (const proxyHttps of [false]) {
+          for (const proxyAuth of [false, true]) {
+            const targetLabel = testLabel('target', targetHttps, targetAuth);
+            const proxyLabel = testLabel('proxy', proxyHttps, proxyAuth);
+            const testName = `${targetLabel}; ${proxyLabel}`;
+
+            const opts = { targetHttps, targetAuth, proxyHttps, proxyAuth };
+
+            test(`basic; ${testName}`, async () => await basicProxyTest(opts));
+
+            if (targetAuth) {
+              test(`wrong target password; ${testName}`, async () =>
+                await wrongTargetPasswordProxyTest(opts));
+
+              test(`missing target password; ${testName}`, async () =>
+                await missingTargetPasswordProxyTest(opts));
+            }
+
+            if (proxyAuth) {
+              test(`wrong proxy password; ${testName}`, async () =>
+                await wrongProxyPasswordProxyTest(opts));
+
+              test(`missing proxy password; ${testName}`, async () =>
+                await missingProxyPasswordProxyTest(opts));
+            }
+
+            if (targetHttps) {
+              test(`missing CA; ${testName}`, async () => await missingCaProxyTest(opts));
+
+              test(`rejectUnauthorized target; ${testName}`, async () =>
+                await rejectUnauthorizedTargetProxyTest(opts));
+
+              test(`custom CA target; ${testName}`, async () => await customCAProxyTest(opts));
+
+              test(`verModeNone target; ${testName}`, async () =>
+                await verModeNoneTargetProxyTest(opts));
+            }
+          }
+        }
       }
     }
   });
 });
 
-const EvergreenHttpsUrl = 'https://www.elastic.co/';
+async function basicProxyTest(opts: RunTestOptions) {
+  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+    const acu = getACUfromConfig({
+      proxyUrl: proxy.url,
+      ssl: { verificationMode: 'none' },
+      customHostSettings: [{ url: target.url, ssl: { certificateAuthoritiesData: CA } }],
+    });
 
-async function runProxyTest(
-  targetProto: string,
-  targetAuth: boolean,
-  proxyProto: string,
-  proxyAuth: boolean
-) {
-  const proxyServer = await createProxy({
-    useHttps: proxyProto === 'https',
+    const res = await request({ ...axiosDefaults, configurationUtilities: acu });
+    expect(res.status).toBe(200);
+  });
+}
+
+async function wrongTargetPasswordProxyTest(opts: RunTestOptions) {
+  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+    const acu = getACUfromConfig({
+      proxyUrl: proxy.url,
+      ssl: { verificationMode: 'none' },
+      customHostSettings: [{ url: target.url, ssl: { certificateAuthoritiesData: CA } }],
+    });
+
+    const wrongUrl = manglePassword(target.url);
+    const res = await request({ ...axiosDefaults, url: wrongUrl, configurationUtilities: acu });
+    expect(res.status).toBe(403);
+  });
+}
+
+async function missingTargetPasswordProxyTest(opts: RunTestOptions) {
+  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+    const acu = getACUfromConfig({
+      proxyUrl: proxy.url,
+      ssl: { verificationMode: 'none' },
+      customHostSettings: [{ url: target.url, ssl: { certificateAuthoritiesData: CA } }],
+    });
+
+    const anonUrl = removePassword(target.url);
+    const res = await request({ ...axiosDefaults, url: anonUrl, configurationUtilities: acu });
+    expect(res.status).toBe(401);
+  });
+}
+
+async function wrongProxyPasswordProxyTest(opts: RunTestOptions) {
+  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+    const wrongUrl = manglePassword(proxy.url);
+    const acu = getACUfromConfig({
+      proxyUrl: wrongUrl,
+      ssl: { verificationMode: 'none' },
+    });
+
+    try {
+      await request({ ...axiosDefaults, configurationUtilities: acu });
+      expect('request should have thrown error').toBeUndefined();
+    } catch (err) {
+      expect(err.message).toMatch('407');
+    }
+  });
+}
+
+async function missingProxyPasswordProxyTest(opts: RunTestOptions) {
+  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+    const anonUrl = removePassword(proxy.url);
+    const acu = getACUfromConfig({
+      proxyUrl: anonUrl,
+      ssl: { verificationMode: 'none' },
+    });
+
+    try {
+      await request({ ...axiosDefaults, configurationUtilities: acu });
+      expect('request should have thrown error').toBeUndefined();
+    } catch (err) {
+      expect(err.message).toMatch('407');
+    }
+  });
+}
+
+async function missingCaProxyTest(opts: RunTestOptions) {
+  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+    const acu = getACUfromConfig({
+      proxyUrl: proxy.url,
+    });
+
+    try {
+      await request({ ...axiosDefaults, configurationUtilities: acu });
+      expect('request should have thrown error').toBeUndefined();
+    } catch (err) {
+      expect(err.code).toEqual('UNABLE_TO_VERIFY_LEAF_SIGNATURE');
+    }
+  });
+}
+
+async function rejectUnauthorizedTargetProxyTest(opts: RunTestOptions) {
+  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+    const acu = getACUfromConfig({
+      proxyUrl: proxy.url,
+      rejectUnauthorized: false,
+      customHostSettings: [{ url: target.url, ssl: { verificationMode: 'none' } }],
+    });
+
+    const res = await request({ ...axiosDefaults, configurationUtilities: acu });
+    expect(res.status).toBe(200);
+  });
+}
+
+async function customCAProxyTest(opts: RunTestOptions) {
+  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+    const acu = getACUfromConfig({
+      proxyUrl: proxy.url,
+      customHostSettings: [{ url: target.url, ssl: { certificateAuthoritiesData: CA } }],
+    });
+
+    const res = await request({ ...axiosDefaults, configurationUtilities: acu });
+    expect(res.status).toBe(200);
+  });
+}
+
+async function verModeNoneTargetProxyTest(opts: RunTestOptions) {
+  await runWithSetup(opts, async (target, proxy, axiosDefaults) => {
+    const acu = getACUfromConfig({
+      proxyUrl: proxy.url,
+      customHostSettings: [{ url: target.url, ssl: { verificationMode: 'none' } }],
+    });
+
+    const res = await request({ ...axiosDefaults, configurationUtilities: acu });
+    expect(res.status).toBe(200);
+  });
+}
+
+async function missingoxyTestsOld(opts: RunTestOptions) {
+  const target = await createServer({
+    useHttps: opts.targetHttps,
+    requireAuth: opts.targetAuth,
   });
 
-  const configurationUtilities = getACUfromConfig({
-    proxyUrl: proxyServer.url,
-    rejectUnauthorized: false,
-    ssl: {
-      verificationMode: 'none',
-      proxyVerificationMode: 'none',
-    },
+  const proxy = await createProxy({
+    useHttps: opts.proxyHttps,
+    requireAuth: opts.proxyAuth,
   });
 
-  const res = await request({ axios, url: EvergreenHttpsUrl, logger, configurationUtilities });
+  const axiosDefaults = { axios, logger, validateStatus, url: target.url };
+
+  // basic test that should work
+  let acu = getACUfromConfig({
+    proxyUrl: proxy.url,
+    ssl: { verificationMode: 'none' },
+  });
+
+  let res = await request({ ...axiosDefaults, configurationUtilities: acu });
   expect(res.status).toBe(200);
 
-  proxyServer.server.close();
-  proxyServer.proxy?.close();
+  if (opts.targetAuth) {
+    // wrong target password
+    const wrongUrl = manglePassword(target.url);
+    res = await request({ ...axiosDefaults, url: wrongUrl, configurationUtilities: acu });
+    expect(res.status).toBe(403);
 
-  proxyServer.server.unref();
+    // missing target password
+    const anonUrl = removePassword(target.url);
+    res = await request({ ...axiosDefaults, url: anonUrl, configurationUtilities: acu });
+    expect(res.status).toBe(401);
+  }
+
+  if (opts.proxyAuth) {
+    // wrong proxy password
+    const wrongUrl = manglePassword(proxy.url);
+    acu = getACUfromConfig({
+      proxyUrl: wrongUrl,
+      ssl: { verificationMode: 'none' },
+    });
+
+    try {
+      await request({ ...axiosDefaults, configurationUtilities: acu });
+      expect('request should have thrown error').toBeUndefined();
+    } catch (err) {
+      expect(err.message).toMatch('407');
+    }
+
+    // missing proxy password
+    const anonUrl = removePassword(proxy.url);
+    acu = getACUfromConfig({
+      proxyUrl: anonUrl,
+      ssl: { verificationMode: 'none' },
+    });
+
+    try {
+      await request({ ...axiosDefaults, configurationUtilities: acu });
+      expect('request should have thrown error').toBeUndefined();
+    } catch (err) {
+      expect(err.message).toMatch('407');
+    }
+  }
+
+  if (opts.targetHttps) {
+    // will be rejected, using strict SSL with private CA
+    acu = getACUfromConfig({
+      proxyUrl: proxy.url,
+    });
+
+    try {
+      await request({ ...axiosDefaults, configurationUtilities: acu });
+      expect('request should have thrown error').toBeUndefined();
+    } catch (err) {
+      expect(err.code).toEqual('UNABLE_TO_VERIFY_LEAF_SIGNATURE');
+    }
+
+    // works with rejectUnauthorized
+    acu = getACUfromConfig({
+      proxyUrl: proxy.url,
+      rejectUnauthorized: false,
+    });
+
+    res = await request({ ...axiosDefaults, configurationUtilities: acu });
+    expect(res.status).toBe(200);
+
+    // works with custom host setting of CA
+    acu = getACUfromConfig({
+      proxyUrl: proxy.url,
+      customHostSettings: [{ url: target.url, ssl: { certificateAuthoritiesData: CA } }],
+    });
+
+    res = await request({ ...axiosDefaults, configurationUtilities: acu });
+    expect(res.status).toBe(200);
+
+    // works with custom host setting of verificationMode: 'none'
+    acu = getACUfromConfig({
+      proxyUrl: proxy.url,
+      customHostSettings: [{ url: target.url, ssl: { verificationMode: 'none' } }],
+    });
+
+    res = await request({ ...axiosDefaults, configurationUtilities: acu });
+    expect(res.status).toBe(200);
+  }
+
+  target.server.close();
+  proxy.server.close();
+}
+
+interface RunTestOptions {
+  targetHttps: boolean;
+  targetAuth: boolean;
+  proxyHttps: boolean;
+  proxyAuth: boolean;
+}
+
+type AxiosParams = Parameters<typeof request>[0];
+
+type Test = (
+  target: CreateServerResult,
+  proxy: CreateProxyResult,
+  axiosDefaults: AxiosParams
+) => Promise<void>;
+
+async function runWithSetup(opts: RunTestOptions, fn: Test) {
+  const target = await createServer({
+    useHttps: opts.targetHttps,
+    requireAuth: opts.targetAuth,
+  });
+
+  const proxy = await createProxy({
+    useHttps: opts.proxyHttps,
+    requireAuth: opts.proxyAuth,
+  });
+
+  const axiosDefaults = {
+    axios,
+    logger,
+    validateStatus,
+    url: target.url,
+    configurationUtilities: getACUfromConfig({
+      proxyUrl: proxy.url,
+    }),
+  };
+
+  try {
+    await fn(target, proxy, axiosDefaults);
+  } catch (err) {
+    expect(err).toBeUndefined();
+  }
+
+  target.server.close();
+  proxy.server.close();
+}
+
+function testLabel(type: string, tls: boolean, auth: boolean) {
+  return `${type} https:${tls ? '✓' : 'x'};auth:${auth ? '✓' : 'x'}`;
+}
+
+function validateStatus(status: number) {
+  return true;
+}
+
+function manglePassword(url: string) {
+  const parsed = new URL(url);
+  parsed.password = `nope-${parsed.password}-nope`;
+  return parsed.toString();
+}
+
+function removePassword(url: string) {
+  const parsed = new URL(url);
+  parsed.username = '';
+  parsed.password = '';
+  return parsed.toString();
 }
 
 const TlsOptions = {
-  cert: KB_CRT,
-  key: KB_KEY,
+  cert: KIBANA_CRT,
+  key: KIBANA_KEY,
 };
 
 interface CreateServerOptions {
@@ -270,11 +583,24 @@ interface CreateServerResult {
 async function createServer(options: CreateServerOptions): Promise<CreateServerResult> {
   const { useHttps, requireAuth = false } = options;
   const port = await getPort();
-  const url = `http${useHttps ? 's' : ''}://${
-    requireAuth ? 'elastic:changeme@' : ''
-  }localhost:${port}`;
+  const url = `http${useHttps ? 's' : ''}://${requireAuth ? `${Auth}@` : ''}localhost:${port}`;
 
   function requestHandler(req: http.IncomingMessage, res: http.ServerResponse) {
+    if (requireAuth) {
+      const auth = req.headers.authorization;
+      if (auth == null) {
+        res.setHeader('WWW-Authenticate', 'Basic');
+        res.writeHead(401);
+        res.end('authorization required');
+        return;
+      }
+      if (auth !== `Basic ${AuthB64}`) {
+        res.writeHead(403);
+        res.end('not authorized');
+        return;
+      }
+    }
+
     res.writeHead(200);
     res.end('http: just testing that a connection could be made');
   }
@@ -285,6 +611,7 @@ async function createServer(options: CreateServerOptions): Promise<CreateServerR
   } else {
     server = https.createServer(TlsOptions, requestHandler);
   }
+  server.unref();
 
   const readySignal = createReadySignal<CreateServerResult>();
   server.listen(port, 'localhost', () => {
@@ -302,114 +629,46 @@ interface CreateProxyOptions {
 interface CreateProxyResult {
   url: string;
   server: http.Server | https.Server;
-  proxy: httpProxy | null;
+}
+
+type AuthenticateCallback = (err: null | Error, authenticated: boolean) => void;
+
+interface IAuthenticate {
+  authenticate(req: http.IncomingMessage, callback: AuthenticateCallback): void;
 }
 
 async function createProxy(options: CreateProxyOptions): Promise<CreateProxyResult> {
   const { useHttps, requireAuth = false } = options;
   const port = await getPort();
   const url = getUrl(useHttps, requireAuth, port);
-  let httpServer: http.Server | https.Server;
-
-  function requestHandler(req: http.IncomingMessage, res: http.ServerResponse) {
-    proxy.web(req, res, { forward: req.url, secure: false });
-  }
+  let proxyServer: http.Server | https.Server;
 
   if (!useHttps) {
-    httpServer = http.createServer(requestHandler);
+    proxyServer = http.createServer();
   } else {
-    httpServer = https.createServer(TlsOptions, requestHandler);
+    proxyServer = https.createServer(TlsOptions);
   }
+  proxyServer.unref();
 
-  const proxyOpts: httpProxy.ServerOptions = { secure: false };
-
+  proxySetup(proxyServer);
   if (requireAuth) {
-    proxyOpts.auth = 'elastic:changeme';
+    (proxyServer as unknown as IAuthenticate).authenticate = (req, callback) => {
+      const auth = req.headers['proxy-authorization'];
+      callback(null, auth === `Basic ${AuthB64}`);
+    };
   }
-
-  if (useHttps) {
-    proxyOpts.ssl = TlsOptions;
-  }
-
-  const proxy = httpProxy.createProxyServer(proxyOpts);
-
-  proxy.on('error', (err, req, res) => {
-    res.end();
-  });
-
-  // addExtraConnectListeners(httpServer, url);
 
   const readySignal = createReadySignal<CreateProxyResult>();
 
-  httpServer.listen(port, 'localhost', () => {
-    readySignal.signal({ server: httpServer, proxy, url });
+  proxyServer.listen(port, 'localhost', () => {
+    readySignal.signal({ server: proxyServer, url });
   });
 
   return readySignal.wait();
 }
 
 function getUrl(useHttps: boolean, requiresAuth: boolean, port: number) {
-  return `http${useHttps ? 's' : ''}://${requiresAuth ? 'elastic:changeme@' : ''}localhost:${port}`;
-}
-function addExtraConnectListeners(server: http.Server | https.Server, serverUrl: string) {
-  // see: https://stackoverflow.com/questions/8165570/https-proxy-server-in-node-js
-
-  server.addListener('connect', function (req, socket, bodyhead) {
-    if (!req.url) {
-      socket.end();
-      return;
-    }
-
-    const [host, port] = getHostPort(req.url);
-    const proxyRawSocket = new net.Socket();
-    const portNumber = parseInt(port, 10);
-    if (isNaN(portNumber)) throw new Error('non-numeric port');
-
-    const proxySocket = new tls.TLSSocket(proxyRawSocket, {
-      ALPNProtocols: ['http/1.1'],
-      rejectUnauthorized: true,
-    });
-
-    const connectOptions = {
-      host,
-      port: portNumber,
-      rejectUnauthorized: false,
-      ALPNProtocols: ['http/1.1'],
-    };
-    proxySocket.connect(connectOptions, () => {
-      proxySocket.write(bodyhead);
-      socket.write('HTTP/' + req.httpVersion + ' 200 Connection established\r\n\r\n');
-    });
-
-    proxySocket.on('data', (chunk) => socket.write(chunk));
-    proxySocket.on('end', () => socket.end());
-    proxySocket.on('error', (err) => {
-      socket.write('HTTP/' + req.httpVersion + ' 500 Connection error\r\n\r\n');
-      socket.end();
-    });
-
-    socket.on('data', (chunk) => proxySocket.write(chunk));
-    socket.on('end', () => proxySocket.end());
-    socket.on('error', (err) => {
-      proxySocket.end();
-    });
-  });
-}
-
-function getHostPort(hostString: string) {
-  const hostportRegex_ = /^([^:]+)(:([0-9]+))?$/;
-  let host = hostString;
-  let port = '443';
-
-  const result = hostportRegex_.exec(hostString);
-  if (result != null) {
-    host = result[1];
-    if (result[2] != null) {
-      port = result[3];
-    }
-  }
-
-  return [host, port];
+  return `http${useHttps ? 's' : ''}://${requiresAuth ? `${Auth}@` : ''}localhost:${port}`;
 }
 
 const BaseActionsConfig: ActionsConfig = {
@@ -439,8 +698,6 @@ const BaseActionsConfig: ActionsConfig = {
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {
-  return getActionsConfigurationUtilities({
-    ...BaseActionsConfig,
-    ...config,
-  });
+  const resolvedConfig = resolveCustomHosts(logger, { ...BaseActionsConfig, ...config });
+  return getActionsConfigurationUtilities(resolvedConfig);
 }

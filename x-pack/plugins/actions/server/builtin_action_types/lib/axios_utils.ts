@@ -35,9 +35,6 @@ export const request = async <T = unknown>({
   const { httpAgent, httpsAgent } = getCustomAgents(configurationUtilities, logger, url);
   const { maxContentLength, timeout } = configurationUtilities.getResponseSettings();
 
-  logger.debug(`httpAgent: ${JSON.stringify(httpAgent)}`);
-  logger.debug(`httpsAgent: ${JSON.stringify(httpsAgent)}`);
-
   return await axios(url, {
     ...rest,
     method,

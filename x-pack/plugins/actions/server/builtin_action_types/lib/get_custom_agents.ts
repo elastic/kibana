@@ -112,18 +112,12 @@ export function getCustomAgents(
     logger,
     proxySettings.proxySSLSettings.verificationMode
   );
+
   // At this point, we are going to use a proxy, so we need new agents.
   // We will though, copy over the calculated ssl options from above, into
   // the https agent.
-  const httpAgent = new HttpProxyAgent({
-    proxy: proxyUrl,
-  });
-  const httpsAgent = new HttpsProxyAgent({
-    proxy: proxyUrl,
-    rejectUnauthorized: false,
-    ALPNProtocols: ['http/1.1'],
-  }) as unknown as HttpsAgent;
-  // vsCode wasn't convinced HttpsProxyAgent is an https.Agent, so we convinced it
+  const httpAgent = new HttpProxyAgent({ proxy: proxyUrl });
+  const httpsAgent = new HttpsProxyAgent({ proxy: proxyUrl, ...proxyNodeSSLOptions });
 
   if (agentOptions) {
     httpsAgent.options = {
