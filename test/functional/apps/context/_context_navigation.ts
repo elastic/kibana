@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const dataGrid = getService('dataGrid');
-  const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'header', 'context', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const find = getService('find');
@@ -34,7 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitForDocTableLoadingComplete();
+      await PageObjects.header.waitUntilLoadingHasFinished();
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await filterBar.addFilter(columnName, 'is', value);
       }

@@ -41,8 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         defaultIndex: 'logstash-*',
       });
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.waitUntilSearchingHasFinished();
-
+      await PageObjects.header.waitUntilLoadingHasFinished();
       for (const columnName of TEST_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItemAdd(columnName);
       }
