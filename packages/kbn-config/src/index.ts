@@ -10,6 +10,7 @@ export type {
   ConfigDeprecationFactory,
   AddConfigDeprecation,
   ConfigDeprecationProvider,
+  DeprecatedConfigDetails,
   ConfigDeprecationWithContext,
   ConfigDeprecation,
   ConfigDeprecationCommand,

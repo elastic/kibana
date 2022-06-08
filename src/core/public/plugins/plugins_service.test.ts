@@ -22,6 +22,7 @@ import {
 } from './plugins_service';
 
 import type { InjectedMetadataPlugin } from '@kbn/core-injected-metadata-common-internal';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 import { notificationServiceMock } from '../notifications/notifications_service.mock';
 import { applicationServiceMock } from '../application/application_service.mock';
 import { i18nServiceMock } from '../i18n/i18n_service.mock';
@@ -32,7 +33,6 @@ import { uiSettingsServiceMock } from '../ui_settings/ui_settings_service.mock';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { httpServiceMock } from '../http/http_service.mock';
 import { CoreSetup, CoreStart, PluginInitializerContext } from '..';
-import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 import { savedObjectsServiceMock } from '../saved_objects/saved_objects_service.mock';
 import { deprecationsServiceMock } from '../deprecations/deprecations_service.mock';
 import { themeServiceMock } from '../theme/theme_service.mock';

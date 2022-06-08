@@ -14,7 +14,7 @@ import { TestScheduler } from 'rxjs/testing';
 import { HotObservable } from 'rxjs/internal/testing/HotObservable';
 
 import { configServiceMock } from '@kbn/config-mocks';
-import { mockCoreContext } from '../core_context.mock';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { config as RawElasticsearchConfig } from '../elasticsearch/elasticsearch_config';
 import { config as RawHttpConfig } from '../http/http_config';
 import { config as RawLoggingConfig } from '../logging/logging_config';

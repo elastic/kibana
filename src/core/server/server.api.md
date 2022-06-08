@@ -26,7 +26,8 @@ import { ContextProviderOpts } from '@kbn/analytics-client';
 import { CoreId } from '@kbn/core-base-common-internal';
 import { DetailedPeerCertificate } from 'tls';
 import { DiscoveredPlugin } from '@kbn/core-base-common';
-import type { DocLinks } from '@kbn/doc-links';
+import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { Duration } from 'moment';
 import { Duration as Duration_2 } from 'moment-timezone';
 import { Ecs } from '@kbn/logging';
@@ -507,6 +508,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     coreUsageData: CoreUsageDataSetup;
     // (undocumented)
     deprecations: DeprecationsServiceSetup;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     docLinks: DocLinksServiceSetup;
     // (undocumented)
@@ -541,6 +544,8 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
     coreUsageData: CoreUsageDataStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     docLinks: DocLinksServiceStart;
     // (undocumented)
@@ -926,15 +931,9 @@ export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
 
 export { DiscoveredPlugin }
 
-// @public (undocumented)
-export interface DocLinksServiceSetup {
-    readonly elasticWebsiteUrl: string;
-    readonly links: DocLinks;
-    readonly version: string;
-}
+export { DocLinksServiceSetup }
 
-// @public (undocumented)
-export type DocLinksServiceStart = DocLinksServiceSetup;
+export { DocLinksServiceStart }
 
 export { Ecs }
 

@@ -30,6 +30,7 @@
 
 import { AwaitedProperties } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
@@ -70,7 +71,6 @@ import {
   CoreServicesUsageData,
 } from './core_usage_data';
 import { PrebootServicePreboot } from './preboot';
-import { DocLinksServiceStart, DocLinksServiceSetup } from './doc_links';
 
 export type { PrebootServicePreboot } from './preboot';
 
@@ -449,7 +449,7 @@ export type {
   CoreIncrementCounterParams,
 } from './core_usage_data';
 
-export type { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
+export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 
 export type {
   AnalyticsServiceSetup,

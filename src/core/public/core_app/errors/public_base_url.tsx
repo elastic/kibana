@@ -11,8 +11,8 @@ import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { HttpStart, NotificationsStart } from '../..';
-import type { DocLinksStart } from '../../doc_links';
 import { mountReactNode } from '../../utils';
 
 /** Only exported for tests */

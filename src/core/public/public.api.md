@@ -11,7 +11,7 @@ import { AnalyticsClient } from '@kbn/analytics-client';
 import type { ButtonColor } from '@elastic/eui';
 import { ContextProviderOpts } from '@kbn/analytics-client';
 import { CoreContext } from '@kbn/core-base-browser-internal';
-import type { DocLinks } from '@kbn/doc-links';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { EnvironmentMode } from '@kbn/config';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -429,6 +429,8 @@ export interface CoreStart {
     chrome: ChromeStart;
     // (undocumented)
     deprecations: DeprecationsServiceStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     docLinks: DocLinksStart;
     // (undocumented)
@@ -492,15 +494,7 @@ export interface DeprecationsServiceStart {
     resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;
 }
 
-// @public (undocumented)
-export interface DocLinksStart {
-    // (undocumented)
-    readonly DOC_LINK_VERSION: string;
-    // (undocumented)
-    readonly ELASTIC_WEBSITE_URL: string;
-    // (undocumented)
-    readonly links: DocLinks;
-}
+export { DocLinksStart }
 
 // Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
 //

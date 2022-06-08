@@ -9,6 +9,7 @@
 import { UnregisterCallback } from 'history';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import {
   InternalApplicationSetup,
   InternalApplicationStart,
@@ -24,7 +25,6 @@ import {
   setupUrlOverflowDetection,
 } from './errors';
 import { renderApp as renderStatusApp } from './status';
-import { DocLinksStart } from '../doc_links';
 
 export interface SetupDeps {
   application: InternalApplicationSetup;

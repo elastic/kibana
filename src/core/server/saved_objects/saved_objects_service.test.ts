@@ -22,9 +22,10 @@ import { RawPackageInfo, Env } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/utils';
 import { getEnvOptions } from '@kbn/config-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 
 import { SavedObjectsService } from './saved_objects_service';
-import { mockCoreContext } from '../core_context.mock';
 import { configServiceMock } from '../mocks';
 import { elasticsearchServiceMock } from '../elasticsearch/elasticsearch_service.mock';
 import { coreUsageDataServiceMock } from '../core_usage_data/core_usage_data_service.mock';
@@ -36,7 +37,6 @@ import { NodesVersionCompatibility } from '../elasticsearch/version_check/ensure
 import { SavedObjectsRepository } from './service/lib/repository';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
-import { docLinksServiceMock } from '../doc_links/doc_links_service.mock';
 
 jest.mock('./service/lib/repository');
 jest.mock('./object_types');

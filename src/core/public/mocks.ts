@@ -9,6 +9,7 @@
 import { createMemoryHistory } from 'history';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 
 // Only import types from '.' to avoid triggering default Jest mocks.
 import { PluginInitializerContext, AppMountParameters } from '.';
@@ -18,7 +19,6 @@ import { ScopedHistory } from './application';
 import { analyticsServiceMock } from './analytics/analytics_service.mock';
 import { applicationServiceMock } from './application/application_service.mock';
 import { chromeServiceMock } from './chrome/chrome_service.mock';
-import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 import { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';
 import { httpServiceMock } from './http/http_service.mock';
 import { i18nServiceMock } from './i18n/i18n_service.mock';
@@ -31,8 +31,8 @@ import { themeServiceMock } from './theme/theme_service.mock';
 import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 export { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
+export { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
 export { chromeServiceMock } from './chrome/chrome_service.mock';
-export { docLinksServiceMock } from './doc_links/doc_links_service.mock';
 export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 export { analyticsServiceMock } from './analytics/analytics_service.mock';
 export { fatalErrorsServiceMock } from './fatal_errors/fatal_errors_service.mock';

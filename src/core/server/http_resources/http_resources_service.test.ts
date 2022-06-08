@@ -10,8 +10,8 @@ import { getApmConfigMock } from './http_resources_service.test.mocks';
 
 import { IRouter, RouteConfig } from '../http';
 
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { coreMock } from '../mocks';
-import { mockCoreContext } from '../core_context.mock';
 import { httpServiceMock } from '../http/http_service.mock';
 import { httpServerMock } from '../http/http_server.mocks';
 import { renderingMock } from '../rendering/rendering_service.mock';

@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { InternalContextPreboot, ContextSetup } from './context';
 import {
@@ -41,7 +42,6 @@ import type {
   InternalExecutionContextStart,
 } from './execution_context';
 import { InternalPrebootServicePreboot } from './preboot';
-import { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
 import type {
   AnalyticsServicePreboot,
   AnalyticsServiceSetup,

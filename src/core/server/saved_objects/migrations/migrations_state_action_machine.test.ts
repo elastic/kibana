@@ -8,7 +8,8 @@
 
 import { cleanupMock } from './migrations_state_machine_cleanup.mocks';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
-import { loggingSystemMock, elasticsearchServiceMock, docLinksServiceMock } from '../../mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { loggingSystemMock, elasticsearchServiceMock } from '../../mocks';
 import { typeRegistryMock } from '../saved_objects_type_registry.mock';
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';

@@ -117,9 +117,9 @@ jest.doMock('./deprecations/deprecations_service', () => ({
   DeprecationsService: jest.fn(() => mockDeprecationService),
 }));
 
-import { docLinksServiceMock } from './doc_links/doc_links_service.mock';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 
 export const mockDocLinksService = docLinksServiceMock.create();
-jest.doMock('./doc_links/doc_links_service', () => ({
+jest.doMock('@kbn/core-doc-links-server-internal', () => ({
   DocLinksService: jest.fn(() => mockDocLinksService),
 }));

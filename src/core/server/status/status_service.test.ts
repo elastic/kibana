@@ -16,7 +16,7 @@ import {
 } from './types';
 import { StatusService } from './status_service';
 import { first, take, toArray } from 'rxjs/operators';
-import { mockCoreContext } from '../core_context.mock';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { ServiceStatusLevelSnapshotSerializer } from './test_utils';
 import { environmentServiceMock } from '../environment/environment_service.mock';
 import { httpServiceMock } from '../http/http_service.mock';
