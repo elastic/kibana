@@ -6,9 +6,11 @@
  */
 
 import type { DataViewBase } from '@kbn/es-query';
+import { NarrowDateRange } from '../../../common/components/ml/types';
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import { NavTab } from '../../../common/components/navigation/types';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy/security_solution/network';
 import { networkModel } from '../../store';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
