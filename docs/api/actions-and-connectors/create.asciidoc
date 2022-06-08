@@ -34,6 +34,8 @@ You must have `all` privileges for the *Actions and Connectors* feature in the
 (Required, object) The configuration for the connector. Configuration properties
 vary depending on the connector type. For example:
 +
+--
+// tag::connector-config[]
 .Index connectors
 [%collapsible%open]
 ====
@@ -51,7 +53,7 @@ request. The default value is `false`.
 For more information, refer to
 {kibana-ref}/index-action-type.html[Index connector and action].
 ====
-+
+
 .{jira} connectors
 [%collapsible%open]
 ====
@@ -65,8 +67,10 @@ For more information, refer to
 For more information, refer to
 {kibana-ref}/jira-action-type.html[{jira} connector and action].
 ====
-+
+
 For more configuration properties, refer to <<action-types>>.
+// end::connector-config[]  
+--
 
 `connector_type_id`::
 (Required, string) The connector type ID for the connector.
@@ -75,7 +79,7 @@ For more configuration properties, refer to <<action-types>>.
 (Required, string) The display name for the connector.
 
 `secrets`::
-(Required, object) The secrets configuration for the connector. Secrets
+(Required^*^, object) The secrets configuration for the connector. Secrets
 configuration properties vary depending on the connector type. For information
 about the secrets configuration properties, refer to <<action-types>>.
 +
@@ -83,6 +87,8 @@ about the secrets configuration properties, refer to <<action-types>>.
 WARNING: Remember these values. You must provide them each time you call the <<update-connector-api, update>> API.
 --
 +
+--
+// tag::connector-secrets[]
 .{jira} connectors
 [%collapsible%open]
 ====
@@ -93,6 +99,8 @@ authentication.
 `email`::
 (Required, string) The account email for HTTP Basic authentication.
 ====
+// end::connector-secrets[]  
+--
 
 [[create-connector-api-request-codes]]
 === {api-response-codes-title}
