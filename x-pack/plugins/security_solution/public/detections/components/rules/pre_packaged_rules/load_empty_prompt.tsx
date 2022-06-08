@@ -35,10 +35,6 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
   loading = false,
   userHasPermissions = false,
 }) => {
-  const handlePreBuiltCreation = useCallback(() => {
-    createPrePackagedRules();
-  }, [createPrePackagedRules]);
-
   const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey, canUserCRUD, hasIndexWrite }] =
     useUserData();
 
@@ -58,8 +54,8 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
   // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121
   const mlJobUpgradeModalConfirm = useCallback(() => {
     setIsUpgradeModalVisible(false);
-    handlePreBuiltCreation();
-  }, [handlePreBuiltCreation, setIsUpgradeModalVisible]);
+    createPrePackagedRules();
+  }, [createPrePackagedRules, setIsUpgradeModalVisible]);
 
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
@@ -69,7 +65,7 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
           if (legacyJobsInstalled.length > 0) {
             setIsUpgradeModalVisible(true);
           } else {
-            handlePreBuiltCreation();
+            createPrePackagedRules();
           }
         },
         fill: true,
@@ -81,7 +77,7 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
       loading,
       loadingJobs,
       legacyJobsInstalled,
-      handlePreBuiltCreation,
+      createPrePackagedRules,
     ]
   );
 
