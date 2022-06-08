@@ -125,7 +125,7 @@ export class TaskRunnerFactory {
           logger.error(
             `Action '${actionId}' failed ${
               isRetryableBasedOnAttempts ? willRetryMessage : willNotRetryMessage
-            }: ${e.message} - ${e.serviceMessage} -\nStack trace: ${e.stack}`
+            }: ${e.message}`
           );
           if (isRetryableBasedOnAttempts) {
             // In order for retry to work, we need to indicate to task manager this task

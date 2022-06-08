@@ -408,7 +408,7 @@ function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string
   }
 
   if (result.stack) {
-    message = `${message} -\nStack track: ${result.stack}`;
+    message = `${message} -\nStack trace: ${result.stack}`;
   }
 
   return message;
