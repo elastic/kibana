@@ -26,13 +26,10 @@ import { usePostPushToService } from '../../containers/use_post_push_to_service'
 import { useKibana } from '../../common/lib/kibana';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
-import { TestProviders } from '../../common/mock';
+import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import CaseView from '.';
-import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/dom';
 import { useGetTags } from '../../containers/use_get_tags';
-import { QueryClient, QueryClientProvider } from 'react-query';
-import { act } from '@testing-library/react-hooks';
 import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
 import {
   alertsHit,
@@ -42,6 +39,7 @@ import {
   defaultUpdateCaseState,
   defaultUseGetCaseUserActions,
 } from './mocks';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -85,6 +83,8 @@ describe('CaseView', () => {
     });
   };
 
+  let appMockRenderer: AppMockRenderer;
+
   beforeAll(() => {
     mockGetCase();
     useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
@@ -101,44 +101,29 @@ describe('CaseView', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    appMockRenderer = createAppMockRenderer();
   });
 
-  it('should return null if error', async () => {
+  it('should show an error if a case return error', async () => {
     mockGetCase({ isError: true });
-    const wrapper = mount(
-      <TestProviders>
-        <CaseView {...caseViewProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(wrapper).toEqual({});
-    });
+    const result = appMockRenderer.render(<CaseView {...caseViewProps} />);
+
+    expect(result.queryByTestId('case-view-does-not-exist')).toBeInTheDocument();
   });
 
   it('should return spinner if loading', async () => {
     mockGetCase({ isLoading: true });
-    const wrapper = mount(
-      <TestProviders>
-        <CaseView {...caseViewProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="case-view-loading"]').exists()).toBeTruthy();
-    });
+    const result = appMockRenderer.render(<CaseView {...caseViewProps} />);
+    expect(result.queryByTestId('case-view-loading')).toBeInTheDocument();
   });
 
   it('should return case view when data is there', async () => {
     mockGetCase({ data: { ...defaultGetCase.data, outcome: 'exactMatch' } });
-    const wrapper = mount(
-      <TestProviders>
-        <CaseView {...caseViewProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
-      expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
-      expect(spacesUiApiMock.redirectLegacyUrl).not.toHaveBeenCalled();
-    });
+    const result = appMockRenderer.render(<CaseView {...caseViewProps} />);
+
+    expect(result.queryByTestId('case-view-title')).toBeInTheDocument();
+    expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
+    expect(spacesUiApiMock.redirectLegacyUrl).not.toHaveBeenCalled();
   });
 
   it('should redirect case view when resolves to alias match', async () => {
@@ -152,19 +137,13 @@ describe('CaseView', () => {
         aliasPurpose: resolveAliasPurpose,
       },
     });
-    const wrapper = mount(
-      <TestProviders>
-        <CaseView {...caseViewProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
-      expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
-      expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith({
-        path: `/cases/${resolveAliasId}`,
-        aliasPurpose: resolveAliasPurpose,
-        objectNoun: 'case',
-      });
+    const result = appMockRenderer.render(<CaseView {...caseViewProps} />);
+    expect(result.queryByTestId('case-view-title')).toBeInTheDocument();
+    expect(spacesUiApiMock.components.getLegacyUrlConflict).not.toHaveBeenCalled();
+    expect(spacesUiApiMock.redirectLegacyUrl).toHaveBeenCalledWith({
+      path: `/cases/${resolveAliasId}`,
+      aliasPurpose: resolveAliasPurpose,
+      objectNoun: 'case',
     });
   });
 
@@ -173,66 +152,47 @@ describe('CaseView', () => {
     mockGetCase({
       data: { ...defaultGetCase.data, outcome: 'conflict', aliasTargetId: resolveAliasId },
     });
-    const wrapper = mount(
-      <TestProviders>
-        <CaseView {...caseViewProps} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="case-view-title"]').exists()).toBeTruthy();
-      expect(wrapper.find('[data-test-subj="conflict-component"]').exists()).toBeTruthy();
-      expect(spacesUiApiMock.redirectLegacyUrl).not.toHaveBeenCalled();
-      expect(spacesUiApiMock.components.getLegacyUrlConflict).toHaveBeenCalledWith({
-        objectNoun: 'case',
-        currentObjectId: defaultGetCase.data.case.id,
-        otherObjectId: resolveAliasId,
-        otherObjectPath: `/cases/${resolveAliasId}`,
-      });
+
+    const result = appMockRenderer.render(<CaseView {...caseViewProps} />);
+
+    expect(result.queryByTestId('case-view-title')).toBeInTheDocument();
+    expect(result.queryByTestId('conflict-component')).toBeInTheDocument();
+
+    expect(spacesUiApiMock.redirectLegacyUrl).not.toHaveBeenCalled();
+    expect(spacesUiApiMock.components.getLegacyUrlConflict).toHaveBeenCalledWith({
+      objectNoun: 'case',
+      currentObjectId: defaultGetCase.data.case.id,
+      otherObjectId: resolveAliasId,
+      otherObjectPath: `/cases/${resolveAliasId}`,
     });
   });
 
   it('should refresh data on refresh', async () => {
-    const queryClient = new QueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
-    const wrapper = mount(
-      <TestProviders>
-        <QueryClientProvider client={queryClient}>
-          <CaseView {...caseViewProps} />
-        </QueryClientProvider>
-      </TestProviders>
-    );
-    wrapper.find('[data-test-subj="case-refresh"]').first().simulate('click');
-    await waitFor(() => {
-      expect(queryClientSpy).toHaveBeenCalledWith('case');
-    });
+    const queryClientSpy = jest.spyOn(appMockRenderer.queryClient, 'invalidateQueries');
+    const result = appMockRenderer.render(<CaseView {...caseViewProps} />);
+    userEvent.click(result.getByTestId('case-refresh'));
+    expect(queryClientSpy).toHaveBeenCalledWith('case');
   });
 
   describe('when a `refreshRef` prop is provided', () => {
     let refreshRef: CaseViewProps['refreshRef'];
-    const queryClient = new QueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
+    let queryClientSpy: jest.SpyInstance;
 
     beforeEach(async () => {
+      queryClientSpy = jest.spyOn(appMockRenderer.queryClient, 'invalidateQueries');
       refreshRef = React.createRef();
-
-      await act(async () => {
-        mount(
-          <TestProviders>
-            <QueryClientProvider client={queryClient}>
-              <CaseView
-                {...{
-                  refreshRef,
-                  caseId: '1234',
-                  onComponentInitialized: jest.fn(),
-                  showAlertDetails: jest.fn(),
-                  useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
-                  userCanCrud: true,
-                }}
-              />
-            </QueryClientProvider>
-          </TestProviders>
-        );
-      });
+      appMockRenderer.render(
+        <CaseView
+          {...{
+            refreshRef,
+            caseId: '1234',
+            onComponentInitialized: jest.fn(),
+            showAlertDetails: jest.fn(),
+            useFetchAlertData: jest.fn().mockReturnValue([false, alertsHit[0]]),
+            userCanCrud: true,
+          }}
+        />
+      );
     });
 
     it('should set it with expected refresh interface', async () => {
