@@ -27,11 +27,12 @@ import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
-import { themeServiceMock } from './theme/theme_service.mock';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 export { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+export { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 export { chromeServiceMock } from './chrome/chrome_service.mock';
 export { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 export { analyticsServiceMock } from './analytics/analytics_service.mock';
@@ -45,7 +46,6 @@ export { savedObjectsServiceMock } from './saved_objects/saved_objects_service.m
 export { scopedHistoryMock } from './application/scoped_history.mock';
 export { applicationServiceMock } from './application/application_service.mock';
 export { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
-export { themeServiceMock } from './theme/theme_service.mock';
 
 function createCoreSetupMock({
   basePath = '',
