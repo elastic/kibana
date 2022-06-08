@@ -258,7 +258,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           filterOptions={filterOptions}
           goToCreateCase={onRowClick}
           handleIsLoading={handleIsLoading}
-          isCasesLoading={isLoadingCases && data.cases.length === 0}
+          isCasesLoading={isLoadingCases}
           isCommentUpdating={isLoadingCases}
           isDataEmpty={isDataEmpty}
           isSelectorView={isSelectorView}
