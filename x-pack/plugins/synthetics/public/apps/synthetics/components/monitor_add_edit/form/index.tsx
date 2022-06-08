@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { EuiForm, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useFormWrapped } from './use_form_wrapped';
 import { FormMonitorType } from '../types';
 import { DEFAULT_FORM_FIELDS } from './defaults';
 import { ActionBar } from './submit';
+import { Disclaimer } from './disclaimer';
 
 export const MonitorForm: React.FC = ({ children }) => {
   const methods = useFormWrapped({
@@ -31,14 +32,7 @@ export const MonitorForm: React.FC = ({ children }) => {
         <EuiSpacer />
         <ActionBar />
       </EuiForm>
-      <EuiSpacer size="l" />
-      <EuiText size="xs" color="subdued">
-        <p>
-          You consent to the transfer of testing instructions and the output of such instructions
-          (including any data shown therein) to your selected testing location, on infrastructure
-          provided by a cloud service provider chosen by Elastic.
-        </p>
-      </EuiText>
+      <Disclaimer />
     </FormProvider>
   );
 };
