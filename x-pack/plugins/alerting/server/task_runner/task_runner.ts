@@ -116,6 +116,7 @@ export class TaskRunner<
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
   private cancelled: boolean;
+  private startTime: Date;
 
   constructor(
     ruleType: NormalizedRuleType<
@@ -143,6 +144,7 @@ export class TaskRunner<
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
+    this.startTime = new Date();
   }
 
   private async getDecryptedAttributes(
@@ -326,6 +328,7 @@ export class TaskRunner<
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const ruleType = this.ruleTypeRegistry.get(alertTypeId);
 
+    this.logger.info(`RULE EXECUTION - starting executeRule`);
     const alerts = mapValues<
       Record<string, RawAlertInstance>,
       Alert<InstanceState, InstanceContext>
@@ -334,8 +337,12 @@ export class TaskRunner<
       (rawAlert, alertId) => new Alert<InstanceState, InstanceContext>(alertId, rawAlert)
     );
 
+    this.logger.info(`RULE EXECUTION - finished mapValues`);
+
     const originalAlerts = cloneDeep(alerts);
     const originalAlertIds = new Set(Object.keys(originalAlerts));
+
+    this.logger.info(`RULE EXECUTION - finished cloneDeep`);
 
     const ruleLabel = `${this.ruleType.id}:${ruleId}: '${name}'`;
 
@@ -375,6 +382,7 @@ export class TaskRunner<
         includedHiddenTypes: ['alert', 'action'],
       });
 
+      this.logger.info(`RULE EXECUTION - started rule type execution`);
       updatedRuleTypeState = await this.context.executionContext.withContext(ctx, () =>
         this.ruleType.executor({
           alertId: ruleId,
@@ -434,6 +442,9 @@ export class TaskRunner<
       throw new ErrorWithReason(RuleExecutionStatusErrorReasons.Execute, err);
     }
 
+    const postprocessStart = new Date();
+
+    this.logger.info('RULE EXECUTION - finished rule type executor');
     this.alertingEventLogger.setExecutionSucceeded(`rule executed: ${ruleLabel}`);
 
     const scopedClusterClientMetrics = wrappedScopedClusterClient.getMetrics();
@@ -468,6 +479,7 @@ export class TaskRunner<
       ruleLabel,
       canSetRecoveryContext: ruleType.doesSetRecoveryContext ?? false,
     });
+    this.logger.info('RULE EXECUTION - finished logging active and recovered alerts');
 
     trackAlertDurations({
       originalAlerts,
@@ -484,6 +496,7 @@ export class TaskRunner<
         ruleLabel,
         ruleRunMetricsStore,
       });
+      this.logger.info('RULE EXECUTION - finished logging recovered alerts');
     }
 
     const ruleIsSnoozed = isRuleSnoozed(rule);
@@ -520,12 +533,21 @@ export class TaskRunner<
         }
       );
 
-      await Promise.all(
-        alertsWithExecutableActions.map(
-          ([alertId, alert]: [string, Alert<InstanceState, InstanceContext>]) =>
-            this.executeAlert(alertId, alert, executionHandler, ruleRunMetricsStore)
-        )
-      );
+      this.logger.info('RULE EXECUTION - starting executing alert actions');
+
+      try {
+        await Promise.all(
+          alertsWithExecutableActions.map(
+            ([alertId, alert]: [string, Alert<InstanceState, InstanceContext>]) =>
+              this.executeAlert(alertId, alert, executionHandler, ruleRunMetricsStore)
+          )
+        );
+      } catch (err) {
+        this.logger.info('RULE EXECUTION - error while executing alert actions - moving on');
+        this.logger.info(err);
+      }
+
+      this.logger.info('RULE EXECUTION - finished executing alert actions');
 
       await scheduleActionsForRecoveredAlerts<
         InstanceState,
@@ -540,6 +562,7 @@ export class TaskRunner<
         ruleLabel,
         ruleRunMetricsStore,
       });
+      this.logger.info('RULE EXECUTION - finished executing alert recovery actions');
     } else {
       if (ruleIsSnoozed) {
         this.logger.debug(`no scheduling of actions for rule ${ruleLabel}: rule is snoozed.`);
@@ -557,6 +580,12 @@ export class TaskRunner<
       }
     }
 
+    const postprocessEnd = new Date();
+    this.logger.info(
+      `RULE EXECUTION - post process time ${
+        postprocessEnd.getTime() - postprocessStart.getTime()
+      }ms`
+    );
     return {
       metrics: ruleRunMetricsStore.getMetrics(),
       alertTypeState: updatedRuleTypeState || undefined,
@@ -687,6 +716,7 @@ export class TaskRunner<
   }
 
   async run(): Promise<RuleTaskRunResult> {
+    this.startTime = new Date();
     const {
       params: { alertId: ruleId, spaceId, consumer },
       startedAt,
@@ -730,6 +760,8 @@ export class TaskRunner<
     });
 
     this.alertingEventLogger.start();
+
+    this.logger.info(`RULE EXECUTION - finished initializing event logger`);
 
     const { stateWithMetrics, schedule, monitoring } = await errorAsRuleTaskRunResult(
       this.loadRuleAttributesAndRun()
@@ -821,12 +853,18 @@ export class TaskRunner<
       };
     };
 
+    const endTime = new Date();
+    // this.logger.info(
+    //   `RULE EXECUTION - TOTAL process time ${endTime.getTime() - this.startTime.getTime()}ms`
+    // );
+
     return {
       state: map<RuleTaskStateAndMetrics, ElasticsearchError, RuleTaskState>(
         stateWithMetrics,
         (ruleRunStateWithMetrics: RuleTaskStateAndMetrics) =>
           transformRunStateToTaskState(ruleRunStateWithMetrics),
         (err: ElasticsearchError) => {
+          this.logger.error(err);
           const message = `Executing Rule ${spaceId}:${
             this.ruleType.id
           }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
