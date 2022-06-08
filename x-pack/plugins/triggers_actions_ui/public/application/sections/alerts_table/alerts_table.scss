@@ -1,6 +1,6 @@
 .alertsTableActiveRow {
   background-color: tintOrShade($euiColorLightShade, 50%, 0);
 }
-.euiDataGridRowCell {
+.alertsTableResponseOps .euiDataGridRowCell {
   font-size: $euiFontSizeXS;
 }
