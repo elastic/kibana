@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { mockCoreContext } from '../../core_context.mock';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { elasticsearchServiceMock } from '../../elasticsearch/elasticsearch_service.mock';
 import { httpServiceMock } from '../../http/http_service.mock';
 import { pluginServiceMock } from '../../plugins/plugins_service.mock';
