@@ -32,23 +32,33 @@ export const useInProgressImage = ({
 
   const { lastRefresh, refreshApp } = useUptimeRefreshContext();
 
+  const skippedStep = stepStatus === 'skipped';
+
   const { data, loading } = useFetcher(() => {
-    if (stepStatus === 'skipped') {
+    if (skippedStep) {
       return new Promise<ScreenshotImageBlob | ScreenshotRefImageData | null>((resolve) =>
         resolve(null)
       );
     }
 
     if (hasIntersected && !hasImage) return getJourneyScreenshot(imgPath);
-  }, [hasIntersected, imgPath, stepStatus, lastRefresh]);
+  }, [hasIntersected, imgPath, skippedStep, lastRefresh]);
 
   useEffect(() => {
-    if (!loading && !hasImage && (isAddRoute?.isExact || isEditRoute?.isExact)) {
+    if (!loading && !hasImage && (isAddRoute?.isExact || isEditRoute?.isExact) && !skippedStep) {
       setTimeout(() => {
         refreshApp();
       }, 5 * 1000);
     }
-  }, [hasImage, loading, refreshApp, lastRefresh, isAddRoute?.isExact, isEditRoute?.isExact]);
+  }, [
+    hasImage,
+    loading,
+    refreshApp,
+    lastRefresh,
+    isAddRoute?.isExact,
+    isEditRoute?.isExact,
+    skippedStep,
+  ]);
 
   return {
     data,
