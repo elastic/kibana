@@ -34,7 +34,7 @@ function getParsedFile(flags: RunCliFlags) {
     return filepath;
   }
 
-  throw new Error(`Could not find scenario file2: "${parsedFile}"`);
+  throw new Error(`Could not find scenario file: "${parsedFile}"`);
 }
 
 export function parseRunCliFlags(flags: RunCliFlags) {
