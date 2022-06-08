@@ -20508,7 +20508,6 @@
     "xpack.monitoring.kibana.listing.nameColumnTitle": "Nom",
     "xpack.monitoring.kibana.listing.requestsColumnTitle": "Demandes",
     "xpack.monitoring.kibana.listing.responseTimeColumnTitle": "Temps de réponse",
-    "xpack.monitoring.kibana.listing.statusColumnTitle": "Statut",
     "xpack.monitoring.kibana.overview.pageTitle": "Aperçu Kibana",
     "xpack.monitoring.kibana.overview.title": "Kibana",
     "xpack.monitoring.kibana.shardActivity.bytesTitle": "Octets",
