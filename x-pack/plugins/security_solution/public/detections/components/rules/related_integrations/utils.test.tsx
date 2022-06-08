@@ -54,5 +54,31 @@ describe('Related Integrations Utilities', () => {
 
       expect(integrationDetails.length).toEqual(0);
     });
+
+    describe('version is correctly computed', () => {
+      test('Integration that is installed, and its version is less than required version', () => {
+        const integrationDetails = getInstalledRelatedIntegrations(
+          [
+            {
+              package: 'aws',
+              integration: 'route53',
+              version: '~123.456.789',
+            },
+          ],
+          [
+            {
+              package_name: 'aws',
+              package_title: 'AWS',
+              package_version: '1.11.0',
+              integration_name: 'route53',
+              integration_title: 'AWS Route 53',
+              is_enabled: false,
+            },
+          ]
+        );
+
+        expect(integrationDetails[0].target_version).toEqual('123.456.789');
+      });
+    });
   });
 });

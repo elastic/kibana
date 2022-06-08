@@ -71,9 +71,12 @@ export const getInstalledRelatedIntegrations = (
     if (match != null) {
       // Version check e.g. fleet match `1.2.3` satisfies rule dependency `~1.2.1`
       const versionSatisfied = semver.satisfies(match.package_version, i.version);
+      const packageVersion = versionSatisfied
+        ? i.version
+        : semver.valid(semver.coerce(i.version)) ?? '';
       integrationDetails.push({
         ...match,
-        target_version: i.version,
+        target_version: packageVersion,
         version_satisfied: versionSatisfied,
         is_installed: true,
       });

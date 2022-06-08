@@ -24,7 +24,7 @@ const PaddedBadge = styled(EuiBadge)`
   margin-left: 5px;
 `;
 
-const VersionWarningIcon = styled(EuiIconTip)`
+const VersionWarningIconContainer = styled.span`
   margin-left: 5px;
 `;
 
@@ -53,15 +53,16 @@ export const IntegrationDescriptionComponent: React.FC<{ integration: Integratio
         <PaddedBadge color={badgeColor}>{badgeText}</PaddedBadge>
       </EuiToolTip>
       {integration.is_installed && !integration.version_satisfied && (
-        <VersionWarningIcon
-          type={'alert'}
-          color={'yellow'}
-          content={i18n.INTEGRATIONS_INSTALLED_VERSION_TOOLTIP(
-            integration.package_version,
-            integration.target_version
-          )}
-          position={'right'}
-        />
+        <VersionWarningIconContainer>
+          <EuiIconTip
+            type={'alert'}
+            color={'warning'}
+            content={i18n.INTEGRATIONS_INSTALLED_VERSION_TOOLTIP(
+              integration.package_version,
+              integration.target_version
+            )}
+          />
+        </VersionWarningIconContainer>
       )}
     </Wrapper>
   );
