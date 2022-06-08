@@ -10,8 +10,7 @@ it in <<advanced-options,Advanced Settings>>.
 
 . Choose one of the following:
 
-* *Quick select*. Set a recent time range, then use the back and forward
-  arrows to move through the time ranges.
+* *Quick select*. Set a time based on the last or next number of seconds, minutes, hours, or other time unit.
 
 * *Commonly used*. Select a time range from options such as *Last 15 minutes*,
   *Today*, and *Week to date*.

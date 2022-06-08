@@ -25,17 +25,13 @@ For more information, see <<xpack-security-authorization, Granting access to Kib
 ==== Save a query
 
 . Once you’ve built a query worth saving, click the save query icon image:concepts/images/saved-query-icon.png[save query icon, width=24px].
-. In the menu, click *Save saved query*.
-. Enter a unique name to identify the query.
+. In the menu, select the item to save the query.
+. Enter a unique name.
 . Choose whether to include or exclude filters and a time range.
 By default, filters are automatically included, but the time filter is not.
-+
-[role="screenshot"]
-image:concepts/images/saved-query-popup.png[Example of the saved query management popover with a list of saved queries]
-
-. Click *Save saved query*.
+. Save the query.
 . To load a saved query, select it in the *Saved query* menu.
 +
 The query text, filters, and time range are updated and your data refreshed.
 If you’re loading a saved query that did not include the filters or time range, those components remain as-is.
-. To clear, add filters, and delete saved queries, use the *Saved query* menu.
+. To add filters and clear saved queries, use the *Saved query* menu.
