@@ -61,8 +61,10 @@ export class FillMaskInference extends InferenceBase<TextClassificationResponse>
           'Enter a phrase to test. Use [MASK] as a placeholder for the missing words.',
       }
     );
-
-    return getGeneralInputComponent(this, placeholder);
+    const title = i18n.translate('xpack.ml.trainedModels.testModelsFlyout.fillMask.inputTitle', {
+      defaultMessage: 'Input text',
+    });
+    return getGeneralInputComponent(this, placeholder, title);
   }
 
   public getOutputComponent(): JSX.Element {

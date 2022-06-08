@@ -96,7 +96,13 @@ export class QuestionAnsweringInference extends InferenceBase<QuestionAnsweringR
         defaultMessage: "Enter unstructured text phrases related to the answers you're seeking",
       }
     );
-    return getQuestionAnsweringInput(this, placeholder);
+    const title = i18n.translate(
+      'xpack.ml.trainedModels.testModelsFlyout.questionAnswer.inputTitle',
+      {
+        defaultMessage: 'Input text',
+      }
+    );
+    return getQuestionAnsweringInput(this, placeholder, title);
   }
 
   public getOutputComponent(): JSX.Element {

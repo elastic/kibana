@@ -63,7 +63,13 @@ export class ZeroShotClassificationInference extends InferenceBase<TextClassific
         defaultMessage: 'Enter a phrase to test',
       }
     );
-    return getZeroShotClassificationInput(this, placeholder);
+    const title = i18n.translate(
+      'xpack.ml.trainedModels.testModelsFlyout.zeroShotClassification.inputTitle',
+      {
+        defaultMessage: 'Input text',
+      }
+    );
+    return getZeroShotClassificationInput(this, placeholder, title);
   }
 
   public getOutputComponent(): JSX.Element {

@@ -51,7 +51,10 @@ export class LangIdentInference extends InferenceBase<TextClassificationResponse
         defaultMessage: 'Enter a phrase to test',
       }
     );
-    return getGeneralInputComponent(this, placeholder);
+    const title = i18n.translate('xpack.ml.trainedModels.testModelsFlyout.langIdent.inputTitle', {
+      defaultMessage: 'Input text',
+    });
+    return getGeneralInputComponent(this, placeholder, title);
   }
 
   public getOutputComponent(): JSX.Element {

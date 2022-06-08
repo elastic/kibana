@@ -9,7 +9,7 @@ import React, { FC, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 
-import { EuiSpacer, EuiFieldText, EuiFormRow, EuiText } from '@elastic/eui';
+import { EuiSpacer, EuiFieldText, EuiFormRow } from '@elastic/eui';
 
 import { TextInput } from '../text_input';
 import { ZeroShotClassificationInference } from './zero_shot_classification_inference';
@@ -50,13 +50,11 @@ const ClassNameInput: FC<{
 
 export const getZeroShotClassificationInput = (
   inferrer: ZeroShotClassificationInference,
-  placeholder?: string
+  placeholder?: string,
+  title?: string
 ) => (
   <>
-    <EuiText grow={false}>
-      <h4>Determine how well a set of labels fit your text</h4>
-    </EuiText>
-    <TextInput placeholder={placeholder} inferrer={inferrer} />
+    <TextInput placeholder={placeholder} inferrer={inferrer} title={title} />
     <EuiSpacer />
     <ClassNameInput inferrer={inferrer} />
   </>
