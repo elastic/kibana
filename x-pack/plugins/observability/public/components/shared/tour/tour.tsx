@@ -18,6 +18,7 @@ import {
   EuiText,
   ElementTarget,
   EuiOverlayMask,
+  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { ApplicationStart } from '@kbn/core/public';
@@ -264,6 +265,8 @@ export function ObservabilityTour({
 
   const { pathname: currentPath } = useLocation();
 
+  const isSmallBreakpoint = useIsWithinBreakpoints(['s']);
+
   const isOverviewPage = currentPath === overviewPath;
   const { showOverlay } = tourStepsConfig[activeStep - 1];
 
@@ -273,7 +276,9 @@ export function ObservabilityTour({
 
   const endTour = useCallback(() => setIsTourActive(false), []);
 
-  const showTour = isTourActive && isPageDataLoaded; // The tour may not render correctly unless the page data has finished loading
+  // We must wait for the page data to load in order for the tour to render correctly
+  // The tour should also not render on small devices
+  const showTour = isTourActive && isPageDataLoaded && isSmallBreakpoint === false;
 
   useEffect(() => {
     localStorage.setItem(observabilityTourStorageKey, JSON.stringify({ isTourActive, activeStep }));
