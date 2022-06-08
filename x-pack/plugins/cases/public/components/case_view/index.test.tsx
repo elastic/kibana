@@ -16,12 +16,7 @@ import React from 'react';
 
 import '../../common/mock/match_media';
 import { CaseViewProps } from './types';
-import {
-  caseUserActions,
-  getAlertUserAction,
-  basicCaseMetrics,
-  connectorsMock,
-} from '../../containers/mock';
+import { connectorsMock } from '../../containers/mock';
 import { SpacesApi } from '@kbn/spaces-plugin/public';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { UseGetCase, useGetCase } from '../../containers/use_get_case';
@@ -39,7 +34,14 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { act } from '@testing-library/react-hooks';
 import { CASE_VIEW_CACHE_KEY } from '../../containers/constants';
-import { alertsHit, caseData, caseViewProps } from './mocks';
+import {
+  alertsHit,
+  caseViewProps,
+  defaultGetCase,
+  defaultGetCaseMetrics,
+  defaultUpdateCaseState,
+  defaultUseGetCaseUserActions,
+} from './mocks';
 
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_update_case');
@@ -71,51 +73,6 @@ const spacesUiApiMock = {
 };
 
 describe('CaseView', () => {
-  const updateCaseProperty = jest.fn();
-  const fetchCaseUserActions = jest.fn();
-  const refetchCase = jest.fn();
-  const fetchCaseMetrics = jest.fn();
-  const pushCaseToExternalService = jest.fn();
-
-  const defaultGetCase = {
-    isLoading: false,
-    isError: false,
-    data: {
-      case: caseData,
-      outcome: 'exactMatch',
-    },
-    refetch: refetchCase,
-  };
-
-  const defaultGetCaseMetrics = {
-    isLoading: false,
-    isError: false,
-    data: {
-      metrics: basicCaseMetrics,
-    },
-    refetch: fetchCaseMetrics,
-  };
-
-  const defaultUpdateCaseState = {
-    isLoading: false,
-    isError: false,
-    updateKey: null,
-    updateCaseProperty,
-  };
-
-  const defaultUseGetCaseUserActions = {
-    data: {
-      caseUserActions: [...caseUserActions, getAlertUserAction()],
-      caseServices: {},
-      hasDataToPush: false,
-      participants: [caseData.createdBy],
-    },
-    refetch: fetchCaseUserActions,
-    isLoading: false,
-    isFetching: false,
-    isError: false,
-  };
-
   const mockGetCase = (props: Partial<UseGetCase> = {}) => {
     const data = {
       ...defaultGetCase.data,
@@ -133,7 +90,10 @@ describe('CaseView', () => {
     useGetCaseMetricsMock.mockReturnValue(defaultGetCaseMetrics);
     useUpdateCaseMock.mockReturnValue(defaultUpdateCaseState);
     useGetCaseUserActionsMock.mockReturnValue(defaultUseGetCaseUserActions);
-    usePostPushToServiceMock.mockReturnValue({ isLoading: false, pushCaseToExternalService });
+    usePostPushToServiceMock.mockReturnValue({
+      isLoading: false,
+      pushCaseToExternalService: jest.fn(),
+    });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });
     useKibanaMock().services.spaces = { ui: spacesUiApiMock } as unknown as SpacesApi;

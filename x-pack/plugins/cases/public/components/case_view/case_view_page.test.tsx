@@ -14,13 +14,7 @@ import { AppMockRenderer, createAppMockRenderer } from '../../common/mock';
 import '../../common/mock/match_media';
 import { useCaseViewNavigation, useUrlParams } from '../../common/navigation/hooks';
 import { useGetConnectors } from '../../containers/configure/use_connectors';
-import {
-  basicCaseClosed,
-  basicCaseMetrics,
-  caseUserActions,
-  connectorsMock,
-  getAlertUserAction,
-} from '../../containers/mock';
+import { basicCaseClosed, connectorsMock } from '../../containers/mock';
 import { useGetCase, UseGetCase } from '../../containers/use_get_case';
 import { useGetCaseMetrics } from '../../containers/use_get_case_metrics';
 import { useGetCaseUserActions } from '../../containers/use_get_case_user_actions';
@@ -28,7 +22,14 @@ import { useGetTags } from '../../containers/use_get_tags';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 import { useUpdateCase } from '../../containers/use_update_case';
 import { CaseViewPage } from './case_view_page';
-import { caseData, caseViewProps } from './mocks';
+import {
+  caseData,
+  caseViewProps,
+  defaultGetCase,
+  defaultGetCaseMetrics,
+  defaultUpdateCaseState,
+  defaultUseGetCaseUserActions,
+} from './mocks';
 import { CaseViewPageProps, CASE_VIEW_PAGE_TABS } from './types';
 
 jest.mock('../../containers/use_get_action_license');
@@ -52,16 +53,6 @@ const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetCaseMetricsMock = useGetCaseMetrics as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
-
-const defaultGetCase = {
-  isLoading: false,
-  isError: false,
-  data: {
-    case: caseData,
-    outcome: 'exactMatch',
-  },
-  refetch: jest.fn(),
-};
 
 const mockGetCase = (props: Partial<UseGetCase> = {}) => {
   const data = {
@@ -88,41 +79,9 @@ export const caseClosedProps: CaseViewPageProps = {
 };
 
 describe('CaseViewPage', () => {
-  const updateCaseProperty = jest.fn();
-  const fetchCaseUserActions = jest.fn();
+  const updateCaseProperty = defaultUpdateCaseState.updateCaseProperty;
   const pushCaseToExternalService = jest.fn();
-  const fetchCaseMetrics = jest.fn();
-
   const data = caseProps.caseData;
-
-  const defaultUpdateCaseState = {
-    isLoading: false,
-    isError: false,
-    updateKey: null,
-    updateCaseProperty,
-  };
-
-  const defaultUseGetCaseUserActions = {
-    data: {
-      caseUserActions: [...caseUserActions, getAlertUserAction()],
-      caseServices: {},
-      hasDataToPush: false,
-      participants: [data.createdBy],
-    },
-    refetch: fetchCaseUserActions,
-    isLoading: false,
-    isError: false,
-  };
-
-  const defaultGetCaseMetrics = {
-    isLoading: false,
-    isError: false,
-    data: {
-      metrics: basicCaseMetrics,
-    },
-    refetch: fetchCaseMetrics,
-  };
-
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {

@@ -6,7 +6,13 @@
  */
 
 import { ConnectorTypes } from '../../../common/api';
-import { alertComment, basicCase } from '../../containers/mock';
+import {
+  alertComment,
+  basicCase,
+  basicCaseMetrics,
+  caseUserActions,
+  getAlertUserAction,
+} from '../../containers/mock';
 import { Case } from '../../containers/types';
 import { CaseViewProps } from './types';
 
@@ -66,4 +72,42 @@ export const caseData: Case = {
     type: ConnectorTypes.resilient,
     fields: null,
   },
+};
+export const defaultGetCase = {
+  isLoading: false,
+  isError: false,
+  data: {
+    case: caseData,
+    outcome: 'exactMatch',
+  },
+  refetch: jest.fn(),
+};
+
+export const defaultGetCaseMetrics = {
+  isLoading: false,
+  isError: false,
+  data: {
+    metrics: basicCaseMetrics,
+  },
+  refetch: jest.fn(),
+};
+
+export const defaultUpdateCaseState = {
+  isLoading: false,
+  isError: false,
+  updateKey: null,
+  updateCaseProperty: jest.fn(),
+};
+
+export const defaultUseGetCaseUserActions = {
+  data: {
+    caseUserActions: [...caseUserActions, getAlertUserAction()],
+    caseServices: {},
+    hasDataToPush: false,
+    participants: [caseData.createdBy],
+  },
+  refetch: jest.fn(),
+  isLoading: false,
+  isFetching: false,
+  isError: false,
 };
