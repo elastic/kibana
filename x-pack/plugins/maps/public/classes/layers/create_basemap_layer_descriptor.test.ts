@@ -89,7 +89,7 @@ describe('EMS is enabled', () => {
         lightModeDefault: 'road_map_desaturated',
         type: 'EMS_TMS',
       },
-      style: { type: 'TILE' },
+      style: { type: 'EMS_VECTOR_TILE', color: '' },
       type: 'EMS_VECTOR_TILE',
       visible: true,
     });
