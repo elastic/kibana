@@ -7,7 +7,7 @@
 Create {kib} rules.
 
 [[create-rule-api-request]]
-=== Request
+=== {api-request-title}
 
 `POST <kibana host>:<port>/api/alerting/rule/<id>`
 
@@ -37,7 +37,7 @@ If a user with different privileges updates the rule, its behavior might change.
 ====
 
 [[create-rule-api-path-params]]
-=== Path parameters
+=== {api-path-parms-title}
 
 `<id>`::
   (Optional, string) Specifies a UUID v1 or v4 to use instead of a randomly generated ID.
@@ -47,7 +47,7 @@ If a user with different privileges updates the rule, its behavior might change.
 
 [role="child_attributes"]
 [[create-rule-api-request-body]]
-=== Request body
+=== {api-request-body-title}
 
 `name`::
   (Required, string) A name to reference and search.
@@ -105,13 +105,13 @@ There are plans to support multiple other schedule formats in the near future.
 
 
 [[create-rule-api-request-codes]]
-=== Response code
+===  {api-response-codes-title}
 
 `200`::
     Indicates a successful call.
 
 [[create-rule-api-example]]
-=== Example
+=== {api-examples-title}
 
 Create a rule that has actions associated with a server log connector:
 
