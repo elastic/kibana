@@ -113,10 +113,9 @@ export const ColorPicker = ({
 
   const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
     setColor(text);
-    setIsColorValid(output.isValid);
+    setIsColorValid(output.isValid || text === '');
     if (output.isValid || text === '') {
-      const newColor = text === '' ? undefined : output.hex;
-      setConfig({ color: newColor });
+      setConfig({ color: text === '' ? undefined : text });
     }
   };
 
