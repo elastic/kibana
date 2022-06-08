@@ -829,7 +829,9 @@ export class TaskRunner<
         (err: ElasticsearchError) => {
           const message = `Executing Rule ${spaceId}:${
             this.ruleType.id
-          }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)}`;
+          }:${ruleId} has resulted in Error: ${getEsErrorMessage(err)} -\nStack trace: ${
+            err.stack
+          }`;
           if (isAlertSavedObjectNotFoundError(err, ruleId)) {
             this.logger.debug(message);
           } else {
