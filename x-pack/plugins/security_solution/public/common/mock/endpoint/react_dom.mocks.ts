@@ -27,6 +27,7 @@
  * });
  */
 export const getReactDomMock = () => {
+  // FIXME:PT delete this utility - not used?
   const realReactDomModule = jest.requireActual('react-dom');
 
   return {
