@@ -16,18 +16,15 @@ import {
 import { selectServiceLocationsState } from '../../../state';
 import { FieldMeta } from './config';
 
-interface Props {
+type Props = FieldMeta & {
   component: React.ComponentType<any>;
-  props?: any;
-  fieldKey: string;
-  useSetValue?: boolean;
   field: ControllerRenderProps;
   fieldState: ControllerFieldState;
   isInvalid: boolean;
-  customHook: FieldMeta['customHook'];
   formRowProps: Partial<EuiFormRowProps>;
   error: React.ReactNode;
-}
+  dependenciesValues: unknown[];
+};
 
 const setFieldValue = (key: string, setValue: UseFormReturn['setValue']) => (value: any) => {
   setValue(key, value);
@@ -44,6 +41,7 @@ export const ControlledField = ({
   fieldState,
   customHook,
   error,
+  dependenciesValues,
 }: Props) => {
   const { setValue, reset } = useFormContext();
   const noop = () => {};
@@ -56,7 +54,9 @@ export const ControlledField = ({
   }
   const { [hookProps?.fieldKey as string]: hookResult } = hook(hookProps?.params) || {};
   const onChange = useSetValue ? setFieldValue(fieldKey, setValue) : field.onChange;
-  const generatedProps = props ? props({ value: field.value, setValue, reset, locations }) : {};
+  const generatedProps = props
+    ? props({ value: field.value, setValue, reset, locations, dependencies: dependenciesValues })
+    : {};
   return (
     <EuiFormRow
       {...formRowProps}

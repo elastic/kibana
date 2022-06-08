@@ -36,7 +36,7 @@ export const Field = memo<Props>(
     const { register, watch, control, setValue, reset } = useFormContext();
     const { locations } = useSelector(selectServiceLocationsState);
     let show = true;
-    let dependenciesValues = [];
+    let dependenciesValues: unknown[] = [];
     if (showWhen) {
       const [showKey, expectedValue] = showWhen;
       const [actualValue] = watch([showKey]);
@@ -79,6 +79,7 @@ export const Field = memo<Props>(
               formRowProps={formRowProps}
               fieldState={fieldStateT}
               error={error}
+              dependenciesValues={dependenciesValues}
             />
           );
         }}
@@ -94,7 +95,9 @@ export const Field = memo<Props>(
             required,
             ...(validation ? validation(dependenciesValues) : {}),
           })}
-          {...(props ? props({ value: '', setValue, reset, locations }) : {})}
+          {...(props
+            ? props({ value: '', setValue, reset, locations, dependencies: dependenciesValues })
+            : {})}
           isInvalid={Boolean(fieldError)}
           fullWidth
         />

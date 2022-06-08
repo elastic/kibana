@@ -9,11 +9,14 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UseFormReturn } from 'react-hook-form';
 import {
+  EuiButtonEmpty,
   EuiButtonGroup,
   EuiCheckbox,
   EuiCode,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiFieldText,
   EuiFieldNumber,
   EuiFieldPassword,
@@ -57,6 +60,7 @@ export interface FieldMeta {
     setValue: UseFormReturn['setValue'];
     reset: UseFormReturn['reset'];
     locations: ServiceLocations;
+    dependencies: unknown[];
   }) => Record<string, any>;
   controlled?: boolean;
   required?: boolean;
@@ -122,7 +126,24 @@ const MONITOR_SCRIPT_STEP: Step = {
   title: 'Add a script',
   children: (
     <StepFields
-      description="Use Elastic Script Recorder to generate a script and then upload it. Alternatively, you can write your own Playwright script and paste it in the script editor."
+      description={
+        <>
+          <p>
+            Use Elastic Script Recorder to generate a script and then upload it. Alternatively, you
+            can write your own Playwright script and paste it in the script editor.
+          </p>
+          <EuiFlexGroup justifyContent="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href="https://github.com/elastic/synthetics-recorder/releases/"
+                iconType="download"
+              >
+                Download Script Recorder
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      }
       stepKey="step3"
     />
   ),
@@ -143,6 +164,68 @@ export const EDIT_MONITOR_STEPS: StepMap = {
   [FormMonitorType.ICMP]: [MONITOR_DETAILS_STEP],
   [FormMonitorType.TCP]: [MONITOR_DETAILS_STEP],
 };
+
+const BROWSER_SCHEDULES = [
+  {
+    value: '5',
+    text: 'Every 3 minutes',
+  },
+  {
+    value: '10',
+    text: 'Every 10 minutes',
+  },
+  {
+    value: '15',
+    text: 'Every 15 minutes',
+  },
+  {
+    value: '30',
+    text: 'Every 30 minutes',
+  },
+  {
+    value: '60',
+    text: 'Every hour',
+  },
+  {
+    value: '120',
+    text: 'Every 2 hours',
+  },
+  {
+    value: '240',
+    text: 'Every 4 hours',
+  },
+];
+
+const LIGHTWEIGHT_SCHEDULES = [
+  {
+    value: '1',
+    text: 'Every 1 minute',
+  },
+  {
+    value: '3',
+    text: 'Every 3 minutes',
+  },
+  {
+    value: '5',
+    text: 'Every 5 minutes',
+  },
+  {
+    value: '10',
+    text: 'Every 10 minutes',
+  },
+  {
+    value: '15',
+    text: 'Every 15 minutes',
+  },
+  {
+    value: '30',
+    text: 'Every 30 minutes',
+  },
+  {
+    value: '60',
+    text: 'Every hour',
+  },
+];
 
 export const MONITOR_TYPE_CONFIG = {
   [FormMonitorType.MULTISTEP]: {
@@ -274,30 +357,13 @@ export const FIELD: Record<string, FieldMeta> = {
     label: 'Frequency',
     helpText:
       'How often do you want to run this test? Higher frequencies will increase your total cost.',
-    props: () => ({
-      options: [
-        {
-          value: '3',
-          text: 'Every 3 minutes',
-        },
-        {
-          value: '5',
-          text: 'Every 5 minutes',
-        },
-        {
-          value: '10',
-          text: 'Every 10 minutes',
-        },
-        {
-          value: '30',
-          text: 'Every 30 minutes',
-        },
-        {
-          value: '60',
-          text: 'Every hour',
-        },
-      ],
-    }),
+    dependencies: [ConfigKey.MONITOR_TYPE],
+    props: ({ dependencies }) => {
+      const [monitorType] = dependencies;
+      return {
+        options: monitorType === DataStream.BROWSER ? BROWSER_SCHEDULES : LIGHTWEIGHT_SCHEDULES,
+      };
+    },
   },
   [ConfigKey.LOCATIONS]: {
     fieldKey: ConfigKey.LOCATIONS,
