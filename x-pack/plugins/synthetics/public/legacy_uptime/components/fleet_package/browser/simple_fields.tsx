@@ -105,6 +105,7 @@ export const BrowserSimpleFields = memo<Props>(({ validate, onFieldBlur }) => {
         }
       >
         <SourceField
+          validate={validate}
           onChange={onChangeSourceField}
           onFieldBlur={onFieldBlur}
           defaultConfig={useMemo(
