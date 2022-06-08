@@ -7,6 +7,7 @@
 import React, { useMemo, useState } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiBasicTable,
@@ -436,7 +437,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         width: '14%',
         'data-test-subj': 'rulesTableCell-rulesListNotify',
         render: (rule: RuleTableItem) => {
-          if (rule.ruleTypeId.startsWith('siem') || !rule.enabled) {
+          if (rule.consumer === AlertConsumers.SIEM || !rule.enabled) {
             return null;
           }
           return (

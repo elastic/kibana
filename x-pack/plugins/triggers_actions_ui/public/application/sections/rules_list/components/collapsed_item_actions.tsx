@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { asyncScheduler } from 'rxjs';
 import moment from 'moment';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -124,7 +125,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   }, [isSnoozed, item]);
 
   const snoozePanelItem = useMemo(() => {
-    if (isDisabled || item.ruleTypeId.startsWith('siem')) {
+    if (isDisabled || item.consumer === AlertConsumers.SIEM) {
       return [];
     }
 
