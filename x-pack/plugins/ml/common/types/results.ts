@@ -21,14 +21,13 @@ export interface MLRectAnnotationDatum extends RectAnnotationDatum {
   header: number;
 }
 export interface LineAnnotationDatumWithModelSnapshot extends LineAnnotationDatum {
-  modelSnapshot: ModelSnapshot;
+  modelSnapshot?: ModelSnapshot;
 }
 export interface GetDatafeedResultsChartDataResult {
   bucketResults: number[][];
   datafeedResults: number[][];
   annotationResultsRect: MLRectAnnotationDatum[];
   annotationResultsLine: LineAnnotationDatum[];
-  modelSnapshotResultsLine: LineAnnotationDatumWithModelSnapshot[];
 }
 
 export interface DatafeedResultsChartDataParams {

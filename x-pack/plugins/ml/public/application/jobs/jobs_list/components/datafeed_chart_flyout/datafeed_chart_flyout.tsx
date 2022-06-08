@@ -52,6 +52,7 @@ import {
   ModelSnapshot,
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { JobMessage } from '../../../../../../common/types/audit_message';
+import { LineAnnotationDatumWithModelSnapshot } from '../../../../../../common/types/results';
 import { useToastNotificationService } from '../../../../services/toast_notification_service';
 import { useMlApiContext } from '../../../../contexts/kibana';
 import { useCurrentEuiTheme } from '../../../../components/color_range_legend';
@@ -63,6 +64,12 @@ import { checkPermission } from '../../../../capabilities/check_capabilities';
 
 const dateFormatter = timeFormatter('MM-DD HH:mm:ss');
 const MAX_CHART_POINTS = 480;
+const revertSnapshotMessage = i18n.translate(
+  'xpack.ml.jobsList.datafeedChart.revertSnapshotMessage',
+  {
+    defaultMessage: 'Click to revert to this model snapshot.',
+  }
+);
 
 interface DatafeedChartFlyoutProps {
   jobId: string;
@@ -71,7 +78,9 @@ interface DatafeedChartFlyoutProps {
   onModelSnapshotAnnotationClick: (modelSnapshot: ModelSnapshot) => void;
 }
 
-function setLineAnnotationHeader(lineDatum: LineAnnotationDatum) {
+function setLineAnnotationHeader(
+  lineDatum: LineAnnotationDatum | LineAnnotationDatumWithModelSnapshot
+) {
   lineDatum.header = dateFormatter(lineDatum.dataValue);
   return lineDatum;
 }
@@ -94,7 +103,13 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     datafeedConfig: CombinedJobWithStats['datafeed_config'] | undefined;
     bucketSpan: string | undefined;
     isInitialized: boolean;
-  }>({ datafeedConfig: undefined, bucketSpan: undefined, isInitialized: false });
+    modelSnapshotData: LineAnnotationDatumWithModelSnapshot[];
+  }>({
+    datafeedConfig: undefined,
+    bucketSpan: undefined,
+    isInitialized: false,
+    modelSnapshotData: [],
+  });
   const [endDate, setEndDate] = useState<any>(moment(end));
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
   const [bucketData, setBucketData] = useState<number[][]>([]);
@@ -102,7 +117,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     rect: RectAnnotationDatum[];
     line: LineAnnotationDatum[];
   }>({ rect: [], line: [] });
-  const [modelSnapshotData, setModelSnapshotData] = useState<LineAnnotationDatum[]>([]);
+  // const [modelSnapshotData, setModelSnapshotData] = useState<LineAnnotationDatum[]>([]);
   const [messageData, setMessageData] = useState<LineAnnotationDatum[]>([]);
   const [sourceData, setSourceData] = useState<number[][]>([]);
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
@@ -111,6 +126,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const canUpdateDatafeed = useMemo(() => checkPermission('canUpdateDatafeed'), []);
 
   const {
+    getModelSnapshots,
     results: { getDatafeedResultChartData },
   } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
@@ -155,7 +171,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
         rect: chartData.annotationResultsRect,
         line: chartData.annotationResultsLine.map(setLineAnnotationHeader),
       });
-      setModelSnapshotData(chartData.modelSnapshotResultsLine.map(setLineAnnotationHeader));
     } catch (error) {
       const title = i18n.translate('xpack.ml.jobsList.datafeedChart.errorToastTitle', {
         defaultMessage: 'Error fetching data',
@@ -165,21 +180,35 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     setIsLoadingChartData(false);
   }, [endDate, data.bucketSpan]);
 
-  const getJobData = useCallback(async () => {
+  const getJobAndSnapshotData = useCallback(async () => {
     try {
       const job: CombinedJobWithStats = await loadFullJob(jobId);
+      const modelSnapshotResultsLine: LineAnnotationDatumWithModelSnapshot[] = [];
+      const modelSnapshotsResp = await getModelSnapshots(jobId);
+      const modelSnapshots = modelSnapshotsResp?.model_snapshots ?? [];
+      modelSnapshots.forEach((modelSnapshot) => {
+        const timestamp = Number(modelSnapshot?.latest_record_time_stamp);
+
+        modelSnapshotResultsLine.push({
+          dataValue: timestamp,
+          details: `${modelSnapshot.description}. ${revertSnapshotMessage}`,
+          modelSnapshot,
+        });
+      });
+
       setData({
         datafeedConfig: job.datafeed_config,
         bucketSpan: job.analysis_config.bucket_span,
         isInitialized: true,
+        modelSnapshotData: modelSnapshotResultsLine.map(setLineAnnotationHeader),
       });
     } catch (error) {
       displayErrorToast(error);
     }
   }, [jobId]);
 
-  useEffect(function loadJobWithDatafeed() {
-    getJobData();
+  useEffect(function loadInitialData() {
+    getJobAndSnapshotData();
   }, []);
 
   useEffect(
@@ -386,7 +415,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             )}
                             key="model-snapshots-results-line"
                             domainType={AnnotationDomainType.XDomain}
-                            dataValues={modelSnapshotData}
+                            dataValues={data.modelSnapshotData}
                             marker={<EuiIcon type="asterisk" />}
                             markerPosition={Position.Top}
                             style={{
