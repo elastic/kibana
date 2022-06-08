@@ -18,6 +18,7 @@ import yaml from 'js-yaml';
 
 import { PackagePolicy, PackagePolicyConfigRecord } from '@kbn/fleet-plugin/common';
 import { PackagePolicyServiceInterface } from '@kbn/fleet-plugin/server';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { CspAppContext } from '../../plugin';
 import { CspRulesConfigSchema } from '../../../common/schemas/csp_configuration';
 import { CspRuleSchema } from '../../../common/schemas/csp_rule';
@@ -101,14 +102,21 @@ export const updateAgentConfiguration = async (
   packagePolicyService: PackagePolicyServiceInterface,
   packagePolicy: PackagePolicy,
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  user: AuthenticatedUser | null
 ): Promise<PackagePolicy> => {
   const cspRules = await getCspRules(soClient, packagePolicy);
   const rulesConfig = createRulesConfig(cspRules);
   const dataYaml = convertRulesConfigToYaml(rulesConfig);
   const updatedPackagePolicy = setVarToPackagePolicy(packagePolicy, dataYaml);
-
-  return packagePolicyService.update(soClient, esClient, packagePolicy.id, updatedPackagePolicy);
+  const options = { user: user ? user : undefined };
+  return packagePolicyService.update(
+    soClient,
+    esClient,
+    packagePolicy.id,
+    updatedPackagePolicy,
+    options
+  );
 };
 
 export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspAppContext): void =>
@@ -126,6 +134,7 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
         const coreContext = await context.core;
         const esClient = coreContext.elasticsearch.client.asCurrentUser;
         const soClient = coreContext.savedObjects.client;
+        const user = await cspContext.security.authc.getCurrentUser(request);
         const packagePolicyService = cspContext.service.packagePolicyService;
         const packagePolicyId = request.body.package_policy_id;
 
@@ -142,7 +151,8 @@ export const defineUpdateRulesConfigRoute = (router: CspRouter, cspContext: CspA
           packagePolicyService,
           packagePolicy,
           esClient,
-          soClient
+          soClient,
+          user
         );
 
         return response.ok({ body: updatedPackagePolicy });
