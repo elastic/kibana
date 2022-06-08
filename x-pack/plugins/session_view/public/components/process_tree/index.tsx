@@ -130,10 +130,6 @@ export const ProcessTree = ({
     }
   }, [searchResults, setSearchResults]);
 
-  useEffect(() => {
-    fetchNextPage();
-  },[])
-
   useScroll({
     div: scrollerRef.current,
     handler: (pos: number, endReached: boolean) => {
