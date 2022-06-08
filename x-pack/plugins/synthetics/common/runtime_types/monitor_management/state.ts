@@ -12,7 +12,7 @@ export const FetchMonitorManagementListQueryArgsCodec = t.partial({
   perPage: t.number,
   sortField: t.string,
   sortOrder: t.union([t.literal('desc'), t.literal('asc')]),
-  search: t.string,
+  query: t.string,
   searchFields: t.array(t.string),
 });
 
