@@ -64,7 +64,8 @@ describe('rare terms Agg', () => {
           type: BUCKET_TYPES.RARE_TERMS,
         },
       ],
-      { typesRegistry: mockAggTypesRegistry() }
+      { typesRegistry: mockAggTypesRegistry() },
+      jest.fn()
     );
   };
 
