@@ -163,7 +163,9 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           subActionParams: { foo: 'foo' },
         });
 
-        expect(execRes.body).to.eql({
+        const { stack, ...execResWithoutStackTrace } = execRes.body;
+
+        expect(execResWithoutStackTrace).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
           retry: false,
@@ -242,7 +244,9 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           subActionParams: { foo: 'foo' },
         });
 
-        expect(execRes.body).to.eql({
+        const { stack, ...execResWithoutStackTrace } = execRes.body;
+
+        expect(execResWithoutStackTrace).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
           retry: false,
@@ -262,7 +266,9 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           subActionParams: { foo: 'foo' },
         });
 
-        expect(execRes.body).to.eql({
+        const { stack, ...execResWithoutStackTrace } = execRes.body;
+
+        expect(execResWithoutStackTrace).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
           retry: false,
@@ -282,7 +288,9 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           subActionParams: { foo: 'foo' },
         });
 
-        expect(execRes.body).to.eql({
+        const { stack, ...execResWithoutStackTrace } = execRes.body;
+
+        expect(execResWithoutStackTrace).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
           retry: false,
@@ -305,7 +313,9 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           subActionParams: { foo: 'foo' },
         });
 
-        expect(execRes.body).to.eql({
+        const { stack, ...execResWithoutStackTrace } = execRes.body;
+
+        expect(execResWithoutStackTrace).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
           retry: false,

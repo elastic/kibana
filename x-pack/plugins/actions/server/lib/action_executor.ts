@@ -7,7 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from '@kbn/core/server';
-import { cloneDeep } from 'lodash';
+import { cloneDeep, omit } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
@@ -21,6 +21,7 @@ import {
 import {
   ActionType,
   ActionTypeExecutorResult,
+  ActionTypeExecutorRawResult,
   ActionTypeRegistryContract,
   GetServicesFunction,
   PreConfiguredAction,
@@ -203,7 +204,7 @@ export class ActionExecutor {
 
         eventLogger.logEvent(startEvent);
 
-        let rawResult: ActionTypeExecutorResult<unknown>;
+        let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
           const { validatedParams, validatedConfig, validatedSecrets } = validateAction({
             actionId,
@@ -270,7 +271,7 @@ export class ActionExecutor {
         }
 
         eventLogger.logEvent(event);
-        return result;
+        return omit(result, 'stack');
       }
     );
   }
@@ -394,7 +395,7 @@ async function getActionInfoInternal(
   };
 }
 
-function actionErrorToMessage(result: ActionTypeExecutorResult<unknown>): string {
+function actionErrorToMessage(result: ActionTypeExecutorRawResult<unknown>): string {
   let message = result.message || 'unknown error running action';
 
   if (result.serviceMessage) {
