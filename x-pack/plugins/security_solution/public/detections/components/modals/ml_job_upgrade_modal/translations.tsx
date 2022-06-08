@@ -40,13 +40,13 @@ export const ML_JOB_UPGRADE_MODAL_AFFECTED_JOBS = i18n.translate(
 
 export const MlJobUpgradeModalBody = () => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.mlJobCompatibilityCallout.messageBody"
+    id="xpack.securitySolution.detectionEngine.mlJobUpgradeModal.messageBody"
     defaultMessage="{summary} Documentation: {docs}"
     values={{
       summary: (
         <p>
           <FormattedMessage
-            id="xpack.securitySolution.detectionEngine.mlJobCompatibilityCallout.messageBody.summary"
+            id="xpack.securitySolution.detectionEngine.mlJobUpgradeModal.messageBody.summary"
             defaultMessage="New V3 machine learning jobs have been released,
             and the latest corresponding prebuilt detection rules now use these
             new ML jobs. You're currently running one or more V1/V2 jobs, which
