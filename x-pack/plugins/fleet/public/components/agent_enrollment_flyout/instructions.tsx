@@ -67,6 +67,8 @@ export const Instructions = (props: InstructionProps) => {
     return settings?.fleet_server_hosts || [];
   }, [settings]);
 
+  if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
+
   const hasNoFleetServerHost = fleetStatus.isReady && fleetServerHosts.length === 0;
 
   const showAgentEnrollment =
@@ -85,8 +87,6 @@ export const Instructions = (props: InstructionProps) => {
   } else {
     setSelectionType('tabs');
   }
-
-  if (isLoadingAgents || isLoadingAgentPolicies) return <Loading size="l" />;
 
   if (hasNoFleetServerHost) {
     return null;

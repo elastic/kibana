@@ -76,8 +76,11 @@ function usePrimaryNavigationItemsToDisplay(navTabs: Record<string, NavTab>) {
             {
               id: 'main',
               name: '',
+              items: [navTabs[SecurityPageName.landing]],
+            },
+            {
+              ...securityNavGroup[SecurityNavGroupKey.dashboards],
               items: [
-                navTabs[SecurityPageName.landing],
                 navTabs[SecurityPageName.overview],
                 navTabs[SecurityPageName.detectionAndResponse],
               ],
