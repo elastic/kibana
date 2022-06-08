@@ -168,4 +168,3 @@ export function getModulePath(module: WebpackNormalModule) {
   const queryIndex = module.resource.indexOf('?');
   return queryIndex === -1 ? module.resource : module.resource.slice(0, queryIndex);
 }
-//
