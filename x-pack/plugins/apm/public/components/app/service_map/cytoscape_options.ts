@@ -175,9 +175,7 @@ const getStyle = (
         // fairly new.
         //
         // @ts-expect-error
-        'target-distance-from-node': isIE11
-          ? undefined
-          : theme.eui.euiSizeXS,
+        'target-distance-from-node': isIE11 ? undefined : theme.eui.euiSizeXS,
         width: 1,
         'source-arrow-shape': 'none',
         'z-index': zIndexEdge,
