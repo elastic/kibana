@@ -20,9 +20,8 @@ import { Case } from '../../../../common';
 import { CaseViewProps } from '../types';
 import { useGetCaseUserActions } from '../../../containers/use_get_case_user_actions';
 import { usePostPushToService } from '../../../containers/use_post_push_to_service';
-import { useGetTags } from '../../../containers/use_get_tags';
-import { useGetActionLicense } from '../../../containers/use_get_action_license';
 import { useGetConnectors } from '../../../containers/configure/use_connectors';
+import { useGetTags } from '../../../containers/use_get_tags';
 
 jest.mock('../../../containers/use_get_case_user_actions');
 jest.mock('../../../containers/configure/use_connectors');
@@ -32,11 +31,7 @@ jest.mock('../../../common/navigation/hooks');
 jest.mock('../../../containers/use_get_action_license');
 jest.mock('../../../containers/use_get_tags');
 
-(useGetTags as jest.Mock).mockReturnValue({ tags: ['coke', 'pepsi'], fetchTags: jest.fn() });
-(useGetActionLicense as jest.Mock).mockReturnValue({
-  data: null,
-  isLoading: false,
-});
+(useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
 
 const caseData: Case = {
   ...basicCase,

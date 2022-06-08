@@ -28,7 +28,7 @@ import { scheduleTaskSafe, removeTaskSafe } from '../lib/task_manager_util';
 import { CspServerPluginStartServices } from '../types';
 
 const CSPM_FINDINGS_STATS_TASK_ID = 'cloud_security_posture-findings_stats';
-const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-findings';
+const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-stats_task';
 const CSPM_FINDINGS_STATS_INTERVAL = '5m';
 
 export async function scheduleFindingsStatsTask(
