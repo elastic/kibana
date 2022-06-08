@@ -9,7 +9,7 @@
 import { CommonProps } from '@elastic/eui';
 import { ElasticAgentCardProps } from './no_data_card';
 
-export type NoDataPageActions = Omit<ElasticAgentCardProps, 'description'>;
+export type NoDataPageActions = ElasticAgentCardProps;
 
 export interface NoDataPageProps extends CommonProps {
   /**
