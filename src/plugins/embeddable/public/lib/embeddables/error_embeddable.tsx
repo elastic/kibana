@@ -87,14 +87,14 @@ const CompactEmbeddableError = ({ children }: { children?: React.ReactNode }) =>
   const [isPopoverOpen, setPopoverOpen] = useState(false);
 
   const popoverButton = (
-    <EuiText className="errorEmbeddable__button" size="xs">
+    <EuiText className="errorEmbeddableCompact__button" size="xs">
       <EuiLink
         className="eui-textTruncate"
         color="subdued"
         onClick={() => setPopoverOpen((open) => !open)}
       >
         <EuiIcon type="alert" color="danger" />
-        {i18n.translate('embeddableApi.panel.errorEmbeddable.learnMore', {
+        {i18n.translate('embeddableApi.panel.errorEmbeddable.message', {
           defaultMessage: 'A fatal error has occurred. Learn more.',
         })}
       </EuiLink>
@@ -105,7 +105,7 @@ const CompactEmbeddableError = ({ children }: { children?: React.ReactNode }) =>
     <EuiPopover
       button={popoverButton}
       isOpen={isPopoverOpen}
-      anchorClassName="errorEmbeddable__popoverAnchor"
+      anchorClassName="errorEmbeddableCompact__popoverAnchor"
       closePopover={() => setPopoverOpen(false)}
     >
       {children}
