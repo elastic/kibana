@@ -1513,12 +1513,14 @@ export class RulesClient {
 
       try {
         await this.taskManager.bulkUpdateSchedules(taskIds, scheduleOperation.value);
+        this.logger.debug(
+          `Successfully updated schedules for underlying tasks: ${taskIds.join(', ')}`
+        );
       } catch (error) {
-        this.auditLogger?.log(
-          ruleAuditEvent({
-            action: RuleAuditAction.BULK_EDIT,
-            error,
-          })
+        this.logger.error(
+          `Failure to update schedules for underlying tasks: ${taskIds.join(
+            ', '
+          )}. TaskManager bulkUpdateSchedules failed with Error: ${error.message}`
         );
       }
     }
