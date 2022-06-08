@@ -10,7 +10,7 @@ import { of } from 'rxjs';
 import { duration } from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { isPromise } from '@kbn/std';
-import type { MockedKeys } from '@kbn/utility-types/jest';
+import type { MockedKeys } from '@kbn/utility-types-jest';
 import type {
   PluginInitializerContext,
   CoreSetup,
