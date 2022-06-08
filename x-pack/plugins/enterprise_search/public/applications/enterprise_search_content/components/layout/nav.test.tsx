@@ -8,8 +8,8 @@
 jest.mock('../../../shared/layout', () => ({
   generateNavLink: jest.fn(({ to, items }) => ({ href: to, items })),
 }));
-jest.mock('../search_index/index_nav', () => ({
-  useSearchIndicesNav: () => [],
+jest.mock('../index_detail/index_nav', () => ({
+  useIndicesNav: () => [],
 }));
 
 import { useEnterpriseSearchContentNav } from '.';
@@ -31,10 +31,10 @@ describe('useEnterpriseSearchContentNav', () => {
         href: '/',
         items: [
           {
-            href: '/search_indices',
-            id: 'search_indices',
+            href: '/indices',
+            id: 'indices',
             items: [],
-            name: 'Search indices',
+            name: 'Indices',
           },
           {
             href: '/connector_settings',

@@ -34,9 +34,9 @@ import { i18n } from '@kbn/i18n';
 import { Engine } from '../../../app_search/components/engine/types';
 
 import { SUPPORTED_LANGUAGES, NEW_INDEX_TEMPLATE_TYPES } from './constants';
-import { NewSearchIndexLogic } from './new_search_index_logic';
+import { NewIndexLogic } from './new_index_logic';
 
-export interface ISearchIndex {
+export interface IIndex {
   description: React.ReactNode;
   docsUrl: string;
   type: string;
@@ -48,16 +48,16 @@ export interface ISearchEngineOption {
   value: Engine;
 }
 
-export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
+export const NewIndexTemplate: React.FC<IIndex> = ({
   children,
   description,
   type,
   onNameChange,
 }) => {
   const { searchEngineSelectOptions, name, language, rawName, selectedSearchEngines } =
-    useValues(NewSearchIndexLogic);
+    useValues(NewIndexLogic);
   const { setRawName, setLanguage, setSelectedSearchEngineOptions } =
-    useActions(NewSearchIndexLogic);
+    useActions(NewIndexLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -77,7 +77,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
           <EuiTitle size="s">
             <h2>
               {i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.title',
+                'xpack.enterpriseSearch.content.newIndex.newIndexTemplate.title',
                 {
                   defaultMessage: 'New {type}',
                   values: { type: NEW_INDEX_TEMPLATE_TYPES[type] },
@@ -90,7 +90,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
               {description}
               <EuiLink target="_blank" href="#">
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.learnMore.linkText',
+                  'xpack.enterpriseSearch.content.newIndex.newIndexTemplate.learnMore.linkText',
                   {
                     defaultMessage: 'Learn more',
                   }
@@ -104,7 +104,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
             <EuiFlexItem grow>
               <EuiFormRow
                 label={i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputLabel',
+                  'xpack.enterpriseSearch.content.newIndex.newIndexTemplate.nameInputLabel',
                   {
                     defaultMessage: 'Name your {type}',
                     values: { type: NEW_INDEX_TEMPLATE_TYPES[type] },
@@ -114,7 +114,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
               >
                 <EuiFieldText
                   placeholder={i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputPlaceholder',
+                    'xpack.enterpriseSearch.content.newIndex.newIndexTemplate.nameInputPlaceholder',
                     {
                       defaultMessage: 'Set a name for the {type}',
                       values: { type: NEW_INDEX_TEMPLATE_TYPES[type] },
@@ -130,7 +130,7 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
             <EuiFlexItem grow={false}>
               <EuiFormRow
                 label={i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.languageInputLabel',
+                  'xpack.enterpriseSearch.content.newIndex.newIndexTemplate.languageInputLabel',
                   {
                     defaultMessage: 'Language',
                   }
@@ -149,14 +149,14 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
           <EuiFlexItem grow>
             <EuiFormRow
               label={i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.attachSearchEngines.label',
+                'xpack.enterpriseSearch.content.newIndex.newIndexTemplate.attachSearchEngines.label',
                 {
                   defaultMessage: 'Attach search engines',
                 }
               )}
               fullWidth
               helpText={i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.attachSearchEngines.helpText',
+                'xpack.enterpriseSearch.content.newIndex.newIndexTemplate.attachSearchEngines.helpText',
                 {
                   defaultMessage:
                     'Select one or more existing search engines. You can also create one later',
@@ -180,9 +180,9 @@ export const NewSearchIndexTemplate: React.FC<ISearchIndex> = ({
       <span>
         <EuiButton fill isDisabled={!name}>
           {i18n.translate(
-            'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.createIndex.buttonText',
+            'xpack.enterpriseSearch.content.newIndex.newIndexTemplate.createIndex.buttonText',
             {
-              defaultMessage: 'Create search index',
+              defaultMessage: 'Create index',
             }
           )}
         </EuiButton>

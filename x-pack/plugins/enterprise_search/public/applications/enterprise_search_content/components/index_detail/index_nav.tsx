@@ -16,11 +16,11 @@ import { i18n } from '@kbn/i18n';
 import { generateNavLink } from '../../../shared/layout';
 
 import {
-  SEARCH_INDEX_PATH,
-  SEARCH_INDEX_OVERVIEW_PATH,
-  SEARCH_INDEX_DOCUMENTS_PATH,
-  SEARCH_INDEX_SCHEMA_PATH,
-  SEARCH_INDEX_LOGS_PATH,
+  INDEX_PATH,
+  INDEX_OVERVIEW_PATH,
+  INDEX_DOCUMENTS_PATH,
+  INDEX_SCHEMA_PATH,
+  INDEX_LOGS_PATH,
 } from '../../routes';
 
 import './index_nav.scss';
@@ -28,8 +28,8 @@ import './index_nav.scss';
 // TODO: replace once logic in place.
 const indexName = 'Index name goes here';
 
-export const useSearchIndicesNav = () => {
-  const isIndexRoute = !!useRouteMatch(SEARCH_INDEX_PATH);
+export const useIndicesNav = () => {
+  const isIndexRoute = !!useRouteMatch(INDEX_PATH);
   const { indexSlug } = useParams() as { indexSlug: string };
 
   if (!indexSlug || !isIndexRoute) return undefined;
@@ -50,7 +50,7 @@ export const useSearchIndicesNav = () => {
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.overviewTitle', {
         defaultMessage: 'Overview',
       }),
-      ...generateNavLink({ to: generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug }) }),
+      ...generateNavLink({ to: generatePath(INDEX_OVERVIEW_PATH, { indexSlug }) }),
       'data-test-subj': 'IndexOverviewLink',
     },
     {
@@ -58,7 +58,7 @@ export const useSearchIndicesNav = () => {
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.documentsTitle', {
         defaultMessage: 'Documents',
       }),
-      ...generateNavLink({ to: generatePath(SEARCH_INDEX_DOCUMENTS_PATH, { indexSlug }) }),
+      ...generateNavLink({ to: generatePath(INDEX_DOCUMENTS_PATH, { indexSlug }) }),
       'data-test-subj': 'IndexDocumentsLink',
     },
     {
@@ -66,7 +66,7 @@ export const useSearchIndicesNav = () => {
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.schemaTitle', {
         defaultMessage: 'Schema',
       }),
-      ...generateNavLink({ to: generatePath(SEARCH_INDEX_SCHEMA_PATH, { indexSlug }) }),
+      ...generateNavLink({ to: generatePath(INDEX_SCHEMA_PATH, { indexSlug }) }),
       'data-test-subj': 'IndexSchemaLink',
     },
     {
@@ -74,7 +74,7 @@ export const useSearchIndicesNav = () => {
       name: i18n.translate('xpack.enterpriseSearch.content.searchIndex.nav.logsitle', {
         defaultMessage: 'Logs',
       }),
-      ...generateNavLink({ to: generatePath(SEARCH_INDEX_LOGS_PATH, { indexSlug }) }),
+      ...generateNavLink({ to: generatePath(INDEX_LOGS_PATH, { indexSlug }) }),
       'data-test-subj': 'IndexLogsLink',
     },
   ];

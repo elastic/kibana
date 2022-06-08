@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { searchIndices } from './search_indices.mock';
+export { indices } from './indices.mock';
 export { searchEngines } from './search_engines.mock';

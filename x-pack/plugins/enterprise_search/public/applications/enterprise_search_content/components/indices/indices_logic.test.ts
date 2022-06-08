@@ -6,16 +6,16 @@
  */
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
-import { searchIndices, searchEngines } from '../../__mocks__';
+import { indices, searchEngines } from '../../__mocks__';
 
-import { SearchIndicesLogic } from './search_indices_logic';
+import { IndicesLogic } from './indices_logic';
 
-describe('SearchIndicesLogic', () => {
-  const { mount } = new LogicMounter(SearchIndicesLogic);
+describe('IndicesLogic', () => {
+  const { mount } = new LogicMounter(IndicesLogic);
 
   const DEFAULT_VALUES = {
     searchEngines: [],
-    searchIndices: [],
+    indices: [],
   };
 
   beforeEach(() => {
@@ -24,23 +24,23 @@ describe('SearchIndicesLogic', () => {
   });
 
   it('has expected default values', () => {
-    expect(SearchIndicesLogic.values).toEqual(DEFAULT_VALUES);
+    expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
   });
 
   describe('actions', () => {
-    describe('searchIndicesLoadSuccess', () => {
-      it('should set searchIndices', () => {
-        SearchIndicesLogic.actions.searchIndicesLoadSuccess(searchIndices);
-        expect(SearchIndicesLogic.values).toEqual({
+    describe('indicesLoadSuccess', () => {
+      it('should set indices', () => {
+        IndicesLogic.actions.indicesLoadSuccess(indices);
+        expect(IndicesLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          searchIndices,
+          indices,
         });
       });
     });
     describe('searchEnginesLoadSuccess', () => {
       it('should set searchEngines', () => {
-        SearchIndicesLogic.actions.searchEnginesLoadSuccess(searchEngines);
-        expect(SearchIndicesLogic.values).toEqual({
+        IndicesLogic.actions.searchEnginesLoadSuccess(searchEngines);
+        expect(IndicesLogic.values).toEqual({
           ...DEFAULT_VALUES,
           searchEngines,
         });

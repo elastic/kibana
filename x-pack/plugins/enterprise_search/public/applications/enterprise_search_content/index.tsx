@@ -21,11 +21,11 @@ import { ConnectorSettings } from './components/connector_settings';
 import { CrawlerSettings } from './components/crawler_settings';
 import { ErrorConnecting } from './components/error_connecting';
 import { NotFound } from './components/not_found';
-import { SearchIndicesRouter } from './components/search_indices';
+import { IndicesRouter } from './components/indices';
 import {
   SETUP_GUIDE_PATH,
   ROOT_PATH,
-  SEARCH_INDICES_PATH,
+  INDICES_PATH,
   CONNECTOR_SETTINGS_PATH,
   CRAWLER_SETTINGS_PATH,
 } from './routes';
@@ -74,9 +74,9 @@ export const EnterpriseSearchContentUnconfigured: React.FC = () => (
 export const EnterpriseSearchContentConfigured: React.FC<Required<InitialAppData>> = () => {
   return (
     <Switch>
-      <Redirect exact from={ROOT_PATH} to={SEARCH_INDICES_PATH} />
-      <Route path={SEARCH_INDICES_PATH}>
-        <SearchIndicesRouter />
+      <Redirect exact from={ROOT_PATH} to={INDICES_PATH} />
+      <Route path={INDICES_PATH}>
+        <IndicesRouter />
       </Route>
       <Route path={CONNECTOR_SETTINGS_PATH}>
         <ConnectorSettings />

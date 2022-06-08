@@ -6,7 +6,7 @@
  */
 
 import {
-  searchIndices as searchIndicesMock,
+  indices as indicesMock,
   searchEngines as searchEnginesMock,
 } from '../../__mocks__';
 
@@ -14,35 +14,35 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Engine } from '../../../app_search/components/engine/types';
 import { flashAPIErrors } from '../../../shared/flash_messages';
-import { SearchIndex } from '../../types';
+import { IIndex } from '../../types';
 
-export interface SearchIndicesValues {
-  searchIndices: SearchIndex[];
+export interface IndicesValues {
+  indices: IIndex[];
   searchEngines: Engine[];
 }
 
-export interface SearchIndicesActions {
+export interface IndicesActions {
   initPage(): void;
   loadSearchEngines(): void;
   searchEnginesLoadSuccess(searchEngines: Engine[]): Engine[]; // TODO proper types when backend ready
-  loadSearchIndices(): void;
-  searchIndicesLoadSuccess(searchIndices: SearchIndex[]): SearchIndex[]; // TODO proper types when backend ready
+  loadIndices(): void;
+  indicesLoadSuccess(searchIndices: IIndex[]): IIndex[]; // TODO proper types when backend ready
 }
 
-export const SearchIndicesLogic = kea<MakeLogicType<SearchIndicesValues, SearchIndicesActions>>({
+export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
   path: ['enterprise_search', 'content', 'search_indices'],
   actions: {
     initPage: true,
-    loadSearchIndices: true,
-    searchIndicesLoadSuccess: (searchIndices) => searchIndices,
+    loadIndices: true,
+    indicesLoadSuccess: (searchIndices) => searchIndices,
     loadSearchEngines: true,
     searchEnginesLoadSuccess: (searchEngines) => searchEngines,
   },
   reducers: {
-    searchIndices: [
+    indices: [
       [],
       {
-        searchIndicesLoadSuccess: (_, searchIndices) => searchIndices,
+        indicesLoadSuccess: (_, searchIndices) => searchIndices,
       },
     ],
     searchEngines: [
@@ -55,7 +55,7 @@ export const SearchIndicesLogic = kea<MakeLogicType<SearchIndicesValues, SearchI
   listeners: ({ actions }) => ({
     initPage: async () => {
       actions.loadSearchEngines();
-      actions.loadSearchIndices();
+      actions.loadIndices();
     },
     loadSearchEngines: async () => {
       try {
@@ -66,11 +66,11 @@ export const SearchIndicesLogic = kea<MakeLogicType<SearchIndicesValues, SearchI
         flashAPIErrors(e);
       }
     },
-    loadSearchIndices: async () => {
+    loadIndices: async () => {
       try {
         // TODO replace with actual backend call, add test cases
-        const response = await Promise.resolve(searchIndicesMock);
-        actions.searchIndicesLoadSuccess(response);
+        const response = await Promise.resolve(indicesMock);
+        actions.indicesLoadSuccess(response);
       } catch (e) {
         flashAPIErrors(e);
       }

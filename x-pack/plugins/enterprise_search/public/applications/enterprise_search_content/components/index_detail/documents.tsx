@@ -9,14 +9,14 @@ import React from 'react';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-export const SearchIndexSchema: React.FC = () => {
+export const IndexDocuments: React.FC = () => {
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[]}
-      pageViewTelemetry="Schema"
+      pageViewTelemetry="Documents"
       isLoading={false}
     >
-      <>Schema</>
+      <>Documents</>
     </EnterpriseSearchContentPageTemplate>
   );
 };

@@ -22,7 +22,7 @@ import { VersionMismatchPage } from '../shared/version_mismatch';
 import { ConnectorSettings } from './components/connector_settings';
 import { CrawlerSettings } from './components/crawler_settings';
 import { ErrorConnecting } from './components/error_connecting';
-import { SearchIndicesRouter } from './components/search_indices';
+import { IndicesRouter } from './components/indices';
 
 import {
   EnterpriseSearchContent,
@@ -80,7 +80,7 @@ describe('EnterpriseSearchContentConfigured', () => {
   const wrapper = shallow(<EnterpriseSearchContentConfigured {...DEFAULT_INITIAL_APP_DATA} />);
 
   it('renders engine routes', () => {
-    expect(wrapper.find(SearchIndicesRouter)).toHaveLength(1);
+    expect(wrapper.find(IndicesRouter)).toHaveLength(1);
     expect(wrapper.find(ConnectorSettings)).toHaveLength(1);
     expect(wrapper.find(CrawlerSettings)).toHaveLength(1);
   });

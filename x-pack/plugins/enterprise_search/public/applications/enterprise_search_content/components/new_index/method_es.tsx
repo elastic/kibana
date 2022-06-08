@@ -19,13 +19,13 @@ import React from 'react';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NewSearchIndexTemplate } from './new_search_index_template';
+import { NewIndexTemplate } from './new_index_template';
 
 export const MethodEs: React.FC = () => {
   const onNameChange = (value: string) => value;
 
   return (
-    <NewSearchIndexTemplate
+    <NewIndexTemplate
       description={i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.methodElasticsearch.description',
         {
@@ -50,6 +50,6 @@ export const MethodEs: React.FC = () => {
           <h4>Place the Elasticsearch index selectable list here... </h4>
         </EuiTitle>
       </EuiPanel>
-    </NewSearchIndexTemplate>
+    </NewIndexTemplate>
   );
 };

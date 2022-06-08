@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-export const SearchIndexOverview: React.FC = () => {
+export const IndexOverview: React.FC = () => {
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[]}

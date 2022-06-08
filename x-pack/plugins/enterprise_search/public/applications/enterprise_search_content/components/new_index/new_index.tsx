@@ -30,10 +30,10 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
-import { baseBreadcrumbs } from '../search_indices';
-import { SearchIndicesLogic } from '../search_indices/search_indices_logic';
+import { baseBreadcrumbs } from '../indices';
+import { IndicesLogic } from '../indices/indices_logic';
 
-import { SearchIndexEmptyState } from './empty_state';
+import { IndexEmptyState } from './empty_state';
 import { MethodApi } from './method_api';
 import { MethodConnector } from './method_connector';
 import { MethodCrawler } from './method_crawler';
@@ -57,7 +57,7 @@ export const NewIndex: React.FC = () => {
   const [selectedMethod, setSelectedMethod] = useState({ id: '', label: '' });
   const [methodIsSelected, setMethodIsSelected] = useState(false);
 
-  const { loadSearchEngines } = useActions(SearchIndicesLogic);
+  const { loadSearchEngines } = useActions(IndicesLogic);
   useEffect(() => {
     loadSearchEngines();
   }, []);
@@ -140,7 +140,7 @@ export const NewIndex: React.FC = () => {
     setMethodIsSelected(true);
   };
 
-  const NewSearchIndexLayout = () => (
+  const NewIndexLayout = () => (
     <>
       {selectedMethod.id === 'crawler' && <MethodCrawler />}
       {selectedMethod.id === 'api' && <MethodApi />}
@@ -167,14 +167,14 @@ export const NewIndex: React.FC = () => {
     </span>
   );
 
-  const SelectSearchIndexLayout = () => (
+  const SelectIndexLayout = () => (
     <>
       <EuiFlexGroup>
         <EuiFlexItem grow={false} style={{ maxWidth: '22rem' }}>
           <EuiPanel hasShadow={false} paddingSize="none" grow={false}>
             <EuiTitle size="xs">
               <h4>
-                {i18n.translate('xpack.enterpriseSearch.content.newIndex.selectSearchIndex.title', {
+                {i18n.translate('xpack.enterpriseSearch.content.newIndex.selectIndex.title', {
                   defaultMessage: 'Create a search index',
                 })}
               </h4>
@@ -183,7 +183,7 @@ export const NewIndex: React.FC = () => {
             <EuiText size="s">
               <p>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.selectSearchIndex.description',
+                  'xpack.enterpriseSearch.content.newIndex.selectIndex.description',
                   {
                     defaultMessage:
                       'Add your content to Enterprise Search by creating a search index.',
@@ -215,7 +215,7 @@ export const NewIndex: React.FC = () => {
             <EuiSpacer size="m" />
             <EuiLink href="#" target="_blank">
               {i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.selectSearchIndex.learnMore.buttonText',
+                'xpack.enterpriseSearch.content.newIndex.selectIndex.learnMore.buttonText',
                 {
                   defaultMessage: 'Learn more about search indices',
                 }
@@ -224,7 +224,7 @@ export const NewIndex: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem>
-          {methodIsSelected ? <NewSearchIndexLayout /> : <SearchIndexEmptyState />}
+          {methodIsSelected ? <NewIndexLayout /> : <IndexEmptyState />}
         </EuiFlexItem>
       </EuiFlexGroup>
     </>
@@ -246,7 +246,7 @@ export const NewIndex: React.FC = () => {
         }),
       }}
     >
-      <SelectSearchIndexLayout />
+      <SelectIndexLayout />
     </EnterpriseSearchContentPageTemplate>
   );
 };

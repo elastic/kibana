@@ -17,12 +17,12 @@ import { generateNavLink } from '../../../shared/layout';
 
 import {
   ROOT_PATH,
-  SEARCH_INDICES_PATH,
+  INDICES_PATH,
   CONNECTOR_SETTINGS_PATH,
   CRAWLER_SETTINGS_PATH,
 } from '../../routes';
 
-import { useSearchIndicesNav } from '../search_index/index_nav';
+import { useIndicesNav } from '../index_detail/index_nav';
 
 export const useEnterpriseSearchContentNav = () => {
   const navItems: Array<EuiSideNavItemType<unknown>> = [
@@ -49,15 +49,15 @@ export const useEnterpriseSearchContentNav = () => {
         shouldShowActiveForSubroutes: false,
         items: [
           {
-            id: 'search_indices',
-            name: i18n.translate('xpack.enterpriseSearch.content.nav.searchIndicesTitle', {
-              defaultMessage: 'Search indices',
+            id: 'indices',
+            name: i18n.translate('xpack.enterpriseSearch.content.nav.indicesTitle', {
+              defaultMessage: 'Indices',
             }),
             ...generateNavLink({
-              to: SEARCH_INDICES_PATH,
+              to: INDICES_PATH,
               isRoot: true,
               shouldShowActiveForSubroutes: true,
-              items: useSearchIndicesNav(),
+              items: useIndicesNav(),
             }),
           },
           {

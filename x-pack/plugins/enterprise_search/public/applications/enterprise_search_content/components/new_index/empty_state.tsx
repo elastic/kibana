@@ -15,7 +15,7 @@ import React from 'react';
 import { EuiEmptyPrompt, EuiLink, EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export const SearchIndexEmptyState: React.FC = () => {
+export const IndexEmptyState: React.FC = () => {
   return (
     <EuiPanel color="subdued">
       <EuiEmptyPrompt

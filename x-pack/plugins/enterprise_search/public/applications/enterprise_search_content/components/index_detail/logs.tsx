@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-export const SearchIndexLogs: React.FC = () => {
+export const IndexLogs: React.FC = () => {
   return (
     <EnterpriseSearchContentPageTemplate pageChrome={[]} pageViewTelemetry="Logs" isLoading={false}>
       <>Logs</>

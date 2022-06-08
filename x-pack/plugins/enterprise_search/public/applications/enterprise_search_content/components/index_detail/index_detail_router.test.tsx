@@ -12,13 +12,13 @@ import { Route, Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { SearchIndicesRouter } from '.';
+import { IndexDetailRouter } from '.';
 
-describe('SearchIndicesRouter', () => {
+describe('IndexDetailRouter', () => {
   it('renders Search index routes', () => {
-    const wrapper = shallow(<SearchIndicesRouter />);
+    const wrapper = shallow(<IndexDetailRouter />);
 
     expect(wrapper.find(Switch)).toHaveLength(1);
-    expect(wrapper.find(Route)).toHaveLength(3);
+    expect(wrapper.find(Route)).toHaveLength(4);
   });
 });

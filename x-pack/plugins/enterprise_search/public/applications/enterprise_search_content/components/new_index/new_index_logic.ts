@@ -11,13 +11,12 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import { Engine } from '../../../app_search/components/engine/types';
 import { formatApiName } from '../../utils/format_api_name';
-
-import { SearchIndicesLogic, SearchIndicesValues } from '../search_indices/search_indices_logic';
+import { IndicesLogic, IndicesValues } from '../indices/indices_logic';
 
 import { DEFAULT_LANGUAGE } from './constants';
-import { ISearchEngineOption } from './new_search_index_template';
+import { ISearchEngineOption } from './new_index_template';
 
-export interface NewSearchIndexValues extends Pick<SearchIndicesValues, 'searchEngines'> {
+export interface NewIndexValues extends Pick<IndicesValues, 'searchEngines'> {
   searchEngineSelectOptions: ISearchEngineOption[];
   rawName: string;
   name: string;
@@ -25,7 +24,7 @@ export interface NewSearchIndexValues extends Pick<SearchIndicesValues, 'searchE
   selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>;
 }
 
-export interface NewSearchIndexActions {
+export interface NewIndexActions {
   setRawName(rawName: string): { rawName: string };
   setLanguage(language: string): { language: string };
   setSelectedSearchEngineOptions(selectedSearchEngines: Array<EuiComboBoxOptionOption<Engine>>): {
@@ -33,10 +32,10 @@ export interface NewSearchIndexActions {
   };
 }
 
-export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSearchIndexActions>>({
-  path: ['enterprise_search', 'content', 'new_search_index'],
+export const NewIndexLogic = kea<MakeLogicType<NewIndexValues, NewIndexActions>>({
+  path: ['enterprise_search', 'content', 'new_index'],
   connect: {
-    values: [SearchIndicesLogic, ['searchEngines']],
+    values: [IndicesLogic, ['searchEngines']],
   },
   actions: {
     setRawName: (rawName) => ({ rawName }),

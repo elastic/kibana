@@ -16,11 +16,11 @@ import React from 'react';
 import { EuiPanel, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { NewSearchIndexTemplate } from './new_search_index_template';
+import { NewIndexTemplate } from './new_index_template';
 
 export const MethodCrawler: React.FC = () => {
   return (
-    <NewSearchIndexTemplate
+    <NewIndexTemplate
       description={i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.methodCrawler.description',
         {
@@ -44,6 +44,6 @@ export const MethodCrawler: React.FC = () => {
           <h4>Place the crawler domain validation here...</h4>
         </EuiTitle>
       </EuiPanel>
-    </NewSearchIndexTemplate>
+    </NewIndexTemplate>
   );
 };

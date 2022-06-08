@@ -7,7 +7,7 @@
 
 import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
-import { searchIndices, searchEngines } from '../../__mocks__';
+import { indices, searchEngines } from '../../__mocks__';
 
 import React from 'react';
 
@@ -19,24 +19,24 @@ import { AddContentEmptyPrompt } from '../../../shared/add_content_empty_prompt'
 import { ElasticsearchResources } from '../../../shared/elasticsearch_resources';
 import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 
-import { SearchIndices } from './search_indices';
+import { Indices } from './indices';
 
 const mockActions = {
   initPage: jest.fn(),
 };
 
-describe('SearchIndices', () => {
+describe('Indices', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
   describe('Empty state', () => {
     it('renders when both Search Indices and Search Engines empty', () => {
       setMockValues({
-        searchIndices: [],
+        indices: [],
         searchEngines: [],
       });
       setMockActions(mockActions);
-      const wrapper = shallow(<SearchIndices />);
+      const wrapper = shallow(<Indices />);
 
       expect(wrapper.find(AddContentEmptyPrompt)).toHaveLength(1);
       expect(wrapper.find(EuiBasicTable)).toHaveLength(0);
@@ -47,11 +47,11 @@ describe('SearchIndices', () => {
 
     it('renders complete empty state when only Search Indices empty', () => {
       setMockValues({
-        searchIndices: [],
+        indices: [],
         searchEngines,
       });
       setMockActions(mockActions);
-      const wrapper = shallow(<SearchIndices />);
+      const wrapper = shallow(<Indices />);
 
       expect(wrapper.find(AddContentEmptyPrompt)).toHaveLength(1);
       expect(wrapper.find(EuiBasicTable)).toHaveLength(0);
@@ -62,11 +62,11 @@ describe('SearchIndices', () => {
 
     it('renders when only Search Engines empty', () => {
       setMockValues({
-        searchIndices,
+        indices,
         searchEngines: [],
       });
       setMockActions(mockActions);
-      const wrapper = shallow(<SearchIndices />);
+      const wrapper = shallow(<Indices />);
 
       expect(wrapper.find(AddContentEmptyPrompt)).toHaveLength(0);
       expect(wrapper.find(EuiBasicTable)).toHaveLength(1);
@@ -78,12 +78,12 @@ describe('SearchIndices', () => {
 
   it('renders with Data', () => {
     setMockValues({
-      searchIndices,
+      indices,
       searchEngines,
     });
     setMockActions(mockActions);
 
-    const wrapper = shallow(<SearchIndices />);
+    const wrapper = shallow(<Indices />);
 
     expect(wrapper.find(AddContentEmptyPrompt)).toHaveLength(0);
     expect(wrapper.find(EuiBasicTable)).toHaveLength(1);

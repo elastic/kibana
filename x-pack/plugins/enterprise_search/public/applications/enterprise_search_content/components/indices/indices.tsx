@@ -27,25 +27,25 @@ import { ElasticsearchResources } from '../../../shared/elasticsearch_resources'
 import { GettingStartedSteps } from '../../../shared/getting_started_steps';
 import { EuiLinkTo, EuiButtonIconTo } from '../../../shared/react_router_helpers';
 
-import { SEARCH_INDEX_OVERVIEW_PATH, NEW_INDEX_PATH } from '../../routes';
-import { SearchIndex } from '../../types';
+import { INDEX_OVERVIEW_PATH, NEW_INDEX_PATH } from '../../routes';
+import { IIndex } from '../../types';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
-import { SearchIndicesLogic } from './search_indices_logic';
+import { IndicesLogic } from './indices_logic';
 
 export const baseBreadcrumbs = [
-  i18n.translate('xpack.enterpriseSearch.content.searchIndices.content.breadcrumb', {
+  i18n.translate('xpack.enterpriseSearch.content.indices.content.breadcrumb', {
     defaultMessage: 'Content',
   }),
-  i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.breadcrumb', {
+  i18n.translate('xpack.enterpriseSearch.content.indices.indices.breadcrumb', {
     defaultMessage: 'Search indices',
   }),
 ];
 
-export const SearchIndices: React.FC = () => {
-  const { initPage, searchEnginesLoadSuccess, searchIndicesLoadSuccess } =
-    useActions(SearchIndicesLogic);
-  const { searchIndices, searchEngines } = useValues(SearchIndicesLogic);
+export const Indices: React.FC = () => {
+  const { initPage, searchEnginesLoadSuccess, indicesLoadSuccess } =
+    useActions(IndicesLogic);
+  const { indices, searchEngines } = useValues(IndicesLogic);
 
   useEffect(() => {
     initPage();
@@ -55,7 +55,7 @@ export const SearchIndices: React.FC = () => {
   // @ts-ignore
   window.contentActions = {
     initPage,
-    searchIndicesLoadSuccess,
+    indicesLoadSuccess,
     searchEnginesLoadSuccess,
   };
 
@@ -63,15 +63,15 @@ export const SearchIndices: React.FC = () => {
   const columns = [
     {
       field: 'name',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.name.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.indices.name.columnTitle', {
         defaultMessage: 'Search index name',
       }),
       sortable: true,
       truncateText: true,
-      render: (name: string, { indexSlug }: SearchIndex) => (
+      render: (name: string, { indexSlug }: IIndex) => (
         <EuiLinkTo
           data-test-subj="search-index-link"
-          to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug })}
+          to={generatePath(INDEX_OVERVIEW_PATH, { indexSlug })}
         >
           {name}
         </EuiLinkTo>
@@ -79,7 +79,7 @@ export const SearchIndices: React.FC = () => {
     },
     {
       field: 'source_type',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.sourceType.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.indices.sourceType.columnTitle', {
         defaultMessage: 'Source type',
       }),
       sortable: true,
@@ -88,7 +88,7 @@ export const SearchIndices: React.FC = () => {
     {
       field: 'elasticsearch_index_name',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndices.elasticsearchIndexName.columnTitle',
+        'xpack.enterpriseSearch.content.indices.elasticsearchIndexName.columnTitle',
         {
           defaultMessage: 'Elasticsearch index name',
         }
@@ -99,7 +99,7 @@ export const SearchIndices: React.FC = () => {
     {
       field: 'search_engines',
       name: i18n.translate(
-        'xpack.enterpriseSearch.content.searchIndices.searchEngines.columnTitle',
+        'xpack.enterpriseSearch.content.indices.searchEngines.columnTitle',
         {
           defaultMessage: 'Attached search engines',
         }
@@ -108,7 +108,7 @@ export const SearchIndices: React.FC = () => {
     },
     {
       field: 'document_count',
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.docsCount.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.indices.docsCount.columnTitle', {
         defaultMessage: 'Documents',
       }),
       sortable: true,
@@ -116,16 +116,16 @@ export const SearchIndices: React.FC = () => {
       align: 'right' as HorizontalAlignment,
     },
     {
-      name: i18n.translate('xpack.enterpriseSearch.content.searchIndices.actions.columnTitle', {
+      name: i18n.translate('xpack.enterpriseSearch.content.indices.actions.columnTitle', {
         defaultMessage: 'Actions',
       }),
       actions: [
         {
-          render: ({ indexSlug }: SearchIndex) => (
+          render: ({ indexSlug }: IIndex) => (
             <EuiButtonIconTo
               iconType="eye"
               data-test-subj="view-search-index-button"
-              to={generatePath(SEARCH_INDEX_OVERVIEW_PATH, { indexSlug })}
+              to={generatePath(INDEX_OVERVIEW_PATH, { indexSlug })}
             />
           ),
         },
@@ -136,7 +136,7 @@ export const SearchIndices: React.FC = () => {
   const createNewIndexButton = (
     <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
       <EuiButton iconType="plusInCircle" color="primary" fill>
-        {i18n.translate('xpack.enterpriseSearch.content.searchIndices.create.buttonTitle', {
+        {i18n.translate('xpack.enterpriseSearch.content.indices.create.buttonTitle', {
           defaultMessage: 'Create new index',
         })}
       </EuiButton>
@@ -147,7 +147,7 @@ export const SearchIndices: React.FC = () => {
     <>
       <EuiTitle>
         <h2>
-          {i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.stepsTitle', {
+          {i18n.translate('xpack.enterpriseSearch.content.indices.indices.stepsTitle', {
             defaultMessage: 'Build beautiful search experiences with Enterprise Search',
           })}
         </h2>
@@ -155,7 +155,7 @@ export const SearchIndices: React.FC = () => {
       <EuiSpacer size="l" />
       <EuiFlexGroup>
         <EuiFlexItem>
-          <GettingStartedSteps step={searchIndices.length === 0 ? 'first' : 'second'} />
+          <GettingStartedSteps step={indices.length === 0 ? 'first' : 'second'} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ElasticsearchResources />
@@ -165,12 +165,12 @@ export const SearchIndices: React.FC = () => {
   );
 
   const pageTitle =
-    searchIndices.length !== 0
-      ? i18n.translate('xpack.enterpriseSearch.content.searchIndices.searchIndices.pageTitle', {
+    indices.length !== 0
+      ? i18n.translate('xpack.enterpriseSearch.content.indices.indices.pageTitle', {
           defaultMessage: 'Content',
         })
       : i18n.translate(
-          'xpack.enterpriseSearch.content.searchIndices.searchIndices.emptyPageTitle',
+          'xpack.enterpriseSearch.content.indices.indices.emptyPageTitle',
           {
             defaultMessage: 'Welcome to Enterprise Search',
           }
@@ -180,33 +180,33 @@ export const SearchIndices: React.FC = () => {
     <>
       <EnterpriseSearchContentPageTemplate
         pageChrome={baseBreadcrumbs}
-        pageViewTelemetry="Search indices"
+        pageViewTelemetry="Indices"
         isLoading={false}
         pageHeader={{
           pageTitle,
           rightSideItems: [createNewIndexButton],
         }}
       >
-        {searchIndices.length !== 0 ? (
+        {indices.length !== 0 ? (
           <>
             <EuiTitle>
               <h2>
                 {i18n.translate(
-                  'xpack.enterpriseSearch.content.searchIndices.searchIndices.tableTitle',
+                  'xpack.enterpriseSearch.content.indices.indices.tableTitle',
                   {
-                    defaultMessage: 'Search Indices',
+                    defaultMessage: 'Indices',
                   }
                 )}
               </h2>
             </EuiTitle>
             <EuiSpacer size="l" />
-            <EuiBasicTable items={searchIndices} columns={columns} />
+            <EuiBasicTable items={indices} columns={columns} />
           </>
         ) : (
           <AddContentEmptyPrompt />
         )}
         <EuiSpacer size="xxl" />
-        {(searchEngines.length === 0 || searchIndices.length === 0) && engineSteps}
+        {(searchEngines.length === 0 || indices.length === 0) && engineSteps}
       </EnterpriseSearchContentPageTemplate>
       )
     </>

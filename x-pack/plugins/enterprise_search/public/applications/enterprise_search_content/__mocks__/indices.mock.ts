@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { SearchIndex } from '../types';
+import { IIndex } from '../types';
 
-export const searchIndices = [
+export const indices = [
   {
     name: 'Our API Index',
     indexSlug: 'index-1',
@@ -40,4 +40,4 @@ export const searchIndices = [
     search_engines: '--',
     document_count: 1,
   },
-] as SearchIndex[];
+] as IIndex[];

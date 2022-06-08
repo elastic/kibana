@@ -22,17 +22,17 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getEnterpriseSearchUrl } from '../../../shared/enterprise_search_url/external_url';
 
 import { DOCUMENTS_API_JSON_EXAMPLE } from './constants';
-import { NewSearchIndexLogic } from './new_search_index_logic';
-import { NewSearchIndexTemplate } from './new_search_index_template';
+import { NewIndexLogic } from './new_index_logic';
+import { NewIndexTemplate } from './new_index_template';
 
 export const MethodApi: React.FC = () => {
-  const { name } = useValues(NewSearchIndexLogic);
+  const { name } = useValues(NewIndexLogic);
   const apiKey = 1212312313; // TODO change this
 
-  const searchIndexApiUrl = getEnterpriseSearchUrl('/api/ent/v1/search_indices/');
+  const searchIndexApiUrl = getEnterpriseSearchUrl('/api/ent/v1/indices/');
 
   return (
-    <NewSearchIndexTemplate
+    <NewIndexTemplate
       description={
         <EuiText size="s">
           <FormattedMessage
@@ -78,6 +78,6 @@ curl -X POST '${searchIndexApiUrl}${name}/document' \\
           </>
         )}
       </EuiPanel>
-    </NewSearchIndexTemplate>
+    </NewIndexTemplate>
   );
 };
