@@ -417,7 +417,7 @@
             "description": [],
             "signature": [
               "(criteria: ",
-              "Criteria",
+              "CriteriaWithPagination",
               "<V>) => void"
             ],
             "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
@@ -431,7 +431,7 @@
                 "label": "criteria",
                 "description": [],
                 "signature": [
-                  "Criteria",
+                  "CriteriaWithPagination",
                   "<V>"
                 ],
                 "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
@@ -3890,6 +3890,19 @@
           },
           {
             "parentPluginId": "kibanaReact",
+            "id": "def-public.TableListViewState.pagination",
+            "type": "Object",
+            "tags": [],
+            "label": "pagination",
+            "description": [],
+            "signature": [
+              "Pagination"
+            ],
+            "path": "src/plugins/kibana_react/public/table_list_view/table_list_view.tsx",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
             "id": "def-public.TableListViewState.tableSort",
             "type": "Object",
             "tags": [],
@@ -4589,7 +4602,9 @@
             "section": "def-public.ThemeServiceStart",
             "text": "ThemeServiceStart"
           },
-          " | undefined; injectedMetadata?: { getInjectedVar: (name: string, defaultValue?: any) => unknown; } | undefined; }"
+          " | undefined; injectedMetadata?: ",
+          "InjectedMetadataStart",
+          " | undefined; }"
         ],
         "path": "src/plugins/kibana_react/public/context/types.ts",
         "deprecated": false,
