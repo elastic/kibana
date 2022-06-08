@@ -33,7 +33,6 @@ describe('links', () => {
     coreMockStarted = coreMock.createStart();
     fakeHttpServices = coreMockStarted.http as jest.Mocked<HttpSetup>;
     fakeHttpServices.get.mockClear();
-    fakeHttpServices.post.mockClear();
     getPlugins = (roles) =>
       ({
         security: {
