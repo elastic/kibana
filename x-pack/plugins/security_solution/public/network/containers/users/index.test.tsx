@@ -9,7 +9,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../common/mock';
 import { ID, useNetworkUsers } from '.';
 import { NetworkType } from '../../store/model';
-import { FlowTarget } from '../../../../common/search_strategy';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
 describe('useNetworkUsers', () => {
   it('skip = true will cancel any running request', () => {
@@ -18,7 +18,7 @@ describe('useNetworkUsers', () => {
       docValueFields: [],
       id: `${ID}-${NetworkType.page}`,
       ip: '1.1.1.1',
-      flowTarget: FlowTarget.source,
+      flowTarget: FlowTargetSourceDest.source,
       startDate: '2020-07-07T08:20:18.966Z',
       endDate: '2020-07-08T08:20:18.966Z',
       indexNames: ['cool'],

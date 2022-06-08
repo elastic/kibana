@@ -19,7 +19,7 @@ import {
   UsersQueryTabBody,
 } from '../../components/query_tabs';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
-import { FlowTarget, LastEventIndexKey } from '../../../../common/search_strategy';
+import { FlowTargetSourceDest, LastEventIndexKey } from '../../../../common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -57,7 +57,7 @@ const NetworkDetailsComponent: React.FC = () => {
   const { to, from, setQuery, isInitializing } = useGlobalTime();
   const { detailName, flowTarget } = useParams<{
     detailName: string;
-    flowTarget: FlowTarget;
+    flowTarget: FlowTargetSourceDest;
   }>();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
@@ -177,7 +177,7 @@ const NetworkDetailsComponent: React.FC = () => {
                 <IPsQueryTabBody
                   endDate={to}
                   filterQuery={filterQuery}
-                  flowTarget={FlowTarget.source}
+                  flowTarget={FlowTargetSourceDest.source}
                   indexNames={selectedPatterns}
                   indexPattern={indexPattern}
                   ip={ip}
@@ -192,7 +192,7 @@ const NetworkDetailsComponent: React.FC = () => {
                 <IPsQueryTabBody
                   endDate={to}
                   filterQuery={filterQuery}
-                  flowTarget={FlowTarget.destination}
+                  flowTarget={FlowTargetSourceDest.destination}
                   indexNames={selectedPatterns}
                   indexPattern={indexPattern}
                   ip={ip}
@@ -211,7 +211,7 @@ const NetworkDetailsComponent: React.FC = () => {
                 <CountriesQueryTabBody
                   endDate={to}
                   filterQuery={filterQuery}
-                  flowTarget={FlowTarget.source}
+                  flowTarget={FlowTargetSourceDest.source}
                   indexNames={selectedPatterns}
                   indexPattern={indexPattern}
                   ip={ip}
@@ -226,7 +226,7 @@ const NetworkDetailsComponent: React.FC = () => {
                 <CountriesQueryTabBody
                   endDate={to}
                   filterQuery={filterQuery}
-                  flowTarget={FlowTarget.destination}
+                  flowTarget={FlowTargetSourceDest.destination}
                   indexNames={selectedPatterns}
                   indexPattern={indexPattern}
                   ip={ip}

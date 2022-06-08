@@ -11,7 +11,7 @@ import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 import { networkModel } from '../../store';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { NarrowDateRange } from '../../../common/components/ml/types';
-import { FlowTarget } from '../../../../common/search_strategy';
+import { FlowTargetSourceDest } from '../../../../common/search_strategy';
 
 interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   endDate: string;
@@ -29,12 +29,12 @@ export type NetworkComponentQueryProps = QueryTabBodyProps & {
 };
 
 export type IPsQueryTabBodyProps = QueryTabBodyProps & {
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
   indexPattern: DataViewBase;
 };
 
 export type FTQueryTabBodyProps = QueryTabBodyProps & {
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
 };
 
 export type IPQueryTabBodyProps = FTQueryTabBodyProps & {

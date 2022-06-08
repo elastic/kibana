@@ -20,7 +20,7 @@ import { createFilter } from '../../../common/containers/helpers';
 import { generateTablePaginationOptions } from '../../../common/components/paginated_table/helpers';
 import { networkSelectors } from '../../store';
 import {
-  FlowTarget,
+  FlowTargetSourceDest,
   NetworkQueries,
   NetworkUsersRequestOptions,
   NetworkUsersStrategyResponse,
@@ -51,7 +51,7 @@ interface UseNetworkUsers {
   endDate: string;
   startDate: string;
   skip: boolean;
-  flowTarget: FlowTarget;
+  flowTarget: FlowTargetSourceDest;
   ip: string;
 }
 
