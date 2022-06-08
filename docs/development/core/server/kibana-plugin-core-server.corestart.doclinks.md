@@ -4,7 +4,6 @@
 
 ## CoreStart.docLinks property
 
-[DocLinksServiceStart](./kibana-plugin-core-server.doclinksservicestart.md)
 
 <b>Signature:</b>
 
