@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export * from './register_routes';
+import { IRouter } from '@kbn/core/server';
+import { DataRequestHandlerContext } from '@kbn/data-plugin/server';
+import { registerSourceListRoute } from './source_list';
+
+export function registerRoutes(router: IRouter<DataRequestHandlerContext>) {
+  registerSourceListRoute(router);
+}
