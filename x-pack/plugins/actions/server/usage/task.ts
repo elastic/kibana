@@ -137,5 +137,5 @@ export function telemetryTaskRunner(
 }
 
 function getNextMidnight() {
-  return moment().add(1, 'm').startOf('m').toDate();
+  return moment().add(1, 'd').startOf('d').toDate();
 }
