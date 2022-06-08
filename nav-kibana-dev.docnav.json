@@ -184,7 +184,8 @@
             { "id": "kibDevDocsOpsTypeSummarizer" },
             { "id": "kibDevDocsOpsBabelPluginSyntheticPackages" },
             { "id": "kibDevDocsOpsUiSharedDepsNpm" },
-            { "id": "kibDevDocsOpsUiSharedDepsSrc" }
+            { "id": "kibDevDocsOpsUiSharedDepsSrc" },
+            { "id": "kibDevDocsOpsPluginDiscovery" }
           ]
         },
         {
@@ -206,7 +207,8 @@
             { "id": "kibDevDocsOpsAmbientUiTypes" },
             { "id": "kibDevDocsOpsTestSubjSelector" },
             { "id": "kibDevDocsOpsBazelRunner" },
-            { "id": "kibDevDocsOpsCliDevMode" }
+            { "id": "kibDevDocsOpsCliDevMode" },
+            { "id": "kibDevDocsOpsEs" }
           ]
         }
       ]

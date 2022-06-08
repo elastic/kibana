@@ -100,15 +100,9 @@ export {
   CSV_MIME_TYPE,
 } from './exports';
 export type {
-  IIndexPatternFieldList,
-  FieldFormatMap,
-  RuntimeType,
-  RuntimeField,
   DataViewAttributes,
   FieldAttrs,
   FieldAttrSet,
-  OnNotification,
-  OnError,
   UiSettingsCommon,
   GetFieldsOptions,
   IDataViewsApiClient,
@@ -134,7 +128,6 @@ export {
   fieldList,
   DataViewField,
   DataViewType,
-  IndexPatternsService,
   DataViewsService,
   DataView,
   DuplicateDataViewError,
