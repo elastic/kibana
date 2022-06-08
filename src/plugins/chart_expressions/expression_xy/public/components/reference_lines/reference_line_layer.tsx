@@ -63,7 +63,8 @@ export const ReferenceLineLayer: FC<ReferenceLineLayerProps> = ({
       ({ forAccessor }) => forAccessor === decorationConfig.forAccessor
     );
 
-    const shouldCheckNextReferenceLine = indexFromSameType < yDecorationsWithSameDirection.length - 1;
+    const shouldCheckNextReferenceLine =
+      indexFromSameType < yDecorationsWithSameDirection.length - 1;
 
     const nextValue = shouldCheckNextReferenceLine
       ? row[yDecorationsWithSameDirection[indexFromSameType + 1].forAccessor]

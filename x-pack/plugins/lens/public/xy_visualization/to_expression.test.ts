@@ -494,8 +494,9 @@ describe('#toExpression', () => {
     ) as Ast;
 
     function getYConfigColorForLayer(ast: Ast, index: number) {
-      return ((ast.chain[0].arguments.layers[index] as Ast).chain[0].arguments.decorations[0] as Ast)
-        .chain[0].arguments.color;
+      return (
+        (ast.chain[0].arguments.layers[index] as Ast).chain[0].arguments.decorations[0] as Ast
+      ).chain[0].arguments.color;
     }
     expect(getYConfigColorForLayer(expression, 0)).toEqual([]);
     expect(getYConfigColorForLayer(expression, 1)).toEqual([defaultReferenceLineColor]);
