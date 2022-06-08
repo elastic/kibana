@@ -1483,10 +1483,10 @@
     "@elastic/transport" "^8.0.2"
     tslib "^2.3.0"
 
-"@elastic/ems-client@8.3.2":
-  version "8.3.2"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.3.2.tgz#a12eafcfd9ac8d3068da78a5a77503ea8a89f67c"
-  integrity sha512-81u+Z7+4Y2Fu+sTl9QOKdG3SVeCzzpfyCsHFR8X0V2WFCpQa+SU4sSN9WhdLHz/pe9oi6Gtt5eFMF90TOO/ckg==
+"@elastic/ems-client@8.3.3":
+  version "8.3.3"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.3.3.tgz#16ddd582e1029055a5a77e7bebbc5b57b3246ff7"
+  integrity sha512-vcgPwnAw7QjcR68IddErobZqwJdH0T4h/6U4swUR3XEF+9jojNZnxBkvM3mEV9Z7QLQxDprebJJu04d37lzlUw==
   dependencies:
     "@types/geojson" "^7946.0.7"
     "@types/lru-cache" "^5.1.0"
@@ -1503,10 +1503,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@55.1.4":
-  version "55.1.4"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-55.1.4.tgz#c056aea2467d3ad4bbc2b9ad3156957d7e84a2e6"
-  integrity sha512-K8KBQa+esI+pILsUxUvKdQZ/ruB7SV/IXN3nE4TTyZ7sfzuIV0rkxg2g3+dmXmUP73PkQOI/THpFuUiiippmvQ==
+"@elastic/eui@58.0.0":
+  version "58.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-58.0.0.tgz#12aad69385edbd56253a70108ed34f8ef572a980"
+  integrity sha512-LE6yzfu2PfiPVcgyiTURm1ypYtLiVX8YlAgypqN3f6QB89Q1UBeb2njeqyBubzpzOpC/OU1a98CgWy2YWl+0mg==
   dependencies:
     "@types/chroma-js" "^2.0.0"
     "@types/lodash" "^4.14.160"
@@ -3001,6 +3001,34 @@
   uid ""
 
 "@kbn/core-base-server-internal@link:bazel-bin/packages/core/base/core-base-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-base-server-mocks@link:bazel-bin/packages/core/base/core-base-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-doc-links-browser-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-doc-links-browser-mocks@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-doc-links-browser@link:bazel-bin/packages/core/doc-links/core-doc-links-browser":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-doc-links-server-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-server-internal":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-doc-links-server-mocks@link:bazel-bin/packages/core/doc-links/core-doc-links-server-mocks":
+  version "0.0.0"
+  uid ""
+
+"@kbn/core-doc-links-server@link:bazel-bin/packages/core/doc-links/core-doc-links-server":
   version "0.0.0"
   uid ""
 
@@ -6298,11 +6326,39 @@
   version "0.0.0"
   uid ""
 
+"@types/kbn__core-base-server-mocks@link:bazel-bin/packages/core/base/core-base-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
 "@types/kbn__core-base-server@link:bazel-bin/packages/core/base/core-base-server/npm_module_types":
   version "0.0.0"
   uid ""
 
 "@types/kbn__core-common-internal-base@link:bazel-bin/packages/core/common/internal-base/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-doc-links-browser-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-doc-links-browser-mocks@link:bazel-bin/packages/core/doc-links/core-doc-links-browser-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-doc-links-browser@link:bazel-bin/packages/core/doc-links/core-doc-links-browser/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-doc-links-server-internal@link:bazel-bin/packages/core/doc-links/core-doc-links-server-internal/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-doc-links-server-mocks@link:bazel-bin/packages/core/doc-links/core-doc-links-server-mocks/npm_module_types":
+  version "0.0.0"
+  uid ""
+
+"@types/kbn__core-doc-links-server@link:bazel-bin/packages/core/doc-links/core-doc-links-server/npm_module_types":
   version "0.0.0"
   uid ""
 
