@@ -28,9 +28,11 @@ const BASE64_FRAME_ID_LENGTH = 32;
 
 export interface EncodedStackTrace {
   // This field is a base64-encoded byte string. The string represents a
-  // serialized list of frame IDs. Each frame ID is composed of two
-  // concatenated values: a 16-byte file ID and an 8-byte address or line
-  // number (depending on the context of the downstream reader).
+  // serialized list of frame IDs in which the order of frames are
+  // reversed to allow for prefix compression (leaf frame last). Each
+  // frame ID is composed of two concatenated values: a 16-byte file ID
+  // and an 8-byte address or line number (depending on the context of
+  // the downstream reader).
   //
   //         Frame ID #1               Frame ID #2
   // +----------------+--------+----------------+--------+----
@@ -41,6 +43,44 @@ export interface EncodedStackTrace {
   // This field is a run-length encoding of a list of uint8s. The order is
   // reversed from the original input.
   Type: string;
+}
+
+// runLengthEncodeReverse encodes the reversed input array using a
+// run-length encoding.
+//
+// The input is a list of uint8s. The output is a binary stream of
+// 2-byte pairs (first byte is the length and the second byte is the
+// binary representation of the object) in reverse order.
+//
+// E.g. uint8 array [2, 2, 0, 0, 0, 0, 0] is converted into the byte
+// array [5, 0, 2, 2].
+export function runLengthEncodeReverse(input: number[]): Buffer {
+  const output: number[] = [];
+
+  if (input.length === 0) {
+    return Buffer.from(output);
+  }
+
+  let count = 0;
+  let current = input[input.length - 1];
+
+  for (let i = input.length - 2; i >= 0; i--) {
+    const next = input[i];
+
+    if (next === current && count < 255) {
+      count++;
+      continue;
+    }
+
+    output.push(count + 1, current);
+
+    count = 0;
+    current = next;
+  }
+
+  output.push(count + 1, current);
+
+  return Buffer.from(output);
 }
 
 // runLengthDecodeReverse decodes a run-length encoding for the reversed input array.
@@ -95,7 +135,7 @@ export function decodeStackTrace(input: EncodedStackTrace): StackTrace {
     const frameID = input.FrameID.slice(i, i + BASE64_FRAME_ID_LENGTH);
     const fileIDChunk = frameID.slice(0, BASE64_FILE_ID_LENGTH);
     const fileID = fileIDChunkToFileIDCache.get(fileIDChunk) as string;
-    const j = Math.floor(i / BASE64_FRAME_ID_LENGTH);
+    const j = countsFrameIDs - Math.floor(i / BASE64_FRAME_ID_LENGTH) - 1;
 
     frameIDs[j] = frameID;
 

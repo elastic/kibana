@@ -12,11 +12,16 @@ import {
   compareFrameGroup,
   createStackFrameMetadata,
   defaultGroupBy,
+  Executable,
+  FileID,
   FrameGroup,
   FrameGroupID,
   groupStackFrameMetadataByStackTrace,
   hashFrameGroup,
+  StackFrame,
+  StackFrameID,
   StackFrameMetadata,
+  StackTrace,
   StackTraceID,
 } from './profiling';
 
