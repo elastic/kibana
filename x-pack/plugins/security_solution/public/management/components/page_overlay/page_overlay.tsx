@@ -20,6 +20,7 @@ import { EuiFocusTrap, EuiPortal } from '@elastic/eui';
 import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
 import { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { TIMELINE_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
 import {
   SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
@@ -78,7 +79,7 @@ const PAGE_OVERLAY_CSS_CLASSNAME = 'securitySolution-pageOverlay';
 const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
 const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
 
-const PageOverlayGlobalStyles = createGlobalStyle`
+const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   body.${PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME} {
     overflow: hidden;
   }
