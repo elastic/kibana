@@ -16,7 +16,6 @@ import { isEqual } from 'lodash/fp';
 import React, { useCallback } from 'react';
 import styled from 'styled-components';
 import * as i18n from '../../translations';
-import { SEARCH_CAPABILITIES_TOUR_ANCHOR } from '../feature_tour/rules_feature_tour';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from './tags_filter_popover';
 
@@ -81,7 +80,6 @@ const RulesTableFiltersComponent = ({
     <FilterWrapper gutterSize="m" justifyContent="flexEnd">
       <SearchBarWrapper grow>
         <EuiFieldSearch
-          id={SEARCH_CAPABILITIES_TOUR_ANCHOR}
           aria-label={i18n.SEARCH_RULES}
           fullWidth
           incremental={false}
