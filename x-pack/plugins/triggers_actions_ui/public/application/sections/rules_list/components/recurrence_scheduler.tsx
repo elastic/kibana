@@ -6,7 +6,7 @@
  */
 
 import { invert, mapValues } from 'lodash';
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import moment, { Moment } from 'moment';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -25,6 +25,12 @@ import { i18nMonthDayDate } from '../../../lib/i18n_month_day_date';
 import { RRuleFrequency, RecurrenceSchedule } from '../../../../types';
 
 const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
+
+const RECURRENCE_END_OPTIONS = [
+  { id: 'never', label: 'Never' },
+  { id: 'ondate', label: 'On date' },
+  { id: 'afterx', label: 'After {x}' },
+];
 
 interface ComponentOpts {
   startDate: Moment | null;
@@ -47,7 +53,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
   onChange,
   initialState,
 }) => {
-  const [hasInitialized, setHasInitialized] = useState(false);
+  const hasInitialized = useRef(false);
   const [frequency, setFrequency] = useState<RRuleFrequency | 'CUSTOM'>(RRuleFrequency.DAILY);
   const [recurrenceEnds, setRecurrenceEnds] = useState('never');
 
@@ -73,7 +79,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
   }, [disableDailyOption, frequency]);
 
   useEffect(() => {
-    if (initialState && !hasInitialized) {
+    if (initialState && !hasInitialized.current) {
       const isCustomFrequency =
         initialState.interval > 1 || (initialState.byweekday ?? []).length > 1;
       setFrequency(isCustomFrequency ? 'CUSTOM' : initialState.freq);
@@ -89,8 +95,8 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
         setOccurrrences(initialState.count);
       }
     }
-    setHasInitialized(true);
-  }, [initialState, hasInitialized]);
+    hasInitialized.current = true;
+  }, [initialState]);
 
   const { repeatOptions, rrulePresets } = useMemo(() => {
     if (!startDate) {
@@ -224,11 +230,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
             legend="Recurrence ends"
             idSelected={recurrenceEnds}
             onChange={setRecurrenceEnds}
-            options={[
-              { id: 'never', label: 'Never' },
-              { id: 'ondate', label: 'On date' },
-              { id: 'afterx', label: 'After {x}' },
-            ]}
+            options={RECURRENCE_END_OPTIONS}
           />
         </EuiFormRow>
         {recurrenceEnds === 'ondate' && (
@@ -312,13 +314,26 @@ const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps> = ({
       : 'day'
   );
 
-  const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = useMemo(
-    () =>
-      startDate
-        ? getWeekdayInfo(startDate)
-        : { dayOfWeek: null, nthWeekdayOfMonth: null, isLastOfMonth: false },
-    [startDate]
-  );
+  const monthlyRecurDayOptions = useMemo(() => {
+    if (!startDate) return [];
+    const { dayOfWeek, nthWeekdayOfMonth, isLastOfMonth } = getWeekdayInfo(startDate);
+    return [
+      {
+        id: 'day',
+        label: i18n.translate(
+          'xpack.triggersActionsUI.ruleSnoozeScheduler.repeatOnMonthlyDayNumber',
+          {
+            defaultMessage: 'On day {dayNumber}',
+            values: { dayNumber: startDate.date() },
+          }
+        ),
+      },
+      {
+        id: 'weekday',
+        label: i18nNthWeekdayShort(dayOfWeek!)[isLastOfMonth ? 0 : nthWeekdayOfMonth!],
+      },
+    ];
+  }, [startDate]);
 
   useEffect(() => {
     if (initialStartDate !== startDate) setByweekday(getInitialByweekday([], startDate));
@@ -363,6 +378,40 @@ const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps> = ({
     [byweekday, setByweekday]
   );
 
+  const endControlOptions = useMemo(
+    () => [
+      {
+        text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurDay', {
+          defaultMessage: '{interval, plural, one {day} other {days}}',
+          values: { interval },
+        }),
+        value: RRuleFrequency.DAILY,
+      },
+      {
+        text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurWeek', {
+          defaultMessage: '{interval, plural, one {week} other {weeks}}',
+          values: { interval },
+        }),
+        value: RRuleFrequency.WEEKLY,
+      },
+      {
+        text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurMonth', {
+          defaultMessage: '{interval, plural, one {month} other {months}}',
+          values: { interval },
+        }),
+        value: RRuleFrequency.MONTHLY,
+      },
+      {
+        text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurYear', {
+          defaultMessage: '{interval, plural, one {year} other {years}}',
+          values: { interval },
+        }),
+        value: RRuleFrequency.YEARLY,
+      },
+    ],
+    [interval]
+  );
+
   return (
     <>
       <EuiFormRowWithDelimitedFixer style={{ alignItems: 'center' }} fullWidth label=" ">
@@ -387,36 +436,7 @@ const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps> = ({
             <EuiSelect
               onChange={(e) => setFrequency(Number(e.target.value))}
               value={frequency}
-              options={[
-                {
-                  text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurDay', {
-                    defaultMessage: '{interval, plural, one {day} other {days}}',
-                    values: { interval },
-                  }),
-                  value: RRuleFrequency.DAILY,
-                },
-                {
-                  text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurWeek', {
-                    defaultMessage: '{interval, plural, one {week} other {weeks}}',
-                    values: { interval },
-                  }),
-                  value: RRuleFrequency.WEEKLY,
-                },
-                {
-                  text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurMonth', {
-                    defaultMessage: '{interval, plural, one {month} other {months}}',
-                    values: { interval },
-                  }),
-                  value: RRuleFrequency.MONTHLY,
-                },
-                {
-                  text: i18n.translate('xpack.triggersActionsUI.ruleSnoozeScheduler.recurYear', {
-                    defaultMessage: '{interval, plural, one {year} other {years}}',
-                    values: { interval },
-                  }),
-                  value: RRuleFrequency.YEARLY,
-                },
-              ]}
+              options={endControlOptions}
             />
           }
         />
@@ -451,22 +471,7 @@ const CustomRecurrenceScheduler: React.FC<CustomRecurrenceSchedulerProps> = ({
             legend="Repeat on weekday or month day"
             idSelected={monthlyRecurDay}
             onChange={setMonthlyRecurDay}
-            options={[
-              {
-                id: 'day',
-                label: i18n.translate(
-                  'xpack.triggersActionsUI.ruleSnoozeScheduler.repeatOnMonthlyDayNumber',
-                  {
-                    defaultMessage: 'On day {dayNumber}',
-                    values: { dayNumber: startDate.date() },
-                  }
-                ),
-              },
-              {
-                id: 'weekday',
-                label: i18nNthWeekdayShort(dayOfWeek!)[isLastOfMonth ? 0 : nthWeekdayOfMonth!],
-              },
-            ]}
+            options={monthlyRecurDayOptions}
           />
         </EuiFormRow>
       )}
