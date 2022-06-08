@@ -35,9 +35,8 @@ const ConsoleWindow = styled.div`
     }
 
     &-container {
-      padding: ${({ theme: { eui } }) => eui.euiSizeL}
-        ${({ theme: { eui } }) => eui.euiSizeL} ${({ theme: { eui } }) => eui.euiSizeS}
-        ${({ theme: { eui } }) => eui.euiSizeL};
+      padding: ${({ theme: { eui } }) => eui.euiSizeL} ${({ theme: { eui } }) => eui.euiSizeL}
+        ${({ theme: { eui } }) => eui.euiSizeS} ${({ theme: { eui } }) => eui.euiSizeL};
     }
 
     &-header {
