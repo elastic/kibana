@@ -20,7 +20,7 @@ export type {
   User,
   UserProfile,
   UserData,
-  UserAvatar,
+  UserAvatarData,
   UserInfo,
   ApiKey,
   UserRealm,

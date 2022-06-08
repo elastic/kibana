@@ -12,8 +12,18 @@ import type { User } from './user';
 
 const REALMS_ELIGIBLE_FOR_PASSWORD_CHANGE = ['reserved', 'native'];
 
+/**
+ * An Elasticsearch realm that was used to resolve and authenticate the user.
+ */
 export interface UserRealm {
+  /**
+   * Arbitrary name of the security realm.
+   */
   name: string;
+
+  /**
+   * Type of the security realm (file, native, saml etc.).
+   */
   type: string;
 }
 

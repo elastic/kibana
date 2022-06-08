@@ -31,7 +31,10 @@ describe('accountManagementApp', () => {
       application,
       getStartServices,
       authc,
-      apiClients: { userProfiles: new UserProfileAPIClient(http), users: new UserAPIClient(http) },
+      securityApiClients: {
+        userProfiles: new UserProfileAPIClient(http),
+        users: new UserAPIClient(http),
+      },
     });
 
     expect(application.register).toHaveBeenCalledTimes(1);
@@ -54,7 +57,10 @@ describe('accountManagementApp', () => {
       application,
       authc,
       getStartServices,
-      apiClients: { userProfiles: new UserProfileAPIClient(http), users: new UserAPIClient(http) },
+      securityApiClients: {
+        userProfiles: new UserProfileAPIClient(http),
+        users: new UserAPIClient(http),
+      },
     });
 
     const [[{ mount }]] = application.register.mock.calls;

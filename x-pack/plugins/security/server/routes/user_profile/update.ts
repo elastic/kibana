@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import type { RouteDefinitionParams } from '..';
 import { wrapIntoCustomErrorResponse } from '../../errors';
+import { getPrintableSessionId } from '../../session_management';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineUpdateUserProfileDataRoute({
@@ -33,15 +34,17 @@ export function defineUpdateUserProfileDataRoute({
       }
 
       if (!session.userProfileId) {
-        logger.warn(`User profile missing from current session. (sid: ${session.sid.slice(-10)})`);
+        logger.warn(
+          `User profile missing from current session. (sid: ${getPrintableSessionId(session.sid)})`
+        );
         return response.notFound();
       }
 
       const currentUser = getAuthenticationService().getCurrentUser(request);
       if (currentUser?.elastic_cloud_user) {
         logger.warn(
-          `Elastic Cloud SSO users aren't allowed to update profiles in Kibana. (sid: ${session.sid.slice(
-            -10
+          `Elastic Cloud SSO users aren't allowed to update profiles in Kibana. (sid: ${getPrintableSessionId(
+            session.sid
           )})`
         );
         return response.forbidden();

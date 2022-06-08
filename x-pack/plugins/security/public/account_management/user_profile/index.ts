@@ -6,8 +6,6 @@
  */
 
 export { UserProfile } from './user_profile';
-export { UserAvatar } from './user_avatar';
 
 export type { UserProfileProps, UserProfileFormValues } from './user_profile';
-export type { UserAvatarProps } from './user_avatar';
 export { UserProfileAPIClient } from './user_profile_api_client';

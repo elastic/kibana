@@ -58,7 +58,7 @@ describe('<AccountManagementPage>', () => {
         theme$={theme$}
         history={history}
         authc={authc}
-        apiClients={{
+        securityApiClients={{
           userProfiles: new UserProfileAPIClient(coreStart.http),
           users: new UserAPIClient(coreStart.http),
         }}

@@ -19,15 +19,15 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 
 import type { SecurityLicense } from '../../common/licensing';
 import type { AuthenticationServiceSetup } from '../authentication';
-import type { ApiClients } from '../components';
-import { ApiClientsProvider, AuthenticationProvider } from '../components';
+import type { SecurityApiClients } from '../components';
+import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
 import type { UserMenuLink } from './nav_control_component';
 import { SecurityNavControl } from './nav_control_component';
 
 interface SetupDeps {
   securityLicense: SecurityLicense;
   logoutUrl: string;
-  apiClients: ApiClients;
+  securityApiClients: SecurityApiClients;
 }
 
 interface StartDeps {
@@ -50,7 +50,7 @@ export interface SecurityNavControlServiceStart {
 export class SecurityNavControlService {
   private securityLicense!: SecurityLicense;
   private logoutUrl!: string;
-  private apiClients!: ApiClients;
+  private securityApiClients!: SecurityApiClients;
 
   private navControlRegistered!: boolean;
 
@@ -59,10 +59,10 @@ export class SecurityNavControlService {
   private readonly stop$ = new ReplaySubject<void>(1);
   private userMenuLinks$ = new BehaviorSubject<UserMenuLink[]>([]);
 
-  public setup({ securityLicense, logoutUrl, apiClients }: SetupDeps) {
+  public setup({ securityLicense, logoutUrl, securityApiClients }: SetupDeps) {
     this.securityLicense = securityLicense;
     this.logoutUrl = logoutUrl;
-    this.apiClients = apiClients;
+    this.securityApiClients = securityApiClients;
   }
 
   public start({ core, authc }: StartDeps): SecurityNavControlServiceStart {
@@ -121,7 +121,12 @@ export class SecurityNavControlService {
       order: 2000,
       mount: (element: HTMLElement) => {
         ReactDOM.render(
-          <Providers services={core} authc={authc} theme$={theme$} apiClients={this.apiClients}>
+          <Providers
+            services={core}
+            authc={authc}
+            theme$={theme$}
+            securityApiClients={this.securityApiClients}
+          >
             <SecurityNavControl
               editProfileUrl={core.http.basePath.prepend('/security/account')}
               logoutUrl={this.logoutUrl}
@@ -146,7 +151,7 @@ export class SecurityNavControlService {
 export interface ProvidersProps {
   authc: AuthenticationServiceSetup;
   services: CoreStart;
-  apiClients: ApiClients;
+  securityApiClients: SecurityApiClients;
   theme$: Observable<CoreTheme>;
 }
 
@@ -154,16 +159,16 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
   authc,
   services,
   theme$,
-  apiClients,
+  securityApiClients,
   children,
 }) => (
   <KibanaContextProvider services={services}>
     <AuthenticationProvider authc={authc}>
-      <ApiClientsProvider {...apiClients}>
+      <SecurityApiClientsProvider {...securityApiClients}>
         <I18nProvider>
           <KibanaThemeProvider theme$={theme$}>{children}</KibanaThemeProvider>
         </I18nProvider>
-      </ApiClientsProvider>
+      </SecurityApiClientsProvider>
     </AuthenticationProvider>
   </KibanaContextProvider>
 );

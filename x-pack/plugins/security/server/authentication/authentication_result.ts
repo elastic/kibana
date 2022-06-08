@@ -53,17 +53,23 @@ interface AuthenticationOptions {
   userProfileGrant?: UserProfileGrant;
 }
 
-export type SucceededAuthenticationResultOptions = Pick<
-  AuthenticationOptions,
-  'authHeaders' | 'userProfileGrant' | 'authResponseHeaders' | 'state'
->;
+export interface SucceededAuthenticationResultOptions {
+  state?: unknown;
+  authHeaders?: AuthHeaders;
+  authResponseHeaders?: AuthHeaders;
+  userProfileGrant?: UserProfileGrant;
+}
 
-export type RedirectedAuthenticationResultOptions = Pick<
-  AuthenticationOptions,
-  'user' | 'userProfileGrant' | 'authResponseHeaders' | 'state'
->;
+export interface RedirectedAuthenticationResultOptions {
+  state?: unknown;
+  user?: AuthenticatedUser;
+  authResponseHeaders?: AuthHeaders;
+  userProfileGrant?: UserProfileGrant;
+}
 
-export type FailedAuthenticationResultOptions = Pick<AuthenticationOptions, 'authResponseHeaders'>;
+export interface FailedAuthenticationResultOptions {
+  authResponseHeaders?: AuthHeaders;
+}
 
 /**
  * Represents the result of an authentication attempt.

@@ -59,7 +59,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
-      apiClients: mockApiClients(coreStart.http),
+      securityApiClients: mockApiClients(coreStart.http),
     });
 
     coreStart.chrome.navControls.registerRight = jest.fn();
@@ -126,7 +126,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
-      apiClients: mockApiClients(coreStart.http),
+      securityApiClients: mockApiClients(coreStart.http),
     });
 
     navControlService.start({ core: coreStart, authc });
@@ -146,7 +146,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
-      apiClients: mockApiClients(coreStart.http),
+      securityApiClients: mockApiClients(coreStart.http),
     });
 
     coreStart.http.anonymousPaths.isAnonymous.mockReturnValue(true);
@@ -163,7 +163,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
-      apiClients: mockApiClients(coreStart.http),
+      securityApiClients: mockApiClients(coreStart.http),
     });
 
     navControlService.start({ core: coreStart, authc });
@@ -185,7 +185,7 @@ describe('SecurityNavControlService', () => {
     navControlService.setup({
       securityLicense: new SecurityLicenseService().setup({ license$ }).license,
       logoutUrl: '/some/logout/url',
-      apiClients: mockApiClients(coreStart.http),
+      securityApiClients: mockApiClients(coreStart.http),
     });
 
     navControlService.start({ core: coreStart, authc });
@@ -208,7 +208,7 @@ describe('SecurityNavControlService', () => {
       navControlService.setup({
         securityLicense: new SecurityLicenseService().setup({ license$ }).license,
         logoutUrl: '/some/logout/url',
-        apiClients: mockApiClients(coreSetup.http),
+        securityApiClients: mockApiClients(coreSetup.http),
       });
     });
 

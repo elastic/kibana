@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { RouteDefinitionParams } from '..';
 import type { AuthenticatedUserProfile } from '../../../common';
 import { wrapIntoCustomErrorResponse } from '../../errors';
+import { getPrintableSessionId } from '../../session_management';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
 
 export function defineGetUserProfileRoute({
@@ -32,7 +33,9 @@ export function defineGetUserProfileRoute({
       }
 
       if (!session.userProfileId) {
-        logger.warn(`User profile missing from current session. (sid: ${session.sid.slice(-10)})`);
+        logger.warn(
+          `User profile missing from current session. (sid: ${getPrintableSessionId(session.sid)})`
+        );
         return response.notFound();
       }
 

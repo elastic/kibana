@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-export { ApiClientsProvider, useApiClients } from './api_clients_provider';
-export type { ApiClients } from './api_clients_provider';
+export { SecurityApiClientsProvider, useSecurityApiClients } from './security_api_clients_provider';
+export type { SecurityApiClients } from './security_api_clients_provider';
 export {
   AuthenticationProvider,
   useAuthentication,
   useUserProfile,
   useCurrentUser,
 } from './use_current_user';
+export { UserAvatar } from './user_avatar';
+export type { UserAvatarProps } from './user_avatar';

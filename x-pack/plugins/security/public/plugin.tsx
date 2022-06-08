@@ -91,7 +91,7 @@ export class SecurityPlugin
       http: core.http,
     });
 
-    const apiClients = {
+    const securityApiClients = {
       userProfiles: new UserProfileAPIClient(core.http),
       users: new UserAPIClient(core.http),
     };
@@ -99,14 +99,14 @@ export class SecurityPlugin
     this.navControlService.setup({
       securityLicense: license,
       logoutUrl: getLogoutUrl(core.http),
-      apiClients,
+      securityApiClients,
     });
 
     accountManagementApp.create({
       authc: this.authc,
       application: core.application,
       getStartServices: core.getStartServices,
-      apiClients,
+      securityApiClients,
     });
 
     if (management) {

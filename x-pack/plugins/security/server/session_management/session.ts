@@ -107,6 +107,15 @@ export type InvalidateSessionsFilter =
 const SID_BYTE_LENGTH = 32;
 const AAD_BYTE_LENGTH = 32;
 
+/**
+ * Returns last 10 characters of the session identifier. Referring to the specific session by its identifier is useful
+ * for logging and debugging purposes, but we cannot include full session ID in logs because of the security reasons.
+ * @param sid Full user session id
+ */
+export function getPrintableSessionId(sid: string) {
+  return sid.slice(-10);
+}
+
 export class Session {
   /**
    * Used to encrypt and decrypt portion of the session value using configured encryption key.
@@ -479,7 +488,7 @@ export class Session {
    * @param [sid] Session ID to create logger for.
    */
   private getLoggerForSID(sid?: string) {
-    return this.options.logger.get(sid?.slice(-10) ?? 'no_session');
+    return this.options.logger.get(sid ? getPrintableSessionId(sid) : 'no_session');
   }
 
   /**

@@ -12,7 +12,7 @@ export type {
   UserProfile,
   UserData,
   UserInfo,
-  UserAvatar,
+  UserAvatarData,
 } from './user_profile';
 export {
   getUserAvatarColor,

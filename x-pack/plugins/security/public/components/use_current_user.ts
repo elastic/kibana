@@ -9,7 +9,7 @@ import constate from 'constate';
 import useAsync from 'react-use/lib/useAsync';
 import useObservable from 'react-use/lib/useObservable';
 
-import { useApiClients } from '.';
+import { useSecurityApiClients } from '.';
 import type { UserData } from '../../common';
 import type { AuthenticationServiceSetup } from '../authentication';
 
@@ -29,7 +29,7 @@ export function useCurrentUser() {
 }
 
 export function useUserProfile<T extends UserData>(dataPath?: string) {
-  const { userProfiles } = useApiClients();
+  const { userProfiles } = useSecurityApiClients();
   const dataUpdateState = useObservable(userProfiles.dataUpdates$);
   return useAsync(() => userProfiles.get<T>(dataPath), [userProfiles, dataUpdateState]);
 }

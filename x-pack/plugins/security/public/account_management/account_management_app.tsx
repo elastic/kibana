@@ -25,21 +25,21 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import type { AuthenticationServiceSetup } from '../authentication';
-import type { ApiClients } from '../components';
-import { ApiClientsProvider, AuthenticationProvider } from '../components';
+import type { SecurityApiClients } from '../components';
+import { AuthenticationProvider, SecurityApiClientsProvider } from '../components';
 import type { BreadcrumbsChangeHandler } from '../components/breadcrumb';
 import { BreadcrumbsProvider } from '../components/breadcrumb';
 
 interface CreateDeps {
   application: ApplicationSetup;
   authc: AuthenticationServiceSetup;
-  apiClients: ApiClients;
+  securityApiClients: SecurityApiClients;
   getStartServices: StartServicesAccessor;
 }
 
 export const accountManagementApp = Object.freeze({
   id: 'security_account',
-  create({ application, authc, getStartServices, apiClients }: CreateDeps) {
+  create({ application, authc, getStartServices, securityApiClients }: CreateDeps) {
     application.register({
       id: this.id,
       title: i18n.translate('xpack.security.account.breadcrumb', {
@@ -59,7 +59,7 @@ export const accountManagementApp = Object.freeze({
             theme$={theme$}
             history={history}
             authc={authc}
-            apiClients={apiClients}
+            securityApiClients={securityApiClients}
           >
             <AccountManagementPage />
           </Providers>,
@@ -77,7 +77,7 @@ export interface ProvidersProps {
   theme$: Observable<CoreTheme>;
   history: History;
   authc: AuthenticationServiceSetup;
-  apiClients: ApiClients;
+  securityApiClients: SecurityApiClients;
   onChange?: BreadcrumbsChangeHandler;
 }
 
@@ -86,13 +86,13 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
   theme$,
   history,
   authc,
-  apiClients,
+  securityApiClients,
   onChange,
   children,
 }) => (
   <KibanaContextProvider services={services}>
     <AuthenticationProvider authc={authc}>
-      <ApiClientsProvider {...apiClients}>
+      <SecurityApiClientsProvider {...securityApiClients}>
         <I18nProvider>
           <KibanaThemeProvider theme$={theme$}>
             <Router history={history}>
@@ -100,7 +100,7 @@ export const Providers: FunctionComponent<ProvidersProps> = ({
             </Router>
           </KibanaThemeProvider>
         </I18nProvider>
-      </ApiClientsProvider>
+      </SecurityApiClientsProvider>
     </AuthenticationProvider>
   </KibanaContextProvider>
 );

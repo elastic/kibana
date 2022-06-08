@@ -15,7 +15,7 @@ import { mockAuthenticatedUser } from '../../common/model/authenticated_user.moc
 import { ConfigSchema, createConfig } from '../config';
 import { sessionCookieMock, sessionIndexMock, sessionMock } from './index.mock';
 import type { SessionValueContentToEncrypt } from './session';
-import { Session } from './session';
+import { getPrintableSessionId, Session } from './session';
 import type { SessionCookie } from './session_cookie';
 import type { SessionIndex } from './session_index';
 
@@ -1037,5 +1037,9 @@ describe('Session', () => {
         },
       });
     });
+  });
+
+  it('#getPrintableSessionId', async () => {
+    expect(getPrintableSessionId('1234567890abcdefghijklmno')).toBe('fghijklmno');
   });
 });

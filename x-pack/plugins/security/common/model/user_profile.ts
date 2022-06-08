@@ -21,7 +21,7 @@ export interface UserInfo extends User {
 /**
  * Avatar stored in user profile.
  */
-export interface UserAvatar {
+export interface UserAvatarData {
   initials?: string;
   color?: string;
   imageUrl?: string;
@@ -76,11 +76,11 @@ export const USER_AVATAR_MAX_INITIALS = 2;
  * Otherwise, a color is provided from EUI's Visualization Colors based on the display name.
  *
  * @param {UserInfo} user User info
- * @param {UserAvatar} avatar User avatar
+ * @param {UserAvatarData} avatar User avatar
  */
 export function getUserAvatarColor(
   user: Pick<UserInfo, 'username' | 'full_name'>,
-  avatar?: UserAvatar
+  avatar?: UserAvatarData
 ) {
   if (avatar && avatar.color) {
     return avatar.color;
@@ -97,11 +97,11 @@ export function getUserAvatarColor(
  * Otherwise, the initials are calculated based off the words in the display name, with a max length of 2 characters.
  *
  * @param {UserInfo} user User info
- * @param {UserAvatar} avatar User avatar
+ * @param {UserAvatarData} avatar User avatar
  */
 export function getUserAvatarInitials(
   user: Pick<UserInfo, 'username' | 'full_name'>,
-  avatar?: UserAvatar
+  avatar?: UserAvatarData
 ) {
   if (avatar && avatar.initials) {
     return avatar.initials;

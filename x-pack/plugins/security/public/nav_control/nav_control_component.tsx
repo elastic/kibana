@@ -21,10 +21,9 @@ import type { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { UserAvatar as IUserAvatar } from '../../common';
+import type { UserAvatarData } from '../../common';
 import { getUserDisplayName, isUserAnonymous } from '../../common/model';
-import { UserAvatar } from '../account_management';
-import { useCurrentUser, useUserProfile } from '../components';
+import { useCurrentUser, UserAvatar, useUserProfile } from '../components';
 
 export interface UserMenuLink {
   label: string;
@@ -48,7 +47,7 @@ export const SecurityNavControl: FunctionComponent<SecurityNavControlProps> = ({
   const userMenuLinks = useObservable(userMenuLinks$, []);
   const [isOpen, setIsOpen] = useState(false);
 
-  const userProfile = useUserProfile<{ avatar: IUserAvatar }>('avatar');
+  const userProfile = useUserProfile<{ avatar: UserAvatarData }>('avatar');
   const currentUser = useCurrentUser(); // User profiles do not exist for anonymous users so need to fetch current user as well
 
   const displayName = currentUser.value ? getUserDisplayName(currentUser.value) : '';
