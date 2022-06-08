@@ -82,7 +82,7 @@ resubmit your searches.
 image:concepts/images/refresh-every.png["section of time filter where you can configure a refresh rate", width=75%]
 
 To manually resubmit a search, click the *Refresh* button.
-This is useful when you use {kib} to monitor the underlying data.
+This is useful when you use {kib} to view the underlying data.
 
 [float]
 [[semi-structured-search]]
