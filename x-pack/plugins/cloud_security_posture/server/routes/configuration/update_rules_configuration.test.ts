@@ -239,14 +239,14 @@ describe('Update rules configuration API', () => {
     const packagePolicyId1 = chance.guid();
     mockPackagePolicy.id = packagePolicyId1;
 
-    const userAuth = null;
+    const user = null;
 
     const updatePackagePolicy = await updateAgentConfiguration(
       mockPackagePolicyService,
       mockPackagePolicy,
       mockEsClient,
       mockSoClient,
-      userAuth
+      user
     );
 
     expect(updatePackagePolicy.vars!.dataYaml).toHaveProperty('value');
@@ -283,7 +283,7 @@ describe('Update rules configuration API', () => {
 
     const mockPackagePolicy = createPackagePolicyMock();
     const packagePolicyId1 = chance.guid();
-    const userAuth = null;
+    const user = null;
     mockPackagePolicy.id = packagePolicyId1;
     mockPackagePolicy.vars = { foo: {}, dataYaml: { type: 'yaml' } };
 
@@ -304,20 +304,20 @@ describe('Update rules configuration API', () => {
       mockPackagePolicy,
       mockEsClient,
       mockSoClient,
-      userAuth
+      user
     );
 
     expect(mockPackagePolicyService.update).toBeCalledTimes(1);
     expect(updatedPackagePolicy.vars).toHaveProperty('foo');
   });
 
-  it('validate updateAgentConfiguration passes userAuth to the package update method', async () => {
+  it('validate updateAgentConfiguration passes user to the package update method', async () => {
     mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
     mockSoClient = savedObjectsClientMock.create();
 
     const mockPackagePolicyService = createPackagePolicyServiceMock();
     const mockPackagePolicy = createPackagePolicyMock();
-    const userAuth = mockAuthenticatedUser();
+    const user = mockAuthenticatedUser();
 
     mockSoClient.find.mockResolvedValueOnce({
       page: 1,
@@ -339,8 +339,8 @@ describe('Update rules configuration API', () => {
       mockPackagePolicy,
       mockEsClient,
       mockSoClient,
-      userAuth
+      user
     );
-    expect(mockPackagePolicyService.update.mock.calls[0][4]).toMatchObject({ user: userAuth });
+    expect(mockPackagePolicyService.update.mock.calls[0][4]).toMatchObject({ user });
   });
 });
