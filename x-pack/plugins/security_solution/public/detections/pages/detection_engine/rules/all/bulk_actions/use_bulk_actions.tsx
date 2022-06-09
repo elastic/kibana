@@ -39,6 +39,8 @@ import { convertRulesFilterToKQL } from '../../../../../containers/detection_eng
 
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
 import { useInvalidateRules } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
+import { BULK_RULE_ACTIONS } from '../../../../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../../../../common/lib/apm/use_start_transaction';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -65,6 +67,7 @@ export const useBulkActions = ({
   const toasts = useAppToasts();
   const getIsMounted = useIsMounted();
   const filterQuery = convertRulesFilterToKQL(filterOptions);
+  const { startTransaction } = useStartTransaction();
 
   // refetch tags if edit action is related to tags: add_tags/delete_tags/set_tags
   const resolveTagsRefetch = useCallback(
@@ -99,6 +102,7 @@ export const useBulkActions = ({
         selectedRules.some((rule) => !canEditRuleWithActions(rule, hasActionsPrivileges));
 
       const handleEnableAction = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.ENABLE });
         closePopover();
         const disabledRules = selectedRules.filter(({ enabled }) => !enabled);
         const disabledRulesNoML = disabledRules.filter(({ type }) => !isMlRule(type));
@@ -123,6 +127,7 @@ export const useBulkActions = ({
       };
 
       const handleDisableActions = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.DISABLE });
         closePopover();
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
         await executeRulesBulkAction({
@@ -136,6 +141,7 @@ export const useBulkActions = ({
       };
 
       const handleDuplicateAction = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
         closePopover();
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
@@ -156,6 +162,7 @@ export const useBulkActions = ({
           }
         }
 
+        startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.delete,
@@ -169,6 +176,7 @@ export const useBulkActions = ({
       const handleExportAction = async () => {
         closePopover();
 
+        startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.export,
@@ -201,6 +209,8 @@ export const useBulkActions = ({
           setIsRefreshOn(true);
           return;
         }
+
+        startTransaction({ name: BULK_RULE_ACTIONS.EDIT });
 
         const hideWarningToast = () => {
           if (longTimeWarningToast) {
@@ -415,18 +425,19 @@ export const useBulkActions = ({
       hasActionsPrivileges,
       isAllSelected,
       loadingRuleIds,
+      startTransaction,
       hasMlPermissions,
-      invalidateRules,
       setLoadingRules,
       toasts,
       filterQuery,
+      invalidateRules,
       confirmDeletion,
       setIsRefreshOn,
       confirmBulkEdit,
       completeBulkEditForm,
       queryClient,
-      getIsMounted,
       filterOptions,
+      getIsMounted,
       resolveTagsRefetch,
     ]
   );
