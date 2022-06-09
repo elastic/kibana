@@ -126,6 +126,8 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const [showModelSnapshots, setShowModelSnapshots] = useState<boolean>(true);
   const [range, setRange] = useState<{ start: string; end: string } | undefined>();
   const canUpdateDatafeed = useMemo(() => checkPermission('canUpdateDatafeed'), []);
+  const canCreateJob = useMemo(() => checkPermission('canCreateJob'), []);
+  const canStartStopDatafeed = useMemo(() => checkPermission('canStartStopDatafeed'), []);
 
   const {
     getModelSnapshots,
@@ -376,8 +378,9 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           }) => {
                             // If it's not a line annotation or if it's not a model snapshot annotation then do nothing
                             if (
+                              !(canCreateJob && canStartStopDatafeed) ||
                               annotations.lines?.length === 0 ||
-                              (annotations.lines && annotations.lines[0].id !== 'Model snapshots')
+                              (annotations.lines && !annotations.lines[0].id.includes('Model snapshots'))
                             )
                               return;
 
