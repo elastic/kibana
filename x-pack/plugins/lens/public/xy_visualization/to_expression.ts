@@ -442,7 +442,6 @@ const dataLayerToExpression = (
   const isPercentage = dataFromType.includes('percentage');
   const isStacked = dataFromType.includes('stacked');
   const isHorizontal = dataFromType.includes('horizontal');
-  debugger;
 
   return {
     type: 'expression',
