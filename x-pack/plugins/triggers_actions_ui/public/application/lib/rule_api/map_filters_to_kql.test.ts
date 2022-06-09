@@ -46,29 +46,29 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['enabled'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(true) and not (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)',
+      '(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now))',
     ]);
 
     expect(
       mapFiltersToKql({
         ruleStatusesFilter: ['disabled'],
       })
-    ).toEqual([
-      'alert.attributes.enabled:(false) and not (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)',
-    ]);
+    ).toEqual(['alert.attributes.enabled: false']);
 
     expect(
       mapFiltersToKql({
         ruleStatusesFilter: ['snoozed'],
       })
-    ).toEqual(['(alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)']);
+    ).toEqual([
+      '((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)',
+    ]);
 
     expect(
       mapFiltersToKql({
         ruleStatusesFilter: ['enabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(true) or (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)',
+      '(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)) or ((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)',
     ]);
 
     expect(
@@ -76,7 +76,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['disabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(false) or (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)',
+      'alert.attributes.enabled: false or ((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)',
     ]);
 
     expect(
@@ -84,7 +84,7 @@ describe('mapFiltersToKql', () => {
         ruleStatusesFilter: ['enabled', 'disabled', 'snoozed'],
       })
     ).toEqual([
-      'alert.attributes.enabled:(true or false) or (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)',
+      '(alert.attributes.enabled: true AND NOT (alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now)) or alert.attributes.enabled: false or ((alert.attributes.muteAll:true OR alert.attributes.isSnoozedUntil > now) AND NOT alert.attributes.enabled: false)',
     ]);
   });
 
