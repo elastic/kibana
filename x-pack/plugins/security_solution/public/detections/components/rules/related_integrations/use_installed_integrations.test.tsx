@@ -98,7 +98,8 @@ describe('useInstalledIntegrations', () => {
     ]);
   });
 
-  it('handles exceptions from the API', async () => {
+  // Skipping until we re-enable errors
+  it.skip('handles exceptions from the API', async () => {
     const exception = new Error('Boom!');
     jest.spyOn(api, 'fetchInstalledIntegrations').mockRejectedValue(exception);
 
