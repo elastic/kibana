@@ -38,8 +38,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/syncResponse"
+                  "$ref": "#/components/schemas/syncResponse"
+                },
+                "examples": {
+                  "syncExample": {
+                    "$ref": "#/components/examples/syncExample"
                   }
                 }
               }
@@ -62,8 +65,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "items": {
-                    "$ref": "#/components/schemas/syncResponse"
+                  "$ref": "#/components/schemas/syncResponse"
+                },
+                "examples": {
+                  "syncExample": {
+                    "$ref": "#/components/examples/syncExample"
                   }
                 }
               }
@@ -213,6 +219,26 @@
               }
             }
           }
+        }
+      }
+    },
+    "examples": {
+      "syncExample": {
+        "summary": "Two anomaly detection jobs required synchronization in this example.",
+        "value": {
+          "savedObjectsCreated": {
+            "anomaly_detector": {
+              "myjob1": {
+                "success": true
+              },
+              "myjob2": {
+                "success": true
+              }
+            }
+          },
+          "savedObjectsDeleted": {},
+          "datafeedsAdded": {},
+          "datafeedsRemoved": {}
         }
       }
     }
