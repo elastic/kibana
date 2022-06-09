@@ -7,7 +7,7 @@
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from '@kbn/core/server';
-import { cloneDeep, omit } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
@@ -271,7 +271,8 @@ export class ActionExecutor {
         }
 
         eventLogger.logEvent(event);
-        return omit(result, 'stack');
+        const { stack, ...resultWithoutStackTrace } = result;
+        return resultWithoutStackTrace;
       }
     );
   }

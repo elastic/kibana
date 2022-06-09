@@ -163,9 +163,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           subActionParams: { foo: 'foo' },
         });
 
-        const { stack, ...execResWithoutStackTrace } = execRes.body;
-
-        expect(execResWithoutStackTrace).to.eql({
+        expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
           retry: false,
@@ -244,9 +242,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           subActionParams: { foo: 'foo' },
         });
 
-        const { stack, ...execResWithoutStackTrace } = execRes.body;
-
-        expect(execResWithoutStackTrace).to.eql({
+        expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
           retry: false,
@@ -266,9 +262,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           subActionParams: { foo: 'foo' },
         });
 
-        const { stack, ...execResWithoutStackTrace } = execRes.body;
-
-        expect(execResWithoutStackTrace).to.eql({
+        expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
           retry: false,
@@ -288,9 +282,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           subActionParams: { foo: 'foo' },
         });
 
-        const { stack, ...execResWithoutStackTrace } = execRes.body;
-
-        expect(execResWithoutStackTrace).to.eql({
+        expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
           retry: false,
@@ -313,9 +305,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
           subActionParams: { foo: 'foo' },
         });
 
-        const { stack, ...execResWithoutStackTrace } = execRes.body;
-
-        expect(execResWithoutStackTrace).to.eql({
+        expect(execRes.body).to.eql({
           status: 'error',
           message: 'an error occurred while running the action',
           retry: false,
