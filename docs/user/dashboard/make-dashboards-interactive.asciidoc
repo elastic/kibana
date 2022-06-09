@@ -74,7 +74,7 @@ The *Control type* is automatically applied for the field you selected.
 
 . If you are creating an *Options list*, specify the options.
 
-.. To allow the ability to select multiple options in the dropdown, select *Allow multiple selections in dropdown*.
+.. To allow users to select multiple options, select *Allow multiple selections in dropdown*.
 
 .. To populate the entire list of options, even when the Options list takes longer to populate than expected, select *Run past timeout*.
 
