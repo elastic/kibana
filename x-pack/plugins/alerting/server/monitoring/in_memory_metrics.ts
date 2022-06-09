@@ -6,7 +6,6 @@
  */
 
 import { Logger } from '@kbn/logging';
-import { MetricAttributes, Counter, Meter, metrics } from '@opentelemetry/api-metrics';
 
 export enum IN_MEMORY_METRICS {
   RULE_EXECUTIONS = 'ruleExecutions',
@@ -22,22 +21,11 @@ export class InMemoryMetrics {
     [IN_MEMORY_METRICS.RULE_TIMEOUTS]: 0,
   };
 
-  private readonly meter: Meter;
-  private readonly metrics: Record<IN_MEMORY_METRICS, Counter>;
-
   constructor(logger: Logger) {
     this.logger = logger;
-    this.meter = metrics.getMeter('kibana.alerting');
-    this.metrics = {
-      [IN_MEMORY_METRICS.RULE_EXECUTIONS]: this.meter.createCounter(
-        IN_MEMORY_METRICS.RULE_EXECUTIONS
-      ),
-      [IN_MEMORY_METRICS.RULE_FAILURES]: this.meter.createCounter(IN_MEMORY_METRICS.RULE_FAILURES),
-      [IN_MEMORY_METRICS.RULE_TIMEOUTS]: this.meter.createCounter(IN_MEMORY_METRICS.RULE_TIMEOUTS),
-    };
   }
 
-  public increment(metric: IN_MEMORY_METRICS, attributes?: MetricAttributes) {
+  public increment(metric: IN_MEMORY_METRICS) {
     if (this.inMemoryMetrics[metric] === null) {
       this.logger.info(
         `Metric ${metric} is null because the counter ran over the max safe integer value, skipping increment.`
@@ -53,8 +41,6 @@ export class InMemoryMetrics {
     } else {
       (this.inMemoryMetrics[metric] as number)++;
     }
-
-    this.metrics[metric].add(1, attributes);
   }
 
   public getInMemoryMetric(metric: IN_MEMORY_METRICS) {

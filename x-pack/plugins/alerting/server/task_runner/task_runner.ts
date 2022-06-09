@@ -57,7 +57,7 @@ import {
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
+import { InMemoryMetrics, IN_MEMORY_METRICS, Metrics } from '../monitoring';
 import {
   GenerateNewAndRecoveredAlertEventsParams,
   LogActiveAndRecoveredAlertsParams,
@@ -112,6 +112,7 @@ export class TaskRunner<
   private readonly executionId: string;
   private readonly ruleTypeRegistry: RuleTypeRegistry;
   private readonly inMemoryMetrics: InMemoryMetrics;
+  private readonly metrics: Metrics;
   private alertingEventLogger: AlertingEventLogger;
   private usageCounter?: UsageCounter;
   private searchAbortController: AbortController;
@@ -129,7 +130,8 @@ export class TaskRunner<
     >,
     taskInstance: ConcreteTaskInstance,
     context: TaskRunnerContext,
-    inMemoryMetrics: InMemoryMetrics
+    inMemoryMetrics: InMemoryMetrics,
+    metrics: Metrics
   ) {
     this.context = context;
     this.logger = context.logger;
@@ -142,6 +144,7 @@ export class TaskRunner<
     this.cancelled = false;
     this.executionId = uuid.v4();
     this.inMemoryMetrics = inMemoryMetrics;
+    this.metrics = metrics;
     this.alertingEventLogger = new AlertingEventLogger(this.context.eventLogger);
   }
 
@@ -798,6 +801,8 @@ export class TaskRunner<
 
     if (!this.cancelled) {
       this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);
+      // NOTE: Using the typesafe opentelemetry counter here directly
+      this.metrics.ruleExecutions.add(1);
       if (executionStatus.error) {
         this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_FAILURES);
       }
