@@ -59,6 +59,7 @@ export interface FileChunkDocument {
 }
 
 export const mappings: MappingTypeMapping = {
+  dynamic: false,
   properties: {
     data: { type: 'binary' }, // Base64 encoded content, binary fields are automatically marked as not searchable
     head_chunk_id: { type: 'keyword', index: true },
@@ -78,6 +79,7 @@ export const mappings: MappingTypeMapping = {
     app_extra_data: {
       enabled: false, // Do not parse this value for mapping in ES
       type: 'object',
+      properties: {},
     },
   } as Record<keyof FileChunkDocument, MappingProperty>, // Ensure that our ES types and TS types stay somewhat in sync
 } as const;
