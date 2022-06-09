@@ -50,7 +50,7 @@ export const actionListHandler = (
         body,
       });
     } catch (error) {
-      return errorHandler(endpointContext.logFactory.get('EndpointActionList'), res, error);
+      return errorHandler(logger, res, error);
     }
   };
 };

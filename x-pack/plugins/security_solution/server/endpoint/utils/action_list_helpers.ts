@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
 import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -49,11 +49,10 @@ export const getActions = async ({
   esClient,
   endDate,
   from,
-  logger,
   size,
   startDate,
   userIds,
-}: GetActionDetailsListParam): Promise<{
+}: Omit<GetActionDetailsListParam, 'logger'>): Promise<{
   actionIds: string[];
   actionRequests: TransportResult<
     estypes.SearchResponse<EndpointAction | LogsEndpointAction>,
@@ -132,12 +131,10 @@ export const getActionResponses = async ({
   actionIds,
   elasticAgentIds,
   esClient,
-  logger,
 }: {
   actionIds: string[];
   elasticAgentIds?: string[];
   esClient: ElasticsearchClient;
-  logger: Logger;
 }): Promise<
   TransportResult<
     estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>,

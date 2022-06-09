@@ -104,7 +104,6 @@ const getActionDetailsList = async ({
       elasticAgentIds,
       startDate,
       endDate,
-      logger,
       from,
       size,
       userIds,
@@ -122,14 +121,20 @@ const getActionDetailsList = async ({
     let newError;
     // not found or index not found error
     if (actions?.statusCode === 404) {
-      errorMessage = `Action list not found for agentIds ${elasticAgentIds}`;
-      const error = new Error(errorMessage);
-      newError = new NotFoundError(errorMessage, error);
+      // log the error
+      // return empty details array
+      const baseMessage = 'Action list not found';
+      errorMessage = elasticAgentIds
+        ? `${baseMessage} for agentIds ${elasticAgentIds}`
+        : baseMessage;
+      return [];
     } else {
-      // all else errors
-      errorMessage = `Error fetching action list for agentIds ${elasticAgentIds}`;
-      const error = new Error(errorMessage);
-      newError = new EndpointError(errorMessage, error);
+      // all other errors
+      errorMessage = 'Error fetching action list';
+      newError = new EndpointError(
+        elasticAgentIds ? `${errorMessage}  for agentIds ${elasticAgentIds}` : errorMessage,
+        actions
+      );
     }
     logger.error(errorMessage);
     throw newError;
@@ -149,7 +154,6 @@ const getActionDetailsList = async ({
     actionIds: actionReqIds,
     elasticAgentIds,
     esClient,
-    logger,
   });
 
   // categorize responses as fleet and endpoint responses
