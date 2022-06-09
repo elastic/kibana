@@ -22,7 +22,6 @@ served by the server and called by the UI:
 * /api/prodfiler/v1/topn/threads
 * /api/prodfiler/v1/topn/traces
 * /api/prodfiler/v1/flamechart/elastic
-* /api/prodfiler/v1/flamechart/pixi
 
 If the server uses an Elasticsearch cluster as a data source, then the following
 API is served by the server and called by the UI:
@@ -33,7 +32,6 @@ API is served by the server and called by the UI:
 * /api/prodfiler/v2/topn/threads
 * /api/prodfiler/v2/topn/traces
 * /api/prodfiler/v2/flamechart/elastic
-* /api/prodfiler/v2/flamechart/pixi
 
 By default, the plugin is configured to use the second API set. See README.md to
 configure the plugin to use the first API set (aka local fixtures as a data
@@ -97,9 +95,3 @@ Here is a basic description of the response format:
 * `value` represents the number of samples for that node
 * `depth` represents the depth of the node in the flamegraph, starting from zero
 * `pathFromRoot` represents the full path from the flamegraph root to the given node
-
-### /api/prodfiler/*/flamechart/pixi
-
-The response returned from this API is used by the Pixi flamegraph.
-
-The expected JSON response is the same format returned from `/api/v1/restricted/flamechart/$projectID/$timeStart/$timeStop`.

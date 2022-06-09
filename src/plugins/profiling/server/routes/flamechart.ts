@@ -15,7 +15,7 @@ import { logExecutionLatency } from './logger';
 import { newProjectTimeQuery, ProjectTimeQuery } from './query';
 import { downsampleEventsRandomly, findDownsampledIndex } from './downsampling';
 import { mgetExecutables, mgetStackFrames, mgetStackTraces, searchStackTraces } from './stacktrace';
-import { getHitsItems, getAggs, getClient } from './compat';
+import { getAggs, getClient } from './compat';
 
 export function parallelMget(
   nQueries: number,
@@ -191,56 +191,6 @@ export function registerFlameChartElasticSearchRoute(
 
         return response.ok({
           body: flamegraph.toElastic(),
-        });
-      } catch (e) {
-        logger.error('Caught exception when fetching Flamegraph data: ' + e.message);
-        return response.customError({
-          statusCode: e.statusCode ?? 500,
-          body: {
-            message: e.message,
-          },
-        });
-      }
-    }
-  );
-}
-
-export function registerFlameChartPixiSearchRoute(
-  router: IRouter<DataRequestHandlerContext>,
-  logger: Logger
-) {
-  const paths = getRoutePaths();
-  router.get(
-    {
-      path: paths.FlamechartPixi,
-      validate: {
-        query: schema.object({
-          index: schema.maybe(schema.string()),
-          projectID: schema.maybe(schema.string()),
-          timeFrom: schema.maybe(schema.string()),
-          timeTo: schema.maybe(schema.string()),
-          n: schema.maybe(schema.number()),
-        }),
-      },
-    },
-    async (context, request, response) => {
-      const { index, projectID, timeFrom, timeTo } = request.query;
-      const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
-
-      try {
-        const esClient = await getClient(context);
-        const filter = newProjectTimeQuery(projectID!, timeFrom!, timeTo!);
-
-        const flamegraph = await queryFlameGraph(
-          logger,
-          esClient,
-          index!,
-          filter,
-          targetSampleSize
-        );
-
-        return response.ok({
-          body: flamegraph.toPixi(),
         });
       } catch (e) {
         logger.error('Caught exception when fetching Flamegraph data: ' + e.message);
