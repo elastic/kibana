@@ -9261,10 +9261,10 @@ bach@^1.0.0:
     async-settle "^1.0.0"
     now-and-later "^2.0.0"
 
-backport@^8.5.1:
-  version "8.5.1"
-  resolved "https://registry.yarnpkg.com/backport/-/backport-8.5.1.tgz#cea41868cd0930fa32154173f0d298d8535b4bfe"
-  integrity sha512-D0lQ+iuQP8NVBJisGdYdA4ZwnVoNusmCGCrccNUeK3hKqSVn8pL594nA1iM/TMEDb0iaWdPnAvm2Em0M/ezUDg==
+backport@^8.5.2:
+  version "8.5.2"
+  resolved "https://registry.yarnpkg.com/backport/-/backport-8.5.2.tgz#500f0f6b7a5bb78996c88553bfb7b6d85a3e627a"
+  integrity sha512-qtPWz51O02tnRN2qNMhWJvZNaNlh8K+LXNO8ktXiBIEAkrI96VVKzWNvOXcNYl8lOBq0ZYyPkAE6HH8W/l/tdA==
   dependencies:
     "@octokit/rest" "^18.12.0"
     axios "^0.27.2"
