@@ -130,19 +130,23 @@ export function createTelemetryTimelineTaskConfig() {
           telemetryTimeline.push(timelineTelemetryEvent);
         }
 
-        const record: TimelineTelemetryTemplate = {
-          '@timestamp': moment().toISOString(),
-          ...baseDocument,
-          alert_id: alertUUID,
-          event_id: eventId,
-          timeline: telemetryTimeline,
-        };
+        if (telemetryTimeline.length >= 1) {
+          const record: TimelineTelemetryTemplate = {
+            '@timestamp': moment().toISOString(),
+            ...baseDocument,
+            alert_id: alertUUID,
+            event_id: eventId,
+            timeline: telemetryTimeline,
+          };
 
-        sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [record]);
-        counter += 1;
+          sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [record]);
+          counter += 1;
+        } else {
+          logger.debug('no events in timeline');
+        }
       }
 
-      logger.debug(`sent ${counter} timelines. exiting telemetry task.`);
+      logger.debug(`sent ${counter} timelines. concluding timeline task.`);
       return counter;
     },
   };
