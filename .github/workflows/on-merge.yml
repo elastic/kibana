@@ -7,7 +7,7 @@ on:
       - labeled
 
 jobs:
-  backport:
+  on-merge:
     name: 'Label and Backport'
     runs-on: ubuntu-latest
     if: |
