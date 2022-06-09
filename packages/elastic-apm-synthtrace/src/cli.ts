@@ -1,5 +1,3 @@
-#!/usr/bin/env node
-
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -8,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires*/
-require('@babel/register')({
-  extensions: ['.ts', '.js'],
-  presets: [['@babel/preset-env', { targets: { node: 'current' } }], '@babel/preset-typescript'],
-});
-
-require('../src/cli').runSynthtrace();
+export { runSynthtrace } from './scripts/run_synthtrace';
