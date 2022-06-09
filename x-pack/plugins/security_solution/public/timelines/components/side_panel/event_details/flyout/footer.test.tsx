@@ -6,14 +6,14 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { EventDetailsFooter } from './footer';
-import '../../../../common/mock/match_media';
-import { TestProviders } from '../../../../common/mock';
-import { TimelineId } from '../../../../../common/types/timeline';
-import { Ecs } from '../../../../../common/ecs';
-import { mockAlertDetailsData } from '../../../../common/components/event_details/__mocks__';
-import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
-import { KibanaServices, useKibana } from '../../../../common/lib/kibana';
+import { FlyoutFooter } from './footer';
+import '../../../../../common/mock/match_media';
+import { TestProviders } from '../../../../../common/mock';
+import { TimelineId } from '../../../../../../common/types/timeline';
+import { Ecs } from '../../../../../../common/ecs';
+import { mockAlertDetailsData } from '../../../../../common/components/event_details/__mocks__';
+import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
+import { KibanaServices, useKibana } from '../../../../../common/lib/kibana';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 
@@ -38,14 +38,14 @@ const mockAlertDetailsDataWithIsObject = mockAlertDetailsData.map((detail) => {
   };
 }) as TimelineEventsDetailsItem[];
 
-jest.mock('../../../../../common/endpoint/service/host_isolation/utils', () => {
+jest.mock('../../../../../../common/endpoint/service/host_isolation/utils', () => {
   return {
     isIsolationSupported: jest.fn().mockReturnValue(true),
   };
 });
 
 jest.mock(
-  '../../../../detections/containers/detection_engine/alerts/use_host_isolation_status',
+  '../../../../../detections/containers/detection_engine/alerts/use_host_isolation_status',
   () => {
     return {
       useHostIsolationStatus: jest.fn().mockReturnValue({
@@ -57,30 +57,34 @@ jest.mock(
   }
 );
 
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
+jest.mock('../../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
-jest.mock('../../../../detections/components/user_info', () => ({
+jest.mock('../../../../../detections/components/user_info', () => ({
   useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
 }));
-jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../../common/lib/kibana');
 jest.mock(
-  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
+  '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({
     useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
   })
 );
-jest.mock('../../../../cases/components/use_insert_timeline');
+jest.mock('../../../../../cases/components/use_insert_timeline');
 
-jest.mock('../../../../common/utils/endpoint_alert_check', () => {
+jest.mock('../../../../../common/utils/endpoint_alert_check', () => {
+  const realEndpointAlertCheckUtils = jest.requireActual(
+    '../../../../../common/utils/endpoint_alert_check'
+  );
   return {
+    isTimelineEventItemAnAlert: realEndpointAlertCheckUtils.isTimelineEventItemAnAlert,
     isAlertFromEndpointAlert: jest.fn().mockReturnValue(true),
     isAlertFromEndpointEvent: jest.fn().mockReturnValue(true),
   };
 });
 jest.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
+  '../../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline',
   () => {
     return {
       useInvestigateInTimeline: jest.fn().mockReturnValue({
@@ -90,7 +94,7 @@ jest.mock(
     };
   }
 );
-jest.mock('../../../../detections/components/alerts_table/actions');
+jest.mock('../../../../../detections/components/alerts_table/actions');
 
 const defaultProps = {
   timelineId: TimelineId.test,
@@ -126,7 +130,7 @@ describe('event details footer component', () => {
   test('it renders the take action dropdown', () => {
     const wrapper = render(
       <TestProviders>
-        <EventDetailsFooter {...defaultProps} />
+        <FlyoutFooter {...defaultProps} />
       </TestProviders>
     );
     expect(wrapper.getByTestId('take-action-dropdown-btn')).toBeTruthy();

@@ -155,10 +155,11 @@ describe('When using the release action from response actions console', () => {
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(2);
 
-      await consoleManagerMockAccess.hideOpenedConsole();
       await consoleManagerMockAccess.openRunningConsole();
 
-      expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(3);
+      await waitFor(() => {
+        expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(3);
+      });
     });
 
     it('should display completion output if done (no additional API calls)', async () => {
@@ -166,7 +167,6 @@ describe('When using the release action from response actions console', () => {
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
 
-      await consoleManagerMockAccess.hideOpenedConsole();
       await consoleManagerMockAccess.openRunningConsole();
 
       expect(apiMocks.responseProvider.actionDetails).toHaveBeenCalledTimes(1);
