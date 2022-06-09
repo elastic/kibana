@@ -59,7 +59,7 @@ Elastic Security::
 For the Elastic Security 8.2.3 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Fleet::
 * Elastic Agent integration now installs automatically if agent monitoring is turned on in the agent policy {kibana-pull}133530[#133530]
-* Removes misc beats tutorials from elastic_stack category {kibana-pull}132957[#132957]
+* Removes {beats} tutorials from the Elastic Stack category {kibana-pull}132957[#132957]
 Management::
 Fixes an edge case in the Inspector request selector where duplicate request names could result in a UI bug {kibana-pull}133511[#133511]
 Operations::
