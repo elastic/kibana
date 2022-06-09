@@ -11,7 +11,7 @@ import type { PaletteRegistry } from '@kbn/coloring';
 
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/common/constants';
-import type { AxisExtentConfig, YConfig, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
+import type { YConfig, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
 import {
   State,
   XYDataLayerConfig,
@@ -32,6 +32,7 @@ import {
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
 import { layerTypes } from '../../common';
+import { axisExtentConfigToExpression } from '../shared_components';
 
 export const getSortedAccessors = (
   datasource: DatasourcePublicAPI,
@@ -248,8 +249,9 @@ export const buildExpression = (
           emphasizeFitting: [state.emphasizeFitting || false],
           curveType: [state.curveType || 'LINEAR'],
           fillOpacity: [state.fillOpacity || 0.3],
-          yLeftExtent: [axisExtentConfigToExpression(state.yLeftExtent, validDataLayers)],
-          yRightExtent: [axisExtentConfigToExpression(state.yRightExtent, validDataLayers)],
+          xExtent: [axisExtentConfigToExpression(state.xExtent)],
+          yLeftExtent: [axisExtentConfigToExpression(state.yLeftExtent)],
+          yRightExtent: [axisExtentConfigToExpression(state.yRightExtent)],
           yLeftScale: [state.yLeftScale || 'linear'],
           yRightScale: [state.yRightScale || 'linear'],
           axisTitlesVisibilitySettings: [
@@ -530,21 +532,3 @@ const extendedYConfigToExpression = (yConfig: ExtendedYConfig, defaultColor?: st
     ],
   };
 };
-
-const axisExtentConfigToExpression = (
-  extent: AxisExtentConfig | undefined,
-  layers: ValidXYDataLayerConfig[]
-): Ast => ({
-  type: 'expression',
-  chain: [
-    {
-      type: 'function',
-      function: 'axisExtentConfig',
-      arguments: {
-        mode: [extent?.mode ?? 'full'],
-        lowerBound: extent?.lowerBound !== undefined ? [extent?.lowerBound] : [],
-        upperBound: extent?.upperBound !== undefined ? [extent?.upperBound] : [],
-      },
-    },
-  ],
-});

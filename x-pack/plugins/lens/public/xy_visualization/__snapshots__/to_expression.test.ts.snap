@@ -210,6 +210,24 @@ Object {
         "valuesInLegend": Array [
           false,
         ],
+        "xExtent": Array [
+          Object {
+            "chain": Array [
+              Object {
+                "arguments": Object {
+                  "lowerBound": Array [],
+                  "mode": Array [
+                    "full",
+                  ],
+                  "upperBound": Array [],
+                },
+                "function": "axisExtentConfig",
+                "type": "function",
+              },
+            ],
+            "type": "expression",
+          },
+        ],
         "xTitle": Array [
           "",
         ],

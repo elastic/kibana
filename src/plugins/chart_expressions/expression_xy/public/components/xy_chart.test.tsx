@@ -496,6 +496,33 @@ describe('XYChart component', () => {
     });
   });
 
+  describe('x axis extents', () => {
+    const { args } = sampleArgs();
+
+    test('it passes custom x axis extents to elastic-charts settings spec', () => {
+      {
+        const component = shallow(
+          <XYChart
+            {...defaultProps}
+            args={{
+              ...args,
+              xExtent: {
+                type: 'axisExtentConfig',
+                mode: 'custom',
+                lowerBound: 123,
+                upperBound: 456,
+              },
+            }}
+          />
+        );
+        expect(component.find(Settings).prop('xDomain')).toEqual({
+          min: 123,
+          max: 456,
+        });
+      }
+    });
+  });
+
   describe('y axis extents', () => {
     const { args } = sampleArgs();
 
@@ -2256,6 +2283,10 @@ describe('XYChart component', () => {
         yLeft: 0,
         yRight: 0,
       },
+      xExtent: {
+        mode: 'dataBounds',
+        type: 'axisExtentConfig',
+      },
       yLeftExtent: {
         mode: 'full',
         type: 'axisExtentConfig',
@@ -2347,6 +2378,10 @@ describe('XYChart component', () => {
         yLeft: 0,
         yRight: 0,
       },
+      xExtent: {
+        mode: 'dataBounds',
+        type: 'axisExtentConfig',
+      },
       yLeftExtent: {
         mode: 'full',
         type: 'axisExtentConfig',
@@ -2422,6 +2457,10 @@ describe('XYChart component', () => {
         x: 0,
         yLeft: 0,
         yRight: 0,
+      },
+      xExtent: {
+        mode: 'dataBounds',
+        type: 'axisExtentConfig',
       },
       yLeftExtent: {
         mode: 'full',
