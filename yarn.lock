@@ -4200,6 +4200,15 @@
     "@opentelemetry/resources" "1.3.1"
     "@opentelemetry/sdk-metrics-base" "0.29.2"
 
+"@opentelemetry/exporter-prometheus@^0.29.2":
+  version "0.29.2"
+  resolved "https://registry.yarnpkg.com/@opentelemetry/exporter-prometheus/-/exporter-prometheus-0.29.2.tgz#70ca7fb37655ca57a580387607d5465b47e27ac3"
+  integrity sha512-E5sRfUM4rzbvjxdpL1H6YRtjr8wY8+/2R4NjfxPEwrENLeeQk87V1E+YFLqAS7TfFLW7Zr4lmmamunwn5THvQA==
+  dependencies:
+    "@opentelemetry/api-metrics" "0.29.2"
+    "@opentelemetry/core" "1.3.1"
+    "@opentelemetry/sdk-metrics-base" "0.29.2"
+
 "@opentelemetry/otlp-exporter-base@0.29.2":
   version "0.29.2"
   resolved "https://registry.yarnpkg.com/@opentelemetry/otlp-exporter-base/-/otlp-exporter-base-0.29.2.tgz#fc844cc00e1ad95444b85056c08b1ca3e8a40447"
