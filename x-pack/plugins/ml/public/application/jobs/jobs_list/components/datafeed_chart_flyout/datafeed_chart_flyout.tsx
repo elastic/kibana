@@ -380,7 +380,8 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             if (
                               !(canCreateJob && canStartStopDatafeed) ||
                               annotations.lines?.length === 0 ||
-                              (annotations.lines && !annotations.lines[0].id.includes('Model snapshots'))
+                              (annotations.lines &&
+                                !annotations.lines[0].id.includes('Model snapshots'))
                             )
                               return;
 
