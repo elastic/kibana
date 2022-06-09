@@ -49,8 +49,9 @@ export const getActionList = async ({
   logger: Logger;
 }): Promise<ActionListApiResponse> => {
   const size = pageSize ?? 10;
-  const page = _page ?? 1;
-  const from = page <= 1 ? 0 : page * size - size + 1;
+  const page = (_page ?? 1) - 1;
+  // # of hits to skip
+  const from = page * size;
 
   const data = await getActionDetailsList({
     commands,
