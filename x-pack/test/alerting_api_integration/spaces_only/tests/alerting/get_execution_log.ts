@@ -418,7 +418,7 @@ export default function createGetExecutionLogTests({ getService }: FtrProviderCo
 
       for (const errors of response.body.errors) {
         expect(errors.type).to.equal('actions');
-        expect(errors.message).to.equal(
+        expect(errors.message).to.contain(
           `action execution failure: test.throw:${createdConnector.id}: connector that throws - an error occurred while running the action: this action is intended to fail`
         );
       }
