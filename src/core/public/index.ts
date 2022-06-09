@@ -26,6 +26,11 @@
 
 import './index.scss';
 
+import type {
+  InjectedMetadataSetup,
+  InjectedMetadataStart,
+} from '@kbn/core-injected-metadata-browser';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import {
   ChromeBadge,
   ChromeBreadcrumb,
@@ -56,7 +61,6 @@ import { OverlayStart } from './overlays';
 import { Plugin, PluginInitializer, PluginInitializerContext, PluginOpaqueId } from './plugins';
 import { UiSettingsState, IUiSettingsClient } from './ui_settings';
 import { ApplicationSetup, Capabilities, ApplicationStart } from './application';
-import { DocLinksStart } from './doc_links';
 import { SavedObjectsStart } from './saved_objects';
 import { DeprecationsServiceStart } from './deprecations';
 import type { ThemeServiceSetup, ThemeServiceStart } from './theme';
@@ -243,16 +247,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   uiSettings: IUiSettingsClient;
   /** {@link ExecutionContextSetup} */
   executionContext: ExecutionContextSetup;
-  /**
-   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-   * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform.
-   * @deprecated
-   * @removeBy 8.8.0
-   * */
-  injectedMetadata: {
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  };
+  /** {@link InjectedMetadataSetup} */
+  injectedMetadata: InjectedMetadataSetup;
   /** {@link ThemeServiceSetup} */
   theme: ThemeServiceSetup;
   /** {@link StartServicesAccessor} */
@@ -309,16 +305,8 @@ export interface CoreStart {
   deprecations: DeprecationsServiceStart;
   /** {@link ThemeServiceStart} */
   theme: ThemeServiceStart;
-  /**
-   * exposed temporarily until https://github.com/elastic/kibana/issues/41990 done
-   * use *only* to retrieve config values. There is no way to set injected values
-   * in the new platform.
-   * @deprecated
-   * @removeBy 8.8.0
-   * */
-  injectedMetadata: {
-    getInjectedVar: (name: string, defaultValue?: any) => unknown;
-  };
+  /** {@link InjectedMetadataStart} */
+  injectedMetadata: InjectedMetadataStart;
 }
 
 export type {

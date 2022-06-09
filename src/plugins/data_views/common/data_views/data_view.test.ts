@@ -48,7 +48,7 @@ function create(id: string) {
   const {
     type,
     version,
-    attributes: { timeFieldName, fields, title },
+    attributes: { timeFieldName, fields, title, name },
   } = stubbedSavedObjectIndexPattern(id);
 
   return new DataView({
@@ -59,6 +59,7 @@ function create(id: string) {
       timeFieldName,
       fields: { ...JSON.parse(fields), runtime_field: runtimeField },
       title,
+      name,
       runtimeFieldMap,
     },
     fieldFormats: fieldFormatsMock,
@@ -369,6 +370,8 @@ describe('IndexPattern', () => {
           name: 'scriptedFieldWithEmptyFormatter',
           type: 'number',
           esTypes: ['long'],
+          searchable: true,
+          aggregatable: true,
         })
       ).toEqual(
         expect.objectContaining({

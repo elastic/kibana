@@ -95,12 +95,12 @@ Defaults to `desc`.
 
 === {api-examples-title}
 
-Retrieve the first five cases with the `phishing` tag, in ascending order by
+Retrieve the first five cases with the `tag-1` tag, in ascending order by
 last update time:
 
 [source,sh]
 --------------------------------------------------
-GET api/cases/_find?page=1&perPage=5&sortField=updatedAt&sortOrder=asc&tags=phishing
+GET api/cases/_find?page=1&perPage=5&sortField=updatedAt&sortOrder=asc&tags=tag-1
 --------------------------------------------------
 // KIBANA
 
@@ -120,11 +120,11 @@ The API returns a JSON object listing the retrieved cases. For example:
       "totalComment": 1,
       "totalAlerts": 0,
       "title": "Case title",
-      "tags": [ "phishing" ],
+      "tags": [ "tag-1" ],
       "description": "Case description",
       "settings": { "syncAlerts": true },
       "owner": "securitySolution",
-      "duration": null,
+      "duration": null, <1>
       "severity": "low",
       "closed_at": null,
       "closed_by": null,
@@ -155,3 +155,7 @@ The API returns a JSON object listing the retrieved cases. For example:
   "count_closed_cases": 0
 }
 --------------------------------------------------
+<1> Duration represents the elapsed time from the creation of the case to its
+closure (in seconds). If the case has not been closed, the duration is set to
+`null`. If the case was closed after less than half a second, the duration is
+rounded down to zero.

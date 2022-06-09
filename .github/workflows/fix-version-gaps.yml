@@ -14,6 +14,12 @@ jobs:
       github.event.pull_request.merged == true
       && !contains(github.event.pull_request.labels.*.name, 'auto-backport')
       && !(
+        contains(github.event.pull_request.labels.*.name, 'backport:prev-minor')
+        || contains(github.event.pull_request.labels.*.name, 'backport:prev-major')
+        || contains(github.event.pull_request.labels.*.name, 'backport:all-open')
+        || contains(github.event.pull_request.labels.*.name, 'backport:auto-version')
+      )
+      && !(
         (github.event.action == 'labeled' && github.event.label.name == 'auto-backport')
         || (github.event.action == 'closed')
       )

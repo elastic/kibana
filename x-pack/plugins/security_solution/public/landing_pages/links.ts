@@ -31,7 +31,7 @@ export const dashboardsLandingLinks: LinkItem = {
       defaultMessage: 'Dashboards',
     }),
   ],
-  links: [overviewLinks, detectionResponseLinks],
+  links: [overviewLinks, detectionResponseLinks, kubernetesLinks],
   skipUrlState: true,
   hideTimeline: true,
 };
@@ -47,7 +47,7 @@ export const threatHuntingLandingLinks: LinkItem = {
       defaultMessage: 'Explore',
     }),
   ],
-  links: [hostsLinks, networkLinks, usersLinks, kubernetesLinks],
+  links: [hostsLinks, networkLinks, usersLinks],
   skipUrlState: true,
   hideTimeline: true,
 };

@@ -11,14 +11,14 @@ import { act, render } from '@testing-library/react';
 
 import { NONE_CONNECTOR_ID } from '../../../common/api';
 import { useForm, Form, FormHook } from '../../common/shared_imports';
-import { useGetTags } from '../../containers/use_get_tags';
-import { useConnectors } from '../../containers/configure/use_connectors';
 import { connectorsMock } from '../../containers/mock';
 import { schema, FormProps } from './schema';
 import { CreateCaseForm, CreateCaseFormProps } from './form';
 import { useCaseConfigure } from '../../containers/configure/use_configure';
 import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 import { TestProviders } from '../../common/mock';
+import { useGetConnectors } from '../../containers/configure/use_connectors';
+import { useGetTags } from '../../containers/use_get_tags';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/configure/use_connectors');
@@ -29,7 +29,7 @@ jest.mock('../app/use_available_owners', () => ({
 }));
 
 const useGetTagsMock = useGetTags as jest.Mock;
-const useConnectorsMock = useConnectors as jest.Mock;
+const useGetConnectorsMock = useGetConnectors as jest.Mock;
 const useCaseConfigureMock = useCaseConfigure as jest.Mock;
 
 const initialCaseValue: FormProps = {
@@ -69,8 +69,8 @@ describe('CreateCaseForm', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useGetTagsMock.mockReturnValue({ tags: ['test'] });
-    useConnectorsMock.mockReturnValue({ loading: false, connectors: connectorsMock });
+    useGetTagsMock.mockReturnValue({ data: ['test'] });
+    useGetConnectorsMock.mockReturnValue({ isLoading: false, data: connectorsMock });
     useCaseConfigureMock.mockImplementation(() => useCaseConfigureResponse);
   });
 

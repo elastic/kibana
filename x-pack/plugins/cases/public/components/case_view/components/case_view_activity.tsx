@@ -7,8 +7,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingContent } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
+import { useGetConnectors } from '../../../containers/configure/use_connectors';
 import { CaseSeverity } from '../../../../common/api';
-import { useConnectors } from '../../../containers/configure/use_connectors';
 import { useCaseViewNavigation } from '../../../common/navigation';
 import { UseFetchAlertData } from '../../../../common/ui/types';
 import { Case, CaseStatuses } from '../../../../common';
@@ -88,7 +88,7 @@ export const CaseViewActivity = ({
     [onUpdateField]
   );
 
-  const { loading: isLoadingConnectors, connectors } = useConnectors();
+  const { isLoading: isLoadingConnectors, data: connectors = [] } = useGetConnectors();
 
   const [connectorName, isValidConnector] = useMemo(() => {
     const connector = connectors.find((c) => c.id === caseData.connector.id);
@@ -171,7 +171,6 @@ export const CaseViewActivity = ({
           />
         ) : null}
         <TagList
-          data-test-subj="case-view-tag-list"
           userCanCrud={userCanCrud}
           tags={caseData.tags}
           onSubmit={onSubmitTags}

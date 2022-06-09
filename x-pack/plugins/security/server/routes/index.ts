@@ -19,6 +19,7 @@ import type { ConfigType } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { Session } from '../session_management';
 import type { SecurityRouter } from '../types';
+import type { UserProfileServiceStart } from '../user_profile';
 import { defineAnonymousAccessRoutes } from './anonymous_access';
 import { defineApiKeysRoutes } from './api_keys';
 import { defineAuthenticationRoutes } from './authentication';
@@ -28,6 +29,7 @@ import { defineIndicesRoutes } from './indices';
 import { defineRoleMappingRoutes } from './role_mapping';
 import { defineSecurityCheckupGetStateRoutes } from './security_checkup';
 import { defineSessionManagementRoutes } from './session_management';
+import { defineUserProfileRoutes } from './user_profile';
 import { defineUsersRoutes } from './users';
 import { defineViewRoutes } from './views';
 
@@ -47,6 +49,7 @@ export interface RouteDefinitionParams {
   getFeatures: () => Promise<KibanaFeature[]>;
   getFeatureUsageService: () => SecurityFeatureUsageServiceStart;
   getAuthenticationService: () => InternalAuthenticationServiceStart;
+  getUserProfileService: () => UserProfileServiceStart;
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
 }
 
@@ -57,6 +60,7 @@ export function defineRoutes(params: RouteDefinitionParams) {
   defineApiKeysRoutes(params);
   defineIndicesRoutes(params);
   defineUsersRoutes(params);
+  defineUserProfileRoutes(params);
   defineRoleMappingRoutes(params);
   defineViewRoutes(params);
   defineDeprecationsRoutes(params);

@@ -23,7 +23,12 @@ export function PageTitle({ rule }: PageHeaderProps) {
   const closeTagsPopover = () => setIsTagsPopoverOpen(false);
   return (
     <>
-      {rule.name} <ExperimentalBadge />
+      <EuiFlexGroup alignItems="center">
+        <EuiFlexItem grow={false} data-test-subj="ruleName">
+          {rule.name}
+        </EuiFlexItem>
+        <ExperimentalBadge />
+      </EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <EuiSpacer size="xs" />
         <EuiText size="xs">
