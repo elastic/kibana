@@ -46,7 +46,7 @@ export async function validateDatafeedPreview(
           job_config: tempJob,
           datafeed_config: datafeed,
         },
-        // @ts-expect-error
+        // @ts-expect-error es client types are wrong
         start,
         end,
       },
