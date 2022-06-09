@@ -37,6 +37,7 @@ const createSelectedOption = (field: SwimlaneFieldMappingConfig | null | undefin
   field != null ? [formatOption(field)] : EMPTY_COMBO_BOX_ARRAY;
 
 interface Props {
+  readOnly: boolean;
   fields: SwimlaneFieldMappingConfig[];
 }
 
@@ -72,9 +73,19 @@ const MappingField: React.FC<{
   options: EuiComboBoxProps<string>['options'];
   fieldIdMap: Map<string, SwimlaneFieldMappingConfig>;
   connectorType: SwimlaneConnectorType;
+  readOnly: boolean;
   dataTestSubj?: string;
 }> = React.memo(
-  ({ path, options, label, validationLabel, dataTestSubj, fieldIdMap, connectorType }) => {
+  ({
+    path,
+    options,
+    label,
+    validationLabel,
+    dataTestSubj,
+    fieldIdMap,
+    connectorType,
+    readOnly,
+  }) => {
     return (
       <UseField<SwimlaneFieldMappingConfig | null>
         path={path}
@@ -121,6 +132,7 @@ const MappingField: React.FC<{
                 noSuggestions={false}
                 data-test-subj={dataTestSubj}
                 options={options}
+                isDisabled={readOnly}
               />
             </EuiFormRow>
           );
@@ -130,7 +142,7 @@ const MappingField: React.FC<{
   }
 );
 
-const SwimlaneFieldsComponent: React.FC<Props> = ({ fields }) => {
+const SwimlaneFieldsComponent: React.FC<Props> = ({ fields, readOnly }) => {
   const [{ config }] = useFormData({
     watch: ['config.connectorType'],
   });
@@ -180,6 +192,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ fields }) => {
           fieldIdMap={fieldIdMap}
           connectorType={connectorType}
           dataTestSubj="swimlaneAlertIdInput"
+          readOnly={readOnly}
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'ruleNameConfig') && (
@@ -191,6 +204,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ fields }) => {
           dataTestSubj="swimlaneAlertNameInput"
           fieldIdMap={fieldIdMap}
           connectorType={connectorType}
+          readOnly={readOnly}
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'severityConfig') && (
@@ -202,6 +216,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ fields }) => {
           dataTestSubj="swimlaneSeverityInput"
           fieldIdMap={fieldIdMap}
           connectorType={connectorType}
+          readOnly={readOnly}
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'caseIdConfig') && (
@@ -213,6 +228,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ fields }) => {
           dataTestSubj="swimlaneCaseIdConfig"
           fieldIdMap={fieldIdMap}
           connectorType={connectorType}
+          readOnly={readOnly}
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'caseNameConfig') && (
@@ -224,6 +240,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ fields }) => {
           dataTestSubj="swimlaneCaseNameConfig"
           fieldIdMap={fieldIdMap}
           connectorType={connectorType}
+          readOnly={readOnly}
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'commentsConfig') && (
@@ -235,6 +252,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ fields }) => {
           dataTestSubj="swimlaneCommentsConfig"
           fieldIdMap={fieldIdMap}
           connectorType={connectorType}
+          readOnly={readOnly}
         />
       )}
       {isValidFieldForConnector(connectorType as SwimlaneConnectorType, 'descriptionConfig') && (
@@ -246,6 +264,7 @@ const SwimlaneFieldsComponent: React.FC<Props> = ({ fields }) => {
           dataTestSubj="swimlaneDescriptionConfig"
           fieldIdMap={fieldIdMap}
           connectorType={connectorType}
+          readOnly={readOnly}
         />
       )}
     </>

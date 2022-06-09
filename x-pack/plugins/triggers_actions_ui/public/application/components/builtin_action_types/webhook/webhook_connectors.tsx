@@ -70,6 +70,7 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                 'data-test-subj': 'webhookMethodSelect',
                 options: HTTP_VERBS.map((verb) => ({ text: verb.toUpperCase(), value: verb })),
                 fullWidth: true,
+                readOnly,
               },
             }}
           />
@@ -176,6 +177,9 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                         // This is needed because when you delete
                         // a row and add a new one, the stale values will appear
                         readDefaultValueOnForm={!item.isNew}
+                        componentProps={{
+                          euiFieldProps: { readOnly },
+                        }}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
@@ -184,6 +188,9 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                         config={{ label: i18n.HEADER_VALUE_LABEL }}
                         component={TextField}
                         readDefaultValueOnForm={!item.isNew}
+                        componentProps={{
+                          euiFieldProps: { readOnly },
+                        }}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>

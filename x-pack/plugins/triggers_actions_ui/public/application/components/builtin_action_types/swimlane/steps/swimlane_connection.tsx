@@ -40,6 +40,7 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({ readOnly 
           euiFieldProps: {
             disabled: readOnly,
             'data-test-subj': 'swimlaneApiUrlInput',
+            readOnly,
           },
         }}
       />
@@ -58,6 +59,7 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({ readOnly 
           euiFieldProps: {
             disabled: readOnly,
             'data-test-subj': 'swimlaneAppIdInput',
+            readOnly,
           },
         }}
       />

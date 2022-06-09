@@ -277,6 +277,7 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                 'data-test-subj': 'executionTimeFieldSelect',
                 options: timeFieldOptions,
                 fullWidth: true,
+                readOnly,
               },
             }}
           />

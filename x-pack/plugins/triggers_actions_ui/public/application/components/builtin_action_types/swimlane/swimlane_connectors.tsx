@@ -135,7 +135,7 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
           </EuiFormRow>
         </div>
         <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
-          <SwimlaneFields fields={fields} />
+          <SwimlaneFields fields={fields} readOnly={readOnly} />
           <EuiButton onClick={resetConnection} iconType="arrowLeft">
             {i18n.SW_BACK}
           </EuiButton>

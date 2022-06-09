@@ -44,7 +44,7 @@ const authenticationButtons = [
   },
 ];
 
-const XmattersUrlField: React.FC<{ path: string }> = ({ path }) => {
+const XmattersUrlField: React.FC<{ path: string; readOnly: boolean }> = ({ path, readOnly }) => {
   return (
     <UseField
       path={path}
@@ -64,7 +64,7 @@ const XmattersUrlField: React.FC<{ path: string }> = ({ path }) => {
         ],
       }}
       componentProps={{
-        euiFieldProps: { 'data-test-subj': path },
+        euiFieldProps: { 'data-test-subj': path, readOnly },
       }}
     />
   );
@@ -117,7 +117,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
       {selectedAuth === XmattersAuthenticationType.URL ? (
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem>
-            <XmattersUrlField path="secrets.secretsUrl" />
+            <XmattersUrlField path="secrets.secretsUrl" readOnly={readOnly} />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : null}
@@ -125,7 +125,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         <>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>
-              <XmattersUrlField path="config.configUrl" />
+              <XmattersUrlField path="config.configUrl" readOnly={readOnly} />
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="m" />
@@ -157,6 +157,7 @@ const XmattersActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
                   euiFieldProps: {
                     disabled: readOnly,
                     'data-test-subj': 'xmattersUserInput',
+                    readOnly,
                   },
                 }}
               />

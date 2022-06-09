@@ -134,7 +134,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
             component={TextField}
             config={emailFieldConfig}
             componentProps={{
-              euiFieldProps: { 'data-test-subj': 'emailFromInput' },
+              euiFieldProps: { 'data-test-subj': 'emailFromInput', readOnly },
             }}
           />
         </EuiFlexItem>
@@ -160,6 +160,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                 hasNoInitialSelection: true,
                 disabled: readOnly || isLoading,
                 isLoading,
+                readOnly,
               },
             }}
           />
@@ -227,6 +228,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                         label: i18n.SECURE_LABEL,
                         disabled: readOnly || disableServiceConfig,
                         'data-test-subj': 'emailSecureSwitch',
+                        readOnly,
                       },
                     }}
                   />
@@ -254,6 +256,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                   euiFieldProps: {
                     label: i18n.HAS_AUTH_LABEL,
                     disabled: readOnly,
+                    readOnly,
                   },
                 }}
               />
@@ -275,7 +278,7 @@ export const EmailActionConnectorFields: React.FunctionComponent<ActionConnector
                       ],
                     }}
                     componentProps={{
-                      euiFieldProps: { 'data-test-subj': 'emailUserInput' },
+                      euiFieldProps: { 'data-test-subj': 'emailUserInput', readOnly },
                     }}
                   />
                 </EuiFlexItem>
