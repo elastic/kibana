@@ -433,7 +433,7 @@ export const getClosedInfoForUpdate = ({
   }
 };
 
-export const getDuration = ({
+export const getDurationInSeconds = ({
   closedAt,
   createdAt,
 }: {
@@ -464,7 +464,7 @@ export const getDurationForUpdate = ({
   status?: CaseStatuses;
 }): Pick<CaseAttributes, 'duration'> | undefined => {
   if (status && status === CaseStatuses.closed) {
-    return getDuration({ createdAt, closedAt });
+    return getDurationInSeconds({ createdAt, closedAt });
   }
 
   if (status && (status === CaseStatuses.open || status === CaseStatuses['in-progress'])) {
