@@ -16,14 +16,23 @@ import { useCspBreadcrumbs } from '../../../../common/navigation/use_csp_breadcr
 import { findingsNavigation } from '../../../../common/navigation/constants';
 import { ResourceFindingsQuery, useResourceFindings } from './use_resource_findings';
 import { useUrlQuery } from '../../../../common/hooks/use_url_query';
-import type { FindingsBaseProps, FindingsBaseURLQuery } from '../../types';
-import { getBaseQuery, getPaginationQuery, getPaginationTableParams } from '../../utils';
+import type { FindingsBaseURLQuery, FindingsBaseProps } from '../../types';
+import {
+  getPaginationQuery,
+  getPaginationTableParams,
+  useBaseEsQuery,
+  usePersistedQuery,
+} from '../../utils';
 import { ResourceFindingsTable } from './resource_findings_table';
 import { FindingsSearchBar } from '../../layout/findings_search_bar';
+import { ErrorCallout } from '../../layout/error_callout';
 
-const getDefaultQuery = (): FindingsBaseURLQuery & ResourceFindingsQuery => ({
-  query: { language: 'kuery', query: '' },
-  filters: [],
+const getDefaultQuery = ({
+  query,
+  filters,
+}: FindingsBaseURLQuery): FindingsBaseURLQuery & ResourceFindingsQuery => ({
+  query,
+  filters,
   pageIndex: 0,
   pageSize: 10,
 });
@@ -43,20 +52,33 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   useCspBreadcrumbs([findingsNavigation.findings_default]);
   const { euiTheme } = useEuiTheme();
   const params = useParams<{ resourceId: string }>();
-  const { urlQuery, setUrlQuery } = useUrlQuery(getDefaultQuery);
 
+  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
+  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+
+  /**
+   * Page URL query to ES query
+   */
+  const baseEsQuery = useBaseEsQuery({
+    dataView,
+    filters: urlQuery.filters,
+    query: urlQuery.query,
+  });
+
+  /**
+   * Page ES query result
+   */
   const resourceFindings = useResourceFindings({
-    resourceId: params.resourceId,
-    ...getBaseQuery({
-      dataView,
-      filters: urlQuery.filters,
-      query: urlQuery.query,
-    }),
     ...getPaginationQuery({
       pageSize: urlQuery.pageSize,
       pageIndex: urlQuery.pageIndex,
     }),
+    query: baseEsQuery.query,
+    resourceId: params.resourceId,
+    enabled: !baseEsQuery.error,
   });
+
+  const error = resourceFindings.error || baseEsQuery.error;
 
   return (
     <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
@@ -65,8 +87,6 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
         setQuery={(query) => {
           setUrlQuery({ ...query, pageIndex: 0 });
         }}
-        query={urlQuery.query}
-        filters={urlQuery.filters}
         loading={resourceFindings.isFetching}
       />
       <PageWrapper>
@@ -85,19 +105,21 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           />
         </PageTitle>
         <EuiSpacer />
-        <ResourceFindingsTable
-          loading={resourceFindings.isFetching}
-          data={resourceFindings.data}
-          error={resourceFindings.error}
-          pagination={getPaginationTableParams({
-            pageSize: urlQuery.pageSize,
-            pageIndex: urlQuery.pageIndex,
-            totalItemCount: resourceFindings.data?.total || 0,
-          })}
-          setTableOptions={({ page }) =>
-            setUrlQuery({ pageIndex: page.index, pageSize: page.size })
-          }
-        />
+        {error && <ErrorCallout error={error} />}
+        {!error && (
+          <ResourceFindingsTable
+            loading={resourceFindings.isFetching}
+            items={resourceFindings.data?.page || []}
+            pagination={getPaginationTableParams({
+              pageSize: urlQuery.pageSize,
+              pageIndex: urlQuery.pageIndex,
+              totalItemCount: resourceFindings.data?.total || 0,
+            })}
+            setTableOptions={({ page }) =>
+              setUrlQuery({ pageIndex: page.index, pageSize: page.size })
+            }
+          />
+        )}
       </PageWrapper>
     </div>
   );
