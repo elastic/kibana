@@ -72,6 +72,10 @@ export const VIEW_DASHBOARD = i18n.translate('xpack.securitySolution.overview.ct
   defaultMessage: 'View dashboard',
 });
 
+export const IMPORT_DASHBOARD = i18n.translate('xpack.securitySolution.overview.importDasboard', {
+  defaultMessage: 'Import dashboard',
+});
+
 export const OTHER_DATA_SOURCE_TITLE = i18n.translate(
   'xpack.securitySolution.overview.ctiDashboardOtherDatasourceTitle',
   {

@@ -5,27 +5,49 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 
 import * as i18n from './translations';
 import { DisabledLinkPanel } from '../link_panel/disabled_link_panel';
 import { RiskyHostsPanelView } from './risky_hosts_panel_view';
 import { RiskyHostsEnabledModule } from './risky_hosts_enabled_module';
+import { DANGER_BUTTON } from './translations';
+import { devToolConsoleUrl } from '../../../../common/constants';
+import { useSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_signal_index';
+import { OpenInDevConsoleButton } from '../../../common/components/open_in_dev_console';
 
 export const RISKY_HOSTS_DOC_LINK =
   'https://www.github.com/elastic/detection-rules/blob/main/docs/experimental-machine-learning/host-risk-score.md';
 
-export const RiskyHostsDisabledModuleComponent = () => (
-  <DisabledLinkPanel
-    bodyCopy={i18n.DANGER_BODY}
-    buttonCopy={i18n.LEARN_MORE}
-    dataTestSubjPrefix="risky-hosts"
-    docLink={RISKY_HOSTS_DOC_LINK}
-    listItems={[]}
-    titleCopy={i18n.DANGER_TITLE}
-    LinkPanelViewComponent={RiskyHostsPanelView}
-  />
-);
+export const RiskyHostsDisabledModuleComponent = () => {
+  const hostRiskScoreConsoleId = '61c3927a-e933-4404-b986-188680950a95';
+  const loadFromUrl = useMemo(() => {
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    const port = window.location.port;
+    return `${protocol}//${hostname}:${port}${devToolConsoleUrl(hostRiskScoreConsoleId)}`;
+  }, []);
+  const { signalIndexName } = useSignalIndex();
+
+  return (
+    <DisabledLinkPanel
+      bodyCopy={i18n.DANGER_BODY}
+      learnMore={i18n.LEARN_MORE}
+      dataTestSubjPrefix="risky-hosts"
+      docLink={RISKY_HOSTS_DOC_LINK}
+      listItems={[]}
+      titleCopy={i18n.DANGER_TITLE}
+      LinkPanelViewComponent={RiskyHostsPanelView}
+      moreButtons={
+        <OpenInDevConsoleButton
+          loadFromUrl={loadFromUrl}
+          signalIndexName={signalIndexName}
+          title={DANGER_BUTTON}
+        />
+      }
+    />
+  );
+};
 
 export const RiskyHostsDisabledModule = React.memo(RiskyHostsDisabledModuleComponent);
 RiskyHostsEnabledModule.displayName = 'RiskyHostsDisabledModule';

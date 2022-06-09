@@ -62,7 +62,6 @@ const buildConsoleResponse = (response: KibanaResponseFactory) =>
 
 const ReadConsoleRequestSchema = {
   params: schema.object({
-    space_id: schema.string(),
     console_id: schema.string(),
   }),
 };
@@ -78,7 +77,8 @@ export const readConsoleRoute = (router: SecuritySolutionPluginRouter) => {
     },
     async (context, request, response) => {
       const siemResponse = buildConsoleResponse(response);
-      const { space_id: spaceId, console_id: consoleId } = request.params;
+      const { console_id: consoleId } = request.params;
+      const spaceId = context.securitySolution.getSpaceId();
 
       const fileName = mappings[consoleId] ?? null;
 

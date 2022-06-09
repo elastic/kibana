@@ -8,12 +8,8 @@
 import { HttpStart, SavedObjectsImportResponse } from 'src/core/public';
 import { CREATE_DASHBOARD_ROUTE } from '../../../../common/constants';
 
-export async function importFile(http: HttpStart, spaceId: string) {
-  const res = await http.post<SavedObjectsImportResponse>(CREATE_DASHBOARD_ROUTE, {
-    query: {
-      space_id: spaceId,
-    },
-  });
+export async function importFile(http: HttpStart) {
+  const res = await http.post<SavedObjectsImportResponse>(CREATE_DASHBOARD_ROUTE);
 
   return res;
 }

@@ -6,7 +6,6 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { schema } from '@kbn/config-schema';
 
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
@@ -19,12 +18,6 @@ import { buildSiemResponse } from '../../detection_engine/routes/utils';
 import { buildFrameworkRequest } from '../../timeline/utils/common';
 import { createDashboards } from '../../timeline/saved_object/console';
 
-const createDashboardsRouteSchema = {
-  query: schema.object({
-    space_id: schema.string(),
-  }),
-};
-
 export const createDashboardsRoute = (
   router: SecuritySolutionPluginRouter,
   security: SetupPlugins['security']
@@ -32,14 +25,14 @@ export const createDashboardsRoute = (
   router.post(
     {
       path: CREATE_DASHBOARD_ROUTE,
-      validate: createDashboardsRouteSchema,
+      validate: false,
       options: {
         tags: ['access:securitySolution'],
       },
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const { space_id: spaceId } = request.query;
+      const spaceId = context.securitySolution.getSpaceId();
 
       try {
         const frameworkRequest = await buildFrameworkRequest(context, security, request);

@@ -39,6 +39,7 @@ export const readIndexRoute = (
           return siemResponse.error({ statusCode: 404 });
         }
 
+        // console.log('spaceId', index);
         const spaceId = context.securitySolution.getSpaceId();
         const indexName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
 
@@ -73,6 +74,7 @@ export const readIndexRoute = (
             body: {
               name: indexName,
               index_mapping_outdated: mappingOutdated || aliasesOutdated,
+              indexExists,
             },
           });
         } else {
@@ -80,6 +82,7 @@ export const readIndexRoute = (
             body: {
               name: indexName,
               index_mapping_outdated: false,
+              indexExists,
             },
           });
         }

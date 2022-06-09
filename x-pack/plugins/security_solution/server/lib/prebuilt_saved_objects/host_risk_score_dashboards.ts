@@ -327,7 +327,7 @@ export const savedObjectsToCreate = [
                     operationType: 'last_value',
                     params: { sortField: '@timestamp' },
                     scale: 'ordinal',
-                    sourceField: 'risk.keyword',
+                    sourceField: 'risk',
                   },
                 },
                 incompleteColumns: {},
