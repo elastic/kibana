@@ -164,22 +164,6 @@ export function getAssignedColorConfig(
   };
 }
 
-export function getAssignedColorConfigs(
-  colorAssignments: ColorAssignments,
-  frame: Pick<FramePublicAPI, 'datasourceLayers'>,
-  layer: XYLayerConfig,
-  paletteService: PaletteRegistry
-): AccessorConfig[] {
-  if (isAnnotationsLayer(layer)) {
-    return layer.annotations.map((accessor) =>
-      getAssignedColorConfig(layer, accessor.id, colorAssignments, frame, paletteService)
-    );
-  }
-  return layer.accessors.map((accessor) =>
-    getAssignedColorConfig(layer, accessor, colorAssignments, frame, paletteService)
-  );
-}
-
 export function getAccessorColorConfigs(
   colorAssignments: ColorAssignments,
   frame: Pick<FramePublicAPI, 'datasourceLayers'>,
