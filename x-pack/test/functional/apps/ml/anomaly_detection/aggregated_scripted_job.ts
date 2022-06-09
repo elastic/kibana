@@ -413,7 +413,7 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('pre-fills the job selection');
           await ml.jobSelection.assertJobSelection([testData.jobConfig.job_id]);
 
-          await ml.testExecution.logTestStep('displays the swimlanes');
+          await ml.testExecution.logTestStep('displays the swim lanes');
           await ml.anomalyExplorer.assertOverallSwimlaneExists();
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
         });
@@ -447,13 +447,15 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('open job in anomaly explorer');
           await ml.jobTable.clickOpenJobInAnomalyExplorerButton(testData.jobConfig.job_id);
           await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+
+          await ml.anomalyExplorer.assertSingleMetricViewerButtonEnabled(false);
         });
 
         it('displays job results', async () => {
           await ml.testExecution.logTestStep('pre-fills the job selection');
           await ml.jobSelection.assertJobSelection([testData.jobConfig.job_id]);
 
-          await ml.testExecution.logTestStep('displays the swimlanes');
+          await ml.testExecution.logTestStep('displays the swim lanes');
           await ml.anomalyExplorer.assertOverallSwimlaneExists();
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
 
