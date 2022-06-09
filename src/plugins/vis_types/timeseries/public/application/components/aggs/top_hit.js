@@ -97,7 +97,6 @@ const AGG_WITH_KEY = 'agg_with';
 const ORDER_DATE_RESTRICT_FIELDS = [KBN_FIELD_TYPES.DATE];
 
 const getModelDefaults = () => ({
-  size: 1,
   order: 'desc',
   [AGG_WITH_KEY]: 'noop',
 });
@@ -203,7 +202,7 @@ const TopHitAggUi = (props) => {
             <EuiFieldNumber
               onChange={handleNumberChange('size', { isClearable: true })}
               value={model.size}
-              min={1}
+              placeholder="1"
             />
           </EuiFormRow>
         </EuiFlexItem>

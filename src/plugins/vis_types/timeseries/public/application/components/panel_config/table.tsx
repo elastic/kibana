@@ -96,7 +96,7 @@ export class TablePanelConfig extends Component<
     (name: keyof TimeseriesVisParams, isClearable: boolean) =>
     (e: React.ChangeEvent<HTMLInputElement>) =>
       this.props.onChange({
-        [name]: isClearable && !e.target.value ? undefined : Number(e.target.value),
+        [name]: isClearable && !e.target.value ? undefined : Number(e.target.value ?? 0),
       });
 
   render() {
@@ -105,7 +105,6 @@ export class TablePanelConfig extends Component<
       drilldown_url: '',
       filter: { query: '', language: getDefaultQueryLanguage() },
       pivot_label: '',
-      pivot_rows: 10,
       pivot_type: '',
     };
     const model = { ...defaults, ...this.props.model };
@@ -183,6 +182,7 @@ export class TablePanelConfig extends Component<
                     <EuiFieldNumber
                       onChange={this.handleNumberChange('pivot_rows', true)}
                       value={model.pivot_rows}
+                      placeholder="10"
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
