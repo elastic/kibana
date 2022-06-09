@@ -33,7 +33,7 @@ exports[`KibanaPageTemplateSolutionNav accepts EuiSideNavProps 1`] = `
   >
     <EuiPanel
       color="transparent"
-      paddingSize="m"
+      paddingSize="s"
     >
       <EuiSideNav
         aria-hidden={false}
@@ -133,7 +133,7 @@ exports[`KibanaPageTemplateSolutionNav accepts canBeCollapsed prop 1`] = `
   >
     <EuiPanel
       color="transparent"
-      paddingSize="m"
+      paddingSize="s"
     >
       <EuiSideNav
         aria-hidden={false}
@@ -232,7 +232,7 @@ exports[`KibanaPageTemplateSolutionNav heading accepts more headingProps 1`] = `
   >
     <EuiPanel
       color="transparent"
-      paddingSize="m"
+      paddingSize="s"
     />
   </EuiCollapsibleNavGroup>
 </Fragment>
@@ -271,7 +271,7 @@ exports[`KibanaPageTemplateSolutionNav renders 1`] = `
   >
     <EuiPanel
       color="transparent"
-      paddingSize="m"
+      paddingSize="s"
     >
       <EuiSideNav
         aria-hidden={false}
@@ -375,7 +375,7 @@ exports[`KibanaPageTemplateSolutionNav renders with icon 1`] = `
   >
     <EuiPanel
       color="transparent"
-      paddingSize="m"
+      paddingSize="s"
     >
       <EuiSideNav
         aria-hidden={false}

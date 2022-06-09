@@ -171,7 +171,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
   return (
     <>
       {isSmallerBreakpoint && (
-        // @ts-expect-error
+        // @ts-expect-error Mismatch in collapsible vs unconllapsible props
         <EuiCollapsibleNavGroup
           className={sideNavClasses}
           paddingSize="none"
@@ -181,7 +181,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
           isCollapsible={canBeCollapsed}
           initialIsOpen={false}
         >
-          <EuiPanel color="transparent" paddingSize="m">
+          <EuiPanel color="transparent" paddingSize="s">
             {sideNavContent}
           </EuiPanel>
         </EuiCollapsibleNavGroup>
