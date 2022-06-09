@@ -934,7 +934,7 @@ export class VisualBuilderPageObject extends FtrService {
 
   public async getVisualizeError() {
     const visError = await this.testSubjects.find(`visualization-error`);
-    const errorSpans = await visError.findAllByClassName('euiText--extraSmall');
+    const errorSpans = await visError.findAllByClassName('visualization-error-text');
     return await errorSpans[0].getVisibleText();
   }
 
