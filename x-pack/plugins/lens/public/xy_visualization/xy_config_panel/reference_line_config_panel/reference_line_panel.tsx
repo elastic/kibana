@@ -94,6 +94,7 @@ export const ReferenceLinePanel = (
       <FillSetting isHorizontal={isHorizontal} setConfig={setConfig} currentConfig={localConfig} />
       <ColorPicker
         {...props}
+        overwriteColor={localConfig?.color}
         defaultColor={defaultReferenceLineColor}
         setConfig={setConfig}
         disableHelpTooltip

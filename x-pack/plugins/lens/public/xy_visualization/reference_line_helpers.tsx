@@ -370,7 +370,7 @@ export const setReferenceDimension: Visualization<XYState>['setDimension'] = ({
   };
 };
 
-const getSingleColorConfig = (id: string, color = defaultReferenceLineColor) => ({
+export const getSingleColorConfig = (id: string, color = defaultReferenceLineColor) => ({
   columnId: id,
   triggerIcon: 'color' as const,
   color,
