@@ -117,7 +117,9 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
     rect: RectAnnotationDatum[];
     line: LineAnnotationDatum[];
   }>({ rect: [], line: [] });
-  // const [modelSnapshotData, setModelSnapshotData] = useState<LineAnnotationDatum[]>([]);
+  const [modelSnapshotDataForTimeRange, setModelSnapshotDataForTimeRange] = useState<
+    LineAnnotationDatumWithModelSnapshot[]
+  >([]);
   const [messageData, setMessageData] = useState<LineAnnotationDatum[]>([]);
   const [sourceData, setSourceData] = useState<number[][]>([]);
   const [showAnnotations, setShowAnnotations] = useState<boolean>(true);
@@ -171,6 +173,11 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
         rect: chartData.annotationResultsRect,
         line: chartData.annotationResultsLine.map(setLineAnnotationHeader),
       });
+      setModelSnapshotDataForTimeRange(
+        data.modelSnapshotData.filter(
+          (datum) => datum.dataValue >= startTimestamp && datum.dataValue <= endTimestamp
+        )
+      );
     } catch (error) {
       const title = i18n.translate('xpack.ml.jobsList.datafeedChart.errorToastTitle', {
         defaultMessage: 'Error fetching data',
@@ -415,7 +422,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             )}
                             key="model-snapshots-results-line"
                             domainType={AnnotationDomainType.XDomain}
-                            dataValues={data.modelSnapshotData}
+                            dataValues={modelSnapshotDataForTimeRange}
                             marker={<EuiIcon type="asterisk" />}
                             markerPosition={Position.Top}
                             style={{
