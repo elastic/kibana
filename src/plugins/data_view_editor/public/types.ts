@@ -50,6 +50,10 @@ export interface DataViewEditorProps {
    */
   requireTimestampField?: boolean;
   /**
+   * Pass the data view to be edited.
+   */
+  editData?: DataView;
+  /**
    * If set to false, the screen for prompting a user to create a data view will be skipped, and the user will be taken directly
    * to data view creation.
    */
@@ -157,6 +161,7 @@ export interface IndexPatternConfig {
   allowHidden: boolean;
   id?: string;
   type: INDEX_PATTERN_TYPE;
+  name?: string;
 }
 
 export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'> {
