@@ -40,7 +40,7 @@ describe('ExceptionsViewerItems', () => {
 
     expect(wrapper.find('[data-test-subj="exceptionsEmptyPrompt"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="exceptionsContainer"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptTitle"]').text()).toEqual(
+    expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptTitle"]').last().text()).toEqual(
       i18n.EXCEPTION_EMPTY_PROMPT_TITLE
     );
     expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptBody"]').text()).toEqual(
@@ -67,7 +67,7 @@ describe('ExceptionsViewerItems', () => {
 
     expect(wrapper.find('[data-test-subj="exceptionsEmptyPrompt"]').exists()).toBeTruthy();
     expect(wrapper.find('[data-test-subj="exceptionsContainer"]').exists()).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptTitle"]').text()).toEqual('');
+    expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptTitle"]').last().text()).toEqual('');
     expect(wrapper.find('[data-test-subj="exceptionsEmptyPromptBody"]').text()).toEqual(
       i18n.EXCEPTION_NO_SEARCH_RESULTS_PROMPT_BODY
     );

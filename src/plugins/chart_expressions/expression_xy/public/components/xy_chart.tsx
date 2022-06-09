@@ -12,8 +12,6 @@ import {
   Settings,
   Axis,
   Position,
-  GeometryValue,
-  XYChartSeriesIdentifier,
   VerticalAlignment,
   HorizontalAlignment,
   LayoutDirection,
@@ -27,6 +25,7 @@ import {
   TooltipType,
   Placement,
   Direction,
+  XYChartElementEvent,
 } from '@elastic/charts';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
@@ -408,10 +407,9 @@ export function XYChart({
     valueLabels !== ValueLabelModes.HIDE &&
     getValueLabelsStyling(shouldRotate);
 
-  const clickHandler: ElementClickListener = ([[geometry, series]]) => {
-    // for xyChart series is always XYChartSeriesIdentifier and geometry is always type of GeometryValue
-    const xySeries = series as XYChartSeriesIdentifier;
-    const xyGeometry = geometry as GeometryValue;
+  const clickHandler: ElementClickListener = ([elementEvent]) => {
+    // this cast is safe because we are rendering a cartesian chart
+    const [xyGeometry, xySeries] = elementEvent as XYChartElementEvent;
 
     const layerIndex = dataLayers.findIndex((l) =>
       xySeries.seriesKeys.some((key: string | number) =>
