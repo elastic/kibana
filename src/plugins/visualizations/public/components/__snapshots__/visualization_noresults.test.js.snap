@@ -30,7 +30,7 @@ exports[`VisualizationNoResults should render according to snapshot 1`] = `
             class="euiText css-nexvet-euiText-m-euiTextColor-subdued"
           >
             <div
-              class="euiText css-1utxlgq-euiText-xs"
+              class="euiText visualization-error-text css-1utxlgq-euiText-xs"
             >
               No results found
             </div>
