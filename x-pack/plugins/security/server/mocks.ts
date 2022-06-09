@@ -31,6 +31,7 @@ function createSetupMock() {
     privilegeDeprecationsService: {
       getKibanaRolesByFeatureId: jest.fn(),
     },
+    setIsElasticCloudDeployment: jest.fn(),
   };
 }
 

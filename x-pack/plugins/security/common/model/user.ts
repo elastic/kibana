@@ -23,6 +23,6 @@ export interface EditUser extends User {
   confirmPassword?: string;
 }
 
-export function getUserDisplayName(user: User) {
+export function getUserDisplayName(user: Pick<User, 'username' | 'full_name'>) {
   return user.full_name || user.username;
 }

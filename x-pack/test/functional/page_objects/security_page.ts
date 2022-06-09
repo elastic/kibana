@@ -497,7 +497,7 @@ export class SecurityPageObject extends FtrService {
       'editUserChangePasswordConfirmPasswordInput',
       user.confirm_password ?? ''
     );
-    await this.testSubjects.click('formFlyoutSubmitButton');
+    await this.testSubjects.click('changePasswordFormSubmitButton');
   }
 
   async updateUserProfile(user: UserFormValues) {

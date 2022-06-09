@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
+import type { UserProfileGrant } from '../user_profile';
 import { AuthenticationResult } from './authentication_result';
 
 describe('AuthenticationResult', () => {
@@ -21,6 +22,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.redirected()).toBe(false);
 
       expect(authenticationResult.user).toBeUndefined();
+      expect(authenticationResult.userProfileGrant).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
       expect(authenticationResult.error).toBeUndefined();
       expect(authenticationResult.authHeaders).toBeUndefined();
@@ -47,6 +49,7 @@ describe('AuthenticationResult', () => {
 
       expect(authenticationResult.error).toBe(failureReason);
       expect(authenticationResult.user).toBeUndefined();
+      expect(authenticationResult.userProfileGrant).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
@@ -67,6 +70,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.authResponseHeaders).toEqual({ 'WWW-Authenticate': 'Negotiate' });
       expect(authenticationResult.error).toBe(failureReason);
       expect(authenticationResult.user).toBeUndefined();
+      expect(authenticationResult.userProfileGrant).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.redirectURL).toBeUndefined();
@@ -80,7 +84,7 @@ describe('AuthenticationResult', () => {
       );
     });
 
-    it('correctly produces `succeeded` authentication result without state and auth headers.', () => {
+    it('correctly produces `succeeded` authentication result without state, auth headers and user profile grant.', () => {
       const user = mockAuthenticatedUser();
       const authenticationResult = AuthenticationResult.succeeded(user);
 
@@ -90,6 +94,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.redirected()).toBe(false);
 
       expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.userProfileGrant).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
@@ -97,7 +102,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.redirectURL).toBeUndefined();
     });
 
-    it('correctly produces `succeeded` authentication result with state, but without auth headers.', () => {
+    it('correctly produces `succeeded` authentication result with state, but without user profile grant and auth headers.', () => {
       const user = mockAuthenticatedUser();
       const state = { some: 'state' };
       const authenticationResult = AuthenticationResult.succeeded(user, { state });
@@ -109,13 +114,40 @@ describe('AuthenticationResult', () => {
 
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.state).toBe(state);
+      expect(authenticationResult.userProfileGrant).toBeUndefined();
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
       expect(authenticationResult.error).toBeUndefined();
       expect(authenticationResult.redirectURL).toBeUndefined();
     });
 
-    it('correctly produces `succeeded` authentication result with auth headers, but without state.', () => {
+    it('correctly produces `succeeded` authentication result with state and user profile grant, but without auth headers.', () => {
+      const user = mockAuthenticatedUser();
+      const state = { some: 'state' };
+      const userProfileGrant = {
+        type: 'accessToken' as 'accessToken',
+        accessToken: 'access-token',
+      };
+      const authenticationResult = AuthenticationResult.succeeded(user, {
+        userProfileGrant,
+        state,
+      });
+
+      expect(authenticationResult.succeeded()).toBe(true);
+      expect(authenticationResult.failed()).toBe(false);
+      expect(authenticationResult.notHandled()).toBe(false);
+      expect(authenticationResult.redirected()).toBe(false);
+
+      expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.state).toBe(state);
+      expect(authenticationResult.userProfileGrant).toBe(userProfileGrant);
+      expect(authenticationResult.authHeaders).toBeUndefined();
+      expect(authenticationResult.authResponseHeaders).toBeUndefined();
+      expect(authenticationResult.error).toBeUndefined();
+      expect(authenticationResult.redirectURL).toBeUndefined();
+    });
+
+    it('correctly produces `succeeded` authentication result with auth headers, but without state and user profile grant.', () => {
       const user = mockAuthenticatedUser();
       const authHeaders = { authorization: 'some-token' };
       const authResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
@@ -130,6 +162,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.redirected()).toBe(false);
 
       expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.userProfileGrant).toBeUndefined();
       expect(authenticationResult.state).toBeUndefined();
       expect(authenticationResult.authHeaders).toBe(authHeaders);
       expect(authenticationResult.authResponseHeaders).toBe(authResponseHeaders);
@@ -137,14 +170,20 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.redirectURL).toBeUndefined();
     });
 
-    it('correctly produces `succeeded` authentication result with both auth headers and state.', () => {
+    it('correctly produces `succeeded` authentication result with auth headers, state and user profile grant.', () => {
       const user = mockAuthenticatedUser();
       const authHeaders = { authorization: 'some-token' };
       const authResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
       const state = { some: 'state' };
+      const userProfileGrant: UserProfileGrant = {
+        type: 'password',
+        username: 'user',
+        password: 'password',
+      };
       const authenticationResult = AuthenticationResult.succeeded(user, {
         authHeaders,
         authResponseHeaders,
+        userProfileGrant,
         state,
       });
 
@@ -157,6 +196,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.state).toBe(state);
       expect(authenticationResult.authHeaders).toBe(authHeaders);
       expect(authenticationResult.authResponseHeaders).toBe(authResponseHeaders);
+      expect(authenticationResult.userProfileGrant).toBe(userProfileGrant);
       expect(authenticationResult.error).toBeUndefined();
       expect(authenticationResult.redirectURL).toBeUndefined();
     });
@@ -169,7 +209,7 @@ describe('AuthenticationResult', () => {
       );
     });
 
-    it('correctly produces `redirected` authentication result without state, user and response headers.', () => {
+    it('correctly produces `redirected` authentication result without state, user, user profile grant and response headers.', () => {
       const redirectURL = '/redirect/url';
       const authenticationResult = AuthenticationResult.redirectTo(redirectURL);
 
@@ -183,6 +223,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.state).toBeUndefined();
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
+      expect(authenticationResult.userProfileGrant).toBeUndefined();
       expect(authenticationResult.error).toBeUndefined();
     });
 
@@ -200,6 +241,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.state).toBe(state);
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
+      expect(authenticationResult.userProfileGrant).toBeUndefined();
       expect(authenticationResult.user).toBeUndefined();
       expect(authenticationResult.error).toBeUndefined();
     });
@@ -219,17 +261,24 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.state).toBe(state);
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.authResponseHeaders).toBeUndefined();
+      expect(authenticationResult.userProfileGrant).toBeUndefined();
       expect(authenticationResult.user).toBe(user);
       expect(authenticationResult.error).toBeUndefined();
     });
 
-    it('correctly produces `redirected` authentication result with state, user and response headers.', () => {
+    it('correctly produces `redirected` authentication result with state, user, user profile grant and response headers.', () => {
       const redirectURL = '/redirect/url';
       const state = { some: 'state' };
       const user = mockAuthenticatedUser();
       const authResponseHeaders = { 'WWW-Authenticate': 'Negotiate' };
+      const userProfileGrant: UserProfileGrant = {
+        type: 'password',
+        username: 'user',
+        password: 'password',
+      };
       const authenticationResult = AuthenticationResult.redirectTo(redirectURL, {
         user,
+        userProfileGrant,
         state,
         authResponseHeaders,
       });
@@ -244,6 +293,7 @@ describe('AuthenticationResult', () => {
       expect(authenticationResult.authHeaders).toBeUndefined();
       expect(authenticationResult.authResponseHeaders).toBe(authResponseHeaders);
       expect(authenticationResult.user).toBe(user);
+      expect(authenticationResult.userProfileGrant).toBe(userProfileGrant);
       expect(authenticationResult.error).toBeUndefined();
     });
   });

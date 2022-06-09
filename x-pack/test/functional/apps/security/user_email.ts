@@ -45,18 +45,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('login as new user and verify email', async function () {
       await PageObjects.security.login('newuser', 'changeme');
-      await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
+      await PageObjects.accountSetting.verifyAccountSettings('newuser');
     });
 
     it('click changepassword link, change the password and re-login', async function () {
-      await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
+      await PageObjects.accountSetting.verifyAccountSettings('newuser');
       await PageObjects.accountSetting.changePassword('changeme', 'mechange');
       await PageObjects.security.forceLogout();
     });
 
     it('login as new user with changed password', async function () {
       await PageObjects.security.login('newuser', 'mechange');
-      await PageObjects.accountSetting.verifyAccountSettings('newuser@myEmail.com', 'newuser');
+      await PageObjects.accountSetting.verifyAccountSettings('newuser');
     });
 
     after(async function () {
