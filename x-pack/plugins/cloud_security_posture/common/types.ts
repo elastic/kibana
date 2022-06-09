@@ -47,8 +47,25 @@ export interface ComplianceDashboardData {
   trend: PostureTrend[];
 }
 
+export interface Applicable {
+  status_1: {
+    applicable: true;
+    description: 'Missing running agent';
+  };
+}
+export type FindingsIndexState =
+  | 'indexed'
+  | 'indexing'
+  | 'index_timeout'
+  | 'not deployed'
+  | 'not installed';
+
 export interface CspSetupStatus {
-  latestFindingsIndexStatus: 'applicable' | 'inapplicable';
+  status: FindingsIndexState;
+  installed_pkg_ver: string | null;
+  latest_pkg_ver: string;
+  installed_integration: number;
+  healthy_agents: number;
 }
 
 export interface CspRulesStatus {

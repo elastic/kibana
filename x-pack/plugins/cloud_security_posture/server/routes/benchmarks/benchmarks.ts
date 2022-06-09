@@ -69,7 +69,7 @@ export const getCspPackagePolicies = (
   });
 };
 
-export const getAgentPolicies = async (
+export const getCspAgentPolicies = async (
   soClient: SavedObjectsClientContract,
   packagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface
@@ -185,6 +185,7 @@ const createBenchmarks = (
         const benchmark = createBenchmarkEntry(agentPolicy, cspPackage, cspRulesStatus);
         return benchmark;
       });
+
       return benchmarks;
     })
   );
@@ -220,7 +221,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter, cspContext: CspAppCo
           query
         );
 
-        const agentPolicies = await getAgentPolicies(
+        const agentPolicies = await getCspAgentPolicies(
           soClient,
           cspPackagePolicies.items,
           agentPolicyService
