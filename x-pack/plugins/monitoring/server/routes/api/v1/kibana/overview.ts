@@ -33,18 +33,25 @@ export function kibanaOverviewRoute(server: MonitoringCore) {
 
       try {
         const moduleType = 'kibana';
-        const dsDataset = 'stats';
+        const dsDatasets = ['stats', 'cluster_rules', 'cluster_actions'];
+        const bools = dsDatasets.reduce(
+          (accum: Array<{ term: { [key: string]: string } }>, dsDataset) => {
+            accum.push(
+              ...[
+                { term: { 'data_stream.dataset': `${moduleType}.${dsDataset}` } },
+                { term: { 'metricset.name': dsDataset } },
+                { term: { type: `kibana_${dsDataset}` } },
+              ]
+            );
+            return accum;
+          },
+          []
+        );
         const [clusterStatus, metrics] = await Promise.all([
           getKibanaClusterStatus(req, { clusterUuid }),
           getMetrics(req, moduleType, metricSet, [
             {
-              bool: {
-                should: [
-                  { term: { 'data_stream.dataset': `${moduleType}.${dsDataset}` } },
-                  { term: { 'metricset.name': dsDataset } },
-                  { term: { type: 'kibana_stats' } },
-                ],
-              },
+              bool: { should: bools },
             },
           ]),
         ]);

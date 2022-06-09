@@ -6,34 +6,35 @@
  */
 
 import expect from '@kbn/expect';
-import overviewFixture from './fixtures/overview.json';
+import fixture from './fixtures/overview.json';
+import { getLifecycleMethods } from '../../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('overview', () => {
-    const archive = 'x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/kibana/rules_and_actions';
     const timeRange = {
-      min: '2017-08-29T17:24:17.000Z',
-      max: '2017-08-29T17:26:08.000Z',
+      min: '2022-05-31T18:44:19.267Z',
+      max: '2022-05-31T19:59:19.267Z',
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
-    it('should summarize kibana instances with stats', async () => {
+    it('should get data for the entire cluster', async () => {
       const { body } = await supertest
-        .post('/api/monitoring/v1/clusters/DFDDUmKHR0Ge0mkdYW2bew/kibana')
+        .post('/api/monitoring/v1/clusters/SvjwrFv6Rvuqjm9-cSSVEg')
         .set('kbn-xsrf', 'xxx')
-        .send({ timeRange })
+        .send({ timeRange, codePaths: ['all'] })
         .expect(200);
-      expect(body).to.eql(overviewFixture);
+      expect(body).to.eql(fixture);
     });
   });
 }
