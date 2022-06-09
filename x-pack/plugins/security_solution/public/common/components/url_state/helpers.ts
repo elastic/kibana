@@ -24,8 +24,6 @@ import { formatDate } from '../super_date_picker';
 import { NavTab } from '../navigation/types';
 import { CONSTANTS, UrlStateType } from './constants';
 import { ReplaceStateInLocation, KeyUrlState, ValueUrlState } from './types';
-import { sourcererSelectors } from '../../store/sourcerer';
-import { SourcererScopeName, SourcererUrlState } from '../../store/sourcerer/model';
 
 export const isDetectionsPages = (pageName: string) =>
   pageName === SecurityPageName.alerts ||
@@ -49,6 +47,7 @@ export const encodeRisonUrlState = (state: any) => encode(state);
 
 export const getQueryStringFromLocation = (search: string) => search.substring(1);
 
+// getParamFromQueryString returns undefined despite of the type not alowing it.
 export const getParamFromQueryString = (queryString: string, key: string) => {
   const parsedQueryString = parse(queryString, { sort: false });
   const queryParam = parsedQueryString[key];
@@ -128,7 +127,6 @@ export const makeMapStateToProps = () => {
   const getGlobalFiltersQuerySelector = inputsSelectors.globalFiltersQuerySelector();
   const getGlobalSavedQuerySelector = inputsSelectors.globalSavedQuerySelector();
   const getTimeline = timelineSelectors.getTimelineByIdSelector();
-  const getSourcererScopes = sourcererSelectors.scopesSelector();
   const mapStateToProps = (state: State) => {
     const inputState = getInputsSelector(state);
     const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
@@ -159,25 +157,10 @@ export const makeMapStateToProps = () => {
         [CONSTANTS.savedQuery]: savedQuery.id,
       };
     }
-    const sourcerer = getSourcererScopes(state);
-    const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
-    const selectedPatterns: SourcererUrlState = activeScopes
-      .filter((scope) => scope === SourcererScopeName.default)
-      .reduce(
-        (acc, scope) => ({
-          ...acc,
-          [scope]: {
-            id: sourcerer[scope]?.selectedDataViewId,
-            selectedPatterns: sourcerer[scope]?.selectedPatterns,
-          },
-        }),
-        {}
-      );
 
     return {
       urlState: {
         ...searchAttr,
-        [CONSTANTS.sourcerer]: selectedPatterns,
         [CONSTANTS.timerange]: {
           global: {
             [CONSTANTS.timerange]: globalTimerange,

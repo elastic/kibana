@@ -120,7 +120,6 @@ export const defaultProps: UrlStateContainerPropTypes = {
       id: '',
       isOpen: false,
     },
-    [CONSTANTS.sourcerer]: {},
   },
   history: {
     ...mockHistory,

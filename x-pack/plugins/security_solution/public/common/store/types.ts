@@ -20,6 +20,7 @@ import { TimelinePluginState } from '../../timelines/store/timeline';
 import { NetworkPluginState } from '../../network/store';
 import { ManagementPluginState } from '../../management';
 import { UsersPluginState } from '../../users/store';
+import { GlobalUrlState } from './global_url_state';
 
 export type StoreState = HostsPluginState &
   UsersPluginState &
@@ -31,6 +32,7 @@ export type StoreState = HostsPluginState &
     dragAndDrop: DragAndDropState;
     inputs: InputsState;
     sourcerer: SourcererState;
+    globalUrlState: GlobalUrlState;
   };
 /**
  * The redux `State` type for the Security App.

@@ -14,12 +14,12 @@ import {
   SelectedDataView,
   SourcererDataView,
   SourcererScopeName,
+  SourcererUrlState,
 } from '../../store/sourcerer/model';
 import { useUserInfo } from '../../../detections/components/user_info';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import {
   ALERTS_PATH,
-  CASES_PATH,
   HOSTS_PATH,
   USERS_PATH,
   NETWORK_PATH,
@@ -37,6 +37,9 @@ import { useAppToasts } from '../../hooks/use_app_toasts';
 import { postSourcererDataView } from './api';
 import { useDataView } from '../source/use_data_view';
 import { useFetchIndex } from '../source';
+import { isDetectionPage } from '../../utils/route/helpers';
+import { registerUrlParam } from '../../utils/global_query_string_manager';
+import { CONSTANTS } from '../../components/url_state/constants';
 
 export const useInitSourcerer = (
   scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
@@ -87,6 +90,29 @@ export const useInitSourcerer = (
     missingPatterns: timelineMissingPatterns,
   } = useDeepEqualSelector((state) => scopeIdSelector(state, SourcererScopeName.timeline));
   const { indexFieldsSearch } = useDataView();
+
+  // Register Soucerer url param and intilize store
+  useEffect(() => {
+    const sourcererInitialState = registerUrlParam<SourcererUrlState>({
+      urlStateKey: CONSTANTS.sourcerer,
+    });
+
+    if (sourcererInitialState != null) {
+      const activeScopes: SourcererScopeName[] = Object.keys(sourcererInitialState).filter(
+        (key) => !(key === SourcererScopeName.default && scopeId === SourcererScopeName.detections)
+      ) as SourcererScopeName[];
+      activeScopes.forEach((scope) =>
+        dispatch(
+          sourcererActions.setSelectedDataView({
+            id: scope,
+            selectedDataViewId: sourcererInitialState[scope]?.id ?? null,
+            selectedPatterns: sourcererInitialState[scope]?.selectedPatterns ?? [],
+          })
+        )
+      );
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch]);
 
   /*
    * Note for future engineer:
@@ -391,17 +417,10 @@ export const useSourcererDataView = (
   );
 };
 
-const detectionsPaths = [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`];
-
 export const getScopeFromPath = (
   pathname: string
 ): SourcererScopeName.default | SourcererScopeName.detections =>
-  matchPath(pathname, {
-    path: detectionsPaths,
-    strict: false,
-  }) == null
-    ? SourcererScopeName.default
-    : SourcererScopeName.detections;
+  isDetectionPage(pathname) ? SourcererScopeName.detections : SourcererScopeName.default;
 
 export const sourcererPaths = [
   ALERTS_PATH,

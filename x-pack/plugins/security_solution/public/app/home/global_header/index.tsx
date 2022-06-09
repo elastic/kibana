@@ -11,7 +11,7 @@ import {
   EuiHeaderSectionItem,
 } from '@elastic/eui';
 import React, { useEffect, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { createPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { i18n } from '@kbn/i18n';
 
@@ -27,6 +27,10 @@ import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
 import { getScopeFromPath, showSourcererByPath } from '../../../common/containers/sourcerer';
+import { SourcererScopeName, SourcererUrlState } from '../../../common/store/sourcerer/model';
+import { sourcererSelectors } from '../../../common/store';
+import { CONSTANTS } from '../../../common/components/url_state/constants';
+import { updateUrlParam } from '../../../common/utils/global_query_string_manager';
 
 const BUTTON_ADD_DATA = i18n.translate('xpack.securitySolution.globalHeader.buttonAddData', {
   defaultMessage: 'Add integrations',
@@ -54,6 +58,35 @@ export const GlobalHeader = React.memo(
 
     const sourcererScope = getScopeFromPath(pathname);
     const showSourcerer = showSourcererByPath(pathname);
+
+    const history = useHistory();
+
+    const sourcerer = useShallowEqualSelector(sourcererSelectors.scopesSelector());
+
+    const selectedPatterns: SourcererUrlState = useMemo(() => {
+      const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
+
+      return activeScopes
+        .filter((scope) => scope === SourcererScopeName.default)
+        .reduce(
+          (acc, scope) => ({
+            ...acc,
+            [scope]: {
+              id: sourcerer[scope]?.selectedDataViewId,
+              selectedPatterns: sourcerer[scope]?.selectedPatterns,
+            },
+          }),
+          {}
+        );
+    }, [sourcerer]);
+
+    useEffect(() => {
+      updateUrlParam<SourcererUrlState>({
+        urlStateKey: CONSTANTS.sourcerer,
+        value: selectedPatterns,
+        history,
+      });
+    }, [selectedPatterns, history]);
 
     const href = useMemo(() => prepend(ADD_DATA_PATH), [prepend]);
 
@@ -98,4 +131,3 @@ export const GlobalHeader = React.memo(
     );
   }
 );
-GlobalHeader.displayName = 'GlobalHeader';

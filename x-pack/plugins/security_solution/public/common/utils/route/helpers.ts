@@ -7,6 +7,8 @@
 
 import { noop } from 'lodash/fp';
 import { createContext, Dispatch } from 'react';
+import { matchPath } from 'react-router-dom';
+import { ALERTS_PATH, CASES_PATH, RULES_PATH } from '../../../../common/constants';
 
 import { RouteSpyState, RouteSpyAction } from './types';
 
@@ -23,3 +25,11 @@ export const RouterSpyStateContext = createContext<[RouteSpyState, Dispatch<Rout
   initRouteSpy,
   () => noop,
 ]);
+
+const detectionsPaths = [ALERTS_PATH, `${RULES_PATH}/id/:id`, `${CASES_PATH}/:detailName`];
+
+export const isDetectionPage = (pathname: string) =>
+  matchPath(pathname, {
+    path: detectionsPaths,
+    strict: false,
+  }) !== null;
