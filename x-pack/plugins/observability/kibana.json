@@ -30,7 +30,8 @@
     "timelines",
     "triggersActionsUi",
     "inspector",
-    "unifiedSearch"
+    "unifiedSearch",
+    "sharedUX"
   ],
   "ui": true,
   "server": true,

@@ -68,7 +68,9 @@ const getAnomalies = async (
     [],
     'auto',
     params.severity,
-    moment(lastCheckedAt).valueOf(),
+    // Lookback window will be 2x Bucket time span, for uptime job, for now bucket
+    // timespan will always be 15minute
+    moment(lastCheckedAt).subtract(30, 'minute').valueOf(),
     moment().valueOf(),
     Intl.DateTimeFormat().resolvedOptions().timeZone,
     500,

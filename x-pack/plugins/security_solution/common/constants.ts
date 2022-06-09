@@ -95,7 +95,6 @@ export enum SecurityPageName {
   hostsExternalAlerts = 'hosts-external_alerts',
   hostsRisk = 'hosts-risk',
   hostsEvents = 'hosts-events',
-  hostsAuthentications = 'hosts-authentications',
   investigate = 'investigate',
   landing = 'get_started',
   network = 'network',
