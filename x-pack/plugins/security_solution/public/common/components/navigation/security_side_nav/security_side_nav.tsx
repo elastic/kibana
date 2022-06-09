@@ -64,14 +64,17 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
           : {}),
         ...(navItem.links && navItem.links.length > 0
           ? {
-              items: navItem.links
-                .filter((link) => !link.disabled)
-                .map((panelNavItem) => ({
-                  id: panelNavItem.id,
-                  label: panelNavItem.title,
-                  description: panelNavItem.description,
-                  ...getSecuritySolutionLinkProps({ deepLinkId: panelNavItem.id }),
-                })),
+              items: navItem.links.reduce<DefaultSideNavItem[]>((acc, current) => {
+                if (!current.disabled) {
+                  acc.push({
+                    id: current.id,
+                    label: current.title,
+                    description: current.description,
+                    ...getSecuritySolutionLinkProps({ deepLinkId: current.id }),
+                  });
+                }
+                return acc;
+              }, []),
             }
           : {}),
       });

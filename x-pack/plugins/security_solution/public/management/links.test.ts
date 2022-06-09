@@ -43,7 +43,7 @@ describe('links', () => {
       } as unknown as StartPlugins);
   });
 
-  it('it returns all links without filtering when having isolate permisions', async () => {
+  it('it returns all links without filtering when having isolate permissions', async () => {
     (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
     fakeHttpServices.get.mockResolvedValue({ total: 0 });
     const filteredLinks = await getManagementFilteredLinks(
