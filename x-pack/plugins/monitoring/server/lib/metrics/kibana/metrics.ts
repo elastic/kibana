@@ -270,7 +270,7 @@ export const metrics = {
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.ruleInstanceFailuresDescription',
       {
-        defaultMessage: 'Rate of rule executions for the Kibana instance.',
+        defaultMessage: 'Rate of rule failures for the Kibana instance.',
       }
     ),
     format: SMALL_FLOAT,
@@ -304,7 +304,7 @@ export const metrics = {
     description: i18n.translate(
       'xpack.monitoring.metrics.kibanaInstance.actionInstanceFailuresDescription',
       {
-        defaultMessage: 'Rate of action executions for the Kibana instance.',
+        defaultMessage: 'Rate of action failures for the Kibana instance.',
       }
     ),
     format: SMALL_FLOAT,
