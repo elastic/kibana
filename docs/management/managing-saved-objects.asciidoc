@@ -97,12 +97,25 @@ limits the number of saved objects which may be exported.
 === Copy to other {kib} spaces
 
 To copy a saved object to another space, click the actions icon image:images/actions_icon.png[Actions icon]
-and select *Copy to space*. From here, you can select the spaces in which to copy the object.
+and select *Copy to spaces*. From here, you can select the spaces in which to copy the object.
 You can also select whether to automatically overwrite any conflicts in the target spaces, or
 resolve them manually.
 
 WARNING: The copy operation automatically includes child objects that are related to the saved objects. If you don't want this behavior, use
 the <<spaces-api-copy-saved-objects, copy saved objects to space API>> instead.
 
+[float]
+[role="xpack"]
+[[managing-saved-objects-share-to-space]]
+=== Share to other {kib} spaces
+
+To share a saved object to another space -- which makes a single saved object available in multiple spaces -- click the actions icon
+image:images/actions_icon.png[Actions icon] and select *Share to spaces*. From here, you can select the spaces in which to share the object,
+or indicate that you want the object to be shared to _all spaces_, which includes those that exist now and any created in the future.
+
+Not all saved object types are shareable. If an object is shareable, the Spaces column shows which spaces it exists in. You can also click
+those space icons to open the Share UI.
+
+WARNING: The share operation automatically includes child objects that are related to the saved objects.
 
 include::saved-objects/saved-object-ids.asciidoc[]
