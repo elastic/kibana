@@ -243,13 +243,16 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             nonAggregatableFields
           );
 
+          const documentCountStats = processDocumentCountStats(
+            documentCountStatsResp?.rawResponse,
+            searchStrategyParams
+          );
+
           setOverallStats({
-            documentCountStats: processDocumentCountStats(
-              documentCountStatsResp?.rawResponse,
-              searchStrategyParams
-            ),
+            documentCountStats,
             ...nonAggregatableOverallStats,
             ...aggregatableOverallStats,
+            totalCount: documentCountStats?.totalCount ?? aggregatableOverallStats.totalCount,
           });
         }
       },

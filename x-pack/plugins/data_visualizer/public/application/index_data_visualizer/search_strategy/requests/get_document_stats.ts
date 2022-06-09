@@ -69,6 +69,7 @@ export const processDocumentCountStats = (
   ) {
     return undefined;
   }
+  let totalCount = 0;
   const buckets: { [key: string]: number } = {};
   const dataByTimeBucket: Array<{ key: string; doc_count: number }> = get(
     body,
@@ -78,6 +79,7 @@ export const processDocumentCountStats = (
   each(dataByTimeBucket, (dataForTime) => {
     const time = dataForTime.key;
     buckets[time] = dataForTime.doc_count;
+    totalCount += dataForTime.doc_count;
   });
 
   return {
@@ -85,5 +87,6 @@ export const processDocumentCountStats = (
     buckets,
     timeRangeEarliest: params.earliest,
     timeRangeLatest: params.latest,
+    totalCount,
   };
 };
