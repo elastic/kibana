@@ -64,7 +64,7 @@ const OverlayRootContainer = styled.div`
     padding: ${({ theme: { eui } }) => eui.paddingSizes.m};
   }
   &.padding-l {
-    padding: ${({ theme: { eui } }) => eui.paddingSizesl};
+    padding: ${({ theme: { eui } }) => eui.paddingSizes.l};
   }
   &.padding-xl {
     padding: ${({ theme: { eui } }) => eui.paddingSizes.xl};
