@@ -16,7 +16,7 @@ import { selectServiceLocationsState } from '../../../../state';
 
 export interface FilterItem {
   label: string;
-  values: string[];
+  values: Array<{ label: string; count: number }>;
   field: 'tags' | 'status' | 'locations' | 'monitorType';
 }
 
@@ -33,19 +33,20 @@ export const FilterGroup = () => {
     {
       label: TYPE_LABEL,
       field: 'monitorType',
-      values: data.types.map((value: string) => ({ label: value })),
+      values: data.types.map((value: string) => ({ label: value, count: 0 })),
     },
     {
       label: LOCATION_LABEL,
       field: 'locations',
       values: data.locations.map((value: string) => ({
         label: findLocationItem(value, locations)?.label ?? value,
+        count: 0,
       })),
     },
     {
       label: TAGS_LABEL,
       field: 'tags',
-      values: data.tags.map((value: string) => ({ label: value })),
+      values: data.tags.map((value: string) => ({ label: value, count: 0 })),
     },
   ];
 

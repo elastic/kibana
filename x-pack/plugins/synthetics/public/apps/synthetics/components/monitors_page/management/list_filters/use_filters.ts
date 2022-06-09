@@ -8,7 +8,6 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { useMemo } from 'react';
-import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { syntheticsMonitorType } from '../../../../../../../common/types/saved_objects';
 
 const aggs = {
@@ -32,34 +31,28 @@ const aggs = {
   },
 };
 
-const esParams = { aggs, index: '', query: {} };
-
-type AggsResponse = ESSearchResponse<unknown, typeof esParams>;
+interface AggsResponse {
+  types: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+  locations: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+  tags: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
 
 export const useFilters = () => {
   const { savedObjects } = useKibana().services;
 
   const { data } = useFetcher(async () => {
-    const aggs = {
-      types: {
-        terms: {
-          field: `${syntheticsMonitorType}.attributes.type.keyword`,
-          size: 10000,
-        },
-      },
-      tags: {
-        terms: {
-          field: `${syntheticsMonitorType}.attributes.tags`,
-          size: 10000,
-        },
-      },
-      locations: {
-        terms: {
-          field: `${syntheticsMonitorType}.attributes.locations.id`,
-          size: 10000,
-        },
-      },
-    };
     return savedObjects?.client.find({
       type: syntheticsMonitorType,
       perPage: 0,
@@ -68,7 +61,7 @@ export const useFilters = () => {
   }, []);
 
   return useMemo(() => {
-    const { types, tags, locations } = (data?.aggregations as AggsResponse['aggregations']) ?? {};
+    const { types, tags, locations } = (data?.aggregations as AggsResponse) ?? {};
     return {
       types: types?.buckets?.map(({ key }) => key) ?? [],
       tags: tags?.buckets?.map(({ key }) => key) ?? [],

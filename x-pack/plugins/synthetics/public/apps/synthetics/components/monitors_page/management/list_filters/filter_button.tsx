@@ -24,7 +24,11 @@ export const FilterButton = ({ filter }: { filter: FilterItem }) => {
       selectedValue={urlParams[field] || []}
       singleSelection={false}
       label={label}
-      values={values}
+      values={
+        query
+          ? values.filter(({ label: str }) => str.toLowerCase().includes(query.toLowerCase()))
+          : values
+      }
       setQuery={setQuery}
       onChange={(selectedValues) => {
         updateUrlParams({ [field]: selectedValues ? JSON.stringify(selectedValues) : '' });
