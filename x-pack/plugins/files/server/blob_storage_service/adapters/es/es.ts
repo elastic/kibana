@@ -10,7 +10,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { pipeline as _pipeline, Readable } from 'stream';
 import { promisify } from 'util';
-import type { BlobStorage } from '../../types';
+import type { BlobAttributes, BlobStorage } from '../../types';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
 import { mappings } from './mappings';
 
@@ -65,6 +65,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     }
   }
 
+  // TODO: Use blob attributes!
   public async upload(src: Readable): Promise<{ id: string; size: number }> {
     await this.createIndexIfNotExists();
 
@@ -101,6 +102,10 @@ export class ElasticsearchBlobStorage implements BlobStorage {
         size,
       },
     });
+  }
+
+  public async getAttributes(id: string): Promise<BlobAttributes> {
+    throw new Error('Method not implemented.');
   }
 
   public async delete(id: string): Promise<void> {

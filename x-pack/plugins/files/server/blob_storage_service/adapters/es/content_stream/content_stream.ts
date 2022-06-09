@@ -123,9 +123,9 @@ export class ContentStream extends Duplex {
       const response = await this.client.get<FileChunkDocument>({
         id,
         index: this.index,
-        _source_includes: ['content'],
+        _source_includes: ['data'],
       });
-      return response?._source?.content;
+      return response?._source?.data;
     } catch (e) {
       if (e instanceof esErrors.ResponseError && e.statusCode === 404) {
         const readingHeadChunk = this.chunksRead <= 0;
@@ -213,7 +213,7 @@ export class ContentStream extends Duplex {
     return chunkNumber === 0 ? this.getHeadChunkId() : `${chunkNumber}.${this.getId()}`;
   }
 
-  private async writeChunk(content: string) {
+  private async writeChunk(data: string) {
     const chunkId = this.getChunkId(this.chunksWritten);
 
     this.logger.debug(`Writing chunk #${this.chunksWritten} (${chunkId}).`);
@@ -222,7 +222,7 @@ export class ContentStream extends Duplex {
       id: chunkId,
       index: this.index,
       document: {
-        content,
+        data,
         head_chunk_id: this.chunksWritten > 0 ? this.getHeadChunkId() : undefined,
       },
     });
