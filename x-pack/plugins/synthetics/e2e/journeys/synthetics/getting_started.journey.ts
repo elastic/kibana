@@ -15,7 +15,6 @@ journey(`Getting Started Page`, async ({ page, params }: { page: Page; params: a
     await syntheticsApp.fillFirstMonitorDetails({
       url: 'https://www.elastic.co',
       locations: ['us_central'],
-      apmServiceName: 'synthetics',
     });
   };
 
