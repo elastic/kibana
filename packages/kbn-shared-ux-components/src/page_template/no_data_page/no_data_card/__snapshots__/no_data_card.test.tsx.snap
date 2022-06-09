@@ -8,10 +8,14 @@ exports[`NoDataCard props button 1`] = `
     class="euiCard__content"
   >
     <span
-      class="euiTitle euiTitle--small euiCard__title"
+      class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
       id="generated-idTitle"
     >
-      Card title
+      <span
+        class="euiScreenReaderOnly"
+      >
+        Card title
+      </span>
     </span>
     <div
       class="euiText euiText--small euiCard__description"
@@ -51,10 +55,14 @@ exports[`NoDataCard props extends EuiCardProps 1`] = `
     class="euiCard__content"
   >
     <span
-      class="euiTitle euiTitle--small euiCard__title"
+      class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
       id="generated-idTitle"
     >
-      Card title
+      <span
+        class="euiScreenReaderOnly"
+      >
+        Card title
+      </span>
     </span>
     <div
       class="euiText euiText--small euiCard__description"
@@ -94,7 +102,7 @@ exports[`NoDataCard props href 1`] = `
     class="euiCard__content"
   >
     <span
-      class="euiTitle euiTitle--small euiCard__title"
+      class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
       id="generated-idTitle"
     >
       <a
@@ -103,7 +111,11 @@ exports[`NoDataCard props href 1`] = `
         href="#"
         rel="noreferrer"
       >
-        Card title
+        <span
+          class="euiScreenReaderOnly"
+        >
+          Card title
+        </span>
       </a>
     </span>
     <div
@@ -144,7 +156,7 @@ exports[`NoDataCard props isDisabled 1`] = `
     class="euiCard__content"
   >
     <span
-      class="euiTitle euiTitle--small euiCard__title"
+      class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
       id="generated-idTitle"
     >
       <button
@@ -152,7 +164,11 @@ exports[`NoDataCard props isDisabled 1`] = `
         class="euiCard__titleButton"
         disabled=""
       >
-        Card title
+        <span
+          class="euiScreenReaderOnly"
+        >
+          Card title
+        </span>
       </button>
     </span>
     <div
@@ -175,10 +191,14 @@ exports[`NoDataCard renders 1`] = `
     class="euiCard__content"
   >
     <span
-      class="euiTitle euiTitle--small euiCard__title"
+      class="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
       id="generated-idTitle"
     >
-      Card title
+      <span
+        class="euiScreenReaderOnly"
+      >
+        Card title
+      </span>
     </span>
     <div
       class="euiText euiText--small euiCard__description"

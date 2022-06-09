@@ -24,6 +24,10 @@ export function isAgentUpgradeable(agent: Agent, kibanaVersion: string, versionT
   if (!agent.local_metadata.elastic.agent.upgradeable) {
     return false;
   }
+  // check that the agent is not already in the process of updating
+  if (agent.upgrade_started_at && !agent.upgraded_at) {
+    return false;
+  }
   if (versionToUpgrade !== undefined) {
     return (
       isNotDowngrade(agentVersion, versionToUpgrade) &&

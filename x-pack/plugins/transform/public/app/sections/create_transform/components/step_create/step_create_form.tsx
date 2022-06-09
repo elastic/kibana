@@ -29,7 +29,7 @@ import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/public';
 
 import { DuplicateDataViewError } from '@kbn/data-plugin/public';
-import type { RuntimeField } from '@kbn/data-plugin/common';
+import type { RuntimeField } from '@kbn/data-views-plugin/common';
 import type { PutTransformsResponseSchema } from '../../../../../../common/api_schemas/transforms';
 import {
   isGetTransformsStatsResponseSchema,

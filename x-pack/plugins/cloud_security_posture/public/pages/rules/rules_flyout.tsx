@@ -8,7 +8,6 @@ import React, { useState } from 'react';
 import {
   EuiSpacer,
   EuiFlyout,
-  EuiToolTip,
   EuiFlyoutHeader,
   EuiFlyoutBody,
   EuiTab,
@@ -45,7 +44,6 @@ export const RuleFlyout = ({ onClose, rule, toggleRule }: RuleFlyoutProps) => {
     <EuiFlyout
       ownFocus={false}
       onClose={onClose}
-      outsideClickCloses
       data-test-subj={TEST_SUBJECTS.CSP_RULES_FLYOUT_CONTAINER}
     >
       <EuiFlyoutHeader>
@@ -80,14 +78,12 @@ const RuleOverviewTab = ({ rule, toggleRule }: { rule: RuleSavedObject; toggleRu
   <EuiFlexGroup direction="column">
     <EuiFlexItem>
       <span>
-        <EuiToolTip content={rule.attributes.enabled ? TEXT.DEACTIVATE : TEXT.ACTIVATE}>
-          <EuiSwitch
-            label={TEXT.ACTIVATED}
-            checked={rule.attributes.enabled}
-            onChange={toggleRule}
-            data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
-          />
-        </EuiToolTip>
+        <EuiSwitch
+          label={TEXT.ACTIVATED}
+          checked={rule.attributes.enabled}
+          onChange={toggleRule}
+          data-test-subj={TEST_SUBJECTS.getCspRulesTableItemSwitchTestId(rule.id)}
+        />
       </span>
     </EuiFlexItem>
     <EuiFlexItem>
