@@ -149,21 +149,5 @@ describe(`Console's send request`, () => {
       const [httpRequestOptions] = stub.firstCall.args;
       expect((httpRequestOptions as any).path).toEqual('/%3Cmy-index-%7Bnow%2Fd%7D%3E');
     });
-
-    it('should not encode path if it does not require encoding', async () => {
-      const result = await proxyRequest({
-        agent: null as any,
-        headers: {},
-        method: 'get',
-        payload: null as any,
-        timeout: 30000,
-        uri: new URL(`http://noone.nowhere.none/my-index/_doc/this%2Fis%2Fa%2Fdoc`),
-        originalPath: 'my-index/_doc/this%2Fis%2Fa%2Fdoc',
-      });
-
-      expect(result).toEqual('done');
-      const [httpRequestOptions] = stub.firstCall.args;
-      expect((httpRequestOptions as any).path).toEqual('/my-index/_doc/this%2Fis%2Fa%2Fdoc');
-    });
   });
 });
