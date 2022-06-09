@@ -30,6 +30,7 @@
 
 import { AwaitedProperties } from '@kbn/utility-types';
 import { Type } from '@kbn/config-schema';
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import {
   ElasticsearchServiceSetup,
   configSchema as elasticsearchConfigSchema,
@@ -70,7 +71,6 @@ import {
   CoreServicesUsageData,
 } from './core_usage_data';
 import { PrebootServicePreboot } from './preboot';
-import { DocLinksServiceStart, DocLinksServiceSetup } from './doc_links';
 
 export type { PrebootServicePreboot } from './preboot';
 
@@ -109,7 +109,7 @@ export type {
   AddConfigDeprecation,
   EnvironmentMode,
   PackageInfo,
-} from './config';
+} from '@kbn/config';
 export type {
   IContextContainer,
   IContextProvider,
@@ -117,7 +117,7 @@ export type {
   HandlerContextType,
   HandlerParameters,
 } from './context';
-export type { CoreId } from './core_context';
+export type { CoreId } from '@kbn/core-base-common-internal';
 
 export { CspConfig } from './csp';
 export type { ICspConfig } from './csp';
@@ -261,7 +261,7 @@ export type {
   LogLevel,
 } from '@kbn/logging';
 
-export { PluginType } from './plugins';
+export { PluginType } from '@kbn/core-base-common';
 
 export type {
   DiscoveredPlugin,
@@ -449,7 +449,7 @@ export type {
   CoreIncrementCounterParams,
 } from './core_usage_data';
 
-export type { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
+export type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 
 export type {
   AnalyticsServiceSetup,

@@ -27,7 +27,7 @@
     "triggersActionsUi",
     "uiActions",
     "unifiedSearch",
-    "sessionView"
+    "kubernetesSecurity"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
