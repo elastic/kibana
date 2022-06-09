@@ -171,6 +171,10 @@ export const navTabs: SecurityNav = {
 };
 
 export const securityNavGroup: SecurityNavGroup = {
+  [SecurityNavGroupKey.dashboards]: {
+    id: SecurityNavGroupKey.dashboards,
+    name: i18n.DASHBOARDS,
+  },
   [SecurityNavGroupKey.detect]: {
     id: SecurityNavGroupKey.detect,
     name: i18n.DETECT,

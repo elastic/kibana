@@ -316,11 +316,6 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
             },
           },
           {
-            exists: {
-              field: 'start_time',
-            },
-          },
-          {
             range: {
               expiration: { gte: now },
             },
@@ -343,7 +338,7 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
           complete: false,
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
-          startTime: hit._source.start_time as string,
+          startTime: hit._source?.start_time,
         };
       }
 
