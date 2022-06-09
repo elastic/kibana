@@ -42,6 +42,9 @@ export const isDashboardAppInNoDataState = async (
   dataViews: DataPublicPluginStart['dataViews']
 ) => {
   const hasUserDataView = await dataViews.hasData.hasUserDataView().catch(() => false);
+  if (hasUserDataView) {
+    return false;
+  }
   const hasEsData = await dataViews.hasData.hasESData().catch(() => true);
-  return !hasUserDataView || !hasEsData;
+  return !hasEsData;
 };
