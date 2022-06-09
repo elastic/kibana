@@ -34,9 +34,13 @@ export const AnomalyResultsViewSelector: FC<Props> = ({
     () => [
       {
         id: 'timeseriesexplorer',
-        label: i18n.translate('xpack.ml.anomalyResultsViewSelector.singleMetricViewerLabel', {
-          defaultMessage: 'View results in the Single Metric Viewer',
-        }),
+        label: isSingleMetricViewerDisabled
+          ? i18n.translate('xpack.ml.anomalyResultsViewSelector.singleMetricViewerDisabledLabel', {
+              defaultMessage: 'Selected jobs are not viewable in the Single Metric Viewer',
+            })
+          : i18n.translate('xpack.ml.anomalyResultsViewSelector.singleMetricViewerLabel', {
+              defaultMessage: 'View results in the Single Metric Viewer',
+            }),
         iconType: 'visLine',
         value: ML_PAGES.SINGLE_METRIC_VIEWER,
         'data-test-subj': 'mlAnomalyResultsViewSelectorSingleMetricViewer',
