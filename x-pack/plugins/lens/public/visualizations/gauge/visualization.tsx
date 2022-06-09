@@ -13,7 +13,6 @@ import { Ast } from '@kbn/interpreter';
 import { DatatableRow } from '@kbn/expressions-plugin';
 import { PaletteRegistry, CustomPaletteParams, CUSTOM_PALETTE } from '@kbn/coloring';
 import type { GaugeArguments } from '@kbn/expression-gauge-plugin/common';
-import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { GaugeShapes, EXPRESSION_GAUGE_NAME } from '@kbn/expression-gauge-plugin/common';
 import {
   getGoalValue,
@@ -222,8 +221,6 @@ export const getGaugeVisualization = ({
     );
   },
   getSuggestions,
-
-  triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration({ state, frame }) {
     const hasColoring = Boolean(state.colorMode !== 'none' && state.palette?.params?.stops);
