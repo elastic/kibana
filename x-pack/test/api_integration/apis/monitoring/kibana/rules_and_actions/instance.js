@@ -6,36 +6,37 @@
  */
 
 import expect from '@kbn/expect';
-import instanceFixture from './fixtures/instance.json';
+import fixture from './fixtures/instance.json';
+import { getLifecycleMethods } from '../../data_stream';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
+  const { setup, tearDown } = getLifecycleMethods(getService);
 
   describe('instance detail', () => {
-    const archive = 'x-pack/test/functional/es_archives/monitoring/singlecluster_yellow_platinum';
+    const archive = 'x-pack/test/functional/es_archives/monitoring/kibana/rules_and_actions';
     const timeRange = {
-      min: '2017-08-29T17:24:17.000Z',
-      max: '2017-08-29T17:26:08.000Z',
+      min: '2022-05-31T18:44:19.267Z',
+      max: '2022-05-31T19:59:19.267Z',
     };
 
     before('load archive', () => {
-      return esArchiver.load(archive);
+      return setup(archive);
     });
 
     after('unload archive', () => {
-      return esArchiver.unload(archive);
+      return tearDown();
     });
 
-    it('should summarize single kibana instance with metrics', async () => {
+    it('should get data for the kibana instance view', async () => {
       const { body } = await supertest
         .post(
-          '/api/monitoring/v1/clusters/DFDDUmKHR0Ge0mkdYW2bew/kibana/de3b8f2a-7bb9-4931-9bf3-997ba7824cf9'
+          '/api/monitoring/v1/clusters/SvjwrFv6Rvuqjm9-cSSVEg/kibana/5b2de169-2785-441b-ae8c-186a1936b17d'
         )
         .set('kbn-xsrf', 'xxx')
         .send({ timeRange })
         .expect(200);
-      expect(body).to.eql(instanceFixture);
+      expect(body).to.eql(fixture);
     });
   });
 }
