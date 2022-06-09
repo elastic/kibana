@@ -449,6 +449,9 @@ events.
 [[securitysolution-threatindices]]`securitySolution:defaultThreatIndex`::
 A comma-delimited list of Threat Intelligence indices from which the {security-app} collects indicators.
 
+[[securitysolution-enableCcsWarning]]`securitySolution:enableCcsWarning`:: Enables
+privilege check warnings in rules for CCS indices.
+
 [[securitysolution-enablenewsfeed]]`securitySolution:enableNewsFeed`:: Enables
 the security news feed on the Security *Overview* page.
 
@@ -464,7 +467,10 @@ The URL from which the security news feed content is retrieved.
 The default refresh interval for the Security time filter, in milliseconds.
 
 [[security-solution-rules-table-refresh]]`securitySolution:rulesTableRefresh`::
-The default period of time in the Security time filter.
+Enables auto refresh on the rules and monitoring tables, in milliseconds.
+
+[[securitySolution-showRelatedIntegrations]]`securitySolution:showRelatedIntegrations`::
+Shows related integrations on the rules and monitoring tables.
 
 [[securitysolution-timedefaults]]`securitySolution:timeDefaults`::
 The default period of time in the Security time filter.
