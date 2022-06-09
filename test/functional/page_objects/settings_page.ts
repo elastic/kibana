@@ -145,7 +145,7 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getIndexPatternField() {
-    return this.testSubjects.find('createIndexPatternNameInput');
+    return this.testSubjects.find('createIndexPatternTitleInput');
   }
 
   async getTimeFieldNameField() {
@@ -163,6 +163,16 @@ export class SettingsPageObject extends FtrService {
 
   async getTimeFieldOption(selection: string) {
     return await this.find.displayedByCssSelector('option[value="' + selection + '"]');
+  }
+
+  async getNameField() {
+    return this.testSubjects.find('createIndexPatternNameInput');
+  }
+
+  async setNameField(dataViewName: string) {
+    const field = await this.getNameField();
+    await field.clearValue();
+    await field.type(dataViewName);
   }
 
   async getSaveIndexPatternButton() {
@@ -189,6 +199,10 @@ export class SettingsPageObject extends FtrService {
   async clickDefaultIndexButton() {
     await this.testSubjects.click('setDefaultIndexPatternButton');
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  async clickEditIndexButton() {
+    await this.testSubjects.click('editIndexPatternButton');
   }
 
   async clickDeletePattern() {
@@ -416,7 +430,8 @@ export class SettingsPageObject extends FtrService {
     indexPatternName: string,
     // null to bypass default value
     timefield: string | null = '@timestamp',
-    isStandardIndexPattern = true
+    isStandardIndexPattern = true,
+    dataViewName?: string
   ) {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
@@ -447,6 +462,9 @@ export class SettingsPageObject extends FtrService {
       if (timefield) {
         await this.selectTimeFieldOption(timefield);
       }
+      if (dataViewName) {
+        await this.setNameField(dataViewName);
+      }
       await (await this.getSaveIndexPatternButton()).click();
     });
     await this.header.waitUntilLoadingHasFinished();
@@ -462,10 +480,50 @@ export class SettingsPageObject extends FtrService {
 
     if (!isStandardIndexPattern) {
       const badges = await this.find.allByCssSelector('.euiBadge__text');
-      const text = await badges[1].getVisibleText();
+      const text = await badges[0].getVisibleText();
       expect(text).to.equal('Rollup');
     }
 
+    return await this.getIndexPatternIdFromUrl();
+  }
+
+  async editIndexPattern(
+    indexPatternName: string,
+    // null to bypass default value
+    timefield: string | null = '@timestamp',
+    dataViewName?: string,
+    errorCheck?: boolean
+  ) {
+    if (!indexPatternName) {
+      throw new Error('No Data View name provided for edit');
+    }
+
+    this.clickEditIndexButton();
+    await this.header.waitUntilLoadingHasFinished();
+
+    await this.retry.try(async () => {
+      await this.setIndexPatternField(indexPatternName);
+    });
+    if (dataViewName) {
+      await this.setNameField(dataViewName);
+    }
+    if (timefield) {
+      await this.selectTimeFieldOption(timefield);
+    }
+    await (await this.getSaveIndexPatternButton()).click();
+
+    if (errorCheck) {
+      await this.retry.try(async () => {
+        this.log.debug('getAlertText');
+        await this.testSubjects.getVisibleText('confirmModalTitleText');
+      });
+      await this.retry.try(async () => {
+        this.log.debug('acceptConfirmation');
+        await this.testSubjects.click('confirmModalConfirmButton');
+      });
+    }
+
+    await this.header.waitUntilLoadingHasFinished();
     return await this.getIndexPatternIdFromUrl();
   }
 

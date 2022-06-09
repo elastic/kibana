@@ -53,7 +53,6 @@ export default function navLinksTests({ getService }: FtrProviderContext) {
               navLinksBuilder.except(
                 'monitoring',
                 'enterpriseSearch',
-                'enterpriseSearchContent',
                 'appSearch',
                 'workplaceSearch'
               )
