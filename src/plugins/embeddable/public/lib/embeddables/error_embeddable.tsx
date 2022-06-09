@@ -95,7 +95,7 @@ const CompactEmbeddableError = ({ children }: { children?: React.ReactNode }) =>
       >
         <EuiIcon type="alert" color="danger" />
         {i18n.translate('embeddableApi.panel.errorEmbeddable.message', {
-          defaultMessage: 'A fatal error has occurred. Learn more.',
+          defaultMessage: 'An error has occurred. Read more',
         })}
       </EuiLink>
     </EuiText>
