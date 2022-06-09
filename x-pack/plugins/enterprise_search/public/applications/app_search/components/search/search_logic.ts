@@ -10,7 +10,7 @@ import { kea, MakeLogicType } from 'kea';
 import { flashAPIErrors } from '../../../shared/flash_messages';
 
 import { HttpLogic } from '../../../shared/http';
-import { flattenObject } from '../../utils/results';
+import { flattenDocument } from '../../utils/results';
 import { EngineLogic } from '../engine';
 
 import { Result } from '../result/types';
@@ -50,7 +50,7 @@ export const SearchLogic = kea<MakeLogicType<SearchValues, SearchActions>>({
     searchResults: [
       [],
       {
-        onSearch: (_, { results }) => results.map((res) => flattenObject(res) as Result),
+        onSearch: (_, { results }) => results.map((res) => flattenDocument(res) as Result),
       },
     ],
   }),

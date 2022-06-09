@@ -5,15 +5,34 @@
  * 2.0.
  */
 
-export const flattenField = (fieldName: string, fieldValue: object): Array<[string, object]> => {
+/* This method flattens fields in documents returned from the ent-search backend.
+ * If a field in the document contains "raw" key, it's already flat.
+ * If it doesn't, we want to pull properties from it, and move them to the top level.
+ * This field is already flat:
+ * 'country', { raw: 'United States' }
+ * This field is not flat:
+ * 'address', {
+ *     country: { raw: 'United States' },
+ *     city: { raw: 'Los Angeles' }
+ * }
+ * It will be transformed into:
+ * [
+ *   ['address.country', { raw: 'United States' }],
+ *   ['address.city', { raw: 'Los Angeles' }]
+ * ]
+ */
+export const flattenDocumentField = (
+  fieldName: string,
+  fieldValue: object
+): Array<[string, object]> => {
   const flattened: Array<[string, object]> = [];
 
-  if (typeof fieldValue === 'object' && !Object.keys(fieldValue).includes('raw')) {
-    Object.entries(fieldValue).map(([propName, value]) => {
-      flattenField(fieldName + '.' + propName, value).map(([flatKey, flatVal]) => {
+  if (typeof fieldValue === 'object' && !fieldValue.hasOwnProperty('raw')) {
+    for (const [propName, value] of Object.entries(fieldValue)) {
+      flattenDocumentField(fieldName + '.' + propName, value).map(([flatKey, flatVal]) => {
         flattened.push([flatKey, flatVal]);
       });
-    });
+    }
   } else {
     flattened.push([fieldName, fieldValue]);
   }
@@ -21,18 +40,35 @@ export const flattenField = (fieldName: string, fieldValue: object): Array<[stri
   return flattened;
 };
 
-export const flattenObject = (result: object): object => {
+/* This method flattens documents returned from the ent-search backend.
+ * Example document:
+ * {
+ *   id: { raw: '123' },
+ *   _meta: { engine: 'Test', id: '1' },
+ *   title: { raw: 'Getty Museum' },
+ *   address: { city: { raw: 'Los Angeles' }, state: { raw: 'California' } },
+ * }
+ * Will be transformed to:
+ * {
+ *   id: { raw: '123' },
+ *   _meta: { engine: 'Test', id: '1' },
+ *   title: { raw: 'Getty Museum' },
+ *   'address.city': { raw: 'Los Angeles' },
+ *   'address.state': { raw: 'California' },
+ * }
+ */
+export const flattenDocument = (result: object): object => {
   const flattened: { [index: string]: object } = {};
 
-  Object.entries(result).map(([key, value]) => {
+  for (const [key, value] of Object.entries(result)) {
     if (key === 'id' || key === '_meta') {
       flattened[key] = value;
     } else {
-      flattenField(key, value).map(([flatName, flatValue]) => {
+      for (const [flatName, flatValue] of flattenDocumentField(key, value)) {
         flattened[flatName] = flatValue;
-      });
+      }
     }
-  });
+  }
 
   return flattened;
 };

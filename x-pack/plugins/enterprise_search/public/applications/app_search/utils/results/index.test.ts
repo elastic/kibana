@@ -6,16 +6,16 @@
  */
 import { Result } from '../../components/result/types';
 
-import { flattenObject, flattenField } from '.';
+import { flattenDocument, flattenDocumentField } from '.';
 
-describe('flattenField', () => {
+describe('flattenDocumentField', () => {
   it('flattens field if raw key is absent', () => {
-    expect(flattenField('address', { country: { raw: 'United States' } })).toEqual([
+    expect(flattenDocumentField('address', { country: { raw: 'United States' } })).toEqual([
       ['address.country', { raw: 'United States' }],
     ]);
   });
   it('preserves field if raw key is present', () => {
-    expect(flattenField('country', { raw: 'United States' })).toEqual([
+    expect(flattenDocumentField('country', { raw: 'United States' })).toEqual([
       ['country', { raw: 'United States' }],
     ]);
   });
@@ -36,11 +36,11 @@ describe('flattenField', () => {
       ['customer.address.country.code', { raw: 'US' }],
       ['customer.address.country.name', { raw: 'United States' }],
     ];
-    expect(flattenField('customer', data)).toEqual(expected);
+    expect(flattenDocumentField('customer', data)).toEqual(expected);
   });
 });
 
-describe('flattenObject', () => {
+describe('flattenDocument', () => {
   it('flattens all fields without raw key', () => {
     const result: Result = {
       id: { raw: '123' },
@@ -55,6 +55,6 @@ describe('flattenObject', () => {
       'address.city': { raw: 'Los Angeles' },
       'address.state': { raw: 'California' },
     };
-    expect(flattenObject(result)).toEqual(expected);
+    expect(flattenDocument(result)).toEqual(expected);
   });
 });
