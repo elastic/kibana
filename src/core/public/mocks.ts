@@ -10,6 +10,7 @@ import { createMemoryHistory } from 'history';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 
 // Only import types from '.' to avoid triggering default Jest mocks.
 import { PluginInitializerContext, AppMountParameters } from '.';
@@ -27,7 +28,6 @@ import { overlayServiceMock } from './overlays/overlay_service.mock';
 import { uiSettingsServiceMock } from './ui_settings/ui_settings_service.mock';
 import { savedObjectsServiceMock } from './saved_objects/saved_objects_service.mock';
 import { deprecationsServiceMock } from './deprecations/deprecations_service.mock';
-import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { executionContextServiceMock } from './execution_context/execution_context_service.mock';
 
 export { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
