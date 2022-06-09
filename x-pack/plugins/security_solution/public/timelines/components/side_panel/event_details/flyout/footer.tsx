@@ -9,20 +9,20 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { EuiFlyoutFooter, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { find } from 'lodash/fp';
 import { connect, ConnectedProps } from 'react-redux';
-import { TakeActionDropdown } from '../../../../detections/components/take_action_dropdown';
-import type { TimelineEventsDetailsItem } from '../../../../../common/search_strategy';
-import { TimelineId } from '../../../../../common/types';
-import { useExceptionFlyout } from '../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
-import { AddExceptionFlyoutWrapper } from '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
-import { EventFiltersFlyout } from '../../../../management/pages/event_filters/view/components/event_filters_flyout';
-import { useEventFilterModal } from '../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
-import { getFieldValue } from '../../../../detections/components/host_isolation/helpers';
-import { Status } from '../../../../../common/detection_engine/schemas/common/schemas';
-import { Ecs } from '../../../../../common/ecs';
-import { inputsModel, inputsSelectors, State } from '../../../../common/store';
-import { OsqueryFlyout } from '../../../../detections/components/osquery/osquery_flyout';
+import { TakeActionDropdown } from '../../../../../detections/components/take_action_dropdown';
+import type { TimelineEventsDetailsItem } from '../../../../../../common/search_strategy';
+import { useExceptionFlyout } from '../../../../../detections/components/alerts_table/timeline_actions/use_add_exception_flyout';
+import { AddExceptionFlyoutWrapper } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
+import { EventFiltersFlyout } from '../../../../../management/pages/event_filters/view/components/event_filters_flyout';
+import { useEventFilterModal } from '../../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
+import { getFieldValue } from '../../../../../detections/components/host_isolation/helpers';
+import { Status } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import { Ecs } from '../../../../../../common/ecs';
+import { inputsModel, inputsSelectors, State } from '../../../../../common/store';
+import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
+import { TimelineId } from '../../../../../../common/types';
 
-interface EventDetailsFooterProps {
+interface FlyoutFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
   detailsEcsData: Ecs | null;
   expandedEvent: {
@@ -32,6 +32,7 @@ interface EventDetailsFooterProps {
   };
   handleOnEventClosed: () => void;
   isHostIsolationPanelOpen: boolean;
+  isReadOnly?: boolean;
   loadingEventDetails: boolean;
   onAddIsolationStatusClick: (action: 'isolateHost' | 'unisolateHost') => void;
   timelineId: string;
@@ -45,20 +46,21 @@ interface AddExceptionModalWrapperData {
   ruleName: string;
 }
 
-export const EventDetailsFooterComponent = React.memo(
+export const FlyoutFooterComponent = React.memo(
   ({
     detailsData,
     detailsEcsData,
     expandedEvent,
     handleOnEventClosed,
     isHostIsolationPanelOpen,
+    isReadOnly,
     loadingEventDetails,
     onAddIsolationStatusClick,
     timelineId,
     globalQuery,
     timelineQuery,
     refetchFlyoutData,
-  }: EventDetailsFooterProps & PropsFromRedux) => {
+  }: FlyoutFooterProps & PropsFromRedux) => {
     const ruleIndex = useMemo(
       () =>
         find({ category: 'signal', field: 'signal.rule.index' }, detailsData)?.values ??
@@ -118,6 +120,10 @@ export const EventDetailsFooterComponent = React.memo(
       setOsqueryFlyoutOpenWithAgentId(null);
     }, [setOsqueryFlyoutOpenWithAgentId]);
 
+    if (isReadOnly) {
+      return null;
+    }
+
     return (
       <>
         <EuiFlyoutFooter data-test-subj="side-panel-flyout-footer">
@@ -175,7 +181,7 @@ export const EventDetailsFooterComponent = React.memo(
 const makeMapStateToProps = () => {
   const getGlobalQueries = inputsSelectors.globalQuery();
   const getTimelineQuery = inputsSelectors.timelineQueryByIdSelector();
-  const mapStateToProps = (state: State, { timelineId }: EventDetailsFooterProps) => {
+  const mapStateToProps = (state: State, { timelineId }: FlyoutFooterProps) => {
     return {
       globalQuery: getGlobalQueries(state),
       timelineQuery: getTimelineQuery(state, timelineId),
@@ -188,4 +194,4 @@ const connector = connect(makeMapStateToProps);
 
 type PropsFromRedux = ConnectedProps<typeof connector>;
 
-export const EventDetailsFooter = connector(React.memo(EventDetailsFooterComponent));
+export const FlyoutFooter = connector(React.memo(FlyoutFooterComponent));
