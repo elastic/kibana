@@ -73,7 +73,7 @@ Change the fields list to display a different {data-source}, different time rang
 * To add fields, open the action menu (*...*) next to the *Data view* dropdown, then select *Add field to {data-source}*.
 +
 [role="screenshot"]
-image:images/runtime-field-menu.png[Dropdown menu located next to {data-source} field with items for adding and managing fields, width=50%]
+image:images/lens_runtimeFieldMenu_8.3.png[Dropdown menu located next to {data-source} field with items for adding and managing fields, width=50%]
 +
 For more information about adding fields to {data-sources} and examples, refer to <<runtime-fields>>.
 
@@ -110,9 +110,6 @@ All columns that belong to the same layer pane group are sorted in the table.
 ==== Create visualizations with keyboard navigation
 
 To use a keyboard instead of a mouse, use the *Lens* fully accessible and continuously improved drag system.
-
-[role="screenshot"]
-image::images/lens_drag_drop_1.gif[Presented Lens drag and drop]
 
 . Select the field in the fields list or layer pane. Most fields have an inner and outer select state. The inner state opens a panel with detailed information or options. 
 The outer state allows you to drag the field. Tab through the fields until you get the outer state on the field.
@@ -197,7 +194,13 @@ image::images/lens_annotations_8.2.0.png[Lens annotations]
 
 . To open the annotation options, click *Event*.
 
-. Specify the *Annotation date*, then change the *Appearance* options you want to display.
+. Specify the *Annotation date*.
+
+. To display the annotation as a time range, select *Apply as range*, then specify the *From* and *To* time range.
+
+. Enter the annotation *Name*.
+
+. Change the *Appearance* options for how you want the annotation to display.
 
 . Click *Close*.
 
