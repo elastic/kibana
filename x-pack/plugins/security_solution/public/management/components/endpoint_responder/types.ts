@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import { ManagedConsoleExtensionComponentProps } from '../console';
+import { HostMetadata } from '../../../../common/endpoint/types';
+
 export interface EndpointCommandDefinitionMeta {
   endpointId: string;
 }
+
+export type EndpointResponderExtensionComponentProps = ManagedConsoleExtensionComponentProps<{
+  endpoint: HostMetadata;
+}>;

@@ -147,6 +147,15 @@ export const EndpointStatusActionResult = memo<
       <EuiFlexItem grow={false}>
         <EuiText size="s">
           <FormattedMessage
+            id="xpack.securitySolution.endpointResponseActions.status.version"
+            defaultMessage="Version"
+          />
+        </EuiText>
+        <EuiText>{endpointDetails.metadata.agent.version}</EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          <FormattedMessage
             id="xpack.securitySolution.endpointResponseActions.status.policyStatus"
             defaultMessage="Policy status"
           />
