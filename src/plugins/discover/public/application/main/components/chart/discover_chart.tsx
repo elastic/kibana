@@ -214,6 +214,7 @@ export function DiscoverChart({
           >
             <DiscoverHistogramMemoized
               savedSearchData$={savedSearchDataChart$}
+              savedSearchDataTotalHits$={savedSearchDataTotalHits$}
               timefilterUpdateHandler={timefilterUpdateHandler}
               stateContainer={stateContainer}
               dataView={indexPattern}

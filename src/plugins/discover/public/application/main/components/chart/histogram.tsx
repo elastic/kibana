@@ -6,72 +6,46 @@
  * Side Public License, v 1.
  */
 import './histogram.scss';
-import moment, { unitOfTime } from 'moment-timezone';
+import moment from 'moment-timezone';
 import React, { useCallback, useMemo } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiIconTip,
-  EuiLoadingChart,
-  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import dateMath from '@kbn/datemath';
 import {
   ElementClickListener,
-  HistogramBarSeries,
-  Position,
-  ScaleType,
-  Settings,
-  TooltipType,
   XYBrushEvent,
   XYChartElementEvent,
 } from '@elastic/charts';
-import { IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import {
-  CurrentTime,
-  Endzones,
-  getAdjustedInterval,
-  renderEndzoneTooltip,
-} from '@kbn/charts-plugin/public';
-import { LEGACY_TIME_AXIS, MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
-import { DataCharts$, DataChartsMessage } from '../../utils/use_saved_search';
+import { DataCharts$, DataChartsMessage, DataTotalHits$ } from '../../utils/use_saved_search';
 import { FetchStatus } from '../../../types';
 import { useDataState } from '../../utils/use_data_state';
 import { GetStateReturn } from '../../services/discover_state';
 
 export interface DiscoverHistogramProps {
   savedSearchData$: DataCharts$;
+  savedSearchDataTotalHits$: DataTotalHits$;
   timefilterUpdateHandler: (ranges: { from: number; to: number }) => void;
   stateContainer: GetStateReturn;
 }
 
-function getTimezone(uiSettings: IUiSettingsClient) {
-  if (uiSettings.isDefault('dateFormat:tz')) {
-    const detectedTimezone = moment.tz.guess();
-    if (detectedTimezone) return detectedTimezone;
-    else return moment().format('Z');
-  } else {
-    return uiSettings.get('dateFormat:tz', 'Browser');
-  }
-}
-
 export function DiscoverHistogram({
   savedSearchData$,
+  savedSearchDataTotalHits$,
   timefilterUpdateHandler,
   stateContainer,
   dataView,
 }: DiscoverHistogramProps) {
-  const { data, theme, uiSettings, fieldFormats, lens } = useDiscoverServices();
+  const { data, uiSettings, fieldFormats, lens } = useDiscoverServices();
 
   const dataState: DataChartsMessage = useDataState(savedSearchData$);
 
-  const timeZone = getTimezone(uiSettings);
-  const { chartData, bucketInterval, fetchStatus, error } = dataState;
+  const { bucketInterval } = dataState;
 
   const onBrushEnd = useCallback(
     ({ x }: XYBrushEvent) => {
@@ -84,20 +58,6 @@ export function DiscoverHistogram({
     [timefilterUpdateHandler]
   );
 
-  const onElementClick = useCallback(
-    (xInterval: number): ElementClickListener =>
-      ([elementData]) => {
-        const startRange = (elementData as XYChartElementEvent)[0].x;
-
-        const range = {
-          from: startRange,
-          to: startRange + xInterval,
-        };
-
-        timefilterUpdateHandler(range);
-      },
-    [timefilterUpdateHandler]
-  );
 
   const { timefilter } = data.query.timefilter;
 
@@ -137,90 +97,6 @@ export function DiscoverHistogram({
     return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
   }, [from, to, toMoment, bucketInterval, stateContainer]);
 
-  if (!chartData && fetchStatus === FetchStatus.LOADING) {
-    return (
-      <div className="dscHistogram" data-test-subj="discoverChart">
-        <div className="dscChart__loading">
-          <EuiText size="xs" color="subdued">
-            <EuiLoadingChart mono size="l" />
-            <EuiSpacer size="s" />
-            <FormattedMessage id="discover.loadingChartResults" defaultMessage="Loading chart" />
-          </EuiText>
-        </div>
-      </div>
-    );
-  }
-
-  if (fetchStatus === FetchStatus.ERROR && error) {
-    return (
-      <div className="dscHistogram__errorChartContainer">
-        <EuiFlexGroup gutterSize="s">
-          <EuiFlexItem grow={false} className="dscHistogram__errorChart__icon">
-            <EuiIcon type="visBarVertical" color="danger" size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem className="dscHistogram__errorChart">
-            <EuiText size="s" color="danger">
-              <FormattedMessage
-                id="discover.errorLoadingChart"
-                defaultMessage="Error loading chart"
-              />
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiText className="dscHistogram__errorChart__text" size="s">
-          {error.message}
-        </EuiText>
-      </div>
-    );
-  }
-
-  if (!chartData) {
-    return null;
-  }
-
-  const formatXValue = (val: string) => {
-    const xAxisFormat = chartData.xAxisFormat.params!.pattern;
-    return moment(val).format(xAxisFormat);
-  };
-
-  const isDarkMode = uiSettings.get('theme:darkMode');
-
-  /*
-   * Deprecation: [interval] on [date_histogram] is deprecated, use [fixed_interval] or [calendar_interval].
-   * see https://github.com/elastic/kibana/issues/27410
-   * TODO: Once the Discover query has been update, we should change the below to use the new field
-   */
-  const { intervalESValue, intervalESUnit, interval } = chartData.ordered;
-  const xInterval = interval.asMilliseconds();
-
-  const xValues = chartData.xAxisOrderedValues;
-  const lastXValue = xValues[xValues.length - 1];
-
-  const domain = chartData.ordered;
-  const domainStart = domain.min.valueOf();
-  const domainEnd = domain.max.valueOf();
-
-  const domainMin = Math.min(chartData.values[0]?.x, domainStart);
-  const domainMax = Math.max(domainEnd - xInterval, lastXValue);
-
-  const xDomain = {
-    min: domainMin,
-    max: domainMax,
-    minInterval: getAdjustedInterval(
-      xValues,
-      intervalESValue,
-      intervalESUnit as unitOfTime.Base,
-      timeZone
-    ),
-  };
-  const tooltipProps = {
-    headerFormatter: renderEndzoneTooltip(xInterval, domainStart, domainEnd, formatXValue),
-    type: TooltipType.VerticalCursor,
-  };
-
-  const xAxisFormatter = fieldFormats.deserialize(chartData.yAxisFormat);
-
-  const useLegacyTimeAxis = uiSettings.get(LEGACY_TIME_AXIS, false);
 
   const toolTipTitle = i18n.translate('discover.timeIntervalWithValueWarning', {
     defaultMessage: 'Warning',
@@ -264,7 +140,6 @@ export function DiscoverHistogram({
   }
 
   const LensComponent = lens.EmbeddableComponent;
-  console.log(dataView.id);
 
   return (
     <React.Fragment>
@@ -277,10 +152,10 @@ export function DiscoverHistogram({
           timeRange={{ from, to }}
           onLoad={(_, activeData) => {
             if (!activeData) return;
-            alert(`Total count is ${activeData?.layer1?.meta?.statistics?.totalCount}.`);
-            // TODO somehow use this total count instead of the separate request?
-            // TODO pass the inspector data and merge it with the top level inspector?
-
+            savedSearchDataTotalHits$.next({
+               fetchStatus: FetchStatus.COMPLETE,
+               result: activeData?.layer1?.meta?.statistics?.totalCount
+            });
           }}
           attributes={{
             title: 'Prefilled from example app',
