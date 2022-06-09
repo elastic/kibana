@@ -153,6 +153,10 @@ export interface DataViewAttributes {
    * Prevents errors when index pattern exists before indices
    */
   allowNoIndex?: boolean;
+  /**
+   * Name of the data view. Human readable name used to differentiate data view.
+   */
+  name?: string;
 }
 
 /**
@@ -476,6 +480,10 @@ export type DataViewSpec = {
    * Array of namespace ids
    */
   namespaces?: string[];
+  /**
+   * Name of the data view. Human readable name used to differentiate data view.
+   */
+  name?: string;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
