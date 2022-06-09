@@ -2,8 +2,8 @@
   "metrics": {
     "kibana_os_load": [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana_stats.os.load.1m",
@@ -17,20 +17,13 @@
           "isDerivative": false
         },
         "data": [
-          [1504027460000, 5.87109375],
-          [1504027470000, 5.84375],
-          [1504027480000, 5.08984375],
-          [1504027490000, 4.53515625],
-          [1504027500000, 3.990234375],
-          [1504027510000, 3.537109375],
-          [1504027520000, 3.29296875],
-          [1504027530000, 3.2421875],
-          [1504027540000, 3.19140625]
+          [1654023060000, 5.27734375],
+          [1654023120000, 4.78125]
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana_stats.os.load.5m",
@@ -44,20 +37,13 @@
           "isDerivative": false
         },
         "data": [
-          [1504027460000, 4.92578125],
-          [1504027470000, 4.9453125],
-          [1504027480000, 4.81640625],
-          [1504027490000, 4.70703125],
-          [1504027500000, 4.58203125],
-          [1504027510000, 4.46484375],
-          [1504027520000, 4.3828125],
-          [1504027530000, 4.3359375],
-          [1504027540000, 4.29296875]
+          [1654023060000, 6.7734375],
+          [1654023120000, 6.5625]
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana_stats.os.load.15m",
@@ -71,22 +57,15 @@
           "isDerivative": false
         },
         "data": [
-          [1504027460000, 4.5390625],
-          [1504027470000, 4.546875],
-          [1504027480000, 4.5078125],
-          [1504027490000, 4.46875],
-          [1504027500000, 4.4296875],
-          [1504027510000, 4.390625],
-          [1504027520000, 4.359375],
-          [1504027530000, 4.34375],
-          [1504027540000, 4.328125]
+          [1654023060000, 5.8359375],
+          [1654023120000, 5.78125]
         ]
       }
     ],
     "kibana_average_concurrent_connections": [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana_stats.concurrent_connections",
@@ -99,22 +78,15 @@
           "isDerivative": false
         },
         "data": [
-          [1504027460000, 78],
-          [1504027470000, 90],
-          [1504027480000, 102],
-          [1504027490000, 114],
-          [1504027500000, 126],
-          [1504027510000, 138],
-          [1504027520000, 150],
-          [1504027530000, 162],
-          [1504027540000, 174]
+          [1654023060000, 10],
+          [1654023120000, 17]
         ]
       }
     ],
     "kibana_process_delay": [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana_stats.process.event_loop_delay",
@@ -127,22 +99,15 @@
           "isDerivative": false
         },
         "data": [
-          [1504027460000, 9.576263427734375],
-          [1504027470000, 10.395200729370117],
-          [1504027480000, 11.072744369506836],
-          [1504027490000, 11.617706298828125],
-          [1504027500000, 12.510245323181152],
-          [1504027510000, 13.343531608581543],
-          [1504027520000, 14.059904098510742],
-          [1504027530000, 14.816107749938965],
-          [1504027540000, 15.663384437561035]
+          [1654023060000, 10.624],
+          [1654023120000, 11.916]
         ]
       }
     ],
     "kibana_memory": [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana_stats.process.memory.heap.size_limit",
@@ -156,20 +121,13 @@
           "isDerivative": false
         },
         "data": [
-          [1504027460000, 1501560832],
-          [1504027470000, 1501560832],
-          [1504027480000, 1501560832],
-          [1504027490000, 1501560832],
-          [1504027500000, 1501560832],
-          [1504027510000, 1501560832],
-          [1504027520000, 1501560832],
-          [1504027530000, 1501560832],
-          [1504027540000, 1501560832]
+          [1654023060000, 8438939648],
+          [1654023120000, 8438939648]
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana_stats.process.memory.resident_set_size_in_bytes",
@@ -183,22 +141,15 @@
           "isDerivative": false
         },
         "data": [
-          [1504027460000, 228552704],
-          [1504027470000, 231333888],
-          [1504027480000, 232230912],
-          [1504027490000, 229707776],
-          [1504027500000, 230150144],
-          [1504027510000, 230617088],
-          [1504027520000, 229924864],
-          [1504027530000, 230363136],
-          [1504027540000, 230227968]
+          [1654023060000, 568397824],
+          [1654023120000, 632569856]
         ]
       }
     ],
     "kibana_response_times": [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana_stats.response_times.max",
@@ -212,20 +163,13 @@
           "isDerivative": false
         },
         "data": [
-          [1504027460000, 2203],
-          [1504027470000, 2203],
-          [1504027480000, 2203],
-          [1504027490000, 2203],
-          [1504027500000, 2203],
-          [1504027510000, 2203],
-          [1504027520000, 2203],
-          [1504027530000, 2203],
-          [1504027540000, 2203]
+          [1654023060000, 77],
+          [1654023120000, 418]
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana_stats.response_times.average",
@@ -239,22 +183,15 @@
           "isDerivative": false
         },
         "data": [
-          [1504027460000, 171.05714416503906],
-          [1504027470000, 171.05714416503906],
-          [1504027480000, 171.05714416503906],
-          [1504027490000, 171.05714416503906],
-          [1504027500000, 171.05714416503906],
-          [1504027510000, 171.05714416503906],
-          [1504027520000, 171.05714416503906],
-          [1504027530000, 171.05714416503906],
-          [1504027540000, 171.05714416503906]
+          [1654023060000, 37],
+          [1654023120000, 40]
         ]
       }
     ],
     "kibana_requests": [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana_stats.requests.total",
@@ -267,20 +204,13 @@
           "isDerivative": false
         },
         "data": [
-          [1504027460000, 113],
-          [1504027470000, 146],
-          [1504027480000, 162],
-          [1504027490000, 164],
-          [1504027500000, 166],
-          [1504027510000, 168],
-          [1504027520000, 170],
-          [1504027530000, 172],
-          [1504027540000, 174]
+          [1654023060000, 3],
+          [1654023120000, 59]
         ]
       },
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana_stats.requests.disconnects",
@@ -293,22 +223,15 @@
           "isDerivative": false
         },
         "data": [
-          [1504027460000, 0],
-          [1504027470000, 0],
-          [1504027480000, 0],
-          [1504027490000, 0],
-          [1504027500000, 0],
-          [1504027510000, 0],
-          [1504027520000, 0],
-          [1504027530000, 0],
-          [1504027540000, 0]
+          [1654023060000, 0],
+          [1654023120000, 0]
         ]
       }
     ],
     "kibana_instance_rule_failures": [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana.node_rules.failures",
@@ -320,24 +243,17 @@
           "hasCalculation": false,
           "isDerivative": true
         },
-        "indices_found": { "internal": true, "metricbeat": false },
+        "indices_found": { "internal": false, "metricbeat": true },
         "data": [
-          [1504027460000, null],
-          [1504027470000, null],
-          [1504027480000, null],
-          [1504027490000, null],
-          [1504027500000, null],
-          [1504027510000, null],
-          [1504027520000, null],
-          [1504027530000, null],
-          [1504027540000, null]
+          [1654023060000, null],
+          [1654023120000, 0]
         ]
       }
     ],
     "kibana_instance_rule_executions": [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana.node_rules.executions",
@@ -349,24 +265,17 @@
           "hasCalculation": false,
           "isDerivative": true
         },
-        "indices_found": { "internal": true, "metricbeat": false },
+        "indices_found": { "internal": false, "metricbeat": true },
         "data": [
-          [1504027460000, null],
-          [1504027470000, null],
-          [1504027480000, null],
-          [1504027490000, null],
-          [1504027500000, null],
-          [1504027510000, null],
-          [1504027520000, null],
-          [1504027530000, null],
-          [1504027540000, null]
+          [1654023060000, null],
+          [1654023120000, 0.03333333333333333]
         ]
       }
     ],
     "kibana_instance_action_failures": [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana.node_actions.failures",
@@ -378,24 +287,17 @@
           "hasCalculation": false,
           "isDerivative": true
         },
-        "indices_found": { "internal": true, "metricbeat": false },
+        "indices_found": { "internal": false, "metricbeat": true },
         "data": [
-          [1504027460000, null],
-          [1504027470000, null],
-          [1504027480000, null],
-          [1504027490000, null],
-          [1504027500000, null],
-          [1504027510000, null],
-          [1504027520000, null],
-          [1504027530000, null],
-          [1504027540000, null]
+          [1654023060000, null],
+          [1654023120000, 0]
         ]
       }
     ],
     "kibana_instance_action_executions": [
       {
-        "bucket_size": "10 seconds",
-        "timeRange": { "min": 1504027457000, "max": 1504027568000 },
+        "bucket_size": "1 min",
+        "timeRange": { "min": 1654022659267, "max": 1654027159267 },
         "metric": {
           "app": "kibana",
           "field": "kibana.node_actions.executions",
@@ -407,33 +309,26 @@
           "hasCalculation": false,
           "isDerivative": true
         },
-        "indices_found": { "internal": true, "metricbeat": false },
+        "indices_found": { "internal": false, "metricbeat": true },
         "data": [
-          [1504027460000, null],
-          [1504027470000, null],
-          [1504027480000, null],
-          [1504027490000, null],
-          [1504027500000, null],
-          [1504027510000, null],
-          [1504027520000, null],
-          [1504027530000, null],
-          [1504027540000, null]
+          [1654023060000, null],
+          [1654023120000, 0.03333333333333333]
         ]
       }
     ]
   },
   "kibanaSummary": {
-    "host": "tsullivan.local",
-    "index": ".kibana",
-    "name": "tsullivan.local",
-    "snapshot": false,
+    "name": "CBR-MBP.local",
+    "host": "localhost",
     "status": "green",
-    "transport_address": "tsullivan.local:5601",
-    "uuid": "de3b8f2a-7bb9-4931-9bf3-997ba7824cf9",
-    "version": "7.0.0-alpha1",
-    "lastSeenTimestamp": "2017-08-29T17:25:43.192Z",
     "statusIsStale": true,
-    "os_memory_free": 1645989888,
-    "uptime": 200102
+    "transport_address": "localhost:5601",
+    "uuid": "5b2de169-2785-441b-ae8c-186a1936b17d",
+    "snapshot": false,
+    "index": ".kibana",
+    "lastSeenTimestamp": "2022-05-31T18:52:10.179Z",
+    "version": "8.4.0",
+    "os_memory_free": 1504448512,
+    "uptime": 1845765
   }
 }
