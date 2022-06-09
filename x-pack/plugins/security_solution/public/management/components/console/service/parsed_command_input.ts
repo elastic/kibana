@@ -78,6 +78,17 @@ const parseInputString = (rawInput: string): ParseInputStringResponse => {
 
 export interface ParsedCommandInterface extends ParseInputStringResponse {
   input: string;
+
+  /**
+   * Checks if the given argument name was entered by the user
+   * @param argName
+   */
+  hasArg(argName: string): boolean;
+
+  /**
+   * Checks to see if any argument was entered
+   */
+  hasArgs(): boolean;
 }
 
 class ParsedCommand implements ParsedCommandInterface {
@@ -92,6 +103,10 @@ class ParsedCommand implements ParsedCommandInterface {
 
   hasArg(argName: string): boolean {
     return argName in this.args;
+  }
+
+  hasArgs(): boolean {
+    return Object.keys(this.args).length > 0;
   }
 }
 

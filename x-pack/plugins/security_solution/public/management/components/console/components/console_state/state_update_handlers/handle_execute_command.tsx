@@ -14,7 +14,7 @@ import {
   ConsoleDataState,
   ConsoleStoreReducer,
 } from '../types';
-import { parseCommandInput } from '../../../service/parsed_command_input';
+import { parseCommandInput, ParsedCommandInterface } from '../../../service/parsed_command_input';
 import { UnknownCommand } from '../../unknow_comand';
 import { BadArgument } from '../../bad_argument';
 import { Command, CommandDefinition, CommandExecutionComponentProps } from '../../../types';
@@ -29,6 +29,21 @@ const getRequiredArguments = (argDefinitions: CommandDefinition['args']): string
   return Object.entries(argDefinitions)
     .filter(([_, argDef]) => argDef.required)
     .map(([argName]) => argName);
+};
+
+const getUnknownArguments = (
+  inputArgs: ParsedCommandInterface['args'],
+  argDefinitions: CommandDefinition['args'] | undefined
+): string[] => {
+  const response: string[] = [];
+
+  Object.keys(inputArgs).forEach((argName) => {
+    if (!argDefinitions || !argDefinitions[argName]) {
+      response.push(argName);
+    }
+  });
+
+  return response;
 };
 
 const updateStateWithNewCommandHistoryItem = (
@@ -136,7 +151,9 @@ export const handleExecuteCommand: ConsoleStoreReducer<
     }
 
     // no unknown arguments allowed?
-    if (parsedInput.unknownArgs && parsedInput.unknownArgs.length) {
+    const unknownInputArgs = getUnknownArguments(parsedInput.args, commandDefinition.args);
+
+    if (unknownInputArgs.length) {
       return updateStateWithNewCommandHistoryItem(state, {
         id: uuidV4(),
         command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
@@ -146,7 +163,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
             {
               defaultMessage: 'unknown argument(s): {unknownArgs}',
               values: {
-                unknownArgs: parsedInput.unknownArgs.join(', '),
+                unknownArgs: unknownInputArgs.join(', '),
               },
             }
           ),
