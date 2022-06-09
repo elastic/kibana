@@ -13,7 +13,7 @@ import { promisify } from 'util';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import type { AuthenticationProvider } from '../../common/model';
+import type { AuthenticationProvider } from '../../common';
 import type { ConfigType } from '../config';
 import type { SessionCookie } from './session_cookie';
 import type { SessionIndex, SessionIndexValue } from './session_index';
@@ -57,6 +57,12 @@ export interface SessionValue {
   state: unknown;
 
   /**
+   * Unique identifier of the user profile, if any. Not all users that have session will have an associated user
+   * profile, e.g. anonymous users won't have it.
+   */
+  userProfileId?: string;
+
+  /**
    * Indicates whether user acknowledged access agreement or not.
    */
   accessAgreementAcknowledged?: boolean;
@@ -76,6 +82,7 @@ export interface SessionOptions {
 
 export interface SessionValueContentToEncrypt {
   username?: string;
+  userProfileId?: string;
   state: unknown;
 }
 
@@ -99,6 +106,15 @@ export type InvalidateSessionsFilter =
  */
 const SID_BYTE_LENGTH = 32;
 const AAD_BYTE_LENGTH = 32;
+
+/**
+ * Returns last 10 characters of the session identifier. Referring to the specific session by its identifier is useful
+ * for logging and debugging purposes, but we cannot include full session ID in logs because of the security reasons.
+ * @param sid Full user session id
+ */
+export function getPrintableSessionId(sid: string) {
+  return sid.slice(-10);
+}
 
 export class Session {
   /**
@@ -173,7 +189,7 @@ export class Session {
 
     return {
       ...Session.sessionIndexValueToSessionValue(sessionIndexValue, decryptedContent),
-      // Unlike session index, session cookie contains the most up to date idle timeout expiration.
+      // Unlike session index, session cookie contains the most up-to-date idle timeout expiration.
       idleTimeoutExpiration: sessionCookieValue.idleTimeoutExpiration,
     };
   }
@@ -198,7 +214,7 @@ export class Session {
     sessionLogger.debug('Creating a new session.');
 
     const sessionExpirationInfo = this.calculateExpiry(sessionValue.provider);
-    const { username, state, ...publicSessionValue } = sessionValue;
+    const { username, userProfileId, state, ...publicSessionValue } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
@@ -207,14 +223,18 @@ export class Session {
       ...sessionExpirationInfo,
       sid,
       usernameHash: username && Session.getUsernameHash(username),
-      content: await this.crypto.encrypt(JSON.stringify({ username, state }), aad),
+      content: await this.crypto.encrypt(JSON.stringify({ username, userProfileId, state }), aad),
     });
 
     await this.options.sessionCookie.set(request, { ...sessionExpirationInfo, sid, aad });
 
     sessionLogger.debug('Successfully created a new session.');
 
-    return Session.sessionIndexValueToSessionValue(sessionIndexValue, { username, state });
+    return Session.sessionIndexValueToSessionValue(sessionIndexValue, {
+      username,
+      userProfileId,
+      state,
+    });
   }
 
   /**
@@ -234,7 +254,7 @@ export class Session {
       sessionValue.provider,
       sessionCookieValue.lifespanExpiration
     );
-    const { username, state, metadata, ...publicSessionInfo } = sessionValue;
+    const { username, userProfileId, state, metadata, ...publicSessionInfo } = sessionValue;
 
     // First try to store session in the index and only then in the cookie to make sure cookie is
     // only updated if server side session is created successfully.
@@ -244,7 +264,7 @@ export class Session {
       ...sessionExpirationInfo,
       usernameHash: username && Session.getUsernameHash(username),
       content: await this.crypto.encrypt(
-        JSON.stringify({ username, state }),
+        JSON.stringify({ username, userProfileId, state }),
         sessionCookieValue.aad
       ),
     });
@@ -264,7 +284,11 @@ export class Session {
 
     sessionLogger.debug('Successfully updated existing session.');
 
-    return Session.sessionIndexValueToSessionValue(sessionIndexValue, { username, state });
+    return Session.sessionIndexValueToSessionValue(sessionIndexValue, {
+      username,
+      userProfileId,
+      state,
+    });
   }
 
   /**
@@ -446,11 +470,17 @@ export class Session {
    */
   private static sessionIndexValueToSessionValue(
     sessionIndexValue: Readonly<SessionIndexValue>,
-    { username, state }: SessionValueContentToEncrypt
+    { username, userProfileId, state }: SessionValueContentToEncrypt
   ): Readonly<SessionValue> {
     // Extract values that are specific to session index value.
     const { usernameHash, content, ...publicSessionValue } = sessionIndexValue;
-    return { ...publicSessionValue, username, state, metadata: { index: sessionIndexValue } };
+    return {
+      ...publicSessionValue,
+      username,
+      userProfileId,
+      state,
+      metadata: { index: sessionIndexValue },
+    };
   }
 
   /**
@@ -458,7 +488,7 @@ export class Session {
    * @param [sid] Session ID to create logger for.
    */
   private getLoggerForSID(sid?: string) {
-    return this.options.logger.get(sid?.slice(-10) ?? 'no_session');
+    return this.options.logger.get(sid ? getPrintableSessionId(sid) : 'no_session');
   }
 
   /**

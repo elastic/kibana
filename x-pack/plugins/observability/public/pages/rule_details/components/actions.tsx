@@ -14,11 +14,10 @@ import {
   IconType,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { intersectionBy } from 'lodash';
 import { suspendedComponentWithProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ActionsProps } from '../types';
-import { useFetchRuleActions } from '../../../hooks/use_fetch_rule_actions';
+import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
 import { useKibana } from '../../../utils/kibana_react';
 
 export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
@@ -26,13 +25,18 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
     http,
     notifications: { toasts },
   } = useKibana().services;
-  const { isLoadingActions, allActions, errorActions } = useFetchRuleActions({ http });
+  const { isLoadingActionConnectors, actionConnectors, errorActionConnectors } =
+    useFetchRuleActionConnectors({
+      http,
+      ruleActions,
+    });
   useEffect(() => {
-    if (errorActions) {
-      toasts.addDanger({ title: errorActions });
+    if (errorActionConnectors) {
+      toasts.addDanger({ title: errorActionConnectors });
     }
-  }, [errorActions, toasts]);
-  if (ruleActions && ruleActions.length <= 0)
+  }, [errorActionConnectors, toasts]);
+
+  if (!actionConnectors || actionConnectors.length <= 0)
     return (
       <EuiFlexItem>
         <EuiText size="s">
@@ -49,11 +53,10 @@ export function Actions({ ruleActions, actionTypeRegistry }: ActionsProps) {
       ? actionGroup?.iconClass
       : suspendedComponentWithProps(actionGroup?.iconClass as React.ComponentType);
   }
-  const actions = intersectionBy(allActions, ruleActions, 'actionTypeId');
-  if (isLoadingActions) return <EuiLoadingSpinner size="s" />;
+  if (isLoadingActionConnectors) return <EuiLoadingSpinner size="s" />;
   return (
     <EuiFlexGroup direction="column">
-      {actions.map(({ actionTypeId, name }) => (
+      {actionConnectors.map(({ actionTypeId, name }) => (
         <React.Fragment key={actionTypeId}>
           <EuiFlexGroup alignItems="center" gutterSize="s" component="span">
             <EuiFlexItem grow={false}>
