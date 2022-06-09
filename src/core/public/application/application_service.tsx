@@ -151,6 +151,10 @@ export class ApplicationService {
 
     const wrapMount = (plugin: PluginOpaqueId, app: App<any>): AppMount => {
       return async (params) => {
+        const currentAppId = this.currentAppId$.value;
+        if (currentAppId && currentAppId !== app.id) {
+          this.appInternalStates.delete(currentAppId);
+        }
         this.currentAppId$.next(app.id);
         return app.mount(params);
       };
@@ -271,11 +275,7 @@ export class ApplicationService {
         if (openInNewTab) {
           this.openInNewTab!(getAppUrl(availableMounters, appId, path));
         } else {
-          if (!navigatingToSameApp) {
-            this.appInternalStates.delete(this.currentAppId$.value!);
-          }
           this.navigate!(getAppUrl(availableMounters, appId, path), state, replace);
-          this.currentAppId$.next(appId);
         }
       }
     };

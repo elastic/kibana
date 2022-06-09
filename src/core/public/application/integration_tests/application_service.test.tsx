@@ -106,9 +106,13 @@ describe('ApplicationService', () => {
           },
         });
 
-        const { navigateToApp, currentAppId$ } = await service.start(startDeps);
+        const { navigateToApp, currentAppId$, getComponent } = await service.start(startDeps);
+        update = createRenderer(getComponent());
 
-        await act(() => navigateToApp('app1'));
+        await act(async () => {
+          await navigateToApp('app1');
+          update();
+        });
 
         expect(await currentAppId$.pipe(take(1)).toPromise()).toEqual('app1');
 
