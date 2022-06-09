@@ -29,6 +29,7 @@ jobs:
         )
         || (github.event.action == 'closed')
       )
+    steps:
       - name: Checkout Actions
         uses: actions/checkout@v2
         with:
