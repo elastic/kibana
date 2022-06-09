@@ -167,7 +167,7 @@ Object {
                   "legendSize": Array [],
                   "maxLines": Array [],
                   "position": Array [
-                    "bottom",
+                    "left",
                   ],
                   "shouldTruncate": Array [
                     true,
