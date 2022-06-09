@@ -14,24 +14,10 @@ export const WEBHOOK_URL_LABEL = i18n.translate(
   }
 );
 
-export const WEBHOOK_URL_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.requiredWebhookUrlText',
-  {
-    defaultMessage: 'Webhook URL is required.',
-  }
-);
-
 export const WEBHOOK_URL_INVALID = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.invalidWebhookUrlText',
   {
     defaultMessage: 'Webhook URL is invalid.',
-  }
-);
-
-export const WEBHOOK_URL_HTTP_INVALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.error.requireHttpsWebhookUrlText',
-  {
-    defaultMessage: 'Webhook URL must start with https://.',
   }
 );
 
@@ -40,9 +26,4 @@ export const MESSAGE_REQUIRED = i18n.translate(
   {
     defaultMessage: 'Message is required.',
   }
-);
-
-export const WEBHOOK_URL_ENC_MSG = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.reenterValueLabel',
-  { defaultMessage: 'This URL is encrypted. Please reenter a value for this field.' }
 );

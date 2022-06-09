@@ -48,8 +48,3 @@ export const INTEGRATION_KEY_LABEL = i18n.translate(
     defaultMessage: 'Integration key',
   }
 );
-
-export const ENC_MSG = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.teamsAction.reenterValueLabel',
-  { defaultMessage: 'This URL is encrypted. Please reenter a value for this field.' }
-);

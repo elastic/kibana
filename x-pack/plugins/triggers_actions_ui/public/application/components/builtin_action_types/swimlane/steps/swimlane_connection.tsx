@@ -32,7 +32,7 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({ readOnly 
           label: i18n.SW_API_URL_TEXT_FIELD_LABEL,
           validations: [
             {
-              validator: urlField(i18n.SW_API_URL_REQUIRED),
+              validator: urlField(i18n.SW_API_URL_INVALID),
             },
           ],
         }}

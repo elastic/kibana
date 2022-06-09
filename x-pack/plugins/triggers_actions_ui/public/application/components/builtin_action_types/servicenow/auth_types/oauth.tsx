@@ -47,10 +47,10 @@ const OAuthComponent: React.FC<Props> = ({ isLoading, readOnly, pathPrefix = '' 
         path={`${pathPrefix}config.userIdentifierValue`}
         component={TextField}
         config={{
-          label: i18n.USER_EMAIL_LABEL,
+          label: i18n.USER_IDENTIFIER_LABEL,
           validations: [
             {
-              validator: emptyField(i18n.USERNAME_REQUIRED),
+              validator: emptyField(i18n.USER_IDENTIFIER_REQUIRED),
             },
           ],
         }}

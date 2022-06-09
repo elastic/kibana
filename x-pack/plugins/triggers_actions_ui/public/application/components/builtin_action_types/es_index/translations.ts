@@ -7,10 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const INDEX_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.error.requiredIndexText',
+export const INDEX_IS_NOT_VALID = i18n.translate(
+  'xpack.triggersActionsUI.components.builtinActionTypes.indexAction.error.notValidIndexText',
   {
-    defaultMessage: 'Index is required.',
+    defaultMessage: 'Index is not valid.',
   }
 );
 

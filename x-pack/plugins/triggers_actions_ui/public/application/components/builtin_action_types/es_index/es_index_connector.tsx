@@ -61,7 +61,7 @@ const getIndexConfig = (docLinks: DocLinksStart): FieldConfig => ({
   ),
   validations: [
     {
-      validator: emptyField(translations.INDEX_REQUIRED),
+      validator: emptyField(translations.INDEX_IS_NOT_VALID),
     },
     {
       validator: indexPatternField(i18n),

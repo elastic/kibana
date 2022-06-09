@@ -91,13 +91,6 @@ export const SENDER_REQUIRED = i18n.translate(
   }
 );
 
-export const SENDER_NOT_VALID = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.formatFromText',
-  {
-    defaultMessage: 'Sender is not a valid email address.',
-  }
-);
-
 export const CLIENT_ID_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredClientIdText',
   {
@@ -109,13 +102,6 @@ export const TENANT_ID_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredTenantIdText',
   {
     defaultMessage: 'Tenant ID is required.',
-  }
-);
-
-export const CLIENT_SECRET_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredClientSecretText',
-  {
-    defaultMessage: 'Client Secret is required.',
   }
 );
 
@@ -144,20 +130,6 @@ export const USERNAME_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredAuthUserNameText',
   {
     defaultMessage: 'Username is required.',
-  }
-);
-
-export const PASSWORD_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredAuthPasswordText',
-  {
-    defaultMessage: 'Password is required.',
-  }
-);
-
-export const PASSWORD_REQUIRED_FOR_USER_USED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.error.requiredPasswordText',
-  {
-    defaultMessage: 'Password is required when username is used.',
   }
 );
 

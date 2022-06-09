@@ -77,13 +77,6 @@ export const HEADER_VALUE_LABEL = i18n.translate(
   }
 );
 
-export const URL_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.error.requiredUrlText',
-  {
-    defaultMessage: 'URL is required.',
-  }
-);
-
 export const URL_INVALID = i18n.translate(
   'xpack.triggersActionsUI.components.builtinActionTypes.webhookAction.error.invalidUrlTextField',
   {
@@ -102,27 +95,6 @@ export const USERNAME_REQUIRED = i18n.translate(
   'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredAuthUserNameText',
   {
     defaultMessage: 'Username is required.',
-  }
-);
-
-export const PASSWORD_REQUIRED = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredAuthPasswordText',
-  {
-    defaultMessage: 'Password is required.',
-  }
-);
-
-export const PASSWORD_REQUIRED_FOR_USER = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredPasswordText',
-  {
-    defaultMessage: 'Password is required when username is used.',
-  }
-);
-
-export const USERNAME_REQUIRED_FOR_PASSWORD = i18n.translate(
-  'xpack.triggersActionsUI.sections.addAction.webhookAction.error.requiredUserText',
-  {
-    defaultMessage: 'Username is required when password is used.',
   }
 );
 
