@@ -234,16 +234,16 @@ export function Detail() {
                 />
               )}
             </FlexItemWithMaxHeight>
-            <EuiFlexItem>
-              <EuiFlexGroup alignItems="center" gutterSize="m">
-                <FlexItemWithMinWidth grow={true}>
-                  <EuiFlexGroup alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiText>
-                        {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
-                        <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
-                      </EuiText>
-                    </EuiFlexItem>
+            <FlexItemWithMinWidth grow={true}>
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText>
+                    {/* Render space in place of package name while package info loads to prevent layout from jumping around */}
+                    <h1>{integrationInfo?.title || packageInfo?.title || '\u00A0'}</h1>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="none">
                     <EuiFlexItem grow={false}>
                       <EuiBadge color="default">
                         {i18n.translate('xpack.fleet.epm.elasticAgentBadgeLabel', {
@@ -251,18 +251,21 @@ export function Detail() {
                         })}
                       </EuiBadge>
                     </EuiFlexItem>
+                    {packageInfo?.release && packageInfo.release !== 'ga' ? (
+                      <>
+                        <EuiSpacer size="xs" />
+                        <EuiFlexItem grow={false}>
+                          <EuiBetaBadge
+                            label={RELEASE_BADGE_LABEL[packageInfo.release]}
+                            tooltipContent={RELEASE_BADGE_DESCRIPTION[packageInfo.release]}
+                          />
+                        </EuiFlexItem>
+                      </>
+                    ) : null}
                   </EuiFlexGroup>
-                </FlexItemWithMinWidth>
-                {packageInfo?.release && packageInfo.release !== 'ga' ? (
-                  <EuiFlexItem grow={false}>
-                    <EuiBetaBadge
-                      label={RELEASE_BADGE_LABEL[packageInfo.release]}
-                      tooltipContent={RELEASE_BADGE_DESCRIPTION[packageInfo.release]}
-                    />
-                  </EuiFlexItem>
-                ) : null}
+                </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiFlexItem>
+            </FlexItemWithMinWidth>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
