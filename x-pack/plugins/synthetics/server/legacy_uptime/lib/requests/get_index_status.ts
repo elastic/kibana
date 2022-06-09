@@ -11,18 +11,28 @@ import { StatesIndexStatus } from '../../../../common/runtime_types';
 export const getIndexStatus: UMElasticsearchQueryFn<{}, StatesIndexStatus> = async ({
   uptimeEsClient,
 }) => {
-  const {
-    indices,
-    result: {
-      body: {
-        _shards: { total },
-        count,
+  try {
+    const {
+      indices,
+      result: {
+        body: {
+          _shards: { total },
+          count,
+        },
       },
-    },
-  } = await uptimeEsClient.count({ terminate_after: 1 });
-  return {
-    indices,
-    indexExists: total > 0,
-    docCount: count,
-  };
+    } = await uptimeEsClient.count({ terminate_after: 1 });
+    return {
+      indices,
+      indexExists: total > 0,
+      docCount: count,
+    };
+  } catch (e) {
+    if (e.meta.statusCode === 404) {
+      return {
+        indices: '',
+        indexExists: false,
+        docCount: 0,
+      };
+    }
+  }
 };
