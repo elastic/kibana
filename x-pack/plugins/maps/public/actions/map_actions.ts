@@ -246,6 +246,7 @@ export function mapExtentChanged(mapExtentState: MapExtentState) {
 }
 
 export function setMouseCoordinates({ lat, lon }: { lat: number; lon: number }) {
+  return;
   let safeLon = lon;
   if (lon > 180) {
     const overlapWestOfDateLine = lon - 180;

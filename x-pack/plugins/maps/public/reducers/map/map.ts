@@ -88,6 +88,7 @@ export const DEFAULT_MAP_STATE: MapState = {
 };
 
 export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, any>) {
+  console.log(action.type);
   switch (action.type) {
     case UPDATE_DRAW_STATE:
       return {
@@ -136,13 +137,15 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
         },
       };
     case SET_GOTO:
-      return {
+      const newState = {
         ...state,
         goto: {
           center: action.center,
           bounds: action.bounds,
         },
       };
+      console.log('newState', newState);
+      return newState;
     case CLEAR_GOTO:
       return {
         ...state,

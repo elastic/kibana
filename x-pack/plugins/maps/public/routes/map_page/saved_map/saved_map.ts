@@ -110,6 +110,7 @@ export class SavedMap {
   }
 
   public getStore() {
+    console.log('getStore state', this._store.getState());
     return this._store;
   }
 

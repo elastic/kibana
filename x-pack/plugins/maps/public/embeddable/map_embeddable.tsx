@@ -35,6 +35,7 @@ import {
   disableScrollZoom,
   setReadOnly,
   updateLayerById,
+  setGotoWithCenter,
 } from '../actions';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
@@ -78,6 +79,7 @@ import { getIndexPatternsFromIds } from '../index_pattern_util';
 import { getMapAttributeService } from '../map_attribute_service';
 import { isUrlDrilldown, toValueClickDataFormat } from '../trigger_actions/trigger_utils';
 import { waitUntilTimeLayersLoad$ } from '../routes/map_page/map_app/wait_until_time_layers_load';
+import { synchronizeMaps } from './synchronize_maps';
 
 import {
   MapByValueInput,
@@ -170,6 +172,18 @@ export class MapEmbeddable
     this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
 
     const store = this._savedMap.getStore();
+
+    // TODO add check isSync and isAutoFitToBounds
+    synchronizeMaps.register(this.input.id, this._mapSyncHandler);
+    const syncedLocation = synchronizeMaps.getLocation();
+    if (!syncedLocation) {
+      const center = getMapCenter(store.getState());
+      const zoom = getMapZoom(store.getState());
+      synchronizeMaps.setLocation(center.lat, center.lon, zoom);
+    } else {
+      this._mapSyncHandler(syncedLocation.lat, syncedLocation.lon, syncedLocation.zoom);
+    }
+
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
     store.dispatch(
@@ -182,7 +196,7 @@ export class MapEmbeddable
       forceRefresh: false,
     });
 
-    this._unsubscribeFromStore = this._savedMap.getStore().subscribe(() => {
+    this._unsubscribeFromStore = store.subscribe(() => {
       this._handleStoreChanges();
     });
   }
@@ -328,6 +342,7 @@ export class MapEmbeddable
     this._prevQuery = this.input.query;
     this._prevFilters = filters;
     this._prevSearchSessionId = this._getSearchSessionId();
+    console.log('set query state', this._savedMap.getStore().getState());
     this._savedMap.getStore().dispatch<any>(
       setQuery({
         filters,
@@ -537,6 +552,7 @@ export class MapEmbeddable
 
   destroy() {
     super.destroy();
+    synchronizeMaps.unregister(this.input.id);
     this._isActive = false;
     if (this._unsubscribeFromStore) {
       this._unsubscribeFromStore();
@@ -555,6 +571,11 @@ export class MapEmbeddable
     this._dispatchSetQuery({
       forceRefresh: true,
     });
+  }
+
+  _mapSyncHandler = (lat: number, lon: number, zoom: number) => {
+    console.log('_mapSyncHandler state', this._savedMap.getStore().getState());
+    this._savedMap.getStore().dispatch(setGotoWithCenter({ lat, lon, zoom }));
   }
 
   _handleStoreChanges() {
@@ -586,6 +607,8 @@ export class MapEmbeddable
       mapCenter.lon !== center.lon ||
       mapCenter.zoom !== zoom
     ) {
+      // TODO if isSynced
+      synchronizeMaps.setLocation(center.lat, center.lon, zoom);
       this.updateInput({
         mapCenter: {
           lat: center.lat,

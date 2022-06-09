@@ -320,6 +320,8 @@ export class MbMap extends Component<Props, State> {
   _syncMbMapWithMapState = () => {
     const { isMapReady, goto, clearGoto } = this.props;
 
+    console.log('goto', goto);
+
     if (!isMapReady || !goto || !this.state.mbMap) {
       return;
     }

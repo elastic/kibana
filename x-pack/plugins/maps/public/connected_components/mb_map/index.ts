@@ -39,6 +39,7 @@ import { TileMetaFeature } from '../../../common/descriptor_types';
 import type { MapExtentState } from '../../reducers/map/types';
 
 function mapStateToProps(state: MapStoreState) {
+  console.log('mbMap connector goto', state);
   return {
     isMapReady: getMapReady(state),
     settings: getMapSettings(state),
@@ -70,10 +71,10 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(mapDestroyed());
     },
     setMouseCoordinates: ({ lat, lon }: { lat: number; lon: number }) => {
-      dispatch(setMouseCoordinates({ lat, lon }));
+      //dispatch(setMouseCoordinates({ lat, lon }));
     },
     clearMouseCoordinates: () => {
-      dispatch(clearMouseCoordinates());
+      //dispatch(clearMouseCoordinates());
     },
     clearGoto: () => {
       dispatch(clearGoto());
