@@ -49,7 +49,7 @@ export const useInProgressImage = ({
     if (!loading && !hasImage && (isAddRoute?.isExact || isEditRoute?.isExact) && !skippedStep) {
       setTimeout(() => {
         setRetryLoading((prevState) => {
-          if (prevState < 20) {
+          if (prevState < NUMBER_OF_RETRIES) {
             return prevState + 1;
           }
           return prevState;

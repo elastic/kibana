@@ -80,6 +80,7 @@ export const BrowserTestRunResult = ({ monitorId, isMonitorSaved, expectPings, o
                 compactView={true}
                 showStepDurationTrend={isMonitorSaved}
                 loading={Boolean(stepLoadingInProgress)}
+                allStepsLoaded={expectedSummariesLoaded}
                 error={undefined}
               />
             )}

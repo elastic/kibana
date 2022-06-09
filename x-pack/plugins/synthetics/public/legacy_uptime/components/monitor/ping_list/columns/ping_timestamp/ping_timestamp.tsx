@@ -36,9 +36,16 @@ interface Props {
   label?: string;
   stepStatus?: string;
   initialStepNo?: number;
+  allStepsLoaded?: boolean;
 }
 
-export const PingTimestamp = ({ label, checkGroup, stepStatus, initialStepNo = 1 }: Props) => {
+export const PingTimestamp = ({
+  label,
+  checkGroup,
+  stepStatus,
+  allStepsLoaded,
+  initialStepNo = 1,
+}: Props) => {
   const [stepNumber, setStepNumber] = useState(initialStepNo);
   const [isImagePopoverOpen, setIsImagePopoverOpen] = useState(false);
 
@@ -126,7 +133,7 @@ export const PingTimestamp = ({ label, checkGroup, stepStatus, initialStepNo = 1
             />
           )}
           {!imgSrc && !screenshotRef && (
-            <NoImageDisplay imageCaption={ImageCaption} isLoading={loading} />
+            <NoImageDisplay imageCaption={ImageCaption} isLoading={loading || !allStepsLoaded} />
           )}
         </StepDiv>
       </EuiFlexItem>
