@@ -27,14 +27,6 @@ export const links: LinkItem = {
   globalNavOrder: 9002,
   links: [
     {
-      id: SecurityPageName.hostsAuthentications,
-      title: i18n.translate('xpack.securitySolution.appLinks.hosts.authentications', {
-        defaultMessage: 'Authentications',
-      }),
-      path: `${HOSTS_PATH}/authentications`,
-      hideWhenExperimentalKey: 'usersEnabled',
-    },
-    {
       id: SecurityPageName.uncommonProcesses,
       title: i18n.translate('xpack.securitySolution.appLinks.hosts.uncommonProcesses', {
         defaultMessage: 'Uncommon Processes',

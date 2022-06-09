@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { useHostsKpiAuthentications } from '../../../containers/kpi_hosts/authentications';
+import { useUsersKpiAuthentications } from '../../../containers/users/authentications';
 import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { render } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import React from 'react';
-import { HostsKpiAuthentications } from '.';
+import { UsersKpiAuthentications } from '.';
 
 jest.mock('../../../../common/containers/query_toggle');
-jest.mock('../../../containers/kpi_hosts/authentications');
-jest.mock('../common', () => ({
+jest.mock('../../../containers/users/authentications');
+jest.mock('../../../../hosts/components/kpi_hosts/common', () => ({
   KpiBaseComponentManage: () => <span data-test-subj="KpiBaseComponentManage" />,
 }));
 
 describe('Authentications KPI', () => {
-  const mockUseHostsKpiAuthentications = useHostsKpiAuthentications as jest.Mock;
+  const mockUseHostsKpiAuthentications = useUsersKpiAuthentications as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const defaultProps = {
     from: '2019-06-25T04:31:59.345Z',
@@ -49,7 +49,7 @@ describe('Authentications KPI', () => {
   it('toggleStatus=true, do not skip', () => {
     render(
       <TestProviders>
-        <HostsKpiAuthentications {...defaultProps} />
+        <UsersKpiAuthentications {...defaultProps} />
       </TestProviders>
     );
     expect(mockUseHostsKpiAuthentications.mock.calls[0][0].skip).toEqual(false);
@@ -58,7 +58,7 @@ describe('Authentications KPI', () => {
     mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: jest.fn() });
     render(
       <TestProviders>
-        <HostsKpiAuthentications {...defaultProps} />
+        <UsersKpiAuthentications {...defaultProps} />
       </TestProviders>
     );
     expect(mockUseHostsKpiAuthentications.mock.calls[0][0].skip).toEqual(true);

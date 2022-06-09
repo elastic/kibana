@@ -12,6 +12,7 @@ import { SecuritySolutionFactory } from '../types';
 import { allUsers } from './all';
 import { authentications } from './authentications';
 import { userDetails } from './details';
+import { usersKpiAuthentications } from './kpi/authentications';
 import { totalUsersKpi } from './kpi/total_users';
 
 export const usersFactory: Record<UsersQueries, SecuritySolutionFactory<FactoryQueryTypes>> = {
@@ -19,4 +20,5 @@ export const usersFactory: Record<UsersQueries, SecuritySolutionFactory<FactoryQ
   [UsersQueries.kpiTotalUsers]: totalUsersKpi,
   [UsersQueries.users]: allUsers,
   [UsersQueries.authentications]: authentications,
+  [UsersQueries.kpiAuthentications]: usersKpiAuthentications,
 };

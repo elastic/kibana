@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import {
-  HostsKpiAuthenticationsStrategyResponse,
   HostsKpiHostsStrategyResponse,
   HostsKpiQueries,
   HostsKpiUniqueIpsStrategyResponse,
@@ -38,10 +37,6 @@ export default function ({ getService }: FtrProviderContext) {
             y: 1,
           },
         ],
-        authSuccess: 0,
-        authSuccessHistogram: null,
-        authFailure: 0,
-        authFailureHistogram: null,
         uniqueSourceIps: 1,
         uniqueSourceIpsHistogram: [
           {
@@ -76,28 +71,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
         expect(kpiHosts.hostsHistogram).to.eql(expectedResult.hostsHistogram);
         expect(kpiHosts.hosts).to.eql(expectedResult.hosts);
-      });
-
-      it('Make sure that we get KpiAuthentications data', async () => {
-        const body = await bsearch.send<HostsKpiAuthenticationsStrategyResponse>({
-          supertest,
-          options: {
-            factoryQueryType: HostsKpiQueries.kpiAuthentications,
-            timerange: {
-              interval: '12h',
-              to: TO,
-              from: FROM,
-            },
-            defaultIndex: ['filebeat-*'],
-            docValueFields: [],
-            inspect: false,
-          },
-          strategy: 'securitySolutionSearchStrategy',
-        });
-        expect(body.authenticationsSuccess).to.eql(expectedResult.authSuccess);
-        expect(body.authenticationsSuccessHistogram).to.eql(expectedResult.authSuccessHistogram);
-        expect(body.authenticationsFailure).to.eql(expectedResult.authFailure);
-        expect(body.authenticationsFailureHistogram).to.eql(expectedResult.authFailureHistogram);
       });
 
       it('Make sure that we get KpiUniqueIps data', async () => {
@@ -164,10 +137,6 @@ export default function ({ getService }: FtrProviderContext) {
             y: 1,
           },
         ],
-        authSuccess: 0,
-        authSuccessHistogram: null,
-        authFailure: 0,
-        authFailureHistogram: null,
         uniqueSourceIps: 3,
         uniqueSourceIpsHistogram: [
           { x: 1543276800000, y: 1 },
@@ -206,28 +175,6 @@ export default function ({ getService }: FtrProviderContext) {
         });
         expect(kpiHosts.hostsHistogram).to.eql(expectedResult.hostsHistogram);
         expect(kpiHosts.hosts).to.eql(expectedResult.hosts);
-      });
-
-      it('Make sure that we get KpiAuthentications data', async () => {
-        const body = await bsearch.send<HostsKpiAuthenticationsStrategyResponse>({
-          supertest,
-          options: {
-            factoryQueryType: HostsKpiQueries.kpiAuthentications,
-            timerange: {
-              interval: '12h',
-              to: TO,
-              from: FROM,
-            },
-            defaultIndex: ['auditbeat-*'],
-            docValueFields: [],
-            inspect: false,
-          },
-          strategy: 'securitySolutionSearchStrategy',
-        });
-        expect(body.authenticationsSuccess).to.eql(expectedResult.authSuccess);
-        expect(body.authenticationsSuccessHistogram).to.eql(expectedResult.authSuccessHistogram);
-        expect(body.authenticationsFailure).to.eql(expectedResult.authFailure);
-        expect(body.authenticationsFailureHistogram).to.eql(expectedResult.authFailureHistogram);
       });
 
       it('Make sure that we get KpiUniqueIps data', async () => {

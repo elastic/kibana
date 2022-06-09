@@ -15,9 +15,9 @@ import { inputsModel } from '../../../../common/store';
 import { createFilter } from '../../../../common/containers/helpers';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
-  HostsKpiQueries,
-  HostsKpiAuthenticationsRequestOptions,
-  HostsKpiAuthenticationsStrategyResponse,
+  UsersKpiAuthenticationsRequestOptions,
+  UsersKpiAuthenticationsStrategyResponse,
+  UsersQueries,
 } from '../../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../../common/typed_json';
 
@@ -25,17 +25,17 @@ import * as i18n from './translations';
 import { getInspectResponse } from '../../../../helpers';
 import { InspectResponse } from '../../../../types';
 
-export const ID = 'hostsKpiAuthenticationsQuery';
+export const ID = 'usersKpiAuthenticationsQuery';
 
-export interface HostsKpiAuthenticationsArgs
-  extends Omit<HostsKpiAuthenticationsStrategyResponse, 'rawResponse'> {
+export interface UsersKpiAuthenticationsArgs
+  extends Omit<UsersKpiAuthenticationsStrategyResponse, 'rawResponse'> {
   id: string;
   inspect: InspectResponse;
   isInspected: boolean;
   refetch: inputsModel.Refetch;
 }
 
-interface UseHostsKpiAuthentications {
+interface UseUsersKpiAuthentications {
   filterQuery?: ESTermQuery | string;
   endDate: string;
   indexNames: string[];
@@ -43,23 +43,23 @@ interface UseHostsKpiAuthentications {
   startDate: string;
 }
 
-export const useHostsKpiAuthentications = ({
+export const useUsersKpiAuthentications = ({
   filterQuery,
   endDate,
   indexNames,
   skip = false,
   startDate,
-}: UseHostsKpiAuthentications): [boolean, HostsKpiAuthenticationsArgs] => {
+}: UseUsersKpiAuthentications): [boolean, UsersKpiAuthenticationsArgs] => {
   const { data } = useKibana().services;
   const refetch = useRef<inputsModel.Refetch>(noop);
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
-  const [hostsKpiAuthenticationsRequest, setHostsKpiAuthenticationsRequest] =
-    useState<HostsKpiAuthenticationsRequestOptions | null>(null);
+  const [usersKpiAuthenticationsRequest, setUsersKpiAuthenticationsRequest] =
+    useState<UsersKpiAuthenticationsRequestOptions | null>(null);
 
-  const [hostsKpiAuthenticationsResponse, setHostsKpiAuthenticationsResponse] =
-    useState<HostsKpiAuthenticationsArgs>({
+  const [usersKpiAuthenticationsResponse, setUsersKpiAuthenticationsResponse] =
+    useState<UsersKpiAuthenticationsArgs>({
       authenticationsSuccess: 0,
       authenticationsSuccessHistogram: [],
       authenticationsFailure: 0,
@@ -74,8 +74,8 @@ export const useHostsKpiAuthentications = ({
     });
   const { addError, addWarning } = useAppToasts();
 
-  const hostsKpiAuthenticationsSearch = useCallback(
-    (request: HostsKpiAuthenticationsRequestOptions | null) => {
+  const usersKpiAuthenticationsSearch = useCallback(
+    (request: UsersKpiAuthenticationsRequestOptions | null) => {
       if (request == null || skip) {
         return;
       }
@@ -85,7 +85,7 @@ export const useHostsKpiAuthentications = ({
         setLoading(true);
 
         searchSubscription$.current = data.search
-          .search<HostsKpiAuthenticationsRequestOptions, HostsKpiAuthenticationsStrategyResponse>(
+          .search<UsersKpiAuthenticationsRequestOptions, UsersKpiAuthenticationsStrategyResponse>(
             request,
             {
               strategy: 'securitySolutionSearchStrategy',
@@ -96,7 +96,7 @@ export const useHostsKpiAuthentications = ({
             next: (response) => {
               if (!response.isPartial && !response.isRunning) {
                 setLoading(false);
-                setHostsKpiAuthenticationsResponse((prevResponse) => ({
+                setUsersKpiAuthenticationsResponse((prevResponse) => ({
                   ...prevResponse,
                   authenticationsSuccess: response.authenticationsSuccess,
                   authenticationsSuccessHistogram: response.authenticationsSuccessHistogram,
@@ -108,14 +108,14 @@ export const useHostsKpiAuthentications = ({
                 searchSubscription$.current.unsubscribe();
               } else if (response.isPartial && !response.isRunning) {
                 setLoading(false);
-                addWarning(i18n.ERROR_HOSTS_KPI_AUTHENTICATIONS);
+                addWarning(i18n.ERROR_USERS_KPI_AUTHENTICATIONS);
                 searchSubscription$.current.unsubscribe();
               }
             },
             error: (msg) => {
               setLoading(false);
               addError(msg, {
-                title: i18n.FAIL_HOSTS_KPI_AUTHENTICATIONS,
+                title: i18n.FAIL_USERS_KPI_AUTHENTICATIONS,
               });
               searchSubscription$.current.unsubscribe();
             },
@@ -130,11 +130,11 @@ export const useHostsKpiAuthentications = ({
   );
 
   useEffect(() => {
-    setHostsKpiAuthenticationsRequest((prevRequest) => {
+    setUsersKpiAuthenticationsRequest((prevRequest) => {
       const myRequest = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
-        factoryQueryType: HostsKpiQueries.kpiAuthentications,
+        factoryQueryType: UsersQueries.kpiAuthentications,
         filterQuery: createFilter(filterQuery),
         timerange: {
           interval: '12h',
@@ -150,12 +150,12 @@ export const useHostsKpiAuthentications = ({
   }, [indexNames, endDate, filterQuery, startDate]);
 
   useEffect(() => {
-    hostsKpiAuthenticationsSearch(hostsKpiAuthenticationsRequest);
+    usersKpiAuthenticationsSearch(usersKpiAuthenticationsRequest);
     return () => {
       searchSubscription$.current.unsubscribe();
       abortCtrl.current.abort();
     };
-  }, [hostsKpiAuthenticationsRequest, hostsKpiAuthenticationsSearch]);
+  }, [usersKpiAuthenticationsRequest, usersKpiAuthenticationsSearch]);
 
   useEffect(() => {
     if (skip) {
@@ -165,5 +165,5 @@ export const useHostsKpiAuthentications = ({
     }
   }, [skip]);
 
-  return [loading, hostsKpiAuthenticationsResponse];
+  return [loading, usersKpiAuthenticationsResponse];
 };

@@ -25,8 +25,8 @@ import {
 import { LensAttributes } from '../visualization_actions/types';
 import { authenticationLensAttributes } from '../visualization_actions/lens_attributes/common/authentication';
 
-export const getHostDetailsAuthenticationColumns = (usersEnabled: boolean): AuthTableColumns => [
-  getUserColumn(usersEnabled),
+export const getHostDetailsAuthenticationColumns = (): AuthTableColumns => [
+  USER_COLUMN,
   SUCCESS_COLUMN,
   FAILURES_COLUMN,
   LAST_SUCCESSFUL_TIME_COLUMN,
@@ -35,8 +35,8 @@ export const getHostDetailsAuthenticationColumns = (usersEnabled: boolean): Auth
   LAST_FAILED_SOURCE_COLUMN,
 ];
 
-export const getHostsPageAuthenticationColumns = (usersEnabled: boolean): AuthTableColumns => [
-  getUserColumn(usersEnabled),
+export const getHostsPageAuthenticationColumns = (): AuthTableColumns => [
+  USER_COLUMN,
   SUCCESS_COLUMN,
   FAILURES_COLUMN,
   LAST_SUCCESSFUL_TIME_COLUMN,
@@ -48,7 +48,7 @@ export const getHostsPageAuthenticationColumns = (usersEnabled: boolean): AuthTa
 ];
 
 export const getUsersPageAuthenticationColumns = (): AuthTableColumns =>
-  getHostsPageAuthenticationColumns(true);
+  getHostsPageAuthenticationColumns();
 
 export const getUserDetailsAuthenticationColumns = (): AuthTableColumns => [
   HOST_COLUMN,
@@ -157,9 +157,7 @@ const LAST_FAILED_DESTINATION_COLUMN: Columns<AuthenticationsEdges, Authenticati
     }),
 };
 
-const getUserColumn = (
-  usersEnabled: boolean
-): Columns<AuthenticationsEdges, AuthenticationsEdges> => ({
+const USER_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
   name: i18n.USER,
   truncateText: false,
   mobileOptions: { show: true },
@@ -170,9 +168,9 @@ const getUserColumn = (
       isAggregatable: true,
       fieldType: 'keyword',
       idPrefix: `authentications-table-${node._id}-userName`,
-      render: (item) => (usersEnabled ? <UserDetailsLink userName={item} /> : <>{item}</>),
+      render: (item) => <UserDetailsLink userName={item} />,
     }),
-});
+};
 
 const HOST_COLUMN: Columns<AuthenticationsEdges, AuthenticationsEdges> = {
   name: i18n.HOST,

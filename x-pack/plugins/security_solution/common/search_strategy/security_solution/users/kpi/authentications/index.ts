@@ -7,19 +7,18 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { Inspect, Maybe } from '../../../../common';
-import { RequestBasicOptions } from '../../..';
-import { HostsKpiHistogramData } from '../common';
+import { KpiHistogramData, RequestBasicOptions } from '../../..';
 
-export interface HostsKpiAuthenticationsHistogramCount {
+export interface UsersKpiAuthenticationsHistogramCount {
   doc_count: number;
 }
 
-export type HostsKpiAuthenticationsRequestOptions = RequestBasicOptions;
+export type UsersKpiAuthenticationsRequestOptions = RequestBasicOptions;
 
-export interface HostsKpiAuthenticationsStrategyResponse extends IEsSearchResponse {
+export interface UsersKpiAuthenticationsStrategyResponse extends IEsSearchResponse {
   authenticationsSuccess: Maybe<number>;
-  authenticationsSuccessHistogram: Maybe<HostsKpiHistogramData[]>;
+  authenticationsSuccessHistogram: Maybe<KpiHistogramData[]>;
   authenticationsFailure: Maybe<number>;
-  authenticationsFailureHistogram: Maybe<HostsKpiHistogramData[]>;
+  authenticationsFailureHistogram: Maybe<KpiHistogramData[]>;
   inspect?: Maybe<Inspect>;
 }

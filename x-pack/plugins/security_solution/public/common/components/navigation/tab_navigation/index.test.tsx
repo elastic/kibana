@@ -56,7 +56,7 @@ describe('Table Navigation', () => {
   const mockProps: TabNavigationProps & RouteSpyState = {
     pageName: 'hosts',
     pathName: '/hosts',
-    detailName: undefined,
+    detailName: hostName,
     search: '',
     tabName: HostsTableType.authentications,
     navTabs: navTabsHostDetails({

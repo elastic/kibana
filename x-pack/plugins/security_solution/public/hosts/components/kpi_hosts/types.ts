@@ -19,8 +19,6 @@ export interface HostsKpiProps {
 }
 
 export enum HostsKpiChartColors {
-  authenticationsSuccess = '#54B399',
-  authenticationsFailure = '#E7664C',
   uniqueSourceIps = '#D36086',
   uniqueDestinationIps = '#9170B8',
   hosts = '#6092C0',
