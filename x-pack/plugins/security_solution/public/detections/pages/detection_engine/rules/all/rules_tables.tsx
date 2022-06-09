@@ -43,13 +43,14 @@ import { useBulkEditFormFlyout } from './bulk_actions/use_bulk_edit_form_flyout'
 import { BulkEditConfirmation } from './bulk_actions/bulk_edit_confirmation';
 import { BulkEditFlyout } from './bulk_actions/bulk_edit_flyout';
 import { useBulkActions } from './bulk_actions/use_bulk_actions';
+import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
+import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
 interface RulesTableProps {
   createPrePackagedRules: CreatePreBuiltRules | null;
   hasPermissions: boolean;
-  loading: boolean;
   loadingCreatePrePackagedRules: boolean;
   rulesCustomInstalled: number | null;
   rulesInstalled: number | null;
@@ -74,7 +75,6 @@ export const RulesTables = React.memo<RulesTableProps>(
   ({
     createPrePackagedRules,
     hasPermissions,
-    loading,
     loadingCreatePrePackagedRules,
     rulesCustomInstalled,
     rulesInstalled,
@@ -82,6 +82,7 @@ export const RulesTables = React.memo<RulesTableProps>(
     rulesNotUpdated,
     selectedTab,
   }) => {
+    const { startTransaction } = useStartTransaction();
     const tableRef = useRef<EuiBasicTable>(null);
     const rulesTableContext = useRulesTableContext();
 
@@ -198,10 +199,16 @@ export const RulesTables = React.memo<RulesTableProps>(
 
     const handleCreatePrePackagedRules = useCallback(async () => {
       if (createPrePackagedRules != null) {
+        startTransaction({ name: RULES_TABLE_ACTIONS.LOAD_PREBUILT });
         await createPrePackagedRules();
         await reFetchRules();
       }
-    }, [createPrePackagedRules, reFetchRules]);
+    }, [createPrePackagedRules, reFetchRules, startTransaction]);
+
+    const handleRefreshRules = useCallback(() => {
+      startTransaction({ name: RULES_TABLE_ACTIONS.REFRESH });
+      reFetchRules();
+    }, [reFetchRules, startTransaction]);
 
     const isSelectAllCalled = useRef(false);
 
@@ -349,7 +356,7 @@ export const RulesTables = React.memo<RulesTableProps>(
               paginationTotal={pagination.total ?? 0}
               numberSelectedItems={selectedItemsCount}
               onGetBulkItemsPopoverContent={getBulkItemsPopoverContent}
-              onRefresh={reFetchRules}
+              onRefresh={handleRefreshRules}
               isAutoRefreshOn={isRefreshOn}
               onRefreshSwitch={handleAutoRefreshSwitch}
               isAllSelected={isAllSelected}
