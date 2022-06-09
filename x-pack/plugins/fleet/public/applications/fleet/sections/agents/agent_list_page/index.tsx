@@ -554,7 +554,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
-        refreshAgents={() => Promise.all([fetchData(), refreshUpgrades()])}
+        refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) =>
+          Promise.all([fetchData({ refreshTags }), refreshUpgrades()])
+        }
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
       />
       <EuiSpacer size="m" />
