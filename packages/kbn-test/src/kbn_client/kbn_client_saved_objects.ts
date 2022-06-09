@@ -223,18 +223,31 @@ export class KbnClientSavedObjects {
   public async cleanStandardList(options?: { space?: string }) {
     // add types here
     const types = [
-      'search',
+      'url',
       'index-pattern',
+      'action',
+      'query',
+      'alert',
+      'graph-workspace',
+      'tag',
       'visualization',
+      'canvas-element',
+      'canvas-workpad',
       'dashboard',
+      'search',
       'lens',
       'map',
-      'graph-workspace',
-      'query',
-      'tag',
-      'url',
-      'canvas-workpad',
+      'cases',
+      'uptime-dynamic-settings',
+      'osquery-saved-query',
+      'osquery-pack',
+      'infrastructure-ui-source',
+      'metrics-explorer-view',
+      'inventory-view',
+      'infrastructure-monitoring-log-view',
+      'apm-indices',
     ];
+
     const newOptions = { types, space: options?.space };
     await this.clean(newOptions);
   }
