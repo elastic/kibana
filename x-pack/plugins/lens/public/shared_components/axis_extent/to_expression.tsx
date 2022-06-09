@@ -11,7 +11,6 @@ import { UnifiedAxisExtentConfig } from './types';
 // TODO: import it from the expression config directly?
 const CHART_TO_FN_NAME = {
   xy: 'axisExtentConfig',
-  heatmap: 'heatmap_axis_extent',
 } as const;
 
 export const axisExtentConfigToExpression = (

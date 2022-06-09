@@ -216,9 +216,7 @@ Object {
               Object {
                 "arguments": Object {
                   "lowerBound": Array [],
-                  "mode": Array [
-                    "full",
-                  ],
+                  "mode": Array [],
                   "upperBound": Array [],
                 },
                 "function": "axisExtentConfig",
@@ -237,9 +235,7 @@ Object {
               Object {
                 "arguments": Object {
                   "lowerBound": Array [],
-                  "mode": Array [
-                    "full",
-                  ],
+                  "mode": Array [],
                   "upperBound": Array [],
                 },
                 "function": "axisExtentConfig",
