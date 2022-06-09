@@ -7,7 +7,7 @@
 
 import React, { FC, useMemo } from 'react';
 
-import { EuiButtonGroup } from '@elastic/eui';
+import { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -30,7 +30,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({
   const locator = useMlLocator()!;
   const navigateToPath = useNavigateToPath();
 
-  const toggleButtonsIcons = useMemo(
+  const toggleButtonsIcons = useMemo<EuiButtonGroupProps['options']>(
     () => [
       {
         id: 'timeseriesexplorer',

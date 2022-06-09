@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { createContext, FC, useCallback, useMemo, useReducer } from 'react';
-import { EuiLoadingContent, EuiPageContentBody } from '@elastic/eui';
+import React, { createContext, FC, useMemo, useState } from 'react';
+import { EuiPageContentBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Redirect, Route, Switch } from 'react-router-dom';
 import type { AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { createPortalNode, PortalNode } from 'react-reverse-portal';
+import { MlPageHeaderRenderer } from '../page_header/page_header';
 import { useSideNavItems } from './side_nav';
 import * as routes from '../../routing/routes';
 import { MlPageWrapper } from '../../routing/ml_page_wrapper';
@@ -21,33 +23,14 @@ import { useActiveRoute } from '../../routing/use_active_route';
 import { useDocTitle } from '../../routing/use_doc_title';
 
 export const MlPageControlsContext = createContext<{
-  setPageTitle: (v?: React.ReactNode | undefined) => void;
+  headerPortal: PortalNode;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
-}>({ setPageTitle: () => {}, setHeaderActionMenu: () => {} });
-
-const ML_PAGE_ACTION = {
-  SET_HEADER: 'setPageHeader',
-};
-
-interface SetHeaderAction {
-  type: typeof ML_PAGE_ACTION.SET_HEADER;
-  payload: React.ReactNode;
-}
-
-type PageAction = SetHeaderAction;
-
-interface MlPageUIState {
-  pageHeader?: React.ReactNode;
-}
-
-function pageStateReducer(state: MlPageUIState, action: PageAction): MlPageUIState {
-  switch (action.type) {
-    case ML_PAGE_ACTION.SET_HEADER:
-      return { ...state, pageHeader: action.payload };
-  }
-
-  return state;
-}
+  setIsHeaderMounted: (v: boolean) => void;
+}>({
+  setHeaderActionMenu: () => {},
+  headerPortal: createPortalNode(),
+  setIsHeaderMounted: () => {},
+});
 
 /**
  * Main page component of the ML App
@@ -61,14 +44,8 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
     },
   } = useMlKibana();
 
-  const [pageState, dispatch] = useReducer<typeof pageStateReducer>(pageStateReducer, {});
-
-  const setPageTitle = useCallback(
-    (payload) => {
-      dispatch({ type: ML_PAGE_ACTION.SET_HEADER, payload });
-    },
-    [dispatch]
-  );
+  const headerPortalNode = useMemo(() => createPortalNode(), []);
+  const [isHeaderMounted, setIsHeaderMounted] = useState(false);
 
   const routeList = useMemo(
     () =>
@@ -104,7 +81,9 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         items: useSideNavItems(activeRoute),
       }}
       pageHeader={{
-        pageTitle: pageState.pageHeader ?? <EuiLoadingContent lines={1} />,
+        pageTitle: (
+          <MlPageHeaderRenderer portal={headerPortalNode} isHeaderMounted={isHeaderMounted} />
+        ),
         rightSideItems,
         restrictWidth: false,
       }}
@@ -112,19 +91,25 @@ export const MlPage: FC<{ pageDeps: PageDependencies }> = React.memo(({ pageDeps
         'data-test-subj': activeRoute?.['data-test-subj'],
       }}
     >
-      <CommonPageWrapper setPageTitle={setPageTitle} pageDeps={pageDeps} routeList={routeList} />
+      <CommonPageWrapper
+        headerPortal={headerPortalNode}
+        setIsHeaderMounted={setIsHeaderMounted}
+        pageDeps={pageDeps}
+        routeList={routeList}
+      />
     </KibanaPageTemplate>
   );
 });
 
 interface CommonPageWrapperProps {
-  setPageTitle: (title?: React.ReactNode | undefined) => void;
+  setIsHeaderMounted: (v: boolean) => void;
   pageDeps: PageDependencies;
   routeList: MlRoute[];
+  headerPortal: PortalNode;
 }
 
 const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(
-  ({ setPageTitle, pageDeps, routeList }) => {
+  ({ pageDeps, routeList, headerPortal, setIsHeaderMounted }) => {
     const {
       services: { application },
     } = useMlKibana();
@@ -134,7 +119,11 @@ const CommonPageWrapper: FC<CommonPageWrapperProps> = React.memo(
        * avoiding full page reload **/
       <RedirectAppLinks application={application}>
         <MlPageControlsContext.Provider
-          value={{ setPageTitle, setHeaderActionMenu: pageDeps.setHeaderActionMenu }}
+          value={{
+            setHeaderActionMenu: pageDeps.setHeaderActionMenu,
+            headerPortal,
+            setIsHeaderMounted,
+          }}
         >
           <EuiPageContentBody restrictWidth={false}>
             <Switch>
