@@ -88,6 +88,7 @@ export class CasesUiPlugin
     return {
       api: createClientAPI({ http: core.http }),
       ui: {
+        // defines the methods allowed to be used by other plugins
         getCases: getCasesLazy,
         getCasesContext: getCasesContextLazy,
         getRecentCases: getRecentCasesLazy,

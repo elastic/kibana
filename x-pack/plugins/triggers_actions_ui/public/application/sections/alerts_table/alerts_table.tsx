@@ -173,7 +173,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       props.alertsTableConfiguration,
     ]
   );
-
+  console.log('drawing an alerts table');
   return (
     <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
       {flyoutAlertIndex > -1 && (

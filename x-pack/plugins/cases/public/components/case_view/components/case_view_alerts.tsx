@@ -34,14 +34,15 @@ export const CaseViewAlerts = ({ caseData }: CaseViewAlertsProps) => {
     [caseData.comments]
   );
 
-  const { isLoading: isLoadingAlertFeatureIds, alertFeatureIds } =
-    useGetFeatureIds(alertRegistrationContexts);
+  const status = useGetFeatureIds(alertRegistrationContexts);
+  console.log(status);
+  const { isLoading: isLoadingAlertFeatureIds, alertFeatureIds } = status;
 
   const alertStateProps = {
     alertsTableConfigurationRegistry: triggersActionsUi.alertsTableConfigurationRegistry,
     configurationId: caseData.owner,
     id: `case-details-alerts-${caseData.owner}`,
-    flyoutState: alertFeatureIds.includes('siem')
+    flyoutState: alertFeatureIds.includes('siem') // what is siem?
       ? AlertsTableFlyoutState.internal
       : AlertsTableFlyoutState.external,
     featureIds: alertFeatureIds,
