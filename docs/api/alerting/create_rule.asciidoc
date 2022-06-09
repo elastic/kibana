@@ -16,14 +16,12 @@ Create {kib} rules.
 
 === {api-prereq-title}
 
-You must have `all` privileges for the *Management* > *Stack Rules*,
-*{observability}* > *APM and User Experience*, *Logs*, *Metrics*, or
-*Synthetics and Uptime*, *Analytics* > *{ml-app}*, or *Security* >
-*Security* features in the
-<<kibana-feature-privileges,{kib} feature privileges>>, depending on the
-`consumer` of the rule you're creating. If the rule has `actions`, you must also
-have `read` privileges for the *Management* > *Actions and Connectors* feature.
-
+You must have `all` privileges for the *Management* > *Stack Rules* feature or
+for the *Discover*, *{ml-app}*, *{observability}*, or *Security* features,
+depending on the `consumer` of the rule you're creating. If the rule has
+`actions`, you must also have `read` privileges for the
+*Management* > *Actions and Connectors* feature. For more details, refer to
+<<kibana-feature-privileges>>.
 
 === {api-description-title}
 
@@ -82,7 +80,9 @@ There are plans to support multiple other schedule formats in the near future.
   (Optional, boolean) Indicates if you want to run the rule on an interval basis after it is created.
 
 `consumer`::
-  (Required, string) The name of the application that owns the rule. This name has to match the Kibana Feature name, as that dictates the required RBAC privileges.
+(Required, string) The name of the application or feature that owns the rule.
+For example: `alerts`, `apm`, `discover`, `infrastructure`, `logs`, `metrics`,
+`ml`, `monitoring`, `securitySolution`, `siem`, `stackAlerts`, or `uptime`.
 
 `params`::
   (Required, object) The parameters to pass to the rule type executor `params` value. This will also validate against the rule type params validator, if defined.
