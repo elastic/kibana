@@ -25,7 +25,7 @@ import {
   ENTRY_LEADER_ENTITY_ID,
 } from '../../../common/constants';
 import { KubernetesWidget } from '../kubernetes_widget';
-import { PercentCompareWidget } from '../percent_compare_widget';
+import { PercentWidget } from '../percent_widget';
 import { KubernetesSecurityDeps } from '../../types';
 import { useStyles } from './styles';
 
@@ -83,7 +83,7 @@ const KubernetesSecurityRoutesComponent = ({ filter, indexPattern, globalFilter 
         <EuiSpacer size="m" />
         <EuiFlexGroup css={styles.percentageWidgets}>
           <EuiFlexItem>
-            <PercentCompareWidget
+            <PercentWidget
               title={
                 <>
                   <EuiText size="xs" css={styles.percentageChartTitle}>
@@ -115,7 +115,7 @@ const KubernetesSecurityRoutesComponent = ({ filter, indexPattern, globalFilter 
             />
           </EuiFlexItem>
           <EuiFlexItem>
-            <PercentCompareWidget
+            <PercentWidget
               title={
                 <>
                   <EuiText size="xs" css={styles.percentageChartTitle}>

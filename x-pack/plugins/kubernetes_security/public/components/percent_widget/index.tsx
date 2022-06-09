@@ -19,7 +19,7 @@ export interface PercenWidgetDataValueMap {
   color: string;
 }
 
-export interface PercentCompareWidgetDeps {
+export interface PercentWidgetDeps {
   title: ReactNode;
   dataValueMap: Record<string, PercenWidgetDataValueMap>;
   widgetKey: string;
@@ -34,7 +34,7 @@ interface FilterButtons {
   filterOutButtons: Array<ReactNode>;
 }
 
-export const PercentCompareWidget = ({ title, dataValueMap, widgetKey, indexPattern, globalFilter, groupedBy, countBy }: PercentCompareWidgetDeps) => {
+export const PercentWidget = ({ title, dataValueMap, widgetKey, indexPattern, globalFilter, groupedBy, countBy }: PercentCompareWidgetDeps) => {
   const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
   const styles = useStyles();
 
@@ -95,7 +95,7 @@ export const PercentCompareWidget = ({ title, dataValueMap, widgetKey, indexPatt
           const value = data?.[groupedByValue] || 0;
           return (
             <EuiFlexItem
-              key={`percentage-compare-widget--${dataValueMap[groupedByValue].name}`}
+              key={`percentage-widget--${dataValueMap[groupedByValue].name}`}
               onMouseEnter={() => setHoveredFilter(idx)}
               onMouseLeave={() => setHoveredFilter(null)}
             >
