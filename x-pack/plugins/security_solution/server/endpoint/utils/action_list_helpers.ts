@@ -11,10 +11,8 @@ import type { SearchRequest } from '@kbn/data-plugin/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { TransportResult } from '@elastic/elasticsearch';
 
-import { ENDPOINT_ACTIONS_DS, ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
-import { EndpointError } from '../../../common/endpoint/errors';
+import { ENDPOINT_ACTIONS_INDEX } from '../../../common/endpoint/constants';
 import type {
-  EndpointAction,
   LogsEndpointAction,
   ActionListApiResponse,
   EndpointActionResponse,
