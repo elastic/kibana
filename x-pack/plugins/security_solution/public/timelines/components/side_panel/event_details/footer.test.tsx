@@ -74,7 +74,11 @@ jest.mock(
 jest.mock('../../../../cases/components/use_insert_timeline');
 
 jest.mock('../../../../common/utils/endpoint_alert_check', () => {
+  const realEndpointAlertCheckUtils = jest.requireActual(
+    '../../../../common/utils/endpoint_alert_check'
+  );
   return {
+    isTimelineEventItemAnAlert: realEndpointAlertCheckUtils.isTimelineEventItemAnAlert,
     isAlertFromEndpointAlert: jest.fn().mockReturnValue(true),
     isAlertFromEndpointEvent: jest.fn().mockReturnValue(true),
   };
