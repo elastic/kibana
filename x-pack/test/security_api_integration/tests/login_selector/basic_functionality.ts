@@ -64,6 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
       'lookup_realm',
       'authentication_provider',
       'authentication_type',
+      'elastic_cloud_user',
     ]);
 
     expect(apiResponse.body.username).to.be(username);
