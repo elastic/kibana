@@ -20,7 +20,7 @@ export const ElasticAgentCard = (props: ElasticAgentCardProps) => {
   const { navigateToUrl, currentAppId$ } = useApplication();
   const currentAppId = useObservable(currentAppId$);
 
-  const { href: srcHref, category } = props;
+  const { href: srcHref, category, description } = props;
 
   const href = useMemo(() => {
     if (srcHref) {
@@ -39,7 +39,7 @@ export const ElasticAgentCard = (props: ElasticAgentCardProps) => {
 
   return (
     <RedirectAppLinks {...{ currentAppId, navigateToUrl }}>
-      <ElasticAgentCardComponent {...{ ...props, href, canAccessFleet }} />
+      <ElasticAgentCardComponent {...{ ...props, href, canAccessFleet, description }} />
     </RedirectAppLinks>
   );
 };

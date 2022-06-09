@@ -62,7 +62,7 @@ const createTitlesNoDupesValidator = (
     if (namesNotAllowed.includes(value)) {
       return {
         message: i18n.translate('indexPatternEditor.dataViewExists.ValidationErrorMessage', {
-          defaultMessage: 'A data view with this title already exists.',
+          defaultMessage: 'An index pattern with this name already exists.',
         }),
       };
     }
@@ -186,7 +186,7 @@ export const TitleField = ({
       componentProps={{
         euiFieldProps: {
           'aria-label': i18n.translate('indexPatternEditor.form.titleAriaLabel', {
-            defaultMessage: 'Title field',
+            defaultMessage: 'Index pattern field',
           }),
         },
       }}
@@ -222,7 +222,7 @@ export const TitleField = ({
               }}
               isLoading={field.isValidating}
               fullWidth
-              data-test-subj="createIndexPatternNameInput"
+              data-test-subj="createIndexPatternTitleInput"
             />
           </EuiFormRow>
         );
