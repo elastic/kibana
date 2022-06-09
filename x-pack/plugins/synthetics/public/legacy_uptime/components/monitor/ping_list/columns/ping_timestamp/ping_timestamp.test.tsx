@@ -48,7 +48,11 @@ describe('Ping Timestamp component', () => {
       .spyOn(observabilityPublic, 'useFetcher')
       .mockReturnValue({ status: FETCH_STATUS.SUCCESS, data: null, refetch: () => null });
     const { getByTestId } = render(
-      <PingTimestamp checkGroup={checkGroup} label={getShortTimeStamp(moment(timestamp))} />
+      <PingTimestamp
+        checkGroup={checkGroup}
+        label={getShortTimeStamp(moment(timestamp))}
+        allStepsLoaded={true}
+      />
     );
     expect(getByTestId('pingTimestampNoImageAvailable')).toBeInTheDocument();
   });
