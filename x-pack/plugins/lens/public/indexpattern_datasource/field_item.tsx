@@ -45,7 +45,7 @@ import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { DragDrop, DragDropIdentifier } from '../drag_drop';
 import { DatasourceDataPanelProps, DataType } from '../types';
-import { BucketedAggregation, FieldStatsResponse } from '../../common';
+import { BucketedAggregation, DOCUMENT_FIELD_NAME, FieldStatsResponse } from '../../common';
 import { IndexPattern, IndexPatternField, DraggedField } from './types';
 import { LensFieldIcon } from './lens_field_icon';
 import { trackUiEvent } from '../lens_ui_telemetry';
@@ -334,7 +334,7 @@ function FieldPanelHeader({
         dropOntoWorkspace={dropOntoWorkspace}
         field={draggableField}
       />
-      {editField && (
+      {editField && field.name !== DOCUMENT_FIELD_NAME && (
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('xpack.lens.indexPattern.editFieldLabel', {
