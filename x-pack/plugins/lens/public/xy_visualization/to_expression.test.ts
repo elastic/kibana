@@ -16,6 +16,7 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
 import { defaultReferenceLineColor } from './color_assignment';
 import { themeServiceMock } from '@kbn/core/public/mocks';
+import { LegendSize } from '@kbn/visualizations-plugin/common';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({
@@ -71,7 +72,7 @@ describe('#toExpression', () => {
     expect(
       xyVisualization.toExpression(
         {
-          legend: { position: Position.Bottom, isVisible: true },
+          legend: { position: Position.Left, isVisible: true },
           valueLabels: 'hide',
           preferredSeriesType: 'bar',
           fittingFunction: 'Carry',
@@ -365,6 +366,94 @@ describe('#toExpression', () => {
       datasourceExpressionsByLayers
     ) as Ast;
     expect(expression.chain[0].arguments.valueLabels[0] as Ast).toEqual('show');
+  });
+
+  it('should set legend size for outside legend', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: { position: Position.Left, isVisible: true, legendSize: LegendSize.SMALL },
+        valueLabels: 'show',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+    expect(
+      (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize[0]
+    ).toEqual('small');
+  });
+
+  it('should use auto legend size for bottom/top legend', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: {
+          position: Position.Bottom,
+          isVisible: true,
+          isInside: false,
+          legendSize: LegendSize.SMALL,
+        },
+        valueLabels: 'show',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+    expect((expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize[0]).toBe(
+      LegendSize.AUTO
+    );
+  });
+
+  it('should ignore legend size for inside legend', () => {
+    const expression = xyVisualization.toExpression(
+      {
+        legend: {
+          position: Position.Left,
+          isVisible: true,
+          isInside: true,
+          legendSize: LegendSize.SMALL,
+        },
+        valueLabels: 'show',
+        preferredSeriesType: 'bar',
+        layers: [
+          {
+            layerId: 'first',
+            layerType: layerTypes.DATA,
+            seriesType: 'area',
+            splitAccessor: 'd',
+            xAccessor: 'a',
+            accessors: ['b', 'c'],
+          },
+        ],
+      },
+      frame.datasourceLayers,
+      undefined,
+      datasourceExpressionsByLayers
+    ) as Ast;
+    expect(
+      (expression.chain[0].arguments.legend[0] as Ast).chain[0].arguments.legendSize[0]
+    ).toBeUndefined();
   });
 
   it('should compute the correct series color fallback based on the layer type', () => {

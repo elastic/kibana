@@ -119,7 +119,7 @@ describe('useSecuritySolutionNavigation', () => {
       { wrapper: TestProviders }
     );
 
-    expect(result?.current?.items?.[2].items?.[2].id).toEqual(SecurityPageName.users);
+    expect(result?.current?.items?.[3].items?.[2].id).toEqual(SecurityPageName.users);
   });
 
   it('should omit host isolation exceptions if hook reports false', () => {
@@ -150,7 +150,7 @@ describe('useSecuritySolutionNavigation', () => {
           { wrapper: TestProviders }
         );
 
-        const caseNavItem = (result.current?.items || [])[3].items?.find(
+        const caseNavItem = (result.current?.items || [])[4].items?.find(
           (item) => item['data-test-subj'] === 'navigation-cases'
         );
         expect(caseNavItem).toMatchInlineSnapshot(`
