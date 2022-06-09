@@ -1,29 +1,34 @@
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
     types:
       - closed
+      - labeled
 
 jobs:
-  gaps:
-    name: Fix Version Label Gaps
-    # This fix also runs as part of the backport action (because backport depends on the labels)
-    # So we only need to trigger it for merged PRs that also won't be auto-backported
+  on-merge:
+    name: 'Label and Backport'
+    runs-on: ubuntu-latest
     if: |
       github.event.pull_request.merged == true
-      && !contains(github.event.pull_request.labels.*.name, 'auto-backport')
-      && !(
+      && (
         contains(github.event.pull_request.labels.*.name, 'backport:prev-minor')
         || contains(github.event.pull_request.labels.*.name, 'backport:prev-major')
         || contains(github.event.pull_request.labels.*.name, 'backport:all-open')
         || contains(github.event.pull_request.labels.*.name, 'backport:auto-version')
       )
-      && !(
-        (github.event.action == 'labeled' && github.event.label.name == 'auto-backport')
+      && (
+        (
+          github.event.action == 'labeled' && (
+            github.event.label.name == 'backport:prev-minor'
+            || github.event.label.name == 'backport:prev-major'
+            || github.event.label.name == 'backport:all-open'
+            || github.event.label.name == 'backport:auto-version'
+          )
+        )
         || (github.event.action == 'closed')
       )
-    runs-on: ubuntu-latest
     steps:
       - name: Checkout Actions
         uses: actions/checkout@v2
@@ -35,7 +40,7 @@ jobs:
       - name: Install Actions
         run: npm install --production --prefix ./actions
 
-      - name: Run Fix Gaps
-        uses: ./actions/fix-version-gaps
+      - name: Run On-Merge
+        uses: ./actions/on-merge
         with:
           github_token: ${{secrets.KIBANAMACHINE_TOKEN}}
