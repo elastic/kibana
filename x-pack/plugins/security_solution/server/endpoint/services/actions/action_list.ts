@@ -6,9 +6,12 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EndpointError } from '../../../../common/endpoint/errors';
-import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
-import { wrapErrorIfNeeded } from '../../utils';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
+import type {
+  ActionDetails,
+  ActionListApiResponse,
+  EndpointActivityLogAction,
+} from '../../../../common/endpoint/types';
 
 import {
   getActions,
@@ -93,12 +96,13 @@ const getActionDetailsList = async ({
   startDate,
   userIds,
 }: GetActionDetailsListParam): Promise<ActionDetails[]> => {
-  let actions;
+  let actionRequests;
   let actionReqIds;
+  let actionResponses;
 
   try {
     // fetch actions with matching agent_ids if any
-    const { actionIds, actionRequests } = await getActions({
+    const { actionIds, actionRequests: _actionRequests } = await getActions({
       commands,
       esClient,
       elasticAgentIds,
@@ -108,53 +112,48 @@ const getActionDetailsList = async ({
       size,
       userIds,
     });
-    actions = actionRequests;
+    actionRequests = _actionRequests;
     actionReqIds = actionIds;
   } catch (error) {
-    const err = wrapErrorIfNeeded(error);
+    // all other errors
+    const err = new CustomHttpRequestError(
+      error.meta?.meta?.body?.error?.reason ?? 'Unknown error while fetching action requests',
+      error.meta?.meta?.statusCode ?? 500,
+      error
+    );
     logger.error(err);
     throw err;
   }
 
-  if (actions?.statusCode !== 200) {
-    let errorMessage;
-    let newError;
-    // not found or index not found error
-    if (actions?.statusCode === 404) {
-      // log the error
-      // return empty details array
-      const baseMessage = 'Action list not found';
-      errorMessage = elasticAgentIds
-        ? `${baseMessage} for agentIds ${elasticAgentIds}`
-        : baseMessage;
-      return [];
-    } else {
-      // all other errors
-      errorMessage = 'Error fetching action list';
-      newError = new EndpointError(
-        elasticAgentIds ? `${errorMessage}  for agentIds ${elasticAgentIds}` : errorMessage,
-        actions
-      );
-    }
-    logger.error(errorMessage);
-    throw newError;
-  }
+  // return empty details array
+  if (!actionRequests?.body?.hits?.hits) return [];
 
-  // categorize actions as fleet and endpoint actions
+  // format endpoint actions into { type, item } structure
   const categorizedActions = categorizeActionResults({
-    results: actions?.body?.hits?.hits,
-  });
+    results: actionRequests?.body?.hits?.hits,
+  }) as EndpointActivityLogAction[];
 
   // normalized actions with a flat structure to access relevant values
   const normalizedActionRequests: Array<ReturnType<typeof mapToNormalizedActionRequest>> =
     categorizedActions.map((action) => mapToNormalizedActionRequest(action.item.data));
 
-  // get all responses for given action Ids and agent Ids
-  const actionResponses = await getActionResponses({
-    actionIds: actionReqIds,
-    elasticAgentIds,
-    esClient,
-  });
+  try {
+    // get all responses for given action Ids and agent Ids
+    actionResponses = await getActionResponses({
+      actionIds: actionReqIds,
+      elasticAgentIds,
+      esClient,
+    });
+  } catch (error) {
+    // all other errors
+    const err = new CustomHttpRequestError(
+      error.meta?.meta?.body?.error?.reason ?? 'Unknown error while fetching action responses',
+      error.meta?.meta?.statusCode ?? 500,
+      error
+    );
+    logger.error(err);
+    throw err;
+  }
 
   // categorize responses as fleet and endpoint responses
   const categorizedResponses = categorizeResponseResults({
@@ -164,10 +163,8 @@ const getActionDetailsList = async ({
   // compute action details list for each action id
   const actionDetails: ActionDetails[] = normalizedActionRequests.map((action) => {
     // pick only those actions that match the current action id
-    const matchedActions = categorizedActions.filter((categorizedAction) =>
-      categorizedAction.type === 'action'
-        ? categorizedAction.item.data.EndpointActions.action_id === action.id
-        : categorizedAction.item.data.action_id === action.id
+    const matchedActions = categorizedActions.filter(
+      (categorizedAction) => categorizedAction.item.data.EndpointActions.action_id === action.id
     );
     // pick only those responses that match the current action id
     const matchedResponses = categorizedResponses.filter((categorizedResponse) =>

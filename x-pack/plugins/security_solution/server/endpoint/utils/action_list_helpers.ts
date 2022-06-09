@@ -54,10 +54,7 @@ export const getActions = async ({
   userIds,
 }: Omit<GetActionDetailsListParam, 'logger'>): Promise<{
   actionIds: string[];
-  actionRequests: TransportResult<
-    estypes.SearchResponse<EndpointAction | LogsEndpointAction>,
-    unknown
-  >;
+  actionRequests: TransportResult<estypes.SearchResponse<LogsEndpointAction>, unknown>;
 }> => {
   const additionalFilters = [];
   if (commands?.length) {
@@ -103,28 +100,22 @@ export const getActions = async ({
     },
   };
 
-  let actionRequests: TransportResult<
-    estypes.SearchResponse<EndpointAction | LogsEndpointAction>,
+  const actionRequests: TransportResult<
+    estypes.SearchResponse<LogsEndpointAction>,
     unknown
-  >;
-  try {
-    actionRequests = await esClient
-      .search<EndpointAction | LogsEndpointAction>(actionsSearchQuery, {
-        ...queryOptions,
-        meta: true,
-      })
-      .catch(catchAndWrapError);
+  > = await esClient
+    .search<LogsEndpointAction>(actionsSearchQuery, {
+      ...queryOptions,
+      meta: true,
+    })
+    .catch(catchAndWrapError);
 
-    const actionIds = actionRequests?.body?.hits?.hits?.map((e) => {
-      return e._index.includes(ENDPOINT_ACTIONS_DS)
-        ? (e._source as LogsEndpointAction).EndpointActions.action_id
-        : (e._source as EndpointAction).action_id;
-    });
+  // only one type of actions
+  const actionIds = actionRequests?.body?.hits?.hits.map((e) => {
+    return (e._source as LogsEndpointAction).EndpointActions.action_id;
+  });
 
-    return { actionIds, actionRequests };
-  } catch (error) {
-    throw new EndpointError(error.message, error);
-  }
+  return { actionIds, actionRequests };
 };
 
 export const getActionResponses = async ({
@@ -160,19 +151,14 @@ export const getActionResponses = async ({
     },
   };
 
-  let actionResponses: TransportResult<
+  const actionResponses: TransportResult<
     estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>,
     unknown
-  >;
-  try {
-    actionResponses = await esClient
-      .search<EndpointActionResponse | LogsEndpointActionResponse>(responsesSearchQuery, {
-        ...queryOptions,
-        meta: true,
-      })
-      .catch(catchAndWrapError);
-    return actionResponses;
-  } catch (error) {
-    throw new EndpointError(error.message, error);
-  }
+  > = await esClient
+    .search<EndpointActionResponse | LogsEndpointActionResponse>(responsesSearchQuery, {
+      ...queryOptions,
+      meta: true,
+    })
+    .catch(catchAndWrapError);
+  return actionResponses;
 };
