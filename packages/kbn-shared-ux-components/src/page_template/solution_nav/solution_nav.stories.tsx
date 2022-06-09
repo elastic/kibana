@@ -73,6 +73,10 @@ PureComponent.argTypes = {
     control: 'text',
     defaultValue: '',
   },
+  canBeCollapsed: {
+    control: 'boolean',
+    defaultValue: true,
+  },
 };
 
 PureComponent.parameters = {
