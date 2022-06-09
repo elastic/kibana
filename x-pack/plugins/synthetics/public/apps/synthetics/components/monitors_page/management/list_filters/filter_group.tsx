@@ -29,7 +29,7 @@ export const FilterGroup = () => {
 
   const { locations } = useSelector(selectServiceLocationsState);
 
-  const filters = [
+  const filters: FilterItem[] = [
     {
       label: TYPE_LABEL,
       field: 'monitorType',

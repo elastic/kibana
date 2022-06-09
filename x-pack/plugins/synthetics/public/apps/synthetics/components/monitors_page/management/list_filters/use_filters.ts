@@ -8,12 +8,38 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { useMemo } from 'react';
+import { ESSearchResponse } from '@kbn/core/types/elasticsearch';
 import { syntheticsMonitorType } from '../../../../../../../common/types/saved_objects';
+
+const aggs = {
+  types: {
+    terms: {
+      field: `${syntheticsMonitorType}.attributes.type.keyword`,
+      size: 10000,
+    },
+  },
+  tags: {
+    terms: {
+      field: `${syntheticsMonitorType}.attributes.tags`,
+      size: 10000,
+    },
+  },
+  locations: {
+    terms: {
+      field: `${syntheticsMonitorType}.attributes.locations.id`,
+      size: 10000,
+    },
+  },
+};
+
+const esParams = { aggs, index: '', query: {} };
+
+type AggsResponse = ESSearchResponse<unknown, typeof esParams>;
 
 export const useFilters = () => {
   const { savedObjects } = useKibana().services;
 
-  const { data } = useFetcher(() => {
+  const { data } = useFetcher(async () => {
     const aggs = {
       types: {
         terms: {
@@ -34,7 +60,7 @@ export const useFilters = () => {
         },
       },
     };
-    return savedObjects?.client.find<unknown, typeof aggs>({
+    return savedObjects?.client.find({
       type: syntheticsMonitorType,
       perPage: 0,
       aggs,
@@ -42,7 +68,7 @@ export const useFilters = () => {
   }, []);
 
   return useMemo(() => {
-    const { types, tags, locations } = data?.aggregations ?? {};
+    const { types, tags, locations } = (data?.aggregations as AggsResponse['aggregations']) ?? {};
     return {
       types: types?.buckets?.map(({ key }) => key) ?? [],
       tags: tags?.buckets?.map(({ key }) => key) ?? [],
