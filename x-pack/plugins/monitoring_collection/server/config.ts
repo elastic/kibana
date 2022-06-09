@@ -13,8 +13,14 @@ export const configSchema = schema.object({
     metrics: schema.object({
       otlp: schema.object({
         url: schema.maybe(schema.string()),
+        exportIntervalMillis: schema.number({ defaultValue: 10000 }),
       }),
-      exportIntervalMillis: schema.number({ defaultValue: 10000 }),
+      prometheus: schema.object({
+        enabled: schema.boolean({ defaultValue: false }),
+        host: schema.string({ defaultValue: 'localhost' }),
+        port: schema.number({ defaultValue: 9464 }),
+        endpoint: schema.string({ defaultValue: '/metrics' }),
+      }),
     }),
   }),
 });
