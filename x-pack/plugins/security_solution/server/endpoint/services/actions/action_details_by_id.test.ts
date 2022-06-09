@@ -9,7 +9,6 @@ import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
-  EndpointAction,
   EndpointActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
@@ -26,7 +25,7 @@ import {
 describe('When using `getActionDetailsById()', () => {
   let esClient: ElasticsearchClientMock;
   let endpointActionGenerator: EndpointActionGenerator;
-  let actionRequests: estypes.SearchResponse<EndpointAction | LogsEndpointAction>;
+  let actionRequests: estypes.SearchResponse<LogsEndpointAction>;
   let actionResponses: estypes.SearchResponse<EndpointActionResponse | LogsEndpointActionResponse>;
 
   beforeEach(() => {
@@ -150,7 +149,9 @@ describe('When using `getActionDetailsById()', () => {
   });
 
   it('should have `isExpired` of `true` if NOT complete and expiration is in the past', async () => {
-    (actionRequests.hits.hits[0]._source as EndpointAction).expiration = `2021-04-30T16:08:47.449Z`;
+    (
+      actionRequests.hits.hits[0]._source as LogsEndpointAction
+    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
     actionResponses.hits.hits.pop(); // remove the endpoint response
 
     await expect(getActionDetailsById(esClient, '123')).resolves.toEqual(
@@ -162,7 +163,9 @@ describe('When using `getActionDetailsById()', () => {
   });
 
   it('should have `isExpired` of `false` if complete and expiration is in the past', async () => {
-    (actionRequests.hits.hits[0]._source as EndpointAction).expiration = `2021-04-30T16:08:47.449Z`;
+    (
+      actionRequests.hits.hits[0]._source as LogsEndpointAction
+    ).EndpointActions.expiration = `2021-04-30T16:08:47.449Z`;
 
     await expect(getActionDetailsById(esClient, '123')).resolves.toEqual(
       expect.objectContaining({
