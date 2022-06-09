@@ -24,5 +24,5 @@ describe('When using PageOverlay component', () => {
 
   it.todo('should NOT call `onHide` when `hideOnUrlPathnameChange` is `false` and url changes');
 
-  it.todo('should add padding when `paddingSize` prop is defined');
+  it.todo('should add padding class names when `paddingSize` prop is defined');
 });

@@ -250,13 +250,13 @@ describe('When using ConsoleManager', () => {
       expect(renderResult.getByTestId('testRunningConsole')).toBeTruthy();
     });
 
-    it('should show `hide` button', async () => {
+    it('should show `Done` button', async () => {
       await render();
 
       expect(renderResult.getByTestId('consolePageOverlay-doneButton')).toBeTruthy();
     });
 
-    it('should hide the console popup', async () => {
+    it('should hide the console page overlay', async () => {
       await render();
       userEvent.click(renderResult.getByTestId('consolePageOverlay-doneButton'));
 

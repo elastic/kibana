@@ -23,15 +23,15 @@ import {
 } from './types';
 import { Console } from '../../console';
 
-interface ManagedConsole {
+interface ManagedConsole
+  extends Pick<
+    ConsoleRegistrationInterface,
+    'consoleProps' | 'PageTitleComponent' | 'PageBodyComponent' | 'ActionComponents'
+  > {
   client: RegisteredConsoleClient;
-  consoleProps: ConsoleRegistrationInterface['consoleProps'];
   console: JSX.Element; // actual console component
   isOpen: boolean;
   key: symbol;
-  TitleComponent: ConsoleRegistrationInterface['TitleComponent'];
-  BodyComponent: ConsoleRegistrationInterface['BodyComponent'];
-  ActionComponents: ConsoleRegistrationInterface['ActionComponents'];
 }
 
 type RunningConsoleStorage = Record<string, ManagedConsole>;
@@ -182,9 +182,9 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       const isThisConsoleVisible = isVisible.bind(null, id);
 
       const managedConsole: ManagedConsole = {
-        BodyComponent: undefined,
+        PageBodyComponent: undefined,
+        PageTitleComponent: undefined,
         ActionComponents: undefined,
-        TitleComponent: undefined,
         ...otherRegisterProps,
         client: {
           id,
@@ -283,13 +283,13 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
           }
           isHidden={!visibleConsole}
           pageTitle={
-            visibleConsole.TitleComponent && (
-              <visibleConsole.TitleComponent meta={visibleConsoleMeta} />
+            visibleConsole.PageTitleComponent && (
+              <visibleConsole.PageTitleComponent meta={visibleConsoleMeta} />
             )
           }
           body={
-            visibleConsole.BodyComponent && (
-              <visibleConsole.BodyComponent meta={visibleConsoleMeta} />
+            visibleConsole.PageBodyComponent && (
+              <visibleConsole.PageBodyComponent meta={visibleConsoleMeta} />
             )
           }
           actions={

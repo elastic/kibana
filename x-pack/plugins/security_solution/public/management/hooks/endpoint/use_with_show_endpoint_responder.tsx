@@ -43,7 +43,7 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
               prompt: `endpoint-${endpointMetadata.agent.version}`,
               TitleComponent: () => <>{endpointMetadata.host.name}</>,
             },
-            TitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
+            PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
             ActionComponents: [ActionLogButton],
           })
           .show();
