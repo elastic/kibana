@@ -18,6 +18,10 @@ import { getThroughputChartsForBackend } from './get_throughput_charts_for_backe
 import { getErrorRateChartsForBackend } from './get_error_rate_charts_for_backend';
 import { ConnectionStatsItemWithImpact } from '../../../common/connections';
 import { offsetRt } from '../../../common/comparison_rt';
+import {
+  BackendOperation,
+  getTopBackendOperations,
+} from './get_top_backend_operations';
 
 const topBackendsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/backends/top_backends',
@@ -423,6 +427,41 @@ const backendFailedTransactionRateChartsRoute = createApmServerRoute({
   },
 });
 
+const backendOperationsRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/backends/operations',
+  options: {
+    tags: ['access:apm'],
+  },
+  params: t.type({
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      kueryRt,
+      offsetRt,
+      t.type({ backendName: t.string }),
+    ]),
+  }),
+  handler: async (resources): Promise<{ operations: BackendOperation[] }> => {
+    const setup = await setupRequest(resources);
+
+    const {
+      query: { backendName, start, end, environment, kuery, offset },
+    } = resources.params;
+
+    const operations = await getTopBackendOperations({
+      setup,
+      backendName,
+      start,
+      end,
+      offset,
+      environment,
+      kuery,
+    });
+
+    return { operations };
+  },
+});
+
 export const backendsRouteRepository = {
   ...topBackendsRoute,
   ...upstreamServicesForBackendRoute,
@@ -430,4 +469,5 @@ export const backendsRouteRepository = {
   ...backendLatencyChartsRoute,
   ...backendThroughputChartsRoute,
   ...backendFailedTransactionRateChartsRoute,
+  ...backendOperationsRoute,
 };
