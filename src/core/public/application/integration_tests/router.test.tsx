@@ -10,7 +10,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { createMemoryHistory, History, createHashHistory } from 'history';
 
-import { themeServiceMock } from '../../theme/theme_service.mock';
+import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { AppRouter, AppNotFound } from '../ui';
 import { MockedMounterMap, MockedMounterTuple } from '../test_types';
 import { createRenderer, createAppMounter, getUnmounter } from './utils';
