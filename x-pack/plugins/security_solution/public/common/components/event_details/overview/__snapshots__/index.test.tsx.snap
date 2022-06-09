@@ -89,10 +89,10 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
         class="euiFlexItem"
       >
         <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 css-1nab1hq-euiPanel-grow-none-s-plain"
         >
           <div
-            class="euiText euiText--small"
+            class="euiText css-1vkrgyt-euiText-s"
           >
             Status
           </div>
@@ -186,10 +186,10 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
         class="euiFlexItem"
       >
         <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 css-1nab1hq-euiPanel-grow-none-s-plain"
         >
           <div
-            class="euiText euiText--small"
+            class="euiText css-1vkrgyt-euiText-s"
           >
             Risk Score
           </div>
@@ -262,10 +262,10 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
         class="euiFlexItem"
       >
         <div
-          class="euiPanel euiPanel--paddingSmall euiPanel--borderRadiusNone euiPanel--plain euiPanel--noShadow euiPanel--noBorder c1"
+          class="euiPanel euiPanel--plain euiPanel--paddingSmall c1 css-1nab1hq-euiPanel-grow-none-s-plain"
         >
           <div
-            class="euiText euiText--small"
+            class="euiText css-1vkrgyt-euiText-s"
           >
             Rule
           </div>

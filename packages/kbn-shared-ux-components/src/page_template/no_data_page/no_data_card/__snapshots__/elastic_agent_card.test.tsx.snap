@@ -3,7 +3,7 @@
 exports[`ElasticAgentCard renders 1`] = `
 <div>
   <div
-    class="euiPanel euiPanel--paddingLarge euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiPanel--isClickable euiCard euiCard--centerAligned euiCard--isClickable css-1hu4pg0-EuiCard"
+    class="euiPanel euiPanel--plain euiPanel--paddingLarge euiCard euiCard--centerAligned euiCard--isClickable css-1xmyfa3-euiPanel-grow-m-l-plain-hasShadow-isClickable-EuiCard"
   >
     <div
       class="euiCard__top"
@@ -44,7 +44,7 @@ exports[`ElasticAgentCard renders 1`] = `
         </a>
       </span>
       <div
-        class="euiText euiText--small euiCard__description"
+        class="euiText euiCard__description css-1vkrgyt-euiText-s"
         id="generated-idDescription"
       >
         <p>
