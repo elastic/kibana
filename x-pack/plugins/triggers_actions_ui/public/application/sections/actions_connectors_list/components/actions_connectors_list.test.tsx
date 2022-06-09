@@ -258,7 +258,7 @@ describe('actions_connectors_list component with items', () => {
 
   test('if select item for edit should render EditConnectorFlyout', async () => {
     await setup();
-    wrapper.find('[data-test-subj="edit1"]').first().simulate('click');
+    await wrapper.find('[data-test-subj="edit1"]').first().find('button').simulate('click');
     expect(wrapper.find('[data-test-subj="edit-connector-flyout"]').exists()).toBeTruthy();
   });
 });
