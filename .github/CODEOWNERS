@@ -586,6 +586,9 @@ x-pack/plugins/session_view @elastic/awp-platform
 x-pack/plugins/security_solution/public/common/components/sessions_viewer @elastic/awp-platform
 x-pack/plugins/security_solution/public/kubernetes @elastic/awp-platform
 
+## Security Solution sub teams - Protections Experience
+x-pack/plugins/threat_intelligence @elastic/protections-experience
+
 # Security Intelligence And Analytics
 /x-pack/plugins/security_solution/server/lib/detection_engine/rules/prepackaged_rules @elastic/security-intelligence-analytics
 
