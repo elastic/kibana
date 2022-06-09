@@ -31,7 +31,12 @@ export const FilterButton = ({ filter }: { filter: FilterItem }) => {
       }
       setQuery={setQuery}
       onChange={(selectedValues) => {
-        updateUrlParams({ [field]: selectedValues ? JSON.stringify(selectedValues) : '' });
+        updateUrlParams({
+          [field]:
+            selectedValues && selectedValues.length > 0
+              ? JSON.stringify(selectedValues)
+              : undefined,
+        });
       }}
       allowExclusions={false}
       loading={false}
