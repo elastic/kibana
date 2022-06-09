@@ -107,7 +107,7 @@ export const FindingsRuleFlyout = ({ onClose, findings }: FindingFlyoutProps) =>
           ))}
         </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+      <EuiFlyoutBody key={tab.id}>
         <FindingsTab tab={tab} findings={findings} />
       </EuiFlyoutBody>
     </EuiFlyout>
