@@ -21,7 +21,7 @@ export const getNewConsoleRegistrationMock = (
 ): ConsoleRegistrationInterface => {
   return {
     id: Math.random().toString(36),
-    TitleComponent: () => <>{'Test console'}</>,
+    PageTitleComponent: () => <>{'Test console'}</>,
     meta: { about: 'for unit testing ' },
     consoleProps: {
       'data-test-subj': 'testRunningConsole',
