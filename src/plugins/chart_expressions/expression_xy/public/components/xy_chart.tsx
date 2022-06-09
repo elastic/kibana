@@ -285,7 +285,7 @@ export function XYChart({
   const getYAxesTitles = (axisSeries: Series[]) => {
     return axisSeries
       .map(({ layer, accessor }) => titles?.[layer]?.yTitles?.[accessor])
-      .filter((name) => Boolean(name))[0];
+      .find((name) => Boolean(name));
   };
 
   const referenceLineLayers = getReferenceLayers(layers);
