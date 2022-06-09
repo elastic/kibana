@@ -106,7 +106,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     metrics.setGlobalMeterProvider(meterProvider);
 
     const otlpConfig = this.config.opentelemetry?.metrics.otlp;
-    if (otlpConfig.url) {
+    if (otlpConfig?.url) {
       const url = otlpConfig.url;
       this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
       let credentials: grpc.ChannelCredentials;
@@ -125,7 +125,7 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     }
 
     const prometheusConfig = this.config.opentelemetry?.metrics.prometheus;
-    if (prometheusConfig.enabled) {
+    if (prometheusConfig?.enabled) {
       // TODO: authenticate the prometheus endpoint
       const url = `${prometheusConfig.host}:${prometheusConfig.port}${prometheusConfig.endpoint}`;
       this.logger.debug(`Starting prometheus exporter at: ${url}`);
