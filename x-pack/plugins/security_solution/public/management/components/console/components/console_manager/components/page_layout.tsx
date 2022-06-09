@@ -74,7 +74,7 @@ export const PageLayout = memo<PageLayoutProps>(
       };
     }, []);
 
-    const bodyClassname = useMemo(() => {
+    const bodyClassName = useMemo(() => {
       return classnames({
         'is-scrollable': scrollableBody,
         'is-not-scrollable': !scrollableBody,
@@ -99,14 +99,12 @@ export const PageLayout = memo<PageLayoutProps>(
       <EuiPanelStyled
         hasShadow={false}
         paddingSize={paddingSize}
-        hasBorder={false}
         data-test-subj={dataTestSubj}
         className="full-height"
         color="transparent"
       >
         <EuiFlexGroup
           direction="column"
-          wrap={false}
           responsive={false}
           gutterSize="none"
           className="full-height"
@@ -127,7 +125,7 @@ export const PageLayout = memo<PageLayoutProps>(
             </EuiFlexItem>
           )}
 
-          <EuiFlexItem grow className={bodyClassname} data-test-subj={getTestId('body')}>
+          <EuiFlexItem grow className={bodyClassName} data-test-subj={getTestId('body')}>
             <div role="main" className="full-height">
               {children}
             </div>

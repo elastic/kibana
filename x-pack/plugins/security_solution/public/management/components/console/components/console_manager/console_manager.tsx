@@ -14,7 +14,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { ConsoleDataState } from '../console_state/types';
+import type { ConsoleDataState } from '../console_state/types';
 import { ConsolePageOverlay } from './components/console_page_overlay';
 import {
   ConsoleManagerClient,

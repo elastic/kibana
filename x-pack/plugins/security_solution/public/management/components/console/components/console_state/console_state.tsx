@@ -16,7 +16,7 @@ import React, {
 } from 'react';
 import { useWithManagedConsoleState } from '../console_manager/console_manager';
 import { InitialStateInterface, initiateState, stateDataReducer } from './state_reducer';
-import { ConsoleDataState, ConsoleStore } from './types';
+import type { ConsoleDataState, ConsoleStore } from './types';
 
 const ConsoleStateContext = createContext<null | ConsoleStore>(null);
 
