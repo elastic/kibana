@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const browser = getService('browser');
   const docTable = getService('docTable');
-  const PageObjects = getPageObjects(['common', 'header', 'context', 'discover', 'timePicker']);
+  const PageObjects = getPageObjects(['common', 'context', 'discover', 'timePicker']);
   const kibanaServer = getService('kibanaServer');
   const filterBar = getService('filterBar');
   const find = getService('find');
@@ -31,8 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({ 'doc_table:legacy': true });
       await PageObjects.common.navigateToApp('discover');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
         await PageObjects.discover.clickFieldListItem(columnName);
         await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
@@ -61,7 +59,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return initialHitCount === hitCount;
       });
     });
-
     it('should go back via breadcrumbs with preserved state', async function () {
       await retry.waitFor(
         'user navigating to context and returning to discover via breadcrumbs',
