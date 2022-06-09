@@ -34,7 +34,7 @@ There are two types of controls:
 
 * *Options list* &mdash; Adds a dropdown that allows you to filter the data with one or more options that you select.
 +
-For example, if you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, you can add an options list for the `machine.os.keyword` field that allows you to display only the logs that generated from `osx` and `ios` operating systems.
+For example, if you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, you can add an options list for the `machine.os.keyword` field that allows you to display only the logs generated from `osx` and `ios` operating systems.
 +
 [role="screenshot"]
 image::images/dashboard_controlsOptionsList_8.3.0.png[Options list control for the `machine.os.keyword` field with the `osx` and `ios` options selected]
