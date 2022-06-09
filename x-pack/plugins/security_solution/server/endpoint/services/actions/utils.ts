@@ -137,7 +137,7 @@ export const getActionCompletionInfo = (
       if (!normalizedAgentResponse.wasSuccessful) {
         completedInfo.wasSuccessful = false;
         responseErrors.push(
-          ...(normalizedAgentResponse.errors ? normalizedAgentResponse.errors : '')
+          ...(normalizedAgentResponse.errors ? normalizedAgentResponse.errors : [])
         );
       }
     }
