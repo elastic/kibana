@@ -22,7 +22,6 @@ interface Args {
   timeout: number;
   headers: http.OutgoingHttpHeaders;
   rejectUnauthorized?: boolean;
-  originalPath?: string;
 }
 
 /**
@@ -40,6 +39,11 @@ const sanitizeHostname = (hostName: string): string =>
 const encodePathname = (pathname: string) => {
   const decodedPath = new URLSearchParams(`path=${pathname}`).get('path') ?? '';
 
+  // Skip if it is valid
+  if (pathname === decodedPath) {
+    return pathname;
+  }
+
   return `/${encodeURIComponent(trimStart(decodedPath, '/'))}`;
 };
 
@@ -54,17 +58,11 @@ export const proxyRequest = ({
   timeout,
   payload,
   rejectUnauthorized,
-  originalPath,
 }: Args) => {
-  const { hostname, port, protocol, search, pathname: percentEncodedPath } = uri;
+  const { hostname, port, protocol, pathname, search } = uri;
   const client = uri.protocol === 'https:' ? https : http;
-  let pathname = uri.pathname;
+  const encodedPath = encodePathname(pathname);
   let resolved = false;
-  const requiresEncoding = trimStart(originalPath, '/') !== trimStart(percentEncodedPath, '/');
-
-  if (requiresEncoding) {
-    pathname = encodePathname(pathname);
-  }
 
   let resolve: (res: http.IncomingMessage) => void;
   let reject: (res: unknown) => void;
@@ -86,7 +84,7 @@ export const proxyRequest = ({
     host: sanitizeHostname(hostname),
     port: port === '' ? undefined : parseInt(port, 10),
     protocol,
-    path: `${pathname}${search || ''}`,
+    path: `${encodedPath}${search || ''}`,
     headers: {
       ...finalUserHeaders,
       'content-type': 'application/json',
