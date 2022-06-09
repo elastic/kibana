@@ -30,6 +30,7 @@ describe('Kibana No Data Page', () => {
     },
     docsLink: 'http://www.docs.com',
   };
+
   const onDataViewCreated = jest.fn();
   const config = {
     hasESData: false,
@@ -45,7 +46,7 @@ describe('Kibana No Data Page', () => {
     const services = getMockServices({ config: { ...config, hasESData: false } });
     const component = mountWithIntl(
       <KibanaNoDataPageProvider {...services}>
-        <KibanaNoDataPage noDataConfig={noDataConfig} onDataViewCreated={onDataViewCreated} />
+        <KibanaNoDataPage {...{ noDataConfig, onDataViewCreated }} />
       </KibanaNoDataPageProvider>
     );
 

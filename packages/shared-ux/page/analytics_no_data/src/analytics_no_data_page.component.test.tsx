@@ -33,8 +33,6 @@ describe('AnalyticsNoDataPageComponent', () => {
 
     await act(() => new Promise(setImmediate));
 
-    expect(component).toMatchSnapshot();
-
     expect(component.find(KibanaNoDataPage).length).toBe(1);
 
     const noDataConfig = component.find(KibanaNoDataPage).props().noDataConfig;
