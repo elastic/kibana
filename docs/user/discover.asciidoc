@@ -54,8 +54,7 @@ Tell {kib} where to find the data you want to explore, and then specify the time
 +
 {kib} uses a <<data-views,{data-source}>> to tell it where to find
 your {es} data.
-To view the ecommerce sample data, select **kibana_sample_data_ecommerce**
-from the {data-source} dropdown.
+To view the ecommerce sample data, open the {data-source} menu, and select **kibana_sample_data_ecommerce**.
 +
 [role="screenshot"]
 image::images/discover-data-view.png[How to set the {data-source} in Discover, width=50%]
@@ -133,7 +132,7 @@ emit("Hello World!");
 
 . Click *Save*.
 
-. In the fields list, search for the *hello* field, and then add it to the document table to view it's value.
+. In the fields list, search for the *hello* field, and then add it to the document table.
 +
 [role="screenshot"]
 image:images/hello-field.png[hello field in the document tables]
@@ -271,8 +270,17 @@ image:images/discover-maps.png[Map containing documents]
 [[share-your-findings]]
 === Share your findings
 
-To share your findings with a larger audience, click *Share* in the *Discover* toolbar. For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
+To share your findings with a larger audience, click *Share* in the *Discover* toolbar.
+For detailed information about the sharing options, refer to <<reporting-getting-started,Reporting>>.
 
+[float]
+[[alert-from-Discover]]
+=== Create alert rules
+
+To create an alert rule from *Discover*,
+click *Alerts* in the toolbar. Then build the data view, query,
+and filters that match the data for which you want the alert notification.
+For detailed information, refer to <<alerting-getting-started, Alerting>>.
 
 [float]
 === What’s next?
@@ -280,12 +288,6 @@ To share your findings with a larger audience, click *Share* in the *Discover* t
 * <<kuery-query, Learn more about the structure of a KQL query>>.
 
 * <<discover-search-for-relevance, Search for relevance>>.
-
-* <<alerting-getting-started, Create an alert from Discover>>.
-In the toolbar, click *Alerts*, and then
-click *Create search threshold rule*. Follow the prompts to
-create an alert that periodically checks when data goes above or below a certain
-threshold within a given time interval.
 
 * <<kibana-discover-settings, Configure Discover>> to better meet your needs.
 Go to **Advanced Settings** to configure the number of documents to show,
