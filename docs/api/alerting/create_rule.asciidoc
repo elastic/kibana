@@ -17,10 +17,10 @@ Create {kib} rules.
 === {api-prereq-title}
 
 You must have `all` privileges for the *Management* > *Stack Rules* feature or
-for the *Discover*, *{ml-app}*, *{observability}*, or *Security* features,
-depending on the `consumer` of the rule you're creating. If the rule has
-`actions`, you must also have `read` privileges for the
-*Management* > *Actions and Connectors* feature. For more details, refer to
+for the *{ml-app}*, *{observability}*, or *Security* features, depending on the
+`consumer` and `rule_type_id` of the rule you're creating. If the rule has
+`actions`, you must also have `read` privileges for the *Management* >
+*Actions and Connectors* feature. For more details, refer to
 <<kibana-feature-privileges>>.
 
 === {api-description-title}
@@ -54,7 +54,11 @@ If a user with different privileges updates the rule, its behavior might change.
   (Optional, string array) A list of keywords to reference and search.
 
 `rule_type_id`::
-  (Required, string) The ID of the rule type that you want to call when the rule is scheduled to run.
+(Required, string) The ID of the rule type that you want to call when the rule
+is scheduled to run. For example, `.es-query`, `.index-threshold`,
+`logs.alert.document.count`, `monitoring_alert_cluster_health`,
+`siem.thresholdRule`, or `xpack.ml.anomaly_detection_alert`. For more
+information, refer to <<rule-types>>.
 
 `schedule`::
   (Required, object) The schedule specifying when this rule should be run, using one of the available schedule formats specified under
