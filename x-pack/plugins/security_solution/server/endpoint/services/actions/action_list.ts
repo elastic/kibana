@@ -78,9 +78,9 @@ export const getActionList = async ({
 
 export type GetActionDetailsListParam = OptionalFilterParams & {
   esClient: ElasticsearchClient;
-  from?: number;
+  from: number;
   logger: Logger;
-  size?: number;
+  size: number;
 };
 const getActionDetailsList = async ({
   commands,
