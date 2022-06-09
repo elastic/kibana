@@ -925,6 +925,24 @@ export const alertsMock: AlertSearchResponse<unknown, unknown> = {
   },
 };
 
+export const alertMockEmptyResults: AlertSearchResponse<unknown, unknown> = {
+  took: 3,
+  timeout: false,
+  _shards: {
+    total: 1,
+    successful: 1,
+    skipped: 1,
+    failed: 0,
+  },
+  hits: {
+    total: {
+      value: 0,
+      relation: 'gte',
+    },
+    hits: [],
+  },
+};
+
 export const alertsMock8x: AlertSearchResponse<unknown, unknown> = {
   took: 3,
   timeout: false,

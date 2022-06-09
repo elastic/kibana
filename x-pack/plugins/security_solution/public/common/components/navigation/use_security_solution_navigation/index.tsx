@@ -33,7 +33,6 @@ export const useSecuritySolutionNavigation = () => {
   const { detailName, flowTarget, pageName, pathName, search, state, tabName } = routeProps;
 
   const disabledNavTabs = [
-    ...(!useIsExperimentalFeatureEnabled('usersEnabled') ? ['users'] : []),
     ...(!useIsExperimentalFeatureEnabled('kubernetesEnabled') ? ['kubernetes'] : []),
   ];
   const enabledNavTabs: GenericNavRecord = omit(disabledNavTabs, navTabs);

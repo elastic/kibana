@@ -51,7 +51,8 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
+        "$ProgressPreference = 'SilentlyContinue'
+        wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
         Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
         cd elastic-agent--windows-x86_64
         .\\\\elastic-agent.exe install  \`
@@ -69,11 +70,12 @@ describe('getInstallCommandForPlatform', () => {
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--x86_64.rpm
-        tar xzvf elastic-agent--x86_64.rpm
-        cd elastic-agent--x86_64
+        sudo rpm -vi elastic-agent--x86_64.rpm
         sudo elastic-agent enroll  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
-          --fleet-server-service-token=service-token-1"
+          --fleet-server-service-token=service-token-1
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent"
       `);
     });
 
@@ -86,11 +88,12 @@ describe('getInstallCommandForPlatform', () => {
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
-        tar xzvf elastic-agent--amd64.deb
-        cd elastic-agent--amd64
+        sudo dpkg -i elastic-agent--amd64.deb
         sudo elastic-agent enroll  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
-          --fleet-server-service-token=service-token-1"
+          --fleet-server-service-token=service-token-1
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent"
       `);
     });
 
@@ -165,7 +168,8 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
+        "$ProgressPreference = 'SilentlyContinue'
+        wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
         Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
         cd elastic-agent--windows-x86_64
         .\\\\elastic-agent.exe install  \`
@@ -185,12 +189,13 @@ describe('getInstallCommandForPlatform', () => {
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--x86_64.rpm
-        tar xzvf elastic-agent--x86_64.rpm
-        cd elastic-agent--x86_64
+        sudo rpm -vi elastic-agent--x86_64.rpm
         sudo elastic-agent enroll  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-policy=policy-1"
+          --fleet-server-policy=policy-1
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent"
       `);
     });
 
@@ -204,12 +209,13 @@ describe('getInstallCommandForPlatform', () => {
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
-        tar xzvf elastic-agent--amd64.deb
-        cd elastic-agent--amd64
+        sudo dpkg -i elastic-agent--amd64.deb
         sudo elastic-agent enroll  \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
-          --fleet-server-policy=policy-1"
+          --fleet-server-policy=policy-1
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent"
       `);
     });
   });
@@ -276,7 +282,8 @@ describe('getInstallCommandForPlatform', () => {
       );
 
       expect(res).toMatchInlineSnapshot(`
-        "wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
+        "$ProgressPreference = 'SilentlyContinue'
+        wget https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--windows-x86_64.zip -OutFile elastic-agent--windows-x86_64.zip
         Expand-Archive .\\\\elastic-agent--windows-x86_64.zip
         cd elastic-agent--windows-x86_64
         .\\\\elastic-agent.exe install --url=http://fleetserver:8220 \`
@@ -302,8 +309,7 @@ describe('getInstallCommandForPlatform', () => {
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--x86_64.rpm
-        tar xzvf elastic-agent--x86_64.rpm
-        cd elastic-agent--x86_64
+        sudo rpm -vi elastic-agent--x86_64.rpm
         sudo elastic-agent enroll --url=http://fleetserver:8220 \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
@@ -311,7 +317,9 @@ describe('getInstallCommandForPlatform', () => {
           --certificate-authorities=<PATH_TO_CA> \\\\
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
-          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY>"
+          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY>
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent"
       `);
     });
 
@@ -327,8 +335,7 @@ describe('getInstallCommandForPlatform', () => {
 
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--amd64.deb
-        tar xzvf elastic-agent--amd64.deb
-        cd elastic-agent--amd64
+        sudo dpkg -i elastic-agent--amd64.deb
         sudo elastic-agent enroll --url=http://fleetserver:8220 \\\\
           --fleet-server-es=http://elasticsearch:9200 \\\\
           --fleet-server-service-token=service-token-1 \\\\
@@ -336,7 +343,9 @@ describe('getInstallCommandForPlatform', () => {
           --certificate-authorities=<PATH_TO_CA> \\\\
           --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
           --fleet-server-cert=<PATH_TO_FLEET_SERVER_CERT> \\\\
-          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY>"
+          --fleet-server-cert-key=<PATH_TO_FLEET_SERVER_CERT_KEY>
+        sudo systemctl enable elastic-agent
+        sudo systemctl start elastic-agent"
       `);
     });
   });
