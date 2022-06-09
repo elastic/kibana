@@ -506,6 +506,12 @@ describe('XYChart component', () => {
             {...defaultProps}
             args={{
               ...args,
+              layers: [
+                {
+                  ...(args.layers[0] as DataLayerConfig),
+                  isHistogram: true,
+                },
+              ],
               xExtent: {
                 type: 'axisExtentConfig',
                 mode: 'custom',
@@ -518,6 +524,7 @@ describe('XYChart component', () => {
         expect(component.find(Settings).prop('xDomain')).toEqual({
           min: 123,
           max: 456,
+          minInterval: 50,
         });
       }
     });

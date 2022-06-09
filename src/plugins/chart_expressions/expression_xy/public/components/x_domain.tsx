@@ -60,7 +60,7 @@ export const getXDomain = (
     : undefined;
 
   if (isHistogram && isFullyQualified(baseDomain)) {
-    if (xExtent) {
+    if (xExtent && !isTimeViz) {
       return {
         extendedDomain: {
           min: xExtent.lowerBound ?? NaN,
