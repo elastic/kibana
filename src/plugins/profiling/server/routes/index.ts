@@ -8,10 +8,7 @@
 import type { IRouter, Logger } from 'kibana/server';
 import { DataRequestHandlerContext } from '../../../data/server';
 
-import {
-  registerFlameChartElasticSearchRoute,
-  registerFlameChartPixiSearchRoute,
-} from './flamechart';
+import { registerFlameChartElasticSearchRoute } from './flamechart';
 
 import {
   registerTraceEventsTopNContainersSearchRoute,
@@ -23,7 +20,6 @@ import {
 
 export function registerRoutes(router: IRouter<DataRequestHandlerContext>, logger?: Logger) {
   registerFlameChartElasticSearchRoute(router, logger!);
-  registerFlameChartPixiSearchRoute(router, logger!);
   registerTraceEventsTopNContainersSearchRoute(router, logger!);
   registerTraceEventsTopNDeploymentsSearchRoute(router, logger!);
   registerTraceEventsTopNHostsSearchRoute(router, logger!);

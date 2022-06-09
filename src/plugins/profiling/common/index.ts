@@ -20,7 +20,6 @@ export function getRoutePaths() {
     TopNThreads: `${BASE_ROUTE_PATH}/topn/threads`,
     TopNTraces: `${BASE_ROUTE_PATH}/topn/traces`,
     FlamechartElastic: `${BASE_ROUTE_PATH}/flamechart/elastic`,
-    FlamechartPixi: `${BASE_ROUTE_PATH}/flamechart/pixi`,
   };
 }
 

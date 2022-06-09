@@ -31,11 +31,6 @@ interface ElasticFlameGraph {
   Color: number[];
 }
 
-interface PixiFlameGraph extends CallerCalleeNode {
-  TotalTraces: number;
-  TotalSeconds: number;
-}
-
 /*
  * Helper to calculate the color of a given block to be drawn. The desirable outcomes of this are:
  * Each of the following frame types should get a different set of color hues:
@@ -250,19 +245,5 @@ export class FlameGraph {
       this.executables
     );
     return this.createElasticFlameGraph(this.createColumnarCallerCallee(root));
-  }
-
-  toPixi(): PixiFlameGraph {
-    const root = createCallerCalleeDiagram(
-      this.events,
-      this.stacktraces,
-      this.stackframes,
-      this.executables
-    );
-    return {
-      ...root,
-      TotalTraces: this.totalCount,
-      TotalSeconds: 0,
-    } as PixiFlameGraph;
   }
 }

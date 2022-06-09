@@ -32,7 +32,6 @@ import { ChartGrid } from './components/chart-grid';
 import { FlameGraphContext } from './components/contexts/flamegraph';
 import { FlameGraphNavigation } from './components/flamegraph-nav';
 import { FlameGraph } from './components/flamegraph';
-import { PixiFlamechart } from './components/PixiFlamechart';
 
 import { Services } from './services';
 
@@ -94,7 +93,7 @@ function buildTimeRange(start: string, end: string): TimeRange {
 
 type Props = Services;
 
-function App({ fetchTopN, fetchElasticFlamechart, fetchPixiFlamechart }: Props) {
+function App({ fetchTopN, fetchElasticFlamechart }: Props) {
   const defaultTimeRange = buildTimeRange(commonlyUsedRanges[0].start, commonlyUsedRanges[0].end);
   const [timeRange, setTimeRange] = useState(defaultTimeRange);
 
@@ -108,7 +107,6 @@ function App({ fetchTopN, fetchElasticFlamechart, fetchPixiFlamechart }: Props) 
   });
 
   const [elasticFlamegraph, setElasticFlamegraph] = useState({});
-  const [pixiFlamegraph, setPixiFlamegraph] = useState({});
 
   const handleTimeChange = (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
     if (selectedTime.isInvalid) {
@@ -126,7 +124,7 @@ function App({ fetchTopN, fetchElasticFlamechart, fetchPixiFlamechart }: Props) 
   const tabs = [
     {
       id: 'stacktrace-elastic',
-      name: 'Stack Traces (Elastic)',
+      name: 'Stack Traces',
       content: (
         <>
           <EuiSpacer />
@@ -147,7 +145,7 @@ function App({ fetchTopN, fetchElasticFlamechart, fetchPixiFlamechart }: Props) 
     },
     {
       id: 'flamegraph-elastic',
-      name: 'FlameGraph (Elastic)',
+      name: 'FlameGraph',
       content: (
         <>
           <EuiSpacer />
@@ -161,26 +159,6 @@ function App({ fetchTopN, fetchElasticFlamechart, fetchPixiFlamechart }: Props) 
               setter={setElasticFlamegraph}
             />
             <FlameGraph id="flamechart" height={600} />
-          </FlameGraphContext.Provider>
-        </>
-      ),
-    },
-    {
-      id: 'flamegraph-pixi',
-      name: 'FlameGraph (Pixi)',
-      content: (
-        <>
-          <EuiSpacer />
-          <FlameGraphContext.Provider value={pixiFlamegraph}>
-            <FlameGraphNavigation
-              index={index}
-              projectID={projectID}
-              n={n}
-              timeRange={timeRange}
-              getter={fetchPixiFlamechart}
-              setter={setPixiFlamegraph}
-            />
-            <PixiFlamechart projectID={projectID.toString()} />
           </FlameGraphContext.Provider>
         </>
       ),

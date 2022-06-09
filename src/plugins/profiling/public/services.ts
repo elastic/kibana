@@ -25,13 +25,6 @@ export interface Services {
     timeTo: number,
     n: number
   ) => Promise<any[] | HttpFetchError>;
-  fetchPixiFlamechart: (
-    index: string,
-    projectID: number,
-    timeFrom: number,
-    timeTo: number,
-    n: number
-  ) => Promise<any[] | HttpFetchError>;
 }
 
 export function getServices(core: CoreStart): Services {
@@ -76,27 +69,6 @@ export function getServices(core: CoreStart): Services {
           n,
         };
         return await core.http.get(paths.FlamechartElastic, { query });
-      } catch (e) {
-        return e;
-      }
-    },
-
-    fetchPixiFlamechart: async (
-      index: string,
-      projectID: number,
-      timeFrom: number,
-      timeTo: number,
-      n: number
-    ) => {
-      try {
-        const query: HttpFetchQuery = {
-          index,
-          projectID,
-          timeFrom,
-          timeTo,
-          n,
-        };
-        return await core.http.get(paths.FlamechartPixi, { query });
       } catch (e) {
         return e;
       }
