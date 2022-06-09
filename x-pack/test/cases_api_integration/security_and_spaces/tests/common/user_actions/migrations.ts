@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { CASES_URL, SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common/constants';
-import { CaseUserActionsResponse, CommentType } from '@kbn/cases-plugin/common/api';
+import { ActionTypes, CaseUserActionsResponse, CommentType } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { deleteAllCaseItems, getCaseUserActions } from '../../../../common/lib/utils';
 
@@ -1055,6 +1055,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     describe('8.3.0', () => {
       const CASE_ID = '5257a000-5e7d-11ec-9ee9-cd64f0b77b3c';
+      const CREATE_UA_ID = '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c';
 
       before(async () => {
         await kibanaServer.importExport.load(
@@ -1076,7 +1077,10 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             caseID: CASE_ID,
           });
 
-          const createUserAction = userActions[0];
+          const createUserAction = userActions.find(
+            (userAction) => userAction.action_id === CREATE_UA_ID
+          );
+
           expect(createUserAction).to.eql({
             action: 'create',
             action_id: '5275af50-5e7d-11ec-9ee9-cd64f0b77b3c',
@@ -1116,7 +1120,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
             caseID: CASE_ID,
           });
 
-          for (const userAction of userActions.slice(1)) {
+          const userActionsWithoutCreateAction = userActions.filter(
+            (userAction) => userAction.type !== ActionTypes.create_case
+          );
+
+          for (const userAction of userActionsWithoutCreateAction) {
             expect(userAction.payload).not.to.have.property('severity');
           }
         });
