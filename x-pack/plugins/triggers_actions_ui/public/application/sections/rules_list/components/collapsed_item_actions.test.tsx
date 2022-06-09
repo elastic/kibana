@@ -334,7 +334,7 @@ describe('CollapsedItemActions', () => {
     const wrapper = mountWithIntl(
       <CollapsedItemActions
         {...getPropsWithRule({
-          ruleTypeId: 'siem.threshold',
+          consumer: 'siem',
         })}
       />
     );
