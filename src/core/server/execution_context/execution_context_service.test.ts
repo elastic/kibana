@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 import { BehaviorSubject } from 'rxjs';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import {
   ExecutionContextService,
   InternalExecutionContextSetup,
 } from './execution_context_service';
-import { mockCoreContext } from '../core_context.mock';
 import { loggingSystemMock } from '../logging/logging_system.mock';
 
 const delay = (ms: number = 100) => new Promise((resolve) => setTimeout(resolve, ms));
