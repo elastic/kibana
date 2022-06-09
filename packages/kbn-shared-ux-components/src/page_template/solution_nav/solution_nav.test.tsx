@@ -100,4 +100,11 @@ describe('KibanaPageTemplateSolutionNav', () => {
     );
     expect(component).toMatchSnapshot();
   });
+
+  test('accepts canBeCollapsed prop', () => {
+    const component = shallow(
+      <KibanaPageTemplateSolutionNav name="Solution" canBeCollapsed={true} items={items} />
+    );
+    expect(component).toMatchSnapshot();
+  });
 });
