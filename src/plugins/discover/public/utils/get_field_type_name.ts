@@ -26,7 +26,12 @@ export const KNOWN_FIELD_TYPES = {
   VERSION: ES_FIELD_TYPES.VERSION,
 };
 
-export const UNKNOWN_FIELD_TYPE_MESSAGE = 'Unknown field';
+export const UNKNOWN_FIELD_TYPE_MESSAGE = i18n.translate(
+  'discover.fieldNameIcons.unknownFieldAriaLabel',
+  {
+    defaultMessage: 'Unknown field',
+  }
+);
 
 export function getFieldTypeName(type?: string) {
   switch (type) {
@@ -88,8 +93,6 @@ export function getFieldTypeName(type?: string) {
         defaultMessage: 'Version field',
       });
     default:
-      return i18n.translate('discover.fieldNameIcons.unknownFieldAriaLabel', {
-        defaultMessage: UNKNOWN_FIELD_TYPE_MESSAGE,
-      });
+      return UNKNOWN_FIELD_TYPE_MESSAGE;
   }
 }
