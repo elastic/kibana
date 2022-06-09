@@ -42,7 +42,14 @@ const renderWithRouter = (
   });
   return render(
     <MemoryRouter initialEntries={initialEntries}>
-      <KubernetesSecurityRoutes filter={<div>{'Mock filters'}</div>} />
+      <KubernetesSecurityRoutes
+        filter={<div>{'Mock filters'}</div>}
+        globalFilter={{
+          filterQuery: '{"bool":{"must":[],"filter":[],"should":[],"must_not":[]}}',
+          startDate: '2022-03-08T18:52:15.532Z',
+          endDate: '2022-06-09T17:52:15.532Z',
+        }}
+      />
     </MemoryRouter>
   );
 };

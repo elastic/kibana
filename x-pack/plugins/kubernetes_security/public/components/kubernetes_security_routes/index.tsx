@@ -19,14 +19,19 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { KUBERNETES_PATH } from '../../../common/constants';
+import {
+  KUBERNETES_PATH,
+  ENTRY_LEADER_INTERACTIVE,
+  ENTRY_LEADER_ENTITY_ID,
+} from '../../../common/constants';
 import { KubernetesWidget } from '../kubernetes_widget';
 import { PercentCompareWidget } from '../percent_compare_widget';
 import { KubernetesSecurityDeps } from '../../types';
 import { useStyles } from './styles';
 
-const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) => {
+const KubernetesSecurityRoutesComponent = ({ filter, indexPattern, globalFilter }: KubernetesSecurityDeps) => {
   const styles = useStyles();
+
   return (
     <Switch>
       <Route strict exact path={KUBERNETES_PATH}>
@@ -90,22 +95,23 @@ const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) =
                   <EuiIconTip content="Sessions icon tip placeholder" />
                 </>
               }
-              data={[
-                {
+              widgetKey="sessionsPercentage"
+              indexPattern={indexPattern}
+              globalFilter={globalFilter}
+              dataValueMap={{
+                'true': {
                   name: 'Interactive',
-                  value: 280,
-                  fieldName: 'process.entry_leader.interactive',
-                  fieldValue: true,
+                  fieldName: ENTRY_LEADER_INTERACTIVE,
                   color: euiThemeVars.euiColorVis0,
                 },
-                {
+                'false': {
                   name: 'Non-interactive',
-                  value: 780,
-                  fieldName: 'process.entry_leader.interactive',
-                  fieldValue: false,
+                  fieldName: ENTRY_LEADER_INTERACTIVE,
                   color: euiThemeVars.euiColorVis1,
                 },
-              ]}
+              }}
+              groupedBy={ENTRY_LEADER_INTERACTIVE}
+              countBy={ENTRY_LEADER_ENTITY_ID}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -121,22 +127,23 @@ const KubernetesSecurityRoutesComponent = ({ filter }: KubernetesSecurityDeps) =
                   <EuiIconTip content="Sessions login root icon tip placeholder" />
                 </>
               }
-              data={[
-                {
+              widgetKey="rootLoginPercentage"
+              dataValueMap={{
+                'true': {
                   name: 'Root',
-                  value: 480,
-                  fieldName: 'process.entry_leader.interactive',
-                  fieldValue: true,
+                  fieldName: ENTRY_LEADER_INTERACTIVE,
                   color: euiThemeVars.euiColorVis2,
                 },
-                {
+                'false': {
                   name: 'Non-root',
-                  value: 780,
-                  fieldName: 'process.entry_leader.interactive',
-                  fieldValue: false,
+                  fieldName: ENTRY_LEADER_INTERACTIVE,
                   color: euiThemeVars.euiColorVis3,
                 },
-              ]}
+              }}
+              indexPattern={indexPattern}
+              globalFilter={globalFilter}
+              groupedBy={ENTRY_LEADER_INTERACTIVE}
+              countBy={ENTRY_LEADER_ENTITY_ID}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

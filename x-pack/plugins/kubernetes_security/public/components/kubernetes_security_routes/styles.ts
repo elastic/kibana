@@ -10,10 +10,10 @@ import { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
 export const useStyles = () => {
-  const { euiTheme, euiVars } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
-    const { size, colors, font } = euiTheme;
+    const { size, font } = euiTheme;
 
     const widgetBadge: CSSObject = {
       position: 'absolute',

@@ -5,43 +5,116 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
+import type { IndexPattern, GlobalFilter } from '../../types';
+import { useSetFilter } from '../../hooks/use_filter';
+import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
+import { useFetchPercentWidgetData } from './hooks';
 
-export interface PercentCompareWidgetData {
+export interface PercenWidgetDataValueMap {
   name: string;
-  value: number;
   fieldName: string;
-  fieldValue: string | number | boolean;
   color: string;
 }
 
 export interface PercentCompareWidgetDeps {
   title: ReactNode;
-  data: PercentCompareWidgetData[];
+  dataValueMap: Record<string, PercenWidgetDataValueMap>;
+  widgetKey: string;
+  indexPattern?: IndexPattern;
+  globalFilter: GlobalFilter;
+  groupedBy: string;
+  countBy?: string;
 }
 
-export const PercentCompareWidget = ({ title, data }: PercentCompareWidgetDeps) => {
+interface FilterButtons {
+  filterForButtons: Array<ReactNode>;
+  filterOutButtons: Array<ReactNode>;
+}
+
+export const PercentCompareWidget = ({ title, dataValueMap, widgetKey, indexPattern, globalFilter, groupedBy, countBy }: PercentCompareWidgetDeps) => {
+  const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
   const styles = useStyles();
-  const dataValueSum = data.reduce((sumSoFar, current) => sumSoFar + current.value, 0);
+
+  const filterQueryWithTimeRange = useMemo(() => {
+    return addTimerangeToQuery(
+      globalFilter.filterQuery,
+      globalFilter.startDate,
+      globalFilter.endDate,
+    );
+  }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
+
+  const { data } = useFetchPercentWidgetData(
+    filterQueryWithTimeRange,
+    widgetKey,
+    groupedBy,
+    countBy,
+    indexPattern?.title,
+  );
+
+  const { getFilterForValueButton, getFilterOutValueButton, filterManager } = useSetFilter();
+  const dataValueSum = useMemo(() => data ? Object.keys(data).reduce((sumSoFar, current) => sumSoFar + data[current], 0) : 0, [data]);
+  const filterButtons = useMemo(() => {
+    const result: FilterButtons = {
+      filterForButtons: [],
+      filterOutButtons: [],
+    };
+    Object.keys(dataValueMap).forEach((groupedByValue) => {
+      result.filterForButtons.push(getFilterForValueButton({
+        field: dataValueMap[groupedByValue].fieldName,
+        filterManager,
+        size: 'xs',
+        onClick: () => {},
+        onFilterAdded: () => {},
+        ownFocus: false,
+        showTooltip: true,
+        value: [groupedByValue],
+      }));
+      result.filterOutButtons.push(getFilterOutValueButton({
+        field: dataValueMap[groupedByValue].fieldName,
+        filterManager,
+        size: 'xs',
+        onClick: () => {},
+        onFilterAdded: () => {},
+        ownFocus: false,
+        showTooltip: true,
+        value: [groupedByValue],
+      }));
+    });
+
+    return result;
+  }, [dataValueMap, getFilterForValueButton, getFilterOutValueButton]);
+
   return (
     <div css={styles.container}>
       <div css={styles.title}>{title}</div>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {data.map(({ name, value, fieldName, fieldValue, color }) => {
+        {Object.keys(dataValueMap).map((groupedByValue, idx) => {
+          const value = data?.[groupedByValue] || 0;
           return (
-            <EuiFlexItem key={`percentage-compare-widget--${name}`}>
+            <EuiFlexItem
+              key={`percentage-compare-widget--${dataValueMap[groupedByValue].name}`}
+              onMouseEnter={() => setHoveredFilter(idx)}
+              onMouseLeave={() => setHoveredFilter(null)}
+            >
               <EuiText size="xs" css={styles.dataInfo}>
-                {name}
+                {dataValueMap[groupedByValue].name}
+                {hoveredFilter === idx && (
+                  <div css={styles.filters}>
+                    {filterButtons.filterForButtons[idx]}
+                    {filterButtons.filterOutButtons[idx]}
+                  </div>
+                )}
                 <span css={styles.dataValue}>{value}</span>
               </EuiText>
               <div css={styles.percentageBackground}>
                 <div
                   css={{
                     ...styles.percentageBar,
-                    width: `${(value / dataValueSum) * 100}%`,
-                    backgroundColor: color,
+                    width: `${((value / dataValueSum) || 0) * 100}%`,
+                    backgroundColor: dataValueMap[groupedByValue].color,
                   }}
                 />
               </div>

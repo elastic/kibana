@@ -13,6 +13,6 @@ export default function kubernetesSecurityApiIntegrationTests({
 }: FtrProviderContext) {
   describe('Kubernetes security API (basic)', function () {
     loadTestFile(require.resolve('./aggregate'));
-    loadTestFile(require.resolve('./count'));
+    // loadTestFile(require.resolve('./count'));
   });
 }

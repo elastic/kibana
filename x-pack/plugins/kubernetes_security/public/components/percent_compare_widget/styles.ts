@@ -9,13 +9,8 @@ import { useMemo } from 'react';
 import { CSSObject } from '@emotion/react';
 import { useEuiTheme } from '../../hooks';
 
-interface StylesDeps {
-  isInvestigated: boolean;
-  isSelected: boolean;
-}
-
 export const useStyles = () => {
-  const { euiTheme, euiVars } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { size, colors, font } = euiTheme;
@@ -24,6 +19,7 @@ export const useStyles = () => {
       padding: size.base,
       border: euiTheme.border.thin,
       borderRadius: euiTheme.border.radius.medium,
+      overflow: 'auto',
     };
 
     const title: CSSObject = {
@@ -32,11 +28,18 @@ export const useStyles = () => {
 
     const dataInfo: CSSObject = {
       marginBottom: size.xs,
+      display: 'flex',
+      alignItems: 'center',
+      height: '18px',
     };
 
     const dataValue: CSSObject = {
       fontWeight: font.weight.semiBold,
-      float: 'right',
+      marginLeft: 'auto',
+    };
+
+    const filters: CSSObject = {
+      marginLeft: size.s,
     };
 
     const percentageBackground: CSSObject = {
@@ -57,6 +60,7 @@ export const useStyles = () => {
       title,
       dataInfo,
       dataValue,
+      filters,
       percentageBackground,
       percentageBar,
     };
