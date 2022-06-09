@@ -321,12 +321,13 @@
     "name": "CBR-MBP.local",
     "host": "localhost",
     "status": "green",
+    "statusIsStale": true,
     "transport_address": "localhost:5601",
     "uuid": "5b2de169-2785-441b-ae8c-186a1936b17d",
     "snapshot": false,
     "index": ".kibana",
+    "lastSeenTimestamp": "2022-05-31T18:52:10.179Z",
     "version": "8.4.0",
-    "availability": false,
     "os_memory_free": 1504448512,
     "uptime": 1845765
   }

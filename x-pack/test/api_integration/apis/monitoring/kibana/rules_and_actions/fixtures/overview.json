@@ -40,6 +40,7 @@
     "logstash": {},
     "kibana": {
       "status": "green",
+      "some_status_is_stale": true,
       "requests_total": 59,
       "concurrent_connections": 17,
       "response_time_max": 418,
