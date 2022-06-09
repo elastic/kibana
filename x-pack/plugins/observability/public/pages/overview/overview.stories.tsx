@@ -15,7 +15,6 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { HasDataContextProvider } from '../../context/has_data_context';
 import { PluginContext } from '../../context/plugin_context';
-import { ObservabilityPublicPluginsStart } from '../../plugin';
 import { registerDataHandler, unregisterDataHandler } from '../../data_handler';
 import { OverviewPage } from '.';
 import { alertsFetchData } from './mock/alerts.mock';
@@ -90,8 +89,6 @@ const withCore = makeDecorator({
                   rules: { enabled: true },
                 },
               },
-              core: {} as CoreStart,
-              plugins: {} as ObservabilityPublicPluginsStart,
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
               ObservabilityPageTemplate: KibanaPageTemplate,
               kibanaFeatures: [],

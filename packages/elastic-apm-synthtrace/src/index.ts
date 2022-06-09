@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+export { runSynthtrace } from './scripts/run_synthtrace';
 export { timerange } from './lib/timerange';
 export { apm } from './lib/apm';
 export { stackMonitoring } from './lib/stack_monitoring';
