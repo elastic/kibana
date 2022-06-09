@@ -11,7 +11,7 @@ import { mockServicesFactory, MockServicesFactoryParams } from '@kbn/shared-ux-s
 import {
   getNoDataViewsPromptStoryArgTypes,
   getNoDataViewsPromptStorybookServices,
-  getNoDataViewsPromptJestServices,
+  getNoDataViewsPromptMockServices,
 } from '@kbn/shared-ux-prompt-no-data-views';
 
 import { KibanaNoDataPageServices } from './services';
@@ -82,7 +82,7 @@ export const getStoryArgTypes = () => ({
  */
 export const getMockServices = (params?: MockServicesFactoryParams) => {
   const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor } =
-    getNoDataViewsPromptJestServices();
+    getNoDataViewsPromptMockServices();
 
   const { application, data, docLinks, editors, http, permissions, platform } =
     mockServicesFactory(params);

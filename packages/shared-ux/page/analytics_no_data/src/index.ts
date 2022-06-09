@@ -11,7 +11,7 @@ export { AnalyticsNoDataPage } from './analytics_no_data_page';
 export { AnalyticsNoDataPage as AnalyticsNoDataPageComponent } from './analytics_no_data_page.component';
 
 export {
-  getMockServices as getAnalyticsNoDataPageJestServices,
+  getMockServices as getAnalyticsNoDataPageMockServices,
   getStoryArgTypes as getAnalyticsNoDataPageStoryArgTypes,
   getStoryServices as getAnalyticsNoDataPageStoryServices,
 } from './mocks';

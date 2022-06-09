@@ -14,5 +14,5 @@ export { KibanaNoDataPageKibanaProvider, KibanaNoDataPageProvider } from './serv
 export {
   getStoryArgTypes as getKibanaNoDataPageStoryArgTypes,
   getStoryServices as getKibanaNoDataPageStoryMock,
-  getMockServices as getKibanaNoDataPageJestServices,
+  getMockServices as getKibanaNoDataPageMockServices,
 } from './mocks';
