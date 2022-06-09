@@ -43,28 +43,28 @@ describe('MTTR', () => {
     expect(await handler.compute()).toEqual({});
   });
 
-  it('returns zero values when aggregation returns undefined', async () => {
+  it('returns null when aggregation returns undefined', async () => {
     caseService.executeAggregations.mockResolvedValue(undefined);
     const handler = new MTTR(constructorOptions);
     handler.setupFeature('mttr');
 
-    expect(await handler.compute()).toEqual({ mttr: 0 });
+    expect(await handler.compute()).toEqual({ mttr: null });
   });
 
-  it('returns zero values when aggregation returns empty object', async () => {
+  it('returns null when aggregation returns empty object', async () => {
     caseService.executeAggregations.mockResolvedValue({});
     const handler = new MTTR(constructorOptions);
     handler.setupFeature('mttr');
 
-    expect(await handler.compute()).toEqual({ mttr: 0 });
+    expect(await handler.compute()).toEqual({ mttr: null });
   });
 
-  it('returns zero values when aggregation returns empty mttr object', async () => {
+  it('returns null when aggregation returns empty mttr object', async () => {
     caseService.executeAggregations.mockResolvedValue({ mttr: {} });
     const handler = new MTTR(constructorOptions);
     handler.setupFeature('mttr');
 
-    expect(await handler.compute()).toEqual({ mttr: 0 });
+    expect(await handler.compute()).toEqual({ mttr: null });
   });
 
   it('returns values when there is a mttr value', async () => {

@@ -187,6 +187,6 @@ export const CasesMetricsResponseRt = rt.partial(
     /**
      * The average resolve time of all cases in seconds
      */
-    mttr: rt.number,
+    mttr: rt.union([rt.number, rt.null]),
   }).props
 );
