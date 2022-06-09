@@ -39,7 +39,7 @@ const OverlayRootContainer = styled.div`
   bottom: 0;
   right: 0;
 
-  height: calc(100% - calc(${({ theme: { eui } }) => eui.euiHeaderHeightCompensation} * 2));
+  height: calc(100% - ${({ theme: { eui } }) => eui.euiHeaderHeightCompensation} * 2);
   width: 100%;
 
   z-index: ${({ theme: { eui } }) => eui.euiZFlyout};
