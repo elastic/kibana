@@ -51,7 +51,7 @@ export type RenderArgData = BaseFormProps & {
   onValueChange: (argName: string, argIndex: number) => (value: string | Ast) => void;
   onValueRemove: (argName: string, argIndex: number) => () => void;
   onContainerRemove: () => void;
-  onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => string;
+  onAssetAdd: (type: AssetType['type'], content: AssetType['value']) => Promise<string | void>;
   updateContext: (element?: CanvasElement) => void;
   typeInstance?: ExpressionType;
 };
