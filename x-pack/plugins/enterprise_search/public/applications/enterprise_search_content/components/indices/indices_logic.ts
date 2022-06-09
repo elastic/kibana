@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  indices as indicesMock,
-  searchEngines as searchEnginesMock,
-} from '../../__mocks__';
+import { indices as indicesMock, searchEngines as searchEnginesMock } from '../../__mocks__';
 
 import { kea, MakeLogicType } from 'kea';
 

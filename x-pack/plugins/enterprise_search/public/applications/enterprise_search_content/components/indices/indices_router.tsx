@@ -10,8 +10,8 @@ import { Route, Switch } from 'react-router-dom';
 
 import { INDICES_PATH, INDEX_PATH, NEW_INDEX_PATH } from '../../routes';
 
-import { NewIndex } from '../new_index';
 import { IndexDetailRouter } from '../index_detail';
+import { NewIndex } from '../new_index';
 
 import { Indices } from './indices';
 

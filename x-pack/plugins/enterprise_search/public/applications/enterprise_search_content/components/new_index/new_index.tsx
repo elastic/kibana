@@ -29,9 +29,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 import { baseBreadcrumbs } from '../indices';
 import { IndicesLogic } from '../indices/indices_logic';
+import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { IndexEmptyState } from './empty_state';
 import { MethodApi } from './method_api';
@@ -182,13 +182,10 @@ export const NewIndex: React.FC = () => {
             <EuiSpacer size="xs" />
             <EuiText size="s">
               <p>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.newIndex.selectIndex.description',
-                  {
-                    defaultMessage:
-                      'Add your content to Enterprise Search by creating a search index.',
-                  }
-                )}
+                {i18n.translate('xpack.enterpriseSearch.content.newIndex.selectIndex.description', {
+                  defaultMessage:
+                    'Add your content to Enterprise Search by creating a search index.',
+                })}
               </p>
             </EuiText>
             <EuiSpacer size="m" />
@@ -223,9 +220,7 @@ export const NewIndex: React.FC = () => {
             </EuiLink>
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem>
-          {methodIsSelected ? <NewIndexLayout /> : <IndexEmptyState />}
-        </EuiFlexItem>
+        <EuiFlexItem>{methodIsSelected ? <NewIndexLayout /> : <IndexEmptyState />}</EuiFlexItem>
       </EuiFlexGroup>
     </>
   );

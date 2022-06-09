@@ -20,8 +20,8 @@ import { VersionMismatchPage } from '../shared/version_mismatch';
 import { ConnectorSettings } from './components/connector_settings';
 import { CrawlerSettings } from './components/crawler_settings';
 import { ErrorConnecting } from './components/error_connecting';
-import { NotFound } from './components/not_found';
 import { IndicesRouter } from './components/indices';
+import { NotFound } from './components/not_found';
 import {
   SETUP_GUIDE_PATH,
   ROOT_PATH,

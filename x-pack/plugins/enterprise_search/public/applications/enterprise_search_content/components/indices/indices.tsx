@@ -43,8 +43,7 @@ export const baseBreadcrumbs = [
 ];
 
 export const Indices: React.FC = () => {
-  const { initPage, searchEnginesLoadSuccess, indicesLoadSuccess } =
-    useActions(IndicesLogic);
+  const { initPage, searchEnginesLoadSuccess, indicesLoadSuccess } = useActions(IndicesLogic);
   const { indices, searchEngines } = useValues(IndicesLogic);
 
   useEffect(() => {
@@ -98,12 +97,9 @@ export const Indices: React.FC = () => {
     },
     {
       field: 'search_engines',
-      name: i18n.translate(
-        'xpack.enterpriseSearch.content.indices.searchEngines.columnTitle',
-        {
-          defaultMessage: 'Attached search engines',
-        }
-      ),
+      name: i18n.translate('xpack.enterpriseSearch.content.indices.searchEngines.columnTitle', {
+        defaultMessage: 'Attached search engines',
+      }),
       truncateText: true,
     },
     {
@@ -169,12 +165,9 @@ export const Indices: React.FC = () => {
       ? i18n.translate('xpack.enterpriseSearch.content.indices.indices.pageTitle', {
           defaultMessage: 'Content',
         })
-      : i18n.translate(
-          'xpack.enterpriseSearch.content.indices.indices.emptyPageTitle',
-          {
-            defaultMessage: 'Welcome to Enterprise Search',
-          }
-        );
+      : i18n.translate('xpack.enterpriseSearch.content.indices.indices.emptyPageTitle', {
+          defaultMessage: 'Welcome to Enterprise Search',
+        });
 
   return (
     <>
@@ -191,12 +184,9 @@ export const Indices: React.FC = () => {
           <>
             <EuiTitle>
               <h2>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.indices.indices.tableTitle',
-                  {
-                    defaultMessage: 'Indices',
-                  }
-                )}
+                {i18n.translate('xpack.enterpriseSearch.content.indices.indices.tableTitle', {
+                  defaultMessage: 'Indices',
+                })}
               </h2>
             </EuiTitle>
             <EuiSpacer size="l" />

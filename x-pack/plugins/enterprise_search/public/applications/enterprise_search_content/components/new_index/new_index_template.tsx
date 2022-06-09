@@ -56,8 +56,7 @@ export const NewIndexTemplate: React.FC<IIndex> = ({
 }) => {
   const { searchEngineSelectOptions, name, language, rawName, selectedSearchEngines } =
     useValues(NewIndexLogic);
-  const { setRawName, setLanguage, setSelectedSearchEngineOptions } =
-    useActions(NewIndexLogic);
+  const { setRawName, setLanguage, setSelectedSearchEngineOptions } = useActions(NewIndexLogic);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -76,13 +75,10 @@ export const NewIndexTemplate: React.FC<IIndex> = ({
         <EuiFlexItem grow={false}>
           <EuiTitle size="s">
             <h2>
-              {i18n.translate(
-                'xpack.enterpriseSearch.content.newIndex.newIndexTemplate.title',
-                {
-                  defaultMessage: 'New {type}',
-                  values: { type: NEW_INDEX_TEMPLATE_TYPES[type] },
-                }
-              )}
+              {i18n.translate('xpack.enterpriseSearch.content.newIndex.newIndexTemplate.title', {
+                defaultMessage: 'New {type}',
+                values: { type: NEW_INDEX_TEMPLATE_TYPES[type] },
+              })}
             </h2>
           </EuiTitle>
           <EuiText size="s" color="subdued">
