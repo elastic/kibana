@@ -15,17 +15,10 @@ import { useBreadcrumb } from '../../../context/breadcrumbs/use_breadcrumb';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useApmRouter } from '../../../hooks/use_apm_router';
-import { SearchBar } from '../../shared/search_bar';
 import { BackendLatencyChart } from './backend_latency_chart';
-import { DependenciesInventoryTitle } from '../../routing/home';
 import { BackendDetailDependenciesTable } from './backend_detail_dependencies_table';
 import { BackendThroughputChart } from './backend_throughput_chart';
 import { BackendFailedTransactionRateChart } from './backend_error_rate_chart';
-import { BackendDetailTemplate } from '../../routing/templates/backend_detail_template';
-import {
-  getKueryBarBoolFilter,
-  kueryBarPlaceholder,
-} from '../../../../common/backends';
 import { useBreakpoints } from '../../../hooks/use_breakpoints';
 
 export function BackendDetailOverview() {
@@ -46,21 +39,9 @@ export function BackendDetailOverview() {
 
   useBreadcrumb([
     {
-      title: DependenciesInventoryTitle,
-      href: apmRouter.link('/backends', {
-        query: {
-          rangeFrom,
-          rangeTo,
-          refreshInterval,
-          refreshPaused,
-          environment,
-          kuery,
-          comparisonEnabled,
-        },
+      title: i18n.translate('xpack.apm.backendDetailOverview.breadcrumbTitle', {
+        defaultMessage: 'Overview',
       }),
-    },
-    {
-      title: backendName,
       href: apmRouter.link('/backends/overview', {
         query: {
           backendName,
@@ -75,21 +56,10 @@ export function BackendDetailOverview() {
       }),
     },
   ]);
-
-  const kueryBarBoolFilter = getKueryBarBoolFilter({
-    environment,
-    backendName,
-  });
-
   const largeScreenOrSmaller = useBreakpoints().isLarge;
 
   return (
-    <BackendDetailTemplate title={backendName}>
-      <SearchBar
-        showTimeComparison
-        kueryBarPlaceholder={kueryBarPlaceholder}
-        kueryBarBoolFilter={kueryBarBoolFilter}
-      />
+    <>
       <ChartPointerEventContextProvider>
         <EuiFlexGroup
           direction={largeScreenOrSmaller ? 'column' : 'row'}
@@ -137,6 +107,6 @@ export function BackendDetailOverview() {
       </ChartPointerEventContextProvider>
       <EuiSpacer size="l" />
       <BackendDetailDependenciesTable />
-    </BackendDetailTemplate>
+    </>
   );
 }

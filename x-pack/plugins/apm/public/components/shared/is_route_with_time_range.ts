@@ -21,6 +21,7 @@ export function isRouteWithTimeRange({
       route.path === '/traces' ||
       route.path === '/service-map' ||
       route.path === '/backends' ||
+      route.path === '/backends/inventory' ||
       route.path === '/services/{serviceName}' ||
       route.path === '/service-groups' ||
       location.pathname === '/' ||

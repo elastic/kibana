@@ -22,14 +22,12 @@ import { ServiceLink } from '../../../shared/service_link';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
-  isSingleColumn?: boolean;
   link?: ReactNode;
   showPerPageOptions?: boolean;
 }
 
 export function ServiceOverviewDependenciesTable({
   fixedHeight,
-  isSingleColumn = true,
   link,
   showPerPageOptions = true,
 }: ServiceOverviewDependenciesTableProps) {
@@ -136,7 +134,6 @@ export function ServiceOverviewDependenciesTable({
     <DependenciesTable
       dependencies={dependencies}
       fixedHeight={fixedHeight}
-      isSingleColumn={isSingleColumn}
       title={
         <EuiToolTip
           content={i18n.translate(
