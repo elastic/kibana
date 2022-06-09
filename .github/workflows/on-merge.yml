@@ -34,7 +34,7 @@ jobs:
         uses: actions/checkout@v2
         with:
           repository: 'elastic/kibana-github-actions'
-          ref: on-merge
+          ref: main
           path: ./actions
 
       - name: Install Actions
