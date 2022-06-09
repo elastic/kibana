@@ -50,7 +50,7 @@ export interface ExplorerJob {
   id: string;
   selected: boolean;
   bucketSpanSeconds: number;
-  isSingleMetricViewerJob: boolean;
+  isSingleMetricViewerJob?: boolean;
 }
 
 interface ClearedSelectedAnomaliesState {
