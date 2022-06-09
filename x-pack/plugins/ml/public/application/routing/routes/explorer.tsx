@@ -208,6 +208,11 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     anomalyExplorerContext.anomalyExplorerCommonStateService.getInfluencerFilterQuery$()
   );
 
+  const smvJobs = useObservable(
+    anomalyExplorerContext.anomalyExplorerCommonStateService.getSingleMetricJobs$()
+  );
+  const isSingleMetricViewerDisabled = (smvJobs?.length ?? 0) === 0;
+
   const loadExplorerDataConfig =
     explorerState !== undefined
       ? {
@@ -250,7 +255,10 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
       <MlPageHeader>
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <AnomalyResultsViewSelector viewId="explorer" />
+            <AnomalyResultsViewSelector
+              viewId="explorer"
+              isSingleMetricViewerDisabled={isSingleMetricViewerDisabled}
+            />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <FormattedMessage id="xpack.ml.explorer.pageTitle" defaultMessage="Anomaly Explorer" />

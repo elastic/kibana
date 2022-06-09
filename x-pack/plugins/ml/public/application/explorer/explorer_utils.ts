@@ -24,6 +24,7 @@ import {
   isSourceDataChartableForDetector,
   isModelPlotChartableForDetector,
   isModelPlotEnabled,
+  isTimeSeriesViewJob,
 } from '../../../common/util/job_utils';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { ml } from '../services/ml_api_service';
@@ -49,6 +50,7 @@ export interface ExplorerJob {
   id: string;
   selected: boolean;
   bucketSpanSeconds: number;
+  isSingleMetricViewerJob: boolean;
 }
 
 interface ClearedSelectedAnomaliesState {
@@ -113,7 +115,12 @@ export interface ViewBySwimLaneData extends OverallSwimlaneData {
 export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
   return jobs.map((job) => {
     const bucketSpan = parseInterval(job.analysis_config.bucket_span);
-    return { id: job.job_id, selected: false, bucketSpanSeconds: bucketSpan!.asSeconds() };
+    return {
+      id: job.job_id,
+      selected: false,
+      bucketSpanSeconds: bucketSpan!.asSeconds(),
+      isSingleMetricViewerJob: isTimeSeriesViewJob(job),
+    };
   });
 }
 

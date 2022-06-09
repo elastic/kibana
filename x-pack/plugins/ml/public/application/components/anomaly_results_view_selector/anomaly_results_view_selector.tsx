@@ -17,11 +17,16 @@ import { ML_PAGES } from '../../../../common/constants/locator';
 
 interface Props {
   viewId: typeof ML_PAGES.SINGLE_METRIC_VIEWER | typeof ML_PAGES.ANOMALY_EXPLORER;
+  isSingleMetricViewerDisabled?: boolean;
 }
 
-// Component for rendering a set of buttons for switching between the Anomaly Detection results views.
-
-export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
+/**
+ * Component for rendering a set of buttons for switching between the Anomaly Detection results views.
+ */
+export const AnomalyResultsViewSelector: FC<Props> = ({
+  viewId,
+  isSingleMetricViewerDisabled = false,
+}) => {
   const locator = useMlLocator()!;
   const navigateToPath = useNavigateToPath();
 
@@ -35,6 +40,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
         iconType: 'visLine',
         value: ML_PAGES.SINGLE_METRIC_VIEWER,
         'data-test-subj': 'mlAnomalyResultsViewSelectorSingleMetricViewer',
+        isDisabled: isSingleMetricViewerDisabled,
       },
       {
         id: 'explorer',
@@ -46,7 +52,7 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId }) => {
         'data-test-subj': 'mlAnomalyResultsViewSelectorExplorer',
       },
     ],
-    []
+    [isSingleMetricViewerDisabled]
   );
 
   const [globalState] = useUrlState('_g');
