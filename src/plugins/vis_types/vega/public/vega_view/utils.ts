@@ -19,7 +19,7 @@ export function normalizeDate(date: unknown) {
 
 /*
 Recursive function to check a nested object for a function property
-This function should run after JSON.stringify to ensure that functions such as toJSON
+This function should run before JSON.stringify to ensure that functions such as toJSON
 are not invoked. We dont use the replacer function as it doesnt catch the toJSON function
 */
 export function checkObjectForFunctionProperty(object: unknown): boolean {
