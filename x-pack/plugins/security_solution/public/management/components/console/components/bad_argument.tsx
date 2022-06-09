@@ -9,14 +9,14 @@ import React, { memo, PropsWithChildren, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiText } from '@elastic/eui';
 import { UnsupportedMessageCallout } from './unsupported_message_callout';
-import { ParsedCommandInput } from '../service/parsed_command_input';
+import { ParsedCommandInterface } from '../service/parsed_command_input';
 import { CommandDefinition, CommandExecutionComponentProps } from '../types';
 import { CommandInputUsage } from './command_usage';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export type BadArgumentProps = PropsWithChildren<{
-  parsedInput: ParsedCommandInput;
+  parsedInput: ParsedCommandInterface;
   commandDefinition: CommandDefinition;
 }>;
 
