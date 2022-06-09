@@ -8,7 +8,7 @@
 import { DeepPartial } from 'utility-types';
 import { merge } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_INDEX } from '../constants';
+import { ENDPOINT_ACTION_RESPONSES_DS, ENDPOINT_ACTIONS_DS } from '../constants';
 import { BaseDataGenerator } from './base_data_generator';
 import {
   ActionDetails,
@@ -59,7 +59,7 @@ export class EndpointActionGenerator extends BaseDataGenerator {
     overrides: DeepPartial<LogsEndpointAction> = {}
   ): estypes.SearchHit<LogsEndpointAction> {
     return Object.assign(this.toEsSearchHit(this.generate(overrides)), {
-      _index: `.ds-${ENDPOINT_ACTIONS_INDEX}-some_namespace`,
+      _index: `.ds-${ENDPOINT_ACTIONS_DS}-some_namespace`,
     });
   }
 

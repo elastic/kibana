@@ -7,11 +7,10 @@
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
 import {
-  EndpointAction,
   EndpointActionResponse,
   LogsEndpointAction,
   LogsEndpointActionResponse,
@@ -21,25 +20,18 @@ import {
   ENDPOINT_ACTIONS_INDEX,
 } from '../../../../common/endpoint/constants';
 
-export const createActionRequestsEsSearchResultsMock = (): estypes.SearchResponse<
-  EndpointAction | LogsEndpointAction
-> => {
-  const endpointActionGenerator = new EndpointActionGenerator('seed');
-  const fleetActionGenerator = new FleetActionGenerator('seed');
+export const createActionRequestsEsSearchResultsMock =
+  (): estypes.SearchResponse<LogsEndpointAction> => {
+    const endpointActionGenerator = new EndpointActionGenerator('seed');
 
-  return endpointActionGenerator.toEsSearchResponse<EndpointAction | LogsEndpointAction>([
-    fleetActionGenerator.generateActionEsHit({
-      action_id: '123',
-      agents: ['agent-a'],
-      '@timestamp': '2022-04-27T16:08:47.449Z',
-    }),
-    endpointActionGenerator.generateActionEsHit({
-      EndpointActions: { action_id: '123' },
-      agent: { id: 'agent-a' },
-      '@timestamp': '2022-04-27T16:08:47.449Z',
-    }),
-  ]);
-};
+    return endpointActionGenerator.toEsSearchResponse<LogsEndpointAction>([
+      endpointActionGenerator.generateActionEsHit({
+        EndpointActions: { action_id: '123' },
+        agent: { id: 'agent-a' },
+        '@timestamp': '2022-04-27T16:08:47.449Z',
+      }),
+    ]);
+  };
 
 export const createActionResponsesEsSearchResultsMock = (): estypes.SearchResponse<
   LogsEndpointActionResponse | EndpointActionResponse
@@ -73,9 +65,7 @@ export const createActionResponsesEsSearchResultsMock = (): estypes.SearchRespon
  */
 export const applyActionsEsSearchMock = (
   esClient: ElasticsearchClientMock,
-  actionRequests: estypes.SearchResponse<
-    EndpointAction | LogsEndpointAction
-  > = createActionRequestsEsSearchResultsMock(),
+  actionRequests: estypes.SearchResponse<LogsEndpointAction> = createActionRequestsEsSearchResultsMock(),
   actionResponses: estypes.SearchResponse<
     LogsEndpointActionResponse | EndpointActionResponse
   > = createActionResponsesEsSearchResultsMock()
@@ -86,7 +76,7 @@ export const applyActionsEsSearchMock = (
     const params = args[0] ?? {};
     const indexes = Array.isArray(params.index) ? params.index : [params.index];
 
-    if (indexes.includes(AGENT_ACTIONS_INDEX) || indexes.includes(ENDPOINT_ACTIONS_INDEX)) {
+    if (indexes.includes(ENDPOINT_ACTIONS_INDEX)) {
       return actionRequests;
     } else if (
       indexes.includes(AGENT_ACTIONS_RESULTS_INDEX) ||

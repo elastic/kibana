@@ -7,18 +7,16 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
+import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import {
   categorizeActionResults,
   categorizeResponseResults,
   getActionCompletionInfo,
-  getUniqueLogData,
   mapToNormalizedActionRequest,
 } from './utils';
 import type {
   ActionDetails,
-  ActivityLogAction,
   ActivityLogActionResponse,
-  EndpointAction,
   EndpointActionResponse,
   EndpointActivityLogAction,
   EndpointActivityLogActionResponse,
@@ -28,17 +26,13 @@ import type {
 import { catchAndWrapError } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
-import {
-  ACTION_REQUEST_INDICES,
-  ACTION_RESPONSE_INDICES,
-  ACTIONS_SEARCH_PAGE_SIZE,
-} from './constants';
+import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 export const getActionDetailsById = async (
   esClient: ElasticsearchClient,
   actionId: string
 ): Promise<ActionDetails> => {
-  let actionRequestsLogEntries: Array<ActivityLogAction | EndpointActivityLogAction>;
+  let actionRequestsLogEntries: EndpointActivityLogAction[];
 
   let normalizedActionRequest: ReturnType<typeof mapToNormalizedActionRequest> | undefined;
   let actionResponses: Array<ActivityLogActionResponse | EndpointActivityLogActionResponse>;
@@ -48,9 +42,9 @@ export const getActionDetailsById = async (
     const [actionRequestEsSearchResults, actionResponsesEsSearchResults] = await Promise.all([
       // Get the action request(s)
       esClient
-        .search<EndpointAction | LogsEndpointAction>(
+        .search<LogsEndpointAction>(
           {
-            index: ACTION_REQUEST_INDICES,
+            index: ENDPOINT_ACTIONS_INDEX,
             body: {
               query: {
                 bool: {
@@ -88,11 +82,9 @@ export const getActionDetailsById = async (
         .catch(catchAndWrapError),
     ]);
 
-    actionRequestsLogEntries = getUniqueLogData(
-      categorizeActionResults({
-        results: actionRequestEsSearchResults?.hits?.hits ?? [],
-      })
-    ) as Array<ActivityLogAction | EndpointActivityLogAction>;
+    actionRequestsLogEntries = categorizeActionResults({
+      results: actionRequestEsSearchResults?.hits?.hits ?? [],
+    }) as EndpointActivityLogAction[];
 
     // Multiple Action records could have been returned, but we only really
     // need one since they both hold similar data

@@ -9,7 +9,6 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
 import { wrapErrorIfNeeded } from '../../utils';
-import { NotFoundError } from '../../errors';
 
 import {
   getActions,
