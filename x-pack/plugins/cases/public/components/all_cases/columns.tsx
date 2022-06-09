@@ -24,7 +24,7 @@ import {
 import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
 import styled from 'styled-components';
 
-import { Case, DeleteCase } from '../../../common/ui/types';
+import { Case, DeleteCase, UpdateByKey } from '../../../common/ui/types';
 import { CaseStatuses, ActionConnector, CaseSeverity } from '../../../common/api';
 import { OWNER_INFO } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
@@ -33,7 +33,6 @@ import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
 import { ALERTS } from '../../common/translations';
 import { getActions } from './actions';
-import { UpdateCase } from '../../containers/use_get_cases';
 import { useDeleteCases } from '../../containers/use_delete_cases';
 import { ConfirmDeleteCaseModal } from '../confirm_delete_case';
 import { useApplicationCapabilities, useKibana } from '../../common/lib/kibana';
@@ -43,6 +42,7 @@ import { getConnectorIcon } from '../utils';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { useCasesFeatures } from '../cases_context/use_cases_features';
 import { severities } from '../severity/config';
+import { useUpdateCase } from '../../containers/use_update_case';
 
 export type CasesColumns =
   | EuiTableActionsColumnType<Case>
@@ -57,10 +57,8 @@ const renderStringField = (field: string, dataTestSubj: string) =>
   field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
 
 export interface GetCasesColumn {
-  dispatchUpdateCaseProperty: (u: UpdateCase) => void;
   filterStatus: string;
   handleIsLoading: (a: boolean) => void;
-  isLoadingCases: string[];
   refreshCases?: (a?: boolean) => void;
   isSelectorView: boolean;
   userCanCrud: boolean;
@@ -70,10 +68,8 @@ export interface GetCasesColumn {
   showSolutionColumn?: boolean;
 }
 export const useCasesColumns = ({
-  dispatchUpdateCaseProperty,
   filterStatus,
   handleIsLoading,
-  isLoadingCases,
   refreshCases,
   isSelectorView,
   userCanCrud,
@@ -98,6 +94,8 @@ export const useCasesColumns = ({
     title: '',
   });
 
+  const { updateCaseProperty, isLoading: isLoadingUpdateCase } = useUpdateCase();
+
   const toggleDeleteModal = useCallback(
     (deleteCase: Case) => {
       handleToggleModal();
@@ -107,15 +105,17 @@ export const useCasesColumns = ({
   );
 
   const handleDispatchUpdate = useCallback(
-    (args: Omit<UpdateCase, 'refetchCasesStatus'>) => {
-      dispatchUpdateCaseProperty({
-        ...args,
-        refetchCasesStatus: () => {
+    ({ updateKey, updateValue, caseData }: UpdateByKey) => {
+      updateCaseProperty({
+        updateKey,
+        updateValue,
+        caseData,
+        onSuccess: () => {
           if (refreshCases != null) refreshCases();
         },
       });
     },
-    [dispatchUpdateCaseProperty, refreshCases]
+    [refreshCases, updateCaseProperty]
   );
 
   const actions = useMemo(
@@ -136,8 +136,8 @@ export const useCasesColumns = ({
   );
 
   useEffect(() => {
-    handleIsLoading(isDeleting || isLoadingCases.indexOf('caseUpdate') > -1);
-  }, [handleIsLoading, isDeleting, isLoadingCases]);
+    handleIsLoading(isDeleting || isLoadingUpdateCase);
+  }, [handleIsLoading, isDeleting, isLoadingUpdateCase]);
 
   useEffect(() => {
     if (isDeleted) {
@@ -319,13 +319,12 @@ export const useCasesColumns = ({
               return (
                 <StatusContextMenu
                   currentStatus={theCase.status}
-                  disabled={!userCanCrud || isLoadingCases.length > 0}
+                  disabled={!userCanCrud || isLoadingUpdateCase}
                   onStatusChanged={(status) =>
                     handleDispatchUpdate({
                       updateKey: 'status',
                       updateValue: status,
-                      caseId: theCase.id,
-                      version: theCase.version,
+                      caseData: theCase,
                     })
                   }
                 />
