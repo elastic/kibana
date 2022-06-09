@@ -85,15 +85,17 @@ export const LandingCards = memo(() => {
           </EuiFlexItem>
           <EuiFlexItem>
             <iframe
-              className="vidyard_iframe"
-              src="//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?"
-              width="100%"
-              height="100%"
-              scrolling="no"
-              frameBorder="0"
-              allowTransparency
               allowFullScreen
+              allowTransparency
+              className="vidyard_iframe"
+              frameBorder="0"
+              height="100%"
+              referrerPolicy="no-referrer"
+              sandbox="allow-scripts allow-same-origin"
+              scrolling="no"
+              src="//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?"
               title={i18n.SIEM_HEADER}
+              width="100%"
             />
           </EuiFlexItem>
         </EuiFlexGroup>
