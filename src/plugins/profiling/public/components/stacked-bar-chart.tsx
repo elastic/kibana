@@ -32,9 +32,11 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
   category,
 }) => {
   const ctx = useContext(TopNContext);
+
   useEffect(() => {
     console.log(new Date().toISOString(), 'updated stacked-bar-chart');
-  });
+  }, [ctx, id, name, x, y, category]);
+
   return (
     <Chart size={{ height }}>
       <Settings showLegend={false} />

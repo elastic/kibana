@@ -24,7 +24,7 @@ export interface BarChartProps {
 export const BarChart: React.FC<BarChartProps> = ({ id, name, height, data, x, y }) => {
   useEffect(() => {
     console.log(new Date().toISOString(), 'updated bar-chart');
-  });
+  }, [id, name, height, data, x, y]);
 
   return (
     <Chart size={{ height }}>

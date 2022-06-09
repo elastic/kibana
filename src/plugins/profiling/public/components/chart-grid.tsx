@@ -62,9 +62,11 @@ export const ChartGrid: React.FC<ChartGridProps> = ({ maximum }) => {
     }
     return charts;
   };
+
   useEffect(() => {
     console.log(new Date().toISOString(), 'updated chart-grid');
-  });
+  }, [ctx]);
+
   return (
     <>
       <EuiSpacer />
