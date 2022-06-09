@@ -58,7 +58,7 @@ export function hasNumericHistogramDimension(
 }
 
 /**
- * Finds the table data min and max
+ * Finds the table data min and max. Returns undefined when no min/max is found
  * @param layerId
  * @param tables
  * @param columnId

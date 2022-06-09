@@ -9,7 +9,11 @@ import { AxisExtentConfig } from '@kbn/expression-xy-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import type { IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { FormatFactory } from '../../common';
-import { validateAxisDomain, validateZeroInclusivityExtent } from '../shared_components';
+import {
+  getDataBounds,
+  validateAxisDomain,
+  validateZeroInclusivityExtent,
+} from '../shared_components';
 import { XYDataLayerConfig } from './types';
 
 interface FormattedMetric {
@@ -35,14 +39,11 @@ export function isFormatterCompatible(
 export function getXDomain(layers: XYDataLayerConfig[] = [], tables?: Record<string, Datatable>) {
   const dataBounds = layers.reduce(
     (bounds, layer) => {
-      const table = tables?.[layer.layerId];
-      if (layer.xAccessor && table) {
-        const sortedRows = table.rows
-          .map(({ [layer.xAccessor!]: xValue }) => xValue)
-          .sort((a, b) => a - b);
+      const tableBounds = getDataBounds(layer.layerId, tables, layer.xAccessor);
+      if (tableBounds) {
         return {
-          min: Math.min(bounds.min, sortedRows[0]),
-          max: Math.max(bounds.max, sortedRows[sortedRows.length - 1]),
+          min: Math.min(bounds.min, tableBounds.min),
+          max: Math.max(bounds.max, tableBounds.max),
         };
       }
       return bounds;

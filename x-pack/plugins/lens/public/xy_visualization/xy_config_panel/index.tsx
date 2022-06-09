@@ -14,14 +14,14 @@ import { LegendSize } from '@kbn/visualizations-plugin/public';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../types';
 import { State, XYState } from '../types';
 import { isHorizontalChart } from '../state_helpers';
-import { LegendSettingsPopover } from '../../shared_components';
+import { hasNumericHistogramDimension, LegendSettingsPopover } from '../../shared_components';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { getAxesConfiguration, getXDomain, GroupsConfiguration } from '../axes_configuration';
 import { VisualOptionsPopover } from './visual_options_popover';
 import { getScaleType } from '../to_expression';
 import { TooltipWrapper } from '../../shared_components';
 import { getDefaultVisualValuesForLayer } from '../../shared_components/datasource_default_values';
-import { checkScaleOperation, getDataLayers } from '../visualization_helpers';
+import { getDataLayers } from '../visualization_helpers';
 import { LegendSettingsPopoverProps } from '../../shared_components/legend_settings_popover';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
@@ -299,8 +299,8 @@ export const XyToolbar = memo(function XyToolbar(
     }
   );
 
-  const hasNumberHistogram = dataLayers.some(
-    checkScaleOperation('interval', 'number', props.frame.datasourceLayers)
+  const hasNumberHistogram = dataLayers.some(({ layerId, xAccessor }) =>
+    hasNumericHistogramDimension(props.frame.datasourceLayers[layerId], xAccessor)
   );
 
   // Ask the datasource if it has a say about default truncation value
