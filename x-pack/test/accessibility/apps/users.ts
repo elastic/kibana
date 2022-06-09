@@ -98,7 +98,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.clickLinkText('deleteA11y');
       await find.clickByButtonText('Change password');
       await a11y.testAppSnapshot();
-      await testSubjects.click('formFlyoutCancelButton');
+      await testSubjects.click('changePasswordFormCancelButton');
     });
 
     it('a11y test for deactivate user screen', async () => {
