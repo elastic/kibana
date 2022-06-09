@@ -8,15 +8,15 @@
 import { useQuery } from 'react-query';
 import { InstalledIntegrationArray } from '../../../../../common/detection_engine/schemas/common';
 import { fetchInstalledIntegrations } from '../../../containers/detection_engine/rules/api';
-import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
-import * as i18n from './translations';
+// import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
+// import * as i18n from './translations';
 
 export interface UseInstalledIntegrationsArgs {
   packages?: string[];
 }
 
 export const useInstalledIntegrations = ({ packages }: UseInstalledIntegrationsArgs) => {
-  const { addError } = useAppToasts();
+  // const { addError } = useAppToasts();
 
   return useQuery<InstalledIntegrationArray>(
     [
@@ -35,8 +35,8 @@ export const useInstalledIntegrations = ({ packages }: UseInstalledIntegrationsA
     {
       keepPreviousData: true,
       onError: (e) => {
-        // TODO: Suppress if always failing in cases where fleet isn't setup, etc
-        addError(e, { title: i18n.INTEGRATIONS_FETCH_FAILURE });
+        // Suppressing for now to prevent excessive errors when fleet isn't configured
+        // addError(e, { title: i18n.INTEGRATIONS_FETCH_FAILURE });
       },
     }
   );

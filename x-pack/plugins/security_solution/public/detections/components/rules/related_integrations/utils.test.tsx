@@ -56,28 +56,156 @@ describe('Related Integrations Utilities', () => {
     });
 
     describe('version is correctly computed', () => {
-      test('Integration that is installed, and its version is less than required version', () => {
+      test('Unknown integration that does not exist', () => {
+        const integrationDetails = getInstalledRelatedIntegrations(
+          [
+            {
+              package: 'foo1',
+              version: '~1.2.3',
+            },
+            {
+              package: 'foo2',
+              version: '^1.2.3',
+            },
+            {
+              package: 'foo3',
+              version: '1.2.x',
+            },
+          ],
+          []
+        );
+
+        expect(integrationDetails[0].target_version).toEqual('1.2.3');
+        expect(integrationDetails[1].target_version).toEqual('1.2.3');
+        expect(integrationDetails[2].target_version).toEqual('1.2.0');
+      });
+
+      test('Integration that is not installed', () => {
         const integrationDetails = getInstalledRelatedIntegrations(
           [
             {
               package: 'aws',
               integration: 'route53',
-              version: '~123.456.789',
+              version: '~1.2.3',
+            },
+            {
+              package: 'system',
+              version: '^1.2.3',
+            },
+          ],
+          []
+        );
+
+        expect(integrationDetails[0].target_version).toEqual('1.2.3');
+        expect(integrationDetails[1].target_version).toEqual('1.2.3');
+      });
+
+      test('Integration that is installed, and its version matches required version', () => {
+        const integrationDetails = getInstalledRelatedIntegrations(
+          [
+            {
+              package: 'aws',
+              integration: 'route53',
+              version: '^1.2.3',
+            },
+            {
+              package: 'system',
+              version: '~1.2.3',
             },
           ],
           [
             {
               package_name: 'aws',
               package_title: 'AWS',
-              package_version: '1.11.0',
+              package_version: '1.3.0',
               integration_name: 'route53',
               integration_title: 'AWS Route 53',
               is_enabled: false,
             },
+            {
+              package_name: 'system',
+              package_title: 'System',
+              package_version: '1.2.5',
+              is_enabled: true,
+            },
           ]
         );
 
-        expect(integrationDetails[0].target_version).toEqual('123.456.789');
+        // Since version is satisfied, we check `package_version`
+        expect(integrationDetails[0].version_satisfied).toEqual(true);
+        expect(integrationDetails[0].package_version).toEqual('1.3.0');
+        expect(integrationDetails[1].version_satisfied).toEqual(true);
+        expect(integrationDetails[1].package_version).toEqual('1.2.5');
+      });
+
+      test('Integration that is installed, and its version is less than required version', () => {
+        const integrationDetails = getInstalledRelatedIntegrations(
+          [
+            {
+              package: 'aws',
+              integration: 'route53',
+              version: '~1.2.3',
+            },
+            {
+              package: 'system',
+              version: '^1.2.3',
+            },
+          ],
+          [
+            {
+              package_name: 'aws',
+              package_title: 'AWS',
+              package_version: '1.2.0',
+              integration_name: 'route53',
+              integration_title: 'AWS Route 53',
+              is_enabled: false,
+            },
+            {
+              package_name: 'system',
+              package_title: 'System',
+              package_version: '1.2.2',
+              is_enabled: true,
+            },
+          ]
+        );
+
+        expect(integrationDetails[0].target_version).toEqual('1.2.3');
+        expect(integrationDetails[1].target_version).toEqual('1.2.3');
+      });
+
+      test('Integration that is installed, and its version is greater than required version', () => {
+        const integrationDetails = getInstalledRelatedIntegrations(
+          [
+            {
+              package: 'aws',
+              integration: 'route53',
+              version: '^1.2.3',
+            },
+            {
+              package: 'system',
+              version: '~1.2.3',
+            },
+          ],
+          [
+            {
+              package_name: 'aws',
+              package_title: 'AWS',
+              package_version: '2.0.1',
+              integration_name: 'route53',
+              integration_title: 'AWS Route 53',
+              is_enabled: false,
+            },
+            {
+              package_name: 'system',
+              package_title: 'System',
+              package_version: '1.3.0',
+              is_enabled: true,
+            },
+          ]
+        );
+
+        expect(integrationDetails[0].target_version).toEqual('1.2.3');
+        expect(integrationDetails[1].target_version).toEqual('1.2.3');
       });
     });
   });
