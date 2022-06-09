@@ -21,13 +21,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Management', () => {
     it('main view', async () => {
+      await PageObjects.settings.navigateTo();
       await a11y.testAppSnapshot();
     });
 
     describe('index management', async () => {
       describe('indices', async () => {
         it('empty state', async () => {
-          await PageObjects.settings.navigateTo();
           await PageObjects.settings.clickIndexManagement();
           await a11y.testAppSnapshot();
         });
