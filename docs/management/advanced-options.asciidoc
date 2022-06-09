@@ -90,11 +90,12 @@ from suggesting values for fields.
 
 [[autocomplete-valuesuggestionmethod]]`autocomplete:valueSuggestionMethod`::
 When set to `terms_enum`, autocomplete uses the terms enum API for value suggestions. Kibana returns results faster, but suggestions are approximate, sorted alphabetically, and can be outside the selected time range.
-When set to `terms_agg`, Kibana uses a terms aggregation for value suggestions, which is slower, but suggestions include all values that optionally match your time range and are sorted by popularity.
-<<kibana-concepts-searching-your-data, Learn more>>.
+When set to `terms_agg`, Kibana uses a terms aggregation for value suggestions, which is
+slower, but suggestions include all values that optionally match your time range and are sorted by popularity.
 
 [[autocomplete-usetimerange]]`autocomplete:useTimeRange`::
-Disable this property to get autocomplete suggestions from your full dataset, rather than from the current time range. <<kibana-concepts-searching-your-data, Learn more>>.
+Disable this property to get autocomplete suggestions from
+your full dataset, rather than from the current time range.
 
 [[filters-pinnedbydefault]]`filters:pinnedByDefault`::
 Set this property to `true` to make filters have a global state (be pinned) by

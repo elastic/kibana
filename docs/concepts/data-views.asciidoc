@@ -46,8 +46,8 @@ image:management/index-patterns/images/create-data-view.png["Create data view"]
 `filebeat-apache-a`, `filebeat-apache-b`, and so on.
 +
 ** To match multiple single sources, enter their names,
-separated with a comma.  Do not include a space after the comma.
-`filebeat-a,filebeat-b` matches two indices, but not match `filebeat-c`.
+separated by a comma.  Do not include a space after the comma.
+`filebeat-a,filebeat-b` matches two indices, but does not match `filebeat-c`.
 +
 ** To exclude a source, use a minus sign (-), for example, `-test3`.
 
@@ -148,6 +148,5 @@ WARNING: Deleting a {data-source} breaks all visualizations, saved searches, and
 
 . Open the main menu, then click *Stack Management > Data Views*.
 
-. Click the {data-source} to delete.
-
-. Delete (image:management/index-patterns/images/delete.png[Delete icon]) the {data-source}.
+. Find the {data-source} that you want to delete, and then
+click (image:management/index-patterns/images/delete.png[Delete icon]) in the *Actions* column.
