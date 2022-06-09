@@ -21,6 +21,7 @@ interface FooterProps {
   onCancel: () => void;
   onSubmit: () => void;
   submitDisabled: boolean;
+  isEdit: boolean;
 }
 
 const closeButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutCloseButtonLabel', {
@@ -31,7 +32,11 @@ const saveButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutSaveButt
   defaultMessage: 'Create data view',
 });
 
-export const Footer = ({ onCancel, onSubmit, submitDisabled }: FooterProps) => {
+const editButtonLabel = i18n.translate('indexPatternEditor.editor.flyoutEditButtonLabel', {
+  defaultMessage: 'Save',
+});
+
+export const Footer = ({ onCancel, onSubmit, submitDisabled, isEdit }: FooterProps) => {
   return (
     <EuiFlyoutFooter className="indexPatternEditor__footer">
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
@@ -54,7 +59,7 @@ export const Footer = ({ onCancel, onSubmit, submitDisabled }: FooterProps) => {
             fill
             disabled={submitDisabled}
           >
-            {saveButtonLabel}
+            {isEdit ? editButtonLabel : saveButtonLabel}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>

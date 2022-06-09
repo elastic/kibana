@@ -34,7 +34,7 @@ describe('ElasticAgentCard', () => {
 
   test('renders', () => {
     const component = mount(<ElasticAgentCard />);
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 
   describe('href', () => {
