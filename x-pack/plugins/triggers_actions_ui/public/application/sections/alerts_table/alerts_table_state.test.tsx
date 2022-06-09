@@ -68,7 +68,11 @@ const getMock = jest.fn().mockImplementation((plugin: string) => {
       columns,
       sort: DefaultSort,
       externalFlyout: { body: FlyoutBody },
-      internalFlyout: { body: FlyoutBody },
+      useInternalFlyout: () => ({
+        body: FlyoutBody,
+        header: () => <>{'header'}</>,
+        footer: () => <>{'footer'}</>,
+      }),
       getRenderCellValue: () =>
         jest.fn().mockImplementation((props) => {
           return `${props.colIndex}:${props.rowIndex}`;
