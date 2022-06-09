@@ -9,7 +9,7 @@ import React, { ReactNode, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
-import { useSetFilter } from '../../hooks/use_filter';
+import { useSetFilter } from '../../hooks';
 import { addTimerangeToQuery } from '../../utils/add_timerange_to_query';
 import { useFetchPercentWidgetData } from './hooks';
 
