@@ -12,6 +12,7 @@ import {
   defaultAnnotationRangeColor,
   isRangeAnnotation,
 } from '@kbn/event-annotation-plugin/public';
+import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
 import { layerTypes } from '../../../common';
 import type { FramePublicAPI, Visualization } from '../../types';
 import { isHorizontalChart } from '../state_helpers';
@@ -168,17 +169,16 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
   };
 };
 
-export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig) => {
-  return layer.annotations.map((annotation) => {
-    return {
-      columnId: annotation.id,
-      triggerIcon: annotation.isHidden ? ('invisible' as const) : ('color' as const),
-      color:
-        annotation?.color ||
-        (isRangeAnnotation(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
-    };
-  });
-};
+export const getSingleColorAnnotationConfig = (annotation: EventAnnotationConfig) => ({
+  columnId: annotation.id,
+  triggerIcon: annotation.isHidden ? ('invisible' as const) : ('color' as const),
+  color:
+    annotation?.color ||
+    (isRangeAnnotation(annotation) ? defaultAnnotationRangeColor : defaultAnnotationColor),
+});
+
+export const getAnnotationsAccessorColorConfig = (layer: XYAnnotationLayerConfig) =>
+  layer.annotations.map((annotation) => getSingleColorAnnotationConfig(annotation));
 
 export const getAnnotationsConfiguration = ({
   state,
