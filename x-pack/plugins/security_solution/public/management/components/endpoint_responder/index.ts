@@ -6,3 +6,4 @@
  */
 
 export { getEndpointResponseActionsConsoleCommands } from './endpoint_response_actions_console_commands';
+export { ActionLogButton } from './action_log_button';

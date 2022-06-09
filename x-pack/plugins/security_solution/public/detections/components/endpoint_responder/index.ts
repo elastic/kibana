@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { useResponseActionsConsoleActionItem } from './use_response_actions_console_action_item';
+export { useResponderActionItem } from './use_responder_action_item';

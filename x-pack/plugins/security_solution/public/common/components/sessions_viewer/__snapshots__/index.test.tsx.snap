@@ -97,55 +97,5 @@ exports[`SessionsView renders correctly against snapshot 1`] = `
       </div>
     </div>
   </div>
-  .c0 {
-  position: fixed;
-  bottom: 60px;
-  left: 20px;
-  height: 50vh;
-  width: 48vw;
-  max-width: 90vw;
-}
-
-.c0.is-hidden {
-  display: none;
-}
-
-.c0.is-confirming .modal-content {
-  opacity: 0.3;
-}
-
-.c0 .console-holder {
-  height: 100%;
-}
-
-.c0 .terminate-confirm-panel {
-  max-width: 85%;
-  -webkit-box-flex: 0;
-  -webkit-flex-grow: 0;
-  -ms-flex-positive: 0;
-  flex-grow: 0;
-}
-
-<div
-    class="c0 euiModal euiModal--maxWidth-default is-hidden"
-    data-test-subj="consolePopupWrapper"
-  >
-    <div
-      class="euiModal__flex modal-content"
-    >
-      <div
-        class="euiModalBody"
-        data-test-subj="consolePopupBody"
-      >
-        <div
-          class="euiModalBody__overflow"
-        >
-          <div
-            class="console-holder"
-          />
-        </div>
-      </div>
-    </div>
-  </div>
 </DocumentFragment>
 `;

@@ -24,7 +24,7 @@ import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_exper
 import {
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
   NOT_FROM_ENDPOINT_HOST_TOOLTIP,
-} from '../response_actions_console/response_actions_console_context_menu_item';
+} from '../endpoint_responder/responder_context_menu_item';
 import { endpointMetadataHttpMocks } from '../../../management/pages/endpoint_hosts/mocks';
 import { HttpSetup } from '@kbn/core/public';
 import {
@@ -59,7 +59,11 @@ jest.mock('../../../common/hooks/use_experimental_features', () => ({
 }));
 
 jest.mock('../../../common/utils/endpoint_alert_check', () => {
+  const realEndpointAlertCheckUtils = jest.requireActual(
+    '../../../common/utils/endpoint_alert_check'
+  );
   return {
+    isTimelineEventItemAnAlert: realEndpointAlertCheckUtils.isTimelineEventItemAnAlert,
     isAlertFromEndpointAlert: jest.fn().mockReturnValue(true),
     isAlertFromEndpointEvent: jest.fn().mockReturnValue(true),
   };
@@ -426,6 +430,13 @@ describe('take action dropdown', () => {
           ...mockInitialUserPrivilegesState(),
           endpointPrivileges: { loading: false, canAccessEndpointManagement: false },
         });
+        render();
+
+        expect(findLaunchResponderButton()).toHaveLength(0);
+      });
+
+      it('should not display the button for Events', async () => {
+        setAlertDetailsDataMockToEvent();
         render();
 
         expect(findLaunchResponderButton()).toHaveLength(0);

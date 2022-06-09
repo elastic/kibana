@@ -14,7 +14,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { ConsolePopup } from './components/console_popup';
+import type { ConsoleDataState } from '../console_state/types';
+import { ConsolePageOverlay } from './components/console_page_overlay';
 import {
   ConsoleManagerClient,
   ConsoleRegistrationInterface,
@@ -22,13 +23,15 @@ import {
 } from './types';
 import { Console } from '../../console';
 
-interface ManagedConsole {
+interface ManagedConsole
+  extends Pick<
+    ConsoleRegistrationInterface,
+    'consoleProps' | 'PageTitleComponent' | 'PageBodyComponent' | 'ActionComponents'
+  > {
   client: RegisteredConsoleClient;
-  consoleProps: ConsoleRegistrationInterface['consoleProps'];
   console: JSX.Element; // actual console component
   isOpen: boolean;
   key: symbol;
-  onBeforeTerminate?: ConsoleRegistrationInterface['onBeforeTerminate'];
 }
 
 type RunningConsoleStorage = Record<string, ManagedConsole>;
@@ -39,6 +42,12 @@ interface ConsoleManagerInternalClient {
    * @param key
    */
   getManagedConsole(key: ManagedConsole['key']): ManagedConsole | undefined;
+
+  /** Returns the Console's internal state (if any) */
+  getManagedConsoleState(key: ManagedConsole['key']): ConsoleDataState | undefined;
+
+  /** Stores the console's internal state */
+  storeManagedConsoleState(key: ManagedConsole['key'], state: ConsoleDataState): void;
 }
 
 interface ConsoleManagerContextClients {
@@ -60,6 +69,7 @@ export type ConsoleManagerProps = PropsWithChildren<{
  */
 export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, children }) => {
   const [consoleStorage, setConsoleStorage] = useState<RunningConsoleStorage>(storage);
+  const [consoleStateStorage] = useState(new Map<ManagedConsole['key'], ConsoleDataState>());
 
   // `consoleStorageRef` keeps a copy (reference) to the latest copy of the `consoleStorage` so that
   // some exposed methods (ex. `RegisteredConsoleClient`) are guaranteed to be immutable and function
@@ -123,12 +133,6 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       validateIdOrThrow(id);
 
       setConsoleStorage((prevState) => {
-        const { onBeforeTerminate } = prevState[id];
-
-        if (onBeforeTerminate) {
-          onBeforeTerminate();
-        }
-
         const newState = { ...prevState };
         delete newState[id];
 
@@ -153,7 +157,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     return Object.values(consoleStorage).map(
       (managedConsole) => managedConsole.client
     ) as ReadonlyArray<Readonly<RegisteredConsoleClient<Meta>>>;
-  }, [consoleStorage]); // << This callack should always use `consoleStorage`
+  }, [consoleStorage]); // << This callback should always use `consoleStorage`
 
   const isVisible = useCallback((id: string): boolean => {
     if (consoleStorageRef.current?.[id]) {
@@ -164,7 +168,7 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
   }, []); // << IMPORTANT: this callback should have no dependencies
 
   const register = useCallback<ConsoleManagerClient['register']>(
-    ({ id, title, meta, consoleProps, ...otherRegisterProps }) => {
+    ({ id, meta, consoleProps, ...otherRegisterProps }) => {
       if (consoleStorage[id]) {
         throw new Error(`Console with id ${id} already registered`);
       }
@@ -178,10 +182,12 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
       const isThisConsoleVisible = isVisible.bind(null, id);
 
       const managedConsole: ManagedConsole = {
+        PageBodyComponent: undefined,
+        PageTitleComponent: undefined,
+        ActionComponents: undefined,
         ...otherRegisterProps,
         client: {
           id,
-          title,
           meta,
           // The use of `setTimeout()` below is needed because this client interface can be consumed
           // prior to the component state being updated. Placing a delay on the execution of these
@@ -230,23 +236,30 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
   const consoleManageContextClients = useMemo<ConsoleManagerContextClients>(() => {
     return {
       client: consoleManagerClient,
+
       internal: {
         getManagedConsole(key): ManagedConsole | undefined {
           return Object.values(consoleStorage).find((managedConsole) => managedConsole.key === key);
         },
+
+        getManagedConsoleState(key: ManagedConsole['key']): ConsoleDataState | undefined {
+          return consoleStateStorage.get(key);
+        },
+
+        storeManagedConsoleState(key: ManagedConsole['key'], state: ConsoleDataState) {
+          consoleStateStorage.set(key, state);
+        },
       },
     };
-  }, [consoleManagerClient, consoleStorage]);
+  }, [consoleManagerClient, consoleStateStorage, consoleStorage]);
 
   const visibleConsole = useMemo(() => {
     return Object.values(consoleStorage).find((managedConsole) => managedConsole.isOpen);
   }, [consoleStorage]);
 
-  const handleOnTerminate = useCallback(() => {
-    if (visibleConsole) {
-      consoleManagerClient.terminate(visibleConsole.client.id);
-    }
-  }, [consoleManagerClient, visibleConsole]);
+  const visibleConsoleMeta = useMemo(() => {
+    return visibleConsole?.client.meta ?? {};
+  }, [visibleConsole?.client.meta]);
 
   const handleOnHide = useCallback(() => {
     if (visibleConsole) {
@@ -254,22 +267,39 @@ export const ConsoleManager = memo<ConsoleManagerProps>(({ storage = {}, childre
     }
   }, [consoleManagerClient, visibleConsole]);
 
-  const runningConsoles = useMemo(() => {
-    return Object.values(consoleStorage).map((managedConsole) => managedConsole.console);
-  }, [consoleStorage]);
-
   return (
     <ConsoleManagerContext.Provider value={consoleManageContextClients}>
       {children}
 
-      <ConsolePopup
-        title={visibleConsole?.client.title}
-        isHidden={!visibleConsole}
-        onTerminate={handleOnTerminate}
-        onHide={handleOnHide}
-      >
-        {runningConsoles}
-      </ConsolePopup>
+      {visibleConsole && (
+        <ConsolePageOverlay
+          onHide={handleOnHide}
+          console={
+            <Console
+              {...visibleConsole.consoleProps}
+              managedKey={visibleConsole.key}
+              key={visibleConsole.client.id}
+            />
+          }
+          isHidden={!visibleConsole}
+          pageTitle={
+            visibleConsole.PageTitleComponent && (
+              <visibleConsole.PageTitleComponent meta={visibleConsoleMeta} />
+            )
+          }
+          body={
+            visibleConsole.PageBodyComponent && (
+              <visibleConsole.PageBodyComponent meta={visibleConsoleMeta} />
+            )
+          }
+          actions={
+            visibleConsole.ActionComponents &&
+            visibleConsole.ActionComponents.map((ActionComponent) => {
+              return <ActionComponent meta={visibleConsoleMeta} />;
+            })
+          }
+        />
+      )}
     </ConsoleManagerContext.Provider>
   );
 });
@@ -303,4 +333,40 @@ export const useWithManagedConsole = (
   if (key && consoleManagerClients) {
     return consoleManagerClients.internal.getManagedConsole(key);
   }
+};
+
+type WithManagedConsoleState = Readonly<
+  [
+    getState: undefined | (() => ConsoleDataState | undefined),
+    storeState: undefined | ((state: ConsoleDataState) => void)
+  ]
+>;
+/**
+ * Provides methods for retrieving/storing a console's internal state (if any)
+ * @param key
+ */
+export const useWithManagedConsoleState = (
+  key: ManagedConsole['key'] | undefined
+): WithManagedConsoleState => {
+  const consoleManagerClients = useContext(ConsoleManagerContext);
+
+  return useMemo(() => {
+    if (!key || !consoleManagerClients) {
+      return [undefined, undefined];
+    }
+
+    return [
+      // getState()
+      () => {
+        return consoleManagerClients.internal.getManagedConsoleState(key);
+      },
+
+      // storeState()
+      (state: ConsoleDataState) => {
+        if (consoleManagerClients.internal.getManagedConsole(key)) {
+          consoleManagerClients.internal.storeManagedConsoleState(key, state);
+        }
+      },
+    ];
+  }, [consoleManagerClients, key]);
 };

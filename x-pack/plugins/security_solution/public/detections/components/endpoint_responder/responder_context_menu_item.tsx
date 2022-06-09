@@ -9,10 +9,7 @@ import { EuiContextMenuItem } from '@elastic/eui';
 import React, { memo, ReactNode, useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  useGetEndpointDetails,
-  useShowEndpointResponseActionsConsole,
-} from '../../../management/hooks';
+import { useGetEndpointDetails, useWithShowEndpointResponder } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
 
 export const NOT_FROM_ENDPOINT_HOST_TOOLTIP = i18n.translate(
@@ -28,14 +25,14 @@ export const LOADING_ENDPOINT_DATA_TOOLTIP = i18n.translate(
   { defaultMessage: 'Loading' }
 );
 
-export interface ResponseActionsConsoleContextMenuItemProps {
+export interface ResponderContextMenuItemProps {
   endpointId: string;
   onClick?: () => void;
 }
 
-export const ResponseActionsConsoleContextMenuItem =
-  memo<ResponseActionsConsoleContextMenuItemProps>(({ endpointId, onClick }) => {
-    const showEndpointResponseActionsConsole = useShowEndpointResponseActionsConsole();
+export const ResponderContextMenuItem = memo<ResponderContextMenuItemProps>(
+  ({ endpointId, onClick }) => {
+    const showEndpointResponseActionsConsole = useWithShowEndpointResponder();
     const {
       data: endpointHostInfo,
       isFetching,
@@ -85,5 +82,6 @@ export const ResponseActionsConsoleContextMenuItem =
         />
       </EuiContextMenuItem>
     );
-  });
-ResponseActionsConsoleContextMenuItem.displayName = 'ResponseActionsConsoleContextMenuItem';
+  }
+);
+ResponderContextMenuItem.displayName = 'ResponderContextMenuItem';

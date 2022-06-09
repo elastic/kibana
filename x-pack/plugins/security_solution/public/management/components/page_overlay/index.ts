@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { useGetEndpointDetails } from './endpoint/use_get_endpoint_details';
-export { useWithShowEndpointResponder } from './endpoint/use_with_show_endpoint_responder';
+export { PageOverlay } from './page_overlay';
+export type { PageOverlayProps } from './page_overlay';

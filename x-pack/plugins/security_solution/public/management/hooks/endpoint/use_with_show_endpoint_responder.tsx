@@ -6,13 +6,21 @@
  */
 
 import React, { useCallback } from 'react';
-import { getEndpointResponseActionsConsoleCommands } from '../../components/endpoint_console';
+import { i18n } from '@kbn/i18n';
+import {
+  ActionLogButton,
+  getEndpointResponseActionsConsoleCommands,
+} from '../../components/endpoint_responder';
 import { useConsoleManager } from '../../components/console';
 import type { HostMetadata } from '../../../../common/endpoint/types';
 
 type ShowEndpointResponseActionsConsole = (endpointMetadata: HostMetadata) => void;
 
-export const useShowEndpointResponseActionsConsole = (): ShowEndpointResponseActionsConsole => {
+const RESPONDER_PAGE_TITLE = i18n.translate('xpack.securitySolution.responder_overlay.pageTitle', {
+  defaultMessage: 'Responder',
+});
+
+export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConsole => {
   const consoleManager = useConsoleManager();
 
   return useCallback(
@@ -26,13 +34,17 @@ export const useShowEndpointResponseActionsConsole = (): ShowEndpointResponseAct
         consoleManager
           .register({
             id: endpointAgentId,
-            title: `${endpointMetadata.host.name} - Endpoint v${endpointMetadata.agent.version}`,
+            meta: {
+              endpoint: endpointMetadata,
+            },
             consoleProps: {
               commands: getEndpointResponseActionsConsoleCommands(endpointAgentId),
               'data-test-subj': 'endpointResponseActionsConsole',
               prompt: `endpoint-${endpointMetadata.agent.version}`,
               TitleComponent: () => <>{endpointMetadata.host.name}</>,
             },
+            PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
+            ActionComponents: [ActionLogButton],
           })
           .show();
       }

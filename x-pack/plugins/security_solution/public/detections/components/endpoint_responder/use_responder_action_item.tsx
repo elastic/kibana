@@ -8,12 +8,15 @@
 import React, { useMemo } from 'react';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { isAlertFromEndpointEvent } from '../../../common/utils/endpoint_alert_check';
-import { ResponseActionsConsoleContextMenuItem } from './response_actions_console_context_menu_item';
+import {
+  isAlertFromEndpointEvent,
+  isTimelineEventItemAnAlert,
+} from '../../../common/utils/endpoint_alert_check';
+import { ResponderContextMenuItem } from './responder_context_menu_item';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { getFieldValue } from '../host_isolation/helpers';
 
-export const useResponseActionsConsoleActionItem = (
+export const useResponderActionItem = (
   eventDetailsData: TimelineEventsDetailsItem[] | null,
   onClick: () => void
 ): JSX.Element[] => {
@@ -22,6 +25,10 @@ export const useResponseActionsConsoleActionItem = (
   );
   const { loading: isAuthzLoading, canAccessEndpointManagement } =
     useUserPrivileges().endpointPrivileges;
+
+  const isAlert = useMemo(() => {
+    return isTimelineEventItemAnAlert(eventDetailsData || []);
+  }, [eventDetailsData]);
 
   const isEndpointAlert = useMemo(() => {
     return isAlertFromEndpointEvent({ data: eventDetailsData || [] });
@@ -35,9 +42,14 @@ export const useResponseActionsConsoleActionItem = (
   return useMemo(() => {
     const actions: JSX.Element[] = [];
 
-    if (isResponseActionsConsoleEnabled && !isAuthzLoading && canAccessEndpointManagement) {
+    if (
+      isResponseActionsConsoleEnabled &&
+      !isAuthzLoading &&
+      canAccessEndpointManagement &&
+      isAlert
+    ) {
       actions.push(
-        <ResponseActionsConsoleContextMenuItem
+        <ResponderContextMenuItem
           endpointId={isEndpointAlert ? endpointId : ''}
           onClick={onClick}
         />
@@ -48,6 +60,7 @@ export const useResponseActionsConsoleActionItem = (
   }, [
     canAccessEndpointManagement,
     endpointId,
+    isAlert,
     isAuthzLoading,
     isEndpointAlert,
     isResponseActionsConsoleEnabled,
