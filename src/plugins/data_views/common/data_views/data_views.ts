@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-/* eslint-disable max-classes-per-file */
-
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
@@ -19,7 +17,6 @@ import { SavedObjectsClientCommon } from '../types';
 import { createDataViewCache } from '.';
 import type { RuntimeField, RuntimeFieldSpec, RuntimeType } from '../types';
 import { DataView } from './data_view';
-import { createEnsureDefaultDataView, EnsureDefaultDataView } from './ensure_default_data_view';
 import {
   OnNotification,
   OnError,
@@ -40,11 +37,14 @@ import { DuplicateDataViewError, DataViewInsufficientAccessError } from '../erro
 
 const MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS = 3;
 
-export type DataViewSavedObjectAttrs = Pick<DataViewAttributes, 'title' | 'type' | 'typeMeta'>;
+export type DataViewSavedObjectAttrs = Pick<
+  DataViewAttributes,
+  'title' | 'type' | 'typeMeta' | 'name'
+>;
 
 export type IndexPatternListSavedObjectAttrs = Pick<
   DataViewAttributes,
-  'title' | 'type' | 'typeMeta'
+  'title' | 'type' | 'typeMeta' | 'name'
 >;
 
 /**
@@ -71,6 +71,7 @@ export interface DataViewListItem {
    * Data view type meta
    */
   typeMeta?: TypeMeta;
+  name?: string;
 }
 
 /**
@@ -149,11 +150,6 @@ export interface DataViewsServicePublicMethods {
    * @param indexPatternId - Id of the data view to delete.
    */
   delete: (indexPatternId: string) => Promise<{}>;
-  /**
-   * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
-   *             'no data view' case in api consumer code - no more auto redirect
-   */
-  ensureDefaultDataView: EnsureDefaultDataView;
   /**
    * Takes field array and field attributes and returns field map by name.
    * @param fields - Array of fieldspecs
@@ -252,7 +248,7 @@ export interface DataViewsServicePublicMethods {
     indexPattern: DataView,
     saveAttempts?: number,
     ignoreErrors?: boolean
-  ) => Promise<void | Error>;
+  ) => Promise<DataView | void | Error>;
 }
 
 /**
@@ -284,12 +280,6 @@ export class DataViewsService {
   public getCanSave: () => Promise<boolean>;
 
   /**
-   * @deprecated Use `getDefaultDataView` instead (when loading data view) and handle
-   *             'no data view' case in api consumer code - no more auto redirect
-   */
-  ensureDefaultDataView: EnsureDefaultDataView;
-
-  /**
    * DataViewsService constructor
    * @param deps Service dependencies
    */
@@ -301,7 +291,6 @@ export class DataViewsService {
       fieldFormats,
       onNotification,
       onError,
-      onRedirectNoIndexPattern = () => {},
       getCanSave = () => Promise.resolve(false),
     } = deps;
     this.apiClient = apiClient;
@@ -310,7 +299,6 @@ export class DataViewsService {
     this.fieldFormats = fieldFormats;
     this.onNotification = onNotification;
     this.onError = onError;
-    this.ensureDefaultDataView = createEnsureDefaultDataView(onRedirectNoIndexPattern);
     this.getCanSave = getCanSave;
 
     this.dataViewCache = createDataViewCache();
@@ -322,7 +310,7 @@ export class DataViewsService {
   private async refreshSavedObjectsCache() {
     const so = await this.savedObjectsClient.find<DataViewSavedObjectAttrs>({
       type: DATA_VIEW_SAVED_OBJECT_TYPE,
-      fields: ['title', 'type', 'typeMeta'],
+      fields: ['title', 'type', 'typeMeta', 'name'],
       perPage: 10000,
     });
     this.savedObjectsCache = so;
@@ -393,6 +381,7 @@ export class DataViewsService {
       title: obj?.attributes?.title,
       type: obj?.attributes?.type,
       typeMeta: obj?.attributes?.typeMeta && JSON.parse(obj?.attributes?.typeMeta),
+      name: obj?.attributes?.name,
     }));
   };
 
@@ -618,6 +607,7 @@ export class DataViewsService {
         type,
         fieldAttrs,
         allowNoIndex,
+        name,
       },
     } = savedObject;
 
@@ -644,6 +634,7 @@ export class DataViewsService {
       fieldAttrs: parsedFieldAttrs,
       allowNoIndex,
       runtimeFieldMap: parsedRuntimeFieldMap,
+      name,
     };
   };
 
@@ -753,7 +744,6 @@ export class DataViewsService {
    * Get an index pattern by id, cache optimized.
    * @param id
    */
-
   get = async (id: string): Promise<DataView> => {
     const indexPatternPromise =
       this.dataViewCache.get(id) || this.dataViewCache.set(id, this.getSavedObjectAndInit(id));
@@ -850,7 +840,7 @@ export class DataViewsService {
     indexPattern: DataView,
     saveAttempts: number = 0,
     ignoreErrors: boolean = false
-  ): Promise<void | Error> {
+  ): Promise<DataView | void | Error> {
     if (!indexPattern.id) return;
     if (!(await this.getCanSave())) {
       throw new DataViewInsufficientAccessError(indexPattern.id);
@@ -875,6 +865,7 @@ export class DataViewsService {
       .then((resp) => {
         indexPattern.id = resp.id;
         indexPattern.version = resp.version;
+        return indexPattern;
       })
       .catch(async (err) => {
         if (err?.res?.status === 409 && saveAttempts++ < MAX_ATTEMPTS_TO_RESOLVE_CONFLICTS) {
@@ -986,11 +977,6 @@ export class DataViewsService {
     }
   }
 }
-
-/**
- * @deprecated Use DataViewsService. All index pattern interfaces were renamed.
- */
-export class IndexPatternsService extends DataViewsService {}
 
 /**
  * Data views service interface

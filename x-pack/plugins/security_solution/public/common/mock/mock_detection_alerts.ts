@@ -22,6 +22,7 @@ export const getDetectionAlertMock = (overrides: Partial<Ecs> = {}): Ecs => ({
       category: ['Access'],
       module: ['nginx'],
       severity: [3],
+      kind: ['signal'],
     },
     source: {
       ip: ['192.168.0.1'],

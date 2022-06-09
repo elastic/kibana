@@ -176,6 +176,7 @@ export class TelemetryEventsSender {
           ...(clusterName ? { 'X-Elastic-Cluster-Name': clusterName } : undefined),
           'X-Elastic-Stack-Version': clusterVersion?.number ? clusterVersion.number : '8.2.0',
         },
+        timeout: 5000,
       });
       this.logger.debug(`Events sent!. Response: ${resp.status} ${JSON.stringify(resp.data)}`);
     } catch (err) {

@@ -18,12 +18,7 @@ import {
   XYChartSeriesIdentifier,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import {
-  FieldFormat,
-  FieldFormatParams,
-  IFieldFormat,
-  SerializedFieldFormat,
-} from '@kbn/field-formats-plugin/common';
+import { FieldFormat, IFieldFormat, SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import { Datatable } from '@kbn/expressions-plugin';
 import {
   getFormatByAccessor,
@@ -64,7 +59,7 @@ type GetSeriesNameFn = (
   config: {
     splitColumnId?: string;
     accessorsCount: number;
-    splitHint: SerializedFieldFormat<FieldFormatParams> | undefined;
+    splitHint: SerializedFieldFormat | undefined;
     splitFormatter: FieldFormat;
     alreadyFormattedColumns: Record<string, boolean>;
     columnToLabelMap: Record<string, string>;

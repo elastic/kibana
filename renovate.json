@@ -115,6 +115,7 @@
       "groupName": "platform security modules",
       "matchPackageNames": [
         "node-forge",
+        "formik",
         "@types/node-forge",
         "require-in-the-middle",
         "tough-cookie",

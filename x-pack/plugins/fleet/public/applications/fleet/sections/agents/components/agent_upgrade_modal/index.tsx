@@ -7,7 +7,6 @@
 
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import moment from 'moment';
 import {
   EuiConfirmModal,
   EuiComboBox,
@@ -26,6 +25,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 
 import semverCoerce from 'semver/functions/coerce';
 import semverGt from 'semver/functions/gt';
+import semverValid from 'semver/functions/valid';
 
 import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
 import type { Agent } from '../../../../types';
@@ -37,6 +37,7 @@ import {
 } from '../../../../hooks';
 
 import { FALLBACK_VERSIONS, MAINTAINANCE_VALUES } from './constants';
+import { useScheduleDateTime } from './hooks';
 
 export interface AgentUpgradeAgentModalProps {
   onClose: () => void;
@@ -106,8 +107,8 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
     isSmallBatch ? maintainanceOptions[0] : maintainanceOptions[1],
   ]);
 
-  const initialDatetime = useMemo(() => moment(), []);
-  const [startDatetime, setStartDatetime] = useState<moment.Moment>(initialDatetime);
+  const { startDatetime, onChangeStartDateTime, initialDatetime, minTime, maxTime } =
+    useScheduleDateTime();
 
   async function onSubmit() {
     const version = getVersion(selectedVersion);
@@ -199,6 +200,10 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
   }
 
   const onCreateOption = (searchValue: string) => {
+    if (!semverValid(searchValue)) {
+      return;
+    }
+
     const agentVersionNumber = semverCoerce(searchValue);
     if (
       agentVersionNumber?.version &&
@@ -297,8 +302,12 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           fullWidth
           singleSelection={{ asPlainText: true }}
           options={versionOptions}
+          isClearable={false}
           selectedOptions={selectedVersion}
           onChange={(selected: Array<EuiComboBoxOptionOption<string>>) => {
+            if (!selected.length) {
+              return;
+            }
             setSelectedVersion(selected);
           }}
           onCreateOption={onCreateOption}
@@ -332,7 +341,9 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
               showTimeSelect
               selected={startDatetime}
               minDate={initialDatetime}
-              onChange={(date) => setStartDatetime(date as moment.Moment)}
+              minTime={minTime}
+              maxTime={maxTime}
+              onChange={onChangeStartDateTime}
             />
           </EuiFormRow>
         </>
@@ -369,10 +380,14 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
           <EuiComboBox
             data-test-subj="agentUpgradeModal.MaintainanceCombobox"
             fullWidth
+            isClearable={false}
             singleSelection={{ asPlainText: true }}
             options={maintainanceOptions}
             selectedOptions={selectedMantainanceWindow}
             onChange={(selected: Array<EuiComboBoxOptionOption<number>>) => {
+              if (!selected.length) {
+                return;
+              }
               setSelectedMantainanceWindow(selected);
             }}
           />
