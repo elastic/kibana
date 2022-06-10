@@ -20,7 +20,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { AlertStatusFilterButton } from '../../../../../common/typings';
 import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
 import { observabilityFeatureId } from '../../../../../common';
-import { ExperimentalBadge } from '../../../../components/shared/experimental_badge';
 import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
 import { useAlertIndexNames } from '../../../../hooks/use_alert_index_names';
 import { useHasData } from '../../../../hooks/use_has_data';
@@ -35,7 +34,7 @@ import {
   useAlertsPageStateContainer,
 } from '../state_container';
 import './styles.scss';
-import { AlertsStatusFilter, AlertsDisclaimer, AlertsSearchBar } from '../../components';
+import { AlertsStatusFilter, AlertsSearchBar } from '../../components';
 import { renderRuleStats } from '../../components/rule_stats';
 import { ObservabilityAppServices } from '../../../../application/types';
 
@@ -237,18 +236,12 @@ function AlertsPage() {
       data-test-subj={noDataConfig ? 'noDataPage' : undefined}
       pageHeader={{
         pageTitle: (
-          <>
-            {i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })}{' '}
-            <ExperimentalBadge />
-          </>
+          <>{i18n.translate('xpack.observability.alertsTitle', { defaultMessage: 'Alerts' })} </>
         ),
         rightSideItems: renderRuleStats(ruleStats, manageRulesHref, ruleStatsLoading),
       }}
     >
       <EuiFlexGroup direction="column" gutterSize="s">
-        <EuiFlexItem>
-          <AlertsDisclaimer />
-        </EuiFlexItem>
         <EuiFlexItem>
           <AlertsSearchBar
             dynamicIndexPatterns={dynamicIndexPatternsAsyncState.value ?? NO_INDEX_PATTERNS}

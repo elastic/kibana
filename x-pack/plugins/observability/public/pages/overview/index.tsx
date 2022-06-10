@@ -195,7 +195,6 @@ export function OverviewPage({ routeParams }: Props) {
                     defaultMessage: 'Show alerts',
                   }),
                 }}
-                showExperimentalBadge={true}
               >
                 <CasesContext
                   owner={[observabilityFeatureId]}
