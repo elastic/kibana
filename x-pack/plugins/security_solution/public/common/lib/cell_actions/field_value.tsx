@@ -18,7 +18,6 @@ import { FormattedFieldValue } from '../../../timelines/components/timeline/body
 import { parseValue } from '../../../timelines/components/timeline/body/renderers/parse_value';
 import { EmptyComponent, getLinkColumnDefinition } from './helpers';
 import { getField, getFieldKey } from '../../../helpers';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 
 const useFormattedFieldProps = ({
   rowIndex,
@@ -36,9 +35,8 @@ const useFormattedFieldProps = ({
   pageSize: number;
 }) => {
   const pageRowIndex = getPageRowIndex(rowIndex, pageSize);
-  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
   const ecs = ecsData[pageRowIndex];
-  const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField, usersEnabled);
+  const link = getLinkColumnDefinition(columnId, header?.type, header?.linkField);
   const linkField = header?.linkField ? header?.linkField : link?.linkField;
   const linkValues = header && getOr([], linkField ?? '', ecs);
   const eventId = (header && get('_id' ?? '', ecs)) || '';
@@ -60,8 +58,7 @@ const useFormattedFieldProps = ({
     const normalizedLink = getLinkColumnDefinition(
       normalizedColumnId,
       header?.type,
-      normalizedLinkField,
-      usersEnabled
+      normalizedLinkField
     );
     return {
       pageRowIndex,
