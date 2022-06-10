@@ -13,6 +13,8 @@ import { RulesListNotifyBadge } from './rules_list_notify_badge';
 import { RulesListSnoozePanel } from './rules_list_snooze_panel';
 import { act } from 'react-dom/test-utils';
 
+jest.mock('../../../../common/lib/kibana');
+
 const onClick = jest.fn();
 const onClose = jest.fn();
 const onLoading = jest.fn();
@@ -127,7 +129,8 @@ describe('RulesListNotifyBadge', () => {
     // Snooze for 1 hour
     wrapper
       .find(RulesListSnoozePanel)
-      .find('.euiFlexItem .euiLink--primary')
+      .find({ children: '1 hour' })
+      .find('button')
       .first()
       .simulate('click');
     expect(onLoading).toHaveBeenCalledWith(true);
