@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_QUERY } from "../../common/constants";
+import { DEFAULT_QUERY } from '../../common/constants';
 
 /**
  * Add startDate and endDate filter for '@timestamp' field into query.
@@ -20,9 +20,11 @@ import { DEFAULT_QUERY } from "../../common/constants";
  *                  in the right format, return a default query.
  */
 
-
-
-export const addTimerangeToQuery = (query: string | undefined, startDate: string, endDate: string) => {
+export const addTimerangeToQuery = (
+  query: string | undefined,
+  startDate: string,
+  endDate: string
+) => {
   if (!(query && !isNaN(Date.parse(startDate)) && !isNaN(Date.parse(endDate)))) {
     return DEFAULT_QUERY;
   }
@@ -30,7 +32,7 @@ export const addTimerangeToQuery = (query: string | undefined, startDate: string
   try {
     const parsedQuery = JSON.parse(query);
     if (!parsedQuery.bool) {
-      throw 'Field \'bool\' does not exist in query.';
+      throw "Field 'bool' does not exist in query.";
     }
 
     const range = {
@@ -40,7 +42,7 @@ export const addTimerangeToQuery = (query: string | undefined, startDate: string
           lte: endDate,
         },
       },
-    }
+    };
     if (parsedQuery.bool.filter) {
       parsedQuery.bool.filter = [...parsedQuery.bool.filter, range];
     } else {

@@ -56,17 +56,19 @@ export const doSearch = async (
   page: number, // zero based
   index?: string,
   countBy?: string,
-  sortByCount?: string,
-  ) => {
+  sortByCount?: string
+) => {
   const queryDSL = JSON.parse(query);
 
-  const countByAggs = countBy ? {
-    count_by_aggs: {
-      cardinality: {
-        field: countBy,
-      },
-    },
-  } : undefined;
+  const countByAggs = countBy
+    ? {
+        count_by_aggs: {
+          cardinality: {
+            field: countBy,
+          },
+        },
+      }
+    : undefined;
 
   let sort: SortCombinations = { _key: { order: ASC } };
   if (sortByCount === ASC || sortByCount === DESC) {

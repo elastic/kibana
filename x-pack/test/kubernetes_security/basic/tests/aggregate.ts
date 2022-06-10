@@ -78,7 +78,7 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
         });
       expect(response.status).to.be(200);
       expect(response.body.length).to.be(10);
-      
+
       // when groupBy and countBy use the same field, count_by_aggs.value will always be 1
       response.body.forEach((agg: any) => {
         expect(agg.count_by_aggs.value).to.be(1);

@@ -14,10 +14,7 @@ export const useSetFilter = () => {
   const { data, timelines } = useKibana<CoreStart & StartPlugins>().services;
   const { getFilterForValueButton, getFilterOutValueButton } = timelines.getHoverActions();
 
-  const filterManager = useMemo(
-    () => data.query.filterManager,
-    [data.query.filterManager]
-  );
+  const filterManager = useMemo(() => data.query.filterManager, [data.query.filterManager]);
 
   return {
     getFilterForValueButton,

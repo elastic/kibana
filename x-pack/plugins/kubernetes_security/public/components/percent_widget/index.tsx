@@ -30,11 +30,19 @@ export interface PercentWidgetDeps {
 }
 
 interface FilterButtons {
-  filterForButtons: Array<ReactNode>;
-  filterOutButtons: Array<ReactNode>;
+  filterForButtons: ReactNode[];
+  filterOutButtons: ReactNode[];
 }
 
-export const PercentWidget = ({ title, dataValueMap, widgetKey, indexPattern, globalFilter, groupedBy, countBy }: PercentCompareWidgetDeps) => {
+export const PercentWidget = ({
+  title,
+  dataValueMap,
+  widgetKey,
+  indexPattern,
+  globalFilter,
+  groupedBy,
+  countBy,
+}: PercentCompareWidgetDeps) => {
   const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
   const styles = useStyles();
 
@@ -42,7 +50,7 @@ export const PercentWidget = ({ title, dataValueMap, widgetKey, indexPattern, gl
     return addTimerangeToQuery(
       globalFilter.filterQuery,
       globalFilter.startDate,
-      globalFilter.endDate,
+      globalFilter.endDate
     );
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
 
@@ -51,37 +59,44 @@ export const PercentWidget = ({ title, dataValueMap, widgetKey, indexPattern, gl
     widgetKey,
     groupedBy,
     countBy,
-    indexPattern?.title,
+    indexPattern?.title
   );
 
   const { getFilterForValueButton, getFilterOutValueButton, filterManager } = useSetFilter();
-  const dataValueSum = useMemo(() => data ? Object.keys(data).reduce((sumSoFar, current) => sumSoFar + data[current], 0) : 0, [data]);
+  const dataValueSum = useMemo(
+    () => (data ? Object.keys(data).reduce((sumSoFar, current) => sumSoFar + data[current], 0) : 0),
+    [data]
+  );
   const filterButtons = useMemo(() => {
     const result: FilterButtons = {
       filterForButtons: [],
       filterOutButtons: [],
     };
     Object.keys(dataValueMap).forEach((groupedByValue) => {
-      result.filterForButtons.push(getFilterForValueButton({
-        field: dataValueMap[groupedByValue].fieldName,
-        filterManager,
-        size: 'xs',
-        onClick: () => {},
-        onFilterAdded: () => {},
-        ownFocus: false,
-        showTooltip: true,
-        value: [groupedByValue],
-      }));
-      result.filterOutButtons.push(getFilterOutValueButton({
-        field: dataValueMap[groupedByValue].fieldName,
-        filterManager,
-        size: 'xs',
-        onClick: () => {},
-        onFilterAdded: () => {},
-        ownFocus: false,
-        showTooltip: true,
-        value: [groupedByValue],
-      }));
+      result.filterForButtons.push(
+        getFilterForValueButton({
+          field: dataValueMap[groupedByValue].fieldName,
+          filterManager,
+          size: 'xs',
+          onClick: () => {},
+          onFilterAdded: () => {},
+          ownFocus: false,
+          showTooltip: true,
+          value: [groupedByValue],
+        })
+      );
+      result.filterOutButtons.push(
+        getFilterOutValueButton({
+          field: dataValueMap[groupedByValue].fieldName,
+          filterManager,
+          size: 'xs',
+          onClick: () => {},
+          onFilterAdded: () => {},
+          ownFocus: false,
+          showTooltip: true,
+          value: [groupedByValue],
+        })
+      );
     });
 
     return result;
@@ -113,7 +128,7 @@ export const PercentWidget = ({ title, dataValueMap, widgetKey, indexPattern, gl
                 <div
                   css={{
                     ...styles.percentageBar,
-                    width: `${((value / dataValueSum) || 0) * 100}%`,
+                    width: `${(value / dataValueSum || 0) * 100}%`,
                     backgroundColor: dataValueMap[groupedByValue].color,
                   }}
                 />

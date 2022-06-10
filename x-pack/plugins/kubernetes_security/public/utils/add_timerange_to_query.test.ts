@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { DEFAULT_QUERY } from "../../common/constants";
+import { DEFAULT_QUERY } from '../../common/constants';
 import { addTimerangeToQuery } from './add_timerange_to_query';
 
-const TEST_QUERY = '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"process.entry_leader.same_as_process":true}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}';
+const TEST_QUERY =
+  '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"process.entry_leader.same_as_process":true}}],"minimum_should_match":1}}],"should":[],"must_not":[]}}';
 const TEST_INVALID_QUERY = '{"bool":{"must":[';
 const TEST_EMPTY_STRING = '';
 const TEST_DATE = '2022-06-09T22:36:46.628Z';
-const VALID_RESULT = '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"process.entry_leader.same_as_process":true}}],"minimum_should_match":1}},{"range":{"@timestamp":{"gte":"2022-06-09T22:36:46.628Z","lte":"2022-06-09T22:36:46.628Z"}}}],"should":[],"must_not":[]}}';
+const VALID_RESULT =
+  '{"bool":{"must":[],"filter":[{"bool":{"should":[{"match":{"process.entry_leader.same_as_process":true}}],"minimum_should_match":1}},{"range":{"@timestamp":{"gte":"2022-06-09T22:36:46.628Z","lte":"2022-06-09T22:36:46.628Z"}}}],"should":[],"must_not":[]}}';
 
 describe('addTimerangeToQuery(query, startDate, endDate)', () => {
   it('works for valid query, startDate, and endDate', () => {
@@ -20,7 +22,7 @@ describe('addTimerangeToQuery(query, startDate, endDate)', () => {
   });
   it('works with missing filter in bool', () => {
     expect(addTimerangeToQuery('{"bool":{}}', TEST_DATE, TEST_DATE)).toEqual(
-      '{"bool":{"filter":[{"range":{"@timestamp":{"gte":"2022-06-09T22:36:46.628Z","lte":"2022-06-09T22:36:46.628Z"}}}]}}',
+      '{"bool":{"filter":[{"range":{"@timestamp":{"gte":"2022-06-09T22:36:46.628Z","lte":"2022-06-09T22:36:46.628Z"}}}]}}'
     );
   });
   it('returns default query with invalid JSON query', () => {

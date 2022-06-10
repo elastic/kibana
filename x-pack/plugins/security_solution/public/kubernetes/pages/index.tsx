@@ -51,7 +51,14 @@ export const KubernetesContainer = React.memo(() => {
     [filters, indexPattern, uiSettings, query]
   );
 
-  useInvalidFilterQuery({ id: 'kubernetesQuery', filterQuery, kqlError, query, startDate: from, endDate: to });
+  useInvalidFilterQuery({
+    id: 'kubernetesQuery',
+    filterQuery,
+    kqlError,
+    query,
+    startDate: from,
+    endDate: to,
+  });
 
   return (
     <SecuritySolutionPageWrapper noPadding>
@@ -66,7 +73,7 @@ export const KubernetesContainer = React.memo(() => {
           filterQuery,
           startDate: from,
           endDate: to,
-        }
+        },
       })}
       <SpyRoute pageName={SecurityPageName.kubernetes} />
     </SecuritySolutionPageWrapper>

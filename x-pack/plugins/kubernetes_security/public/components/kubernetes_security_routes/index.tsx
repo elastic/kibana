@@ -29,7 +29,11 @@ import { PercentWidget } from '../percent_widget';
 import { KubernetesSecurityDeps } from '../../types';
 import { useStyles } from './styles';
 
-const KubernetesSecurityRoutesComponent = ({ filter, indexPattern, globalFilter }: KubernetesSecurityDeps) => {
+const KubernetesSecurityRoutesComponent = ({
+  filter,
+  indexPattern,
+  globalFilter,
+}: KubernetesSecurityDeps) => {
   const styles = useStyles();
 
   return (
@@ -99,12 +103,12 @@ const KubernetesSecurityRoutesComponent = ({ filter, indexPattern, globalFilter 
               indexPattern={indexPattern}
               globalFilter={globalFilter}
               dataValueMap={{
-                'true': {
+                true: {
                   name: 'Interactive',
                   fieldName: ENTRY_LEADER_INTERACTIVE,
                   color: euiThemeVars.euiColorVis0,
                 },
-                'false': {
+                false: {
                   name: 'Non-interactive',
                   fieldName: ENTRY_LEADER_INTERACTIVE,
                   color: euiThemeVars.euiColorVis1,
@@ -129,12 +133,12 @@ const KubernetesSecurityRoutesComponent = ({ filter, indexPattern, globalFilter 
               }
               widgetKey="rootLoginPercentage"
               dataValueMap={{
-                'true': {
+                true: {
                   name: 'Root',
                   fieldName: ENTRY_LEADER_INTERACTIVE,
                   color: euiThemeVars.euiColorVis2,
                 },
-                'false': {
+                false: {
                   name: 'Non-root',
                   fieldName: ENTRY_LEADER_INTERACTIVE,
                   color: euiThemeVars.euiColorVis3,
