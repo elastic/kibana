@@ -41,6 +41,15 @@ elasticsearch.username: kibana_system
 elasticsearch.password: changeme
 ```
 
+**Connect Kibana to ES**
+Update `config/kibana.dev.yml` with:
+
+```yml
+elasticsearch.hosts: http://localhost:9200
+elasticsearch.username: kibana_system
+elasticsearch.password: changeme
+```
+
 Documentation for [Synthtrace](https://github.com/elastic/kibana/blob/main/packages/elastic-apm-synthtrace/README.md)
 
 ## 2. Cloud-based ES Cluster (internal devs only)
