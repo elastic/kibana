@@ -94,10 +94,9 @@ export const DataLayers: FC<Props> = ({
             axisConfiguration.series.find((currentSeries) => currentSeries.accessor === yColumnId)
           );
 
-          let isPercentage = layer.isPercentage;
-          if (yAxis?.mode) {
-            isPercentage = yAxis?.mode === AxisModes.PERCENTAGE;
-          }
+          const isPercentage = yAxis?.mode
+            ? yAxis?.mode === AxisModes.PERCENTAGE
+            : layer.isPercentage;
 
           const seriesProps = getSeriesProps({
             layer,

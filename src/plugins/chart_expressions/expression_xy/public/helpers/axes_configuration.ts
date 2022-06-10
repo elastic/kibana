@@ -37,8 +37,11 @@ interface AxesSeries {
 }
 
 export interface AxisConfiguration extends Omit<YAxisConfig, 'id'> {
+  /**
+   * Axis group identificator. Format: `axis-${axis.id}` or just `left`/`right`.
+   */
   groupId: string;
-  position: 'left' | 'right' | 'bottom' | 'top';
+  position: Position;
   formatter?: IFieldFormat;
   series: Series[];
 }
@@ -77,7 +80,7 @@ export function groupAxesByType(
         (axis) =>
           decorationByAccessor?.axisId && axis.id && axis.id === decorationByAccessor?.axisId
       );
-      const key = axisConfigById?.id || 'auto';
+      const key = `axis-${axisConfigById?.id}` || 'auto';
       const fieldFormat = fieldFormats[layerId].yAccessors[yAccessor]!;
       if (!series[key]) {
         series[key] = [];
@@ -89,7 +92,9 @@ export function groupAxesByType(
   const tablesExist = layers.filter(({ table }) => Boolean(table)).length > 0;
 
   series.auto.forEach((currentSeries) => {
-    let key = Object.keys(series).find(
+    // if we already have the specified axis with compatible formatters, we should use it
+    // if not, use logic below this `find` with auto-assignment series to left or right global axis
+    let axisGroupId = Object.keys(series).find(
       (seriesKey) =>
         seriesKey.includes('axis') &&
         series[seriesKey].length > 0 &&
@@ -97,7 +102,7 @@ export function groupAxesByType(
           isFormatterCompatible(axisSeries.fieldFormat, currentSeries.fieldFormat)
         )
     );
-    if (!key) {
+    if (!axisGroupId) {
       if (
         series.left.length === 0 ||
         (tablesExist &&
@@ -105,7 +110,7 @@ export function groupAxesByType(
             isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
           ))
       ) {
-        key = 'left';
+        axisGroupId = 'left';
       } else if (
         series.right.length === 0 ||
         (tablesExist &&
@@ -113,15 +118,15 @@ export function groupAxesByType(
             isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
           ))
       ) {
-        key = 'right';
+        axisGroupId = 'right';
       } else if (series.right.length >= series.left.length) {
-        key = 'left';
+        axisGroupId = 'left';
       } else {
-        key = 'right';
+        axisGroupId = 'right';
       }
     }
 
-    series[key].push(currentSeries);
+    series[axisGroupId].push(currentSeries);
   });
   return series;
 }
@@ -178,9 +183,9 @@ export function getAxesConfiguration(
   });
 
   if (series.left.length > 0) {
-    position = shouldRotate ? 'bottom' : 'left';
+    position = shouldRotate ? Position.Bottom : Position.Left;
     axisGroups.push({
-      groupId: 'left',
+      groupId: Position.Left,
       formatter: formatFactory?.(series.left[0].fieldFormat),
       series: series.left.map(({ fieldFormat, ...currentSeries }) => currentSeries),
       ...axisGlobalConfig(position, yAxisConfigs),
@@ -189,9 +194,9 @@ export function getAxesConfiguration(
   }
 
   if (series.right.length > 0) {
-    position = shouldRotate ? 'top' : 'right';
+    position = shouldRotate ? Position.Top : Position.Right;
     axisGroups.push({
-      groupId: 'right',
+      groupId: Position.Right,
       formatter: formatFactory?.(series.right[0].fieldFormat),
       series: series.right.map(({ fieldFormat, ...currentSeries }) => currentSeries),
       ...axisGlobalConfig(position, yAxisConfigs),
