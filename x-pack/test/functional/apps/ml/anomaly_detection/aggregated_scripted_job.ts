@@ -447,8 +447,6 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('open job in anomaly explorer');
           await ml.jobTable.clickOpenJobInAnomalyExplorerButton(testData.jobConfig.job_id);
           await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
-
-          await ml.anomalyExplorer.assertSingleMetricViewerButtonEnabled(false);
         });
 
         it('displays job results', async () => {
@@ -462,14 +460,10 @@ export default function ({ getService }: FtrProviderContext) {
           // TODO: click on swimlane cells to trigger warning callouts
           // when we figure out a way to click inside canvas renderings
 
-          await ml.testExecution.logTestStep('should navigate to single metric viewer');
-          await ml.navigation.navigateToSingleMetricViewerViaAnomalyExplorer();
-
           await ml.testExecution.logTestStep(
-            'should show warning message and ask to select another job'
+            'should prevent navigation to the Single Metric Viewer'
           );
-          await ml.singleMetricViewer.assertDisabledJobReasonWarningToastExist();
-          await ml.jobSelection.assertJobSelectionFlyoutOpen();
+          await ml.anomalyExplorer.assertSingleMetricViewerButtonEnabled(false);
         });
       });
     }
