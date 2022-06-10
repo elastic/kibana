@@ -61,7 +61,6 @@ describe('renderApp', () => {
 
     const config = {
       unsafe: {
-        alertingExperience: { enabled: true },
         cases: { enabled: true },
       },
     };

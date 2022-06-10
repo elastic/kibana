@@ -26,7 +26,6 @@ export const data = dataPluginMock.createStartContract();
 
 const config = {
   unsafe: {
-    alertingExperience: { enabled: true },
     cases: { enabled: true },
   },
 };

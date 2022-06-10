@@ -35,7 +35,6 @@ export { uptimeOverviewLocatorID } from '../common';
 
 export interface ConfigSchema {
   unsafe: {
-    alertingExperience: { enabled: boolean };
     cases: { enabled: boolean };
   };
 }

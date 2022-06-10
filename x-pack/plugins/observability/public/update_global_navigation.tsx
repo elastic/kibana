@@ -38,10 +38,7 @@ export function updateGlobalNavigation({
       case 'alerts':
         return {
           ...link,
-          navLinkStatus:
-            config.unsafe.alertingExperience.enabled && someVisible
-              ? AppNavLinkStatus.visible
-              : AppNavLinkStatus.hidden,
+          navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
         };
       case 'rules':
         return {

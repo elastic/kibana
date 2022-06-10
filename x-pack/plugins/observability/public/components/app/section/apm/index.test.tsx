@@ -48,7 +48,6 @@ describe('APMSection', () => {
       appMountParameters: {} as AppMountParameters,
       config: {
         unsafe: {
-          alertingExperience: { enabled: true },
           cases: { enabled: true },
         },
       },

@@ -21,7 +21,7 @@ describe('updateGlobalNavigation', () => {
         navLinks: { apm: false, logs: false, metrics: false, uptime: false },
       } as unknown as ApplicationStart['capabilities'];
       const config = {
-        unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
+        unsafe: { cases: { enabled: true } },
       } as ConfigSchema;
       const deepLinks: AppDeepLink[] = [];
       const callback = jest.fn();
@@ -44,7 +44,7 @@ describe('updateGlobalNavigation', () => {
         navLinks: { apm: true, logs: false, metrics: false, uptime: false },
       } as unknown as ApplicationStart['capabilities'];
       const config = {
-        unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
+        unsafe: { cases: { enabled: true } },
       } as ConfigSchema;
       const deepLinks: AppDeepLink[] = [];
       const callback = jest.fn();
@@ -67,7 +67,7 @@ describe('updateGlobalNavigation', () => {
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
         const config = {
-          unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
+          unsafe: { cases: { enabled: true } },
         } as ConfigSchema;
         const deepLinks = [
           {
@@ -107,7 +107,7 @@ describe('updateGlobalNavigation', () => {
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
         const config = {
-          unsafe: { alertingExperience: { enabled: true }, cases: { enabled: false } },
+          unsafe: { cases: { enabled: false } },
         } as ConfigSchema;
         const deepLinks = [
           {
@@ -147,7 +147,7 @@ describe('updateGlobalNavigation', () => {
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
         const config = {
-          unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
+          unsafe: { cases: { enabled: true } },
         } as ConfigSchema;
         const deepLinks = [
           {
@@ -187,7 +187,7 @@ describe('updateGlobalNavigation', () => {
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
         const config = {
-          unsafe: { alertingExperience: { enabled: true }, cases: { enabled: true } },
+          unsafe: { cases: { enabled: true } },
         } as ConfigSchema;
         const deepLinks = [
           {
@@ -227,7 +227,7 @@ describe('updateGlobalNavigation', () => {
           navLinks: { apm: true, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
         const config = {
-          unsafe: { alertingExperience: { enabled: false }, cases: { enabled: false } },
+          unsafe: { cases: { enabled: false } },
         } as ConfigSchema;
         const deepLinks = [
           {

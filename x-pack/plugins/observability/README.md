@@ -4,7 +4,7 @@ This plugin provides shared components and services for use across observability
 
 ## Rules, Alerts, and Cases
 
-The Observability plugin contains experimental support for improved alerting and
+The Observability plugin contains experimental support for improved
 case management.
 
 If you have:
@@ -14,14 +14,6 @@ xpack.observability.unsafe.cases.enabled: true
 ```
 
 In your Kibana configuration, the Cases page will be available.
-
-If you have:
-
-```yaml
-xpack.observability.unsafe.alertingExperience.enabled: true
-```
-
-In your Kibana configuration, the Alerts page will be available.
 
 This will only enable the UI for this page when. In order to have alert data indexed
 you'll need to enable writing in the [Rule Registry plugin](../rule_registry/README.md):
