@@ -87,4 +87,9 @@ describe.skip('when navigating to integration page', () => {
     cy.visit('/app/fleet/integrations/apm-8.0.0/add-integration');
     cy.contains('Tail-based sampling').should('not.exist');
   });
+
+  it('should Display Debug section', () => {
+    cy.visit('/app/fleet/integrations/apm-8.0.0/add-integration');
+    cy.contains('Debug settings').should('exist');
+  });
 });
