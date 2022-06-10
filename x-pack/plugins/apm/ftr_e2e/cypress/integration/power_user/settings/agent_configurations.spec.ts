@@ -101,4 +101,29 @@ describe('Agent configuration', () => {
     cy.wait('@serviceEnvironmentApi');
     cy.contains('production');
   });
+  it('displays All label when selecting all option', () => {
+    cy.intercept(
+      'GET',
+      '/api/apm/settings/agent-configuration/environments'
+    ).as('serviceEnvironmentApi');
+    cy.contains('Create configuration').click();
+    cy.get('[data-test-subj="serviceNameComboBox"]')
+      .click()
+      .type('All')
+      .type('{enter}');
+    cy.contains('All').realClick();
+    cy.wait('@serviceEnvironmentApi');
+
+    cy.get('[data-test-subj="serviceEnviromentComboBox"]')
+      .click({ force: true })
+      .type('All');
+
+    cy.get('mark').contains('All').click();
+    cy.contains('Next step').click();
+    cy.contains('Service name All');
+    cy.contains('Environment All');
+    cy.contains('Edit').click();
+    cy.wait('@serviceEnvironmentApi');
+    cy.contains('All');
+  });
 });
