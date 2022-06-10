@@ -465,6 +465,16 @@ export default function ({ getService }: FtrProviderContext) {
           );
           await ml.anomalyExplorer.assertSingleMetricViewerButtonEnabled(false);
         });
+
+        it('should prevent opening this job in the Single Metric Viewer', async () => {
+          await ml.navigation.navigateToSingleMetricViewer(testData.jobConfig.job_id);
+
+          await ml.testExecution.logTestStep(
+            'should show warning message and ask to select another job'
+          );
+          await ml.singleMetricViewer.assertDisabledJobReasonWarningToastExist();
+          await ml.jobSelection.assertJobSelectionFlyoutOpen();
+        });
       });
     }
   });
