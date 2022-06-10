@@ -50,7 +50,7 @@ export interface FileChunkDocument {
    * @note Suitable for tags or other identifiers.
    */
   app_search_data?: {
-    [key: string]: JsonValue | undefined;
+    [key: string]: JsonValue;
   };
 
   /**
@@ -59,8 +59,8 @@ export interface FileChunkDocument {
    * @note Suitable for data about a file chunk that should not be searchable but
    * used by an application when downloaded later.
    */
-  app_extra_data?: {
-    [key: string]: JsonValue | undefined;
+  app_meta_data?: {
+    [key: string]: JsonValue;
   };
 }
 
@@ -82,7 +82,7 @@ export const mappings: MappingTypeMapping = {
       dynamic: true,
       properties: {},
     },
-    app_extra_data: {
+    app_meta_data: {
       enabled: false, // Do not parse this value for mapping in ES
       type: 'object',
       properties: {},

@@ -11,7 +11,7 @@ import { defaults, once, set } from 'lodash';
 import Puid from 'puid';
 import { Duplex, Writable, Readable } from 'stream';
 
-import type { CreateBlobAttributes } from '../../../types';
+import type { BlobAttributes } from '../../../types';
 import type { FileChunkDocument } from '../mappings';
 
 /**
@@ -80,7 +80,7 @@ export class ContentStream extends Duplex {
     private readonly index: string,
     private readonly logger: Logger,
     parameters: ContentStreamParameters = {},
-    private readonly attributes: CreateBlobAttributes = []
+    private readonly attributes: BlobAttributes = []
   ) {
     super();
     this.parameters = defaults(parameters, {
@@ -212,14 +212,25 @@ export class ContentStream extends Duplex {
     return chunkNumber === 0 ? this.getHeadChunkId() : `${chunkNumber}.${this.getId()}`;
   }
 
+  private throwIfDuplicateAttributeKeyNames(): void {
+    const keyNameSet = new Set<string>();
+    for (const [name] of this.attributes) {
+      if (keyNameSet.has(name)) {
+        throw new Error(`Duplicate attributes are not allowed. Found duplicate name "${name}".`);
+      }
+      keyNameSet.add(name);
+    }
+  }
+
   private getAttributes: () =>
     | undefined
-    | Pick<FileChunkDocument, 'app_extra_data' | 'app_search_data'> = once(() => {
+    | Pick<FileChunkDocument, 'app_meta_data' | 'app_search_data'> = once(() => {
     if (!this.attributes.length) return undefined;
+    this.throwIfDuplicateAttributeKeyNames();
     return this.attributes.reduce((acc, [key, value, options]) => {
       return options?.searchable
         ? set(acc, `app_search_data.${key}`, value)
-        : set(acc, `app_extra_data.${key}`, value);
+        : set(acc, `app_meta_data.${key}`, value);
     }, {});
   });
 
@@ -334,7 +345,7 @@ export interface ContentStreamArgs {
    */
   logger: Logger;
   parameters?: ContentStreamParameters;
-  attributes?: CreateBlobAttributes;
+  attributes?: BlobAttributes;
 }
 
 function getContentStream({
@@ -357,7 +368,7 @@ export function getWritableContentStream(args: ContentStreamArgs): WritableConte
 type ReadableContentStream = Readable;
 
 export function getReadableContentStream(
-  args: Omit<ContentStreamArgs, 'id'> & { id: string }
+  args: Omit<ContentStreamArgs, 'id' | 'attributes'> & { id: string }
 ): ReadableContentStream {
   return getContentStream(args);
 }

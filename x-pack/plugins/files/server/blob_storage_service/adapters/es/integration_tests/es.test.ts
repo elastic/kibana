@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import {} from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { Readable } from 'stream';
 import {
@@ -15,6 +16,8 @@ import {
 } from '@kbn/core/test_helpers/kbn_server';
 
 import { ElasticsearchBlobStorage, BLOB_STORAGE_SYSTEM_INDEX_NAME } from '../es';
+import { BlobAttributes } from '../../../types';
+import { FileChunkDocument } from '../mappings';
 
 describe('Elasticsearch blob storage', () => {
   let manageES: TestElasticsearchUtils;
@@ -131,5 +134,51 @@ describe('Elasticsearch blob storage', () => {
       chunks.push(chunk);
     }
     expect(chunks.join('')).toBe(fileString2);
+  });
+
+  it('sets attributes on a blob', async () => {
+    const attrs: BlobAttributes = [
+      ['foo', 'bar'],
+      ['searchable', { a: 1 }, { searchable: true }],
+    ];
+    const { id } = await esBlobStorage.upload(Readable.from(['upload this']), attrs);
+    const attrsResponse = await esBlobStorage.getAttributes(id);
+    expect(attrsResponse).toEqual(
+      expect.objectContaining({
+        foo: 'bar',
+        searchable: { a: 1 },
+      })
+    );
+
+    // We can search by searchable attributes
+
+    await esClient.indices.refresh({ index: BLOB_STORAGE_SYSTEM_INDEX_NAME });
+    const {
+      hits: { hits: hits1 },
+    } = await esClient.search<FileChunkDocument>({
+      index: BLOB_STORAGE_SYSTEM_INDEX_NAME,
+      query: {
+        match: {
+          'app_search_data.searchable.a': 1,
+        },
+      },
+      _source_includes: ['app_search_data', 'app_meta_data'],
+    });
+    expect(hits1).toHaveLength(1);
+    expect(hits1[0]).toHaveProperty('_source.app_search_data.searchable.a', 1);
+    expect(hits1[0]).toHaveProperty('_source.app_meta_data.foo', 'bar'); // non searchable attributes are included
+
+    // We cannot search by other attributes
+    const {
+      hits: { hits: hits2 },
+    } = await esClient.search<FileChunkDocument>({
+      index: BLOB_STORAGE_SYSTEM_INDEX_NAME,
+      query: {
+        match: {
+          'app_meta_data.searchable.foo': 'bar',
+        },
+      },
+    });
+    expect(hits2).toHaveLength(0);
   });
 });

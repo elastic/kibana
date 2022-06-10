@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { set } from 'lodash';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
-import { CreateBlobAttributes } from '../../../types';
+import { BlobAttributes } from '../../../types';
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -24,7 +24,7 @@ describe('ContentStream', () => {
       encoding: 'base64' as ContentStreamEncoding,
       size: 1,
     } as ContentStreamParameters,
-    attributes = [] as CreateBlobAttributes,
+    attributes = [] as BlobAttributes,
   } = {}) => {
     return new ContentStream(client, id, index, logger, params, attributes);
   };
@@ -322,7 +322,7 @@ describe('ContentStream', () => {
 
       const expectedAttributeData = {
         app_search_data: { myOtherName: 'myOtherValue', myOtherNameAsObject: { a: 1 } },
-        app_extra_data: { myName: 'myValue' },
+        app_meta_data: { myName: 'myValue' },
       };
 
       expect(client.index).toHaveBeenCalledTimes(3);
@@ -379,6 +379,19 @@ describe('ContentStream', () => {
       );
     });
 
-    it('should not add `attributes` fields if they were not provided', async () => {});
+    it('does not allow duplicate attribute names', async () => {
+      base64Stream = getContentStream({
+        attributes: [
+          ['myName', 'myValue'],
+          ['myName', 'myOtherValue'],
+        ],
+        params: { encoding: 'base64', maxChunkSize: '1028B' },
+      });
+      base64Stream.end('12345678');
+      const error = await new Promise((resolve) => base64Stream.once('error', resolve));
+      expect(error).toEqual(
+        new Error('Duplicate attributes are not allowed. Found duplicate name "myName".')
+      );
+    });
   });
 });

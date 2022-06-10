@@ -8,11 +8,16 @@
 import type { JsonValue } from '@kbn/utility-types';
 import type { Readable } from 'stream';
 
-type CreateBlobAttribute = [key: string, value: JsonValue, options?: { searchable?: boolean }];
+export type BlobAttribute = [key: string, value: JsonValue, options?: { searchable?: boolean }];
 
-export type CreateBlobAttributes = CreateBlobAttribute[];
+/**
+ * An array of {@link BlobAttribute}.
+ *
+ * @note Each key value must be unique.
+ */
+export type BlobAttributes = BlobAttribute[];
 
-export interface BlobAttributes {
+export interface BlobAttributesResponse {
   [key: string]: JsonValue;
 }
 
@@ -35,7 +40,7 @@ export interface BlobStorage {
    * Generates a random file ID and returns it upon successfully uploading a
    * file. The file size can be used when downloading the file later.
    */
-  upload(content: Readable, attrs?: CreateBlobAttributes): Promise<{ id: string; size: number }>;
+  upload(content: Readable, attrs?: BlobAttributes): Promise<{ id: string; size: number }>;
 
   /**
    * Download a file.
@@ -48,7 +53,7 @@ export interface BlobStorage {
   /**
    * Get attributes of a blob.
    */
-  getAttributes(id: string): Promise<BlobAttributes>;
+  getAttributes(id: string): Promise<BlobAttributesResponse>;
 
   /**
    * Delete a file given a unique ID.

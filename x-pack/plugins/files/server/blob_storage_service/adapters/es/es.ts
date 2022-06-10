@@ -10,9 +10,9 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { pipeline as _pipeline, Readable } from 'stream';
 import { promisify } from 'util';
-import type { BlobAttributes, BlobStorage, CreateBlobAttributes } from '../../types';
+import type { BlobAttributes, BlobStorage, BlobAttributesResponse } from '../../types';
 import { getReadableContentStream, getWritableContentStream } from './content_stream';
-import { mappings } from './mappings';
+import { FileChunkDocument, mappings } from './mappings';
 
 const pipeline = promisify(_pipeline);
 
@@ -67,7 +67,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
 
   public async upload(
     src: Readable,
-    attributes?: CreateBlobAttributes
+    attributes?: BlobAttributes
   ): Promise<{ id: string; size: number }> {
     await this.createIndexIfNotExists();
 
@@ -107,8 +107,21 @@ export class ElasticsearchBlobStorage implements BlobStorage {
     });
   }
 
-  public async getAttributes(id: string): Promise<BlobAttributes> {
-    throw new Error('Method not implemented.');
+  public async getAttributes(id: string): Promise<BlobAttributesResponse> {
+    const doc = await this.esClient.getSource<FileChunkDocument>({
+      index: this.index,
+      id: `0.${id}`, // Attributes should all live on the head chunk
+      _source_includes: ['app_search_data', 'app_meta_data'],
+      refresh: true,
+    });
+
+    if (!doc) {
+      throw new Error('File not found');
+    }
+    return {
+      ...doc.app_search_data,
+      ...doc.app_meta_data,
+    };
   }
 
   public async delete(id: string): Promise<void> {
