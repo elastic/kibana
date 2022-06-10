@@ -30,7 +30,7 @@ describe('ContentStream', () => {
   beforeEach(() => {
     client = elasticsearchServiceMock.createClusterClient().asInternalUser;
     logger = loggingSystemMock.createLogger();
-    client.get.mockResponse(set<any>({}, '_source.content', 'some content'));
+    client.get.mockResponse(set<any>({}, '_source.data', 'some content'));
   });
 
   describe('read', () => {
@@ -76,7 +76,7 @@ describe('ContentStream', () => {
 
     it('should decode base64 encoded content', async () => {
       client.get.mockResponseOnce(
-        set<any>({}, '_source.content', Buffer.from('encoded content').toString('base64'))
+        set<any>({}, '_source.data', Buffer.from('encoded content').toString('base64'))
       );
       const data = await new Promise((resolve) => base64Stream.once('data', resolve));
 
@@ -84,9 +84,9 @@ describe('ContentStream', () => {
     });
 
     it('should compound content from multiple chunks', async () => {
-      client.get.mockResponseOnce(set<any>({}, '_source.content', '12'));
-      client.get.mockResponseOnce(set<any>({}, '_source.content', '34'));
-      client.get.mockResponseOnce(set<any>({}, '_source.content', '56'));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', '12'));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', '34'));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', '56'));
       stream = getContentStream({
         params: { encoding: 'raw', size: 6 },
       });
@@ -109,9 +109,9 @@ describe('ContentStream', () => {
     });
 
     it('should stop reading on empty chunk', async () => {
-      client.get.mockResponseOnce(set<any>({}, '_source.content', '12'));
-      client.get.mockResponseOnce(set<any>({}, '_source.content', '34'));
-      client.get.mockResponseOnce(set<any>({}, '_source.content', ''));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', '12'));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', '34'));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', ''));
       stream = getContentStream({ params: { encoding: 'raw', size: 12 } });
       let data = '';
       for await (const chunk of stream) {
@@ -123,8 +123,8 @@ describe('ContentStream', () => {
     });
 
     it('should read until chunks are present when there is no size', async () => {
-      client.get.mockResponseOnce(set<any>({}, '_source.content', '12'));
-      client.get.mockResponseOnce(set<any>({}, '_source.content', '34'));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', '12'));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', '34'));
       client.get.mockResponseOnce({} as any);
       stream = getContentStream({ params: { size: undefined, encoding: 'raw' } });
       let data = '';
@@ -138,15 +138,15 @@ describe('ContentStream', () => {
 
     it('should decode every chunk separately', async () => {
       client.get.mockResponseOnce(
-        set<any>({}, '_source.content', Buffer.from('12').toString('base64'))
+        set<any>({}, '_source.data', Buffer.from('12').toString('base64'))
       );
       client.get.mockResponseOnce(
-        set<any>({}, '_source.content', Buffer.from('34').toString('base64'))
+        set<any>({}, '_source.data', Buffer.from('34').toString('base64'))
       );
       client.get.mockResponseOnce(
-        set<any>({}, '_source.content', Buffer.from('56').toString('base64'))
+        set<any>({}, '_source.data', Buffer.from('56').toString('base64'))
       );
-      client.get.mockResponseOnce(set<any>({}, '_source.content', ''));
+      client.get.mockResponseOnce(set<any>({}, '_source.data', ''));
       base64Stream = getContentStream({ params: { size: 12 } });
       let data = '';
       for await (const chunk of base64Stream) {
@@ -188,7 +188,7 @@ describe('ContentStream', () => {
 
       expect(request).toHaveProperty('id', '0.something');
       expect(request).toHaveProperty('index', 'somewhere');
-      expect(request).toHaveProperty('document.content', '123456');
+      expect(request).toHaveProperty('document.data', '123456');
     });
 
     it('should update a number of written bytes', async () => {
@@ -230,7 +230,7 @@ describe('ContentStream', () => {
       expect(client.index).toHaveBeenCalledTimes(3);
       expect(client.index).toHaveBeenNthCalledWith(
         1,
-        expect.objectContaining(set({}, 'document.content', '12'))
+        expect.objectContaining(set({}, 'document.data', '12'))
       );
       expect(client.index).toHaveBeenNthCalledWith(
         2,
@@ -239,7 +239,7 @@ describe('ContentStream', () => {
           index: 'somewhere',
           document: {
             head_chunk_id: '0.something',
-            content: '34',
+            data: '34',
           },
         })
       );
@@ -250,7 +250,7 @@ describe('ContentStream', () => {
           index: 'somewhere',
           document: {
             head_chunk_id: '0.something',
-            content: '56',
+            data: '56',
           },
         })
       );
@@ -264,7 +264,7 @@ describe('ContentStream', () => {
       expect(client.index).toHaveBeenCalledTimes(3);
       expect(client.index).toHaveBeenNthCalledWith(
         1,
-        expect.objectContaining(set({}, 'document.content', Buffer.from('123').toString('base64')))
+        expect.objectContaining(set({}, 'document.data', Buffer.from('123').toString('base64')))
       );
       expect(client.index).toHaveBeenNthCalledWith(
         2,
@@ -272,7 +272,7 @@ describe('ContentStream', () => {
           id: '1.something',
           index: 'somewhere',
           document: {
-            content: Buffer.from('456').toString('base64'),
+            data: Buffer.from('456').toString('base64'),
             head_chunk_id: '0.something',
           },
         })
@@ -283,7 +283,7 @@ describe('ContentStream', () => {
           id: '2.something',
           index: 'somewhere',
           document: {
-            content: Buffer.from('78').toString('base64'),
+            data: Buffer.from('78').toString('base64'),
             head_chunk_id: '0.something',
           },
         })
