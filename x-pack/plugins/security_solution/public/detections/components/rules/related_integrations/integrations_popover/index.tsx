@@ -15,6 +15,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import styled from 'styled-components';
+import { useKibana } from '../../../../../common/lib/kibana';
 import { IntegrationDescription } from '../integrations_description';
 import { getInstalledRelatedIntegrations } from '../utils';
 import { useInstalledIntegrations } from '../use_installed_integrations';
@@ -54,6 +55,8 @@ const IntegrationListItem = styled('li')`
 const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const { data: allInstalledIntegrations } = useInstalledIntegrations({ packages: [] });
+  const services = useKibana().services;
+  const isSOMAvailable = services.application.capabilities.savedObjectsManagement.read;
 
   const integrationDetails = getInstalledRelatedIntegrations(
     integrations,
@@ -62,7 +65,7 @@ const IntegrationsPopoverComponent = ({ integrations }: IntegrationsPopoverProps
 
   const totalRelatedIntegrationsInstalled = integrationDetails.filter((i) => i.is_enabled).length;
   const badgeTitle =
-    allInstalledIntegrations != null
+    allInstalledIntegrations != null && isSOMAvailable
       ? `${totalRelatedIntegrationsInstalled}/${integrations.length} ${i18n.INTEGRATIONS_BADGE}`
       : `${integrations.length} ${i18n.INTEGRATIONS_BADGE}`;
 

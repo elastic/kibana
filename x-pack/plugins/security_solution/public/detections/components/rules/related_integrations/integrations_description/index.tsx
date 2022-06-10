@@ -12,7 +12,7 @@ import { useInstalledIntegrations } from '../use_installed_integrations';
 import { getInstalledRelatedIntegrations, getIntegrationLink, IntegrationDetails } from '../utils';
 
 import { RelatedIntegrationArray } from '../../../../../../common/detection_engine/schemas/common';
-import { useBasePath } from '../../../../../common/lib/kibana';
+import { useBasePath, useKibana } from '../../../../../common/lib/kibana';
 import { ListItems } from '../../description_step/types';
 import * as i18n from '../translations';
 
@@ -32,6 +32,9 @@ export const IntegrationDescriptionComponent: React.FC<{ integration: Integratio
   integration,
 }) => {
   const basePath = useBasePath();
+  const services = useKibana().services;
+  const isSOMAvailable = services.application.capabilities.savedObjectsManagement.read;
+
   const badgeInstalledColor = 'success';
   const badgeUninstalledColor = '#E0E5EE';
   const badgeColor = integration.is_installed ? badgeInstalledColor : badgeUninstalledColor;
@@ -49,10 +52,12 @@ export const IntegrationDescriptionComponent: React.FC<{ integration: Integratio
   return (
     <Wrapper>
       {getIntegrationLink(integration, basePath)}{' '}
-      <EuiToolTip content={badgeTooltip}>
-        <PaddedBadge color={badgeColor}>{badgeText}</PaddedBadge>
-      </EuiToolTip>
-      {integration.is_installed && !integration.version_satisfied && (
+      {isSOMAvailable && (
+        <EuiToolTip content={badgeTooltip}>
+          <PaddedBadge color={badgeColor}>{badgeText}</PaddedBadge>
+        </EuiToolTip>
+      )}
+      {isSOMAvailable && integration.is_installed && !integration.version_satisfied && (
         <VersionWarningIconContainer>
           <EuiIconTip
             type={'alert'}
