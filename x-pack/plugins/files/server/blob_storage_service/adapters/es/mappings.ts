@@ -11,6 +11,12 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { JsonValue } from '@kbn/utility-types';
 
+/**
+ * These are the fields we expect to find a given document acting as a file chunk.
+ *
+ * @note not all fields are used by this adapter but this represents the standard
+ * shape for any consumers of BlobStorage in ES.
+ */
 export interface FileChunkDocument {
   /**
    * Data contents. Could be part of a file (chunk) or the entire file.

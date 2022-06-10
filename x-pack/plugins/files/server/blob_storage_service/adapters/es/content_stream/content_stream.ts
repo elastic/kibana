@@ -7,10 +7,11 @@
 import { errors as esErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { defaults } from 'lodash';
+import { defaults, once, set } from 'lodash';
 import Puid from 'puid';
 import { Duplex, Writable, Readable } from 'stream';
 
+import type { CreateBlobAttributes } from '../../../types';
 import type { FileChunkDocument } from '../mappings';
 
 /**
@@ -74,14 +75,20 @@ export class ContentStream extends Duplex {
   bytesWritten = 0;
 
   constructor(
-    private client: ElasticsearchClient,
+    private readonly client: ElasticsearchClient,
     private id: undefined | string,
-    private index: string,
-    private logger: Logger,
-    parameters: ContentStreamParameters = {}
+    private readonly index: string,
+    private readonly logger: Logger,
+    parameters: ContentStreamParameters = {},
+    private readonly attributes: CreateBlobAttributes = []
   ) {
     super();
-    this.parameters = defaults(parameters, { encoding: 'base64', size: -1, maxChunkSize: '4mb' });
+    this.parameters = defaults(parameters, {
+      encoding: 'base64',
+      size: -1,
+      maxChunkSize: '4mb',
+      attributes: {},
+    });
   }
 
   private decode(content: string) {
@@ -190,14 +197,6 @@ export class ContentStream extends Duplex {
     });
   }
 
-  public getDocumentId(): undefined | string {
-    return this.id;
-  }
-
-  public getBytesWritten(): number {
-    return this.bytesWritten;
-  }
-
   private getId(): string {
     if (!this.id) {
       this.id = this.puid.generate();
@@ -213,8 +212,20 @@ export class ContentStream extends Duplex {
     return chunkNumber === 0 ? this.getHeadChunkId() : `${chunkNumber}.${this.getId()}`;
   }
 
+  private getAttributes: () =>
+    | undefined
+    | Pick<FileChunkDocument, 'app_extra_data' | 'app_search_data'> = once(() => {
+    if (!this.attributes.length) return undefined;
+    return this.attributes.reduce((acc, [key, value, options]) => {
+      return options?.searchable
+        ? set(acc, `app_search_data.${key}`, value)
+        : set(acc, `app_extra_data.${key}`, value);
+    }, {});
+  });
+
   private async writeChunk(data: string) {
     const chunkId = this.getChunkId(this.chunksWritten);
+    const isHeadChunk = this.chunksWritten === 0;
 
     this.logger.debug(`Writing chunk #${this.chunksWritten} (${chunkId}).`);
 
@@ -223,7 +234,8 @@ export class ContentStream extends Duplex {
       index: this.index,
       document: {
         data,
-        head_chunk_id: this.chunksWritten > 0 ? this.getHeadChunkId() : undefined,
+        head_chunk_id: isHeadChunk ? undefined : this.getHeadChunkId(),
+        ...(isHeadChunk ? this.getAttributes() : undefined),
       },
     });
   }
@@ -294,6 +306,14 @@ export class ContentStream extends Duplex {
       .then(() => callback())
       .catch(callback);
   }
+
+  public getDocumentId(): undefined | string {
+    return this.id;
+  }
+
+  public getBytesWritten(): number {
+    return this.bytesWritten;
+  }
 }
 
 export interface ContentStreamArgs {
@@ -314,10 +334,18 @@ export interface ContentStreamArgs {
    */
   logger: Logger;
   parameters?: ContentStreamParameters;
+  attributes?: CreateBlobAttributes;
 }
 
-function getContentStream({ client, id, index, logger, parameters }: ContentStreamArgs) {
-  return new ContentStream(client, id, index, logger, parameters);
+function getContentStream({
+  client,
+  id,
+  index,
+  logger,
+  parameters,
+  attributes,
+}: ContentStreamArgs) {
+  return new ContentStream(client, id, index, logger, parameters, attributes);
 }
 
 type WritableContentStream = Writable & Pick<ContentStream, 'getDocumentId' | 'getBytesWritten'>;

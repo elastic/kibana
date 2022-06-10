@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { set } from 'lodash';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ContentStream, ContentStreamEncoding, ContentStreamParameters } from './content_stream';
+import { CreateBlobAttributes } from '../../../types';
 
 describe('ContentStream', () => {
   let client: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
@@ -23,8 +24,9 @@ describe('ContentStream', () => {
       encoding: 'base64' as ContentStreamEncoding,
       size: 1,
     } as ContentStreamParameters,
+    attributes = [] as CreateBlobAttributes,
   } = {}) => {
-    return new ContentStream(client, id, index, logger, params);
+    return new ContentStream(client, id, index, logger, params, attributes);
   };
 
   beforeEach(() => {
@@ -305,5 +307,78 @@ describe('ContentStream', () => {
       );
       expect(deleteRequest).toHaveProperty('query.bool.should.1.match._id', '0.something');
     });
+
+    it('should store the attributes on the first document it creates', async () => {
+      base64Stream = getContentStream({
+        attributes: [
+          ['myName', 'myValue'],
+          ['myOtherName', 'myOtherValue', { searchable: true }],
+          ['myOtherNameAsObject', { a: 1 }, { searchable: true }],
+        ],
+        params: { encoding: 'base64', maxChunkSize: '1028B' },
+      });
+      base64Stream.end('12345678');
+      await new Promise((resolve) => base64Stream.once('finish', resolve));
+
+      const expectedAttributeData = {
+        app_search_data: { myOtherName: 'myOtherValue', myOtherNameAsObject: { a: 1 } },
+        app_extra_data: { myName: 'myValue' },
+      };
+
+      expect(client.index).toHaveBeenCalledTimes(3);
+      expect(client.index).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({
+          id: '0.something',
+          index: 'somewhere',
+          document: {
+            data: Buffer.from('123').toString('base64'),
+            ...expectedAttributeData,
+          },
+        })
+      );
+      expect(client.index).toHaveBeenNthCalledWith(
+        2,
+        expect.objectContaining({
+          id: '1.something',
+          index: 'somewhere',
+          document: {
+            data: Buffer.from('456').toString('base64'),
+            head_chunk_id: '0.something',
+          },
+        })
+      );
+      expect(client.index).toHaveBeenNthCalledWith(
+        2,
+        expect.not.objectContaining({
+          document: {
+            ...expectedAttributeData,
+          },
+        })
+      );
+      // Non-head chunks should not contain attributes
+      expect(client.index).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
+          id: '2.something',
+          index: 'somewhere',
+          document: {
+            data: Buffer.from('78').toString('base64'),
+            head_chunk_id: '0.something',
+          },
+        })
+      );
+      // Non-head chunks should not contain attributes
+      expect(client.index).toHaveBeenNthCalledWith(
+        3,
+        expect.not.objectContaining({
+          document: {
+            ...expectedAttributeData,
+          },
+        })
+      );
+    });
+
+    it('should not add `attributes` fields if they were not provided', async () => {});
   });
 });
