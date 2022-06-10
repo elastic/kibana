@@ -356,7 +356,7 @@ export class SettingsPageObject extends FtrService {
     // null to bypass default value
     timefield: string | null = '@timestamp',
     isStandardIndexPattern = true,
-    customDataViewId?: string,
+    customDataViewId?: string
   ) {
     await this.retry.try(async () => {
       await this.header.waitUntilLoadingHasFinished();
