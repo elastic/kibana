@@ -38,7 +38,7 @@ export const plugin: PluginInitializer<
   ObservabilityPublicStart,
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicPluginsStart
-> = (context: PluginInitializerContext) => {
+> = () => {
   return new Plugin();
 };
 

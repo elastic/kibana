@@ -31,9 +31,6 @@ export const config: PluginConfigDescriptor = {
       enabled: schema.boolean({ defaultValue: true }),
       index: schema.string({ defaultValue: 'observability-annotations' }),
     }),
-    unsafe: schema.object({
-      cases: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
-    }),
   }),
 };
 

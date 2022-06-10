@@ -46,11 +46,6 @@ describe('APMSection', () => {
 
     jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       appMountParameters: {} as AppMountParameters,
-      config: {
-        unsafe: {
-          cases: { enabled: true },
-        },
-      },
       core: {} as CoreStart,
       plugins: {} as ObservabilityPublicPluginsStart,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
