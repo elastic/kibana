@@ -6,6 +6,7 @@
  */
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
+import { TimeRangeMetadata } from '../../../common/time_range_metadata';
 import { setupRequest } from '../../lib/helpers/setup_request';
 import { getIsUsingServiceDestinationMetrics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -23,9 +24,7 @@ export const timeRangeMetadataRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (
-    resources
-  ): Promise<{ isUsingServiceDestinationMetrics: boolean }> => {
+  handler: async (resources): Promise<TimeRangeMetadata> => {
     const setup = await setupRequest(resources);
 
     const {

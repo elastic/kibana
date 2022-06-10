@@ -13,6 +13,9 @@ export function useTimeRangeMetadata({
   rangeTo,
   kuery,
 }: {
+  // require parameters to enforce type-safety. Only components
+  // with access to rangeFrom and rangeTo should be able to request
+  // time range metadata.
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
