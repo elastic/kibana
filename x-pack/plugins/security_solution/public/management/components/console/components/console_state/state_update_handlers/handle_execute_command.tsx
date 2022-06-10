@@ -124,7 +124,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
   const requiredArgs = getRequiredArguments(commandDefinition.args);
 
   // If args were entered, then validate them
-  if (parsedInput.hasArgs()) {
+  if (parsedInput.hasArgs) {
     // Show command help
     if (parsedInput.hasArg('help')) {
       return updateStateWithNewCommandHistoryItem(state, {

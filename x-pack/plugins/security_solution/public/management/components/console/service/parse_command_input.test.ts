@@ -19,19 +19,23 @@ describe('when using `parseCommandInput()`', () => {
     } as ParsedCommandInterface;
   };
 
-  it.each([['foo'], ['    foo'], ['    foo     '], ['foo     ']])(
-    'should identify the command entered',
-    (input) => {
-      const parsedCommand = parseCommandInput(input);
+  it.each([
+    ['foo', 'foo'],
+    ['    foo', 'foo'],
+    ['    foo     ', 'foo'],
+    ['foo     ', 'foo'],
+    [' foo-bar  ', 'foo-bar'],
+  ])('should identify the command entered: [%s]', (input, expectedCommandName) => {
+    const parsedCommand = parseCommandInput(input);
 
-      expect(parsedCommand).toEqual(
-        parsedCommandWith({
-          input,
-          args: {},
-        })
-      );
-    }
-  );
+    expect(parsedCommand).toEqual(
+      parsedCommandWith({
+        input,
+        name: expectedCommandName,
+        args: {},
+      })
+    );
+  });
 
   it('should parse arguments that the `--` prefix', () => {
     const input = 'foo    --one     --two';

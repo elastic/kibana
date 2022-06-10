@@ -86,27 +86,25 @@ export interface ParsedCommandInterface extends ParseInputStringResponse {
   hasArg(argName: string): boolean;
 
   /**
-   * Checks to see if any argument was entered
+   * if any argument was entered
    */
-  hasArgs(): boolean;
+  hasArgs: boolean;
 }
 
 class ParsedCommand implements ParsedCommandInterface {
   public readonly name: string;
   public readonly args: Record<string, string[]>;
+  public readonly hasArgs: boolean;
 
   constructor(public readonly input: string) {
     const parseInput = parseInputString(input);
     this.name = parseInput.name;
     this.args = parseInput.args;
+    this.hasArgs = Object.keys(this.args).length > 0;
   }
 
   hasArg(argName: string): boolean {
     return argName in this.args;
-  }
-
-  hasArgs(): boolean {
-    return Object.keys(this.args).length > 0;
   }
 }
 
