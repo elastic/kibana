@@ -80,7 +80,7 @@ export function groupAxesByType(
         (axis) =>
           decorationByAccessor?.axisId && axis.id && axis.id === decorationByAccessor?.axisId
       );
-      const key = `axis-${axisConfigById?.id}` || 'auto';
+      const key = axisConfigById?.id ? `axis-${axisConfigById?.id}` : 'auto';
       const fieldFormat = fieldFormats[layerId].yAccessors[yAccessor]!;
       if (!series[key]) {
         series[key] = [];
