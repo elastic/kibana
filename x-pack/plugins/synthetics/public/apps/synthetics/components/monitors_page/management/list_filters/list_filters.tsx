@@ -8,6 +8,7 @@
 import React, { useState } from 'react';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
+import { i18n } from '@kbn/i18n';
 import { useGetUrlParams, useUrlParams } from '../../../../hooks';
 import { FilterGroup } from './filter_group';
 
@@ -27,21 +28,25 @@ export function ListFilters() {
 
   return (
     <EuiFlexGroup gutterSize="s">
-      <EuiFlexItem grow={1}>
+      <EuiFlexItem grow={2}>
         <EuiFieldSearch
           fullWidth
-          placeholder="Search this"
+          placeholder={PLACEHOLDER_TEXT}
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
           }}
           isClearable={true}
-          aria-label="Use aria labels when no actual label is in use"
+          aria-label={PLACEHOLDER_TEXT}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={1}>
         <FilterGroup />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
+
+const PLACEHOLDER_TEXT = i18n.translate('xpack.synthetics.monitorManagement.filter.placeholder', {
+  defaultMessage: `Search by name, url, tag or location`,
+});

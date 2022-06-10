@@ -115,7 +115,7 @@ export const MonitorList = ({
   return (
     <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
       <ListFilters />
-      <EuiSpacer size="s" />
+      <EuiSpacer />
       {recordRangeLabel}
       <EuiSpacer size="s" />
       <hr style={{ border: `1px solid ${euiTheme.colors.lightShade}` }} />
