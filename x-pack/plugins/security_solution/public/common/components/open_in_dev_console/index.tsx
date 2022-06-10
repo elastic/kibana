@@ -4,26 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { EuiButton, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiButton, EuiFlexItem, EuiLink, EuiPopover } from '@elastic/eui';
 
 interface OpenInDevConsoleButtonProps {
   dataTestSubjPrefix?: string;
   loadFromUrl: string;
-  signalIndexName: string;
+  enableButton: boolean;
   title: string;
 }
 
 const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = ({
   dataTestSubjPrefix = 'open-in-dev-console',
   loadFromUrl,
-  signalIndexName,
+  enableButton,
   title,
 }) => {
   const href = `/app/dev_tools#/console?load_from=${loadFromUrl}`;
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const onMouseEnter = () => {
+    setIsPopoverOpen(true);
+  };
+
+  const closePopover = () => setIsPopoverOpen(false);
+
   return loadFromUrl ? (
     <EuiFlexItem>
-      {signalIndexName != null ? (
+      {enableButton != null && enableButton ? (
         <EuiButton
           href={href}
           color="warning"
@@ -34,21 +41,33 @@ const OpenInDevConsoleButtonComponent: React.FC<OpenInDevConsoleButtonProps> = (
           {title}
         </EuiButton>
       ) : (
-        <EuiToolTip
-          position="top"
-          // TODO: i18n
-          content="Create a rule and generate some alerts to enable Host Risk Score Module"
+        <EuiPopover
+          isOpen={isPopoverOpen}
+          closePopover={closePopover}
+          button={
+            <EuiButton
+              href={href}
+              color="warning"
+              target="_blank"
+              isDisabled={true}
+              data-test-subj={`${dataTestSubjPrefix}-disabled-module-button`}
+              onMouseEnter={onMouseEnter}
+            >
+              {title}
+            </EuiButton>
+          }
         >
-          <EuiButton
-            href={href}
-            color="warning"
-            target="_blank"
-            isDisabled={true}
-            data-test-subj={`${dataTestSubjPrefix}-disabled-module-button`}
-          >
-            {title}
-          </EuiButton>
-        </EuiToolTip>
+          <p>
+            {`Make sure you have alerts available before enabling the module.`}{' '}
+            <EuiLink
+              href="https://www.elastic.co/guide/en/security/current/detection-engine-overview.html"
+              target="_blank"
+              external={false}
+            >
+              {'Learn More'}
+            </EuiLink>
+          </p>
+        </EuiPopover>
       )}
     </EuiFlexItem>
   ) : null;

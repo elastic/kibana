@@ -330,10 +330,8 @@ export const redirectToDetections = (
   hasEncryptionKey: boolean | null,
   needsListsConfiguration: boolean
 ) =>
-  isSignalIndexExists === false ||
-  isAuthenticated === false ||
-  hasEncryptionKey === false ||
-  needsListsConfiguration;
+  // isSignalIndexExists === false || WHY redirect to alerts if signal index doesn't exist
+  isAuthenticated === false || hasEncryptionKey === false || needsListsConfiguration;
 
 const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
   const queryRuleParams = ['index', 'filters', 'language', 'query', 'saved_id'];
@@ -349,9 +347,7 @@ const getRuleSpecificRuleParamKeys = (ruleType: Type) => {
     case 'eql':
       return queryRuleParams;
   }
-  assertUnreachable(ruleType);
 };
-
 export const getActionMessageRuleParams = (ruleType: Type): string[] => {
   const commonRuleParamsKeys = [
     'id',

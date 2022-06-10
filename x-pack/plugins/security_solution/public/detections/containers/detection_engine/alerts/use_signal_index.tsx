@@ -54,8 +54,8 @@ export const useSignalIndex = (): ReturnSignalIndex => {
         if (isSubscribed && signal != null) {
           // console.log(signal.indexExists);
           setSignalIndex({
-            // signalIndexExists: signal.indexExists,
-            signalIndexExists: true,
+            signalIndexExists: signal.indexExists,
+            // signalIndexExists: true,
             signalIndexName: signal.name,
             signalIndexMappingOutdated: signal.index_mapping_outdated,
             createDeSignalIndex: createIndex,
@@ -64,8 +64,8 @@ export const useSignalIndex = (): ReturnSignalIndex => {
       } catch (error) {
         if (isSubscribed) {
           setSignalIndex({
-            // signalIndexExists: signal.indexExists,
-            signalIndexExists: false,
+            signalIndexExists: signal.indexExists,
+            // signalIndexExists: false,
             signalIndexName: null,
             signalIndexMappingOutdated: null,
             createDeSignalIndex: createIndex,
