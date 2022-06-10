@@ -216,6 +216,10 @@ export const IP_REPUTATION_LINKS_SETTING_DEFAULT = `[
   { "name": "talosIntelligence.com", "url_template": "https://talosintelligence.com/reputation_center/lookup?search={{ip}}" }
 ]`;
 
+/** This Kibana Advanced Setting shows related integrations on the Rules Table */
+export const SHOW_RELATED_INTEGRATIONS_SETTING =
+  'securitySolution:showRelatedIntegrations' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
