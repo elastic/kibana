@@ -52,7 +52,7 @@ const apisToIntercept = [
   },
 ];
 
-describe('when navigating to integration page', () => {
+describe.skip('when navigating to integration page', () => {
   beforeEach(() => {
     const integrationsPath = '/app/integrations/browse';
 
@@ -76,54 +76,6 @@ describe('when navigating to integration page', () => {
       );
       cy.get(`[data-test-subj="${field.selector}"`).type(field.value);
     });
-  });
-
-  it('adds a new policy without agent', () => {
-    apisToIntercept.map(({ endpoint, method, name }) => {
-      cy.intercept(method, endpoint).as(name);
-    });
-
-    cy.url().should('include', 'app/fleet/integrations/apm/add-integration');
-    policyFormFields.map((field) => {
-      cy.get(`[data-test-subj="${field.selector}"`).clear().type(field.value);
-    });
-    cy.contains('Save and continue').click();
-    cy.wait('@fleetAgentPolicies');
-    cy.wait('@fleetAgentStatus');
-    cy.wait('@fleetPackagePolicies');
-
-    cy.get('[data-test-subj="confirmModalCancelButton').click();
-
-    cy.url().should('include', '/app/integrations/detail/apm/policies');
-    cy.contains(policyName);
-  });
-
-  it('updates an existing policy', () => {
-    apisToIntercept.map(({ endpoint, method, name }) => {
-      cy.intercept(method, endpoint).as(name);
-    });
-
-    policyFormFields.map((field) => {
-      cy.get(`[data-test-subj="${field.selector}"`)
-        .clear()
-        .type(`${field.value}-new`);
-    });
-
-    cy.contains('Save and continue').click();
-    cy.wait('@fleetAgentPolicies');
-    cy.wait('@fleetAgentStatus');
-    cy.wait('@fleetPackagePolicies');
-
-    cy.get('[data-test-subj="confirmModalCancelButton').click();
-    cy.contains(`${policyName}-new`).click();
-
-    policyFormFields.map((field) => {
-      cy.get(`[data-test-subj="${field.selector}"`)
-        .clear()
-        .type(`${field.value}-updated`);
-    });
-    cy.contains('Save integration').click();
-    cy.contains(`${policyName}-updated`);
   });
 
   it('should display Tail-based section on latest version', () => {
