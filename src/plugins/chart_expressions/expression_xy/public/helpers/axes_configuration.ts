@@ -169,12 +169,13 @@ export function getAxesConfiguration(
   let position: Position;
 
   yAxisConfigs?.forEach((axis) => {
-    if (axis.id && series[axis.id] && series[axis.id].length > 0) {
+    const groupId = axis.id ? `axis-${axis.id}` : undefined;
+    if (groupId && series[groupId] && series[groupId].length > 0) {
       position = getAxisPosition(axis.position || Position.Left, shouldRotate);
       axisGroups.push({
-        groupId: `axis-${axis.id}`,
-        formatter: formatFactory?.(series[axis.id][0].fieldFormat),
-        series: series[axis.id].map(({ fieldFormat, ...currentSeries }) => currentSeries),
+        groupId,
+        formatter: formatFactory?.(series[groupId][0].fieldFormat),
+        series: series[groupId].map(({ fieldFormat, ...currentSeries }) => currentSeries),
         ...axisGlobalConfig(position, yAxisConfigs),
         ...axis,
         position,
