@@ -6,8 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { defaultCore, WrappedHelper } from '../../../../../../legacy_uptime/lib/helper/rtl_helpers';
 import { useFilters } from './use_filters';
+import { defaultCore, WrappedHelper } from '../../../../utils/testing';
 
 describe('useMonitorListFilters', () => {
   it('returns expected results', () => {
