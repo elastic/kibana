@@ -20,13 +20,11 @@ export const links: LinkItem = {
       'Provides key activity metrics in an interactive map as well as event tables that enable interaction with the Timeline.',
   }),
   path: NETWORK_PATH,
-  globalNavEnabled: true,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.network', {
       defaultMessage: 'Network',
     }),
   ],
-  globalNavOrder: 9003,
   links: [
     {
       id: SecurityPageName.networkDns,
