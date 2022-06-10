@@ -21914,7 +21914,7 @@
     "xpack.osquery.pack.queryFlyoutForm.idFieldLabel": "ID",
     "xpack.osquery.pack.queryFlyoutForm.intervalFieldLabel": "Intervalle (s)",
     "xpack.osquery.pack.queryFlyoutForm.invalidIdError": "Les caractères doivent être alphanumériques, _ ou -",
-    "xpack.osquery.pack.queryFlyoutForm.invalidIntervalField": "Une valeur d'intervalle positive est requise",
+    "xpack.osquery.pack.queryFlyoutForm.intervalFieldMinNumberError": "Une valeur d'intervalle positive est requise",
     "xpack.osquery.pack.queryFlyoutForm.mappingEcsFieldLabel": "Champ ECS",
     "xpack.osquery.pack.queryFlyoutForm.mappingValueFieldLabel": "Valeur",
     "xpack.osquery.pack.queryFlyoutForm.osqueryResultFieldRequiredErrorMessage": "Valeur obligatoire.",
