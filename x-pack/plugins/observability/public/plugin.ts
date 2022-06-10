@@ -17,7 +17,6 @@ import {
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin as PluginClass,
-  PluginInitializerContext,
 } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -35,7 +34,6 @@ import {
 import { KibanaFeature } from '@kbn/features-plugin/common';
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { ConfigSchema } from '.';
 import { observabilityAppId, observabilityFeatureId, casesPath } from '../common';
 import { createLazyObservabilityPageTemplate } from './components/shared';
 import { registerDataHandler } from './data_handler';
@@ -127,17 +125,12 @@ export class Plugin
     }),
   ];
 
-  constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
-    this.initializerContext = initializerContext;
-  }
-
   public setup(
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
-    const config = this.initializerContext.config.get();
 
     createCallObservabilityApi(coreSetup.http);
 
@@ -168,7 +161,6 @@ export class Plugin
       }
 
       return renderApp({
-        config,
         core: coreStart,
         plugins: pluginsStart,
         appMountParameters: params,
@@ -281,11 +273,9 @@ export class Plugin
 
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
-    const config = this.initializerContext.config.get();
 
     updateGlobalNavigation({
       capabilities: application.capabilities,
-      config,
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
     });

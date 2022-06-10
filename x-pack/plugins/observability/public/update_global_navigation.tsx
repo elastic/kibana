@@ -8,17 +8,14 @@
 import { Subject } from 'rxjs';
 import { AppNavLinkStatus, AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
-import { ConfigSchema } from '.';
 import { casesFeatureId } from '../common';
 
 export function updateGlobalNavigation({
   capabilities,
-  config,
   deepLinks,
   updater$,
 }: {
   capabilities: ApplicationStart['capabilities'];
-  config: ConfigSchema;
   deepLinks: AppDeepLink[];
   updater$: Subject<AppUpdater>;
 }) {
@@ -31,7 +28,7 @@ export function updateGlobalNavigation({
         return {
           ...link,
           navLinkStatus:
-            config.unsafe.cases.enabled && capabilities[casesFeatureId].read_cases && someVisible
+            capabilities[casesFeatureId].read_cases && someVisible
               ? AppNavLinkStatus.visible
               : AppNavLinkStatus.hidden,
         };

@@ -33,19 +33,13 @@ export {
 } from '../common/ui_settings_keys';
 export { uptimeOverviewLocatorID } from '../common';
 
-export interface ConfigSchema {
-  unsafe: {
-    cases: { enabled: boolean };
-  };
-}
-
 export const plugin: PluginInitializer<
   ObservabilityPublicSetup,
   ObservabilityPublicStart,
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicPluginsStart
-> = (context: PluginInitializerContext<ConfigSchema>) => {
-  return new Plugin(context);
+> = (context: PluginInitializerContext) => {
+  return new Plugin();
 };
 
 export * from './components/shared/action_menu';
