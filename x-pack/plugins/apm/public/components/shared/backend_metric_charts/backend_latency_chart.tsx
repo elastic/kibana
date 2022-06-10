@@ -7,43 +7,49 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
-import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
-import { asTransactionRate } from '../../../../common/utils/formatters';
+import { isTimeComparison } from '../time_comparison/get_comparison_options';
+import { getDurationFormatter } from '../../../../common/utils/formatters';
 import { useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
-import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import { useApmParams } from '../../../hooks/use_apm_params';
+import { TimeseriesChart } from '../charts/timeseries_chart';
+import {
+  getMaxY,
+  getResponseTimeTickFormatter,
+} from '../charts/transaction_charts/helper';
 import {
   ChartType,
   getTimeSeriesColor,
-} from '../../shared/charts/helper/get_timeseries_color';
-import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
+} from '../charts/helper/get_timeseries_color';
+import { getComparisonChartTheme } from '../time_comparison/get_comparison_chart_theme';
+import { BackendMetricChartsRouteParams } from './backend_metric_charts_route_params';
+import { useSearchServiceDestinationMetrics } from '../../../context/time_range_metadata/use_search_service_destination_metrics';
 
-export function BackendThroughputChart({ height }: { height: number }) {
-  const {
-    query: {
-      backendName,
-      rangeFrom,
-      rangeTo,
-      kuery,
-      environment,
-      offset,
-      comparisonEnabled,
-    },
-  } = useApmParams('/backends/overview');
-
+export function BackendLatencyChart({
+  height,
+  backendName,
+  rangeFrom,
+  rangeTo,
+  kuery,
+  environment,
+  offset,
+  comparisonEnabled,
+  spanName,
+}: { height: number } & BackendMetricChartsRouteParams) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const comparisonChartTheme = getComparisonChartTheme();
 
+  const { isTimeRangeMetadataLoading, searchServiceDestinationMetrics } =
+    useSearchServiceDestinationMetrics({ rangeFrom, rangeTo, kuery });
+
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end) {
+      if (isTimeRangeMetadataLoading) {
         return;
       }
 
-      return callApmApi('GET /internal/apm/backends/charts/throughput', {
+      return callApmApi('GET /internal/apm/backends/charts/latency', {
         params: {
           query: {
             backendName,
@@ -55,15 +61,28 @@ export function BackendThroughputChart({ height }: { height: number }) {
                 : undefined,
             kuery,
             environment,
+            spanName: spanName || '',
+            searchServiceDestinationMetrics,
           },
         },
       });
     },
-    [backendName, start, end, offset, kuery, environment, comparisonEnabled]
+    [
+      backendName,
+      start,
+      end,
+      offset,
+      kuery,
+      environment,
+      comparisonEnabled,
+      spanName,
+      isTimeRangeMetadataLoading,
+      searchServiceDestinationMetrics,
+    ]
   );
 
   const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.THROUGHPUT
+    ChartType.LATENCY_AVG
   );
 
   const previousPeriodLabel = usePreviousPeriodLabel();
@@ -76,8 +95,8 @@ export function BackendThroughputChart({ height }: { height: number }) {
         data: data.currentTimeseries,
         type: 'linemark',
         color: currentPeriodColor,
-        title: i18n.translate('xpack.apm.backendThroughputChart.chartTitle', {
-          defaultMessage: 'Throughput',
+        title: i18n.translate('xpack.apm.backendLatencyChart.chartTitle', {
+          defaultMessage: 'Latency',
         }),
       });
     }
@@ -94,14 +113,17 @@ export function BackendThroughputChart({ height }: { height: number }) {
     return specs;
   }, [data, currentPeriodColor, previousPeriodColor, previousPeriodLabel]);
 
+  const maxY = getMaxY(timeseries);
+  const latencyFormatter = getDurationFormatter(maxY);
+
   return (
     <TimeseriesChart
       height={height}
       fetchStatus={status}
-      id="throughputChart"
+      id="latencyChart"
       customTheme={comparisonChartTheme}
       timeseries={timeseries}
-      yLabelFormat={asTransactionRate}
+      yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
     />
   );
 }

@@ -30,6 +30,8 @@ import { BackendDetailOperations } from '../../app/backend_detail_operations';
 import { BackendDetailView } from '../../app/backend_detail_view';
 import { RedirectPathBackendDetailView } from './redirect_path_backend_detail_view';
 import { RedirectBackendsToBackendDetailOverview } from './redirect_backends_to_backend_detail_view';
+import { BackendOperationDetailView } from '../../app/backend_operation_detail_view';
+import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 
 function page<
   TPath extends string,
@@ -69,6 +71,7 @@ function page<
         </Breadcrumb>
       ),
       children,
+      params,
     },
   } as any;
 }
@@ -149,7 +152,11 @@ export const DependenciesOperationsTitle = i18n.translate(
 
 export const home = {
   '/': {
-    element: <Outlet />,
+    element: (
+      <TimeRangeMetadataContextProvider>
+        <Outlet />
+      </TimeRangeMetadataContextProvider>
+    ),
     params: t.type({
       query: t.intersection([
         environmentRt,
@@ -273,16 +280,15 @@ export const home = {
             children: {
               '/backends/operations': {
                 element: <BackendDetailOperations />,
-                children: {
-                  '/backends/operation': {
-                    params: t.type({
-                      query: t.type({
-                        spanName: t.string,
-                      }),
-                    }),
-                    element: <Outlet />,
-                  },
-                },
+              },
+
+              '/backends/operation': {
+                params: t.type({
+                  query: t.type({
+                    spanName: t.string,
+                  }),
+                }),
+                element: <BackendOperationDetailView />,
               },
               '/backends/overview': {
                 element: <BackendDetailOverview />,
