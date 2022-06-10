@@ -348,6 +348,16 @@ export const ArgumentStrings = {
         defaultMessage: 'Provides colors for the values, based on the bounds',
       }),
   },
+  Editor: {
+    getDisplayName: () =>
+      i18n.translate('xpack.canvas.uis.arguments.editorTitle', {
+        defaultMessage: 'Editor',
+      }),
+    getHelp: () =>
+      i18n.translate('xpack.canvas.uis.arguments.editorLabel', {
+        defaultMessage: 'Provides a text area with syntax highlighting',
+      }),
+  },
 };
 
 export const DataSourceStrings = {
