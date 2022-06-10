@@ -6,7 +6,6 @@
  */
 
 import sinon from 'sinon';
-import {} from 'lodash';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { Readable } from 'stream';
 import {
