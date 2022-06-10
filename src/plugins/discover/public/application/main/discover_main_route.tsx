@@ -79,9 +79,6 @@ export function DiscoverMainRoute(props: Props) {
         const hasUserDataViewValue = await data.dataViews.hasData
           .hasUserDataView()
           .catch(() => false);
-
-        const hasESDataValue =
-          isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
         setHasUserDataView(hasUserDataViewValue);
 
         if (hasUserDataViewValue) {
@@ -104,7 +101,8 @@ export function DiscoverMainRoute(props: Props) {
           return indexPatternData;
         }
 
-        const hasESDataValue = await data.dataViews.hasData.hasESData().catch(() => false);
+        const hasESDataValue =
+          isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
         setHasESData(hasESDataValue);
         setShowNoDataPage((!hasUserDataViewValue && hasESDataValue) || !hasESDataValue);
       } catch (e) {
