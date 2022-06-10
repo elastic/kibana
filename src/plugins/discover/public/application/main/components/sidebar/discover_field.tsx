@@ -29,7 +29,7 @@ import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { FieldDetails } from './types';
-import { getFieldTypeName } from './lib/get_field_type_name';
+import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { DiscoverFieldVisualize } from './discover_field_visualize';
 
 function wrapOnDot(str?: string) {
