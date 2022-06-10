@@ -101,7 +101,7 @@ export const VisualizeApp = ({ onAppLeave }: VisualizeAppProps) => {
       }
 
       const hasEsData = await dataViews.hasData.hasESData().catch(() => false);
-      setShowNoDataPage(!hasEsData);
+      setShowNoDataPage((!hasUserDataView && hasEsData) || !hasEsData);
       setIsLoading(false);
     };
 

@@ -75,6 +75,7 @@ export function DiscoverMainRoute() {
           .hasUserDataView()
           .catch(() => false);
         setHasUserDataView(hasUserDataViewValue);
+
         if (hasUserDataViewValue) {
           const defaultDataView = await data.dataViews.getDefaultDataView();
 
@@ -94,9 +95,10 @@ export function DiscoverMainRoute() {
 
           return indexPatternData;
         }
+
         const hasESDataValue = await data.dataViews.hasData.hasESData().catch(() => false);
         setHasESData(hasESDataValue);
-        setShowNoDataPage(!hasESDataValue);
+        setShowNoDataPage((!hasUserDataViewValue && hasESDataValue) || !hasESDataValue);
       } catch (e) {
         setError(e);
       }

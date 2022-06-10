@@ -46,5 +46,5 @@ export const isDashboardAppInNoDataState = async (
     return false;
   }
   const hasEsData = await dataViews.hasData.hasESData().catch(() => true);
-  return !hasEsData;
+  return (!hasUserDataView && hasEsData) || !hasEsData;
 };

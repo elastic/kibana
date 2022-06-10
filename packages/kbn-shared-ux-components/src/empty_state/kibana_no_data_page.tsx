@@ -48,10 +48,6 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => 
     return <EuiLoadingElastic css={{ margin: 'auto' }} size="xxl" />;
   }
 
-  if (!dataExists) {
-    return <NoDataConfigPage noDataConfig={noDataConfig} />;
-  }
-
   /*
     TODO: clintandrewhall - the use and population of `NoDataViewPromptProvider` here is temporary,
     until `KibanaNoDataPage` is moved to a package of its own.
@@ -60,7 +56,7 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => 
     with `KibanaNoDataPageProvider`, creating a single Provider that manages contextual dependencies
     throughout the React tree from the top-level of composition and consumption.
   */
-  if (!hasUserDataViews) {
+  if (!hasUserDataViews && dataExists) {
     const services: NoDataViewsPromptServices = {
       canCreateNewDataView,
       dataViewsDocLink,
@@ -72,6 +68,10 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => 
         <NoDataViewsPrompt onDataViewCreated={onDataViewCreated} />
       </NoDataViewsPromptProvider>
     );
+  }
+
+  if (!dataExists) {
+    return <NoDataConfigPage noDataConfig={noDataConfig} />;
   }
 
   return null;
