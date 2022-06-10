@@ -86,7 +86,6 @@ const withCore = makeDecorator({
                 unsafe: {
                   alertingExperience: { enabled: true },
                   cases: { enabled: true },
-                  rules: { enabled: true },
                 },
               },
               observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),

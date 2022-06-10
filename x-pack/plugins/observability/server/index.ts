@@ -33,7 +33,6 @@ export const config: PluginConfigDescriptor = {
     }),
     unsafe: schema.object({
       alertingExperience: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
-      rules: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
       cases: schema.object({ enabled: schema.boolean({ defaultValue: true }) }),
     }),
   }),

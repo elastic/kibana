@@ -276,7 +276,7 @@ export class Plugin
       navigation: {
         registerSections: this.navigationRegistry.registerSections,
       },
-      useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
+      useRulesLink: createUseRulesLink(),
     };
   }
 
@@ -310,7 +310,7 @@ export class Plugin
         pluginsStart.dataViews,
         pluginsStart.lens
       ),
-      useRulesLink: createUseRulesLink(config.unsafe.rules.enabled),
+      useRulesLink: createUseRulesLink(),
     };
   }
 }

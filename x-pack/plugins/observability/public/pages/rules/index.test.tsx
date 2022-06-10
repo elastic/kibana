@@ -48,7 +48,6 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
       alertingExperience: { enabled: true },
       cases: { enabled: true },
       overviewNext: { enabled: false },
-      rules: { enabled: true },
     },
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),

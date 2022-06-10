@@ -50,7 +50,6 @@ describe('APMSection', () => {
         unsafe: {
           alertingExperience: { enabled: true },
           cases: { enabled: true },
-          rules: { enabled: true },
         },
       },
       core: {} as CoreStart,

@@ -46,10 +46,7 @@ export function updateGlobalNavigation({
       case 'rules':
         return {
           ...link,
-          navLinkStatus:
-            config.unsafe.rules.enabled && someVisible
-              ? AppNavLinkStatus.visible
-              : AppNavLinkStatus.hidden,
+          navLinkStatus: someVisible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden,
         };
       default:
         return link;
