@@ -379,7 +379,7 @@ describe('ContentStream', () => {
       );
     });
 
-    it('does not allow duplicate attribute names', async () => {
+    it('should not allow duplicate attribute names', async () => {
       base64Stream = getContentStream({
         attributes: [
           ['myName', 'myValue'],

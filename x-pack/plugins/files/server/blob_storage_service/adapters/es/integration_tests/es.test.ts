@@ -149,23 +149,24 @@ describe('Elasticsearch blob storage', () => {
       })
     );
 
-    // We can search by searchable attributes
+    const searchableAttributePath = 'app_search_data.searchable.a';
+    const unsearchableAttributePath = 'app_meta_data.foo';
 
-    await esClient.indices.refresh({ index: BLOB_STORAGE_SYSTEM_INDEX_NAME });
+    // We can search by searchable attributes
     const {
       hits: { hits: hits1 },
     } = await esClient.search<FileChunkDocument>({
       index: BLOB_STORAGE_SYSTEM_INDEX_NAME,
       query: {
         match: {
-          'app_search_data.searchable.a': 1,
+          [searchableAttributePath]: 1,
         },
       },
       _source_includes: ['app_search_data', 'app_meta_data'],
     });
     expect(hits1).toHaveLength(1);
-    expect(hits1[0]).toHaveProperty('_source.app_search_data.searchable.a', 1);
-    expect(hits1[0]).toHaveProperty('_source.app_meta_data.foo', 'bar'); // non searchable attributes are included
+    expect(hits1[0]).toHaveProperty(`_source.${searchableAttributePath}`, 1);
+    expect(hits1[0]).toHaveProperty(`_source.${unsearchableAttributePath}`, 'bar'); // non searchable attributes are included
 
     // We cannot search by other attributes
     const {
@@ -174,7 +175,7 @@ describe('Elasticsearch blob storage', () => {
       index: BLOB_STORAGE_SYSTEM_INDEX_NAME,
       query: {
         match: {
-          'app_meta_data.searchable.foo': 'bar',
+          [unsearchableAttributePath]: 'bar',
         },
       },
     });
