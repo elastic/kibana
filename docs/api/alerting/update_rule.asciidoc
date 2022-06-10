@@ -58,12 +58,12 @@ empty array (`[]`).
 .Properties of the action objects:
 [%collapsible%open]
 =====
-`id`:::
-(Required, string) The identifier of the action.
-
 `group`:::
 (Required, string) Grouping actions is recommended for escalations for different
 types of alerts. If you don't need this, set the value to `default`.
+
+`id`:::
+(Required, string) The identifier of the action.
 
 `params`:::
 (Required, object) The map to the `params` that the
