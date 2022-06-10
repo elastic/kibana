@@ -8,6 +8,10 @@
 
 require('../src/setup_node_env/ensure_node_preserve_symlinks');
 require('source-map-support/register');
+
+var Path = require('path');
+var REPO_ROOT = require('@kbn/utils').REPO_ROOT;
+
 require('@kbn/optimizer').runKbnOptimizerCli({
-  defaultLimitsPath: require.resolve('@kbn/optimizer/limits.yml'),
+  defaultLimitsPath: Path.resolve(REPO_ROOT, 'packages/kbn-optimizer/limits.yml'),
 });
