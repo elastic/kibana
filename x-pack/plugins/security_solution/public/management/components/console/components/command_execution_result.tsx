@@ -21,6 +21,10 @@ const COMMAND_EXECUTION_RESULT_FAILURE_TITLE = i18n.translate(
   'xpack.securitySolution.commandExecutionResult.failureTitle',
   { defaultMessage: 'Command failed.' }
 );
+const COMMAND_EXECUTION_RESULT_PENDING = i18n.translate(
+  'xpack.securitySolution.commandExecutionResult.pending',
+  { defaultMessage: 'Waiting for response' }
+);
 
 export type CommandExecutionResultProps = PropsWithChildren<{
   /**
@@ -80,7 +84,9 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
         data-test-subj={dataTestSubj ? dataTestSubj : getTestId('commandExecutionResult')}
       >
         {showAs === 'pending' ? (
-          <EuiTextColor color="subdued">{children}</EuiTextColor>
+          <EuiTextColor color="subdued">
+            {children ?? COMMAND_EXECUTION_RESULT_PENDING}
+          </EuiTextColor>
         ) : (
           <>
             {showTitle && (
