@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 export type ParsedArgData = string[];
 
-interface ParseInputStringResponse {
+interface ParseInputStringResponse<TArgs extends object = any> {
   name: string;
-  args: Record<string, ParsedArgData>;
+  args: {
+    [key in keyof TArgs]: ParsedArgData;
+  };
 }
 const parseInputString = (rawInput: string): ParseInputStringResponse => {
   const input = rawInput.trim();
@@ -76,7 +80,8 @@ const parseInputString = (rawInput: string): ParseInputStringResponse => {
   return response;
 };
 
-export interface ParsedCommandInterface extends ParseInputStringResponse {
+export interface ParsedCommandInterface<TArgs extends object = any>
+  extends ParseInputStringResponse<TArgs> {
   input: string;
 
   /**

@@ -17,6 +17,7 @@ import { CommandExecutionComponentProps } from '../console/types';
 
 export const ReleaseActionResult = memo<
   CommandExecutionComponentProps<
+    { comment?: string },
     {
       actionId?: string;
       actionRequestSent?: boolean;
@@ -42,14 +43,14 @@ export const ReleaseActionResult = memo<
     if (!actionRequestSent && endpointId) {
       releaseHostApi.mutate({
         endpoint_ids: [endpointId],
-        comment: command.args.args?.comment?.value,
+        comment: command.args.args?.comment?.[0],
       });
 
       setStore((prevState) => {
         return { ...prevState, actionRequestSent: true };
       });
     }
-  }, [actionRequestSent, command.args.args?.comment?.value, endpointId, releaseHostApi, setStore]);
+  }, [actionRequestSent, command.args.args?.comment, endpointId, releaseHostApi, setStore]);
 
   // If release request was created, store the action id if necessary
   useEffect(() => {

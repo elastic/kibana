@@ -57,21 +57,28 @@ export interface CommandDefinition<TMeta = any> {
 /**
  * A command to be executed (as entered by the user)
  */
-export interface Command<TDefinition extends CommandDefinition = CommandDefinition> {
+export interface Command<
+  TDefinition extends CommandDefinition = CommandDefinition,
+  TArgs extends object = any
+> {
   /** The raw input entered by the user */
   input: string;
   // FIXME:PT this should be a generic that allows for the arguments type to be used
   /** An object with the arguments entered by the user and their value */
-  args: ParsedCommandInterface;
+  args: ParsedCommandInterface<TArgs>;
   /** The command definition associated with this user command */
   commandDefinition: TDefinition;
 }
 
 export interface CommandExecutionComponentProps<
+  /** The arguments that could have been entered by the user */
+  TArgs extends object = any,
+  /** Internal store for the Command execution */
   TStore extends object = Record<string, unknown>,
+  /** The metadata defined on the Command Definition */
   TMeta = any
 > {
-  command: Command<CommandDefinition<TMeta>>;
+  command: Command<CommandDefinition<TMeta>, TArgs>;
 
   /**
    * A data store for the command execution to store data in, if needed.
@@ -110,9 +117,13 @@ export interface CommandExecutionComponentProps<
  * The component that will handle the Command execution and display the result.
  */
 export type CommandExecutionComponent<
+  /** The arguments that could have been entered by the user */
+  TArgs extends object = any,
+  /** Internal store for the Command execution */
   TStore extends object = Record<string, unknown>,
+  /** The metadata defined on the Command Definition */
   TMeta = any
-> = ComponentType<CommandExecutionComponentProps<TStore, TMeta>>;
+> = ComponentType<CommandExecutionComponentProps<TArgs, TStore, TMeta>>;
 
 export interface ConsoleProps extends CommonProps {
   /**

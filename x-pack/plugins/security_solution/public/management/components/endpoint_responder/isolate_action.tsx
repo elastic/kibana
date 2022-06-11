@@ -17,6 +17,7 @@ import { CommandExecutionComponentProps } from '../console/types';
 
 export const IsolateActionResult = memo<
   CommandExecutionComponentProps<
+    { comment?: string },
     {
       actionId?: string;
       actionRequestSent?: boolean;
@@ -42,14 +43,14 @@ export const IsolateActionResult = memo<
     if (!actionRequestSent && endpointId) {
       isolateHostApi.mutate({
         endpoint_ids: [endpointId],
-        comment: command.args.args?.comment?.value,
+        comment: command.args.args?.comment?.[0],
       });
 
       setStore((prevState) => {
         return { ...prevState, actionRequestSent: true };
       });
     }
-  }, [actionRequestSent, command.args.args?.comment?.value, endpointId, isolateHostApi, setStore]);
+  }, [actionRequestSent, command.args.args?.comment, endpointId, isolateHostApi, setStore]);
 
   // If isolate request was created, store the action id if necessary
   useEffect(() => {
