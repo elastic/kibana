@@ -9,6 +9,7 @@
 
 import type { ComponentType } from 'react';
 import type { CommonProps } from '@elastic/eui';
+import { CommandExecutionResultComponent } from './components/command_execution_result';
 import type { CommandExecutionState } from './components/console_state/types';
 import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/types';
 import type { ParsedArgData, ParsedCommandInterface } from './service/parsed_command_input';
@@ -98,6 +99,11 @@ export interface CommandExecutionComponentProps<
 
   /** Set the status of the command execution  */
   setStatus: (status: CommandExecutionState['status']) => void;
+
+  /**
+   * A component that can be used to format the returned result from the command execution.
+   */
+  ResultComponent: CommandExecutionResultComponent;
 }
 
 /**

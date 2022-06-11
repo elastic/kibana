@@ -6,8 +6,9 @@
  */
 
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiLoadingChart } from '@elastic/eui';
+import { EuiLoadingChart, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
+import { CommandExecutionResult } from './command_execution_result';
 import type { CommandExecutionComponentProps } from '../types';
 import type { CommandExecutionState, CommandHistoryItem } from './console_state/types';
 import { UserCommandInput } from './user_command_input';
@@ -61,15 +62,19 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
       <CommandOutputContainer>
         <div>
           <UserCommandInput input={command.input} />
-          {isRunning && <EuiLoadingChart size="m" style={{ marginLeft: '0.5em' }} />}
         </div>
         <div>
+          <EuiSpacer size="s" />
+
+          {isRunning && <EuiLoadingChart size="m" style={{ marginLeft: '0.5em' }} />}
+
           <RenderComponent
             command={command}
             store={state.store}
             status={state.status}
             setStore={setCommandStore}
             setStatus={setCommandStatus}
+            ResultComponent={CommandExecutionResult}
           />
         </div>
       </CommandOutputContainer>
