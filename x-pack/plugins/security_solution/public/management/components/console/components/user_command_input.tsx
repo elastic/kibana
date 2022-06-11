@@ -6,6 +6,7 @@
  */
 
 import React, { memo } from 'react';
+import { EuiCode } from '@elastic/eui';
 
 export interface UserCommandInputProps {
   input: string;
@@ -13,10 +14,9 @@ export interface UserCommandInputProps {
 
 export const UserCommandInput = memo<UserCommandInputProps>(({ input }) => {
   return (
-    <>
-      {'$ '}
-      <code>{input}</code>
-    </>
+    <EuiCode language="shell" transparentBackground={true}>
+      {input}
+    </EuiCode>
   );
 });
 UserCommandInput.displayName = 'UserCommandInput';
