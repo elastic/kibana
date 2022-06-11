@@ -10,7 +10,6 @@ import React, { Fragment, useCallback, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiIcon } from '@elastic/eui';
-import { flattenHit } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { formatFieldValue } from '../../../utils/format_value';
 import { DocViewer } from '../../../services/doc_views/components/doc_viewer';
@@ -22,6 +21,7 @@ import { ElasticSearchHit } from '../../../types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../utils/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
+import { DataDocumentMsgResultDoc } from '../../../application/main/utils/use_saved_search';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
@@ -30,7 +30,7 @@ export type DocTableRow = ElasticSearchHit & {
 export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
-  row: DocTableRow;
+  row: DataDocumentMsgResultDoc;
   indexPattern: DataView;
   useNewFieldsApi: boolean;
   fieldsToShow: string[];
@@ -62,10 +62,6 @@ export const TableRow = ({
   });
   const anchorDocTableRowSubj = row.isAnchor ? ' docTableAnchorRow' : '';
 
-  const flattenedRow = useMemo(
-    () => flattenHit(row, indexPattern, { includeIgnoredValues: true }),
-    [indexPattern, row]
-  );
   const mapping = useMemo(() => indexPattern.fields.getByName, [indexPattern]);
 
   // toggle display of the rows details, a full list of the fields from each row
@@ -78,12 +74,12 @@ export const TableRow = ({
     // If we're formatting the _source column, don't use the regular field formatter,
     // but our Discover mechanism to format a hit in a better human-readable way.
     if (fieldName === '_source') {
-      return formatRow(row, indexPattern, fieldsToShow, maxEntries, fieldFormats);
+      return formatRow(row.raw, indexPattern, fieldsToShow, maxEntries, fieldFormats);
     }
 
     const formattedField = formatFieldValue(
-      flattenedRow[fieldName],
-      row,
+      row.flattened[fieldName],
+      row.raw,
       fieldFormats,
       indexPattern,
       mapping(fieldName)
@@ -98,15 +94,15 @@ export const TableRow = ({
   const inlineFilter = useCallback(
     (column: string, type: '+' | '-') => {
       const field = indexPattern.fields.getByName(column);
-      filter(field!, flattenedRow[column], type);
+      filter(field!, row.flattened, type);
     },
-    [filter, flattenedRow, indexPattern.fields]
+    [filter, indexPattern.fields, row.flattened]
   );
 
   const { singleDocProps, surrDocsProps } = useNavigationProps({
     indexPatternId: indexPattern.id!,
-    rowIndex: row._index,
-    rowId: row._id,
+    rowIndex: row.raw._index,
+    rowId: row.id,
     filterManager,
     addBasePath,
     columns,
@@ -146,7 +142,7 @@ export const TableRow = ({
   }
 
   if (columns.length === 0 && useNewFieldsApi) {
-    const formatted = formatRow(row, indexPattern, fieldsToShow, maxEntries, fieldFormats);
+    const formatted = formatRow(row.raw, indexPattern, fieldsToShow, maxEntries, fieldFormats);
 
     rowCells.push(
       <TableCell
@@ -161,9 +157,9 @@ export const TableRow = ({
     );
   } else {
     columns.forEach(function (column: string) {
-      if (useNewFieldsApi && !mapping(column) && row.fields && !row.fields[column]) {
+      if (useNewFieldsApi && !mapping(column) && row.raw.fields && !row.raw.fields[column]) {
         const innerColumns = Object.fromEntries(
-          Object.entries(row.fields).filter(([key]) => {
+          Object.entries(row.raw.fields).filter(([key]) => {
             return key.indexOf(`${column}.`) === 0;
           })
         );
@@ -185,7 +181,7 @@ export const TableRow = ({
         // We should improve this and show a helpful tooltip why the filter buttons are not
         // there/disabled when there are ignored values.
         const isFilterable = Boolean(
-          mapping(column)?.filterable && filter && !row._ignored?.includes(column)
+          mapping(column)?.filterable && filter && !row.raw._ignored?.includes(column)
         );
         rowCells.push(
           <TableCell
@@ -218,7 +214,7 @@ export const TableRow = ({
           <DocViewer
             columns={columns}
             filter={filter}
-            hit={row}
+            hit={row.raw}
             indexPattern={indexPattern}
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}

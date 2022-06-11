@@ -21,7 +21,6 @@ import {
   EuiDataGridRefProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { flattenHit } from '@kbn/data-plugin/public';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
@@ -45,13 +44,14 @@ import {
   MAX_DOC_FIELDS_DISPLAYED,
   SHOW_MULTIFIELDS,
 } from '../../../common';
-import { DiscoverGridDocumentToolbarBtn, getDocId } from './discover_grid_document_selection';
+import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import type { ElasticSearchHit, ValueToStringConverter } from '../../types';
+import type { ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { convertValueToString } from '../../utils/convert_value_to_string';
+import { DataDocumentMsgResultDoc } from '../../application/main/utils/use_saved_search';
 
 interface SortObj {
   id: string;
@@ -74,7 +74,7 @@ export interface DiscoverGridProps {
   /**
    * If set, the given document is displayed in a flyout
    */
-  expandedDoc?: ElasticSearchHit;
+  expandedDoc?: DataDocumentMsgResultDoc;
   /**
    * The used index pattern
    */
@@ -111,7 +111,7 @@ export interface DiscoverGridProps {
   /**
    * Array of documents provided by Elasticsearch
    */
-  rows?: ElasticSearchHit[];
+  rows?: DataDocumentMsgResultDoc[];
   /**
    * The max size of the documents returned by Elasticsearch
    */
@@ -119,7 +119,7 @@ export interface DiscoverGridProps {
   /**
    * Function to set the expanded document, which is displayed in a flyout
    */
-  setExpandedDoc: (doc?: ElasticSearchHit) => void;
+  setExpandedDoc: (doc?: DataDocumentMsgResultDoc) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */
@@ -208,7 +208,7 @@ export const DiscoverGrid = ({
     if (!selectedDocs.length || !rows?.length) {
       return [];
     }
-    const idMap = rows.reduce((map, row) => map.set(getDocId(row), true), new Map());
+    const idMap = rows.reduce((map, row) => map.set(row.id, true), new Map());
     // filter out selected docs that are no longer part of the current data
     const result = selectedDocs.filter((docId) => idMap.get(docId));
     if (result.length === 0 && isFilterActive) {
@@ -224,7 +224,7 @@ export const DiscoverGrid = ({
     if (!isFilterActive || usedSelectedDocs.length === 0) {
       return rows;
     }
-    const rowsFiltered = rows.filter((row) => usedSelectedDocs.includes(getDocId(row)));
+    const rowsFiltered = rows.filter((row) => usedSelectedDocs.includes(row.id));
     if (!rowsFiltered.length) {
       // in case the selected docs are no longer part of the sample of 500, show all docs
       return rows;
@@ -232,25 +232,18 @@ export const DiscoverGrid = ({
     return rowsFiltered;
   }, [rows, usedSelectedDocs, isFilterActive]);
 
-  const displayedRowsFlattened = useMemo(() => {
-    return displayedRows.map((hit) => {
-      return flattenHit(hit, indexPattern, { includeIgnoredValues: true });
-    });
-  }, [displayedRows, indexPattern]);
-
   const valueToStringConverter: ValueToStringConverter = useCallback(
     (rowIndex, columnId, options) => {
       return convertValueToString({
         rowIndex,
         rows: displayedRows,
-        rowsFlattened: displayedRowsFlattened,
         dataView: indexPattern,
         columnId,
         services,
         options,
       });
     },
-    [displayedRows, displayedRowsFlattened, indexPattern, services]
+    [displayedRows, indexPattern, services]
   );
 
   /**
@@ -311,20 +304,12 @@ export const DiscoverGrid = ({
       getRenderCellValueFn(
         indexPattern,
         displayedRows,
-        displayedRowsFlattened,
         useNewFieldsApi,
         fieldsToShow,
         services.uiSettings.get(MAX_DOC_FIELDS_DISPLAYED),
         () => dataGridRef.current?.closeCellPopover()
       ),
-    [
-      indexPattern,
-      displayedRowsFlattened,
-      displayedRows,
-      useNewFieldsApi,
-      fieldsToShow,
-      services.uiSettings,
-    ]
+    [indexPattern, displayedRows, useNewFieldsApi, fieldsToShow, services.uiSettings]
   );
 
   /**
@@ -470,7 +455,6 @@ export const DiscoverGrid = ({
         expanded: expandedDoc,
         setExpanded: setExpandedDoc,
         rows: displayedRows,
-        rowsFlattened: displayedRowsFlattened,
         onFilter,
         indexPattern,
         isDarkMode: services.uiSettings.get('theme:darkMode'),

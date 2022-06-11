@@ -27,6 +27,7 @@ type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
  */
 export function formatHit(
   hit: estypes.SearchHit,
+  hitFlattened: Record<string, unknown> | undefined,
   dataView: DataView,
   fieldsToShow: string[],
   maxEntries: number,
@@ -39,7 +40,8 @@ export function formatHit(
 
   const highlights = hit.highlight ?? {};
   // Flatten the object using the flattenHit implementation we use across Discover for flattening documents.
-  const flattened = flattenHit(hit, dataView, { includeIgnoredValues: true, source: true });
+  const flattened =
+    hitFlattened ?? flattenHit(hit, dataView, { includeIgnoredValues: true, source: true });
 
   const highlightPairs: Array<[fieldName: string, formattedValue: string]> = [];
   const sourcePairs: Array<[fieldName: string, formattedValue: string]> = [];

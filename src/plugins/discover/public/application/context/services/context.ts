@@ -14,7 +14,7 @@ import { fetchHitsInInterval } from '../utils/fetch_hits_in_interval';
 import { generateIntervals } from '../utils/generate_intervals';
 import { getEsQuerySearchAfter } from '../utils/get_es_query_search_after';
 import { getEsQuerySort } from '../utils/get_es_query_sort';
-import { EsHitRecord, EsHitRecordList } from '../../types';
+import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
 
 export enum SurrDocType {
   SUCCESSORS = 'successors',
@@ -42,14 +42,14 @@ const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS
 export async function fetchSurroundingDocs(
   type: SurrDocType,
   indexPattern: DataView,
-  anchor: EsHitRecord,
+  anchor: DataDocumentMsgResultDoc,
   tieBreakerField: string,
   sortDir: SortDirection,
   size: number,
   filters: Filter[],
   data: DataPublicPluginStart,
   useNewFieldsApi?: boolean
-): Promise<EsHitRecordList> {
+): Promise<DataDocumentMsgResultDoc[]> {
   if (typeof anchor !== 'object' || anchor === null || !size) {
     return [];
   }
@@ -57,13 +57,14 @@ export async function fetchSurroundingDocs(
   const searchSource = data.search.searchSource.createEmpty();
   updateSearchSource(searchSource, indexPattern, filters, Boolean(useNewFieldsApi));
   const sortDirToApply = type === SurrDocType.SUCCESSORS ? sortDir : reverseSortDir(sortDir);
+  const anchorRaw = anchor.raw!;
 
-  const nanos = indexPattern.isTimeNanosBased() ? extractNanos(anchor.fields[timeField][0]) : '';
+  const nanos = indexPattern.isTimeNanosBased() ? extractNanos(anchorRaw.fields[timeField][0]) : '';
   const timeValueMillis =
-    nanos !== '' ? convertIsoToMillis(anchor.fields[timeField][0]) : anchor.sort[0];
+    nanos !== '' ? convertIsoToMillis(anchorRaw.fields[timeField][0]) : anchorRaw.sort[0];
 
   const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis as number, type, sortDir);
-  let documents: EsHitRecordList = [];
+  let documents: DataDocumentMsgResultDoc[] = [];
 
   for (const interval of intervals) {
     const remainingSize = size - documents.length;
@@ -92,7 +93,7 @@ export async function fetchSurroundingDocs(
       searchAfter,
       remainingSize,
       nanos,
-      anchor._id
+      anchor.raw._id
     );
 
     documents =

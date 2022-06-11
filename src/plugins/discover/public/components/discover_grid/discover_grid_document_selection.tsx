@@ -21,6 +21,7 @@ import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-th
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
 import { ElasticSearchHit } from '../../types';
+import { DataDocumentMsgResultDoc } from '../../application/main/utils/use_saved_search';
 
 /**
  * Returning a generated id of a given ES document, since `_id` can be the same
@@ -34,8 +35,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   const { selectedDocs, expanded, rows, isDarkMode, setSelectedDocs } =
     useContext(DiscoverGridContext);
   const doc = useMemo(() => rows[rowIndex], [rows, rowIndex]);
-  const id = useMemo(() => getDocId(doc), [doc]);
-  const checked = useMemo(() => selectedDocs.includes(id), [selectedDocs, id]);
+  const checked = useMemo(() => selectedDocs.includes(doc.id), [selectedDocs, doc.id]);
 
   const toggleDocumentSelectionLabel = i18n.translate('discover.grid.selectDoc', {
     defaultMessage: `Select document '{rowNumber}'`,
@@ -43,7 +43,7 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
   });
 
   useEffect(() => {
-    if (expanded && doc && expanded._id === doc._id) {
+    if (expanded && doc && expanded.id === doc.id) {
       setCellProps({
         style: {
           backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
@@ -56,16 +56,16 @@ export const SelectButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
 
   return (
     <EuiCheckbox
-      id={id}
+      id={doc.id}
       aria-label={toggleDocumentSelectionLabel}
       checked={checked}
-      data-test-subj={`dscGridSelectDoc-${id}`}
+      data-test-subj={`dscGridSelectDoc-${doc.id}`}
       onChange={() => {
         if (checked) {
-          const newSelection = selectedDocs.filter((docId) => docId !== id);
+          const newSelection = selectedDocs.filter((docId) => docId !== doc.id);
           setSelectedDocs(newSelection);
         } else {
-          setSelectedDocs([...selectedDocs, id]);
+          setSelectedDocs([...selectedDocs, doc.id]);
         }
       }}
     />
@@ -80,7 +80,7 @@ export function DiscoverGridDocumentToolbarBtn({
   setSelectedDocs,
 }: {
   isFilterActive: boolean;
-  rows: ElasticSearchHit[];
+  rows: DataDocumentMsgResultDoc[];
   selectedDocs: string[];
   setIsFilterActive: (value: boolean) => void;
   setSelectedDocs: (value: string[]) => void;
@@ -121,7 +121,11 @@ export function DiscoverGridDocumentToolbarBtn({
         key="copyJsonWrapper"
         data-test-subj="dscGridCopySelectedDocumentsJSON"
         textToCopy={
-          rows ? JSON.stringify(rows.filter((row) => selectedDocs.includes(getDocId(row)))) : ''
+          rows
+            ? JSON.stringify(
+                rows.filter((row) => selectedDocs.includes(row.id)).map((row) => row.raw)
+              )
+            : ''
         }
       >
         {(copy) => (

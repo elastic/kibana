@@ -20,7 +20,5 @@ export type EsHitRecord = Required<
 > & {
   _source?: Record<string, unknown>;
   _score?: number;
-  // note that this a special property for Discover Context, to determine the anchor record
-  isAnchor?: boolean;
 };
 export type EsHitRecordList = EsHitRecord[];

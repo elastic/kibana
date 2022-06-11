@@ -5,11 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { ISearchSource } from '@kbn/data-plugin/public';
+import { flattenHit, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { DataViewType } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import {
   sendCompleteMsg,
   sendErrorMsg,
@@ -24,7 +25,7 @@ import { fetchDocuments } from './fetch_documents';
 import { fetchTotalHits } from './fetch_total_hits';
 import { fetchChart } from './fetch_chart';
 import { AppState } from '../services/discover_state';
-import { FetchStatus } from '../../types';
+import { EsHitRecord, FetchStatus } from '../../types';
 import {
   DataCharts$,
   DataDocuments$,
@@ -33,6 +34,7 @@ import {
   SavedSearchData,
 } from './use_saved_search';
 import { DiscoverServices } from '../../../build_services';
+import { getDocId } from '../../../components/discover_grid/discover_grid_document_selection';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -45,6 +47,16 @@ export interface FetchDeps {
   services: DiscoverServices;
   useNewFieldsApi: boolean;
 }
+
+export function buildDataRecord(doc: EsHitRecord, dataView: DataView, isAnchor?: boolean) {
+  return {
+    id: getDocId(doc),
+    raw: doc,
+    flattened: flattenHit(doc, dataView, { includeIgnoredValues: true }),
+    isAnchor,
+  };
+}
+
 /**
  * This function starts fetching all required queries in Discover. This will be the query to load the individual
  * documents, and depending on whether a chart is shown either the aggregation query to load the chart data
@@ -139,10 +151,13 @@ export function fetchAll(
             result: docs.length,
           });
         }
+        const dataView = searchSource.getField('index')!;
+
+        const resultDocs = docs.map((doc) => buildDataRecord(doc as EsHitRecord, dataView));
 
         dataSubjects.documents$.next({
           fetchStatus: FetchStatus.COMPLETE,
-          result: docs,
+          result: resultDocs,
         });
 
         checkHitCount(docs.length);

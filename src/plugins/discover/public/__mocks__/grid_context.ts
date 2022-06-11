@@ -18,15 +18,18 @@ import { convertValueToString } from '../utils/convert_value_to_string';
 import type { ElasticSearchHit } from '../types';
 
 const buildGridContext = (dataView: DataView, rows: ElasticSearchHit[]): GridContext => {
-  const rowsFlattened = rows.map((hit) =>
-    flattenHit(hit, dataView, { includeIgnoredValues: true })
-  );
+  const usedRows = rows.map((row, idx) => {
+    return {
+      id: String(idx),
+      raw: row,
+      flattened: flattenHit(row, dataView, { includeIgnoredValues: true }),
+    };
+  });
 
   return {
     expanded: undefined,
     setExpanded: jest.fn(),
-    rows,
-    rowsFlattened,
+    rows: usedRows,
     onFilter: jest.fn(),
     indexPattern: dataView,
     isDarkMode: false,
@@ -37,8 +40,7 @@ const buildGridContext = (dataView: DataView, rows: ElasticSearchHit[]): GridCon
         rowIndex,
         columnId,
         services: discoverServiceMock,
-        rows,
-        rowsFlattened,
+        rows: usedRows,
         dataView,
         options,
       }),

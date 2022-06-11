@@ -44,7 +44,7 @@ export const formatRow = (
   maxEntries: number,
   fieldFormats: FieldFormatsStart
 ) => {
-  const pairs = formatHit(hit, indexPattern, fieldsToShow, maxEntries, fieldFormats);
+  const pairs = formatHit(hit, undefined, indexPattern, fieldsToShow, maxEntries, fieldFormats);
   return <TemplateComponent defPairs={pairs} />;
 };
 

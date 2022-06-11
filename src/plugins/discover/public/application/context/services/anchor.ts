@@ -10,6 +10,8 @@ import { i18n } from '@kbn/i18n';
 import { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { EsHitRecord } from '../../types';
+import { buildDataRecord } from '../../main/utils/fetch_all';
+import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
 
 export async function fetchAnchor(
   anchorId: string,
@@ -17,7 +19,7 @@ export async function fetchAnchor(
   searchSource: ISearchSource,
   sort: EsQuerySortValue[],
   useNewFieldsApi: boolean = false
-): Promise<EsHitRecord> {
+): Promise<DataDocumentMsgResultDoc> {
   updateSearchSource(searchSource, anchorId, sort, useNewFieldsApi, indexPattern);
   const { rawResponse } = await lastValueFrom(await searchSource.fetch$());
   const doc = rawResponse.hits?.hits?.[0];
@@ -29,11 +31,7 @@ export async function fetchAnchor(
       })
     );
   }
-
-  return {
-    ...doc,
-    isAnchor: true,
-  } as EsHitRecord;
+  return buildDataRecord(doc as EsHitRecord, indexPattern, true);
 }
 
 export function updateSearchSource(

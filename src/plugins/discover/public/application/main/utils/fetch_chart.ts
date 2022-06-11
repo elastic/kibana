@@ -34,7 +34,6 @@ export function fetchChart(
     data,
     inspectorAdapters,
     searchSessionId,
-    savedSearch,
   }: FetchDeps
 ): Promise<Result> {
   const interval = appStateContainer.getState().interval ?? 'auto';

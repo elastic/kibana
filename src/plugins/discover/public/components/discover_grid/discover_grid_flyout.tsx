@@ -28,31 +28,24 @@ import {
 import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_viewer';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useNavigationProps } from '../../utils/use_navigation_props';
-import { ElasticSearchHit } from '../../types';
 import { useDiscoverServices } from '../../utils/use_discover_services';
+import { DataDocumentMsgResultDoc } from '../../application/main/utils/use_saved_search';
 
 export interface DiscoverGridFlyoutProps {
   columns: string[];
-  hit: ElasticSearchHit;
-  hits?: ElasticSearchHit[];
+  hit: DataDocumentMsgResultDoc;
+  hits?: DataDocumentMsgResultDoc[];
   indexPattern: DataView;
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  setExpandedDoc: (doc: ElasticSearchHit) => void;
+  setExpandedDoc: (doc: DataDocumentMsgResultDoc) => void;
 }
 
-type ElasticSearchHitWithRouting = ElasticSearchHit & { _routing?: string };
-
-function getDocFingerprintId(doc: ElasticSearchHitWithRouting) {
-  const routing = doc._routing || '';
-  return [doc._index, doc._id, routing].join('||');
-}
-
-function getIndexByDocId(hits: ElasticSearchHit[], id: string) {
+function getIndexByDocId(hits: DataDocumentMsgResultDoc[], id: string) {
   return hits.findIndex((h) => {
-    return getDocFingerprintId(h) === id;
+    return h.id === id;
   });
 }
 /**
@@ -71,10 +64,10 @@ export function DiscoverGridFlyout({
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
   // Get actual hit with updated highlighted searches
-  const actualHit = useMemo(() => hits?.find(({ _id }) => _id === hit?._id) || hit, [hit, hits]);
+  const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
   const pageCount = useMemo<number>(() => (hits ? hits.length : 0), [hits]);
   const activePage = useMemo<number>(() => {
-    const id = getDocFingerprintId(hit);
+    const id = hit.id;
     if (!hits || pageCount <= 1) {
       return -1;
     }
@@ -104,8 +97,8 @@ export function DiscoverGridFlyout({
 
   const { singleDocProps, surrDocsProps } = useNavigationProps({
     indexPatternId: indexPattern.id!,
-    rowIndex: hit._index,
-    rowId: hit._id,
+    rowIndex: hit.raw._index,
+    rowId: hit.raw._id,
     filterManager: services.filterManager,
     addBasePath: services.addBasePath,
     columns,
@@ -217,7 +210,7 @@ export function DiscoverGridFlyout({
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <DocViewer
-            hit={actualHit}
+            hit={actualHit.raw}
             columns={columns}
             indexPattern={indexPattern}
             filter={(mapping, value, mode) => {

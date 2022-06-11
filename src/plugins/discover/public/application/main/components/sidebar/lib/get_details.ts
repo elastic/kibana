@@ -9,11 +9,11 @@
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
-import { ElasticSearchHit } from '../../../../../types';
+import { DataDocumentMsgResultDoc } from '../../../utils/use_saved_search';
 
 export function getDetails(
   field: DataViewField,
-  hits: ElasticSearchHit[] | undefined,
+  hits: DataDocumentMsgResultDoc[] | undefined,
   columns: string[],
   indexPattern?: DataView
 ) {
@@ -24,7 +24,6 @@ export function getDetails(
     ...fieldCalculator.getFieldValueCounts({
       hits,
       field,
-      indexPattern,
       count: 5,
       grouped: false,
     }),

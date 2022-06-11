@@ -16,13 +16,11 @@ import { GetStateReturn } from '../services/discover_state';
 import { validateTimeRange } from './validate_time_range';
 import { Chart } from '../components/chart/point_series';
 import { useSingleton } from './use_singleton';
-import { FetchStatus } from '../../types';
-
+import { EsHitRecord, FetchStatus } from '../../types';
 import { fetchAll } from './fetch_all';
 import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from './get_fetch_observable';
-import { ElasticSearchHit } from '../../../types';
 import { SavedSearch } from '../../../services/saved_searches';
 
 export interface SavedSearchData {
@@ -65,8 +63,15 @@ export interface DataMainMsg extends DataMsg {
   foundDocuments?: boolean;
 }
 
+export interface DataDocumentMsgResultDoc {
+  id: string;
+  raw: EsHitRecord;
+  flattened: Record<string, unknown>;
+  isAnchor?: boolean;
+}
+
 export interface DataDocumentsMsg extends DataMsg {
-  result?: ElasticSearchHit[];
+  result?: DataDocumentMsgResultDoc[];
 }
 
 export interface DataTotalHitsMsg extends DataMsg {

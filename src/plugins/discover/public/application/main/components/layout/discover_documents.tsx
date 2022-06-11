@@ -27,12 +27,15 @@ import {
 } from '../../../../../common';
 import { useColumns } from '../../../../utils/use_data_grid_columns';
 import { SavedSearch } from '../../../../services/saved_searches';
-import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
+import {
+  DataDocumentsMsg,
+  DataDocuments$,
+  DataDocumentMsgResultDoc,
+} from '../../utils/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
 import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
-import { ElasticSearchHit } from '../../../../types';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
@@ -51,12 +54,12 @@ function DiscoverDocumentsComponent({
   stateContainer,
 }: {
   documents$: DataDocuments$;
-  expandedDoc?: ElasticSearchHit;
+  expandedDoc?: DataDocumentMsgResultDoc;
   indexPattern: DataView;
   navigateTo: (url: string) => void;
   onAddFilter: DocViewFilterFn;
   savedSearch: SavedSearch;
-  setExpandedDoc: (doc?: ElasticSearchHit) => void;
+  setExpandedDoc: (doc?: DataDocumentMsgResultDoc) => void;
   state: AppState;
   stateContainer: GetStateReturn;
 }) {
