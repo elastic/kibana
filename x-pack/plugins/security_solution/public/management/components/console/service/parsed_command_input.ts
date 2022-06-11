@@ -9,17 +9,17 @@
 
 export type ParsedArgData = string[];
 
-interface ParseInputStringResponse<TArgs extends object = any> {
+interface ParsedCommandInput<TArgs extends object = any> {
   name: string;
   args: {
     [key in keyof TArgs]: ParsedArgData;
   };
 }
-const parseInputString = (rawInput: string): ParseInputStringResponse => {
+const parseInputString = (rawInput: string): ParsedCommandInput => {
   const input = rawInput.trim();
   const inputFirstSpacePosition = input.indexOf(' ');
 
-  const response: ParseInputStringResponse = {
+  const response: ParsedCommandInput = {
     name: input.substring(
       0,
       inputFirstSpacePosition === -1 ? input.length : inputFirstSpacePosition
@@ -81,7 +81,7 @@ const parseInputString = (rawInput: string): ParseInputStringResponse => {
 };
 
 export interface ParsedCommandInterface<TArgs extends object = any>
-  extends ParseInputStringResponse<TArgs> {
+  extends ParsedCommandInput<TArgs> {
   input: string;
 
   /**
