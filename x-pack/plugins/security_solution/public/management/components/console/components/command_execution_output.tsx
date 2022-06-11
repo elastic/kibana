@@ -66,7 +66,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
         <div>
           <EuiSpacer size="s" />
 
-          {isRunning && <EuiLoadingChart size="m" style={{ marginLeft: '0.5em' }} />}
+          {isRunning && <EuiLoadingChart size="m" style={{ marginRight: '1em' }} />}
 
           <RenderComponent
             command={command}

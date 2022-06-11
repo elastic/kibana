@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { memo, PropsWithChildren, ComponentType } from 'react';
+import React, { memo, PropsWithChildren, ComponentType, useMemo } from 'react';
 import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import { CommonProps, EuiPanel, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
+import classNames from 'classnames';
 import { useDataTestSubj } from '../hooks/state_selectors/use_data_test_subj';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
@@ -22,14 +23,23 @@ const COMMAND_EXECUTION_RESULT_FAILURE_TITLE = i18n.translate(
 );
 
 export type CommandExecutionResultProps = PropsWithChildren<{
-  /** Default is `success` */
-  showAs?: 'success' | 'failure';
+  /**
+   * Default is `success`.
+   *
+   * **IMPORTANT**: Note that when `pending` is used, the `title` will NOT be shown - only `children`.
+   *                Also,
+   *                The element output to DOM will be `inline-block`, allowing for messages
+   *                to be displayed after the loading/busy indicator.
+   */
+  showAs?: 'success' | 'failure' | 'pending';
 
   /** Default title message are provided depending based on the value for `showAs` */
   title?: ReactNode;
 
   /** If the title should be shown. Default is true */
   showTitle?: boolean;
+
+  className?: CommonProps['className'];
 
   'data-test-subj'?: string;
 }>;
@@ -40,9 +50,25 @@ export type CommandExecutionResultProps = PropsWithChildren<{
  * whether the result is a success or failure.
  */
 export const CommandExecutionResult = memo<CommandExecutionResultProps>(
-  ({ showAs = 'success', title, showTitle = true, 'data-test-subj': dataTestSubj, children }) => {
+  ({
+    showAs = 'success',
+    title,
+    showTitle = true,
+    'data-test-subj': dataTestSubj,
+    className,
+    children,
+  }) => {
     const consoleDataTestSubj = useDataTestSubj();
     const getTestId = useTestIdGenerator(dataTestSubj ?? consoleDataTestSubj);
+
+    const panelClassName = useMemo(() => {
+      return classNames({
+        'eui-displayInlineBlock': showAs === 'pending',
+        // This class name (font-family-code) is a utility class defined in `Console.tsx`
+        'font-family-code': true,
+        [className || '_']: Boolean(className),
+      });
+    }, [className, showAs]);
 
     return (
       <EuiPanel
@@ -50,24 +76,30 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
         paddingSize="none"
         borderRadius="none"
         color="transparent"
-        className="font-family-code"
+        className={panelClassName}
         data-test-subj={dataTestSubj ? dataTestSubj : getTestId('commandExecutionResult')}
       >
-        {showTitle && (
+        {showAs === 'pending' ? (
+          <EuiTextColor color="subdued">{children}</EuiTextColor>
+        ) : (
           <>
-            <EuiText size="s">
-              <EuiTextColor color={showAs === 'success' ? 'success' : 'danger'}>
-                {title
-                  ? title
-                  : showAs === 'success'
-                  ? COMMAND_EXECUTION_RESULT_SUCCESS_TITLE
-                  : COMMAND_EXECUTION_RESULT_FAILURE_TITLE}
-              </EuiTextColor>
-            </EuiText>
-            <EuiSpacer size="s" />
+            {showTitle && (
+              <>
+                <EuiText size="s">
+                  <EuiTextColor color={showAs === 'success' ? 'success' : 'danger'}>
+                    {title
+                      ? title
+                      : showAs === 'success'
+                      ? COMMAND_EXECUTION_RESULT_SUCCESS_TITLE
+                      : COMMAND_EXECUTION_RESULT_FAILURE_TITLE}
+                  </EuiTextColor>
+                </EuiText>
+                <EuiSpacer size="s" />
+              </>
+            )}
+            {children}
           </>
         )}
-        {children}
       </EuiPanel>
     );
   }
