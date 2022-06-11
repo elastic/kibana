@@ -8,7 +8,6 @@
 import React, { memo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCallOut } from '@elastic/eui';
 import { ActionDetails } from '../../../../common/endpoint/types';
 import { useGetActionDetails } from '../../hooks/endpoint/use_get_action_details';
 import { EndpointCommandDefinitionMeta } from './types';
@@ -25,7 +24,7 @@ export const ReleaseActionResult = memo<
     },
     EndpointCommandDefinitionMeta
   >
->(({ command, setStore, store, status, setStatus }) => {
+>(({ command, setStore, store, status, setStatus, ResultComponent }) => {
   const endpointId = command.commandDefinition?.meta?.endpointId;
   const { actionId, completedActionDetails } = store;
   const isPending = status === 'pending';
@@ -75,46 +74,44 @@ export const ReleaseActionResult = memo<
 
   // Show nothing if still pending
   if (isPending) {
-    return null;
+    return (
+      <ResultComponent showAs="pending">
+        <FormattedMessage
+          id="xpack.securitySolution.endpointResponseActions.release.pendingMessage"
+          defaultMessage="Releasing"
+        />
+      </ResultComponent>
+    );
   }
 
   // Show errors
   if (completedActionDetails?.errors) {
     return (
-      <EuiCallOut
-        color="danger"
-        iconType="alert"
+      <ResultComponent
         title={i18n.translate(
           'xpack.securitySolution.endpointResponseActions.release.errorMessageTitle',
-          { defaultMessage: 'Failure' }
+          { defaultMessage: 'Release action Failure' }
         )}
         data-test-subj="releaseErrorCallout"
       >
         <FormattedMessage
           id="xpack.securitySolution.endpointResponseActions.release.errorMessage"
-          defaultMessage="Release action failed with: {errors}"
+          defaultMessage="The following error were encountered: {errors}"
           values={{ errors: completedActionDetails.errors.join(' | ') }}
         />
-      </EuiCallOut>
+      </ResultComponent>
     );
   }
 
   // Show Success
   return (
-    <EuiCallOut
-      color="success"
-      iconType="check"
+    <ResultComponent
       title={i18n.translate(
         'xpack.securitySolution.endpointResponseActions.release.successMessageTitle',
-        { defaultMessage: 'Success' }
+        { defaultMessage: 'Host isolated successfully!' }
       )}
       data-test-subj="releaseSuccessCallout"
-    >
-      <FormattedMessage
-        id="xpack.securitySolution.endpointResponseActions.release.successMessage"
-        defaultMessage="A host isolation request was sent and an acknowledgement was received from Host."
-      />
-    </EuiCallOut>
+    />
   );
 });
 ReleaseActionResult.displayName = 'ReleaseActionResult';

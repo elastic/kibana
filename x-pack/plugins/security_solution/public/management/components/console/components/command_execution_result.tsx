@@ -84,9 +84,11 @@ export const CommandExecutionResult = memo<CommandExecutionResultProps>(
         data-test-subj={dataTestSubj ? dataTestSubj : getTestId('commandExecutionResult')}
       >
         {showAs === 'pending' ? (
-          <EuiTextColor color="subdued">
-            {children ?? COMMAND_EXECUTION_RESULT_PENDING}
-          </EuiTextColor>
+          <EuiText size="s">
+            <EuiTextColor color="subdued">
+              {children ?? COMMAND_EXECUTION_RESULT_PENDING}
+            </EuiTextColor>
+          </EuiText>
         ) : (
           <>
             {showTitle && (
