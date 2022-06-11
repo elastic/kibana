@@ -15,6 +15,7 @@ describe('when using `parseCommandInput()`', () => {
       input: '',
       name: 'foo',
       args: {},
+      hasArgs: Object.keys(overrides.args || {}).length > 0,
       ...overrides,
     } as ParsedCommandInterface;
   };
