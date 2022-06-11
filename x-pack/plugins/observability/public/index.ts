@@ -8,7 +8,7 @@
 // TODO: https://github.com/elastic/kibana/issues/110905
 /* eslint-disable @kbn/eslint/no_export_all */
 
-import { PluginInitializerContext, PluginInitializer } from '@kbn/core/public';
+import { PluginInitializer } from '@kbn/core/public';
 import { lazy } from 'react';
 import {
   Plugin,
