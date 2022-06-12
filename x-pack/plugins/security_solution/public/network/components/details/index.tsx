@@ -17,7 +17,6 @@ import { getEmptyTagValue } from '../../../common/components/empty_value';
 
 import {
   autonomousSystemRenderer,
-  dateRenderer,
   hostIdRenderer,
   hostNameRenderer,
   locationRenderer,
