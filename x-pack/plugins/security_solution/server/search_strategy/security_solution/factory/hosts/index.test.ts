@@ -12,7 +12,6 @@ import { hostDetails } from './details';
 import { hostOverview } from './overview';
 
 import { uncommonProcesses } from './uncommon_processes';
-import { hostsKpiAuthentications } from './kpi/authentications';
 import { hostsKpiHosts } from './kpi/hosts';
 import { hostsKpiUniqueIps } from './kpi/unique_ips';
 
@@ -20,7 +19,6 @@ jest.mock('./all');
 jest.mock('./details');
 jest.mock('./overview');
 jest.mock('./uncommon_processes');
-jest.mock('./kpi/authentications');
 jest.mock('./kpi/hosts');
 jest.mock('./kpi/unique_ips');
 
@@ -31,7 +29,6 @@ describe('hostsFactory', () => {
       [HostsQueries.hosts]: allHosts,
       [HostsQueries.overview]: hostOverview,
       [HostsQueries.uncommonProcesses]: uncommonProcesses,
-      [HostsKpiQueries.kpiAuthentications]: hostsKpiAuthentications,
       [HostsKpiQueries.kpiHosts]: hostsKpiHosts,
       [HostsKpiQueries.kpiUniqueIps]: hostsKpiUniqueIps,
     };

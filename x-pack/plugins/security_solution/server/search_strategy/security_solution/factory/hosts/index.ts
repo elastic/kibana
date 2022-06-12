@@ -16,7 +16,6 @@ import { allHosts } from './all';
 import { hostDetails } from './details';
 import { hostOverview } from './overview';
 import { uncommonProcesses } from './uncommon_processes';
-import { hostsKpiAuthentications } from './kpi/authentications';
 import { hostsKpiHosts } from './kpi/hosts';
 import { hostsKpiUniqueIps } from './kpi/unique_ips';
 
@@ -28,7 +27,6 @@ export const hostsFactory: Record<
   [HostsQueries.hosts]: allHosts,
   [HostsQueries.overview]: hostOverview,
   [HostsQueries.uncommonProcesses]: uncommonProcesses,
-  [HostsKpiQueries.kpiAuthentications]: hostsKpiAuthentications,
   [HostsKpiQueries.kpiHosts]: hostsKpiHosts,
   [HostsKpiQueries.kpiUniqueIps]: hostsKpiUniqueIps,
 };
