@@ -11,14 +11,14 @@ import { setTimeout as setTimeoutP } from 'timers/promises';
 import moment from 'moment';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
-import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public';
 import { AnalyticsNoDataPage } from '@kbn/shared-ux-page-analytics-no-data';
-import { hasESData, hasUserDataView } from './overview.test.mocks';
+import { hasESData, hasUserDataView, mockDataViewEditor } from './overview.test.mocks';
 import { Overview } from './overview';
-import { EuiLoadingSpinner } from '@elastic/eui';
+
 const mockNewsFetchResult = {
   error: null,
   feedItems: [
@@ -127,8 +127,6 @@ const mockFeatures = [
     category: 'data' as FeatureCatalogueCategory,
   },
 ];
-
-const mockDataViewEditor = indexPatternEditorPluginMock.createStartContract();
 
 const flushPromises = async () => await setTimeoutP(10);
 
