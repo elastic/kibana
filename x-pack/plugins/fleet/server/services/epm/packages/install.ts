@@ -38,6 +38,7 @@ import {
   setPackageInfo,
   generatePackageInfoFromArchiveBuffer,
   unpackBufferToCache,
+  validateZipBufferWithPackageSpec,
 } from '../archive';
 import { toAssetReference } from '../kibana/assets/install';
 import type { ArchiveAsset } from '../kibana/assets/install';
@@ -414,6 +415,12 @@ async function installPackageByUpload({
   const telemetryEvent: PackageUpdateEvent = getTelemetryEvent('', '');
   try {
     const { packageInfo } = await generatePackageInfoFromArchiveBuffer(archiveBuffer, contentType);
+    // Throws an exception if the package doesn't pass the spec
+    await validateZipBufferWithPackageSpec(
+      `${packageInfo.name}-${packageInfo.version}.zip`,
+      archiveBuffer.length,
+      archiveBuffer
+    );
 
     const installedPkg = await getInstallationObject({
       savedObjectsClient,
