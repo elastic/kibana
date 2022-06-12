@@ -120,8 +120,8 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd1 --foo');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'Unsupported argument!Command does not support any argumentsUsage:cmd1Type cmd1 --help for assistance.'
+      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+        'Command does not support any arguments'
       );
     });
   });
@@ -131,8 +131,8 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2 --file test --foo');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'Unsupported argument!The following cmd2 argument is not support by this command: --fooUsage:cmd2--file [--ext --bad]Type cmd2 --help for assistance.'
+      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+        'The following cmd2 argument is not support by this command: --foo'
       );
     });
   });
@@ -142,8 +142,8 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2 --file test --foo --bar');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'Unsupported argument!The following cmd2 arguments are not support by this command: --foo, --barUsage:cmd2--file [--ext --bad]Type cmd2 --help for assistance.'
+      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+        'The following cmd2 arguments are not support by this command: --foo, --bar'
       );
     });
   });
@@ -153,8 +153,8 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2 --ext one');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'Unsupported argument!Missing required argument: --fileUsage:cmd2--file [--ext --bad]Type cmd2 --help for assistance.'
+      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+        'Missing required argument: --file'
       );
     });
   });
@@ -164,8 +164,8 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2 --file one --file two');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'Unsupported argument!Argument can only be used once: --fileUsage:cmd2--file [--ext --bad]Type cmd2 --help for assistance.'
+      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+        'Argument can only be used once: --file'
       );
     });
   });
@@ -175,8 +175,8 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2 --file one --bad foo');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'Unsupported argument!Invalid argument value: --bad. This is a bad valueUsage:cmd2--file [--ext --bad]Type cmd2 --help for assistance.'
+      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+        'Invalid argument value: --bad. This is a bad value'
       );
     });
   });
@@ -186,8 +186,8 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd2');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'Unsupported argument!Missing required arguments: --fileUsage:cmd2--file [--ext --bad]Type cmd2 --help for assistance.'
+      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+        'Missing required arguments: --file'
       );
     });
   });
@@ -197,8 +197,8 @@ describe('When a Console command is entered by the user', () => {
     enterCommand('cmd4');
 
     await waitFor(() => {
-      expect(renderResult.getByTestId('test-badArgument').textContent).toEqual(
-        'Unsupported argument!At least one argument must be usedUsage:cmd4[--foo --bar]Type cmd4 --help for assistance.'
+      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+        'At least one argument must be used'
       );
     });
   });
