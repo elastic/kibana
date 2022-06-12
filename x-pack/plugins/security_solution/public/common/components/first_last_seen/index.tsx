@@ -13,26 +13,22 @@ import { useFirstLastSeen } from '../../containers/first_last_seen';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { Direction } from '../../../../common/search_strategy';
-import { useSourcererDataView } from '../../containers/sourcerer';
 
 export enum FirstLastSeenType {
   FIRST_SEEN = 'first-seen',
   LAST_SEEN = 'last-seen',
 }
 
-interface FirstLastSeenProps {
+export interface FirstLastSeenProps {
   field: string;
   value: string;
   type: FirstLastSeenType;
 }
 
 export const FirstLastSeen = React.memo<FirstLastSeenProps>(({ field, type, value }) => {
-  const { docValueFields, selectedPatterns } = useSourcererDataView();
   const [loading, { firstSeen, lastSeen, errorMessage }] = useFirstLastSeen({
-    docValueFields,
     field,
     value,
-    indexNames: selectedPatterns,
     order: type === FirstLastSeenType.FIRST_SEEN ? Direction.asc : Direction.desc,
   });
   const valueSeen = useMemo(
@@ -56,12 +52,12 @@ export const FirstLastSeen = React.memo<FirstLastSeenProps>(({ field, type, valu
 
   return (
     <>
-      {loading && <EuiLoadingSpinner size="m" />}
+      {loading && <EuiLoadingSpinner data-test-subj="loading-spinner" size="m" />}
       {!loading && valueSeen != null && new Date(valueSeen).toString() === 'Invalid Date'
         ? valueSeen
         : !loading &&
           valueSeen !== null && (
-            <EuiText size="s">
+            <EuiText data-test-subj="first-last-seen-value" size="s">
               <FormattedRelativePreferenceDate value={`${valueSeen}`} />
             </EuiText>
           )}

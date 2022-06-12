@@ -16,13 +16,13 @@ import { useKibana } from '../../lib/kibana';
 import * as i18n from './translations';
 import {
   Direction,
-  DocValueFields,
   FirstLastSeenQuery,
   FirstLastSeenRequestOptions,
   FirstLastSeenStrategyResponse,
 } from '../../../../common/search_strategy';
+import { useSourcererDataView } from '../sourcerer';
 
-const ID = 'firstLastSeenHostQuery';
+const ID = 'firstLastSeenQuery';
 
 export interface FirstLastSeenArgs {
   id: string;
@@ -32,27 +32,24 @@ export interface FirstLastSeenArgs {
   order: Direction.asc | Direction.desc | null;
 }
 interface UseFirstLastSeen {
-  docValueFields: DocValueFields[];
   field: string;
   value: string;
-  indexNames: string[];
   order: Direction.asc | Direction.desc;
 }
 
 export const useFirstLastSeen = ({
-  docValueFields,
   field,
   value,
-  indexNames,
   order,
 }: UseFirstLastSeen): [boolean, FirstLastSeenArgs] => {
   const { search } = useKibana().services.data;
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
+  const { docValueFields, selectedPatterns: defaultIndex } = useSourcererDataView();
 
   const [firstLastSeenRequest, setFirstLastSeenRequest] = useState<FirstLastSeenRequestOptions>({
-    defaultIndex: indexNames,
+    defaultIndex,
     docValueFields: docValueFields ?? [],
     factoryQueryType: FirstLastSeenQuery,
     field,
@@ -120,7 +117,7 @@ export const useFirstLastSeen = ({
     setFirstLastSeenRequest((prevRequest) => {
       const myRequest = {
         ...prevRequest,
-        defaultIndex: indexNames,
+        defaultIndex,
         docValueFields: docValueFields ?? [],
         field,
         value,
@@ -130,7 +127,7 @@ export const useFirstLastSeen = ({
       }
       return prevRequest;
     });
-  }, [docValueFields, field, indexNames, value]);
+  }, [defaultIndex, docValueFields, field, value]);
 
   useEffect(() => {
     firstLastSeenSearch(firstLastSeenRequest);

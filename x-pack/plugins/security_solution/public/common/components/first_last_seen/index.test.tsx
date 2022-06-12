@@ -7,15 +7,15 @@
 
 import React from 'react';
 
-import { render as _render, waitFor } from '@testing-library/react';
+import { render, waitFor } from '@testing-library/react';
 
 import { useFirstLastSeen } from '../../containers/first_last_seen';
 import { TestProviders } from '../../mock';
-import { FirstLastSeen, FirstLastSeenType } from '.';
+import { FirstLastSeen, FirstLastSeenProps, FirstLastSeenType } from '.';
 
 const MOCKED_RESPONSE = {
   firstSeen: '2019-04-08T16:09:40.692Z',
-  lastSeen: '2019-04-08T18:35:45.064Z',
+  lastSeen: '2022-04-08T18:35:45.064Z',
 };
 
 jest.mock('../../containers/first_last_seen');
@@ -24,58 +24,46 @@ useFirstLastSeenMock.mockReturnValue([false, MOCKED_RESPONSE]);
 
 describe('FirstLastSeen Component', () => {
   const firstSeen = 'Apr 8, 2019 @ 16:09:40.692';
-  const lastSeen = 'Apr 8, 2019 @ 18:35:45.064';
+  const lastSeen = 'Apr 8, 2022 @ 18:35:45.064';
 
-  let render: (ui: React.ReactElement) => ReturnType<typeof _render>;
-
-  beforeEach(() => {
-    render = (ui: React.ReactElement): ReturnType<typeof _render> => {
-      return _render(
-        <TestProviders>
-          <div data-test-subj="test-render-output">{ui}</div>
-        </TestProviders>
-      );
-    };
-  });
+  const renderComponent = (overrides?: Partial<FirstLastSeenProps>) => {
+    return render(
+      <TestProviders>
+        <FirstLastSeen
+          field="host.name"
+          value="some-host"
+          type={FirstLastSeenType.FIRST_SEEN}
+          {...overrides}
+        />
+      </TestProviders>
+    );
+  };
 
   test('Loading', async () => {
     useFirstLastSeenMock.mockReturnValue([true, MOCKED_RESPONSE]);
-    const { getByTestId } = render(
-      <TestProviders>
-        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.FIRST_SEEN} />
-      </TestProviders>
-    );
-    expect(getByTestId('test-render-output').innerHTML).toBe(
-      '<span class="euiLoadingSpinner euiLoadingSpinner--medium"></span>'
-    );
+
+    const { getByTestId } = renderComponent();
+
+    expect(getByTestId('loading-spinner')).toBeInTheDocument();
   });
 
   test('First Seen', async () => {
     useFirstLastSeenMock.mockReturnValue([false, MOCKED_RESPONSE]);
-    const { getByTestId } = render(
-      <TestProviders>
-        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.FIRST_SEEN} />
-      </TestProviders>
-    );
+
+    const { getByText } = renderComponent();
 
     await waitFor(() => {
-      expect(getByTestId('test-render-output').innerHTML).toBe(
-        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
-      );
+      expect(getByText(firstSeen)).toBeInTheDocument();
     });
   });
 
   test('Last Seen', async () => {
     useFirstLastSeenMock.mockReturnValue([false, MOCKED_RESPONSE]);
-    const { getByTestId } = render(
-      <TestProviders>
-        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.LAST_SEEN} />
-      </TestProviders>
-    );
+
+    const { getByText } = renderComponent({ type: FirstLastSeenType.LAST_SEEN });
+
     await waitFor(() => {
-      expect(getByTestId('test-render-output').innerHTML).toBe(
-        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
-      );
+      expect(getByText(lastSeen)).toBeInTheDocument();
     });
   });
 
@@ -87,16 +75,11 @@ describe('FirstLastSeen Component', () => {
         firstSeen: null,
       },
     ]);
-    const { getByTestId } = render(
-      <TestProviders>
-        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.LAST_SEEN} />
-      </TestProviders>
-    );
+
+    const { getByText } = renderComponent({ type: FirstLastSeenType.LAST_SEEN });
 
     await waitFor(() => {
-      expect(getByTestId('test-render-output').innerHTML).toBe(
-        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${lastSeen}</span></div>`
-      );
+      expect(getByText(lastSeen)).toBeInTheDocument();
     });
   });
 
@@ -108,20 +91,15 @@ describe('FirstLastSeen Component', () => {
         lastSeen: null,
       },
     ]);
-    const { getByTestId } = render(
-      <TestProviders>
-        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.FIRST_SEEN} />
-      </TestProviders>
-    );
+
+    const { getByText } = renderComponent({ type: FirstLastSeenType.FIRST_SEEN });
 
     await waitFor(() => {
-      expect(getByTestId('test-render-output').innerHTML).toBe(
-        `<div class="euiText euiText--small"><span class="euiToolTipAnchor">${firstSeen}</span></div>`
-      );
+      expect(getByText(firstSeen)).toBeInTheDocument();
     });
   });
 
-  test('First Seen With a bad date time string', async () => {
+  test('With a bad date time string', async () => {
     useFirstLastSeenMock.mockReturnValue([
       false,
       {
@@ -129,31 +107,9 @@ describe('FirstLastSeen Component', () => {
         firstSeen: 'something-invalid',
       },
     ]);
-    const { container } = render(
-      <TestProviders>
-        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.FIRST_SEEN} />
-      </TestProviders>
-    );
+    const { getByText } = renderComponent();
     await waitFor(() => {
-      expect(container.textContent).toBe('something-invalid');
-    });
-  });
-
-  test('Last Seen With a bad date time string', async () => {
-    useFirstLastSeenMock.mockReturnValue([
-      false,
-      {
-        ...MOCKED_RESPONSE,
-        lastSeen: 'something-invalid',
-      },
-    ]);
-    const { container } = render(
-      <TestProviders>
-        <FirstLastSeen field="hostName" value="kibana-siem" type={FirstLastSeenType.LAST_SEEN} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(container.textContent).toBe('something-invalid');
+      expect(getByText('something-invalid')).toBeInTheDocument();
     });
   });
 });
