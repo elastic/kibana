@@ -24,7 +24,7 @@ import { FormattedError } from '../formatted_error';
 
 export const EndpointStatusActionResult = memo<
   CommandExecutionComponentProps<
-    never,
+    {},
     {
       apiCalled?: boolean;
       endpointDetails?: HostInfo;
