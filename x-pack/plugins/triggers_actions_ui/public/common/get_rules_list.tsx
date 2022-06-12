@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { RulesList } from '../application/sections';
+import type { RulesListProps } from '../application/sections/rules_list/components/rules_list';
 
-export const getRulesListLazy = () => {
-  return <RulesList />;
+export const getRulesListLazy = (props: RulesListProps) => {
+  return <RulesList {...props} />;
 };

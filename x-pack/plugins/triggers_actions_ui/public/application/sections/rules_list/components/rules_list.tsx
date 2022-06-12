@@ -90,6 +90,12 @@ import { UpdateApiKeyModalConfirmation } from '../../../components/update_api_ke
 
 const ENTER_KEY = 13;
 
+export interface RulesListProps {
+  filteredRulesTypes: string[] | undefined; // try to add optional
+  filteredSolutions: string[] | undefined;
+  showActionFilter: boolean;
+}
+
 interface RuleTypeState {
   isLoading: boolean;
   isInitialized: boolean;
@@ -108,7 +114,11 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
   key: percentile,
 }));
 
-export const RulesList: React.FunctionComponent = () => {
+export const RulesList = ({
+  filteredRulesTypes,
+  filteredSolutions,
+  showActionFilter = true,
+}: RulesListProps) => {
   const history = useHistory();
   const {
     http,
@@ -183,7 +193,7 @@ export const RulesList: React.FunctionComponent = () => {
   const { rulesState, setRulesState, loadRules, noData, initialLoad } = useLoadRules({
     page,
     searchText,
-    typesFilter,
+    typesFilter: typesFilter.length > 0 ? typesFilter : filteredRulesTypes,
     actionTypesFilter,
     ruleExecutionStatusesFilter,
     ruleStatusesFilter,
@@ -249,7 +259,13 @@ export const RulesList: React.FunctionComponent = () => {
         for (const ruleType of ruleTypes) {
           index.set(ruleType.id, ruleType);
         }
-        setRuleTypesState({ isLoading: false, data: index, isInitialized: true });
+        let filteredIndex = index;
+        if (filteredSolutions && filteredSolutions.length > 0) {
+          filteredIndex = new Map(
+            [...index].filter(([k, v]) => filteredSolutions.includes(v.producer))
+          );
+        }
+        setRuleTypesState({ isLoading: false, data: filteredIndex, isInitialized: true });
       } catch (e) {
         toasts.addDanger({
           title: i18n.translate(
@@ -422,11 +438,13 @@ export const RulesList: React.FunctionComponent = () => {
         })
       )}
     />,
-    <ActionTypeFilter
-      key="action-type-filter"
-      actionTypes={actionTypes}
-      onChange={(ids: string[]) => setActionTypesFilter(ids)}
-    />,
+    showActionFilter && (
+      <ActionTypeFilter
+        key="action-type-filter"
+        actionTypes={actionTypes}
+        onChange={(ids: string[]) => setActionTypesFilter(ids)}
+      />
+    ),
     <RuleExecutionStatusFilter
       key="rule-status-filter"
       selectedStatuses={ruleExecutionStatusesFilter}

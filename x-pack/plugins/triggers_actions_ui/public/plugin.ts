@@ -55,6 +55,7 @@ import type {
   RuleStatusFilterProps,
   RuleTagBadgeProps,
   RuleEventLogListProps,
+  RulesListProps,
   AlertsTableConfigurationRegistry,
 } from './types';
 import { TriggersActionsUiConfigType } from '../common/types';
@@ -92,7 +93,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getRuleStatusFilter: (props: RuleStatusFilterProps) => ReactElement<RuleStatusFilterProps>;
   getRuleTagBadge: (props: RuleTagBadgeProps) => ReactElement<RuleTagBadgeProps>;
   getRuleEventLogList: (props: RuleEventLogListProps) => ReactElement<RuleEventLogListProps>;
-  getRulesList: () => ReactElement;
+  getRulesList: (props: RulesListProps) => ReactElement;
 }
 
 interface PluginsSetup {
@@ -281,8 +282,8 @@ export class Plugin
       getRuleEventLogList: (props: RuleEventLogListProps) => {
         return getRuleEventLogListLazy(props);
       },
-      getRulesList: () => {
-        return getRulesListLazy();
+      getRulesList: (props: RulesListProps) => {
+        return getRulesListLazy(props);
       },
     };
   }

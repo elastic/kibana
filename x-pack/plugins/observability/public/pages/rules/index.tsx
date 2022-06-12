@@ -75,7 +75,8 @@ import { ExperimentalBadge } from '../../components/shared/experimental_badge';
 const ENTER_KEY = 13;
 
 function RulesPage() {
-  const { ObservabilityPageTemplate, kibanaFeatures } = usePluginContext();
+  const { ObservabilityPageTemplate, kibanaFeatures, observabilityRuleTypeRegistry } =
+    usePluginContext();
   const {
     http,
     docLinks,
@@ -83,6 +84,7 @@ function RulesPage() {
     application: { capabilities },
     notifications: { toasts },
   } = useKibana().services;
+
   const documentationLink = docLinks.links.observability.createAlerts;
   const ruleTypeRegistry = triggersActionsUi.ruleTypeRegistry;
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
@@ -421,7 +423,7 @@ function RulesPage() {
         <EuiHorizontalRule margin="xs" />
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            <RulesTable
+            {/* <RulesTable
               columns={getRulesTableColumns()}
               rules={convertRulesToTableItems(rules, ruleTypeIndex, canExecuteActions)}
               isLoading={rulesState.isLoading}
@@ -432,7 +434,14 @@ function RulesPage() {
               onSortChange={(changedSort) => {
                 setSort(changedSort);
               }}
-            />
+            /> */}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {triggersActionsUi.getRulesList({
+              filteredRulesTypes: observabilityRuleTypeRegistry.list(),
+              filteredSolutions: OBSERVABILITY_SOLUTIONS,
+              showActionFilter: false,
+            })}
           </EuiFlexItem>
         </EuiFlexGroup>
       </>

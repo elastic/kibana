@@ -48,6 +48,7 @@ import { TypeRegistry } from './application/type_registry';
 import type { ComponentOpts as RuleStatusDropdownProps } from './application/sections/rules_list/components/rule_status_dropdown';
 import type { RuleTagFilterProps } from './application/sections/rules_list/components/rule_tag_filter';
 import type { RuleStatusFilterProps } from './application/sections/rules_list/components/rule_status_filter';
+import type { RulesListProps } from './application/sections/rules_list/components/rules_list';
 import type { RuleTagBadgeProps } from './application/sections/rules_list/components/rule_tag_badge';
 import type { RuleEventLogListProps } from './application/sections/rule_details/components/rule_event_log_list';
 
@@ -86,6 +87,7 @@ export type {
   RuleStatusFilterProps,
   RuleTagBadgeProps,
   RuleEventLogListProps,
+  RulesListProps,
 };
 export type { ActionType, AsApiContract };
 export {
@@ -464,3 +466,7 @@ export enum AlertsTableFlyoutState {
 }
 
 export type RuleStatus = 'enabled' | 'disabled' | 'snoozed';
+
+// export interface RulesListProps {
+//   filteredRulesTypes: string[] | undefined; // try to add optional
+// }

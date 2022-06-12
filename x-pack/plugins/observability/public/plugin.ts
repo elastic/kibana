@@ -70,6 +70,8 @@ export interface ObservabilityPublicPluginsStart {
   features: FeaturesPluginStart;
   kibanaFeatures: KibanaFeature[];
   sharedUX: SharedUXPluginStart;
+  ruleTypeRegistry: {};
+  actionTypeRegistry: {};
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -155,7 +157,9 @@ export class Plugin
       const { registerAlertsTableConfiguration } = await import(
         './config/register_alerts_table_configuration'
       );
-      const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+      const { alertsTableConfigurationRegistry, ruleTypeRegistry, actionTypeRegistry } =
+        pluginsStart.triggersActionsUi;
+
       registerAlertsTableConfiguration(alertsTableConfigurationRegistry);
       // The `/api/features` endpoint requires the "Global All" Kibana privilege. Users with a
       // subset of this privilege are not authorized to access this endpoint and will receive a 404
@@ -166,11 +170,10 @@ export class Plugin
       } catch (err) {
         kibanaFeatures = [];
       }
-
       return renderApp({
         config,
         core: coreStart,
-        plugins: pluginsStart,
+        plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         appMountParameters: params,
         observabilityRuleTypeRegistry,
         ObservabilityPageTemplate: navigation.PageTemplate,
