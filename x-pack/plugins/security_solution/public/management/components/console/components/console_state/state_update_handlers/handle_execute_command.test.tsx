@@ -202,4 +202,23 @@ describe('When a Console command is entered by the user', () => {
       );
     });
   });
+
+  it('should show error if command definition `validate()` callback return a message', async () => {
+    const cmd1Definition = commands.find((command) => command.name === 'cmd1');
+
+    if (!cmd1Definition) {
+      throw new Error('cmd1 defintion not fount');
+    }
+
+    cmd1Definition.validate = () => 'command is invalid';
+
+    render();
+    enterCommand('cmd1');
+
+    await waitFor(() => {
+      expect(renderResult.getByTestId('test-bardArgument-message').textContent).toEqual(
+        'command is invalid'
+      );
+    });
+  });
 });

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+// FIXME:PT breakup module in order to avoid turning off eslint rule below
+/* eslint-disable complexity */
+
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
 import { EuiCode } from '@elastic/eui';
@@ -289,6 +292,21 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         ),
       }),
     });
+  }
+
+  // if the Command definition has a `validate()` callback, then call it now
+  if (commandDefinition.validate) {
+    const validationResult = commandDefinition.validate(command);
+
+    if (validationResult !== true) {
+      return updateStateWithNewCommandHistoryItem(state, {
+        id: uuidV4(),
+        command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
+        state: createCommandExecutionState({
+          errorMessage: validationResult,
+        }),
+      });
+    }
   }
 
   // All is good. Execute the command

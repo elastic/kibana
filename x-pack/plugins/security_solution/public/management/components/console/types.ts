@@ -35,6 +35,15 @@ export interface CommandDefinition<TMeta = any> {
 
   /** If all args are optional, but at least one must be defined, set to true */
   mustHaveArgs?: boolean;
+
+  /**
+   * Validate the command entered by the user. This is called only after the Console has ran
+   * through all of its builtin validations (based on `CommandDefinition`).
+   * Example: used it when there are multiple optional arguments but at least one of those
+   * must be defined.
+   */
+  validate?: (command: Command) => true | string;
+
   /** The list of arguments supported by this command */
   args?: {
     [longName: string]: {
@@ -46,6 +55,7 @@ export interface CommandDefinition<TMeta = any> {
        * Should return `true` if valid or a string with the error message
        */
       validate?: (argData: ParsedArgData) => true | string;
+
       // Selector: Idea is that the schema can plugin in a rich component for the
       // user to select something (ex. a file)
       // FIXME: implement selector
