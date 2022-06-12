@@ -37,7 +37,6 @@ import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from '.
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRules } from '../../hooks/use_fetch_rules';
-import { RulesTable } from './components/rules_table';
 import { Name } from './components/name';
 import { LastResponseFilter } from './components/last_response_filter';
 import { TypeFilter } from './components/type_filter';
@@ -51,7 +50,6 @@ import { CenterJustifiedSpinner } from './components/center_justified_spinner';
 import { Pagination } from './types';
 import {
   DEFAULT_SEARCH_PAGE_SIZE,
-  convertRulesToTableItems,
   OBSERVABILITY_SOLUTIONS,
   hasExecuteActionsCapability,
 } from './config';
