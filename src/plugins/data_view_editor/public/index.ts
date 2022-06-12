@@ -25,3 +25,5 @@ export type { PluginStart as DataViewEditorStart, DataViewEditorProps } from './
 export function plugin() {
   return new DataViewEditorPlugin();
 }
+
+export { indexPatternEditorPluginMock } from './mocks';

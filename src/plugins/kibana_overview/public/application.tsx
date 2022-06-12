@@ -22,7 +22,7 @@ export const renderApp = (
   { appBasePath, element, theme$ }: AppMountParameters
 ) => {
   const { notifications, http } = core;
-  const { newsfeed, home, navigation } = deps;
+  const { newsfeed, home, navigation, dataViewEditor } = deps;
   const newsfeed$ = newsfeed?.createNewsFeed$(NewsfeedApiEndpoint.KIBANA_ANALYTICS);
   const navLinks = core.chrome.navLinks.getAll();
   const solutions = home.featureCatalogue
@@ -47,6 +47,7 @@ export const renderApp = (
             newsfeed$={newsfeed$}
             solutions={solutions}
             features={features}
+            dataViewEditor={dataViewEditor}
           />
         </KibanaContextProvider>
       </KibanaThemeProvider>

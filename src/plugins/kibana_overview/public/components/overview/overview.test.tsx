@@ -6,15 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { hasUserDataViewMock } from './overview.test.mocks';
+import React from 'react';
 import { setTimeout as setTimeoutP } from 'timers/promises';
 import moment from 'moment';
-import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { ReactWrapper } from 'enzyme';
-import { Overview } from './overview';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import type { FeatureCatalogueCategory } from '@kbn/home-plugin/public';
+import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public';
+import { AnalyticsNoDataPage } from '@kbn/shared-ux-page-analytics-no-data';
+import { hasESData, hasUserDataView } from './overview.test.mocks';
+import { Overview } from './overview';
+import { EuiLoadingSpinner } from '@elastic/eui';
 const mockNewsFetchResult = {
   error: null,
   feedItems: [
@@ -124,6 +128,8 @@ const mockFeatures = [
   },
 ];
 
+const mockDataViewEditor = indexPatternEditorPluginMock.createStartContract();
+
 const flushPromises = async () => await setTimeoutP(10);
 
 const updateComponent = async (component: ReactWrapper) => {
@@ -135,8 +141,8 @@ const updateComponent = async (component: ReactWrapper) => {
 
 describe('Overview', () => {
   beforeEach(() => {
-    hasUserDataViewMock.mockClear();
-    hasUserDataViewMock.mockResolvedValue(true);
+    hasESData.mockResolvedValue(true);
+    hasUserDataView.mockResolvedValue(true);
   });
 
   afterAll(() => jest.clearAllMocks());
@@ -147,17 +153,24 @@ describe('Overview', () => {
         newsFetchResult={mockNewsFetchResult}
         solutions={mockSolutions}
         features={mockFeatures}
+        dataViewEditor={mockDataViewEditor}
       />
     );
 
     await updateComponent(component);
 
     expect(component).toMatchSnapshot();
+    expect(component.find(KibanaPageTemplate).length).toBe(1);
   });
 
   test('without solutions', async () => {
     const component = mountWithIntl(
-      <Overview newsFetchResult={mockNewsFetchResult} solutions={[]} features={mockFeatures} />
+      <Overview
+        newsFetchResult={mockNewsFetchResult}
+        solutions={[]}
+        features={mockFeatures}
+        dataViewEditor={mockDataViewEditor}
+      />
     );
 
     await updateComponent(component);
@@ -167,7 +180,12 @@ describe('Overview', () => {
 
   test('without features', async () => {
     const component = mountWithIntl(
-      <Overview newsFetchResult={mockNewsFetchResult} solutions={mockSolutions} features={[]} />
+      <Overview
+        newsFetchResult={mockNewsFetchResult}
+        solutions={mockSolutions}
+        features={[]}
+        dataViewEditor={mockDataViewEditor}
+      />
     );
 
     await updateComponent(component);
@@ -176,34 +194,44 @@ describe('Overview', () => {
   });
 
   test('when there is no user data view', async () => {
-    hasUserDataViewMock.mockResolvedValue(false);
+    hasESData.mockResolvedValue(true);
+    hasUserDataView.mockResolvedValue(false);
 
     const component = mountWithIntl(
       <Overview
         newsFetchResult={mockNewsFetchResult}
         solutions={mockSolutions}
         features={mockFeatures}
+        dataViewEditor={mockDataViewEditor}
       />
     );
 
     await updateComponent(component);
 
     expect(component).toMatchSnapshot();
+    expect(component.find(AnalyticsNoDataPage).length).toBe(1);
+    expect(component.find(KibanaPageTemplate).length).toBe(0);
+    expect(component.find(EuiLoadingSpinner).length).toBe(0);
   });
 
   test('during loading', async () => {
-    hasUserDataViewMock.mockImplementation(() => new Promise(() => {}));
+    hasESData.mockImplementation(() => new Promise(() => {}));
+    hasUserDataView.mockImplementation(() => new Promise(() => {}));
 
     const component = mountWithIntl(
       <Overview
         newsFetchResult={mockNewsFetchResult}
         solutions={mockSolutions}
         features={mockFeatures}
+        dataViewEditor={mockDataViewEditor}
       />
     );
 
     await updateComponent(component);
 
     expect(component.render()).toMatchSnapshot();
+    expect(component.find(AnalyticsNoDataPage).length).toBe(0);
+    expect(component.find(KibanaPageTemplate).length).toBe(0);
+    expect(component.find(EuiLoadingSpinner).length).toBe(1);
   });
 });

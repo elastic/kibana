@@ -7,15 +7,32 @@
  */
 
 import React from 'react';
+import { Observable } from 'rxjs';
 
-export const hasUserDataViewMock = jest.fn();
+export const hasUserDataView = jest.fn();
+export const hasESData = jest.fn();
 
 jest.doMock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
+      application: {
+        currentAppId$: new Observable<string | undefined>(),
+        navigateToUrl: jest.fn(),
+        capabilities: {
+          navLinks: {
+            integrations: {
+              canAccessFleet: false,
+            },
+          },
+        },
+      },
       http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
       dataViews: {
-        hasUserDataView: hasUserDataViewMock,
+        hasUserDataView: jest.fn(),
+        hasData: {
+          hasESData,
+          hasUserDataView,
+        },
       },
       share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
       uiSettings: { get: jest.fn() },
