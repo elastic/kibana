@@ -24,7 +24,7 @@ export type BadArgumentProps = PropsWithChildren<{
  * Shows a bad argument error. The error message needs to be defined via the Command History Item's
  * `state.errorMessage`
  */
-export const BadArgument = memo<CommandExecutionComponentProps<never, { errorMessage: ReactNode }>>(
+export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessage: ReactNode }>>(
   ({ command, setStatus, store }) => {
     const getTestId = useTestIdGenerator(useDataTestSubj());
 
