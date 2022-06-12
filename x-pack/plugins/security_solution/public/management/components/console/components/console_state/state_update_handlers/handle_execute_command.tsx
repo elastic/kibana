@@ -7,6 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { v4 as uuidV4 } from 'uuid';
+import { EuiCode } from '@elastic/eui';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { HelpCommandArgument } from '../../builtin_commands/help_command_argument';
 import {
   CommandHistoryItem,
@@ -143,7 +146,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
           errorMessage: i18n.translate(
             'xpack.securitySolution.console.commandValidation.noArgumentsSupported',
             {
-              defaultMessage: 'command does not support any arguments',
+              defaultMessage: 'Command does not support any arguments',
             }
           ),
         }),
@@ -158,14 +161,20 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         id: uuidV4(),
         command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
         state: createCommandExecutionState({
-          errorMessage: i18n.translate(
-            'xpack.securitySolution.console.commandValidation.unknownArgument',
-            {
-              defaultMessage: 'unknown argument(s): {unknownArgs}',
-              values: {
-                unknownArgs: unknownInputArgs.join(', '),
-              },
-            }
+          errorMessage: (
+            <FormattedMessage
+              id="xpack.securitySolution.console.commandValidation.unknownArgument"
+              defaultMessage="The following {command} {countOfInvalidArgs, plural, =1 {argument is} other {arguments are}} not support by this command: {unknownArgs}"
+              values={{
+                countOfInvalidArgs: unknownInputArgs.length,
+                command: <EuiCode transparentBackground={true}>{parsedInput.name}</EuiCode>,
+                unknownArgs: (
+                  <EuiCode transparentBackground={true}>
+                    {unknownInputArgs.map(toCliArgumentOption).join(', ')}
+                  </EuiCode>
+                ),
+              }}
+            />
           ),
         }),
       });
@@ -181,7 +190,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
             errorMessage: i18n.translate(
               'xpack.securitySolution.console.commandValidation.missingRequiredArg',
               {
-                defaultMessage: 'missing required argument: {argName}',
+                defaultMessage: 'Missing required argument: {argName}',
                 values: {
                   argName: toCliArgumentOption(requiredArg),
                 },
@@ -206,7 +215,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
             errorMessage: i18n.translate(
               'xpack.securitySolution.console.commandValidation.unsupportedArg',
               {
-                defaultMessage: 'unsupported argument: {argName}',
+                defaultMessage: 'Unsupported argument: {argName}',
                 values: { argName: toCliArgumentOption(argName) },
               }
             ),
@@ -215,11 +224,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
       }
 
       // does not allow multiple values
-      if (
-        !argDefinition.allowMultiples &&
-        Array.isArray(argInput.values) &&
-        argInput.values.length > 0
-      ) {
+      if (!argDefinition.allowMultiples && Array.isArray(argInput) && argInput.length > 1) {
         return updateStateWithNewCommandHistoryItem(state, {
           id: uuidV4(),
           command: cloneCommandDefinitionWithNewRenderComponent(command, BadArgument),
@@ -227,7 +232,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
             errorMessage: i18n.translate(
               'xpack.securitySolution.console.commandValidation.argSupportedOnlyOnce',
               {
-                defaultMessage: 'argument can only be used once: {argName}',
+                defaultMessage: 'Argument can only be used once: {argName}',
                 values: { argName: toCliArgumentOption(argName) },
               }
             ),
@@ -246,7 +251,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
               errorMessage: i18n.translate(
                 'xpack.securitySolution.console.commandValidation.invalidArgValue',
                 {
-                  defaultMessage: 'invalid argument value: {argName}. {error}',
+                  defaultMessage: 'Invalid argument value: {argName}. {error}',
                   values: { argName: toCliArgumentOption(argName), error: validationResult },
                 }
               ),
@@ -263,7 +268,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         errorMessage: i18n.translate(
           'xpack.securitySolution.console.commandValidation.mustHaveArgs',
           {
-            defaultMessage: 'missing required arguments: {requiredArgs}',
+            defaultMessage: 'Missing required arguments: {requiredArgs}',
             values: {
               requiredArgs: requiredArgs.map((argName) => toCliArgumentOption(argName)).join(', '),
             },
@@ -279,7 +284,7 @@ export const handleExecuteCommand: ConsoleStoreReducer<
         errorMessage: i18n.translate(
           'xpack.securitySolution.console.commandValidation.oneArgIsRequired',
           {
-            defaultMessage: 'at least one argument must be used',
+            defaultMessage: 'At least one argument must be used',
           }
         ),
       }),
