@@ -13,7 +13,6 @@ import { NewsfeedPublicPluginStart } from '@kbn/newsfeed-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { CoreStart } from '@kbn/core/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface KibanaOverviewPluginSetup {}
@@ -27,7 +26,6 @@ export interface AppPluginSetupDependencies {
 }
 
 export interface AppPluginStartDependencies {
-  core: CoreStart;
   home: HomePublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   navigation: NavigationPublicPluginStart;
