@@ -37,7 +37,6 @@ const OsqueryConnectorForm: React.FunctionComponent<ActionParamsProps<OsqueryAct
   actionParams,
   editAction,
   index,
-  errors,
   actionConnector,
 }) => {
   const FORM_ID = useMemo(

@@ -45,7 +45,6 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({ rawEventData }
   );
 
   const agentIds = rawEventData?.fields['agent.id'];
-  const startDate = rawEventData?._source['@timestamp'];
   const ruleName = rawEventData?._source['kibana.alert.rule.name'];
   const ruleActions = rawEventData?._source['kibana.alert.rule.actions'];
 
@@ -60,6 +59,7 @@ const OsqueryResultsComponent: React.FC<OsqueryResultsProps> = ({ rawEventData }
   return actionsData?.actions.map((ruleAction) => {
     const actionId = ruleAction._source.action_id;
     const query = ruleAction._source.data.query;
+    const startDate = ruleAction?._source['@timestamp'];
 
     return (
       <EuiComment
@@ -108,7 +108,6 @@ const OsqueryResultsWrapperComponent: React.FC<OsqueryResultsWrapperProps> = ({
     <KibanaContextProvider services={services}>
       <EuiErrorBoundary>
         <QueryClientProvider client={queryClient}>
-          Osquery Results component
           <OsqueryResults rawEventData={rawEventData} />
         </QueryClientProvider>
       </EuiErrorBoundary>
