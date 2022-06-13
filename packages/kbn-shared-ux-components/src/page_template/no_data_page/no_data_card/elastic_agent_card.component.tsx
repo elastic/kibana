@@ -51,12 +51,13 @@ const elasticAgentCardDescription = i18n.translate(
 export const ElasticAgentCardComponent: FunctionComponent<ElasticAgentCardComponentProps> = ({
   canAccessFleet,
   title = elasticAgentCardTitle,
+  description,
   ...cardRest
 }) => {
   const props = canAccessFleet
     ? {
         title,
-        description: elasticAgentCardDescription,
+        description: description || elasticAgentCardDescription,
       }
     : {
         title: <EuiTextColor color="default">{noPermissionTitle}</EuiTextColor>,

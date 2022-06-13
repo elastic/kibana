@@ -25,7 +25,9 @@ exports[`PageLoading should show a simple page loading component 1`] = `
               class="euiFlexItem euiFlexItem--flexGrowZero"
             >
               <span
-                class="euiLoadingSpinner euiLoadingSpinner--xLarge"
+                aria-label="Loading"
+                class="euiLoadingSpinner css-1ow0yso-euiLoadingSpinner-xl"
+                role="progressbar"
               />
             </div>
             <div
