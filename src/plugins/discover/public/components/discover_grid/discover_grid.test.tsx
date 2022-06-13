@@ -18,6 +18,7 @@ import { getDocId } from './discover_grid_document_selection';
 import { ElasticSearchHit } from '../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { discoverServiceMock } from '../../__mocks__/services';
+import { buildDataRecord } from '../../application/main/utils/fetch_all';
 
 function getProps() {
   return {
@@ -32,7 +33,7 @@ function getProps() {
     onResize: jest.fn(),
     onSetColumns: jest.fn(),
     onSort: jest.fn(),
-    rows: esHits,
+    rows: esHits.map((hit) => buildDataRecord(hit, indexPatternMock)),
     sampleSize: 30,
     searchDescription: '',
     searchTitle: '',
@@ -146,7 +147,7 @@ describe('DiscoverGrid', () => {
               bytes: 50,
             },
           },
-        ],
+        ].map((row) => buildDataRecord(row, indexPatternMock)),
       });
       expect(getDisplayedDocNr(component)).toBe(1);
       expect(getSelectedDocNr(component)).toBe(0);

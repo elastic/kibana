@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { EsHitRecord, EsHitRecordList } from '../../types';
+import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
 
 export interface ContextFetchState {
   /**
    * Documents listed before anchor
    */
-  predecessors: EsHitRecordList;
+  predecessors: DataDocumentMsgResultDoc[];
   /**
    * Documents after anchor
    */
-  successors: EsHitRecordList;
+  successors: DataDocumentMsgResultDoc[];
   /**
    * Anchor document
    */
-  anchor: EsHitRecord;
+  anchor: DataDocumentMsgResultDoc;
   /**
    * Anchor fetch status
    */
@@ -54,7 +54,7 @@ export interface LoadingStatusEntry {
 }
 
 export const getInitialContextQueryState = (): ContextFetchState => ({
-  anchor: {} as EsHitRecord,
+  anchor: {} as DataDocumentMsgResultDoc,
   predecessors: [],
   successors: [],
   anchorStatus: { value: LoadingStatus.UNINITIALIZED },

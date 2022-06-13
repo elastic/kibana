@@ -20,6 +20,7 @@ import { DiscoverDocuments } from './discover_documents';
 import { indexPatternMock } from '../../../../__mocks__/index_pattern';
 import { ElasticSearchHit } from '../../../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { buildDataRecord } from '../../utils/fetch_all';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -31,7 +32,7 @@ function mountComponent(fetchStatus: FetchStatus, hits: ElasticSearchHit[]) {
 
   const documents$ = new BehaviorSubject({
     fetchStatus,
-    result: hits,
+    result: hits.map((hit) => buildDataRecord(hit, indexPatternMock)),
   }) as DataDocuments$;
 
   const props = {

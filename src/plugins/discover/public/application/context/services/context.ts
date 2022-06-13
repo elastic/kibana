@@ -59,9 +59,11 @@ export async function fetchSurroundingDocs(
   const sortDirToApply = type === SurrDocType.SUCCESSORS ? sortDir : reverseSortDir(sortDir);
   const anchorRaw = anchor.raw!;
 
-  const nanos = indexPattern.isTimeNanosBased() ? extractNanos(anchorRaw.fields[timeField][0]) : '';
+  const nanos = indexPattern.isTimeNanosBased()
+    ? extractNanos(anchorRaw.fields?.[timeField][0])
+    : '';
   const timeValueMillis =
-    nanos !== '' ? convertIsoToMillis(anchorRaw.fields[timeField][0]) : anchorRaw.sort[0];
+    nanos !== '' ? convertIsoToMillis(anchorRaw.fields?.[timeField][0]) : anchorRaw.sort?.[0];
 
   const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis as number, type, sortDir);
   let documents: DataDocumentMsgResultDoc[] = [];

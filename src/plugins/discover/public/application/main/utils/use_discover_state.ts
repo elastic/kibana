@@ -13,7 +13,7 @@ import { getStateDefaults } from './get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
 import { SavedSearch, getSavedSearch } from '../../../services/saved_searches';
 import { loadIndexPattern } from './resolve_index_pattern';
-import { useSavedSearch as useSavedSearchData } from './use_saved_search';
+import { DataDocumentMsgResultDoc, useSavedSearch as useSavedSearchData } from './use_saved_search';
 import {
   MODIFY_COLUMNS_ON_SWITCH,
   SEARCH_FIELDS_FROM_SOURCE,
@@ -24,7 +24,6 @@ import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
 import { getSwitchIndexPatternAppState } from './get_switch_index_pattern_app_state';
 import { SortPairArr } from '../../../components/doc_table/lib/get_sort';
-import { ElasticSearchHit } from '../../../types';
 
 export function useDiscoverState({
   services,
@@ -35,7 +34,7 @@ export function useDiscoverState({
   services: DiscoverServices;
   savedSearch: SavedSearch;
   history: History;
-  setExpandedDoc: (doc?: ElasticSearchHit) => void;
+  setExpandedDoc: (doc?: DataDocumentMsgResultDoc) => void;
 }) {
   const { uiSettings: config, data, filterManager, indexPatterns, storage } = services;
   const useNewFieldsApi = useMemo(() => !config.get(SEARCH_FIELDS_FROM_SOURCE), [config]);

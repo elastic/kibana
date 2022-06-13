@@ -13,7 +13,9 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { createContextSearchSourceStub } from './_stubs';
 import { DataPublicPluginStart, Query } from '@kbn/data-plugin/public';
 import { fetchSurroundingDocs, SurrDocType } from './context';
-import { EsHitRecord, EsHitRecordList } from '../../types';
+import { EsHitRecord } from '../../types';
+import { buildDataRecord } from '../../main/utils/fetch_all';
+import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -33,7 +35,7 @@ describe('context successors', function () {
     tieBreakerField: string,
     tieBreakerValue: number,
     size: number
-  ) => Promise<EsHitRecordList>;
+  ) => Promise<DataDocumentMsgResultDoc[]>;
   let dataPluginMock: DataPublicPluginStart;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
@@ -57,17 +59,20 @@ describe('context successors', function () {
       } as unknown as DataPublicPluginStart;
 
       fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
-        const anchor = {
-          _source: {
-            [indexPattern.timeFieldName!]: timeValIso,
-          },
-          sort: [timeValNr, tieBreakerValue],
-        };
+        const anchor = buildDataRecord(
+          {
+            _source: {
+              [indexPattern.timeFieldName!]: timeValIso,
+            },
+            sort: [timeValNr, tieBreakerValue],
+          } as EsHitRecord,
+          indexPattern
+        );
 
         return fetchSurroundingDocs(
           SurrDocType.SUCCESSORS,
           indexPattern,
-          anchor as EsHitRecord,
+          anchor,
           tieBreakerField,
           SortDirection.desc,
           size,
@@ -193,17 +198,20 @@ describe('context successors', function () {
       } as unknown as DataPublicPluginStart;
 
       fetchSuccessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size) => {
-        const anchor = {
-          _source: {
-            [indexPattern.timeFieldName!]: timeValIso,
-          },
-          sort: [timeValNr, tieBreakerValue],
-        };
+        const anchor = buildDataRecord(
+          {
+            _source: {
+              [indexPattern.timeFieldName!]: timeValIso,
+            },
+            sort: [timeValNr, tieBreakerValue],
+          } as EsHitRecord,
+          indexPattern
+        );
 
         return fetchSurroundingDocs(
           SurrDocType.SUCCESSORS,
           indexPattern,
-          anchor as EsHitRecord,
+          anchor,
           tieBreakerField,
           SortDirection.desc,
           size,

@@ -15,10 +15,5 @@ export enum FetchStatus {
   ERROR = 'error',
 }
 
-export type EsHitRecord = Required<
-  Pick<estypes.SearchHit, '_id' | 'fields' | 'sort' | '_index' | '_version'>
-> & {
-  _source?: Record<string, unknown>;
-  _score?: number;
-};
+export type EsHitRecord = estypes.SearchHit;
 export type EsHitRecordList = EsHitRecord[];

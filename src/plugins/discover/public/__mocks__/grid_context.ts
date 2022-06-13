@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { flattenHit } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { indexPatternMock } from './index_pattern';
 import { dataViewComplexMock } from './data_view_complex';
@@ -16,14 +15,12 @@ import { discoverServiceMock } from './services';
 import { GridContext } from '../components/discover_grid/discover_grid_context';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import type { ElasticSearchHit } from '../types';
+import { buildDataRecord } from '../application/main/utils/fetch_all';
+import { EsHitRecord } from '../application/types';
 
 const buildGridContext = (dataView: DataView, rows: ElasticSearchHit[]): GridContext => {
-  const usedRows = rows.map((row, idx) => {
-    return {
-      id: String(idx),
-      raw: row,
-      flattened: flattenHit(row, dataView, { includeIgnoredValues: true }),
-    };
+  const usedRows = rows.map((row) => {
+    return buildDataRecord(row as EsHitRecord, dataView);
   });
 
   return {

@@ -13,7 +13,9 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import { createContextSearchSourceStub } from './_stubs';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { DataPublicPluginStart, Query } from '@kbn/data-plugin/public';
-import { EsHitRecord, EsHitRecordList } from '../../types';
+import { EsHitRecord } from '../../types';
+import { buildDataRecord } from '../../main/utils/fetch_all';
+import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -35,7 +37,7 @@ describe('context predecessors', function () {
     tieBreakerField: string,
     tieBreakerValue: number,
     size: number
-  ) => Promise<EsHitRecordList>;
+  ) => Promise<DataDocumentMsgResultDoc[]>;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;
@@ -58,17 +60,20 @@ describe('context predecessors', function () {
       } as unknown as DataPublicPluginStart;
 
       fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
-        const anchor = {
-          _source: {
-            [indexPattern.timeFieldName!]: timeValIso,
-          },
-          sort: [timeValNr, tieBreakerValue],
-        };
+        const anchor = buildDataRecord(
+          {
+            _source: {
+              [indexPattern.timeFieldName!]: timeValIso,
+            },
+            sort: [timeValNr, tieBreakerValue],
+          } as EsHitRecord,
+          indexPattern
+        );
 
         return fetchSurroundingDocs(
           SurrDocType.PREDECESSORS,
           indexPattern,
-          anchor as EsHitRecord,
+          anchor,
           tieBreakerField,
           SortDirection.desc,
           size,
@@ -88,7 +93,7 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
-        (hits: EsHitRecordList) => {
+        (hits) => {
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);
           expect(hits).toEqual(mockSearchSource._stubHits.slice(0, 3));
         }
@@ -105,7 +110,7 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 6).then(
-        (hits: EsHitRecordList) => {
+        (hits) => {
           const intervals: Timestamp[] = mockSearchSource.setField.args
             .filter(([property]: string) => property === 'query')
             .map(([, { query }]: [string, { query: Query }]) =>
@@ -135,7 +140,7 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_1000, MS_PER_DAY * 1000, '_doc', 0, 3).then(
-        (hits: EsHitRecordList) => {
+        (hits) => {
           const intervals: Timestamp[] = mockSearchSource.setField.args
             .filter(([property]: string) => property === 'query')
             .map(([, { query }]: [string, { query: Query }]) => {
@@ -160,11 +165,9 @@ describe('context predecessors', function () {
     });
 
     it('should return an empty array when no hits were found', function () {
-      return fetchPredecessors(ANCHOR_TIMESTAMP_3, MS_PER_DAY * 3, '_doc', 0, 3).then(
-        (hits: EsHitRecordList) => {
-          expect(hits).toEqual([]);
-        }
-      );
+      return fetchPredecessors(ANCHOR_TIMESTAMP_3, MS_PER_DAY * 3, '_doc', 0, 3).then((hits) => {
+        expect(hits).toEqual([]);
+      });
     });
 
     it('should configure the SearchSource to not inherit from the implicit root', function () {
@@ -200,17 +203,20 @@ describe('context predecessors', function () {
       } as unknown as DataPublicPluginStart;
 
       fetchPredecessors = (timeValIso, timeValNr, tieBreakerField, tieBreakerValue, size = 10) => {
-        const anchor = {
-          _source: {
-            [indexPattern.timeFieldName!]: timeValIso,
-          },
-          sort: [timeValNr, tieBreakerValue],
-        };
+        const anchor = buildDataRecord(
+          {
+            _source: {
+              [indexPattern.timeFieldName!]: timeValIso,
+            },
+            sort: [timeValNr, tieBreakerValue],
+          } as EsHitRecord,
+          indexPattern
+        );
 
         return fetchSurroundingDocs(
           SurrDocType.PREDECESSORS,
           indexPattern,
-          anchor as EsHitRecord,
+          anchor,
           tieBreakerField,
           SortDirection.desc,
           size,
@@ -231,7 +237,7 @@ describe('context predecessors', function () {
       ];
 
       return fetchPredecessors(ANCHOR_TIMESTAMP_3000, MS_PER_DAY * 3000, '_doc', 0, 3).then(
-        (hits: EsHitRecordList) => {
+        (hits) => {
           const setFieldsSpy = mockSearchSource.setField.withArgs('fields');
           const removeFieldsSpy = mockSearchSource.removeField.withArgs('fieldsFromSource');
           expect(mockSearchSource.fetch$.calledOnce).toBe(true);

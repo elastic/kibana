@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, each } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { ReactWrapper } from 'enzyme';
 import { findTestSubject } from '@elastic/eui/lib/test';
 // @ts-expect-error
@@ -23,17 +23,15 @@ import { DiscoverSidebarComponent as DiscoverSidebar } from './discover_sidebar'
 import { discoverServiceMock as mockDiscoverServices } from '../../../../__mocks__/services';
 import { stubLogstashIndexPattern } from '@kbn/data-plugin/common/stubs';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
-import { ElasticSearchHit } from '../../../../types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { BehaviorSubject } from 'rxjs';
-import { FetchStatus } from '../../../types';
+import { EsHitRecord, FetchStatus } from '../../../types';
 import { AvailableFields$ } from '../../utils/use_saved_search';
+import { buildDataRecord } from '../../utils/fetch_all';
 
 function getCompProps(): DiscoverSidebarProps {
   const indexPattern = stubLogstashIndexPattern;
-  const hits = each(cloneDeep(realHits), (hit) =>
-    flattenHit(hit, indexPattern)
-  ) as unknown as ElasticSearchHit[];
+  const hits = cloneDeep(realHits).map((hit: EsHitRecord) => buildDataRecord(hit, indexPattern));
 
   const indexPatternList = [
     { id: '0', attributes: { title: 'b' } } as SavedObject<DataViewAttributes>,

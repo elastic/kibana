@@ -10,8 +10,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { indexPatternMock as dataViewMock } from '../__mocks__/index_pattern';
 import { formatHit } from './format_hit';
 import { discoverServiceMock } from '../__mocks__/services';
+import { DataDocumentMsgResultDoc } from '../application/main/utils/use_saved_search';
+import { buildDataRecord } from '../application/main/utils/fetch_all';
 
 describe('formatHit', () => {
+  let row: DataDocumentMsgResultDoc;
   let hit: estypes.SearchHit;
   beforeEach(() => {
     hit = {
@@ -24,6 +27,7 @@ describe('formatHit', () => {
         bytes: [123],
       },
     };
+    row = buildDataRecord(hit, dataViewMock);
     (dataViewMock.getFormatterForField as jest.Mock).mockReturnValue({
       convert: (value: unknown) => `formatted:${value}`,
     });
@@ -35,7 +39,8 @@ describe('formatHit', () => {
 
   it('formats a document as expected', () => {
     const formatted = formatHit(
-      hit,
+      row.raw,
+      row.flattened,
       dataViewMock,
       ['message', 'extension', 'object.value'],
       220,
@@ -52,7 +57,8 @@ describe('formatHit', () => {
 
   it('orders highlighted fields first', () => {
     const formatted = formatHit(
-      { ...hit, highlight: { message: ['%%'] } },
+      { ...row.raw, highlight: { message: ['%%'] } },
+      row.flattened,
       dataViewMock,
       ['message', 'extension', 'object.value'],
       220,
@@ -69,7 +75,8 @@ describe('formatHit', () => {
 
   it('only limits count of pairs based on advanced setting', () => {
     const formatted = formatHit(
-      hit,
+      row.raw,
+      row.flattened,
       dataViewMock,
       ['message', 'extension', 'object.value'],
       2,
@@ -84,7 +91,8 @@ describe('formatHit', () => {
 
   it('should not include fields not mentioned in fieldsToShow', () => {
     const formatted = formatHit(
-      hit,
+      row.raw,
+      row.flattened,
       dataViewMock,
       ['message', 'object.value'],
       220,
@@ -100,7 +108,8 @@ describe('formatHit', () => {
 
   it('should filter fields based on their real name not displayName', () => {
     const formatted = formatHit(
-      hit,
+      row.raw,
+      row.flattened,
       dataViewMock,
       ['bytes'],
       220,

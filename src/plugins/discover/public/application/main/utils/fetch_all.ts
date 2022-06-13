@@ -28,6 +28,7 @@ import { AppState } from '../services/discover_state';
 import { EsHitRecord, FetchStatus } from '../../types';
 import {
   DataCharts$,
+  DataDocumentMsgResultDoc,
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
@@ -48,7 +49,11 @@ export interface FetchDeps {
   useNewFieldsApi: boolean;
 }
 
-export function buildDataRecord(doc: EsHitRecord, dataView: DataView, isAnchor?: boolean) {
+export function buildDataRecord(
+  doc: EsHitRecord,
+  dataView?: DataView,
+  isAnchor?: boolean
+): DataDocumentMsgResultDoc {
   return {
     id: getDocId(doc),
     raw: doc,

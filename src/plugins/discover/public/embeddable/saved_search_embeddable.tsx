@@ -44,7 +44,8 @@ import { SortOrder } from '../components/doc_table/components/table_header/helpe
 import { VIEW_MODE } from '../components/view_mode_toggle';
 import { updateSearchSource } from './utils/update_search_source';
 import { FieldStatisticsTable } from '../application/main/components/field_stats_table';
-import { ElasticSearchHit } from '../types';
+import { DataDocumentMsgResultDoc } from '../application/main/utils/use_saved_search';
+import { buildDataRecord } from '../application/main/utils/fetch_all';
 
 export type SearchProps = Partial<DiscoverGridProps> &
   Partial<DocTableProps> & {
@@ -53,9 +54,8 @@ export type SearchProps = Partial<DiscoverGridProps> &
     sharedItemTitle?: string;
     inspectorAdapters?: Adapters;
     services: DiscoverServices;
-
     filter?: (field: DataViewField, value: string[], operator: string) => void;
-    hits?: ElasticSearchHit[];
+    hits?: DataDocumentMsgResultDoc[];
     totalHitCount?: number;
     onMoveColumn?: (column: string, index: number) => void;
     onUpdateRowHeight?: (rowHeight?: number) => void;
@@ -201,7 +201,9 @@ export class SavedSearchEmbeddable
       );
       this.updateOutput({ loading: false, error: undefined });
 
-      this.searchProps!.rows = resp.hits.hits;
+      this.searchProps!.rows = resp.hits.hits.map((hit) =>
+        buildDataRecord(hit, this.searchProps!.indexPattern)
+      );
       this.searchProps!.totalHitCount = resp.hits.total as number;
       this.searchProps!.isLoading = false;
     } catch (error) {

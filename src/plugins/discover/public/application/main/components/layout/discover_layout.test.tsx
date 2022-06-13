@@ -32,10 +32,10 @@ import { FetchStatus } from '../../../types';
 import { RequestAdapter } from '@kbn/inspector-plugin';
 import { Chart } from '../chart/point_series';
 import { DiscoverSidebar } from '../sidebar/discover_sidebar';
-import { ElasticSearchHit } from '../../../../types';
 import { LocalStorageMock } from '../../../../__mocks__/local_storage_mock';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
+import { buildDataRecord } from '../../utils/fetch_all';
 
 setHeaderActionMenuMounter(jest.fn());
 
@@ -62,7 +62,7 @@ function mountComponent(indexPattern: DataView, prevSidebarClosed?: boolean) {
 
   const documents$ = new BehaviorSubject({
     fetchStatus: FetchStatus.COMPLETE,
-    result: esHits as ElasticSearchHit[],
+    result: esHits.map((esHit) => buildDataRecord(esHit, indexPattern)),
   }) as DataDocuments$;
 
   const availableFields$ = new BehaviorSubject({

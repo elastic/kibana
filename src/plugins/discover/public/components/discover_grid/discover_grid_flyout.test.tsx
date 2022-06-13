@@ -20,6 +20,7 @@ import { indexPatternWithTimefieldMock } from '../../__mocks__/index_pattern_wit
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ElasticSearchHit } from '../../types';
+import { buildDataRecord } from '../../application/main/utils/fetch_all';
 
 describe('Discover flyout', function () {
   setDocViewsRegistry(new DocViewsRegistry());
@@ -40,11 +41,18 @@ describe('Discover flyout', function () {
       history: () => ({ location: {} }),
     } as unknown as DiscoverServices;
 
+    const hit = buildDataRecord(
+      hitIndex ? esHits[hitIndex] : (esHits[0] as ElasticSearchHit),
+      indexPatternMock
+    );
+
     const props = {
       columns: ['date'],
       indexPattern: indexPattern || indexPatternMock,
-      hit: hitIndex ? esHits[hitIndex] : esHits[0],
-      hits: hits || esHits,
+      hit,
+      hits: (hits || esHits).map((entry: ElasticSearchHit) =>
+        buildDataRecord(entry, indexPattern || indexPatternMock)
+      ),
       onAddColumn: jest.fn(),
       onClose,
       onFilter: jest.fn(),

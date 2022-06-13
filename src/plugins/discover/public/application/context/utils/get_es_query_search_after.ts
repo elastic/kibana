@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
-
 import { SurrDocType } from '../services/context';
-
 import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
 
 /**
@@ -30,23 +28,24 @@ export function getEsQuerySearchAfter(
     const afterTimeRecIdx =
       type === SurrDocType.SUCCESSORS && documents.length ? documents.length - 1 : 0;
     const afterTimeDoc = documents[afterTimeRecIdx];
-    let afterTimeValue = afterTimeDoc.raw.sort[0] as string | number;
+    const afterTimeDocRaw = afterTimeDoc.raw;
+    let afterTimeValue = afterTimeDocRaw.sort?.[0] as string | number;
     if (nanoSeconds) {
       afterTimeValue = useNewFieldsApi
-        ? afterTimeDoc.raw.fields[timeFieldName][0]
-        : afterTimeDoc.raw._source?.[timeFieldName];
+        ? afterTimeDocRaw.fields?.[timeFieldName][0]
+        : ((afterTimeDocRaw._source as Record<string, unknown>)?.[timeFieldName] as string);
     }
-    return [afterTimeValue, afterTimeDoc.raw.sort[1] as string | number];
+    return [afterTimeValue, afterTimeDoc.raw.sort?.[1] as string | number];
   }
   // if data_nanos adapt timestamp value for sorting, since numeric value was rounded by browser
   // ES search_after also works when number is provided as string
   const searchAfter = new Array(2) as EsQuerySearchAfter;
-  searchAfter[0] = anchor.raw.sort[0] as string | number;
+  searchAfter[0] = anchor.raw.sort?.[0] as string | number;
   if (nanoSeconds) {
     searchAfter[0] = useNewFieldsApi
-      ? anchor.raw.fields[timeFieldName][0]
-      : anchor.raw._source?.[timeFieldName];
+      ? anchor.raw.fields?.[timeFieldName][0]
+      : (anchor.raw._source as Record<string, unknown>)?.[timeFieldName];
   }
-  searchAfter[1] = anchor.raw.sort[1] as string | number;
+  searchAfter[1] = anchor.raw.sort?.[1] as string | number;
   return searchAfter;
 }
