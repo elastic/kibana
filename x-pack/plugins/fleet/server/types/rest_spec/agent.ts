@@ -127,7 +127,8 @@ export const UpdateAgentRequestSchema = {
     agentId: schema.string(),
   }),
   body: schema.object({
-    user_provided_metadata: schema.recordOf(schema.string(), schema.any()),
+    user_provided_metadata: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    tags: schema.maybe(schema.arrayOf(schema.string())),
   }),
 };
 

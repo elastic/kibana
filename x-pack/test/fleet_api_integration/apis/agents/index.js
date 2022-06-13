@@ -15,5 +15,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./current_upgrades'));
     loadTestFile(require.resolve('./reassign'));
     loadTestFile(require.resolve('./status'));
+    loadTestFile(require.resolve('./update'));
   });
 }
