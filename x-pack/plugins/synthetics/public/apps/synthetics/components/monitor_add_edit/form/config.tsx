@@ -16,6 +16,7 @@ import {
   EuiCode,
   EuiComboBox,
   EuiComboBoxOptionOption,
+  EuiComboBoxProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFieldText,
@@ -576,7 +577,7 @@ export const FIELD: Record<string, FieldMeta> = {
     fieldKey: ConfigKey.LOCATIONS,
     required: true,
     controlled: true,
-    component: EuiComboBox,
+    component: EuiComboBox as React.ComponentType<EuiComboBoxProps<string>>,
     label: i18n.translate('xpack.synthetics.monitorConfig.locations.label', {
       defaultMessage: 'Locations',
     }),
@@ -1021,7 +1022,7 @@ export const FIELD: Record<string, FieldMeta> = {
   },
   [ConfigKey.TLS_VERSION]: {
     fieldKey: ConfigKey.TLS_VERSION,
-    component: EuiComboBox,
+    component: EuiComboBox as React.ComponentType<EuiComboBoxProps<string>>,
     label: i18n.translate('xpack.synthetics.monitorConfig.tlsVersion.label', {
       defaultMessage: 'Supported TLS protocols',
     }),
