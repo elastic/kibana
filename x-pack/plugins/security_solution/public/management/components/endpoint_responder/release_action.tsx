@@ -96,7 +96,7 @@ export const ReleaseActionResult = memo<
       >
         <FormattedMessage
           id="xpack.securitySolution.endpointResponseActions.release.errorMessage"
-          defaultMessage="The following error were encountered: {errors}"
+          defaultMessage="The following errors were encountered: {errors}"
           values={{ errors: completedActionDetails.errors.join(' | ') }}
         />
       </ResultComponent>
