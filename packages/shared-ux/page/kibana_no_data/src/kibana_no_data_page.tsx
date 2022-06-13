@@ -51,12 +51,12 @@ export const KibanaNoDataPage = ({ onDataViewCreated, noDataConfig }: Props) => 
     return <EuiLoadingElastic css={{ margin: 'auto' }} size="xxl" />;
   }
 
-  if (!dataExists) {
-    return <NoDataConfigPage noDataConfig={noDataConfig} />;
+  if (!hasUserDataViews && dataExists) {
+    return <NoDataViewsPrompt onDataViewCreated={onDataViewCreated} />;
   }
 
-  if (!hasUserDataViews) {
-    return <NoDataViewsPrompt onDataViewCreated={onDataViewCreated} />;
+  if (!dataExists) {
+    return <NoDataConfigPage noDataConfig={noDataConfig} />;
   }
 
   return null;
