@@ -7,10 +7,12 @@
 
 import { useContext, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { useRouteMatch } from 'react-router-dom';
 import { indexStatusAction } from '../../../state/actions';
 import { indexStatusSelector, selectDynamicSettings } from '../../../state/selectors';
 import { UptimeRefreshContext } from '../../../contexts';
 import { getDynamicSettings } from '../../../state/actions/dynamic_settings';
+import { MONITOR_ADD_ROUTE, MONITOR_EDIT_ROUTE } from '../../../../../common/constants';
 
 export const useHasData = () => {
   const { loading, error, data } = useSelector(indexStatusSelector);
@@ -20,9 +22,16 @@ export const useHasData = () => {
 
   const dispatch = useDispatch();
 
+  const isAddRoute = useRouteMatch(MONITOR_ADD_ROUTE);
+  const isEditRoute = useRouteMatch(MONITOR_EDIT_ROUTE);
+
+  const skippedRoute = isAddRoute?.isExact || isEditRoute?.isExact;
+
   useEffect(() => {
-    dispatch(indexStatusAction.get());
-  }, [dispatch, lastRefresh]);
+    if (!skippedRoute) {
+      dispatch(indexStatusAction.get());
+    }
+  }, [dispatch, lastRefresh, skippedRoute]);
 
   useEffect(() => {
     dispatch(getDynamicSettings());
