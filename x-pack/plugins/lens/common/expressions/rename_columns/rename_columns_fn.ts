@@ -25,19 +25,18 @@ export const renameColumnFn: RenameColumnsExpressionFunction['fn'] = (
   data,
   { idMap: encodedIdMap }
 ) => {
-  const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn>;
+  const idMap = JSON.parse(encodedIdMap) as Record<string, OriginalColumn[]>;
 
   return {
     ...data,
     rows: data.rows.map((row) => {
       const mappedRow: Record<string, unknown> = {};
-      Object.entries(idMap).forEach(([fromId, toId]) => {
-        mappedRow[toId.id] = row[fromId];
-      });
 
       Object.entries(row).forEach(([id, value]) => {
         if (id in idMap) {
-          mappedRow[idMap[id].id] = value;
+          idMap[id].forEach(({ id: originalId }) => {
+            mappedRow[originalId] = value;
+          });
         } else {
           mappedRow[id] = value;
         }
@@ -45,18 +44,20 @@ export const renameColumnFn: RenameColumnsExpressionFunction['fn'] = (
 
       return mappedRow;
     }),
-    columns: data.columns.map((column) => {
-      const mappedItem = idMap[column.id];
+    columns: data.columns
+      .map((column) => {
+        const originalColumns = idMap[column.id];
 
-      if (!mappedItem) {
-        return column;
-      }
+        if (!originalColumns) {
+          return column;
+        }
 
-      return {
-        ...column,
-        id: mappedItem.id,
-        name: getColumnName(mappedItem, column),
-      };
-    }),
+        return originalColumns.map((originalColumn) => ({
+          ...column,
+          id: originalColumn.id,
+          name: getColumnName(originalColumn, column),
+        }));
+      })
+      .flat(),
   };
 };
