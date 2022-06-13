@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, MouseEventHandler, useCallback, useRef, useState } from 'react';
-import { CommonProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import React, { memo, MouseEventHandler, useCallback, useMemo, useRef, useState } from 'react';
+import { CommonProps, EuiFlexGroup, EuiFlexItem, useResizeObserver } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
 import { InputAreaPopover } from './components/input_area_popover';
@@ -64,11 +64,19 @@ export const CommandInput = memo<CommandInputProps>(
     const dispatch = useConsoleStateDispatch();
     const [textEntered, setTextEntered] = useState<string>('');
     const [isKeyInputBeingCaptured, setIsKeyInputBeingCaptured] = useState(false);
-    const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
-    const textDisplayRef = useRef<HTMLDivElement | null>(null);
     const getTestId = useTestIdGenerator(useDataTestSubj());
 
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const _focusRef: KeyCaptureProps['focusRef'] = useRef(null);
+    const textDisplayRef = useRef<HTMLDivElement | null>(null);
+
+    const dimensions = useResizeObserver(containerRef.current);
+
     const keyCaptureFocusRef = focusRef || _focusRef;
+
+    const popoverWidth = useMemo(() => {
+      return dimensions.width ? `${dimensions.width}px` : '92vw';
+    }, [dimensions.width]);
 
     const handleKeyCaptureOnStateChange = useCallback<
       NonNullable<KeyCaptureProps['onStateChange']>
@@ -124,8 +132,8 @@ export const CommandInput = memo<CommandInputProps>(
     );
 
     return (
-      <InputAreaPopover>
-        <CommandInputContainer {...commonProps} onClick={handleTypingAreaClick}>
+      <InputAreaPopover width={popoverWidth}>
+        <CommandInputContainer {...commonProps} onClick={handleTypingAreaClick} ref={containerRef}>
           <EuiFlexGroup
             wrap={true}
             responsive={false}

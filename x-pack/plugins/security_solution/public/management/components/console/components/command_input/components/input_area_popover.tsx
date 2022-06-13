@@ -5,20 +5,29 @@
  * 2.0.
  */
 
-import React, { memo, ReactElement, useCallback } from 'react';
+import React, { CSSProperties, memo, ReactElement, useCallback, useMemo } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import { CommandInputHistory } from './command_input_history';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
 
 export interface InputAreaPopoverProps {
+  /** Should be the Console's input area */
   children: ReactElement;
+  /** Width should match that of the entire input area of the console */
+  width?: string;
 }
 
-export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children }) => {
+export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children, width = '92vw' }) => {
   const show = useWithInputShowPopover();
   const isPopoverOpen = show !== undefined;
   const dispatch = useConsoleStateDispatch();
+
+  const popoverPanelStyles = useMemo<CSSProperties>(() => {
+    return {
+      width,
+    };
+  }, [width]);
 
   const handlePopoverOnClose = useCallback(() => {
     dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
@@ -29,6 +38,7 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children }) => {
       button={children}
       closePopover={handlePopoverOnClose}
       isOpen={isPopoverOpen}
+      panelStyle={popoverPanelStyles}
       anchorPosition="upLeft"
       hasArrow={false}
       display="block"
