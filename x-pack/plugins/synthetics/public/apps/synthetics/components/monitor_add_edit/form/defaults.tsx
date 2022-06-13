@@ -12,38 +12,46 @@ import {
   FormMonitorType,
   SyntheticsMonitor,
   BrowserFields,
-  HTTPFields,
   TLSFields,
 } from '../types';
 
-export const DEFAULT_FORM_FIELDS: Record<FormMonitorType, Record<string, any>> = {
-  [FormMonitorType.MULTISTEP]: {
-    ...DEFAULT_FIELDS[DataStream.BROWSER],
-    'source.inline': {
-      type: 'recorder',
-      script: '',
-      fileName: '',
+export const getDefaultFormFields = (
+  spaceId: string = 'default'
+): Record<FormMonitorType, Record<string, any>> => {
+  return {
+    [FormMonitorType.MULTISTEP]: {
+      ...DEFAULT_FIELDS[DataStream.BROWSER],
+      'source.inline': {
+        type: 'recorder',
+        script: '',
+        fileName: '',
+      },
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
+      [ConfigKey.NAMESPACE]: spaceId,
     },
-    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
-  },
-  [FormMonitorType.SINGLE]: {
-    ...DEFAULT_FIELDS[DataStream.BROWSER],
-    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
-  },
-  [FormMonitorType.HTTP]: {
-    ...DEFAULT_FIELDS[DataStream.HTTP],
-    isTLSEnabled: false,
-    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
-  },
-  [FormMonitorType.TCP]: {
-    ...DEFAULT_FIELDS[DataStream.TCP],
-    isTLSEnabled: false,
-    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
-  },
-  [FormMonitorType.ICMP]: {
-    ...DEFAULT_FIELDS[DataStream.ICMP],
-    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
-  },
+    [FormMonitorType.SINGLE]: {
+      ...DEFAULT_FIELDS[DataStream.BROWSER],
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
+      [ConfigKey.NAMESPACE]: spaceId,
+    },
+    [FormMonitorType.HTTP]: {
+      ...DEFAULT_FIELDS[DataStream.HTTP],
+      isTLSEnabled: false,
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
+      [ConfigKey.NAMESPACE]: spaceId,
+    },
+    [FormMonitorType.TCP]: {
+      ...DEFAULT_FIELDS[DataStream.TCP],
+      isTLSEnabled: false,
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
+      [ConfigKey.NAMESPACE]: spaceId,
+    },
+    [FormMonitorType.ICMP]: {
+      ...DEFAULT_FIELDS[DataStream.ICMP],
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
+      [ConfigKey.NAMESPACE]: spaceId,
+    },
+  };
 };
 
 export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {

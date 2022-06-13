@@ -13,6 +13,7 @@ import {
   ControllerFieldState,
   useFormContext,
 } from 'react-hook-form';
+import { useKibanaSpace } from '../hooks/use_kibana_space';
 import { selectServiceLocationsState } from '../../../state';
 import { FieldMeta } from './config';
 
@@ -48,6 +49,7 @@ export const ControlledField = ({
   let hook: Function = noop;
   let hookProps;
   const { locations } = useSelector(selectServiceLocationsState);
+  const { space } = useKibanaSpace();
   if (customHook) {
     hookProps = customHook(field.value);
     hook = hookProps.func;
@@ -62,6 +64,7 @@ export const ControlledField = ({
         locations,
         dependencies: dependenciesValues,
         dependenciesFieldMeta,
+        space: space?.id,
       })
     : {};
   const isInvalid = hookResult || Boolean(fieldState.error);

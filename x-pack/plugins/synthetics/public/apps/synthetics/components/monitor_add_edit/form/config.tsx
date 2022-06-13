@@ -45,7 +45,7 @@ import { RequestBodyField } from '../fields/request_body_field';
 import { ResponseBodyIndexField } from '../fields/index_response_body_field';
 import { ComboBox } from '../fields/combo_box';
 import { SourceField } from '../fields/source_field';
-import { DEFAULT_FORM_FIELDS } from './defaults';
+import { getDefaultFormFields } from './defaults';
 import { StepFields } from '../steps/step_fields';
 import { validate, validateHeaders, WHOLE_NUMBERS_ONLY, FLOATS_ONLY } from './validation';
 
@@ -62,6 +62,7 @@ export interface FieldMeta {
     locations: ServiceLocations;
     dependencies: unknown[];
     dependenciesFieldMeta: Record<string, ControllerFieldState>;
+    space?: string;
   }) => Record<string, any>;
   controlled?: boolean;
   required?: boolean;
@@ -325,9 +326,9 @@ export const FIELD: Record<string, FieldMeta> = {
     component: MonitorTypeRadioGroup,
     ariaLabel: 'Monitor Type',
     controlled: true,
-    props: ({ field, reset }) => ({
+    props: ({ field, reset, space }) => ({
       onChange: (_: string, monitorType: FormMonitorType) => {
-        const defaultFields = DEFAULT_FORM_FIELDS[monitorType];
+        const defaultFields = getDefaultFormFields(space)[monitorType];
         reset(defaultFields);
       },
       selectedOption: field?.value,

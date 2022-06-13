@@ -8,14 +8,16 @@
 import React, { useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useKibanaSpace } from './hooks/use_kibana_space';
 import { getServiceLocations } from '../../state';
 import { MonitorSteps } from './steps';
 import { MonitorForm } from './form';
 import { ADD_MONITOR_STEPS } from './form/config';
 import { useMonitorAddEditBreadcrumbs } from './use_breadcrumbs';
 
-export const MonitorAddPage: React.FC = () => {
+export const MonitorAddPage = () => {
   useTrackPageview({ app: 'synthetics', path: 'add-monitor' });
+  const { space, loading, error } = useKibanaSpace();
   useTrackPageview({ app: 'synthetics', path: 'add-monitor', delay: 15000 });
   useMonitorAddEditBreadcrumbs();
   const dispatch = useDispatch();
@@ -24,9 +26,9 @@ export const MonitorAddPage: React.FC = () => {
     dispatch(getServiceLocations());
   }, [dispatch]);
 
-  return (
-    <MonitorForm>
+  return !loading && !error ? (
+    <MonitorForm space={space?.id}>
       <MonitorSteps stepMap={ADD_MONITOR_STEPS} />
     </MonitorForm>
-  );
+  ) : null;
 };

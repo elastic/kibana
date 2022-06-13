@@ -40,6 +40,7 @@ import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesUiStart } from '@kbn/cases-plugin/public';
 import { CloudSetup } from '@kbn/cloud-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { PLUGIN } from '../common/constants/plugin';
 import { MONITORS_ROUTE } from '../common/constants/ui';
 import {
@@ -74,6 +75,7 @@ export interface ClientPluginsStart {
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
   dataViews: DataViewsPublicPluginStart;
+  spaces: SpacesPluginStart;
 }
 
 export interface UptimePluginServices extends Partial<CoreStart> {
@@ -187,6 +189,8 @@ export class UptimePlugin
       ],
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
+        console.warn('mount plugins', plugins);
+        console.warn('mount start plugins', corePlugins);
 
         const { renderApp } = await import('./legacy_uptime/app/render_app');
         return renderApp(coreStart, plugins, corePlugins, params, this.initContext.env.mode.dev);
@@ -218,6 +222,7 @@ export class UptimePlugin
   }
 
   public start(start: CoreStart, plugins: ClientPluginsStart): void {
+    console.warn('plugins1', plugins);
     if (plugins.fleet) {
       const { registerExtension } = plugins.fleet;
 

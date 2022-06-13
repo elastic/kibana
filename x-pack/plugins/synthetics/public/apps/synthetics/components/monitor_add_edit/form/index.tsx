@@ -10,20 +10,21 @@ import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useFormWrapped } from './use_form_wrapped';
 import { FormMonitorType, SyntheticsMonitor } from '../types';
-import { DEFAULT_FORM_FIELDS, formatDefaultFormValues } from './defaults';
+import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
 import { Disclaimer } from './disclaimer';
 
-export const MonitorForm: React.FC<{ defaultValues?: SyntheticsMonitor }> = ({
+export const MonitorForm: React.FC<{ defaultValues?: SyntheticsMonitor; space?: string }> = ({
   children,
   defaultValues,
+  space,
 }) => {
   const methods = useFormWrapped({
     mode: 'onTouched',
     reValidateMode: 'onChange',
     defaultValues:
       formatDefaultFormValues(defaultValues as SyntheticsMonitor) ||
-      DEFAULT_FORM_FIELDS[FormMonitorType.MULTISTEP],
+      getDefaultFormFields(space)[FormMonitorType.MULTISTEP],
     shouldFocusError: true,
   });
 
