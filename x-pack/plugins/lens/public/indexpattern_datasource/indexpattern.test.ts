@@ -491,10 +491,10 @@ describe('IndexPattern Data Source', () => {
             Object {
               "arguments": Object {
                 "idMap": Array [
-                  "{\\"col-0-0\\":{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"},\\"col-1-1\\":{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}}",
+                  "{\\"col-0-0\\":[{\\"label\\":\\"Count of records\\",\\"dataType\\":\\"number\\",\\"isBucketed\\":false,\\"sourceField\\":\\"___records___\\",\\"operationType\\":\\"count\\",\\"id\\":\\"col1\\"}],\\"col-1-1\\":[{\\"label\\":\\"Date\\",\\"dataType\\":\\"date\\",\\"isBucketed\\":true,\\"operationType\\":\\"date_histogram\\",\\"sourceField\\":\\"timestamp\\",\\"params\\":{\\"interval\\":\\"1d\\"},\\"id\\":\\"col2\\"}]}",
                 ],
               },
-              "function": "lens_rename_columns",
+              "function": "lens_map_to_original_columns",
               "type": "function",
             },
           ],
@@ -905,9 +905,9 @@ describe('IndexPattern Data Source', () => {
       const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
       expect(ast.chain[1].arguments.metricsAtAllLevels).toEqual([false]);
       expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
-        'col-0-0': expect.objectContaining({ id: 'bucket1' }),
-        'col-1-1': expect.objectContaining({ id: 'bucket2' }),
-        'col-2-2': expect.objectContaining({ id: 'metric' }),
+        'col-0-0': [expect.objectContaining({ id: 'bucket1' })],
+        'col-1-1': [expect.objectContaining({ id: 'bucket2' })],
+        'col-2-2': [expect.objectContaining({ id: 'metric' })],
       });
     });
 
@@ -1026,10 +1026,13 @@ describe('IndexPattern Data Source', () => {
         const state = enrichBaseState(queryBaseState);
 
         const ast = indexPatternDatasource.toExpression(state, 'first') as Ast;
+
         expect(JSON.parse(ast.chain[2].arguments.idMap[0] as string)).toEqual({
-          'col-0-0': expect.objectContaining({
-            id: 'col1',
-          }),
+          'col-0-0': [
+            expect.objectContaining({
+              id: 'col1',
+            }),
+          ],
         });
       });
 

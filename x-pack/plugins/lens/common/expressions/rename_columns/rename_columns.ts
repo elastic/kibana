@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { RenameColumnsExpressionFunction } from './types';
+import type { MapToOriginalColumnsExpressionFunction } from './types';
 
-export const renameColumns: RenameColumnsExpressionFunction = {
-  name: 'lens_restore_original_column_ids',
+export const renameColumns: MapToOriginalColumnsExpressionFunction = {
+  name: 'lens_map_to_original_columns',
   type: 'datatable',
   help: i18n.translate('xpack.lens.functions.renameColumns.help', {
     defaultMessage: 'A helper to rename the columns of a datatable',
@@ -26,7 +26,7 @@ export const renameColumns: RenameColumnsExpressionFunction = {
   inputTypes: ['datatable'],
   async fn(...args) {
     /** Build optimization: prevent adding extra code into initial bundle **/
-    const { renameColumnFn } = await import('./rename_columns_fn');
-    return renameColumnFn(...args);
+    const { mapToOriginalColumns } = await import('./rename_columns_fn');
+    return mapToOriginalColumns(...args);
   },
 };
