@@ -91,6 +91,7 @@ import {
   aggFilteredMetric,
   aggSinglePercentile,
   aggSinglePercentileRank,
+  AggConfigsOptions,
 } from '.';
 import { AggParamsSampler } from './buckets/sampler';
 import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
@@ -100,7 +101,7 @@ import { aggTopMetrics } from './metrics/top_metrics_fn';
 import { AggParamsCount } from './metrics';
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
-export type { CreateAggConfigParams, IAggConfigs } from './agg_configs';
+export type { CreateAggConfigParams, IAggConfigs, AggConfigsOptions } from './agg_configs';
 export type { IAggType } from './agg_type';
 export type { AggParam, AggParamOption } from './agg_params';
 export type { IFieldParamType } from './param_types';
@@ -116,7 +117,8 @@ export interface AggsCommonStart {
   calculateAutoTimeExpression: ReturnType<typeof getCalculateAutoTimeExpression>;
   createAggConfigs: (
     indexPattern: DataView,
-    configStates?: CreateAggConfigParams[]
+    configStates?: CreateAggConfigParams[],
+    options?: Partial<AggConfigsOptions>
   ) => InstanceType<typeof AggConfigs>;
   types: ReturnType<AggTypesRegistry['start']>;
 }
