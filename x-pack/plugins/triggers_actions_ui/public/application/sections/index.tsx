@@ -47,3 +47,6 @@ export const RuleEventLogList = suspendedComponentWithProps(
 export const RulesList = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rules_list'))
 );
+export const RulesListNotifyBadge = suspendedComponentWithProps(
+  lazy(() => import('./rules_list/components/rules_list_notify_badge'))
+);
