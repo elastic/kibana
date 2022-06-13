@@ -8,53 +8,30 @@
 
 import React from 'react';
 import { EuiAvatar, EuiCard, EuiText, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+
+import { METRIC_TYPE } from '@kbn/analytics';
+
+import { getServices } from '../../kibana_services';
+
+import { i18nTexts, iconTypes, navigateOptions } from './constants';
+
 import './use_case_card.scss';
-
-const i18nTexts = {
-  search: {
-    title: i18n.translate('guidedOnboarding.gettingStarted.search.cardTitle', {
-      defaultMessage: 'Search my data',
-    }),
-    description: i18n.translate('guidedOnboarding.gettingStarted.search.cardDescription', {
-      defaultMessage:
-        'Create a search experience for your websites, applications, workplace content, or anything in between.',
-    }),
-  },
-  observability: {
-    title: i18n.translate('guidedOnboarding.gettingStarted.observability.cardTitle', {
-      defaultMessage: 'Monitor my infrastructure',
-    }),
-    description: i18n.translate('guidedOnboarding.gettingStarted.observability.cardDescription', {
-      defaultMessage:
-        'Monitor your infrastructure by consolidating your logs, metrics, and traces for end‑to‑end observability.',
-    }),
-  },
-  security: {
-    title: i18n.translate('guidedOnboarding.gettingStarted.security.cardTitle', {
-      defaultMessage: 'Protect my environment',
-    }),
-    description: i18n.translate('guidedOnboarding.gettingStarted.security.cardDescription', {
-      defaultMessage:
-        'Protect your environment by unifying SIEM, endpoint security, and cloud security to protect against threats.',
-    }),
-  },
-};
-
-const iconTypes = {
-  search: 'inspect',
-  observability: 'eye',
-  security: 'securitySignal',
-};
 
 type UseCase = 'search' | 'observability' | 'security';
 
-const onUseCaseSelection = (useCase: UseCase) => {
-  // TODO navigate to the correct solution landing page,
-  // activate a product tour (if applicable), send telemetry
-};
-
 export const UseCaseCard = ({ useCase }: { useCase: UseCase }) => {
+  const { application, trackUiMetric } = getServices();
+
+  const onUseCaseSelection = () => {
+    // TODO telemetry for guided onboarding
+    trackUiMetric(METRIC_TYPE.CLICK, `guided_onboarding__use_case__${useCase}`);
+
+    localStorage.setItem(`guidedOnboarding.activeTour`, useCase);
+    application.navigateToApp(navigateOptions[useCase].appId, {
+      path: navigateOptions[useCase].path,
+    });
+  };
+
   return (
     <EuiCard
       display="subdued"
@@ -82,9 +59,7 @@ export const UseCaseCard = ({ useCase }: { useCase: UseCase }) => {
           <p>{i18nTexts[useCase].description}</p>
         </EuiText>
       }
-      onClick={() => {
-        onUseCaseSelection(useCase);
-      }}
+      onClick={onUseCaseSelection}
     />
   );
 };

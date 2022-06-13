@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -17,13 +17,42 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+
+import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 
-import './getting_started.scss';
+import { getServices } from '../../kibana_services';
 import { UseCaseCard } from './use_case_card';
 
+import './getting_started.scss';
+
 export const GettingStarted = () => {
+  const { application, trackUiMetric, chrome } = getServices();
+
+  useEffect(() => {
+    chrome.setBreadcrumbs([
+      {
+        // using # prevents a reloading of the whole app when clicking the breadcrumb
+        href: '#',
+        text: i18n.translate('home.breadcrumbs.homeTitle', { defaultMessage: 'Home' }),
+        // TODO telemetry for navigating away from getting started via breadcrumbs
+        onClick: () => {},
+      },
+      {
+        text: i18n.translate('home.breadcrumbs.gettingStartedTitle', {
+          defaultMessage: 'Getting Started',
+        }),
+      },
+    ]);
+  }, [chrome]);
+
+  const onSkip = () => {
+    // TODO telemetry for guided onboarding
+    trackUiMetric(METRIC_TYPE.CLICK, 'guided_onboarding__skipped');
+    application.navigateToApp('home');
+  };
   return (
     <KibanaPageTemplate template="empty">
       <EuiPanel className="gettingStarted__panel">
@@ -61,11 +90,7 @@ export const GettingStarted = () => {
         <EuiHorizontalRule />
         <EuiSpacer />
         <div className="eui-textCenter">
-          <EuiLink
-            onClick={() => {
-              // TODO navigate to home page and send telemetry data
-            }}
-          >
+          <EuiLink onClick={onSkip}>
             <FormattedMessage
               id="guidedOnboarding.gettingStarted.skip.buttonLabel"
               defaultMessage="I'd like to do something else (Skip)"
