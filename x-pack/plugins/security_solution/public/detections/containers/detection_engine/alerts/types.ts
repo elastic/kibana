@@ -46,6 +46,7 @@ export interface UpdateAlertStatusProps {
 export interface AlertsIndex {
   name: string;
   index_mapping_outdated: boolean;
+  indexExists: boolean;
 }
 
 export type CasesFromAlertsResponse = Array<{ id: string; title: string }>;

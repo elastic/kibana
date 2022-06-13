@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { transformError, getBootstrapIndexExists } from '@kbn/securitysolution-es-utils';
+import {
+  transformError,
+  getBootstrapIndexExists,
+  getIndexExists,
+} from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { DETECTION_ENGINE_INDEX_URL } from '../../../../../common/constants';
 
@@ -44,11 +48,14 @@ export const readIndexRoute = (
         const indexName = ruleDataService.getResourceName(`security.alerts-${spaceId}`);
 
         const index = siemClient.getSignalsIndex();
-        const indexExists = await getBootstrapIndexExists(
+        // const indexExists = await getBootstrapIndexExists(
+        //   context.core.elasticsearch.client.asInternalUser,
+        //   index
+        // );
+        const indexExists = await getIndexExists(
           context.core.elasticsearch.client.asInternalUser,
           index
         );
-
         if (indexExists) {
           let mappingOutdated: boolean | null = null;
           let aliasesOutdated: boolean | null = null;
