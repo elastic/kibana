@@ -123,10 +123,3 @@ export const RULE_EXECUTION_EVENTS_FETCH_FAILURE = i18n.translate(
     defaultMessage: 'Failed to fetch rule execution events',
   }
 );
-
-export const INSTALLED_INTEGRATIONS_FETCH_FAILURE = i18n.translate(
-  'xpack.securitySolution.containers.detectionEngine.installedIntegrationsFetchFailDescription',
-  {
-    defaultMessage: 'Failed to fetch installed integrations',
-  }
-);

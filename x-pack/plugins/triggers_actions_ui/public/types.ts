@@ -444,7 +444,7 @@ export interface AlertsTableConfigurationRegistry {
     body?: AlertTableFlyoutComponent;
     footer?: AlertTableFlyoutComponent;
   };
-  internalFlyout?: {
+  useInternalFlyout?: () => {
     header?: AlertTableFlyoutComponent;
     body?: AlertTableFlyoutComponent;
     footer?: AlertTableFlyoutComponent;
