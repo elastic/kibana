@@ -21,7 +21,9 @@ import {
   EuiFieldNumber,
   EuiFieldPassword,
   EuiSelect,
+  EuiSuperSelect,
   EuiSwitch,
+  EuiText,
   EuiLink,
   EuiTextArea,
 } from '@elastic/eui';
@@ -39,6 +41,7 @@ import {
   TLSVersion,
   VerificationMode,
 } from '../types';
+import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../constants';
 import { HeaderField } from '../fields/header_field';
 import { RequestBodyField } from '../fields/request_body_field';
 import { ResponseBodyIndexField } from '../fields/index_response_body_field';
@@ -62,6 +65,7 @@ export interface FieldMeta {
     dependencies: unknown[];
     dependenciesFieldMeta: Record<string, ControllerFieldState>;
     space?: string;
+    isEdit?: boolean;
   }) => Record<string, any>;
   controlled?: boolean;
   required?: boolean;
@@ -345,11 +349,11 @@ export const FIELD: Record<string, FieldMeta> = {
     helpText: 'For example, https://www.elastic.co.',
     controlled: true,
     dependencies: [ConfigKey.NAME],
-    props: ({ setValue, dependenciesFieldMeta }) => {
+    props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
       return {
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
           setValue(ConfigKey.URLS, event.target.value);
-          if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty) {
+          if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
             setValue(ConfigKey.NAME, event.target.value);
           }
         },
@@ -362,18 +366,54 @@ export const FIELD: Record<string, FieldMeta> = {
     component: EuiFieldText,
     label: 'URL',
     helpText: 'For example, your service endpoint.',
+    controlled: true,
+    dependencies: [ConfigKey.NAME],
+    props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
+      return {
+        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+          setValue(ConfigKey.URLS, event.target.value);
+          if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
+            setValue(ConfigKey.NAME, event.target.value);
+          }
+        },
+      };
+    },
   },
   [`${ConfigKey.HOSTS}__tcp`]: {
     fieldKey: ConfigKey.HOSTS,
     required: true,
     component: EuiFieldText,
     label: 'Host:Port',
+    controlled: true,
+    dependencies: [ConfigKey.NAME],
+    props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
+      return {
+        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+          setValue(ConfigKey.HOSTS, event.target.value);
+          if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
+            setValue(ConfigKey.NAME, event.target.value);
+          }
+        },
+      };
+    },
   },
   [`${ConfigKey.HOSTS}__icmp`]: {
     fieldKey: ConfigKey.HOSTS,
     required: true,
     component: EuiFieldText,
     label: 'Host',
+    controlled: true,
+    dependencies: [ConfigKey.NAME],
+    props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
+      return {
+        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+          setValue(ConfigKey.HOSTS, event.target.value);
+          if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty && !isEdit) {
+            setValue(ConfigKey.NAME, event.target.value);
+          }
+        },
+      };
+    },
   },
   [ConfigKey.NAME]: {
     fieldKey: ConfigKey.NAME,
@@ -853,6 +893,38 @@ export const FIELD: Record<string, FieldMeta> = {
       required: true,
     }),
   },
+  [ConfigKey.THROTTLING_CONFIG]: {
+    fieldKey: ConfigKey.THROTTLING_CONFIG,
+    component: EuiSuperSelect,
+    label: 'Connection profile',
+    required: true,
+    controlled: true,
+    helpText:
+      'Simulate network throttling (download, upload, latency). More options will be added in a future version.',
+    props: () => ({
+      options: [
+        {
+          value: DEFAULT_BROWSER_ADVANCED_FIELDS[ConfigKey.THROTTLING_CONFIG],
+          inputDisplay: (
+            <EuiFlexGroup alignItems="center" gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiText>Default</EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {'(5 Mbps, 3 Mbps, 20 ms)'}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        },
+      ],
+      disabled: true, // currently disabled through 1.0 until we define connection profiles
+    }),
+    validation: () => ({
+      required: true,
+    }),
+  },
 };
 
 const TLS_OPTIONS = {
@@ -960,7 +1032,12 @@ export const FIELD_CONFIG: FieldConfig = {
   },
   [FormMonitorType.MULTISTEP]: {
     step1: [FIELD[ConfigKey.FORM_MONITOR_TYPE]],
-    step2: [FIELD[ConfigKey.NAME], FIELD[ConfigKey.LOCATIONS], FIELD[ConfigKey.SCHEDULE]],
+    step2: [
+      FIELD[ConfigKey.NAME],
+      FIELD[ConfigKey.LOCATIONS],
+      FIELD[ConfigKey.SCHEDULE],
+      FIELD[ConfigKey.THROTTLING_CONFIG],
+    ],
     step3: [FIELD[ConfigKey.SOURCE_INLINE]],
     scriptEdit: [FIELD[`${ConfigKey.SOURCE_INLINE}__edit`]],
     advanced: [
@@ -983,6 +1060,7 @@ export const FIELD_CONFIG: FieldConfig = {
       FIELD[ConfigKey.NAME],
       FIELD[ConfigKey.LOCATIONS],
       FIELD[ConfigKey.SCHEDULE],
+      FIELD[ConfigKey.THROTTLING_CONFIG],
     ],
     advanced: [
       {

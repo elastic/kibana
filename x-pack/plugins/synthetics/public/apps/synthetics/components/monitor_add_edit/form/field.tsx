@@ -9,9 +9,8 @@ import { useSelector } from 'react-redux';
 import { Controller, useFormContext, FieldError, ControllerFieldState } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { selectServiceLocationsState } from '../../../state';
-import { useKibanaSpace } from '../hooks/use_kibana_space';
+import { useKibanaSpace, useIsEditFlow } from '../hooks';
 import { ControlledField } from './controlled_field';
-import { OptionalLabel } from '../fields/optional_label';
 import { FieldMeta } from './config';
 
 type Props = FieldMeta & { fieldError: FieldError };
@@ -37,6 +36,7 @@ export const Field = memo<Props>(
     const { register, watch, control, setValue, reset, getFieldState } = useFormContext();
     const { locations } = useSelector(selectServiceLocationsState);
     const { space } = useKibanaSpace();
+    const isEdit = useIsEditFlow();
     const [dependenciesFieldMeta, setDependenciesFieldMeta] = useState<
       Record<string, ControllerFieldState>
     >({});
@@ -72,7 +72,6 @@ export const Field = memo<Props>(
       'aria-label': ariaLabel,
       helpText,
       fullWidth: true,
-      labelAppend: !required ? <OptionalLabel /> : undefined,
     };
 
     return controlled ? (
@@ -121,6 +120,7 @@ export const Field = memo<Props>(
                 dependencies: dependenciesValues,
                 dependenciesFieldMeta,
                 space: space?.id,
+                isEdit,
               })
             : {})}
           isInvalid={Boolean(fieldError)}

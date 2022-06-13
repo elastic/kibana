@@ -27,11 +27,11 @@ export const MonitorEditPage: React.FC = () => {
     dispatch(getServiceLocations());
   }, [dispatch]);
 
-  const { data, status, error } = useFetcher(() => {
+  const { data, loading, error } = useFetcher(() => {
     return getMonitorAPI({ id: monitorId });
   }, []);
 
-  return data ? (
+  return data && !loading && !error ? (
     <MonitorForm defaultValues={data?.attributes}>
       <MonitorSteps stepMap={EDIT_MONITOR_STEPS} isEditFlow={true} />
     </MonitorForm>
