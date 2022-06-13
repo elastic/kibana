@@ -24,7 +24,7 @@ import {
   defineGetBenchmarksRoute,
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   getCspPackagePolicies,
-  getCspAgentPolicies,
+  getAgentPolicies,
   createBenchmarkEntry,
   addPackagePolicyCspRules,
 } from './benchmarks';
@@ -308,7 +308,7 @@ describe('benchmarks API', () => {
         const agentPolicyService = createMockAgentPolicyService();
         const packagePolicies = [createPackagePolicyMock(), createPackagePolicyMock()];
 
-        await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
+        await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(1);
       });
@@ -321,7 +321,7 @@ describe('benchmarks API', () => {
         packagePolicy2.policy_id = 'AnotherId';
         const packagePolicies = [packagePolicy1, packagePolicy2];
 
-        await getCspAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
+        await getAgentPolicies(mockSoClient, packagePolicies, agentPolicyService);
 
         expect(agentPolicyService.getByIds.mock.calls[0][1]).toHaveLength(2);
       });

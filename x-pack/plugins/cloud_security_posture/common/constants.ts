@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const INFO_ROUTE_PATH = '/internal/cloud_security_posture/status';
+export const INFO_ROUTE_PATH = '/internal/cloud_security_posture/setup_status';
 export const STATS_ROUTE_PATH = '/internal/cloud_security_posture/stats';
 export const BENCHMARKS_ROUTE_PATH = '/internal/cloud_security_posture/benchmarks';
 export const UPDATE_RULES_CONFIG_ROUTE_PATH =
