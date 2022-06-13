@@ -162,9 +162,10 @@ class SavedObjectFinderUi extends React.Component<
             type,
           } = savedObject;
           const titleToUse = typeof title === 'string' ? title : '';
+          const nameToUse = name && typeof name === 'string' ? name : titleToUse;
           return {
             title: titleToUse,
-            name: typeof name === 'string' ? name : titleToUse,
+            name: nameToUse,
             id,
             type,
             savedObject,
