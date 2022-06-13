@@ -6,18 +6,27 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsErrorHelpers, SavedObjectsClientContract } from '@kbn/core/server';
-import { TelemetrySavedObject } from '.';
+import {
+  SavedObjectsErrorHelpers,
+  type SavedObjectsClientContract,
+  type SavedObjectsBaseOptions,
+} from '@kbn/core/server';
+import type { TelemetrySavedObject } from '.';
 
 type GetTelemetrySavedObject = (
   repository: SavedObjectsClientContract
 ) => Promise<TelemetrySavedObject>;
 
 export const getTelemetrySavedObject: GetTelemetrySavedObject = async (
-  repository: SavedObjectsClientContract
+  repository: SavedObjectsClientContract,
+  opts?: SavedObjectsBaseOptions
 ) => {
   try {
-    const { attributes } = await repository.get<TelemetrySavedObject>('telemetry', 'telemetry');
+    const { attributes } = await repository.get<TelemetrySavedObject>(
+      'telemetry',
+      'telemetry',
+      opts
+    );
     return attributes;
   } catch (error) {
     if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
