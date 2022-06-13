@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { handleInputAreaState } from './state_update_handlers/handle_input_area_state';
 import { handleSidePanel } from './state_update_handlers/handle_side_panel';
 import { handleUpdateCommandState } from './state_update_handlers/handle_update_command_state';
 import type { ConsoleDataState, ConsoleStoreReducer } from './types';
@@ -35,6 +36,10 @@ export const initiateState = (
     managedKey,
     commandHistory: [],
     sidePanel: { show: null },
+    input: {
+      showPopover: undefined,
+      history: [],
+    },
   };
 
   if (managedConsolePriorState) {
@@ -65,6 +70,9 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
 
     case 'showSidePanel':
       return handleSidePanel(state, action);
+
+    case 'updateInputPopoverState':
+      return handleInputAreaState(state, action);
 
     case 'clear':
       return { ...state, commandHistory: [] };

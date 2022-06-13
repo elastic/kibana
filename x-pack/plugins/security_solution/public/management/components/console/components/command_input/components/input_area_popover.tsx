@@ -5,19 +5,28 @@
  * 2.0.
  */
 
-import React, { memo, ReactElement } from 'react';
+import React, { memo, ReactElement, useCallback } from 'react';
 import { EuiPopover } from '@elastic/eui';
+import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
+import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
 
 export interface InputAreaPopoverProps {
   children: ReactElement;
 }
 
 export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children }) => {
+  const isPopoverOpen = useWithInputShowPopover() !== undefined;
+  const dispatch = useConsoleStateDispatch();
+
+  const handlePopoverOnClose = useCallback(() => {
+    dispatch({ type: 'updateInputPopoverState', payload: { show: undefined } });
+  }, [dispatch]);
+
   return (
     <EuiPopover
       button={children}
-      closePopover={() => {}}
-      isOpen={true}
+      closePopover={handlePopoverOnClose}
+      isOpen={isPopoverOpen}
       anchorPosition="upLeft"
       hasArrow={false}
       display="block"

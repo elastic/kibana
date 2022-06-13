@@ -104,6 +104,11 @@ export const CommandInput = memo<CommandInputProps>(
             case 13:
               dispatch({ type: 'executeCommand', payload: { input: updatedState } });
               return '';
+
+            // ARROW UP
+            case 38:
+              dispatch({ type: 'updateInputPopoverState', payload: { show: 'input-history' } });
+              break;
           }
 
           return updatedState;

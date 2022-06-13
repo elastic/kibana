@@ -34,6 +34,14 @@ export interface ConsoleDataState {
 
   /** The key for the console when it is under ConsoleManager control */
   managedKey?: symbol;
+
+  /** state for the command input area */
+  input: {
+    /** A history of commands entered by the user */
+    history: []; // FIXME:PT define type for this
+    /** Show the input area popover */
+    showPopover: 'input-history' | undefined; // Other values will exist in the future
+  };
 }
 
 export interface CommandHistoryItem {
@@ -65,6 +73,12 @@ export type ConsoleDataAction =
   | {
       type: 'updateCommandStatusState';
       payload: { id: string; value: CommandExecutionState['status'] };
+    }
+  | {
+      type: 'updateInputPopoverState';
+      payload: {
+        show: ConsoleDataState['input']['showPopover'];
+      };
     };
 
 export interface ConsoleStore {
