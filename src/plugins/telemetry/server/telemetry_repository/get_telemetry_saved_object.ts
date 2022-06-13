@@ -14,7 +14,8 @@ import {
 import type { TelemetrySavedObject } from '.';
 
 type GetTelemetrySavedObject = (
-  repository: SavedObjectsClientContract
+  repository: SavedObjectsClientContract,
+  opts?: SavedObjectsBaseOptions
 ) => Promise<TelemetrySavedObject>;
 
 export const getTelemetrySavedObject: GetTelemetrySavedObject = async (

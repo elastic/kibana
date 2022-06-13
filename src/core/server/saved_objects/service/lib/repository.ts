@@ -1239,7 +1239,7 @@ export class SavedObjectsRepository {
         id: this._serializer.generateRawId(namespace, type, id),
         index: this.getIndexForType(type),
       },
-      { ignore: [404], meta: true }
+      { ...options?.requestOptions, ignore: [404], meta: true }
     );
     const indexNotFound = statusCode === 404;
     // check if we have the elasticsearch header when index is not found and, if we do, ensure it is from Elasticsearch

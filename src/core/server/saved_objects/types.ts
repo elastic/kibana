@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { TransportRequestOptions } from '@elastic/elasticsearch';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObjectsClient } from './service/saved_objects_client';
 import { SavedObjectsTypeMappingDefinition } from './mappings';
@@ -164,6 +165,7 @@ export interface SavedObjectsFindOptions {
 export interface SavedObjectsBaseOptions {
   /** Specify the namespace for this operation */
   namespace?: string;
+  requestOptions?: TransportRequestOptions;
 }
 
 /**
