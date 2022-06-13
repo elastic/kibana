@@ -18,10 +18,10 @@ import { EmbeddableStart } from '../../plugin';
 import { EmbeddableError } from '../embeddables/i_embeddable';
 
 export interface EmbeddableLoadedEvent {
-  id: string,
-  status: string,
-  error?: EmbeddableError,
-  timeTookMs: number,
+  id: string;
+  status: string;
+  error?: EmbeddableError;
+  timeTookMs: number;
 }
 
 export interface EmbeddableChildPanelProps {
@@ -67,9 +67,9 @@ export class EmbeddableChildPanel extends React.Component<EmbeddableChildPanelPr
       .getOutput$()
       .pipe(
         /**
-        * Record start time if loading === true
-        * Forward events only if loading === false 
-        */
+         * Record start time if loading === true
+         * Forward events only if loading === false
+         */
         filter((output) => {
           if (output.loading === true) {
             // Record start time

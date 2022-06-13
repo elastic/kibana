@@ -138,23 +138,21 @@ export class MapEmbeddable
     this._initializeSaveMap();
     this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
     this.setEventHandlers({
-      onDataLoad: _ => {
+      onDataLoad: (_) => {
         this.updateOutput({
           ...this.getOutput(),
           loading: true,
           error: undefined,
         });
-
       },
-      onDataLoadEnd: _ => {
+      onDataLoadEnd: (_) => {
         this.updateOutput({
           ...this.getOutput(),
           loading: false,
           error: undefined,
         });
-
       },
-      onDataLoadError: e => {
+      onDataLoadError: (e) => {
         this.updateOutput({
           ...this.getOutput(),
           loading: false,
@@ -163,8 +161,7 @@ export class MapEmbeddable
             message: e.errorMessage,
           },
         });
-
-      }
+      },
     });
     this._controlledBy = `mapEmbeddablePanel${this.id}`;
     this._prevFilterByMapExtent =
