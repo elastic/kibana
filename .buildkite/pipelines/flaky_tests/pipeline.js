@@ -174,6 +174,9 @@ for (const testSuite of testSuites) {
         concurrency: concurrency,
         concurrency_group: process.env.UUID,
         concurrency_method: 'eager',
+        env: {
+          SKIP_TEST_CASES_SPLITTING: true,
+        },
       });
       break;
     default:
