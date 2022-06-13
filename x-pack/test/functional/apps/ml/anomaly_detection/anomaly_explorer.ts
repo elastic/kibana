@@ -129,7 +129,7 @@ export default function ({ getService }: FtrProviderContext) {
             }
           }
 
-          await ml.testExecution.logTestStep('displays the swimlanes');
+          await ml.testExecution.logTestStep('displays the swim lanes');
           await ml.anomalyExplorer.assertOverallSwimlaneExists();
           await ml.anomalyExplorer.assertSwimlaneViewByExists();
 
@@ -141,6 +141,10 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('anomalies table is not empty');
           await ml.anomaliesTable.assertTableNotEmpty();
+        });
+
+        it('has enabled Single Metric Viewer button', async () => {
+          await ml.anomalyExplorer.assertSingleMetricViewerButtonEnabled(true);
         });
 
         it('renders Overall swim lane', async () => {
