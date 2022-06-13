@@ -88,7 +88,7 @@ export class ElasticsearchBlobStorage implements BlobStorage {
       if (attributes) this.esClient.indices.refresh({ index: this.index }).catch(() => {}); // Enable search on attrs, fire and forget
 
       return {
-        id: dest.getDocumentId()!,
+        id: dest.getContentReferenceId()!,
         size: dest.getBytesWritten(),
       };
     } catch (e) {

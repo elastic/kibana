@@ -317,7 +317,17 @@ export class ContentStream extends Duplex {
       .catch(callback);
   }
 
-  public getDocumentId(): undefined | string {
+  /**
+   * This ID can be used to retrieve or delete all of the file chunks but does
+   * not necessarily correspond to an existing document.
+   *
+   * @note do not use this ID with anything other than a {@link ContentStream}
+   * compatible implementation for reading blob-like structures from ES.
+   *
+   * @note When creating a new blob, this value may be undefined until the first
+   * chunk is written.
+   */
+  public getContentReferenceId(): undefined | string {
     return this.id;
   }
 
@@ -358,7 +368,8 @@ function getContentStream({
   return new ContentStream(client, id, index, logger, parameters, attributes);
 }
 
-type WritableContentStream = Writable & Pick<ContentStream, 'getDocumentId' | 'getBytesWritten'>;
+type WritableContentStream = Writable &
+  Pick<ContentStream, 'getContentReferenceId' | 'getBytesWritten'>;
 
 export function getWritableContentStream(args: ContentStreamArgs): WritableContentStream {
   return getContentStream(args);

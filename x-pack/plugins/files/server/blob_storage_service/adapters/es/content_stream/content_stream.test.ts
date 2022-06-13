@@ -172,10 +172,10 @@ describe('ContentStream', () => {
 
     it('should provide a document ID after writing to a destination', async () => {
       stream = new ContentStream(client, undefined, 'somewhere', logger);
-      expect(stream.getDocumentId()).toBe(undefined);
+      expect(stream.getContentReferenceId()).toBe(undefined);
       stream.end('some data');
       await new Promise((resolve) => stream.once('finish', resolve));
-      expect(stream.getDocumentId()).toEqual(expect.any(String));
+      expect(stream.getContentReferenceId()).toEqual(expect.any(String));
     });
 
     it('should send the contents when stream ends', async () => {
