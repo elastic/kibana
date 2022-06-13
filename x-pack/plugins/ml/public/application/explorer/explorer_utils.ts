@@ -45,17 +45,12 @@ import { TimeRangeBounds } from '../util/time_buckets';
 import { Annotations, AnnotationsTable } from '../../../common/types/annotations';
 import { Influencer } from '../../../common/types/anomalies';
 import { RecordForInfluencer } from '../services/results_service/results_service';
-import {
-  ViewableDetector,
-  getViewableDetectors,
-} from '../timeseriesexplorer/timeseriesexplorer_utils/get_viewable_detectors';
 
 export interface ExplorerJob {
   id: string;
   selected: boolean;
   bucketSpanSeconds: number;
   isSingleMetricViewerJob?: boolean;
-  singleMetricViewableDetectors?: ViewableDetector[];
 }
 
 interface ClearedSelectedAnomaliesState {
@@ -124,7 +119,6 @@ export function createJobs(jobs: CombinedJob[]): ExplorerJob[] {
       selected: false,
       bucketSpanSeconds: bucketSpan!.asSeconds(),
       isSingleMetricViewerJob: isTimeSeriesViewJob(job),
-      singleMetricViewableDetectors: getViewableDetectors(job),
     };
   });
 }

@@ -75,9 +75,6 @@ export const AnomalyResultsViewSelector: FC<Props> = ({ viewId, selectedJobs }) 
       page: newViewId,
       pageState: {
         globalState,
-        ...(newViewId === 'timeseriesexplorer' && smvJobs.length > 0
-          ? { detectorIndex: smvJobs[0].singleMetricViewableDetectors![0].index }
-          : {}),
       },
     });
     await navigateToPath(url);
