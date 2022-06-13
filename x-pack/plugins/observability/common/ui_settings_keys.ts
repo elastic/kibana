@@ -18,3 +18,4 @@ export const apmServiceInventoryOptimizedSorting =
 export const apmServiceGroupMaxNumberOfServices =
   'observability:apmServiceGroupMaxNumberOfServices';
 export const apmTraceExplorerTab = 'observability:apmTraceExplorerTab';
+export const apmOperationsTab = 'observability:apmOperationsTab';
