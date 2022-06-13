@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);
   const browser = getService('browser');
-  const esArchiver = getService('esArchiver');
+  const kibanaServer = getService('kibanaServer');
 
   const findResultsWithApi = async (t: string): Promise<GlobalSearchResult[]> => {
     return browser.executeAsync(async (term, cb) => {
@@ -30,11 +30,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('SavedObject provider', function () {
       before(async () => {
-        await esArchiver.load('x-pack/test/plugin_functional/es_archives/global_search/basic');
+        await kibanaServer.savedObjects.cleanStandardList();
+        await kibanaServer.importExport.load(
+          'x-pack/test/functional/fixtures/kbn_archiver/global_search/basic'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/plugin_functional/es_archives/global_search/basic');
+        await kibanaServer.savedObjects.cleanStandardList();
       });
 
       it('can search for index patterns', async () => {
