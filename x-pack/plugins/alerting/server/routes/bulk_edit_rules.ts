@@ -8,13 +8,9 @@
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
 
-import { ILicenseState, RuleTypeDisabledError } from '../lib';
+import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
 import { verifyAccessAndContext, rewriteRule, handleDisabledApiKeysError } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-
-const scheduleSchema = schema.object({
-  interval: schema.string(),
-});
 
 const ruleActionSchema = schema.object({
   group: schema.string(),
@@ -41,7 +37,7 @@ const operationsSchema = schema.arrayOf(
     schema.object({
       operation: schema.literal('set'),
       field: schema.literal('schedule'),
-      value: scheduleSchema,
+      value: schema.object({ interval: schema.string({ validate: validateDurationSchema }) }),
     }),
     schema.object({
       operation: schema.literal('set'),

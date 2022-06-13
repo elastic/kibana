@@ -909,7 +909,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should bulk updates schedules for multiple tasks', async () => {
+    it('should bulk update schedules for multiple tasks', async () => {
       const initialTime = Date.now();
       const tasks = await Promise.all([
         scheduleTask({
@@ -965,6 +965,45 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should not bulk update schedules for task in running status', async () => {
+      // this task should be in running status for 60s until it will be time outed
+      const longRunningTask = await scheduleTask({
+        taskType: 'sampleRecurringTaskWhichHangs',
+        schedule: { interval: '1h' },
+        params: {},
+      });
+
+      runTaskNow({ id: longRunningTask.id });
+
+      let scheduledRunAt: string;
+      // ensure task is running and store scheduled runAt
+      await retry.try(async () => {
+        const task = await currentTask(longRunningTask.id);
+
+        expect(task.status).to.be('running');
+
+        scheduledRunAt = task.runAt;
+      });
+
+      await retry.try(async () => {
+        const updates = await bulkUpdateSchedules([longRunningTask.id], { interval: '3h' });
+
+        // length should be 0, as task in running status won't be updated
+        expect(updates.tasks.length).to.be(0);
+        expect(updates.errors.length).to.be(0);
+      });
+
+      // ensure task wasn't updated
+      await retry.try(async () => {
+        const task = await currentTask(longRunningTask.id);
+
+        // interval shouldn't be changed
+        expect(task.schedule).to.eql({ interval: '1h' });
+
+        // scheduledRunAt shouldn't be changed
+        expect(task.runAt).to.eql(scheduledRunAt);
+      });
+    });
     // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
     // it('should return the resulting task state when asked to run an ephemeral task now', async () => {
     //   const ephemeralTask = await runEphemeralTaskNow({
