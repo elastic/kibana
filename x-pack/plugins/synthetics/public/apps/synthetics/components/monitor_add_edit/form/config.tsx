@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { UseFormReturn, ControllerRenderProps, ControllerFieldState } from 'react-hook-form';
 import {
@@ -114,44 +115,73 @@ interface Step {
 export type StepMap = Record<FormMonitorType, Step[]>;
 
 const MONITOR_TYPE_STEP: Step = {
-  title: 'Select a monitor type',
+  title: i18n.translate('xpack.synthetics.monitorConfig.monitorTypeStep.title', {
+    defaultMessage: 'Select a monitor type',
+  }),
   children: (
     <StepFields
-      description={<p>Choose a monitor that best fits your use case</p>}
+      description={
+        <p>
+          {i18n.translate('xpack.synthetics.monitorConfig.monitorTypeStep.description', {
+            defaultMessage: 'Choose a monitor that best fits your use case',
+          })}
+        </p>
+      }
       stepKey="step1"
     />
   ),
 };
 const MONITOR_DETAILS_STEP: Step = {
-  title: 'Monitor details',
+  title: i18n.translate('xpack.synthetics.monitorConfig.monitorDetailsStep.title', {
+    defaultMessage: 'Monitor details',
+  }),
   children: (
     <StepFields
-      description={<p>Provide some details about how your monitor should run</p>}
+      description={
+        <p>
+          {i18n.translate('xpack.synthetics.monitorConfig.monitorDetailsStep.description', {
+            defaultMessage: 'Provide some details about how your monitor should run',
+          })}
+        </p>
+      }
       stepKey="step2"
     />
   ),
 };
 
+const SCRIPT_RECORDER_BTNS = (
+  <EuiFlexGroup justifyContent="flexStart">
+    <EuiFlexItem grow={false}>
+      <EuiButtonEmpty
+        href="https://github.com/elastic/synthetics-recorder/releases/"
+        iconType="download"
+      >
+        {i18n.translate(
+          'xpack.synthetics.monitorConfig.monitorScriptStep.scriptRecorder.download',
+          {
+            defaultMessage: 'Download Script Recorder',
+          }
+        )}
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);
+
 const MONITOR_SCRIPT_STEP: Step = {
-  title: 'Add a script',
+  title: i18n.translate('xpack.synthetics.monitorConfig.monitorScriptStep.title', {
+    defaultMessage: 'Add a script',
+  }),
   children: (
     <StepFields
       description={
         <>
           <p>
-            Use Elastic Script Recorder to generate a script and then upload it. Alternatively, you
-            can write your own Playwright script and paste it in the script editor.
+            {i18n.translate('xpack.synthetics.monitorConfig.monitorScriptStep.description', {
+              defaultMessage:
+                'Use Elastic Script Recorder to generate a script and then upload it. Alternatively, you can write your own Playwright script and paste it in the script editor.',
+            })}
           </p>
-          <EuiFlexGroup justifyContent="flexStart">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href="https://github.com/elastic/synthetics-recorder/releases/"
-                iconType="download"
-              >
-                Download Script Recorder
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {SCRIPT_RECORDER_BTNS}
         </>
       }
       stepKey="step3"
@@ -160,25 +190,20 @@ const MONITOR_SCRIPT_STEP: Step = {
 };
 
 const MONITOR_SCRIPT_STEP_EDIT: Step = {
-  title: 'Monitor script',
+  title: i18n.translate('xpack.synthetics.monitorConfig.monitorScriptEditStep.title', {
+    defaultMessage: 'Monitor script',
+  }),
   children: (
     <StepFields
       description={
         <>
           <p>
-            Use Elastic Script Recorder to generate and upload a script. Alternatively, you can edit
-            the existing Playwright script (or paste a new one) in the script editor.
+            {i18n.translate('xpack.synthetics.monitorConfig.monitorScriptEditStep.description', {
+              defaultMessage:
+                'Use Elastic Script Recorder to generate and upload a script. Alternatively, you can edit the existing Playwright script (or paste a new one) in the script editor.',
+            })}
           </p>
-          <EuiFlexGroup justifyContent="flexStart">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href="https://github.com/elastic/synthetics-recorder/releases/"
-                iconType="download"
-              >
-                Download Script Recorder
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          {SCRIPT_RECORDER_BTNS}
         </>
       }
       stepKey="scriptEdit"
@@ -202,65 +227,106 @@ export const EDIT_MONITOR_STEPS: StepMap = {
   [FormMonitorType.TCP]: [MONITOR_DETAILS_STEP],
 };
 
+const getScheduleContent = (value: number) => {
+  let unit: string;
+  const minutes = i18n.translate('xpack.synthetics.monitorConfig.schedule.unit.minutes', {
+    defaultMessage: 'minutes',
+  });
+  const minute = i18n.translate('xpack.synthetics.monitorConfig.schedule.unit.minute', {
+    defaultMessage: 'minute',
+  });
+  const hours = i18n.translate('xpack.synthetics.monitorConfig.schedule.unit.hours', {
+    defaultMessage: 'hours',
+  });
+  const hour = i18n.translate('xpack.synthetics.monitorConfig.schedule.unit.hour', {
+    defaultMessage: 'hour',
+  });
+  switch (true) {
+    case value === 1:
+      unit = minute;
+      break;
+    case value / 60 === 1:
+      unit = hour;
+      break;
+    case value / 60 > 1:
+      unit = hours;
+      break;
+    default:
+      unit = minutes;
+  }
+
+  return i18n.translate('xpack.synthetics.monitorConfig.schedule.label', {
+    defaultMessage: 'Every {number} {unit}',
+    values: {
+      number: value >= 60 ? value / 60 : value,
+      unit,
+    },
+  });
+};
+
 const BROWSER_SCHEDULES = [
   {
+    value: '3',
+    text: getScheduleContent(3),
+  },
+  {
     value: '5',
-    text: 'Every 3 minutes',
+    text: getScheduleContent(5),
   },
   {
     value: '10',
-    text: 'Every 10 minutes',
+    text: getScheduleContent(10),
   },
   {
     value: '15',
-    text: 'Every 15 minutes',
+    text: getScheduleContent(15),
   },
   {
     value: '30',
-    text: 'Every 30 minutes',
+    text: getScheduleContent(30),
   },
   {
     value: '60',
-    text: 'Every hour',
+    text: getScheduleContent(60),
   },
   {
     value: '120',
-    text: 'Every 2 hours',
+    text: getScheduleContent(120),
   },
   {
     value: '240',
-    text: 'Every 4 hours',
+    text: getScheduleContent(240),
   },
 ];
 
 const LIGHTWEIGHT_SCHEDULES = [
   {
     value: '1',
-    text: 'Every 1 minute',
+    text: getScheduleContent(1),
   },
   {
     value: '3',
-    text: 'Every 3 minutes',
+    text: getScheduleContent(3),
   },
   {
     value: '5',
-    text: 'Every 5 minutes',
+    text: getScheduleContent(5),
   },
   {
     value: '10',
-    text: 'Every 10 minutes',
+    text: getScheduleContent(10),
   },
   {
     value: '15',
-    text: 'Every 15 minutes',
+    text: getScheduleContent(15),
   },
   {
     value: '30',
-    text: 'Every 30 minutes',
+    text: getScheduleContent(30),
   },
   {
     value: '60',
-    text: 'Every hour',
+    text: getScheduleContent(60),
   },
 ];
 
@@ -269,9 +335,16 @@ export const MONITOR_TYPE_CONFIG = {
     id: 'syntheticsMonitorTypeMultiStep',
     label: 'Multistep',
     value: FormMonitorType.MULTISTEP,
-    descriptionTitle: 'Multistep Browser Journey',
-    description:
-      'A lightweight API check to validate the availability of a web service or endpoint.',
+    descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.multiStep.title', {
+      defaultMessage: 'Multistep Browser Journey',
+    }),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.monitorType.multiStep.description',
+      {
+        defaultMessage:
+          'A lightweight API check to validate the availability of a web service or endpoint.',
+      }
+    ),
     link: '#',
     icon: 'videoPlayer',
     beta: true,
@@ -280,9 +353,19 @@ export const MONITOR_TYPE_CONFIG = {
     id: 'syntheticsMonitorTypeSingle',
     label: 'Single Page',
     value: FormMonitorType.SINGLE,
-    descriptionTitle: 'Single Page Browser Test',
-    description:
-      'A lightweight API check to validate the availability of a web service or endpoint.',
+    descriptionTitle: i18n.translate(
+      'xpack.synthetics.monitorConfig.monitorType.singlePage.title',
+      {
+        defaultMessage: 'Single Page Browser Test',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.monitorType.singlePage.description',
+      {
+        defaultMessage:
+          'A lightweight API check to validate the availability of a web service or endpoint.',
+      }
+    ),
     link: '#',
     icon: 'videoPlayer',
     beta: true,
@@ -291,20 +374,13 @@ export const MONITOR_TYPE_CONFIG = {
     id: 'syntheticsMonitorTypeHTTP',
     label: 'HTTP Ping',
     value: FormMonitorType.HTTP,
-    descriptionTitle: 'HTTP Ping',
-    description:
-      'A lightweight API check to validate the availability of a web service or endpoint.',
-    link: '#',
-    icon: 'online',
-    beta: false,
-  },
-  [FormMonitorType.ICMP]: {
-    id: 'syntheticsMonitorTypeICMP',
-    label: 'ICMP Ping',
-    value: FormMonitorType.ICMP,
-    descriptionTitle: 'ICMP Ping',
-    description:
-      'A lightweight API check to validate the availability of a web service or endpoint.',
+    descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.http.title', {
+      defaultMessage: 'HTTP Ping',
+    }),
+    description: i18n.translate('xpack.synthetics.monitorConfig.monitorType.http.description', {
+      defaultMessage:
+        'A lightweight API check to validate the availability of a web service or endpoint.',
+    }),
     link: '#',
     icon: 'online',
     beta: false,
@@ -313,9 +389,28 @@ export const MONITOR_TYPE_CONFIG = {
     id: 'syntheticsMonitorTypeTCP',
     label: 'TCP Ping',
     value: FormMonitorType.TCP,
-    descriptionTitle: 'TCP Ping',
-    description:
-      'A lightweight API check to validate the availability of a web service or endpoint.',
+    descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.tcp.title', {
+      defaultMessage: 'TCP Ping',
+    }),
+    description: i18n.translate('xpack.synthetics.monitorConfig.monitorType.tcp.description', {
+      defaultMessage:
+        'A lightweight API check to validate the availability of a web service or endpoint.',
+    }),
+    link: '#',
+    icon: 'online',
+    beta: false,
+  },
+  [FormMonitorType.ICMP]: {
+    id: 'syntheticsMonitorTypeICMP',
+    label: 'ICMP Ping',
+    value: FormMonitorType.ICMP,
+    descriptionTitle: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.title', {
+      defaultMessage: 'ICMP Ping',
+    }),
+    description: i18n.translate('xpack.synthetics.monitorConfig.monitorType.icmp.description', {
+      defaultMessage:
+        'A lightweight API check to validate the availability of a web service or endpoint.',
+    }),
     link: '#',
     icon: 'online',
     beta: false,
@@ -327,7 +422,9 @@ export const FIELD: Record<string, FieldMeta> = {
     fieldKey: ConfigKey.FORM_MONITOR_TYPE,
     required: true,
     component: MonitorTypeRadioGroup,
-    ariaLabel: 'Monitor Type',
+    ariaLabel: i18n.translate('xpack.synthetics.monitorConfig.monitorType.label', {
+      defaultMessage: 'Monitor type',
+    }),
     controlled: true,
     props: ({ field, reset, space }) => ({
       onChange: (_: string, monitorType: FormMonitorType) => {
@@ -345,8 +442,12 @@ export const FIELD: Record<string, FieldMeta> = {
     fieldKey: ConfigKey.URLS,
     required: true,
     component: EuiFieldText,
-    label: 'Website URL',
-    helpText: 'For example, https://www.elastic.co.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.urlsSingle.label', {
+      defaultMessage: 'Website URL',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.urlsSingle.helpText', {
+      defaultMessage: 'For example, https://www.elastic.co.',
+    }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
     props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
@@ -364,8 +465,12 @@ export const FIELD: Record<string, FieldMeta> = {
     fieldKey: ConfigKey.URLS,
     required: true,
     component: EuiFieldText,
-    label: 'URL',
-    helpText: 'For example, your service endpoint.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.urls.label', {
+      defaultMessage: 'URL',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.urls.helpText', {
+      defaultMessage: 'For example, your service endpoint.',
+    }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
     props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
@@ -383,7 +488,9 @@ export const FIELD: Record<string, FieldMeta> = {
     fieldKey: ConfigKey.HOSTS,
     required: true,
     component: EuiFieldText,
-    label: 'Host:Port',
+    label: i18n.translate('xpack.synthetics.monitorConfig.hostsTCP.label', {
+      defaultMessage: 'Host:Port',
+    }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
     props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
@@ -401,7 +508,9 @@ export const FIELD: Record<string, FieldMeta> = {
     fieldKey: ConfigKey.HOSTS,
     required: true,
     component: EuiFieldText,
-    label: 'Host',
+    label: i18n.translate('xpack.synthetics.monitorConfig.hostsICMP.label', {
+      defaultMessage: 'Host',
+    }),
     controlled: true,
     dependencies: [ConfigKey.NAME],
     props: ({ setValue, dependenciesFieldMeta, isEdit }) => {
@@ -420,29 +529,41 @@ export const FIELD: Record<string, FieldMeta> = {
     required: true,
     component: EuiFieldText,
     controlled: true,
-    label: 'Monitor name',
-    helpText: 'Choose a name to help identify this monitor in the future.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.name.label', {
+      defaultMessage: 'Monitor name',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.name.helpText', {
+      defaultMessage: 'Choose a name to help identify this monitor in the future.',
+    }),
     dependencies: [ConfigKey.URLS, ConfigKey.HOSTS],
     customHook: (value: unknown) => ({
       fieldKey: 'nameAlreadyExists',
       func: useMonitorName,
       params: { search: value as string },
-      error: 'Monitor name already exists',
+      error: i18n.translate('xpack.synthetics.monitorConfig.name.existsError', {
+        defaultMessage: 'Monitor name already exists',
+      }),
     }),
     validation: () => ({
       validate: {
         notEmpty: (value) => Boolean(value.trim()),
       },
     }),
-    error: 'Monitor name is required',
+    error: i18n.translate('xpack.synthetics.monitorConfig.name.error', {
+      defaultMessage: 'Monitor name is required',
+    }),
   },
   [ConfigKey.SCHEDULE]: {
     fieldKey: `${ConfigKey.SCHEDULE}.number`,
     required: true,
     component: EuiSelect,
-    label: 'Frequency',
-    helpText:
-      'How often do you want to run this test? Higher frequencies will increase your total cost.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.frequency.label', {
+      defaultMessage: 'Frequency',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.frequency.helpText', {
+      defaultMessage:
+        'How often do you want to run this test? Higher frequencies will increase your total cost.',
+    }),
     dependencies: [ConfigKey.MONITOR_TYPE],
     props: ({ dependencies }) => {
       const [monitorType] = dependencies;
@@ -456,9 +577,13 @@ export const FIELD: Record<string, FieldMeta> = {
     required: true,
     controlled: true,
     component: EuiComboBox,
-    label: 'Locations',
-    helpText:
-      'Where do you want to run this test from? Additional locations will increase your total cost.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.locations.label', {
+      defaultMessage: 'Locations',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.locations.helpText', {
+      defaultMessage:
+        'Where do you want to run this test from? Additional locations will increase your total cost.',
+    }),
     props: ({
       field,
       setValue,
@@ -494,9 +619,13 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.TAGS]: {
     fieldKey: ConfigKey.TAGS,
     component: ComboBox,
-    label: 'Tags',
-    helpText:
-      'A list of tags that will be sent with each monitor event. Useful for searching and segmenting data.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.tags.label', {
+      defaultMessage: 'Tags',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.tags.helpText', {
+      defaultMessage:
+        'A list of tags that will be sent with each monitor event. Useful for searching and segmenting data.',
+    }),
     controlled: true,
     props: ({ field }) => ({
       selectedOptions: field?.value,
@@ -505,8 +634,12 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.TIMEOUT]: {
     fieldKey: ConfigKey.TIMEOUT,
     component: EuiFieldNumber,
-    label: 'Timeout in seconds',
-    helpText: 'The total time allowed for testing the connection and exchanging data.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.timeout.label', {
+      defaultMessage: 'Timeout in seconds',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.timeout.helpText', {
+      defaultMessage: 'The total time allowed for testing the connection and exchanging data.',
+    }),
     props: () => ({
       min: 1,
       step: 'any',
@@ -517,11 +650,17 @@ export const FIELD: Record<string, FieldMeta> = {
         validate: (value) => {
           switch (true) {
             case value < 0:
-              return 'Timeout must be greater than or equal to 0.';
+              return i18n.translate('xpack.synthetics.monitorConfig.timeout.greaterThan0Error', {
+                defaultMessage: 'Timeout must be greater than or equal to 0.',
+              });
             case value > parseFloat((schedule as MonitorFields[ConfigKey.SCHEDULE]).number) * 60:
-              return 'Timemout must be less than the monitor frequency.';
+              return i18n.translate('xpack.synthetics.monitorConfig.timeout.scheduleError', {
+                defaultMessage: 'Timemout must be less than the monitor frequency.',
+              });
             case !Boolean(`${value}`.match(FLOATS_ONLY)):
-              return 'Timeout is invalid.';
+              return i18n.translate('xpack.synthetics.monitorConfig.timeout.formatError', {
+                defaultMessage: 'Timeout is invalid.',
+              });
             default:
               return true;
           }
@@ -532,9 +671,13 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.APM_SERVICE_NAME]: {
     fieldKey: ConfigKey.APM_SERVICE_NAME,
     component: EuiFieldText,
-    label: 'APM service name',
-    helpText:
-      'Corrseponds to the service.name ECS field from APM. Set this to enable integrations between APM and Synthetics data.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.apmServiceName.label', {
+      defaultMessage: 'APM service name',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.apmServiceName.helpText', {
+      defaultMessage:
+        'Corrseponds to the service.name ECS field from APM. Set this to enable integrations between APM and Synthetics data.',
+    }),
     controlled: true,
     props: ({ field }) => ({
       selectedOptions: field?.value,
@@ -543,13 +686,20 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.NAMESPACE]: {
     fieldKey: ConfigKey.NAMESPACE,
     component: EuiFieldText,
-    label: 'Data stream namespace',
+    label: i18n.translate('xpack.synthetics.monitorConfig.namespace.label', {
+      defaultMessage: 'Data stream namespace',
+    }),
     helpText: (
       <span>
-        {
-          "Change the default namespace. This setting changes the name of the monitor's data stream. "
-        }
-        <EuiLink href="#">Learn More</EuiLink>
+        {i18n.translate('xpack.synthetics.monitorConfig.namespace.helpText', {
+          defaultMessage:
+            "Change the default namespace. This setting changes the name of the monitor's data stream. ",
+        })}
+        <EuiLink href="#">
+          {i18n.translate('xpack.synthetics.monitorConfig.namespace.learnMore', {
+            defaultMessage: 'Learn more',
+          })}
+        </EuiLink>
       </span>
     ),
     controlled: true,
@@ -560,8 +710,12 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.MAX_REDIRECTS]: {
     fieldKey: ConfigKey.MAX_REDIRECTS,
     component: EuiFieldNumber,
-    label: 'Max redirects',
-    helpText: 'The total number of redirects to follow.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.maxRedirects.label', {
+      defaultMessage: 'Max redirects',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.maxRedirects.helpText', {
+      defaultMessage: 'The total number of redirects to follow.',
+    }),
     props: () => ({
       min: 0,
       max: 10,
@@ -571,14 +725,20 @@ export const FIELD: Record<string, FieldMeta> = {
       min: 0,
       pattern: WHOLE_NUMBERS_ONLY,
     }),
-    error: 'Max redirects is invalid.',
+    error: i18n.translate('xpack.synthetics.monitorConfig.maxRedirects.error', {
+      defaultMessage: 'Max redirects is invalid.',
+    }),
   },
   [ConfigKey.WAIT]: {
     fieldKey: ConfigKey.WAIT,
     component: EuiFieldNumber,
-    label: 'Wait',
-    helpText:
-      'The duration to wait before emitting another ICMP Echo Request if no response is received.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.wait.label', {
+      defaultMessage: 'Wait',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.wait.helpText', {
+      defaultMessage:
+        'The duration to wait before emitting another ICMP Echo Request if no response is received.',
+    }),
     props: () => ({
       min: 1,
       step: 1,
@@ -587,31 +747,45 @@ export const FIELD: Record<string, FieldMeta> = {
       min: 1,
       pattern: WHOLE_NUMBERS_ONLY,
     }),
-    error: 'Wait duration is invalid.',
+    error: i18n.translate('xpack.synthetics.monitorConfig.wait.error', {
+      defaultMessage: 'Wait duration is invalid.',
+    }),
   },
   [ConfigKey.USERNAME]: {
     fieldKey: ConfigKey.USERNAME,
     component: EuiFieldText,
-    label: 'Username',
-    helpText: 'Username for authenticating with the server.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.username.label', {
+      defaultMessage: 'Username',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.username.helpText', {
+      defaultMessage: 'Username for authenticating with the server.',
+    }),
   },
   [ConfigKey.PASSWORD]: {
     fieldKey: ConfigKey.PASSWORD,
     component: EuiFieldPassword,
-    label: 'Password',
-    helpText: 'Password for authenticating with the server.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.password.label', {
+      defaultMessage: 'Password',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.password.helpText', {
+      defaultMessage: 'Password for authenticating with the server.',
+    }),
   },
   [ConfigKey.PROXY_URL]: {
     fieldKey: ConfigKey.PROXY_URL,
     component: EuiFieldText,
     label: 'Proxy URL',
-    helpText: 'HTTP Proxy URL.',
+    helpText: 'HTTP proxy URL.',
   },
   [ConfigKey.REQUEST_METHOD_CHECK]: {
     fieldKey: ConfigKey.REQUEST_METHOD_CHECK,
     component: EuiSelect,
-    label: 'Request Method',
-    helpText: 'The HTTP method to use.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.requestMethod.label', {
+      defaultMessage: 'Request method',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.requestMethod.helpText', {
+      defaultMessage: 'The HTTP method to use.',
+    }),
     props: () => ({
       options: Object.keys(HTTPMethod).map((method) => ({
         value: method,
@@ -622,20 +796,30 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.REQUEST_HEADERS_CHECK]: {
     fieldKey: ConfigKey.REQUEST_HEADERS_CHECK,
     component: HeaderField,
-    label: 'Request Headers',
-    helpText:
-      'A dictionary of additional HTTP headers to send. By default the client will set the User-Agent header to identify itself.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.requestHeaders.label', {
+      defaultMessage: 'Request headers',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.requestHeaders.helpText', {
+      defaultMessage:
+        'A dictionary of additional HTTP headers to send. By default the client will set the User-Agent header to identify itself.',
+    }),
     controlled: true,
     validation: () => ({
       validate: (headers) => !validateHeaders(headers),
     }),
-    error: 'Header key must be a valid HTTP token.',
+    error: i18n.translate('xpack.synthetics.monitorConfig.requestHeaders.error', {
+      defaultMessage: 'Header key must be a valid HTTP token.',
+    }),
   },
   [ConfigKey.REQUEST_BODY_CHECK]: {
     fieldKey: ConfigKey.REQUEST_BODY_CHECK,
     component: RequestBodyField,
-    label: 'Request Body',
-    helpText: 'Request body content.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.requestBody.label', {
+      defaultMessage: 'Request body',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.requestBody.helpText', {
+      defaultMessage: 'Request body content.',
+    }),
     controlled: true,
   },
   [ConfigKey.RESPONSE_HEADERS_INDEX]: {
@@ -651,8 +835,10 @@ export const FIELD: Record<string, FieldMeta> = {
       </>
     ),
     props: () => ({
-      label: 'Index response headers',
-      id: 'sampleId', // checkbox needs an id or it won't work
+      label: i18n.translate('xpack.synthetics.monitorConfig.indexResponseHeader.label', {
+        defaultMessage: 'Index response headers',
+      }),
+      id: 'syntheticsMonitorConfigResponseHeadersIndex', // checkbox needs an id or it won't work
     }),
     controlled: true,
   },
@@ -669,16 +855,22 @@ export const FIELD: Record<string, FieldMeta> = {
       </>
     ),
     props: () => ({
-      label: 'Index response body',
+      label: i18n.translate('xpack.synthetics.monitorConfig.indexResponseBody.label', {
+        defaultMessage: 'Index response body',
+      }),
     }),
     controlled: true,
   },
   [ConfigKey.RESPONSE_STATUS_CHECK]: {
     fieldKey: ConfigKey.RESPONSE_STATUS_CHECK,
     component: ComboBox,
-    label: 'Check response status equals',
-    helpText:
-      'A list of expected status codes. Press enter to add a new code. 4xx and 5xx codes are considered down by default. Other codes are considered up.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.responseStatusCheck.label', {
+      defaultMessage: 'Check response status equals',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.responseStatusCheck.helpText', {
+      defaultMessage:
+        'A list of expected status codes. Press enter to add a new code. 4xx and 5xx codes are considered down by default. Other codes are considered up.',
+    }),
     controlled: true,
     props: ({ field }) => ({
       selectedOptions: field?.value,
@@ -693,25 +885,37 @@ export const FIELD: Record<string, FieldMeta> = {
         }
       },
     }),
-    error: 'Status code must contain digits only.',
+    error: i18n.translate('xpack.synthetics.monitorConfig.responseStatusCheck.error', {
+      defaultMessage: 'Status code must contain digits only.',
+    }),
   },
   [ConfigKey.RESPONSE_HEADERS_CHECK]: {
     fieldKey: ConfigKey.RESPONSE_HEADERS_CHECK,
     component: HeaderField,
-    label: 'Check response headers contain',
-    helpText: 'A list of expected response headers.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.responseHeadersCheck.label', {
+      defaultMessage: 'Check response headers contain',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.responseHeadersCheck.helpText', {
+      defaultMessage: 'A list of expected response headers.',
+    }),
     controlled: true,
     validation: () => ({
       validate: (headers) => !validateHeaders(headers),
     }),
-    error: 'Header key must be a valid HTTP token.',
+    error: i18n.translate('xpack.synthetics.monitorConfig.responseHeadersCheck.error', {
+      defaultMessage: 'Header key must be a valid HTTP token.',
+    }),
   },
   [ConfigKey.RESPONSE_BODY_CHECK_POSITIVE]: {
     fieldKey: ConfigKey.RESPONSE_BODY_CHECK_POSITIVE,
     component: ComboBox,
-    label: 'Check response body contains',
-    helpText:
-      'A list of regular expressions to match the body output. Press enter to add a new expression. Only a single expression needs to match.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheck.label', {
+      defaultMessage: 'Check response body contains',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheck.helpText', {
+      defaultMessage:
+        'A list of regular expressions to match the body output. Press enter to add a new expression. Only a single expression needs to match.',
+    }),
     controlled: true,
     props: ({ field }) => ({
       selectedOptions: field?.value,
@@ -720,58 +924,66 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: {
     fieldKey: ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
     component: ComboBox,
-    label: 'Check response body does not contain',
-    helpText:
-      'A list of regular expressions to match the the body output negatively. Press enter to add a new expression. Return match failed if single expression matches.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheckNegative.label', {
+      defaultMessage: 'Check response body does not contain',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.responseBodyCheckNegative.helpText', {
+      defaultMessage:
+        'A list of regular expressions to match the the body output negatively. Press enter to add a new expression. Return match failed if single expression matches.',
+    }),
     controlled: true,
     props: ({ field }) => ({
       selectedOptions: field?.value,
     }),
   },
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: {
-    fieldKey: ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE,
+    fieldKey: ConfigKey.RESPONSE_RECEIVE_CHECK,
     component: EuiFieldText,
-    label: 'Check response contains.',
-    helpText: 'The expected remote host response.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.responseReceiveCheck.label', {
+      defaultMessage: 'Check response contains',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.responseReceiveCheck.helpText', {
+      defaultMessage: 'The expected remote host response.',
+    }),
   },
   [`${ConfigKey.PROXY_URL}__tcp`]: {
     fieldKey: ConfigKey.PROXY_URL,
     component: EuiFieldText,
-    label: 'Proxy URL',
-    helpText:
-      'The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of socks5://.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.proxyURLTCP.label', {
+      defaultMessage: 'Proxy URL',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.proxyURLTCP.label', {
+      defaultMessage:
+        'The URL of the SOCKS5 proxy to use when connecting to the server. The value must be a URL with a scheme of socks5://.',
+    }),
   },
   [ConfigKey.REQUEST_SEND_CHECK]: {
     fieldKey: ConfigKey.REQUEST_SEND_CHECK,
     component: EuiFieldText,
-    label: 'Request payload',
-    helpText: 'A payload string to send to the remote host.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.requestSendCheck.label', {
+      defaultMessage: 'Request payload',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.requestSendCheck.helpText', {
+      defaultMessage: 'A payload string to send to the remote host.',
+    }),
   },
   [ConfigKey.SOURCE_INLINE]: {
     fieldKey: 'source.inline',
     required: true,
     component: SourceField,
-    ariaLabel: 'Monitor script',
-    controlled: true,
-    props: () => ({}),
-    validation: () => ({
-      validate: (value) => Boolean(value.script),
+    ariaLabel: i18n.translate('xpack.synthetics.monitorConfig.monitorScript.label', {
+      defaultMessage: 'Monitor script',
     }),
-    error: 'Monitor script is required',
-  },
-  [`${ConfigKey.SOURCE_INLINE}__edit`]: {
-    fieldKey: 'source.inline',
-    required: true,
-    component: SourceField,
-    ariaLabel: 'Monitor script',
     controlled: true,
-    props: () => ({
-      isEditFlow: true,
+    props: ({ isEdit }) => ({
+      isEditFlow: isEdit,
     }),
     validation: () => ({
       validate: (value) => Boolean(value.script),
     }),
-    error: 'Monitor script is required',
+    error: i18n.translate('xpack.synthetics.monitorConfig.monitorScript.error', {
+      defaultMessage: 'Monitor script is required',
+    }),
   },
   isTLSEnabled: {
     fieldKey: 'isTLSEnabled',
@@ -779,8 +991,10 @@ export const FIELD: Record<string, FieldMeta> = {
     controlled: true,
     props: ({ setValue }) => {
       return {
-        id: 'syntheticsIsTLSEnabledSwitch',
-        label: 'Use custom TLS configuration',
+        id: 'syntheticsMontiorConfigIsTLSEnabledSwitch',
+        label: i18n.translate('xpack.synthetics.monitorConfig.customTLS.label', {
+          defaultMessage: 'Use custom TLS configuration',
+        }),
         onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
           setValue('isTLSEnabled', event.target.checked);
         },
@@ -790,9 +1004,13 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.TLS_VERIFICATION_MODE]: {
     fieldKey: ConfigKey.TLS_VERIFICATION_MODE,
     component: EuiSelect,
-    label: 'Verification Mode',
-    helpText:
-      'Verifies that the provided certificate is signed by a trusted authority (CA) and also verifies that the server’s hostname (or IP address) matches the names identified within the certificate. If the Subject Alternative Name is empty, it returns an error.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.verificationMode.label', {
+      defaultMessage: 'Verification mode',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.verificationMode.helpText', {
+      defaultMessage:
+        'Verifies that the provided certificate is signed by a trusted authority (CA) and also verifies that the server’s hostname (or IP address) matches the names identified within the certificate. If the Subject Alternative Name is empty, it returns an error.',
+    }),
     showWhen: ['isTLSEnabled', true],
     props: () => ({
       options: Object.values(VerificationMode).map((method) => ({
@@ -804,7 +1022,9 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.TLS_VERSION]: {
     fieldKey: ConfigKey.TLS_VERSION,
     component: EuiComboBox,
-    label: 'Supported TLS protocols',
+    label: i18n.translate('xpack.synthetics.monitorConfig.tlsVersion.label', {
+      defaultMessage: 'Supported TLS protocols',
+    }),
     controlled: true,
     showWhen: ['isTLSEnabled', true],
     props: ({
@@ -833,36 +1053,56 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.TLS_CERTIFICATE_AUTHORITIES]: {
     fieldKey: ConfigKey.TLS_CERTIFICATE_AUTHORITIES,
     component: EuiTextArea,
-    label: 'Certificate Authorities',
-    helpText: 'PEM formatted custom certificate authorities.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.certificateAuthorities.label', {
+      defaultMessage: 'Certificate authorities',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.certificateAuthorities.helpText', {
+      defaultMessage: 'PEM formatted custom certificate authorities.',
+    }),
     showWhen: ['isTLSEnabled', true],
   },
   [ConfigKey.TLS_CERTIFICATE]: {
     fieldKey: ConfigKey.TLS_CERTIFICATE,
     component: EuiTextArea,
-    label: 'Client certificate',
-    helpText: 'PEM formatted certificate for TLS client authentication.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.clientCertificate.label', {
+      defaultMessage: 'Client certificate',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.clientCertificate.helpText', {
+      defaultMessage: 'PEM formatted certificate for TLS client authentication.',
+    }),
     showWhen: ['isTLSEnabled', true],
   },
   [ConfigKey.TLS_KEY]: {
     fieldKey: ConfigKey.TLS_KEY,
     component: EuiTextArea,
-    label: 'Client key',
-    helpText: 'PEM formatted certificate key for TLS client authentication.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.clientKey.label', {
+      defaultMessage: 'Client key',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.clientKey.helpText', {
+      defaultMessage: 'PEM formatted certificate key for TLS client authentication.',
+    }),
     showWhen: ['isTLSEnabled', true],
   },
   [ConfigKey.TLS_KEY_PASSPHRASE]: {
     fieldKey: ConfigKey.TLS_KEY_PASSPHRASE,
     component: EuiFieldPassword,
-    label: 'Client key passphrase',
-    helpText: 'Certificate key passphrase for TLS client authentication.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.clientKey.label', {
+      defaultMessage: 'Client key passphrase',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.clientKey.helpText', {
+      defaultMessage: 'Certificate key passphrase for TLS client authentication.',
+    }),
     showWhen: ['isTLSEnabled', true],
   },
   [ConfigKey.SCREENSHOTS]: {
     fieldKey: ConfigKey.SCREENSHOTS,
     component: EuiButtonGroup,
-    label: 'Screenshot options',
-    helpText: 'Set this option to manage the screenshots captured by the synthetics agent.',
+    label: i18n.translate('xpack.synthetics.monitorConfig.screenshotOptions.label', {
+      defaultMessage: 'Screenshot options',
+    }),
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.screenshotOptions.helpText', {
+      defaultMessage: 'Set this option to manage the screenshots captured by the synthetics agent.',
+    }),
     controlled: true,
     props: ({
       field,
@@ -886,9 +1126,13 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.TEXT_ASSERTION]: {
     fieldKey: ConfigKey.TEXT_ASSERTION,
     component: EuiFieldText,
-    label: 'Text assertion',
+    label: i18n.translate('xpack.synthetics.monitorConfig.textAssertion.label', {
+      defaultMessage: 'Text assertion',
+    }),
     required: true,
-    helpText: 'Consider the page loaded when the specified text is rendered.',
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.textAssertion.helpText', {
+      defaultMessage: 'Consider the page loaded when the specified text is rendered.',
+    }),
     validation: () => ({
       required: true,
     }),
@@ -896,11 +1140,15 @@ export const FIELD: Record<string, FieldMeta> = {
   [ConfigKey.THROTTLING_CONFIG]: {
     fieldKey: ConfigKey.THROTTLING_CONFIG,
     component: EuiSuperSelect,
-    label: 'Connection profile',
+    label: i18n.translate('xpack.synthetics.monitorConfig.throttling.label', {
+      defaultMessage: 'Connection profile',
+    }),
     required: true,
     controlled: true,
-    helpText:
-      'Simulate network throttling (download, upload, latency). More options will be added in a future version.',
+    helpText: i18n.translate('xpack.synthetics.monitorConfig.throttling.helpText', {
+      defaultMessage:
+        'Simulate network throttling (download, upload, latency). More options will be added in a future version.',
+    }),
     props: () => ({
       options: [
         {
@@ -908,7 +1156,11 @@ export const FIELD: Record<string, FieldMeta> = {
           inputDisplay: (
             <EuiFlexGroup alignItems="center" gutterSize="xs">
               <EuiFlexItem grow={false}>
-                <EuiText>Default</EuiText>
+                <EuiText>
+                  {i18n.translate('xpack.synthetics.monitorConfig.throttling.options.default', {
+                    defaultMessage: 'Default',
+                  })}
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
@@ -928,8 +1180,12 @@ export const FIELD: Record<string, FieldMeta> = {
 };
 
 const TLS_OPTIONS = {
-  title: 'TLS Options',
-  description: 'TLS Description',
+  title: i18n.translate('xpack.synthetics.monitorConfig.section.tlsOptions.title', {
+    defaultMessage: 'TLS options',
+  }),
+  description: i18n.translate('xpack.synthetics.monitorConfig.section.tlsOptions.description', {
+    defaultMessage: 'TLS Description',
+  }),
   components: [
     FIELD.isTLSEnabled,
     FIELD[ConfigKey.TLS_VERIFICATION_MODE],
@@ -942,8 +1198,12 @@ const TLS_OPTIONS = {
 };
 
 const DEFAULT_DATA_OPTIONS = {
-  title: 'Data options',
-  description: 'A description goes here',
+  title: i18n.translate('xpack.synthetics.monitorConfig.section.dataOptions.title', {
+    defaultMessage: 'Data options',
+  }),
+  description: i18n.translate('xpack.synthetics.monitorConfig.section.dataOptions.description', {
+    defaultMessage: 'A description goes here',
+  }),
   components: [
     FIELD[ConfigKey.TAGS],
     FIELD[ConfigKey.APM_SERVICE_NAME],
@@ -953,9 +1213,16 @@ const DEFAULT_DATA_OPTIONS = {
 
 export const HTTP_ADVANCED = {
   requestConfig: {
-    title: 'Request configuration',
-    description:
-      'Configure an optional request to send to the remote host including method, body, and headers.',
+    title: i18n.translate('xpack.synthetics.monitorConfig.section.requestConfiguration.title', {
+      defaultMessage: 'Request configuration',
+    }),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.section.requestConfiguration.description',
+      {
+        defaultMessage:
+          'Configure an optional request to send to the remote host including method, body, and headers.',
+      }
+    ),
     components: [
       FIELD[ConfigKey.USERNAME],
       FIELD[ConfigKey.PASSWORD],
@@ -966,13 +1233,27 @@ export const HTTP_ADVANCED = {
     ],
   },
   responseConfig: {
-    title: 'Response configuration',
-    description: 'Control the indexing of the HTTP response contents.',
+    title: i18n.translate('xpack.synthetics.monitorConfig.section.responseConfiguration.title', {
+      defaultMessage: 'Response configuration',
+    }),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.section.responseConfiguration.description',
+      {
+        defaultMessage: 'Control the indexing of the HTTP response contents.',
+      }
+    ),
     components: [FIELD[ConfigKey.RESPONSE_HEADERS_INDEX], FIELD[ConfigKey.RESPONSE_BODY_INDEX]],
   },
   responseChecks: {
-    title: 'Response checks',
-    description: 'Configure the expected HTTP response.',
+    title: i18n.translate('xpack.synthetics.monitorConfig.section.responseChecks.title', {
+      defaultMessage: 'Response checks',
+    }),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.section.responseChecks.description',
+      {
+        defaultMessage: 'Configure the expected HTTP response.',
+      }
+    ),
     components: [
       FIELD[ConfigKey.RESPONSE_STATUS_CHECK],
       FIELD[ConfigKey.RESPONSE_HEADERS_CHECK],
@@ -984,13 +1265,24 @@ export const HTTP_ADVANCED = {
 
 export const TCP_ADVANCED = {
   requestConfig: {
-    title: 'Request configuration',
-    description: 'Configure the payload sent to the remote host.',
+    title: i18n.translate('xpack.synthetics.monitorConfig.section.requestConfigTCP.title', {
+      defaultMessage: 'Request configuration',
+    }),
+    description: i18n.translate(
+      'xpack.synthetics.monitorConfig.section.requestConfigTCP.description',
+      {
+        defaultMessage: 'Configure the payload sent to the remote host.',
+      }
+    ),
     components: [FIELD[`${ConfigKey.PROXY_URL}__tcp`], FIELD[ConfigKey.REQUEST_SEND_CHECK]],
   },
   responseChecks: {
-    title: 'Response checks',
-    description: 'Configure the expected response from the remote host.',
+    title: i18n.translate('xpack.synthetics.monitorConfig.section.responseChecksTCP.title', {
+      defaultMessage: 'Response checks',
+    }),
+    description: i18n.translate('xpack.synthetics.monitorConfig.section.responseChecksTCP.title', {
+      defaultMessage: 'Configure the expected response from the remote host.',
+    }),
     components: [FIELD[ConfigKey.RESPONSE_RECEIVE_CHECK]],
   },
 };
@@ -1039,7 +1331,7 @@ export const FIELD_CONFIG: FieldConfig = {
       FIELD[ConfigKey.THROTTLING_CONFIG],
     ],
     step3: [FIELD[ConfigKey.SOURCE_INLINE]],
-    scriptEdit: [FIELD[`${ConfigKey.SOURCE_INLINE}__edit`]],
+    scriptEdit: [FIELD[ConfigKey.SOURCE_INLINE]],
     advanced: [
       {
         ...DEFAULT_DATA_OPTIONS,
