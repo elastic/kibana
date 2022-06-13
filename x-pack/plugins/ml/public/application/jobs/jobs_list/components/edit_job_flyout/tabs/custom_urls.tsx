@@ -142,7 +142,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         this.props.setCustomUrls(customUrls);
         this.setState({ editorOpen: false });
       })
-      .catch((error: any) => {
+      .catch((error: Error) => {
         // eslint-disable-next-line no-console
         console.error('Error building custom URL from settings:', error);
         const { toasts } = this.props.kibana.services.notifications;

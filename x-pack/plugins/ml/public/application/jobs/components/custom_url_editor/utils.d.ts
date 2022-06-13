@@ -45,4 +45,4 @@ export function isValidCustomUrlSettings(
   settings: CustomUrlSettings,
   savedCustomUrls: UrlConfig[]
 ): boolean;
-export function buildCustomUrlFromSettings(settings: CustomUrlSettings): Promise<UrlConfig>;
+export async function buildCustomUrlFromSettings(settings: CustomUrlSettings): Promise<UrlConfig>;
