@@ -45,7 +45,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.removeSampleDataSet('flights');
-
     });
 
     it('saved objects management page a11y validations', async () => {
@@ -129,9 +128,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('savedObjectsTableAction-copy_saved_objects_to_space');
       await a11y.testAppSnapshot();
     });
-
-
-
 
     // inspecting a different saved object than data views because the inspect screen is different
 
