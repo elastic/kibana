@@ -21,7 +21,6 @@ let mockedLicenseState: jest.Mocked<ILicenseState>;
 let ruleTypeRegistryParams: ConstructorOptions;
 
 const taskManager = taskManagerMock.createSetup();
-
 const inMemoryMetrics = inMemoryMetricsMock.create();
 const metrics = metricsMock.create();
 
