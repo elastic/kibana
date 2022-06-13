@@ -33,6 +33,7 @@ import { Setup } from '../../lib/helpers/setup_request';
 const MAX_NUM_SPANS = 1000;
 
 export interface BackendSpan {
+  '@timestamp': number;
   spanName: string;
   serviceName: string;
   agentName: AgentName;
@@ -88,6 +89,7 @@ export async function getTopBackendSpans({
           SERVICE_ENVIRONMENT,
           AGENT_NAME,
           SPAN_DURATION,
+          '@timestamp',
         ],
       },
     })
@@ -123,6 +125,7 @@ export async function getTopBackendSpans({
       : undefined;
 
     return {
+      '@timestamp': new Date(span['@timestamp']).getTime(),
       spanName: span.span.name,
       serviceName: span.service.name,
       agentName: span.agent.name,

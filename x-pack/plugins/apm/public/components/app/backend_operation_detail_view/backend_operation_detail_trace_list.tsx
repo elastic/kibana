@@ -23,6 +23,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { ITableColumn, ManagedTable } from '../../shared/managed_table';
 import { ServiceLink } from '../../shared/service_link';
+import { TimestampTooltip } from '../../shared/timestamp_tooltip';
 
 type BackendSpan = ValuesType<
   APIReturnType<'GET /internal/apm/backends/operations/spans'>['spans']
@@ -34,6 +35,7 @@ export function BackendOperationDetailTraceList() {
   const {
     query: {
       backendName,
+      spanName,
       comparisonEnabled,
       environment,
       offset,
@@ -140,6 +142,18 @@ export function BackendOperationDetailTraceList() {
       sortable: true,
       align: RIGHT_ALIGNMENT,
     },
+    {
+      name: i18n.translate(
+        'xpack.apm.backendOperationDetailTraceListTimestampColumn',
+        { defaultMessage: 'Timestamp' }
+      ),
+      field: '@timestamp',
+      render: (_, { '@timestamp': timestamp }) => {
+        return <TimestampTooltip time={timestamp} />;
+      },
+      sortable: true,
+      align: RIGHT_ALIGNMENT,
+    },
   ];
 
   const { data = { spans: [] }, status } = useFetcher(
@@ -148,6 +162,7 @@ export function BackendOperationDetailTraceList() {
         params: {
           query: {
             backendName,
+            spanName,
             start,
             end,
             environment,
@@ -156,7 +171,7 @@ export function BackendOperationDetailTraceList() {
         },
       });
     },
-    [backendName, start, end, environment, kuery]
+    [backendName, spanName, start, end, environment, kuery]
   );
 
   return (
@@ -174,8 +189,8 @@ export function BackendOperationDetailTraceList() {
         <ManagedTable
           columns={columns}
           items={data?.spans}
-          initialSortField="duration"
-          initialSortDirection="desc"
+          initialSortField="timestamp"
+          initialSortDirection="asc"
           isLoading={
             status === FETCH_STATUS.LOADING ||
             status === FETCH_STATUS.NOT_INITIATED
