@@ -96,7 +96,10 @@ export function reportFailuresToFile(
     );
 
     let screenshot = '';
-    const screenshotName = `${failure.name.replace(/([^ a-zA-Z0-9-]+)/g, '_')}`;
+    const truncatedName = failure.name.replace(/([^ a-zA-Z0-9-]+)/g, '_').slice(0, 80);
+    const failureNameHash = createHash('sha256').update(failure.name).digest('hex');
+    const screenshotName = `${truncatedName}-${failureNameHash}`;
+
     if (screenshotsByName[screenshotName]) {
       try {
         screenshot = readFileSync(screenshotsByName[screenshotName]).toString('base64');
