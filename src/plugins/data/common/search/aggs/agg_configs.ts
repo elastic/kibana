@@ -9,14 +9,14 @@
 import moment from 'moment-timezone';
 import _, { cloneDeep } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Assign } from '@kbn/utility-types';
+import type { Assign } from '@kbn/utility-types';
 import { isRangeFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IndexPatternLoadExpressionFunctionDefinition } from '@kbn/data-views-plugin/common';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import {
+import type {
   IEsSearchResponse,
   ISearchOptions,
   ISearchSource,
@@ -25,12 +25,12 @@ import {
 } from '../../../public';
 import type { EsaggsExpressionFunctionDefinition } from '../expressions';
 import { AggConfig, AggConfigSerialized, IAggConfig } from './agg_config';
-import { IAggType } from './agg_type';
-import { AggTypesRegistryStart } from './agg_types_registry';
+import type { IAggType } from './agg_type';
+import type { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
 import { AggTypesDependencies, GetConfigFn, getUserTimeZone } from '../..';
 import { TimeRange, getTime, calculateBounds } from '../..';
-import { IBucketAggConfig } from './buckets';
+import type { IBucketAggConfig } from './buckets';
 import { insertTimeShiftSplit, mergeTimeShifts } from './utils/time_splits';
 
 function removeParentAggs(obj: any) {
@@ -88,8 +88,6 @@ export class AggConfigs {
   public timeFields?: string[];
   public forceNow?: Date;
   public aggs: IAggConfig[] = [];
-  public partialRows?: boolean;
-  public hierarchical?: boolean;
   public readonly timeZone: string;
 
   constructor(
@@ -98,9 +96,6 @@ export class AggConfigs {
     private opts: AggConfigsOptions,
     private getConfig: GetConfigFn
   ) {
-    this.hierarchical = opts.hierarchical ?? false;
-    this.partialRows = opts.partialRows ?? false;
-
     this.timeZone = getUserTimeZone(
       this.getConfig,
       opts?.aggExecutionContext?.shouldDetectTimeZone
@@ -108,6 +103,14 @@ export class AggConfigs {
 
     configStates = AggConfig.ensureIds(configStates);
     configStates.forEach((params: any) => this.createAggConfig(params));
+  }
+
+  public get hierarchical() {
+    return this.opts.hierarchical ?? false;
+  }
+
+  public get partialRows() {
+    return this.opts.partialRows ?? false;
   }
 
   setTimeFields(timeFields: string[] | undefined) {
@@ -149,7 +152,13 @@ export class AggConfigs {
   }
 
   // clone method will reuse existing AggConfig in the list (will not create new instances)
-  clone({ enabledOnly = true } = {}) {
+  clone({
+    enabledOnly = true,
+    opts,
+  }: {
+    enabledOnly?: boolean;
+    opts?: Partial<AggConfigsOptions>;
+  } = {}) {
     const filterAggs = (agg: AggConfig) => {
       if (!enabledOnly) return true;
       return agg.enabled;
@@ -160,8 +169,7 @@ export class AggConfigs {
       this.aggs.filter(filterAggs),
       {
         ...this.opts,
-        hierarchical: this.hierarchical,
-        partialRows: this.partialRows,
+        ...opts,
       },
       this.getConfig
     );
@@ -440,7 +448,7 @@ export class AggConfigs {
     ];
   }
 
-  postFlightTransform(response: IEsSearchResponse<any>) {
+  postFlightTransform(response: IEsSearchResponse) {
     if (!this.hasTimeShifts()) {
       return response;
     }
