@@ -958,6 +958,19 @@ module.exports = {
       },
     },
 
+    {
+      // disable imports from legacy uptime plugin
+      files: ['x-pack/plugins/synthetics/public/apps/synthetics/**/*.{js,mjs,ts,tsx}'],
+      rules: {
+        'no-restricted-imports': [
+          'error',
+          {
+            patterns: ['**/legacy_uptime/*'],
+          },
+        ],
+      },
+    },
+
     /**
      * Fleet overrides
      */
