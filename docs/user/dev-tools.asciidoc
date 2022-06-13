@@ -12,7 +12,7 @@ with your data.
 
 a| <<console-kibana, Console>>
 
-| Interact with the REST API of Elasticsearch, including sending requests
+| Interact with the REST APIs of {es} and {kib}, including sending requests
 and viewing API documentation.
 
 a| <<xpack-profiler, {searchprofiler}>>
