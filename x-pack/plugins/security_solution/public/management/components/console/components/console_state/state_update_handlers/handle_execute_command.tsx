@@ -21,7 +21,7 @@ import {
   ConsoleStoreReducer,
 } from '../types';
 import { parseCommandInput, ParsedCommandInterface } from '../../../service/parsed_command_input';
-import { UnknownCommand } from '../../unknow_comand';
+import { UnknownCommand } from '../../unknown_comand';
 import { BadArgument } from '../../bad_argument';
 import { Command, CommandDefinition, CommandExecutionComponentProps } from '../../../types';
 
