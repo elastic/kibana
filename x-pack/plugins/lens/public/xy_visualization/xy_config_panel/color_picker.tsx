@@ -70,29 +70,34 @@ export const ColorPicker = ({
   disabled?: boolean;
   showAlpha?: boolean;
 }) => {
-  const [color, setColor] = useState(overwriteColor || defaultColor);
-  const [hexColor, setHexColor] = useState(overwriteColor || defaultColor);
-  const [currentColorAlpha, setCurrentColorAlpha] = useState(getColorAlpha(color));
+  const [colorText, setColorText] = useState(overwriteColor || defaultColor);
+  const [validatedColor, setValidatedColor] = useState(overwriteColor || defaultColor);
+  const [currentColorAlpha, setCurrentColorAlpha] = useState(getColorAlpha(colorText));
   const unflushedChanges = useRef(false);
 
   useEffect(() => {
     //  only the changes from outside the color picker should be applied
     if (!unflushedChanges.current) {
       // something external changed the color that is currently selected (switching from annotation line to annotation range)
-      if (overwriteColor && hexColor && overwriteColor !== hexColor) {
-        setColor(overwriteColor || defaultColor);
+      if (
+        overwriteColor &&
+        validatedColor &&
+        overwriteColor.toUpperCase() !== validatedColor.toUpperCase()
+      ) {
+        setColorText(overwriteColor);
+        setValidatedColor(overwriteColor.toUpperCase());
         setCurrentColorAlpha(getColorAlpha(overwriteColor));
       }
     }
     unflushedChanges.current = false;
-  }, [hexColor, overwriteColor, defaultColor]);
+  }, [validatedColor, overwriteColor, defaultColor]);
 
   const handleColor: EuiColorPickerProps['onChange'] = (text, output) => {
-    setColor(text);
+    setColorText(text);
     unflushedChanges.current = true;
     if (output.isValid) {
-      setHexColor(output.hex);
-      setCurrentColorAlpha(chroma(output.hex)?.alpha() || 1);
+      setValidatedColor(output.hex.toUpperCase());
+      setCurrentColorAlpha(getColorAlpha(output.hex));
       setConfig({ color: output.hex });
     }
     if (text === '') {
@@ -113,7 +118,7 @@ export const ColorPicker = ({
       compressed
       isClearable={Boolean(overwriteColor)}
       onChange={handleColor}
-      color={disabled ? '' : color}
+      color={disabled ? '' : colorText}
       disabled={disabled}
       placeholder={
         defaultColor?.toUpperCase() ||
@@ -139,7 +144,7 @@ export const ColorPicker = ({
         <TooltipWrapper
           delay="long"
           position="top"
-          tooltipContent={color && !disabled ? tooltipContent.custom : tooltipContent.auto}
+          tooltipContent={colorText && !disabled ? tooltipContent.custom : tooltipContent.auto}
           condition={!disableHelpTooltip}
         >
           <span>
