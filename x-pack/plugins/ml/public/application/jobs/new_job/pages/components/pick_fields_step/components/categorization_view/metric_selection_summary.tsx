@@ -79,8 +79,12 @@ export const CategorizationDetectorsSummary: FC = () => {
         loading={loadingData}
         fadeChart={jobIsRunning}
       />
-      <TopCategories />
-      <CategoryStoppedPartitions />
+      {jobIsRunning ? (
+        <>
+          <TopCategories />
+          <CategoryStoppedPartitions />
+        </>
+      ) : null}
     </>
   );
 };
