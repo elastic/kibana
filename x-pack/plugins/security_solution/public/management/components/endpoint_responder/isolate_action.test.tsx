@@ -78,8 +78,8 @@ describe('When using isolate action from response actions console', () => {
     await render();
     enterConsoleCommand(renderResult, 'isolate --comment "one" --comment "two"');
 
-    expect(renderResult.getByTestId('test-badArgument-message').textContent).toMatch(
-      /Argument can only be used once: --comment/
+    expect(renderResult.getByTestId('test-badArgument-message').textContent).toEqual(
+      'Argument can only be used once: --comment'
     );
   });
 

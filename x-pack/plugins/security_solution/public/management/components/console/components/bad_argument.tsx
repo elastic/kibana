@@ -43,7 +43,7 @@ export const BadArgument = memo<CommandExecutionComponentProps<{}, { errorMessag
         data-test-subj={getTestId('badArgument')}
       >
         <>
-          <div data-test-subj={getTestId('bardArgument-message')}>{store.errorMessage}</div>
+          <div data-test-subj={getTestId('badArgument-message')}>{store.errorMessage}</div>
           <div className="eui-displayInlineBlock">
             <CommandInputUsage commandDef={command.commandDefinition} />
           </div>
