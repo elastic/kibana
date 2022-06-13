@@ -31,5 +31,3 @@ export const selectEsKuery = createSelector(uiStateSelector, ({ esKuery }) => es
 export const selectSearchText = createSelector(uiStateSelector, ({ searchText }) => searchText);
 
 export const selectMonitorId = createSelector(uiStateSelector, ({ monitorId }) => monitorId);
-
-export const selectedFiltersSelector = ({ selectedFilters }: SyntheticsAppState) => selectedFilters;
