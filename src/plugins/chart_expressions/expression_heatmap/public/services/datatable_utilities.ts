@@ -6,12 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { getDatatableUtilities, setDatatableUtilities } from './datatable_utilities';
-export { getFormatService, setFormatService } from './format_service';
-export {
-  getPaletteService,
-  setPaletteService,
-  setThemeService,
-  getThemeService,
-} from './palette_service';
-export { getUISettings, setUISettings } from './ui_settings';
+import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
+
+export const [getDatatableUtilities, setDatatableUtilities] =
+  createGetterSetter<DatatableUtilitiesService>('data.datatableUtilities');

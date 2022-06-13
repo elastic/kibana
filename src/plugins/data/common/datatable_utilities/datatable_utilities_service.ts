@@ -9,7 +9,21 @@
 import type { DataView, DataViewsContract, DataViewField } from '@kbn/data-views-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { FieldFormatsStartCommon, FieldFormat } from '@kbn/field-formats-plugin/common';
-import type { AggsCommonStart, AggConfig, CreateAggConfigParams, IAggType } from '../search';
+import type {
+  AggsCommonStart,
+  AggConfig,
+  AggParamsDateHistogram,
+  CreateAggConfigParams,
+  IAggType,
+} from '../search';
+import { BUCKET_TYPES } from '../search/aggs/buckets/bucket_agg_types';
+import type { TimeRange } from '../types';
+
+interface DateHistogramMeta {
+  interval?: string;
+  timeZone?: string;
+  timeRange?: TimeRange;
+}
 
 export class DatatableUtilitiesService {
   constructor(
@@ -44,6 +58,39 @@ export class DatatableUtilitiesService {
     );
 
     return aggs[0];
+  }
+
+  /**
+   * Helper function returning the used interval, used time zone and applied time filters for data table column created by the date_histogramm agg type.
+   * "auto" will get expanded to the actually used interval.
+   * If the column is not a column created by a date_histogram aggregation of the esaggs data source,
+   * this function will return undefined.
+   */
+  getDateHistogramMeta(
+    column: DatatableColumn,
+    defaults: Partial<{
+      timeZone: string;
+    }> = {}
+  ): DateHistogramMeta | undefined {
+    if (column.meta.source !== 'esaggs') {
+      return;
+    }
+    if (column.meta.sourceParams?.type !== BUCKET_TYPES.DATE_HISTOGRAM) {
+      return;
+    }
+
+    const params = column.meta.sourceParams.params as AggParamsDateHistogram;
+
+    let interval: string | undefined;
+    if (params.used_interval && params.used_interval !== 'auto') {
+      interval = params.used_interval;
+    }
+
+    return {
+      interval,
+      timeZone: params.used_time_zone || defaults.timeZone,
+      timeRange: column.meta.sourceParams.appliedTimeRange as TimeRange | undefined,
+    };
   }
 
   async getDataView(column: DatatableColumn): Promise<DataView | undefined> {
