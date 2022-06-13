@@ -19,7 +19,9 @@ export const TabAliases: React.FunctionComponent<Props> = ({ aliases }) => {
   if (aliases && Object.keys(aliases).length) {
     return (
       <div data-test-subj="aliasesTabContent">
-        <EuiCodeBlock lang="json">{JSON.stringify(aliases, null, 2)}</EuiCodeBlock>
+        <EuiCodeBlock lang="json" isCopyable={true}>
+          {JSON.stringify(aliases, null, 2)}
+        </EuiCodeBlock>
       </div>
     );
   }
