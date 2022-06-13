@@ -61,9 +61,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     dashboard: {
       guide: `${KIBANA_DOCS}dashboard.html`,
       drilldowns: `${KIBANA_DOCS}drilldowns.html`,
-      drilldownsTriggerPicker: `${KIBANA_DOCS}drilldowns.html#url-drilldowns`,
-      urlDrilldownTemplateSyntax: `${KIBANA_DOCS}url_templating-language.html`,
-      urlDrilldownVariables: `${KIBANA_DOCS}url_templating-language.html#url-template-variables`,
+      drilldownsTriggerPicker: `${KIBANA_DOCS}create-drilldowns.html#url-drilldowns`,
+      urlDrilldownTemplateSyntax: `${KIBANA_DOCS}create-drilldowns.html#url_templating-language`,
+      urlDrilldownVariables: `${KIBANA_DOCS}create-drilldowns.html#url-template-variables`,
     },
     discover: {
       guide: `${KIBANA_DOCS}discover.html`,
