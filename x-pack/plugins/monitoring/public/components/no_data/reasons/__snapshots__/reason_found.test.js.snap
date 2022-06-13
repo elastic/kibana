@@ -3,7 +3,7 @@
 exports[`ReasonFound should load ExplainCollectionInterval component 1`] = `
 Array [
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle css-1bexacr-euiTitle-l"
   >
     Monitoring is currently off
   </h2>,
@@ -19,7 +19,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-ilegow-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText euiText--medium"
@@ -43,7 +43,7 @@ Array [
     </p>
   </div>,
   <div
-    class="euiSpacer euiSpacer--l css-jz428s-euiSpacer-l"
+    class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
   />,
   <div
     class="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--alignItemsCenter euiFlexGroup--justifyContentSpaceAround euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -74,7 +74,7 @@ Array [
 exports[`ReasonFound should load ExplainExporters component 1`] = `
 Array [
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle css-1bexacr-euiTitle-l"
   >
     You need to make some adjustments
   </h2>,
@@ -90,7 +90,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-ilegow-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText euiText--medium eui-textLeft"
@@ -151,14 +151,14 @@ Array [
       <p>
         Configure monitoring through 
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink css-102pf9n-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener"
           target="_blank"
         >
           Elasticsearch Service Console
           <span
-            class="euiLink__externalIcon"
+            class="css-q4vwwx-euiLink__externalIcon"
             data-euiicon-type="popout"
           >
             External link
@@ -171,14 +171,14 @@ Array [
         </a>
          Go to 
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink css-102pf9n-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener"
           target="_blank"
         >
           Logs and metrics
           <span
-            class="euiLink__externalIcon"
+            class="css-q4vwwx-euiLink__externalIcon"
             data-euiicon-type="popout"
           >
             External link
@@ -191,14 +191,14 @@ Array [
         </a>
          section for a deployment to configure monitoring. For more information visit 
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink css-102pf9n-euiLink-primary"
           href="https://www.elastic.co/guide/en/cloud/current/ec-enable-logging-and-monitoring.html"
           rel="noopener"
           target="_blank"
         >
           the documentation page.
           <span
-            class="euiLink__externalIcon"
+            class="css-q4vwwx-euiLink__externalIcon"
             data-euiicon-type="popout"
           >
             External link
@@ -213,7 +213,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-ilegow-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText euiText--medium eui-textLeft"
@@ -228,7 +228,7 @@ Array [
 exports[`ReasonFound should load ExplainPluginEnabled component 1`] = `
 Array [
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle css-1bexacr-euiTitle-l"
   >
     You need to make some adjustments
   </h2>,
@@ -244,7 +244,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-ilegow-euiHorizontalRule-half-l"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText euiText--medium"

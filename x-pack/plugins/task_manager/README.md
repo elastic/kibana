@@ -419,9 +419,14 @@ export class Plugin {
 ```
 
 #### bulkUpdateSchedules
-Using `bulkUpdatesSchedules` you can instruct TaskManger to update interval of tasks that are in `idle` status.
-When interval updated, new `runAt` will be computed and task will be updated with that value
+Using `bulkUpdatesSchedules` you can instruct TaskManger to update interval of tasks that are in `idle` status
+(for the tasks which have `running` status,  `schedule` and `runAt` will be recalculated after task run finishes).
+When interval updated, new `runAt` will be computed and task will be updated with that value, using formula
+```
+newRunAt = oldRunAt - oldInterval + newInterval
+```
 
+Example:
 ```js
 export class Plugin {
   constructor() {
