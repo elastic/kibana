@@ -48,7 +48,7 @@ describe('migration v2', () => {
       const { startES } = createTestServers();
       root = createRoot();
       esServer = await startES();
-      await rootPrebotAndSetup(root);
+      await rootPrebootAndSetup(root);
 
       try {
         await root.start();
@@ -101,7 +101,7 @@ describe('migration v2', () => {
       const currentVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
       root = createRoot(currentVersion);
       esServer = await startES();
-      await rootPrebotAndSetup(root);
+      await rootPrebootAndSetup(root);
 
       await expect(root.start()).resolves.not.toThrowError();
       // TODO check that the destination indices contain data, but NOT the conflicting objects
@@ -216,7 +216,7 @@ function createRoot(discardCorruptObjects?: string) {
   );
 }
 
-async function rootPrebotAndSetup(root: Root) {
+async function rootPrebootAndSetup(root: Root) {
   await root.preboot();
   const coreSetup = await root.setup();
 
