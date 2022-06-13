@@ -70,10 +70,10 @@ function mapDispatchToProps(dispatch: ThunkDispatch<MapStoreState, void, AnyActi
       dispatch(mapDestroyed());
     },
     setMouseCoordinates: ({ lat, lon }: { lat: number; lon: number }) => {
-      //dispatch(setMouseCoordinates({ lat, lon }));
+      dispatch(setMouseCoordinates({ lat, lon }));
     },
     clearMouseCoordinates: () => {
-      //dispatch(clearMouseCoordinates());
+      dispatch(clearMouseCoordinates());
     },
     clearGoto: () => {
       dispatch(clearGoto());

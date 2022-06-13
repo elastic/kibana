@@ -91,6 +91,8 @@ export class MapComponent extends Component<Props, State> {
           ]),
         },
         mapCenter: this.props.mapCenter,
+        filterByMapExtent: false,
+        linkMapView: false,
       }
     );
     this._mapEmbeddable.setOnInitialRenderComplete(this.props.onInitialRenderComplete);

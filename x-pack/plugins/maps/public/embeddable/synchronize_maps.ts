@@ -5,27 +5,31 @@
  * 2.0.
  */
 
-import { MapCenterAndZoom, MapExtent } from '../../common/descriptor_types';
+import { MapCenterAndZoom } from '../../common/descriptor_types';
 
 const registry: Record<string, (lat: number, lon: number, zoom: number) => void> = {};
 let location: MapCenterAndZoom | undefined;
 
 export const synchronizeMaps = {
-  getLocation: function() {
+  getLocation() {
     return location;
   },
-  setLocation: function (triggeringEmbedableId: string, lat: number, lon: number, zoom: number) {
+  setLocation(triggeringEmbedableId: string, lat: number, lon: number, zoom: number) {
+    if (location && location.lat === lat && location.lon === lon && location.zoom === zoom) {
+      return;
+    }
+
     location = { lat, lon, zoom };
-    Object.keys(registry).forEach(key => {
+    Object.keys(registry).forEach((key) => {
       if (key !== triggeringEmbedableId) {
         registry[key](lat, lon, zoom);
       }
     });
   },
-  register: function (embeddableId: string, handler: (lat: number, lon: number, zoom: number) => void) {
+  register(embeddableId: string, handler: (lat: number, lon: number, zoom: number) => void) {
     registry[embeddableId] = handler;
   },
-  unregister: function (embeddableId) {
+  unregister(embeddableId: string) {
     delete registry[embeddableId];
   },
 };
