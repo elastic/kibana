@@ -32,7 +32,7 @@ export const addTimerangeToQuery = (
   try {
     const parsedQuery = JSON.parse(query);
     if (!parsedQuery.bool) {
-      throw "Field 'bool' does not exist in query.";
+      throw new Error("Field 'bool' does not exist in query.");
     }
 
     const range = {

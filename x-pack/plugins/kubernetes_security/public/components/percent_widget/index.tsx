@@ -42,7 +42,7 @@ export const PercentWidget = ({
   globalFilter,
   groupedBy,
   countBy,
-}: PercentCompareWidgetDeps) => {
+}: PercentWidgetDeps) => {
   const [hoveredFilter, setHoveredFilter] = useState<number | null>(null);
   const styles = useStyles();
 
@@ -100,7 +100,7 @@ export const PercentWidget = ({
     });
 
     return result;
-  }, [dataValueMap, getFilterForValueButton, getFilterOutValueButton]);
+  }, [dataValueMap, filterManager, getFilterForValueButton, getFilterOutValueButton]);
 
   return (
     <div css={styles.container}>

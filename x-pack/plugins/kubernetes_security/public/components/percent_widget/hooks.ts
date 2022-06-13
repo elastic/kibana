@@ -4,9 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { useQuery } from 'react-query';
-import { CoreStart } from '@kbn/core/server';
+import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QUERY_KEY_PERCENT_WIDGET, AGGREGATE_ROUTE } from '../../../common/constants';
 import { AggregateResults } from '../../../common/types/aggregate';
@@ -33,8 +32,9 @@ export const useFetchPercentWidgetData = (
         },
       });
 
-      const data = res.reduce((groupedByKeyValue, { key, key_as_string, count_by_aggs }) => {
-        groupedByKeyValue[key_as_string || (key.toString() as string)] = count_by_aggs.value;
+      const data = res.reduce((groupedByKeyValue, aggregate) => {
+        groupedByKeyValue[aggregate.key_as_string || (aggregate.key.toString() as string)] =
+          aggregate.count_by_aggs.value;
         return groupedByKeyValue;
       }, {} as Record<string, number>);
 
