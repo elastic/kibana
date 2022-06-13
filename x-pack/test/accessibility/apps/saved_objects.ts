@@ -45,7 +45,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.home.removeSampleDataSet('flights');
-
     });
 
     it('saved objects management page a11y validations', async () => {
@@ -92,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.settings.navigateTo();
         await PageObjects.settings.clickKibanaSavedObjects();
-      })
+      });
       it('share to space panel from actions meets a11y requirements ', async () => {
         await testSubjects.click('euiCollapsedItemActionsButton');
         await find.byCssSelector('.euiContextMenuPanel');
