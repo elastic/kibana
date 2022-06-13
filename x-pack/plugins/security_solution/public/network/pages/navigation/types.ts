@@ -6,6 +6,7 @@
  */
 
 import type { DataViewBase } from '@kbn/es-query';
+import { NarrowDateRange } from '../../../common/components/ml/types';
 import { ESTermQuery } from '../../../../common/typed_json';
 
 import { NavTab } from '../../../common/components/navigation/types';
@@ -14,17 +15,17 @@ import { networkModel } from '../../store';
 import { GlobalTimeArgs } from '../../../common/containers/use_global_time';
 
 import { SetAbsoluteRangeDatePicker } from '../types';
-import { NarrowDateRange } from '../../../common/components/ml/types';
 import { DocValueFields } from '../../../common/containers/source';
 
 interface QueryTabBodyProps extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
-  skip: boolean;
-  type: networkModel.NetworkType;
-  startDate: string;
   endDate: string;
   filterQuery?: string | ESTermQuery;
-  narrowDateRange?: NarrowDateRange;
   indexNames: string[];
+  ip?: string;
+  narrowDateRange?: NarrowDateRange;
+  skip: boolean;
+  startDate: string;
+  type: networkModel.NetworkType;
 }
 
 export type NetworkComponentQueryProps = QueryTabBodyProps & {
@@ -32,18 +33,19 @@ export type NetworkComponentQueryProps = QueryTabBodyProps & {
 };
 
 export type IPsQueryTabBodyProps = QueryTabBodyProps & {
+  flowTarget: FlowTargetSourceDest;
   indexPattern: DataViewBase;
+};
+
+export type FTQueryTabBodyProps = QueryTabBodyProps & {
   flowTarget: FlowTargetSourceDest;
 };
 
-export type TlsQueryTabBodyProps = QueryTabBodyProps & {
-  flowTarget: FlowTargetSourceDest;
-  ip?: string;
+export type IPQueryTabBodyProps = FTQueryTabBodyProps & {
+  ip: string;
 };
 
-export type HttpQueryTabBodyProps = QueryTabBodyProps & {
-  ip?: string;
-};
+export type HttpQueryTabBodyProps = QueryTabBodyProps;
 
 export type NetworkRoutesProps = GlobalTimeArgs & {
   docValueFields: DocValueFields[];
@@ -53,6 +55,15 @@ export type NetworkRoutesProps = GlobalTimeArgs & {
   indexNames: string[];
   setAbsoluteRangeDatePicker: SetAbsoluteRangeDatePicker;
 };
+
+export enum NetworkRouteType {
+  flows = 'flows',
+  dns = 'dns',
+  anomalies = 'anomalies',
+  tls = 'tls',
+  http = 'http',
+  alerts = 'external-alerts',
+}
 
 export type KeyNetworkNavTabWithoutMlPermission = NetworkRouteType.dns &
   NetworkRouteType.flows &
@@ -66,15 +77,6 @@ type KeyNetworkNavTabWithMlPermission = KeyNetworkNavTabWithoutMlPermission &
 type KeyNetworkNavTab = KeyNetworkNavTabWithoutMlPermission | KeyNetworkNavTabWithMlPermission;
 
 export type NetworkNavTab = Record<KeyNetworkNavTab, NavTab>;
-
-export enum NetworkRouteType {
-  flows = 'flows',
-  dns = 'dns',
-  anomalies = 'anomalies',
-  tls = 'tls',
-  http = 'http',
-  alerts = 'external-alerts',
-}
 
 export type GetNetworkRoutePath = (
   capabilitiesFetched: boolean,

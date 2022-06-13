@@ -8,7 +8,7 @@
 import deepmerge from 'deepmerge';
 
 import { MlSummaryJob } from '@kbn/ml-plugin/public';
-import { FlowTarget } from '../../../../../common/search_strategy';
+import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import { ESTermQuery } from '../../../../../common/typed_json';
 import { createFilter } from '../../helpers';
 
@@ -17,7 +17,7 @@ export const getAnomaliesFilterQuery = (
   anomaliesFilterQuery: object = {},
   securityJobs: MlSummaryJob[] = [],
   anomalyScore: number,
-  flowTarget?: FlowTarget,
+  flowTarget?: FlowTargetSourceDest,
   ip?: string
 ): string => {
   const securityJobIds = securityJobs

@@ -11,12 +11,15 @@ import { useDispatch } from 'react-redux';
 import { useParams } from 'react-router-dom';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import {
-  FlowTarget,
-  FlowTargetSourceDest,
-  LastEventIndexKey,
-} from '../../../../common/search_strategy';
+  CountriesQueryTabBody,
+  HttpQueryTabBody,
+  IPsQueryTabBody,
+  TlsQueryTabBody,
+  UsersQueryTabBody,
+} from '../navigation';
+import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
+import { FlowTargetSourceDest, LastEventIndexKey } from '../../../../common/search_strategy';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
@@ -39,11 +42,6 @@ import { inputsSelectors } from '../../../common/store';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
 import { setNetworkDetailsTablesActivePageToZero } from '../../store/actions';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
-import { NetworkHttpQueryTable } from './network_http_query_table';
-import { NetworkTopCountriesQueryTable } from './network_top_countries_query_table';
-import { NetworkTopNFlowQueryTable } from './network_top_n_flow_query_table';
-import { TlsQueryTable } from './tls_query_table';
-import { UsersQueryTable } from './users_query_table';
 import { AnomaliesQueryTabBody } from '../../../common/containers/anomalies/anomalies_query_tab_body';
 import { networkModel } from '../../store';
 import { SecurityPageName } from '../../../app/types';
@@ -59,7 +57,7 @@ const NetworkDetailsComponent: React.FC = () => {
   const { to, from, setQuery, isInitializing } = useGlobalTime();
   const { detailName, flowTarget } = useParams<{
     detailName: string;
-    flowTarget: FlowTarget;
+    flowTarget: FlowTargetSourceDest;
   }>();
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
@@ -176,32 +174,32 @@ const NetworkDetailsComponent: React.FC = () => {
 
             <ConditionalFlexGroup direction="column">
               <EuiFlexItem>
-                <NetworkTopNFlowQueryTable
+                <IPsQueryTabBody
                   endDate={to}
                   filterQuery={filterQuery}
                   flowTarget={FlowTargetSourceDest.source}
                   indexNames={selectedPatterns}
+                  indexPattern={indexPattern}
                   ip={ip}
+                  setQuery={setQuery}
                   skip={shouldSkip}
                   startDate={from}
                   type={type}
-                  setQuery={setQuery}
-                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
 
               <EuiFlexItem>
-                <NetworkTopNFlowQueryTable
+                <IPsQueryTabBody
                   endDate={to}
-                  flowTarget={FlowTargetSourceDest.destination}
                   filterQuery={filterQuery}
+                  flowTarget={FlowTargetSourceDest.destination}
                   indexNames={selectedPatterns}
+                  indexPattern={indexPattern}
                   ip={ip}
+                  setQuery={setQuery}
                   skip={shouldSkip}
                   startDate={from}
                   type={type}
-                  setQuery={setQuery}
-                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
             </ConditionalFlexGroup>
@@ -210,69 +208,69 @@ const NetworkDetailsComponent: React.FC = () => {
 
             <ConditionalFlexGroup direction="column">
               <EuiFlexItem>
-                <NetworkTopCountriesQueryTable
+                <CountriesQueryTabBody
                   endDate={to}
                   filterQuery={filterQuery}
                   flowTarget={FlowTargetSourceDest.source}
                   indexNames={selectedPatterns}
+                  indexPattern={indexPattern}
                   ip={ip}
+                  setQuery={setQuery}
                   skip={shouldSkip}
                   startDate={from}
                   type={type}
-                  setQuery={setQuery}
-                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
 
               <EuiFlexItem>
-                <NetworkTopCountriesQueryTable
+                <CountriesQueryTabBody
                   endDate={to}
-                  flowTarget={FlowTargetSourceDest.destination}
                   filterQuery={filterQuery}
+                  flowTarget={FlowTargetSourceDest.destination}
                   indexNames={selectedPatterns}
+                  indexPattern={indexPattern}
                   ip={ip}
+                  setQuery={setQuery}
                   skip={shouldSkip}
                   startDate={from}
                   type={type}
-                  setQuery={setQuery}
-                  indexPattern={indexPattern}
                 />
               </EuiFlexItem>
             </ConditionalFlexGroup>
 
             <EuiSpacer />
 
-            <UsersQueryTable
+            <UsersQueryTabBody
               endDate={to}
               filterQuery={filterQuery}
               flowTarget={flowTarget}
               indexNames={selectedPatterns}
               ip={ip}
+              setQuery={setQuery}
               skip={shouldSkip}
               startDate={from}
               type={type}
-              setQuery={setQuery}
             />
 
             <EuiSpacer />
 
-            <NetworkHttpQueryTable
+            <HttpQueryTabBody
               endDate={to}
               filterQuery={filterQuery}
               indexNames={selectedPatterns}
               ip={ip}
+              setQuery={setQuery}
               skip={shouldSkip}
               startDate={from}
               type={type}
-              setQuery={setQuery}
             />
 
             <EuiSpacer />
 
-            <TlsQueryTable
+            <TlsQueryTabBody
               endDate={to}
               filterQuery={filterQuery}
-              flowTarget={flowTarget as unknown as FlowTargetSourceDest}
+              flowTarget={flowTarget}
               indexNames={selectedPatterns}
               ip={ip}
               setQuery={setQuery}
@@ -284,18 +282,18 @@ const NetworkDetailsComponent: React.FC = () => {
             <EuiSpacer />
 
             <AnomaliesQueryTabBody
-              filterQuery={filterQuery}
-              setQuery={setQuery}
-              startDate={from}
+              AnomaliesTableComponent={AnomaliesNetworkTable}
               endDate={to}
-              skip={shouldSkip}
+              filterQuery={filterQuery}
+              flowTarget={flowTarget}
+              hideHistogramIfEmpty={true}
               indexNames={selectedPatterns}
               ip={ip}
-              type={type}
-              flowTarget={flowTarget}
               narrowDateRange={narrowDateRange}
-              hideHistogramIfEmpty={true}
-              AnomaliesTableComponent={AnomaliesNetworkTable}
+              setQuery={setQuery}
+              skip={shouldSkip}
+              startDate={from}
+              type={type}
             />
           </SecuritySolutionPageWrapper>
         </>

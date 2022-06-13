@@ -7,7 +7,11 @@
 
 import { EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
-import { FlowTarget, FlowDirection } from '../../../../common/search_strategy';
+import {
+  FlowTarget,
+  FlowTargetSourceDest,
+  FlowDirection,
+} from '../../../../common/search_strategy';
 
 import * as i18n from './translations';
 
@@ -41,10 +45,10 @@ const toggleTargetOptions = (id: string, displayText: string[]) => [
 interface OwnProps {
   id: string;
   isLoading: boolean;
-  selectedTarget: FlowTarget;
+  selectedTarget: FlowTarget | FlowTargetSourceDest;
   displayTextOverride?: string[];
   selectedDirection?: FlowDirection;
-  updateFlowTargetAction: (flowTarget: FlowTarget) => void;
+  updateFlowTargetAction: (flowTarget: FlowTarget | FlowTargetSourceDest) => void;
 }
 
 export type FlowTargetSelectProps = OwnProps;

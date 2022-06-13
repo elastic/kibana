@@ -503,20 +503,16 @@ export type TimelineExpandedUserType =
       };
     }
   | EmptyObject;
-
-enum FlowTarget {
-  client = 'client',
+enum FlowTargetSourceDest {
   destination = 'destination',
-  server = 'server',
   source = 'source',
 }
-
 export type TimelineExpandedNetworkType =
   | {
       panelView?: 'networkDetail';
       params?: {
         ip: string;
-        flowTarget: FlowTarget;
+        flowTarget: FlowTargetSourceDest;
       };
     }
   | EmptyObject;

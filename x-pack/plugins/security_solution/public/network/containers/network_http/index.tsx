@@ -46,7 +46,7 @@ export interface NetworkHttpArgs {
 }
 
 interface UseNetworkHttp {
-  id?: string;
+  id: string;
   ip?: string;
   indexNames: string[];
   type: networkModel.NetworkType;
@@ -59,7 +59,7 @@ interface UseNetworkHttp {
 export const useNetworkHttp = ({
   endDate,
   filterQuery,
-  id = ID,
+  id,
   indexNames,
   ip,
   skip,

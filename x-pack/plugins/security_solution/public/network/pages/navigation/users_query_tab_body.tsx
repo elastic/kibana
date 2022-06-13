@@ -5,64 +5,63 @@
  * 2.0.
  */
 
-import { getOr } from 'lodash/fp';
 import React, { useEffect, useState } from 'react';
+import { getOr } from 'lodash/fp';
 import { manageQuery } from '../../../common/components/page/manage_query';
-import { NetworkTopNFlowTable } from '../../components/network_top_n_flow_table';
-import { useNetworkTopNFlow, ID } from '../../containers/network_top_n_flow';
-import { NetworkWithIndexComponentsQueryTableProps } from './types';
+import { useNetworkUsers, ID } from '../../containers/users';
+import { IPQueryTabBodyProps } from './types';
+import { UsersTable } from '../../components/users_table';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
-const NetworkTopNFlowTableManage = manageQuery(NetworkTopNFlowTable);
+const UsersTableManage = manageQuery(UsersTable);
 
-export const NetworkTopNFlowQueryTable = ({
+export const UsersQueryTabBody = ({
   endDate,
   filterQuery,
   flowTarget,
   ip,
-  indexNames,
   setQuery,
   skip,
   startDate,
   type,
-}: NetworkWithIndexComponentsQueryTableProps) => {
-  const { toggleStatus } = useQueryToggle(`${ID}-${flowTarget}`);
+}: IPQueryTabBodyProps) => {
+  const queryId = `${ID}-${type}`;
+  const { toggleStatus } = useQueryToggle(queryId);
   const [querySkip, setQuerySkip] = useState(skip || !toggleStatus);
   useEffect(() => {
     setQuerySkip(skip || !toggleStatus);
   }, [skip, toggleStatus]);
   const [
     loading,
-    { id, inspect, isInspected, loadPage, networkTopNFlow, pageInfo, refetch, totalCount },
-  ] = useNetworkTopNFlow({
+    { id, inspect, isInspected, networkUsers, totalCount, pageInfo, loadPage, refetch },
+  ] = useNetworkUsers({
     endDate,
     filterQuery,
     flowTarget,
-    indexNames,
+    id: queryId,
     ip,
     skip: querySkip,
     startDate,
-    type,
   });
 
   return (
-    <NetworkTopNFlowTableManage
-      data={networkTopNFlow}
-      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
-      flowTargeted={flowTarget}
+    <UsersTableManage
+      data={networkUsers}
       id={id}
       inspect={inspect}
       isInspect={isInspected}
+      flowTarget={flowTarget}
+      fakeTotalCount={getOr(50, 'fakeTotalCount', pageInfo)}
       loading={loading}
       loadPage={loadPage}
+      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       refetch={refetch}
       setQuery={setQuery}
       setQuerySkip={setQuerySkip}
-      showMorePagesIndicator={getOr(false, 'showMorePagesIndicator', pageInfo)}
       totalCount={totalCount}
       type={type}
     />
   );
 };
 
-NetworkTopNFlowQueryTable.displayName = 'NetworkTopNFlowQueryTable';
+UsersQueryTabBody.displayName = 'UsersQueryTable';

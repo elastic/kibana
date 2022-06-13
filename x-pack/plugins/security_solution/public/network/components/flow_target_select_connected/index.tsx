@@ -15,7 +15,11 @@ import * as i18nIp from '../details/translations';
 
 import { FlowTargetSelect } from '../flow_controls/flow_target_select';
 import { IpOverviewId } from '../../../timelines/components/field_renderers/field_renderers';
-import { FlowTarget, FlowDirection } from '../../../../common/search_strategy';
+import {
+  FlowTarget,
+  FlowTargetSourceDest,
+  FlowDirection,
+} from '../../../../common/search_strategy';
 
 const SelectTypeItem = styled(EuiFlexItem)`
   min-width: 180px;
@@ -24,13 +28,13 @@ const SelectTypeItem = styled(EuiFlexItem)`
 SelectTypeItem.displayName = 'SelectTypeItem';
 
 interface Props {
-  flowTarget: FlowTarget;
+  flowTarget: FlowTarget | FlowTargetSourceDest;
 }
 
 const getUpdatedFlowTargetPath = (
   location: Location,
-  currentFlowTarget: FlowTarget,
-  newFlowTarget: FlowTarget
+  currentFlowTarget: FlowTarget | FlowTargetSourceDest,
+  newFlowTarget: FlowTarget | FlowTargetSourceDest
 ) => {
   const newPathame = location.pathname.replace(currentFlowTarget, newFlowTarget);
 
@@ -42,7 +46,7 @@ export const FlowTargetSelectConnectedComponent: React.FC<Props> = ({ flowTarget
   const location = useLocation();
 
   const updateNetworkDetailsFlowTarget = useCallback(
-    (newFlowTarget: FlowTarget) => {
+    (newFlowTarget: FlowTarget | FlowTargetSourceDest) => {
       const newPath = getUpdatedFlowTargetPath(location, flowTarget, newFlowTarget);
       history.push(newPath);
     },
