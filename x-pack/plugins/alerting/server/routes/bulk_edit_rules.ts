@@ -12,10 +12,6 @@ import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '..
 import { verifyAccessAndContext, rewriteRule, handleDisabledApiKeysError } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 
-const scheduleSchema = schema.object({
-  interval: schema.string(),
-});
-
 const ruleActionSchema = schema.object({
   group: schema.string(),
   id: schema.string(),
