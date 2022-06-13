@@ -9,6 +9,7 @@ import {
   BrowserSimpleFields,
   CommonFields,
   DataStream,
+  FormMonitorType,
   HTTPAdvancedFields,
   HTTPMethod,
   HTTPSimpleFields,
@@ -31,6 +32,7 @@ export const DEFAULT_NAMESPACE_STRING = 'default';
 
 export const DEFAULT_COMMON_FIELDS: CommonFields = {
   [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+  [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
   [ConfigKey.ENABLED]: true,
   [ConfigKey.SCHEDULE]: {
     number: '3',
@@ -84,6 +86,7 @@ export const DEFAULT_BROWSER_SIMPLE_FIELDS: BrowserSimpleFields = {
   [ConfigKey.SOURCE_ZIP_PASSWORD]: '',
   [ConfigKey.SOURCE_ZIP_FOLDER]: '',
   [ConfigKey.SOURCE_ZIP_PROXY_URL]: '',
+  [ConfigKey.TEXT_ASSERTION]: '',
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE_AUTHORITIES]: undefined,
   [ConfigKey.ZIP_URL_TLS_CERTIFICATE]: undefined,
   [ConfigKey.ZIP_URL_TLS_KEY]: undefined,
@@ -158,16 +161,22 @@ export const DEFAULT_FIELDS: MonitorDefaults = {
     ...DEFAULT_HTTP_SIMPLE_FIELDS,
     ...DEFAULT_HTTP_ADVANCED_FIELDS,
     ...DEFAULT_TLS_FIELDS,
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
   },
   [DataStream.TCP]: {
     ...DEFAULT_TCP_SIMPLE_FIELDS,
     ...DEFAULT_TCP_ADVANCED_FIELDS,
     ...DEFAULT_TLS_FIELDS,
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
   },
-  [DataStream.ICMP]: DEFAULT_ICMP_SIMPLE_FIELDS,
+  [DataStream.ICMP]: {
+    ...DEFAULT_ICMP_SIMPLE_FIELDS,
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
+  },
   [DataStream.BROWSER]: {
     ...DEFAULT_BROWSER_SIMPLE_FIELDS,
     ...DEFAULT_BROWSER_ADVANCED_FIELDS,
     ...DEFAULT_TLS_FIELDS,
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
   },
 };

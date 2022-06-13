@@ -13,6 +13,7 @@ import {
   SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
 import { API_URLS } from '../../../../../common/constants';
+import { DecryptedSyntheticsMonitorSavedObject } from '../../../../../common/types';
 
 export const createMonitorAPI = async ({
   monitor,
@@ -30,4 +31,12 @@ export const updateMonitorAPI = async ({
   id: string;
 }): Promise<{ attributes: { errors: ServiceLocationErrors } } | SyntheticsMonitorWithId> => {
   return await apiService.put(`${API_URLS.SYNTHETICS_MONITORS}/${id}`, monitor);
+};
+
+export const getMonitorAPI = async ({
+  id,
+}: {
+  id: string;
+}): Promise<DecryptedSyntheticsMonitorSavedObject> => {
+  return await apiService.get(`${API_URLS.SYNTHETICS_MONITORS}/${id}`);
 };

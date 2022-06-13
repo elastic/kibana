@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiSteps, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { FormMonitorType } from '../types';
+import { ConfigKey, FormMonitorType } from '../types';
 import { AdvancedConfig } from '../advanced';
 import { StepMap } from '../form/config';
 import { MonitorTypePortal } from './monitor_type_portal';
@@ -21,7 +21,7 @@ export const MonitorSteps = ({
   isEditFlow?: boolean;
 }) => {
   const { watch } = useFormContext();
-  const [type]: [FormMonitorType] = watch(['formMonitorType']);
+  const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
   const steps = stepMap[type];
 
   return (
@@ -37,13 +37,13 @@ export const MonitorSteps = ({
               {step.children}
             </EuiPanel>
             <EuiSpacer size="m" />
-            <MonitorTypePortal monitorType={type} />
           </>
         ))
       ) : (
         <EuiSteps steps={steps} headingElement="h2" />
       )}
       <AdvancedConfig />
+      <MonitorTypePortal monitorType={type} />
     </>
   );
 };

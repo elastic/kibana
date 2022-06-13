@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { UseFormReturn } from 'react-hook-form';
+import { UseFormReturn, ControllerRenderProps, ControllerFieldState } from 'react-hook-form';
 import {
   EuiButtonEmpty,
   EuiButtonGroup,
@@ -56,11 +56,12 @@ export interface FieldMeta {
   ariaLabel?: string;
   helpText?: string | React.ReactNode;
   props?: (params: {
-    value: any;
+    field?: ControllerRenderProps;
     setValue: UseFormReturn['setValue'];
     reset: UseFormReturn['reset'];
     locations: ServiceLocations;
     dependencies: unknown[];
+    dependenciesFieldMeta: Record<string, ControllerFieldState>;
   }) => Record<string, any>;
   controlled?: boolean;
   required?: boolean;
@@ -94,11 +95,12 @@ export type FieldConfig = Record<
     step1: FieldMeta[];
     step2: FieldMeta[];
     step3?: FieldMeta[];
+    scriptEdit?: FieldMeta[];
     advanced?: AdvancedFieldGroup[];
   }
 >;
 
-export type StepKey = 'step1' | 'step2' | 'step3';
+export type StepKey = 'step1' | 'step2' | 'step3' | 'scriptEdit';
 
 interface Step {
   title: string;
@@ -125,6 +127,7 @@ const MONITOR_DETAILS_STEP: Step = {
     />
   ),
 };
+
 const MONITOR_SCRIPT_STEP: Step = {
   title: 'Add a script',
   children: (
@@ -152,6 +155,33 @@ const MONITOR_SCRIPT_STEP: Step = {
   ),
 };
 
+const MONITOR_SCRIPT_STEP_EDIT: Step = {
+  title: 'Monitor script',
+  children: (
+    <StepFields
+      description={
+        <>
+          <p>
+            Use Elastic Script Recorder to generate and upload a script. Alternatively, you can edit
+            the existing Playwright script (or paste a new one) in the script editor.
+          </p>
+          <EuiFlexGroup justifyContent="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                href="https://github.com/elastic/synthetics-recorder/releases/"
+                iconType="download"
+              >
+                Download Script Recorder
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      }
+      stepKey="scriptEdit"
+    />
+  ),
+};
+
 export const ADD_MONITOR_STEPS: StepMap = {
   [FormMonitorType.MULTISTEP]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP, MONITOR_SCRIPT_STEP],
   [FormMonitorType.SINGLE]: [MONITOR_TYPE_STEP, MONITOR_DETAILS_STEP],
@@ -161,7 +191,7 @@ export const ADD_MONITOR_STEPS: StepMap = {
 };
 
 export const EDIT_MONITOR_STEPS: StepMap = {
-  [FormMonitorType.MULTISTEP]: [MONITOR_SCRIPT_STEP, MONITOR_DETAILS_STEP, MONITOR_SCRIPT_STEP],
+  [FormMonitorType.MULTISTEP]: [MONITOR_SCRIPT_STEP_EDIT, MONITOR_DETAILS_STEP],
   [FormMonitorType.SINGLE]: [MONITOR_DETAILS_STEP],
   [FormMonitorType.HTTP]: [MONITOR_DETAILS_STEP],
   [FormMonitorType.ICMP]: [MONITOR_DETAILS_STEP],
@@ -289,18 +319,18 @@ export const MONITOR_TYPE_CONFIG = {
 };
 
 export const FIELD: Record<string, FieldMeta> = {
-  [ConfigKey.MONITOR_TYPE]: {
-    fieldKey: 'formMonitorType',
+  [ConfigKey.FORM_MONITOR_TYPE]: {
+    fieldKey: ConfigKey.FORM_MONITOR_TYPE,
     required: true,
     component: MonitorTypeRadioGroup,
     ariaLabel: 'Monitor Type',
     controlled: true,
-    props: ({ value, reset }) => ({
+    props: ({ field, reset }) => ({
       onChange: (_: string, monitorType: FormMonitorType) => {
         const defaultFields = DEFAULT_FORM_FIELDS[monitorType];
         reset(defaultFields);
       },
-      selectedOption: value,
+      selectedOption: field?.value,
       options: Object.values(MONITOR_TYPE_CONFIG),
     }),
     validation: () => ({
@@ -313,6 +343,18 @@ export const FIELD: Record<string, FieldMeta> = {
     component: EuiFieldText,
     label: 'Website URL',
     helpText: 'For example, https://www.elastic.co.',
+    controlled: true,
+    dependencies: [ConfigKey.NAME],
+    props: ({ setValue, dependenciesFieldMeta }) => {
+      return {
+        onChange: (event: React.ChangeEvent<HTMLInputElement>) => {
+          setValue(ConfigKey.URLS, event.target.value);
+          if (!dependenciesFieldMeta[ConfigKey.NAME].isDirty) {
+            setValue(ConfigKey.NAME, event.target.value);
+          }
+        },
+      };
+    },
   },
   [`${ConfigKey.URLS}__http`]: {
     fieldKey: ConfigKey.URLS,
@@ -340,6 +382,7 @@ export const FIELD: Record<string, FieldMeta> = {
     controlled: true,
     label: 'Monitor name',
     helpText: 'Choose a name to help identify this monitor in the future.',
+    dependencies: [ConfigKey.URLS, ConfigKey.HOSTS],
     customHook: (value: unknown) => ({
       fieldKey: 'nameAlreadyExists',
       func: useMonitorName,
@@ -377,11 +420,11 @@ export const FIELD: Record<string, FieldMeta> = {
     helpText:
       'Where do you want to run this test from? Additional locations will increase your total cost.',
     props: ({
-      value,
+      field,
       setValue,
       locations,
     }: {
-      value: ServiceLocations;
+      field?: ControllerRenderProps;
       setValue: UseFormReturn['setValue'];
       locations: ServiceLocations;
     }) => {
@@ -391,7 +434,7 @@ export const FIELD: Record<string, FieldMeta> = {
           id: location.id,
           isServiceManaged: location.isServiceManaged,
         })),
-        selectedOptions: Object.values(value).map((location) => ({
+        selectedOptions: Object.values(field?.value as ServiceLocations).map((location) => ({
           label: locations?.find((loc) => location.id === loc.id)?.label,
           id: location.id,
           isServiceManaged: location.isServiceManaged,
@@ -415,8 +458,8 @@ export const FIELD: Record<string, FieldMeta> = {
     helpText:
       'A list of tags that will be sent with each monitor event. Useful for searching and segmenting data.',
     controlled: true,
-    props: ({ value }: { value: string[] }) => ({
-      selectedOptions: value,
+    props: ({ field }) => ({
+      selectedOptions: field?.value,
     }),
   },
   [ConfigKey.TIMEOUT]: {
@@ -453,8 +496,8 @@ export const FIELD: Record<string, FieldMeta> = {
     helpText:
       'Corrseponds to the service.name ECS field from APM. Set this to enable integrations between APM and Synthetics data.',
     controlled: true,
-    props: ({ value }: { value: string[] }) => ({
-      selectedOptions: value,
+    props: ({ field }) => ({
+      selectedOptions: field?.value,
     }),
   },
   [ConfigKey.NAMESPACE]: {
@@ -470,8 +513,8 @@ export const FIELD: Record<string, FieldMeta> = {
       </span>
     ),
     controlled: true,
-    props: ({ value }: { value: string[] }) => ({
-      selectedOptions: value,
+    props: ({ field }) => ({
+      selectedOptions: field,
     }),
   },
   [ConfigKey.MAX_REDIRECTS]: {
@@ -597,8 +640,8 @@ export const FIELD: Record<string, FieldMeta> = {
     helpText:
       'A list of expected status codes. Press enter to add a new code. 4xx and 5xx codes are considered down by default. Other codes are considered up.',
     controlled: true,
-    props: ({ value }: { value: string[] }) => ({
-      selectedOptions: value,
+    props: ({ field }) => ({
+      selectedOptions: field?.value,
     }),
     validation: () => ({
       validate: (value) => {
@@ -630,8 +673,8 @@ export const FIELD: Record<string, FieldMeta> = {
     helpText:
       'A list of regular expressions to match the body output. Press enter to add a new expression. Only a single expression needs to match.',
     controlled: true,
-    props: ({ value }: { value: string[] }) => ({
-      selectedOptions: value,
+    props: ({ field }) => ({
+      selectedOptions: field?.value,
     }),
   },
   [ConfigKey.RESPONSE_BODY_CHECK_NEGATIVE]: {
@@ -641,8 +684,8 @@ export const FIELD: Record<string, FieldMeta> = {
     helpText:
       'A list of regular expressions to match the the body output negatively. Press enter to add a new expression. Return match failed if single expression matches.',
     controlled: true,
-    props: ({ value }: { value: string[] }) => ({
-      selectedOptions: value,
+    props: ({ field }) => ({
+      selectedOptions: field?.value,
     }),
   },
   [ConfigKey.RESPONSE_RECEIVE_CHECK]: {
@@ -670,9 +713,20 @@ export const FIELD: Record<string, FieldMeta> = {
     component: SourceField,
     ariaLabel: 'Monitor script',
     controlled: true,
+    props: () => ({}),
+    validation: () => ({
+      validate: (value) => Boolean(value.script),
+    }),
+    error: 'Monitor script is required',
+  },
+  [`${ConfigKey.SOURCE_INLINE}__edit`]: {
+    fieldKey: 'source.inline',
+    required: true,
+    component: SourceField,
+    ariaLabel: 'Monitor script',
+    controlled: true,
     props: () => ({
-      id: 'javascript',
-      languageId: MonacoEditorLangId.JAVASCRIPT,
+      isEditFlow: true,
     }),
     validation: () => ({
       validate: (value) => Boolean(value.script),
@@ -713,12 +767,18 @@ export const FIELD: Record<string, FieldMeta> = {
     label: 'Supported TLS protocols',
     controlled: true,
     showWhen: ['isTLSEnabled', true],
-    props: ({ value, setValue }: { value: string[]; setValue: UseFormReturn['setValue'] }) => {
+    props: ({
+      field,
+      setValue,
+    }: {
+      field?: ControllerRenderProps;
+      setValue: UseFormReturn['setValue'];
+    }) => {
       return {
         options: Object.values(TLSVersion).map((version) => ({
           label: version,
         })),
-        selectedOptions: Object.values(value).map((version) => ({
+        selectedOptions: Object.values(field?.value).map((version) => ({
           label: version,
         })),
         onChange: (updatedValues: Array<EuiComboBoxOptionOption<TLSVersion>>) => {
@@ -765,14 +825,14 @@ export const FIELD: Record<string, FieldMeta> = {
     helpText: 'Set this option to manage the screenshots captured by the synthetics agent.',
     controlled: true,
     props: ({
-      value,
+      field,
       setValue,
     }: {
-      value: ScreenshotOption;
+      field?: ControllerRenderProps;
       setValue: UseFormReturn['setValue'];
     }) => ({
       type: 'single',
-      idSelected: value,
+      idSelected: field?.value,
       onChange: (option: ScreenshotOption) => setValue(ConfigKey.SCREENSHOTS, option),
       options: Object.values(ScreenshotOption).map((option) => ({
         id: option,
@@ -781,6 +841,16 @@ export const FIELD: Record<string, FieldMeta> = {
       css: {
         'text-transform': 'capitalize',
       },
+    }),
+  },
+  [ConfigKey.TEXT_ASSERTION]: {
+    fieldKey: ConfigKey.TEXT_ASSERTION,
+    component: EuiFieldText,
+    label: 'Text assertion',
+    required: true,
+    helpText: 'Consider the page loaded when the specified text is rendered.',
+    validation: () => ({
+      required: true,
     }),
   },
 };
@@ -855,7 +925,7 @@ export const TCP_ADVANCED = {
 
 export const FIELD_CONFIG: FieldConfig = {
   [FormMonitorType.HTTP]: {
-    step1: [FIELD[ConfigKey.MONITOR_TYPE]],
+    step1: [FIELD[ConfigKey.FORM_MONITOR_TYPE]],
     step2: [
       FIELD[`${ConfigKey.URLS}__http`],
       FIELD[ConfigKey.NAME],
@@ -873,7 +943,7 @@ export const FIELD_CONFIG: FieldConfig = {
     ],
   },
   [FormMonitorType.TCP]: {
-    step1: [FIELD[ConfigKey.MONITOR_TYPE]],
+    step1: [FIELD[ConfigKey.FORM_MONITOR_TYPE]],
     step2: [
       FIELD[`${ConfigKey.HOSTS}__tcp`],
       FIELD[ConfigKey.NAME],
@@ -889,9 +959,10 @@ export const FIELD_CONFIG: FieldConfig = {
     ],
   },
   [FormMonitorType.MULTISTEP]: {
-    step1: [FIELD[ConfigKey.MONITOR_TYPE]],
+    step1: [FIELD[ConfigKey.FORM_MONITOR_TYPE]],
     step2: [FIELD[ConfigKey.NAME], FIELD[ConfigKey.LOCATIONS], FIELD[ConfigKey.SCHEDULE]],
     step3: [FIELD[ConfigKey.SOURCE_INLINE]],
+    scriptEdit: [FIELD[`${ConfigKey.SOURCE_INLINE}__edit`]],
     advanced: [
       {
         ...DEFAULT_DATA_OPTIONS,
@@ -905,9 +976,10 @@ export const FIELD_CONFIG: FieldConfig = {
     ],
   },
   [FormMonitorType.SINGLE]: {
-    step1: [FIELD[ConfigKey.MONITOR_TYPE]],
+    step1: [FIELD[ConfigKey.FORM_MONITOR_TYPE]],
     step2: [
       FIELD[`${ConfigKey.URLS}__single`],
+      FIELD[ConfigKey.TEXT_ASSERTION],
       FIELD[ConfigKey.NAME],
       FIELD[ConfigKey.LOCATIONS],
       FIELD[ConfigKey.SCHEDULE],
@@ -925,7 +997,7 @@ export const FIELD_CONFIG: FieldConfig = {
     ],
   },
   [FormMonitorType.ICMP]: {
-    step1: [FIELD[ConfigKey.MONITOR_TYPE]],
+    step1: [FIELD[ConfigKey.FORM_MONITOR_TYPE]],
     step2: [
       FIELD[`${ConfigKey.HOSTS}__icmp`],
       FIELD[ConfigKey.NAME],

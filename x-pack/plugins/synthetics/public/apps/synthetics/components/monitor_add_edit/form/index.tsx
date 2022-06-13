@@ -9,18 +9,24 @@ import React from 'react';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useFormWrapped } from './use_form_wrapped';
-import { FormMonitorType } from '../types';
-import { DEFAULT_FORM_FIELDS } from './defaults';
+import { FormMonitorType, SyntheticsMonitor } from '../types';
+import { DEFAULT_FORM_FIELDS, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
 import { Disclaimer } from './disclaimer';
 
-export const MonitorForm: React.FC = ({ children }) => {
+export const MonitorForm: React.FC<{ defaultValues?: SyntheticsMonitor }> = ({
+  children,
+  defaultValues,
+}) => {
   const methods = useFormWrapped({
     mode: 'onTouched',
     reValidateMode: 'onChange',
-    defaultValues: DEFAULT_FORM_FIELDS[FormMonitorType.MULTISTEP],
+    defaultValues:
+      formatDefaultFormValues(defaultValues as SyntheticsMonitor) ||
+      DEFAULT_FORM_FIELDS[FormMonitorType.MULTISTEP],
     shouldFocusError: true,
   });
+
   const {
     formState: { isValid, isSubmitted },
   } = methods;

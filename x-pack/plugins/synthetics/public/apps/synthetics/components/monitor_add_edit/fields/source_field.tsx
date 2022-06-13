@@ -35,9 +35,10 @@ interface Props {
   onChange: (sourceConfig: SourceConfig) => void;
   onBlur: (field: ConfigKey) => void;
   value: SourceConfig;
+  isEditFlow?: boolean;
 }
 
-export const SourceField = ({ onChange, onBlur, value }: Props) => {
+export const SourceField = ({ onChange, onBlur, value, isEditFlow = false}: Props) => {
   const [sourceType, setSourceType] = useState<SourceType>(
     value.type === 'inline' ? SourceType.INLINE : SourceType.SCRIPT_RECORDER
   );
@@ -90,6 +91,7 @@ export const SourceField = ({ onChange, onBlur, value }: Props) => {
             }));
           }}
           script={config.script}
+          isEditable={isEditFlow}
           fileName={config.fileName}
         />
       ),
@@ -98,8 +100,8 @@ export const SourceField = ({ onChange, onBlur, value }: Props) => {
       id: 'syntheticsBrowserInlineConfig',
       name: (
         <FormattedMessage
-          id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.label"
-          defaultMessage="Inline script"
+          id="xpack.synthetics.addEditMonitor.scriptEditor.label"
+          defaultMessage="Script editor"
         />
       ),
       'data-test-subj': `syntheticsSourceTab__inline`,
@@ -107,19 +109,16 @@ export const SourceField = ({ onChange, onBlur, value }: Props) => {
         <EuiFormRow
           helpText={
             <FormattedMessage
-              id="xpack.synthetics.createPackagePolicy.stepConfigure.monitorIntegrationSettingsSection.browser.inlineScript.helpText"
+              id="xpack.synthetics.addEditMonitor.scriptEditor.helpText"
               defaultMessage="Runs Synthetic test scripts that are defined inline."
             />
           }
           fullWidth
         >
           <CodeEditor
-            ariaLabel={i18n.translate(
-              'xpack.synthetics.createPackagePolicy.stepConfigure.requestBody.codeEditor.javascript.ariaLabel',
-              {
-                defaultMessage: 'JavaScript code editor',
-              }
-            )}
+            ariaLabel={i18n.translate('xpack.synthetics.addEditMonitor.scriptEditor.ariaLabel', {
+              defaultMessage: 'JavaScript code editor',
+            })}
             id="javascript"
             languageId={MonacoEditorLangId.JAVASCRIPT}
             onChange={(code) => {
@@ -133,16 +132,20 @@ export const SourceField = ({ onChange, onBlur, value }: Props) => {
     },
   ];
 
+  if (isEditFlow) {
+    allTabs.reverse();
+  }
+
   return (
     <EuiTabbedContent
       tabs={allTabs}
-      initialSelectedTab={allTabs.find((tab) => tab.id === sourceType)}
+      initialSelectedTab={isEditFlow ? allTabs.find((tab) => tab.id === SourceType.INLINE) : allTabs.find((tab) => tab.id === sourceType)}
       autoFocus="selected"
       onTabClick={(tab) => {
         if (tab.id !== sourceType) {
           setConfig({
             script: '',
-            type: sourceType === SourceType.INLINE ? 'inline' : 'recorder',
+            type: tab.id === SourceType.INLINE ? 'inline' : 'recorder',
             fileName: '',
           });
         }

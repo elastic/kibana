@@ -10,11 +10,11 @@ import { EuiAccordion, EuiDescribedFormGroup, EuiPanel, EuiSpacer } from '@elast
 import { useFormContext } from 'react-hook-form';
 import { FIELD_CONFIG } from '../form/config';
 import { Field } from '../form/field';
-import { FormMonitorType } from '../types';
+import { ConfigKey, FormMonitorType } from '../types';
 
 export const AdvancedConfig = () => {
   const { watch } = useFormContext();
-  const [type]: [FormMonitorType] = watch(['formMonitorType']);
+  const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
 
   return FIELD_CONFIG[type]?.advanced ? (
     <EuiPanel hasBorder>

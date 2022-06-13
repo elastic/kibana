@@ -27,7 +27,11 @@ export const format = (fields: Record<string, unknown>) => {
       ...formattedFields,
       [ConfigKey.SOURCE_INLINE]: `step('Go to ${formattedFields[ConfigKey.URLS]}', async () => {
           await page.goto('${formattedFields[ConfigKey.URLS]}');
+          expect(await page.isVisible('text=${
+            formattedFields[ConfigKey.TEXT_ASSERTION]
+          }')).toBeTruthy();
         });`,
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.SINGLE,
     },
     [FormMonitorType.MULTISTEP]: {
       ...formattedFields,
@@ -37,24 +41,28 @@ export const format = (fields: Record<string, unknown>) => {
           file_name: get(fields, 'source.inline.fileName'),
         },
       },
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
     },
     [FormMonitorType.HTTP]: {
       ...formattedFields,
       [ConfigKey.METADATA]: {
         is_tls_enabled: isCustomTLSEnabled(formattedFields),
       },
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.HTTP,
     },
     [FormMonitorType.TCP]: {
       ...formattedFields,
       [ConfigKey.METADATA]: {
         is_tls_enabled: isCustomTLSEnabled(formattedFields),
       },
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.TCP,
     },
     [FormMonitorType.ICMP]: {
       ...formattedFields,
+      [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
     },
   };
-  return formattedMap[fields.formMonitorType as FormMonitorType];
+  return formattedMap[fields[ConfigKey.FORM_MONITOR_TYPE] as FormMonitorType];
 };
 
 const isCustomTLSEnabled = (fields: MonitorFields) => {

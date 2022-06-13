@@ -20,10 +20,10 @@ type Props = FieldMeta & {
   component: React.ComponentType<any>;
   field: ControllerRenderProps;
   fieldState: ControllerFieldState;
-  isInvalid: boolean;
   formRowProps: Partial<EuiFormRowProps>;
   error: React.ReactNode;
   dependenciesValues: unknown[];
+  dependenciesFieldMeta: Record<string, ControllerFieldState>;
 };
 
 const setFieldValue = (key: string, setValue: UseFormReturn['setValue']) => (value: any) => {
@@ -36,12 +36,12 @@ export const ControlledField = ({
   fieldKey,
   useSetValue,
   field,
-  isInvalid,
   formRowProps,
   fieldState,
   customHook,
   error,
   dependenciesValues,
+  dependenciesFieldMeta,
 }: Props) => {
   const { setValue, reset } = useFormContext();
   const noop = () => {};
@@ -55,13 +55,22 @@ export const ControlledField = ({
   const { [hookProps?.fieldKey as string]: hookResult } = hook(hookProps?.params) || {};
   const onChange = useSetValue ? setFieldValue(fieldKey, setValue) : field.onChange;
   const generatedProps = props
-    ? props({ value: field.value, setValue, reset, locations, dependencies: dependenciesValues })
+    ? props({
+        field,
+        setValue,
+        reset,
+        locations,
+        dependencies: dependenciesValues,
+        dependenciesFieldMeta,
+      })
     : {};
+  const isInvalid = hookResult || Boolean(fieldState.error);
+  const hookError = hookResult ? hookProps?.error : undefined;
   return (
     <EuiFormRow
       {...formRowProps}
-      isInvalid={hookResult || Boolean(fieldState.error)}
-      error={fieldState.error?.message || error || hookProps?.error}
+      isInvalid={isInvalid}
+      error={isInvalid ? hookError || fieldState.error?.message || error : undefined}
     >
       <Component
         {...field}

@@ -12,6 +12,7 @@ import { MonitorServiceLocationsCodec, ServiceLocationErrors } from './locations
 import {
   DataStream,
   DataStreamCodec,
+  FormMonitorTypeCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
   ScheduleUnitCodec,
@@ -65,6 +66,7 @@ export type ZipUrlTLSFields = t.TypeOf<typeof ZipUrlTLSCodec>;
 // CommonFields
 export const CommonFieldsCodec = t.intersection([
   t.interface({
+    [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,
     [ConfigKey.NAME]: t.string,
     [ConfigKey.NAMESPACE]: t.string,
     [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
@@ -215,6 +217,7 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
       [ConfigKey.PROJECT_ID]: t.string,
       [ConfigKey.ORIGINAL_SPACE]: t.string,
       [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
+      [ConfigKey.TEXT_ASSERTION]: t.string,
     }),
   ]),
   ZipUrlTLSFieldsCodec,

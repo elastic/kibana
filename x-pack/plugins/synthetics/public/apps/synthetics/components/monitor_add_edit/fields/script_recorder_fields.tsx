@@ -27,7 +27,7 @@ interface Props {
   onChange: ({ scriptText, fileName }: { scriptText: string; fileName: string }) => void;
   script: string;
   fileName?: string;
-  isEditable?: string;
+  isEditable?: boolean;
 }
 
 export function ScriptRecorderFields({ onChange, script, fileName, isEditable }: Props) {

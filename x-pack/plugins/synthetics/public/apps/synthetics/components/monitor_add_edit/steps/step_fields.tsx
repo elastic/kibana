@@ -10,7 +10,7 @@ import { useFormContext } from 'react-hook-form';
 import { Step } from './step';
 import { FIELD_CONFIG, StepKey } from '../form/config';
 import { Field } from '../form/field';
-import { FormMonitorType } from '../types';
+import { ConfigKey, FormMonitorType } from '../types';
 
 export const StepFields = ({
   description,
@@ -23,7 +23,7 @@ export const StepFields = ({
     watch,
     formState: { errors },
   } = useFormContext();
-  const [type]: [FormMonitorType] = watch(['formMonitorType']);
+  const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
 
   return (
     <Step description={description}>

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Controller, useFormContext, FieldError } from 'react-hook-form';
+import { Controller, useFormContext, FieldError, ControllerFieldState } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { selectServiceLocationsState } from '../../../state';
 import { ControlledField } from './controlled_field';
@@ -33,8 +33,11 @@ export const Field = memo<Props>(
     dependencies,
     customHook,
   }: Props) => {
-    const { register, watch, control, setValue, reset } = useFormContext();
+    const { register, watch, control, setValue, reset, getFieldState } = useFormContext();
     const { locations } = useSelector(selectServiceLocationsState);
+    const [dependenciesFieldMeta, setDependenciesFieldMeta] = useState<
+      Record<string, ControllerFieldState>
+    >({});
     let show = true;
     let dependenciesValues: unknown[] = [];
     if (showWhen) {
@@ -45,6 +48,18 @@ export const Field = memo<Props>(
     if (dependencies) {
       dependenciesValues = watch(dependencies);
     }
+    useEffect(() => {
+      if (dependencies) {
+        dependencies.forEach((dependency) => {
+          setDependenciesFieldMeta((prevState) => ({
+            ...prevState,
+            [dependency]: getFieldState(dependency),
+          }));
+        });
+      }
+      // run effect when dependencies values change, to get the most up to date meta state
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [JSON.stringify(dependenciesValues || []), dependencies, getFieldState]);
 
     if (!show) {
       return null;
@@ -74,12 +89,12 @@ export const Field = memo<Props>(
               props={props}
               useSetValue={useSetValue}
               fieldKey={fieldKey}
-              isInvalid={Boolean(fieldStateT.error)}
               customHook={customHook}
               formRowProps={formRowProps}
               fieldState={fieldStateT}
               error={error}
               dependenciesValues={dependenciesValues}
+              dependenciesFieldMeta={dependenciesFieldMeta}
             />
           );
         }}
@@ -96,7 +111,14 @@ export const Field = memo<Props>(
             ...(validation ? validation(dependenciesValues) : {}),
           })}
           {...(props
-            ? props({ value: '', setValue, reset, locations, dependencies: dependenciesValues })
+            ? props({
+                field: undefined,
+                setValue,
+                reset,
+                locations,
+                dependencies: dependenciesValues,
+                dependenciesFieldMeta,
+              })
             : {})}
           isInvalid={Boolean(fieldError)}
           fullWidth
