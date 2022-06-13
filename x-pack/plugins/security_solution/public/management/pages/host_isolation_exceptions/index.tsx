@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Switch } from 'react-router-dom';
+import { Switch, Redirect } from 'react-router-dom';
 import { Route } from '@kbn/kibana-react-plugin/public';
 import React, { memo } from 'react';
-import { SecurityPageName } from '../../../../common/constants';
+import { ENDPOINTS_PATH, SecurityPageName } from '../../../../common/constants';
 import { useLinkExists } from '../../../common/links/links';
 import { MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH } from '../../common/constants';
 import { NotFoundPage } from '../../../app/404';
@@ -21,15 +21,18 @@ export const HostIsolationExceptionsContainer = memo(() => {
   const canAccessHostIsolationExceptionsLink = useLinkExists(
     SecurityPageName.hostIsolationExceptions
   );
+
+  if (!canAccessHostIsolationExceptionsLink) {
+    return <Redirect to={ENDPOINTS_PATH} />;
+  }
+
   return (
     <Switch>
-      {canAccessHostIsolationExceptionsLink && (
-        <Route
-          path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
-          exact
-          component={HostIsolationExceptionsList}
-        />
-      )}
+      <Route
+        path={MANAGEMENT_ROUTING_HOST_ISOLATION_EXCEPTIONS_PATH}
+        exact
+        component={HostIsolationExceptionsList}
+      />
       <Route path="*" component={NotFoundPage} />
     </Switch>
   );
