@@ -136,14 +136,13 @@ export function map(state: MapState = DEFAULT_MAP_STATE, action: Record<string, 
         },
       };
     case SET_GOTO:
-      const newState = {
+      return {
         ...state,
         goto: {
           center: action.center,
           bounds: action.bounds,
         },
       };
-      return newState;
     case CLEAR_GOTO:
       return {
         ...state,
