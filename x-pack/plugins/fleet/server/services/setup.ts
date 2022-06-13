@@ -103,8 +103,10 @@ async function createSetupSideEffects(
 
   await cleanPreconfiguredOutputs(soClient, outputsOrUndefined ?? []);
 
-  await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
-  await ensureFleetServerAgentPoliciesExists(soClient, esClient);
+  const internalEsClient = appContextService.getInternalUserESClient();
+
+  await ensureDefaultEnrollmentAPIKeysExists(soClient, internalEsClient);
+  await ensureFleetServerAgentPoliciesExists(soClient, internalEsClient);
 
   return {
     isInitialized: true,
@@ -120,6 +122,7 @@ export async function ensureFleetGlobalEsAssets(
   esClient: ElasticsearchClient
 ) {
   const logger = appContextService.getLogger();
+
   // Ensure Global Fleet ES assets are installed
   const globalAssetsRes = await Promise.all([
     ensureDefaultComponentTemplate(esClient),
