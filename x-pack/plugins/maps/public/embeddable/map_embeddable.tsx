@@ -47,6 +47,7 @@ import {
 import {
   areLayersLoaded,
   getGeoFieldNames,
+  getGoto,
   getMapCenter,
   getMapBuffer,
   getMapExtent,
@@ -172,17 +173,6 @@ export class MapEmbeddable
     this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
 
     const store = this._savedMap.getStore();
-
-    // TODO add check isSync and isAutoFitToBounds
-    synchronizeMaps.register(this.input.id, this._mapSyncHandler);
-    const syncedLocation = synchronizeMaps.getLocation();
-    if (!syncedLocation) {
-      const center = getMapCenter(store.getState());
-      const zoom = getMapZoom(store.getState());
-      synchronizeMaps.setLocation(center.lat, center.lon, zoom);
-    } else {
-      this._mapSyncHandler(syncedLocation.lat, syncedLocation.lon, syncedLocation.zoom);
-    }
 
     store.dispatch(setReadOnly(true));
     store.dispatch(disableScrollZoom());
@@ -342,7 +332,6 @@ export class MapEmbeddable
     this._prevQuery = this.input.query;
     this._prevFilters = filters;
     this._prevSearchSessionId = this._getSearchSessionId();
-    console.log('set query state', this._savedMap.getStore().getState());
     this._savedMap.getStore().dispatch<any>(
       setQuery({
         filters,
@@ -379,6 +368,19 @@ export class MapEmbeddable
     this._domNode = domNode;
     if (!this._isInitialized) {
       return;
+    }
+
+    // TODO add check isSync and isAutoFitToBounds
+    synchronizeMaps.register(this.input.id, this._mapSyncHandler);
+    const syncedLocation = synchronizeMaps.getLocation();
+    if (!syncedLocation) {
+      // get initial location from goto since map not rendered and mapCenter and mapZoom have not been set 
+      const goto = getGoto(this._savedMap.getStore().getState());
+      if (goto.center) {
+        synchronizeMaps.setLocation(this.input.id, goto.center.lat, goto.center.lon, goto.center.zoom);
+      }
+    } else {
+      this._mapSyncHandler(syncedLocation.lat, syncedLocation.lon, syncedLocation.zoom);
     }
 
     const sharingSavedObjectProps = this._savedMap.getSharingSavedObjectProps();
@@ -574,7 +576,6 @@ export class MapEmbeddable
   }
 
   _mapSyncHandler = (lat: number, lon: number, zoom: number) => {
-    console.log('_mapSyncHandler state', this._savedMap.getStore().getState());
     this._savedMap.getStore().dispatch(setGotoWithCenter({ lat, lon, zoom }));
   }
 
@@ -608,7 +609,7 @@ export class MapEmbeddable
       mapCenter.zoom !== zoom
     ) {
       // TODO if isSynced
-      synchronizeMaps.setLocation(center.lat, center.lon, zoom);
+      synchronizeMaps.setLocation(this.input.id, center.lat, center.lon, zoom);
       this.updateInput({
         mapCenter: {
           lat: center.lat,

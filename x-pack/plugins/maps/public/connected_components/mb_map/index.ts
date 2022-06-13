@@ -39,7 +39,6 @@ import { TileMetaFeature } from '../../../common/descriptor_types';
 import type { MapExtentState } from '../../reducers/map/types';
 
 function mapStateToProps(state: MapStoreState) {
-  console.log('mbMap connector goto', state);
   return {
     isMapReady: getMapReady(state),
     settings: getMapSettings(state),

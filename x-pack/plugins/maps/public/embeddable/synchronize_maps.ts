@@ -14,10 +14,12 @@ export const synchronizeMaps = {
   getLocation: function() {
     return location;
   },
-  setLocation: function (lat: number, lon: number, zoom: number) {
+  setLocation: function (triggeringEmbedableId: string, lat: number, lon: number, zoom: number) {
     location = { lat, lon, zoom };
-    Object.values(registry).forEach(handler => {
-      handler(lat, lon, zoom);
+    Object.keys(registry).forEach(key => {
+      if (key !== triggeringEmbedableId) {
+        registry[key](lat, lon, zoom);
+      }
     });
   },
   register: function (embeddableId: string, handler: (lat: number, lon: number, zoom: number) => void) {
