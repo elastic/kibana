@@ -79,32 +79,33 @@ export function DiscoverMainRoute(props: Props) {
         const hasUserDataViewValue = await data.dataViews.hasData
           .hasUserDataView()
           .catch(() => false);
-        setHasUserDataView(hasUserDataViewValue);
-
-        if (hasUserDataViewValue) {
-          const defaultDataView = await data.dataViews.getDefaultDataView();
-
-          if (!defaultDataView) {
-            setShowNoDataPage(true);
-            return;
-          }
-
-          const { appStateContainer } = getState({ history, uiSettings: config });
-          const { index } = appStateContainer.getState();
-          const ip = await loadIndexPattern(index || '', data.dataViews, config);
-
-          const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
-          const indexPatternData = resolveIndexPattern(ip, searchSource, toastNotifications);
-
-          setIndexPatternList(ipList);
-
-          return indexPatternData;
-        }
-
         const hasESDataValue =
           isDev || (await data.dataViews.hasData.hasESData().catch(() => false));
+        setHasUserDataView(hasUserDataViewValue);
         setHasESData(hasESDataValue);
-        setShowNoDataPage(!hasUserDataViewValue || !hasESDataValue);
+
+        if (!hasUserDataViewValue) {
+          setShowNoDataPage(true);
+          return;
+        }
+
+        const defaultDataView = await data.dataViews.getDefaultDataView();
+
+        if (!defaultDataView) {
+          setShowNoDataPage(true);
+          return;
+        }
+
+        const { appStateContainer } = getState({ history, uiSettings: config });
+        const { index } = appStateContainer.getState();
+        const ip = await loadIndexPattern(index || '', data.dataViews, config);
+
+        const ipList = ip.list as Array<SavedObject<DataViewAttributes>>;
+        const indexPatternData = resolveIndexPattern(ip, searchSource, toastNotifications);
+
+        setIndexPatternList(ipList);
+
+        return indexPatternData;
       } catch (e) {
         setError(e);
       }
