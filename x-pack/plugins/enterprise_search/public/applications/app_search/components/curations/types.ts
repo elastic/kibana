@@ -45,5 +45,5 @@ export interface CurationResult {
   // TODO: Consider updating our internal API to return more standard Result data in the future
   id: string;
   _meta?: ResultMeta;
-  [key: string]: string | string[] | ResultMeta | undefined;
+  [key: string]: string | string[] | ResultMeta | unknown | undefined;
 }
