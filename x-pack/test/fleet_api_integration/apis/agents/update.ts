@@ -33,6 +33,18 @@ export default function (providerContext: FtrProviderContext) {
       expect(apiResponse.item.tags).to.eql(['tag1']);
     });
 
+    it('should dedupe tags in agent update', async () => {
+      const { body: apiResponse } = await supertest
+        .put(`/api/fleet/agents/agent1`)
+        .set('kbn-xsrf', 'xx')
+        .send({
+          tags: ['tag1', 'tag2', 'tag1'],
+        })
+        .expect(200);
+
+      expect(apiResponse.item.tags).to.eql(['tag1', 'tag2']);
+    });
+
     it('should return a 200 if this a valid update request with user metadata', async () => {
       const { body: apiResponse } = await supertest
         .put(`/api/fleet/agents/agent1`)

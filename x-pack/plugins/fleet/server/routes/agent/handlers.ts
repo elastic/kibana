@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { uniq } from 'lodash';
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
@@ -92,7 +93,7 @@ export const updateAgentHandler: RequestHandler<
     partialAgent.user_provided_metadata = request.body.user_provided_metadata;
   }
   if (request.body.tags) {
-    partialAgent.tags = request.body.tags;
+    partialAgent.tags = uniq(request.body.tags);
   }
 
   try {
