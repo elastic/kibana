@@ -136,4 +136,3 @@ export enum FormMonitorType {
 }
 
 export const FormMonitorTypeCodec = tEnum<FormMonitorType>('FormMonitorType', FormMonitorType);
-

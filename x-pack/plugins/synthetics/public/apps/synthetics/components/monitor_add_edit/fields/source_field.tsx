@@ -38,7 +38,7 @@ interface Props {
   isEditFlow?: boolean;
 }
 
-export const SourceField = ({ onChange, onBlur, value, isEditFlow = false}: Props) => {
+export const SourceField = ({ onChange, onBlur, value, isEditFlow = false }: Props) => {
   const [sourceType, setSourceType] = useState<SourceType>(
     value.type === 'inline' ? SourceType.INLINE : SourceType.SCRIPT_RECORDER
   );
@@ -139,7 +139,11 @@ export const SourceField = ({ onChange, onBlur, value, isEditFlow = false}: Prop
   return (
     <EuiTabbedContent
       tabs={allTabs}
-      initialSelectedTab={isEditFlow ? allTabs.find((tab) => tab.id === SourceType.INLINE) : allTabs.find((tab) => tab.id === sourceType)}
+      initialSelectedTab={
+        isEditFlow
+          ? allTabs.find((tab) => tab.id === SourceType.INLINE)
+          : allTabs.find((tab) => tab.id === sourceType)
+      }
       autoFocus="selected"
       onTabClick={(tab) => {
         if (tab.id !== sourceType) {
