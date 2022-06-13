@@ -93,10 +93,9 @@ export class TablePanelConfig extends Component<
       this.props.onChange({ [name]: e.target.value });
 
   handleNumberChange =
-    (name: keyof TimeseriesVisParams, isClearable: boolean) =>
-    (e: React.ChangeEvent<HTMLInputElement>) =>
+    (name: keyof TimeseriesVisParams) => (e: React.ChangeEvent<HTMLInputElement>) =>
       this.props.onChange({
-        [name]: isClearable && !e.target.value ? undefined : Number(e.target.value ?? 0),
+        [name]: !e.target.value ? undefined : Number(e.target.value),
       });
 
   render() {
@@ -180,8 +179,8 @@ export class TablePanelConfig extends Component<
                     }
                   >
                     <EuiFieldNumber
-                      onChange={this.handleNumberChange('pivot_rows', true)}
-                      value={model.pivot_rows}
+                      onChange={this.handleNumberChange('pivot_rows')}
+                      value={model.pivot_rows === undefined ? Number(model.pivot_rows) : ''}
                       placeholder="10"
                     />
                   </EuiFormRow>
