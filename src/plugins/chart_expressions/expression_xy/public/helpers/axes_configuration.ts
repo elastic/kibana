@@ -55,6 +55,18 @@ export function isFormatterCompatible(
   return formatter1?.id === formatter2?.id;
 }
 
+const LEFT_GLOBAL_AXIS_ID = 'left';
+const RIGHT_GLOBAL_AXIS_ID = 'right';
+
+function isAxisSeriesAppliedForFormatter(
+  series: FormattedMetric[],
+  currentSeries: FormattedMetric
+) {
+  return series.every((leftSeries) =>
+    isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
+  );
+}
+
 export function groupAxesByType(
   layers: CommonXYDataLayerConfig[],
   fieldFormats: LayersFieldFormats,
@@ -65,6 +77,9 @@ export function groupAxesByType(
     left: [],
     right: [],
   };
+
+  const leftSeriesKeys: string[] = [];
+  const rightSeriesKeys: string[] = [];
 
   layers.forEach((layer) => {
     const { layerId, table } = layer;
@@ -86,33 +101,43 @@ export function groupAxesByType(
         series[key] = [];
       }
       series[key].push({ layer: layer.layerId, accessor: yAccessor, fieldFormat });
+
+      if (axisConfigById?.position === Position.Left) {
+        leftSeriesKeys.push(key);
+      } else if (axisConfigById?.position === Position.Right) {
+        rightSeriesKeys.push(key);
+      }
     });
   });
 
   const tablesExist = layers.filter(({ table }) => Boolean(table)).length > 0;
 
+  leftSeriesKeys.push(LEFT_GLOBAL_AXIS_ID);
+  rightSeriesKeys.push(RIGHT_GLOBAL_AXIS_ID);
+
   series.auto.forEach((currentSeries) => {
-    let axisGroupId;
-    if (
-      series.left.length === 0 ||
-      (tablesExist &&
-        series.left.every((leftSeries) =>
-          isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
-        ))
-    ) {
-      axisGroupId = 'left';
-    } else if (
-      series.right.length === 0 ||
-      (tablesExist &&
-        series.left.every((leftSeries) =>
-          isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
-        ))
-    ) {
-      axisGroupId = 'right';
-    } else if (series.right.length >= series.left.length) {
-      axisGroupId = 'left';
+    const leftAxisGroupId = tablesExist
+      ? leftSeriesKeys.find((leftSeriesKey) =>
+          isAxisSeriesAppliedForFormatter(series[leftSeriesKey], currentSeries)
+        )
+      : undefined;
+
+    const rightAxisGroupId = tablesExist
+      ? rightSeriesKeys.find((rightSeriesKey) =>
+          isAxisSeriesAppliedForFormatter(series[rightSeriesKey], currentSeries)
+        )
+      : undefined;
+
+    let axisGroupId = LEFT_GLOBAL_AXIS_ID;
+
+    if (series[LEFT_GLOBAL_AXIS_ID].length === 0 || leftAxisGroupId) {
+      axisGroupId = leftAxisGroupId || LEFT_GLOBAL_AXIS_ID;
+    } else if (series[RIGHT_GLOBAL_AXIS_ID].length === 0 || rightAxisGroupId) {
+      axisGroupId = rightAxisGroupId || RIGHT_GLOBAL_AXIS_ID;
+    } else if (series[RIGHT_GLOBAL_AXIS_ID].length >= series[LEFT_GLOBAL_AXIS_ID].length) {
+      axisGroupId = LEFT_GLOBAL_AXIS_ID;
     } else {
-      axisGroupId = 'right';
+      axisGroupId = RIGHT_GLOBAL_AXIS_ID;
     }
 
     series[axisGroupId].push(currentSeries);
@@ -172,10 +197,10 @@ export function getAxesConfiguration(
     }
   });
 
-  if (series.left.length > 0) {
+  if (series[LEFT_GLOBAL_AXIS_ID].length > 0) {
     position = shouldRotate ? Position.Bottom : Position.Left;
     axisGroups.push({
-      groupId: Position.Left,
+      groupId: LEFT_GLOBAL_AXIS_ID,
       formatter: formatFactory?.(series.left[0].fieldFormat),
       series: series.left.map(({ fieldFormat, ...currentSeries }) => currentSeries),
       ...axisGlobalConfig(position, yAxisConfigs),
@@ -183,10 +208,10 @@ export function getAxesConfiguration(
     });
   }
 
-  if (series.right.length > 0) {
+  if (series[RIGHT_GLOBAL_AXIS_ID].length > 0) {
     position = shouldRotate ? Position.Top : Position.Right;
     axisGroups.push({
-      groupId: Position.Right,
+      groupId: RIGHT_GLOBAL_AXIS_ID,
       formatter: formatFactory?.(series.right[0].fieldFormat),
       series: series.right.map(({ fieldFormat, ...currentSeries }) => currentSeries),
       ...axisGlobalConfig(position, yAxisConfigs),
