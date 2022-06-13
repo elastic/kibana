@@ -52,7 +52,7 @@ interface CustomUrlsProps {
 
 interface CustomUrlsState {
   customUrls: UrlConfig[];
-  dashboards: any[];
+  dashboards: Array<{ id: string; title: string }>;
   dataViewListItems: DataViewListItem[];
   queryEntityFieldNames: string[];
   editorOpen: boolean;
