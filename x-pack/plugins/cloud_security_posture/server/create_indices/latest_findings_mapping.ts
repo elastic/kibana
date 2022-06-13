@@ -107,6 +107,16 @@ export const latestFindingsMapping: MappingTypeMapping = {
             },
           },
         },
+        id: {
+          ignore_above: 1024,
+          type: 'keyword',
+          fields: {
+            keyword: {
+              ignore_above: 1024,
+              type: 'keyword',
+            },
+          },
+        },
         benchmark: {
           properties: {
             name: {
