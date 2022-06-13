@@ -29,10 +29,10 @@ export default class RowParser {
       return MODE.BETWEEN_REQUESTS;
     }
     const mode = this.editor.getLineState(lineNumber);
+
     if (!mode) {
       return MODE.BETWEEN_REQUESTS;
     } // shouldn't really happen
-
     // If another "start" mode is added here because we want to allow for new language highlighting
     // please see https://github.com/elastic/kibana/pull/51446 for a discussion on why
     // should consider a different approach.
@@ -40,6 +40,10 @@ export default class RowParser {
       return MODE.IN_REQUEST;
     }
     let line = (this.editor.getLineValue(lineNumber) || '').trim();
+
+    if (line && /(\${\w+})/.test(line)) {
+      return MODE.REQUEST_START;
+    }
     if (!line || line.startsWith('#') || line.startsWith('//') || line.startsWith('/*')) {
       return MODE.BETWEEN_REQUESTS;
     } // empty line or a comment waiting for a new req to start

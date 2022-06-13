@@ -19,8 +19,15 @@ import { constructUrl } from '../../../lib/es/es';
 import { CoreEditor, Position, Range } from '../../../types';
 import { createTokenIterator } from '../../factories';
 import createAutocompleter from '../../../lib/autocomplete/autocomplete';
+import { getVariables } from '../../../services';
 
 const { collapseLiteralStrings } = XJson;
+
+function replaceVariableWithValue(value: string) {
+  const key = value.replace('${', '').replace('}', '');
+  const variables = getVariables();
+  return variables.extractValue(key);
+}
 
 export class SenseEditor {
   currentReqRange: (Range & { markerRef: unknown }) | null;
@@ -248,7 +255,10 @@ export class SenseEditor {
 
     request.url = '';
 
-    while (t && t.type && t.type.indexOf('url') === 0) {
+    while (t && t.type && (t.type.indexOf('url') === 0 || t.type === 'variable.punctuation')) {
+      if (t.type === 'variable.punctuation') {
+        t.value = replaceVariableWithValue(t.value);
+      }
       request.url += t.value;
       t = tokenIter.stepForward();
     }
@@ -273,7 +283,14 @@ export class SenseEditor {
         },
         end: dataEndPos,
       };
-      const data = this.coreEditor.getValueInRange(bodyRange)!;
+      let data = this.coreEditor.getValueInRange(bodyRange)!;
+      const re = /(\${\w+})/g;
+
+      data = data.replaceAll(re, (match) => {
+        const value = replaceVariableWithValue(match);
+        return value;
+      });
+
       request.data.push(data.trim());
       bodyStartLineNumber = dataEndPos.lineNumber + 1;
     }

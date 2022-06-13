@@ -19,7 +19,14 @@ import {
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaThemeProvider } from '../shared_imports';
-import { createStorage, createHistory, createSettings, AutocompleteInfo } from '../services';
+import {
+  createStorage,
+  createHistory,
+  createSettings,
+  AutocompleteInfo,
+  createVariables,
+  setVariables,
+} from '../services';
 import { createUsageTracker } from '../services/tracker';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';
 import { Main } from './containers';
@@ -61,6 +68,8 @@ export function renderApp({
   const objectStorageClient = localStorageObjectClient.create(storage);
   const api = createApi({ http });
   const esHostService = createEsHostService({ api });
+  const variables = createVariables({ storage });
+  setVariables(variables);
 
   render(
     <I18nContext>
@@ -79,6 +88,7 @@ export function renderApp({
               objectStorageClient,
               http,
               autocompleteInfo,
+              variables,
             },
             theme$,
           }}
