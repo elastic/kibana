@@ -107,7 +107,7 @@ function getExpressionForLayer(
     });
 
     const orderedColumnIds = esAggEntries.map(([colId]) => colId);
-    let esAggsIdMap: Record<string, OriginalColumn> = {};
+    let esAggsIdMap: Record<string, OriginalColumn[]> = {};
     const aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string> = new Map();
     esAggEntries.forEach(([colId, col], index) => {
       const def = operationDefinitionMap[col.operationType];
@@ -154,10 +154,12 @@ function getExpressionForLayer(
           ? `col-${index + (col.isBucketed ? 0 : 1)}-${aggId}`
           : `col-${index}-${aggId}`;
 
-        esAggsIdMap[esAggsId] = {
-          ...col,
-          id: colId,
-        };
+        esAggsIdMap[esAggsId] = [
+          {
+            ...col,
+            id: colId,
+          },
+        ];
 
         aggExpressionToEsAggsIdMap.set(expressionBuilder, esAggsId);
       }
@@ -215,7 +217,7 @@ function getExpressionForLayer(
       col-1-2:    column3
       col-3-3.98: column4 (98th percentile)
     */
-    const newEsAggsIdToOriginalColumn: Record<string, OriginalColumn> = {};
+    const newEsAggsIdToOriginalColumn: Record<string, OriginalColumn[]> = {};
     let counter = 0;
     aggs.forEach((builder) => {
       const extractEsAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -232,7 +234,8 @@ function getExpressionForLayer(
       );
 
       matchingEsAggColumnIds.forEach((currentId) => {
-        const currentColumn = esAggsIdMap[currentId];
+        const currentColumn = esAggsIdMap[currentId][0];
+        // TODO what if multiple columns are mapped to, and only one is bucketed?
         const aggIndex = window.ELASTIC_LENS_DELAY_SECONDS
           ? counter + (currentColumn.isBucketed ? 0 : 1)
           : counter;

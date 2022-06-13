@@ -387,11 +387,11 @@ interface BaseOperationDefinitionProps<C extends BaseIndexPatternColumn, P = {}>
    */
   optimizeEsAggs?: (
     aggs: ExpressionAstExpressionBuilder[],
-    esAggsIdMap: Record<string, OriginalColumn>,
+    esAggsIdMap: Record<string, OriginalColumn[]>,
     aggExpressionToEsAggsIdMap: Map<ExpressionAstExpressionBuilder, string>
   ) => {
     aggs: ExpressionAstExpressionBuilder[];
-    esAggsIdMap: Record<string, OriginalColumn>;
+    esAggsIdMap: Record<string, OriginalColumn[]>;
   };
 }
 
