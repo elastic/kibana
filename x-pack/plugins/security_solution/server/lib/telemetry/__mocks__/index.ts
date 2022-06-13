@@ -64,8 +64,13 @@ const stubLicenseInfo = {
 };
 
 export const createMockTelemetryReceiver = (
-  diagnosticsAlert?: unknown
+  diagnosticsAlert?: unknown,
+  emptyTimelineTree?: boolean
 ): jest.Mocked<TelemetryReceiver> => {
+  const processTreeResponse = emptyTimelineTree
+    ? Promise.resolve([])
+    : Promise.resolve(Promise.resolve(stubProcessTree()));
+
   return {
     start: jest.fn(),
     fetchClusterInfo: jest.fn().mockReturnValue(stubClusterInfo),
@@ -82,7 +87,7 @@ export const createMockTelemetryReceiver = (
     fetchTimelineEndpointAlerts: jest
       .fn()
       .mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
-    buildProcessTree: jest.fn().mockReturnValue(Promise.resolve(stubProcessTree())),
+    buildProcessTree: jest.fn().mockReturnValue(processTreeResponse),
     fetchTimelineEvents: jest.fn().mockReturnValue(Promise.resolve(stubFetchTimelineEvents())),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };
