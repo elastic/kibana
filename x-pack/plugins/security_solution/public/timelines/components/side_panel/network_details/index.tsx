@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { FlowTarget } from '../../../../../common/search_strategy';
+import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 import {
   ExpandableNetworkDetailsTitle,
   ExpandableNetworkDetailsPageLink,
@@ -59,7 +59,7 @@ const StyledPanelContent = styled.div`
 
 interface NetworkDetailsProps {
   contextID: string;
-  expandedNetwork: { ip: string; flowTarget: FlowTarget };
+  expandedNetwork: { ip: string; flowTarget: FlowTargetSourceDest };
   handleOnNetworkClosed: () => void;
   isFlyoutView?: boolean;
   isDraggable?: boolean;

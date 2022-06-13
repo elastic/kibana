@@ -64,6 +64,14 @@ const ConsoleWindow = styled.div`
     }
   }
 
+  //-----------------------------------------------------------
+  // 👇 Utility classnames for use anywhere inside of Console
+  //-----------------------------------------------------------
+
+  .font-family-code {
+    font-family: ${({ theme: { eui } }) => eui.euiCodeFontFamily};
+  }
+
   .descriptionList-20_80 {
     &.euiDescriptionList {
       > .euiDescriptionList__title {
