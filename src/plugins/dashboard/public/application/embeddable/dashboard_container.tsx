@@ -157,7 +157,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
   }
 
   private onDataLoaded(data: DashboardDataLoadedEvent) {
-    console.log(`${this.id} took ${data.timeTookMs} in total`);
+    // console.log(`${this.id} took ${data.timeTookMs} in total`);
     this.services.analytics.reportEvent('dashboard-data-loaded', {
       ...data,
       id: this.id,
