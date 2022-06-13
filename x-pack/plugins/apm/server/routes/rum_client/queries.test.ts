@@ -13,8 +13,6 @@ import { getClientMetrics } from './get_client_metrics';
 import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getLongTaskMetrics } from './get_long_task_metrics';
-import { getWebCoreVitals } from './get_web_core_vitals';
-import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 
 describe('rum client dashboard queries', () => {
   let mock: SearchParamsMock;
@@ -62,19 +60,6 @@ describe('rum client dashboard queries', () => {
           end: 50000,
         }),
       { uiFilters: { environment: 'staging' } }
-    );
-    expect(mock.params).toMatchSnapshot();
-  });
-
-  it('fetches rum core vitals', async () => {
-    mock = await inspectSearchParams(
-      (setup) =>
-        getWebCoreVitals({
-          setup,
-          start: 0,
-          end: 50000,
-        }),
-      { uiFilters: { environment: ENVIRONMENT_ALL.value } }
     );
     expect(mock.params).toMatchSnapshot();
   });
