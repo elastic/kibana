@@ -8,15 +8,23 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+const getUsageCount = (checkUsage: any, counterName: string): number => {
+  return (
+    checkUsage.usage_counters.daily_events.find((item: any) => item.counter_name === counterName)
+      ?.total || 0
+  );
+};
+
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
+  const esArchiver = getService('esArchiver');
   const usageAPI = getService('usageAPI');
   const reportingAPI = getService('reportingAPI');
-  const log = getService('log');
 
-  describe(`API Usage Counters`, () => {
+  describe(`Usage Counters`, () => {
     before(async () => {
+      await esArchiver.emptyKibanaIndex();
       await reportingAPI.initEcommerce();
     });
 
@@ -25,91 +33,54 @@ export default function ({ getService }: FtrProviderContext) {
       await reportingAPI.teardownEcommerce();
     });
 
-    it('test server configuration settings', async () => {
+    it('configuration settings of the tests_server', async () => {
       const usage = await usageAPI.getUsageStats();
       expect(usage.kibana_config_usage.xpack_reporting_capture_max_attempts).to.be(1);
       expect(usage.kibana_config_usage.xpack_reporting_csv_max_size_bytes).to.be(6000);
       expect(usage.kibana_config_usage.xpack_reporting_roles_enabled).to.be(false);
     });
 
-    const getUsageCount = (checkUsage: any, counterName: string): number => {
-      return (
-        checkUsage.usage_counters.daily_events.find(
-          (item: any) => item.counter_name === counterName
-        )?.total || 0
-      );
-    };
+    describe('API counters: management', () => {
+      enum paths {
+        LIST = '/api/reporting/jobs/list',
+        COUNT = '/api/reporting/jobs/count',
+        INFO = '/api/reporting/jobs/info/{docId}',
+        ILM = '/api/reporting/ilm_policy_status',
+        DIAG_BROWSER = '/api/reporting/diagnose/browser',
+        DIAG_SCREENSHOT = '/api/reporting/diagnose/screenshot',
+      }
 
-    it('usage count of job LISTING', async () => {
-      const path = '/api/reporting/jobs/list';
+      let stats: any;
 
-      // determine the current usage count
-      const initialCount = getUsageCount(await usageAPI.getUsageStats(), `get ${path}`);
-      log.debug(`initial listing usage: ${initialCount}`);
+      before('call APIs', async () => {
+        // call selected APIs 5 times
+        const RUN_TIMES = 5;
+        await Promise.all(
+          Object.keys(paths).map(async (key) => {
+            await Promise.all([...Array(RUN_TIMES)].map(() => supertest.get((paths as any)[key])));
+          })
+        );
 
-      // call the listing api 5 times
-      await supertest.get(path);
-      await supertest.get(path);
-      await supertest.get(path);
-      await supertest.get(path);
-      await supertest.get(path);
+        // wait for events to aggregate into the usage stats
+        await new Promise((resolve) => {
+          setTimeout(resolve, 8000);
+        });
 
-      // wait for events to aggregate into the usage stats
-      await new Promise((resolve) => {
-        setTimeout(resolve, 8000);
+        // determine the result usage count
+        stats = await usageAPI.getUsageStats();
       });
 
-      const postCount = getUsageCount(await usageAPI.getUsageStats(), `get ${path}`);
-      log.debug(`current listing usage: ${postCount}`);
-      expect(postCount - initialCount).to.be(5); // test added 5 counts
-    });
-
-    it('usage count of job COUNT', async () => {
-      const path = '/api/reporting/jobs/count';
-
-      // determine the current usage count
-      const initialCount = getUsageCount(await usageAPI.getUsageStats(), `get ${path}`);
-      log.debug(`initial usage: ${initialCount}`);
-
-      // call the listing api 5 times
-      await supertest.get(path);
-      await supertest.get(path);
-      await supertest.get(path);
-      await supertest.get(path);
-      await supertest.get(path);
-
-      // wait for events to aggregate into the usage stats
-      await new Promise((resolve) => {
-        setTimeout(resolve, 8000);
+      it('usage count of job LISTING', async () => {
+        expect(getUsageCount(stats, `get ${paths.LIST}`)).to.be(5); // testing added 5 counts
       });
 
-      const postCount = getUsageCount(await usageAPI.getUsageStats(), `get ${path}`);
-      log.debug(`current usage: ${postCount}`);
-      expect(postCount - initialCount).to.be(5); // test added 5 counts
-    });
-
-    it('usage count of job INFO', async () => {
-      const path = '/api/reporting/jobs/info/{docId}';
-
-      // determine the current usage count
-      const initialCount = getUsageCount(await usageAPI.getUsageStats(), `get ${path}`);
-      log.debug(`initial usage: ${initialCount}`);
-
-      // call the listing api 5 times
-      await supertest.get('/api/reporting/jobs/info/hugenumber');
-      await supertest.get('/api/reporting/jobs/info/blipblorp');
-      await supertest.get('/api/reporting/jobs/info/hectortester');
-      await supertest.get('/api/reporting/jobs/info/macandcheese');
-      await supertest.get('/api/reporting/jobs/info/summersquash');
-
-      // wait for events to aggregate into the usage stats
-      await new Promise((resolve) => {
-        setTimeout(resolve, 8000);
+      it('usage count of job COUNT', async () => {
+        expect(getUsageCount(stats, `get ${paths.COUNT}`)).to.be(5); // testing added 5 counts
       });
 
-      const postCount = getUsageCount(await usageAPI.getUsageStats(), `get ${path}`);
-      log.debug(`current usage: ${postCount}`);
-      expect(postCount - initialCount).to.be(5); // test added 5 counts
+      it('usage count of job INFO', async () => {
+        expect(getUsageCount(stats, `get ${paths.INFO}`)).to.be(5); // testing added 5 counts
+      });
     });
   });
 }
