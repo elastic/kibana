@@ -47,7 +47,7 @@ export const DetailPanelMetadataTab = ({
       <DetailPanelAccordion
         id="metadataHost"
         title={i18n.translate('xpack.sessionView.metadataDetailsTab.metadata', {
-          defaultMessage: 'Metadata',
+          defaultMessage: 'Host',
         })}
         initialIsOpen={true}
         listItems={[
@@ -132,19 +132,6 @@ export const DetailPanelMetadataTab = ({
               defaultMessage: 'Host OS',
             })}
             listItems={[
-              {
-                title: <DetailPanelListItem>architecture</DetailPanelListItem>,
-                description: (
-                  <DetailPanelCopy
-                    textToCopy={`host.architecture: "${hostData.architecture}"`}
-                    tooltipContent={hostData.architecture}
-                  >
-                    <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                      {hostData.architecture}
-                    </EuiTextColor>
-                  </DetailPanelCopy>
-                ),
-              },
               {
                 title: <DetailPanelListItem>os.family</DetailPanelListItem>,
                 description: (
