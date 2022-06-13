@@ -32,7 +32,6 @@ import {
   DataStream,
   FormMonitorType,
   HTTPMethod,
-  MonacoEditorLangId,
   MonitorFields,
   MonitorServiceLocations,
   ScreenshotOption,

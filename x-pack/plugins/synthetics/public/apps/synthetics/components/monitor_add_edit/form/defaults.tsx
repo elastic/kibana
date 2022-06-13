@@ -12,7 +12,6 @@ import {
   FormMonitorType,
   SyntheticsMonitor,
   BrowserFields,
-  HTTPFields,
   TLSFields,
 } from '../types';
 
