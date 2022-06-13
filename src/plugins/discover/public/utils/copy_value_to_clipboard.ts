@@ -15,7 +15,7 @@ import { convertNameToString } from './convert_value_to_string';
 const WARNING_FOR_FORMULAS = i18n.translate(
   'discover.grid.copyEscapedValueWithFormulasToClipboardWarningText',
   {
-    defaultMessage: 'It may contain formulas whose values have been escaped.',
+    defaultMessage: 'Values may contain formulas that are escaped.',
   }
 );
 const COPY_FAILED_ERROR_MESSAGE = i18n.translate('discover.grid.copyFailedErrorText', {
@@ -107,7 +107,7 @@ export const copyColumnValuesToClipboard = async ({
   }
 
   const toastTitle = i18n.translate('discover.grid.copyColumnValuesToClipboard.toastTitle', {
-    defaultMessage: 'Copied values of "{column}" column to clipboard',
+    defaultMessage: 'Values of "{column}" column copied to clipboard',
     values: { column: columnId },
   });
 

@@ -140,32 +140,14 @@ describe('deepLinks', () => {
     ).toBeTruthy();
   });
 
+  it('should return users link', () => {
+    const deepLinks = getDeepLinks({
+      ...mockGlobalState.app.enableExperimental,
+    });
+    expect(findDeepLink(SecurityPageName.users, deepLinks)).toBeTruthy();
+  });
+
   describe('experimental flags', () => {
-    it('should return NO users link when enableExperimental.usersEnabled === false', () => {
-      const deepLinks = getDeepLinks({
-        ...mockGlobalState.app.enableExperimental,
-        usersEnabled: false,
-      });
-
-      expect(findDeepLink(SecurityPageName.users, deepLinks)).toBeFalsy();
-    });
-
-    it('should return users link when enableExperimental.usersEnabled === true', () => {
-      const deepLinks = getDeepLinks({
-        ...mockGlobalState.app.enableExperimental,
-        usersEnabled: true,
-      });
-      expect(findDeepLink(SecurityPageName.users, deepLinks)).toBeTruthy();
-    });
-
-    it('should NOT return host authentications when enableExperimental.usersEnabled === true', () => {
-      const deepLinks = getDeepLinks({
-        ...mockGlobalState.app.enableExperimental,
-        usersEnabled: true,
-      });
-      expect(findDeepLink(SecurityPageName.hostsAuthentications, deepLinks)).toBeFalsy();
-    });
-
     it('should return NO kubernetes link when enableExperimental.kubernetesEnabled === false', () => {
       const deepLinks = getDeepLinks({
         ...mockGlobalState.app.enableExperimental,
