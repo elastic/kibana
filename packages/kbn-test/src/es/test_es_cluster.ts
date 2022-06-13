@@ -283,7 +283,7 @@ export function createTestEsCluster<
     }
 
     async stop() {
-      await Promise.all(
+      const results = await Promise.allSettled(
         this.nodes.map(async (node, i) => {
           log.info(`[es] stopping node ${nodes[i].name}`);
           await node.stop();
@@ -291,8 +291,22 @@ export function createTestEsCluster<
       );
 
       log.info('[es] stopped');
-
       await this.captureDebugFiles();
+      this.handleStopResults(results);
+    }
+
+    private handleStopResults(results: Array<PromiseSettledResult<void>>) {
+      const failures = results.flatMap((r) => (r.status === 'rejected' ? r : []));
+      if (failures.length === 1) {
+        throw failures[0].reason;
+      }
+      if (failures.length > 1) {
+        throw new Error(
+          `${failures.length} nodes failed:\n - ${failures
+            .map((f) => f.reason.message)
+            .join('\n - ')}`
+        );
+      }
     }
 
     async captureDebugFiles() {
@@ -340,7 +354,7 @@ export function createTestEsCluster<
 
     async cleanup() {
       log.info('[es] killing', this.nodes.length === 1 ? 'node' : `${this.nodes.length} nodes`);
-      await Promise.all(
+      const results = await Promise.allSettled(
         this.nodes.map(async (node, i) => {
           log.info(`[es] stopping node ${nodes[i].name}`);
           // we are deleting this install, stop ES more aggressively
@@ -351,6 +365,7 @@ export function createTestEsCluster<
       await this.captureDebugFiles();
       await del(config.installPath, { force: true });
       log.info('[es] cleanup complete');
+      this.handleStopResults(results);
     }
 
     /**

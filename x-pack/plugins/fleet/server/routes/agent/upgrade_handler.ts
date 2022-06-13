@@ -21,7 +21,7 @@ import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
 import { defaultIngestErrorHandler } from '../../errors';
 import { isAgentUpgradeable } from '../../../common/services';
-import { getMaxVersion } from '../../../common/services/get_max_version';
+import { getMaxVersion } from '../../../common/services/get_min_max_version';
 import { getAgentById } from '../../services/agents';
 import type { Agent } from '../../types';
 
@@ -57,7 +57,7 @@ export const postAgentUpgradeHandler: RequestHandler<
       },
     });
   }
-  if (!force && !isAgentUpgradeable(agent, kibanaVersion)) {
+  if (!force && !isAgentUpgradeable(agent, kibanaVersion, version)) {
     return response.customError({
       statusCode: 400,
       body: {
@@ -180,6 +180,10 @@ const checkFleetServerVersion = (versionToUpgradeNumber: string, fleetServerAgen
   ) as string[];
 
   const maxFleetServerVersion = getMaxVersion(fleetServerVersions);
+
+  if (!maxFleetServerVersion) {
+    return;
+  }
 
   if (semverGt(versionToUpgradeNumber, maxFleetServerVersion)) {
     throw new Error(

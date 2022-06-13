@@ -104,7 +104,7 @@ describe('getSeries', () => {
         fieldName: 'document',
         isFullReference: true,
         params: {
-          formula: 'clamp(max(day_of_week_i), 0, max(day_of_week_i))',
+          formula: 'pick_max(max(day_of_week_i), 0)',
         },
       },
     ]);
@@ -325,6 +325,48 @@ describe('getSeries', () => {
     ]);
   });
 
+  test('should return the correct config for the percentile ranks aggregation', () => {
+    const metric = [
+      {
+        field: 'day_of_week_i',
+        id: 'id1',
+        type: 'percentile_rank',
+        values: ['1', '5', '7'],
+        colors: ['rgba(211,96,134,1)', 'rgba(155,33,230,1)', '#68BC00'],
+      },
+    ] as Metric[];
+    const config = getSeries(metric, 1);
+    expect(config).toStrictEqual([
+      {
+        agg: 'percentile_rank',
+        color: 'rgba(211,96,134,1)',
+        fieldName: 'day_of_week_i',
+        isFullReference: false,
+        params: {
+          value: '1',
+        },
+      },
+      {
+        agg: 'percentile_rank',
+        color: 'rgba(155,33,230,1)',
+        fieldName: 'day_of_week_i',
+        isFullReference: false,
+        params: {
+          value: '5',
+        },
+      },
+      {
+        agg: 'percentile_rank',
+        color: '#68BC00',
+        fieldName: 'day_of_week_i',
+        isFullReference: false,
+        params: {
+          value: '7',
+        },
+      },
+    ]);
+  });
+
   test('should return the correct formula config for a top_hit size 1 aggregation', () => {
     const metric = [
       {
@@ -457,6 +499,57 @@ describe('getSeries', () => {
         params: {
           formula:
             'percentile(day_of_week_i, percentile=90) + percentile(day_of_week_i, percentile=50) + average(day_of_week_i)',
+        },
+      },
+    ]);
+  });
+
+  test('should return the correct formula for the math aggregation with percentile ranks as variables', () => {
+    const metric = [
+      {
+        field: 'day_of_week_i',
+        id: 'e72265d2-2106-4af9-b646-33afd9cddcad',
+        values: ['1', '5', '7'],
+        colors: ['rgba(211,96,134,1)', 'rgba(155,33,230,1)', '#68BC00'],
+        type: 'percentile_rank',
+      },
+      {
+        field: 'day_of_week_i',
+        id: '6280b080-7d1c-11ec-bfa7-3798d98f8341',
+        type: 'avg',
+      },
+      {
+        id: '23a05540-7d18-11ec-a589-45a3784fc1ce',
+        script: 'params.perc1 + params.perc5 + params.avg',
+        type: 'math',
+        variables: [
+          {
+            field: 'e72265d2-2106-4af9-b646-33afd9cddcad[1]',
+            id: '25840960-7d18-11ec-a589-45a3784fc1ce',
+            name: 'perc1',
+          },
+          {
+            field: 'e72265d2-2106-4af9-b646-33afd9cddcad[5]',
+            id: '2a440270-7d18-11ec-a589-45a3784fc1ce',
+            name: 'perc5',
+          },
+          {
+            field: '6280b080-7d1c-11ec-bfa7-3798d98f8341',
+            id: '64c82f80-7d1c-11ec-bfa7-3798d98f8341',
+            name: 'avg',
+          },
+        ],
+      },
+    ] as Metric[];
+    const config = getSeries(metric, 1);
+    expect(config).toStrictEqual([
+      {
+        agg: 'formula',
+        fieldName: 'document',
+        isFullReference: true,
+        params: {
+          formula:
+            'percentile_rank(day_of_week_i, value=1) + percentile_rank(day_of_week_i, value=5) + average(day_of_week_i)',
         },
       },
     ]);

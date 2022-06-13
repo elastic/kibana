@@ -367,14 +367,16 @@ export const LensTopNavMenu = ({
       datasourceMap[activeDatasourceId],
       datasourceStates[activeDatasourceId].state,
       activeData,
+      data.query.timefilter.timefilter.getTime(),
       application.capabilities
     );
   }, [
-    activeData,
     activeDatasourceId,
+    discover,
     datasourceMap,
     datasourceStates,
-    discover,
+    activeData,
+    data.query.timefilter.timefilter,
     application.capabilities,
   ]);
 
@@ -694,7 +696,7 @@ export const LensTopNavMenu = ({
 
   const dataViewPickerProps = {
     trigger: {
-      label: currentIndexPattern?.title || '',
+      label: currentIndexPattern?.getName?.() || '',
       'data-test-subj': 'lns-dataView-switch-link',
       title: currentIndexPattern?.title || '',
     },

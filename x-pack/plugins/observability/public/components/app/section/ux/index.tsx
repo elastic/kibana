@@ -7,13 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { AppDataType } from '../../../shared/exploratory_view/types';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useHasData } from '../../../../hooks/use_has_data';
 import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import CoreVitals from '../../../shared/core_web_vitals';
 import { BucketSize } from '../../../../pages/overview';
 import { getExploratoryViewEmbeddable } from '../../../shared/exploratory_view/embeddable';
@@ -22,6 +22,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_DURATION,
 } from '../../../shared/exploratory_view/configurations/constants/elasticsearch_fieldnames';
+import { ObservabilityAppServices } from '../../../../application/types';
 
 interface Props {
   bucketSize: BucketSize;
@@ -29,13 +30,17 @@ interface Props {
 
 export function UXSection({ bucketSize }: Props) {
   const { forceUpdate, hasDataMap } = useHasData();
-  const { core, plugins } = usePluginContext();
+  const { services } = useKibana<ObservabilityAppServices>();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
     useDatePickerContext();
   const uxHasDataResponse = hasDataMap.ux;
   const serviceName = uxHasDataResponse?.serviceName as string;
 
-  const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(core, plugins);
+  const ExploratoryViewEmbeddable = getExploratoryViewEmbeddable(
+    services.uiSettings,
+    services.dataViews,
+    services.lens
+  );
 
   const seriesList: AllSeries = [
     {
@@ -50,6 +55,7 @@ export function UXSection({ bucketSize }: Props) {
       breakdown: SERVICE_NAME,
       dataType: 'ux' as AppDataType,
       selectedMetricField: TRANSACTION_DURATION,
+      showPercentileAnnotations: false,
     },
   ];
 

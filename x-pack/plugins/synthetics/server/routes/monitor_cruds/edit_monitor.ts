@@ -27,6 +27,7 @@ import {
   sendTelemetryEvents,
   formatTelemetryUpdateEvent,
 } from '../telemetry/monitor_upgrade_sender';
+import { formatHeartbeatRequest } from '../../synthetics_service/formatters/format_configs';
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
 import type { UptimeServerSetup } from '../../legacy_uptime/lib/adapters/framework';
 
@@ -126,18 +127,16 @@ export const syncEditedMonitor = async ({
   previousMonitor: SavedObject<EncryptedSyntheticsMonitor>;
   server: UptimeServerSetup;
 }) => {
-  const errors = await server.syntheticsService.pushConfigs([
-    {
-      ...editedMonitor,
-      id:
-        (editedMonitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID] ||
-        editedMonitorSavedObject.id,
-      fields: {
-        config_id: editedMonitorSavedObject.id,
-      },
-      fields_under_root: true,
-    },
-  ]);
+  const errors = await server.syntheticsService.pushConfigs(
+    [
+      formatHeartbeatRequest({
+        monitor: editedMonitor,
+        monitorId: editedMonitorSavedObject.id,
+        customHeartbeatId: (editedMonitor as MonitorFields)[ConfigKey.CUSTOM_HEARTBEAT_ID],
+      }),
+    ],
+    true
+  );
 
   sendTelemetryEvents(
     server.logger,

@@ -28,20 +28,17 @@ export type RulesQueryResult = ReturnType<typeof useFindCspRules>;
 export const useFindCspRules = ({ search, page, perPage, filter }: RulesQuery) => {
   const { savedObjects } = useKibana().services;
 
-  return useQuery(
-    [cspRuleAssetSavedObjectType, { search, page, perPage }],
-    () =>
-      savedObjects.client.find<CspRuleSchema>({
-        type: cspRuleAssetSavedObjectType,
-        search,
-        searchFields: ['name'],
-        page: 1,
-        // NOTE: 'name.raw' is a field mapping we defined on 'name'
-        sortField: 'name.raw',
-        perPage,
-        filter,
-      }),
-    { refetchOnWindowFocus: false }
+  return useQuery([cspRuleAssetSavedObjectType, { search, page, perPage }], () =>
+    savedObjects.client.find<CspRuleSchema>({
+      type: cspRuleAssetSavedObjectType,
+      search,
+      searchFields: ['name'],
+      page: 1,
+      // NOTE: 'name.raw' is a field mapping we defined on 'name'
+      sortField: 'name.raw',
+      perPage,
+      filter,
+    })
   );
 };
 
