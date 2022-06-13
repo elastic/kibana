@@ -244,11 +244,8 @@ export async function mountApp(
         (async () => {
           const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
           if (!hasUserDataView) {
-            const hasEsData = await data.dataViews.hasData.hasESData().catch(() => true);
-            if ((!hasUserDataView && hasEsData) || !hasEsData) {
-              setEditorState('no_data');
-              return;
-            }
+            setEditorState('no_data');
+            return;
           }
           setEditorState('data');
           initCallback();
