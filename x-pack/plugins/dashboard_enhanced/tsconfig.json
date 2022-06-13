@@ -18,7 +18,7 @@
     { "path": "../../../src/plugins/share/tsconfig.json" },
     { "path": "../../../src/plugins/data/tsconfig.json"},
     { "path": "../../../src/plugins/embeddable/tsconfig.json" },
+    { "path": "../../../src/plugins/ui_actions_enhanced/tsconfig.json" },
     { "path": "../embeddable_enhanced/tsconfig.json" },
-    { "path": "../ui_actions_enhanced/tsconfig.json" },
   ]
 }

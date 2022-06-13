@@ -8,6 +8,7 @@
 import React from 'react';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { PipelinesTable } from './pipelines_table';
+import { EuiLink } from '@elastic/eui';
 
 describe('PipelinesTable component', () => {
   let props;
@@ -66,7 +67,7 @@ describe('PipelinesTable component', () => {
   it('calls openPipeline on id click', () => {
     props.pipelines = [{ id: 'testPipeline', isCentrallyManaged: true }];
     const wrapper = mountWithIntl(<PipelinesTable.WrappedComponent {...props} />);
-    wrapper.find('EuiLink').simulate('click');
+    wrapper.find(EuiLink).find('button').simulate('click');
     expect(openPipeline).toHaveBeenCalledWith('testPipeline');
   });
 });

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { BehaviorSubject, firstValueFrom, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, filter, firstValueFrom, ReplaySubject } from 'rxjs';
 import { takeWhile, tap, toArray } from 'rxjs/operators';
 import { schema } from '@kbn/config-schema';
 import type { Plugin, CoreSetup, CoreStart, TelemetryCounter, Event } from '@kbn/core/server';
@@ -70,7 +70,11 @@ export class AnalyticsPluginAPlugin implements Plugin {
 
         return res.ok({
           body: stats
-            .filter((counter) => counter.event_type === eventType)
+            .filter(
+              (counter) =>
+                counter.event_type === eventType &&
+                ['client', 'FTR-shipper'].includes(counter.source)
+            )
             .slice(-takeNumberOfCounters),
         });
       }
@@ -86,11 +90,15 @@ export class AnalyticsPluginAPlugin implements Plugin {
         const actions = await firstValueFrom(
           actions$.pipe(
             takeWhile(() => !found),
-            tap(({ action, meta }) => {
-              found =
-                action === 'reportEvents' &&
-                meta.find((event: Event) => event.event_type === 'test-plugin-lifecycle');
+            tap((action) => {
+              found = isTestPluginLifecycleReportEventAction(action);
             }),
+            // Filter only the actions that are relevant to this plugin
+            filter(
+              ({ action, meta }) =>
+                ['optIn', 'extendContext'].includes(action) ||
+                isTestPluginLifecycleReportEventAction({ action, meta })
+            ),
             toArray()
           )
         );
@@ -120,4 +128,11 @@ export class AnalyticsPluginAPlugin implements Plugin {
   }
 
   public stop() {}
+}
+
+function isTestPluginLifecycleReportEventAction({ action, meta }: Action): boolean {
+  return (
+    action === 'reportEvents' &&
+    meta.find((event: Event) => event.event_type === 'test-plugin-lifecycle')
+  );
 }

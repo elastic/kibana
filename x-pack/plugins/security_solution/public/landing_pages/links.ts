@@ -18,6 +18,7 @@ import { overviewLinks, detectionResponseLinks } from '../overview/links';
 import { links as hostsLinks } from '../hosts/links';
 import { links as networkLinks } from '../network/links';
 import { links as usersLinks } from '../users/links';
+import { links as kubernetesLinks } from '../kubernetes/links';
 
 export const dashboardsLandingLinks: LinkItem = {
   id: SecurityPageName.dashboardsLanding,
@@ -30,7 +31,7 @@ export const dashboardsLandingLinks: LinkItem = {
       defaultMessage: 'Dashboards',
     }),
   ],
-  links: [overviewLinks, detectionResponseLinks],
+  links: [overviewLinks, detectionResponseLinks, kubernetesLinks],
   skipUrlState: true,
   hideTimeline: true,
 };

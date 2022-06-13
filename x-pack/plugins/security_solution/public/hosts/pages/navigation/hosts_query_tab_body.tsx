@@ -17,7 +17,6 @@ const HostsTableManage = manageQuery(HostsTable);
 
 export const HostsQueryTabBody = ({
   deleteQuery,
-  docValueFields,
   endDate,
   filterQuery,
   indexNames,
@@ -33,7 +32,6 @@ export const HostsQueryTabBody = ({
   }, [skip, toggleStatus]);
   const [loading, { hosts, totalCount, pageInfo, loadPage, id, inspect, isInspected, refetch }] =
     useAllHost({
-      docValueFields,
       endDate,
       filterQuery,
       indexNames,

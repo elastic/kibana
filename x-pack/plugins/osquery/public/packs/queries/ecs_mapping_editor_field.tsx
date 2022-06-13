@@ -188,7 +188,7 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
           }
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__labelDisplay--expand">
+          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__label--expand">
             {option.value.field}
           </StyledFieldSpan>
         </EuiFlexItem>
@@ -363,7 +363,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
         gutterSize="none"
       >
         <EuiFlexItem grow={false}>
-          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__labelDisplay--expand">
+          <StyledFieldSpan className="euiSuggestItem__label euiSuggestItem__label--expand">
             {option.value.suggestion_label}
           </StyledFieldSpan>
         </EuiFlexItem>
@@ -398,7 +398,7 @@ const OsqueryColumnFieldComponent: React.FC<OsqueryColumnFieldProps> = ({
       return ecsKeySchemaOption?.value?.normalization !== 'array';
     }
 
-    return true;
+    return !!ecsKey?.length;
   }, [typeValue, formData, item.path]);
 
   const onTypeChange = useCallback(
@@ -637,6 +637,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
               osquerySchemaOptions,
               editForm: !isLastItem,
             },
+            readDefaultValueOnForm: !item.isNew,
             config: {
               valueChangeDebounceTime: 300,
               type: FIELD_TYPES.COMBO_BOX,
@@ -702,6 +703,7 @@ export const ECSMappingEditorForm: React.FC<ECSMappingEditorFormProps> = ({
                 component={ECSComboboxField}
                 euiFieldProps={ecsComboBoxEuiFieldProps}
                 validationData={validationData}
+                readDefaultValueOnForm={!item.isNew}
                 // @ts-expect-error update types
                 config={config}
               />
@@ -1017,7 +1019,9 @@ export const ECSMappingEditorField = React.memo(
         if (itemKey) {
           const serializedFormData = formDataSerializer();
           const itemValue =
-            serializedFormData.ecs_mapping && serializedFormData.ecs_mapping[`${itemKey}`]?.field;
+            serializedFormData.ecs_mapping &&
+            (serializedFormData.ecs_mapping[`${itemKey}`]?.field ||
+              serializedFormData.ecs_mapping[`${itemKey}`]?.value);
 
           if (itemValue && onAdd.current) {
             onAdd.current();

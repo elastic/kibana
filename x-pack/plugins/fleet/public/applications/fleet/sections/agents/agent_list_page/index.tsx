@@ -35,7 +35,7 @@ import {
 } from '../../../hooks';
 import { AgentEnrollmentFlyout, AgentPolicySummaryLine } from '../../../components';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../../services';
-import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE } from '../../../constants';
+import { AGENTS_PREFIX, FLEET_SERVER_PACKAGE, SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentHealth,
@@ -200,84 +200,87 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   // Request to fetch agents and agent status
   const currentRequestRef = useRef<number>(0);
-  const fetchData = useCallback(() => {
-    async function fetchDataAsync() {
-      currentRequestRef.current++;
-      const currentRequest = currentRequestRef.current;
+  const fetchData = useCallback(
+    ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
+      async function fetchDataAsync() {
+        currentRequestRef.current++;
+        const currentRequest = currentRequestRef.current;
 
-      try {
-        setIsLoading(true);
-        const [agentsRequest, agentsStatusRequest] = await Promise.all([
-          sendGetAgents({
-            page: pagination.currentPage,
-            perPage: pagination.pageSize,
-            kuery: kuery && kuery !== '' ? kuery : undefined,
-            showInactive,
-            showUpgradeable,
-          }),
-          sendGetAgentStatus({
-            kuery: kuery && kuery !== '' ? kuery : undefined,
-          }),
-        ]);
-        // Return if a newer request as been triggered
-        if (currentRequestRef.current !== currentRequest) {
-          return;
-        }
-        if (agentsRequest.error) {
-          throw agentsRequest.error;
-        }
-        if (!agentsRequest.data) {
-          throw new Error('Invalid GET /agents response');
-        }
-        if (agentsStatusRequest.error) {
-          throw agentsStatusRequest.error;
-        }
-        if (!agentsStatusRequest.data) {
-          throw new Error('Invalid GET /agents-status response');
-        }
+        try {
+          setIsLoading(true);
+          const [agentsRequest, agentsStatusRequest] = await Promise.all([
+            sendGetAgents({
+              page: pagination.currentPage,
+              perPage: pagination.pageSize,
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+              showInactive,
+              showUpgradeable,
+            }),
+            sendGetAgentStatus({
+              kuery: kuery && kuery !== '' ? kuery : undefined,
+            }),
+          ]);
+          // Return if a newer request as been triggered
+          if (currentRequestRef.current !== currentRequest) {
+            return;
+          }
+          if (agentsRequest.error) {
+            throw agentsRequest.error;
+          }
+          if (!agentsRequest.data) {
+            throw new Error('Invalid GET /agents response');
+          }
+          if (agentsStatusRequest.error) {
+            throw agentsStatusRequest.error;
+          }
+          if (!agentsStatusRequest.data) {
+            throw new Error('Invalid GET /agents-status response');
+          }
 
-        setAgentsStatus({
-          healthy: agentsStatusRequest.data.results.online,
-          unhealthy: agentsStatusRequest.data.results.error,
-          offline: agentsStatusRequest.data.results.offline,
-          updating: agentsStatusRequest.data.results.updating,
-          inactive: agentsRequest.data.totalInactive,
-        });
+          setAgentsStatus({
+            healthy: agentsStatusRequest.data.results.online,
+            unhealthy: agentsStatusRequest.data.results.error,
+            offline: agentsStatusRequest.data.results.offline,
+            updating: agentsStatusRequest.data.results.updating,
+            inactive: agentsRequest.data.totalInactive,
+          });
 
-        const newAllTags = Array.from(
-          new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
-        );
+          const newAllTags = Array.from(
+            new Set(agentsRequest.data.items.flatMap((agent) => agent.tags ?? []))
+          );
 
-        // We only want to update the list of available tags if we've either received
-        // more tags than we currently have from the API (e.g. new agents have been enrolled)
-        // or we haven't set our list of tags yet. TODO: Would it be possible to remove a tag
-        // from the filterable list if an agent is unenrolled and no agents remain with that tag?
-        if (!allTags || newAllTags.length > allTags.length) {
-          setAllTags(newAllTags);
+          // We only want to update the list of available tags if
+          // - We haven't set any tags yet
+          // - We've received net-new tags from the API (e.g. more tags than we have rendered now)
+          // - We've received the "refreshTags" flag which will force a refresh of the tags list when an agent is unenrolled
+          if (!allTags || newAllTags.length > allTags.length || refreshTags) {
+            setAllTags(newAllTags);
+          }
+
+          setAgents(agentsRequest.data.items);
+          setTotalAgents(agentsRequest.data.total);
+          setTotalInactiveAgents(agentsRequest.data.totalInactive);
+        } catch (error) {
+          notifications.toasts.addError(error, {
+            title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
+              defaultMessage: 'Error fetching agents',
+            }),
+          });
         }
-
-        setAgents(agentsRequest.data.items);
-        setTotalAgents(agentsRequest.data.total);
-        setTotalInactiveAgents(agentsRequest.data.totalInactive);
-      } catch (error) {
-        notifications.toasts.addError(error, {
-          title: i18n.translate('xpack.fleet.agentList.errorFetchingDataTitle', {
-            defaultMessage: 'Error fetching agents',
-          }),
-        });
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    }
-    fetchDataAsync();
-  }, [
-    pagination.currentPage,
-    pagination.pageSize,
-    kuery,
-    showInactive,
-    showUpgradeable,
-    allTags,
-    notifications.toasts,
-  ]);
+      fetchDataAsync();
+    },
+    [
+      pagination.currentPage,
+      pagination.pageSize,
+      kuery,
+      showInactive,
+      showUpgradeable,
+      allTags,
+      notifications.toasts,
+    ]
+  );
 
   // Send request to get agent list and status
   useEffect(() => {
@@ -291,7 +294,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const agentPoliciesRequest = useGetAgentPolicies({
     page: 1,
-    perPage: 1000,
+    perPage: SO_SEARCH_LIMIT,
     full: true,
   });
 
@@ -468,7 +471,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         <EuiPortal>
           <AgentEnrollmentFlyout
             agentPolicy={agentPolicies.find((p) => p.id === enrollmentFlyout.selectedPolicyId)}
-            onClose={() => setEnrollmentFlyoutState({ isOpen: false })}
+            onClose={() => {
+              setEnrollmentFlyoutState({ isOpen: false });
+              fetchData();
+              agentPoliciesRequest.resendRequest();
+            }}
           />
         </EuiPortal>
       ) : null}
@@ -490,7 +497,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             agentCount={1}
             onClose={() => {
               setAgentToUnenroll(undefined);
-              fetchData();
+              fetchData({ refreshTags: true });
             }}
             useForceUnenroll={agentToUnenroll.status === 'unenrolling'}
             hasFleetServer={agentToUnenrollHasFleetServer}
@@ -547,7 +554,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         selectionMode={selectionMode}
         currentQuery={kuery}
         selectedAgents={selectedAgents}
-        refreshAgents={() => Promise.all([fetchData(), refreshUpgrades()])}
+        refreshAgents={({ refreshTags = false }: { refreshTags?: boolean } = {}) =>
+          Promise.all([fetchData({ refreshTags }), refreshUpgrades()])
+        }
+        onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
       />
       <EuiSpacer size="m" />
       {/* Agent total, bulk actions and status bar */}
