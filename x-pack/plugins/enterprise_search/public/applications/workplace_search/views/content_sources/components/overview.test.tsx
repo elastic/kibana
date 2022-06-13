@@ -16,8 +16,6 @@ import { EuiCallOut, EuiConfirmModal, EuiEmptyPrompt, EuiTable } from '@elastic/
 
 import { ComponentLoader } from '../../../components/shared/component_loader';
 
-import * as SourceData from '../source_data';
-
 import { CustomSourceDeployment } from './custom_source_deployment';
 
 import { Overview } from './overview';
@@ -142,33 +140,6 @@ describe('Overview', () => {
     modal.prop('onConfirm')!({} as any);
 
     expect(initializeSourceSynchronization).toHaveBeenCalled();
-  });
-
-  it('uses a base service type if one is provided', () => {
-    jest.spyOn(SourceData, 'getSourceData');
-    setMockValues({
-      ...mockValues,
-      contentSource: {
-        ...fullContentSources[0],
-        baseServiceType: 'share_point_server',
-      },
-    });
-
-    shallow(<Overview />);
-
-    expect(SourceData.getSourceData).toHaveBeenCalledWith('share_point_server');
-  });
-
-  it('defaults to the regular service tye', () => {
-    jest.spyOn(SourceData, 'getSourceData');
-    setMockValues({
-      ...mockValues,
-      contentSource: fullContentSources[0],
-    });
-
-    shallow(<Overview />);
-
-    expect(SourceData.getSourceData).toHaveBeenCalledWith('custom');
   });
 
   describe('custom sources', () => {

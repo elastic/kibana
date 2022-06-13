@@ -14,6 +14,25 @@ is_pr() {
   false
 }
 
+is_pr_with_label() {
+  match="$1"
+
+  IFS=',' read -ra labels <<< "${GITHUB_PR_LABELS:-}"
+
+  for label in "${labels[@]}"
+  do
+    if [ "$label" == "$match" ]; then
+      return
+    fi
+  done
+
+  false
+}
+
+is_auto_commit_disabled() {
+  is_pr_with_label "ci:no-auto-commit"
+}
+
 check_for_changed_files() {
   RED='\033[0;31m'
   YELLOW='\033[0;33m'
@@ -23,7 +42,7 @@ check_for_changed_files() {
   GIT_CHANGES="$(git ls-files --modified -- . ':!:.bazelrc')"
 
   if [ "$GIT_CHANGES" ]; then
-    if [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
+    if ! is_auto_commit_disabled && [[ "$SHOULD_AUTO_COMMIT_CHANGES" == "true" && "${BUILDKITE_PULL_REQUEST:-}" ]]; then
       NEW_COMMIT_MESSAGE="[CI] Auto-commit changed files from '$1'"
       PREVIOUS_COMMIT_MESSAGE="$(git log -1 --pretty=%B)"
 
@@ -47,6 +66,11 @@ check_for_changed_files() {
 
       git commit -m "$NEW_COMMIT_MESSAGE"
       git push
+
+      # After the git push, the new commit will trigger a new build within a few seconds and this build should get cancelled
+      # So, let's just sleep to give the build time to cancel itself without an error
+      # If it doesn't get cancelled for some reason, then exit with an error, because we don't want this build to be green (we just don't want it to generate an error either)
+      sleep 300
       exit 1
     else
       echo -e "\n${RED}ERROR: '$1' caused changes to the following files:${C_RESET}\n"

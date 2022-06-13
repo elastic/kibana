@@ -97,7 +97,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
           'xpack.apm.agentConfig.servicePage.service.fieldLabel',
           { defaultMessage: 'Service name' }
         )}
-        field={SERVICE_NAME}
+        fieldName={SERVICE_NAME}
         value={newConfig.service.name}
         onChange={(name) => {
           setNewConfig((prev) => ({
@@ -105,6 +105,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             service: { name, environment: '' },
           }));
         }}
+        dataTestSubj="serviceNameComboBox"
       />
       {/* Environment options */}
       <FormRowSelect
@@ -135,6 +136,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
             service: { name: prev.service.name, environment },
           }));
         }}
+        dataTestSubj="serviceEnviromentComboBox"
       />
       <EuiSpacer />
       <EuiFlexGroup justifyContent="flexEnd">

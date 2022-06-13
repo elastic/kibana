@@ -7,11 +7,11 @@
 
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import { IRouter } from 'kibana/server';
+import { IRouter } from '@kbn/core/server';
 import { ILicenseState } from '../lib';
 import { verifyAccessAndContext, RewriteResponseCase } from './lib';
 import {
-  AlertTypeParams,
+  RuleTypeParams,
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
   ResolvedSanitizedRule,
@@ -21,7 +21,7 @@ const paramSchema = schema.object({
   id: schema.string(),
 });
 
-const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<AlertTypeParams>> = ({
+const rewriteBodyRes: RewriteResponseCase<ResolvedSanitizedRule<RuleTypeParams>> = ({
   alertTypeId,
   createdBy,
   updatedBy,
@@ -73,7 +73,7 @@ export const resolveRuleRoute = (
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
-        const rulesClient = context.alerting.getRulesClient();
+        const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
         const rule = await rulesClient.resolve({ id });
         return res.ok({

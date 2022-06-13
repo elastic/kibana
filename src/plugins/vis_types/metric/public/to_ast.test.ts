@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { TimefilterContract } from 'src/plugins/data/public';
-import { Vis } from 'src/plugins/visualizations/public';
+import { TimefilterContract } from '@kbn/data-plugin/public';
+import { Vis } from '@kbn/visualizations-plugin/public';
 
 import { toExpressionAst } from './to_ast';
 import { VisParams } from './types';
@@ -22,13 +22,7 @@ describe('metric vis toExpressionAst function', () => {
       params: {
         percentageMode: false,
       },
-      data: {
-        indexPattern: { id: '123' } as any,
-        aggs: {
-          getResponseAggs: () => [],
-          aggs: [],
-        } as any,
-      },
+      data: {},
     } as unknown as Vis<VisParams>;
   });
 

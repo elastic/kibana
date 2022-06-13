@@ -11,7 +11,7 @@ import { EuiFormRow } from '@elastic/eui';
 import { FramePublicAPI, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { ChildDragDropProvider, DragDrop } from '../../../drag_drop';
-import { coreMock } from '../../../../../../../src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { generateId } from '../../../id_generator';
 import {
   createMockVisualization,
@@ -415,7 +415,7 @@ describe('LayerPanel', () => {
       );
 
       act(() => {
-        instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+        instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').last().simulate('click');
       });
       instance.update();
 
@@ -580,9 +580,9 @@ describe('LayerPanel', () => {
 
       // Close without a state update
       mockDatasource.updateStateOnCloseDimension = jest.fn();
-      instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+      instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').last().simulate('click');
       act(() => {
-        (instance.find('DimensionContainer').first().prop('handleClose') as () => void)();
+        (instance.find('DimensionContainer').last().prop('handleClose') as () => void)();
       });
       instance.update();
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();
@@ -591,9 +591,9 @@ describe('LayerPanel', () => {
       // Close with a state update
       mockDatasource.updateStateOnCloseDimension = jest.fn().mockReturnValue({ newState: true });
 
-      instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').first().simulate('click');
+      instance.find('[data-test-subj="lnsLayerPanel-dimensionLink"]').last().simulate('click');
       act(() => {
-        (instance.find('DimensionContainer').first().prop('handleClose') as () => void)();
+        (instance.find('DimensionContainer').last().prop('handleClose') as () => void)();
       });
       instance.update();
       expect(mockDatasource.updateStateOnCloseDimension).toHaveBeenCalled();

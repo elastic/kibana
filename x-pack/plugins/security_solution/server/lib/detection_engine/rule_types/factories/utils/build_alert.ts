@@ -78,7 +78,6 @@ import {
   commonParamsCamelToSnake,
   typeSpecificCamelToSnake,
 } from '../../../schemas/rule_converters';
-import { transformTags } from '../../../routes/rules/utils';
 import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
 import {
   AncestorLatest,
@@ -215,7 +214,7 @@ export const buildAlert = (
     [ALERT_RULE_RULE_ID]: params.ruleId,
     [ALERT_RULE_RULE_NAME_OVERRIDE]: params.ruleNameOverride,
     [ALERT_RULE_SEVERITY_MAPPING]: params.severityMapping,
-    [ALERT_RULE_TAGS]: transformTags(tags),
+    [ALERT_RULE_TAGS]: tags,
     [ALERT_RULE_THREAT]: params.threat,
     [ALERT_RULE_THROTTLE]: throttle ?? undefined,
     [ALERT_RULE_TIMELINE_ID]: params.timelineId,

@@ -8,19 +8,19 @@
 
 import { mapValues } from 'lodash';
 import {
+  mergeMigrationFunctionMaps,
+  MigrateFunctionsObject,
+} from '@kbn/kibana-utils-plugin/common';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
+import {
   createSearchSource,
   extractReferences,
   injectReferences,
   SearchSource,
   SearchSourceDependencies,
   SerializedSearchSourceFields,
-} from './';
-import { IndexPatternsContract } from '../..';
-import {
-  mergeMigrationFunctionMaps,
-  MigrateFunctionsObject,
-} from '../../../../kibana_utils/common';
-import { getAllMigrations as filtersGetAllMigrations } from '../../query/persistable_state';
+} from '.';
+import { getAllMigrations as filtersGetAllMigrations } from '../../query/filters/persistable_state';
 
 const getAllMigrations = (): MigrateFunctionsObject => {
   const searchSourceMigrations = {};
@@ -42,7 +42,7 @@ export class SearchSourceService {
     return { getAllMigrations };
   }
 
-  public start(indexPatterns: IndexPatternsContract, dependencies: SearchSourceDependencies) {
+  public start(indexPatterns: DataViewsContract, dependencies: SearchSourceDependencies) {
     return {
       /**
        * creates searchsource based on serialized search source fields

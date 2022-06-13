@@ -7,6 +7,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
+import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -15,7 +17,6 @@ import {
   aggregations,
   mlOnlyAggregations,
 } from '../../../../../../common/constants/aggregation_types';
-import { ES_FIELD_TYPES } from '../../../../../../../../../src/plugins/data/public';
 import {
   Job,
   Datafeed,
@@ -40,9 +41,9 @@ import { filterRuntimeMappings } from './util/filter_runtime_mappings';
 import { parseInterval } from '../../../../../../common/util/parse_interval';
 import { Calendar } from '../../../../../../common/types/calendars';
 import { mlCalendarService } from '../../../../services/calendar_service';
-import type { DataView } from '../../../../../../../../../src/plugins/data_views/public';
 import { getDatafeedAggregations } from '../../../../../../common/util/datafeed_utils';
 import { getFirstKeyInObject } from '../../../../../../common/util/object_utils';
+import { ml } from '../../../../services/ml_api_service';
 
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
@@ -760,6 +761,19 @@ export class JobCreator {
         aggregatable: true,
       }));
     }
+  }
+
+  // load the start and end times for the selected index
+  // and apply them to the job creator
+  public async autoSetTimeRange() {
+    const { start, end } = await ml.getTimeFieldRange({
+      index: this._indexPatternTitle,
+      timeFieldName: this.timeFieldName,
+      query: this.query,
+      runtimeMappings: this.datafeedConfig.runtime_mappings,
+      indicesOptions: this.datafeedConfig.indices_options,
+    });
+    this.setTimeRange(start.epoch, end.epoch);
   }
 
   protected _overrideConfigs(job: Job, datafeed: Datafeed) {

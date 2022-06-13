@@ -9,6 +9,7 @@
  * Creates URL to the DataFrameAnalytics page
  */
 import { isEmpty } from 'lodash';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { formatGenericMlUrl } from './common';
 import {
   DataFrameAnalyticsExplorationQueryState,
@@ -19,7 +20,6 @@ import {
   MlCommonGlobalState,
 } from '../../../common/types/locator';
 import { ML_PAGES } from '../../../common/constants/locator';
-import { setStateToKbnUrl } from '../../../../../../src/plugins/kibana_utils/public';
 import { getGroupQueryText, getJobQueryText } from '../../../common/util/string_utils';
 import { AppPageState, ListingPageUrlState } from '../../../common/types/common';
 

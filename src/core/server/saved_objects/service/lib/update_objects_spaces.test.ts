@@ -13,9 +13,9 @@ import {
   mockDeleteLegacyUrlAliases,
 } from './update_objects_spaces.test.mock';
 
-import { elasticsearchClientMock } from 'src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '../../../elasticsearch/client/mocks';
 
-import { loggerMock } from '../../../logging/logger.mock';
+import { loggerMock } from '@kbn/logging-mocks';
 import { typeRegistryMock } from '../../saved_objects_type_registry.mock';
 import { SavedObjectsSerializer } from '../../serialization';
 import type {

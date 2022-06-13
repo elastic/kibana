@@ -8,15 +8,18 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { elasticsearchClientMock } from '../../../../../src/core/server/elasticsearch/client/mocks';
+import { elasticsearchClientMock } from '@kbn/core/server/elasticsearch/client/mocks';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   getTotalCountAggregations,
   getTotalCountInUse,
   getExecutionsPerDayCount,
   getExecutionTimeoutsPerDayCount,
   getFailedAndUnrecognizedTasksPerDay,
+  parsePercentileAggsByRuleType,
 } from './alerting_telemetry';
 
+const mockLogger = loggingSystemMock.create().get();
 describe('alerting telemetry', () => {
   test('getTotalCountInUse should replace "." symbols with "__" in rule types names', async () => {
     const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
@@ -43,7 +46,7 @@ describe('alerting telemetry', () => {
       }
     );
 
-    const telemetry = await getTotalCountInUse(mockEsClient, 'test');
+    const telemetry = await getTotalCountInUse(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -56,6 +59,25 @@ Object {
   },
   "countNamespaces": 1,
   "countTotal": 4,
+}
+`);
+  });
+
+  test('getTotalCountInUse should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getTotalCountInUse(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing alerting telemetry task: getTotalCountInUse - {}`
+    );
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "countByType": Object {},
+  "countNamespaces": 0,
+  "countTotal": 0,
 }
 `);
   });
@@ -91,7 +113,7 @@ Object {
       }
     );
 
-    const telemetry = await getTotalCountAggregations(mockEsClient, 'test');
+    const telemetry = await getTotalCountAggregations(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -127,6 +149,50 @@ Object {
   "throttle_time_number_s": Object {
     "avg": 30,
     "max": 60,
+    "min": 0,
+  },
+}
+`);
+  });
+
+  test('getTotalCountAggregations should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getTotalCountAggregations(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing alerting telemetry task: getTotalCountAggregations - {}`
+    );
+    expect(telemetry).toMatchInlineSnapshot(`
+Object {
+  "connectors_per_alert": Object {
+    "avg": 0,
+    "max": 0,
+    "min": 0,
+  },
+  "count_by_type": Object {},
+  "count_rules_namespaces": 0,
+  "count_total": 0,
+  "schedule_time": Object {
+    "avg": "0s",
+    "max": "0s",
+    "min": "0s",
+  },
+  "schedule_time_number_s": Object {
+    "avg": 0,
+    "max": 0,
+    "min": 0,
+  },
+  "throttle_time": Object {
+    "avg": "0s",
+    "max": "0s",
+    "min": "0s",
+  },
+  "throttle_time_number_s": Object {
+    "avg": 0,
+    "max": 0,
     "min": 0,
   },
 }
@@ -181,6 +247,62 @@ Object {
           avgTotalSearchDuration: {
             value: 30.642857142857142,
           },
+          percentileScheduledActions: {
+            values: {
+              '50.0': 4.0,
+              '90.0': 26.0,
+              '99.0': 26.0,
+            },
+          },
+          percentileAlerts: {
+            values: {
+              '50.0': 10.0,
+              '90.0': 22.0,
+              '99.0': 22.0,
+            },
+          },
+          aggsByType: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: '.index-threshold',
+                doc_count: 149,
+                percentileScheduledActions: {
+                  values: {
+                    '50.0': 4.0,
+                    '90.0': 26.0,
+                    '99.0': 26.0,
+                  },
+                },
+                percentileAlerts: {
+                  values: {
+                    '50.0': 10.0,
+                    '90.0': 22.0,
+                    '99.0': 22.0,
+                  },
+                },
+              },
+              {
+                key: 'logs.alert.document.count',
+                doc_count: 1,
+                percentileScheduledActions: {
+                  values: {
+                    '50.0': 10.0,
+                    '90.0': 10.0,
+                    '99.0': 10.0,
+                  },
+                },
+                percentileAlerts: {
+                  values: {
+                    '50.0': 5.0,
+                    '90.0': 13.0,
+                    '99.0': 13.0,
+                  },
+                },
+              },
+            ],
+          },
         },
         hits: {
           hits: [],
@@ -188,7 +310,7 @@ Object {
       }
     );
 
-    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test');
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -228,6 +350,73 @@ Object {
       },
       countTotal: 4,
       countTotalFailures: 4,
+      generatedActionsPercentiles: {
+        p50: 4,
+        p90: 26,
+        p99: 26,
+      },
+      generatedActionsPercentilesByType: {
+        p50: {
+          '__index-threshold': 4,
+          logs__alert__document__count: 10,
+        },
+        p90: {
+          '__index-threshold': 26,
+          logs__alert__document__count: 10,
+        },
+        p99: {
+          '__index-threshold': 26,
+          logs__alert__document__count: 10,
+        },
+      },
+      alertsPercentiles: {
+        p50: 10,
+        p90: 22,
+        p99: 22,
+      },
+      alertsPercentilesByType: {
+        p50: {
+          '__index-threshold': 10,
+          logs__alert__document__count: 5,
+        },
+        p90: {
+          '__index-threshold': 22,
+          logs__alert__document__count: 13,
+        },
+        p99: {
+          '__index-threshold': 22,
+          logs__alert__document__count: 13,
+        },
+      },
+    });
+  });
+
+  test('getExecutionsPerDayCount should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getExecutionsPerDayCount(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing alerting telemetry task: getExecutionsPerDayCount - {}`
+    );
+    expect(telemetry).toStrictEqual({
+      avgEsSearchDuration: 0,
+      avgEsSearchDurationByType: {},
+      avgExecutionTime: 0,
+      avgExecutionTimeByType: {},
+      avgTotalSearchDuration: 0,
+      avgTotalSearchDurationByType: {},
+      countByType: {},
+      countFailuresByReason: {},
+      countFailuresByReasonByType: {},
+      countTotal: 0,
+      countTotalFailures: 0,
+      generatedActionsPercentiles: {},
+      generatedActionsPercentilesByType: {},
+      alertsPercentiles: {},
+      alertsPercentilesByType: {},
     });
   });
 
@@ -253,7 +442,7 @@ Object {
       }
     );
 
-    const telemetry = await getExecutionTimeoutsPerDayCount(mockEsClient, 'test');
+    const telemetry = await getExecutionTimeoutsPerDayCount(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -264,6 +453,22 @@ Object {
         document__test__: 1,
         logs__alert__document__count: 1,
       },
+    });
+  });
+
+  test('getExecutionTimeoutsPerDayCount should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getExecutionTimeoutsPerDayCount(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing alerting telemetry task: getExecutionsPerDayCount - {}`
+    );
+    expect(telemetry).toStrictEqual({
+      countTotal: 0,
+      countByType: {},
     });
   });
 
@@ -294,7 +499,7 @@ Object {
       }
     );
 
-    const telemetry = await getFailedAndUnrecognizedTasksPerDay(mockEsClient, 'test');
+    const telemetry = await getFailedAndUnrecognizedTasksPerDay(mockEsClient, 'test', mockLogger);
 
     expect(mockEsClient.search).toHaveBeenCalledTimes(1);
 
@@ -314,6 +519,207 @@ Object {
         },
       },
       countTotal: 5,
+    });
+  });
+
+  test('getFailedAndUnrecognizedTasksPerDay should return empty results if query throws error', async () => {
+    const mockEsClient = elasticsearchClientMock.createClusterClient().asScoped().asInternalUser;
+    mockEsClient.search.mockRejectedValue(new Error('oh no'));
+
+    const telemetry = await getFailedAndUnrecognizedTasksPerDay(mockEsClient, 'test', mockLogger);
+
+    expect(mockEsClient.search).toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      `Error executing alerting telemetry task: getFailedAndUnrecognizedTasksPerDay - {}`
+    );
+    expect(telemetry).toStrictEqual({
+      countByStatus: {},
+      countByStatusByRuleType: {},
+      countTotal: 0,
+    });
+  });
+
+  test('parsePercentileAggsByRuleType', () => {
+    const aggsByType = {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '.index-threshold',
+          doc_count: 149,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 4.0,
+              '90.0': 26.0,
+              '99.0': 26.0,
+            },
+          },
+          percentileAlerts: {
+            values: {
+              '50.0': 3.0,
+              '90.0': 22.0,
+              '99.0': 22.0,
+            },
+          },
+        },
+        {
+          key: 'logs.alert.document.count',
+          doc_count: 1,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 10.0,
+              '90.0': 10.0,
+              '99.0': 10.0,
+            },
+          },
+          percentileAlerts: {
+            values: {
+              '50.0': 5.0,
+              '90.0': 16.0,
+              '99.0': 16.0,
+            },
+          },
+        },
+        {
+          key: 'document.test.',
+          doc_count: 1,
+          percentileScheduledActions: {
+            values: {
+              '50.0': null,
+              '90.0': null,
+              '99.0': null,
+            },
+          },
+          percentileAlerts: {
+            values: {
+              '50.0': null,
+              '90.0': null,
+              '99.0': null,
+            },
+          },
+        },
+      ],
+    };
+    expect(
+      parsePercentileAggsByRuleType(aggsByType.buckets, 'percentileScheduledActions.values')
+    ).toEqual({
+      p50: {
+        '__index-threshold': 4,
+        document__test__: 0,
+        logs__alert__document__count: 10,
+      },
+      p90: {
+        '__index-threshold': 26,
+        document__test__: 0,
+        logs__alert__document__count: 10,
+      },
+      p99: {
+        '__index-threshold': 26,
+        document__test__: 0,
+        logs__alert__document__count: 10,
+      },
+    });
+    expect(parsePercentileAggsByRuleType(aggsByType.buckets, 'percentileAlerts.values')).toEqual({
+      p50: {
+        '__index-threshold': 3,
+        document__test__: 0,
+        logs__alert__document__count: 5,
+      },
+      p90: {
+        '__index-threshold': 22,
+        document__test__: 0,
+        logs__alert__document__count: 16,
+      },
+      p99: {
+        '__index-threshold': 22,
+        document__test__: 0,
+        logs__alert__document__count: 16,
+      },
+    });
+  });
+
+  test('parsePercentileAggsByRuleType handles unknown path', () => {
+    const aggsByType = {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '.index-threshold',
+          doc_count: 149,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 4.0,
+              '90.0': 26.0,
+              '99.0': 26.0,
+            },
+          },
+        },
+        {
+          key: 'logs.alert.document.count',
+          doc_count: 1,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 10.0,
+              '90.0': 10.0,
+              '99.0': 10.0,
+            },
+          },
+        },
+      ],
+    };
+    expect(parsePercentileAggsByRuleType(aggsByType.buckets, 'foo.values')).toEqual({
+      p50: {},
+      p90: {},
+      p99: {},
+    });
+  });
+
+  test('parsePercentileAggsByRuleType handles unrecognized percentiles', () => {
+    const aggsByType = {
+      doc_count_error_upper_bound: 0,
+      sum_other_doc_count: 0,
+      buckets: [
+        {
+          key: '.index-threshold',
+          doc_count: 149,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 4.0,
+              '75.0': 8.0,
+              '90.0': 26.0,
+              '99.0': 26.0,
+            },
+          },
+        },
+        {
+          key: 'logs.alert.document.count',
+          doc_count: 1,
+          percentileScheduledActions: {
+            values: {
+              '50.0': 10.0,
+              '75.0': 10.0,
+              '90.0': 10.0,
+              '99.0': 10.0,
+            },
+          },
+        },
+      ],
+    };
+    expect(
+      parsePercentileAggsByRuleType(aggsByType.buckets, 'percentileScheduledActions.values')
+    ).toEqual({
+      p50: {
+        '__index-threshold': 4,
+        logs__alert__document__count: 10,
+      },
+      p90: {
+        '__index-threshold': 26,
+        logs__alert__document__count: 10,
+      },
+      p99: {
+        '__index-threshold': 26,
+        logs__alert__document__count: 10,
+      },
     });
   });
 });

@@ -20,7 +20,6 @@ export interface UserActionTreeProps {
   caseServices: CaseServices;
   caseUserActions: CaseUserActions[];
   data: Case;
-  fetchUserActions: () => void;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
   isLoadingDescription: boolean;
@@ -29,7 +28,6 @@ export interface UserActionTreeProps {
   onShowAlertDetails: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
-  updateCase: (newCase: Case) => void;
   useFetchAlertData: UseFetchAlertData;
   userCanCrud: boolean;
 }
@@ -55,6 +53,7 @@ export interface UserActionBuilderArgs {
   handleOutlineComment: (id: string) => void;
   handleManageMarkdownEditId: (id: string) => void;
   handleSaveComment: ({ id, version }: { id: string; version: string }, content: string) => void;
+  handleDeleteComment: (id: string) => void;
   handleManageQuote: (quote: string) => void;
   onShowAlertDetails: (alertId: string, index: string) => void;
   actionsNavigation?: ActionsNavigation;

@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IScopedClusterClient, KibanaRequest, SavedObjectsFindResult } from 'kibana/server';
+import type { IScopedClusterClient, KibanaRequest, SavedObjectsFindResult } from '@kbn/core/server';
 import type {
   MLSavedObjectService,
   TrainedModelJob,
@@ -131,7 +131,7 @@ export function checksFactory(
     );
 
     const dfaJobsCreateTimeMap = dfaJobs.data_frame_analytics.reduce((acc, cur) => {
-      acc.set(cur.id, cur.create_time);
+      acc.set(cur.id, cur.create_time!);
       return acc;
     }, new Map<string, number>());
 

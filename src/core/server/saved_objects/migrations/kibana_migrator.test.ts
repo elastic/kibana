@@ -16,6 +16,8 @@ import { SavedObjectTypeRegistry } from '../saved_objects_type_registry';
 import { SavedObjectsType } from '../types';
 import { DocumentMigrator } from './core/document_migrator';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
+import { lastValueFrom } from 'rxjs';
 
 jest.mock('./core/document_migrator', () => {
   return {
@@ -134,7 +136,7 @@ describe('KibanaMigrator', () => {
     it('emits results on getMigratorResult$()', async () => {
       const options = mockV2MigrationOptions();
       const migrator = new KibanaMigrator(options);
-      const migratorStatus = migrator.getStatus$().pipe(take(3)).toPromise();
+      const migratorStatus = lastValueFrom(migrator.getStatus$().pipe(take(3)));
       migrator.prepareMigrations();
       await migrator.runMigrations();
 
@@ -286,6 +288,7 @@ const mockOptions = () => {
       retryAttempts: 20,
     },
     client: elasticsearchClientMock.createElasticsearchClient(),
+    docLinks: docLinksServiceMock.createSetupContract(),
   };
   return options;
 };

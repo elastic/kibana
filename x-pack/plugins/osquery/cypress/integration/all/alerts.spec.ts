@@ -17,6 +17,8 @@ import {
 import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
+import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { ROLES } from '../../test';
 
 describe('Alert Event Details', () => {
   before(() => {
@@ -24,7 +26,7 @@ describe('Alert Event Details', () => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
   });
   beforeEach(() => {
-    login();
+    login(ROLES.soc_manager);
   });
 
   after(() => {
@@ -32,7 +34,7 @@ describe('Alert Event Details', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'rule');
   });
 
-  it('should be able to run live query', () => {
+  it('should prepare packs and alert rules', () => {
     const PACK_NAME = 'testpack';
     const RULE_NAME = 'Test-rule';
     navigateTo('/app/osquery/packs');
@@ -54,12 +56,31 @@ describe('Alert Event Details', () => {
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
     cy.getBySel('ruleSwitch').click();
     cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+  });
+
+  it('should be able to run live query and add to timeline (-depending on the previous test)', () => {
+    const TIMELINE_NAME = 'Untitled timeline';
     cy.visit('/app/security/alerts');
+    cy.getBySel('header-page-title').contains('Alerts').should('exist');
+    cy.getBySel('timeline-context-menu-button').first().click({ force: true });
+    cy.getBySel('osquery-action-item').should('exist').contains('Run Osquery');
     cy.getBySel('expand-event').first().click();
     cy.getBySel('take-action-dropdown-btn').click();
     cy.getBySel('osquery-action-item').click();
+    cy.contains('1 agent selected.');
     inputQuery('select * from uptime;');
     submitQuery();
     checkResults();
+    cy.contains('Save for later').click();
+    cy.contains('Save query');
+    cy.get('.euiButtonEmpty--flushLeft').contains('Cancel').click();
+    cy.getBySel('add-to-timeline').first().click();
+    cy.getBySel('globalToastList').contains('Added');
+    cy.getBySel(RESULTS_TABLE).within(() => {
+      cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
+    });
+    cy.contains('Cancel').click();
+    cy.contains(TIMELINE_NAME).click();
+    cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');
   });
 });

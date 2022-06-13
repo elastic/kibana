@@ -9,9 +9,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { ColorMode, ColorSchemas } from '../../../../charts/public';
-import { AggGroupNames } from '../../../../data/public';
-import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '../../../../visualizations/public';
+import { ColorMode, ColorSchemas } from '@kbn/charts-plugin/public';
+import { AggGroupNames } from '@kbn/data-plugin/public';
+import { VisTypeDefinition, VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
 import { Alignment, GaugeType, GaugeTypeProps } from '../types';
 import { toExpressionAst } from '../to_ast';
@@ -29,6 +29,7 @@ export const getGaugeVisTypeDefinition = (
     defaultMessage: 'Show the status of a metric.',
   }),
   getSupportedTriggers: () => [VIS_EVENT_TO_TRIGGER.filter],
+  fetchDatatable: true,
   toExpressionAst,
   visConfig: {
     defaults: {
@@ -77,6 +78,7 @@ export const getGaugeVisTypeDefinition = (
     },
   },
   editorConfig: {
+    enableDataViewChange: true,
     optionsTemplate: getGaugeOptions(props),
     schemas: [
       {
@@ -97,6 +99,7 @@ export const getGaugeVisTypeDefinition = (
           '!geo_bounds',
           '!filtered_metric',
           '!single_percentile',
+          '!single_percentile_rank',
         ],
         defaults: [{ schema: 'metric', type: 'count' }],
       },

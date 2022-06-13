@@ -11,8 +11,9 @@ import { resolve } from 'path';
 import { coerce } from 'semver';
 import { promisify } from 'util';
 import { snakeCase } from 'lodash';
-import { isConfigPath, PackageInfo } from '../../config';
-import { PluginManifest, PluginType } from '../types';
+import { isConfigPath, PackageInfo } from '@kbn/config';
+import { PluginType } from '@kbn/core-base-common';
+import { PluginManifest } from '../types';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { isCamelCase } from './is_camel_case';
 
@@ -51,6 +52,7 @@ const KNOWN_MANIFEST_FIELDS = (() => {
     serviceFolders: true,
     owner: true,
     description: true,
+    enabledOnAnonymousPages: true,
   };
 
   return new Set(Object.keys(manifestFields));
@@ -212,6 +214,7 @@ export async function parseManifest(
     extraPublicDirs: manifest.extraPublicDirs,
     owner: manifest.owner!,
     description: manifest.description,
+    enabledOnAnonymousPages: manifest.enabledOnAnonymousPages,
   };
 }
 

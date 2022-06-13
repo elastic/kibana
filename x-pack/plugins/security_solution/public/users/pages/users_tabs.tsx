@@ -6,7 +6,8 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/kibana-react-plugin/public';
 
 import { UsersTabsProps } from './types';
 import { UsersTableType } from '../store/model';
@@ -27,6 +28,7 @@ export const UsersTabs = memo<UsersTabsProps>(
   ({
     deleteQuery,
     filterQuery,
+    pageFilters,
     from,
     indexNames,
     isInitializing,
@@ -90,13 +92,17 @@ export const UsersTabs = memo<UsersTabsProps>(
           <UserRiskScoreQueryTabBody {...tabProps} />
         </Route>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.events})`}>
-          <EventsQueryTabBody {...tabProps} timelineId={TimelineId.usersPageEvents} />
+          <EventsQueryTabBody
+            {...tabProps}
+            timelineId={TimelineId.usersPageEvents}
+            pageFilters={pageFilters}
+          />
         </Route>
         <Route path={`${USERS_PATH}/:tabName(${UsersTableType.alerts})`}>
           <AlertsView
             entityType="events"
             timelineId={TimelineId.usersPageExternalAlerts}
-            pageFilters={[]}
+            pageFilters={pageFilters ?? []}
             {...tabProps}
           />
         </Route>

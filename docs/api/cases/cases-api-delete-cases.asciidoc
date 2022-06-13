@@ -6,26 +6,26 @@
 
 Deletes one or more cases.
 
-=== Request
+=== {api-request-title}
 
 `DELETE <kibana host>:<port>/api/cases?ids=["<case ID1>","<case ID2>"]`
 
 `DELETE <kibana host>:<port>/s/<space_id>/api/cases?ids=["<case ID1>","<case ID2>"]`
 
-=== Prerequisite
+=== {api-prereq-title}
 
 You must have `all` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
 `owner` of the cases you're deleting.
 
-=== Path parameters
+=== {api-path-parms-title}
 
 `<space_id>`::
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
-=== Query parameters
+=== {api-query-parms-title}
 
 `ids`::
 (Required, string) The cases that you want to remove. To retrieve case IDs, use
@@ -33,12 +33,12 @@ default space is used.
 +
 NOTE: All non-ASCII characters must be URL encoded.
 
-==== Response code
+=== {api-response-codes-title}
 
 `204`::
    Indicates a successful call.
 
-=== Example
+=== {api-examples-title}
 
 Delete cases with these IDs:
 

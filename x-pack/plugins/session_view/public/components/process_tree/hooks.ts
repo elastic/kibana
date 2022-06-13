@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import _ from 'lodash';
 import memoizeOne from 'memoize-one';
-import { useState, useEffect } from 'react';
+import { sortedUniqBy } from 'lodash';
+import { useState, useEffect, useMemo } from 'react';
 import {
   AlertStatusEventEntityIdMap,
   EventAction,
@@ -17,20 +17,21 @@ import {
   ProcessEventsPage,
 } from '../../../common/types/process_tree';
 import {
+  inferProcessFromLeaderInfo,
   updateAlertEventStatus,
   processNewEvents,
   searchProcessTree,
   autoExpandProcessTree,
-  updateProcessMap,
 } from './helpers';
 import { sortProcesses } from '../../../common/utils/sort_processes';
 
 interface UseProcessTreeDeps {
   sessionEntityId: string;
   data: ProcessEventsPage[];
-  alerts: ProcessEvent[];
   searchQuery?: string;
   updatedAlertsStatus: AlertStatusEventEntityIdMap;
+  verboseMode: boolean;
+  jumpToEntityId?: string;
 }
 
 export class ProcessImpl implements Process {
@@ -53,44 +54,61 @@ export class ProcessImpl implements Process {
     this.searchMatched = null;
   }
 
-  addEvent(event: ProcessEvent) {
-    // rather than push new events on the array, we return a new one
-    // this helps the below memoizeOne functions to behave correctly.
-    this.events = this.events.concat(event);
+  addEvent(newEvent: ProcessEvent) {
+    const exists = this.events.find((event) => {
+      return event.event?.id === newEvent.event?.id;
+    });
+
+    if (!exists) {
+      this.events = this.events.concat(newEvent);
+    }
   }
 
   addAlert(alert: ProcessEvent) {
-    this.alerts = this.alerts.concat(alert);
+    const exists = this.alerts.find((event) => {
+      return event.event?.id === alert.event?.id;
+    });
+
+    if (!exists) {
+      this.alerts = this.alerts.concat(alert);
+    }
+  }
+
+  addChild(newChild: Process) {
+    this.children = this.children.concat(newChild);
   }
 
   clearSearch() {
     this.searchMatched = null;
-    this.autoExpand = false;
   }
 
   getChildren(verboseMode: boolean) {
-    let children = this.children;
+    return this.getChildrenMemo(this.children, this.orphans, verboseMode);
+  }
+
+  getChildrenMemo = memoizeOne((children: Process[], orphans: Process[], verboseMode: boolean) => {
+    if (children.length === 0 && orphans.length === 0) {
+      return [];
+    }
 
     // if there are orphans, we just render them inline with the other child processes (currently only session leader does this)
-    if (this.orphans.length) {
-      children = [...children, ...this.orphans].sort(sortProcesses);
+    if (orphans.length) {
+      children = [...children, ...orphans];
     }
     // When verboseMode is false, we filter out noise via a few techniques.
     // This option is driven by the "verbose mode" toggle in SessionView/index.tsx
     if (!verboseMode) {
-      return children.filter((child) => {
-        const { group_leader: groupLeader, session_leader: sessionLeader } =
-          child.getDetails().process;
+      children = children.filter((child) => {
+        if (child.events.length === 0) {
+          return false;
+        }
 
-        // search matches or processes with alerts will never be filtered out
-        if (child.autoExpand || child.searchMatched || child.hasAlerts()) {
+        // processes with alerts will never be filtered out
+        if (child.autoExpand || child.hasAlerts()) {
           return true;
         }
 
-        // Hide processes that have their session leader as their process group leader.
-        // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
-        // other shell startup activities (e.g bashrc .profile etc)
-        if (groupLeader.pid === sessionLeader.pid) {
+        if (child.isVerbose()) {
           return false;
         }
 
@@ -98,7 +116,27 @@ export class ProcessImpl implements Process {
       });
     }
 
-    return children;
+    return sortedUniqBy(children.sort(sortProcesses), (child) => child.id);
+  });
+
+  isVerbose() {
+    const {
+      group_leader: groupLeader,
+      session_leader: sessionLeader,
+      entry_leader: entryLeader,
+    } = this.getDetails().process ?? {};
+
+    // Processes that have their session leader as their process group leader are considered "verbose"
+    // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
+    // other shell startup activities (e.g bashrc .profile etc)
+    if (
+      this.id !== entryLeader?.entity_id &&
+      (!groupLeader || !sessionLeader || groupLeader.pid === sessionLeader.pid)
+    ) {
+      return true;
+    }
+
+    return false;
   }
 
   hasOutput() {
@@ -107,6 +145,14 @@ export class ProcessImpl implements Process {
 
   hasAlerts() {
     return !!this.alerts.length;
+  }
+
+  hasAlert(alertUuid: string | undefined) {
+    if (!alertUuid) {
+      return false;
+    }
+
+    return !!this.alerts.find((event) => event.kibana?.alert?.uuid === alertUuid);
   }
 
   getAlerts() {
@@ -134,6 +180,11 @@ export class ProcessImpl implements Process {
     return '';
   }
 
+  getEndTime() {
+    const endEvent = this.findEventByAction(this.events, EventAction.end);
+    return endEvent?.['@timestamp'] || '';
+  }
+
   // isUserEntered is a best guess at which processes were initiated by a real person
   // In most situations a user entered command in a shell such as bash, will cause bash
   // to fork, create a new process group, and exec the command (e.g ls). If the session
@@ -144,13 +195,17 @@ export class ProcessImpl implements Process {
   isUserEntered() {
     const event = this.getDetails();
 
+    if (!event) {
+      return false;
+    }
+
     const {
       pid,
       tty,
       parent,
       session_leader: sessionLeader,
       group_leader: groupLeader,
-    } = event.process;
+    } = event.process ?? {};
 
     const parentIsASessionLeader = parent && sessionLeader && parent.pid === sessionLeader.pid;
     const processIsAGroupLeader = groupLeader && pid === groupLeader.pid;
@@ -165,19 +220,19 @@ export class ProcessImpl implements Process {
   }
 
   findEventByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
-    return events.find(({ event }) => event.action === action);
+    return events.find(({ event }) => event?.action === action);
   });
 
   findEventByKind = memoizeOne((events: ProcessEvent[], kind: EventKind) => {
-    return events.find(({ event }) => event.kind === kind);
+    return events.find(({ event }) => event?.kind === kind);
   });
 
   filterEventsByAction = memoizeOne((events: ProcessEvent[], action: EventAction) => {
-    return events.filter(({ event }) => event.action === action);
+    return events.filter(({ event }) => event?.action === action);
   });
 
   filterEventsByKind = memoizeOne((events: ProcessEvent[], kind: EventKind) => {
-    return events.filter(({ event }) => event.kind === kind);
+    return events.filter(({ event }) => event?.kind === kind);
   });
 
   // returns the most recent fork, exec, or end event
@@ -185,40 +240,56 @@ export class ProcessImpl implements Process {
   // on the processes lifecycle.
   getDetailsMemo = memoizeOne((events: ProcessEvent[]) => {
     // TODO: add these to generator
-    const actionsToFind = [EventAction.fork, EventAction.exec, EventAction.end];
+    const actionsToFind: Array<EventAction | undefined> = [
+      EventAction.fork,
+      EventAction.exec,
+      EventAction.end,
+    ];
     const filtered = events.filter((processEvent) => {
-      return actionsToFind.includes(processEvent.event.action);
+      return actionsToFind.includes(processEvent.event?.action);
     });
+
+    // there are some anomalous processes which are omitting event.action
+    // we return whatever we have regardless so we at least render something in process tree
+    if (filtered.length === 0 && events.length > 0) {
+      return events[events.length - 1];
+    }
 
     // because events is already ordered by @timestamp we take the last event
     // which could be a fork (w no exec or exit), most recent exec event (there can be multiple), or end event.
     // If a process has an 'end' event will always be returned (since it is last and includes details like exit_code and end time)
-    return filtered[filtered.length - 1];
+    return filtered[filtered.length - 1] ?? {};
   });
+
+  isDescendantOf(process: Process) {
+    let parent = this.parent;
+
+    while (parent) {
+      if (parent === process) {
+        return true;
+      }
+
+      parent = parent.parent;
+    }
+
+    return false;
+  }
 }
 
 export const useProcessTree = ({
   sessionEntityId,
   data,
-  alerts,
   searchQuery,
   updatedAlertsStatus,
+  verboseMode,
+  jumpToEntityId,
 }: UseProcessTreeDeps) => {
-  // initialize map, as well as a placeholder for session leader process
-  // we add a fake session leader event, sourced from wide event data.
-  // this is because we might not always have a session leader event
-  // especially if we are paging in reverse from deep within a large session
-  const fakeLeaderEvent = data[0].events.find((event) => event.event.kind === EventKind.event);
-  const sessionLeaderProcess = new ProcessImpl(sessionEntityId);
+  const firstEvent = data[0]?.events?.[0];
+  const sessionLeaderProcess = useMemo(() => {
+    const entryLeader = firstEvent?.process?.entry_leader;
 
-  if (fakeLeaderEvent) {
-    fakeLeaderEvent.process = {
-      ...fakeLeaderEvent.process,
-      ...fakeLeaderEvent.process.entry_leader,
-      parent: fakeLeaderEvent.process.parent,
-    };
-    sessionLeaderProcess.events.push(fakeLeaderEvent);
-  }
+    return inferProcessFromLeaderInfo(firstEvent, entryLeader);
+  }, [firstEvent]);
 
   const initializedProcessMap: ProcessMap = {
     [sessionEntityId]: sessionLeaderProcess,
@@ -226,7 +297,6 @@ export const useProcessTree = ({
 
   const [processMap, setProcessMap] = useState(initializedProcessMap);
   const [processedPages, setProcessedPages] = useState<ProcessEventsPage[]>([]);
-  const [alertsProcessed, setAlertsProcessed] = useState(false);
   const [searchResults, setSearchResults] = useState<Process[]>([]);
   const [orphans, setOrphans] = useState<Process[]>([]);
 
@@ -236,7 +306,9 @@ export const useProcessTree = ({
     const newProcessedPages: ProcessEventsPage[] = [];
 
     data.forEach((page, i) => {
-      const processed = processedPages.find((p) => p.cursor === page.cursor);
+      const processed = processedPages.find(
+        (p) => p.cursor === page.cursor && p.events?.length === page.events?.length
+      );
 
       if (!processed) {
         const backwards = i < processedPages.length;
@@ -260,22 +332,13 @@ export const useProcessTree = ({
       setProcessMap({ ...updatedProcessMap });
       setProcessedPages([...processedPages, ...newProcessedPages]);
       setOrphans(newOrphans);
+      autoExpandProcessTree(updatedProcessMap, jumpToEntityId);
     }
-  }, [data, processMap, orphans, processedPages, sessionEntityId]);
+  }, [data, processMap, orphans, processedPages, sessionEntityId, jumpToEntityId]);
 
   useEffect(() => {
-    // currently we are loading a single page of alerts, with no pagination
-    // so we only need to add these alert events to processMap once.
-    if (!alertsProcessed) {
-      updateProcessMap(processMap, alerts);
-      setAlertsProcessed(true);
-    }
-  }, [processMap, alerts, alertsProcessed]);
-
-  useEffect(() => {
-    setSearchResults(searchProcessTree(processMap, searchQuery));
-    autoExpandProcessTree(processMap);
-  }, [searchQuery, processMap]);
+    setSearchResults(searchProcessTree(processMap, searchQuery, verboseMode));
+  }, [searchQuery, processMap, verboseMode]);
 
   // set new orphans array on the session leader
   const sessionLeader = processMap[sessionEntityId];

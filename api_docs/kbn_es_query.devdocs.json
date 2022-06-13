@@ -1172,7 +1172,7 @@
             "section": "def-common.RangeFilterParams",
             "text": "RangeFilterParams"
           },
-          ", indexPattern: ",
+          ", indexPattern?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1180,7 +1180,7 @@
             "section": "def-common.DataViewBase",
             "text": "DataViewBase"
           },
-          ", formattedValue?: string | undefined) => ",
+          " | undefined, formattedValue?: string | undefined) => ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1256,11 +1256,12 @@
                 "docId": "kibKbnEsQueryPluginApi",
                 "section": "def-common.DataViewBase",
                 "text": "DataViewBase"
-              }
+              },
+              " | undefined"
             ],
             "path": "packages/kbn-es-query/src/filters/build_filters/range_filter.ts",
             "deprecated": false,
-            "isRequired": true
+            "isRequired": false
           },
           {
             "parentPluginId": "@kbn/es-query",
@@ -1484,6 +1485,51 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
+        "id": "def-common.convertRangeFilterToTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "convertRangeFilterToTimeRange",
+        "description": [],
+        "signature": [
+          "(filter: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.RangeFilter",
+            "text": "RangeFilter"
+          },
+          ") => { from: moment.Moment; to: moment.Moment; }"
+        ],
+        "path": "packages/kbn-es-query/src/filters/helpers/convert_range_filter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.convertRangeFilterToTimeRange.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "filter",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.RangeFilter",
+                "text": "RangeFilter"
+              }
+            ],
+            "path": "packages/kbn-es-query/src/filters/helpers/convert_range_filter.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
         "id": "def-common.decorateQuery",
         "type": "Function",
         "tags": [],
@@ -1693,6 +1739,158 @@
             "deprecated": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.extractTimeFilter",
+        "type": "Function",
+        "tags": [],
+        "label": "extractTimeFilter",
+        "description": [],
+        "signature": [
+          "(timeFieldName: string, filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]) => { restOfFilters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; timeRangeFilter: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.RangeFilter",
+            "text": "RangeFilter"
+          },
+          " | undefined; }"
+        ],
+        "path": "packages/kbn-es-query/src/filters/helpers/extract_time_filter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.extractTimeFilter.$1",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es-query/src/filters/helpers/extract_time_filter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.extractTimeFilter.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-es-query/src/filters/helpers/extract_time_filter.ts",
+            "deprecated": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.extractTimeRange",
+        "type": "Function",
+        "tags": [],
+        "label": "extractTimeRange",
+        "description": [],
+        "signature": [
+          "(filters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[], timeFieldName: string | undefined) => { restOfFilters: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
+          "[]; timeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; }"
+        ],
+        "path": "packages/kbn-es-query/src/filters/helpers/extract_time_filter.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.extractTimeRange.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "filters",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-es-query/src/filters/helpers/extract_time_filter.ts",
+            "deprecated": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/es-query",
+            "id": "def-common.extractTimeRange.$2",
+            "type": "string",
+            "tags": [],
+            "label": "timeFieldName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-es-query/src/filters/helpers/extract_time_filter.ts",
+            "deprecated": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -3420,7 +3618,7 @@
             "label": "function",
             "description": [],
             "signature": [
-              "\"nested\" | \"is\" | \"exists\" | \"and\" | \"or\" | \"range\" | \"not\""
+              "\"nested\" | \"exists\" | \"range\" | \"is\" | \"and\" | \"or\" | \"not\""
             ],
             "path": "packages/kbn-es-query/src/kuery/node_types/types.ts",
             "deprecated": false
@@ -4254,6 +4452,20 @@
           "; }; }; }"
         ],
         "path": "packages/kbn-es-query/src/filters/build_filters/range_filter.ts",
+        "deprecated": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es-query",
+        "id": "def-common.TimeRange",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeRange",
+        "description": [],
+        "signature": [
+          "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+        ],
+        "path": "packages/kbn-es-query/src/filters/helpers/types.ts",
         "deprecated": false,
         "initialIsOpen": false
       }

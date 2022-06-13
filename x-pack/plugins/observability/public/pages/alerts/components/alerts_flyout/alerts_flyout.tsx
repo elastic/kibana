@@ -33,8 +33,8 @@ import {
 } from '@kbn/rule-data-utils';
 import moment from 'moment-timezone';
 import React, { useMemo } from 'react';
+import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import type { TopAlert } from '../../containers';
-import { useKibana, useUiSetting } from '../../../../../../../../src/plugins/kibana_react/public';
 import { asDuration } from '../../../../../common/utils/formatters';
 import type { ObservabilityRuleTypeRegistry } from '../../../../rules/create_observability_rule_type_registry';
 import { parseAlert } from '../parse_alert';
@@ -77,8 +77,7 @@ export function AlertsFlyout({
   }
 
   const ruleId = alertData.fields['kibana.alert.rule.uuid'] ?? null;
-  const linkToRule = ruleId && prepend ? prepend(paths.management.ruleDetails(ruleId)) : null;
-
+  const linkToRule = ruleId && prepend ? prepend(paths.observability.ruleDetails(ruleId)) : null;
   const overviewListItems = [
     {
       title: translations.alertsFlyout.statusLabel,

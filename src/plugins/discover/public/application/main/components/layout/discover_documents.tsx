@@ -14,6 +14,7 @@ import {
   EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataView } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DocViewFilterFn } from '../../../../services/doc_views/doc_views_types';
 import { DiscoverGrid } from '../../../../components/discover_grid/discover_grid';
@@ -25,7 +26,6 @@ import {
   SEARCH_FIELDS_FROM_SOURCE,
 } from '../../../../../common';
 import { useColumns } from '../../../../utils/use_data_grid_columns';
-import { DataView } from '../../../../../../data_views/public';
 import { SavedSearch } from '../../../../services/saved_searches';
 import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
@@ -35,6 +35,7 @@ import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 import { ElasticSearchHit } from '../../../../types';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
+import { DiscoverTourProvider } from '../../../../components/discover_tour';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -156,9 +157,11 @@ function DiscoverDocumentsComponent({
         </>
       )}
       {!isLegacy && (
-        <div className="dscDiscoverGrid">
-          <>
+        <>
+          <DiscoverTourProvider>
             <DocumentExplorerUpdateCallout />
+          </DiscoverTourProvider>
+          <div className="dscDiscoverGrid">
             <DataGridMemoized
               ariaLabelledBy="documentsAriaLabel"
               columns={columns}
@@ -183,8 +186,8 @@ function DiscoverDocumentsComponent({
               rowHeightState={state.rowHeight}
               onUpdateRowHeight={onUpdateRowHeight}
             />
-          </>
-        </div>
+          </div>
+        </>
       )}
     </EuiFlexItem>
   );

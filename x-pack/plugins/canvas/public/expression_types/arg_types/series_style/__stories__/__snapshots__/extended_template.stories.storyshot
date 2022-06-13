@@ -12,7 +12,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
 >
   <div>
     <div
-      className="euiFormRow euiFormRow--compressed euiFormRow--horizontal"
+      className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed euiFormRow--horizontal"
       id="generated-id-row"
     >
       <div
@@ -36,7 +36,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
             className="euiFormControlLayout__childrenWrapper"
           >
             <select
-              className="euiSelect euiSelect--compressed"
+              className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
               id="generated-id"
               onBlur={[Function]}
               onChange={[Function]}
@@ -81,10 +81,10 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
       </div>
     </div>
     <div
-      className="euiSpacer euiSpacer--s"
+      className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
     />
     <div
-      className="euiSpacer euiSpacer--s"
+      className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
     />
     <div
       className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--directionRow euiFlexGroup--responsive"
@@ -93,7 +93,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
         className="euiFlexItem"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -117,7 +117,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -181,7 +181,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
         className="euiFlexItem"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -205,7 +205,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}
@@ -269,7 +269,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
         className="euiFlexItem"
       >
         <div
-          className="euiFormRow euiFormRow--compressed"
+          className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
           id="generated-id-row"
         >
           <div
@@ -293,7 +293,7 @@ exports[`Storyshots arguments/SeriesStyle extended 1`] = `
                 className="euiFormControlLayout__childrenWrapper"
               >
                 <select
-                  className="euiSelect euiSelect--compressed"
+                  className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
                   id="generated-id"
                   onBlur={[Function]}
                   onChange={[Function]}

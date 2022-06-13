@@ -12,18 +12,14 @@ import {
   buildCustomFilter,
   buildEsQuery,
   FilterStateStore,
+  TimeRange,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Capabilities } from 'kibana/public';
+import { Capabilities } from '@kbn/core/public';
 import { partition } from 'lodash';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { Datasource } from '../types';
-
-export const getShowUnderlyingDataLabel = () =>
-  i18n.translate('xpack.lens.app.exploreRawData', {
-    defaultMessage: 'Explore raw data',
-  });
 
 /**
  * Joins a series of queries.
@@ -64,6 +60,7 @@ export function getLayerMetaInfo(
   currentDatasource: Datasource | undefined,
   datasourceState: unknown,
   activeData: TableInspectorAdapter | undefined,
+  timeRange: TimeRange | undefined,
   capabilities: RecursiveReadonly<{
     navLinks: Capabilities['navLinks'];
     discover?: Capabilities['discover'];
@@ -121,12 +118,22 @@ export function getLayerMetaInfo(
     };
   }
 
+  const filtersOrError = datasourceAPI.getFilters(activeData, timeRange);
+
+  if ('error' in filtersOrError) {
+    return {
+      meta: undefined,
+      error: filtersOrError.error,
+      isVisible,
+    };
+  }
+
   const uniqueFields = [...new Set(columnsWithNoTimeShifts.map(({ fields }) => fields).flat())];
   return {
     meta: {
       id: datasourceAPI.getSourceId()!,
       columns: uniqueFields,
-      filters: datasourceAPI.getFilters(activeData),
+      filters: filtersOrError,
     },
     error: undefined,
     isVisible,

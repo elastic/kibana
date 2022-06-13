@@ -8,7 +8,7 @@
 import { sortBy, slice, get, cloneDeep } from 'lodash';
 import moment from 'moment';
 import Boom from '@hapi/boom';
-import { IScopedClusterClient } from 'kibana/server';
+import { IScopedClusterClient } from '@kbn/core/server';
 import { buildAnomalyTableItems } from './build_anomaly_table_items';
 import { ANOMALIES_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { getPartitionFieldsValuesFactory } from './get_partition_fields_values';
@@ -725,7 +725,9 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     };
 
     if (client) {
-      const { aggregations } = await client.asCurrentUser.search(esSearchRequest);
+      const { aggregations } = await client.asCurrentUser.search(esSearchRequest, {
+        maxRetries: 0,
+      });
 
       finalResults.datafeedResults =
         // @ts-expect-error incorrect search response type
@@ -797,6 +799,11 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     return finalResults;
   }
 
+  const { getAnomalyChartsData, getRecordsForCriteria } = anomalyChartsDataProvider(
+    mlClient,
+    client!
+  );
+
   return {
     getAnomaliesTableData,
     getCategoryDefinition,
@@ -807,6 +814,7 @@ export function resultsServiceProvider(mlClient: MlClient, client?: IScopedClust
     getCategorizerStats,
     getCategoryStoppedPartitions,
     getDatafeedResultsChartData,
-    getAnomalyChartsData: anomalyChartsDataProvider(mlClient, client!),
+    getAnomalyChartsData,
+    getRecordsForCriteria,
   };
 }

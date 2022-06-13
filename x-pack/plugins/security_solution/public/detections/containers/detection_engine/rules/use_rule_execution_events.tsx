@@ -5,22 +5,27 @@
  * 2.0.
  */
 
+import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useQuery } from 'react-query';
+import {
+  AggregateRuleExecutionEvent,
+  RuleExecutionStatus,
+} from '../../../../../common/detection_engine/schemas/common';
 import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { fetchRuleExecutionEvents } from './api';
 import * as i18n from './translations';
 
-interface UseRuleExecutionEventsArgs {
+export interface UseRuleExecutionEventsArgs {
   ruleId: string;
   start: string;
   end: string;
   queryText?: string;
-  statusFilters?: string;
+  statusFilters?: RuleExecutionStatus[];
   page?: number;
   perPage?: number;
-  sortField?: string;
-  sortOrder?: string;
+  sortField?: keyof AggregateRuleExecutionEvent;
+  sortOrder?: SortOrder;
 }
 
 export const useRuleExecutionEvents = ({
@@ -39,15 +44,17 @@ export const useRuleExecutionEvents = ({
   return useQuery<GetAggregateRuleExecutionEventsResponse>(
     [
       'ruleExecutionEvents',
-      ruleId,
-      start,
-      end,
-      queryText,
-      statusFilters,
-      page,
-      perPage,
-      sortField,
-      sortOrder,
+      {
+        ruleId,
+        start,
+        end,
+        queryText,
+        statusFilters,
+        page,
+        perPage,
+        sortField,
+        sortOrder,
+      },
     ],
     async ({ signal }) => {
       return fetchRuleExecutionEvents({
@@ -64,6 +71,7 @@ export const useRuleExecutionEvents = ({
       });
     },
     {
+      keepPreviousData: true,
       onError: (e) => {
         addError(e, { title: i18n.RULE_EXECUTION_EVENTS_FETCH_FAILURE });
       },

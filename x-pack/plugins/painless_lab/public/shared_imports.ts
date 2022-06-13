@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export {
-  createKibanaReactContext,
-  KibanaThemeProvider,
-} from '../../../../src/plugins/kibana_react/public';
+export { createKibanaReactContext, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';

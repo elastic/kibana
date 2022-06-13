@@ -26,12 +26,12 @@ import {
   agentPolicyRouteService,
   AgentPolicy,
   PLUGIN_ID,
-} from '../../../fleet/common';
+} from '@kbn/fleet-plugin/common';
 import {
   pagePathGetters,
   PackagePolicyCreateExtensionComponentProps,
   PackagePolicyEditExtensionComponentProps,
-} from '../../../fleet/public';
+} from '@kbn/fleet-plugin/public';
 import { useKibana } from '../common/lib/kibana';
 import { NavigationButtons } from './navigation_buttons';
 import { DisabledCallout } from './disabled_callout';
@@ -245,6 +245,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
         } else {
           set(draft, 'inputs[0].config.osquery.value', parsedConfig);
         }
+
         return draft;
       });
 
@@ -322,6 +323,7 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
               policy_template: 'osquery_manager',
             });
           }
+
           return draft;
         });
 

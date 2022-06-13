@@ -15,13 +15,13 @@ import { isEmpty } from 'lodash/fp';
 import uuid from 'uuid';
 
 import { Filter, buildEsQuery, Query } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { DEFAULT_NUMBER_FORMAT, APP_UI_ID } from '../../../../../common/constants';
 import type { UpdateDateRange } from '../../../../common/components/charts/common';
 import type { LegendItem } from '../../../../common/components/charts/draggable_legend_item';
 import { escapeDataProviderId } from '../../../../common/components/drag_and_drop/helpers';
 import { HeaderSection } from '../../../../common/components/header_section';
-import { getEsQueryConfig } from '../../../../../../../../src/plugins/data/common';
 import { useQueryAlerts } from '../../../containers/detection_engine/alerts/use_query';
 import { getDetectionEngineUrl, useFormatUrl } from '../../../../common/components/link_to';
 import { defaultLegendColors } from '../../../../common/components/matrix_histogram/utils';
@@ -186,7 +186,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
               ),
               field: selectedStackByOption,
               timelineId,
-              value: bucket.key,
+              value: bucket?.key_as_string ?? bucket.key,
             }))
           : NO_LEGEND_DATA,
       [
@@ -295,7 +295,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
         >
           <HeaderSection
             id={uniqueQueryId}
-            height={!toggleStatus ? 30 : undefined}
             title={titleText}
             titleSize={titleSize}
             toggleStatus={toggleStatus}

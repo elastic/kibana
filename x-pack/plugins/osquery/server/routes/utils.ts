@@ -22,6 +22,7 @@ export const convertECSMappingToObject = (
     ecsMapping,
     (acc, value) => {
       acc[value.key] = value.value;
+
       return acc;
     },
     {} as Record<string, { field?: string; value?: string }>

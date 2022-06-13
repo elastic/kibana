@@ -10,6 +10,7 @@ import _ from 'lodash';
 import { Subject, BehaviorSubject } from 'rxjs';
 import moment from 'moment';
 import { PublicMethodsOf } from '@kbn/utility-types';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
 import { NowProviderInternalContract } from '../../now_provider';
@@ -18,7 +19,6 @@ import {
   getAbsoluteTimeRange,
   getTime,
   getRelativeTime,
-  IIndexPattern,
   RefreshInterval,
   TimeRange,
 } from '../../../common';
@@ -32,10 +32,10 @@ export class Timefilter {
   // Fired when isTimeRangeSelectorEnabled \ isAutoRefreshSelectorEnabled are toggled
   private enabledUpdated$ = new BehaviorSubject(false);
   // Fired when a user changes the timerange
-  private timeUpdate$ = new Subject();
+  private timeUpdate$ = new Subject<void>();
   // Fired when a user changes the the autorefresh settings
-  private refreshIntervalUpdate$ = new Subject();
-  private fetch$ = new Subject();
+  private refreshIntervalUpdate$ = new Subject<void>();
+  private fetch$ = new Subject<void>();
 
   private _time: TimeRange;
   // Denotes whether setTime has been called, can be used to determine if the constructor defaults are being used.
@@ -204,7 +204,7 @@ export class Timefilter {
    *
    * One use case is keeping different elements embedded in the same UI in sync.
    */
-  public createFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
+  public createFilter = (indexPattern: DataView, timeRange?: TimeRange) => {
     return getTime(indexPattern, timeRange ? timeRange : this._time, {
       forceNow: this.nowProvider.get(),
     });
@@ -218,7 +218,7 @@ export class Timefilter {
    *
    * @note Consumers of this function need to ensure that the ES endpoint supports datemath.
    */
-  public createRelativeFilter = (indexPattern: IIndexPattern, timeRange?: TimeRange) => {
+  public createRelativeFilter = (indexPattern: DataView, timeRange?: TimeRange) => {
     return getRelativeTime(indexPattern, timeRange ? timeRange : this._time, {
       forceNow: this.nowProvider.get(),
     });

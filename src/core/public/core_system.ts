@@ -5,25 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { CoreId } from '../server';
-import { PackageInfo, EnvironmentMode } from '../server/types';
+
+import type { CoreContext } from '@kbn/core-base-browser-internal';
+import {
+  InjectedMetadataService,
+  InjectedMetadataParams,
+  InternalInjectedMetadataSetup,
+  InternalInjectedMetadataStart,
+} from '@kbn/core-injected-metadata-browser-internal';
+import { DocLinksService } from '@kbn/core-doc-links-browser-internal';
 import { CoreSetup, CoreStart } from '.';
 import { ChromeService } from './chrome';
 import { FatalErrorsService, FatalErrorsSetup } from './fatal_errors';
 import { HttpService } from './http';
 import { I18nService } from './i18n';
-import {
-  InjectedMetadataParams,
-  InjectedMetadataService,
-  InjectedMetadataSetup,
-  InjectedMetadataStart,
-} from './injected_metadata';
 import { NotificationsService } from './notifications';
 import { OverlayService } from './overlays';
 import { PluginsService } from './plugins';
 import { UiSettingsService } from './ui_settings';
 import { ApplicationService } from './application';
-import { DocLinksService } from './doc_links';
 import { RenderingService } from './rendering';
 import { SavedObjectsService } from './saved_objects';
 import { IntegrationsService } from './integrations';
@@ -32,6 +32,9 @@ import { ThemeService } from './theme';
 import { CoreApp } from './core_app';
 import type { InternalApplicationSetup, InternalApplicationStart } from './application/types';
 import { ExecutionContextService } from './execution_context';
+import type { AnalyticsServiceSetup } from './analytics';
+import { AnalyticsService } from './analytics';
+import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 
 interface Params {
   rootDomElement: HTMLElement;
@@ -40,24 +43,15 @@ interface Params {
 }
 
 /** @internal */
-export interface CoreContext {
-  coreId: CoreId;
-  env: {
-    mode: Readonly<EnvironmentMode>;
-    packageInfo: Readonly<PackageInfo>;
-  };
-}
-
-/** @internal */
 export interface InternalCoreSetup extends Omit<CoreSetup, 'application' | 'getStartServices'> {
   application: InternalApplicationSetup;
-  injectedMetadata: InjectedMetadataSetup;
+  injectedMetadata: InternalInjectedMetadataSetup;
 }
 
 /** @internal */
 export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
   application: InternalApplicationStart;
-  injectedMetadata: InjectedMetadataStart;
+  injectedMetadata: InternalInjectedMetadataStart;
 }
 
 /**
@@ -69,6 +63,7 @@ export interface InternalCoreStart extends Omit<CoreStart, 'application'> {
  * @internal
  */
 export class CoreSystem {
+  private readonly analytics: AnalyticsService;
   private readonly fatalErrors: FatalErrorsService;
   private readonly injectedMetadata: InjectedMetadataService;
   private readonly notifications: NotificationsService;
@@ -102,6 +97,8 @@ export class CoreSystem {
       injectedMetadata,
     });
     this.coreContext = { coreId: Symbol('core'), env: injectedMetadata.env };
+
+    this.analytics = new AnalyticsService(this.coreContext);
 
     this.fatalErrors = new FatalErrorsService(rootDomElement, () => {
       // Stop Core before rendering any fatal errors into the DOM
@@ -144,7 +141,10 @@ export class CoreSystem {
       await this.integrations.setup();
       this.docLinks.setup();
 
-      const executionContext = this.executionContext.setup();
+      const analytics = this.analytics.setup({ injectedMetadata });
+      this.registerLoadedKibanaEventType(analytics);
+
+      const executionContext = this.executionContext.setup({ analytics });
       const http = this.http.setup({
         injectedMetadata,
         fatalErrors: this.fatalErrorsSetup,
@@ -157,6 +157,7 @@ export class CoreSystem {
       this.coreApp.setup({ application, http, injectedMetadata, notifications });
 
       const core: InternalCoreSetup = {
+        analytics,
         application,
         fatalErrors: this.fatalErrorsSetup,
         http,
@@ -184,6 +185,7 @@ export class CoreSystem {
 
   public async start() {
     try {
+      const analytics = this.analytics.start();
       const injectedMetadata = await this.injectedMetadata.start();
       const uiSettings = await this.uiSettings.start();
       const docLinks = this.docLinks.start({ injectedMetadata });
@@ -230,6 +232,7 @@ export class CoreSystem {
       this.coreApp.start({ application, docLinks, http, notifications, uiSettings });
 
       const core: InternalCoreStart = {
+        analytics,
         application,
         chrome,
         docLinks,
@@ -264,6 +267,11 @@ export class CoreSystem {
         targetDomElement: coreUiTargetDomElement,
       });
 
+      analytics.reportEvent('Loaded Kibana', {
+        kibana_version: this.coreContext.env.packageInfo.version,
+        ...fetchOptionalMemoryInfo(),
+      });
+
       return {
         application,
         executionContext,
@@ -291,6 +299,31 @@ export class CoreSystem {
     this.application.stop();
     this.deprecations.stop();
     this.theme.stop();
+    this.analytics.stop();
     this.rootDomElement.textContent = '';
+  }
+
+  private registerLoadedKibanaEventType(analytics: AnalyticsServiceSetup) {
+    analytics.registerEventType({
+      eventType: 'Loaded Kibana',
+      schema: {
+        kibana_version: {
+          type: 'keyword',
+          _meta: { description: 'The version of Kibana' },
+        },
+        memory_js_heap_size_limit: {
+          type: 'long',
+          _meta: { description: 'The maximum size of the heap', optional: true },
+        },
+        memory_js_heap_size_total: {
+          type: 'long',
+          _meta: { description: 'The total size of the heap', optional: true },
+        },
+        memory_js_heap_size_used: {
+          type: 'long',
+          _meta: { description: 'The used size of the heap', optional: true },
+        },
+      },
+    });
   }
 }

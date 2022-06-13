@@ -166,7 +166,7 @@ describe('Edit follower index', () => {
       const error = find('remoteClusterFormField.notConnectedError');
 
       expect(error.length).toBe(1);
-      expect(error.find('.euiCallOutHeader__title').text()).toBe(
+      expect(error.find('.euiCallOutHeader__title').last().text()).toBe(
         `Can't edit follower index because remote cluster '${FOLLOWER_INDEX_EDIT.remoteCluster}' is not connected`
       );
       expect(exists('remoteClusterFormField.notConnectedError.editButton')).toBe(true);

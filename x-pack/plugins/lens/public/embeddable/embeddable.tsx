@@ -10,29 +10,29 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { DataViewBase, Filter } from '@kbn/es-query';
+import type { PaletteOutput } from '@kbn/coloring';
 import {
   ExecutionContextSearch,
   Query,
   TimefilterContract,
   TimeRange,
   FilterManager,
-} from 'src/plugins/data/public';
-import type { PaletteOutput } from 'src/plugins/charts/public';
-import type { Start as InspectorStart } from 'src/plugins/inspector/public';
+} from '@kbn/data-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
-import { RenderMode } from 'src/plugins/expressions';
+import { RenderMode } from '@kbn/expressions-plugin';
 import { map, distinctUntilChanged, skip } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   ExpressionRendererEvent,
   ReactExpressionRendererType,
-} from '../../../../../src/plugins/expressions/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
+} from '@kbn/expressions-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
 import {
   Embeddable as AbstractEmbeddable,
@@ -41,17 +41,24 @@ import {
   IContainer,
   SavedObjectEmbeddableInput,
   ReferenceOrValueEmbeddable,
-} from '../../../../../src/plugins/embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
+import type {
+  Capabilities,
+  IBasePath,
+  KibanaExecutionContext,
+  ThemeServiceStart,
+} from '@kbn/core/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { BrushTriggerEvent, ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
 import {
   isLensBrushEvent,
   isLensFilterEvent,
   isLensEditEvent,
   isLensTableRowContextMenuClickEvent,
-  LensBrushEvent,
-  LensFilterEvent,
   LensTableRowContextMenuEvent,
   VisualizationMap,
   Visualization,
@@ -59,19 +66,11 @@ import {
   Datasource,
 } from '../types';
 
-import type { DataViewsContract, DataView } from '../../../../../src/plugins/data_views/public';
 import { getEditPath, DOC_TYPE, PLUGIN_ID } from '../../common';
-import type {
-  Capabilities,
-  IBasePath,
-  KibanaExecutionContext,
-  ThemeServiceStart,
-} from '../../../../../src/core/public';
 import { LensAttributeService } from '../lens_attribute_service';
 import type { ErrorMessage, TableInspectorAdapter } from '../editor_frame_service/types';
 import { getLensInspectorService, LensInspector } from '../lens_inspector_service';
 import { SharingSavedObjectProps } from '../types';
-import type { SpacesPluginStart } from '../../../spaces/public';
 import { getActiveDatasourceIdFromDoc, getIndexPatternsObjects, inferTimeField } from '../utils';
 import { getLayerMetaInfo, combineQueryAndFilters } from '../app_plugin/show_underlying_data';
 
@@ -94,9 +93,9 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   renderMode?: RenderMode;
   style?: React.CSSProperties;
   className?: string;
-  onBrushEnd?: (data: LensBrushEvent['data']) => void;
+  onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
   onLoad?: (isLoading: boolean) => void;
-  onFilter?: (data: LensFilterEvent['data']) => void;
+  onFilter?: (data: ClickTriggerEvent['data']) => void;
   onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
 }
 
@@ -179,6 +178,7 @@ function getViewUnderlyingDataArgs({
     activeDatasource,
     activeDatasourceState,
     activeData,
+    timeRange,
     capabilities
   );
 
@@ -348,6 +348,7 @@ export class Embeddable
     if (!this.savedVis || !this.savedVis.visualizationType) {
       return [];
     }
+
     return this.deps.visualizationMap[this.savedVis.visualizationType]?.triggers || [];
   }
 
@@ -458,6 +459,7 @@ export class Embeddable
       this.embeddableTitle = this.getTitle();
       isDirty = true;
     }
+
     return isDirty;
   }
 
@@ -529,6 +531,7 @@ export class Embeddable
           interactive={!input.disableTriggers}
           renderMode={input.renderMode}
           syncColors={input.syncColors}
+          syncTooltips={input.syncTooltips}
           hasCompatibleActions={this.hasCompatibleActions}
           className={input.className}
           style={input.style}
@@ -546,7 +549,7 @@ export class Embeddable
   private readonly hasCompatibleActions = async (
     event: ExpressionRendererEvent
   ): Promise<boolean> => {
-    if (isLensTableRowContextMenuClickEvent(event)) {
+    if (isLensTableRowContextMenuClickEvent(event) || isLensFilterEvent(event)) {
       const { getTriggerCompatibleActions } = this.deps;
       if (!getTriggerCompatibleActions) {
         return false;
@@ -752,7 +755,7 @@ export class Embeddable
       this.logError('validation');
     }
 
-    const title = input.hidePanelTitles ? '' : input.title || this.savedVis.title;
+    const title = input.hidePanelTitles ? '' : input.title ?? this.savedVis.title;
     const savedObjectId = (input as LensByReferenceInput).savedObjectId;
     this.updateOutput({
       ...this.getOutput(),
@@ -796,6 +799,10 @@ export class Embeddable
   public getDescription() {
     // mind that savedViz is loaded in async way here
     return this.savedVis && this.savedVis.description;
+  }
+
+  public getSavedVis(): Readonly<Document | undefined> {
+    return this.savedVis;
   }
 
   destroy() {

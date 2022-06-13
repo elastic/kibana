@@ -6,7 +6,16 @@
  */
 
 import { buildEqlSearchRequest, buildEventsSearchQuery } from './build_events_query';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
+
+const emptyFilter = {
+  bool: {
+    must: [],
+    filter: [],
+    should: [],
+    must_not: [],
+  },
+};
 
 describe('create_signals', () => {
   test('it builds a now-5m up to today filter', () => {
@@ -476,6 +485,7 @@ describe('create_signals', () => {
         'now',
         100,
         undefined,
+        undefined,
         [],
         undefined
       );
@@ -497,6 +507,7 @@ describe('create_signals', () => {
                     },
                   },
                 },
+                emptyFilter,
               ],
             },
           },
@@ -521,6 +532,7 @@ describe('create_signals', () => {
         'now-5m',
         'now',
         100,
+        undefined,
         'event.ingested',
         [],
         'event.other_category'
@@ -575,6 +587,7 @@ describe('create_signals', () => {
                     ],
                   },
                 },
+                emptyFilter,
               ],
             },
           },
@@ -604,6 +617,7 @@ describe('create_signals', () => {
         'now',
         100,
         undefined,
+        undefined,
         [getExceptionListItemSchemaMock()],
         undefined
       );
@@ -627,48 +641,153 @@ describe('create_signals', () => {
                 },
                 {
                   bool: {
-                    must_not: {
-                      bool: {
-                        should: [
-                          {
-                            bool: {
-                              filter: [
-                                {
-                                  nested: {
-                                    path: 'some.parentField',
-                                    query: {
-                                      bool: {
-                                        minimum_should_match: 1,
-                                        should: [
-                                          {
-                                            match_phrase: {
-                                              'some.parentField.nested.field': 'some value',
+                    must: [],
+                    filter: [],
+                    should: [],
+                    must_not: [
+                      {
+                        bool: {
+                          should: [
+                            {
+                              bool: {
+                                filter: [
+                                  {
+                                    nested: {
+                                      path: 'some.parentField',
+                                      query: {
+                                        bool: {
+                                          minimum_should_match: 1,
+                                          should: [
+                                            {
+                                              match_phrase: {
+                                                'some.parentField.nested.field': 'some value',
+                                              },
                                             },
-                                          },
-                                        ],
-                                      },
-                                    },
-                                    score_mode: 'none',
-                                  },
-                                },
-                                {
-                                  bool: {
-                                    minimum_should_match: 1,
-                                    should: [
-                                      {
-                                        match_phrase: {
-                                          'some.not.nested.field': 'some value',
+                                          ],
                                         },
                                       },
-                                    ],
+                                      score_mode: 'none',
+                                    },
                                   },
-                                },
-                              ],
+                                  {
+                                    bool: {
+                                      minimum_should_match: 1,
+                                      should: [
+                                        {
+                                          match_phrase: {
+                                            'some.not.nested.field': 'some value',
+                                          },
+                                        },
+                                      ],
+                                    },
+                                  },
+                                ],
+                              },
                             },
-                          },
-                        ],
+                          ],
+                        },
                       },
+                    ],
+                  },
+                },
+              ],
+            },
+          },
+          fields: [
+            {
+              field: '*',
+              include_unmapped: true,
+            },
+            {
+              field: '@timestamp',
+              format: 'strict_date_optional_time',
+            },
+          ],
+        },
+      });
+    });
+
+    test('should build a request with filters', () => {
+      const filters = [
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'exists',
+            key: 'process.name',
+            value: 'exists',
+          },
+          query: {
+            exists: {
+              field: 'process.name',
+            },
+          },
+        },
+        {
+          meta: {
+            alias: null,
+            negate: false,
+            disabled: false,
+            type: 'phrase',
+            key: 'host.name',
+            params: {
+              query: 'Host-b4d9hu1a56',
+            },
+          },
+          query: {
+            match_phrase: {
+              'host.name': 'Host-b4d9hu1a56',
+            },
+          },
+        },
+      ];
+      const request = buildEqlSearchRequest(
+        'process where true',
+        ['testindex1', 'testindex2'],
+        'now-5m',
+        'now',
+        100,
+        filters,
+        undefined,
+        [],
+        undefined
+      );
+      expect(request).toEqual({
+        allow_no_indices: true,
+        index: ['testindex1', 'testindex2'],
+        body: {
+          size: 100,
+          query: 'process where true',
+          filter: {
+            bool: {
+              filter: [
+                {
+                  range: {
+                    '@timestamp': {
+                      gte: 'now-5m',
+                      lte: 'now',
+                      format: 'strict_date_optional_time',
                     },
+                  },
+                },
+                {
+                  bool: {
+                    must: [],
+                    filter: [
+                      {
+                        exists: {
+                          field: 'process.name',
+                        },
+                      },
+                      {
+                        match_phrase: {
+                          'host.name': 'Host-b4d9hu1a56',
+                        },
+                      },
+                    ],
+                    should: [],
+                    must_not: [],
                   },
                 },
               ],

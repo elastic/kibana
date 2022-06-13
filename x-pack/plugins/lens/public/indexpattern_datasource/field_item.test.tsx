@@ -10,14 +10,14 @@ import { ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { EuiLoadingSpinner, EuiPopover } from '@elastic/eui';
 import { InnerFieldItem, FieldItemProps } from './field_item';
-import { coreMock } from 'src/core/public/mocks';
+import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { IndexPattern } from './types';
-import { chartPluginMock } from '../../../../../src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { documentField } from './document_field';
-import { uiActionsPluginMock } from '../../../../../src/plugins/ui_actions/public/mocks';
-import { FieldFormatsStart } from '../../../../../src/plugins/field_formats/public';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DOCUMENT_FIELD_NAME } from '../../common';
 
 const chartsThemeService = chartPluginMock.createSetupContract().theme;
@@ -146,6 +146,29 @@ describe('IndexPattern Field Item', () => {
         .simulate('click');
     });
     expect(editFieldSpy).toHaveBeenCalledWith('bytes');
+  });
+
+  it('should not render edit field button for document field', () => {
+    core.http.post.mockImplementation(() => {
+      return new Promise(() => {});
+    });
+    const editFieldSpy = jest.fn();
+    const wrapper = mountWithIntl(
+      <InnerFieldItem
+        {...defaultProps}
+        field={documentField}
+        editField={editFieldSpy}
+        hideDetails
+      />
+    );
+    clickField(wrapper, documentField.name);
+    wrapper.update();
+    const popoverContent = wrapper.find(EuiPopover).prop('children');
+    expect(
+      mountWithIntl(popoverContent as ReactElement)
+        .find('[data-test-subj="lnsFieldListPanelEdit"]')
+        .exists()
+    ).toBeFalsy();
   });
 
   it('should request field stats every time the button is clicked', async () => {

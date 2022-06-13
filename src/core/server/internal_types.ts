@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { Type } from '@kbn/config-schema';
-
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
-import { ConfigDeprecationProvider } from './config';
 import { InternalContextPreboot, ContextSetup } from './context';
 import {
   InternalElasticsearchServicePreboot,
@@ -44,10 +42,15 @@ import type {
   InternalExecutionContextStart,
 } from './execution_context';
 import { InternalPrebootServicePreboot } from './preboot';
-import { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
+import type {
+  AnalyticsServicePreboot,
+  AnalyticsServiceSetup,
+  AnalyticsServiceStart,
+} from './analytics';
 
 /** @internal */
 export interface InternalCorePreboot {
+  analytics: AnalyticsServicePreboot;
   context: InternalContextPreboot;
   http: InternalHttpServicePreboot;
   elasticsearch: InternalElasticsearchServicePreboot;
@@ -59,6 +62,7 @@ export interface InternalCorePreboot {
 
 /** @internal */
 export interface InternalCoreSetup {
+  analytics: AnalyticsServiceSetup;
   capabilities: CapabilitiesSetup;
   context: ContextSetup;
   docLinks: DocLinksServiceSetup;
@@ -82,6 +86,7 @@ export interface InternalCoreSetup {
  * @internal
  */
 export interface InternalCoreStart {
+  analytics: AnalyticsServiceStart;
   capabilities: CapabilitiesStart;
   elasticsearch: InternalElasticsearchServiceStart;
   docLinks: DocLinksServiceStart;
@@ -92,19 +97,4 @@ export interface InternalCoreStart {
   coreUsageData: CoreUsageDataStart;
   executionContext: InternalExecutionContextStart;
   deprecations: InternalDeprecationsServiceStart;
-}
-
-/**
- * @internal
- */
-export interface ServiceConfigDescriptor<T = any> {
-  path: string;
-  /**
-   * Schema to use to validate the configuration.
-   */
-  schema: Type<T>;
-  /**
-   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
-   */
-  deprecations?: ConfigDeprecationProvider;
 }

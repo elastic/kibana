@@ -8,8 +8,8 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { TelemetryPluginSetup } from 'src/plugins/telemetry/public';
-import { DocLinksStart } from 'kibana/public';
+import type { TelemetryPluginSetup } from '@kbn/telemetry-plugin/public';
+import { DocLinksStart } from '@kbn/core/public';
 import type TelemetryManagementSection from './telemetry_management_section';
 
 export type TelemetryManagementSectionWrapperProps = Omit<

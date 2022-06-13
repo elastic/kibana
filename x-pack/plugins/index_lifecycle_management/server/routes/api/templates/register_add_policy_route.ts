@@ -7,11 +7,11 @@
 
 import { merge } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
-import { ElasticsearchClient } from 'kibana/server';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 
-import { TemplateFromEs, TemplateSerialized } from '../../../../../index_management/common/types';
-import { LegacyTemplateSerialized } from '../../../../../index_management/server';
+import { TemplateFromEs, TemplateSerialized } from '@kbn/index-management-plugin/common/types';
+import { LegacyTemplateSerialized } from '@kbn/index-management-plugin/server';
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
@@ -106,8 +106,9 @@ export function registerAddPolicyRoute({
       const { templateName, policyName, aliasName } = body;
       const isLegacy = (request.query as TypeOf<typeof querySchema>).legacy === 'true';
       try {
+        const esClient = (await context.core).elasticsearch.client;
         const updatedTemplate = await updateIndexTemplate(
-          context.core.elasticsearch.client.asCurrentUser,
+          esClient.asCurrentUser,
           isLegacy,
           templateName,
           policyName,

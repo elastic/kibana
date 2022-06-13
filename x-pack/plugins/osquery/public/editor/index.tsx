@@ -11,7 +11,7 @@ import 'brace/theme/tomorrow';
 
 import { EuiCodeEditor, EuiCodeEditorProps } from '../shared_imports';
 
-import './osquery_mode.ts';
+import './osquery_mode';
 
 const EDITOR_SET_OPTIONS = {
   enableBasicAutocompletion: true,
@@ -35,11 +35,10 @@ const OsqueryEditorComponent: React.FC<OsqueryEditorProps> = ({
 }) => {
   const [editorValue, setEditorValue] = useState(defaultValue ?? '');
 
-  useDebounce(() => onChange(editorValue.replaceAll('\n', ' ').replaceAll('  ', ' ')), 500, [
-    editorValue,
-  ]);
+  useDebounce(() => onChange(editorValue), 500, [editorValue]);
 
   useEffect(() => setEditorValue(defaultValue), [defaultValue]);
+
   return (
     <EuiCodeEditor
       value={editorValue}

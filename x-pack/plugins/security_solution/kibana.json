@@ -13,7 +13,6 @@
     "alerting",
     "cases",
     "data",
-    "dataEnhanced",
     "embeddable",
     "eventLog",
     "features",
@@ -27,7 +26,8 @@
     "timelines",
     "triggersActionsUi",
     "uiActions",
-    "sessionView"
+    "unifiedSearch",
+    "kubernetesSecurity"
   ],
   "optionalPlugins": [
     "encryptedSavedObjects",
@@ -53,6 +53,7 @@
     "kibanaReact",
     "usageCollection",
     "lists",
-    "ml"
+    "ml",
+    "unifiedSearch"
   ]
 }

@@ -48,10 +48,14 @@ const CommonUseField = getUseField({ component: Field });
 interface PackFormProps {
   defaultValue?: OsqueryManagerPackagePolicy;
   editMode?: boolean;
+  isReadOnly?: boolean;
 }
 
-const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = false }) => {
-  const isReadOnly = !!defaultValue?.read_only;
+const PackFormComponent: React.FC<PackFormProps> = ({
+  defaultValue,
+  editMode = false,
+  isReadOnly = false,
+}) => {
   const [showConfirmationModal, setShowConfirmationModal] = useState(false);
   const handleHideConfirmationModal = useCallback(() => setShowConfirmationModal(false), []);
 
@@ -158,6 +162,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
         policyIds,
         (acc, policyId) => {
           const agentPolicy = agentPoliciesById && agentPoliciesById[policyId];
+
           return acc + (agentPolicy?.agents ?? 0);
         },
         0
@@ -173,6 +178,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({ defaultValue, editMode = f
   const handleSaveClick = useCallback(() => {
     if (agentCount) {
       setShowConfirmationModal(true);
+
       return;
     }
 

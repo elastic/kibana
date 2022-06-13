@@ -8,14 +8,14 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { flow, omit } from 'lodash/fp';
 import set from 'set-value';
 
-import { Logger } from '../../../../../../../src/core/server';
+import { Logger } from '@kbn/core/server';
 import {
   AlertInstanceContext,
   AlertInstanceState,
-  AlertServices,
-} from '../../../../../alerting/server';
+  RuleExecutorServices,
+} from '@kbn/alerting-plugin/server';
 import { GenericBulkCreateResponse } from '../rule_types/factories';
-import { AnomalyResults, Anomaly } from '../../machine_learning';
+import { Anomaly } from '../../machine_learning';
 import { BuildRuleMessage } from './rule_messages';
 import { BulkCreate, WrapHits } from './types';
 import { CompleteRule, MachineLearningRuleParams } from '../schemas/rule_schemas';
@@ -23,9 +23,9 @@ import { buildReasonMessageForMlAlert } from './reason_formatters';
 import { BaseFieldsLatest } from '../../../../common/detection_engine/schemas/alerts';
 
 interface BulkCreateMlSignalsParams {
-  someResult: AnomalyResults;
+  anomalyHits: Array<estypes.SearchHit<Anomaly>>;
   completeRule: CompleteRule<MachineLearningRuleParams>;
-  services: AlertServices<AlertInstanceState, AlertInstanceContext, 'default'>;
+  services: RuleExecutorServices<AlertInstanceState, AlertInstanceContext, 'default'>;
   logger: Logger;
   id: string;
   signalsIndex: string;
@@ -65,32 +65,23 @@ export const transformAnomalyFieldsToEcs = (anomaly: Anomaly): EcsAnomaly => {
 };
 
 const transformAnomalyResultsToEcs = (
-  results: AnomalyResults
-): estypes.SearchResponse<EcsAnomaly> => {
-  const transformedHits = results.hits.hits.map(({ _source, ...rest }) => ({
+  results: Array<estypes.SearchHit<Anomaly>>
+): Array<estypes.SearchHit<EcsAnomaly>> => {
+  return results.map(({ _source, ...rest }) => ({
     ...rest,
     _source: transformAnomalyFieldsToEcs(
       // @ts-expect-error @elastic/elasticsearch _source is optional
       _source
     ),
   }));
-
-  // @ts-expect-error Anomaly is not assignable to EcsAnomaly
-  return {
-    ...results,
-    hits: {
-      ...results.hits,
-      hits: transformedHits,
-    },
-  };
 };
 
 export const bulkCreateMlSignals = async (
   params: BulkCreateMlSignalsParams
 ): Promise<GenericBulkCreateResponse<BaseFieldsLatest>> => {
-  const anomalyResults = params.someResult;
+  const anomalyResults = params.anomalyHits;
   const ecsResults = transformAnomalyResultsToEcs(anomalyResults);
 
-  const wrappedDocs = params.wrapHits(ecsResults.hits.hits, buildReasonMessageForMlAlert);
+  const wrappedDocs = params.wrapHits(ecsResults, buildReasonMessageForMlAlert);
   return params.bulkCreate(wrappedDocs);
 };

@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiErrorBoundary } from '@elastic/eui';
-import { ExploratoryViewPage } from './index';
+import { ExploratoryViewPage } from '.';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
 import { AppDataType, ReportViewType } from './types';
 
@@ -30,6 +30,7 @@ import { getMobileKPIConfig } from './configurations/mobile/kpi_over_time_config
 import { getMobileDeviceDistributionConfig } from './configurations/mobile/device_distribution_config';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { getLogsKPIConfig } from './configurations/infra_logs/kpi_over_time_config';
+import { getSingleMetricConfig } from './configurations/rum/single_metric_config';
 
 export const DataTypesLabels = {
   [DataTypes.UX]: i18n.translate('xpack.observability.overview.exploratoryView.uxLabel', {
@@ -88,7 +89,12 @@ export const reportTypesList: Array<{
 ];
 
 export const obsvReportConfigMap = {
-  [DataTypes.UX]: [getKPITrendsLensConfig, getRumDistributionConfig, getCoreWebVitalsConfig],
+  [DataTypes.UX]: [
+    getKPITrendsLensConfig,
+    getRumDistributionConfig,
+    getCoreWebVitalsConfig,
+    getSingleMetricConfig,
+  ],
   [DataTypes.SYNTHETICS]: [getSyntheticsKPIConfig, getSyntheticsDistributionConfig],
   [DataTypes.MOBILE]: [
     getMobileKPIConfig,

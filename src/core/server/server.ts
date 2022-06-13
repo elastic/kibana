@@ -8,20 +8,18 @@
 
 import apm from 'elastic-apm-node';
 import { config as pathConfig } from '@kbn/utils';
-import {
-  ConfigService,
-  Env,
-  RawConfigurationProvider,
-  coreDeprecationProvider,
-  ensureValidConfiguration,
-} from './config';
+import type { Logger, LoggerFactory } from '@kbn/logging';
+import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
+import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
+import { DocLinksService } from '@kbn/core-doc-links-server-internal';
+import { coreDeprecationProvider, ensureValidConfiguration } from './config';
 import { CoreApp } from './core_app';
 import { I18nService } from './i18n';
 import { ElasticsearchService } from './elasticsearch';
 import { HttpService } from './http';
 import { HttpResourcesService } from './http_resources';
 import { RenderingService } from './rendering';
-import { Logger, LoggerFactory, LoggingService, ILoggingSystem } from './logging';
+import { LoggingService, ILoggingSystem } from './logging';
 import { UiSettingsService } from './ui_settings';
 import { PluginsService, config as pluginsConfig } from './plugins';
 import { SavedObjectsService, SavedObjectsServiceStart } from './saved_objects';
@@ -31,7 +29,6 @@ import { EnvironmentService, config as pidConfig } from './environment';
 // do not try to shorten the import to `./status`, it will break server test mocking
 import { StatusService } from './status/status_service';
 import { ExecutionContextService } from './execution_context';
-import { DocLinksService } from './doc_links';
 
 import { config as cspConfig } from './csp';
 import { config as elasticsearchConfig } from './elasticsearch';
@@ -42,13 +39,7 @@ import { config as uiSettingsConfig } from './ui_settings';
 import { config as statusConfig } from './status';
 import { config as i18nConfig } from './i18n';
 import { ContextService } from './context';
-import { RequestHandlerContext } from '.';
-import {
-  InternalCorePreboot,
-  InternalCoreSetup,
-  InternalCoreStart,
-  ServiceConfigDescriptor,
-} from './internal_types';
+import { InternalCorePreboot, InternalCoreSetup, InternalCoreStart } from './internal_types';
 import { CoreUsageDataService } from './core_usage_data';
 import { DeprecationsService, config as deprecationConfig } from './deprecations';
 import { CoreRouteHandlerContext } from './core_route_handler_context';
@@ -57,12 +48,29 @@ import { config as executionContextConfig } from './execution_context';
 import { PrebootCoreRouteHandlerContext } from './preboot_core_route_handler_context';
 import { PrebootService } from './preboot';
 import { DiscoveredPlugins } from './plugins';
+import { AnalyticsService, AnalyticsServiceSetup } from './analytics';
 
 const coreId = Symbol('core');
 const rootConfigPath = '';
+const KIBANA_STARTED_EVENT = 'kibana_started';
+
+/** @internal */
+interface UptimePerStep {
+  start: number;
+  end: number;
+}
+
+/** @internal */
+interface UptimeSteps {
+  constructor: UptimePerStep;
+  preboot: UptimePerStep;
+  setup: UptimePerStep;
+  start: UptimePerStep;
+}
 
 export class Server {
   public readonly configService: ConfigService;
+  private readonly analytics: AnalyticsService;
   private readonly capabilities: CapabilitiesService;
   private readonly context: ContextService;
   private readonly elasticsearch: ElasticsearchService;
@@ -93,16 +101,21 @@ export class Server {
   private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
 
+  private readonly uptimePerStep: Partial<UptimeSteps> = {};
+
   constructor(
     rawConfigProvider: RawConfigurationProvider,
     public readonly env: Env,
     private readonly loggingSystem: ILoggingSystem
   ) {
+    const constructorStartUptime = process.uptime();
+
     this.logger = this.loggingSystem.asLoggerFactory();
     this.log = this.logger.get('server');
     this.configService = new ConfigService(rawConfigProvider, env, this.logger);
 
     const core = { coreId, configService: this.configService, env, logger: this.logger };
+    this.analytics = new AnalyticsService(core);
     this.context = new ContextService(core);
     this.http = new HttpService(core);
     this.rendering = new RenderingService(core);
@@ -127,13 +140,18 @@ export class Server {
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
     });
+
+    this.uptimePerStep.constructor = { start: constructorStartUptime, end: process.uptime() };
   }
 
   public async preboot() {
     this.log.debug('prebooting server');
+    const prebootStartUptime = process.uptime();
     const prebootTransaction = apm.startTransaction('server-preboot', 'kibana-platform');
 
-    const environmentPreboot = await this.environment.preboot();
+    const analyticsPreboot = this.analytics.preboot();
+
+    const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({ environment: environmentPreboot });
@@ -164,6 +182,7 @@ export class Server {
     const loggingPreboot = this.logging.preboot({ loggingSystem: this.loggingSystem });
 
     const corePreboot: InternalCorePreboot = {
+      analytics: analyticsPreboot,
       context: contextServicePreboot,
       elasticsearch: elasticsearchServicePreboot,
       http: httpPreboot,
@@ -182,12 +201,18 @@ export class Server {
     this.coreApp.preboot(corePreboot, uiPlugins);
 
     prebootTransaction?.end();
+    this.uptimePerStep.preboot = { start: prebootStartUptime, end: process.uptime() };
     return corePreboot;
   }
 
   public async setup() {
     this.log.debug('setting up server');
+    const setupStartUptime = process.uptime();
     const setupTransaction = apm.startTransaction('server-setup', 'kibana-platform');
+
+    const analyticsSetup = this.analytics.setup();
+
+    this.registerKibanaStartedEventType(analyticsSetup);
 
     const environmentSetup = this.environment.setup();
 
@@ -216,6 +241,7 @@ export class Server {
     const capabilitiesSetup = this.capabilities.setup({ http: httpSetup });
 
     const elasticsearchServiceSetup = await this.elasticsearch.setup({
+      analytics: analyticsSetup,
       http: httpSetup,
       executionContext: executionContextSetup,
     });
@@ -242,6 +268,7 @@ export class Server {
     });
 
     const statusSetup = await this.status.setup({
+      analytics: analyticsSetup,
       elasticsearch: elasticsearchServiceSetup,
       pluginDependencies: pluginTree.asNames,
       savedObjects: savedObjectsSetup,
@@ -252,6 +279,7 @@ export class Server {
     });
 
     const renderingSetup = await this.rendering.setup({
+      elasticsearch: elasticsearchServiceSetup,
       http: httpSetup,
       status: statusSetup,
       uiPlugins,
@@ -265,6 +293,7 @@ export class Server {
     const loggingSetup = this.logging.setup();
 
     const coreSetup: InternalCoreSetup = {
+      analytics: analyticsSetup,
       capabilities: capabilitiesSetup,
       context: contextServiceSetup,
       docLinks: docLinksSetup,
@@ -291,13 +320,16 @@ export class Server {
     this.coreApp.setup(coreSetup, uiPlugins);
 
     setupTransaction?.end();
+    this.uptimePerStep.setup = { start: setupStartUptime, end: process.uptime() };
     return coreSetup;
   }
 
   public async start() {
     this.log.debug('starting server');
+    const startStartUptime = process.uptime();
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
+    const analyticsStart = this.analytics.start();
     const executionContextStart = this.executionContext.start();
     const docLinkStart = this.docLinks.start();
     const elasticsearchStart = await this.elasticsearch.start();
@@ -306,6 +338,7 @@ export class Server {
     const savedObjectsStart = await this.savedObjects.start({
       elasticsearch: elasticsearchStart,
       pluginsInitialized: this.#pluginsInitialized,
+      docLinks: docLinkStart,
     });
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 
@@ -323,6 +356,7 @@ export class Server {
     this.status.start();
 
     this.coreStart = {
+      analytics: analyticsStart,
       capabilities: capabilitiesStart,
       docLinks: docLinkStart,
       elasticsearch: elasticsearchStart,
@@ -341,12 +375,16 @@ export class Server {
 
     startTransaction?.end();
 
+    this.uptimePerStep.start = { start: startStartUptime, end: process.uptime() };
+    analyticsStart.reportEvent(KIBANA_STARTED_EVENT, { uptime_per_step: this.uptimePerStep });
+
     return this.coreStart;
   }
 
   public async stop() {
     this.log.debug('stopping server');
 
+    this.analytics.stop();
     await this.http.stop(); // HTTP server has to stop before savedObjects and ES clients are closed to be able to gracefully attempt to resolve any pending requests
     await this.plugins.stop();
     await this.savedObjects.stop();
@@ -360,13 +398,9 @@ export class Server {
   }
 
   private registerCoreContext(coreSetup: InternalCoreSetup) {
-    coreSetup.http.registerRouteHandlerContext(
-      coreId,
-      'core',
-      (context, req, res): RequestHandlerContext['core'] => {
-        return new CoreRouteHandlerContext(this.coreStart!, req);
-      }
-    );
+    coreSetup.http.registerRouteHandlerContext(coreId, 'core', async (context, req, res) => {
+      return new CoreRouteHandlerContext(this.coreStart!, req);
+    });
   }
 
   public setupCoreConfig() {
@@ -396,5 +430,93 @@ export class Server {
       }
       this.configService.setSchema(descriptor.path, descriptor.schema);
     }
+  }
+
+  private registerKibanaStartedEventType(analyticsSetup: AnalyticsServiceSetup) {
+    analyticsSetup.registerEventType<{ uptime_per_step: UptimeSteps }>({
+      eventType: KIBANA_STARTED_EVENT,
+      schema: {
+        uptime_per_step: {
+          properties: {
+            constructor: {
+              properties: {
+                start: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until the constructor was called',
+                  },
+                },
+                end: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until the constructor finished',
+                  },
+                },
+              },
+            },
+            preboot: {
+              properties: {
+                start: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until `preboot` was called',
+                  },
+                },
+                end: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until `preboot` finished',
+                  },
+                },
+              },
+            },
+            setup: {
+              properties: {
+                start: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until `setup` was called',
+                  },
+                },
+                end: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until `setup` finished',
+                  },
+                },
+              },
+            },
+            start: {
+              properties: {
+                start: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until `start` was called',
+                  },
+                },
+                end: {
+                  type: 'float',
+                  _meta: {
+                    description:
+                      'Number of seconds the Node.js process has been running until `start` finished',
+                  },
+                },
+              },
+            },
+          },
+          _meta: {
+            description:
+              'Number of seconds the Node.js process has been running until each phase of the server execution is called and finished.',
+          },
+        },
+      },
+    });
   }
 }

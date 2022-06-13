@@ -1,9 +1,11 @@
 pageLoadAssetSize:
   advancedSettings: 27596
+  actions: 20000
+  aiops: 10000
   alerting: 106936
   apm: 64385
   canvas: 1066647
-  charts: 95000
+  charts: 55000
   cloud: 21076
   console: 46091
   core: 435325
@@ -25,12 +27,12 @@ pageLoadAssetSize:
   indexLifecycleManagement: 107090
   indexManagement: 140608
   infra: 184320
-  fleet: 250000
+  fleet: 100000
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
   kibanaOverview: 56279
-  lens: 96624
+  lens: 35000
   licenseManagement: 41817
   licensing: 29004
   lists: 22900
@@ -50,15 +52,14 @@ pageLoadAssetSize:
   savedObjectsTagging: 59482
   savedObjectsTaggingOss: 20590
   searchprofiler: 67080
-  security: 95864
+  security: 115240
   snapshotRestore: 79032
   spaces: 57868
   telemetry: 51957
   telemetryManagementSection: 38586
   transform: 41007
-  triggersActionsUi: 102400
+  triggersActionsUi: 119000 #This is temporary. Check https://github.com/elastic/kibana/pull/130710#issuecomment-1119843458 & https://github.com/elastic/kibana/issues/130728
   upgradeAssistant: 81241
-  uptime: 40825
   urlForwarding: 32579
   usageCollection: 39762
   visDefaultEditor: 50178
@@ -99,14 +100,12 @@ pageLoadAssetSize:
   visTypeMetric: 23332
   bfetch: 22837
   kibanaUtils: 79713
-  data: 491273
   dataViews: 43532
   expressions: 140958
   fieldFormats: 65209
   kibanaReact: 74422
   share: 71239
   uiActions: 35121
-  dataEnhanced: 24980
   embeddable: 87309
   embeddableEnhanced: 22107
   uiActionsEnhanced: 38494
@@ -117,12 +116,18 @@ pageLoadAssetSize:
   reporting: 57003
   visTypeHeatmap: 25340
   expressionGauge: 25000
-  controls: 34788
+  controls: 40000
   expressionPartitionVis: 26338
   sharedUX: 16225
   ux: 20784
   sessionView: 77750
   cloudSecurityPosture: 19109
   visTypeGauge: 24113
-  expressionXY: 26500
+  unifiedSearch: 71059
+  data: 454087
   eventAnnotation: 19334
+  screenshotting: 22870
+  synthetics: 40958
+  expressionXY: 34000
+  kibanaUsageCollection: 16463
+  kubernetesSecurity: 77234

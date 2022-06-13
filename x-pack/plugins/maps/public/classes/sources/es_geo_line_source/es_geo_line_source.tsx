@@ -11,6 +11,7 @@ import React from 'react';
 import { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { type Filter, buildPhraseFilter } from '@kbn/es-query';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,
@@ -33,7 +34,6 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { GeoJsonWithMeta } from '../vector_source';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import { Adapters } from '../../../../../../../src/plugins/inspector/common/adapters';
 import { IField } from '../../fields/field';
 import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
 import { getIsGoldPlus } from '../../../licensed_features';
@@ -83,9 +83,9 @@ export class ESGeoLineSource extends AbstractESAggSource {
 
   readonly _descriptor: ESGeoLineSourceDescriptor;
 
-  constructor(descriptor: Partial<ESGeoLineSourceDescriptor>, inspectorAdapters?: Adapters) {
+  constructor(descriptor: Partial<ESGeoLineSourceDescriptor>) {
     const sourceDescriptor = ESGeoLineSource.createDescriptor(descriptor);
-    super(sourceDescriptor, inspectorAdapters);
+    super(sourceDescriptor);
     this._descriptor = sourceDescriptor;
   }
 
@@ -173,7 +173,8 @@ export class ESGeoLineSource extends AbstractESAggSource {
     layerName: string,
     searchFilters: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
-    isRequestStillActive: () => boolean
+    isRequestStillActive: () => boolean,
+    inspectorAdapters: Adapters
   ): Promise<GeoJsonWithMeta> {
     if (!getIsGoldPlus()) {
       throw new Error(REQUIRES_GOLD_LICENSE_MSG);
@@ -226,6 +227,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       }),
       searchSessionId: searchFilters.searchSessionId,
       executionContext: makePublicExecutionContext('es_geo_line:entities'),
+      requestsAdapter: inspectorAdapters.requests,
     });
     const entityBuckets: Array<{ key: string; doc_count: number }> = _.get(
       entityResp,
@@ -298,6 +300,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
       }),
       searchSessionId: searchFilters.searchSessionId,
       executionContext: makePublicExecutionContext('es_geo_line:tracks'),
+      requestsAdapter: inspectorAdapters.requests,
     });
     const { featureCollection, numTrimmedTracks } = convertToGeoJson(
       tracksResp,

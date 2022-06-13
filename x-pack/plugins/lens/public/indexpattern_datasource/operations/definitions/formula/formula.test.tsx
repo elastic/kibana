@@ -6,7 +6,7 @@
  */
 
 import { createMockedIndexPattern } from '../../../mocks';
-import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '../index';
+import { formulaOperation, GenericOperationDefinition, GenericIndexPatternColumn } from '..';
 import { FormulaIndexPatternColumn } from './formula';
 import { insertOrReplaceFormulaColumn } from './parse';
 import type { IndexPattern, IndexPatternField, IndexPatternLayer } from '../../../types';
@@ -1522,7 +1522,10 @@ invalid: "
           `${fn}(${Array(nArgs.length).fill('bytes').join(', ')})`,
         ];
         // add the fourth check only for those functions with more than 1 arg required
-        const enableFourthCheck = nArgs.filter(({ optional }) => !optional).length > 1;
+        const enableFourthCheck =
+          nArgs.filter(
+            ({ optional, alternativeWhenMissing }) => !optional && !alternativeWhenMissing
+          ).length > 1;
         if (enableFourthCheck) {
           formulas.push(`${fn}(1)`);
         }
@@ -1538,6 +1541,24 @@ invalid: "
         });
       });
     }
+
+    it('returns an error suggesting to use an alternative function', () => {
+      const formulas = [`clamp(1)`, 'clamp(1, 5)'];
+      const errorsWithSuggestions = [
+        'The operation clamp in the Formula is missing the min argument: use the pick_max operation instead.',
+        'The operation clamp in the Formula is missing the max argument: use the pick_min operation instead.',
+      ];
+      formulas.forEach((formula, i) => {
+        expect(
+          formulaOperation.getErrorMessage!(
+            getNewLayerWithFormula(formula),
+            'col1',
+            indexPattern,
+            operationDefinitionMap
+          )
+        ).toEqual([errorsWithSuggestions[i]]);
+      });
+    });
 
     it('returns error if formula filter has not same type of inner operations filter', () => {
       const formulas = [

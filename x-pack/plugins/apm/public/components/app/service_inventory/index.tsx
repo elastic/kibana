@@ -9,6 +9,9 @@ import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import uuid from 'uuid';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { apmServiceInventoryOptimizedSorting } from '@kbn/observability-plugin/common';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -17,9 +20,8 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { SearchBar } from '../../shared/search_bar';
 import { ServiceList } from './service_list';
 import { MLCallout, shouldDisplayMlCallout } from '../../shared/ml_callout';
+import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
 import { joinByKey } from '../../../../common/utils/join_by_key';
-import { useKibana } from '../../../../../../../src/plugins/kibana_react/public';
-import { apmServiceInventoryOptimizedSorting } from '../../../../../observability/common';
 import { ServiceInventoryFieldName } from '../../../../common/service_inventory';
 import { orderServiceItems } from './service_list/order_service_items';
 
@@ -62,7 +64,7 @@ function useServicesFetcher() {
     [start, end, environment, kuery, serviceGroup]
   );
 
-  const mainStatisticsFetch = useFetcher(
+  const mainStatisticsFetch = useProgressiveFetcher(
     (callApmApi) => {
       if (start && end) {
         return callApmApi('GET /internal/apm/services', {
@@ -88,9 +90,14 @@ function useServicesFetcher() {
 
   const { data: mainStatisticsData = initialData } = mainStatisticsFetch;
 
-  const comparisonFetch = useFetcher(
+  const comparisonFetch = useProgressiveFetcher(
     (callApmApi) => {
-      if (start && end && mainStatisticsData.items.length) {
+      if (
+        start &&
+        end &&
+        mainStatisticsData.items.length &&
+        mainStatisticsFetch.status === FETCH_STATUS.SUCCESS
+      ) {
         return callApmApi('GET /internal/apm/services/detailed_statistics', {
           params: {
             query: {
@@ -104,7 +111,10 @@ function useServicesFetcher() {
                   // Service name is sorted to guarantee the same order every time this API is called so the result can be cached.
                   .sort()
               ),
-              offset: comparisonEnabled ? offset : undefined,
+              offset:
+                comparisonEnabled && isTimeComparison(offset)
+                  ? offset
+                  : undefined,
             },
           },
         });
@@ -141,11 +151,23 @@ export function ServiceInventory() {
     !userHasDismissedCallout &&
     shouldDisplayMlCallout(anomalyDetectionSetupState);
 
-  const isLoading =
-    sortedAndFilteredServicesFetch.status === FETCH_STATUS.LOADING ||
-    (sortedAndFilteredServicesFetch.status === FETCH_STATUS.SUCCESS &&
-      sortedAndFilteredServicesFetch.data?.services.length === 0 &&
-      mainStatisticsFetch.status === FETCH_STATUS.LOADING);
+  const useOptimizedSorting =
+    useKibana().services.uiSettings?.get<boolean>(
+      apmServiceInventoryOptimizedSorting
+    ) || false;
+
+  let isLoading: boolean;
+
+  if (useOptimizedSorting) {
+    isLoading =
+      // ensures table is usable when sorted and filtered services have loaded
+      sortedAndFilteredServicesFetch.status === FETCH_STATUS.LOADING ||
+      (sortedAndFilteredServicesFetch.status === FETCH_STATUS.SUCCESS &&
+        sortedAndFilteredServicesFetch.data?.services.length === 0 &&
+        mainStatisticsFetch.status === FETCH_STATUS.LOADING);
+  } else {
+    isLoading = mainStatisticsFetch.status === FETCH_STATUS.LOADING;
+  }
 
   const isFailure = mainStatisticsFetch.status === FETCH_STATUS.FAILURE;
   const noItemsMessage = (
@@ -169,9 +191,7 @@ export function ServiceInventory() {
     ...preloadedServices,
   ].some((item) => 'healthStatus' in item);
 
-  const tiebreakerField = useKibana().services.uiSettings?.get<boolean>(
-    apmServiceInventoryOptimizedSorting
-  )
+  const tiebreakerField = useOptimizedSorting
     ? ServiceInventoryFieldName.ServiceName
     : ServiceInventoryFieldName.Throughput;
 

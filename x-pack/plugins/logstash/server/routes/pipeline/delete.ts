@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { wrapRouteWithLicenseCheck } from '../../../../licensing/server';
+import { wrapRouteWithLicenseCheck } from '@kbn/licensing-plugin/server';
 import type { LogstashPluginRouter } from '../../types';
 import { checkLicense } from '../../lib/check_license';
 
@@ -24,7 +24,7 @@ export function registerPipelineDeleteRoute(router: LogstashPluginRouter) {
       checkLicense,
       router.handleLegacyErrors(async (context, request, response) => {
         const { id } = request.params;
-        const { client } = context.core.elasticsearch;
+        const { client } = (await context.core).elasticsearch;
 
         try {
           await client.asCurrentUser.logstash.deletePipeline({ id });

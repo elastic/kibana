@@ -7,8 +7,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SavedObjectReference } from 'kibana/server';
-import { generateSlug } from 'random-word-slugs';
+import { SavedObjectReference } from '@kbn/core/server';
 import { ShortUrlRecord } from '.';
 import type {
   IShortUrlClient,
@@ -60,14 +59,13 @@ export class ServerShortUrlClient implements IShortUrlClient {
     locator,
     params,
     slug = '',
-    humanReadableSlug = false,
   }: ShortUrlCreateParams<P>): Promise<ShortUrl<P>> {
     if (slug) {
       validateSlug(slug);
     }
 
     if (!slug) {
-      slug = humanReadableSlug ? generateSlug() : randomStr(4);
+      slug = randomStr(5);
     }
 
     const { storage, currentVersion } = this.dependencies;

@@ -6,39 +6,22 @@
  */
 
 import expect from '@kbn/expect';
-import type { Logger, LogMeta } from 'kibana/server';
-import sinon from 'sinon';
-import {
-  Comparator,
-  InventoryMetricConditions,
-} from '../../../../plugins/infra/common/alerting/metrics';
+import { Comparator, InventoryMetricConditions } from '@kbn/infra-plugin/common/alerting/metrics';
 import {
   InventoryItemType,
   SnapshotMetricType,
-} from '../../../../plugins/infra/common/inventory_models/types';
-import { evaluateCondition } from '../../../../plugins/infra/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
-import { InfraSource } from '../../../../plugins/infra/server/lib/sources';
+} from '@kbn/infra-plugin/common/inventory_models/types';
+import { evaluateCondition } from '@kbn/infra-plugin/server/lib/alerting/inventory_metric_threshold/evaluate_condition';
+import { InfraSource } from '@kbn/infra-plugin/server/lib/sources';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { DATES } from './constants';
+import { createFakeLogger } from './create_fake_logger';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const esClient = getService('es');
   const log = getService('log');
-
-  const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) =>
-    meta ? log.debug(msg, meta) : log.debug(msg);
-
-  const logger = {
-    trace: fakeLogger,
-    debug: fakeLogger,
-    info: fakeLogger,
-    warn: fakeLogger,
-    error: fakeLogger,
-    fatal: fakeLogger,
-    log: sinon.stub(),
-    get: sinon.stub(),
-  } as Logger;
+  const logger = createFakeLogger(log);
 
   const baseCondition: InventoryMetricConditions = {
     metric: 'cpu',
@@ -93,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
     source,
     logQueryFields: void 0,
     compositeSize: 10000,
-    startTime: DATES['8.0.0'].hosts_only.max,
+    executionTimestamp: new Date(DATES['8.0.0'].hosts_only.max),
     logger,
   };
 
@@ -181,6 +164,46 @@ export default function ({ getService }: FtrProviderContext) {
             sourceId: 'default',
             threshold: [1],
             comparator: '>',
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 2000,
+          },
+        });
+      });
+      it('should work with a long threshold', async () => {
+        const results = await evaluateCondition({
+          ...baseOptions,
+          condition: {
+            ...baseCondition,
+            metric: 'rx',
+            threshold: [107374182400],
+            comparator: Comparator.LT,
+          },
+          esClient,
+        });
+        expect(results).to.eql({
+          'host-0': {
+            metric: 'rx',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [107374182400],
+            comparator: '<',
+            shouldFire: true,
+            shouldWarn: false,
+            isNoData: false,
+            isError: false,
+            currentValue: 1666.6666666666667,
+          },
+          'host-1': {
+            metric: 'rx',
+            timeSize: 1,
+            timeUnit: 'm',
+            sourceId: 'default',
+            threshold: [107374182400],
+            comparator: '<',
             shouldFire: true,
             shouldWarn: false,
             isNoData: false,
@@ -451,7 +474,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work FOR LAST 1 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
-          startTime: DATES['8.0.0'].pods_only.max,
+          executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
           nodeType: 'pod' as InventoryItemType,
           condition: {
             ...baseCondition,
@@ -492,7 +515,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should work FOR LAST 5 minute', async () => {
         const results = await evaluateCondition({
           ...baseOptions,
-          startTime: DATES['8.0.0'].pods_only.max,
+          executionTimestamp: new Date(DATES['8.0.0'].pods_only.max),
           logQueryFields: { indexPattern: 'metricbeat-*' },
           nodeType: 'pod',
           condition: {

@@ -13,11 +13,11 @@ import { type Filter, isFilterPinned } from '@kbn/es-query';
 import type {
   TimeRange,
   Query,
-  QueryState,
+  GlobalQueryStateFromUrl,
   RefreshInterval,
-} from '../../../../src/plugins/data/public';
-import { setStateToKbnUrl } from '../../../../src/plugins/kibana_utils/public';
-import type { LocatorDefinition, LocatorPublic } from '../../../../src/plugins/share/public';
+} from '@kbn/data-plugin/public';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import type { LayerDescriptor } from '../common/descriptor_types';
 import { INITIAL_LAYERS_KEY, APP_ID } from '../common/constants';
 import { lazyLoadMapModules } from './lazy_load_bundle';
@@ -83,7 +83,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
       filters?: Filter[];
       vis?: unknown;
     } = {};
-    const queryState: QueryState = {};
+    const queryState: GlobalQueryStateFromUrl = {};
 
     if (query) appState.query = query;
     if (filters && filters.length) appState.filters = filters?.filter((f) => !isFilterPinned(f));
@@ -92,7 +92,7 @@ export class MapsAppLocatorDefinition implements LocatorDefinition<MapsAppLocato
     if (refreshInterval) queryState.refreshInterval = refreshInterval;
 
     let path = `/map#/${mapId || ''}`;
-    path = setStateToKbnUrl<QueryState>('_g', queryState, { useHash }, path);
+    path = setStateToKbnUrl<GlobalQueryStateFromUrl>('_g', queryState, { useHash }, path);
     path = setStateToKbnUrl('_a', appState, { useHash }, path);
 
     if (initialLayers && initialLayers.length) {

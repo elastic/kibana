@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import { CommentType } from '../../../../../cases/common';
+import { CommentType } from '@kbn/cases-plugin/common';
 
 import { APP_ID } from '../../../../common/constants';
 import { useKibana } from '../../lib/kibana/kibana_react';
@@ -41,7 +41,6 @@ export const useAddToExistingCase = ({
   }, [lensAttributes, timeRange]);
 
   const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal({
-    attachments,
     onClose: onAddToCaseClicked,
     toastContent: ADD_TO_CASE_SUCCESS,
   });
@@ -50,8 +49,8 @@ export const useAddToExistingCase = ({
     if (onAddToCaseClicked) {
       onAddToCaseClicked();
     }
-    selectCaseModal.open();
-  }, [onAddToCaseClicked, selectCaseModal]);
+    selectCaseModal.open({ attachments });
+  }, [attachments, onAddToCaseClicked, selectCaseModal]);
 
   return {
     onAddToExistingCaseClicked,

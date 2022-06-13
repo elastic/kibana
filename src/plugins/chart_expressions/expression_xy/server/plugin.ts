@@ -6,22 +6,26 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '../../../../core/server';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 
 import { ExpressionXyPluginSetup, ExpressionXyPluginStart } from './types';
 import {
   xyVisFunction,
   yAxisConfigFunction,
+  extendedYAxisConfigFunction,
   legendConfigFunction,
   gridlinesConfigFunction,
-  dataLayerConfigFunction,
   axisExtentConfigFunction,
   tickLabelsConfigFunction,
-  annotationLayerConfigFunction,
+  annotationLayerFunction,
   labelsOrientationConfigFunction,
-  referenceLineLayerConfigFunction,
+  referenceLineFunction,
   axisTitlesVisibilityConfigFunction,
-} from '../common';
+  extendedDataLayerFunction,
+  referenceLineLayerFunction,
+  layeredXyVisFunction,
+  extendedAnnotationLayerFunction,
+} from '../common/expression_functions';
 import { SetupDeps } from './types';
 
 export class ExpressionXyPlugin
@@ -29,16 +33,20 @@ export class ExpressionXyPlugin
 {
   public setup(core: CoreSetup, { expressions }: SetupDeps) {
     expressions.registerFunction(yAxisConfigFunction);
+    expressions.registerFunction(extendedYAxisConfigFunction);
     expressions.registerFunction(legendConfigFunction);
     expressions.registerFunction(gridlinesConfigFunction);
-    expressions.registerFunction(dataLayerConfigFunction);
+    expressions.registerFunction(extendedDataLayerFunction);
     expressions.registerFunction(axisExtentConfigFunction);
     expressions.registerFunction(tickLabelsConfigFunction);
-    expressions.registerFunction(annotationLayerConfigFunction);
+    expressions.registerFunction(annotationLayerFunction);
+    expressions.registerFunction(extendedAnnotationLayerFunction);
     expressions.registerFunction(labelsOrientationConfigFunction);
-    expressions.registerFunction(referenceLineLayerConfigFunction);
+    expressions.registerFunction(referenceLineFunction);
+    expressions.registerFunction(referenceLineLayerFunction);
     expressions.registerFunction(axisTitlesVisibilityConfigFunction);
     expressions.registerFunction(xyVisFunction);
+    expressions.registerFunction(layeredXyVisFunction);
   }
 
   public start(core: CoreStart) {}

@@ -24,13 +24,13 @@
     { "path": "../../../src/plugins/kibana_react/tsconfig.json" },
     { "path": "../../../src/plugins/usage_collection/tsconfig.json" },
     { "path": "../../../src/plugins/vis_types/timeseries/tsconfig.json" },
-    { "path": "../data_enhanced/tsconfig.json" },
     { "path": "../alerting/tsconfig.json" },
     { "path": "../features/tsconfig.json" },
     { "path": "../license_management/tsconfig.json" },
     { "path": "../ml/tsconfig.json" },
     { "path": "../observability/tsconfig.json" },
     { "path": "../spaces/tsconfig.json" },
-    { "path": "../triggers_actions_ui/tsconfig.json" }
+    { "path": "../triggers_actions_ui/tsconfig.json" },
+    { "path": "../../../src/plugins/unified_search/tsconfig.json" }
   ]
 }

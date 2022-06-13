@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { DataView, DataViewsService } from 'src/plugins/data_views/common';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
 import {
   getCachedIndexPatternFetcher,

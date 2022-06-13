@@ -6,14 +6,15 @@
  */
 
 import React from 'react';
-import { CoreStart } from 'kibana/public';
-import { UsageCollectionSetup } from 'src/plugins/usage_collection/public';
-import { ExpressionsSetup, ExpressionsStart } from '../../../../../src/plugins/expressions/public';
-import { EmbeddableSetup, EmbeddableStart } from '../../../../../src/plugins/embeddable/public';
-import {
-  DataPublicPluginSetup,
-  DataPublicPluginStart,
-} from '../../../../../src/plugins/data/public';
+import { CoreStart } from '@kbn/core/public';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { Document } from '../persistence/saved_object_store';
 import {
   Datasource,
   Visualization,
@@ -21,10 +22,6 @@ import {
   EditorFrameInstance,
   EditorFrameStart,
 } from '../types';
-import { Document } from '../persistence/saved_object_store';
-import { UiActionsStart } from '../../../../../src/plugins/ui_actions/public';
-import { ChartsPluginSetup } from '../../../../../src/plugins/charts/public';
-import { DashboardStart } from '../../../../../src/plugins/dashboard/public';
 
 export interface EditorFrameSetupPlugins {
   data: DataPublicPluginSetup;

@@ -9,10 +9,11 @@
 import {
   extractIndexPatternValues,
   isStringTypeIndexPattern,
+  isDataViewTypeIndexPattern,
   fetchIndexPattern,
 } from './index_patterns_utils';
 import { Panel } from './types';
-import type { DataView, DataViewsService } from '../../../data_views/public';
+import type { DataView, DataViewsService } from '@kbn/data-views-plugin/public';
 
 describe('isStringTypeIndexPattern', () => {
   test('should returns true on string-based index', () => {
@@ -20,6 +21,21 @@ describe('isStringTypeIndexPattern', () => {
   });
   test('should returns false on object-based index', () => {
     expect(isStringTypeIndexPattern({ id: 'id' })).toBeFalsy();
+  });
+  test('should returns false on undefined', () => {
+    expect(isStringTypeIndexPattern(undefined)).toBeFalsy();
+  });
+});
+
+describe('isDataViewTypeIndexPattern', () => {
+  test('should returns true on data-view index', () => {
+    expect(isDataViewTypeIndexPattern({ id: 'id' })).toBeTruthy();
+  });
+  test('should returns false on string-based index', () => {
+    expect(isDataViewTypeIndexPattern('index')).toBeFalsy();
+  });
+  test('should returns false on undefined', () => {
+    expect(isDataViewTypeIndexPattern(undefined)).toBeFalsy();
   });
 });
 

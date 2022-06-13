@@ -23,6 +23,7 @@ export type ComponentOpts = {
   onRuleChanged: () => void;
   setRulesToDelete: React.Dispatch<React.SetStateAction<string[]>>;
   onEditRule: (item: RuleTableItem) => void;
+  onUpdateAPIKey: (id: string[]) => void;
 } & Pick<BulkOperationsComponentOpts, 'disableRule' | 'enableRule' | 'unmuteRule' | 'muteRule'>;
 
 export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
@@ -34,6 +35,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
   muteRule,
   setRulesToDelete,
   onEditRule,
+  onUpdateAPIKey,
 }: ComponentOpts) => {
   const { ruleTypeRegistry } = useKibana().services;
 
@@ -53,6 +55,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     <EuiButtonIcon
       disabled={!item.isEditable}
       data-test-subj="selectActionButton"
+      data-testid="selectActionButton"
       iconType="boxesHorizontal"
       onClick={() => setIsPopoverOpen(!isPopoverOpen)}
       aria-label={i18n.translate(
@@ -133,6 +136,19 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         },
         {
           disabled: !item.isEditable,
+          'data-test-subj': 'updateApiKey',
+          onClick: () => {
+            setIsPopoverOpen(!isPopoverOpen);
+            onUpdateAPIKey([item.id]);
+          },
+          name: i18n.translate(
+            'xpack.triggersActionsUI.sections.rulesList.collapsedItemActions.updateApiKey',
+            { defaultMessage: 'Update API key' }
+          ),
+        },
+        {
+          disabled: !item.isEditable,
+          className: 'collapsedItemActions__deleteButton',
           'data-test-subj': 'deleteRule',
           onClick: () => {
             setIsPopoverOpen(!isPopoverOpen);
@@ -161,6 +177,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         panels={panels}
         className="actCollapsedItemActions"
         data-test-subj="collapsedActionPanel"
+        data-testid="collapsedActionPanel"
       />
     </EuiPopover>
   );

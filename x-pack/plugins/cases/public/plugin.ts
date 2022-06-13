@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from 'src/core/public';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { CasesUiStart, CasesPluginSetup, CasesPluginStart } from './types';
 import { KibanaServices } from './common/lib/kibana';
 import { CasesUiConfigType } from '../common/ui/types';
 import { APP_ID, APP_PATH } from '../common/constants';
 import { APP_TITLE, APP_DESC } from './common/translations';
-import { FeatureCatalogueCategory } from '../../../../src/plugins/home/public';
-import { ManagementAppMountParams } from '../../../../src/plugins/management/public';
-import { Storage } from '../../../../src/plugins/kibana_utils/public';
 import { useCasesAddToExistingCaseModal } from './components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
 import { useCasesAddToNewCaseFlyout } from './components/create/flyout/use_cases_add_to_new_case_flyout';
 import { createClientAPI } from './client/api';
@@ -24,6 +23,7 @@ import { getCasesLazy } from './client/ui/get_cases';
 import { getCasesContextLazy } from './client/ui/get_cases_context';
 import { getCreateCaseFlyoutLazy } from './client/ui/get_create_case_flyout';
 import { getRecentCasesLazy } from './client/ui/get_recent_cases';
+import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 
 /**
  * @public
@@ -48,10 +48,10 @@ export class CasesUiPlugin
         id: APP_ID,
         title: APP_TITLE,
         description: APP_DESC,
-        icon: 'watchesApp',
+        icon: 'casesApp',
         path: APP_PATH,
         showOnHomePage: false,
-        category: FeatureCatalogueCategory.ADMIN,
+        category: 'admin',
       });
     }
 
@@ -103,6 +103,7 @@ export class CasesUiPlugin
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),
         getRuleIdFromEvent,
+        groupAlertsByRule,
       },
     };
   }

@@ -5,13 +5,21 @@
  * 2.0.
  */
 
+import apm from 'elastic-apm-node';
 import { i18n } from '@kbn/i18n';
 import semverLt from 'semver/functions/lt';
 import type Boom from '@hapi/boom';
-import type { ElasticsearchClient, SavedObject, SavedObjectsClientContract } from 'src/core/server';
+import type {
+  ElasticsearchClient,
+  SavedObject,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
+
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import pRetry from 'p-retry';
 
 import { generateESIndexPatterns } from '../elasticsearch/template/template';
-import { DEFAULT_SPACE_ID } from '../../../../../spaces/common/constants';
 import type {
   BulkInstallPackageInfo,
   EpmPackageInstallStatus,
@@ -22,14 +30,8 @@ import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common';
 import { IngestManagerError, PackageOutdatedError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import type { KibanaAssetType } from '../../../types';
-import { licenseService } from '../../';
-import type {
-  Installation,
-  AssetType,
-  EsAssetReference,
-  InstallType,
-  InstallResult,
-} from '../../../types';
+import { licenseService } from '../..';
+import type { Installation, EsAssetReference, InstallType, InstallResult } from '../../../types';
 import { appContextService } from '../../app_context';
 import * as Registry from '../registry';
 import {
@@ -43,7 +45,7 @@ import type { ArchiveAsset } from '../kibana/assets/install';
 import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 
-import { getInstallation, getInstallationObject } from './index';
+import { getInstallation, getInstallationObject } from '.';
 import { removeInstallation } from './remove';
 import { getPackageSavedObjects } from './get';
 import { _installPackage } from './_install_package';
@@ -245,6 +247,10 @@ async function installPackageFromRegistry({
   // TODO: change epm API to /packageName/version so we don't need to do this
   const { pkgName, pkgVersion } = Registry.splitPkgKey(pkgkey);
 
+  // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
+  await Promise.resolve();
+  const span = apm.startSpan(`Install package from registry ${pkgName}@${pkgVersion}`, 'package');
+
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
 
@@ -255,10 +261,19 @@ async function installPackageFromRegistry({
     const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
     installType = getInstallType({ pkgVersion, installedPkg });
 
-    // get latest package version
-    const latestPackage = await Registry.fetchFindLatestPackageOrThrow(pkgName, {
-      ignoreConstraints,
+    span?.addLabels({
+      packageName: pkgName,
+      packageVersion: pkgVersion,
+      installType,
     });
+
+    // get latest package version and requested version in parallel for performance
+    const [latestPackage, { paths, packageInfo }] = await Promise.all([
+      Registry.fetchFindLatestPackageOrThrow(pkgName, {
+        ignoreConstraints,
+      }),
+      Registry.getRegistryPackage(pkgName, pkgVersion),
+    ]);
 
     // let the user install if using the force flag or needing to reinstall or install a previous version due to failed update
     const installOutOfDateVersionOk =
@@ -303,9 +318,6 @@ async function installPackageFromRegistry({
       );
     }
 
-    // get package info
-    const { paths, packageInfo } = await Registry.getRegistryPackage(pkgName, pkgVersion);
-
     if (!licenseService.hasAtLeast(packageInfo.license || 'basic')) {
       const err = new Error(`Requires ${packageInfo.license} license`);
       sendEvent({
@@ -321,7 +333,7 @@ async function installPackageFromRegistry({
 
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
-    return _installPackage({
+    return await _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
       esClient,
@@ -372,6 +384,8 @@ async function installPackageFromRegistry({
       installType,
       installSource: 'registry',
     };
+  } finally {
+    span?.end();
   }
 }
 
@@ -390,6 +404,10 @@ async function installPackageByUpload({
   contentType,
   spaceId,
 }: InstallUploadedArchiveParams): Promise<InstallResult> {
+  // Workaround apm issue with async spans: https://github.com/elastic/apm-agent-nodejs/issues/2611
+  await Promise.resolve();
+  const span = apm.startSpan(`Install package from upload`, 'package');
+
   const logger = appContextService.getLogger();
   // if an error happens during getInstallType, report that we don't know
   let installType: InstallType = 'unknown';
@@ -403,6 +421,12 @@ async function installPackageByUpload({
     });
 
     installType = getInstallType({ pkgVersion: packageInfo.version, installedPkg });
+
+    span?.addLabels({
+      packageName: packageInfo.name,
+      packageVersion: packageInfo.version,
+      installType,
+    });
 
     telemetryEvent.packageName = packageInfo.name;
     telemetryEvent.newVersion = packageInfo.version;
@@ -429,7 +453,7 @@ async function installPackageByUpload({
       .createImporter(savedObjectsClient);
 
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'
-    return _installPackage({
+    return await _installPackage({
       savedObjectsClient,
       savedObjectsImporter,
       esClient,
@@ -461,6 +485,8 @@ async function installPackageByUpload({
       errorMessage: e.message,
     });
     return { error: e, installType, installSource: 'upload' };
+  } finally {
+    span?.end();
   }
 }
 
@@ -572,7 +598,6 @@ export async function createInstallation(options: {
     ? true
     : undefined;
 
-  // TODO cleanup removable flag and isUnremovablePackage function
   const created = await savedObjectsClient.create<Installation>(
     PACKAGES_SAVED_OBJECT_TYPE,
     {
@@ -583,7 +608,6 @@ export async function createInstallation(options: {
       es_index_patterns: toSaveESIndexPatterns,
       name: pkgName,
       version: pkgVersion,
-      removable: true,
       install_version: pkgVersion,
       install_status: 'installing',
       install_started_at: new Date().toISOString(),
@@ -602,22 +626,60 @@ export const saveKibanaAssetsRefs = async (
   kibanaAssets: Record<KibanaAssetType, ArchiveAsset[]>
 ) => {
   const assetRefs = Object.values(kibanaAssets).flat().map(toAssetReference);
-  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_kibana: assetRefs,
-  });
+  // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
+  // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
+  // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
+  pRetry(
+    () =>
+      savedObjectsClient.update(
+        PACKAGES_SAVED_OBJECT_TYPE,
+        pkgName,
+        {
+          installed_kibana: assetRefs,
+        },
+        { refresh: false }
+      ),
+    { retries: 20 } // Use a number of retries higher than the number of es asset update operations
+  );
+
   return assetRefs;
 };
 
-export const saveInstalledEsRefs = async (
+/**
+ * Utility function for updating the installed_es field of a package
+ */
+export const updateEsAssetReferences = async (
   savedObjectsClient: SavedObjectsClientContract,
   pkgName: string,
-  installedAssets: EsAssetReference[]
-) => {
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  const installedAssetsToSave = installedPkg?.attributes.installed_es.concat(installedAssets);
+  currentAssets: EsAssetReference[],
+  {
+    assetsToAdd = [],
+    assetsToRemove = [],
+    refresh = false,
+  }: {
+    assetsToAdd?: EsAssetReference[];
+    assetsToRemove?: EsAssetReference[];
+    /**
+     * Whether or not the update should force a refresh on the SO index.
+     * Defaults to `false` for faster updates, should only be `wait_for` if the update needs to be queried back from ES
+     * immediately.
+     */
+    refresh?: 'wait_for' | false;
+  }
+): Promise<EsAssetReference[]> => {
+  const withAssetsRemoved = currentAssets.filter(({ type, id }) => {
+    if (
+      assetsToRemove.some(
+        ({ type: removeType, id: removeId }) => removeType === type && removeId === id
+      )
+    ) {
+      return false;
+    }
+    return true;
+  });
 
   const deduplicatedAssets =
-    installedAssetsToSave?.reduce((acc, currentAsset) => {
+    [...withAssetsRemoved, ...assetsToAdd].reduce((acc, currentAsset) => {
       const foundAsset = acc.find((asset: EsAssetReference) => asset.id === currentAsset.id);
       if (!foundAsset) {
         return acc.concat([currentAsset]);
@@ -626,27 +688,30 @@ export const saveInstalledEsRefs = async (
       }
     }, [] as EsAssetReference[]) || [];
 
-  await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_es: deduplicatedAssets,
-  });
-  return installedAssets;
-};
+  const {
+    attributes: { installed_es: updatedAssets },
+  } =
+    // Because Kibana assets are installed in parallel with ES assets with refresh: false, we almost always run into an
+    // issue that causes a conflict error due to this issue: https://github.com/elastic/kibana/issues/126240. This is safe
+    // to retry constantly until it succeeds to optimize this critical user journey path as much as possible.
+    await pRetry(
+      () =>
+        savedObjectsClient.update<Installation>(
+          PACKAGES_SAVED_OBJECT_TYPE,
+          pkgName,
+          {
+            installed_es: deduplicatedAssets,
+          },
+          {
+            refresh,
+          }
+        ),
+      // Use a lower number of retries for ES assets since they're installed in serial and can only conflict with
+      // the single Kibana update call.
+      { retries: 5 }
+    );
 
-export const removeAssetTypesFromInstalledEs = async (
-  savedObjectsClient: SavedObjectsClientContract,
-  pkgName: string,
-  assetTypes: AssetType[]
-) => {
-  const installedPkg = await getInstallationObject({ savedObjectsClient, pkgName });
-  const installedAssets = installedPkg?.attributes.installed_es;
-  if (!installedAssets?.length) return;
-  const installedAssetsToSave = installedAssets?.filter(
-    (asset) => !assetTypes.includes(asset.type)
-  );
-
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    installed_es: installedAssetsToSave,
-  });
+  return updatedAssets ?? [];
 };
 
 export async function ensurePackagesCompletedInstall(

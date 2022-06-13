@@ -8,16 +8,13 @@
 import React, { useContext, FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Router, Route, Switch } from 'react-router-dom';
-import { ScopedHistory } from 'kibana/public';
+import { ScopedHistory } from '@kbn/core/public';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-} from '../../../../../src/plugins/kibana_react/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
 import { API_BASE_PATH } from '../../common/constants';
 

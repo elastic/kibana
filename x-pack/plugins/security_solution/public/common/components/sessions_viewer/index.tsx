@@ -24,16 +24,8 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
     bool: {
       filter: [
         {
-          bool: {
-            should: [
-              {
-                match: {
-                  // TODO: update to process.entry_leader.same_as_process once ECS is updated to support same_as_process
-                  'process.is_entry_leader': true,
-                },
-              },
-            ],
-            minimum_should_match: 1,
+          exists: {
+            field: 'process.entry_leader.entity_id', // to exclude any records which have no entry_leader.entity_id
           },
         },
       ],
@@ -42,10 +34,10 @@ export const defaultSessionsFilter: Required<Pick<Filter, 'meta' | 'query'>> = {
   meta: {
     alias: null,
     disabled: false,
-    key: 'process.is_entry_leader',
+    key: 'process.entry_leader.entity_id',
     negate: false,
     params: {},
-    type: 'boolean',
+    type: 'string',
   },
 };
 

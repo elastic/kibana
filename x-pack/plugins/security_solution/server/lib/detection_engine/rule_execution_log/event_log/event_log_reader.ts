@@ -6,8 +6,8 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
-import { IEventLogClient } from '../../../../../../event_log/server';
 
 import {
   RuleExecutionEvent,
@@ -16,16 +16,21 @@ import {
 import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { invariant } from '../../../../../common/utils/invariant';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
+import { GetAggregateExecutionEventsArgs } from '../client_for_routes/client_interface';
 import {
-  RULE_SAVED_OBJECT_TYPE,
   RULE_EXECUTION_LOG_PROVIDER,
+  RULE_SAVED_OBJECT_TYPE,
   RuleExecutionLogAction,
 } from './constants';
 import {
   formatExecutionEventResponse,
   getExecutionEventAggregation,
+  mapRuleExecutionStatusToPlatformStatus,
 } from './get_execution_event_aggregation';
-import { ExecutionUuidAggResult } from './get_execution_event_aggregation/types';
+import {
+  EXECUTION_UUID_FIELD,
+  ExecutionUuidAggResult,
+} from './get_execution_event_aggregation/types';
 
 export interface IEventLogReader {
   getAggregateExecutionEvents(
@@ -33,18 +38,6 @@ export interface IEventLogReader {
   ): Promise<GetAggregateRuleExecutionEventsResponse>;
 
   getLastStatusChanges(args: GetLastStatusChangesArgs): Promise<RuleExecutionEvent[]>;
-}
-
-export interface GetAggregateExecutionEventsArgs {
-  ruleId: string;
-  start: string;
-  end: string;
-  queryText: string;
-  statusFilters: string[];
-  page: number;
-  perPage: number;
-  sortField: string;
-  sortOrder: string;
 }
 
 export interface GetLastStatusChangesArgs {
@@ -67,17 +60,27 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
       // TODO: See: https://github.com/elastic/kibana/pull/127339/files#r825240516
       // First fetch execution uuid's by status filter if provided
       let statusIds: string[] = [];
+      let totalExecutions: number | undefined;
       // If 0 or 3 statuses are selected we can search for all statuses and don't need this pre-filter by ID
       if (statusFilters.length > 0 && statusFilters.length < 3) {
-        // TODO: Add cardinality agg and pass as maxEvents in response
+        const outcomes = mapRuleExecutionStatusToPlatformStatus(statusFilters);
+        const outcomeFilter = outcomes.length ? `OR event.outcome:(${outcomes.join(' OR ')})` : '';
         const statusResults = await eventLog.aggregateEventsBySavedObjectIds(soType, soIds, {
           start,
           end,
-          filter: `kibana.alert.rule.execution.status:(${statusFilters.join(' OR ')})`,
+          // Also query for `event.outcome` to catch executions that only contain platform events
+          filter: `kibana.alert.rule.execution.status:(${statusFilters.join(
+            ' OR '
+          )}) ${outcomeFilter}`,
           aggs: {
+            totalExecutions: {
+              cardinality: {
+                field: EXECUTION_UUID_FIELD,
+              },
+            },
             filteredExecutionUUIDs: {
               terms: {
-                field: 'kibana.alert.rule.execution.uuid',
+                field: EXECUTION_UUID_FIELD,
                 size: MAX_EXECUTION_EVENTS_DISPLAYED,
               },
             },
@@ -86,6 +89,9 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
         const filteredExecutionUUIDs = statusResults.aggregations
           ?.filteredExecutionUUIDs as ExecutionUuidAggResult;
         statusIds = filteredExecutionUUIDs?.buckets?.map((b) => b.key) ?? [];
+        totalExecutions = (
+          statusResults.aggregations?.totalExecutions as estypes.AggregationsCardinalityAggregate
+        ).value;
         // Early return if no results based on status filter
         if (statusIds.length === 0) {
           return {
@@ -111,7 +117,7 @@ export const createEventLogReader = (eventLog: IEventLogClient): IEventLogReader
         }),
       });
 
-      return formatExecutionEventResponse(results);
+      return formatExecutionEventResponse(results, totalExecutions);
     },
     async getLastStatusChanges(args) {
       const soType = RULE_SAVED_OBJECT_TYPE;

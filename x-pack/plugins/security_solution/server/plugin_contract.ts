@@ -5,43 +5,35 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '../../../../src/core/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
-} from '../../../../src/plugins/data/server';
-import { UsageCollectionSetup as UsageCollectionPluginSetup } from '../../../../src/plugins/usage_collection/server';
+} from '@kbn/data-plugin/server';
+import { UsageCollectionSetup as UsageCollectionPluginSetup } from '@kbn/usage-collection-plugin/server';
 import {
   PluginSetupContract as AlertingPluginSetup,
   PluginStartContract as AlertingPluginStart,
-} from '../../alerting/server';
-import { PluginStartContract as CasesPluginStart } from '../../cases/server';
-import { EncryptedSavedObjectsPluginSetup } from '../../encrypted_saved_objects/server';
-import { IEventLogClientService, IEventLogService } from '../../event_log/server';
-import { PluginSetupContract as FeaturesPluginSetup } from '../../features/server';
-import { FleetStartContract as FleetPluginStart } from '../../fleet/server';
-import { LicensingPluginStart, LicensingPluginSetup } from '../../licensing/server';
-import { ListPluginSetup } from '../../lists/server';
-import { MlPluginSetup } from '../../ml/server';
+} from '@kbn/alerting-plugin/server';
+import { PluginStartContract as CasesPluginStart } from '@kbn/cases-plugin/server';
+import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
+import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import { FleetStartContract as FleetPluginStart } from '@kbn/fleet-plugin/server';
+import { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { ListPluginSetup } from '@kbn/lists-plugin/server';
+import { MlPluginSetup } from '@kbn/ml-plugin/server';
 import {
   RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
-} from '../../rule_registry/server';
-import { SecurityPluginSetup, SecurityPluginStart } from '../../security/server';
-import { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
+} from '@kbn/rule-registry-plugin/server';
+import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   TaskManagerSetupContract as TaskManagerPluginSetup,
   TaskManagerStartContract as TaskManagerPluginStart,
-} from '../../task_manager/server';
-import {
-  TelemetryPluginStart,
-  TelemetryPluginSetup,
-} from '../../../../src/plugins/telemetry/server';
+} from '@kbn/task-manager-plugin/server';
+import { TelemetryPluginStart, TelemetryPluginSetup } from '@kbn/telemetry-plugin/server';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;

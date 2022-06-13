@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { ProvidedType } from '@kbn/test';
+import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { savedSearches, dashboards } from './test_resources_data';
 import { COMMON_REQUEST_HEADERS } from './common_api';
 import { MlApi } from './api';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { JobType } from '../../../../plugins/ml/common/types/saved_objects';
 
 export enum SavedObjectType {
   CONFIG = 'config',
@@ -483,6 +483,10 @@ export function MachineLearningTestResourcesProvider(
         SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE
       );
       for (const id of savedObjectIds) {
+        if (id === 'lang_ident_model_1') {
+          log.debug('> Skipping internal lang_ident_model_1');
+          continue;
+        }
         await this.deleteSavedObjectById(
           id,
           SavedObjectType.ML_TRAINED_MODEL_SAVED_OBJECT_TYPE,

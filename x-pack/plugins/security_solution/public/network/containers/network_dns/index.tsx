@@ -10,6 +10,7 @@ import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { Subscription } from 'rxjs';
 
+import { isCompleteResponse, isErrorResponse } from '@kbn/data-plugin/common';
 import { ESTermQuery } from '../../../../common/typed_json';
 import { inputsModel } from '../../../common/store';
 import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
@@ -26,7 +27,6 @@ import {
   NetworkDnsEdges,
   PageInfoPaginated,
 } from '../../../../common/search_strategy';
-import { isCompleteResponse, isErrorResponse } from '../../../../../../../src/plugins/data/common';
 import * as i18n from './translations';
 import { getInspectResponse } from '../../../helpers';
 import { InspectResponse } from '../../../types';
@@ -48,7 +48,7 @@ export interface NetworkDnsArgs {
 }
 
 interface UseNetworkDns {
-  id?: string;
+  id: string;
   docValueFields: DocValueFields[];
   indexNames: string[];
   type: networkModel.NetworkType;
@@ -62,6 +62,7 @@ export const useNetworkDns = ({
   docValueFields,
   endDate,
   filterQuery,
+  id,
   indexNames,
   skip,
   startDate,
@@ -96,7 +97,7 @@ export const useNetworkDns = ({
   const [networkDnsResponse, setNetworkDnsResponse] = useState<NetworkDnsArgs>({
     networkDns: [],
     histogram: [],
-    id: ID,
+    id,
     inspect: {
       dsl: [],
       response: [],

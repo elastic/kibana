@@ -11,6 +11,7 @@ import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elas
 import { noop } from 'lodash/fp';
 import styled from 'styled-components';
 
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { eventHasNotes, getEventType, getPinOnClick } from '../helpers';
 import { AlertContextMenu } from '../../../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
@@ -19,12 +20,11 @@ import { AddEventNoteAction } from './add_note_icon_item';
 import { PinEventAction } from './pin_event_action';
 import { EventsTdContent } from '../../styles';
 import * as i18n from '../translations';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 import { useShallowEqualSelector } from '../../../../../common/hooks/use_selector';
 import {
   setActiveTabTimeline,
   updateTimelineGraphEventId,
-  updateTimelineSessionViewSessionId,
+  updateTimelineSessionViewConfig,
 } from '../../../../store/timeline/actions';
 import {
   useGlobalFullScreen,
@@ -35,10 +35,14 @@ import {
   ActionProps,
   OnPinEvent,
   TimelineTabs,
+  TimelineEventsType,
 } from '../../../../../../common/types/timeline';
 import { timelineActions, timelineSelectors } from '../../../../store/timeline';
 import { timelineDefaults } from '../../../../store/timeline/defaults';
 import { isInvestigateInResolverActionEnabled } from '../../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
+
+export const isAlert = (eventType: TimelineEventsType | Omit<TimelineEventsType, 'all'>): boolean =>
+  eventType === 'signal';
 
 const ActionsContainer = styled.div`
   align-items: center;
@@ -129,15 +133,26 @@ const ActionsComponent: React.FC<ActionProps> = ({
     }
   }, [dispatch, ecsData._id, timelineId, setGlobalFullScreen, setTimelineFullScreen]);
 
-  const entryLeader = useMemo(() => {
-    const { process } = ecsData;
-    const entryLeaderIds = process?.entry_leader?.entity_id;
-    if (entryLeaderIds !== undefined && entryLeaderIds.length > 0) {
-      return entryLeaderIds[0];
-    } else {
+  const sessionViewConfig = useMemo(() => {
+    const { process, _id, timestamp } = ecsData;
+    const sessionEntityId = process?.entry_leader?.entity_id?.[0];
+
+    if (sessionEntityId === undefined) {
       return null;
     }
-  }, [ecsData]);
+
+    const jumpToEntityId = process?.entity_id?.[0];
+    const investigatedAlertId = eventType === 'signal' || eventType === 'eql' ? _id : undefined;
+    const jumpToCursor =
+      (investigatedAlertId && ecsData.kibana?.alert.original_time?.[0]) || timestamp;
+
+    return {
+      sessionEntityId,
+      jumpToEntityId,
+      jumpToCursor,
+      investigatedAlertId,
+    };
+  }, [ecsData, eventType]);
 
   const openSessionView = useCallback(() => {
     const dataGridIsFullScreen = document.querySelector('.euiDataGrid--fullScreen');
@@ -145,7 +160,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
       if (dataGridIsFullScreen) {
         setTimelineFullScreen(true);
       }
-      if (entryLeader !== null) {
+      if (sessionViewConfig !== null) {
         dispatch(setActiveTabTimeline({ id: timelineId, activeTab: TimelineTabs.session }));
       }
     } else {
@@ -153,10 +168,10 @@ const ActionsComponent: React.FC<ActionProps> = ({
         setGlobalFullScreen(true);
       }
     }
-    if (entryLeader !== null) {
-      dispatch(updateTimelineSessionViewSessionId({ id: timelineId, eventId: entryLeader }));
+    if (sessionViewConfig !== null) {
+      dispatch(updateTimelineSessionViewConfig({ id: timelineId, sessionViewConfig }));
     }
-  }, [dispatch, timelineId, entryLeader, setGlobalFullScreen, setTimelineFullScreen]);
+  }, [dispatch, timelineId, sessionViewConfig, setGlobalFullScreen, setTimelineFullScreen]);
 
   return (
     <ActionsContainer>
@@ -210,6 +225,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             />
             <PinEventAction
               ariaLabel={i18n.PIN_EVENT_FOR_ROW({ ariaRowindex, columnValues, isEventPinned })}
+              isAlert={isAlert(eventType)}
               key="pin-event"
               onPinClicked={handlePinClicked}
               noteIds={eventIdToNoteIds ? eventIdToNoteIds[eventId] || emptyNotes : emptyNotes}
@@ -250,7 +266,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             </EventsTdContent>
           </div>
         ) : null}
-        {entryLeader !== null ? (
+        {sessionViewConfig !== null ? (
           <div>
             <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
               <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.OPEN_SESSION_VIEW}>

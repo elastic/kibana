@@ -7,7 +7,7 @@
 
 import { getOr } from 'lodash/fp';
 
-import type { IEsSearchResponse } from '../../../../../../../../../src/plugins/data/common';
+import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants';
 
 import { inspectStringifyObject } from '../../../../../utils/build_query';
@@ -50,7 +50,7 @@ export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
       (bucket: AllUsersAggEsItem) => ({
         name: bucket.key,
         lastSeen: getOr(null, `lastSeen.value_as_string`, bucket),
-        domain: getOr(null, `domain.hits.hits[0]._source.user.domain`, bucket),
+        domain: getOr(null, `domain.hits.hits[0].fields['user.domain']`, bucket),
       }),
       {}
     );

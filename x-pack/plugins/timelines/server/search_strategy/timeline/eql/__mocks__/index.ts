@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EqlSearchStrategyResponse } from '../../../../../../../../src/plugins/data/common';
+import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import { EqlSearchResponse } from '../../../../../common/search_strategy';
 
 export const sequenceResponse = {

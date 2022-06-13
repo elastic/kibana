@@ -11,7 +11,7 @@ exports[`Storyshots arguments/AxisConfig extended 1`] = `
   }
 >
   <div
-    className="euiFormRow euiFormRow--compressed euiFormRow--horizontal"
+    className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed euiFormRow--horizontal"
     id="generated-id-row"
   >
     <div
@@ -35,7 +35,7 @@ exports[`Storyshots arguments/AxisConfig extended 1`] = `
           className="euiFormControlLayout__childrenWrapper"
         >
           <select
-            className="euiSelect euiSelect--compressed"
+            className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
             id="generated-id"
             onBlur={[Function]}
             onChange={[Function]}
@@ -75,7 +75,7 @@ exports[`Storyshots arguments/AxisConfig extended 1`] = `
     </div>
   </div>
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
 </div>
 `;
@@ -91,7 +91,7 @@ exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
   }
 >
   <div
-    className="euiFormRow euiFormRow--compressed euiFormRow--horizontal"
+    className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed euiFormRow--horizontal"
     id="generated-id-row"
   >
     <div
@@ -115,7 +115,7 @@ exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
           className="euiFormControlLayout__childrenWrapper"
         >
           <select
-            className="euiSelect euiSelect--compressed"
+            className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
             id="generated-id"
             onBlur={[Function]}
             onChange={[Function]}
@@ -155,7 +155,7 @@ exports[`Storyshots arguments/AxisConfig/components extended 1`] = `
     </div>
   </div>
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
 </div>
 `;

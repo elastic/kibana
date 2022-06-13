@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { getAllMigrations, searchMigrations } from './search_migrations';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
@@ -350,6 +350,7 @@ Object {
       testMigrateMatchAllQuery(migrationFn);
     });
   });
+
   it('should apply search source migrations within saved search', () => {
     const savedSearch = {
       attributes: {
@@ -375,6 +376,29 @@ Object {
             some: 'prop',
             migrated: true,
           }),
+        },
+      },
+    });
+  });
+
+  it('should not apply search source migrations within saved search when searchSourceJSON is not an object', () => {
+    const savedSearch = {
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '5',
+        },
+      },
+    } as SavedObjectUnsanitizedDoc;
+
+    const versionToTest = '9.1.2';
+    const migrations = getAllMigrations({
+      [versionToTest]: (state) => ({ ...state, migrated: true }),
+    });
+
+    expect(migrations[versionToTest](savedSearch, {} as SavedObjectMigrationContext)).toEqual({
+      attributes: {
+        kibanaSavedObjectMeta: {
+          searchSourceJSON: '5',
         },
       },
     });

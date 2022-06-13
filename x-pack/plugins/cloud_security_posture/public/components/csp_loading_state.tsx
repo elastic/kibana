@@ -5,16 +5,28 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
 import React from 'react';
+import { css } from '@emotion/react';
 
-export const cspLoadingStateTestId = 'csp_loading_state';
-
-export const CspLoadingState: React.FunctionComponent = ({ children }) => (
-  <EuiFlexGroup direction="column" alignItems="center" data-test-subj={cspLoadingStateTestId}>
-    <EuiFlexItem>
-      <EuiLoadingSpinner size="xl" />
-    </EuiFlexItem>
-    <EuiFlexItem>{children}</EuiFlexItem>
-  </EuiFlexGroup>
-);
+export const CspLoadingState: React.FunctionComponent<{ ['data-test-subj']?: string }> = ({
+  children,
+  ...rest
+}) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiFlexGroup
+      css={css`
+        padding: ${euiTheme.size.l};
+      `}
+      direction="column"
+      alignItems="center"
+      data-test-subj={rest['data-test-subj']}
+    >
+      <EuiFlexItem>
+        <EuiLoadingSpinner size="xl" />
+      </EuiFlexItem>
+      <EuiFlexItem>{children}</EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};

@@ -13,19 +13,18 @@ import {
   EuiBasicTable,
   EuiButton,
   EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiText,
 } from '@elastic/eui';
 
 import styled from 'styled-components';
+import { useMlHref, ML_PAGES } from '@kbn/ml-plugin/public';
+import { PopoverItems } from '../../popover_items';
 import { useBasePath, useKibana } from '../../../lib/kibana';
 import * as i18n from './translations';
 import { JobSwitch } from './job_switch';
 import { SecurityJob } from '../types';
-import { useMlHref, ML_PAGES } from '../../../../../../ml/public';
 
 const JobNameWrapper = styled.div`
   margin: 5px 0;
@@ -82,16 +81,24 @@ const getJobsTableColumns = (
   },
   {
     name: i18n.COLUMN_GROUPS,
-    render: ({ groups }: SecurityJob) => (
-      <EuiFlexGroup wrap responsive={true} gutterSize="xs">
-        {groups.map((group) => (
-          <EuiFlexItem grow={false} key={group}>
-            <EuiBadge color={'hollow'}>{group}</EuiBadge>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    ),
-    width: '140px',
+    render: ({ groups }: SecurityJob) => {
+      const renderItem = (group: string, i: number) => (
+        <EuiBadge color="hollow" key={`${group}-${i}`} data-test-subj="group">
+          {group}
+        </EuiBadge>
+      );
+
+      return (
+        <PopoverItems
+          items={groups}
+          numberOfItemsToDisplay={0}
+          popoverButtonTitle={`${groups.length} Groups`}
+          renderItem={renderItem}
+          dataTestPrefix="groups"
+        />
+      );
+    },
+    width: '80px',
   },
 
   {

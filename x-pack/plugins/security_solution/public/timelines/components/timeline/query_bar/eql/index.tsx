@@ -37,7 +37,7 @@ const defaultValues = {
   eqlQueryBar: {
     query: { query: '', language: 'eql' },
     filters: [],
-    saved_id: undefined,
+    saved_id: null,
   },
 };
 
@@ -90,7 +90,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
   const { getFields } = form;
 
   const onOptionsChange = useCallback(
-    (field: FieldsEqlOptions, value: string | null) =>
+    (field: FieldsEqlOptions, value: string | undefined) =>
       dispatch(
         timelineActions.updateEqlOptions({
           id: timelineId,
@@ -187,6 +187,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
           idAria: 'timelineEqlQueryBar',
           isDisabled: indexPatternsLoading,
           isLoading: indexPatternsLoading,
+          indexPattern,
           dataTestSubj: 'timelineEqlQueryBar',
         }}
         config={{

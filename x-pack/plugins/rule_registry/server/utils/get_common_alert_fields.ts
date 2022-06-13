@@ -18,11 +18,11 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
-import { AlertExecutorOptions } from '../../../alerting/server';
+import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { CommonAlertFieldsLatest } from '../../common/schemas';
 
 export const getCommonAlertFields = (
-  options: AlertExecutorOptions<any, any, any, any, any>
+  options: RuleExecutorOptions<any, any, any, any, any>
 ): CommonAlertFieldsLatest => {
   return {
     [ALERT_RULE_CATEGORY]: options.rule.ruleTypeName,

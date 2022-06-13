@@ -4,15 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { httpServerMock, httpServiceMock, loggingSystemMock } from 'src/core/server/mocks';
+import { httpServerMock, httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-'src/core/server/elasticsearch/client/mocks';
+'@kbn/core/server/elasticsearch/client/mocks';
 // eslint-disable-next-line @kbn/eslint/no-restricted-paths
-import { KibanaRequest } from 'src/core/server/http/router/request';
+import { KibanaRequest } from '@kbn/core/server/http/router/request';
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard';
 
 import { CspAppService } from '../../lib/csp_app_services';
 import { CspAppContext } from '../../plugin';
+import { securityMock } from '@kbn/security-plugin/server/mocks';
 
 describe('compliance dashboard permissions API', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -29,6 +30,7 @@ describe('compliance dashboard permissions API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
+      security: securityMock.createSetup(),
     };
     defineGetComplianceDashboardRoute(router, cspContext);
     const [_, handler] = router.get.mock.calls[0];
@@ -53,6 +55,7 @@ describe('compliance dashboard permissions API', () => {
     const cspContext: CspAppContext = {
       logger,
       service: cspAppContextService,
+      security: securityMock.createSetup(),
     };
     defineGetComplianceDashboardRoute(router, cspContext);
     const [_, handler] = router.get.mock.calls[0];

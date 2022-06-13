@@ -43,6 +43,7 @@ export const getDescriptionUserAction = ({
   handleManageMarkdownEditId,
   handleManageQuote,
 }: GetDescriptionUserActionArgs): EuiCommentProps => {
+  const isEditable = manageMarkdownEditIds.includes(DESCRIPTION_ID);
   return {
     username: (
       <UserActionUsername
@@ -55,10 +56,11 @@ export const getDescriptionUserAction = ({
     timestamp: <UserActionTimestamp createdAt={caseData.createdAt} />,
     children: (
       <UserActionMarkdown
+        key={isEditable ? DESCRIPTION_ID : undefined}
         ref={(element) => (commentRefs.current[DESCRIPTION_ID] = element)}
         id={DESCRIPTION_ID}
         content={caseData.description}
-        isEditable={manageMarkdownEditIds.includes(DESCRIPTION_ID)}
+        isEditable={isEditable}
         onSaveContent={(content: string) => {
           onUpdateField({ key: DESCRIPTION_ID, value: content });
         }}

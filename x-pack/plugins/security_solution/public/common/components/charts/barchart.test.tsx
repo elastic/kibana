@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Chart, BarSeries, Axis, ScaleType } from '@elastic/charts';
+import { Chart, BarSeries, Axis, ScaleType, AxisStyle } from '@elastic/charts';
 import { mount, ReactWrapper, shallow, ShallowWrapper } from 'enzyme';
 import React from 'react';
 
@@ -166,13 +166,43 @@ describe('BarChartBaseComponent', () => {
 
   describe('render with customized configs', () => {
     const mockNumberFormatter = jest.fn();
+    const mockXAxisStyle = {
+      tickLine: {
+        size: 0,
+      },
+      tickLabel: {
+        padding: 16,
+        fontSize: 10.5,
+      },
+    } as Partial<AxisStyle>;
+    const mockYAxisStyle = {
+      tickLine: {
+        size: 0,
+      },
+      tickLabel: {
+        padding: 16,
+        fontSize: 14,
+      },
+    } as Partial<AxisStyle>;
     const configs = {
       series: {
         xScaleType: ScaleType.Ordinal,
         yScaleType: ScaleType.Linear,
+        barSeriesStyle: {
+          rect: {
+            widthPixel: 22,
+            opacity: 1,
+          },
+        },
       },
       axis: {
         yTickFormatter: mockNumberFormatter,
+        bottom: {
+          style: mockXAxisStyle,
+        },
+        left: {
+          style: mockYAxisStyle,
+        },
       },
     };
 
@@ -203,12 +233,22 @@ describe('BarChartBaseComponent', () => {
       );
     });
 
+    it('should render BarSeries with given barSeriesStyle', () => {
+      expect(shallowWrapper.find(BarSeries).first().prop('barSeriesStyle')).toEqual(
+        configs.series.barSeriesStyle
+      );
+    });
+
     it('should render xAxis with given tick formatter', () => {
       expect(shallowWrapper.find(Axis).first().prop('tickFormat')).toBeUndefined();
     });
 
+    it('should render xAxis style', () => {
+      expect(shallowWrapper.find(Axis).first().prop('style')).toEqual(mockXAxisStyle);
+    });
+
     it('should render yAxis with given tick formatter', () => {
-      expect(shallowWrapper.find(Axis).last().prop('tickFormat')).toEqual(mockNumberFormatter);
+      expect(shallowWrapper.find(Axis).last().prop('style')).toEqual(mockYAxisStyle);
     });
   });
 

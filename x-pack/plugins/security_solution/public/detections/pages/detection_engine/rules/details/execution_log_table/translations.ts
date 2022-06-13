@@ -167,6 +167,27 @@ export const COLUMN_ACTIONS_TOOLTIP = i18n.translate(
   }
 );
 
+export const ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.actionSearchFiltersUpdatedTitle',
+  {
+    defaultMessage: 'Global search filters have been updated',
+  }
+);
+
+export const ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.actionSearchFiltersUpdatedDescription',
+  {
+    defaultMessage: 'Search filters have been updated to show alerts from selected rule execution',
+  }
+);
+
+export const ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_RESTORE_BUTTON = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.actionSearchFiltersUpdatedRestoreButtonTitle',
+  {
+    defaultMessage: 'Restore previous filters',
+  }
+);
+
 export const ACTIONS_FIELD_NOT_FOUND_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.actionFieldNotFoundErrorTitle',
   {
@@ -178,5 +199,19 @@ export const ACTIONS_FIELD_NOT_FOUND_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.actionFieldNotFoundErrorDescription',
   {
     defaultMessage: "Cannot find field 'kibana.alert.rule.execution.uuid' in alerts index.",
+  }
+);
+
+export const DURATION_NOT_AVAILABLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.durationNotAvailableDescription',
+  {
+    defaultMessage: 'N/A',
+  }
+);
+
+export const GREATER_THAN_YEAR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.durationGreaterThanYearDescription',
+  {
+    defaultMessage: '> 1 Year',
   }
 );

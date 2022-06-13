@@ -6,21 +6,20 @@
 
 Adds a comment to a case.
 
-=== Request
+=== {api-request-title}
 
 `POST <kibana host>:<port>/api/cases/<case_id>/comments`
 
 `POST <kibana host>:<port>/s/<space_id>/api/cases/<case_id>/comments`
 
-=== Prerequisite
+=== {api-prereq-title}
 
 You must have `all` privileges for the *Cases* feature in the *Management*,
 *{observability}*, or *Security* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>, depending on the
 `owner` of the case you're updating.
 
-
-=== Path parameters
+=== {api-path-parms-title}
 
 `<case_id>`::
 (Required,string) The identifier for the case. To retrieve case IDs, use
@@ -30,7 +29,7 @@ You must have `all` privileges for the *Cases* feature in the *Management*,
 (Optional, string) An identifier for the space. If it is not specified, the
 default space is used.
 
-=== Request body
+=== {api-request-body-title}
 
 `alertId`::
 (Required*, string) The alert identifier. It is required only when `type` is
@@ -65,12 +64,12 @@ only when `type` is `alert`. preview:[]
 `type`::
 (Required, string) The comment type, which must be `user` or `alert`.
 
-=== Response code
+=== {api-response-codes-title}
 
 `200`::
    Indicates a successful call.
 
-=== Example
+=== {api-examples-title}
 
 Add a comment to case ID `293f1bc0-74f6-11ea-b83a-553aecdb28b6`:
 
@@ -120,6 +119,8 @@ The API returns details about the case and its comments. For example:
     "syncAlerts":false
   },
   "owner": "cases",
+  "duration": null,
+  "severity": "low",
   "closed_at": null,
   "closed_by": null,
   "created_at": "2022-03-24T00:37:03.906Z",

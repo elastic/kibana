@@ -5,14 +5,37 @@
  * 2.0.
  */
 
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { TRAINED_MODEL_TYPE } from '../../../../../common/constants/trained_models';
+import {
+  TRAINED_MODEL_TYPE,
+  DEPLOYMENT_STATE,
+  SUPPORTED_PYTORCH_TASKS,
+} from '../../../../../common/constants/trained_models';
+import type { SupportedPytorchTasksType } from '../../../../../common/constants/trained_models';
+import type { ModelItem } from '../models_list';
 
-const TESTABLE_MODEL_TYPES: estypes.MlTrainedModelType[] = [
-  TRAINED_MODEL_TYPE.PYTORCH,
-  TRAINED_MODEL_TYPE.LANG_IDENT,
-];
+import { isPopulatedObject } from '../../../../../common';
 
-export function isTestable(model: estypes.MlTrainedModelConfig) {
-  return model.model_type && TESTABLE_MODEL_TYPES.includes(model.model_type);
+const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS);
+
+export function isTestable(modelItem: ModelItem) {
+  if (
+    modelItem.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
+    PYTORCH_TYPES.includes(Object.keys(modelItem.inference_config)[0] as SupportedPytorchTasksType)
+  ) {
+    return true;
+  }
+
+  if (modelItem.model_type === TRAINED_MODEL_TYPE.LANG_IDENT) {
+    return true;
+  }
+
+  return false;
+}
+
+export function isTestEnabled(modelItem: ModelItem) {
+  return (
+    isPopulatedObject(modelItem.stats?.deployment_stats) === false ||
+    (isPopulatedObject(modelItem.stats?.deployment_stats) &&
+      modelItem.stats?.deployment_stats?.state === DEPLOYMENT_STATE.STARTED)
+  );
 }

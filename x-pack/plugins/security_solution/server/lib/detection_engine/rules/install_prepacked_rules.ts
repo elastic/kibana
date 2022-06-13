@@ -5,26 +5,27 @@
  * 2.0.
  */
 
+import { SanitizedRule, RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { RulesClient } from '@kbn/alerting-plugin/server';
 import { AddPrepackagedRulesSchemaDecoded } from '../../../../common/detection_engine/schemas/request/add_prepackaged_rules_schema';
-import { SanitizedAlert, AlertTypeParams } from '../../../../../alerting/common';
-import { RulesClient } from '../../../../../alerting/server';
 import { createRules } from './create_rules';
 import { PartialFilter } from '../types';
 
 export const installPrepackagedRules = (
   rulesClient: RulesClient,
   rules: AddPrepackagedRulesSchemaDecoded[],
-  outputIndex: string,
-  isRuleRegistryEnabled: boolean
-): Array<Promise<SanitizedAlert<AlertTypeParams>>> =>
-  rules.reduce<Array<Promise<SanitizedAlert<AlertTypeParams>>>>((acc, rule) => {
+  outputIndex: string
+): Array<Promise<SanitizedRule<RuleTypeParams>>> =>
+  rules.reduce<Array<Promise<SanitizedRule<RuleTypeParams>>>>((acc, rule) => {
     const {
       anomaly_threshold: anomalyThreshold,
       author,
       building_block_type: buildingBlockType,
       description,
       enabled,
+      timestamp_field: timestampField,
       event_category_override: eventCategoryOverride,
+      tiebreaker_field: tiebreakerField,
       false_positives: falsePositives,
       from,
       query,
@@ -40,10 +41,13 @@ export const installPrepackagedRules = (
       index,
       interval,
       max_signals: maxSignals,
+      related_integrations: relatedIntegrations,
+      required_fields: requiredFields,
       risk_score: riskScore,
       risk_score_mapping: riskScoreMapping,
       rule_name_override: ruleNameOverride,
       name,
+      setup,
       severity,
       severity_mapping: severityMapping,
       tags,
@@ -72,14 +76,15 @@ export const installPrepackagedRules = (
     return [
       ...acc,
       createRules({
-        isRuleRegistryEnabled,
         rulesClient,
         anomalyThreshold,
         author,
         buildingBlockType,
         description,
         enabled,
+        timestampField,
         eventCategoryOverride,
+        tiebreakerField,
         falsePositives,
         from,
         immutable: true, // At the moment we force all prepackaged rules to be immutable
@@ -97,10 +102,13 @@ export const installPrepackagedRules = (
         index,
         interval,
         maxSignals,
+        relatedIntegrations,
+        requiredFields,
         riskScore,
         riskScoreMapping,
         ruleNameOverride,
         name,
+        setup,
         severity,
         severityMapping,
         tags,

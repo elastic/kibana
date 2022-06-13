@@ -15,7 +15,7 @@ import {
 } from '../../../common/apm_saved_object_constants';
 import { createCloudApmPackgePolicy } from './create_cloud_apm_package_policy';
 import { getFleetAgents } from './get_agents';
-import { getApmPackgePolicies } from './get_apm_package_policies';
+import { getApmPackagePolicies } from './get_apm_package_policies';
 import {
   getApmPackagePolicy,
   getCloudAgentPolicy,
@@ -35,7 +35,7 @@ const hasFleetDataRoute = createApmServerRoute({
     if (!fleetPluginStart) {
       return { hasApmPolicies: false };
     }
-    const packagePolicies = await getApmPackgePolicies({
+    const packagePolicies = await getApmPackagePolicies({
       core,
       fleetPluginStart,
     });
@@ -89,7 +89,7 @@ const fleetAgentsRoute = createApmServerRoute({
       return { cloudStandaloneSetup, fleetAgents: [], isFleetEnabled: false };
     }
     // fetches package policies that contains APM integrations
-    const packagePolicies = await getApmPackgePolicies({
+    const packagePolicies = await getApmPackagePolicies({
       core,
       fleetPluginStart,
     });
@@ -157,7 +157,7 @@ const getUnsupportedApmServerSchemaRoute = createApmServerRoute({
     resources
   ): Promise<{ unsupported: Array<{ key: string; value: any }> }> => {
     const { context } = resources;
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     return {
       unsupported: await getUnsupportedApmServerSchema({ savedObjectsClient }),
     };
@@ -185,7 +185,7 @@ const getMigrationCheckRoute = createApmServerRoute({
     if (!plugins.fleet || !plugins.security) {
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     const [fleetPluginStart, securityPluginStart] = await Promise.all([
       plugins.fleet.start(),
       plugins.security.start(),
@@ -198,7 +198,7 @@ const getMigrationCheckRoute = createApmServerRoute({
         })
       : undefined;
     const apmPackagePolicy = getApmPackagePolicy(cloudAgentPolicy);
-    const packagePolicies = await getApmPackgePolicies({
+    const packagePolicies = await getApmPackagePolicies({
       core,
       fleetPluginStart,
     });
@@ -231,7 +231,7 @@ const createCloudApmPackagePolicyRoute = createApmServerRoute({
     if (!plugins.fleet || !plugins.security) {
       throw Boom.internal(FLEET_SECURITY_REQUIRED_MESSAGE);
     }
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     const coreStart = await resources.core.start();
     const esClient = coreStart.elasticsearch.client.asScoped(
       resources.request

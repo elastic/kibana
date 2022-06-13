@@ -9,8 +9,9 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useContext } from 'react';
-import { QueryStringInput } from '../../../../../../../src/plugins/data/public';
-import { euiStyled } from '../../../../../../../src/plugins/kibana_react/common';
+import { QueryStringInput } from '@kbn/unified-search-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { LogCustomizationMenu } from '../../../components/logging/log_customization_menu';
 import { LogDatepicker } from '../../../components/logging/log_datepicker';
 import { LogHighlightsMenu } from '../../../components/logging/log_highlights_menu';
@@ -57,7 +58,7 @@ export const LogsToolbar = () => {
           <QueryStringInput
             disableLanguageSwitcher={true}
             iconType="search"
-            indexPatterns={[derivedDataView]}
+            indexPatterns={[derivedDataView as DataView]}
             isInvalid={!isFilterQueryDraftValid}
             onChange={(query: Query) => {
               setSurroundingLogsId(null);

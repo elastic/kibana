@@ -9,7 +9,7 @@ Array [
       className="euiFormControlLayout__childrenWrapper"
     >
       <select
-        className="euiSelect euiSelect--compressed"
+        className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
         id="DateFormatExample3"
         onChange={[Function]}
         onMouseUp={[Function]}
@@ -55,7 +55,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />,
   <div
     className="euiFormControlLayout euiFormControlLayout--compressed"
@@ -84,7 +84,7 @@ Array [
       className="euiFormControlLayout__childrenWrapper"
     >
       <select
-        className="euiSelect euiSelect--compressed"
+        className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
         id="DateFormatExample1"
         onChange={[Function]}
         onMouseUp={[Function]}
@@ -130,7 +130,7 @@ Array [
     </div>
   </div>,
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />,
   <div
     className="euiFormControlLayout euiFormControlLayout--compressed"
@@ -158,7 +158,7 @@ exports[`Storyshots arguments/DateFormat with preset format 1`] = `
     className="euiFormControlLayout__childrenWrapper"
   >
     <select
-      className="euiSelect euiSelect--compressed"
+      className="euiSelect euiFormControlLayout--1icons euiSelect--compressed"
       id="DateFormatExample2"
       onChange={[Function]}
       onMouseUp={[Function]}

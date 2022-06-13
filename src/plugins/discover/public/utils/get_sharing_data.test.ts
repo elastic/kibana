@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { Capabilities, IUiSettingsClient } from 'kibana/public';
-import type { DataView } from 'src/plugins/data_views/public';
+import { Capabilities, IUiSettingsClient } from '@kbn/core/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DiscoverServices } from '../build_services';
-import { dataPluginMock } from '../../../data/public/mocks';
-import { createSearchSourceMock } from '../../../data/common/search/search_source/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { createSearchSourceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
@@ -146,13 +146,13 @@ describe('getSharingData', () => {
       services
     );
     expect(getSearchSource().fields).toStrictEqual([
-      'cool-timefield',
-      'cool-field-1',
-      'cool-field-2',
-      'cool-field-3',
-      'cool-field-4',
-      'cool-field-5',
-      'cool-field-6',
+      { field: 'cool-timefield', include_unmapped: 'true' },
+      { field: 'cool-field-1', include_unmapped: 'true' },
+      { field: 'cool-field-2', include_unmapped: 'true' },
+      { field: 'cool-field-3', include_unmapped: 'true' },
+      { field: 'cool-field-4', include_unmapped: 'true' },
+      { field: 'cool-field-5', include_unmapped: 'true' },
+      { field: 'cool-field-6', include_unmapped: 'true' },
     ]);
   });
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import {
   EuiBadge,
@@ -16,10 +15,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import React from 'react';
+import { useHistory } from 'react-router-dom';
 
 import { i18n } from '@kbn/i18n';
 
-import { useUiTracker } from '../../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
 
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
 
@@ -32,9 +33,14 @@ import type { TabContentProps } from '../types';
 import { useWaterfallFetcher } from '../use_waterfall_fetcher';
 import { WaterfallWithSummary } from '../waterfall_with_summary';
 
-import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { HeightRetainer } from '../../../shared/height_retainer';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { ChartTitleToolTip } from '../../correlations/chart_title_tool_tip';
+import { useTransactionDistributionChartData } from './use_transaction_distribution_chart_data';
+import { TransactionTab } from '../waterfall_with_summary/transaction_tabs';
 
 // Enforce min height so it's consistent across all tabs on the same level
 // to prevent "flickering" behavior
@@ -70,8 +76,28 @@ export function TransactionDistribution({
   traceSamplesStatus,
 }: TransactionDistributionProps) {
   const { urlParams } = useLegacyUrlParams();
-  const { waterfall, status: waterfallStatus } = useWaterfallFetcher();
+  const { traceId, transactionId } = urlParams;
 
+  const {
+    query: { rangeFrom, rangeTo },
+  } = useApmParams('/services/{serviceName}/transactions/view');
+
+  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+
+  const history = useHistory();
+  const { waterfall, status: waterfallStatus } = useWaterfallFetcher({
+    traceId,
+    transactionId,
+    start,
+    end,
+  });
+  const { waterfallItemId, detailTab } = urlParams;
+
+  const {
+    query: { environment },
+  } = useApmParams('/services/{serviceName}/transactions/view');
+
+  const { serviceName } = useApmServiceContext();
   const isLoading =
     waterfallStatus === FETCH_STATUS.LOADING ||
     traceSamplesStatus === FETCH_STATUS.LOADING;
@@ -193,7 +219,29 @@ export function TransactionDistribution({
 
         <EuiSpacer size="s" />
         <WaterfallWithSummary
-          urlParams={urlParams}
+          environment={environment}
+          onSampleClick={(sample) => {
+            history.push({
+              ...history.location,
+              search: fromQuery({
+                ...toQuery(history.location.search),
+                transactionId: sample.transactionId,
+                traceId: sample.traceId,
+              }),
+            });
+          }}
+          onTabClick={(tab) => {
+            history.replace({
+              ...history.location,
+              search: fromQuery({
+                ...toQuery(history.location.search),
+                detailTab: tab,
+              }),
+            });
+          }}
+          serviceName={serviceName}
+          waterfallItemId={waterfallItemId}
+          detailTab={detailTab as TransactionTab | undefined}
           waterfall={waterfall}
           isLoading={isLoading}
           traceSamples={traceSamples}

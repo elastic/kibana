@@ -14,6 +14,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { EuiSuperDatePicker, EuiDataGrid } from '@elastic/eui';
 import { RuleEventLogListStatusFilter } from './rule_event_log_list_status_filter';
 import { RuleEventLogList } from './rule_event_log_list';
+import { RefineSearchPrompt } from '../refine_search_prompt';
 import { RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS } from '../../../constants';
 import { Rule } from '../../../../types';
 
@@ -28,6 +29,7 @@ const mockLogResponse: any = {
       duration: 5000000,
       status: 'success',
       message: 'rule execution #1',
+      version: '8.2.0',
       num_active_alerts: 2,
       num_new_alerts: 4,
       num_recovered_alerts: 3,
@@ -45,6 +47,7 @@ const mockLogResponse: any = {
       duration: 6000000,
       status: 'success',
       message: 'rule execution #2',
+      version: '8.2.0',
       num_active_alerts: 4,
       num_new_alerts: 2,
       num_recovered_alerts: 4,
@@ -62,6 +65,7 @@ const mockLogResponse: any = {
       duration: 340000,
       status: 'failure',
       message: 'rule execution #3',
+      version: '8.2.0',
       num_active_alerts: 8,
       num_new_alerts: 5,
       num_recovered_alerts: 0,
@@ -79,6 +83,7 @@ const mockLogResponse: any = {
       duration: 3000000,
       status: 'unknown',
       message: 'rule execution #4',
+      version: '8.2.0',
       num_active_alerts: 4,
       num_new_alerts: 4,
       num_recovered_alerts: 4,
@@ -500,5 +505,135 @@ describe('rule_event_log_list', () => {
         localStorage.getItem('xpack.triggersActionsUI.ruleEventLogList.initialColumns') ?? 'null'
       )
     ).toEqual([...RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS, 'num_active_alerts']);
+  });
+
+  it('does not show the refine search prompt normally', async () => {
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(RefineSearchPrompt).text()).toBeFalsy();
+  });
+
+  it('shows the refine search prompt when our queries return too much data', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 1000,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find(RefineSearchPrompt).text()).toEqual(
+      'These are the first 1000 matching your search, refine your search to see others. Back to top.'
+    );
+  });
+
+  it('shows the correct pagination results when results are 0', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 0,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 0 of 0 log entries'
+    );
+  });
+
+  it('shows the correct pagination result when result is 1', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 1,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 1 - 1 of 1 log entry'
+    );
+  });
+
+  it('shows the correct pagination result when paginated', async () => {
+    loadExecutionLogAggregationsMock.mockResolvedValue({
+      ...mockLogResponse,
+      total: 85,
+    });
+
+    const wrapper = mountWithIntl(
+      <RuleEventLogList
+        rule={mockRule}
+        loadExecutionLogAggregations={loadExecutionLogAggregationsMock}
+      />
+    );
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 1 - 10 of 85 log entries'
+    );
+
+    wrapper.find('[data-test-subj="pagination-button-1"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 11 - 20 of 85 log entries'
+    );
+
+    wrapper.find('[data-test-subj="pagination-button-8"]').first().simulate('click');
+
+    await act(async () => {
+      await nextTick();
+      wrapper.update();
+    });
+
+    expect(wrapper.find('[data-test-subj="ruleEventLogPaginationStatus"]').first().text()).toEqual(
+      'Showing 81 - 85 of 85 log entries'
+    );
   });
 });

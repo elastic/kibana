@@ -5,18 +5,22 @@
  * 2.0.
  */
 import { ReactNode } from 'react';
-import { CoreStart } from '../../../../src/core/public';
-import { ProcessEvent, Teletype } from '../common/types/process_tree';
+import { CoreStart } from '@kbn/core/public';
 
 export type SessionViewServices = CoreStart;
 
 export interface SessionViewDeps {
   // the root node of the process tree to render. e.g process.entry.entity_id or process.session_leader.entity_id
   sessionEntityId: string;
-  height?: string;
+  height?: number;
+  isFullScreen?: boolean;
   // if provided, the session view will jump to and select the provided event if it belongs to the session leader
   // session view will fetch a page worth of events starting from jumpToEvent as well as a page backwards.
-  jumpToEvent?: ProcessEvent;
+  jumpToEntityId?: string;
+  jumpToCursor?: string;
+
+  // when loading session viewer from an alert, this prop can be set to add extra UX to keep the focus on the alert
+  investigatedAlertId?: string;
   // Callback to open the alerts flyout
   loadAlertDetails?: (
     alertUuid: string,
@@ -38,14 +42,14 @@ export interface DetailPanelProcess {
   id: string;
   start: string;
   end: string;
-  exit_code: number;
+  exitCode: string;
   userName: string;
   groupName: string;
-  args: string[];
+  args: string;
   executable: string[][];
-  working_directory: string;
-  tty: Teletype;
-  pid: number;
+  workingDirectory: string;
+  interactive: string;
+  pid: string;
   entryLeader: DetailPanelProcessLeader;
   sessionLeader: DetailPanelProcessLeader;
   groupLeader: DetailPanelProcessLeader;
@@ -56,17 +60,62 @@ export interface DetailPanelProcessLeader {
   id: string;
   name: string;
   start: string;
-  end?: string;
-  exit_code?: number;
+  end: string;
+  exitCode: string;
   userName: string;
   groupName: string;
-  working_directory: string;
-  tty: Teletype;
-  args: string[];
-  pid: number;
+  workingDirectory: string;
+  interactive: string;
+  args: string;
+  pid: string;
   entryMetaType: string;
   entryMetaSourceIp: string;
-  executable: string;
+  executable: string[][];
+}
+
+export interface DetailPanelHost {
+  architecture: string;
+  hostname: string;
+  id: string;
+  ip: string;
+  mac: string;
+  name: string;
+  os: {
+    family: string;
+    full: string;
+    kernel: string;
+    name: string;
+    platform: string;
+    version: string;
+  };
+}
+
+export interface DetailPanelContainer {
+  id: string;
+  name: string;
+  image: {
+    name: string;
+    tag: string;
+    hash: {
+      all: string;
+    };
+  };
+}
+
+export interface DetailPanelOrchestrator {
+  resource: {
+    name: string;
+    type: string;
+    ip: string;
+  };
+  namespace: string;
+  cluster: {
+    name: string;
+    id: string;
+  };
+  parent: {
+    type: string;
+  };
 }
 
 export interface SessionViewStart {

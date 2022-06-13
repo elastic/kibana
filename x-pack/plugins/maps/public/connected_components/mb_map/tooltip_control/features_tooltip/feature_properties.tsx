@@ -16,10 +16,10 @@ import {
   EuiContextMenu,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionExecutionContext, Action } from 'src/plugins/ui_actions/public';
+import { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/public';
 import { GeoJsonProperties } from 'geojson';
 import { Filter } from '@kbn/es-query';
-import { ACTION_GLOBAL_APPLY_FILTER } from '../../../../../../../../src/plugins/data/public';
+import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { isUrlDrilldown } from '../../../../trigger_actions/trigger_utils';
 import { RawValue } from '../../../../../common/constants';
 import { ITooltipProperty } from '../../../../classes/tooltips/tooltip_property';
@@ -214,10 +214,10 @@ export class FeatureProperties extends Component<Props, State> {
         <table className="eui-yScrollWithShadows mapFeatureTooltip_table" ref={this._tableRef}>
           <tbody>
             <tr>
-              <td className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel">
+              <td className="eui-textBreakWord mapFeatureTooltip__propertyLabel">
                 {tooltipProperty.getPropertyName()}
               </td>
-              <td className="eui-textOverflowWrap">{tooltipProperty.getHtmlDisplayValue()}</td>
+              <td className="eui-textBreakWord">{tooltipProperty.getHtmlDisplayValue()}</td>
             </tr>
           </tbody>
         </table>
@@ -326,10 +326,10 @@ export class FeatureProperties extends Component<Props, State> {
     const rows = this.state.properties.map((tooltipProperty) => {
       return (
         <tr key={tooltipProperty.getPropertyKey()} className="mapFeatureTooltip_row">
-          <td className="eui-textOverflowWrap mapFeatureTooltip__propertyLabel">
+          <td className="eui-textBreakWord mapFeatureTooltip__propertyLabel">
             {tooltipProperty.getPropertyName()}
           </td>
-          <td className="eui-textOverflowWrap">{tooltipProperty.getHtmlDisplayValue()}</td>
+          <td className="eui-textBreakWord">{tooltipProperty.getHtmlDisplayValue()}</td>
           {this._renderFilterCell(tooltipProperty)}
         </tr>
       );
