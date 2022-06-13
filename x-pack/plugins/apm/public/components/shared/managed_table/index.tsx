@@ -75,7 +75,6 @@ function UnoptimizedManagedTable<T>(props: Props<T>) {
     isLoading = false,
     error = false,
     tableLayout,
-    title,
   } = props;
 
   const {

@@ -191,6 +191,7 @@ export function BackendOperationDetailTraceList() {
           items={data?.spans}
           initialSortField="timestamp"
           initialSortDirection="asc"
+          initialPageSize={10}
           isLoading={
             status === FETCH_STATUS.LOADING ||
             status === FETCH_STATUS.NOT_INITIATED
