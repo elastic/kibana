@@ -17,9 +17,6 @@ export const configSchema = schema.object({
       }),
       prometheus: schema.object({
         enabled: schema.boolean({ defaultValue: false }),
-        host: schema.string({ defaultValue: 'localhost' }),
-        port: schema.number({ defaultValue: 9464 }),
-        endpoint: schema.string({ defaultValue: '/metrics' }),
       }),
     }),
   }),

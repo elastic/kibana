@@ -15,10 +15,10 @@ import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk
 import { Resource } from '@opentelemetry/resources';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import * as grpc from '@grpc/grpc-js';
-import { PrometheusExporter } from '@opentelemetry/exporter-prometheus';
+import { PrometheusExporter } from './lib/prometheus_exporter';
 import { MonitoringCollectionConfig } from './config';
-import { registerDynamicRoute } from './routes';
-import { TYPE_ALLOWLIST } from './constants';
+import { registerDynamicRoute, registerV1PrometheusRoute } from './routes';
+import { PROMETHEUS_ROUTE, TYPE_ALLOWLIST } from './constants';
 
 export interface MonitoringCollectionSetup {
   registerMetric: <T>(metric: Metric<T>) => void;
@@ -38,6 +38,8 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
   private readonly config: MonitoringCollectionConfig;
 
   private metrics: Record<string, Metric<any>> = {};
+
+  private prometheusExporter?: PrometheusExporter;
 
   constructor(initializerContext: PluginInitializerContext<MonitoringCollectionConfig>) {
     this.initializerContext = initializerContext;
@@ -62,6 +64,10 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     core.status.overall$.subscribe((newStatus) => {
       status = newStatus;
     });
+
+    if (this.prometheusExporter) {
+      registerV1PrometheusRoute({ router, prometheusExporter: this.prometheusExporter });
+    }
 
     registerDynamicRoute({
       router,
@@ -109,6 +115,8 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
     if (otlpConfig?.url) {
       const url = otlpConfig.url;
       this.logger.debug(`Registering OpenTelemetry metrics exporter to ${url}`);
+
+      // NOTE: We can remove the explicit credentials once https://github.com/open-telemetry/opentelemetry-js/pull/3019 is released
       let credentials: grpc.ChannelCredentials;
       if (url.startsWith('https://')) {
         credentials = grpc.credentials.createSsl();
@@ -124,18 +132,14 @@ export class MonitoringCollectionPlugin implements Plugin<MonitoringCollectionSe
       );
     }
 
-    const prometheusConfig = this.config.opentelemetry?.metrics.prometheus;
-    if (prometheusConfig?.enabled) {
-      // TODO: authenticate the prometheus endpoint
-      const url = `${prometheusConfig.host}:${prometheusConfig.port}${prometheusConfig.endpoint}`;
-      this.logger.debug(`Starting prometheus exporter at: ${url}`);
-      meterProvider.addMetricReader(new PrometheusExporter(prometheusConfig));
+    if (this.config.opentelemetry?.metrics.prometheus.enabled) {
+      this.logger.debug(`Starting prometheus exporter at ${PROMETHEUS_ROUTE}`);
+      this.prometheusExporter = new PrometheusExporter(this.logger);
+      meterProvider.addMetricReader(this.prometheusExporter);
     }
   }
 
   start() {}
 
-  stop() {
-    // TODO: stop otel exporters
-  }
+  stop() {}
 }
