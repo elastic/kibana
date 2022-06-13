@@ -66,7 +66,12 @@ type DotNestedKeys<T, D extends number = 10> = [D] extends [never]
   : never;
 
 export type EcsFields = DotNestedKeys<Omit<Ecs, 'ecs'>>;
+
+export interface BasicFields {
+  _id: string;
+  _index: string;
+}
 export type EcsFieldsResponse = {
   [Property in EcsFields]: string[];
-};
+} & BasicFields;
 export type RuleRegistrySearchResponse = IEsSearchResponse<EcsFieldsResponse>;
