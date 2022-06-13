@@ -130,6 +130,8 @@ export class TaskScheduling {
 
   /**
    * Bulk updates schedules for tasks by ids.
+   * Only tasks with `idle` status will be updated, as for the tasks which have `running` status,
+   * `schedule` and `runAt` will be recalculated after task run finishes
    *
    * @param {string[]} taskIds  - list of task ids
    * @param {IntervalSchedule} schedule  - new schedule
