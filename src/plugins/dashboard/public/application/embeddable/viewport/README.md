@@ -18,6 +18,6 @@ dashboard via the server, see [the original PR](https://github.com/elastic/kiban
 
 # Additional notes
 
-* In future we should investigate not need to rely on the print view
+* In future we should investigate not needing to rely on the print view
   page when generating screenshots and pressing ctrl/cmd+P should get us the print
   layout directly.
