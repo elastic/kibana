@@ -14,6 +14,7 @@ import {
   EuiCollapsibleNavGroup,
   EuiFlyout,
   EuiFlyoutProps,
+  EuiPanel,
   EuiSideNav,
   EuiSideNavItemType,
   EuiSideNavProps,
@@ -58,6 +59,11 @@ export type KibanaPageTemplateSolutionNavProps = Omit<
    */
   isOpenOnDesktop?: boolean;
   onCollapse?: () => void;
+  /**
+   * Allows hiding of the navigation by the user.
+   * If false, forces all breakpoint versions into the open state without the ability to hide.
+   */
+  canBeCollapsed?: boolean;
 };
 
 const FLYOUT_SIZE = 248;
@@ -88,6 +94,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
   closeFlyoutButtonPosition = 'outside',
   name,
   onCollapse,
+  canBeCollapsed = true,
   ...rest
 }) => {
   const isSmallerBreakpoint = useIsWithinBreakpoints(mobileBreakpoints);
@@ -100,7 +107,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
     setIsSideNavOpenOnMobile(!isSideNavOpenOnMobile);
   };
 
-  const isHidden = isLargerBreakpoint && !isOpenOnDesktop;
+  const isHidden = isLargerBreakpoint && !isOpenOnDesktop && canBeCollapsed;
   const isCustomSideNav = !!children;
 
   const sideNavClasses = classNames('kbnPageTemplateSolutionNav', {
@@ -164,21 +171,24 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
   return (
     <>
       {isSmallerBreakpoint && (
+        // @ts-expect-error Mismatch in collapsible vs unconllapsible props
         <EuiCollapsibleNavGroup
           className={sideNavClasses}
-          paddingSize="m"
+          paddingSize="none"
           background="none"
           title={titleText}
           titleElement="span"
-          isCollapsible={true}
+          isCollapsible={canBeCollapsed}
           initialIsOpen={false}
         >
-          {sideNavContent}
+          <EuiPanel color="transparent" paddingSize="s">
+            {sideNavContent}
+          </EuiPanel>
         </EuiCollapsibleNavGroup>
       )}
       {isMediumBreakpoint && (
         <>
-          {isSideNavOpenOnMobile && (
+          {(isSideNavOpenOnMobile || !canBeCollapsed) && (
             <EuiFlyout
               ownFocus={false}
               outsideClickCloses
@@ -187,6 +197,7 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
               size={FLYOUT_SIZE}
               closeButtonPosition={closeFlyoutButtonPosition}
               className="kbnPageTemplateSolutionNav__flyout"
+              hideCloseButton={!canBeCollapsed}
             >
               <div className={sideNavClasses}>
                 {titleText}
@@ -195,10 +206,12 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
               </div>
             </EuiFlyout>
           )}
-          <KibanaPageTemplateSolutionNavCollapseButton
-            isCollapsed={true}
-            onClick={toggleOpenOnMobile}
-          />
+          {canBeCollapsed && (
+            <KibanaPageTemplateSolutionNavCollapseButton
+              isCollapsed={true}
+              onClick={toggleOpenOnMobile}
+            />
+          )}
         </>
       )}
       {isLargerBreakpoint && (
@@ -208,10 +221,12 @@ export const KibanaPageTemplateSolutionNav: FunctionComponent<
             <EuiSpacer size="l" />
             {sideNavContent}
           </div>
-          <KibanaPageTemplateSolutionNavCollapseButton
-            isCollapsed={!isOpenOnDesktop}
-            onClick={onCollapse}
-          />
+          {canBeCollapsed && (
+            <KibanaPageTemplateSolutionNavCollapseButton
+              isCollapsed={!isOpenOnDesktop}
+              onClick={onCollapse}
+            />
+          )}
         </>
       )}
     </>
