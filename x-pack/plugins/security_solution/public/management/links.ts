@@ -204,28 +204,34 @@ export const links: LinkItem = {
   ],
 };
 
+const getFilteredLinks = (linkIds: SecurityPageName[]) => ({
+  ...links,
+  links: links.links?.filter((link) => !linkIds.includes(link.id)),
+});
+
 export const getManagementFilteredLinks = async (
   core: CoreStart,
   plugins: StartPlugins
 ): Promise<LinkItem> => {
-  const currentUserResponse = await plugins.security.authc.getCurrentUser();
-  const privileges = calculateEndpointAuthz(
-    licenseService,
-    plugins.fleet?.authz,
-    currentUserResponse.roles
-  );
-  const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
-    core.http
-  );
+  try {
+    const currentUserResponse = await plugins.security.authc.getCurrentUser();
+    const privileges = calculateEndpointAuthz(
+      licenseService,
+      plugins.fleet?.authz,
+      currentUserResponse.roles
+    );
+    const hostIsolationExceptionsApiClientInstance = HostIsolationExceptionsApiClient.getInstance(
+      core.http
+    );
 
-  if (!privileges.canIsolateHost) {
-    const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
-    if (!summaryResponse.total) {
-      return {
-        ...links,
-        links: links.links?.filter((link) => link.id !== SecurityPageName.hostIsolationExceptions),
-      };
+    if (!privileges.canIsolateHost) {
+      const summaryResponse = await hostIsolationExceptionsApiClientInstance.summary();
+      if (!summaryResponse.total) {
+        return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
+      }
     }
+  } catch {
+    return getFilteredLinks([SecurityPageName.hostIsolationExceptions]);
   }
 
   return links;
