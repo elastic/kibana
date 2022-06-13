@@ -13,8 +13,8 @@ type SecurityService = Awaited<ReturnType<typeof SecurityServiceProvider>>;
 
 export enum ApmUser {
   noAccessUser = 'no_access_user',
-  viewerUser = 'viewer_user',
-  editorUser = 'editor_user',
+  viewerUser = 'viewer',
+  editorUser = 'editor',
   apmAnnotationsWriteUser = 'apm_annotations_write_user',
   apmReadUserWithoutMlAccess = 'apm_read_user_without_ml_access',
   apmManageOwnAgentKeys = 'apm_manage_own_agent_keys',
