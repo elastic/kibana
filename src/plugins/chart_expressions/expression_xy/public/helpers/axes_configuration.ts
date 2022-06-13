@@ -92,38 +92,27 @@ export function groupAxesByType(
   const tablesExist = layers.filter(({ table }) => Boolean(table)).length > 0;
 
   series.auto.forEach((currentSeries) => {
-    // if we already have the specified axis with compatible formatters, we should use it
-    // if not, use logic below this `find` with auto-assignment series to left or right global axis
-    let axisGroupId = Object.keys(series).find(
-      (seriesKey) =>
-        seriesKey.includes('axis') &&
-        series[seriesKey].length > 0 &&
-        series[seriesKey].every((axisSeries) =>
-          isFormatterCompatible(axisSeries.fieldFormat, currentSeries.fieldFormat)
-        )
-    );
-    if (!axisGroupId) {
-      if (
-        series.left.length === 0 ||
-        (tablesExist &&
-          series.left.every((leftSeries) =>
-            isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
-          ))
-      ) {
-        axisGroupId = 'left';
-      } else if (
-        series.right.length === 0 ||
-        (tablesExist &&
-          series.left.every((leftSeries) =>
-            isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
-          ))
-      ) {
-        axisGroupId = 'right';
-      } else if (series.right.length >= series.left.length) {
-        axisGroupId = 'left';
-      } else {
-        axisGroupId = 'right';
-      }
+    let axisGroupId;
+    if (
+      series.left.length === 0 ||
+      (tablesExist &&
+        series.left.every((leftSeries) =>
+          isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
+        ))
+    ) {
+      axisGroupId = 'left';
+    } else if (
+      series.right.length === 0 ||
+      (tablesExist &&
+        series.left.every((leftSeries) =>
+          isFormatterCompatible(leftSeries.fieldFormat, currentSeries.fieldFormat)
+        ))
+    ) {
+      axisGroupId = 'right';
+    } else if (series.right.length >= series.left.length) {
+      axisGroupId = 'left';
+    } else {
+      axisGroupId = 'right';
     }
 
     series[axisGroupId].push(currentSeries);
