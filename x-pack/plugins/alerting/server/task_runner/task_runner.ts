@@ -253,8 +253,8 @@ export class TaskRunner<
     fakeRequest: KibanaRequest,
     rulesClient: RulesClientApi,
     rule: SanitizedRule<Params>,
+    apiKey: RawRule['apiKey'],
     params: Params,
-    executionHandler: ExecutionHandler<ActionGroupIds | RecoveryActionGroupId>,
     spaceId: string
   ): Promise<RuleTaskStateAndMetrics> {
     const {
@@ -277,6 +277,19 @@ export class TaskRunner<
       params: { alertId: ruleId },
       state: { alertInstances: alertRawInstances = {}, alertTypeState = {}, previousStartedAt },
     } = this.taskInstance;
+
+    const executionHandler = this.getExecutionHandler(
+      ruleId,
+      rule.name,
+      rule.tags,
+      spaceId,
+      apiKey,
+      this.context.kibanaBaseUrl,
+      rule.actions,
+      rule.params,
+      fakeRequest
+    );
+
     const namespace = this.context.spaceIdToNamespace(spaceId);
     const ruleType = this.ruleTypeRegistry.get(alertTypeId);
 
@@ -521,38 +534,6 @@ export class TaskRunner<
     };
   }
 
-  private async prepareAndExecuteRule(
-    fakeRequest: KibanaRequest,
-    rulesClient: RulesClientApi,
-    apiKey: RawRule['apiKey'],
-    rule: SanitizedRule<Params>,
-    validatedParams: Params
-  ) {
-    const {
-      params: { alertId: ruleId, spaceId },
-    } = this.taskInstance;
-
-    const executionHandler = this.getExecutionHandler(
-      ruleId,
-      rule.name,
-      rule.tags,
-      spaceId,
-      apiKey,
-      this.context.kibanaBaseUrl,
-      rule.actions,
-      rule.params,
-      fakeRequest
-    );
-    return this.executeRule(
-      fakeRequest,
-      rulesClient,
-      rule,
-      validatedParams,
-      executionHandler,
-      spaceId
-    );
-  }
-
   private async markRuleAsSnoozed(id: string, rulesClient: RulesClientApi) {
     await rulesClient.updateSnoozedUntilTime({ id });
   }
@@ -586,7 +567,7 @@ export class TaskRunner<
       rulesClient: asOk(rulesClient),
       monitoring: asOk(rule.monitoring),
       stateWithMetrics: await promiseResult<RuleTaskStateAndMetrics, Error>(
-        this.prepareAndExecuteRule(fakeRequest, rulesClient, apiKey, rule, validatedParams)
+        this.executeRule(fakeRequest, rulesClient, rule, apiKey, validatedParams, spaceId)
       ),
       schedule: asOk(
         // fetch the rule again to ensure we return the correct schedule as it may have
