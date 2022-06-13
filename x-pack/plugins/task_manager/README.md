@@ -328,6 +328,9 @@ The _Start_ Plugin api allow you to use Task Manager to facilitate your Plugin's
   runNow: (taskId: string) =>  {
     // ...
   },
+  bulkUpdateSchedules: (taskIds: string[], schedule: IntervalSchedule) =>  {
+    // ...
+  },
   ensureScheduled: (taskInstance: TaskInstanceWithId, options?: any) => {
     // ...
   },
@@ -410,6 +413,38 @@ export class Plugin {
       // If running the task has failed, we throw an error with an appropriate message.
       // For example, if the requested task doesnt exist: `Error: failed to run task "91760f10-ba42-de9799" as it does not exist`
       // Or if, for example, the task is already running: `Error: failed to run task "91760f10-ba42-de9799" as it is currently running`
+    }    
+  }
+}
+```
+
+#### bulkUpdateSchedules
+Using `bulkUpdatesSchedules` you can instruct TaskManger to update interval of tasks that are in `idle` status
+(for the tasks which have `running` status,  `schedule` and `runAt` will be recalculated after task run finishes).
+When interval updated, new `runAt` will be computed and task will be updated with that value, using formula
+```
+newRunAt = oldRunAt - oldInterval + newInterval
+```
+
+Example:
+```js
+export class Plugin {
+  constructor() {
+  }
+
+  public setup(core: CoreSetup, plugins: { taskManager }) {
+  }
+
+  public start(core: CoreStart, plugins: { taskManager }) {
+    try {
+      const bulkUpdateResults = await taskManager.bulkUpdateSchedule(
+        ['97c2c4e7-d850-11ec-bf95-895ffd19f959', 'a5ee24d1-dce2-11ec-ab8d-cf74da82133d'],
+        { interval: '10m' },
+      );
+      // If no error is thrown, the bulkUpdateSchedule has completed successfully.
+      // But some updates of some tasks can be failed, due to OCC 409 conflict for example
+    } catch(err: Error) {
+      // if error is caught, means the whole method requested has failed and tasks weren't updated
     }    
   }
 }

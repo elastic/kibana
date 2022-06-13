@@ -6,15 +6,16 @@
  */
 
 import { filter, take } from 'rxjs/operators';
-
+import pMap from 'p-map';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { Option, map as mapOptional, getOrElse, isSome } from 'fp-ts/lib/Option';
 
 import uuid from 'uuid';
-import { pick } from 'lodash';
+import { pick, chunk } from 'lodash';
 import { merge, Subject } from 'rxjs';
 import agent from 'elastic-apm-node';
 import { Logger } from '@kbn/core/server';
+import { mustBeAllOf } from './queries/query_clauses';
 import { asOk, either, map, mapErr, promiseResult, isErr } from './lib/result_type';
 import {
   isTaskRunEvent,
@@ -28,6 +29,7 @@ import {
   TaskClaimErrorType,
 } from './task_events';
 import { Middleware } from './lib/middleware';
+import { parseIntervalAsMillisecond } from './lib/intervals';
 import {
   ConcreteTaskInstance,
   TaskInstanceWithId,
@@ -36,6 +38,7 @@ import {
   TaskLifecycleResult,
   TaskStatus,
   EphemeralTask,
+  IntervalSchedule,
 } from './task';
 import { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
@@ -56,6 +59,20 @@ export interface TaskSchedulingOpts {
   taskManagerId: string;
 }
 
+/**
+ * return type of TaskScheduling.bulkUpdateSchedules method
+ */
+export interface BulkUpdateSchedulesResult {
+  /**
+   * list of successfully updated tasks
+   */
+  tasks: ConcreteTaskInstance[];
+
+  /**
+   * list of failed tasks and errors caused failure
+   */
+  errors: Array<{ task: ConcreteTaskInstance; error: Error }>;
+}
 export interface RunNowResult {
   id: ConcreteTaskInstance['id'];
   state?: ConcreteTaskInstance['state'];
@@ -109,6 +126,75 @@ export class TaskScheduling {
       ...modifiedTask,
       traceparent: traceparent || '',
     });
+  }
+
+  /**
+   * Bulk updates schedules for tasks by ids.
+   * Only tasks with `idle` status will be updated, as for the tasks which have `running` status,
+   * `schedule` and `runAt` will be recalculated after task run finishes
+   *
+   * @param {string[]} taskIds  - list of task ids
+   * @param {IntervalSchedule} schedule  - new schedule
+   * @returns {Promise<BulkUpdateSchedulesResult>}
+   */
+  public async bulkUpdateSchedules(
+    taskIds: string[],
+    schedule: IntervalSchedule
+  ): Promise<BulkUpdateSchedulesResult> {
+    const tasks = await pMap(
+      chunk(taskIds, 100),
+      async (taskIdsChunk) =>
+        this.store.fetch({
+          query: mustBeAllOf(
+            {
+              terms: {
+                _id: taskIdsChunk.map((taskId) => `task:${taskId}`),
+              },
+            },
+            {
+              term: {
+                'task.status': 'idle',
+              },
+            }
+          ),
+          size: 100,
+        }),
+      { concurrency: 10 }
+    );
+
+    const updatedTasks = tasks
+      .flatMap(({ docs }) => docs)
+      .reduce<ConcreteTaskInstance[]>((acc, task) => {
+        // if task schedule interval is the same, no need to update it
+        if (task.schedule?.interval === schedule.interval) {
+          return acc;
+        }
+
+        const oldIntervalInMs = parseIntervalAsMillisecond(task.schedule?.interval ?? '0s');
+
+        // computing new runAt using formula:
+        // newRunAt = oldRunAt - oldInterval + newInterval
+        const newRunAtInMs = Math.max(
+          Date.now(),
+          task.runAt.getTime() - oldIntervalInMs + parseIntervalAsMillisecond(schedule.interval)
+        );
+
+        acc.push({ ...task, schedule, runAt: new Date(newRunAtInMs) });
+        return acc;
+      }, []);
+
+    return (await this.store.bulkUpdate(updatedTasks)).reduce<BulkUpdateSchedulesResult>(
+      (acc, task) => {
+        if (task.tag === 'ok') {
+          acc.tasks.push(task.value);
+        } else {
+          acc.errors.push({ error: task.error.error, task: task.error.entity });
+        }
+
+        return acc;
+      },
+      { tasks: [], errors: [] }
+    );
   }
 
   /**

@@ -27,6 +27,7 @@ const createStartMock = () => {
     ensureScheduled: jest.fn(),
     removeIfExists: jest.fn(),
     supportsEphemeralTasks: jest.fn(),
+    bulkUpdateSchedules: jest.fn(),
   };
   return mock;
 };
