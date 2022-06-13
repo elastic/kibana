@@ -3,11 +3,7 @@
  *    are being calcuated from a percentage of the base font size of 100% (14px).
  */
 
-$tvbTextColor: transparentize($euiColorFullShade, .4);
-$tvbTextColorReversed: transparentize($euiColorEmptyShade, .4);
-
-$tvbValueColor: transparentize($euiColorFullShade, .3);
-$tvbValueColorReversed: transparentize($euiColorEmptyShade, .2);
+@import './variables';
 
 .tvbVisHalfGauge,
 .tvbVisCircleGauge {

@@ -8,11 +8,7 @@
   }
 }
 
-$tvbTextColor: transparentize($euiColorFullShade, .4);
-$tvbTextColorReversed: transparentize($euiColorEmptyShade, .4);
-
-$tvbValueColor: transparentize($euiColorFullShade, .3);
-$tvbValueColorReversed: transparentize($euiColorEmptyShade, .2);
+@import './variables';
 
 /**
  * 1. Text is scaled using a matrix so all font sizes and related metrics
