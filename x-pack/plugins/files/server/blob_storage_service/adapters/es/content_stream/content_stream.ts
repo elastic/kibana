@@ -87,7 +87,6 @@ export class ContentStream extends Duplex {
       encoding: 'base64',
       size: -1,
       maxChunkSize: '4mb',
-      attributes: {},
     });
   }
 
