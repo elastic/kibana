@@ -71,9 +71,10 @@ const getHealthyAgents = async (
     agentPolicyService
   );
   const enrichAgentPolicies = await addRunningAgentToAgentPolicy(agentService, agentPolicies);
+  const initialValue = 0;
   const totalAgents = enrichAgentPolicies
     .map((agentPolicy) => (agentPolicy.agents ? agentPolicy.agents : 0))
-    .reduce((previousValue, currentValue) => previousValue + currentValue);
+    .reduce((previousValue, currentValue) => previousValue + currentValue, initialValue);
   return totalAgents;
 };
 
@@ -85,9 +86,7 @@ const getInstalledPackageVersion = async (
   );
 
   if (packageInfo) {
-    // TODO: check version VS install_version
-    console.log(packageInfo.install_version);
-    return packageInfo.version;
+    return packageInfo.install_version;
   }
   return null;
 };
@@ -103,10 +102,7 @@ const geLatestFindingsIndexStatus = async (
 
   if (healthyAgents > 0) return 'indexing';
 
-  if (healthyAgents === 0) return 'not deployed';
-
-  // todo: calc the real index timeout
-  return 'index_timeout';
+  return 'not deployed';
 };
 
 const getCspSetupStatus = async (
@@ -140,9 +136,10 @@ const getCspSetupStatus = async (
   );
 
   const status = await geLatestFindingsIndexStatus(esClient, installedPckVer, healthyAgents);
+
   return {
     status,
-    latest_pkg_version: 'latestPkgVersion',
+    latest_pkg_ver: latestPkgVersion.version,
     installed_integration: installedIntegrations,
     healthy_agents: healthyAgents,
     installed_pkg_ver: installedPckVer,
