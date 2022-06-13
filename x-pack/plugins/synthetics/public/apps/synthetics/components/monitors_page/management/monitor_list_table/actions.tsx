@@ -136,7 +136,7 @@ export const Actions = ({ euiTheme, id, name, reloadPage, canEditSynthetics }: P
       key="xpack.synthetics.editMonitor"
       icon="pencil"
       onClick={closePopover}
-      href={`${basePath}/app/uptime/edit-monitor/${id}`}
+      href={`${basePath}/app/synthetics/edit-monitor/${id}`}
       disabled={!canEditSynthetics}
     >
       {labels.EDIT_LABEL}

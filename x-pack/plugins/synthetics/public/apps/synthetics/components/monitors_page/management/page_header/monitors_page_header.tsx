@@ -37,7 +37,7 @@ export const MonitorsPageHeader = () => {
           fill
           iconSide="left"
           iconType="plusInCircleFilled"
-          href={`${basePath}/app/uptime${MONITOR_ADD_ROUTE}`}
+          href={`${basePath}/app/synthetics${MONITOR_ADD_ROUTE}`}
         >
           <FormattedMessage
             id="xpack.synthetics.monitors.pageHeader.createButton.label"
