@@ -6,7 +6,7 @@
  */
 
 import { notFound } from '@hapi/boom';
-import { get } from 'lodash';
+import { get, omit } from 'lodash';
 import { set } from '@elastic/safer-lodash-set';
 import { i18n } from '@kbn/i18n';
 import { getClustersStats } from './get_clusters_stats';
@@ -39,6 +39,7 @@ import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
 import { LegacyRequest, Cluster } from '../../types';
 import { RulesByType } from '../../../common/types/alerts';
+import { getClusterRuleDataForClusters, getInstanceRuleDataForClusters } from '../kibana/rules';
 
 /**
  * Get all clusters or the cluster associated with {@code clusterUuid} when it is defined.
@@ -168,10 +169,14 @@ export async function getClustersFromRequest(
     }
   }
   // add kibana data
-  const kibanas =
+  const [kibanas, kibanaClusterRules, kibanaInstanceRules] =
     isInCodePath(codePaths, [CODE_PATH_KIBANA]) && !isStandaloneCluster
-      ? await getKibanasForClusters(req, clusters, CCS_REMOTE_PATTERN)
-      : [];
+      ? await Promise.all([
+          getKibanasForClusters(req, clusters, CCS_REMOTE_PATTERN),
+          getClusterRuleDataForClusters(req, clusters, CCS_REMOTE_PATTERN),
+          getInstanceRuleDataForClusters(req, clusters, CCS_REMOTE_PATTERN),
+        ])
+      : [[], [], []];
   // add the kibana data to each cluster
   kibanas.forEach((kibana) => {
     const clusterIndex = clusters.findIndex(
@@ -179,6 +184,23 @@ export async function getClustersFromRequest(
         get(cluster, 'elasticsearch.cluster.id', cluster.cluster_uuid) === kibana.clusterUuid
     );
     set(clusters[clusterIndex], 'kibana', kibana.stats);
+
+    const clusterKibanaRules = kibanaClusterRules.every((rule) => !Boolean(rule))
+      ? null
+      : kibanaClusterRules?.find((rule) => rule?.clusterUuid === kibana.clusterUuid);
+    const instanceKibanaRules = kibanaInstanceRules.every((rule) => !Boolean(rule))
+      ? null
+      : kibanaInstanceRules?.find((rule) => rule?.clusterUuid === kibana.clusterUuid);
+    set(
+      clusters[clusterIndex],
+      'kibana.rules.cluster',
+      clusterKibanaRules ? omit(clusterKibanaRules, 'clusterUuid') : null
+    );
+    set(
+      clusters[clusterIndex],
+      'kibana.rules.instance',
+      instanceKibanaRules ? omit(instanceKibanaRules, 'clusterUuid') : null
+    );
   });
 
   // add logstash data
