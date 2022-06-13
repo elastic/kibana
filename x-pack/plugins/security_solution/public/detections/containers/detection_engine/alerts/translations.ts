@@ -33,6 +33,11 @@ export const HOST_ISOLATION_FAILURE = i18n.translate(
   { defaultMessage: 'Failed to isolate host' }
 );
 
+export const ENDPOINT_RESPONSE_ACTION_FAILURE = i18n.translate(
+  'xpack.securitySolution.endpoint.responseAction.failedToComplete.title',
+  { defaultMessage: 'Failed to complete Response Actions' }
+);
+
 export const CASES_FROM_ALERTS_FAILURE = i18n.translate(
   'xpack.securitySolution.endpoint.hostIsolation.casesFromAlerts.title',
   { defaultMessage: 'Failed to find associated cases' }

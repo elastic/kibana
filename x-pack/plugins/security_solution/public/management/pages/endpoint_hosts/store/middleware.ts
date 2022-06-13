@@ -23,14 +23,14 @@ import {
   ActivityLog,
   GetHostPolicyResponse,
   HostInfo,
-  HostIsolationRequestBody,
+  EndpointResponseActionRequestBody,
   HostIsolationResponse,
   HostResultList,
   Immutable,
   ImmutableObject,
   MetadataListResponse,
 } from '../../../../../common/endpoint/types';
-import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
+import { endpointResponseAction } from '../../../../common/lib/endpoint_isolation';
 import { fetchPendingActionsByAgentId } from '../../../../common/lib/endpoint_pending_actions';
 import { ImmutableMiddlewareAPI, ImmutableMiddlewareFactory } from '../../../../common/store';
 import { AppAction } from '../../../../common/store/actions';
@@ -295,10 +295,11 @@ const handleIsolateEndpointHost = async (
     // Cast needed below due to the value of payload being `Immutable<>`
     let response: HostIsolationResponse;
 
+    const params = action.payload.data as EndpointResponseActionRequestBody;
     if (action.payload.type === 'unisolate') {
-      response = await unIsolateHost(action.payload.data as HostIsolationRequestBody);
+      response = await endpointResponseAction({ ...params, command: 'unisolate' });
     } else {
-      response = await isolateHost(action.payload.data as HostIsolationRequestBody);
+      response = await endpointResponseAction({ ...params, command: 'isolate' });
     }
 
     dispatch({
