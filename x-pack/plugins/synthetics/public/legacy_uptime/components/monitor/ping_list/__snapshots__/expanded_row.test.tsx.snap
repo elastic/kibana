@@ -140,7 +140,7 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
     class="euiFlexItem"
   >
     <div
-      class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary css-hsxldi-euiPanel-grow-none-m-primary-euiCallOut"
+      class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary css-1lbbq49-euiPanel-none-m-primary-euiCallOut"
     >
       <div
         class="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"

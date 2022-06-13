@@ -33,7 +33,7 @@ Array [
     class="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
   />,
   <div
-    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning css-1fure2l-euiPanel-grow-none-m-warning-euiCallOut"
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning css-1yqbqzs-euiPanel-none-m-warning-euiCallOut"
   >
     <p
       class="euiTitle euiCallOutHeader__title css-nznt5c-euiTitle-xs-euiCallOutHeader-warning"

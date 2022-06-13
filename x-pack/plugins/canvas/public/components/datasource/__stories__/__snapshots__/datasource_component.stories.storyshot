@@ -38,7 +38,7 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
     className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
   <div
-    className="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning css-1fure2l-euiPanel-grow-none-m-warning-euiCallOut"
+    className="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning css-1yqbqzs-euiPanel-none-m-warning-euiCallOut"
   >
     <div
       className="euiText css-le6wmz-euiText-s-euiTextColor-default-euiCallOut__description"

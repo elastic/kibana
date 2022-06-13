@@ -153,7 +153,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
     >
       <div
         aria-live="assertive"
-        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors css-1u13ow-euiPanel-grow-none-m-danger-euiCallOut"
+        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors css-j9niqn-euiPanel-none-m-danger-euiCallOut"
         role="alert"
         tabindex="-1"
       >
@@ -293,7 +293,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
     >
       <div
         aria-live="assertive"
-        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors css-1u13ow-euiPanel-grow-none-m-danger-euiCallOut"
+        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors css-j9niqn-euiPanel-none-m-danger-euiCallOut"
         role="alert"
         tabindex="-1"
       >
@@ -433,7 +433,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
     >
       <div
         aria-live="assertive"
-        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors css-1u13ow-euiPanel-grow-none-m-danger-euiCallOut"
+        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors css-j9niqn-euiPanel-none-m-danger-euiCallOut"
         role="alert"
         tabindex="-1"
       >
@@ -573,7 +573,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
     >
       <div
         aria-live="assertive"
-        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors css-1u13ow-euiPanel-grow-none-m-danger-euiCallOut"
+        class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors css-j9niqn-euiPanel-none-m-danger-euiCallOut"
         role="alert"
         tabindex="-1"
       >

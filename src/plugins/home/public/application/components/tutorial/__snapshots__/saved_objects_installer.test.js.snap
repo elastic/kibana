@@ -45,7 +45,7 @@ Array [
     class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />,
   <div
-    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning css-1fure2l-euiPanel-grow-none-m-warning-euiCallOut"
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning css-1yqbqzs-euiPanel-none-m-warning-euiCallOut"
     data-test-subj="loadSavedObjects_failed"
   >
     <p
@@ -102,7 +102,7 @@ Array [
     class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />,
   <div
-    class="euiPanel euiPanel--success euiPanel--paddingMedium euiCallOut euiCallOut--success css-1ga2k31-euiPanel-grow-none-m-success-euiCallOut"
+    class="euiPanel euiPanel--success euiPanel--paddingMedium euiCallOut euiCallOut--success css-1kpm4pz-euiPanel-none-m-success-euiCallOut"
     data-test-subj="loadSavedObjects_success"
   >
     <p

@@ -8,7 +8,7 @@ Array [
     class="euiSpacer euiSpacer--l css-p2o3x6-euiSpacer-l"
   />,
   <div
-    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger eui-textLeft css-1u13ow-euiPanel-grow-none-m-danger-euiCallOut"
+    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger eui-textLeft css-j9niqn-euiPanel-none-m-danger-euiCallOut"
   >
     <p
       class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"

@@ -159,7 +159,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "canvas" layout 
             class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
-            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger css-xkau7n-euiPanel-grow-none-s-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger css-1a24lnd-euiPanel-none-s-danger-euiCallOut"
           >
             <p
               class="euiTitle euiCallOutHeader__title css-18vjrtd-euiTitle-xxs-euiCallOutHeader-danger"
@@ -355,7 +355,7 @@ exports[`ScreenCapturePanelContent properly renders a view with "print" layout o
             class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
-            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger css-xkau7n-euiPanel-grow-none-s-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger css-1a24lnd-euiPanel-none-s-danger-euiCallOut"
           >
             <p
               class="euiTitle euiCallOutHeader__title css-18vjrtd-euiTitle-xxs-euiCallOutHeader-danger"
@@ -492,7 +492,7 @@ exports[`ScreenCapturePanelContent renders the default view properly 1`] = `
             class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
           />
           <div
-            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger css-xkau7n-euiPanel-grow-none-s-danger-euiCallOut"
+            class="euiPanel euiPanel--danger euiPanel--paddingSmall euiCallOut euiCallOut--danger css-1a24lnd-euiPanel-none-s-danger-euiCallOut"
           >
             <p
               class="euiTitle euiCallOutHeader__title css-18vjrtd-euiTitle-xxs-euiCallOutHeader-danger"

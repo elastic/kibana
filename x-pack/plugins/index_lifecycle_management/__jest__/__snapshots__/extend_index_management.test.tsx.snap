@@ -105,7 +105,7 @@ Array [
     class="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />,
   <div
-    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger css-1u13ow-euiPanel-grow-none-m-danger-euiCallOut"
+    class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger css-j9niqn-euiPanel-none-m-danger-euiCallOut"
   >
     <p
       class="euiTitle euiCallOutHeader__title css-st4zhi-euiTitle-xs-euiCallOutHeader-danger"
