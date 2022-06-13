@@ -29,6 +29,7 @@ const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const GridStyles: EuiDataGridStyle = {
   border: 'none',
   header: 'underline',
+  fontSize: 's',
 };
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
@@ -174,11 +175,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   );
 
   return (
-    <section
-      className="alertsTableResponseOps"
-      style={{ width: '100%' }}
-      data-test-subj={props['data-test-subj']}
-    >
+    <section style={{ width: '100%' }} data-test-subj={props['data-test-subj']}>
       <Suspense fallback={null}>
         {flyoutAlertIndex > -1 && (
           <AlertsFlyout
