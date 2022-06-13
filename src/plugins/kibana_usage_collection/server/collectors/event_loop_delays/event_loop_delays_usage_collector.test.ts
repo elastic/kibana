@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
 import {
   Collector,
   createUsageCollectionSetupMock,
@@ -36,7 +37,8 @@ describe('registerEventLoopDelaysCollector', () => {
       logger,
       usageCollectionMock,
       mockRegisterType,
-      mockGetSavedObjectsClient
+      mockGetSavedObjectsClient,
+      new Observable<void>()
     );
   });
 

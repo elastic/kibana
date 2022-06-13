@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { Observable } from 'rxjs';
 import { savedObjectsRepositoryMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   Collector,
@@ -47,7 +48,8 @@ describe('telemetry_application_usage', () => {
       logger,
       usageCollectionMock,
       registerType,
-      getSavedObjectClient
+      getSavedObjectClient,
+      new Observable<void>()
     );
   });
 
