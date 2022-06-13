@@ -198,12 +198,6 @@ const getSteps = ({
       <EuiTourStep
         {...tourStepProps}
         key={step}
-        subtitle={i18n.translate('xpack.observability.tour.subtitleLabel', {
-          defaultMessage: 'Step {stepNumber}',
-          values: {
-            stepNumber: step,
-          },
-        })}
         step={step}
         minWidth={minWidth}
         maxWidth={maxWidth}
