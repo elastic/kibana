@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { RuleSnooze, RuleSnoozeSchedule } from '@kbn/alerting-plugin/common';
 import { i18nAbbrMonthDayDate, i18nMonthDayDate } from '../../../lib/i18n_month_day_date';
 import { RuleTableItem, SnoozeSchedule } from '../../../../types';
-import { SnoozePanel, futureTimeToInterval } from './rule_snooze_panel';
+import { SnoozePanel, futureTimeToInterval } from './rule_snooze';
 
 export interface RulesListNotifyBadgeProps {
   rule: RuleTableItem;

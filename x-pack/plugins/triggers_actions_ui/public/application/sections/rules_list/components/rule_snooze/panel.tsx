@@ -27,10 +27,10 @@ import {
   EuiConfirmModal,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { parseInterval } from '../../../../../common';
-import type { RecurrenceSchedule, SnoozeSchedule } from '../../../../types';
-import { recurrenceSummary } from './recurrence_scheduler';
-import { RuleSnoozeScheduler } from './rule_snooze_scheduler';
+import { parseInterval } from '../../../../../../common';
+import type { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
+import { RuleSnoozeScheduler } from './scheduler';
+import { recurrenceSummary } from './recurrence_scheduler/helpers';
 
 export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 const COMMON_SNOOZE_TIMES: Array<[number, SnoozeUnit]> = [

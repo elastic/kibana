@@ -26,10 +26,10 @@ import {
   EuiIcon,
   EuiLink,
 } from '@elastic/eui';
-import { RecurrenceSchedule, SnoozeSchedule } from '../../../../types';
+import { RecurrenceSchedule, SnoozeSchedule } from '../../../../../types';
 import { RecurrenceScheduler } from './recurrence_scheduler';
 
-import './rule_snooze_scheduler.scss';
+import './scheduler.scss';
 
 interface PanelOpts {
   onSaveSchedule: (sched: SnoozeSchedule) => void;

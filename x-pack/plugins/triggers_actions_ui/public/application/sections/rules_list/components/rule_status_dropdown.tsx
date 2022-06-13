@@ -21,7 +21,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import type { SnoozeSchedule } from '../../../../types';
-import { SnoozePanel } from './rule_snooze_panel';
+import { SnoozePanel } from './rule_snooze';
 
 import { Rule } from '../../../../types';
 
