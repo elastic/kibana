@@ -10,6 +10,10 @@ import { AllSeries } from '@kbn/observability-plugin/public';
 import { BreakdownItem, UxUIFilters } from '../../../../../typings/ui_filters';
 import { useDataView } from '../local_uifilters/use_data_view';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+} from '../../../../../common/elasticsearch_fieldnames';
 
 interface Props {
   breakdown: BreakdownItem | null;
@@ -45,8 +49,10 @@ export function PageLoadDistChart({
       name: 'page-load-distribution',
       selectedMetricField: 'transaction.duration.us',
       reportDefinitions: {
-        'service.environment': ['ALL_VALUES'],
-        'service.name': uiFilters?.serviceName ?? [],
+        [SERVICE_ENVIRONMENT]: uiFilters?.environment
+          ? [uiFilters.environment]
+          : ['ALL_VALUES'],
+        [SERVICE_NAME]: uiFilters?.serviceName ?? [],
       },
       time: {
         to: end,

@@ -16,48 +16,22 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { createExploratoryViewUrl } from '@kbn/observability-plugin/public';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 import { I18LABELS } from '../translations';
 import { BreakdownFilter } from '../breakdowns/breakdown_filter';
 import { PageViewsChart } from '../charts/page_views_chart';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 import { BreakdownItem } from '../../../../../typings/ui_filters';
+import { SERVICE_NAME } from '../../../../../common/elasticsearch_fieldnames';
 
 export function PageViewsTrend() {
   const { http } = useKibanaServices();
 
-  const { rangeId, urlParams, uxUiFilters } = useLegacyUrlParams();
+  const { urlParams, uxUiFilters } = useLegacyUrlParams();
   const { serviceName } = uxUiFilters;
 
-  const { start, end, searchTerm, rangeTo, rangeFrom } = urlParams;
+  const { rangeTo, rangeFrom } = urlParams;
 
   const [breakdown, setBreakdown] = useState<BreakdownItem | null>(null);
-
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (start && end && serviceName) {
-        return callApmApi('GET /internal/apm/ux/page-view-trends', {
-          params: {
-            query: {
-              start,
-              end,
-              uiFilters: JSON.stringify(uxUiFilters),
-              urlQuery: searchTerm,
-              ...(breakdown
-                ? {
-                    breakdowns: JSON.stringify(breakdown),
-                  }
-                : {}),
-            },
-          },
-        });
-      }
-      return Promise.resolve(undefined);
-    },
-    // `rangeId` acts as a cache buster for stable ranges like "Today"
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [start, end, serviceName, uxUiFilters, searchTerm, breakdown, rangeId]
-  );
 
   const exploratoryViewLink = createExploratoryViewUrl(
     {
@@ -68,7 +42,7 @@ export function PageViewsTrend() {
           dataType: 'ux',
           time: { from: rangeFrom!, to: rangeTo! },
           reportDefinitions: {
-            'service.name': serviceName as string[],
+            [SERVICE_NAME]: serviceName as string[],
           },
           ...(breakdown ? { breakdown: breakdown.fieldName } : {}),
         },
@@ -110,7 +84,7 @@ export function PageViewsTrend() {
         )}
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <PageViewsChart data={data} loading={status !== 'success'} />
+      <PageViewsChart breakdown={breakdown} />
     </div>
   );
 }

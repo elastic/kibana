@@ -10,7 +10,6 @@ import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
 import { getClientMetrics } from './get_client_metrics';
 import { getLongTaskMetrics } from './get_long_task_metrics';
-import { getPageViewTrends } from './get_page_view_trends';
 import { getVisitorBreakdown } from './get_visitor_breakdown';
 import { hasRumData } from './has_rum_data';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
@@ -81,31 +80,6 @@ const rumClientMetricsRoute = createApmServerRoute({
       setup,
       urlQuery,
       percentile: percentile ? Number(percentile) : undefined,
-      start,
-      end,
-    });
-  },
-});
-
-const rumPageViewsTrendRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/page-view-trends',
-  params: t.type({
-    query: t.intersection([uxQueryRt, t.partial({ breakdowns: t.string })]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{ topItems: string[]; items: Array<Record<string, number>> }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { breakdowns, urlQuery, start, end },
-    } = resources.params;
-
-    return getPageViewTrends({
-      setup,
-      breakdowns,
-      urlQuery,
       start,
       end,
     });
@@ -224,7 +198,6 @@ async function setupUXRequest<TParams extends SetupUXRequestParams>(
 
 export const rumRouteRepository = {
   ...rumClientMetricsRoute,
-  ...rumPageViewsTrendRoute,
   ...rumVisitorsBreakdownRoute,
   ...rumLongTaskMetrics,
   ...rumHasDataRoute,
