@@ -82,5 +82,8 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getUsageCount(stats, `get ${paths.INFO}`)).to.be(5); // testing added 5 counts
       });
     });
+
+    // TODO
+    describe('API counters: job generation', () => {});
   });
 }
