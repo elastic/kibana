@@ -41,7 +41,7 @@ jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');
   return {
     ...original,
-    // Mocking EuiComboBox, as it utilizes "react-virtualized" for rendering search suggestions,
+    // Mocking EuiComboBox, as it utilizes "react-window" for rendering search suggestions,
     // which does not produce a valid component wrapper
     EuiComboBox: (props: any) => (
       <input
@@ -51,17 +51,6 @@ jest.mock('@elastic/eui', () => {
           props.onChange([syntheticEvent['0']]);
         }}
       />
-    ),
-  };
-});
-
-jest.mock('react-virtualized', () => {
-  const original = jest.requireActual('react-virtualized');
-
-  return {
-    ...original,
-    AutoSizer: ({ children }: { children: any }) => (
-      <div>{children({ height: 500, width: 500 })}</div>
     ),
   };
 });

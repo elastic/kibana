@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, memo, useRef, useEffect } from 'react';
+import React, { FunctionComponent, memo, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
-import { List, WindowScroller } from 'react-virtualized';
 
 import { DropSpecialLocations } from '../../constants';
 import { ProcessorInternal, ProcessorSelector } from '../../types';
@@ -47,11 +46,6 @@ export interface Props {
  */
 export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
   const { processors, baseSelector, onAction, movingProcessor } = props;
-  // These refs are created here so they can be shared with all
-  // recursively rendered trees. Their values should come from react-virtualized
-  // List component and WindowScroller component.
-  const windowScrollerRef = useRef<WindowScroller>(null);
-  const listRef = useRef<List>(null);
 
   useEffect(() => {
     const cancelMoveKbListener = (event: KeyboardEvent) => {
@@ -90,8 +84,6 @@ export const ProcessorsTree: FunctionComponent<Props> = memo((props) => {
     >
       <EuiFlexItem grow={false}>
         <PrivateTree
-          windowScrollerRef={windowScrollerRef}
-          listRef={listRef}
           level={1}
           onAction={onAction}
           movingProcessor={movingProcessor}

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import './mocks';
 import { setup as homeSetup } from './home.helpers';
 import { setup as repositoryAddSetup } from './repository_add.helpers';
 import { setup as repositoryEditSetup } from './repository_edit.helpers';
