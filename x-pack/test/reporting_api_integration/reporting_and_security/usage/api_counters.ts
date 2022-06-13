@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { createPdfV2Params, createPngV2Params } from '..';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const getUsageCount = (checkUsage: any, counterName: string): number => {
@@ -50,14 +51,16 @@ export default function ({ getService }: FtrProviderContext) {
         DIAG_SCREENSHOT = '/api/reporting/diagnose/screenshot',
       }
 
+      let initialStats: any;
       let stats: any;
+      const CALL_COUNT = 3;
 
       before('call APIs', async () => {
-        // call selected APIs 5 times
-        const RUN_TIMES = 5;
+        initialStats = await usageAPI.getUsageStats();
+
         await Promise.all(
           Object.keys(paths).map(async (key) => {
-            await Promise.all([...Array(RUN_TIMES)].map(() => supertest.get((paths as any)[key])));
+            await Promise.all([...Array(CALL_COUNT)].map(() => supertest.get((paths as any)[key])));
           })
         );
 
@@ -70,20 +73,107 @@ export default function ({ getService }: FtrProviderContext) {
         stats = await usageAPI.getUsageStats();
       });
 
-      it('usage count of job LISTING', async () => {
-        expect(getUsageCount(stats, `get ${paths.LIST}`)).to.be(5); // testing added 5 counts
+      it('job listing', async () => {
+        expect(getUsageCount(initialStats, `get ${paths.LIST}`)).to.be(0);
+        expect(getUsageCount(stats, `get ${paths.LIST}`)).to.be(CALL_COUNT);
       });
 
-      it('usage count of job COUNT', async () => {
-        expect(getUsageCount(stats, `get ${paths.COUNT}`)).to.be(5); // testing added 5 counts
+      it('job count', async () => {
+        expect(getUsageCount(initialStats, `get ${paths.COUNT}`)).to.be(0);
+        expect(getUsageCount(stats, `get ${paths.COUNT}`)).to.be(CALL_COUNT);
       });
 
-      it('usage count of job INFO', async () => {
-        expect(getUsageCount(stats, `get ${paths.INFO}`)).to.be(5); // testing added 5 counts
+      it('job info', async () => {
+        expect(getUsageCount(initialStats, `get ${paths.INFO}`)).to.be(0);
+        expect(getUsageCount(stats, `get ${paths.INFO}`)).to.be(CALL_COUNT);
+      });
+
+      // TODO
+      it('deleting reports', async () => {});
+
+      // TODO
+      it('downloading reports', async () => {});
+    });
+
+    describe('API counters: job generation', () => {
+      let stats: any;
+
+      before(async () => {
+        // call generation APIs
+        await Promise.all([
+          postCsv(),
+          postCsv(),
+          postPng(),
+          postPng(),
+          postPdf(),
+          postPdf(),
+          postPdf(),
+          downloadCsv(),
+        ]);
+
+        // wait for events to aggregate into the usage stats
+        await new Promise((resolve) => {
+          setTimeout(resolve, 8000);
+        });
+
+        // determine the result usage count
+        stats = await usageAPI.getUsageStats();
+      });
+
+      it('PNG', async () => {
+        expect(getUsageCount(stats, 'post /api/reporting/generate/pngV2')).to.be(2);
+      });
+
+      it('PDF', async () => {
+        expect(getUsageCount(stats, 'post /api/reporting/generate/printablePdfV2')).to.be(3);
+      });
+
+      it('CSV', async () => {
+        expect(getUsageCount(stats, 'post /api/reporting/generate/csv_searchsource')).to.be(2);
+      });
+
+      it('Download CSV', async () => {
+        expect(
+          getUsageCount(stats, 'post /api/reporting/v1/generate/immediate/csv_searchsource')
+        ).to.be(1);
       });
     });
 
-    // TODO
-    describe('API counters: job generation', () => {});
+    // helpers
+    const postCsv = () =>
+      reportingAPI.postJobJSON(`/api/reporting/generate/csv_searchsource`, {
+        jobParams:
+          `(browserTimezone:UTC,` +
+          `columns:!(order_date,category,customer_full_name,taxful_total_price,currency),objectType:search,searchSource:(fields:!((field:'*',include_unmapped:true))` +
+          `,filter:!((meta:(field:order_date,index:aac3e500-f2c7-11ea-8250-fb138aa491e7,params:()),query:(range:(order_date:(format:strict_date_optional_time,gte:'2019-06-02T12:28:40.866Z'` +
+          `,lte:'2019-07-18T20:59:57.136Z'))))),index:aac3e500-f2c7-11ea-8250-fb138aa491e7,parent:(filter:!(),highlightAll:!t,index:aac3e500-f2c7-11ea-8250-fb138aa491e7` +
+          `,query:(language:kuery,query:''),version:!t),sort:!((order_date:desc)),trackTotalHits:!t)` +
+          `)`,
+      });
+
+    const postPng = () =>
+      reportingAPI.postJobJSON(`/api/reporting/generate/pngV2`, {
+        jobParams: createPngV2Params(1600),
+      });
+
+    const postPdf = () =>
+      reportingAPI.postJobJSON(`/api/reporting/generate/printablePdfV2`, {
+        jobParams: createPdfV2Params(1600),
+      });
+
+    const downloadCsv = () =>
+      reportingAPI.downloadCsv(
+        reportingAPI.REPORTING_USER_USERNAME,
+        reportingAPI.REPORTING_USER_PASSWORD,
+        {
+          searchSource: {
+            query: { query: '', language: 'kuery' },
+            index: '5193f870-d861-11e9-a311-0fa548c5f953',
+            filter: [],
+          },
+          browserTimezone: 'UTC',
+          title: 'testfooyu78yt90-',
+        }
+      );
   });
 }

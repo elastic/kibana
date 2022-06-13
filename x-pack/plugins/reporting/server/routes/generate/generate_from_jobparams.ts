@@ -41,7 +41,11 @@ export function registerJobGenerationRoutes(reporting: ReportingCore, logger: Lo
         options: { tags: kibanaAccessControlTags },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
-        incrementApiUsageCounter(req.route.method, path, reporting.getUsageCounter());
+        incrementApiUsageCounter(
+          req.route.method,
+          path.replace(/{exportType}/, req.params.exportType),
+          reporting.getUsageCounter()
+        );
 
         let jobParamsRison: null | string = null;
 
