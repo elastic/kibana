@@ -16,6 +16,10 @@ import { useConsoleStateDispatch } from '../hooks/state_selectors/use_console_st
 
 const CommandOutputContainer = styled.div`
   position: relative;
+
+  .busy-indicator {
+    margin-right: 1em;
+  }
 `;
 
 export interface CommandExecutionOutputProps {
@@ -66,7 +70,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
         <div>
           <EuiSpacer size="s" />
 
-          {isRunning && <EuiLoadingChart size="m" style={{ marginRight: '1em' }} />}
+          {isRunning && <EuiLoadingChart className="busy-indicator" />}
 
           <RenderComponent
             command={command}
