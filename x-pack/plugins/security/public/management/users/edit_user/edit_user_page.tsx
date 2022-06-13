@@ -32,7 +32,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getUserDisplayName } from '../../../../common/model';
 import { UserAPIClient } from '../user_api_client';
 import { isUserDeprecated, isUserReserved } from '../user_utils';
-import { ChangePasswordFlyout } from './change_password_flyout';
+import { ChangePasswordModal } from './change_password_modal';
 import { ConfirmDeleteUsers } from './confirm_delete_users';
 import { ConfirmDisableUsers } from './confirm_disable_users';
 import { ConfirmEnableUsers } from './confirm_enable_users';
@@ -157,7 +157,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       />
 
       {action === 'changePassword' ? (
-        <ChangePasswordFlyout
+        <ChangePasswordModal
           username={username!}
           onCancel={() => setAction('none')}
           onSuccess={() => setAction('none')}
