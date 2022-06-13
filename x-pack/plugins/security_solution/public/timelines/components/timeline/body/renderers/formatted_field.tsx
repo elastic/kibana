@@ -18,7 +18,6 @@ import { Duration, EVENT_DURATION_FIELD_NAME } from '../../../duration';
 import { getOrEmptyTagFromValue } from '../../../../../common/components/empty_value';
 import { FormattedDate } from '../../../../../common/components/formatted_date';
 import { FormattedIp } from '../../../formatted_ip';
-import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { Port } from '../../../../../network/components/port';
 import { PORT_NAMES } from '../../../../../network/components/port/helpers';
 import { TruncatableText } from '../../../../../common/components/truncatable_text';
@@ -84,7 +83,6 @@ const FormattedFieldValueComponent: React.FC<{
   value,
   linkValue,
 }) => {
-  const usersEnabled = useIsExperimentalFeatureEnabled('usersEnabled');
   if (isObjectArray || asPlainText) {
     return <span data-test-subj={`formatted-field-${fieldName}`}>{value}</span>;
   } else if (fieldType === IP_FIELD_TYPE) {
@@ -165,7 +163,7 @@ const FormattedFieldValueComponent: React.FC<{
         value={value}
       />
     );
-  } else if (usersEnabled && fieldName === USER_NAME_FIELD_NAME) {
+  } else if (fieldName === USER_NAME_FIELD_NAME) {
     return (
       <UserName
         Component={Component}

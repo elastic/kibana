@@ -28,6 +28,7 @@ import {
   EVENT_RATE_FIELD_ID,
   mlCategory,
 } from '../../../../../../../../../common/types/fields';
+import { filterCategoryFields } from '../../../../../../../../../common/util/fields_utils';
 import { RichDetector } from '../../../../../common/job_creator/advanced_job_creator';
 import { ModalWrapper } from './modal_wrapper';
 import { detectorToString } from '../../../../../../../util/string_utils';
@@ -93,6 +94,7 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const [excludeFrequentEnabled, setExcludeFrequentEnabled] = useState(true);
   const [fieldOptionEnabled, setFieldOptionEnabled] = useState(true);
   const { descriptionPlaceholder, setDescriptionPlaceholder } = useDetectorPlaceholder(detector);
+  const [selectedFieldNames, setSelectedFieldNames] = useState<string[]>([]);
 
   const usingScriptFields = jobCreator.additionalFields.length > 0;
   // list of aggregation combobox options.
@@ -104,8 +106,8 @@ export const AdvancedDetectorModal: FC<Props> = ({
   // fields available for the selected agg
   const { currentFieldOptions, setCurrentFieldOptions } = useCurrentFieldOptions(
     detector.agg,
-    jobCreator.additionalFields,
-    fields
+    filterCategoryFields(jobCreator.additionalFields, false),
+    selectedFieldNames
   );
 
   const allFieldOptions: EuiComboBoxOptionOption[] = [
@@ -115,7 +117,9 @@ export const AdvancedDetectorModal: FC<Props> = ({
   const splitFieldOptions: EuiComboBoxOptionOption[] = [
     ...allFieldOptions,
     ...createMlcategoryFieldOption(jobCreator.categorizationFieldName),
-  ].sort(comboBoxOptionsSort);
+  ]
+    .sort(comboBoxOptionsSort)
+    .filter(({ label }) => selectedFieldNames.includes(label) === false);
 
   const eventRateField = fields.find((f) => f.id === EVENT_RATE_FIELD_ID);
 
@@ -163,6 +167,13 @@ export const AdvancedDetectorModal: FC<Props> = ({
       setSplitFieldsEnabled(false);
       setFieldOptionEnabled(false);
     }
+
+    setSelectedFieldNames([
+      ...(field ? [field.name] : []),
+      ...(byField ? [byField.name] : []),
+      ...(overField ? [overField.name] : []),
+      ...(partitionField ? [partitionField.name] : []),
+    ]);
 
     const dtr: RichDetector = {
       agg,
@@ -389,14 +400,16 @@ function createFieldOptionsFromAgg(agg: Aggregation | null, additionalFields: Fi
 function useCurrentFieldOptions(
   aggregation: Aggregation | null,
   additionalFields: Field[],
-  fields: Field[]
+  selectedFieldNames: string[]
 ) {
   const [currentFieldOptions, setCurrentFieldOptions] = useState(
     createFieldOptionsFromAgg(aggregation, additionalFields)
   );
 
   return {
-    currentFieldOptions,
+    currentFieldOptions: currentFieldOptions.filter(
+      ({ label }) => selectedFieldNames.includes(label) === false
+    ),
     setCurrentFieldOptions: (agg: Aggregation | null) =>
       setCurrentFieldOptions(createFieldOptionsFromAgg(agg, additionalFields)),
   };

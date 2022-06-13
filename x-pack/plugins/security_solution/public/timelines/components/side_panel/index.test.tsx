@@ -30,8 +30,7 @@ import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_cont
 
 jest.mock('../../../common/lib/kibana');
 
-// Failing: See https://github.com/elastic/kibana/issues/132845
-describe.skip('Details Panel Component', () => {
+describe('Details Panel Component', () => {
   const state: State = {
     ...mockGlobalState,
     timeline: {
@@ -190,8 +189,9 @@ describe.skip('Details Panel Component', () => {
           <DetailsPanel {...currentProps} />
         </TestProviders>
       );
-
-      expect(wrapper.find('[data-test-subj="timeline:details-panel:flyout"]')).toMatchSnapshot();
+      expect(
+        wrapper.find('[data-test-subj="timeline:details-panel:flyout"]').first().render()
+      ).toMatchSnapshot();
     });
 
     test('it should have the attributes isDraggable to be false when timelineId !== "active" and activeTab === "query"', () => {
@@ -264,7 +264,7 @@ describe.skip('Details Panel Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('ExpandableHostDetails')).toMatchSnapshot();
+      expect(wrapper.find('ExpandableHostDetails').first().render()).toMatchSnapshot();
     });
   });
 
@@ -283,7 +283,7 @@ describe.skip('Details Panel Component', () => {
         </TestProviders>
       );
 
-      expect(wrapper.find('ExpandableNetworkDetails')).toMatchSnapshot();
+      expect(wrapper.find('ExpandableNetworkDetails').render()).toMatchSnapshot();
     });
   });
 });

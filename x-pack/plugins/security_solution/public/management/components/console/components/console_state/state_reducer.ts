@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { handleSidePanel } from './state_update_handlers/handle_side_panel';
 import { handleUpdateCommandState } from './state_update_handlers/handle_update_command_state';
 import type { ConsoleDataState, ConsoleStoreReducer } from './types';
 import { handleExecuteCommand } from './state_update_handlers/handle_execute_command';
@@ -12,22 +13,41 @@ import { getBuiltinCommands } from '../../service/builtin_commands';
 
 export type InitialStateInterface = Pick<
   ConsoleDataState,
-  'commands' | 'scrollToBottom' | 'dataTestSubj' | 'HelpComponent'
+  'commands' | 'scrollToBottom' | 'dataTestSubj' | 'HelpComponent' | 'managedKey'
 >;
 
-export const initiateState = ({
-  commands,
-  scrollToBottom,
-  dataTestSubj,
-  HelpComponent,
-}: InitialStateInterface): ConsoleDataState => {
-  return {
-    commands: getBuiltinCommands().concat(commands),
+export const initiateState = (
+  {
+    commands: commandList,
+    scrollToBottom,
+    dataTestSubj,
+    HelpComponent,
+    managedKey,
+  }: InitialStateInterface,
+  managedConsolePriorState?: ConsoleDataState
+): ConsoleDataState => {
+  const commands = getBuiltinCommands().concat(commandList);
+  const state = managedConsolePriorState ?? {
+    commands,
     scrollToBottom,
     HelpComponent,
     dataTestSubj,
+    managedKey,
     commandHistory: [],
+    sidePanel: { show: null },
   };
+
+  if (managedConsolePriorState) {
+    Object.assign(state, {
+      commands,
+      scrollToBottom,
+      HelpComponent,
+      dataTestSubj,
+      managedKey,
+    });
+  }
+
+  return state;
 };
 
 export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
@@ -42,6 +62,9 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
     case 'updateCommandStatusState':
     case 'updateCommandStoreState':
       return handleUpdateCommandState(state, action);
+
+    case 'showSidePanel':
+      return handleSidePanel(state, action);
 
     case 'clear':
       return { ...state, commandHistory: [] };

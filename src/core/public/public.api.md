@@ -8,14 +8,10 @@
 
 import { Action } from 'history';
 import { AnalyticsClient } from '@kbn/analytics-client';
-import Boom from '@hapi/boom';
 import type { ButtonColor } from '@elastic/eui';
-import { ByteSizeValue } from '@kbn/config-schema';
-import type { Client } from '@elastic/elasticsearch';
-import { ConfigPath } from '@kbn/config';
 import { ContextProviderOpts } from '@kbn/analytics-client';
-import { DetailedPeerCertificate } from 'tls';
-import type { DocLinks } from '@kbn/doc-links';
+import { CoreContext } from '@kbn/core-base-browser-internal';
+import { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { EnvironmentMode } from '@kbn/config';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiBreadcrumb } from '@elastic/eui';
@@ -31,35 +27,28 @@ import { EventTypeOpts } from '@kbn/analytics-client';
 import { History as History_2 } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
-import { IncomingHttpHeaders } from 'http';
+import { InjectedMetadataParams } from '@kbn/core-injected-metadata-browser-internal';
+import type { InjectedMetadataSetup } from '@kbn/core-injected-metadata-browser';
+import type { InjectedMetadataStart } from '@kbn/core-injected-metadata-browser';
 import { IShipper } from '@kbn/analytics-client';
 import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
-import { Logger } from '@kbn/logging';
-import { LogMeta } from '@kbn/logging';
 import { MaybePromise } from '@kbn/utility-types';
-import { ObjectType } from '@kbn/config-schema';
 import { Observable } from 'rxjs';
 import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { Path } from 'history';
-import { PeerCertificate } from 'tls';
-import type { PublicMethodsOf } from '@kbn/utility-types';
+import { PluginOpaqueId } from '@kbn/core-base-common';
 import { default as React_2 } from 'react';
 import { RecursiveReadonly } from '@kbn/utility-types';
-import { Request as Request_2 } from '@hapi/hapi';
 import * as Rx from 'rxjs';
-import { SchemaTypeError } from '@kbn/config-schema';
 import { ShipperClassConstructor } from '@kbn/analytics-client';
 import { TelemetryCounter } from '@kbn/analytics-client';
 import { TelemetryCounterType } from '@kbn/analytics-client';
-import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 import { TransitionPromptHook } from 'history';
 import { Type } from '@kbn/config-schema';
-import { TypeOf } from '@kbn/config-schema';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UnregisterCallback } from 'history';
-import { URL as URL_2 } from 'url';
 
 // @internal (undocumented)
 export function __kbnBootstrap__(): Promise<void>;
@@ -262,7 +251,7 @@ export interface ChromeDocTitle {
 // @public (undocumented)
 export interface ChromeHelpExtension {
     appName: string;
-    content?: (element: HTMLDivElement) => () => void;
+    content?: (element: HTMLDivElement, menuActions: ChromeHelpMenuActions) => () => void;
     links?: ChromeHelpExtensionMenuLink[];
 }
 
@@ -297,6 +286,12 @@ export interface ChromeHelpExtensionMenuGitHubLink extends ChromeHelpExtensionLi
 
 // @public (undocumented)
 export type ChromeHelpExtensionMenuLink = ChromeHelpExtensionMenuGitHubLink | ChromeHelpExtensionMenuDiscussLink | ChromeHelpExtensionMenuDocumentationLink | ChromeHelpExtensionMenuCustomLink;
+
+// @public (undocumented)
+export interface ChromeHelpMenuActions {
+    // (undocumented)
+    hideHelpMenu: () => void;
+}
 
 // @public (undocumented)
 export interface ChromeNavControl {
@@ -396,18 +391,7 @@ export interface ChromeUserBanner {
 
 export { ContextProviderOpts }
 
-// @internal (undocumented)
-export interface CoreContext {
-    // Warning: (ae-forgotten-export) The symbol "CoreId" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    coreId: CoreId;
-    // (undocumented)
-    env: {
-        mode: Readonly<EnvironmentMode>;
-        packageInfo: Readonly<PackageInfo>;
-    };
-}
+export { CoreContext }
 
 // @public
 export interface CoreSetup<TPluginsStart extends object = object, TStart = unknown> {
@@ -423,10 +407,10 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     getStartServices: StartServicesAccessor<TPluginsStart, TStart>;
     // (undocumented)
     http: HttpSetup;
-    // @deprecated
-    injectedMetadata: {
-        getInjectedVar: (name: string, defaultValue?: any) => unknown;
-    };
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "InjectedMetadataSetup"
+    //
+    // (undocumented)
+    injectedMetadata: InjectedMetadataSetup;
     // (undocumented)
     notifications: NotificationsSetup;
     // (undocumented)
@@ -445,6 +429,8 @@ export interface CoreStart {
     chrome: ChromeStart;
     // (undocumented)
     deprecations: DeprecationsServiceStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     docLinks: DocLinksStart;
     // (undocumented)
@@ -455,10 +441,10 @@ export interface CoreStart {
     http: HttpStart;
     // (undocumented)
     i18n: I18nStart;
-    // @deprecated
-    injectedMetadata: {
-        getInjectedVar: (name: string, defaultValue?: any) => unknown;
-    };
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "InjectedMetadataStart"
+    //
+    // (undocumented)
+    injectedMetadata: InjectedMetadataStart;
     // (undocumented)
     notifications: NotificationsStart;
     // (undocumented)
@@ -508,15 +494,7 @@ export interface DeprecationsServiceStart {
     resolveDeprecation: (details: DomainDeprecationDetails) => Promise<ResolveDeprecationResponse>;
 }
 
-// @public (undocumented)
-export interface DocLinksStart {
-    // (undocumented)
-    readonly DOC_LINK_VERSION: string;
-    // (undocumented)
-    readonly ELASTIC_WEBSITE_URL: string;
-    // (undocumented)
-    readonly links: DocLinks;
-}
+export { DocLinksStart }
 
 // Warning: (ae-forgotten-export) The symbol "DeprecationsDetails" needs to be exported by the entry point index.d.ts
 //
@@ -974,8 +952,7 @@ export interface PluginInitializerContext<ConfigSchema extends object = object> 
     readonly opaqueId: PluginOpaqueId;
 }
 
-// @public (undocumented)
-export type PluginOpaqueId = symbol;
+export { PluginOpaqueId }
 
 // @public
 export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' | 'navLinkStatus' | 'searchable'> & {
@@ -1131,7 +1108,7 @@ export interface SavedObjectsBulkResolveObject {
 // @public (undocumented)
 export interface SavedObjectsBulkResolveResponse<T = unknown> {
     // (undocumented)
-    resolved_objects: Array<SavedObjectsResolveResponse<T>>;
+    resolved_objects: Array<ResolvedSimpleSavedObject<T>>;
 }
 
 // @public (undocumented)
@@ -1155,34 +1132,26 @@ export interface SavedObjectsBulkUpdateOptions {
 }
 
 // @public
-export class SavedObjectsClient {
-    // @internal
-    constructor(http: HttpSetup);
-    bulkCreate: (objects?: SavedObjectsBulkCreateObject[], options?: SavedObjectsBulkCreateOptions) => Promise<SavedObjectsBatchResponse<unknown>>;
-    bulkGet: (objects?: Array<{
+export interface SavedObjectsClientContract {
+    bulkCreate(objects: SavedObjectsBulkCreateObject[], options?: SavedObjectsBulkCreateOptions): Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkGet(objects: Array<{
         id: string;
         type: string;
-    }>) => Promise<SavedObjectsBatchResponse<unknown>>;
-    bulkResolve: <T = unknown>(objects?: Array<{
+    }>): Promise<SavedObjectsBatchResponse<unknown>>;
+    bulkResolve<T = unknown>(objects: Array<{
         id: string;
         type: string;
-    }>) => Promise<{
-        resolved_objects: ResolvedSimpleSavedObject<T>[];
-    }>;
-    bulkUpdate<T = unknown>(objects?: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<T>>;
-    create: <T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions) => Promise<SimpleSavedObject<T>>;
+    }>): Promise<SavedObjectsBulkResolveResponse<T>>;
+    bulkUpdate<T = unknown>(objects: SavedObjectsBulkUpdateObject[]): Promise<SavedObjectsBatchResponse<T>>;
+    create<T = unknown>(type: string, attributes: T, options?: SavedObjectsCreateOptions): Promise<SimpleSavedObject<T>>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsDeleteOptions" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "SavedObjectsClientContract" needs to be exported by the entry point index.d.ts
-    delete: (type: string, id: string, options?: SavedObjectsDeleteOptions | undefined) => ReturnType<SavedObjectsClientContract_2['delete']>;
+    delete(type: string, id: string, options?: SavedObjectsDeleteOptions): Promise<{}>;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsFindOptions" needs to be exported by the entry point index.d.ts
-    find: <T = unknown, A = unknown>(options: SavedObjectsFindOptions_2) => Promise<SavedObjectsFindResponsePublic<T, unknown>>;
-    get: <T = unknown>(type: string, id: string) => Promise<SimpleSavedObject<T>>;
-    resolve: <T = unknown>(type: string, id: string) => Promise<ResolvedSimpleSavedObject<T>>;
-    update<T = unknown>(type: string, id: string, attributes: T, { version, references, upsert }?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
+    find<T = unknown, A = unknown>(options: SavedObjectsFindOptions_2): Promise<SavedObjectsFindResponsePublic<T>>;
+    get<T = unknown>(type: string, id: string): Promise<SimpleSavedObject<T>>;
+    resolve<T = unknown>(type: string, id: string): Promise<ResolvedSimpleSavedObject<T>>;
+    update<T = unknown>(type: string, id: string, attributes: T, options?: SavedObjectsUpdateOptions): Promise<SimpleSavedObject<T>>;
 }
-
-// @public
-export type SavedObjectsClientContract = PublicMethodsOf<SavedObjectsClient>;
 
 // @public
 export interface SavedObjectsCollectMultiNamespaceReferencesResponse {
@@ -1219,7 +1188,7 @@ export interface SavedObjectsFindOptions {
     // (undocumented)
     perPage?: number;
     // Warning: (ae-forgotten-export) The symbol "SavedObjectsPitParams" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-unresolved-link) The @link reference could not be resolved: No member was found with name "openPointInTimeForType"
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "SavedObjectsClient"
     pit?: SavedObjectsPitParams;
     preference?: string;
     rootSearchFields?: string[];
@@ -1590,6 +1559,6 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// src/core/public/core_system.ts:195:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
+// src/core/public/core_system.ts:186:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

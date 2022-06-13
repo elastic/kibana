@@ -72,6 +72,13 @@ export const RESULT = i18n.translate(
   }
 );
 
+export const RESOURCE_TYPE = i18n.translate(
+  'xpack.csp.findings.findingsTable.findingsTableColumn.resourceTypeColumnLabel',
+  {
+    defaultMessage: 'Resource Type',
+  }
+);
+
 export const CLUSTER_ID = i18n.translate(
   'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
   {
@@ -260,4 +267,9 @@ export const DETAILS = i18n.translate('xpack.csp.findings.findingsFlyout.details
 export const FINDINGS_SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.csp.findings.searchBar.searchPlaceholder',
   { defaultMessage: 'Search findings (eg. rule.section.keyword : "API Server" )' }
+);
+
+export const PAGE_SEARCH_ERROR_MESSAGE = i18n.translate(
+  'xpack.csp.findings.errorCallout.pageSearchErrorTitle',
+  { defaultMessage: 'We encountered an error retrieving search results' }
 );

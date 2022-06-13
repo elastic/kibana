@@ -35,7 +35,9 @@ import {
   IExpressionLoaderParams,
 } from '@kbn/expressions-plugin/public';
 import type { RenderMode } from '@kbn/expressions-plugin';
-import { VisualizationMissedDataViewError } from '../components/visualization_missed_data_view_error';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
+import { isFallbackDataView } from '../visualize_app/utils';
+import { VisualizationMissedSavedObjectError } from '../components/visualization_missed_saved_object_error';
 import VisualizationError from '../components/visualization_error';
 import { VISUALIZE_EMBEDDABLE_TYPE } from './constants';
 import { SerializedVis, Vis } from '../vis';
@@ -48,10 +50,7 @@ import {
 } from '../services';
 import { VIS_EVENT_TO_TRIGGER } from './events';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
-import {
-  getSavedVisualization,
-  shouldShowMissedDataViewError,
-} from '../utils/saved_visualize_utils';
+import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
 
@@ -394,14 +393,21 @@ export class VisualizeEmbeddable
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
     this.subscriptions.push(
-      this.getOutput$().subscribe(({ error }) => {
+      this.getUpdated$().subscribe(() => {
+        const { error } = this.getOutput();
+
         if (error) {
-          if (error.original && shouldShowMissedDataViewError(error.original)) {
+          if (isFallbackDataView(this.vis.data.indexPattern)) {
             render(
-              <VisualizationMissedDataViewError
+              <VisualizationMissedSavedObjectError
                 viewMode={this.input.viewMode ?? ViewMode.VIEW}
                 renderMode={this.input.renderMode ?? 'view'}
-                error={error.original}
+                savedObjectMeta={{
+                  savedObjectId: this.vis.data.indexPattern.id,
+                  savedObjectType: this.vis.data.savedSearchId
+                    ? 'search'
+                    : DATA_VIEW_SAVED_OBJECT_TYPE,
+                }}
                 application={getApplication()}
               />,
               this.domNode
