@@ -92,3 +92,41 @@ export const applyActionsEsSearchMock = (
     return new EndpointActionGenerator().toEsSearchResponse([]);
   });
 };
+
+/**
+ * Applies a mock implementation to the `esClient.search()` method that will return action requests or responses
+ * depending on what indexes the `.search()` was called with.
+ * @param esClient
+ * @param actionRequests
+ * @param actionResponses
+ */
+export const applyActionListEsSearchMock = (
+  esClient: ElasticsearchClientMock,
+  actionRequests: estypes.SearchResponse<LogsEndpointAction> = createActionRequestsEsSearchResultsMock(),
+  actionResponses: estypes.SearchResponse<
+    LogsEndpointActionResponse | EndpointActionResponse
+  > = createActionResponsesEsSearchResultsMock()
+) => {
+  const priorSearchMockImplementation = esClient.search.getMockImplementation();
+
+  // @ts-expect-error incorrect type
+  esClient.search.mockImplementation(async (...args) => {
+    const params = args[0] ?? {};
+    const indexes = Array.isArray(params.index) ? params.index : [params.index];
+
+    if (indexes.includes(ENDPOINT_ACTIONS_INDEX)) {
+      return { body: { ...actionRequests } };
+    } else if (
+      indexes.includes(AGENT_ACTIONS_RESULTS_INDEX) ||
+      indexes.includes(ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN)
+    ) {
+      return { body: { ...actionResponses } };
+    }
+
+    if (priorSearchMockImplementation) {
+      return priorSearchMockImplementation(...args);
+    }
+
+    return new EndpointActionGenerator().toEsSearchResponse([]);
+  });
+};

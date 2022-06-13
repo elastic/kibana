@@ -131,7 +131,9 @@ export const getActionResponses = async ({
   if (elasticAgentIds?.length) {
     filter.push({ terms: { agent_id: elasticAgentIds } });
   }
-  filter.push({ terms: { action_id: actionIds } });
+  if (actionIds.length) {
+    filter.push({ terms: { action_id: actionIds } });
+  }
 
   const responsesSearchQuery: SearchRequest = {
     index: ACTION_RESPONSE_INDICES,
@@ -140,7 +142,7 @@ export const getActionResponses = async ({
     body: {
       query: {
         bool: {
-          filter,
+          filter: filter.length ? filter : [],
         },
       },
     },
