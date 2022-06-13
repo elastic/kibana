@@ -18,22 +18,21 @@ export async function getRandomSampler({
   request: KibanaRequest;
   probability: number;
 }) {
-  const defaultSeed = 1;
+  let seed = 1;
 
   if (security) {
     const securityPluginStart = await security.start();
     const username =
       securityPluginStart.authc.getCurrentUser(request)?.username;
 
-    return {
-      probability,
-      seed: username ? Math.abs(seedrandom(username).int32()) : defaultSeed,
-    };
+    if (username) {
+      seed = Math.abs(seedrandom(username).int32());
+    }
   }
 
   return {
     probability,
-    seed: defaultSeed,
+    seed,
   };
 }
 
