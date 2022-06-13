@@ -393,7 +393,9 @@ export class VisualizeEmbeddable
     this.subscriptions.push(this.handler.render$.subscribe(this.onContainerRender));
 
     this.subscriptions.push(
-      this.getOutput$().subscribe(({ error }) => {
+      this.getUpdated$().subscribe(() => {
+        const { error } = this.getOutput();
+
         if (error) {
           if (isFallbackDataView(this.vis.data.indexPattern)) {
             render(

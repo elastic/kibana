@@ -200,4 +200,4 @@ public start(coreStart: CoreStart, startPlugins: SharedUXPluginStartDeps): Share
 
 ## Use in Kibana plugins
 
-In order to make consumption of these services easy by Kibana plugins, `src/plugins/shared_ux` provides a pre-wired set of services as part of the `start` lifecycle.  Plugins can simply make `sharedUX` a dependency, import `SharedUsServicesProvider` and wrap their solution root (or any component).  See the documentation for `sharedUX` for more details.
+In order to make consumption of these services easy by Kibana plugins, `src/plugins/shared_ux` provides a pre-wired set of services as part of the `start` lifecycle.  Plugins can simply make `sharedUX` a dependency, import `SharedUxServicesProvider` and wrap their solution root (or any component).  See the documentation for `sharedUX` for more details.
