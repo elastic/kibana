@@ -88,9 +88,17 @@ export function AlertsFlyout({
       ),
     },
     {
-      title: translations.alertsFlyout.lastUpdatedLabel,
+      title: translations.alertsFlyout.startedAtLabel,
       description: (
         <span title={alertData.start.toString()}>{moment(alertData.start).format(dateFormat)}</span>
+      ),
+    },
+    {
+      title: translations.alertsFlyout.lastUpdatedLabel,
+      description: (
+        <span title={alertData.start.toString()}>
+          {moment(alertData.lastUpdated).format(dateFormat)}
+        </span>
       ),
     },
     {
