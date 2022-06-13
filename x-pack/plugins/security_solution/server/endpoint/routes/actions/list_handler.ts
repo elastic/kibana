@@ -26,7 +26,7 @@ export const actionListHandler = (
   unknown,
   SecuritySolutionRequestHandlerContext
 > => {
-  const logger = endpointContext.logFactory.get('action_list');
+  const logger = endpointContext.logFactory.get('endpoint_action_list');
 
   return async (context, req, res) => {
     const {

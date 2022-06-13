@@ -34,7 +34,7 @@ export function registerActionListRoutes(
     },
     withEndpointAuthz(
       { all: ['canAccessEndpointManagement'] },
-      endpointContext.logFactory.get('endpointActionsLog'),
+      endpointContext.logFactory.get('endpointActionList'),
       actionListHandler(endpointContext)
     )
   );
