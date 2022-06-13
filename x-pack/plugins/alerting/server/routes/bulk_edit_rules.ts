@@ -37,7 +37,7 @@ const operationsSchema = schema.arrayOf(
     schema.object({
       operation: schema.literal('set'),
       field: schema.literal('schedule'),
-      value: schema.string({ validate: validateDurationSchema }),
+      value: schema.object({ interval: schema.string({ validate: validateDurationSchema }) }),
     }),
     schema.object({
       operation: schema.literal('set'),
