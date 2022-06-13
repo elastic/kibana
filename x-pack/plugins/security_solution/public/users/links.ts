@@ -21,7 +21,6 @@ export const links: LinkItem = {
   }),
   path: USERS_PATH,
   globalNavEnabled: true,
-  experimentalKey: 'usersEnabled',
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.users', {
       defaultMessage: 'Users',

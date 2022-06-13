@@ -16,7 +16,7 @@ import {
 import { TextContextTypeConvert } from '../../../common/types';
 
 class DateNanosFormatServer extends DateNanosFormat {
-  textConvert: TextContextTypeConvert = (val: string | number, options?: { timezone?: string }) => {
+  textConvert: TextContextTypeConvert = (val: string | number, options) => {
     // don't give away our ref to converter so
     // we can hot-swap when config changes
     const pattern = this.param('pattern');

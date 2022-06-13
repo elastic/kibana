@@ -16,8 +16,8 @@ import { writePidFile } from './write_pid_file';
 import type { AnalyticsServicePreboot } from '../analytics';
 
 import { configServiceMock } from '@kbn/config-mocks';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock } from '../logging/logging_system.mock';
-import { mockCoreContext } from '../core_context.mock';
 import { analyticsServiceMock } from '../analytics/analytics_service.mock';
 
 jest.mock('./resolve_uuid', () => ({
