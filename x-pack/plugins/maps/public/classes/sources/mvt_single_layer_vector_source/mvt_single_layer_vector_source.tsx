@@ -10,7 +10,12 @@ import uuid from 'uuid/v4';
 import React from 'react';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import { AbstractSource, ImmutableSourceProperty, SourceEditorArgs } from '../source';
-import { BoundsRequestMeta, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
+import {
+  BoundsRequestMeta,
+  GetFeatureActionsArgs,
+  GeoJsonWithMeta,
+  IMvtVectorSource,
+} from '../vector_source';
 import {
   FIELD_ORIGIN,
   MAX_ZOOM,
@@ -24,6 +29,7 @@ import {
   MapExtent,
   MVTFieldDescriptor,
   TiledSingleLayerVectorSourceDescriptor,
+  TooltipFeatureAction,
 } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
@@ -240,6 +246,11 @@ export class MVTSingleLayerVectorSource extends AbstractSource implements IMvtVe
 
   getJoinsDisabledReason(): string | null {
     return null;
+  }
+
+  getFeatureActions(args: GetFeatureActionsArgs): TooltipFeatureAction[] {
+    // Its not possible to filter by geometry for vector tile sources since there is no way to get original geometry
+    return [];
   }
 }
 

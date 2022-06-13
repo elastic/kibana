@@ -18,6 +18,7 @@ import { Feature } from 'geojson';
 import type { Map as MbMap, MapMouseEvent, MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import { TooltipControl } from './tooltip_control';
 import { IVectorLayer } from '../../../classes/layers/vector_layer';
+import { IVectorSource } from '../../../classes/sources/vector_source';
 
 // mutable map state
 let featuresAtLocation: MapGeoJSONFeature[] = [];
@@ -58,6 +59,13 @@ const mockLayer = {
         type: 'Polygon',
       },
     };
+  },
+  getSource: () => {
+    return {
+      getFeatureActions: () => {
+        return [];
+      },
+    } as unknown as IVectorSource;
   },
 } as unknown as IVectorLayer;
 
