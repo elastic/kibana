@@ -248,7 +248,9 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
     expressions.registerType(esRawResponse);
     expressions.registerType(eqlRawResponse);
 
-    const aggs = this.aggsService.setup({ registerFunction: expressions.registerFunction });
+    const aggs = this.aggsService.setup({
+      registerFunction: expressions.registerFunction,
+    });
 
     firstValueFrom(this.initializerContext.config.create<ConfigSchema>()).then((value) => {
       if (value.search.aggs.shardDelay.enabled) {

@@ -87,14 +87,18 @@ describe('esaggs expression function - public', () => {
 
     expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith(
       {},
-      args.aggs.map((agg) => agg.value)
+      args.aggs.map((agg) => agg.value),
+      { hierarchical: true, partialRows: false }
     );
   });
 
   test('calls aggs.createAggConfigs with the empty aggs array when not provided', async () => {
     await definition().fn(null, omit(args, 'aggs'), mockHandlers).toPromise();
 
-    expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, []);
+    expect(startDependencies.aggs.createAggConfigs).toHaveBeenCalledWith({}, [], {
+      hierarchical: true,
+      partialRows: false,
+    });
   });
 
   test('calls getEsaggsMeta to retrieve meta', () => {
@@ -111,8 +115,6 @@ describe('esaggs expression function - public', () => {
       abortSignal: mockHandlers.abortSignal,
       aggs: {
         foo: 'bar',
-        hierarchical: true,
-        partialRows: args.partialRows,
       },
       filters: undefined,
       indexPattern: {},

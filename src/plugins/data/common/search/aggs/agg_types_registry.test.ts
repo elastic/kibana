@@ -7,11 +7,32 @@
  */
 
 import { AggTypesRegistry, AggTypesRegistrySetup } from './agg_types_registry';
-import { BucketAggType } from './buckets/bucket_agg_type';
-import { MetricAggType } from './metrics/metric_agg_type';
+import type { BucketAggType } from './buckets/bucket_agg_type';
+import type { MetricAggType } from './metrics/metric_agg_type';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
+import type { AggTypesDependencies } from './agg_types';
 
-const bucketType = () => ({ name: 'terms', type: 'buckets' } as BucketAggType<any>);
-const metricType = () => ({ name: 'count', type: 'metrics' } as MetricAggType<any>);
+/** @internal */
+export function mockGetFieldFormatsStart() {
+  const { deserialize, getDefaultInstance } = fieldFormatsMock;
+  return {
+    deserialize,
+    getDefaultInstance,
+  };
+}
+
+// Mocked uiSettings shared among aggs unit tests
+const mockGetConfig = jest.fn((key) => key);
+
+/** @internal */
+export const mockAggTypesDependencies: AggTypesDependencies = {
+  calculateBounds: jest.fn(),
+  getFieldFormatsStart: mockGetFieldFormatsStart,
+  getConfig: mockGetConfig,
+};
+
+const bucketType = { name: 'terms', type: 'buckets' } as BucketAggType<any>;
+const metricType = { name: 'count', type: 'metrics' } as MetricAggType<any>;
 
 describe('AggTypesRegistry', () => {
   let registry: AggTypesRegistry;
@@ -21,18 +42,22 @@ describe('AggTypesRegistry', () => {
   beforeEach(() => {
     registry = new AggTypesRegistry();
     setup = registry.setup();
-    start = registry.start();
+    start = registry.start({
+      calculateBounds: jest.fn(),
+      getFieldFormatsStart: mockGetFieldFormatsStart,
+      getConfig: mockGetConfig,
+    });
   });
 
   it('registerBucket adds new buckets', () => {
-    setup.registerBucket('terms', bucketType);
+    setup.registerBucket('terms', () => bucketType);
     expect(start.getAll().buckets).toEqual([bucketType]);
   });
 
   it('registerBucket throws error when registering duplicate bucket', () => {
     expect(() => {
-      setup.registerBucket('terms', bucketType);
-      setup.registerBucket('terms', bucketType);
+      setup.registerBucket('terms', () => bucketType);
+      setup.registerBucket('terms', () => bucketType);
     }).toThrow(/already been registered with name: terms/);
 
     const fooBucket = () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>);
@@ -44,14 +69,14 @@ describe('AggTypesRegistry', () => {
   });
 
   it('registerMetric adds new metrics', () => {
-    setup.registerMetric('count', metricType);
+    setup.registerMetric('count', () => metricType);
     expect(start.getAll().metrics).toEqual([metricType]);
   });
 
   it('registerMetric throws error when registering duplicate metric', () => {
     expect(() => {
-      setup.registerMetric('count', metricType);
-      setup.registerMetric('count', metricType);
+      setup.registerMetric('count', () => metricType);
+      setup.registerMetric('count', () => metricType);
     }).toThrow(/already been registered with name: count/);
 
     const fooBucket = () => ({ name: 'foo', type: 'buckets' } as BucketAggType<any>);
@@ -63,15 +88,15 @@ describe('AggTypesRegistry', () => {
   });
 
   it('gets either buckets or metrics by id', () => {
-    setup.registerBucket('terms', bucketType);
-    setup.registerMetric('count', metricType);
+    setup.registerBucket('terms', () => bucketType);
+    setup.registerMetric('count', () => metricType);
     expect(start.get('terms')).toEqual(bucketType);
     expect(start.get('count')).toEqual(metricType);
   });
 
   it('getAll returns all buckets and metrics', () => {
-    setup.registerBucket('terms', bucketType);
-    setup.registerMetric('count', metricType);
+    setup.registerBucket('terms', () => bucketType);
+    setup.registerMetric('count', () => metricType);
     expect(start.getAll()).toEqual({
       buckets: [bucketType],
       metrics: [metricType],

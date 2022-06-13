@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionFunctionKibana } from '@kbn/data-plugin/public';
+import type { ExpressionFunctionKibana } from '@kbn/data-plugin/public';
 import { ExpressionAstExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
-import { VisToExpressionAst } from '../types';
+import type { VisToExpressionAst } from '../types';
 
 /**
  * Creates an ast expression for a visualization based on kibana context (query, filters, timerange)
@@ -29,12 +29,17 @@ export const toExpressionAst: VisToExpressionAst = async (
   const searchSource = vis.data.searchSource?.createCopy();
 
   if (vis.data.aggs) {
-    vis.data.aggs.hierarchical = vis.isHierarchical();
-    vis.data.aggs.partialRows =
-      typeof vis.type.hasPartialRows === 'function'
-        ? vis.type.hasPartialRows(vis)
-        : vis.type.hasPartialRows;
-    searchSource?.setField('aggs', vis.data.aggs);
+    const aggs = vis.data.aggs.clone({
+      opts: {
+        hierarchical: vis.isHierarchical(),
+        partialRows:
+          typeof vis.type.hasPartialRows === 'function'
+            ? vis.type.hasPartialRows(vis)
+            : vis.type.hasPartialRows,
+      },
+    });
+
+    searchSource?.setField('aggs', aggs);
   }
 
   const visExpressionAst = await vis.type.toExpressionAst(vis, params);

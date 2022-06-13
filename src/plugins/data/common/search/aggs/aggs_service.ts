@@ -8,7 +8,9 @@
 
 import { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { CreateAggConfigParams, UI_SETTINGS, AggTypesDependencies } from '../..';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import { CalculateBoundsOptions } from '../../query';
+import { UI_SETTINGS, AggTypesDependencies, calculateBounds } from '../..';
 import { GetConfigFn } from '../../types';
 import {
   AggConfigs,
@@ -37,9 +39,10 @@ export interface AggsCommonSetupDependencies {
 }
 
 export interface AggsCommonStartDependencies {
-  getConfig: GetConfigFn;
   getIndexPattern(id: string): Promise<DataView>;
-  aggExecutionContext?: AggTypesDependencies['aggExecutionContext'];
+  getConfig: GetConfigFn;
+  fieldFormats: FieldFormatsStartCommon;
+  calculateBoundsOptions: CalculateBoundsOptions;
 }
 
 /**
@@ -49,6 +52,8 @@ export interface AggsCommonStartDependencies {
  */
 export class AggsCommonService {
   private readonly aggTypesRegistry = new AggTypesRegistry();
+
+  constructor(private aggExecutionContext?: AggTypesDependencies['aggExecutionContext']) {}
 
   public setup({ registerFunction }: AggsCommonSetupDependencies): AggsCommonSetup {
     const aggTypesSetup = this.aggTypesRegistry.setup();
@@ -67,26 +72,32 @@ export class AggsCommonService {
     };
   }
 
-  public start({ getConfig, aggExecutionContext }: AggsCommonStartDependencies): AggsCommonStart {
-    const aggTypesStart = this.aggTypesRegistry.start();
-    const calculateAutoTimeExpression = getCalculateAutoTimeExpression(getConfig);
-
-    const createAggConfigs = (indexPattern: DataView, configStates?: CreateAggConfigParams[]) => {
-      return new AggConfigs(
-        indexPattern,
-        configStates,
-        {
-          typesRegistry: aggTypesStart,
-          aggExecutionContext,
-        },
-        getConfig
-      );
-    };
+  public start({
+    getConfig,
+    fieldFormats,
+    calculateBoundsOptions,
+  }: AggsCommonStartDependencies): AggsCommonStart {
+    const aggTypesStart = this.aggTypesRegistry.start({
+      getConfig,
+      getFieldFormatsStart: () => fieldFormats,
+      aggExecutionContext: this.aggExecutionContext,
+      calculateBounds: (timeRange) => calculateBounds(timeRange, calculateBoundsOptions),
+    });
 
     return {
-      calculateAutoTimeExpression,
-      createAggConfigs,
       types: aggTypesStart,
+      calculateAutoTimeExpression: getCalculateAutoTimeExpression(getConfig),
+      createAggConfigs: (indexPattern, configStates, options) =>
+        new AggConfigs(
+          indexPattern,
+          configStates,
+          {
+            ...options,
+            typesRegistry: aggTypesStart,
+            aggExecutionContext: this.aggExecutionContext,
+          },
+          getConfig
+        ),
     };
   }
 }

@@ -14,7 +14,7 @@ import type { Moment } from 'moment';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange, TimeRangeBounds, RangeFilterParams } from '../..';
 
-interface CalculateBoundsOptions {
+export interface CalculateBoundsOptions {
   forceNow?: Date;
 }
 
