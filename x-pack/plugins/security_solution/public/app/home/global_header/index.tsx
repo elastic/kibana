@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 
 import { AppMountParameters } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { isEmpty } from 'lodash/fp';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import { ADD_DATA_PATH } from '../../../../common/constants';
@@ -62,23 +63,24 @@ export const GlobalHeader = React.memo(
     const history = useHistory();
 
     const sourcerer = useShallowEqualSelector(sourcererSelectors.scopesSelector());
+    const sourcererDefault = sourcerer[SourcererScopeName.default];
 
-    const selectedPatterns: SourcererUrlState = useMemo(() => {
-      const activeScopes: SourcererScopeName[] = Object.keys(sourcerer) as SourcererScopeName[];
-
-      return activeScopes
-        .filter((scope) => scope === SourcererScopeName.default)
-        .reduce(
-          (acc, scope) => ({
-            ...acc,
-            [scope]: {
-              id: sourcerer[scope]?.selectedDataViewId,
-              selectedPatterns: sourcerer[scope]?.selectedPatterns,
-            },
-          }),
-          {}
-        );
-    }, [sourcerer]);
+    const selectedPatterns = useMemo(() => {
+      if (
+        sourcererDefault &&
+        sourcererDefault.selectedDataViewId &&
+        !isEmpty(sourcererDefault.selectedPatterns)
+      ) {
+        return {
+          [SourcererScopeName.default]: {
+            id: sourcererDefault.selectedDataViewId,
+            selectedPatterns: sourcererDefault.selectedPatterns,
+          },
+        };
+      } else {
+        return null;
+      }
+    }, [sourcererDefault]);
 
     useEffect(() => {
       updateUrlParam<SourcererUrlState>({

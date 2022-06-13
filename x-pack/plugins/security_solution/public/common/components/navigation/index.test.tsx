@@ -92,7 +92,6 @@ describe('SIEM Navigation', () => {
       },
       [CONSTANTS.appQuery]: { query: '', language: 'kuery' },
       [CONSTANTS.filters]: [],
-      [CONSTANTS.sourcerer]: {},
       [CONSTANTS.timeline]: {
         activeTab: TimelineTabs.query,
         id: '',

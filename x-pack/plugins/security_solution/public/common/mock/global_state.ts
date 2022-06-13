@@ -388,6 +388,7 @@ export const mockGlobalState: State = {
       },
     },
   },
+  globalUrlState: {},
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.

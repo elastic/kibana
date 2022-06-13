@@ -10,6 +10,7 @@ import { parse, stringify } from 'query-string';
 import { useMemo } from 'react';
 
 import { url } from '@kbn/kibana-utils-plugin/public';
+import { isEmpty, pickBy } from 'lodash/fp';
 import {
   decodeRisonUrlState,
   encodeRisonUrlState,
@@ -46,7 +47,7 @@ export const registerUrlParam = <State>({
 
 interface UpdateQueryParams<State> {
   urlStateKey: string;
-  value: State;
+  value: State | null;
   history: H.History;
 }
 
@@ -62,7 +63,7 @@ export const updateUrlParam = <State>({
   const store = getStore();
   if (!store) return;
 
-  const encodedValue = encodeRisonUrlState(value);
+  const encodedValue = value !== null ? encodeRisonUrlState(value) : null;
   const isRegister = selectIsRegister(store.getState(), urlStateKey);
 
   // Only update the URL after the query param is register
@@ -81,7 +82,11 @@ export const useGlobalQueryString = () => {
   const globalUrlState = useShallowEqualSelector(globalUrlStateSelectors.selectGlobalUrlState);
 
   const globalQueryString = useMemo(
-    () => stringify(url.encodeQuery(globalUrlState), { sort: false, encode: false }),
+    () =>
+      stringify(url.encodeQuery(pickBy((value) => !isEmpty(value), globalUrlState)), {
+        sort: false,
+        encode: false,
+      }),
     [globalUrlState]
   );
 

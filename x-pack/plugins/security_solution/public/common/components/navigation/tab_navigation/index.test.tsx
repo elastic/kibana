@@ -89,7 +89,6 @@ describe('Table Navigation', () => {
     },
     [CONSTANTS.appQuery]: { query: 'host.name:"siem-es"', language: 'kuery' },
     [CONSTANTS.filters]: [],
-    [CONSTANTS.sourcerer]: {},
     [CONSTANTS.timeline]: {
       activeTab: TimelineTabs.query,
       id: '',
