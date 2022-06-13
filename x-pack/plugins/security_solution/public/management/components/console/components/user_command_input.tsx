@@ -6,6 +6,12 @@
  */
 
 import React, { memo } from 'react';
+import { EuiCode } from '@elastic/eui';
+import styled from 'styled-components';
+
+const StyledEuiCode = styled(EuiCode)`
+  padding-left: 0;
+`;
 
 export interface UserCommandInputProps {
   input: string;
@@ -13,10 +19,9 @@ export interface UserCommandInputProps {
 
 export const UserCommandInput = memo<UserCommandInputProps>(({ input }) => {
   return (
-    <>
-      {'$ '}
-      <code>{input}</code>
-    </>
+    <StyledEuiCode language="shell" transparentBackground={true}>
+      {input}
+    </StyledEuiCode>
   );
 });
 UserCommandInput.displayName = 'UserCommandInput';

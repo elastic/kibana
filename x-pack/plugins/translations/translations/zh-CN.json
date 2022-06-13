@@ -23934,7 +23934,6 @@
     "xpack.securitySolution.console.commandValidation.mustHaveArgs": "缺少所需参数：{requiredArgs}",
     "xpack.securitySolution.console.commandValidation.noArgumentsSupported": "命令不支持任何参数",
     "xpack.securitySolution.console.commandValidation.oneArgIsRequired": "必须至少使用一个参数",
-    "xpack.securitySolution.console.commandValidation.unknownArgument": "未知参数：{unknownArgs}",
     "xpack.securitySolution.console.commandValidation.unsupportedArg": "不支持的参数：{argName}",
     "xpack.securitySolution.console.unknownCommand.title": "未知命令",
     "xpack.securitySolution.containers.anomalies.errorFetchingAnomaliesData": "无法查询异常数据",
