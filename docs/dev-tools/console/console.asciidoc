@@ -1,7 +1,7 @@
 [[console-kibana]]
 == Run API requests
 
-Interact with the REST APIs of {es} and {kib} with *Console*. You can:
+Interact with the REST APIs of {es} and {kib} with *Console*. With *Console*, you can:
 
 * Send requests and view the responses
 * View API documentation
