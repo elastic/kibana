@@ -69,12 +69,15 @@ export function DiscoverMainRoute() {
   const loadDefaultOrCurrentIndexPattern = useCallback(
     async (searchSource: ISearchSource) => {
       try {
-        const hasUserDataView = await data.dataViews.hasData.hasUserDataView().catch(() => false);
-        const hasEsData = await data.dataViews.hasData.hasESData().catch(() => false);
-        if (!hasUserDataView || !hasEsData) {
+        const hasUserDataViewValue = await data.dataViews.hasData
+          .hasUserDataView()
+          .catch(() => false);
+
+        if (!hasUserDataViewValue) {
           setShowNoDataPage(true);
           return;
         }
+
         const defaultDataView = await data.dataViews.getDefaultDataView();
         if (!defaultDataView) {
           setShowNoDataPage(true);
