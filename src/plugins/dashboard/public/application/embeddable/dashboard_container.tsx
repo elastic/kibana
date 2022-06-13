@@ -14,6 +14,7 @@ import { CoreStart, IUiSettingsClient, KibanaExecutionContext } from '@kbn/core/
 import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
+import { Filter, TimeRange } from '@kbn/es-query';
 import { UiActionsStart } from '../../services/ui_actions';
 import { RefreshInterval, Query } from '../../services/data';
 import {
@@ -48,7 +49,6 @@ import {
   syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
 import { DashboardDataLoadedEvent } from './grid/dashboard_grid';
-import { Filter, TimeRange } from '@kbn/es-query';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;

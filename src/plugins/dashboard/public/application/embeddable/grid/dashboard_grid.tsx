@@ -29,8 +29,8 @@ import { DashboardGridItem } from './dashboard_grid_item';
 export interface DashboardDataLoadedEvent extends Record<string, unknown> {
   timeTookMs: number;
   numOfPanels: number;
-  status: string,
-};
+  status: string;
+}
 
 let lastValidGridSize = 0;
 
@@ -253,18 +253,17 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     const loadStartTime = performance.now();
     let loadStatus: string = 'ok';
 
-
     const onPanelStatusChange = (info: EmbeddableLoadedEvent) => {
       panelIds.push(info);
       if (info.error !== undefined) {
-        loadStatus = 'error'
+        loadStatus = 'error';
       }
       if (panelIds.length === panelsInOrder.length && this.props.onDataLoaded) {
         this.props.onDataLoaded({
-         timeTookMs: performance.now() - loadStartTime,
-         numOfPanels: panelIds.length,
-         status: loadStatus,
-        })
+          timeTookMs: performance.now() - loadStartTime,
+          numOfPanels: panelIds.length,
+          status: loadStatus,
+        });
       }
     };
 

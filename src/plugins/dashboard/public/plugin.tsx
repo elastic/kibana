@@ -144,22 +144,22 @@ export class DashboardPlugin
       schema: {
         id: {
           type: 'keyword',
-          _meta: { description: 'Dashboard saved object id', },
+          _meta: { description: 'Dashboard saved object id' },
         },
         timeTookMs: {
           type: 'long',
-          _meta: { description: 'Time all embeddables took to load data', },
+          _meta: { description: 'Time all embeddables took to load data' },
         },
         status: {
           type: 'keyword',
-          _meta: { description: 'Error \ ok', },
+          _meta: { description: 'Error  ok' },
         },
         numOfPanels: {
           type: 'long',
-          _meta: { description: 'Number of panels loaded', },
+          _meta: { description: 'Number of panels loaded' },
         },
-      }
-    })
+      },
+    });
   }
 
   public setup(

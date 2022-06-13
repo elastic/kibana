@@ -157,10 +157,9 @@ export class DashboardViewport extends React.Component<DashboardViewportProps, S
               />
             </div>
           )}
-          {this.state.controlGroupReady && <DashboardGrid 
-            container={container} 
-            onDataLoaded={this.props.onDataLoaded} 
-          />}
+          {this.state.controlGroupReady && (
+            <DashboardGrid container={container} onDataLoaded={this.props.onDataLoaded} />
+          )}
         </div>
       </>
     );
