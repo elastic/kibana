@@ -95,10 +95,10 @@ export interface BooleanFieldStats {
 }
 
 export interface DocumentCountStats {
-  interval: number;
-  buckets: { [key: string]: number };
-  timeRangeEarliest: number;
-  timeRangeLatest: number;
+  interval?: number;
+  buckets?: { [key: string]: number };
+  timeRangeEarliest?: number;
+  timeRangeLatest?: number;
   totalCount: number;
 }
 
