@@ -208,11 +208,6 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     anomalyExplorerContext.anomalyExplorerCommonStateService.getInfluencerFilterQuery$()
   );
 
-  const smvJobs = useObservable(
-    anomalyExplorerContext.anomalyExplorerCommonStateService.getSingleMetricJobs$()
-  );
-  const isSingleMetricViewerDisabled = (smvJobs?.length ?? 0) === 0;
-
   const loadExplorerDataConfig =
     explorerState !== undefined
       ? {
@@ -257,7 +252,7 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
           <EuiFlexItem grow={false}>
             <AnomalyResultsViewSelector
               viewId="explorer"
-              isSingleMetricViewerDisabled={isSingleMetricViewerDisabled}
+              selectedJobs={explorerState.selectedJobs}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
