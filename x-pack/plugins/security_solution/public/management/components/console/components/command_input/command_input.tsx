@@ -9,6 +9,7 @@ import React, { memo, MouseEventHandler, useCallback, useRef, useState } from 'r
 import { CommonProps, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import classNames from 'classnames';
+import { InputAreaPopover } from './components/input_area_popover';
 import { KeyCapture, KeyCaptureProps } from './key_capture';
 import { useConsoleStateDispatch } from '../../hooks/state_selectors/use_console_state_dispatch';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
@@ -112,35 +113,37 @@ export const CommandInput = memo<CommandInputProps>(
     );
 
     return (
-      <CommandInputContainer {...commonProps} onClick={handleTypingAreaClick}>
-        <EuiFlexGroup
-          wrap={true}
-          responsive={false}
-          alignItems="flexStart"
-          gutterSize="none"
-          justifyContent="flexStart"
-          ref={textDisplayRef}
-        >
-          <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
-            <span className="eui-displayInlineBlock prompt">{prompt}</span>
-          </EuiFlexItem>
-          <EuiFlexItem
-            className="textEntered"
-            grow={false}
-            data-test-subj={getTestId('cmdInput-userTextInput')}
+      <InputAreaPopover>
+        <CommandInputContainer {...commonProps} onClick={handleTypingAreaClick}>
+          <EuiFlexGroup
+            wrap={true}
+            responsive={false}
+            alignItems="flexStart"
+            gutterSize="none"
+            justifyContent="flexStart"
+            ref={textDisplayRef}
           >
-            {textEntered}
-          </EuiFlexItem>
-          <EuiFlexItem grow>
-            <span className={classNames({ cursor: true, inactive: !isKeyInputBeingCaptured })} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <KeyCapture
-          onCapture={handleKeyCapture}
-          focusRef={keyCaptureFocusRef}
-          onStateChange={handleKeyCaptureOnStateChange}
-        />
-      </CommandInputContainer>
+            <EuiFlexItem grow={false} data-test-subj={getTestId('cmdInput-prompt')}>
+              <span className="eui-displayInlineBlock prompt">{prompt}</span>
+            </EuiFlexItem>
+            <EuiFlexItem
+              className="textEntered"
+              grow={false}
+              data-test-subj={getTestId('cmdInput-userTextInput')}
+            >
+              {textEntered}
+            </EuiFlexItem>
+            <EuiFlexItem grow>
+              <span className={classNames({ cursor: true, inactive: !isKeyInputBeingCaptured })} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <KeyCapture
+            onCapture={handleKeyCapture}
+            focusRef={keyCaptureFocusRef}
+            onStateChange={handleKeyCaptureOnStateChange}
+          />
+        </CommandInputContainer>
+      </InputAreaPopover>
     );
   }
 );
