@@ -70,13 +70,13 @@ trap "shutdown" EXIT
 
 export TEST_KIBANA_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').protocol.replace(':', ''))")
 export TEST_KIBANA_HOSTNAME=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').hostname)")
-export TEST_KIBANA_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').port)")
+export TEST_KIBANA_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_KIBANA_URL').port || 443)")
 export TEST_KIBANA_USERNAME="$CLOUD_DEPLOYMENT_USERNAME"
 export TEST_KIBANA_PASSWORD="$CLOUD_DEPLOYMENT_PASSWORD"
 
 export TEST_ES_PROTOCOL=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_ELASTICSEARCH_URL').protocol.replace(':', ''))")
 export TEST_ES_HOSTNAME=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_ELASTICSEARCH_URL').hostname)")
-export TEST_ES_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_ELASTICSEARCH_URL').port)")
+export TEST_ES_PORT=$(node -e "console.log(new URL('$CLOUD_DEPLOYMENT_ELASTICSEARCH_URL').port || 443)")
 export TEST_ES_USERNAME="$CLOUD_DEPLOYMENT_USERNAME"
 export TEST_ES_PASSWORD="$CLOUD_DEPLOYMENT_PASSWORD"
 
