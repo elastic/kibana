@@ -30,6 +30,7 @@ export function useTestQuery(fetch: () => Promise<{ nrOfDocs: number; timeWindow
     TEST_QUERY_INITIAL_RESPONSE
   );
 
+  // Reset query response when criteria got changed
   useEffect(() => {
     setTestQueryResponse(TEST_QUERY_INITIAL_RESPONSE);
   }, [fetch]);
