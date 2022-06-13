@@ -6,15 +6,15 @@
  */
 
 import { useGetArtifact } from './use_get_artifact';
-import { HttpSetup } from 'kibana/public';
+import { HttpSetup } from '@kbn/core/public';
 import { ExceptionsListApiClient } from '../../services/exceptions_list/exceptions_list_api_client';
 import {
   getFakeListId,
   getFakeListDefinition,
   getFakeHttpService,
   renderQuery,
-} from './test_utils';
-import { getExceptionListItemSchemaMock } from '../../../../../lists/common/schemas/response/exception_list_item_schema.mock';
+} from '../test_utils';
+import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 
 describe('Get artifact hook', () => {
   let result: ReturnType<typeof useGetArtifact>;

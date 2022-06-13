@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import deepEqual from 'fast-deep-equal';
+
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { Droppable, DraggableChildrenFn } from 'react-beautiful-dnd';
 
@@ -312,19 +312,4 @@ export const ColumnHeadersComponent = ({
   );
 };
 
-export const ColumnHeaders = React.memo(
-  ColumnHeadersComponent,
-  (prevProps, nextProps) =>
-    prevProps.actionsColumnWidth === nextProps.actionsColumnWidth &&
-    prevProps.isEventViewer === nextProps.isEventViewer &&
-    prevProps.isSelectAllChecked === nextProps.isSelectAllChecked &&
-    prevProps.onSelectAll === nextProps.onSelectAll &&
-    prevProps.show === nextProps.show &&
-    prevProps.showEventsSelect === nextProps.showEventsSelect &&
-    prevProps.showSelectAllCheckbox === nextProps.showSelectAllCheckbox &&
-    deepEqual(prevProps.sort, nextProps.sort) &&
-    prevProps.timelineId === nextProps.timelineId &&
-    deepEqual(prevProps.columnHeaders, nextProps.columnHeaders) &&
-    prevProps.tabType === nextProps.tabType &&
-    deepEqual(prevProps.browserFields, nextProps.browserFields)
-);
+export const ColumnHeaders = React.memo(ColumnHeadersComponent);

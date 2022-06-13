@@ -8,8 +8,7 @@ import * as t from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Outlet } from '@kbn/typed-react-router-config';
-import { toBooleanRt } from '@kbn/io-ts-utils';
-import { comparisonTypeRt } from '../../../../common/runtime_types/comparison_type_rt';
+import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
 import { ServiceOverview } from '../../app/service_overview';
@@ -29,6 +28,8 @@ import { ServiceDependencies } from '../../app/service_dependencies';
 import { ServiceLogs } from '../../app/service_logs';
 import { InfraOverview } from '../../app/infra_overview';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
+import { offsetRt } from '../../../../common/comparison_rt';
+import { TimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 
 function page({
   title,
@@ -63,7 +64,11 @@ function page({
 
 export const serviceDetail = {
   '/services/{serviceName}': {
-    element: <ApmServiceWrapper />,
+    element: (
+      <TimeRangeMetadataContextProvider>
+        <ApmServiceWrapper />
+      </TimeRangeMetadataContextProvider>
+    ),
     params: t.intersection([
       t.type({
         path: t.type({
@@ -78,15 +83,15 @@ export const serviceDetail = {
             rangeTo: t.string,
             kuery: t.string,
             serviceGroup: t.string,
+            comparisonEnabled: toBooleanRt,
           }),
           t.partial({
-            comparisonEnabled: toBooleanRt,
-            comparisonType: comparisonTypeRt,
             latencyAggregationType: t.string,
             transactionType: t.string,
             refreshPaused: t.union([t.literal('true'), t.literal('false')]),
             refreshInterval: t.string,
           }),
+          offsetRt,
         ]),
       }),
     ]),
@@ -99,17 +104,27 @@ export const serviceDetail = {
       },
     },
     children: {
-      '/services/{serviceName}/overview': page({
-        element: <ServiceOverview />,
-        tab: 'overview',
-        title: i18n.translate('xpack.apm.views.overview.title', {
-          defaultMessage: 'Overview',
+      '/services/{serviceName}/overview': {
+        ...page({
+          element: <ServiceOverview />,
+          tab: 'overview',
+          title: i18n.translate('xpack.apm.views.overview.title', {
+            defaultMessage: 'Overview',
+          }),
+          searchBarOptions: {
+            showTransactionTypeSelector: true,
+            showTimeComparison: true,
+          },
         }),
-        searchBarOptions: {
-          showTransactionTypeSelector: true,
-          showTimeComparison: true,
-        },
-      }),
+        params: t.partial({
+          query: t.partial({
+            page: toNumberRt,
+            pageSize: toNumberRt,
+            sortField: t.string,
+            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+          }),
+        }),
+      },
       '/services/{serviceName}/transactions': {
         ...page({
           tab: 'transactions',
@@ -122,6 +137,14 @@ export const serviceDetail = {
             showTimeComparison: true,
           },
         }),
+        params: t.partial({
+          query: t.partial({
+            page: toNumberRt,
+            pageSize: toNumberRt,
+            sortField: t.string,
+            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+          }),
+        }),
         children: {
           '/services/{serviceName}/transactions/view': {
             element: <TransactionDetails />,
@@ -129,13 +152,13 @@ export const serviceDetail = {
               query: t.intersection([
                 t.type({
                   transactionName: t.string,
+                  comparisonEnabled: toBooleanRt,
                 }),
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,
-                  comparisonEnabled: toBooleanRt,
-                  comparisonType: comparisonTypeRt,
                 }),
+                offsetRt,
               ]),
             }),
           },
@@ -167,10 +190,10 @@ export const serviceDetail = {
         }),
         params: t.partial({
           query: t.partial({
-            sortDirection: t.string,
+            page: toNumberRt,
+            pageSize: toNumberRt,
             sortField: t.string,
-            pageSize: t.string,
-            page: t.string,
+            sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
           }),
         }),
         children: {
@@ -251,14 +274,16 @@ export const serviceDetail = {
         }),
         element: <ServiceProfiling />,
       }),
-      '/services/{serviceName}/infra': page({
-        tab: 'infra',
+      '/services/{serviceName}/infrastructure': page({
+        tab: 'infrastructure',
         title: i18n.translate('xpack.apm.views.infra.title', {
           defaultMessage: 'Infrastructure',
         }),
         element: <InfraOverview />,
         searchBarOptions: {
-          hidden: true,
+          showKueryBar: false,
+          showTimeComparison: false,
+          showTransactionTypeSelector: false,
         },
       }),
       '/services/{serviceName}/': {

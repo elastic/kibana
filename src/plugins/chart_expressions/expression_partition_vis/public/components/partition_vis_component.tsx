@@ -18,17 +18,23 @@ import {
   TooltipProps,
   TooltipType,
   SeriesIdentifier,
+  PartitionElementEvent,
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
-import { LegendToggle, ChartsPluginSetup, PaletteRegistry } from '../../../../charts/public';
-import type { PersistedState } from '../../../../visualizations/public';
-import { getColumnByAccessor } from '../../../../visualizations/common/utils';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { LegendToggle, ChartsPluginSetup } from '@kbn/charts-plugin/public';
+import {
+  DEFAULT_LEGEND_SIZE,
+  LegendSizeToPixels,
+} from '@kbn/visualizations-plugin/common/constants';
+import { PersistedState } from '@kbn/visualizations-plugin/public';
+import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import {
   Datatable,
   DatatableColumn,
   IInterpreterRenderHandlers,
-} from '../../../../expressions/public';
-import type { FieldFormat } from '../../../../field_formats/common';
+} from '@kbn/expressions-plugin/public';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import { DEFAULT_PERCENT_DECIMALS } from '../../common/constants';
 import {
   PartitionVisParams,
@@ -127,8 +133,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   useEffect(() => {
     const legendShow = showLegendDefault();
     setShowLegend(legendShow);
-    props.uiState?.set('vis.legendOpen', legendShow);
-  }, [showLegendDefault, props.uiState]);
+  }, [showLegendDefault]);
 
   const onRenderChange = useCallback<RenderChangeListener>(
     (isRendered) => {
@@ -387,15 +392,17 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   showLegend ?? shouldShowLegend(visType, visParams.legendDisplay, bucketColumns)
                 }
                 legendPosition={legendPosition}
-                legendSize={visParams.legendSize}
+                legendSize={LegendSizeToPixels[visParams.legendSize ?? DEFAULT_LEGEND_SIZE]}
                 legendMaxDepth={visParams.nestedLegend ? undefined : 1}
                 legendColorPicker={props.uiState ? LegendColorPickerWrapper : undefined}
                 flatLegend={flatLegend}
                 tooltip={tooltip}
                 showLegendExtra={visParams.showValuesInLegend}
-                onElementClick={(args) => {
+                onElementClick={([elementEvent]) => {
+                  // this cast is safe because we are rendering a partition chart
+                  const [layerValues] = elementEvent as PartitionElementEvent;
                   handleSliceClick(
-                    args[0][0] as LayerValue[],
+                    layerValues,
                     bucketColumns,
                     visData,
                     splitChartDimension,

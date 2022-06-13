@@ -28,10 +28,6 @@ export const OptionsListStrings = {
       }),
   },
   editor: {
-    getIndexPatternTitle: () =>
-      i18n.translate('controls.optionsList.editor.indexPatternTitle', {
-        defaultMessage: 'Index pattern',
-      }),
     getDataViewTitle: () =>
       i18n.translate('controls.optionsList.editor.dataViewTitle', {
         defaultMessage: 'Data view',
@@ -47,6 +43,10 @@ export const OptionsListStrings = {
     getAllowMultiselectTitle: () =>
       i18n.translate('controls.optionsList.editor.allowMultiselectTitle', {
         defaultMessage: 'Allow multiple selections in dropdown',
+      }),
+    getRunPastTimeoutTitle: () =>
+      i18n.translate('controls.optionsList.editor.runPastTimeout', {
+        defaultMessage: 'Run past timeout',
       }),
   },
   popover: {

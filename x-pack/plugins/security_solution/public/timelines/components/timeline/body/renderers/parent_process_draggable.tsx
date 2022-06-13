@@ -60,6 +60,8 @@ export const ParentProcessDraggable = React.memo<Props>(
               field="process.parent.name"
               isDraggable={isDraggable}
               value={processParentName}
+              fieldType="keyword"
+              isAggregatable={true}
             />
           </TokensFlexItem>
         )}
@@ -72,6 +74,8 @@ export const ParentProcessDraggable = React.memo<Props>(
               field="endgame.parent_process_name"
               isDraggable={isDraggable}
               value={endgameParentProcessName}
+              fieldType="keyword"
+              isAggregatable={true}
             />
           </TokensFlexItem>
         )}
@@ -85,6 +89,8 @@ export const ParentProcessDraggable = React.memo<Props>(
               isDraggable={isDraggable}
               queryValue={String(processParentPid)}
               value={`(${String(processParentPid)})`}
+              fieldType="keyword"
+              isAggregatable={true}
             />
           </TokensFlexItem>
         )}
@@ -98,6 +104,8 @@ export const ParentProcessDraggable = React.memo<Props>(
               isDraggable={isDraggable}
               queryValue={String(processPpid)}
               value={`(${String(processPpid)})`}
+              fieldType="keyword"
+              isAggregatable={true}
             />
           </TokensFlexItem>
         )}

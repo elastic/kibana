@@ -28,7 +28,9 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
               color="subdued"
               data-euiicon-type="importAction"
               size="xxl"
-            />
+            >
+              
+            </span>
           </div>
           <div
             className="euiEmptyPrompt__content"
@@ -37,7 +39,7 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
               className="euiEmptyPrompt__contentInner"
             >
               <h2
-                className="euiTitle euiTitle--medium"
+                className="euiTitle css-1w464ad-euiTitle-m"
               >
                 Add your first workpad
               </h2>
@@ -46,7 +48,7 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
                 style={Object {}}
               >
                 <div
-                  className="euiSpacer euiSpacer--m"
+                  className="euiSpacer euiSpacer--m css-jv9za2-euiSpacer-m"
                 />
                 <div
                   className="euiText euiText--medium"
@@ -58,7 +60,7 @@ exports[`Storyshots Home/Components/Empty Prompt Empty Prompt 1`] = `
                     New to Canvas?
                      
                     <a
-                      className="euiLink euiLink--primary"
+                      className="euiLink css-102pf9n-euiLink-primary"
                       href="home#/tutorial_directory/sampleData"
                       rel="noreferrer"
                     >

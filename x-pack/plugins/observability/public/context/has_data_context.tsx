@@ -9,13 +9,13 @@ import { isEmpty, uniqueId } from 'lodash';
 import React, { createContext, useEffect, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { asyncForEach } from '@kbn/std';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getDataHandler } from '../data_handler';
 import { FETCH_STATUS } from '../hooks/use_fetcher';
 import { useDatePickerContext } from '../hooks/use_date_picker_context';
 import { getObservabilityAlerts } from '../services/get_observability_alerts';
 import { ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
 import { ApmIndicesConfig } from '../../common/typings';
-import { useKibana } from '../../../../../src/plugins/kibana_react/public';
 import { ObservabilityAppServices } from '../application/types';
 
 type DataContextApps = ObservabilityFetchDataPlugins | 'alert';
@@ -96,8 +96,11 @@ export function HasDataContextProvider({ children }: { children: React.ReactNode
 
                 break;
               case 'infra_logs':
-                const resultInfra = await getDataHandler(app)?.hasData();
-                updateState({ hasData: resultInfra });
+                const resultInfraLogs = await getDataHandler(app)?.hasData();
+                updateState({
+                  hasData: resultInfraLogs?.hasData,
+                  indices: resultInfraLogs?.indices,
+                });
                 break;
               case 'infra_metrics':
                 const resultInfraMetrics = await getDataHandler(app)?.hasData();

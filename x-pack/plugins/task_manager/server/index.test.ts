@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { config } from './index';
+import { config } from '.';
 import { applyDeprecations, configDeprecationFactory } from '@kbn/config';
-import { configDeprecationsMock } from '../../../../src/core/server/mocks';
+import { configDeprecationsMock } from '@kbn/core/server/mocks';
 
 const CONFIG_PATH = 'xpack.task_manager';
 

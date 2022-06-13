@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { KibanaContextProvider } from 'src/plugins/kibana_react/public';
-import { coreMock } from 'src/core/public/mocks';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { registerDataHandler, unregisterDataHandler } from '../data_handler';
 import { useHasData } from '../hooks/use_has_data';
 import { HasData, ObservabilityFetchDataPlugins } from '../typings/fetch_overview_data';
@@ -92,7 +92,10 @@ describe('HasDataContextProvider', () => {
       beforeAll(() => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: false }) },
-          { appName: 'infra_logs', hasData: async () => false },
+          {
+            appName: 'infra_logs',
+            hasData: async () => ({ hasData: false, indices: 'test-index' }),
+          },
           { appName: 'infra_metrics', hasData: async () => ({ hasData: false }) },
           {
             appName: 'synthetics',
@@ -129,7 +132,7 @@ describe('HasDataContextProvider', () => {
               hasData: false,
               status: 'success',
             },
-            infra_logs: { hasData: false, status: 'success' },
+            infra_logs: { hasData: false, indices: 'test-index', status: 'success' },
             infra_metrics: { hasData: false, status: 'success' },
             ux: {
               hasData: false,
@@ -149,7 +152,10 @@ describe('HasDataContextProvider', () => {
       beforeAll(() => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: true }) },
-          { appName: 'infra_logs', hasData: async () => false },
+          {
+            appName: 'infra_logs',
+            hasData: async () => ({ hasData: false, indices: 'test-index' }),
+          },
           {
             appName: 'infra_metrics',
             hasData: async () => ({ hasData: false, indices: 'metric-*' }),
@@ -189,7 +195,7 @@ describe('HasDataContextProvider', () => {
               indices: 'heartbeat-*, synthetics-*',
               status: 'success',
             },
-            infra_logs: { hasData: false, status: 'success' },
+            infra_logs: { hasData: false, indices: 'test-index', status: 'success' },
             infra_metrics: { hasData: false, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: false,
@@ -210,7 +216,10 @@ describe('HasDataContextProvider', () => {
       beforeAll(() => {
         registerApps([
           { appName: 'apm', hasData: async () => ({ hasData: true }) },
-          { appName: 'infra_logs', hasData: async () => true },
+          {
+            appName: 'infra_logs',
+            hasData: async () => ({ hasData: true, indices: 'test-index' }),
+          },
           {
             appName: 'infra_metrics',
             hasData: async () => ({ hasData: true, indices: 'metric-*' }),
@@ -253,7 +262,7 @@ describe('HasDataContextProvider', () => {
               indices: 'heartbeat-*, synthetics-*',
               status: 'success',
             },
-            infra_logs: { hasData: true, status: 'success' },
+            infra_logs: { hasData: true, indices: 'test-index', status: 'success' },
             infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: true,
@@ -373,7 +382,10 @@ describe('HasDataContextProvider', () => {
               throw new Error('BOOMMMMM');
             },
           },
-          { appName: 'infra_logs', hasData: async () => true },
+          {
+            appName: 'infra_logs',
+            hasData: async () => ({ hasData: true, indices: 'test-index' }),
+          },
           {
             appName: 'infra_metrics',
             hasData: async () => ({ hasData: true, indices: 'metric-*' }),
@@ -413,7 +425,7 @@ describe('HasDataContextProvider', () => {
               indices: 'heartbeat-*, synthetics-*',
               status: 'success',
             },
-            infra_logs: { hasData: true, status: 'success' },
+            infra_logs: { hasData: true, indices: 'test-index', status: 'success' },
             infra_metrics: { hasData: true, indices: 'metric-*', status: 'success' },
             ux: {
               hasData: true,

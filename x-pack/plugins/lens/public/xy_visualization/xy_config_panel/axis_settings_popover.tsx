@@ -14,23 +14,21 @@ import {
   htmlIdGenerator,
   EuiFieldNumber,
   EuiFormControlLayoutDelimited,
+  EuiSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
-import { XYLayerConfig, AxesSettingsConfig, AxisExtentConfig } from '../../../common/expressions';
-import {
-  ToolbarPopover,
-  useDebouncedValue,
-  TooltipWrapper,
-  AxisTitleSettings,
-} from '../../shared_components';
+import { AxesSettingsConfig, AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
+import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { XYLayerConfig } from '../types';
+import { ToolbarPopover, useDebouncedValue, AxisTitleSettings } from '../../shared_components';
 import { isHorizontalChart } from '../state_helpers';
 import { EuiIconAxisBottom } from '../../assets/axis_bottom';
 import { EuiIconAxisLeft } from '../../assets/axis_left';
 import { EuiIconAxisRight } from '../../assets/axis_right';
 import { EuiIconAxisTop } from '../../assets/axis_top';
-import { ToolbarButtonProps } from '../../../../../../src/plugins/kibana_react/public';
 import { validateExtent } from '../axes_configuration';
+
 import './axis_settings_popover.scss';
 
 type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
@@ -96,6 +94,14 @@ export interface AxisSettingsPopoverProps {
    * Flag whether endzones are visible
    */
   endzonesVisible?: boolean;
+  /**
+   * Set scale
+   */
+  setScale?: (scale: YScaleType) => void;
+  /**
+   * Current scale
+   */
+  scale?: YScaleType;
   /**
    *  axis extent
    */
@@ -219,6 +225,8 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
   hasPercentageAxis,
   dataBounds,
   useMultilayerTimeAxis,
+  scale,
+  setScale,
 }) => {
   const isHorizontal = layers?.length ? isHorizontalChart(layers) : false;
   const config = popoverConfig(axis, isHorizontal);
@@ -307,20 +315,13 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
           showLabel={false}
         />
       </EuiFormRow>
-      <EuiFormRow
-        display="columnCompressed"
-        fullWidth
-        isDisabled={useMultilayerTimeAxis}
-        label={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
-          defaultMessage: 'Orientation',
-        })}
-      >
-        <TooltipWrapper
-          tooltipContent={i18n.translate('xpack.lens.xyChart.axisOrientationMultilayer.disabled', {
-            defaultMessage: 'These options can be configured only with non-time-based axes',
+      {!useMultilayerTimeAxis && areTickLabelsVisible && (
+        <EuiFormRow
+          display="columnCompressed"
+          fullWidth
+          label={i18n.translate('xpack.lens.xyChart.axisOrientation.label', {
+            defaultMessage: 'Orientation',
           })}
-          condition={Boolean(useMultilayerTimeAxis)}
-          display="block"
         >
           <EuiButtonGroup
             isFullWidth
@@ -329,7 +330,6 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             })}
             data-test-subj="lnsXY_axisOrientation_groups"
             name="axisOrientation"
-            isDisabled={!areTickLabelsVisible || Boolean(useMultilayerTimeAxis)}
             buttonSize="compressed"
             options={axisOrientationOptions}
             idSelected={axisOrientationOptions.find(({ value }) => value === orientation)!.id}
@@ -340,8 +340,8 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
               setOrientation(axis, newOrientation);
             }}
           />
-        </TooltipWrapper>
-      </EuiFormRow>
+        </EuiFormRow>
+      )}
       {setEndzoneVisibility && (
         <EuiFormRow
           display="columnCompressedSwitch"
@@ -359,6 +359,46 @@ export const AxisSettingsPopover: React.FunctionComponent<AxisSettingsPopoverPro
             onChange={() => setEndzoneVisibility(!Boolean(endzonesVisible))}
             checked={Boolean(endzonesVisible)}
             showLabel={false}
+          />
+        </EuiFormRow>
+      )}
+      {setScale && (
+        <EuiFormRow
+          display="columnCompressed"
+          label={i18n.translate('xpack.lens.xyChart.setScale', {
+            defaultMessage: 'Axis scale',
+          })}
+          fullWidth
+        >
+          <EuiSelect
+            compressed
+            fullWidth
+            data-test-subj={`lnsshowEndzones`}
+            aria-label={i18n.translate('xpack.lens.xyChart.setScale', {
+              defaultMessage: 'Axis scale',
+            })}
+            options={[
+              {
+                text: i18n.translate('xpack.lens.xyChart.scaleLinear', {
+                  defaultMessage: 'Linear',
+                }),
+                value: 'linear',
+              },
+              {
+                text: i18n.translate('xpack.lens.xyChart.scaleLog', {
+                  defaultMessage: 'Logarithmic',
+                }),
+                value: 'log',
+              },
+              {
+                text: i18n.translate('xpack.lens.xyChart.scaleSquare', {
+                  defaultMessage: 'Square root',
+                }),
+                value: 'sqrt',
+              },
+            ]}
+            onChange={(e) => setScale(e.target.value as YScaleType)}
+            value={scale}
           />
         </EuiFormRow>
       )}

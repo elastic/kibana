@@ -18,7 +18,7 @@ import {
 import { createEventCorrelationRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate, waitForTheRuleToBeExecuted } from '../../tasks/create_new_rule';
-import { loginAndWaitForPageWithoutDateRange } from '../../tasks/login';
+import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../urls/navigation';
 
@@ -32,9 +32,9 @@ describe('Detection rules', function () {
   it('EQL rule on remote indices generates alerts', function () {
     esArchiverCCSLoad('linux_process');
     this.rule = getCCSEqlRule();
+    login();
     createEventCorrelationRule(this.rule);
-
-    loginAndWaitForPageWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+    visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
     waitForRulesTableToBeLoaded();
     filterByCustomRules();
     goToRuleDetails();

@@ -6,16 +6,17 @@
  */
 
 import { TypeRegistry } from '../../../type_registry';
-import { registerBuiltInActionTypes } from '.././index';
+import { registerBuiltInActionTypes } from '..';
 import { ActionTypeModel } from '../../../../types';
 import { JiraActionConnector } from './types';
+import { registrationServicesMock } from '../../../../mocks';
 
 const ACTION_TYPE_ID = '.jira';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
-  registerBuiltInActionTypes({ actionTypeRegistry });
+  registerBuiltInActionTypes({ actionTypeRegistry, services: registrationServicesMock });
   const getResult = actionTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
     actionTypeModel = getResult;
@@ -39,6 +40,7 @@ describe('jira connector validation', () => {
       actionTypeId: '.jira',
       name: 'jira',
       isPreconfigured: false,
+      isDeprecated: false,
       config: {
         apiUrl: 'https://siem-kibana.atlassian.net',
         projectKey: 'CK',

@@ -6,16 +6,14 @@
  */
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
+import type { SeriesType, ExtendedYConfig } from '@kbn/expression-xy-plugin/common';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../types';
-import type {
-  SeriesType,
+import {
+  visualizationTypes,
   XYLayerConfig,
-  YConfig,
-  ValidLayer,
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
-} from '../../common/expressions';
-import { visualizationTypes } from './types';
+} from './types';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
@@ -60,7 +58,8 @@ export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
     return null;
   }
   return (
-    layer?.yConfig?.find((yConfig: YConfig) => yConfig.forAccessor === accessor)?.color || null
+    layer?.yConfig?.find((yConfig: ExtendedYConfig) => yConfig.forAccessor === accessor)?.color ||
+    null
   );
 };
 
@@ -81,7 +80,7 @@ export const getColumnToLabelMap = (
 };
 
 export function hasHistogramSeries(
-  layers: ValidLayer[] = [],
+  layers: XYDataLayerConfig[] = [],
   datasourceLayers?: FramePublicAPI['datasourceLayers']
 ) {
   if (!datasourceLayers) {
@@ -89,7 +88,11 @@ export function hasHistogramSeries(
   }
   const validLayers = layers.filter(({ accessors }) => accessors.length);
 
-  return validLayers.some(({ layerId, xAccessor }: ValidLayer) => {
+  return validLayers.some(({ layerId, xAccessor }: XYDataLayerConfig) => {
+    if (!xAccessor) {
+      return false;
+    }
+
     const xAxisOperation = datasourceLayers[layerId].getOperationForColumnId(xAccessor);
     return (
       xAxisOperation &&

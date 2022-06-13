@@ -18,6 +18,7 @@ import {
   OUTPUT_API_ROUTES,
   SETTINGS_API_ROUTES,
   APP_API_ROUTES,
+  K8S_API_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -141,6 +142,14 @@ export const agentPolicyRouteService = {
       agentPolicyId
     );
   },
+
+  getK8sInfoPath: () => {
+    return K8S_API_ROUTES.K8S_INFO_PATTERN;
+  },
+
+  getK8sFullDownloadPath: () => {
+    return K8S_API_ROUTES.K8S_DOWNLOAD_PATTERN;
+  },
 };
 
 export const dataStreamRouteService = {
@@ -166,6 +175,9 @@ export const agentRouteService = {
   getUpgradePath: (agentId: string) =>
     AGENT_API_ROUTES.UPGRADE_PATTERN.replace('{agentId}', agentId),
   getBulkUpgradePath: () => AGENT_API_ROUTES.BULK_UPGRADE_PATTERN,
+  getCurrentUpgradesPath: () => AGENT_API_ROUTES.CURRENT_UPGRADES_PATTERN,
+  getCancelActionPath: (actionId: string) =>
+    AGENT_API_ROUTES.CANCEL_ACTIONS_PATTERN.replace('{actionId}', actionId),
   getListPath: () => AGENT_API_ROUTES.LIST_PATTERN,
   getStatusPath: () => AGENT_API_ROUTES.STATUS_PATTERN,
   getIncomingDataPath: () => AGENT_API_ROUTES.DATA_PATTERN,

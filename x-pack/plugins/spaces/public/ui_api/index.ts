@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from 'src/core/public';
+import type { StartServicesAccessor } from '@kbn/core/public';
 
 import { createRedirectLegacyUrl } from '../legacy_urls';
 import type { PluginsStart } from '../plugin';

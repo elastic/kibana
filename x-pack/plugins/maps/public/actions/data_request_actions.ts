@@ -13,6 +13,7 @@ import bbox from '@turf/bbox';
 import uuid from 'uuid/v4';
 import { multiPoint } from '@turf/helpers';
 import { FeatureCollection } from 'geojson';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { MapStoreState } from '../reducers/store';
 import {
   KBN_IS_CENTROID_FEATURE,
@@ -24,12 +25,14 @@ import {
   getDataRequestDescriptor,
   getLayerById,
   getLayerList,
+  getEditState,
 } from '../selectors/map_selectors';
 import {
   cancelRequest,
   registerCancelCallback,
   unregisterCancelCallback,
   getEventHandlers,
+  getInspectorAdapters,
   ResultMeta,
 } from '../reducers/non_serializable_instances';
 import { updateTooltipStateForLayer } from './tooltip_actions';
@@ -67,6 +70,8 @@ export type DataRequestContext = {
   dataFilters: DataFilters;
   forceRefreshDueToDrawing: boolean; // Boolean signaling data request triggered by a user updating layer features via drawing tools. When true, layer will re-load regardless of "source.applyForceRefresh" flag.
   isForceRefresh: boolean; // Boolean signaling data request triggered by auto-refresh timer or user clicking refresh button. When true, layer will re-load only when "source.applyForceRefresh" flag is set to true.
+  isFeatureEditorOpenForLayer: boolean; // Boolean signaling that feature editor menu is open for a layer. When true, layer will ignore all global and layer filtering so drawn features are displayed and not filtered out.
+  inspectorAdapters: Adapters;
 };
 
 export function clearDataRequests(layer: ILayer) {
@@ -145,6 +150,8 @@ function getDataRequestContext(
       dispatch(registerCancelCallback(requestToken, callback)),
     forceRefreshDueToDrawing,
     isForceRefresh,
+    isFeatureEditorOpenForLayer: getEditState(getState())?.layerId === layerId,
+    inspectorAdapters: getInspectorAdapters(getState()),
   };
 }
 
@@ -220,7 +227,7 @@ export function syncDataForLayerId(layerId: string | null, isForceRefresh: boole
   };
 }
 
-function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
+export function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
   return {
     type: SET_LAYER_ERROR_STATUS,
     isInErrorState: errorMessage !== null,

@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
+import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import { popupVersionsMap } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_forms/protections/popup_options_to_versions';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
-import { IndexedHostsAndAlertsResponse } from '../../../../plugins/security_solution/common/endpoint/index_data';
-import { popupVersionsMap } from '../../../../plugins/security_solution/public/management/pages/policy/view/policy_forms/protections/popup_options_to_versions';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -331,6 +331,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       it('should show event filters card and link should go back to policy', async () => {
         await testSubjects.existOrFail('eventFilters-fleet-integration-card');
+        const eventFiltersCard = await testSubjects.find('eventFilters-fleet-integration-card');
+        await pageObjects.ingestManagerCreatePackagePolicy.scrollToCenterOfWindow(eventFiltersCard);
         await (await testSubjects.find('eventFilters-link-to-exceptions')).click();
         await testSubjects.existOrFail('policyDetailsPage');
         await (await testSubjects.find('policyDetailsBackLink')).click();

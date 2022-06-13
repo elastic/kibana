@@ -95,8 +95,8 @@
                 "pluginId": "alerting",
                 "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertTypeParams",
-                "text": "AlertTypeParams"
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
               },
               " = never>({ id, status, _version, index, }: ",
               "UpdateOptions",
@@ -142,8 +142,8 @@
                 "pluginId": "alerting",
                 "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertTypeParams",
-                "text": "AlertTypeParams"
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
               },
               " = never>({ ids, query, index, status, }: ",
               "BulkUpdateOptions",
@@ -187,10 +187,12 @@
                 "pluginId": "alerting",
                 "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-common.AlertTypeParams",
-                "text": "AlertTypeParams"
+                "section": "def-common.RuleTypeParams",
+                "text": "RuleTypeParams"
               },
-              " = never>({ query, aggs, _source, track_total_hits: trackTotalHits, size, index, }: { query?: object | undefined; aggs?: object | undefined; index: string | undefined; track_total_hits?: boolean | undefined; _source?: string[] | undefined; size?: number | undefined; }) => Promise<",
+              " = never>({ query, aggs, _source, track_total_hits: trackTotalHits, size, index, sort, search_after: searchAfter, }: { query?: object | undefined; aggs?: object | undefined; index: string | undefined; track_total_hits?: boolean | undefined; _source?: string[] | undefined; size?: number | undefined; sort?: ",
+              "SortOptions",
+              "[] | undefined; search_after?: (string | number)[] | undefined; }) => Promise<",
               "SearchResponse",
               "<OutputOf<SetOptional<{ readonly \"kibana.alert.rule.parameters\": { readonly type: \"flattened\"; readonly ignore_above: 4096; }; readonly \"kibana.alert.rule.rule_type_id\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.consumer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.rule.producer\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.space_ids\": { readonly type: \"keyword\"; readonly array: true; readonly required: true; }; readonly \"kibana.alert.uuid\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.alert.start\": { readonly type: \"date\"; }; readonly \"kibana.alert.end\": { readonly type: \"date\"; }; readonly \"kibana.alert.duration.us\": { readonly type: \"long\"; }; readonly \"kibana.alert.severity\": { readonly type: \"keyword\"; }; readonly \"kibana.alert.status\": { readonly type: \"keyword\"; readonly required: true; }; readonly \"kibana.version\": { readonly type: \"version\"; readonly array: false; readonly required: false; }; readonly \"ecs.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.risk_score\": { readonly type: \"float\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_user\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.workflow_reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.system_status\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.action_group\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.reason\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.author\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.category\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.created_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.created_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.description\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.enabled\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.execution.uuid\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.from\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.interval\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.license\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.name\": { readonly type: \"keyword\"; readonly array: false; readonly required: true; }; readonly \"kibana.alert.rule.note\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.references\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.rule_id\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.rule_name_override\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.tags\": { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly \"kibana.alert.rule.to\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.type\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_at\": { readonly type: \"date\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.updated_by\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly \"kibana.alert.rule.version\": { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly tags: { readonly type: \"keyword\"; readonly array: true; readonly required: false; }; readonly '@timestamp': { readonly type: \"date\"; readonly array: false; readonly required: true; }; readonly 'event.action': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; readonly 'event.kind': { readonly type: \"keyword\"; readonly array: false; readonly required: false; }; }>>, unknown>>"
             ],
@@ -202,7 +204,7 @@
                 "id": "def-server.AlertsClient.find.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    query,\n    aggs,\n    _source,\n    track_total_hits: trackTotalHits,\n    size,\n    index,\n  }",
+                "label": "{\n    query,\n    aggs,\n    _source,\n    track_total_hits: trackTotalHits,\n    size,\n    index,\n    sort,\n    search_after: searchAfter,\n  }",
                 "description": [],
                 "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                 "deprecated": false,
@@ -284,6 +286,33 @@
                     ],
                     "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
                     "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.find.$1.sort",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "sort",
+                    "description": [],
+                    "signature": [
+                      "SortOptions",
+                      "[] | undefined"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false
+                  },
+                  {
+                    "parentPluginId": "ruleRegistry",
+                    "id": "def-server.AlertsClient.find.$1.search_after",
+                    "type": "Array",
+                    "tags": [],
+                    "label": "search_after",
+                    "description": [],
+                    "signature": [
+                      "(string | number)[] | undefined"
+                    ],
+                    "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                    "deprecated": false
                   }
                 ]
               }
@@ -309,6 +338,36 @@
                 "type": "Array",
                 "tags": [],
                 "label": "featureIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.AlertsClient.getFeatureIdsByRegistrationContexts",
+            "type": "Function",
+            "tags": [],
+            "label": "getFeatureIdsByRegistrationContexts",
+            "description": [],
+            "signature": [
+              "(RegistrationContexts: string[]) => Promise<string[]>"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/alert_data_client/alerts_client.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.AlertsClient.getFeatureIdsByRegistrationContexts.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "RegistrationContexts",
                 "description": [],
                 "signature": [
                   "string[]"
@@ -859,15 +918,45 @@
           },
           {
             "parentPluginId": "ruleRegistry",
-            "id": "def-server.RuleDataService.findIndicesByFeature",
+            "id": "def-server.RuleDataService.findFeatureIdsByRegistrationContexts",
             "type": "Function",
             "tags": [],
-            "label": "findIndicesByFeature",
+            "label": "findFeatureIdsByRegistrationContexts",
+            "description": [],
+            "signature": [
+              "(registrationContexts: string[]) => string[]"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.RuleDataService.findFeatureIdsByRegistrationContexts.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "registrationContexts",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.RuleDataService.findIndexByFeature",
+            "type": "Function",
+            "tags": [],
+            "label": "findIndexByFeature",
             "description": [],
             "signature": [
               "(featureId: ",
               "AlertConsumers",
-              ", dataset?: ",
+              ", dataset: ",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
@@ -875,16 +964,16 @@
                 "section": "def-server.Dataset",
                 "text": "Dataset"
               },
-              " | undefined) => ",
+              ") => ",
               "IndexInfo",
-              "[]"
+              " | null"
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "ruleRegistry",
-                "id": "def-server.RuleDataService.findIndicesByFeature.$1",
+                "id": "def-server.RuleDataService.findIndexByFeature.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "featureId",
@@ -898,8 +987,8 @@
               },
               {
                 "parentPluginId": "ruleRegistry",
-                "id": "def-server.RuleDataService.findIndicesByFeature.$2",
-                "type": "CompoundType",
+                "id": "def-server.RuleDataService.findIndexByFeature.$2",
+                "type": "Enum",
                 "tags": [],
                 "label": "dataset",
                 "description": [],
@@ -910,12 +999,11 @@
                     "docId": "kibRuleRegistryPluginApi",
                     "section": "def-server.Dataset",
                     "text": "Dataset"
-                  },
-                  " | undefined"
+                  }
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -1136,16 +1224,16 @@
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeParams",
-            "text": "AlertTypeParams"
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
           },
           " = never, State extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeState",
-            "text": "AlertTypeState"
+            "section": "def-common.RuleTypeState",
+            "text": "RuleTypeState"
           },
           " = never, InstanceState extends { [x: string]: unknown; } = never, InstanceContext extends { [x: string]: unknown; } = never, ActionGroupIds extends string = never>(wrappedExecutor: ",
           {
@@ -1160,8 +1248,8 @@
             "pluginId": "alerting",
             "scope": "server",
             "docId": "kibAlertingPluginApi",
-            "section": "def-server.AlertExecutorOptions",
-            "text": "AlertExecutorOptions"
+            "section": "def-server.RuleExecutorOptions",
+            "text": "RuleExecutorOptions"
           },
           "<Params, ",
           "WrappedLifecycleRuleState",
@@ -1236,8 +1324,8 @@
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeParams",
-            "text": "AlertTypeParams"
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
           },
           ", TAlertInstanceContext extends { [x: string]: unknown; }, TServices extends { alertWithLifecycle: ",
           {
@@ -1339,16 +1427,16 @@
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeParams",
-            "text": "AlertTypeParams"
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
           },
           ", TState extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeState",
-            "text": "AlertTypeState"
+            "section": "def-common.RuleTypeState",
+            "text": "RuleTypeState"
           },
           ", TInstanceContext extends { [x: string]: unknown; } = {}, TActionGroupIds extends string = never>(type: ",
           {
@@ -1363,8 +1451,8 @@
             "pluginId": "alerting",
             "scope": "server",
             "docId": "kibAlertingPluginApi",
-            "section": "def-server.AlertExecutorOptions",
-            "text": "AlertExecutorOptions"
+            "section": "def-server.RuleExecutorOptions",
+            "text": "RuleExecutorOptions"
           },
           "<TParams, TState, { [x: string]: unknown; }, TInstanceContext, ",
           {
@@ -1375,7 +1463,7 @@
             "text": "WithoutReservedActionGroups"
           },
           "<TActionGroupIds, never>>) => Promise<void | TState>; id: string; name: string; validate?: { params?: ",
-          "AlertTypeParamsValidator",
+          "RuleTypeParamsValidator",
           "<TParams> | undefined; } | undefined; cancelAlertsOnRuleTimeout?: boolean | undefined; actionGroups: ",
           {
             "pluginId": "alerting",
@@ -1622,7 +1710,7 @@
               "\nID of the Kibana feature associated with the index.\nUsed by alerts-as-data RBAC.\n\nNote from @dhurley14\nThe purpose of the `feature` param is to force the user to update\nthe data structure which contains the mapping of consumers to alerts\nas data indices. The idea is it is typed such that it forces the\nuser to go to the code and modify it. At least until a better system\nis put in place or we move the alerts as data client out of rule registry.\n"
             ],
             "signature": [
-              "\"logs\" | \"apm\" | \"observability\" | \"uptime\" | \"infrastructure\" | \"siem\""
+              "\"logs\" | \"apm\" | \"infrastructure\" | \"observability\" | \"uptime\" | \"siem\""
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/index_options.ts",
             "deprecated": false
@@ -2312,17 +2400,17 @@
           },
           {
             "parentPluginId": "ruleRegistry",
-            "id": "def-server.IRuleDataService.findIndicesByFeature",
+            "id": "def-server.IRuleDataService.findIndexByFeature",
             "type": "Function",
             "tags": [],
-            "label": "findIndicesByFeature",
+            "label": "findIndexByFeature",
             "description": [
               "\nLooks up the index information associated with the given Kibana \"feature\".\nNote: features are used in RBAC."
             ],
             "signature": [
               "(featureId: ",
               "AlertConsumers",
-              ", dataset?: ",
+              ", dataset: ",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
@@ -2330,16 +2418,16 @@
                 "section": "def-server.Dataset",
                 "text": "Dataset"
               },
-              " | undefined) => ",
+              ") => ",
               "IndexInfo",
-              "[]"
+              " | null"
             ],
             "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
             "deprecated": false,
             "children": [
               {
                 "parentPluginId": "ruleRegistry",
-                "id": "def-server.IRuleDataService.findIndicesByFeature.$1",
+                "id": "def-server.IRuleDataService.findIndexByFeature.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "featureId",
@@ -2353,8 +2441,8 @@
               },
               {
                 "parentPluginId": "ruleRegistry",
-                "id": "def-server.IRuleDataService.findIndicesByFeature.$2",
-                "type": "CompoundType",
+                "id": "def-server.IRuleDataService.findIndexByFeature.$2",
+                "type": "Enum",
                 "tags": [],
                 "label": "dataset",
                 "description": [],
@@ -2365,12 +2453,43 @@
                     "docId": "kibRuleRegistryPluginApi",
                     "section": "def-server.Dataset",
                     "text": "Dataset"
-                  },
-                  " | undefined"
+                  }
                 ],
                 "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
                 "deprecated": false,
-                "isRequired": false
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.IRuleDataService.findFeatureIdsByRegistrationContexts",
+            "type": "Function",
+            "tags": [],
+            "label": "findFeatureIdsByRegistrationContexts",
+            "description": [
+              "\nLooks up Kibana \"feature\" associated with the given registration context.\nNote: features are used in RBAC."
+            ],
+            "signature": [
+              "(registrationContexts: string[]) => string[]"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.IRuleDataService.findFeatureIdsByRegistrationContexts.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "registrationContexts",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/rule_data_plugin_service/rule_data_plugin_service.ts",
+                "deprecated": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -2484,6 +2603,36 @@
                 "deprecated": false
               }
             ]
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.LifecycleAlertServices.getAlertStartedDate",
+            "type": "Function",
+            "tags": [],
+            "label": "getAlertStartedDate",
+            "description": [],
+            "signature": [
+              "(alertId: string) => string | null"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+            "deprecated": false,
+            "children": [
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.LifecycleAlertServices.getAlertStartedDate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "alertId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/utils/create_lifecycle_executor.ts",
+                "deprecated": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2516,7 +2665,9 @@
             "label": "createdAlerts",
             "description": [],
             "signature": [
-              "(T & { _id: string; _index: string; })[]"
+              "(T & ",
+              "CommonAlertFields800",
+              " & { _id: string; _index: string; })[]"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false
@@ -2829,16 +2980,16 @@
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeParams",
-            "text": "AlertTypeParams"
+            "section": "def-common.RuleTypeParams",
+            "text": "RuleTypeParams"
           },
           ", TState extends ",
           {
             "pluginId": "alerting",
             "scope": "common",
             "docId": "kibAlertingPluginApi",
-            "section": "def-common.AlertTypeState",
-            "text": "AlertTypeState"
+            "section": "def-common.RuleTypeState",
+            "text": "RuleTypeState"
           },
           ", TInstanceContext extends { [x: string]: unknown; } = {}, TActionGroupIds extends string = never>(type: ",
           {
@@ -2995,16 +3146,16 @@
                 "pluginId": "alerting",
                 "scope": "server",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.AlertExecutorOptions",
-                "text": "AlertExecutorOptions"
+                "section": "def-server.RuleExecutorOptions",
+                "text": "RuleExecutorOptions"
               },
               "<Params, State, InstanceState, InstanceContext, ActionGroupIds>, \"services\"> & { services: ",
               {
                 "pluginId": "alerting",
                 "scope": "server",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-server.AlertServices",
-                "text": "AlertServices"
+                "section": "def-server.RuleExecutorServices",
+                "text": "RuleExecutorServices"
               },
               "<InstanceState, InstanceContext, ActionGroupIds> & ",
               {
@@ -3122,8 +3273,8 @@
             "pluginId": "alerting",
             "scope": "server",
             "docId": "kibAlertingPluginApi",
-            "section": "def-server.AlertExecutorOptions",
-            "text": "AlertExecutorOptions"
+            "section": "def-server.RuleExecutorOptions",
+            "text": "RuleExecutorOptions"
           },
           "<TParams, TState, { [x: string]: unknown; }, TInstanceContext, ",
           {
@@ -3476,7 +3627,41 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-common.RuleRegistrySearchRequestPagination",
+        "type": "Interface",
+        "tags": [],
+        "label": "RuleRegistrySearchRequestPagination",
+        "description": [],
+        "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+        "deprecated": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-common.RuleRegistrySearchRequestPagination.pageIndex",
+            "type": "number",
+            "tags": [],
+            "label": "pageIndex",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-common.RuleRegistrySearchRequestPagination.pageSize",
+            "type": "number",
+            "tags": [],
+            "label": "pageSize",
+            "description": [],
+            "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
+            "deprecated": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [
       {
@@ -3524,12 +3709,20 @@
           },
           " & { featureIds: ",
           "AlertConsumers",
-          "[]; query?: { bool: ",
-          "QueryDslBoolQuery",
-          "; } | undefined; sort?: ",
+          "[]; fields?: ",
+          "QueryDslFieldAndFormat",
+          "[] | undefined; query?: Pick<",
+          "QueryDslQueryContainer",
+          ", \"ids\" | \"bool\"> | undefined; sort?: ",
           "SortCombinations",
           "[] | undefined; pagination?: ",
-          "RuleRegistrySearchRequestPagination",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "common",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-common.RuleRegistrySearchRequestPagination",
+            "text": "RuleRegistrySearchRequestPagination"
+          },
           " | undefined; }"
         ],
         "path": "x-pack/plugins/rule_registry/common/search_strategy/index.ts",
@@ -3553,7 +3746,9 @@
           },
           "<",
           "SearchResponse",
-          "<EcsFieldsResponse, Record<string, ",
+          "<",
+          "EcsFieldsResponse",
+          ", Record<string, ",
           "AggregationsAggregate",
           ">>>"
         ],

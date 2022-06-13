@@ -9,12 +9,12 @@ import { createMemoryHistory } from 'history';
 import { noop } from 'lodash';
 import React from 'react';
 import { Observable } from 'rxjs';
-import { AppMountParameters, CoreStart } from 'src/core/public';
-import { themeServiceMock } from 'src/core/public/mocks';
-import { KibanaPageTemplate } from 'src/plugins/kibana_react/public';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { themeServiceMock } from '@kbn/core/public/mocks';
+import { KibanaPageTemplate } from '@kbn/shared-ux-components';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
-import { renderApp } from './';
+import { renderApp } from '.';
 
 describe('renderApp', () => {
   const originalConsole = global.console;
@@ -63,7 +63,6 @@ describe('renderApp', () => {
       unsafe: {
         alertingExperience: { enabled: true },
         cases: { enabled: true },
-        overviewNext: { enabled: false },
         rules: { enabled: true },
       },
     };
@@ -83,6 +82,13 @@ describe('renderApp', () => {
         appMountParameters: params,
         observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
         ObservabilityPageTemplate: KibanaPageTemplate,
+        kibanaFeatures: [],
+        usageCollection: {
+          components: {
+            ApplicationUsageTrackingProvider: (props) => null,
+          },
+          reportUiCounter: jest.fn(),
+        },
       });
       unmount();
     }).not.toThrowError();

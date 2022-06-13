@@ -13,19 +13,20 @@ import {
   EuiInMemoryTable,
   EuiPageHeader,
   EuiSpacer,
+  EuiIconTip,
   EuiBasicTableColumn,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RouteComponentProps, withRouter, useLocation } from 'react-router-dom';
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { reactRouterNavigate, useKibana } from '../../../../../plugins/kibana_react/public';
+import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
+import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { IndexPatternManagmentContext } from '../../types';
 import { IndexPatternTableItem } from '../types';
 import { getIndexPatterns } from '../utils';
 import { getListBreadcrumbs } from '../breadcrumbs';
 import { SpacesList } from './spaces_list';
-import type { SpacesContextProps } from '../../../../../../x-pack/plugins/spaces/public';
 import { removeDataView, RemoveDataViewProps } from '../edit_index_pattern';
 import { deleteModalMsg } from './delete_modal_msg';
 
@@ -70,6 +71,7 @@ export const IndexPatternTable = ({
     setBreadcrumbs,
     uiSettings,
     indexPatternManagementStart,
+    application,
     chrome,
     dataViews,
     IndexPatternEditor,
@@ -93,7 +95,10 @@ export const IndexPatternTable = ({
       dataViews,
       overlays,
       uiSettings,
-      onDelete: () => loadDataViews(),
+      onDelete: () => {
+        setSelectedItems([]);
+        loadDataViews();
+      },
     });
     if (selectedItems.length === 0) {
       return;
@@ -205,7 +210,20 @@ export const IndexPatternTable = ({
       width: '70%',
       render: (name: string, dataView: IndexPatternTableItem) => (
         <div>
-          <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>{name}</EuiLink>
+          <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>
+            {dataView.getName()}
+            {dataView.name ? (
+              <>
+                &nbsp;
+                <EuiIconTip
+                  type="iInCircle"
+                  color="text"
+                  aria-label={dataView.title}
+                  content={dataView.title}
+                />
+              </>
+            ) : null}
+          </EuiLink>
           {dataView?.id?.indexOf(securitySolution) === 0 && (
             <>
               &emsp;<EuiBadge>{securityDataView}</EuiBadge>
@@ -231,6 +249,7 @@ export const IndexPatternTable = ({
         return spaces ? (
           <SpacesList
             spacesApi={spaces}
+            capabilities={application?.capabilities}
             spaceIds={dataView.namespaces || []}
             id={dataView.id}
             title={dataView.title}
@@ -311,7 +330,7 @@ export const IndexPatternTable = ({
           pagination={pagination}
           sorting={sorting}
           search={search}
-          selection={selection}
+          selection={dataViews.getCanSaveSync() ? selection : undefined}
         />
       </ContextWrapper>
       {displayIndexPatternEditor}

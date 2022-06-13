@@ -25,7 +25,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { omit } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { withTheme, EuiTheme } from '../../../../../../../../src/plugins/kibana_react/common';
+import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../common/constants';
 import { loadAllActions, loadActionTypes, deleteActions } from '../../../lib/action_connector_api';
 import {
   hasDeleteActionsCapability,
@@ -43,14 +44,12 @@ import {
 } from '../../../../types';
 import { EmptyConnectorsPrompt } from '../../../components/prompts/empty_connectors_prompt';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DEFAULT_HIDDEN_ACTION_TYPES } from '../../../../';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 import ConnectorEditFlyout from '../../action_connector_form/connector_edit_flyout';
 import ConnectorAddFlyout from '../../action_connector_form/connector_add_flyout';
 import {
   connectorDeprecatedMessage,
   deprecatedMessage,
-  checkConnectorIsDeprecated,
 } from '../../../../common/connectors_selection';
 
 const ConnectorIconTipWithSpacing = withTheme(({ theme }: { theme: EuiTheme }) => {
@@ -203,7 +202,7 @@ const ActionsConnectorsList: React.FunctionComponent = () => {
          * TODO: Remove when connectors can provide their own UX message.
          * Issue: https://github.com/elastic/kibana/issues/114507
          */
-        const showDeprecatedTooltip = checkConnectorIsDeprecated(item);
+        const showDeprecatedTooltip = item.isDeprecated;
         const name = getConnectorName(value, item);
 
         const link = (
@@ -490,7 +489,7 @@ function getActionsCountByActionType(actions: ActionConnector[], actionTypeId: s
 }
 
 function getConnectorName(name: string, connector: ActionConnector): string {
-  return checkConnectorIsDeprecated(connector) ? `${name} ${deprecatedMessage}` : name;
+  return connector.isDeprecated ? `${name} ${deprecatedMessage}` : name;
 }
 
 const DeleteOperation: React.FunctionComponent<{

@@ -8,37 +8,29 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { UseQueryResult } from 'react-query/types/react/types';
-import { createStubDataView } from '../../../../../../src/plugins/data_views/public/data_views/data_view.stub';
-import { CSP_KUBEBEAT_INDEX_PATTERN } from '../../../common/constants';
-import { useKubebeatDataView } from '../../common/api/use_kubebeat_data_view';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
 import { createReactQueryResponse } from '../../test/fixtures/react_query';
 import { TestProvider } from '../../test/test_provider';
-import { Benchmarks, BENCHMARKS_TABLE_DATA_TEST_SUBJ } from './benchmarks';
 import {
-  ADD_A_CIS_INTEGRATION,
-  BENCHMARK_INTEGRATIONS,
-  TABLE_COLUMN_HEADERS,
-} from './translations';
+  ADD_INTEGRATION_TEST_SUBJ,
+  Benchmarks,
+  BENCHMARKS_TABLE_DATA_TEST_SUBJ,
+} from './benchmarks';
+import { BENCHMARK_INTEGRATIONS, TABLE_COLUMN_HEADERS } from './translations';
 import { useCspBenchmarkIntegrations } from './use_csp_benchmark_integrations';
+import { useCisKubernetesIntegration } from '../../common/api/use_cis_kubernetes_integration';
 
 jest.mock('./use_csp_benchmark_integrations');
-jest.mock('../../common/api/use_kubebeat_data_view');
+jest.mock('../../common/api/use_cis_kubernetes_integration');
 
 describe('<Benchmarks />', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    // Required for the page template to render the benchmarks page
-    (useKubebeatDataView as jest.Mock).mockImplementation(() =>
-      createReactQueryResponse({
-        status: 'success',
-        data: createStubDataView({
-          spec: {
-            id: CSP_KUBEBEAT_INDEX_PATTERN,
-          },
-        }),
-      })
-    );
+
+    // if package installation status is 'not_installed', CspPageTemplate will render a noDataConfig prompt
+    (useCisKubernetesIntegration as jest.Mock).mockImplementation(() => ({
+      data: { item: { status: 'installed' } },
+    }));
   });
 
   const renderBenchmarks = (
@@ -62,7 +54,7 @@ describe('<Benchmarks />', () => {
   it('renders the "add integration" button', () => {
     renderBenchmarks();
 
-    expect(screen.getByText(ADD_A_CIS_INTEGRATION)).toBeInTheDocument();
+    expect(screen.getByTestId(ADD_INTEGRATION_TEST_SUBJ)).toBeInTheDocument();
   });
 
   it('renders error state while there is an error', () => {

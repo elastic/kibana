@@ -3,7 +3,7 @@
 exports[`ExplainExporters should explain about xpack.monitoring.exporters setting 1`] = `
 Array [
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle css-1bexacr-euiTitle-l"
   >
     You need to make some adjustments
   </h2>,
@@ -19,7 +19,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText euiText--medium eui-textLeft"
@@ -80,17 +80,18 @@ Array [
       <p>
         Configure monitoring through 
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink css-102pf9n-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener"
           target="_blank"
         >
           Elasticsearch Service Console
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="css-q4vwwx-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
             class="euiScreenReaderOnly"
           >
@@ -99,17 +100,18 @@ Array [
         </a>
          Go to 
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink css-102pf9n-euiLink-primary"
           href="https://cloud.elastic.co/deployments"
           rel="noopener"
           target="_blank"
         >
           Logs and metrics
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="css-q4vwwx-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
             class="euiScreenReaderOnly"
           >
@@ -118,17 +120,18 @@ Array [
         </a>
          section for a deployment to configure monitoring. For more information visit 
         <a
-          class="euiLink euiLink--primary"
+          class="euiLink css-102pf9n-euiLink-primary"
           href="https://www.elastic.co/guide/en/cloud/current/ec-enable-logging-and-monitoring.html"
           rel="noopener"
           target="_blank"
         >
           the documentation page.
           <span
-            aria-label="External link"
-            class="euiLink__externalIcon"
+            class="css-q4vwwx-euiLink__externalIcon"
             data-euiicon-type="popout"
-          />
+          >
+            External link
+          </span>
           <span
             class="euiScreenReaderOnly"
           >
@@ -139,7 +142,7 @@ Array [
     </div>
   </span>,
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />,
   <div
     class="euiText euiText--medium eui-textLeft"

@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
-import { useDebouncedValue } from '../shared_components';
+import { useDebouncedValue } from '.';
 
 export const NameInput = ({
   value,
@@ -35,8 +35,9 @@ export const NameInput = ({
       fullWidth
     >
       <EuiFieldText
+        fullWidth
         compressed
-        data-test-subj="indexPattern-label-edit"
+        data-test-subj="column-label-edit"
         value={inputValue}
         onChange={(e) => {
           handleInputChange(e.target.value);

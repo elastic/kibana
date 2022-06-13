@@ -7,18 +7,18 @@
 
 import { useHistory } from 'react-router-dom';
 import { Query } from '@kbn/es-query';
-import { allNavigationItems } from '../navigation/constants';
+import { findingsNavigation } from '../navigation/constants';
 import { encodeQuery } from '../navigation/query_utils';
-import { CspFindingsRequest } from '../../pages/findings/use_findings';
+import { FindingsBaseURLQuery } from '../../pages/findings/types';
 
-const getFindingsQuery = (queryValue: Query['query']): Pick<CspFindingsRequest, 'query'> => {
+const getFindingsQuery = (queryValue: Query['query']): Pick<FindingsBaseURLQuery, 'query'> => {
   const query =
     typeof queryValue === 'string'
       ? queryValue
       : // TODO: use a tested query builder instead ASAP
         Object.entries(queryValue)
           .reduce<string[]>((a, [key, value]) => {
-            a.push(`${key} : "${value}"`);
+            a.push(`${key}: "${value}"`);
             return a;
           }, [])
           .join(' and ');
@@ -37,7 +37,7 @@ export const useNavigateFindings = () => {
 
   return (query?: Query['query']) => {
     history.push({
-      pathname: allNavigationItems.findings.path,
+      pathname: findingsNavigation.findings_default.path,
       ...(query && { search: encodeQuery(getFindingsQuery(query)) }),
     });
   };

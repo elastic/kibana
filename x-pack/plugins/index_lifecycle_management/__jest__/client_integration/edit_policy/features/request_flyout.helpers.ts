@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HttpSetup } from '@kbn/core/public';
 import {
   createFormSetValueAction,
   createMinAgeActions,
@@ -18,10 +19,12 @@ type SetupReturn = ReturnType<typeof setupRequestFlyoutTestBed>;
 
 export type RequestFlyoutTestBed = SetupReturn extends Promise<infer U> ? U : SetupReturn;
 
-export const setupRequestFlyoutTestBed = async (isNewPolicy?: boolean) => {
+export const setupRequestFlyoutTestBed = async (httpSetup: HttpSetup, isNewPolicy?: boolean) => {
   const testBed = isNewPolicy
-    ? await initTestBed({ testBedConfig: { memoryRouter: { initialEntries: ['/policies/edit'] } } })
-    : await initTestBed();
+    ? await initTestBed(httpSetup, {
+        testBedConfig: { memoryRouter: { initialEntries: ['/policies/edit'] } },
+      })
+    : await initTestBed(httpSetup);
 
   return {
     ...testBed,

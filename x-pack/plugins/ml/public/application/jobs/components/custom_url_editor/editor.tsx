@@ -24,12 +24,12 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { isValidCustomUrlSettingsTimeRange } from './utils';
 import { isValidLabel } from '../../../util/custom_url_utils';
 
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 import { UrlConfig } from '../../../../../common/types/custom_urls';
-import { DataViewListItem } from '../../../../../../../../src/plugins/data_views/common';
 
 function getLinkToOptions() {
   return [

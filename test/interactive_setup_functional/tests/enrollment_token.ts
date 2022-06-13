@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
 
   describe('Interactive Setup Functional Tests (Enrollment token)', function () {
-    this.tags(['skipCloud', 'ciGroup2']);
+    this.tags('skipCloud');
 
     const elasticsearchConfig = config.get('servers.elasticsearch');
     let verificationCode: string;

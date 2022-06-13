@@ -16,16 +16,19 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
-} from 'src/core/server';
-import type { UsageCollectionSetup } from 'src/plugins/usage_collection/server';
-
+} from '@kbn/core/server';
 import type {
   PluginSetupContract as FeaturesPluginSetup,
   PluginStartContract as FeaturesPluginStart,
-} from '../../features/server';
-import type { LicensingPluginSetup, LicensingPluginStart } from '../../licensing/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '../../spaces/server';
-import type { TaskManagerSetupContract, TaskManagerStartContract } from '../../task_manager/server';
+} from '@kbn/features-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+
 import type { AuthenticatedUser, PrivilegeDeprecationsService, SecurityLicense } from '../common';
 import { SecurityLicenseService } from '../common/licensing';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
@@ -52,6 +55,8 @@ import type { Session } from './session_management';
 import { SessionManagementService } from './session_management';
 import { setupSpacesClient } from './spaces';
 import { registerSecurityUsageCollector } from './usage_collector';
+import { UserProfileService } from './user_profile';
+import type { UserProfileServiceStart } from './user_profile';
 
 export type SpacesService = Pick<
   SpacesPluginSetup['spacesService'],
@@ -87,6 +92,12 @@ export interface SecurityPluginSetup {
    * Exposes services to access kibana roles per feature id with the GetDeprecationsContext
    */
   privilegeDeprecationsService: PrivilegeDeprecationsService;
+
+  /**
+   * Sets the flag to indicate that Kibana is running inside an Elastic Cloud deployment. This flag is supposed to be
+   * set by the Cloud plugin and can be only once.
+   */
+  setIsElasticCloudDeployment: () => void;
 }
 
 /**
@@ -185,6 +196,30 @@ export class SecurityPlugin
     return this.anonymousAccessStart;
   };
 
+  private readonly userProfileService: UserProfileService;
+  private userProfileStart?: UserProfileServiceStart;
+  private readonly getUserProfileService = () => {
+    if (!this.userProfileStart) {
+      throw new Error(`userProfileStart is not registered!`);
+    }
+    return this.userProfileStart;
+  };
+
+  /**
+   * Indicates whether Kibana is running inside an Elastic Cloud deployment. Since circular plugin dependencies are
+   * forbidden, this flag is supposed to be set by the Cloud plugin that already depends on the Security plugin.
+   * @private
+   */
+  private isElasticCloudDeployment?: boolean;
+  private readonly getIsElasticCloudDeployment = () => this.isElasticCloudDeployment === true;
+  private readonly setIsElasticCloudDeployment = () => {
+    if (this.isElasticCloudDeployment !== undefined) {
+      throw new Error(`The Elastic Cloud deployment flag has been set already!`);
+    }
+
+    this.isElasticCloudDeployment = true;
+  };
+
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
 
@@ -201,6 +236,9 @@ export class SecurityPlugin
     this.anonymousAccessService = new AnonymousAccessService(
       this.initializerContext.logger.get('anonymous-access'),
       this.getConfig
+    );
+    this.userProfileService = new UserProfileService(
+      this.initializerContext.logger.get('user-profile')
     );
   }
 
@@ -308,6 +346,7 @@ export class SecurityPlugin
       getFeatureUsageService: this.getFeatureUsageService,
       getAuthenticationService: this.getAuthentication,
       getAnonymousAccessService: this.getAnonymousAccess,
+      getUserProfileService: this.getUserProfileService,
     });
 
     return Object.freeze<SecurityPluginSetup>({
@@ -330,6 +369,7 @@ export class SecurityPlugin
         license,
         logger: this.logger.get('deprecations'),
       }),
+      setIsElasticCloudDeployment: this.setIsElasticCloudDeployment,
     });
   }
 
@@ -354,18 +394,28 @@ export class SecurityPlugin
     });
     this.session = session;
 
+    this.userProfileStart = this.userProfileService.start({ clusterClient });
+
     const config = this.getConfig();
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,
       clusterClient,
       config,
       featureUsageService: this.featureUsageServiceStart,
+      userProfileService: this.userProfileStart,
       http: core.http,
       loggers: this.initializerContext.logger,
       session,
+      applicationName: this.authorizationSetup!.applicationName,
+      kibanaFeatures: features.getKibanaFeatures(),
+      isElasticCloudDeployment: this.getIsElasticCloudDeployment,
     });
 
-    this.authorizationService.start({ features, clusterClient, online$: watchOnlineStatus$() });
+    this.authorizationService.start({
+      features,
+      clusterClient,
+      online$: watchOnlineStatus$(),
+    });
 
     this.anonymousAccessStart = this.anonymousAccessService.start({
       capabilities: core.capabilities,

@@ -8,8 +8,17 @@ import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
 import { EuiContextMenuItem } from '@elastic/eui';
-import { useKibana } from '../../../../common/lib/kibana';
 
+import { i18n } from '@kbn/i18n';
+import { ALERT_RULE_EXCEPTIONS_LIST } from '@kbn/rule-data-utils';
+import {
+  ExceptionListIdentifiers,
+  ExceptionListItemSchema,
+  ExceptionListTypeEnum,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { useApi } from '@kbn/securitysolution-list-hooks';
+
+import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId, TimelineType } from '../../../../../common/types/timeline';
 import { Ecs } from '../../../../../common/ecs';
 import { timelineActions, timelineSelectors } from '../../../../timelines/store/timeline';
@@ -19,6 +28,8 @@ import { useCreateTimeline } from '../../../../timelines/components/timeline/pro
 import { CreateTimelineProps } from '../types';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../translations';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
+import { getField } from '../../../../helpers';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 interface UseInvestigateInTimelineActionProps {
   ecsRowData?: Ecs | Ecs[] | null;
@@ -29,10 +40,64 @@ export const useInvestigateInTimeline = ({
   ecsRowData,
   onInvestigateInTimelineAlertClick,
 }: UseInvestigateInTimelineActionProps) => {
+  const { addError } = useAppToasts();
   const {
     data: { search: searchStrategyClient, query },
   } = useKibana().services;
   const dispatch = useDispatch();
+
+  const { services } = useKibana();
+  const { getExceptionListsItems } = useApi(services.http);
+
+  const getExceptions = useCallback(
+    async (ecsData: Ecs): Promise<ExceptionListItemSchema[]> => {
+      const exceptionsLists = (getField(ecsData, ALERT_RULE_EXCEPTIONS_LIST) ?? []).reduce(
+        (acc: ExceptionListIdentifiers[], next: string) => {
+          const parsedList = JSON.parse(next);
+          if (parsedList.type === 'detection') {
+            const formattedList = {
+              id: parsedList.id,
+              listId: parsedList.list_id,
+              type: ExceptionListTypeEnum.DETECTION,
+              namespaceType: parsedList.namespace_type,
+            };
+            acc.push(formattedList);
+          }
+          return acc;
+        },
+        []
+      );
+
+      const allExceptions: ExceptionListItemSchema[] = [];
+
+      if (exceptionsLists.length > 0) {
+        await getExceptionListsItems({
+          lists: exceptionsLists,
+          filterOptions: [],
+          pagination: {
+            page: 0,
+            perPage: 10000,
+            total: 10000,
+          },
+          showDetectionsListsOnly: true,
+          showEndpointListsOnly: false,
+          onSuccess: ({ exceptions }) => {
+            allExceptions.push(...exceptions);
+          },
+          onError: (err: string[]) => {
+            addError(err, {
+              title: i18n.translate(
+                'xpack.securitySolution.detectionEngine.alerts.fetchExceptionsFailure',
+                { defaultMessage: 'Error fetching exceptions.' }
+              ),
+            });
+          },
+        });
+      }
+      return allExceptions;
+    },
+    [addError, getExceptionListsItems]
+  );
 
   const filterManagerBackup = useMemo(() => query.filterManager, [query.filterManager]);
   const getManageTimeline = useMemo(() => timelineSelectors.getManageTimelineById(), []);
@@ -86,6 +151,7 @@ export const useInvestigateInTimeline = ({
         ecsData: ecsRowData,
         searchStrategyClient,
         updateTimelineIsLoading,
+        getExceptions,
       });
     }
   }, [
@@ -94,6 +160,7 @@ export const useInvestigateInTimeline = ({
     onInvestigateInTimelineAlertClick,
     searchStrategyClient,
     updateTimelineIsLoading,
+    getExceptions,
   ]);
 
   const investigateInTimelineActionItems = useMemo(

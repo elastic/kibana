@@ -14,6 +14,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
+import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
@@ -23,10 +25,7 @@ import { useFetcher } from '../../../hooks/use_fetcher';
 import { usePreferredServiceAnomalyTimeseries } from '../../../hooks/use_preferred_service_anomaly_timeseries';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { TimeseriesChart } from '../../shared/charts/timeseries_chart';
-import {
-  getComparisonChartTheme,
-  getTimeRangeComparison,
-} from '../../shared/time_comparison/get_time_range_comparison';
+import { getComparisonChartTheme } from '../../shared/time_comparison/get_comparison_chart_theme';
 import {
   ChartType,
   getTimeSeriesColor,
@@ -47,7 +46,7 @@ export function ServiceOverviewThroughputChart({
   transactionName?: string;
 }) {
   const {
-    query: { rangeFrom, rangeTo, comparisonEnabled, comparisonType },
+    query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useApmParams('/services/{serviceName}');
 
   const { environment } = useEnvironmentsContext();
@@ -61,12 +60,6 @@ export function ServiceOverviewThroughputChart({
   const { transactionType, serviceName } = useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
-  const { comparisonStart, comparisonEnd } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonType,
-    comparisonEnabled,
-  });
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
@@ -84,8 +77,10 @@ export function ServiceOverviewThroughputChart({
                 start,
                 end,
                 transactionType,
-                comparisonStart,
-                comparisonEnd,
+                offset:
+                  comparisonEnabled && isTimeComparison(offset)
+                    ? offset
+                    : undefined,
                 transactionName,
               },
             },
@@ -100,9 +95,9 @@ export function ServiceOverviewThroughputChart({
       start,
       end,
       transactionType,
-      comparisonStart,
-      comparisonEnd,
+      offset,
       transactionName,
+      comparisonEnabled,
     ]
   );
 
@@ -110,6 +105,7 @@ export function ServiceOverviewThroughputChart({
     ChartType.THROUGHPUT
   );
 
+  const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
       data: data.currentPeriod,
@@ -125,10 +121,7 @@ export function ServiceOverviewThroughputChart({
             data: data.previousPeriod,
             type: 'area',
             color: previousPeriodColor,
-            title: i18n.translate(
-              'xpack.apm.serviceOverview.throughtputChart.previousPeriodLabel',
-              { defaultMessage: 'Previous period' }
-            ),
+            title: previousPeriodLabel,
           },
         ]
       : []),
@@ -167,7 +160,14 @@ export function ServiceOverviewThroughputChart({
         timeseries={timeseries}
         yLabelFormat={asExactTransactionRate}
         customTheme={comparisonChartTheme}
-        anomalyTimeseries={preferredAnomalyTimeseries}
+        anomalyTimeseries={
+          preferredAnomalyTimeseries
+            ? {
+                ...preferredAnomalyTimeseries,
+                color: previousPeriodColor,
+              }
+            : undefined
+        }
       />
     </EuiPanel>
   );

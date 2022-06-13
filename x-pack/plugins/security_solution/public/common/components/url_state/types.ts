@@ -6,7 +6,7 @@
  */
 
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
-import type { FilterManager, SavedQueryService } from 'src/plugins/data/public';
+import type { FilterManager, SavedQueryService } from '@kbn/data-plugin/public';
 import { UrlInputsModel } from '../../store/inputs/model';
 import { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { RouteSpyState } from '../../utils/route/types';
@@ -32,6 +32,7 @@ export type LocationTypes =
   | CONSTANTS.alertsPage
   | CONSTANTS.hostsDetails
   | CONSTANTS.hostsPage
+  | CONSTANTS.kubernetesPage
   | CONSTANTS.networkDetails
   | CONSTANTS.networkPage
   | CONSTANTS.overviewPage

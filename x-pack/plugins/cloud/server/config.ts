@@ -6,7 +6,7 @@
  */
 
 import { schema, TypeOf } from '@kbn/config-schema';
-import { PluginConfigDescriptor } from 'kibana/server';
+import { PluginConfigDescriptor } from '@kbn/core/server';
 
 const apmConfigSchema = schema.object({
   url: schema.maybe(schema.string()),
@@ -26,6 +26,9 @@ const fullStoryConfigSchema = schema.object({
     schema.string({ minLength: 1 }),
     schema.maybe(schema.string())
   ),
+  eventTypesAllowlist: schema.arrayOf(schema.string(), {
+    defaultValue: ['Loaded Kibana'],
+  }),
 });
 
 const chatConfigSchema = schema.object({

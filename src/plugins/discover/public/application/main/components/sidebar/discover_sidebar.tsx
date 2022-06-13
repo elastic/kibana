@@ -20,26 +20,27 @@ import {
   EuiNotificationBadge,
   EuiPageSideBar,
   useResizeObserver,
+  EuiButton,
 } from '@elastic/eui';
 import useShallowCompareEffect from 'react-use/lib/useShallowCompareEffect';
 
-import { isEqual, sortBy } from 'lodash';
+import { isEqual } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { indexPatterns as indexPatternUtils } from '@kbn/data-plugin/public';
+import { DataViewPicker } from '@kbn/unified-search-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 import { useDiscoverServices } from '../../../../utils/use_discover_services';
 import { DiscoverField } from './discover_field';
-import { DiscoverIndexPattern } from './discover_index_pattern';
 import { DiscoverFieldSearch } from './discover_field_search';
 import { FIELDS_LIMIT_SETTING } from '../../../../../common';
 import { groupFields } from './lib/group_fields';
-import { indexPatterns as indexPatternUtils } from '../../../../../../data/public';
 import { getDetails } from './lib/get_details';
 import { FieldFilterState, getDefaultFieldFilter, setFieldFilterProp } from './lib/field_filter';
 import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
-import { DiscoverIndexPatternManagement } from './discover_index_pattern_management';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
+import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
 import { ElasticSearchHit } from '../../../../types';
-import { DataViewField } from '../../../../../../data_views/public';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -83,6 +84,8 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
    * Discover view mode
    */
   viewMode: VIEW_MODE;
+
+  showDataViewPicker?: boolean;
 }
 
 export function DiscoverSidebarComponent({
@@ -99,7 +102,6 @@ export function DiscoverSidebarComponent({
   setFieldFilter,
   trackUiMetric,
   useNewFieldsApi = false,
-  useFlyout = false,
   onEditRuntimeField,
   onChangeIndexPattern,
   setFieldEditorRef,
@@ -107,6 +109,7 @@ export function DiscoverSidebarComponent({
   editField,
   viewMode,
   createNewDataView,
+  showDataViewPicker,
 }: DiscoverSidebarProps) {
   const { uiSettings, dataViewFieldEditor } = useDiscoverServices();
   const [fields, setFields] = useState<DataViewField[] | null>(null);
@@ -196,16 +199,31 @@ export function DiscoverSidebarComponent({
     }
   }, [paginate, scrollContainer, unpopularFields]);
 
-  const fieldTypes = useMemo(() => {
+  const { fieldTypes, presentFieldTypes } = useMemo(() => {
     const result = ['any'];
+    const dataViewFieldTypes = new Set<string>();
     if (Array.isArray(fields)) {
       for (const field of fields) {
-        if (result.indexOf(field.type) === -1) {
-          result.push(field.type);
+        if (field.type !== '_source') {
+          // If it's a string type, we want to distinguish between keyword and text
+          // For this purpose we need the ES type
+          const type =
+            field.type === 'string' &&
+            field.esTypes &&
+            ['keyword', 'text'].includes(field.esTypes[0])
+              ? field.esTypes?.[0]
+              : field.type;
+          // _id and _index would map to string, that's why we don't add the string type here
+          if (type && type !== 'string') {
+            dataViewFieldTypes.add(type);
+          }
+          if (result.indexOf(field.type) === -1) {
+            result.push(field.type);
+          }
         }
       }
     }
-    return result;
+    return { fieldTypes: result, presentFieldTypes: Array.from(dataViewFieldTypes) };
   }, [fields]);
 
   const showFieldStats = useMemo(() => viewMode === VIEW_MODE.DOCUMENT_LEVEL, [viewMode]);
@@ -282,34 +300,6 @@ export function DiscoverSidebarComponent({
     return null;
   }
 
-  if (useFlyout) {
-    return (
-      <section
-        aria-label={i18n.translate('discover.fieldChooser.filter.indexAndFieldsSectionAriaLabel', {
-          defaultMessage: 'Index and fields',
-        })}
-      >
-        <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={true}>
-            <DiscoverIndexPattern
-              selectedIndexPattern={selectedIndexPattern}
-              indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-              onChangeIndexPattern={onChangeIndexPattern}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <DiscoverIndexPatternManagement
-              selectedIndexPattern={selectedIndexPattern}
-              editField={editField}
-              useNewFieldsApi={useNewFieldsApi}
-              createNewDataView={createNewDataView}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </section>
-    );
-  }
-
   return (
     <EuiPageSideBar
       className="dscSidebar"
@@ -326,31 +316,27 @@ export function DiscoverSidebarComponent({
         gutterSize="s"
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={true} className="dscSidebar__indexPatternSwitcher">
-              <DiscoverIndexPattern
-                selectedIndexPattern={selectedIndexPattern}
-                indexPatternList={sortBy(indexPatternList, (o) => o.attributes.title)}
-                onChangeIndexPattern={onChangeIndexPattern}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <DiscoverIndexPatternManagement
-                selectedIndexPattern={selectedIndexPattern}
-                useNewFieldsApi={useNewFieldsApi}
-                editField={editField}
-                createNewDataView={createNewDataView}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
+        {Boolean(showDataViewPicker) && (
+          <DataViewPicker
+            currentDataViewId={selectedIndexPattern.id}
+            onChangeDataView={onChangeIndexPattern}
+            onAddField={editField}
+            onDataViewCreated={createNewDataView}
+            trigger={{
+              label: selectedIndexPattern?.getName() || '',
+              'data-test-subj': 'indexPattern-switch-link',
+              title: selectedIndexPattern?.title || '',
+              fullWidth: true,
+            }}
+          />
+        )}
         <EuiFlexItem grow={false}>
           <form>
             <DiscoverFieldSearch
               onChange={onChangeFieldSearch}
               value={fieldFilter.name}
               types={fieldTypes}
+              presentFieldTypes={presentFieldTypes}
             />
           </form>
         </EuiFlexItem>
@@ -427,7 +413,7 @@ export function DiscoverSidebarComponent({
                   initialIsOpen={true}
                   buttonContent={
                     <EuiText size="xs" id="available_fields">
-                      <strong>
+                      <strong id={DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields}>
                         <FormattedMessage
                           id="discover.fieldChooser.filter.availableFieldsTitle"
                           defaultMessage="Available fields"
@@ -511,6 +497,18 @@ export function DiscoverSidebarComponent({
               </div>
             )}
           </div>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            iconType="indexOpen"
+            data-test-subj="indexPattern-add-field_btn"
+            onClick={() => editField()}
+            size="s"
+          >
+            {i18n.translate('discover.fieldChooser.addField.label', {
+              defaultMessage: 'Add a field',
+            })}
+          </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPageSideBar>

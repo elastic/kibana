@@ -16,9 +16,18 @@ const getTabsOnUsersDetailsUrl = (userName: string, tabName: UsersTableType) =>
 
 export const navTabsUsersDetails = (
   userName: string,
-  hasMlUserPermissions: boolean
+  hasMlUserPermissions: boolean,
+  isRiskyUserEnabled: boolean
 ): UsersDetailsNavTab => {
+  const hiddenTabs = [];
+
   const userDetailsNavTabs = {
+    [UsersTableType.authentications]: {
+      id: UsersTableType.authentications,
+      name: i18n.NAVIGATION_AUTHENTICATIONS_TITLE,
+      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.authentications),
+      disabled: false,
+    },
     [UsersTableType.anomalies]: {
       id: UsersTableType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,
@@ -37,9 +46,21 @@ export const navTabsUsersDetails = (
       href: getTabsOnUsersDetailsUrl(userName, UsersTableType.alerts),
       disabled: false,
     },
+    [UsersTableType.risk]: {
+      id: UsersTableType.risk,
+      name: i18n.NAVIGATION_RISK_TITLE,
+      href: getTabsOnUsersDetailsUrl(userName, UsersTableType.risk),
+      disabled: false,
+    },
   };
 
-  return hasMlUserPermissions
-    ? userDetailsNavTabs
-    : omit([UsersTableType.anomalies], userDetailsNavTabs);
+  if (!hasMlUserPermissions) {
+    hiddenTabs.push(UsersTableType.anomalies);
+  }
+
+  if (!isRiskyUserEnabled) {
+    hiddenTabs.push(UsersTableType.risk);
+  }
+
+  return omit(hiddenTabs, userDetailsNavTabs);
 };

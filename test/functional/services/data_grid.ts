@@ -174,7 +174,8 @@ export class DataGridService extends FtrService {
 
     const textArr = [];
     for (const cell of result) {
-      textArr.push(await cell.getVisibleText());
+      const textContent = await cell.getAttribute('textContent');
+      textArr.push(textContent.trim());
     }
     return Promise.resolve(textArr);
   }
@@ -220,6 +221,17 @@ export class DataGridService extends FtrService {
     }
     await this.find.clickByButtonText('Remove column');
   }
+
+  public async clickCopyColumnValues(field: string) {
+    await this.openColMenuByField(field);
+    await this.find.clickByButtonText('Copy column');
+  }
+
+  public async clickCopyColumnName(field: string) {
+    await this.openColMenuByField(field);
+    await this.find.clickByButtonText('Copy name');
+  }
+
   public async getDetailsRow(): Promise<WebElementWrapper> {
     const detailRows = await this.getDetailsRows();
     return detailRows[0];

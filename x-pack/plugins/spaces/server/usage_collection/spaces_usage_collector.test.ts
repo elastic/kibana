@@ -7,11 +7,11 @@
 
 import * as Rx from 'rxjs';
 
-import { elasticsearchServiceMock } from 'src/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type { ILicense, LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-import { createCollectorFetchContextMock } from '../../../../../src/plugins/usage_collection/server/mocks';
-import type { KibanaFeature } from '../../../features/server';
-import type { ILicense, LicensingPluginSetup } from '../../../licensing/server';
 import type { PluginsSetup } from '../plugin';
 import type { UsageStats } from '../usage_stats';
 import { usageStatsClientMock } from '../usage_stats/usage_stats_client.mock';

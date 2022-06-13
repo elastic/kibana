@@ -26,7 +26,7 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
       }
     >
       <a
-        className="euiLink euiLink--primary"
+        className="euiLink css-102pf9n-euiLink-primary"
         href="https://www.elastic.co"
         rel=""
         title="Powered by Elastic.co"
@@ -34,7 +34,9 @@ exports[`Storyshots shareables/Footer/Title component 1`] = `
         <span
           data-euiicon-type="logoElastic"
           size="l"
-        />
+        >
+          
+        </span>
       </a>
     </div>
     <div
@@ -91,7 +93,7 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
       }
     >
       <a
-        className="euiLink euiLink--primary"
+        className="euiLink css-102pf9n-euiLink-primary"
         href="https://www.elastic.co"
         rel=""
         title="Powered by Elastic.co"
@@ -99,7 +101,9 @@ exports[`Storyshots shareables/Footer/Title contextual: austin 1`] = `
         <span
           data-euiicon-type="logoElastic"
           size="l"
-        />
+        >
+          
+        </span>
       </a>
     </div>
     <div
@@ -156,7 +160,7 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
       }
     >
       <a
-        className="euiLink euiLink--primary"
+        className="euiLink css-102pf9n-euiLink-primary"
         href="https://www.elastic.co"
         rel=""
         title="Powered by Elastic.co"
@@ -164,7 +168,9 @@ exports[`Storyshots shareables/Footer/Title contextual: hello 1`] = `
         <span
           data-euiicon-type="logoElastic"
           size="l"
-        />
+        >
+          
+        </span>
       </a>
     </div>
     <div

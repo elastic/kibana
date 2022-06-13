@@ -9,7 +9,7 @@ import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useEffect, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
   getPolicyDetailPath,
@@ -25,7 +25,6 @@ import {
 } from '../../../../common/routing';
 import { useHttp } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
-import { useFetchHostIsolationExceptionsList } from '../../../host_isolation_exceptions/view/hooks';
 import {
   isOnHostIsolationExceptionsView,
   isOnPolicyEventFiltersView,
@@ -42,14 +41,16 @@ import { POLICY_ARTIFACT_EVENT_FILTERS_LABELS } from './event_filters_translatio
 import { POLICY_ARTIFACT_TRUSTED_APPS_LABELS } from './trusted_apps_translations';
 import { POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS } from './host_isolation_exceptions_translations';
 import { POLICY_ARTIFACT_BLOCKLISTS_LABELS } from './blocklists_translations';
-import { TrustedAppsApiClient } from '../../../trusted_apps/service/trusted_apps_api_client';
-import { EventFiltersApiClient } from '../../../event_filters/service/event_filters_api_client';
+import { TrustedAppsApiClient } from '../../../trusted_apps/service/api_client';
+import { EventFiltersApiClient } from '../../../event_filters/service/api_client';
 import { BlocklistsApiClient } from '../../../blocklist/services/blocklists_api_client';
 import { HostIsolationExceptionsApiClient } from '../../../host_isolation_exceptions/host_isolation_exceptions_api_client';
 import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../trusted_apps/constants';
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
+import { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
+import { useListArtifact } from '../../../../hooks/artifacts';
 
 const enum PolicyTabKeys {
   SETTINGS = 'settings',
@@ -76,14 +77,20 @@ export const PolicyTabs = React.memo(() => {
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
   const policyItem = usePolicyDetailsSelector(policyDetails);
   const privileges = useUserPrivileges().endpointPrivileges;
+  const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
-  const allPolicyHostIsolationExceptionsListRequest = useFetchHostIsolationExceptionsList({
-    page: 1,
-    perPage: 100,
-    policies: [policyId, 'all'],
-    // only enable if privileges are not loading and can not isolate a host
-    enabled: !privileges.loading && !privileges.canIsolateHost,
-  });
+  const allPolicyHostIsolationExceptionsListRequest = useListArtifact(
+    HostIsolationExceptionsApiClient.getInstance(http),
+    {
+      page: 1,
+      perPage: 100,
+      policies: [policyId, 'all'],
+    },
+    HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS,
+    {
+      enabled: !privileges.loading && !privileges.canIsolateHost,
+    }
+  );
 
   const canSeeHostIsolationExceptions =
     privileges.canIsolateHost ||
@@ -123,7 +130,7 @@ export const PolicyTabs = React.memo(() => {
       layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.trustedApps.list.about"
-          defaultMessage="There {count, plural, one {is} other {are}} {count} trusted {count, plural, =1 {app} other {apps}} associated with this policy. Click here to {link}"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} trusted {count, plural, =1 {application} other {applications}} associated with this policy. Click here to {link}"
           values={{ count, link }}
         />
       ),
@@ -155,8 +162,8 @@ export const PolicyTabs = React.memo(() => {
       ...POLICY_ARTIFACT_BLOCKLISTS_LABELS,
       layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
         <FormattedMessage
-          id="xpack.securitySolution.endpoint.policy.blocklists.list.about"
-          defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {blocklist} other {blocklists}} associated with this policy. Click here to {link}"
+          id="xpack.securitySolution.endpoint.policy.blocklist.list.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} {count, plural, =1 {blocklist} other {blocklist entries}} associated with this policy. Click here to {link}"
           values={{ count, link }}
         />
       ),
@@ -241,7 +248,7 @@ export const PolicyTabs = React.memo(() => {
       [PolicyTabKeys.BLOCKLISTS]: {
         id: PolicyTabKeys.BLOCKLISTS,
         name: i18n.translate('xpack.securitySolution.endpoint.policy.details.tabs.blocklists', {
-          defaultMessage: 'Blocklists',
+          defaultMessage: 'Blocklist',
         }),
         content: (
           <>
@@ -320,9 +327,9 @@ export const PolicyTabs = React.memo(() => {
           path = getPolicyBlocklistsPath(policyId);
           break;
       }
-      history.push(path);
+      history.push(path, routeState?.backLink ? { backLink: routeState.backLink } : null);
     },
-    [history, policyId]
+    [history, policyId, routeState]
   );
 
   // show loader for privileges validation

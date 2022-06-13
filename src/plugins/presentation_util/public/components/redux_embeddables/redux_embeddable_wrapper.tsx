@@ -15,18 +15,18 @@ import { Filter } from '@kbn/es-query';
 import { isEqual } from 'lodash';
 
 import {
-  ReduxEmbeddableWrapperProps,
-  ReduxContainerContextServices,
-  ReduxEmbeddableContextServices,
-  ReduxEmbeddableWrapperPropsWithChildren,
-} from './types';
-import {
   IContainer,
   IEmbeddable,
   EmbeddableInput,
   EmbeddableOutput,
   isErrorEmbeddable,
-} from '../../../../embeddable/public';
+} from '@kbn/embeddable-plugin/public';
+import {
+  ReduxEmbeddableWrapperProps,
+  ReduxContainerContextServices,
+  ReduxEmbeddableContextServices,
+  ReduxEmbeddableWrapperPropsWithChildren,
+} from './types';
 import { getManagedEmbeddablesStore } from './generic_embeddable_store';
 import { ReduxEmbeddableContext, useReduxEmbeddableContext } from './redux_embeddable_context';
 
@@ -94,6 +94,7 @@ export const ReduxEmbeddableWrapper = <InputType extends EmbeddableInput = Embed
           updateInputForChild: embeddable.updateInputForChild.bind(embeddable),
           removeEmbeddable: embeddable.removeEmbeddable.bind(embeddable),
           addNewEmbeddable: embeddable.addNewEmbeddable.bind(embeddable),
+          replaceEmbeddable: embeddable.replaceEmbeddable.bind(embeddable),
         };
       }
       return;

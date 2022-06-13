@@ -8,8 +8,8 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import React, { Fragment } from 'react';
-import type { DataView } from 'src/plugins/data_views/public';
-import { FieldFormatsStart } from '../../../../../field_formats/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { formatHit } from '../../../utils/format_hit';
 
 import './row_formatter.scss';
@@ -72,7 +72,6 @@ export const formatTopLevelObject = (
         formatter.convert(val, 'html', {
           field,
           hit: row,
-          indexPattern,
         })
       )
       .join(', ');

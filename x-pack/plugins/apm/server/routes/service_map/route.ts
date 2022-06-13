@@ -16,8 +16,9 @@ import { getServiceMap } from './get_service_map';
 import { getServiceMapBackendNodeInfo } from './get_service_map_backend_node_info';
 import { getServiceMapServiceNodeInfo } from './get_service_map_service_node_info';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, offsetRt, rangeRt } from '../default_api_types';
+import { environmentRt, rangeRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
+import { offsetRt } from '../../../common/comparison_rt';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -87,12 +88,14 @@ const serviceMapRoute = createApmServerRoute({
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
 
     notifyFeatureUsage({
-      licensingPlugin: context.licensing,
+      licensingPlugin: licensingContext,
       featureName: 'serviceMaps',
     });
 
@@ -106,7 +109,7 @@ const serviceMapRoute = createApmServerRoute({
       },
     } = params;
 
-    const savedObjectsClient = context.core.savedObjects.client;
+    const savedObjectsClient = (await context.core).savedObjects.client;
     const [setup, serviceGroup] = await Promise.all([
       setupRequest(resources),
       serviceGroupId
@@ -163,7 +166,9 @@ const serviceMapServiceNodeRoute = createApmServerRoute({
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
     const setup = await setupRequest(resources);
@@ -225,7 +230,8 @@ const serviceMapBackendNodeRoute = createApmServerRoute({
     if (!config.serviceMapEnabled) {
       throw Boom.notFound();
     }
-    if (!isActivePlatinumLicense(context.licensing.license)) {
+    const licensingContext = await context.licensing;
+    if (!isActivePlatinumLicense(licensingContext.license)) {
       throw Boom.forbidden(invalidLicenseMessage);
     }
     const setup = await setupRequest(resources);

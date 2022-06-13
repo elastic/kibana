@@ -9,7 +9,8 @@ import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
-import { useUiTracker } from '../../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
@@ -18,18 +19,15 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/service_link';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
-  isSingleColumn?: boolean;
   link?: ReactNode;
   showPerPageOptions?: boolean;
 }
 
 export function ServiceOverviewDependenciesTable({
   fixedHeight,
-  isSingleColumn = true,
   link,
   showPerPageOptions = true,
 }: ServiceOverviewDependenciesTableProps) {
@@ -41,19 +39,12 @@ export function ServiceOverviewDependenciesTable({
       rangeTo,
       serviceGroup,
       comparisonEnabled,
-      comparisonType,
+      offset,
       latencyAggregationType,
     },
   } = useApmParams('/services/{serviceName}/*');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-  });
 
   const { serviceName, transactionType } = useApmServiceContext();
 
@@ -70,12 +61,21 @@ export function ServiceOverviewDependenciesTable({
         {
           params: {
             path: { serviceName },
-            query: { start, end, environment, numBuckets: 20, offset },
+            query: {
+              start,
+              end,
+              environment,
+              numBuckets: 20,
+              offset:
+                comparisonEnabled && isTimeComparison(offset)
+                  ? offset
+                  : undefined,
+            },
           },
         }
       );
     },
-    [start, end, serviceName, environment, offset]
+    [start, end, serviceName, environment, offset, comparisonEnabled]
   );
 
   const dependencies =
@@ -90,7 +90,7 @@ export function ServiceOverviewDependenciesTable({
             query={{
               backendName: location.backendName,
               comparisonEnabled,
-              comparisonType,
+              offset,
               environment,
               kuery,
               rangeFrom,
@@ -110,7 +110,7 @@ export function ServiceOverviewDependenciesTable({
             agentName={location.agentName}
             query={{
               comparisonEnabled,
-              comparisonType,
+              offset,
               environment,
               kuery,
               rangeFrom,
@@ -134,7 +134,6 @@ export function ServiceOverviewDependenciesTable({
     <DependenciesTable
       dependencies={dependencies}
       fixedHeight={fixedHeight}
-      isSingleColumn={isSingleColumn}
       title={
         <EuiToolTip
           content={i18n.translate(

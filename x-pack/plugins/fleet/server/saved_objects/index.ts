@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectsServiceSetup, SavedObjectsType } from 'kibana/server';
+import type { SavedObjectsServiceSetup, SavedObjectsType } from '@kbn/core/server';
 
-import type { EncryptedSavedObjectsPluginSetup } from '../../../encrypted_saved_objects/server';
+import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+
 import {
   OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
@@ -37,6 +38,7 @@ import { migratePackagePolicyToV7150 } from './migrations/to_v7_15_0';
 import { migrateInstallationToV7160, migratePackagePolicyToV7160 } from './migrations/to_v7_16_0';
 import { migrateInstallationToV800, migrateOutputToV800 } from './migrations/to_v8_0_0';
 import { migratePackagePolicyToV820 } from './migrations/to_v8_2_0';
+import { migrateInstallationToV830, migratePackagePolicyToV830 } from './migrations/to_v8_3_0';
 
 /*
  * Saved object types and mappings
@@ -118,7 +120,7 @@ const getSavedObjectTypes = (
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
-        ssl: { type: 'flattened', index: false },
+        ssl: { type: 'binary' },
       },
     },
     migrations: {
@@ -208,6 +210,7 @@ const getSavedObjectTypes = (
       '7.15.0': migratePackagePolicyToV7150,
       '7.16.0': migratePackagePolicyToV7160,
       '8.2.0': migratePackagePolicyToV820,
+      '8.3.0': migratePackagePolicyToV830,
     },
   },
   [PACKAGES_SAVED_OBJECT_TYPE]: {
@@ -222,7 +225,6 @@ const getSavedObjectTypes = (
         name: { type: 'keyword' },
         version: { type: 'keyword' },
         internal: { type: 'boolean' },
-        removable: { type: 'boolean' },
         keep_policies_up_to_date: { type: 'boolean', index: false },
         es_index_patterns: {
           enabled: false,
@@ -261,6 +263,7 @@ const getSavedObjectTypes = (
       '7.14.1': migrateInstallationToV7140,
       '7.16.0': migrateInstallationToV7160,
       '8.0.0': migrateInstallationToV800,
+      '8.3.0': migrateInstallationToV830,
     },
   },
   [ASSETS_SAVED_OBJECT_TYPE]: {
@@ -310,5 +313,22 @@ export function registerSavedObjects(
 export function registerEncryptedSavedObjects(
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup
 ) {
+  encryptedSavedObjects.registerType({
+    type: OUTPUT_SAVED_OBJECT_TYPE,
+    attributesToEncrypt: new Set([{ key: 'ssl', dangerouslyExposeValue: true }]),
+    attributesToExcludeFromAAD: new Set([
+      'output_id',
+      'name',
+      'type',
+      'is_default',
+      'is_default_monitoring',
+      'hosts',
+      'ca_sha256',
+      'ca_trusted_fingerprint',
+      'config',
+      'config_yaml',
+      'is_preconfigured',
+    ]),
+  });
   // Encrypted saved objects
 }

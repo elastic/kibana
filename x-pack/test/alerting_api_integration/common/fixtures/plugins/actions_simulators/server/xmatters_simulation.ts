@@ -12,7 +12,7 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
   IRouter,
-} from 'kibana/server';
+} from '@kbn/core/server';
 
 export function initPlugin(router: IRouter, path: string) {
   router.post(

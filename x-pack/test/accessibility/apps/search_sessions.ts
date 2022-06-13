@@ -15,7 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const esArchiver = getService('esArchiver');
 
-  describe('Search sessions a11y tests', () => {
+  describe('Search sessions Accessibility', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/data/search_sessions');
       await PageObjects.searchSessionsManagement.goTo();

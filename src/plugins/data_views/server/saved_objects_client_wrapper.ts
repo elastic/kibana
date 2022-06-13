@@ -6,12 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsClientContract, SavedObject } from 'src/core/server';
-import {
-  SavedObjectsClientCommon,
-  SavedObjectsClientCommonFindArgs,
-  DataViewSavedObjectConflictError,
-} from '../common';
+import { SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import { SavedObjectsClientCommon, SavedObjectsClientCommonFindArgs } from '../common/types';
+import { DataViewSavedObjectConflictError } from '../common/errors';
 
 export class SavedObjectsClientServerToCommon implements SavedObjectsClientCommon {
   private savedObjectClient: SavedObjectsClientContract;

@@ -12,13 +12,22 @@ import { XyToolbar } from '.';
 import { DimensionEditor } from './dimension_editor';
 import { AxisSettingsPopover } from './axis_settings_popover';
 import { FramePublicAPI } from '../../types';
-import { State, XYState } from '../types';
+import { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../mocks';
-import { chartPluginMock } from 'src/plugins/charts/public/mocks';
+import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EuiColorPicker } from '@elastic/eui';
 import { layerTypes } from '../../../common';
-import { XYDataLayerConfig } from '../../../common/expressions';
+import { act } from 'react-dom/test-utils';
+
+jest.mock('lodash', () => {
+  const original = jest.requireActual('lodash');
+
+  return {
+    ...original,
+    debounce: (fn: unknown) => fn,
+  };
+});
 
 describe('XY Config panels', () => {
   let frame: FramePublicAPI;
@@ -343,6 +352,68 @@ describe('XY Config panels', () => {
       );
 
       expect(component.find(EuiColorPicker).prop('color')).toEqual('red');
+    });
+    test('does not apply incorrect color', () => {
+      const setState = jest.fn();
+      const state = {
+        ...testState(),
+        layers: [
+          {
+            seriesType: 'bar',
+            layerType: layerTypes.DATA,
+            layerId: 'first',
+            splitAccessor: undefined,
+            xAccessor: 'foo',
+            accessors: ['bar'],
+            yConfig: [{ forAccessor: 'bar', color: 'red' }],
+          },
+        ],
+      } as XYState;
+
+      const component = mount(
+        <DimensionEditor
+          layerId={state.layers[0].layerId}
+          frame={{
+            ...frame,
+            activeData: {
+              first: {
+                type: 'datatable',
+                columns: [],
+                rows: [{ bar: 123 }],
+              },
+            },
+          }}
+          setState={setState}
+          accessor="bar"
+          groupId="left"
+          state={state}
+          formatFactory={jest.fn()}
+          paletteService={chartPluginMock.createPaletteRegistry()}
+          panelRef={React.createRef()}
+        />
+      );
+
+      act(() => {
+        component
+          .find('input[data-test-subj="euiColorPickerAnchor indexPattern-dimension-colorPicker"]')
+          .simulate('change', {
+            target: { value: 'INCORRECT_COLOR' },
+          });
+      });
+      component.update();
+      expect(component.find(EuiColorPicker).prop('color')).toEqual('INCORRECT_COLOR');
+      expect(setState).not.toHaveBeenCalled();
+
+      act(() => {
+        component
+          .find('input[data-test-subj="euiColorPickerAnchor indexPattern-dimension-colorPicker"]')
+          .simulate('change', {
+            target: { value: '666666' },
+          });
+      });
+      component.update();
+      expect(component.find(EuiColorPicker).prop('color')).toEqual('666666');
+      expect(setState).toHaveBeenCalled();
     });
   });
 });

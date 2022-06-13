@@ -18,8 +18,8 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 
-import type { Toast } from '../../../../../../../../../../src/core/public';
-import { mountReactNode } from '../../../../../../../../../../src/core/public/utils';
+import type { Toast } from '@kbn/core/public';
+import { mountReactNode } from '@kbn/core/public/utils';
 import {
   BulkAction,
   BulkActionEditType,
@@ -30,7 +30,7 @@ import { canEditRuleWithActions } from '../../../../../../common/utils/privilege
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import * as detectionI18n from '../../../translations';
 import * as i18n from '../../translations';
-import { executeRulesBulkAction, initRulesBulkAction } from '../actions';
+import { executeRulesBulkAction } from '../actions';
 import { useHasActionsPrivileges } from '../use_has_actions_privileges';
 import { useHasMlPermissions } from '../use_has_ml_permissions';
 import { getCustomRulesCountFromCache } from './use_custom_rules_count';
@@ -39,6 +39,8 @@ import { convertRulesFilterToKQL } from '../../../../../containers/detection_eng
 
 import type { FilterOptions } from '../../../../../containers/detection_engine/rules/types';
 import { useInvalidateRules } from '../../../../../containers/detection_engine/rules/use_find_rules_query';
+import { BULK_RULE_ACTIONS } from '../../../../../../common/lib/apm/user_actions';
+import { useStartTransaction } from '../../../../../../common/lib/apm/use_start_transaction';
 
 interface UseBulkActionsArgs {
   filterOptions: FilterOptions;
@@ -65,6 +67,7 @@ export const useBulkActions = ({
   const toasts = useAppToasts();
   const getIsMounted = useIsMounted();
   const filterQuery = convertRulesFilterToKQL(filterOptions);
+  const { startTransaction } = useStartTransaction();
 
   // refetch tags if edit action is related to tags: add_tags/delete_tags/set_tags
   const resolveTagsRefetch = useCallback(
@@ -99,6 +102,7 @@ export const useBulkActions = ({
         selectedRules.some((rule) => !canEditRuleWithActions(rule, hasActionsPrivileges));
 
       const handleEnableAction = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.ENABLE });
         closePopover();
         const disabledRules = selectedRules.filter(({ enabled }) => !enabled);
         const disabledRulesNoML = disabledRules.filter(({ type }) => !isMlRule(type));
@@ -123,6 +127,7 @@ export const useBulkActions = ({
       };
 
       const handleDisableActions = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.DISABLE });
         closePopover();
         const enabledIds = selectedRules.filter(({ enabled }) => enabled).map(({ id }) => id);
         await executeRulesBulkAction({
@@ -136,6 +141,7 @@ export const useBulkActions = ({
       };
 
       const handleDuplicateAction = async () => {
+        startTransaction({ name: BULK_RULE_ACTIONS.DUPLICATE });
         closePopover();
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
@@ -156,6 +162,7 @@ export const useBulkActions = ({
           }
         }
 
+        startTransaction({ name: BULK_RULE_ACTIONS.DELETE });
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.delete,
@@ -169,6 +176,7 @@ export const useBulkActions = ({
       const handleExportAction = async () => {
         closePopover();
 
+        startTransaction({ name: BULK_RULE_ACTIONS.EXPORT });
         await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.export,
@@ -201,6 +209,8 @@ export const useBulkActions = ({
           setIsRefreshOn(true);
           return;
         }
+
+        startTransaction({ name: BULK_RULE_ACTIONS.EDIT });
 
         const hideWarningToast = () => {
           if (longTimeWarningToast) {
@@ -239,25 +249,22 @@ export const useBulkActions = ({
           );
         }, 5 * 1000);
 
-        const rulesBulkAction = initRulesBulkAction({
+        await executeRulesBulkAction({
           visibleRuleIds: selectedRuleIds,
           action: BulkAction.edit,
           setLoadingRules,
           toasts,
           payload: { edit: [editPayload] },
           onFinish: () => hideWarningToast(),
+          search: isAllSelected
+            ? {
+                query: convertRulesFilterToKQL({
+                  ...filterOptions,
+                  showCustomRules: true, // only edit custom rules, as elastic rule are immutable
+                }),
+              }
+            : { ids: customSelectedRuleIds },
         });
-
-        // only edit custom rules, as elastic rule are immutable
-        if (isAllSelected) {
-          const customRulesOnlyFilterQuery = convertRulesFilterToKQL({
-            ...filterOptions,
-            showCustomRules: true,
-          });
-          await rulesBulkAction.byQuery(customRulesOnlyFilterQuery);
-        } else {
-          await rulesBulkAction.byIds(customSelectedRuleIds);
-        }
 
         isBulkEditFinished = true;
         invalidateRules();
@@ -309,6 +316,16 @@ export const useBulkActions = ({
               'data-test-subj': 'tagsBulkEditRule',
               disabled: isEditDisabled,
               panel: 1,
+            },
+            {
+              key: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
+              name: i18n.BULK_ACTION_APPLY_TIMELINE_TEMPLATE,
+              'data-test-subj': 'applyTimelineTemplateBulk',
+              disabled: isEditDisabled,
+              onClick: handleBulkEdit(BulkActionEditType.set_timeline),
+              toolTipContent: missingActionPrivileges ? i18n.EDIT_RULE_SETTINGS_TOOLTIP : undefined,
+              toolTipPosition: 'right',
+              icon: undefined,
             },
             {
               key: i18n.BULK_ACTION_EXPORT,
@@ -408,18 +425,19 @@ export const useBulkActions = ({
       hasActionsPrivileges,
       isAllSelected,
       loadingRuleIds,
+      startTransaction,
       hasMlPermissions,
-      invalidateRules,
       setLoadingRules,
       toasts,
       filterQuery,
+      invalidateRules,
       confirmDeletion,
       setIsRefreshOn,
       confirmBulkEdit,
       completeBulkEditForm,
       queryClient,
-      getIsMounted,
       filterOptions,
+      getIsMounted,
       resolveTagsRefetch,
     ]
   );

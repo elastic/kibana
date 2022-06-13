@@ -517,7 +517,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -527,7 +527,7 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
           " | undefined; type?: string | undefined; })[]; isLoading: boolean; filterManager: ",
           {
@@ -549,7 +549,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -559,7 +559,7 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
           " | undefined; type?: string | undefined; })[]; isLoading: boolean; filterManager: ",
           {
@@ -1979,30 +1979,30 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-public.useStatusBulkActionItems",
+        "id": "def-public.useBulkActionItems",
         "type": "Function",
         "tags": [],
-        "label": "useStatusBulkActionItems",
+        "label": "useBulkActionItems",
         "description": [],
         "signature": [
-          "({ eventIds, currentStatus, query, indexName, setEventsLoading, setEventsDeleted, onUpdateSuccess, onUpdateFailure, timelineId, }: ",
-          "StatusBulkActionsProps",
+          "({ eventIds, currentStatus, query, indexName, setEventsLoading, showAlertStatusActions, setEventsDeleted, onUpdateSuccess, onUpdateFailure, customBulkActions, timelineId, }: ",
+          "BulkActionsProps",
           ") => JSX.Element[]"
         ],
-        "path": "x-pack/plugins/timelines/public/hooks/use_status_bulk_action_items.tsx",
+        "path": "x-pack/plugins/timelines/public/hooks/use_bulk_action_items.tsx",
         "deprecated": false,
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-public.useStatusBulkActionItems.$1",
+            "id": "def-public.useBulkActionItems.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  timelineId,\n}",
+            "label": "{\n  eventIds,\n  currentStatus,\n  query,\n  indexName,\n  setEventsLoading,\n  showAlertStatusActions = true,\n  setEventsDeleted,\n  onUpdateSuccess,\n  onUpdateFailure,\n  customBulkActions,\n  timelineId,\n}",
             "description": [],
             "signature": [
-              "StatusBulkActionsProps"
+              "BulkActionsProps"
             ],
-            "path": "x-pack/plugins/timelines/public/hooks/use_status_bulk_action_items.tsx",
+            "path": "x-pack/plugins/timelines/public/hooks/use_bulk_action_items.tsx",
             "deprecated": false,
             "isRequired": true
           }
@@ -2047,7 +2047,7 @@
               "EuiDataGridColumn",
               ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
               "EuiDataGridColumn",
-              ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+              ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
               "TGridCellAction",
               "[] | undefined; category?: string | undefined; columnHeaderType: ",
               {
@@ -2057,7 +2057,7 @@
                 "section": "def-common.ColumnHeaderType",
                 "text": "ColumnHeaderType"
               },
-              "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+              "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
               "IFieldSubType",
               " | undefined; type?: string | undefined; })[]"
             ],
@@ -2594,11 +2594,11 @@
         "label": "TGridModelForTimeline",
         "description": [],
         "signature": [
-          "{ columns: (Pick<",
+          "{ title: string; columns: (Pick<",
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -2608,13 +2608,13 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; title: string; id: string; filters?: ",
+          " | undefined; type?: string | undefined; })[]; id: string; filters?: ",
           "Filter",
           "[] | undefined; dataViewId: string | null; sort: ",
           "SortColumnTimeline",
-          "[]; version: string | null; isLoading: boolean; filterManager?: ",
+          "[]; version: string | null; filterManager?: ",
           {
             "pluginId": "data",
             "scope": "public",
@@ -2626,7 +2626,7 @@
           "EuiDataGridColumn",
           ", \"id\" | \"display\" | \"displayAsText\" | \"initialWidth\"> & Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -2636,9 +2636,9 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
-          " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; dataProviders: ",
+          " | undefined; type?: string | undefined; })[]; savedObjectId: string | null; isLoading: boolean; dataProviders: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -3572,6 +3572,19 @@
           },
           {
             "parentPluginId": "timelines",
+            "id": "def-common.BrowserField.esTypes",
+            "type": "Array",
+            "tags": [],
+            "label": "esTypes",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "deprecated": false
+          },
+          {
+            "parentPluginId": "timelines",
             "id": "def-common.BrowserField.subType",
             "type": "CompoundType",
             "tags": [],
@@ -3747,7 +3760,7 @@
                     "signature": [
                       "Pick<",
                       "EuiDataGridColumn",
-                      ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+                      ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
                       "TGridCellAction",
                       "[] | undefined; category?: string | undefined; columnHeaderType: ",
                       {
@@ -3757,7 +3770,7 @@
                         "section": "def-common.ColumnHeaderType",
                         "text": "ColumnHeaderType"
                       },
-                      "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+                      "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
                       "IFieldSubType",
                       " | undefined; type?: string | undefined; }"
                     ],
@@ -4927,15 +4940,7 @@
             "label": "renderRow",
             "description": [],
             "signature": [
-              "({ browserFields, data, isDraggable, timelineId, }: { browserFields: Readonly<Record<string, Partial<",
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.BrowserField",
-                "text": "BrowserField"
-              },
-              ">>>; data: ",
+              "({ data, isDraggable, timelineId, }: { data: ",
               "Ecs",
               "; isDraggable: boolean; timelineId: string; }) => React.ReactNode"
             ],
@@ -4947,32 +4952,11 @@
                 "id": "def-common.RowRenderer.renderRow.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    browserFields,\n    data,\n    isDraggable,\n    timelineId,\n  }",
+                "label": "{\n    data,\n    isDraggable,\n    timelineId,\n  }",
                 "description": [],
                 "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
                 "deprecated": false,
                 "children": [
-                  {
-                    "parentPluginId": "timelines",
-                    "id": "def-common.RowRenderer.renderRow.$1.browserFields",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "browserFields",
-                    "description": [],
-                    "signature": [
-                      "{ readonly [x: string]: Partial<",
-                      {
-                        "pluginId": "timelines",
-                        "scope": "common",
-                        "docId": "kibTimelinesPluginApi",
-                        "section": "def-common.BrowserField",
-                        "text": "BrowserField"
-                      },
-                      ">; }"
-                    ],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
-                    "deprecated": false
-                  },
                   {
                     "parentPluginId": "timelines",
                     "id": "def-common.RowRenderer.renderRow.$1.data",
@@ -5390,7 +5374,7 @@
             "label": "language",
             "description": [],
             "signature": [
-              "\"eql\" | \"lucene\" | \"kuery\""
+              "\"eql\" | \"kuery\" | \"lucene\""
             ],
             "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false
@@ -6241,6 +6225,17 @@
         "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
         "deprecated": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.TimelineType",
+        "type": "Enum",
+        "tags": [],
+        "label": "TimelineType",
+        "description": [],
+        "path": "x-pack/plugins/timelines/common/types/timeline/index.ts",
+        "deprecated": false,
+        "initialIsOpen": false
       }
     ],
     "misc": [
@@ -6252,7 +6247,7 @@
         "label": "AlertWorkflowStatus",
         "description": [],
         "signature": [
-          "\"open\" | \"acknowledged\" | \"closed\""
+          "\"open\" | \"closed\" | \"acknowledged\""
         ],
         "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
@@ -6367,7 +6362,7 @@
         "signature": [
           "Pick<",
           "EuiDataGridColumn",
-          ", \"id\" | \"schema\" | \"display\" | \"actions\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
+          ", \"id\" | \"schema\" | \"actions\" | \"display\" | \"defaultSortDirection\" | \"displayAsText\" | \"initialWidth\" | \"isSortable\"> & { aggregatable?: boolean | undefined; tGridCellActions?: ",
           "TGridCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           {
@@ -6377,7 +6372,7 @@
             "section": "def-common.ColumnHeaderType",
             "text": "ColumnHeaderType"
           },
-          "; description?: string | null | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           "IFieldSubType",
           " | undefined; type?: string | undefined; }"
         ],
@@ -6439,7 +6434,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ type?: ",
+          "{ id: string; type?: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -6447,7 +6442,7 @@
             "section": "def-common.DataProviderType",
             "text": "DataProviderType"
           },
-          " | undefined; id: string; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
+          " | undefined; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -6533,7 +6528,7 @@
         "label": "EntityType",
         "description": [],
         "signature": [
-          "\"alerts\" | \"events\""
+          "\"sessions\" | \"alerts\" | \"events\""
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,
@@ -6833,7 +6828,7 @@
         "label": "EntityType",
         "description": [],
         "signature": [
-          "{ readonly ALERTS: \"alerts\"; readonly EVENTS: \"events\"; }"
+          "{ readonly ALERTS: \"alerts\"; readonly EVENTS: \"events\"; readonly SESSIONS: \"sessions\"; }"
         ],
         "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,

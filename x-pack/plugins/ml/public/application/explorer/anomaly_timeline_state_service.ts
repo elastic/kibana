@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { BehaviorSubject, combineLatest, from, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, from, Observable, of, Subscription } from 'rxjs';
 import {
   switchMap,
   map,
@@ -14,8 +14,11 @@ import {
   startWith,
   tap,
   debounceTime,
+  filter,
 } from 'rxjs/operators';
 import { isEqual, sortBy, uniq } from 'lodash';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { AnomalyTimelineService } from '../services/anomaly_timeline_service';
 import type {
   AppStateSelectedCells,
@@ -25,8 +28,6 @@ import type {
 } from './explorer_utils';
 import type { AnomalyExplorerCommonStateService } from './anomaly_explorer_common_state';
 import type { AnomalyExplorerSwimLaneUrlState } from '../../../common/types/locator';
-import type { TimefilterContract } from '../../../../../../src/plugins/data/public';
-import type { TimeRangeBounds } from '../../../../../../src/plugins/data/common';
 import {
   ANOMALY_SWIM_LANE_HARD_LIMIT,
   SWIMLANE_TYPE,
@@ -40,6 +41,8 @@ import { InfluencersFilterQuery } from '../../../common/types/es_client';
 // FIXME get rid of the static import
 import { mlTimefilterRefresh$ } from '../services/timefilter_refresh_service';
 import type { Refresh } from '../routing/use_refresh';
+import { StateService } from '../services/state_service';
+import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 
 interface SwimLanePagination {
   viewByFromPage: number;
@@ -49,10 +52,11 @@ interface SwimLanePagination {
 /**
  * Service for managing anomaly timeline state.
  */
-export class AnomalyTimelineStateService {
-  private _explorerURLStateCallback:
-    | ((update: AnomalyExplorerSwimLaneUrlState, replaceState?: boolean) => void)
-    | null = null;
+export class AnomalyTimelineStateService extends StateService {
+  private readonly _explorerURLStateCallback: (
+    update: AnomalyExplorerSwimLaneUrlState,
+    replaceState?: boolean
+  ) => void;
 
   private _overallSwimLaneData$ = new BehaviorSubject<OverallSwimlaneData | null>(null);
   private _viewBySwimLaneData$ = new BehaviorSubject<ViewBySwimLaneData | undefined>(undefined);
@@ -62,7 +66,9 @@ export class AnomalyTimelineStateService {
   >(null);
 
   private _containerWidth$ = new BehaviorSubject<number>(0);
-  private _selectedCells$ = new BehaviorSubject<AppStateSelectedCells | undefined>(undefined);
+  private _selectedCells$ = new BehaviorSubject<AppStateSelectedCells | undefined | null>(
+    undefined
+  );
   private _swimLaneSeverity$ = new BehaviorSubject<number>(0);
   private _swimLanePaginations$ = new BehaviorSubject<SwimLanePagination>({
     viewByFromPage: 1,
@@ -80,15 +86,32 @@ export class AnomalyTimelineStateService {
   private _refreshSubject$: Observable<Refresh>;
 
   constructor(
+    private anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService,
     private anomalyExplorerCommonStateService: AnomalyExplorerCommonStateService,
     private anomalyTimelineService: AnomalyTimelineService,
     private timefilter: TimefilterContract
   ) {
+    super();
+
     this._timeBounds$ = this.timefilter.getTimeUpdate$().pipe(
       startWith(null),
       map(() => this.timefilter.getBounds())
     );
     this._refreshSubject$ = mlTimefilterRefresh$.pipe(startWith({ lastRefresh: 0 }));
+
+    this._explorerURLStateCallback = (
+      update: AnomalyExplorerSwimLaneUrlState,
+      replaceState?: boolean
+    ) => {
+      const explorerUrlState = this.anomalyExplorerUrlStateService.getPageUrlState();
+      const mlExplorerSwimLaneState = explorerUrlState?.mlExplorerSwimlane;
+      const resultUpdate = replaceState ? update : { ...mlExplorerSwimLaneState, ...update };
+      return this.anomalyExplorerUrlStateService.updateUrlState({
+        ...explorerUrlState,
+        mlExplorerSwimlane: resultUpdate,
+      });
+    };
+
     this._init();
   }
 
@@ -96,36 +119,53 @@ export class AnomalyTimelineStateService {
    * Initializes required subscriptions for fetching swim lanes data.
    * @private
    */
-  private _init() {
-    this._initViewByData();
+  protected _initSubscriptions(): Subscription {
+    const subscription = new Subscription();
 
-    this._swimLaneUrlState$
-      .pipe(
-        map((v) => v?.severity ?? 0),
-        distinctUntilChanged()
-      )
-      .subscribe(this._swimLaneSeverity$);
+    subscription.add(
+      this.anomalyExplorerUrlStateService
+        .getPageUrlState$()
+        .pipe(
+          map((v) => v?.mlExplorerSwimlane),
+          distinctUntilChanged(isEqual)
+        )
+        .subscribe(this._swimLaneUrlState$)
+    );
 
-    this._initSwimLanePagination();
-    this._initOverallSwimLaneData();
-    this._initTopFieldValues();
-    this._initViewBySwimLaneData();
+    subscription.add(this._initViewByData());
 
-    combineLatest([
-      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
-      this.getContainerWidth$(),
-    ]).subscribe(([selectedJobs, containerWidth]) => {
-      if (!selectedJobs) return;
-      this._swimLaneBucketInterval$.next(
-        this.anomalyTimelineService.getSwimlaneBucketInterval(selectedJobs, containerWidth!)
-      );
-    });
+    subscription.add(
+      this._swimLaneUrlState$
+        .pipe(
+          map((v) => v?.severity ?? 0),
+          distinctUntilChanged()
+        )
+        .subscribe(this._swimLaneSeverity$)
+    );
 
-    this._initSelectedCells();
+    subscription.add(this._initSwimLanePagination());
+    subscription.add(this._initOverallSwimLaneData());
+    subscription.add(this._initTopFieldValues());
+    subscription.add(this._initViewBySwimLaneData());
+
+    subscription.add(
+      combineLatest([
+        this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+        this.getContainerWidth$(),
+      ]).subscribe(([selectedJobs, containerWidth]) => {
+        this._swimLaneBucketInterval$.next(
+          this.anomalyTimelineService.getSwimlaneBucketInterval(selectedJobs, containerWidth!)
+        );
+      })
+    );
+
+    subscription.add(this._initSelectedCells());
+
+    return subscription;
   }
 
-  private _initViewByData(): void {
-    combineLatest([
+  private _initViewByData(): Subscription {
+    return combineLatest([
       this._swimLaneUrlState$.pipe(
         map((v) => v?.viewByFieldName),
         distinctUntilChanged()
@@ -148,7 +188,7 @@ export class AnomalyTimelineStateService {
   }
 
   private _initSwimLanePagination() {
-    combineLatest([
+    return combineLatest([
       this._swimLaneUrlState$.pipe(
         map((v) => {
           return {
@@ -170,10 +210,10 @@ export class AnomalyTimelineStateService {
   }
 
   private _initOverallSwimLaneData() {
-    combineLatest([
+    return combineLatest([
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this._swimLaneSeverity$,
-      this.getContainerWidth$(),
+      this.getSwimLaneBucketInterval$(),
       this._timeBounds$,
       this._refreshSubject$,
     ])
@@ -181,12 +221,12 @@ export class AnomalyTimelineStateService {
         tap(() => {
           this._isOverallSwimLaneLoading$.next(true);
         }),
-        switchMap(([selectedJobs, severity, containerWidth]) => {
+        switchMap(([selectedJobs, severity, bucketInterval]) => {
           return from(
             this.anomalyTimelineService.loadOverallData(
               selectedJobs!,
-              containerWidth,
               undefined,
+              bucketInterval!,
               severity
             )
           );
@@ -199,14 +239,13 @@ export class AnomalyTimelineStateService {
   }
 
   private _initTopFieldValues() {
-    (
+    return (
       combineLatest([
         this.anomalyExplorerCommonStateService.getSelectedJobs$(),
         this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
         this.getViewBySwimlaneFieldName$(),
         this.getSwimLanePagination$(),
         this.getSwimLaneCardinality$(),
-        this.getContainerWidth$(),
         this.getSelectedCells$(),
         this.getSwimLaneBucketInterval$(),
         this._timeBounds$,
@@ -218,9 +257,10 @@ export class AnomalyTimelineStateService {
           string,
           SwimLanePagination,
           number,
-          number,
           AppStateSelectedCells,
-          TimeBucketsInterval
+          TimeBucketsInterval,
+          TimeRangeBounds,
+          Refresh
         ]
       >
     )
@@ -232,7 +272,6 @@ export class AnomalyTimelineStateService {
             viewBySwimlaneFieldName,
             swimLanePagination,
             swimLaneCardinality,
-            swimlaneContainerWidth,
             selectedCells,
             swimLaneBucketInterval,
           ]) => {
@@ -245,11 +284,7 @@ export class AnomalyTimelineStateService {
               viewBySwimlaneFieldName
             );
 
-            const timerange = getSelectionTimeRange(
-              selectedCells,
-              swimLaneBucketInterval.asSeconds(),
-              this.timefilter.getBounds()
-            );
+            const timerange = getSelectionTimeRange(selectedCells, this.timefilter.getBounds());
 
             return from(
               this.anomalyTimelineService.loadViewByTopFieldValuesForSelectedTime(
@@ -260,7 +295,7 @@ export class AnomalyTimelineStateService {
                 ANOMALY_SWIM_LANE_HARD_LIMIT,
                 swimLanePagination.viewByPerPage,
                 swimLanePagination.viewByFromPage,
-                swimlaneContainerWidth,
+                swimLaneBucketInterval,
                 selectionInfluencers,
                 influencersFilterQuery
               )
@@ -272,12 +307,12 @@ export class AnomalyTimelineStateService {
   }
 
   private _initViewBySwimLaneData() {
-    combineLatest([
+    return combineLatest([
       this._overallSwimLaneData$.pipe(skipWhile((v) => !v)),
       this.anomalyExplorerCommonStateService.getSelectedJobs$(),
       this.anomalyExplorerCommonStateService.getInfluencerFilterQuery$(),
       this._swimLaneSeverity$,
-      this.getContainerWidth$(),
+      this.getSwimLaneBucketInterval$(),
       this.getViewBySwimlaneFieldName$(),
       this.getSwimLanePagination$(),
       this._topFieldValues$.pipe(distinctUntilChanged(isEqual)),
@@ -294,7 +329,7 @@ export class AnomalyTimelineStateService {
             selectedJobs,
             influencersFilterQuery,
             severity,
-            swimlaneContainerWidth,
+            bucketInterval,
             viewBySwimlaneFieldName,
             swimLanePagination,
             topFieldValues,
@@ -307,13 +342,13 @@ export class AnomalyTimelineStateService {
                   latest: overallSwimLaneData!.latest,
                 },
                 selectedJobs,
-                viewBySwimlaneFieldName,
+                viewBySwimlaneFieldName!,
                 ANOMALY_SWIM_LANE_HARD_LIMIT,
                 swimLanePagination.viewByPerPage,
                 swimLanePagination.viewByFromPage,
-                swimlaneContainerWidth,
-                influencersFilterQuery,
                 undefined,
+                influencersFilterQuery,
+                bucketInterval!,
                 severity
               )
             );
@@ -328,7 +363,7 @@ export class AnomalyTimelineStateService {
   }
 
   private _initSelectedCells() {
-    combineLatest([
+    return combineLatest([
       this._viewBySwimlaneFieldName$,
       this._swimLaneUrlState$,
       this.getSwimLaneBucketInterval$(),
@@ -337,7 +372,7 @@ export class AnomalyTimelineStateService {
       .pipe(
         map(([viewByFieldName, swimLaneUrlState, swimLaneBucketInterval]) => {
           if (!swimLaneUrlState?.selectedType) {
-            return;
+            return null;
           }
 
           let times: AnomalyExplorerSwimLaneUrlState['selectedTimes'] =
@@ -355,7 +390,7 @@ export class AnomalyTimelineStateService {
           times = this._getAdjustedTimeSelection(times, this.timefilter.getBounds());
 
           if (!times) {
-            return;
+            return null;
           }
 
           return {
@@ -422,7 +457,7 @@ export class AnomalyTimelineStateService {
     filterActive: boolean,
     filteredFields: string[],
     isAndOperator: boolean,
-    selectedCells: AppStateSelectedCells | undefined,
+    selectedCells: AppStateSelectedCells | undefined | null,
     selectedJobs: ExplorerJob[] | undefined
   ) {
     const selectedJobIds = selectedJobs?.map((d) => d.id) ?? [];
@@ -564,8 +599,12 @@ export class AnomalyTimelineStateService {
   /**
    * Provides updates for swim lanes cells selection.
    */
-  public getSelectedCells$(): Observable<AppStateSelectedCells | undefined> {
+  public getSelectedCells$(): Observable<AppStateSelectedCells | undefined | null> {
     return this._selectedCells$.asObservable();
+  }
+
+  public getSelectedCells(): AppStateSelectedCells | undefined | null {
+    return this._selectedCells$.getValue();
   }
 
   public getSwimLaneSeverity$(): Observable<number | undefined> {
@@ -589,7 +628,7 @@ export class AnomalyTimelineStateService {
     if (resultUpdate.viewByPerPage) {
       resultUpdate.viewByFromPage = 1;
     }
-    this._explorerURLStateCallback!(resultUpdate);
+    this._explorerURLStateCallback(resultUpdate);
   }
 
   public getSwimLaneCardinality$(): Observable<number | undefined> {
@@ -617,22 +656,6 @@ export class AnomalyTimelineStateService {
   }
 
   /**
-   * Updates internal subject from the URL state.
-   * @param value
-   */
-  public updateFromUrlState(value: AnomalyExplorerSwimLaneUrlState | undefined) {
-    this._swimLaneUrlState$.next(value);
-  }
-
-  /**
-   * Updates callback for setting URL app state.
-   * @param callback
-   */
-  public updateSetStateCallback(callback: (update: AnomalyExplorerSwimLaneUrlState) => void) {
-    this._explorerURLStateCallback = callback;
-  }
-
-  /**
    * Sets container width
    * @param value
    */
@@ -646,7 +669,7 @@ export class AnomalyTimelineStateService {
    * @param value
    */
   public setSeverity(value: number) {
-    this._explorerURLStateCallback!({ severity: value, viewByFromPage: 1 });
+    this._explorerURLStateCallback({ severity: value, viewByFromPage: 1 });
   }
 
   /**
@@ -681,14 +704,14 @@ export class AnomalyTimelineStateService {
       mlExplorerSwimlane.selectedTimes = swimLaneSelectedCells.times;
       mlExplorerSwimlane.showTopFieldValues = swimLaneSelectedCells.showTopFieldValues;
 
-      this._explorerURLStateCallback!(mlExplorerSwimlane);
+      this._explorerURLStateCallback(mlExplorerSwimlane);
     } else {
       delete mlExplorerSwimlane.selectedType;
       delete mlExplorerSwimlane.selectedLanes;
       delete mlExplorerSwimlane.selectedTimes;
       delete mlExplorerSwimlane.showTopFieldValues;
 
-      this._explorerURLStateCallback!(mlExplorerSwimlane, true);
+      this._explorerURLStateCallback(mlExplorerSwimlane, true);
     }
   }
 
@@ -697,7 +720,7 @@ export class AnomalyTimelineStateService {
    * @param fieldName - Influencer field name of job id.
    */
   public setViewBySwimLaneFieldName(fieldName: string) {
-    this._explorerURLStateCallback!(
+    this._explorerURLStateCallback(
       {
         viewByFromPage: 1,
         viewByPerPage: this._swimLanePaginations$.getValue().viewByPerPage,
@@ -707,8 +730,13 @@ export class AnomalyTimelineStateService {
     );
   }
 
-  public getSwimLaneBucketInterval$(): Observable<TimeBucketsInterval | null> {
-    return this._swimLaneBucketInterval$.pipe(skipWhile((v) => !v));
+  public getSwimLaneBucketInterval$(): Observable<TimeBucketsInterval> {
+    return this._swimLaneBucketInterval$.pipe(
+      filter((v): v is TimeBucketsInterval => !!v),
+      distinctUntilChanged((prev, curr) => {
+        return prev.asSeconds() === curr.asSeconds();
+      })
+    );
   }
 
   public getSwimLaneBucketInterval(): TimeBucketsInterval | null {

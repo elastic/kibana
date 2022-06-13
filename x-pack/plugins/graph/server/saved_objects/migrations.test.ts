@@ -6,7 +6,7 @@
  */
 
 import { graphMigrations } from './migrations';
-import { SavedObjectUnsanitizedDoc } from 'kibana/server';
+import { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 
 describe('graph-workspace', () => {
   describe('7.0.0', () => {

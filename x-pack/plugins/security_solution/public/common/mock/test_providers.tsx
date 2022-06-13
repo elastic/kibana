@@ -14,9 +14,10 @@ import { Provider as ReduxStoreProvider } from 'react-redux';
 import { Store } from 'redux';
 import { BehaviorSubject } from 'rxjs';
 import { ThemeProvider } from 'styled-components';
-import { Capabilities } from 'src/core/public';
+import { Capabilities } from '@kbn/core/public';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
+import { ConsoleManager } from '../../management/components/console';
 import { createStore, State } from '../store';
 import { mockGlobalState } from './global_state';
 import {
@@ -59,7 +60,9 @@ export const TestProvidersComponent: React.FC<Props> = ({
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
             <QueryClientProvider client={queryClient}>
-              <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+              <ConsoleManager>
+                <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+              </ConsoleManager>
             </QueryClientProvider>
           </ThemeProvider>
         </ReduxStoreProvider>

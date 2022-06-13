@@ -159,9 +159,17 @@ describe('Epic Timeline', () => {
         dateRange: { start: '2019-10-30T21:06:27.644Z', end: '2019-10-31T21:06:27.644Z' },
         savedObjectId: '11169110-fc22-11e9-8ca9-072f15ce2685',
         selectedEventIds: {},
+        sessionViewConfig: null,
         show: true,
         showCheckboxes: false,
-        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: Direction.desc,
+          },
+        ],
         status: TimelineStatus.active,
         version: 'WzM4LDFd',
         id: '11169110-fc22-11e9-8ca9-072f15ce2685',
@@ -303,7 +311,8 @@ describe('Epic Timeline', () => {
         sort: [
           {
             columnId: '@timestamp',
-            columnType: 'number',
+            columnType: 'date',
+            esTypes: ['date'],
             sortDirection: 'desc',
           },
         ],

@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedObject } from 'kibana/server';
+import { SavedObject } from '@kbn/core/server';
+import { RawRule } from '@kbn/alerting-plugin/server/types';
 import { Spaces } from '../../scenarios';
 import {
   checkAAD,
@@ -17,7 +18,6 @@ import {
   TaskManagerDoc,
 } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { RawRule } from '../../../../../plugins/alerting/server/types';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertTests({ getService }: FtrProviderContext) {
@@ -85,6 +85,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         created_by: null,
         schedule: { interval: '1m' },
         scheduled_task_id: response.body.scheduled_task_id,
+        snooze_schedule: response.body.snooze_schedule,
         updated_by: null,
         api_key_owner: null,
         throttle: '1m',
@@ -106,6 +107,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
       expect(JSON.parse(taskRecord.task.params)).to.eql({
         alertId: response.body.id,
         spaceId: Spaces.space1.id,
+        consumer: 'alertsFixture',
       });
       // Ensure AAD isn't broken
       await checkAAD({
@@ -179,6 +181,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         created_by: null,
         schedule: { interval: '1m' },
         scheduled_task_id: response.body.scheduled_task_id,
+        snooze_schedule: response.body.snooze_schedule,
         updated_by: null,
         api_key_owner: null,
         throttle: '1m',
@@ -474,6 +477,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
           createdBy: null,
           schedule: { interval: '1m' },
           scheduledTaskId: response.body.scheduledTaskId,
+          snoozeSchedule: response.body.snoozeSchedule,
           updatedBy: null,
           apiKeyOwner: null,
           throttle: '1m',
@@ -495,6 +499,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
         expect(JSON.parse(taskRecord.task.params)).to.eql({
           alertId: response.body.id,
           spaceId: Spaces.space1.id,
+          consumer: 'alertsFixture',
         });
         // Ensure AAD isn't broken
         await checkAAD({

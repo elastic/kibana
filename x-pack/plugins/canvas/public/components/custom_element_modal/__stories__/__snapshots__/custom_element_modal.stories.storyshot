@@ -27,7 +27,9 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -56,7 +58,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
               className="euiFlexItem euiFlexItem--flexGrow2 canvasCustomElementForm"
             >
               <div
-                className="euiFormRow euiFormRow--compressed"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
                 id="generated-id-row"
               >
                 <div
@@ -102,7 +104,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 </div>
               </div>
               <div
-                className="euiFormRow"
+                className="euiFormRow euiFormRow--hasLabel"
                 id="generated-id-row"
               >
                 <div
@@ -139,7 +141,7 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                 </div>
               </div>
               <div
-                className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed canvasCustomElementForm__thumbnail"
                 id="generated-id-row"
               >
                 <div
@@ -184,7 +186,9 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
                           size="l"
-                        />
+                        >
+                          
+                        </span>
                         <div
                           className="euiFilePicker__promptText"
                         >
@@ -207,12 +211,12 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
               className="euiFlexItem euiFlexItem--flexGrow1 canvasElementCard__wrapper canvasCustomElementForm__preview"
             >
               <h4
-                className="euiTitle euiTitle--xxxsmall"
+                className="euiTitle css-7xv8go-euiTitle-xxxs"
               >
                 Element preview
               </h4>
               <div
-                className="euiSpacer euiSpacer--s"
+                className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
               />
               <div
                 className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
@@ -224,13 +228,15 @@ exports[`Storyshots components/Elements/CustomElementModal with description 1`] 
                     className="euiCard__icon"
                     data-euiicon-type="canvasApp"
                     size="xxl"
-                  />
+                  >
+                    
+                  </span>
                 </div>
                 <div
                   className="euiCard__content"
                 >
                   <span
-                    className="euiTitle euiTitle--small euiCard__title"
+                    className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
                     id="generated-idTitle"
                   >
                     
@@ -338,7 +344,9 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -367,7 +375,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
               className="euiFlexItem euiFlexItem--flexGrow2 canvasCustomElementForm"
             >
               <div
-                className="euiFormRow euiFormRow--compressed"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
                 id="generated-id-row"
               >
                 <div
@@ -413,7 +421,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 </div>
               </div>
               <div
-                className="euiFormRow"
+                className="euiFormRow euiFormRow--hasLabel"
                 id="generated-id-row"
               >
                 <div
@@ -450,7 +458,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                 </div>
               </div>
               <div
-                className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed canvasCustomElementForm__thumbnail"
                 id="generated-id-row"
               >
                 <div
@@ -495,7 +503,9 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
                           size="l"
-                        />
+                        >
+                          
+                        </span>
                         <div
                           className="euiFilePicker__promptText"
                         >
@@ -518,12 +528,12 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
               className="euiFlexItem euiFlexItem--flexGrow1 canvasElementCard__wrapper canvasCustomElementForm__preview"
             >
               <h4
-                className="euiTitle euiTitle--xxxsmall"
+                className="euiTitle css-7xv8go-euiTitle-xxxs"
               >
                 Element preview
               </h4>
               <div
-                className="euiSpacer euiSpacer--s"
+                className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
               />
               <div
                 className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned canvasElementCard"
@@ -544,7 +554,7 @@ exports[`Storyshots components/Elements/CustomElementModal with image 1`] = `
                   className="euiCard__content"
                 >
                   <span
-                    className="euiTitle euiTitle--small euiCard__title"
+                    className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
                     id="generated-idTitle"
                   >
                     
@@ -646,7 +656,9 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -675,7 +687,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
               className="euiFlexItem euiFlexItem--flexGrow2 canvasCustomElementForm"
             >
               <div
-                className="euiFormRow euiFormRow--compressed"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
                 id="generated-id-row"
               >
                 <div
@@ -721,7 +733,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 </div>
               </div>
               <div
-                className="euiFormRow"
+                className="euiFormRow euiFormRow--hasLabel"
                 id="generated-id-row"
               >
                 <div
@@ -758,7 +770,7 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                 </div>
               </div>
               <div
-                className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed canvasCustomElementForm__thumbnail"
                 id="generated-id-row"
               >
                 <div
@@ -803,7 +815,9 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
                           size="l"
-                        />
+                        >
+                          
+                        </span>
                         <div
                           className="euiFilePicker__promptText"
                         >
@@ -826,12 +840,12 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
               className="euiFlexItem euiFlexItem--flexGrow1 canvasElementCard__wrapper canvasCustomElementForm__preview"
             >
               <h4
-                className="euiTitle euiTitle--xxxsmall"
+                className="euiTitle css-7xv8go-euiTitle-xxxs"
               >
                 Element preview
               </h4>
               <div
-                className="euiSpacer euiSpacer--s"
+                className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
               />
               <div
                 className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
@@ -843,13 +857,15 @@ exports[`Storyshots components/Elements/CustomElementModal with name 1`] = `
                     className="euiCard__icon"
                     data-euiicon-type="canvasApp"
                     size="xxl"
-                  />
+                  >
+                    
+                  </span>
                 </div>
                 <div
                   className="euiCard__content"
                 >
                   <span
-                    className="euiTitle euiTitle--small euiCard__title"
+                    className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
                     id="generated-idTitle"
                   >
                     My Chart
@@ -949,7 +965,9 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
         color="inherit"
         data-euiicon-type="cross"
         size="m"
-      />
+      >
+        
+      </span>
     </button>
     <div
       className="euiModal__flex"
@@ -978,7 +996,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
               className="euiFlexItem euiFlexItem--flexGrow2 canvasCustomElementForm"
             >
               <div
-                className="euiFormRow euiFormRow--compressed"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed"
                 id="generated-id-row"
               >
                 <div
@@ -1024,7 +1042,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 </div>
               </div>
               <div
-                className="euiFormRow"
+                className="euiFormRow euiFormRow--hasLabel"
                 id="generated-id-row"
               >
                 <div
@@ -1061,7 +1079,7 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                 </div>
               </div>
               <div
-                className="euiFormRow euiFormRow--compressed canvasCustomElementForm__thumbnail"
+                className="euiFormRow euiFormRow--hasLabel euiFormRow--compressed canvasCustomElementForm__thumbnail"
                 id="generated-id-row"
               >
                 <div
@@ -1106,7 +1124,9 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                           className="euiFilePicker__icon"
                           data-euiicon-type="importAction"
                           size="l"
-                        />
+                        >
+                          
+                        </span>
                         <div
                           className="euiFilePicker__promptText"
                         >
@@ -1129,12 +1149,12 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
               className="euiFlexItem euiFlexItem--flexGrow1 canvasElementCard__wrapper canvasCustomElementForm__preview"
             >
               <h4
-                className="euiTitle euiTitle--xxxsmall"
+                className="euiTitle css-7xv8go-euiTitle-xxxs"
               >
                 Element preview
               </h4>
               <div
-                className="euiSpacer euiSpacer--s"
+                className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
               />
               <div
                 className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusMedium euiPanel--plain euiPanel--hasShadow euiCard euiCard--leftAligned euiCard--hasIcon canvasElementCard canvasElementCard--hasIcon"
@@ -1146,13 +1166,15 @@ exports[`Storyshots components/Elements/CustomElementModal with title 1`] = `
                     className="euiCard__icon"
                     data-euiicon-type="canvasApp"
                     size="xxl"
-                  />
+                  >
+                    
+                  </span>
                 </div>
                 <div
                   className="euiCard__content"
                 >
                   <span
-                    className="euiTitle euiTitle--small euiCard__title"
+                    className="euiTitle euiCard__title css-1mr6cet-euiTitle-s"
                     id="generated-idTitle"
                   >
                     

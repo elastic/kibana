@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { IKibanaResponse } from 'src/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 
 import type {
   DeletePackageResponse,

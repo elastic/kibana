@@ -4,19 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useMemo } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
-import { EuiTextColor, EuiEmptyPrompt } from '@elastic/eui';
+import { generatePath, Link, RouteComponentProps } from 'react-router-dom';
+import { EuiTextColor, EuiEmptyPrompt, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import * as t from 'io-ts';
-import { CspPageTemplate } from '../../components/page_template';
+import type { KibanaPageTemplateProps } from '@kbn/kibana-react-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { RulesContainer, type PageUrlParams } from './rules_container';
 import { allNavigationItems } from '../../common/navigation/constants';
 import { useCspBreadcrumbs } from '../../common/navigation/use_csp_breadcrumbs';
-import type { KibanaPageTemplateProps } from '../../../../../../src/plugins/kibana_react/public';
-import { CspLoadingState } from '../../components/csp_loading_state';
 import { CspNavigationItem } from '../../common/navigation/types';
 import { extractErrorMessage } from '../../../common/utils/helpers';
-import { useCspIntegration } from './use_csp_integration';
+import { useCspIntegrationInfo } from './use_csp_integration';
+import { CspPageTemplate } from '../../components/csp_page_template';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
   [allNavigationItems.benchmarks, { ...allNavigationItems.rules, name }].filter(
@@ -24,38 +27,78 @@ const getRulesBreadcrumbs = (name?: string): CspNavigationItem[] =>
   );
 
 export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>) => {
-  const integrationInfo = useCspIntegration(params);
+  const { http } = useKibana().services;
+  const integrationInfo = useCspIntegrationInfo(params);
+
+  const [packageInfo, agentInfo] = integrationInfo.data || [];
+
   const breadcrumbs = useMemo(
     // TODO: make benchmark breadcrumb navigable
-    () => getRulesBreadcrumbs(integrationInfo.data?.name),
-    [integrationInfo.data?.name]
+    () => getRulesBreadcrumbs(packageInfo?.name),
+    [packageInfo?.name]
   );
 
   useCspBreadcrumbs(breadcrumbs);
 
   const pageProps: KibanaPageTemplateProps = useMemo(
     () => ({
-      template: integrationInfo.status !== 'success' ? 'centeredContent' : undefined,
       pageHeader: {
-        bottomBorder: false, // TODO: border still shows.
-        pageTitle: 'Rules',
-        description: integrationInfo.data && integrationInfo.data.package && (
-          <PageDescription
-            text={`${integrationInfo.data.package.title}, ${integrationInfo.data.name}`}
-          />
+        alignItems: 'bottom',
+        rightSideItems: [
+          <EuiButtonEmpty
+            iconType="gear"
+            size="xs"
+            href={http.basePath.prepend(pagePathGetters.edit_integration(params).join(''))}
+          >
+            <FormattedMessage
+              id="xpack.csp.rules.manageIntegrationButtonLabel"
+              defaultMessage="Manage Integration"
+            />
+          </EuiButtonEmpty>,
+        ],
+        pageTitle: (
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <Link to={generatePath(allNavigationItems.benchmarks.path)}>
+              <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
+                <FormattedMessage
+                  id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
+                  defaultMessage="Benchmark Integrations"
+                />
+              </EuiButtonEmpty>
+            </Link>
+            <FormattedMessage
+              id="xpack.csp.rules.rulePageHeader.pageHeaderTitle"
+              defaultMessage="Rules - {integrationName}"
+              values={{
+                integrationName: packageInfo?.name,
+              }}
+            />
+          </EuiFlexGroup>
+        ),
+        description: packageInfo?.package && agentInfo?.name && (
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="xpack.csp.rules.rulePageHeader.pageDescriptionTitle"
+              defaultMessage="{integrationType}, {agentPolicyName}"
+              values={{
+                integrationType: packageInfo.package.title,
+                agentPolicyName: agentInfo.name,
+              }}
+            />
+          </EuiTextColor>
         ),
       },
     }),
-    [integrationInfo.data, integrationInfo.status]
+    [agentInfo?.name, http.basePath, packageInfo?.name, packageInfo?.package, params]
   );
 
   return (
-    <CspPageTemplate {...pageProps}>
-      {integrationInfo.status === 'success' && <RulesContainer />}
-      {integrationInfo.status === 'error' && (
-        <RulesErrorPrompt error={extractErrorBodyMessage(integrationInfo.error)} />
-      )}
-      {integrationInfo.status === 'loading' && <CspLoadingState />}
+    <CspPageTemplate
+      {...pageProps}
+      query={integrationInfo}
+      errorRender={(error) => <RulesErrorPrompt error={extractErrorBodyMessage(error)} />}
+    >
+      <RulesContainer />
     </CspPageTemplate>
   );
 };
@@ -71,10 +114,6 @@ const extractErrorBodyMessage = (err: unknown) => {
   if (bodyError.is(err)) return err.body.message;
   return extractErrorMessage(err);
 };
-
-const PageDescription = ({ text }: { text: string }) => (
-  <EuiTextColor color="subdued">{text}</EuiTextColor>
-);
 
 const RulesErrorPrompt = ({ error }: { error: string }) => (
   <EuiEmptyPrompt

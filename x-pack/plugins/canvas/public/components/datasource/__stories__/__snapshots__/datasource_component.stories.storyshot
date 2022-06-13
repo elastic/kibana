@@ -18,26 +18,30 @@ exports[`Storyshots components/datasource/DatasourceComponent datasource with ex
         color="inherit"
         data-euiicon-type="arrowRight"
         size="m"
-      />
+      >
+        
+      </span>
       <span
         className="euiButtonEmpty__text"
       >
         <span
           className="canvasDataSource__triggerButtonIcon"
           data-euiicon-type="training"
-        />
+        >
+          
+        </span>
         Test Datasource
       </span>
     </span>
   </button>
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
   <div
-    className="euiCallOut euiCallOut--warning"
+    className="euiPanel euiPanel--paddingMedium euiPanel--borderRadiusNone euiPanel--warning euiPanel--noShadow euiPanel--noBorder euiCallOut euiCallOut--warning css-1flvw80-euiCallOut"
   >
     <div
-      className="euiText euiText--small"
+      className="euiText euiText--small css-i7i3v9-euiCallOut__description"
     >
       <div
         className="euiTextColor euiTextColor--default"
@@ -70,26 +74,30 @@ exports[`Storyshots components/datasource/DatasourceComponent simple datasource 
         color="inherit"
         data-euiicon-type="arrowRight"
         size="m"
-      />
+      >
+        
+      </span>
       <span
         className="euiButtonEmpty__text"
       >
         <span
           className="canvasDataSource__triggerButtonIcon"
           data-euiicon-type="training"
-        />
+        >
+          
+        </span>
         Test Datasource
       </span>
     </span>
   </button>
   <div
-    className="euiSpacer euiSpacer--s"
+    className="euiSpacer euiSpacer--s css-78drzl-euiSpacer-s"
   />
   <div
     className="render_to_dom"
   />
   <hr
-    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium"
+    className="euiHorizontalRule euiHorizontalRule--full euiHorizontalRule--marginMedium css-1y0qta5-euiHorizontalRule-full-m"
   />
   <div
     className="euiFlexGroup euiFlexGroup--gutterSmall euiFlexGroup--justifyContentFlexEnd euiFlexGroup--directionRow euiFlexGroup--responsive"

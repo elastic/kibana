@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import { IContainer, ErrorEmbeddable, AttributeService } from '@kbn/embeddable-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { Vis } from '../types';
 import type {
   VisualizeInput,
@@ -14,17 +16,11 @@ import type {
   VisualizeByReferenceInput,
   VisualizeSavedObjectAttributes,
 } from './visualize_embeddable';
-import {
-  IContainer,
-  ErrorEmbeddable,
-  AttributeService,
-} from '../../../../plugins/embeddable/public';
 import { DisabledLabEmbeddable } from './disabled_lab_embeddable';
 import { getUISettings, getHttp, getTimeFilter, getCapabilities } from '../services';
 import { urlFor } from '../utils/saved_visualize_utils';
 import { VisualizeEmbeddableFactoryDeps } from './visualize_embeddable_factory';
 import { VISUALIZE_ENABLE_LABS_SETTING } from '../../common/constants';
-import type { DataView } from '../../../data_views/public';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 
 export const createVisEmbeddableFromObject =
@@ -54,7 +50,11 @@ export const createVisEmbeddableFromObject =
       let indexPatterns: DataView[] = [];
 
       if (vis.type.getUsedIndexPattern) {
-        indexPatterns = await vis.type.getUsedIndexPattern(vis.params);
+        try {
+          indexPatterns = await vis.type.getUsedIndexPattern(vis.params);
+        } catch (e) {
+          // nothing to be here
+        }
       } else if (vis.data.indexPattern) {
         indexPatterns = [vis.data.indexPattern];
       }

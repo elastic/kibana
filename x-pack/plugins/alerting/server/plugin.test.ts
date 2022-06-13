@@ -6,20 +6,23 @@
  */
 
 import { AlertingPlugin, PluginSetupContract } from './plugin';
-import { createUsageCollectionSetupMock } from 'src/plugins/usage_collection/server/mocks';
-import { coreMock, statusServiceMock } from '../../../../src/core/server/mocks';
-import { licensingMock } from '../../licensing/server/mocks';
-import { encryptedSavedObjectsMock } from '../../encrypted_saved_objects/server/mocks';
-import { taskManagerMock } from '../../task_manager/server/mocks';
-import { eventLogServiceMock } from '../../event_log/server/event_log_service.mock';
-import { KibanaRequest } from 'kibana/server';
-import { featuresPluginMock } from '../../features/server/mocks';
-import { KibanaFeature } from '../../features/server';
+import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
+import { coreMock, statusServiceMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { eventLogServiceMock } from '@kbn/event-log-plugin/server/event_log_service.mock';
+import { KibanaRequest } from '@kbn/core/server';
+import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
+import { KibanaFeature } from '@kbn/features-plugin/server';
 import { AlertingConfig } from './config';
 import { RuleType } from './types';
-import { eventLogMock } from '../../event_log/server/mocks';
-import { actionsMock } from '../../actions/server/mocks';
-import { monitoringCollectionMock } from '../../monitoring_collection/server/mocks';
+import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { monitoringCollectionMock } from '@kbn/monitoring-collection-plugin/server/mocks';
+import { PluginSetup as DataPluginSetup } from '@kbn/data-plugin/server';
+import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 
 const generateAlertingConfig = (): AlertingConfig => ({
   healthCheck: {
@@ -30,11 +33,10 @@ const generateAlertingConfig = (): AlertingConfig => ({
     removalDelay: '1h',
   },
   maxEphemeralActionsPerAlert: 10,
-  defaultRuleTaskTimeout: '5m',
   cancelAlertsOnRuleTimeout: true,
   rules: {
     minimumScheduleInterval: { value: '1m', enforce: false },
-    execution: {
+    run: {
       actions: {
         max: 1000,
       },
@@ -50,13 +52,6 @@ const sampleRuleType: RuleType<never, never, never, never, never, 'default'> = {
   actionGroups: [],
   defaultActionGroupId: 'default',
   producer: 'test',
-  config: {
-    execution: {
-      actions: {
-        max: 1000,
-      },
-    },
-  },
   async executor() {},
 };
 
@@ -72,6 +67,7 @@ describe('Alerting Plugin', () => {
       actions: actionsMock.createSetup(),
       statusService: statusServiceMock.createSetupContract(),
       monitoringCollection: monitoringCollectionMock.createSetup(),
+      data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
     };
 
     let plugin: AlertingPlugin;
@@ -118,68 +114,18 @@ describe('Alerting Plugin', () => {
       const setupContract = await plugin.setup(setupMocks, mockPlugins);
 
       expect(setupContract.getConfig()).toEqual({
+        isUsingSecurity: false,
         minimumScheduleInterval: { value: '1m', enforce: false },
-      });
-    });
-
-    it(`applies the default config if there is no rule type specific config `, async () => {
-      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
-        ...generateAlertingConfig(),
-        rules: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
-          execution: {
-            actions: {
-              max: 123,
-            },
-          },
-        },
-      });
-      plugin = new AlertingPlugin(context);
-
-      const setupContract = await plugin.setup(setupMocks, mockPlugins);
-
-      const ruleType = { ...sampleRuleType };
-      setupContract.registerType(ruleType);
-
-      expect(ruleType.config).toEqual({
-        execution: {
-          actions: { max: 123 },
-        },
-      });
-    });
-
-    it(`applies rule type specific config if defined in config`, async () => {
-      const context = coreMock.createPluginInitializerContext<AlertingConfig>({
-        ...generateAlertingConfig(),
-        rules: {
-          minimumScheduleInterval: { value: '1m', enforce: false },
-          execution: {
-            actions: { max: 123 },
-            ruleTypeOverrides: [{ id: sampleRuleType.id, timeout: '1d' }],
-          },
-        },
-      });
-      plugin = new AlertingPlugin(context);
-
-      const setupContract = await plugin.setup(setupMocks, mockPlugins);
-
-      const ruleType = { ...sampleRuleType };
-      setupContract.registerType(ruleType);
-
-      expect(ruleType.config).toEqual({
-        execution: {
-          id: sampleRuleType.id,
-          actions: {
-            max: 123,
-          },
-          timeout: '1d',
-        },
       });
     });
 
     describe('registerType()', () => {
       let setup: PluginSetupContract;
       beforeEach(async () => {
+        const context = coreMock.createPluginInitializerContext<AlertingConfig>(
+          generateAlertingConfig()
+        );
+        plugin = new AlertingPlugin(context);
         setup = await plugin.setup(setupMocks, mockPlugins);
       });
 
@@ -264,15 +210,18 @@ describe('Alerting Plugin', () => {
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
           monitoringCollection: monitoringCollectionMock.createSetup(),
+          data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
           actions: actionsMock.createStart(),
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           features: mockFeatures(),
+          spaces: spacesMock.createStart(),
           licensing: licensingMock.createStart(),
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
+          data: dataPluginMock.createStartContract(),
         });
 
         expect(encryptedSavedObjectsSetup.canEncrypt).toEqual(false);
@@ -301,15 +250,18 @@ describe('Alerting Plugin', () => {
           actions: actionsMock.createSetup(),
           statusService: statusServiceMock.createSetupContract(),
           monitoringCollection: monitoringCollectionMock.createSetup(),
+          data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
         });
 
         const startContract = plugin.start(coreMock.createStart(), {
           actions: actionsMock.createStart(),
           encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
           features: mockFeatures(),
+          spaces: spacesMock.createStart(),
           licensing: licensingMock.createStart(),
           eventLog: eventLogMock.createStart(),
           taskManager: taskManagerMock.createStart(),
+          data: dataPluginMock.createStartContract(),
         });
 
         const fakeRequest = {
@@ -349,15 +301,18 @@ describe('Alerting Plugin', () => {
         actions: actionsMock.createSetup(),
         statusService: statusServiceMock.createSetupContract(),
         monitoringCollection: monitoringCollectionMock.createSetup(),
+        data: dataPluginMock.createSetupContract() as unknown as DataPluginSetup,
       });
 
       const startContract = plugin.start(coreMock.createStart(), {
         actions: actionsMock.createStart(),
         encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),
         features: mockFeatures(),
+        spaces: spacesMock.createStart(),
         licensing: licensingMock.createStart(),
         eventLog: eventLogMock.createStart(),
         taskManager: taskManagerMock.createStart(),
+        data: dataPluginMock.createStartContract(),
       });
 
       const fakeRequest = {

@@ -5,12 +5,12 @@ exports[`WeTried should render "we tried" message 1`] = `
   data-test-subj="weTriedContainer"
 >
   <h2
-    class="euiTitle euiTitle--large"
+    class="euiTitle css-1bexacr-euiTitle-l"
   >
     We couldn't activate monitoring
   </h2>
   <hr
-    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge"
+    class="euiHorizontalRule euiHorizontalRule--half euiHorizontalRule--marginLarge css-16ybxy8-euiHorizontalRule-half-l"
   />
   <div
     class="euiText euiText--medium eui-textLeft"

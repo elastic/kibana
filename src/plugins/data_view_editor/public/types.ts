@@ -13,11 +13,11 @@ import {
   NotificationsStart,
   DocLinksStart,
   HttpSetup,
-} from 'src/core/public';
+} from '@kbn/core/public';
 
 import { EuiComboBoxOptionOption } from '@elastic/eui';
 
-import type { DataView, DataViewsPublicPluginStart } from 'src/plugins/data_views/public';
+import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart, IndexPatternAggRestrictions } from './shared_imports';
 
 export interface DataViewEditorContext {
@@ -49,6 +49,15 @@ export interface DataViewEditorProps {
    * Sets whether a timestamp field is required to create an index pattern. Defaults to false.
    */
   requireTimestampField?: boolean;
+  /**
+   * Pass the data view to be edited.
+   */
+  editData?: DataView;
+  /**
+   * If set to false, the screen for prompting a user to create a data view will be skipped, and the user will be taken directly
+   * to data view creation.
+   */
+  showEmptyPrompt?: boolean;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -152,6 +161,7 @@ export interface IndexPatternConfig {
   allowHidden: boolean;
   id?: string;
   type: INDEX_PATTERN_TYPE;
+  name?: string;
 }
 
 export interface FormInternal extends Omit<IndexPatternConfig, 'timestampField'> {

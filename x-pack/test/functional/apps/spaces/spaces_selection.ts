@@ -31,8 +31,7 @@ export default function spaceSelectorFunctionalTests({
     );
 
     this.tags('includeFirefox');
-    // FLAKY: https://github.com/elastic/kibana/issues/99581
-    describe.skip('Space Selector', () => {
+    describe('Space Selector', () => {
       before(async () => {
         await PageObjects.security.forceLogout();
       });
@@ -63,9 +62,7 @@ export default function spaceSelectorFunctionalTests({
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/118356
-    // FLAKY: https://github.com/elastic/kibana/issues/118474
-    describe.skip('Search spaces in popover', () => {
+    describe('Search spaces in popover', () => {
       const spaceId = 'default';
       before(async () => {
         await PageObjects.security.forceLogout();

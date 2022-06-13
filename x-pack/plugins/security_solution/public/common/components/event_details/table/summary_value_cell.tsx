@@ -9,8 +9,10 @@ import React from 'react';
 
 import { ActionCell } from './action_cell';
 import { FieldValueCell } from './field_value_cell';
-import { AlertSummaryRow } from '../helpers';
+import { AlertSummaryRow, hasHoverOrRowActions } from '../helpers';
 import { TimelineId } from '../../../../../common/types';
+
+const style = { flexGrow: 0 };
 
 export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   data,
@@ -20,32 +22,37 @@ export const SummaryValueCell: React.FC<AlertSummaryRow['description']> = ({
   linkValue,
   timelineId,
   values,
-}) => (
-  <>
-    <FieldValueCell
-      contextId={timelineId}
-      data={data}
-      eventId={eventId}
-      fieldFromBrowserField={fieldFromBrowserField}
-      linkValue={linkValue}
-      isDraggable={isDraggable}
-      style={{ flexGrow: 0 }}
-      values={values}
-    />
-    {timelineId !== TimelineId.active && (
-      <ActionCell
+  isReadOnly,
+}) => {
+  const hoverActionsEnabled = hasHoverOrRowActions(data.field);
+
+  return (
+    <>
+      <FieldValueCell
         contextId={timelineId}
         data={data}
         eventId={eventId}
         fieldFromBrowserField={fieldFromBrowserField}
         linkValue={linkValue}
-        timelineId={timelineId}
+        isDraggable={isDraggable}
+        style={style}
         values={values}
-        applyWidthAndPadding={false}
-        hideAddToTimeline={false}
       />
-    )}
-  </>
-);
+      {timelineId !== TimelineId.active && !isReadOnly && hoverActionsEnabled && (
+        <ActionCell
+          contextId={timelineId}
+          data={data}
+          eventId={eventId}
+          fieldFromBrowserField={fieldFromBrowserField}
+          linkValue={linkValue}
+          timelineId={timelineId}
+          values={values}
+          applyWidthAndPadding={false}
+          hideAddToTimeline={false}
+        />
+      )}
+    </>
+  );
+};
 
 SummaryValueCell.displayName = 'SummaryValueCell';

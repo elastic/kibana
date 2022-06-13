@@ -8,17 +8,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { FunctionComponent } from 'react';
-import { EuiButton, EuiCard } from '@elastic/eui';
+import { EuiButton, EuiCard, EuiScreenReaderOnly } from '@elastic/eui';
 
 import type { NoDataCardProps } from './types';
 import { NoDataCardStyles } from './no_data_card.styles';
-
-const recommendedLabel = i18n.translate(
-  'sharedUXComponents.pageTemplate.noDataPage.recommendedLabel',
-  {
-    defaultMessage: 'Recommended',
-  }
-);
 
 const defaultDescription = i18n.translate(
   'sharedUXComponents.pageTemplate.noDataCard.description',
@@ -28,8 +21,7 @@ const defaultDescription = i18n.translate(
 );
 
 export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
-  recommended,
-  title,
+  title: titleProp,
   button,
   description,
   isDisabled,
@@ -47,10 +39,17 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
       return button;
     }
     // Default footer action is a button with the provided or default string
-    return <EuiButton fill>{button || title}</EuiButton>;
+    return <EuiButton fill>{button || titleProp}</EuiButton>;
   };
-  const label = recommended ? recommendedLabel : undefined;
+
   const cardDescription = description || defaultDescription;
+
+  // Fix the need for an a11y title even though the button exists by setting to screen reader only
+  const title = titleProp ? (
+    <EuiScreenReaderOnly>
+      <span>{titleProp}</span>
+    </EuiScreenReaderOnly>
+  ) : null;
 
   return (
     <EuiCard
@@ -58,7 +57,6 @@ export const NoDataCard: FunctionComponent<NoDataCardProps> = ({
       paddingSize="l"
       title={title!}
       description={cardDescription}
-      betaBadgeProps={{ label }}
       footer={footer()}
       isDisabled={isDisabled}
       {...cardRest}

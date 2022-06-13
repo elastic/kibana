@@ -20,21 +20,22 @@ import deepEqual from 'fast-deep-equal';
 import { merge, Subject, Subscription, BehaviorSubject } from 'rxjs';
 import { tap, debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
 
+import {
+  withSuspense,
+  LazyReduxEmbeddableWrapper,
+  ReduxEmbeddableWrapperPropsWithChildren,
+} from '@kbn/presentation-util-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
+
+import { OptionsListEmbeddableInput, OptionsListField, OPTIONS_LIST_CONTROL } from './types';
 import { OptionsListComponent, OptionsListComponentState } from './options_list_component';
-import { OptionsListEmbeddableInput, OPTIONS_LIST_CONTROL } from './types';
-import { DataView, DataViewField } from '../../../../data_views/public';
-import { Embeddable, IContainer } from '../../../../embeddable/public';
+import { ControlsOptionsListService } from '../../services/options_list';
 import { ControlsDataViewsService } from '../../services/data_views';
 import { optionsListReducers } from './options_list_reducers';
 import { OptionsListStrings } from './options_list_strings';
 import { ControlInput, ControlOutput } from '../..';
 import { pluginServices } from '../../services';
-import {
-  withSuspense,
-  LazyReduxEmbeddableWrapper,
-  ReduxEmbeddableWrapperPropsWithChildren,
-} from '../../../../presentation_util/public';
-import { ControlsOptionsListService } from '../../services/options_list';
 
 const OptionsListReduxWrapper = withSuspense<
   ReduxEmbeddableWrapperPropsWithChildren<OptionsListEmbeddableInput>
@@ -76,7 +77,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private typeaheadSubject: Subject<string> = new Subject<string>();
   private abortController?: AbortController;
   private dataView?: DataView;
-  private field?: DataViewField;
+  private field?: OptionsListField;
   private searchString = '';
 
   // State to be passed down to component
@@ -176,9 +177,10 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
 
   private getCurrentDataViewAndField = async (): Promise<{
     dataView: DataView;
-    field: DataViewField;
+    field: OptionsListField;
   }> => {
-    const { dataViewId, fieldName } = this.getInput();
+    const { dataViewId, fieldName, parentFieldName, childFieldName } = this.getInput();
+
     if (!this.dataView || this.dataView.id !== dataViewId) {
       this.dataView = await this.dataViewsService.get(dataViewId);
       if (this.dataView === undefined) {
@@ -190,7 +192,20 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     }
 
     if (!this.field || this.field.name !== fieldName) {
-      this.field = this.dataView.getFieldByName(fieldName);
+      const originalField = this.dataView.getFieldByName(fieldName);
+      const childField =
+        (childFieldName && this.dataView.getFieldByName(childFieldName)) || undefined;
+      const parentField =
+        (parentFieldName && this.dataView.getFieldByName(parentFieldName)) || undefined;
+
+      const textFieldName = childField?.esTypes?.includes('text')
+        ? childField.name
+        : parentField?.esTypes?.includes('text')
+        ? parentField.name
+        : undefined;
+      (originalField as OptionsListField).textFieldName = textFieldName;
+      this.field = originalField;
+
       if (this.field === undefined) {
         this.onFatalError(new Error(OptionsListStrings.errors.getDataViewNotFoundError(fieldName)));
       }
@@ -212,7 +227,8 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     const { dataView, field } = await this.getCurrentDataViewAndField();
     this.updateComponentState({ loading: true });
     this.updateOutput({ loading: true, dataViews: [dataView] });
-    const { ignoreParentSettings, filters, query, selectedOptions, timeRange } = this.getInput();
+    const { ignoreParentSettings, filters, query, selectedOptions, timeRange, runPastTimeout } =
+      this.getInput();
 
     if (this.abortController) this.abortController.abort();
     this.abortController = new AbortController();
@@ -224,12 +240,12 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
           filters,
           dataView,
           timeRange,
+          runPastTimeout,
           selectedOptions,
           searchString: this.searchString,
         },
         this.abortController.signal
       );
-
     if (!selectedOptions || isEmpty(invalidSelections) || ignoreParentSettings?.ignoreValidations) {
       this.updateComponentState({
         availableOptions: suggestions,

@@ -18,14 +18,20 @@ import { DataFrameAnalysisConfigType } from '../../../../../common/types/data_fr
 import { HelpMenu } from '../../../components/help_menu';
 import { useMlKibana, useMlApiContext } from '../../../contexts/kibana';
 import { MlPageHeader } from '../../../components/page_header';
-import { AnalyticsIdSelector, AnalyticsSelectorIds } from '../components/analytics_selector';
+import {
+  AnalyticsIdSelector,
+  AnalyticsSelectorIds,
+  AnalyticsIdSelectorControls,
+} from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
+import { useUrlState } from '../../../util/url_state';
 
 export const Page: FC<{
   jobId: string;
   analysisType: DataFrameAnalysisConfigType;
 }> = ({ jobId, analysisType }) => {
   const [analyticsId, setAnalyticsId] = useState<AnalyticsSelectorIds | undefined>();
+  const [isIdSelectorFlyoutVisible, setIsIdSelectorFlyoutVisible] = useState<boolean>(!jobId);
   const [jobsExist, setJobsExist] = useState(true);
   const {
     services: { docLinks },
@@ -36,6 +42,8 @@ export const Page: FC<{
   const helpLink = docLinks.links.ml.dataFrameAnalytics;
   const jobIdToUse = jobId ?? analyticsId?.job_id;
   const analysisTypeToUse = analysisType || analyticsId?.analysis_type;
+
+  const [, setGlobalState] = useUrlState('_g');
 
   const checkJobsExist = async () => {
     try {
@@ -51,13 +59,26 @@ export const Page: FC<{
     checkJobsExist();
   }, []);
 
+  useEffect(
+    function updateUrl() {
+      if (analyticsId !== undefined) {
+        setGlobalState({
+          ml: {
+            ...(analyticsId.analysis_type ? { analysisType: analyticsId.analysis_type } : {}),
+            ...(analyticsId.job_id ? { jobId: analyticsId.job_id } : {}),
+          },
+        });
+      }
+    },
+    [analyticsId?.job_id, analyticsId?.model_id]
+  );
+
   const getEmptyState = () => {
     if (jobsExist === false) {
       return <AnalyticsEmptyPrompt />;
     }
     return (
       <>
-        <AnalyticsIdSelector setAnalyticsId={setAnalyticsId} />
         <EuiEmptyPrompt
           iconType="alert"
           title={
@@ -76,8 +97,18 @@ export const Page: FC<{
 
   return (
     <>
+      <AnalyticsIdSelectorControls
+        setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
+        selectedId={jobIdToUse}
+      />
+      {isIdSelectorFlyoutVisible ? (
+        <AnalyticsIdSelector
+          setAnalyticsId={setAnalyticsId}
+          setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
+        />
+      ) : null}
       {jobIdToUse !== undefined && (
-        <MlPageHeader>
+        <MlPageHeader key={`${jobIdToUse}-id`}>
           <FormattedMessage
             id="xpack.ml.dataframe.analyticsExploration.titleWithId"
             defaultMessage="Explore results for job ID {id}"

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { BehaviorSubject, Observable } from 'rxjs';
-import { distinctUntilChanged, map, skipWhile } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { distinctUntilChanged, map, shareReplay, skipWhile } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 import type { ExplorerJob } from './explorer_utils';
 import type { InfluencersFilterQuery } from '../../../common/types/es_client';
 import type { AnomalyExplorerUrlStateService } from './hooks/use_explorer_url_state';
 import type { AnomalyExplorerFilterUrlState } from '../../../common/types/locator';
 import type { KQLFilterSettings } from './components/explorer_query_bar/explorer_query_bar';
+import { StateService } from '../services/state_service';
 
 export interface AnomalyExplorerState {
   selectedJobs: ExplorerJob[];
@@ -27,10 +28,9 @@ export type FilterSettings = Required<
  * Anomaly Explorer common state.
  * Manages related values in the URL state and applies required formatting.
  */
-export class AnomalyExplorerCommonStateService {
+export class AnomalyExplorerCommonStateService extends StateService {
   private _selectedJobs$ = new BehaviorSubject<ExplorerJob[] | undefined>(undefined);
   private _filterSettings$ = new BehaviorSubject<FilterSettings>(this._getDefaultFilterSettings());
-  private _showCharts$ = new BehaviorSubject<boolean>(true);
 
   private _getDefaultFilterSettings(): FilterSettings {
     return {
@@ -42,11 +42,12 @@ export class AnomalyExplorerCommonStateService {
   }
 
   constructor(private anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService) {
+    super();
     this._init();
   }
 
-  private _init() {
-    this.anomalyExplorerUrlStateService
+  protected _initSubscriptions(): Subscription {
+    return this.anomalyExplorerUrlStateService
       .getPageUrlState$()
       .pipe(
         map((urlState) => urlState?.mlExplorerFilter),
@@ -59,14 +60,6 @@ export class AnomalyExplorerCommonStateService {
         };
         this._filterSettings$.next(result);
       });
-
-    this.anomalyExplorerUrlStateService
-      .getPageUrlState$()
-      .pipe(
-        map((urlState) => urlState?.mlShowCharts ?? true),
-        distinctUntilChanged()
-      )
-      .subscribe(this._showCharts$);
   }
 
   public setSelectedJobs(explorerJobs: ExplorerJob[] | undefined) {
@@ -76,8 +69,18 @@ export class AnomalyExplorerCommonStateService {
   public getSelectedJobs$(): Observable<ExplorerJob[]> {
     return this._selectedJobs$.pipe(
       skipWhile((v) => !v || !v.length),
-      distinctUntilChanged(isEqual)
+      distinctUntilChanged(isEqual),
+      shareReplay(1)
     );
+  }
+
+  private readonly _smvJobs$ = this.getSelectedJobs$().pipe(
+    map((jobs) => jobs.filter((j) => j.isSingleMetricViewerJob)),
+    shareReplay(1)
+  );
+
+  public getSingleMetricJobs$(): Observable<ExplorerJob[]> {
+    return this._smvJobs$;
   }
 
   public getSelectedJobs(): ExplorerJob[] | undefined {
@@ -112,17 +115,5 @@ export class AnomalyExplorerCommonStateService {
 
   public clearFilterSettings() {
     this.anomalyExplorerUrlStateService.updateUrlState({ mlExplorerFilter: {} });
-  }
-
-  public getShowCharts$(): Observable<boolean> {
-    return this._showCharts$.asObservable();
-  }
-
-  public getShowCharts(): boolean {
-    return this._showCharts$.getValue();
-  }
-
-  public setShowCharts(update: boolean) {
-    this.anomalyExplorerUrlStateService.updateUrlState({ mlShowCharts: update });
   }
 }

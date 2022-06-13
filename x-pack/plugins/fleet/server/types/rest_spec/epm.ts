@@ -18,6 +18,7 @@ export const GetPackagesRequestSchema = {
   query: schema.object({
     category: schema.maybe(schema.string()),
     experimental: schema.maybe(schema.boolean()),
+    excludeInstallStatus: schema.maybe(schema.boolean({ defaultValue: false })),
   }),
 };
 

@@ -26,10 +26,10 @@ export const IMPORT_RULE = i18n.translate(
   }
 );
 
-export const UPLOAD_VALUE_LISTS = i18n.translate(
-  'xpack.securitySolution.lists.detectionEngine.rules.uploadValueListsButton',
+export const IMPORT_VALUE_LISTS = i18n.translate(
+  'xpack.securitySolution.lists.detectionEngine.rules.importValueListsButton',
   {
-    defaultMessage: 'Upload value lists',
+    defaultMessage: 'Import value lists',
   }
 );
 
@@ -85,50 +85,6 @@ export const EDIT_PAGE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.editPageTitle',
   {
     defaultMessage: 'Edit',
-  }
-);
-
-export const FEATURE_TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.tourTitle',
-  {
-    defaultMessage: "What's new",
-  }
-);
-
-export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepDescription',
-  {
-    defaultMessage:
-      'The experimental rules table view allows for advanced sorting and filtering capabilities.',
-  }
-);
-
-export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepTitle',
-  {
-    defaultMessage: 'Step 1',
-  }
-);
-
-export const FEATURE_TOUR_IN_MEMORY_TABLE_STEP_NEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.inMemoryTableStepNextButtonTitle',
-  {
-    defaultMessage: 'Ok, got it',
-  }
-);
-
-export const FEATURE_TOUR_BULK_ACTIONS_STEP_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.bulkActionsStepTitle',
-  {
-    defaultMessage: 'Step 2',
-  }
-);
-
-export const FEATURE_TOUR_BULK_ACTIONS_STEP = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.featureTour.bulkActionsStepDescription',
-  {
-    defaultMessage:
-      'You can now bulk update index patterns and tags for multiple custom rules at once.',
   }
 );
 
@@ -237,6 +193,13 @@ export const BULK_ACTION_DELETE_TAGS = i18n.translate(
   }
 );
 
+export const BULK_ACTION_APPLY_TIMELINE_TEMPLATE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.applyTimelineTemplateTitle',
+  {
+    defaultMessage: 'Apply Timeline template',
+  }
+);
+
 export const BULK_ACTION_MENU_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.bulkActions.contextMenuTitle',
   {
@@ -298,10 +261,10 @@ export const BULK_EDIT_FLYOUT_FORM_SAVE = i18n.translate(
   }
 );
 
-export const BULK_EDIT_FLYOUT_FORM_CLOSE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.closeButtonLabel',
+export const BULK_EDIT_FLYOUT_FORM_CANCEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.components.allRules.bulkActions.bulkEditFlyoutForm.cancelButtonLabel',
   {
-    defaultMessage: 'Close',
+    defaultMessage: 'Cancel',
   }
 );
 
@@ -435,13 +398,6 @@ export const EXPORT_FILENAME = i18n.translate(
   }
 );
 
-export const ALL_RULES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.allRules.tableTitle',
-  {
-    defaultMessage: 'All rules',
-  }
-);
-
 export const SEARCH_RULES = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchAriaLabel',
   {
@@ -452,7 +408,8 @@ export const SEARCH_RULES = i18n.translate(
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.searchPlaceholder',
   {
-    defaultMessage: 'e.g. rule name',
+    defaultMessage:
+      'Rule name, index pattern (e.g., "filebeat-*"), or MITRE ATT&CK™ tactic or technique (e.g., "Defense Evasion" or "TA0005")',
   }
 );
 
@@ -625,6 +582,13 @@ export const COLUMN_GAP = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.allRules.columns.gap',
   {
     defaultMessage: 'Last Gap (if any)',
+  }
+);
+
+export const COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.allRules.columns.gapTooltipSeeDocsDescription',
+  {
+    defaultMessage: 'see documentation',
   }
 );
 

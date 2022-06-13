@@ -19,14 +19,15 @@ import {
   TooltipValue,
   niceTimeFormatter,
   ElementClickListener,
-  GeometryValue,
   RectAnnotation,
   RectAnnotationDatum,
+  XYChartElementEvent,
 } from '@elastic/charts';
 import { EuiFlexItem } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';
-import { useUiSetting } from '../../../../../../../../../src/plugins/kibana_react/public';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { toMetricOpt } from '../../../../../../common/snapshot_metric_i18n';
 import { MetricsExplorerAggregation } from '../../../../../../common/http_api';
 import { colorTransformer, Color } from '../../../../../../common/color_palette';
@@ -40,7 +41,6 @@ import { MetricsExplorerChartType } from '../../../metrics_explorer/hooks/use_me
 import { getTimelineChartTheme } from '../../../metrics_explorer/components/helpers/get_chart_theme';
 import { calculateDomain } from '../../../metrics_explorer/components/helpers/calculate_domain';
 
-import { euiStyled } from '../../../../../../../../../src/plugins/kibana_react/common';
 import { InfraFormatter } from '../../../../../lib/lib';
 import { useMetricsHostsAnomaliesResults } from '../../hooks/use_metrics_hosts_anomalies';
 import { useMetricsK8sAnomaliesResults } from '../../hooks/use_metrics_k8s_anomalies';
@@ -138,10 +138,11 @@ export const Timeline: React.FC<Props> = ({ interval, yAxisFormatter, isVisible 
     : { max: 0, min: 0 };
 
   const onClickPoint: ElementClickListener = useCallback(
-    ([[geometryValue]]) => {
-      if (!Array.isArray(geometryValue)) {
-        // casting to GeometryValue as we are using cartesian charts
-        const { x: timestamp } = geometryValue as GeometryValue;
+    ([elementEvent]) => {
+      // casting to GeometryValue as we are using cartesian charts
+      const [geometryValue] = elementEvent as XYChartElementEvent;
+      if (geometryValue && !Array.isArray(geometryValue)) {
+        const { x: timestamp } = geometryValue;
         jumpToTime(timestamp);
         stopAutoReload();
       }

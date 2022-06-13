@@ -10,8 +10,12 @@ import React from 'react';
 import { mount } from 'enzyme';
 
 describe('Loading indicator', () => {
-  it('renders correctly', () => {
+  it('default renders correctly', () => {
     const component = mount(<LoadingIndicator />);
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
+  });
+  it('elastic renders correctly', () => {
+    const component = mount(<LoadingIndicator type="elastic" />);
+    expect(component.render()).toMatchSnapshot();
   });
 });

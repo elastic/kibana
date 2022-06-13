@@ -107,7 +107,7 @@ export class UptimePageObject extends FtrService {
 
   public async setAlertKueryBarText(filters: string) {
     const { setKueryBarText } = this.commonService;
-    await setKueryBarText('xpack.uptime.alerts.monitorStatus.filterBar', filters);
+    await setKueryBarText('xpack.synthetics.alerts.monitorStatus.filterBar', filters);
   }
 
   public async setMonitorListPageSize(size: number): Promise<void> {

@@ -9,11 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import { Observable } from 'rxjs';
 
-import type { Datatable, ExpressionFunctionDefinition } from 'src/plugins/expressions/common';
-import { buildExpressionFunction } from '../../../../../../plugins/expressions/common';
+import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 
-import { IndexPatternExpressionType } from '../../../../../data_views/common/expressions';
-import { IndexPatternsContract } from '../../..';
+import { IndexPatternExpressionType } from '@kbn/data-views-plugin/common/expressions';
+import { DataViewsContract } from '@kbn/data-views-plugin/common';
 
 import { AggsStart, AggExpressionType, aggCountFnName } from '../../aggs';
 import { ISearchStartSearchSource } from '../../search_source';
@@ -44,7 +44,7 @@ export type EsaggsExpressionFunctionDefinition = ExpressionFunctionDefinition<
 /** @internal */
 export interface EsaggsStartDependencies {
   aggs: AggsStart;
-  indexPatterns: IndexPatternsContract;
+  indexPatterns: DataViewsContract;
   searchSource: ISearchStartSearchSource;
   getNow?: () => Date;
 }

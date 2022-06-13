@@ -16,8 +16,9 @@ export interface CoreStart
 
 |  Property | Type | Description |
 |  --- | --- | --- |
+|  [analytics](./kibana-plugin-core-server.corestart.analytics.md) | AnalyticsServiceStart | [AnalyticsServiceStart](./kibana-plugin-core-server.analyticsservicestart.md) |
 |  [capabilities](./kibana-plugin-core-server.corestart.capabilities.md) | CapabilitiesStart | [CapabilitiesStart](./kibana-plugin-core-server.capabilitiesstart.md) |
-|  [docLinks](./kibana-plugin-core-server.corestart.doclinks.md) | DocLinksServiceStart | [DocLinksServiceStart](./kibana-plugin-core-server.doclinksservicestart.md) |
+|  [docLinks](./kibana-plugin-core-server.corestart.doclinks.md) | DocLinksServiceStart |  |
 |  [elasticsearch](./kibana-plugin-core-server.corestart.elasticsearch.md) | ElasticsearchServiceStart | [ElasticsearchServiceStart](./kibana-plugin-core-server.elasticsearchservicestart.md) |
 |  [executionContext](./kibana-plugin-core-server.corestart.executioncontext.md) | ExecutionContextStart | [ExecutionContextStart](./kibana-plugin-core-server.executioncontextstart.md) |
 |  [http](./kibana-plugin-core-server.corestart.http.md) | HttpServiceStart | [HttpServiceStart](./kibana-plugin-core-server.httpservicestart.md) |

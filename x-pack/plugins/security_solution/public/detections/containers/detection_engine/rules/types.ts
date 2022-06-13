@@ -30,10 +30,16 @@ import {
   license,
   rule_name_override,
   timestamp_override,
+  timestamp_field,
+  event_category_override,
+  tiebreaker_field,
   threshold,
   BulkAction,
   BulkActionEditPayload,
   ruleExecutionSummary,
+  RelatedIntegrationArray,
+  RequiredFieldArray,
+  SetupGuide,
 } from '../../../../../common/detection_engine/schemas/common';
 
 import {
@@ -43,8 +49,8 @@ import {
 } from '../../../../../common/detection_engine/schemas/request';
 
 /**
- * Params is an "record", since it is a type of AlertActionParams which is action templates.
- * @see x-pack/plugins/alerting/common/alert.ts
+ * Params is an "record", since it is a type of RuleActionParams which is action templates.
+ * @see x-pack/plugins/alerting/common/rule.ts
  * @deprecated Use the one from @kbn/security-io-ts-alerting-types
  */
 export const action = t.exact(
@@ -102,11 +108,14 @@ export const RuleSchema = t.intersection([
     name: t.string,
     max_signals: t.number,
     references: t.array(t.string),
+    related_integrations: RelatedIntegrationArray,
+    required_fields: RequiredFieldArray,
     risk_score: t.number,
     risk_score_mapping,
     rule_id: t.string,
     severity,
     severity_mapping,
+    setup: SetupGuide,
     tags: t.array(t.string),
     type,
     to: t.string,
@@ -142,6 +151,9 @@ export const RuleSchema = t.intersection([
     timeline_id: t.string,
     timeline_title: t.string,
     timestamp_override,
+    timestamp_field,
+    event_category_override,
+    tiebreaker_field,
     note: t.string,
     exceptions_list: listArray,
     uuid: t.string,
@@ -303,6 +315,7 @@ export interface ExceptionsImportError {
 export interface ImportDataResponse {
   success: boolean;
   success_count: number;
+  rules_count?: number;
   errors: Array<ImportRulesResponseError | ImportResponseError>;
   exceptions_success?: boolean;
   exceptions_success_count?: number;

@@ -21,9 +21,12 @@ import {
 import { TestProviders } from '../../../common/mock';
 import { createCommentUserActionBuilder } from './comment';
 import { getMockBuilderArgs } from '../mock';
+import { useCaseViewParams } from '../../../common/navigation';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../../common/navigation/hooks');
+
+const useCaseViewParamsMock = useCaseViewParams as jest.Mock;
 
 describe('createCommentUserActionBuilder', () => {
   const builderArgs = getMockBuilderArgs();
@@ -86,27 +89,64 @@ describe('createCommentUserActionBuilder', () => {
     expect(screen.getByText('Solve this fast!')).toBeInTheDocument();
   });
 
-  it('renders correctly an alert', async () => {
-    const userAction = getAlertUserAction();
+  describe('Single alert', () => {
+    it('renders correctly a single alert', async () => {
+      const userAction = getAlertUserAction();
 
-    const builder = createCommentUserActionBuilder({
-      ...builderArgs,
-      caseData: {
-        ...builderArgs.caseData,
-        comments: [alertComment],
-      },
-      userAction,
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [alertComment],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('single-alert-user-action-alert-action-id')).toHaveTextContent(
+        'added an alert from Awesome rule'
+      );
     });
+  });
 
-    const createdUserAction = builder.build();
-    render(
-      <TestProviders>
-        <EuiCommentList comments={createdUserAction} />
-      </TestProviders>
-    );
+  describe('Multiple alerts', () => {
+    it('renders correctly multiple alerts with a link to the alerts table', async () => {
+      useCaseViewParamsMock.mockReturnValue({ detailName: '1234' });
+      const userAction = getAlertUserAction();
 
-    expect(screen.getByText('added an alert from')).toBeInTheDocument();
-    expect(screen.getByText('Awesome rule')).toBeInTheDocument();
+      const builder = createCommentUserActionBuilder({
+        ...builderArgs,
+        caseData: {
+          ...builderArgs.caseData,
+          comments: [
+            {
+              ...alertComment,
+              alertId: ['alert-id-1', 'alert-id-2'],
+              index: ['alert-index-1', 'alert-index-2'],
+            },
+          ],
+        },
+        userAction,
+      });
+
+      const createdUserAction = builder.build();
+      render(
+        <TestProviders>
+          <EuiCommentList comments={createdUserAction} />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('multiple-alerts-user-action-alert-action-id')).toHaveTextContent(
+        'added 2 alerts from Awesome rule'
+      );
+      expect(screen.getByTestId('comment-action-show-alerts-1234'));
+    });
   });
 
   it('renders correctly an action', async () => {

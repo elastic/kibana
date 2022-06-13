@@ -29,7 +29,21 @@ The index templates for `.monitoring-*` are shipped with and managed by Elastics
 
 To verify changes to these templates, either make them in place on a running cluster or run elasticsearch from source.
 
-The `metrics-*` and `metricbeat-*` mappings are managed by metricbeat and elastic agent, **code locations TBD**.
+When updating the templates, it is important to increment the version number [here](https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/monitoring/src/main/java/org/elasticsearch/xpack/monitoring/MonitoringTemplateRegistry.java#L81). Elasticsearch uses this version number to decide if it should re-install the templates.
+PRs should add the labels ":Data Management/Monitoring" and "Team:Data Management" to involve the right Elasticsearch members.
+[Reference PR](https://github.com/elastic/elasticsearch/pull/85447)
+
+The `metrics-*` and `metricbeat-*` mappings are managed by metricbeat and elastic agent. The mappings are created by metricbeat programmatically by combining the field definitions of all the contained modules.
+
+## Fields
+
+The best place to reference information for each field is in the metricbeat module documentation for each component.
+
+- [Elasticsearch](https://github.com/elastic/beats/blob/main/metricbeat/module/elasticsearch/_meta/README.md)
+- [Kibana](https://github.com/elastic/beats/blob/main/metricbeat/module/kibana/_meta/README.md)
+- [Logstash](https://github.com/elastic/beats/blob/main/metricbeat/module/logstash/_meta/README.md)
+- [Beat](https://github.com/elastic/beats/blob/main/metricbeat/module/beat/_meta/README.md) (\*beat, apm-server, fleet server)
+- [Enterprise Search](https://github.com/elastic/beats/tree/main/x-pack/metricbeat/module/enterprisesearch/_meta/README.md)
 
 ## Aliasing
 

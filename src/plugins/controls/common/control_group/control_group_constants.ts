@@ -6,21 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ControlGroupInput } from '..';
 import { ControlStyle, ControlWidth } from '../types';
 
-export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'auto';
+export const DEFAULT_CONTROL_WIDTH: ControlWidth = 'medium';
+export const DEFAULT_CONTROL_GROW: boolean = true;
 export const DEFAULT_CONTROL_STYLE: ControlStyle = 'oneLine';
-
-export const getDefaultControlGroupInput = (): Omit<ControlGroupInput, 'id'> => ({
-  panels: {},
-  defaultControlWidth: DEFAULT_CONTROL_WIDTH,
-  controlStyle: DEFAULT_CONTROL_STYLE,
-  chainingSystem: 'HIERARCHICAL',
-  ignoreParentSettings: {
-    ignoreFilters: false,
-    ignoreQuery: false,
-    ignoreTimerange: false,
-    ignoreValidations: false,
-  },
-});

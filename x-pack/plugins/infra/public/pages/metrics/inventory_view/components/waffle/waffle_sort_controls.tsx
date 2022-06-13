@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo, useState, ReactNode } from 'react';
 import { EuiSwitch, EuiContextMenuPanelDescriptor, EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiTheme, withTheme } from '../../../../../../../../../src/plugins/kibana_react/common';
+import { EuiTheme, withTheme } from '@kbn/kibana-react-plugin/common';
 import { WaffleSortOption } from '../../hooks/use_waffle_options';
 import { DropdownButton } from '../dropdown_button';
 

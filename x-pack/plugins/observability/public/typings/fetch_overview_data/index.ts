@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ObservabilityApp } from '../../../typings/common';
-import { UXMetrics } from '../../components/shared/core_web_vitals';
+import type { ObservabilityApp } from '../../../typings/common';
+import type { UXMetrics } from '../../components/shared/core_web_vitals';
 import { ApmIndicesConfig } from '../../../common/typings';
 
 export interface Stat {
@@ -56,6 +56,11 @@ export interface APMHasDataResponse {
 }
 
 export interface InfraMetricsHasDataResponse {
+  hasData: boolean;
+  indices: string;
+}
+
+export interface InfraLogsHasDataResponse {
   hasData: boolean;
   indices: string;
 }
@@ -155,7 +160,7 @@ export interface ObservabilityFetchDataResponse {
 export interface ObservabilityHasDataResponse {
   apm: APMHasDataResponse;
   infra_metrics: InfraMetricsHasDataResponse;
-  infra_logs: boolean;
+  infra_logs: InfraLogsHasDataResponse;
   synthetics: SyntheticsHasDataResponse;
   ux: UXHasDataResponse;
 }

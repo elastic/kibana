@@ -8,9 +8,10 @@
 
 import { last } from 'lodash';
 import moment from 'moment';
-import { Datatable } from 'src/plugins/expressions';
-import { esFilters, IFieldType, RangeFilterParams } from '../../../public';
-import { getIndexPatterns, getSearchService } from '../../../public/services';
+import { Datatable } from '@kbn/expressions-plugin';
+import { DataViewFieldBase } from '@kbn/es-query';
+import { esFilters, RangeFilterParams } from '../..';
+import { getIndexPatterns, getSearchService } from '../../services';
 import { AggConfigSerialized } from '../../../common/search/aggs';
 
 interface RangeSelectDataContext {
@@ -33,7 +34,7 @@ export async function createFiltersFromRangeSelectAction(event: RangeSelectDataC
     aggConfigs as AggConfigSerialized,
   ]);
   const aggConfig = aggConfigsInstance.aggs[0];
-  const field: IFieldType = aggConfig.params.field;
+  const field: DataViewFieldBase = aggConfig.params.field;
 
   if (!field || event.range.length <= 1) {
     return [];

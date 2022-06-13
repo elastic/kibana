@@ -16,15 +16,19 @@
     "visualizations",
     "dashboard",
     "uiActions",
+    "uiActionsEnhanced",
     "embeddable",
     "share",
     "presentationUtil",
     "dataViewFieldEditor",
+    "dataViewEditor",
     "expressionGauge",
     "expressionHeatmap",
-    "eventAnnotation"
+    "eventAnnotation",
+    "unifiedSearch"
   ],
   "optionalPlugins": [
+    "expressionXY",
     "usageCollection",
     "taskManager",
     "globalSearch",
@@ -40,6 +44,7 @@
     "common/constants"
   ],
   "requiredBundles": [
+    "unifiedSearch",
     "savedObjects",
     "kibanaUtils",
     "kibanaReact",

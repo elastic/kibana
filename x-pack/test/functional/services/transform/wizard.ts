@@ -25,7 +25,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
   const comboBox = getService('comboBox');
   const retry = getService('retry');
   const ml = getService('ml');
-  const PageObjects = getPageObjects(['discover', 'timePicker']);
+  const PageObjects = getPageObjects(['discover', 'timePicker', 'unifiedSearch']);
 
   return {
     async clickNextButton() {
@@ -684,6 +684,27 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
       );
     },
 
+    async assertDataViewTimeFieldInputExists() {
+      await testSubjects.existOrFail(`transformDataViewTimeFieldSelect`);
+    },
+
+    async assertDataViewTimeFieldValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(
+        `transformDataViewTimeFieldSelect`,
+        'value'
+      );
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Data view time field should be ${expectedValue}, got ${actualValue}`
+      );
+    },
+
+    async setDataViewTimeField(fieldName: string) {
+      const selectControl = await testSubjects.find('transformDataViewTimeFieldSelect');
+      await selectControl.type(fieldName);
+      await this.assertDataViewTimeFieldValue(fieldName);
+    },
+
     async assertContinuousModeSwitchExists() {
       await testSubjects.existOrFail(`transformContinuousModeSwitch`, { allowHidden: true });
     },
@@ -890,6 +911,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
         await testSubjects.click('transformWizardCardDiscover');
         await PageObjects.discover.isDiscoverAppOnScreen();
       });
+      await PageObjects.unifiedSearch.closeTourPopoverByLocalStorage();
     },
 
     async setDiscoverTimeRange(fromTime: string, toTime: string) {

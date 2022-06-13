@@ -17,62 +17,53 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import moment from 'moment';
-import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { PartitionElementEvent } from '@elastic/charts';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import { CloudPostureScoreChart } from '../compliance_charts/cloud_posture_score_chart';
-import { useCloudPostureStatsApi } from '../../../common/api/use_cloud_posture_stats_api';
 import { ChartPanel } from '../../../components/chart_panel';
 import * as TEXT from '../translations';
-import { Evaluation } from '../../../../common/types';
+import type { ComplianceDashboardData, Evaluation } from '../../../../common/types';
 import { RisksTable } from '../compliance_charts/risks_table';
 import { INTERNAL_FEATURE_FLAGS, RULE_FAILED } from '../../../../common/constants';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 
-const logoMap: ReadonlyMap<string, EuiIconType> = new Map([['CIS Kubernetes', 'logoKubernetes']]);
-
-const getBenchmarkLogo = (benchmarkName: string): EuiIconType => {
-  return logoMap.get(benchmarkName) ?? 'logoElastic';
-};
-
-const mockClusterId = '2468540';
-
 const cardHeight = 300;
 
-export const BenchmarksSection = () => {
+export const BenchmarksSection = ({
+  complianceData,
+}: {
+  complianceData: ComplianceDashboardData;
+}) => {
   const { euiTheme } = useEuiTheme();
   const navToFindings = useNavigateFindings();
-  const getStats = useCloudPostureStatsApi();
-  const clusters = getStats.isSuccess && getStats.data.clusters;
-  if (!clusters) return null;
 
   const handleElementClick = (clusterId: string, elements: PartitionElementEvent[]) => {
     const [element] = elements;
     const [layerValue] = element;
     const evaluation = layerValue[0].groupByRollup as Evaluation;
 
-    navToFindings({ cluster_id: clusterId, 'result.evaluation': evaluation });
+    navToFindings({ 'cluster_id.keyword': clusterId, 'result.evaluation.keyword': evaluation });
   };
 
-  const handleCellClick = (clusterId: string, resourceTypeName: string) => {
+  const handleCellClick = (clusterId: string, ruleSection: string) => {
     navToFindings({
-      cluster_id: clusterId,
-      'resource.type': resourceTypeName,
-      'result.evaluation': RULE_FAILED,
+      'cluster_id.keyword': clusterId,
+      'rule.section.keyword': ruleSection,
+      'result.evaluation.keyword': RULE_FAILED,
     });
   };
 
   const handleViewAllClick = (clusterId: string) => {
-    navToFindings({ cluster_id: clusterId, 'result.evaluation': RULE_FAILED });
+    navToFindings({ 'cluster_id.keyword': clusterId, 'result.evaluation.keyword': RULE_FAILED });
   };
 
   return (
     <>
-      {clusters.map((cluster) => {
+      {complianceData.clusters.map((cluster) => {
         const shortId = cluster.meta.clusterId.slice(0, 6);
 
         return (
-          <>
+          <React.Fragment key={cluster.meta.clusterId}>
             <EuiPanel hasBorder hasShadow={false} paddingSize="none">
               <EuiFlexGroup gutterSize="none" style={{ height: cardHeight }}>
                 <EuiFlexItem grow={2} style={getIntegrationBoxStyle(euiTheme)}>
@@ -82,7 +73,7 @@ export const BenchmarksSection = () => {
                         <h4>{cluster.meta.benchmarkName}</h4>
                       </EuiText>
                       <EuiText style={{ textAlign: 'center' }}>
-                        <h4>{`Cluster ID ${shortId || mockClusterId}`}</h4>
+                        <h4>{`Cluster ID ${shortId}`}</h4>
                       </EuiText>
                       <EuiSpacer size="xs" />
                       <EuiText size="xs" color="subdued" style={{ textAlign: 'center' }}>
@@ -91,7 +82,8 @@ export const BenchmarksSection = () => {
                       </EuiText>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type={getBenchmarkLogo(cluster.meta.benchmarkName)} size="xxl" />
+                      {/* TODO: change default k8s logo to use a getBenchmarkLogo function */}
+                      <EuiIcon type="logoKubernetes" size="xxl" />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (
@@ -104,15 +96,11 @@ export const BenchmarksSection = () => {
                   grow={4}
                   style={{ borderRight: `1px solid ${euiTheme.colors.lightShade}` }}
                 >
-                  <ChartPanel
-                    title={TEXT.COMPLIANCE_SCORE}
-                    hasBorder={false}
-                    isLoading={getStats.isLoading}
-                    isError={getStats.isError}
-                  >
+                  <ChartPanel title={TEXT.COMPLIANCE_SCORE} hasBorder={false}>
                     <CloudPostureScoreChart
                       id={`${cluster.meta.clusterId}_score_chart`}
                       data={cluster.stats}
+                      trend={cluster.trend}
                       partitionOnElementClick={(elements) =>
                         handleElementClick(cluster.meta.clusterId, elements)
                       }
@@ -120,14 +108,9 @@ export const BenchmarksSection = () => {
                   </ChartPanel>
                 </EuiFlexItem>
                 <EuiFlexItem grow={4}>
-                  <ChartPanel
-                    title={TEXT.RISKS}
-                    hasBorder={false}
-                    isLoading={getStats.isLoading}
-                    isError={getStats.isError}
-                  >
+                  <ChartPanel title={TEXT.RISKS} hasBorder={false}>
                     <RisksTable
-                      data={cluster.resourcesTypes}
+                      data={cluster.groupedFindingsEvaluation}
                       maxItems={3}
                       onCellClick={(resourceTypeName) =>
                         handleCellClick(cluster.meta.clusterId, resourceTypeName)
@@ -139,7 +122,7 @@ export const BenchmarksSection = () => {
               </EuiFlexGroup>
             </EuiPanel>
             <EuiSpacer />
-          </>
+          </React.Fragment>
         );
       })}
     </>

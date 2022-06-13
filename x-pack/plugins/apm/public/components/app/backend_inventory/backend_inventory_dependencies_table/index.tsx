@@ -8,14 +8,14 @@
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useUiTracker } from '../../../../../../observability/public';
+import { useUiTracker } from '@kbn/observability-plugin/public';
+import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getNodeName, NodeType } from '../../../../../common/connections';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { BackendLink } from '../../../shared/backend_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
-import { getTimeRangeComparison } from '../../../shared/time_comparison/get_time_range_comparison';
 
 export function BackendInventoryDependenciesTable() {
   const {
@@ -25,20 +25,13 @@ export function BackendInventoryDependenciesTable() {
       environment,
       kuery,
       comparisonEnabled,
-      comparisonType,
+      offset,
     },
-  } = useApmParams('/backends');
+  } = useApmParams('/backends/inventory');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const trackEvent = useUiTracker();
-
-  const { offset } = getTimeRangeComparison({
-    start,
-    end,
-    comparisonEnabled,
-    comparisonType,
-  });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
@@ -48,11 +41,21 @@ export function BackendInventoryDependenciesTable() {
 
       return callApmApi('GET /internal/apm/backends/top_backends', {
         params: {
-          query: { start, end, environment, numBuckets: 20, offset, kuery },
+          query: {
+            start,
+            end,
+            environment,
+            numBuckets: 20,
+            offset:
+              comparisonEnabled && isTimeComparison(offset)
+                ? offset
+                : undefined,
+            kuery,
+          },
         },
       });
     },
-    [start, end, environment, offset, kuery]
+    [start, end, environment, offset, kuery, comparisonEnabled]
   );
 
   const dependencies =
@@ -70,7 +73,7 @@ export function BackendInventoryDependenciesTable() {
           query={{
             backendName: location.backendName,
             comparisonEnabled,
-            comparisonType,
+            offset,
             environment,
             kuery,
             rangeFrom,

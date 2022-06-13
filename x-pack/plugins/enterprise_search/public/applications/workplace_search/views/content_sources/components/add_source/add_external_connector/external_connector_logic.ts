@@ -20,17 +20,18 @@ import { AppLogic } from '../../../../../app_logic';
 
 import { getAddPath, getSourcesPath } from '../../../../../routes';
 
-import { AddSourceLogic, SourceConfigData } from '../add_source_logic';
+import { SourceConfigData } from '../add_source_logic';
 
 export interface ExternalConnectorActions {
-  fetchExternalSource: () => true;
+  fetchExternalSource(): void;
   fetchExternalSourceSuccess(sourceConfigData: SourceConfigData): SourceConfigData;
+  saveExternalConnectorConfigError(): void;
   saveExternalConnectorConfigSuccess(externalConnectorId: string): string;
   setExternalConnectorApiKey(externalConnectorApiKey: string): string;
-  saveExternalConnectorConfig(config: ExternalConnectorConfig): ExternalConnectorConfig;
+  saveExternalConnectorConfig(): void;
   setExternalConnectorUrl(externalConnectorUrl: string): string;
-  resetSourceState: () => true;
-  validateUrl: () => true;
+  resetSourceState(): void;
+  validateUrl(): void;
   setUrlValidation(valid: boolean): boolean;
   setShowInsecureUrlCallout(showCallout: boolean): boolean;
 }
@@ -47,7 +48,6 @@ export interface ExternalConnectorValues {
   externalConnectorApiKey: string;
   externalConnectorUrl: string;
   urlValid: boolean;
-  sourceConfigData: SourceConfigData | Pick<SourceConfigData, 'name' | 'categories'>;
   insecureUrl: boolean;
   showInsecureUrlCallout: boolean;
 }
@@ -59,8 +59,9 @@ export const ExternalConnectorLogic = kea<
   actions: {
     fetchExternalSource: true,
     fetchExternalSourceSuccess: (sourceConfigData) => sourceConfigData,
+    saveExternalConnectorConfigError: () => true,
     saveExternalConnectorConfigSuccess: (externalConnectorId) => externalConnectorId,
-    saveExternalConnectorConfig: (config) => config,
+    saveExternalConnectorConfig: () => true,
     setExternalConnectorApiKey: (externalConnectorApiKey: string) => externalConnectorApiKey,
     setExternalConnectorUrl: (externalConnectorUrl: string) => externalConnectorUrl,
     setUrlValidation: (valid: boolean) => valid,
@@ -78,22 +79,27 @@ export const ExternalConnectorLogic = kea<
       false,
       {
         saveExternalConnectorConfigSuccess: () => false,
+        saveExternalConnectorConfigError: () => false,
         saveExternalConnectorConfig: () => true,
       },
     ],
     externalConnectorUrl: [
       '',
       {
-        fetchExternalSourceSuccess: (_, { configuredFields: { externalConnectorUrl } }) =>
-          externalConnectorUrl || '',
+        fetchExternalSourceSuccess: (
+          _,
+          { configuredFields: { external_connector_url: externalConnectorUrl } }
+        ) => externalConnectorUrl || '',
         setExternalConnectorUrl: (_, url) => url,
       },
     ],
     externalConnectorApiKey: [
       '',
       {
-        fetchExternalSourceSuccess: (_, { configuredFields: { externalConnectorApiKey } }) =>
-          externalConnectorApiKey || '',
+        fetchExternalSourceSuccess: (
+          _,
+          { configuredFields: { external_connector_api_key: externalConnectorApiKey } }
+        ) => externalConnectorApiKey || '',
         setExternalConnectorApiKey: (_, apiKey) => apiKey,
       },
     ],
@@ -104,12 +110,6 @@ export const ExternalConnectorLogic = kea<
         setShowInsecureUrlCallout: (_, showCallout) => showCallout,
       },
     ],
-    sourceConfigData: [
-      { name: '', categories: [] },
-      {
-        fetchExternalSourceSuccess: (_, sourceConfigData) => sourceConfigData,
-      },
-    ],
     urlValid: [
       true,
       {
@@ -118,8 +118,6 @@ export const ExternalConnectorLogic = kea<
     ],
   },
   listeners: ({ actions, values }) => ({
-    [AddSourceLogic.actionTypes.setSourceConfigData]: (sourceConfigData) =>
-      actions.fetchExternalSourceSuccess(sourceConfigData),
     fetchExternalSource: async () => {
       const route = '/internal/workplace_search/org/settings/connectors/external';
 
@@ -137,28 +135,28 @@ export const ExternalConnectorLogic = kea<
         actions.setShowInsecureUrlCallout(false);
       }
     },
-    saveExternalConnectorConfig: async ({ url, apiKey }) => {
-      if (!isValidExternalUrl(url)) {
+    saveExternalConnectorConfig: async () => {
+      if (!isValidExternalUrl(values.externalConnectorUrl)) {
         actions.setUrlValidation(false);
       } else {
         clearFlashMessages();
-        const route = '/internal/workplace_search/org/settings/connectors';
-        const http = HttpLogic.values.http.post;
-        const params = {
-          external_connector_url: url,
-          external_connector_api_key: apiKey,
-          service_type: 'external',
-        };
         try {
-          await http<SourceConfigData>(route, {
-            body: JSON.stringify(params),
-          });
+          await HttpLogic.values.http.post<SourceConfigData>(
+            '/internal/workplace_search/org/settings/connectors',
+            {
+              body: JSON.stringify({
+                external_connector_url: values.externalConnectorUrl,
+                external_connector_api_key: values.externalConnectorApiKey,
+                service_type: 'external',
+              }),
+            }
+          );
 
           flashSuccessToast(
             i18n.translate(
               'xpack.enterpriseSearch.workplaceSearch.sources.flashMessages.externalConnectorCreated',
               {
-                defaultMessage: 'Successfully created external connector.',
+                defaultMessage: 'Successfully registered connector package deployment.',
               }
             )
           );
@@ -168,6 +166,7 @@ export const ExternalConnectorLogic = kea<
             getSourcesPath(`${getAddPath('external')}`, AppLogic.values.isOrganization)
           );
         } catch (e) {
+          actions.saveExternalConnectorConfigError();
           flashAPIErrors(e);
         }
       }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from 'kibana/server';
+import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 
 import type { PackagePolicy } from '../../../../common';
@@ -28,6 +28,8 @@ export const migratePackagePolicyToV820: SavedObjectMigrationFn<PackagePolicy, P
     policy.windows.malware.blocklist = policy.windows.malware.mode !== 'off';
     policy.mac.malware.blocklist = policy.mac.malware.mode !== 'off';
     policy.linux.malware.blocklist = policy.linux.malware.mode !== 'off';
+
+    policy.linux.events.session_data = false;
   }
 
   return updatedPackagePolicyDoc;

@@ -36,8 +36,8 @@ export const initialHostsState: HostsState = {
       },
       [HostsTableType.hosts]: {
         activePage: DEFAULT_TABLE_ACTIVE_PAGE,
-        direction: Direction.desc,
         limit: DEFAULT_TABLE_LIMIT,
+        direction: Direction.desc,
         sortField: HostsFields.lastSeen,
       },
       [HostsTableType.events]: {
@@ -61,6 +61,10 @@ export const initialHostsState: HostsState = {
           direction: Direction.desc,
         },
         severitySelection: [],
+      },
+      [HostsTableType.sessions]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
       },
     },
   },
@@ -97,6 +101,10 @@ export const initialHostsState: HostsState = {
           direction: Direction.desc,
         },
         severitySelection: [],
+      },
+      [HostsTableType.sessions]: {
+        activePage: DEFAULT_TABLE_ACTIVE_PAGE,
+        limit: DEFAULT_TABLE_LIMIT,
       },
     },
   },
@@ -157,6 +165,7 @@ export const hostsReducer = reducerWithInitialState(initialHostsState)
           ...state[hostsType].queries[HostsTableType.hosts],
           direction: sort.direction,
           sortField: sort.field,
+          activePage: DEFAULT_TABLE_ACTIVE_PAGE,
         },
       },
     },

@@ -10,24 +10,28 @@ import { render } from 'react-dom';
 import { Position } from '@elastic/charts';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry } from 'src/plugins/charts/public';
-import { FieldFormatsStart } from 'src/plugins/field_formats/public';
-import { ThemeServiceStart } from 'kibana/public';
-import { EventAnnotationServiceType } from '../../../../../src/plugins/event_annotation/public';
-import { KibanaThemeProvider } from '../../../../../src/plugins/kibana_react/public';
-import { VIS_EVENT_TO_TRIGGER } from '../../../../../src/plugins/visualizations/public';
-import type { FillStyle, XYLayerConfig } from '../../common/expressions/xy_chart';
+import type { PaletteRegistry } from '@kbn/coloring';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { ThemeServiceStart } from '@kbn/core/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
+import {
+  FillStyle,
+  SeriesType,
+  YAxisMode,
+  ExtendedYConfig,
+} from '@kbn/expression-xy-plugin/common';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
 import { DimensionEditor } from './xy_config_panel/dimension_editor';
 import { LayerHeader } from './xy_config_panel/layer_header';
 import type { Visualization, AccessorConfig, FramePublicAPI } from '../types';
-import { State, visualizationTypes, XYSuggestion } from './types';
-import { SeriesType, XYDataLayerConfig, YAxisMode } from '../../common/expressions';
+import { State, visualizationTypes, XYSuggestion, XYLayerConfig, XYDataLayerConfig } from './types';
 import { layerTypes } from '../../common';
 import { isHorizontalChart } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
-import { getAccessorColorConfig, getColorAssignments } from './color_assignment';
+import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
 import { getColumnToLabelMap } from './state_helpers';
 import {
   getGroupsAvailableInData,
@@ -61,10 +65,11 @@ import {
   validateLayersForDimension,
 } from './visualization_helpers';
 import { groupAxesByType } from './axes_configuration';
-import { XYState } from '..';
-import { ReferenceLinePanel } from './xy_config_panel/reference_line_panel';
+import { XYState } from './types';
+import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel';
+import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel';
 import { DimensionTrigger } from '../shared_components/dimension_trigger';
-import { AnnotationsPanel, defaultAnnotationLabel } from './annotations/config_panel';
+import { defaultAnnotationLabel } from './annotations/helpers';
 
 export const getXyVisualization = ({
   paletteService,
@@ -202,12 +207,18 @@ export const getXyVisualization = ({
       accessors: sortedAccessors,
     });
 
+    if (isReferenceLayer(layer)) {
+      return getReferenceConfiguration({ state, frame, layer, sortedAccessors });
+    }
+
+    const dataLayer: XYDataLayerConfig = layer;
+
     const dataLayers = getDataLayers(state.layers);
     const isHorizontal = isHorizontalChart(state.layers);
     const { left, right } = groupAxesByType([layer], frame.activeData);
     // Check locally if it has one accessor OR one accessor per axis
     const layerHasOnlyOneAccessor = Boolean(
-      layer.accessors.length < 2 ||
+      dataLayer.accessors.length < 2 ||
         (left.length && left.length < 2) ||
         (right.length && right.length < 2)
     );
@@ -219,9 +230,10 @@ export const getXyVisualization = ({
         // check that the other layers are compatible with this one
         (l) => {
           if (
-            l.seriesType === layer.seriesType &&
-            Boolean(l.xAccessor) === Boolean(layer.xAccessor) &&
-            Boolean(l.splitAccessor) === Boolean(layer.splitAccessor)
+            isDataLayer(l) &&
+            l.seriesType === dataLayer.seriesType &&
+            Boolean(l.xAccessor) === Boolean(dataLayer.xAccessor) &&
+            Boolean(l.splitAccessor) === Boolean(dataLayer.splitAccessor)
           ) {
             const { left: localLeft, right: localRight } = groupAxesByType([l], frame.activeData);
             // return true only if matching axis are found
@@ -240,9 +252,9 @@ export const getXyVisualization = ({
         {
           groupId: 'x',
           groupLabel: getAxisName('x', { isHorizontal }),
-          accessors: layer.xAccessor ? [{ columnId: layer.xAccessor }] : [],
+          accessors: dataLayer.xAccessor ? [{ columnId: dataLayer.xAccessor }] : [],
           filterOperations: isBucketed,
-          supportsMoreColumns: !layer.xAccessor,
+          supportsMoreColumns: !dataLayer.xAccessor,
           dataTestSubj: 'lnsXY_xDimensionPanel',
         },
         {
@@ -260,21 +272,23 @@ export const getXyVisualization = ({
           groupLabel: i18n.translate('xpack.lens.xyChart.splitSeries', {
             defaultMessage: 'Break down by',
           }),
-          accessors: layer.splitAccessor
+          accessors: dataLayer.splitAccessor
             ? [
                 {
-                  columnId: layer.splitAccessor,
-                  triggerIcon: 'colorBy' as const,
-                  palette: paletteService
-                    .get(layer.palette?.name || 'default')
-                    .getCategoricalColors(10, layer.palette?.params),
+                  columnId: dataLayer.splitAccessor,
+                  triggerIcon: dataLayer.collapseFn ? ('aggregate' as const) : ('colorBy' as const),
+                  palette: dataLayer.collapseFn
+                    ? undefined
+                    : paletteService
+                        .get(dataLayer.palette?.name || 'default')
+                        .getCategoricalColors(10, dataLayer.palette?.params),
                 },
               ]
             : [],
           filterOperations: isBucketed,
-          supportsMoreColumns: !layer.splitAccessor,
+          supportsMoreColumns: !dataLayer.splitAccessor,
           dataTestSubj: 'lnsXY_splitDimensionPanel',
-          required: layer.seriesType.includes('percentage') && hasOnlyOneAccessor,
+          required: dataLayer.seriesType.includes('percentage') && hasOnlyOneAccessor,
           enableDimensionEditor: true,
         },
       ],
@@ -288,7 +302,10 @@ export const getXyVisualization = ({
 
   setDimension(props) {
     const { prevState, layerId, columnId, groupId } = props;
-    const foundLayer = prevState.layers.find((l) => l.layerId === layerId);
+
+    const foundLayer: XYLayerConfig | undefined = prevState.layers.find(
+      (l) => l.layerId === layerId
+    );
     if (!foundLayer) {
       return prevState;
     }
@@ -300,7 +317,7 @@ export const getXyVisualization = ({
       return setAnnotationsDimension(props);
     }
 
-    const newLayer = { ...foundLayer };
+    const newLayer: XYDataLayerConfig = Object.assign({}, foundLayer);
     if (groupId === 'x') {
       newLayer.xAccessor = columnId;
     }
@@ -324,7 +341,7 @@ export const getXyVisualization = ({
     }
     const isReferenceLine = metrics.some((metric) => metric.agg === 'static_value');
     const axisMode = axisPosition as YAxisMode;
-    const yConfig = metrics.map((metric, idx) => {
+    const yConfig = metrics.map<ExtendedYConfig>((metric, idx) => {
       return {
         color: metric.color,
         forAccessor: metric.accessor ?? foundLayer.accessors[idx],
@@ -435,7 +452,7 @@ export const getXyVisualization = ({
     const groupsAvailable = getGroupsAvailableInData(
       getDataLayers(prevState.layers),
       frame.datasourceLayers,
-      frame?.activeData
+      frame.activeData
     );
 
     if (
@@ -499,10 +516,24 @@ export const getXyVisualization = ({
     );
   },
 
-  toExpression: (state, layers, attributes) =>
-    toExpression(state, layers, paletteService, attributes, eventAnnotationService),
-  toPreviewExpression: (state, layers) =>
-    toPreviewExpression(state, layers, paletteService, eventAnnotationService),
+  toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
+    toExpression(
+      state,
+      layers,
+      paletteService,
+      attributes,
+      datasourceExpressionsByLayers,
+      eventAnnotationService
+    ),
+
+  toPreviewExpression: (state, layers, datasourceExpressionsByLayers = {}) =>
+    toPreviewExpression(
+      state,
+      layers,
+      paletteService,
+      datasourceExpressionsByLayers,
+      eventAnnotationService
+    ),
 
   getErrorMessages(state, datasourceLayers) {
     // Data error handling below here
@@ -583,10 +614,12 @@ export const getXyVisualization = ({
       ...getDataLayers(state.layers),
       ...getReferenceLayers(state.layers),
     ].filter(({ accessors }) => accessors.length > 0);
+
     const accessorsWithArrayValues = [];
+
     for (const layer of filteredLayers) {
       const { layerId, accessors } = layer;
-      const rows = frame.activeData[layerId] && frame.activeData[layerId].rows;
+      const rows = frame.activeData?.[layerId] && frame.activeData[layerId].rows;
       if (!rows) {
         break;
       }
@@ -598,6 +631,7 @@ export const getXyVisualization = ({
         }
       }
     }
+
     return accessorsWithArrayValues.map((label) => (
       <FormattedMessage
         key={label}
@@ -649,7 +683,7 @@ const getMappedAccessors = ({
   layer,
 }: {
   accessors: string[];
-  frame: FramePublicAPI;
+  frame: Pick<FramePublicAPI, 'activeData' | 'datasourceLayers'>;
   paletteService: PaletteRegistry;
   fieldFormats: FieldFormatsStart;
   state: XYState;
@@ -665,7 +699,7 @@ const getMappedAccessors = ({
       { tables: frame.activeData },
       fieldFormats.deserialize
     );
-    mappedAccessors = getAccessorColorConfig(
+    mappedAccessors = getAccessorColorConfigs(
       colorAssignments,
       frame,
       {

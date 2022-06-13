@@ -15,6 +15,8 @@ import {
   maxAnomalyScoreSchema,
   partitionFieldValuesSchema,
   anomalySearchSchema,
+  getAnomalyChartsSchema,
+  getAnomalyRecordsSchema,
 } from './schemas/results_service_schema';
 import { resultsServiceProvider } from '../models/results_service';
 import { jobIdSchema } from './schemas/anomaly_detectors_schema';
@@ -379,6 +381,82 @@ export function resultsServiceRoutes({ router, routeGuard }: RouteInitialization
       try {
         const { getDatafeedResultsChartData } = resultsServiceProvider(mlClient, client);
         const resp = await getDatafeedResultsChartData(request.body);
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {post} /api/ml/results/anomaly_charts Get data for anomaly charts
+   * @apiName GetAnomalyChartsData
+   * @apiDescription Returns anomaly charts data
+   *
+   * @apiSchema (body) getAnomalyChartsSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/results/anomaly_charts',
+      validate: {
+        body: getAnomalyChartsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const { getAnomalyChartsData } = resultsServiceProvider(mlClient, client);
+        const resp = await getAnomalyChartsData(request.body);
+
+        return response.ok({
+          body: resp,
+        });
+      } catch (e) {
+        return response.customError(wrapError(e));
+      }
+    })
+  );
+
+  /**
+   * @apiGroup ResultsService
+   *
+   * @api {post} /api/ml/results/anomaly_records Get anomaly records for criteria
+   * @apiName GetAnomalyRecords
+   * @apiDescription Returns anomaly records
+   *
+   * @apiSchema (body) getAnomalyRecordsSchema
+   */
+  router.post(
+    {
+      path: '/api/ml/results/anomaly_records',
+      validate: {
+        body: getAnomalyRecordsSchema,
+      },
+      options: {
+        tags: ['access:ml:canGetJobs'],
+      },
+    },
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+      try {
+        const { getRecordsForCriteria } = resultsServiceProvider(mlClient, client);
+
+        const { jobIds, criteriaFields, earliestMs, latestMs, threshold, interval } = request.body;
+
+        const resp = await getRecordsForCriteria(
+          jobIds,
+          criteriaFields,
+          threshold,
+          earliestMs,
+          latestMs,
+          interval
+        );
 
         return response.ok({
           body: resp,

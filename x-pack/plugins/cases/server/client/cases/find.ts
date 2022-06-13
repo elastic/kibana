@@ -53,7 +53,10 @@ export const find = async (
       reporters: queryParams.reporters,
       sortByField: queryParams.sortField,
       status: queryParams.status,
+      severity: queryParams.severity,
       owner: queryParams.owner,
+      from: queryParams.from,
+      to: queryParams.to,
     };
 
     const statusStatsOptions = constructQueryOptions({

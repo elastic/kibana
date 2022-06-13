@@ -41,6 +41,7 @@ import {
   mockRuntimeMappings,
 } from '../containers/source/mock';
 import { usersModel } from '../../users/store';
+import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 
 export const mockSourcererState = {
   ...initialSourcererState,
@@ -87,6 +88,7 @@ export const mockGlobalState: State = {
           sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
+        sessions: { activePage: 0, limit: 10 },
       },
     },
     details: {
@@ -108,6 +110,7 @@ export const mockGlobalState: State = {
           sort: { field: RiskScoreFields.riskScore, direction: Direction.desc },
           severitySelection: [],
         },
+        sessions: { activePage: 0, limit: 10 },
       },
     },
   },
@@ -201,6 +204,11 @@ export const mockGlobalState: State = {
     page: {
       queries: {
         [usersModel.UsersTableType.allUsers]: {
+          activePage: 0,
+          limit: 10,
+          sort: { field: UsersFields.name, direction: Direction.asc },
+        },
+        [usersModel.UsersTableType.authentications]: {
           activePage: 0,
           limit: 10,
         },
@@ -313,12 +321,20 @@ export const mockGlobalState: State = {
           end: '2020-07-08T08:20:18.966Z',
         },
         selectedEventIds: {},
+        sessionViewConfig: null,
         show: false,
         showCheckboxes: false,
         pinnedEventIds: {},
         pinnedEventsSaveObject: {},
         itemsPerPageOptions: [5, 10, 20],
-        sort: [{ columnId: '@timestamp', columnType: 'number', sortDirection: Direction.desc }],
+        sort: [
+          {
+            columnId: '@timestamp',
+            columnType: 'date',
+            esTypes: ['date'],
+            sortDirection: Direction.desc,
+          },
+        ],
         isSaving: false,
         version: null,
         status: TimelineStatus.active,

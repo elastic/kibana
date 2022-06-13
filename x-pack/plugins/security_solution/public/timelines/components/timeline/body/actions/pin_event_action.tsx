@@ -8,14 +8,15 @@
 import React, { useMemo } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 
+import { DEFAULT_ACTION_BUTTON_WIDTH } from '@kbn/timelines-plugin/public';
 import { EventsTdContent } from '../../styles';
-import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../../../../timelines/public';
 import { eventHasNotes, getPinTooltip } from '../helpers';
 import { Pin } from '../../pin';
 import { TimelineType } from '../../../../../../common/types/timeline';
 
 interface PinEventActionProps {
   ariaLabel?: string;
+  isAlert: boolean;
   noteIds: string[];
   onPinClicked: () => void;
   eventIsPinned: boolean;
@@ -24,6 +25,7 @@ interface PinEventActionProps {
 
 const PinEventActionComponent: React.FC<PinEventActionProps> = ({
   ariaLabel,
+  isAlert,
   noteIds,
   onPinClicked,
   eventIsPinned,
@@ -33,10 +35,11 @@ const PinEventActionComponent: React.FC<PinEventActionProps> = ({
     () =>
       getPinTooltip({
         isPinned: eventIsPinned,
+        isAlert,
         eventHasNotes: eventHasNotes(noteIds),
         timelineType,
       }),
-    [eventIsPinned, noteIds, timelineType]
+    [eventIsPinned, isAlert, noteIds, timelineType]
   );
 
   return (
@@ -47,6 +50,7 @@ const PinEventActionComponent: React.FC<PinEventActionProps> = ({
             ariaLabel={ariaLabel}
             allowUnpinning={!eventHasNotes(noteIds)}
             data-test-subj="pin-event"
+            isAlert={isAlert}
             onClick={onPinClicked}
             pinned={eventIsPinned}
             timelineType={timelineType}
