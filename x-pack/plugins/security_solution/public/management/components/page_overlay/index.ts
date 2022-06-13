@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export { PageOverlayProps, PageOverlay } from './page_overlay';
+export { PageOverlay } from './page_overlay';
+export type { PageOverlayProps } from './page_overlay';

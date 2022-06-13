@@ -15,7 +15,7 @@ export const allowedExperimentalValues = Object.freeze({
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
   excludePoliciesInFilterEnabled: false,
-  usersEnabled: true,
+  kubernetesEnabled: false,
   disableIsolationUIPendingStatuses: false,
   riskyHostsEnabled: false,
   riskyUsersEnabled: false,

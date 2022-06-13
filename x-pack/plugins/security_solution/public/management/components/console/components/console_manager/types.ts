@@ -20,12 +20,12 @@ export interface ConsoleRegistrationInterface<TMeta extends object = any> {
   meta?: TMeta;
 
   /** An optional component used to render the Overlay page title where the console will be displayed */
-  TitleComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
+  PageTitleComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
 
   /**
    * An optional component that will be rendered in the Responder page overlay, above the Console area
    */
-  BodyComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
+  PageBodyComponent?: ComponentType<ManagedConsoleExtensionComponentProps<TMeta>>;
 
   /**
    * An array of Action components (likely buttons) that will be rendered into the Responder page

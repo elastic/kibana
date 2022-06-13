@@ -45,7 +45,7 @@ export const useWithShowEndpointResponder = (): ShowEndpointResponseActionsConso
               // TitleComponent: () => <>{endpointMetadata.host.name}</>,
               TitleComponent: () => <HeaderEndpointInfo endpointId={endpointAgentId} />,
             },
-            TitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
+            PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
             ActionComponents: [ActionLogButton],
           })
           .show();

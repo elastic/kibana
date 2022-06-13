@@ -34,7 +34,7 @@ describe('ElasticAgentCard', () => {
 
   test('renders', () => {
     const component = mount(<ElasticAgentCard />);
-    expect(component).toMatchSnapshot();
+    expect(component.render()).toMatchSnapshot();
   });
 
   describe('href', () => {
@@ -54,6 +54,17 @@ describe('ElasticAgentCard', () => {
       const component = mount(<ElasticAgentCard />);
       expect(component.find(ElasticAgentCardComponent).props().href).toBe(
         '/app/integrations/browse'
+      );
+    });
+  });
+
+  describe('description', () => {
+    test('renders custom description if provided', () => {
+      const component = mount(
+        <ElasticAgentCard description="Build seamless search experiences faster." />
+      );
+      expect(component.find(ElasticAgentCardComponent).props().description).toBe(
+        'Build seamless search experiences faster.'
       );
     });
   });

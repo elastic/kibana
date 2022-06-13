@@ -23,8 +23,11 @@ import { ConfigDeprecationProvider } from '@kbn/config';
 import { ConfigPath } from '@kbn/config';
 import { ConfigService } from '@kbn/config';
 import { ContextProviderOpts } from '@kbn/analytics-client';
+import { CoreId } from '@kbn/core-base-common-internal';
 import { DetailedPeerCertificate } from 'tls';
-import type { DocLinks } from '@kbn/doc-links';
+import { DiscoveredPlugin } from '@kbn/core-base-common';
+import { DocLinksServiceSetup } from '@kbn/core-doc-links-server';
+import { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { Duration } from 'moment';
 import { Duration as Duration_2 } from 'moment-timezone';
 import { Ecs } from '@kbn/logging';
@@ -53,6 +56,9 @@ import { OptInConfig } from '@kbn/analytics-client';
 import { PackageInfo } from '@kbn/config';
 import { PathConfigType } from '@kbn/utils';
 import { PeerCertificate } from 'tls';
+import { PluginName } from '@kbn/core-base-common';
+import { PluginOpaqueId } from '@kbn/core-base-common';
+import { PluginType } from '@kbn/core-base-common';
 import { Readable } from 'stream';
 import { RecursiveReadonly } from '@kbn/utility-types';
 import { Request as Request_2 } from '@hapi/hapi';
@@ -421,8 +427,7 @@ export interface CoreEnvironmentUsageData {
     };
 }
 
-// @internal (undocumented)
-export type CoreId = symbol;
+export { CoreId }
 
 // @internal
 export interface CoreIncrementCounterParams {
@@ -503,6 +508,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
     coreUsageData: CoreUsageDataSetup;
     // (undocumented)
     deprecations: DeprecationsServiceSetup;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     docLinks: DocLinksServiceSetup;
     // (undocumented)
@@ -537,6 +544,8 @@ export interface CoreStart {
     capabilities: CapabilitiesStart;
     // @internal (undocumented)
     coreUsageData: CoreUsageDataStart;
+    // Warning: (ae-unresolved-link) The @link reference could not be resolved: This type of declaration is not supported yet by the resolver
+    //
     // (undocumented)
     docLinks: DocLinksServiceStart;
     // (undocumented)
@@ -920,26 +929,11 @@ export interface DeprecationsServiceSetup {
 // @public
 export type DestructiveRouteMethod = 'post' | 'put' | 'delete' | 'patch';
 
-// @public
-export interface DiscoveredPlugin {
-    readonly configPath: ConfigPath;
-    readonly enabledOnAnonymousPages?: boolean;
-    readonly id: PluginName;
-    readonly optionalPlugins: readonly PluginName[];
-    readonly requiredBundles: readonly PluginName[];
-    readonly requiredPlugins: readonly PluginName[];
-    readonly type: PluginType;
-}
+export { DiscoveredPlugin }
 
-// @public (undocumented)
-export interface DocLinksServiceSetup {
-    readonly elasticWebsiteUrl: string;
-    readonly links: DocLinks;
-    readonly version: string;
-}
+export { DocLinksServiceSetup }
 
-// @public (undocumented)
-export type DocLinksServiceStart = DocLinksServiceSetup;
+export { DocLinksServiceStart }
 
 export { Ecs }
 
@@ -1475,7 +1469,7 @@ export type KibanaResponseFactory = typeof kibanaResponseFactory;
 
 // @public
 export const kibanaResponseFactory: {
-    custom: <T extends string | Record<string, any> | Error | Buffer | {
+    custom: <T extends string | Record<string, any> | Buffer | Error | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     } | Stream | undefined>(options: CustomHttpResponseOptions<T>) => KibanaResponse<T>;
@@ -1499,7 +1493,7 @@ export const kibanaResponseFactory: {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     }>;
-    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Error | Buffer | {
+    customError: (options: CustomHttpResponseOptions<ResponseError | Buffer | Stream>) => KibanaResponse<string | Buffer | Error | {
         message: string | Error;
         attributes?: ResponseErrorAttributes | undefined;
     } | Stream>;
@@ -1799,11 +1793,9 @@ export interface PluginManifest {
     readonly version: string;
 }
 
-// @public
-export type PluginName = string;
+export { PluginName }
 
-// @public (undocumented)
-export type PluginOpaqueId = symbol;
+export { PluginOpaqueId }
 
 // @internal (undocumented)
 export interface PluginsServiceSetup {
@@ -1816,11 +1808,7 @@ export interface PluginsServiceStart {
     contracts: Map<PluginName, unknown>;
 }
 
-// @public (undocumented)
-export enum PluginType {
-    preboot = "preboot",
-    standard = "standard"
-}
+export { PluginType }
 
 // @public (undocumented)
 export const pollEsNodesVersion: ({ internalClient, log, kibanaVersion, ignoreVersionMismatch, esVersionCheckInterval: healthCheckInterval, }: PollEsNodesVersionOptions) => Observable<NodesVersionCompatibility>;
@@ -3256,8 +3244,8 @@ export const validBodyOutput: readonly ["data", "stream"];
 //
 // src/core/server/elasticsearch/client/types.ts:81:7 - (ae-forgotten-export) The symbol "Explanation" needs to be exported by the entry point index.d.ts
 // src/core/server/http/router/response.ts:302:3 - (ae-forgotten-export) The symbol "KibanaResponse" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:410:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:412:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
-// src/core/server/plugins/types.ts:519:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
+// src/core/server/plugins/types.ts:339:3 - (ae-forgotten-export) The symbol "SharedGlobalConfigKeys" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:341:3 - (ae-forgotten-export) The symbol "SavedObjectsConfigType" needs to be exported by the entry point index.d.ts
+// src/core/server/plugins/types.ts:448:5 - (ae-unresolved-link) The @link reference could not be resolved: The package "kibana" does not have an export "create"
 
 ```

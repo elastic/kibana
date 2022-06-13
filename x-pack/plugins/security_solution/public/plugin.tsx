@@ -49,7 +49,7 @@ import {
 } from '../common/constants';
 
 import { getDeepLinks, registerDeepLinksUpdater } from './app/deep_links';
-import { AppLinkItems, subscribeAppLinks, updateAppLinks } from './common/links';
+import { AppLinkItems, LinksPermissions, subscribeAppLinks, updateAppLinks } from './common/links';
 import { getSubPluginRoutesByCapabilities, manageOldSiemRoutes } from './helpers';
 import { SecurityAppStore } from './common/store/store';
 import { licenseService } from './common/hooks/use_license';
@@ -124,10 +124,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
      */
     const startServices: Promise<StartServices> = (async () => {
       const [coreStart, startPlugins] = await core.getStartServices();
+      const { apm } = await import('@elastic/apm-rum');
 
       const services: StartServices = {
         ...coreStart,
         ...startPlugins,
+        apm,
         storage: this.storage,
         security: plugins.security,
       };
@@ -239,64 +241,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       });
     }
 
-    licenseService.start(plugins.licensing.license$);
-    const licensing = licenseService.getLicenseInformation$();
-
-    const newNavEnabled = core.uiSettings.get(ENABLE_GROUPED_NAVIGATION, false);
-
-    /**
-     * Register deepLinks and pass an appUpdater for each subPlugin, to change deepLinks as needed when licensing changes.
-     */
-
-    if (newNavEnabled) {
-      registerDeepLinksUpdater(this.appUpdater$);
-    }
-
     // Not using await to prevent blocking start execution
-    this.lazyApplicationLinks().then(({ getAppLinks }) => {
-      getAppLinks(core, plugins).then((appLinks) => {
-        if (licensing !== null) {
-          this.licensingSubscription = licensing.subscribe((currentLicense) => {
-            if (currentLicense.type !== undefined) {
-              updateAppLinks(appLinks, {
-                experimentalFeatures: this.experimentalFeatures,
-                license: currentLicense,
-                capabilities: core.application.capabilities,
-              });
-
-              if (!newNavEnabled) {
-                // TODO: remove block when nav flag no longer needed
-                this.appUpdater$.next(() => ({
-                  navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-                  deepLinks: getDeepLinks(
-                    this.experimentalFeatures,
-                    currentLicense.type,
-                    core.application.capabilities
-                  ),
-                }));
-              }
-            }
-          });
-        } else {
-          updateAppLinks(appLinks, {
-            experimentalFeatures: this.experimentalFeatures,
-            capabilities: core.application.capabilities,
-          });
-
-          if (!newNavEnabled) {
-            // TODO: remove block when nav flag no longer needed
-            this.appUpdater$.next(() => ({
-              navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
-              deepLinks: getDeepLinks(
-                this.experimentalFeatures,
-                undefined,
-                core.application.capabilities
-              ),
-            }));
-          }
-        }
-      });
-    });
+    this.registerAppLinks(core, plugins);
 
     return {};
   }
@@ -374,6 +320,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         hosts: new subPluginClasses.Hosts(),
         users: new subPluginClasses.Users(),
         network: new subPluginClasses.Network(),
+        kubernetes: new subPluginClasses.Kubernetes(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
@@ -402,6 +349,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       users: subPlugins.users.start(storage),
       network: subPlugins.network.start(storage),
       timelines: subPlugins.timelines.start(),
+      kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
     };
@@ -511,5 +459,71 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       startPlugins.timelines.setTGridEmbeddedStore(this._store);
     }
     return this._store;
+  }
+
+  /**
+   * Register deepLinks and appUpdater for all app links, to change deepLinks as needed when licensing changes.
+   */
+  async registerAppLinks(core: CoreStart, plugins: StartPlugins) {
+    licenseService.start(plugins.licensing.license$);
+    const licensing = licenseService.getLicenseInformation$();
+
+    const newNavEnabled = core.uiSettings.get(ENABLE_GROUPED_NAVIGATION, false);
+    if (newNavEnabled) {
+      registerDeepLinksUpdater(this.appUpdater$);
+    }
+
+    const { links, getFilteredLinks } = await this.lazyApplicationLinks();
+
+    const linksPermissions: LinksPermissions = {
+      experimentalFeatures: this.experimentalFeatures,
+      capabilities: core.application.capabilities,
+    };
+
+    if (licensing == null) {
+      // update without license (defaults to "basic")
+      updateAppLinks(links, linksPermissions);
+
+      if (!newNavEnabled) {
+        // TODO: remove block when nav flag no longer needed
+        this.appUpdater$.next(() => ({
+          navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+          deepLinks: getDeepLinks(
+            this.experimentalFeatures,
+            undefined,
+            core.application.capabilities
+          ),
+        }));
+      }
+
+      // async links filtering
+      updateAppLinks(await getFilteredLinks(core, plugins), linksPermissions);
+
+      return;
+    }
+
+    this.licensingSubscription = licensing.subscribe(async (currentLicense) => {
+      if (currentLicense.type !== undefined) {
+        linksPermissions.license = currentLicense;
+      }
+
+      // set initial links to not block rendering
+      updateAppLinks(links, linksPermissions);
+
+      if (!newNavEnabled) {
+        // TODO: remove block when nav flag no longer needed
+        this.appUpdater$.next(() => ({
+          navLinkStatus: AppNavLinkStatus.hidden, // workaround to prevent main navLink to switch to visible after update. should not be needed
+          deepLinks: getDeepLinks(
+            this.experimentalFeatures,
+            currentLicense.type,
+            core.application.capabilities
+          ),
+        }));
+      }
+
+      // async links filtering
+      updateAppLinks(await getFilteredLinks(core, plugins), linksPermissions);
+    });
   }
 }

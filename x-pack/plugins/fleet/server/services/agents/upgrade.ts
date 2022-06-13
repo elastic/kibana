@@ -133,8 +133,9 @@ export async function sendUpgradeAgentsActions(
   const upgradeableResults = await Promise.allSettled(
     agentsToCheckUpgradeable.map(async (agent) => {
       // Filter out agents currently unenrolling, unenrolled, or not upgradeable b/c of version check
-      const isAllowed = options.force || isAgentUpgradeable(agent, kibanaVersion);
-      if (!isAllowed) {
+      const isNotAllowed =
+        !options.force && !isAgentUpgradeable(agent, kibanaVersion, options.version);
+      if (isNotAllowed) {
         throw new IngestManagerError(`${agent.id} is not upgradeable`);
       }
 
@@ -315,11 +316,6 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
             },
           },
           {
-            exists: {
-              field: 'start_time',
-            },
-          },
-          {
             range: {
               expiration: { gte: now },
             },
@@ -342,7 +338,7 @@ async function _getUpgradeActions(esClient: ElasticsearchClient, now = new Date(
           complete: false,
           nbAgentsAck: 0,
           version: hit._source.data?.version as string,
-          startTime: hit._source.start_time as string,
+          startTime: hit._source?.start_time,
         };
       }
 

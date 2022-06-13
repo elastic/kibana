@@ -9,14 +9,11 @@ import { Logger } from '@kbn/core/server';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { setupRequest, Setup } from '../../lib/helpers/setup_request';
 import { getClientMetrics } from './get_client_metrics';
-import { getJSErrors } from './get_js_errors';
 import { getLongTaskMetrics } from './get_long_task_metrics';
 import { getPageLoadDistribution } from './get_page_load_distribution';
 import { getPageViewTrends } from './get_page_view_trends';
 import { getPageLoadDistBreakdown } from './get_pl_dist_breakdown';
-import { getUrlSearch } from './get_url_search';
 import { getVisitorBreakdown } from './get_visitor_breakdown';
-import { getWebCoreVitals } from './get_web_core_vitals';
 import { hasRumData } from './has_rum_data';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { rangeRt } from '../default_api_types';
@@ -216,41 +213,6 @@ const rumVisitorsBreakdownRoute = createApmServerRoute({
   },
 });
 
-const rumWebCoreVitals = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/web-core-vitals',
-  params: t.type({
-    query: uxQueryRt,
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    coreVitalPages: number;
-    cls: number | null;
-    fid: number | null | undefined;
-    lcp: number | null | undefined;
-    tbt: number;
-    fcp: number | null | undefined;
-    lcpRanks: number[];
-    fidRanks: number[];
-    clsRanks: number[];
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { urlQuery, percentile, start, end },
-    } = resources.params;
-
-    return getWebCoreVitals({
-      setup,
-      urlQuery,
-      percentile: percentile ? Number(percentile) : undefined,
-      start,
-      end,
-    });
-  },
-});
-
 const rumLongTaskMetrics = createApmServerRoute({
   endpoint: 'GET /internal/apm/ux/long-task-metrics',
   params: t.type({
@@ -274,76 +236,6 @@ const rumLongTaskMetrics = createApmServerRoute({
       setup,
       urlQuery,
       percentile: percentile ? Number(percentile) : undefined,
-      start,
-      end,
-    });
-  },
-});
-
-const rumUrlSearch = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/url-search',
-  params: t.type({
-    query: uxQueryRt,
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    total: number;
-    items: Array<{ url: string; count: number; pld: number }>;
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { urlQuery, percentile, start, end },
-    } = resources.params;
-
-    return getUrlSearch({
-      setup,
-      urlQuery,
-      percentile: Number(percentile),
-      start,
-      end,
-    });
-  },
-});
-
-const rumJSErrors = createApmServerRoute({
-  endpoint: 'GET /internal/apm/ux/js-errors',
-  params: t.type({
-    query: t.intersection([
-      uiFiltersRt,
-      rangeRt,
-      t.type({ pageSize: t.string, pageIndex: t.string }),
-      t.partial({ urlQuery: t.string }),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    totalErrorPages: number;
-    totalErrors: number;
-    totalErrorGroups: number;
-    items:
-      | Array<{
-          count: number;
-          errorGroupId: string | number;
-          errorMessage: string;
-        }>
-      | undefined;
-  }> => {
-    const setup = await setupUXRequest(resources);
-
-    const {
-      query: { pageSize, pageIndex, urlQuery, start, end },
-    } = resources.params;
-
-    return getJSErrors({
-      setup,
-      urlQuery,
-      pageSize: Number(pageSize),
-      pageIndex: Number(pageIndex),
       start,
       end,
     });
@@ -410,9 +302,6 @@ export const rumRouteRepository = {
   ...rumPageLoadDistBreakdownRoute,
   ...rumPageViewsTrendRoute,
   ...rumVisitorsBreakdownRoute,
-  ...rumWebCoreVitals,
   ...rumLongTaskMetrics,
-  ...rumUrlSearch,
-  ...rumJSErrors,
   ...rumHasDataRoute,
 };

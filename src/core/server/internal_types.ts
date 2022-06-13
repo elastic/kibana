@@ -6,9 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Type } from '@kbn/config-schema';
-import type { ConfigDeprecationProvider } from '@kbn/config';
-
+import type { DocLinksServiceStart, DocLinksServiceSetup } from '@kbn/core-doc-links-server';
 import { CapabilitiesSetup, CapabilitiesStart } from './capabilities';
 import { InternalContextPreboot, ContextSetup } from './context';
 import {
@@ -44,7 +42,6 @@ import type {
   InternalExecutionContextStart,
 } from './execution_context';
 import { InternalPrebootServicePreboot } from './preboot';
-import { DocLinksServiceSetup, DocLinksServiceStart } from './doc_links';
 import type {
   AnalyticsServicePreboot,
   AnalyticsServiceSetup,
@@ -100,19 +97,4 @@ export interface InternalCoreStart {
   coreUsageData: CoreUsageDataStart;
   executionContext: InternalExecutionContextStart;
   deprecations: InternalDeprecationsServiceStart;
-}
-
-/**
- * @internal
- */
-export interface ServiceConfigDescriptor<T = any> {
-  path: string;
-  /**
-   * Schema to use to validate the configuration.
-   */
-  schema: Type<T>;
-  /**
-   * Provider for the {@link ConfigDeprecation} to apply to the plugin configuration.
-   */
-  deprecations?: ConfigDeprecationProvider;
 }

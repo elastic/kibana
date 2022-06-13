@@ -18,7 +18,7 @@ const BACK_LABEL = i18n.translate('xpack.securitySolution.consolePageOverlay.bac
 });
 
 export interface ConsolePageOverlayProps {
-  runningConsoles: ReactNode;
+  console: ReactNode;
   isHidden: boolean;
   onHide: () => void;
   pageTitle?: ReactNode;
@@ -27,7 +27,7 @@ export interface ConsolePageOverlayProps {
 }
 
 export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
-  ({ runningConsoles, onHide, isHidden, body, actions, pageTitle = '' }) => {
+  ({ console, onHide, isHidden, body, actions, pageTitle = '' }) => {
     const getTestId = useTestIdGenerator('consolePageOverlay');
     const handleCloseOverlayOnClick: MouseEventHandler = useCallback(
       (ev) => {
@@ -85,7 +85,7 @@ export const ConsolePageOverlay = memo<ConsolePageOverlayProps>(
         <PageLayout {...layoutProps}>
           {body}
 
-          {runningConsoles}
+          {console}
         </PageLayout>
       </PageOverlay>
     );

@@ -20,6 +20,7 @@ import { EuiFocusTrap, EuiPortal } from '@elastic/eui';
 import classnames from 'classnames';
 import { useLocation } from 'react-router-dom';
 import { EuiPortalProps } from '@elastic/eui/src/components/portal/portal';
+import { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import { TIMELINE_OVERRIDES_CSS_STYLESHEET } from '../../../common/components/page';
 import {
   SELECTOR_TIMELINE_IS_VISIBLE_CSS_CLASS_NAME,
@@ -38,7 +39,7 @@ const OverlayRootContainer = styled.div`
   bottom: 0;
   right: 0;
 
-  height: calc(100% - calc(${({ theme: { eui } }) => eui.euiHeaderHeightCompensation} * 2));
+  height: calc(100% - ${({ theme: { eui } }) => eui.euiHeaderHeightCompensation} * 2);
   width: 100%;
 
   z-index: ${({ theme: { eui } }) => eui.euiZFlyout};
@@ -63,7 +64,7 @@ const OverlayRootContainer = styled.div`
     padding: ${({ theme: { eui } }) => eui.paddingSizes.m};
   }
   &.padding-l {
-    padding: ${({ theme: { eui } }) => eui.paddingSizesl};
+    padding: ${({ theme: { eui } }) => eui.paddingSizes.l};
   }
   &.padding-xl {
     padding: ${({ theme: { eui } }) => eui.paddingSizes.xl};
@@ -78,7 +79,7 @@ const PAGE_OVERLAY_CSS_CLASSNAME = 'securitySolution-pageOverlay';
 const PAGE_OVERLAY_DOCUMENT_BODY_IS_VISIBLE_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-isVisible`;
 const PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME = `${PAGE_OVERLAY_CSS_CLASSNAME}-lock`;
 
-const PageOverlayGlobalStyles = createGlobalStyle`
+const PageOverlayGlobalStyles = createGlobalStyle<{ theme: EuiTheme }>`
   body.${PAGE_OVERLAY_DOCUMENT_BODY_LOCK_CLASSNAME} {
     overflow: hidden;
   }
@@ -272,7 +273,10 @@ export const PageOverlay = memo<PageOverlayProps>(
         }
       }
 
-      return () => unSetDocumentBodyLock();
+      return () => {
+        unSetDocumentBodyLock();
+        unSetDocumentBodyOverlayIsVisible();
+      };
     }, [isHidden, isMounted, lockDocumentBody]);
 
     return (

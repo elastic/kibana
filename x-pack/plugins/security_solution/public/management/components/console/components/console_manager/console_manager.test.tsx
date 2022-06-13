@@ -17,7 +17,11 @@ import {
   AppContextTestRender,
   createAppRootMockRenderer,
 } from '../../../../../common/mock/endpoint';
-import { ConsoleManagerTestComponent, getNewConsoleRegistrationMock } from './mocks';
+import {
+  ConsoleManagerTestComponent,
+  getConsoleManagerMockRenderResultQueriesAndActions,
+  getNewConsoleRegistrationMock,
+} from './mocks';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import { enterConsoleCommand } from '../../mocks';
@@ -201,26 +205,15 @@ describe('When using ConsoleManager', () => {
   });
 
   describe('and when the console page overlay is rendered into the page', () => {
+    type ConsoleManagerQueriesAndActions = ReturnType<
+      typeof getConsoleManagerMockRenderResultQueriesAndActions
+    >;
+
     let render: () => Promise<ReturnType<AppContextTestRender['render']>>;
     let renderResult: ReturnType<AppContextTestRender['render']>;
-
-    const clickOnRegisterNewConsole = () => {
-      act(() => {
-        userEvent.click(renderResult.getByTestId('registerNewConsole'));
-      });
-    };
-
-    const openRunningConsole = async () => {
-      act(() => {
-        userEvent.click(renderResult.queryAllByTestId('showRunningConsole')[0]);
-      });
-
-      await waitFor(() => {
-        expect(renderResult.getByTestId('consolePageOverlay').classList.contains('is-hidden')).toBe(
-          false
-        );
-      });
-    };
+    let clickOnRegisterNewConsole: ConsoleManagerQueriesAndActions['clickOnRegisterNewConsole'];
+    let openRunningConsole: ConsoleManagerQueriesAndActions['openRunningConsole'];
+    let hideOpenedConsole: ConsoleManagerQueriesAndActions['hideOpenedConsole'];
 
     beforeEach(() => {
       const mockedContext = createAppRootMockRenderer();
@@ -228,7 +221,10 @@ describe('When using ConsoleManager', () => {
       render = async () => {
         renderResult = mockedContext.render(<ConsoleManagerTestComponent />);
 
-        clickOnRegisterNewConsole();
+        ({ clickOnRegisterNewConsole, openRunningConsole, hideOpenedConsole } =
+          getConsoleManagerMockRenderResultQueriesAndActions(renderResult));
+
+        await clickOnRegisterNewConsole();
 
         await waitFor(() => {
           expect(renderResult.queryAllByTestId('runningConsole').length).toBeGreaterThan(0);
@@ -254,21 +250,17 @@ describe('When using ConsoleManager', () => {
       expect(renderResult.getByTestId('testRunningConsole')).toBeTruthy();
     });
 
-    it('should show `hide` button', async () => {
+    it('should show `Done` button', async () => {
       await render();
 
       expect(renderResult.getByTestId('consolePageOverlay-doneButton')).toBeTruthy();
     });
 
-    it('should hide the console popup', async () => {
+    it('should hide the console page overlay', async () => {
       await render();
       userEvent.click(renderResult.getByTestId('consolePageOverlay-doneButton'));
 
-      await waitFor(() => {
-        expect(renderResult.getByTestId('consolePageOverlay').classList.contains('is-hidden')).toBe(
-          true
-        );
-      });
+      expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();
     });
 
     it("should persist a console's command output history on hide/show", async () => {
@@ -280,13 +272,7 @@ describe('When using ConsoleManager', () => {
         expect(renderResult.queryAllByTestId('testRunningConsole-historyItem')).toHaveLength(2);
       });
 
-      // Hide the console
-      userEvent.click(renderResult.getByTestId('consolePageOverlay-doneButton'));
-      await waitFor(() => {
-        expect(renderResult.getByTestId('consolePageOverlay').classList.contains('is-hidden')).toBe(
-          true
-        );
-      });
+      await hideOpenedConsole();
 
       // Open the console back up and ensure prior items still there
       await openRunningConsole();
@@ -317,13 +303,7 @@ describe('When using ConsoleManager', () => {
         expectedStoreValue
       );
 
-      // Hide the console
-      userEvent.click(renderResult.getByTestId('consolePageOverlay-doneButton'));
-      await waitFor(() => {
-        expect(renderResult.getByTestId('consolePageOverlay').classList.contains('is-hidden')).toBe(
-          true
-        );
-      });
+      await hideOpenedConsole();
 
       // Open the console back up and ensure `status` and `store` are the last set of values
       await openRunningConsole();

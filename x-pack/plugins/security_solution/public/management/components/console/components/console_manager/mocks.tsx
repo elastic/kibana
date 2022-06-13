@@ -9,7 +9,6 @@
 
 import React, { memo, useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { act } from '@testing-library/react-hooks';
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/react';
 import { AppContextTestRender } from '../../../../../common/mock/endpoint';
@@ -22,7 +21,7 @@ export const getNewConsoleRegistrationMock = (
 ): ConsoleRegistrationInterface => {
   return {
     id: Math.random().toString(36),
-    TitleComponent: () => <>{'Test console'}</>,
+    PageTitleComponent: () => <>{'Test console'}</>,
     meta: { about: 'for unit testing ' },
     consoleProps: {
       'data-test-subj': 'testRunningConsole',
@@ -47,9 +46,7 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
     clickOnRegisterNewConsole: async () => {
       const currentRunningCount = renderResult.queryAllByTestId('showRunningConsole').length;
 
-      act(() => {
-        userEvent.click(renderResult.getByTestId('registerNewConsole'));
-      });
+      userEvent.click(renderResult.getByTestId('registerNewConsole'));
 
       await waitFor(() => {
         expect(renderResult.queryAllByTestId('showRunningConsole')).toHaveLength(
@@ -63,29 +60,24 @@ export const getConsoleManagerMockRenderResultQueriesAndActions = (
      * @param atIndex
      */
     openRunningConsole: async (atIndex: number = 0) => {
-      act(() => {
-        userEvent.click(renderResult.queryAllByTestId('showRunningConsole')[atIndex]);
-      });
+      const runningConsoleShowButton = renderResult.queryAllByTestId('showRunningConsole')[atIndex];
+
+      if (!runningConsoleShowButton) {
+        throw new Error(`No registered console found at index [${atIndex}]`);
+      }
+
+      userEvent.click(runningConsoleShowButton);
 
       await waitFor(() => {
-        expect(renderResult.getByTestId('consolePageOverlay').classList.contains('is-hidden')).toBe(
-          false
-        );
+        expect(renderResult.getByTestId('consolePageOverlay'));
       });
     },
 
     hideOpenedConsole: async () => {
-      const hideConsoleButton = renderResult.queryByTestId('consolePopupHideButton');
+      userEvent.click(renderResult.getByTestId('consolePageOverlay-doneButton'));
 
-      if (!hideConsoleButton) {
-        return;
-      }
-
-      userEvent.click(hideConsoleButton);
       await waitFor(() => {
-        expect(renderResult.getByTestId('consolePageOverlay').classList.contains('is-hidden')).toBe(
-          true
-        );
+        expect(renderResult.queryByTestId('consolePageOverlay')).toBeNull();
       });
     },
   };
