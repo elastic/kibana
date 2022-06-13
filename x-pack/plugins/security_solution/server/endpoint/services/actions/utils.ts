@@ -401,3 +401,18 @@ export const categorizeActionResults = ({
       })
     : [];
 };
+
+// for 8.4+ we only search on endpoint actions index
+// and thus there are only endpoint actions in the results
+export const formatEndpointActionResults = (
+  results: Array<estypes.SearchHit<LogsEndpointAction>>
+): EndpointActivityLogAction[] => {
+  return results?.length
+    ? results?.map((e) => {
+        return {
+          type: ActivityLogItemTypes.ACTION,
+          item: { id: e._id, data: e._source as LogsEndpointAction },
+        };
+      })
+    : [];
+};

@@ -52,26 +52,24 @@ describe('When using `getActionDetailsById()', () => {
         {
           item: {
             data: {
-              '@timestamp': '2022-04-27T16:08:47.449Z',
+              '@timestamp': '2022-04-30T16:08:47.449Z',
               EndpointActions: {
                 action_id: '123',
+                completed_at: '2022-04-30T16:08:47.449Z',
                 data: {
-                  command: 'isolate',
-                  comment: '5wb6pu6kh2xix5i',
+                  command: 'unisolate',
+                  comment: '',
                 },
-                expiration: expect.any(String),
-                input_type: 'endpoint',
-                type: 'INPUT_ACTION',
+                started_at: expect.any(String),
               },
-              agent: { id: 'agent-a' },
-              user: {
-                id: expect.any(String),
+              agent: {
+                id: 'agent-a',
               },
               error: undefined,
             },
             id: expect.any(String),
           },
-          type: 'action',
+          type: 'response',
         },
         {
           item: {
@@ -94,24 +92,26 @@ describe('When using `getActionDetailsById()', () => {
         {
           item: {
             data: {
-              '@timestamp': '2022-04-30T16:08:47.449Z',
+              '@timestamp': '2022-04-27T16:08:47.449Z',
               EndpointActions: {
                 action_id: '123',
-                completed_at: '2022-04-30T16:08:47.449Z',
                 data: {
-                  command: 'unisolate',
-                  comment: '',
+                  command: 'isolate',
+                  comment: '5wb6pu6kh2xix5i',
                 },
-                started_at: expect.any(String),
+                expiration: expect.any(String),
+                input_type: 'endpoint',
+                type: 'INPUT_ACTION',
               },
-              agent: {
-                id: 'agent-a',
+              agent: { id: 'agent-a' },
+              user: {
+                id: expect.any(String),
               },
               error: undefined,
             },
             id: expect.any(String),
           },
-          type: 'response',
+          type: 'action',
         },
       ],
       startedAt: '2022-04-27T16:08:47.449Z',

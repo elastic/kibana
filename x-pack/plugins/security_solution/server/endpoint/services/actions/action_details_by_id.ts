@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../common/endpoint/constants';
 import {
-  categorizeActionResults,
+  formatEndpointActionResults,
   categorizeResponseResults,
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
@@ -23,7 +23,7 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
 } from '../../../../common/endpoint/types';
-import { catchAndWrapError } from '../../utils';
+import { catchAndWrapError, getTimeSortedActionListLogEntries } from '../../utils';
 import { EndpointError } from '../../../../common/endpoint/errors';
 import { NotFoundError } from '../../errors';
 import { ACTION_RESPONSE_INDICES, ACTIONS_SEARCH_PAGE_SIZE } from './constants';
@@ -82,9 +82,9 @@ export const getActionDetailsById = async (
         .catch(catchAndWrapError),
     ]);
 
-    actionRequestsLogEntries = categorizeActionResults({
-      results: actionRequestEsSearchResults?.hits?.hits ?? [],
-    }) as EndpointActivityLogAction[];
+    actionRequestsLogEntries = formatEndpointActionResults(
+      actionRequestEsSearchResults?.hits?.hits ?? []
+    );
 
     // Multiple Action records could have been returned, but we only really
     // need one since they both hold similar data
@@ -116,7 +116,10 @@ export const getActionDetailsById = async (
     agents: normalizedActionRequest.agents,
     command: normalizedActionRequest.command,
     startedAt: normalizedActionRequest.createdAt,
-    logEntries: [...actionRequestsLogEntries, ...actionResponses],
+    logEntries: getTimeSortedActionListLogEntries([
+      ...actionRequestsLogEntries,
+      ...actionResponses,
+    ]),
     isCompleted,
     completedAt,
     wasSuccessful,

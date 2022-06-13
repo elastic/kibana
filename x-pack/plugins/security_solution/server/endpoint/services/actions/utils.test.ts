@@ -11,6 +11,7 @@ import { FleetActionGenerator } from '../../../../common/endpoint/data_generator
 import {
   categorizeActionResults,
   categorizeResponseResults,
+  formatEndpointActionResults,
   getUniqueLogData,
   getActionCompletionInfo,
   isLogsEndpointAction,
@@ -444,7 +445,7 @@ describe('When using Actions service utilities', () => {
     });
   });
 
-  describe('#categorizeActionResults() and #categorizeResponseResults()', () => {
+  describe('#categorizeActionResults(), #categorizeResponseResults() and #formatEndpointActionResults()', () => {
     let fleetActions: Results[];
     let endpointActions: Results[];
     let fleetResponses: Results[];
@@ -538,6 +539,21 @@ describe('When using Actions service utilities', () => {
       expect(
         (categorizedFleetResponses as ActivityLogActionResponse[]).map(
           (e) => 'data' in e.item.data
+        )[0]
+      ).toBeTruthy();
+    });
+
+    it('should correctly format endpoint actions', () => {
+      const actionResults = mockAuditLogSearchResult(endpointActions);
+      const formattedActions = formatEndpointActionResults(
+        actionResults.body.hits.hits as Array<estypes.SearchHit<LogsEndpointAction>>
+      );
+      const formattedActionRequests = formattedActions.filter((e) => e.type === 'action');
+
+      expect(formattedActionRequests.length).toEqual(2);
+      expect(
+        (formattedActionRequests as EndpointActivityLogAction[]).map(
+          (e) => 'EndpointActions' in e.item.data
         )[0]
       ).toBeTruthy();
     });

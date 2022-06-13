@@ -7,11 +7,7 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import type {
-  ActionDetails,
-  ActionListApiResponse,
-  EndpointActivityLogAction,
-} from '../../../../common/endpoint/types';
+import type { ActionDetails, ActionListApiResponse } from '../../../../common/endpoint/types';
 
 import {
   getActions,
@@ -20,7 +16,7 @@ import {
 } from '../../utils/action_list_helpers';
 
 import {
-  categorizeActionResults,
+  formatEndpointActionResults,
   categorizeResponseResults,
   getActionCompletionInfo,
   mapToNormalizedActionRequest,
@@ -129,13 +125,11 @@ const getActionDetailsList = async ({
   if (!actionRequests?.body?.hits?.hits) return [];
 
   // format endpoint actions into { type, item } structure
-  const categorizedActions = categorizeActionResults({
-    results: actionRequests?.body?.hits?.hits,
-  }) as EndpointActivityLogAction[];
+  const formattedActionRequests = formatEndpointActionResults(actionRequests?.body?.hits?.hits);
 
   // normalized actions with a flat structure to access relevant values
   const normalizedActionRequests: Array<ReturnType<typeof mapToNormalizedActionRequest>> =
-    categorizedActions.map((action) => mapToNormalizedActionRequest(action.item.data));
+    formattedActionRequests.map((action) => mapToNormalizedActionRequest(action.item.data));
 
   try {
     // get all responses for given action Ids and agent Ids
@@ -163,7 +157,7 @@ const getActionDetailsList = async ({
   // compute action details list for each action id
   const actionDetails: ActionDetails[] = normalizedActionRequests.map((action) => {
     // pick only those actions that match the current action id
-    const matchedActions = categorizedActions.filter(
+    const matchedActions = formattedActionRequests.filter(
       (categorizedAction) => categorizedAction.item.data.EndpointActions.action_id === action.id
     );
     // pick only those responses that match the current action id

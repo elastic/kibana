@@ -24,9 +24,6 @@ import { catchAndWrapError } from './wrap_errors';
 import { GetActionDetailsListParam } from '../services/actions/action_list';
 
 const queryOptions = Object.freeze({
-  headers: {
-    'X-elastic-product-origin': 'fleet',
-  },
   ignore: [404],
 });
 
@@ -155,6 +152,9 @@ export const getActionResponses = async ({
   > = await esClient
     .search<EndpointActionResponse | LogsEndpointActionResponse>(responsesSearchQuery, {
       ...queryOptions,
+      headers: {
+        'X-elastic-product-origin': 'fleet',
+      },
       meta: true,
     })
     .catch(catchAndWrapError);
