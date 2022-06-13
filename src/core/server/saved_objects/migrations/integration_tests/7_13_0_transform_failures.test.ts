@@ -197,7 +197,7 @@ function createRoot(discardCorruptObjects?: string) {
             type: 'file',
             fileName: logFilePath,
             layout: {
-              type: 'pattern',
+              type: 'json',
             },
           },
         },
