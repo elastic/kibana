@@ -141,6 +141,12 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
       await this.searchAlerts(name);
       await find.clickDisplayedByCssSelector(`[data-test-subj="rulesList"] [title="${name}"]`);
     },
+    async maybeClickOnAlertTab() {
+      if (await testSubjects.exists('ruleDetailsTabbedContent')) {
+        const alertTab = await testSubjects.find('ruleAlertListTab');
+        await alertTab.click();
+      }
+    },
     async changeTabs(tab: 'rulesTab' | 'connectorsTab') {
       await testSubjects.click(tab);
     },
@@ -194,6 +200,33 @@ export function TriggersActionsPageProvider({ getService }: FtrProviderContext) 
         const title = await statusControl.getAttribute('title');
         expect(title.toLowerCase()).to.eql(expectedStatus.toLowerCase());
       });
+    },
+    async ensureEventLogColumnExists(columnId: string) {
+      const columnsButton = await testSubjects.find('dataGridColumnSelectorButton');
+      await columnsButton.click();
+
+      const button = await testSubjects.find(
+        `dataGridColumnSelectorToggleColumnVisibility-${columnId}`
+      );
+      const isChecked = await button.getAttribute('aria-checked');
+
+      if (isChecked === 'false') {
+        await button.click();
+      }
+
+      await columnsButton.click();
+    },
+    async sortEventLogColumn(columnId: string, direction: string) {
+      await testSubjects.click(`dataGridHeaderCell-${columnId}`);
+      const popover = await testSubjects.find(`dataGridHeaderCellActionGroup-${columnId}`);
+      const popoverListItems = await popover.findAllByCssSelector('li');
+
+      if (direction === 'asc') {
+        await popoverListItems[1].click();
+      }
+      if (direction === 'desc') {
+        await popoverListItems[2].click();
+      }
     },
   };
 }

@@ -90,6 +90,7 @@ export {
 export {
   KibanaContextProvider,
   KibanaThemeProvider,
+  useExecutionContext,
 } from '../../../../src/plugins/kibana_react/public';
 
 export const useKibana = () => _useKibana<AppServices>();

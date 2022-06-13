@@ -30,14 +30,9 @@ import { useKibana } from '../../../../../../../src/plugins/kibana_react/public'
 interface Props {
   updateAPMPolicy: (newVars: PackagePolicyVars, isValid: boolean) => void;
   vars?: PackagePolicyVars;
-  isCloudPolicy: boolean;
 }
 
-export function APMPolicyForm({
-  vars = {},
-  isCloudPolicy,
-  updateAPMPolicy,
-}: Props) {
+export function APMPolicyForm({ vars = {}, updateAPMPolicy }: Props) {
   const tailSamplingPoliciesDocsLink =
     useKibana().services.docLinks?.links.apm.tailSamplingPolicies;
   const {
@@ -48,17 +43,15 @@ export function APMPolicyForm({
     tailSamplingSettings,
   } = useMemo(() => {
     return {
-      apmSettings: getApmSettings({ isCloudPolicy }),
+      apmSettings: getApmSettings(),
       rumSettings: getRUMSettings(),
       tlsSettings: getTLSSettings(),
-      agentAuthorizationSettings: getAgentAuthorizationSettings({
-        isCloudPolicy,
-      }),
+      agentAuthorizationSettings: getAgentAuthorizationSettings(),
       tailSamplingSettings: getTailSamplingSettings(
         tailSamplingPoliciesDocsLink
       ),
     };
-  }, [isCloudPolicy, tailSamplingPoliciesDocsLink]);
+  }, [tailSamplingPoliciesDocsLink]);
 
   function handleFormChange(key: string, value: any) {
     // Merge new key/value with the rest of fields

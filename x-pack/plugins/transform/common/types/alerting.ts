@@ -14,6 +14,9 @@ export type TransformHealthRuleParams = {
     notStarted?: {
       enabled: boolean;
     } | null;
+    errorMessages?: {
+      enabled: boolean;
+    } | null;
   } | null;
 } & AlertTypeParams;
 

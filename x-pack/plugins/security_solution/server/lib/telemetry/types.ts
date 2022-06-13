@@ -208,6 +208,10 @@ export interface EndpointMetrics {
     registry_events: DocumentsVolumeMetrics;
     network_events: DocumentsVolumeMetrics;
     overall: DocumentsVolumeMetrics;
+    alerts: DocumentsVolumeMetrics;
+    diagnostic_alerts: DocumentsVolumeMetrics;
+    dns_events: DocumentsVolumeMetrics;
+    security_events: DocumentsVolumeMetrics;
   };
   malicious_behavior_rules: Array<{ id: string; endpoint_uptime_percent: number }>;
   system_impact: Array<{

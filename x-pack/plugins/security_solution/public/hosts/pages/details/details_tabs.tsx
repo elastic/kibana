@@ -26,6 +26,7 @@ import {
   UncommonProcessQueryTabBody,
   HostAlertsQueryTabBody,
   HostRiskTabBody,
+  SessionsTabBody,
 } from '../navigation';
 import { TimelineId } from '../../../../common/types';
 
@@ -110,6 +111,9 @@ export const HostDetailsTabs = React.memo<HostDetailsTabsProps>(
         </Route>
         <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.risk})`}>
           <HostRiskTabBody {...tabProps} />
+        </Route>
+        <Route path={`${hostDetailsPagePath}/:tabName(${HostsTableType.sessions})`}>
+          <SessionsTabBody {...tabProps} />
         </Route>
       </Switch>
     );

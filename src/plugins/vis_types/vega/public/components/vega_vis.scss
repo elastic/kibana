@@ -24,6 +24,10 @@
   width: 100%;
   height: 100%;
 
+  canvas {
+    display: block;
+  }
+
   // BUG #23514: Make sure Vega doesn't display the controls in two places
   .vega-bindings {
     // sass-lint:disable no-important

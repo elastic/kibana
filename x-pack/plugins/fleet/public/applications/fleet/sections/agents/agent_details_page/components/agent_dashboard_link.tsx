@@ -54,7 +54,7 @@ export const AgentDashboardLink: React.FunctionComponent<{
         content={
           <FormattedMessage
             id="xpack.fleet.agentDetails.viewDashboardButtonDisabledTooltip"
-            defaultMessage="Agent dashboard not found, you need to install the elastic_agent package."
+            defaultMessage="Agent dashboard not found, you need to install the elastic_agent integration."
           />
         }
       >

@@ -5,9 +5,29 @@
  * 2.0.
  */
 
-import type { RequestHandlerContext } from 'src/core/server';
+import type { CoreSetup, RequestHandlerContext } from 'src/core/server';
 import type { SearchRequestHandlerContext } from '../../../../src/plugins/data/server';
-import { MlPluginSetup } from '../../ml/server';
+import type { MlPluginSetup } from '../../ml/server';
+import type { InfraStaticSourceConfiguration } from '../common/source_configuration/source_configuration';
+import { InfraServerPluginStartDeps } from './lib/adapters/framework';
+import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views/types';
+
+export type { InfraConfig } from '../common/plugin_config_types';
+
+export type InfraPluginCoreSetup = CoreSetup<InfraServerPluginStartDeps, InfraPluginStart>;
+export type InfraPluginStartServicesAccessor = InfraPluginCoreSetup['getStartServices'];
+
+export interface InfraPluginSetup {
+  defineInternalSourceConfiguration: (
+    sourceId: string,
+    sourceProperties: InfraStaticSourceConfiguration
+  ) => void;
+  logViews: LogViewsServiceSetup;
+}
+
+export interface InfraPluginStart {
+  logViews: LogViewsServiceStart;
+}
 
 export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
 export type MlAnomalyDetectors = ReturnType<MlPluginSetup['anomalyDetectorsProvider']>;
@@ -30,25 +50,4 @@ export type InfraRequestHandlerContext = InfraMlRequestHandlerContext &
 export interface InfraPluginRequestHandlerContext extends RequestHandlerContext {
   infra: InfraRequestHandlerContext;
   search: SearchRequestHandlerContext;
-}
-
-export interface InfraConfig {
-  alerting: {
-    inventory_threshold: {
-      group_by_page_size: number;
-    };
-    metric_threshold: {
-      group_by_page_size: number;
-    };
-  };
-  inventory: {
-    compositeSize: number;
-  };
-  sources?: {
-    default?: {
-      fields?: {
-        message?: string[];
-      };
-    };
-  };
 }

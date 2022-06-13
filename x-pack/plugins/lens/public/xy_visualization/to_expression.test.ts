@@ -13,9 +13,9 @@ import { OperationDescriptor } from '../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../mocks';
 import { layerTypes } from '../../common';
 import { fieldFormatsServiceMock } from '../../../../../src/plugins/field_formats/public/mocks';
+import { eventAnnotationServiceMock } from '../../../../../src/plugins/event_annotation/public/mocks';
 import { defaultReferenceLineColor } from './color_assignment';
 import { themeServiceMock } from '../../../../../src/core/public/mocks';
-import { eventAnnotationServiceMock } from 'src/plugins/event_annotation/public/mocks';
 
 describe('#toExpression', () => {
   const xyVisualization = getXyVisualization({

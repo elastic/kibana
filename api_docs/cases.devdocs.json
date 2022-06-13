@@ -716,11 +716,7 @@
           "label": "hooks",
           "description": [],
           "signature": [
-            "{ getUseCasesAddToNewCaseFlyout: (props: ",
-            "CreateCaseFlyoutProps",
-            ") => { open: () => void; close: () => void; }; getUseCasesAddToExistingCaseModal: (props: ",
-            "AllCasesSelectorModalProps",
-            ") => { open: () => void; close: () => void; }; }"
+            "{ getUseCasesAddToNewCaseFlyout: (props: AddToNewCaseFlyoutProps) => { open: () => void; close: () => void; }; getUseCasesAddToExistingCaseModal: (props: AddToExistingFlyoutProps) => { open: () => void; close: () => void; }; }"
           ],
           "path": "x-pack/plugins/cases/public/types.ts",
           "deprecated": false
@@ -1270,7 +1266,7 @@
         "label": "CasesFeatures",
         "description": [],
         "signature": [
-          "{ alerts?: { sync: boolean; } | undefined; metrics?: ",
+          "{ alerts?: { sync?: boolean | undefined; enabled?: boolean | undefined; } | undefined; metrics?: ",
           "CaseMetricsFeature",
           "[] | undefined; }"
         ],

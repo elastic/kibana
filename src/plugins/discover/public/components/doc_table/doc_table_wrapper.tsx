@@ -164,12 +164,13 @@ export const DocTableWrapper = forwardRef(
             indexPattern={indexPattern}
             row={current}
             useNewFieldsApi={useNewFieldsApi}
-            onAddColumn={onAddColumn}
             fieldsToShow={fieldsToShow}
+            onAddColumn={onAddColumn}
+            onRemoveColumn={onRemoveColumn}
           />
         ));
       },
-      [columns, onFilter, indexPattern, useNewFieldsApi, onAddColumn, fieldsToShow]
+      [columns, onFilter, indexPattern, useNewFieldsApi, fieldsToShow, onAddColumn, onRemoveColumn]
     );
 
     return (

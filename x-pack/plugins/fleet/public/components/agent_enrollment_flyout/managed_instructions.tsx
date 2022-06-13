@@ -63,15 +63,15 @@ export const ManagedInstructions = React.memo<InstructionProps>(
     agentPolicies,
     viewDataStep,
     setSelectedPolicyId,
+    policyId,
     isFleetServerPolicySelected,
+    isK8s,
     settings,
     refreshAgentPolicies,
     isLoadingAgentPolicies,
   }) => {
     const fleetStatus = useFleetStatus();
-
     const [selectedApiKeyId, setSelectedAPIKeyId] = useState<string | undefined>();
-
     const apiKey = useGetOneEnrollmentAPIKey(selectedApiKeyId);
     const fleetServerInstructions = useFleetServerInstructions(apiKey?.data?.item?.policy_id);
 
@@ -111,6 +111,8 @@ export const ManagedInstructions = React.memo<InstructionProps>(
       ];
     }, [fleetServerInstructions]);
 
+    const enrolToken = apiKey.data ? apiKey.data.item.api_key : '';
+
     const steps = useMemo(() => {
       const fleetServerHosts = settings?.fleet_server_hosts || [];
       const baseSteps: EuiContainedStepProps[] = [
@@ -123,7 +125,7 @@ export const ManagedInstructions = React.memo<InstructionProps>(
               refreshAgentPolicies,
             })
           : AgentEnrollmentKeySelectionStep({ agentPolicy, selectedApiKeyId, setSelectedAPIKeyId }),
-        DownloadStep(isFleetServerPolicySelected || false),
+        DownloadStep(isFleetServerPolicySelected || false, isK8s || '', enrolToken || ''),
       ];
       if (isFleetServerPolicySelected) {
         baseSteps.push(...fleetServerSteps);
@@ -133,7 +135,12 @@ export const ManagedInstructions = React.memo<InstructionProps>(
             defaultMessage: 'Enroll and start the Elastic Agent',
           }),
           children: selectedApiKeyId && apiKey.data && (
-            <ManualInstructions apiKey={apiKey.data.item} fleetServerHosts={fleetServerHosts} />
+            <ManualInstructions
+              apiKey={apiKey.data.item}
+              fleetServerHosts={fleetServerHosts}
+              policyId={policyId}
+              isK8s={isK8s}
+            />
           ),
         });
       }
@@ -155,6 +162,9 @@ export const ManagedInstructions = React.memo<InstructionProps>(
       isFleetServerPolicySelected,
       settings?.fleet_server_hosts,
       viewDataStep,
+      enrolToken,
+      isK8s,
+      policyId,
     ]);
 
     if (fleetStatus.isReady && settings?.fleet_server_hosts.length === 0) {

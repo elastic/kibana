@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Filter } from '@kbn/es-query';
 import { Action } from '../../../../../../src/plugins/ui_actions/public';
 import {
   EmbeddableContext,
   EmbeddableInput,
   IEmbeddable,
 } from '../../../../../../src/plugins/embeddable/public';
-import { Query, Filter, TimeRange } from '../../../../../../src/plugins/data/public';
+import { Query, TimeRange } from '../../../../../../src/plugins/data/public';
 import { DiscoverAppLocatorParams } from '../../../../../../src/plugins/discover/public';
 import { KibanaLocation } from '../../../../../../src/plugins/share/public';
 import * as shared from './shared';

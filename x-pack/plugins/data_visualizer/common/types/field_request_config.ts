@@ -17,6 +17,7 @@ export interface FieldRequestConfig {
   fieldName: string;
   type: JobFieldType;
   cardinality: number;
+  existsInDocs: boolean;
 }
 
 export interface DocumentCountBuckets {

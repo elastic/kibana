@@ -6,20 +6,20 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
+import { GetAggregateRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response';
 import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
 import { buildSiemResponse } from '../utils';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL } from '../../../../../common/constants';
-import { GetRuleExecutionEventsRequestParams } from '../../../../../common/detection_engine/schemas/request/get_rule_execution_events_request';
-import { GetRuleExecutionEventsResponse } from '../../../../../common/detection_engine/schemas/response/get_rule_execution_events_response';
+import {
+  GetRuleExecutionEventsQueryParams,
+  GetRuleExecutionEventsRequestParams,
+} from '../../../../../common/detection_engine/schemas/request/get_rule_execution_events_schema';
 
 /**
- * Returns execution events of a given rule (e.g. status changes) from Event Log.
- * Accepts rule's saved object ID (`rule.id`).
- *
- * NOTE: This endpoint is under construction. It will be extended and finalized.
- * https://github.com/elastic/kibana/issues/119598
+ * Returns execution events of a given rule (aggregated by executionId) from Event Log.
+ * Accepts rule's saved object ID (`rule.id`), `start`, `end` and `filters` query params.
  */
 export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter) => {
   router.get(
@@ -27,6 +27,7 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
       path: DETECTION_ENGINE_RULE_EXECUTION_EVENTS_URL,
       validate: {
         params: buildRouteValidation(GetRuleExecutionEventsRequestParams),
+        query: buildRouteValidation(GetRuleExecutionEventsQueryParams),
       },
       options: {
         tags: ['access:securitySolution'],
@@ -34,14 +35,35 @@ export const getRuleExecutionEventsRoute = (router: SecuritySolutionPluginRouter
     },
     async (context, request, response) => {
       const { ruleId } = request.params;
+      const {
+        start,
+        end,
+        query_text: queryText = '',
+        status_filters: statusFilters = '',
+        page,
+        per_page: perPage,
+        sort_field: sortField = 'timestamp',
+        sort_order: sortOrder = 'desc',
+      } = request.query;
       const siemResponse = buildSiemResponse(response);
 
       try {
         const executionLog = context.securitySolution.getRuleExecutionLog();
-        const executionEvents = await executionLog.getLastFailures(ruleId);
+        const { events, total } = await executionLog.getAggregateExecutionEvents({
+          ruleId,
+          start,
+          end,
+          queryText,
+          statusFilters: statusFilters.length ? statusFilters.split(',') : [],
+          page: page != null ? parseInt(page, 10) : 0,
+          perPage: perPage != null ? parseInt(perPage, 10) : 10,
+          sortField,
+          sortOrder,
+        });
 
-        const responseBody: GetRuleExecutionEventsResponse = {
-          events: executionEvents,
+        const responseBody: GetAggregateRuleExecutionEventsResponse = {
+          events,
+          total,
         };
 
         return response.ok({ body: responseBody });

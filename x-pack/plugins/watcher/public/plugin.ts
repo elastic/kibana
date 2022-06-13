@@ -50,6 +50,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           docLinks,
           savedObjects,
           application,
+          executionContext,
         } = coreStart;
 
         docTitle.change(pluginName);
@@ -74,6 +75,7 @@ export class WatcherUIPlugin implements Plugin<void, void, Dependencies, any> {
           history,
           getUrlForApp: application.getUrlForApp,
           theme$,
+          executionContext,
         });
 
         return () => {

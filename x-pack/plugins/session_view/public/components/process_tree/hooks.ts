@@ -83,7 +83,7 @@ export class ProcessImpl implements Process {
           child.getDetails().process;
 
         // search matches or processes with alerts will never be filtered out
-        if (child.searchMatched || child.hasAlerts()) {
+        if (child.autoExpand || child.searchMatched || child.hasAlerts()) {
           return true;
         }
 
@@ -91,11 +91,6 @@ export class ProcessImpl implements Process {
         // This accounts for a lot of noise from bash and other shells forking, running auto completion processes and
         // other shell startup activities (e.g bashrc .profile etc)
         if (groupLeader.pid === sessionLeader.pid) {
-          return false;
-        }
-
-        // If the process has no children and has not exec'd (fork only), we hide it.
-        if (child.children.length === 0 && !child.hasExec()) {
           return false;
         }
 
@@ -157,11 +152,11 @@ export class ProcessImpl implements Process {
       group_leader: groupLeader,
     } = event.process;
 
-    const parentIsASessionLeader = parent.pid === sessionLeader.pid; // possibly bash, zsh or some other shell
-    const processIsAGroupLeader = pid === groupLeader.pid;
+    const parentIsASessionLeader = parent && sessionLeader && parent.pid === sessionLeader.pid;
+    const processIsAGroupLeader = groupLeader && pid === groupLeader.pid;
     const sessionIsInteractive = !!tty;
 
-    return sessionIsInteractive && parentIsASessionLeader && processIsAGroupLeader;
+    return !!(sessionIsInteractive && parentIsASessionLeader && processIsAGroupLeader);
   }
 
   getMaxAlertLevel() {
@@ -189,6 +184,7 @@ export class ProcessImpl implements Process {
   // to be used as a source for the most up to date details
   // on the processes lifecycle.
   getDetailsMemo = memoizeOne((events: ProcessEvent[]) => {
+    // TODO: add these to generator
     const actionsToFind = [EventAction.fork, EventAction.exec, EventAction.end];
     const filtered = events.filter((processEvent) => {
       return actionsToFind.includes(processEvent.event.action);
@@ -197,7 +193,7 @@ export class ProcessImpl implements Process {
     // because events is already ordered by @timestamp we take the last event
     // which could be a fork (w no exec or exit), most recent exec event (there can be multiple), or end event.
     // If a process has an 'end' event will always be returned (since it is last and includes details like exit_code and end time)
-    return filtered[filtered.length - 1] || ({} as ProcessEvent);
+    return filtered[filtered.length - 1];
   });
 }
 

@@ -1625,31 +1625,14 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
-            "id": "def-common.UseExceptionListsProps.showTrustedApps",
-            "type": "boolean",
+            "id": "def-common.UseExceptionListsProps.hideLists",
+            "type": "Object",
             "tags": [],
-            "label": "showTrustedApps",
+            "label": "hideLists",
             "description": [],
-            "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
-            "id": "def-common.UseExceptionListsProps.showEventFilters",
-            "type": "boolean",
-            "tags": [],
-            "label": "showEventFilters",
-            "description": [],
-            "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
-            "deprecated": false
-          },
-          {
-            "parentPluginId": "@kbn/securitysolution-io-ts-list-types",
-            "id": "def-common.UseExceptionListsProps.showHostIsolationExceptions",
-            "type": "boolean",
-            "tags": [],
-            "label": "showHostIsolationExceptions",
-            "description": [],
+            "signature": [
+              "readonly string[] | undefined"
+            ],
             "path": "packages/kbn-securitysolution-io-ts-list-types/src/typescript_types/index.ts",
             "deprecated": false
           }

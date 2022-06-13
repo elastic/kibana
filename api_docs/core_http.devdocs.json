@@ -1811,6 +1811,7 @@
             ],
             "path": "src/core/public/http/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0\n\nNote to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,\nso TS and code-reference navigation might not highlight them.",
             "references": [
               {
                 "plugin": "ml",
@@ -1836,6 +1837,7 @@
             ],
             "path": "src/core/public/http/types.ts",
             "deprecated": true,
+            "removeBy": "8.8.0\n\nNote to maintainers: when looking at usages, mind that typical use could be inside a `catch` block,\nso TS and code-reference navigation might not highlight them.",
             "references": []
           },
           {

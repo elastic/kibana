@@ -24,7 +24,10 @@ import {
   StartedExecution,
 } from './types';
 
-/** @internal */
+export interface ExecutionClaimMetrics extends TaskRunMetrics {
+  queueDurationMs: number;
+}
+
 export interface ExecutionCompleteMetrics extends TaskRunMetrics {
   byteSize: number;
 }
@@ -44,7 +47,6 @@ export interface BaseEvent {
   user?: { name: string };
 }
 
-/** @internal */
 export function reportingEventLoggerFactory(logger: Logger) {
   const genericLogger = new EcsLogAdapter(logger, { event: { provider: PLUGIN_ID } });
 
@@ -145,12 +147,13 @@ export function reportingEventLoggerFactory(logger: Logger) {
       return event;
     }
 
-    logClaimTask(): ClaimedTask {
+    logClaimTask({ queueDurationMs }: ExecutionClaimMetrics): ClaimedTask {
       const message = `claimed report ${this.report._id}`;
       const event = deepMerge(
         {
           message,
           kibana: { reporting: { actionType: ActionType.CLAIM_TASK } },
+          event: { duration: queueDurationMs },
         } as Partial<ClaimedTask>,
         this.eventObj
       );

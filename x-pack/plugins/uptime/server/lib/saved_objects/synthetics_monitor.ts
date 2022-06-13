@@ -32,6 +32,9 @@ export const syntheticsMonitor: SavedObjectsType = {
       tags: {
         type: 'keyword',
       },
+      secrets: {
+        type: 'text',
+      },
     },
   },
   management: {
