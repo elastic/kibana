@@ -107,6 +107,7 @@ function podNodeColumns(
       name: 'Name',
       field: 'name',
       truncateText: true,
+      textOnly: true,
       render: (name: string) => {
         return <MetricsNodeDetailsLink id={name} nodeType={'pod'} timerange={timerange} />;
       },
