@@ -54,8 +54,6 @@ import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import { VisSavedObject } from '../types';
 import { toExpressionAst } from './to_ast';
 
-const getKeys = <T extends {}>(o: T): Array<keyof T> => Object.keys(o) as Array<keyof T>;
-
 export interface VisualizeEmbeddableConfiguration {
   vis: Vis;
   indexPatterns?: DataView[];
@@ -222,9 +220,9 @@ export class VisualizeEmbeddable
         this.vis.uiState.off('change', this.uiStateChangeHandler);
         this.vis.uiState.clearAllKeys();
 
-        getKeys(visCustomizations).forEach((key) => {
-          if (visCustomizations[key]) {
-            this.vis.uiState.set(key, visCustomizations[key]);
+        Object.entries(visCustomizations).forEach(([key, value]) => {
+          if (value) {
+            this.vis.uiState.set(key, value);
           }
         });
 
