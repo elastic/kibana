@@ -72,6 +72,7 @@ export const stateDataReducer: ConsoleStoreReducer = (state, action) => {
       return handleSidePanel(state, action);
 
     case 'updateInputPopoverState':
+    case 'updateInputHistoryState':
       return handleInputAreaState(state, action);
 
     case 'clear':

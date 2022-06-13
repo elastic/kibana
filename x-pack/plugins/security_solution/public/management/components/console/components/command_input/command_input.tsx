@@ -87,22 +87,28 @@ export const CommandInput = memo<CommandInputProps>(
 
     const handleKeyCapture = useCallback<KeyCaptureProps['onCapture']>(
       ({ value, eventDetails }) => {
-        setTextEntered((prevState) => {
-          let updatedState = prevState + value;
+        setTextEntered((prevTextEnteredState) => {
+          let updatedTextEnteredState = prevTextEnteredState + value;
 
           switch (eventDetails.keyCode) {
             // BACKSPACE
             // remove the last character from the text entered
             case 8:
-              if (updatedState.length) {
-                updatedState = updatedState.replace(/.$/, '');
+              if (updatedTextEnteredState.length) {
+                updatedTextEnteredState = updatedTextEnteredState.replace(/.$/, '');
               }
               break;
 
             // ENTER
             // Execute command and blank out the input area
             case 13:
-              dispatch({ type: 'executeCommand', payload: { input: updatedState } });
+              dispatch({
+                type: 'updateInputHistoryState',
+                payload: { command: updatedTextEnteredState },
+              });
+
+              dispatch({ type: 'executeCommand', payload: { input: updatedTextEnteredState } });
+
               return '';
 
             // ARROW UP
@@ -111,7 +117,7 @@ export const CommandInput = memo<CommandInputProps>(
               break;
           }
 
-          return updatedState;
+          return updatedTextEnteredState;
         });
       },
       [dispatch]

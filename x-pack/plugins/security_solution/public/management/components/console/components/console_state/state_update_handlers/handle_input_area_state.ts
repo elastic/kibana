@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { v4 as uuidV4 } from 'uuid';
 import { ConsoleDataAction, ConsoleStoreReducer } from '../types';
 
 type InputAreaStateAction = ConsoleDataAction & {
-  type: 'updateInputPopoverState';
+  type: 'updateInputPopoverState' | 'updateInputHistoryState';
 };
 
 export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
@@ -27,6 +28,15 @@ export const handleInputAreaState: ConsoleStoreReducer<InputAreaStateAction> = (
         };
       }
       break;
+
+    case 'updateInputHistoryState':
+      return {
+        ...state,
+        input: {
+          ...state.input,
+          history: [...state.input.history, { id: uuidV4(), input: payload.command }],
+        },
+      };
   }
 
   return state;

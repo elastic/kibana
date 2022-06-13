@@ -38,7 +38,7 @@ export interface ConsoleDataState {
   /** state for the command input area */
   input: {
     /** A history of commands entered by the user */
-    history: []; // FIXME:PT define type for this
+    history: Array<{ id: string; input: string }>;
     /** Show the input area popover */
     showPopover: 'input-history' | undefined; // Other values will exist in the future
   };
@@ -78,6 +78,12 @@ export type ConsoleDataAction =
       type: 'updateInputPopoverState';
       payload: {
         show: ConsoleDataState['input']['showPopover'];
+      };
+    }
+  | {
+      type: 'updateInputHistoryState';
+      payload: {
+        command: string;
       };
     };
 

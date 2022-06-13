@@ -7,6 +7,7 @@
 
 import React, { memo, ReactElement, useCallback } from 'react';
 import { EuiPopover } from '@elastic/eui';
+import { CommandInputHistory } from './command_input_history';
 import { useConsoleStateDispatch } from '../../../hooks/state_selectors/use_console_state_dispatch';
 import { useWithInputShowPopover } from '../../../hooks/state_selectors/use_with_input_show_popover';
 
@@ -15,7 +16,8 @@ export interface InputAreaPopoverProps {
 }
 
 export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children }) => {
-  const isPopoverOpen = useWithInputShowPopover() !== undefined;
+  const show = useWithInputShowPopover();
+  const isPopoverOpen = show !== undefined;
   const dispatch = useConsoleStateDispatch();
 
   const handlePopoverOnClose = useCallback(() => {
@@ -32,7 +34,7 @@ export const InputAreaPopover = memo<InputAreaPopoverProps>(({ children }) => {
       display="block"
       attachToAnchor={true}
     >
-      <div>{'InputAreaPopover placeholder'}</div>
+      {show === 'input-history' && <CommandInputHistory />}
     </EuiPopover>
   );
 });
