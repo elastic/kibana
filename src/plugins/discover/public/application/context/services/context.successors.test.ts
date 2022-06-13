@@ -15,7 +15,7 @@ import { DataPublicPluginStart, Query } from '@kbn/data-plugin/public';
 import { fetchSurroundingDocs, SurrDocType } from './context';
 import { EsHitRecord } from '../../types';
 import { buildDataRecord } from '../../main/utils/fetch_all';
-import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
+import { DataTableRecord } from '../../../types';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const ANCHOR_TIMESTAMP = new Date(MS_PER_DAY).toJSON();
@@ -35,7 +35,7 @@ describe('context successors', function () {
     tieBreakerField: string,
     tieBreakerValue: number,
     size: number
-  ) => Promise<DataDocumentMsgResultDoc[]>;
+  ) => Promise<DataTableRecord[]>;
   let dataPluginMock: DataPublicPluginStart;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let mockSearchSource: any;

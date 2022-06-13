@@ -10,7 +10,7 @@ import { DataView } from '@kbn/data-views-plugin/public';
 import { cellHasFormulas, createEscapeValue } from '@kbn/data-plugin/common';
 import { formatFieldValue } from './format_value';
 import { DiscoverServices } from '../build_services';
-import { DataDocumentMsgResultDoc } from '../application/main/utils/use_saved_search';
+import { DataTableRecord } from '../types';
 
 interface ConvertedResult {
   formattedString: string;
@@ -26,7 +26,7 @@ export const convertValueToString = ({
   options,
 }: {
   rowIndex: number;
-  rows: DataDocumentMsgResultDoc[];
+  rows: DataTableRecord[];
   columnId: string;
   dataView: DataView;
   services: DiscoverServices;

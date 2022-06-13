@@ -40,7 +40,7 @@ import { getIndexPatternFieldList } from './lib/get_index_pattern_field_list';
 import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { VIEW_MODE } from '../../../../components/view_mode_toggle';
 import { DISCOVER_TOUR_STEP_ANCHOR_IDS } from '../../../../components/discover_tour';
-import { DataDocumentMsgResultDoc } from '../../utils/use_saved_search';
+import type { DataTableRecord } from '../../../../types';
 
 /**
  * Default number of available fields displayed and added on scroll
@@ -79,7 +79,7 @@ export interface DiscoverSidebarProps extends Omit<DiscoverSidebarResponsiveProp
   /**
    * hits fetched from ES, displayed in the doc table
    */
-  documents?: DataDocumentMsgResultDoc[];
+  documents?: DataTableRecord[];
   /**
    * Discover view mode
    */

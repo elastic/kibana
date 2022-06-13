@@ -10,11 +10,11 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { indexPatternMock as dataViewMock } from '../__mocks__/index_pattern';
 import { formatHit } from './format_hit';
 import { discoverServiceMock } from '../__mocks__/services';
-import { DataDocumentMsgResultDoc } from '../application/main/utils/use_saved_search';
 import { buildDataRecord } from '../application/main/utils/fetch_all';
+import { DataTableRecord } from '../types';
 
 describe('formatHit', () => {
-  let row: DataDocumentMsgResultDoc;
+  let row: DataTableRecord;
   let hit: estypes.SearchHit;
   beforeEach(() => {
     hit = {

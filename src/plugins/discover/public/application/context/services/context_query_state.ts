@@ -6,21 +6,21 @@
  * Side Public License, v 1.
  */
 
-import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
+import { DataTableRecord } from '../../../types';
 
 export interface ContextFetchState {
   /**
    * Documents listed before anchor
    */
-  predecessors: DataDocumentMsgResultDoc[];
+  predecessors: DataTableRecord[];
   /**
    * Documents after anchor
    */
-  successors: DataDocumentMsgResultDoc[];
+  successors: DataTableRecord[];
   /**
    * Anchor document
    */
-  anchor: DataDocumentMsgResultDoc;
+  anchor: DataTableRecord;
   /**
    * Anchor fetch status
    */
@@ -54,7 +54,7 @@ export interface LoadingStatusEntry {
 }
 
 export const getInitialContextQueryState = (): ContextFetchState => ({
-  anchor: {} as DataDocumentMsgResultDoc,
+  anchor: {} as DataTableRecord,
   predecessors: [],
   successors: [],
   anchorStatus: { value: LoadingStatus.UNINITIALIZED },

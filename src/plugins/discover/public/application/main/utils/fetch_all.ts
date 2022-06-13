@@ -28,7 +28,6 @@ import { AppState } from '../services/discover_state';
 import { EsHitRecord, FetchStatus } from '../../types';
 import {
   DataCharts$,
-  DataDocumentMsgResultDoc,
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
@@ -36,6 +35,7 @@ import {
 } from './use_saved_search';
 import { DiscoverServices } from '../../../build_services';
 import { getDocId } from '../../../components/discover_grid/discover_grid_document_selection';
+import type { DataTableRecord } from '../../../types';
 
 export interface FetchDeps {
   abortController: AbortController;
@@ -53,7 +53,7 @@ export function buildDataRecord(
   doc: EsHitRecord,
   dataView?: DataView,
   isAnchor?: boolean
-): DataDocumentMsgResultDoc {
+): DataTableRecord {
   return {
     id: getDocId(doc),
     raw: doc,

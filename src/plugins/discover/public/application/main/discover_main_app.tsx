@@ -9,7 +9,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/public';
 import type { SavedObject } from '@kbn/data-plugin/public';
-import { DataDocumentMsgResultDoc } from './utils/use_saved_search';
 import { DiscoverLayout } from './components/layout';
 import { setBreadcrumbsTitle } from '../../utils/breadcrumbs';
 import { addHelpMenuToAppChrome } from '../../components/help_menu/help_menu_util';
@@ -17,6 +16,7 @@ import { useDiscoverState } from './utils/use_discover_state';
 import { useUrl } from './utils/use_url';
 import { SavedSearch } from '../../services/saved_searches';
 import { useDiscoverServices } from '../../utils/use_discover_services';
+import { DataTableRecord } from '../../types';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -36,7 +36,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   const services = useDiscoverServices();
   const { chrome, docLinks, uiSettings: config, data } = services;
   const history = useHistory();
-  const [expandedDoc, setExpandedDoc] = useState<DataDocumentMsgResultDoc | undefined>(undefined);
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
   const navigateTo = useCallback(
     (path: string) => {
       history.push(path);

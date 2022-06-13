@@ -12,7 +12,7 @@ import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
 import { EsHitRecord } from '../../types';
 import { buildDataRecord } from '../../main/utils/fetch_all';
-import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
+import type { DataTableRecord } from '../../../types';
 
 interface RangeQuery {
   format: string;
@@ -37,7 +37,7 @@ export async function fetchHitsInInterval(
   maxCount: number,
   nanosValue: string,
   anchorId: string
-): Promise<DataDocumentMsgResultDoc[]> {
+): Promise<DataTableRecord[]> {
   const range: RangeQuery = {
     format: 'strict_date_optional_time',
   };

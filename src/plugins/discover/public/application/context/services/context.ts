@@ -14,7 +14,7 @@ import { fetchHitsInInterval } from '../utils/fetch_hits_in_interval';
 import { generateIntervals } from '../utils/generate_intervals';
 import { getEsQuerySearchAfter } from '../utils/get_es_query_search_after';
 import { getEsQuerySort } from '../utils/get_es_query_sort';
-import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
+import { DataTableRecord } from '../../../types';
 
 export enum SurrDocType {
   SUCCESSORS = 'successors',
@@ -42,14 +42,14 @@ const LOOKUP_OFFSETS = [0, 1, 7, 30, 365, 10000].map((days) => days * DAY_MILLIS
 export async function fetchSurroundingDocs(
   type: SurrDocType,
   indexPattern: DataView,
-  anchor: DataDocumentMsgResultDoc,
+  anchor: DataTableRecord,
   tieBreakerField: string,
   sortDir: SortDirection,
   size: number,
   filters: Filter[],
   data: DataPublicPluginStart,
   useNewFieldsApi?: boolean
-): Promise<DataDocumentMsgResultDoc[]> {
+): Promise<DataTableRecord[]> {
   if (typeof anchor !== 'object' || anchor === null || !size) {
     return [];
   }
@@ -66,7 +66,7 @@ export async function fetchSurroundingDocs(
     nanos !== '' ? convertIsoToMillis(anchorRaw.fields?.[timeField][0]) : anchorRaw.sort?.[0];
 
   const intervals = generateIntervals(LOOKUP_OFFSETS, timeValueMillis as number, type, sortDir);
-  let documents: DataDocumentMsgResultDoc[] = [];
+  let documents: DataTableRecord[] = [];
 
   for (const interval of intervals) {
     const remainingSize = size - documents.length;

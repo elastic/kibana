@@ -9,11 +9,11 @@
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 // @ts-expect-error
 import { fieldCalculator } from './field_calculator';
-import { DataDocumentMsgResultDoc } from '../../../utils/use_saved_search';
+import { DataTableRecord } from '../../../../../types';
 
 export function getDetails(
   field: DataViewField,
-  hits: DataDocumentMsgResultDoc[] | undefined,
+  hits: DataTableRecord[] | undefined,
   columns: string[],
   indexPattern?: DataView
 ) {

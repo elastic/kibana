@@ -7,21 +7,22 @@
  */
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
+import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import { DiscoverServices } from '../../../build_services';
 import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import { GetStateReturn } from '../services/discover_state';
 import { validateTimeRange } from './validate_time_range';
 import { Chart } from '../components/chart/point_series';
 import { useSingleton } from './use_singleton';
-import { EsHitRecord, FetchStatus } from '../../types';
+import { FetchStatus } from '../../types';
 import { fetchAll } from './fetch_all';
 import { useBehaviorSubject } from './use_behavior_subject';
 import { sendResetMsg } from './use_saved_search_messages';
 import { getFetch$ } from './get_fetch_observable';
 import { SavedSearch } from '../../../services/saved_searches';
+import type { DataTableRecord } from '../../../types';
 
 export interface SavedSearchData {
   main$: DataMain$;
@@ -63,15 +64,8 @@ export interface DataMainMsg extends DataMsg {
   foundDocuments?: boolean;
 }
 
-export interface DataDocumentMsgResultDoc {
-  id: string;
-  raw: EsHitRecord;
-  flattened: Record<string, unknown>;
-  isAnchor?: boolean;
-}
-
 export interface DataDocumentsMsg extends DataMsg {
-  result?: DataDocumentMsgResultDoc[];
+  result?: DataTableRecord[];
 }
 
 export interface DataTotalHitsMsg extends DataMsg {

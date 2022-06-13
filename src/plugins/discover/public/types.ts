@@ -7,6 +7,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { EsHitRecord } from './application/types';
 
 export type ElasticSearchHit<T = unknown> = estypes.SearchHit<T>;
 
@@ -17,3 +18,10 @@ export type ValueToStringConverter = (
   columnId: string,
   options?: { disableMultiline?: boolean }
 ) => { formattedString: string; withFormula: boolean };
+
+export interface DataTableRecord {
+  id: string;
+  raw: EsHitRecord;
+  flattened: Record<string, unknown>;
+  isAnchor?: boolean;
+}

@@ -167,7 +167,7 @@ describe('context app', function () {
         { '@timestamp': SortDirection.desc },
         { _doc: SortDirection.desc },
       ]).then((anchorDocument) => {
-        expect(anchorDocument).toHaveProperty('property1', 'value1');
+        expect(anchorDocument).toHaveProperty('raw.property1', 'value1');
         expect(anchorDocument).toHaveProperty('isAnchor', true);
       });
     });

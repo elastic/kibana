@@ -17,11 +17,10 @@ import { TableCell } from './table_row/table_cell';
 import { formatRow, formatTopLevelObject } from '../lib/row_formatter';
 import { useNavigationProps } from '../../../utils/use_navigation_props';
 import { DocViewFilterFn } from '../../../services/doc_views/doc_views_types';
-import { ElasticSearchHit } from '../../../types';
+import { DataTableRecord, ElasticSearchHit } from '../../../types';
 import { TableRowDetails } from './table_row_details';
 import { useDiscoverServices } from '../../../utils/use_discover_services';
 import { DOC_HIDE_TIME_COLUMN_SETTING, MAX_DOC_FIELDS_DISPLAYED } from '../../../../common';
-import { DataDocumentMsgResultDoc } from '../../../application/main/utils/use_saved_search';
 
 export type DocTableRow = ElasticSearchHit & {
   isAnchor?: boolean;
@@ -30,7 +29,7 @@ export type DocTableRow = ElasticSearchHit & {
 export interface TableRowProps {
   columns: string[];
   filter: DocViewFilterFn;
-  row: DataDocumentMsgResultDoc;
+  row: DataTableRecord;
   indexPattern: DataView;
   useNewFieldsApi: boolean;
   fieldsToShow: string[];

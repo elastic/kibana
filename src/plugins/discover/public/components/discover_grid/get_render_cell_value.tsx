@@ -26,17 +26,16 @@ import { JsonCodeEditor } from '../json_code_editor/json_code_editor';
 import { defaultMonacoEditorWidth } from './constants';
 import { formatFieldValue } from '../../utils/format_value';
 import { formatHit } from '../../utils/format_hit';
-import { ElasticSearchHit } from '../../types';
+import { DataTableRecord, ElasticSearchHit } from '../../types';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
-import { DataDocumentMsgResultDoc } from '../../application/main/utils/use_saved_search';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';
 
 export const getRenderCellValueFn =
   (
     dataView: DataView,
-    rows: DataDocumentMsgResultDoc[] | undefined,
+    rows: DataTableRecord[] | undefined,
     useNewFieldsApi: boolean,
     fieldsToShow: string[],
     maxDocFieldsDisplayed: number,
@@ -167,7 +166,7 @@ function renderPopoverContent({
   fieldFormats,
   closePopover,
 }: {
-  row: DataDocumentMsgResultDoc;
+  row: DataTableRecord;
   field: DataViewField | undefined;
   columnId: string;
   dataView: DataView;

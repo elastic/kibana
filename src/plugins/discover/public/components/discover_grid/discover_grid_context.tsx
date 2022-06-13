@@ -9,13 +9,12 @@
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
-import type { ValueToStringConverter } from '../../types';
-import { DataDocumentMsgResultDoc } from '../../application/main/utils/use_saved_search';
+import type { DataTableRecord, ValueToStringConverter } from '../../types';
 
 export interface GridContext {
-  expanded?: DataDocumentMsgResultDoc | undefined;
-  setExpanded: (hit?: DataDocumentMsgResultDoc) => void;
-  rows: DataDocumentMsgResultDoc[];
+  expanded?: DataTableRecord | undefined;
+  setExpanded: (hit?: DataTableRecord) => void;
+  rows: DataTableRecord[];
   onFilter: DocViewFilterFn;
   indexPattern: DataView;
   isDarkMode: boolean;

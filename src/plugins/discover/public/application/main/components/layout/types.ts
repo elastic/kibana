@@ -10,12 +10,9 @@ import type { Query, TimeRange, SavedObject } from '@kbn/data-plugin/public';
 import type { DataView, DataViewAttributes } from '@kbn/data-views-plugin/public';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin';
+import { DataTableRecord } from '../../../../types';
 import { AppState, GetStateReturn } from '../../services/discover_state';
-import {
-  DataDocumentMsgResultDoc,
-  DataRefetch$,
-  SavedSearchData,
-} from '../../utils/use_saved_search';
+import { DataRefetch$, SavedSearchData } from '../../utils/use_saved_search';
 import { SavedSearch } from '../../../../services/saved_searches';
 
 export interface DiscoverLayoutProps {
@@ -26,8 +23,8 @@ export interface DiscoverLayoutProps {
   onChangeIndexPattern: (id: string) => void;
   onUpdateQuery: (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => void;
   resetSavedSearch: () => void;
-  expandedDoc?: DataDocumentMsgResultDoc;
-  setExpandedDoc: (doc?: DataDocumentMsgResultDoc) => void;
+  expandedDoc?: DataTableRecord;
+  setExpandedDoc: (doc?: DataTableRecord) => void;
   savedSearch: SavedSearch;
   savedSearchData$: SavedSearchData;
   savedSearchRefetch$: DataRefetch$;

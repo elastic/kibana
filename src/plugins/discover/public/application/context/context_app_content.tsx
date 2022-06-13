@@ -22,7 +22,7 @@ import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { SortPairArr } from '../../components/doc_table/lib/get_sort';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import { DataDocumentMsgResultDoc } from '../main/utils/use_saved_search';
+import type { DataTableRecord } from '../../types';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -32,9 +32,9 @@ export interface ContextAppContentProps {
   indexPattern: DataView;
   predecessorCount: number;
   successorCount: number;
-  rows: DataDocumentMsgResultDoc[];
-  predecessors: DataDocumentMsgResultDoc[];
-  successors: DataDocumentMsgResultDoc[];
+  rows: DataTableRecord[];
+  predecessors: DataTableRecord[];
+  successors: DataTableRecord[];
   anchorStatus: LoadingStatus;
   predecessorsStatus: LoadingStatus;
   successorsStatus: LoadingStatus;
@@ -75,7 +75,7 @@ export function ContextAppContent({
 }: ContextAppContentProps) {
   const { uiSettings: config } = useDiscoverServices();
 
-  const [expandedDoc, setExpandedDoc] = useState<DataDocumentMsgResultDoc | undefined>();
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
   const arePredecessorsLoading =

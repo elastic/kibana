@@ -17,13 +17,13 @@ import { TableRow } from './components/table_row';
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import { DataDocumentMsgResultDoc } from '../../application/main/utils/use_saved_search';
+import type { DataTableRecord } from '../../types';
 
 export interface DocTableProps {
   /**
    * Rows of classic table
    */
-  rows: DataDocumentMsgResultDoc[];
+  rows: DataTableRecord[];
   /**
    * Columns of classic table
    */
@@ -80,8 +80,8 @@ export interface DocTableProps {
 
 export interface DocTableRenderProps {
   columnLength: number;
-  rows: DataDocumentMsgResultDoc[];
-  renderRows: (row: DataDocumentMsgResultDoc[]) => JSX.Element[];
+  rows: DataTableRecord[];
+  renderRows: (row: DataTableRecord[]) => JSX.Element[];
   renderHeader: () => JSX.Element;
   onSkipBottomButtonClick: () => void;
 }
@@ -156,7 +156,7 @@ export const DocTableWrapper = forwardRef(
     );
 
     const renderRows = useCallback(
-      (rowsToRender: DataDocumentMsgResultDoc[]) => {
+      (rowsToRender: DataTableRecord[]) => {
         return rowsToRender.map((current, index) => (
           <TableRow
             key={`${current.raw._index}${current.raw._id}${current.raw._score}${current.raw._version}${current.raw._routing}`}

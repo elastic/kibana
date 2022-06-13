@@ -29,21 +29,21 @@ import { DocViewer } from '../../services/doc_views/components/doc_viewer/doc_vi
 import { DocViewFilterFn } from '../../services/doc_views/doc_views_types';
 import { useNavigationProps } from '../../utils/use_navigation_props';
 import { useDiscoverServices } from '../../utils/use_discover_services';
-import { DataDocumentMsgResultDoc } from '../../application/main/utils/use_saved_search';
+import { DataTableRecord } from '../../types';
 
 export interface DiscoverGridFlyoutProps {
   columns: string[];
-  hit: DataDocumentMsgResultDoc;
-  hits?: DataDocumentMsgResultDoc[];
+  hit: DataTableRecord;
+  hits?: DataTableRecord[];
   indexPattern: DataView;
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter: DocViewFilterFn;
   onRemoveColumn: (column: string) => void;
-  setExpandedDoc: (doc: DataDocumentMsgResultDoc) => void;
+  setExpandedDoc: (doc: DataTableRecord) => void;
 }
 
-function getIndexByDocId(hits: DataDocumentMsgResultDoc[], id: string) {
+function getIndexByDocId(hits: DataTableRecord[], id: string) {
   return hits.findIndex((h) => {
     return h.id === id;
   });

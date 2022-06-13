@@ -20,8 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { DiscoverGridContext } from './discover_grid_context';
-import { ElasticSearchHit } from '../../types';
-import { DataDocumentMsgResultDoc } from '../../application/main/utils/use_saved_search';
+import type { DataTableRecord, ElasticSearchHit } from '../../types';
 
 /**
  * Returning a generated id of a given ES document, since `_id` can be the same
@@ -80,7 +79,7 @@ export function DiscoverGridDocumentToolbarBtn({
   setSelectedDocs,
 }: {
   isFilterActive: boolean;
-  rows: DataDocumentMsgResultDoc[];
+  rows: DataTableRecord[];
   selectedDocs: string[];
   setIsFilterActive: (value: boolean) => void;
   setSelectedDocs: (value: string[]) => void;

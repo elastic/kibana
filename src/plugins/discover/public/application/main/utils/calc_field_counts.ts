@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 import { DataView } from '@kbn/data-views-plugin/public';
-import { DataDocumentMsgResultDoc } from './use_saved_search';
+import { DataTableRecord } from '../../../types';
 
 /**
  * This function is calculating stats of the available fields, for usage in sidebar and sharing
  * Note that this values aren't displayed, but used for internal calculations
  */
-export function calcFieldCounts(rows?: DataDocumentMsgResultDoc[], indexPattern?: DataView) {
+export function calcFieldCounts(rows?: DataTableRecord[], indexPattern?: DataView) {
   const counts: Record<string, number> = {};
   if (!rows || !indexPattern) {
     return {};

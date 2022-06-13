@@ -5,9 +5,9 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { EsQuerySearchAfter } from '@kbn/data-plugin/common';
+import type { EsQuerySearchAfter } from '@kbn/data-plugin/common';
 import { SurrDocType } from '../services/context';
-import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
+import type { DataTableRecord } from '../../../types';
 
 /**
  * Get the searchAfter query value for elasticsearch
@@ -17,9 +17,9 @@ import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
  */
 export function getEsQuerySearchAfter(
   type: SurrDocType,
-  documents: DataDocumentMsgResultDoc[],
+  documents: DataTableRecord[],
   timeFieldName: string,
-  anchor: DataDocumentMsgResultDoc,
+  anchor: DataTableRecord,
   nanoSeconds: string,
   useNewFieldsApi?: boolean
 ): EsQuerySearchAfter {

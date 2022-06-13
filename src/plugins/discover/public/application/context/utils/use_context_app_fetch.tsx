@@ -22,7 +22,7 @@ import {
 import { AppState } from '../services/context_state';
 import { getFirstSortableField } from './sorting';
 import { useDiscoverServices } from '../../../utils/use_discover_services';
-import { DataDocumentMsgResultDoc } from '../../main/utils/use_saved_search';
+import type { DataTableRecord } from '../../../types';
 
 const createError = (statusKey: string, reason: FailureReason, error?: Error) => ({
   [statusKey]: { value: LoadingStatus.FAILED, error, reason },
@@ -117,7 +117,7 @@ export function useContextAppFetch({
   ]);
 
   const fetchSurroundingRows = useCallback(
-    async (type: SurrDocType, fetchedAnchor?: DataDocumentMsgResultDoc) => {
+    async (type: SurrDocType, fetchedAnchor?: DataTableRecord) => {
       const filters = filterManager.getFilters();
 
       const count =
@@ -167,7 +167,7 @@ export function useContextAppFetch({
   );
 
   const fetchContextRows = useCallback(
-    (anchor?: DataDocumentMsgResultDoc) =>
+    (anchor?: DataTableRecord) =>
       Promise.allSettled([
         fetchSurroundingRows(SurrDocType.PREDECESSORS, anchor),
         fetchSurroundingRows(SurrDocType.SUCCESSORS, anchor),

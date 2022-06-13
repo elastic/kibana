@@ -27,11 +27,7 @@ import {
 } from '../../../../../common';
 import { useColumns } from '../../../../utils/use_data_grid_columns';
 import { SavedSearch } from '../../../../services/saved_searches';
-import {
-  DataDocumentsMsg,
-  DataDocuments$,
-  DataDocumentMsgResultDoc,
-} from '../../utils/use_saved_search';
+import { DataDocumentsMsg, DataDocuments$ } from '../../utils/use_saved_search';
 import { AppState, GetStateReturn } from '../../services/discover_state';
 import { useDataState } from '../../utils/use_data_state';
 import { DocTableInfinite } from '../../../../components/doc_table/doc_table_infinite';
@@ -39,6 +35,7 @@ import { SortPairArr } from '../../../../components/doc_table/lib/get_sort';
 import { DocumentExplorerCallout } from '../document_explorer_callout';
 import { DocumentExplorerUpdateCallout } from '../document_explorer_callout/document_explorer_update_callout';
 import { DiscoverTourProvider } from '../../../../components/discover_tour';
+import { DataTableRecord } from '../../../../types';
 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DataGridMemoized = React.memo(DiscoverGrid);
@@ -54,12 +51,12 @@ function DiscoverDocumentsComponent({
   stateContainer,
 }: {
   documents$: DataDocuments$;
-  expandedDoc?: DataDocumentMsgResultDoc;
+  expandedDoc?: DataTableRecord;
   indexPattern: DataView;
   navigateTo: (url: string) => void;
   onAddFilter: DocViewFilterFn;
   savedSearch: SavedSearch;
-  setExpandedDoc: (doc?: DataDocumentMsgResultDoc) => void;
+  setExpandedDoc: (doc?: DataTableRecord) => void;
   state: AppState;
   stateContainer: GetStateReturn;
 }) {

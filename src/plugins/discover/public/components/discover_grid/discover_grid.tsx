@@ -47,11 +47,10 @@ import {
 import { DiscoverGridDocumentToolbarBtn } from './discover_grid_document_selection';
 import { SortPairArr } from '../doc_table/lib/get_sort';
 import { getFieldsToShow } from '../../utils/get_fields_to_show';
-import type { ValueToStringConverter } from '../../types';
+import type { DataTableRecord, ValueToStringConverter } from '../../types';
 import { useRowHeightsOptions } from '../../utils/use_row_heights_options';
 import { useDiscoverServices } from '../../utils/use_discover_services';
 import { convertValueToString } from '../../utils/convert_value_to_string';
-import { DataDocumentMsgResultDoc } from '../../application/main/utils/use_saved_search';
 
 interface SortObj {
   id: string;
@@ -74,7 +73,7 @@ export interface DiscoverGridProps {
   /**
    * If set, the given document is displayed in a flyout
    */
-  expandedDoc?: DataDocumentMsgResultDoc;
+  expandedDoc?: DataTableRecord;
   /**
    * The used index pattern
    */
@@ -111,7 +110,7 @@ export interface DiscoverGridProps {
   /**
    * Array of documents provided by Elasticsearch
    */
-  rows?: DataDocumentMsgResultDoc[];
+  rows?: DataTableRecord[];
   /**
    * The max size of the documents returned by Elasticsearch
    */
@@ -119,7 +118,7 @@ export interface DiscoverGridProps {
   /**
    * Function to set the expanded document, which is displayed in a flyout
    */
-  setExpandedDoc: (doc?: DataDocumentMsgResultDoc) => void;
+  setExpandedDoc: (doc?: DataTableRecord) => void;
   /**
    * Grid display settings persisted in Elasticsearch (e.g. column width)
    */
