@@ -129,21 +129,27 @@ export function ObservabilityPageTemplate({
   return (
     <SharedUxServicesProvider {...sharedUXServices}>
       <ObservabilityTour navigateToApp={navigateToApp} isPageDataLoaded={isPageDataLoaded}>
-        <KibanaPageTemplate
-          restrictWidth={false}
-          {...pageTemplateProps}
-          solutionNav={
-            showSolutionNav
-              ? {
-                  icon: 'logoObservability',
-                  items: sideNavItems,
-                  name: sideNavTitle,
-                }
-              : undefined
-          }
-        >
-          {children}
-        </KibanaPageTemplate>
+        {({ isTourVisible }) => {
+          return (
+            <KibanaPageTemplate
+              restrictWidth={false}
+              {...pageTemplateProps}
+              solutionNav={
+                showSolutionNav
+                  ? {
+                      icon: 'logoObservability',
+                      items: sideNavItems,
+                      name: sideNavTitle,
+                      // Only false if tour is active
+                      canBeCollapsed: isTourVisible === false,
+                    }
+                  : undefined
+              }
+            >
+              {children}
+            </KibanaPageTemplate>
+          );
+        }}
       </ObservabilityTour>
     </SharedUxServicesProvider>
   );

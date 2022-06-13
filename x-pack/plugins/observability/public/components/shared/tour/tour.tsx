@@ -247,7 +247,7 @@ export function ObservabilityTour({
   navigateToApp,
   isPageDataLoaded,
 }: {
-  children: ReactNode;
+  children: ({ isTourVisible }: { isTourVisible: boolean }) => ReactNode;
   navigateToApp: ApplicationStart['navigateToApp'];
   isPageDataLoaded: boolean;
 }) {
@@ -273,7 +273,7 @@ export function ObservabilityTour({
 
   // We must wait for the page data to load in order for the tour to render correctly
   // The tour should also not render on small devices
-  const showTour = isTourActive && isPageDataLoaded && isSmallBreakpoint === false;
+  const isTourVisible = isTourActive && isPageDataLoaded && isSmallBreakpoint === false;
 
   useEffect(() => {
     localStorage.setItem(observabilityTourStorageKey, JSON.stringify({ isTourActive, activeStep }));
@@ -290,8 +290,8 @@ export function ObservabilityTour({
 
   return (
     <>
-      {children}
-      {showTour && (
+      {children({ isTourVisible })}
+      {isTourVisible && (
         <>
           {getSteps({ activeStep, incrementStep, endTour })}
           {showOverlay && (
