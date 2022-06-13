@@ -16,7 +16,9 @@ export const MonitorType = ({ monitorType }: { monitorType: FormMonitorType }) =
   return (
     <>
       <EuiText color="subdued" size="s">
-        Monitor type
+        {i18n.translate('xpack.synthetics.monitorConfig.monitorType.label', {
+          defaultMessage: 'Monitor type',
+        })}
       </EuiText>
       <EuiText size="s">
         <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -28,7 +30,7 @@ export const MonitorType = ({ monitorType }: { monitorType: FormMonitorType }) =
               <EuiBetaBadge
                 label="Beta"
                 tooltipContent={i18n.translate(
-                  'xpack.synthetics.monitorManagement.monitorType.betaLabel',
+                  'xpack.synthetics.monitorConfig.monitorType.betaLabel',
                   {
                     defaultMessage:
                       'This functionality is in beta and is subject to change. The design and code is less mature than official generally available features and is being provided as-is with no warranties. Beta features are not subject to the support service level agreement of official generally available features.',

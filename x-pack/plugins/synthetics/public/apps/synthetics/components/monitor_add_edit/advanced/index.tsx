@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiAccordion, EuiDescribedFormGroup, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { FIELD_CONFIG } from '../form/config';
@@ -13,12 +14,20 @@ import { Field } from '../form/field';
 import { ConfigKey, FormMonitorType } from '../types';
 
 export const AdvancedConfig = () => {
-  const { watch } = useFormContext();
+  const {
+    watch,
+    formState: { errors },
+  } = useFormContext();
   const [type]: [FormMonitorType] = watch([ConfigKey.FORM_MONITOR_TYPE]);
 
   return FIELD_CONFIG[type]?.advanced ? (
     <EuiPanel hasBorder>
-      <EuiAccordion id="syntheticsAdvancedPanel" buttonContent="Advanced options">
+      <EuiAccordion
+        id="syntheticsAdvancedPanel"
+        buttonContent={i18n.translate('xpack.synthetics.monitorConfig.advancedOptions.title', {
+          defaultMessage: 'Advanced options',
+        })}
+      >
         <EuiSpacer />
         {FIELD_CONFIG[type].advanced?.map((configGroup) => {
           return (
@@ -29,7 +38,9 @@ export const AdvancedConfig = () => {
               key={configGroup.title}
             >
               {configGroup.components.map((field) => {
-                return <Field {...field} key={field.fieldKey} />;
+                return (
+                  <Field {...field} key={field.fieldKey} fieldError={errors[field.fieldKey]} />
+                );
               })}
             </EuiDescribedFormGroup>
           );

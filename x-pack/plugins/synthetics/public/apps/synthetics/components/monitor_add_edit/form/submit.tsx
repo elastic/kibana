@@ -23,7 +23,7 @@ export const ActionBar = () => {
   const history = useHistory();
   const editRouteMatch = useRouteMatch({ path: MONITOR_EDIT_ROUTE });
   const isEdit = editRouteMatch?.isExact;
-  const { handleSubmit, getValues } = useFormContext();
+  const { handleSubmit } = useFormContext();
 
   const [monitorData, setMonitorData] = useState<SyntheticsMonitor | undefined>(undefined);
 
@@ -52,7 +52,6 @@ export const ActionBar = () => {
   }, [data, status, monitorId, loading]);
 
   const formSubmitter = (formData: Record<string, any>) => {
-    console.warn(format(formData));
     setMonitorData(format(formData) as SyntheticsMonitor);
   };
 
@@ -114,7 +113,3 @@ const MONITOR_FAILURE_LABEL = i18n.translate(
     defaultMessage: 'Monitor was unable to be saved. Please try again later.',
   }
 );
-
-const TEST_NOW_DESCRIPTION = i18n.translate('xpack.synthetics.testRun.description', {
-  defaultMessage: 'Test your monitor and verify the results before saving',
-});

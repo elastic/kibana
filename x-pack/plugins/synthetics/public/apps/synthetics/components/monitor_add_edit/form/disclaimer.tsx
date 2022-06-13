@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { ConfigKey, MonitorServiceLocation } from '../types';
@@ -21,9 +22,10 @@ export const Disclaimer: React.FC = () => {
       <EuiSpacer size="l" />
       <EuiText size="xs" color="subdued">
         <p>
-          You consent to the transfer of testing instructions and the output of such instructions
-          (including any data shown therein) to your selected testing location, on infrastructure
-          provided by a cloud service provider chosen by Elastic.
+          {i18n.translate('xpack.synthetics.monitorConfig.locations.disclaimer', {
+            defaultMessage:
+              'You consent to the transfer of testing instructions and the output of such instructions (including any data shown therein) to your selected testing location, on infrastructure provided by a cloud service provider chosen by Elastic.',
+          })}
         </p>
       </EuiText>
     </>
