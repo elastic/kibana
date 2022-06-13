@@ -187,7 +187,7 @@ export interface DataViewsServicePublicMethods {
   /**
    * Get default data view, if it doesn't exist, choose and save new default data view and return it.
    */
-  getDefaultDataView: () => Promise<DataView | null>;
+  getDefaultDataView: (update: boolean) => Promise<DataView | null>;
   /**
    * Get fields for data view
    * @param dataView - Data view instance or spec
@@ -947,7 +947,7 @@ export class DataViewsService {
    *
    * @returns default data view
    */
-  async getDefaultDataView(): Promise<DataView | null> {
+  async getDefaultDataView(update: true): Promise<DataView | null> {
     const patterns = await this.getIdsWithTitle();
     let defaultId: string | undefined = await this.config.get('defaultIndex');
     const exists = defaultId ? patterns.some((pattern) => pattern.id === defaultId) : false;
@@ -967,7 +967,9 @@ export class DataViewsService {
       );
 
       defaultId = userDataViews[0]?.id ?? patterns[0].id;
-      await this.config.set('defaultIndex', defaultId);
+      if (update) {
+        await this.config.set('defaultIndex', defaultId);
+      }
     }
 
     if (defaultId) {
