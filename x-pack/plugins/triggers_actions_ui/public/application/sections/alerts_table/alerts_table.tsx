@@ -193,24 +193,26 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           />
         )}
       </Suspense>
-      <EuiDataGrid
-        aria-label="Alerts table"
-        data-test-subj="alertsTable"
-        columns={props.columns}
-        columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
-        trailingControlColumns={props.trailingControlColumns}
-        leadingControlColumns={leadingControlColumns}
-        rowCount={alertsCount}
-        renderCellValue={handleRenderCellValue}
-        gridStyle={{ ...GridStyles, rowClasses }}
-        sorting={{ columns: sortingColumns, onSort }}
-        pagination={{
-          ...pagination,
-          pageSizeOptions: props.pageSizeOptions,
-          onChangeItemsPerPage: onChangePageSize,
-          onChangePage: onChangePageIndex,
-        }}
-      />
+      {alertsCount >= 0 && (
+        <EuiDataGrid
+          aria-label="Alerts table"
+          data-test-subj="alertsTable"
+          columns={props.columns}
+          columnVisibility={{ visibleColumns, setVisibleColumns: onChangeVisibleColumns }}
+          trailingControlColumns={props.trailingControlColumns}
+          leadingControlColumns={leadingControlColumns}
+          rowCount={alertsCount}
+          renderCellValue={handleRenderCellValue}
+          gridStyle={{ ...GridStyles, rowClasses }}
+          sorting={{ columns: sortingColumns, onSort }}
+          pagination={{
+            ...pagination,
+            pageSizeOptions: props.pageSizeOptions,
+            onChangeItemsPerPage: onChangePageSize,
+            onChangePage: onChangePageIndex,
+          }}
+        />
+      )}
     </section>
   );
 };
