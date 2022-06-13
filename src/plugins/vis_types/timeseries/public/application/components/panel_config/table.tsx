@@ -180,7 +180,7 @@ export class TablePanelConfig extends Component<
                   >
                     <EuiFieldNumber
                       onChange={this.handleNumberChange('pivot_rows')}
-                      value={model.pivot_rows === undefined ? Number(model.pivot_rows) : ''}
+                      value={model.pivot_rows !== undefined ? Number(model.pivot_rows) : ''}
                       placeholder="10"
                     />
                   </EuiFormRow>
