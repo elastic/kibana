@@ -31,9 +31,7 @@ export const getWatcher = async (watch, id, client, log, common, tryForTime) => 
       expect(getWatchResponse.body._id).to.eql(id);
       expect(getWatchResponse.body._version).to.be.above(1);
       log.debug(`\n getWatchResponse.body._version: ${getWatchResponse.body._version}`);
-      expect(getWatchResponse.body.status.actions.email_admin.last_execution.successful).to.eql(
-        true
-      );
+      expect(getWatchResponse.body.status.execution_state).to.eql('throttled');
       expect(getWatchResponse.body.status.actions.email_admin.last_execution.successful).to.eql(
         true
       );
