@@ -169,7 +169,7 @@ export const TimeSeriesExplorerUrlStateManager: FC<TimeSeriesExplorerUrlStateMan
   const selectedJob = selectedJobId !== undefined ? mlJobService.getJob(selectedJobId) : undefined;
   const timeSeriesJobs = createTimeSeriesJobData(mlJobService.jobs);
 
-  const viewableDetector = selectedJob ? getViewableDetectors(selectedJob)[0].index : 0;
+  const viewableDetector = selectedJob ? getViewableDetectors(selectedJob)[0]?.index ?? 0 : 0;
 
   // Next we get globalState and appState information to pass it on as props later.
   // If a job change is going on, we fall back to defaults (as if appState was already cleared),
