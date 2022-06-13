@@ -275,7 +275,7 @@ For detailed information about the sharing options, refer to <<reporting-getting
 
 [float]
 [[alert-from-Discover]]
-=== Create alert rules
+=== Generate alerts
 
 To create a rule from *Discover*,
 click *Alerts* in the toolbar. Then build the data view, query,
