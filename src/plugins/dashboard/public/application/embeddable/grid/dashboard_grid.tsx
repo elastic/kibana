@@ -26,6 +26,12 @@ import { withKibana } from '../../../services/kibana_react';
 import { DashboardContainer, DashboardReactContextValue } from '../dashboard_container';
 import { DashboardGridItem } from './dashboard_grid_item';
 
+export interface DashboardDataLoadedEvent extends Record<string, unknown> {
+  timeTookMs: number;
+  numOfPanels: number;
+  status: string,
+};
+
 let lastValidGridSize = 0;
 
 /**
@@ -105,6 +111,7 @@ const ResponsiveSizedGrid = sizeMe(config)(ResponsiveGrid);
 export interface DashboardGridProps extends ReactIntl.InjectedIntlProps {
   kibana: DashboardReactContextValue;
   container: DashboardContainer;
+  onDataLoaded?: (data: DashboardDataLoadedEvent) => void;
 }
 
 interface State {
@@ -243,12 +250,21 @@ class DashboardGridUi extends React.Component<DashboardGridProps, State> {
     });
 
     const panelIds = [];
-    const startTime = new Date().getTime();
+    const loadStartTime = performance.now();
+    let loadStatus: string = 'ok';
+
 
     const onPanelStatusChange = (info: EmbeddableLoadedEvent) => {
       panelIds.push(info);
-      if (panelIds.length === panelsInOrder.length) {
-        console.log(`Took ${new Date().getTime() - startTime} in total`);
+      if (info.error !== undefined) {
+        loadStatus = 'error'
+      }
+      if (panelIds.length === panelsInOrder.length && this.props.onDataLoaded) {
+        this.props.onDataLoaded({
+         timeTookMs: performance.now() - loadStartTime,
+         numOfPanels: panelIds.length,
+         status: loadStatus,
+        })
       }
     };
 

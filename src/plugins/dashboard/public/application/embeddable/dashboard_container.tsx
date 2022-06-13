@@ -15,7 +15,7 @@ import { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import { UiActionsStart } from '../../services/ui_actions';
-import { RefreshInterval, TimeRange, Query, Filter } from '../../services/data';
+import { RefreshInterval, Query } from '../../services/data';
 import {
   ViewMode,
   Container,
@@ -47,6 +47,8 @@ import {
   combineDashboardFiltersWithControlGroupFilters,
   syncDashboardControlGroup,
 } from '../lib/dashboard_control_group';
+import { DashboardDataLoadedEvent } from './grid/dashboard_grid';
+import { Filter, TimeRange } from '@kbn/es-query';
 
 export interface DashboardContainerServices {
   ExitFullScreenButton: React.ComponentType<any>;
@@ -62,6 +64,7 @@ export interface DashboardContainerServices {
   uiActions: UiActionsStart;
   theme: CoreStart['theme'];
   http: CoreStart['http'];
+  analytics: CoreStart['analytics'];
 }
 
 interface IndexSignature {
@@ -151,6 +154,14 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
         }
       );
     }
+  }
+
+  private onDataLoaded(data: DashboardDataLoadedEvent) {
+    console.log(`${this.id} took ${data.timeTookMs} in total`);
+    this.services.analytics.reportEvent('dashboard-data-loaded', {
+      ...data,
+      id: this.id,
+    });
   }
 
   protected createNewPanelState<
@@ -289,6 +300,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
                 controlsEnabled={controlsEnabled}
                 container={this}
                 controlGroup={this.controlGroup}
+                onDataLoaded={this.onDataLoaded.bind(this)}
               />
             </this.services.presentationUtil.ContextProvider>
           </KibanaThemeProvider>
