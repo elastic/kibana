@@ -275,6 +275,10 @@ export const createLifecycleExecutor =
           event,
         ]),
       });
+    } else {
+      logger.debug(
+        `[Rule Registry] Not indexing ${allEventsToIndex.length} alerts because writing has been disabled.`
+      );
     }
 
     const nextTrackedAlerts = Object.fromEntries(

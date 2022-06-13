@@ -202,7 +202,7 @@ describe('RuleDataClient', () => {
         );
       });
 
-      test('logs error, returns undefined and turns off writing if initialization error', async () => {
+      test('logs initialization error and turns off writing if initialization error, throws error when calling bulk', async () => {
         const ruleDataClient = new RuleDataClient(
           getRuleDataClientOptions({
             waitUntilReadyForWriting: Promise.resolve(
@@ -218,7 +218,6 @@ describe('RuleDataClient', () => {
         // Adding this delay in the tests to ensure this does not pop up again.
         await delay();
 
-        expect(await writer.bulk({})).toEqual(undefined);
         expect(mockLogger.error).toHaveBeenNthCalledWith(
           1,
           new RuleDataWriterInitializationError(
@@ -232,9 +231,13 @@ describe('RuleDataClient', () => {
           `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
         );
         expect(ruleDataClient.isWriteEnabled()).toBe(false);
+
+        await expect(() => writer.bulk({})).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Error initializing index resources for registration context observability.apm. Check logs for details."`
+        );
       });
 
-      test('logs error, returns undefined and turns off writing if resource installation error', async () => {
+      test('logs error and turns off writing if resource installation error, throws error when calling bulk', async () => {
         const error = new Error('bad resource installation');
         mockResourceInstaller.installAndUpdateNamespaceLevelResources.mockRejectedValueOnce(error);
         const ruleDataClient = new RuleDataClient(getRuleDataClientOptions({}));
@@ -246,7 +249,6 @@ describe('RuleDataClient', () => {
         // Adding this delay in the tests to ensure this does not pop up again.
         await delay();
 
-        expect(await writer.bulk({})).toEqual(undefined);
         expect(mockLogger.error).toHaveBeenNthCalledWith(
           1,
           new RuleDataWriterInitializationError('namespace', 'observability.apm', error)
@@ -256,6 +258,10 @@ describe('RuleDataClient', () => {
           `The writer for the Rule Data Client for the observability.apm registration context was not initialized properly, bulk() cannot continue, and writing will be disabled.`
         );
         expect(ruleDataClient.isWriteEnabled()).toBe(false);
+
+        await expect(() => writer.bulk({})).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Error initializing index resources for registration context observability.apm. Check logs for details."`
+        );
       });
 
       test('logs error and returns undefined if bulk function throws error', async () => {

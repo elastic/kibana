@@ -147,8 +147,12 @@ export class RuleDataClient implements IRuleDataClient {
   }
 
   private initializeWriter(namespace: string): IRuleDataWriter {
+    let hasInitializationError: boolean = false;
     const isWriteEnabled = () => this.writeEnabled;
-    const turnOffWrite = () => (this.writeEnabled = false);
+    const turnOffWrite = () => {
+      this.writeEnabled = false;
+      hasInitializationError = true;
+    };
 
     const { indexInfo, resourceInstaller } = this.options;
     const alias = indexInfo.getPrimaryAlias(namespace);
@@ -196,9 +200,9 @@ export class RuleDataClient implements IRuleDataClient {
 
     return {
       bulk: async (request: estypes.BulkRequest) => {
-        try {
-          const clusterClient = await prepareForWritingResult;
-          if (clusterClient) {
+        const clusterClient = await prepareForWritingResult;
+        if (clusterClient) {
+          try {
             const requestWithDefaultParameters = {
               ...request,
               require_alias: true,
@@ -212,15 +216,20 @@ export class RuleDataClient implements IRuleDataClient {
               this.options.logger.error(error);
             }
             return response;
-          } else {
-            this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
-          }
-          return undefined;
-        } catch (error) {
-          this.options.logger.error(error);
+          } catch (error) {
+            this.options.logger.error(error);
 
-          return undefined;
+            return undefined;
+          }
+        } else {
+          if (hasInitializationError) {
+            throw new Error(
+              `Error initializing index resources for registration context ${indexInfo.indexOptions.registrationContext}. Check logs for details.`
+            );
+          }
+          this.options.logger.debug(`Writing is disabled, bulk() will not write any data.`);
         }
+        return undefined;
       },
     };
   }
