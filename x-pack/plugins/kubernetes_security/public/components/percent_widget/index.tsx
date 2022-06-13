@@ -6,13 +6,7 @@
  */
 
 import React, { ReactNode, useMemo, useState } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiText,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
 import type { IndexPattern, GlobalFilter } from '../../types';
 import { useSetFilter } from '../../hooks';
@@ -64,7 +58,7 @@ export const PercentWidget = ({
     );
   }, [globalFilter.filterQuery, globalFilter.startDate, globalFilter.endDate]);
 
-  const { data, isLoading, isError } = useFetchPercentWidgetData(
+  const { data, isLoading } = useFetchPercentWidgetData(
     onReduce,
     filterQueryWithTimeRange,
     widgetKey,
@@ -117,52 +111,39 @@ export const PercentWidget = ({
 
   return (
     <div css={styles.container}>
+      {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
       <div css={styles.title}>{title}</div>
       <EuiFlexGroup direction="column" gutterSize="m">
-        {(() => {
-          if (isError) {
-            return (
-              <EuiEmptyPrompt
-                iconType="alert"
-                color="danger"
-                body={<p>There was an error loading data. Please try again.</p>}
-              />
-            );
-          }
-          if (isLoading) {
-            return <EuiLoadingSpinner css={styles.loadingSpinner} size="xl" />;
-          }
-          return Object.keys(dataValueMap).map((groupedByValue, idx) => {
-            const value = data?.[groupedByValue] || 0;
-            return (
-              <EuiFlexItem
-                key={`percentage-widget--${dataValueMap[groupedByValue].name}`}
-                onMouseEnter={() => setHoveredFilter(idx)}
-                onMouseLeave={() => setHoveredFilter(null)}
-              >
-                <EuiText size="xs" css={styles.dataInfo}>
-                  {dataValueMap[groupedByValue].name}
-                  {hoveredFilter === idx && (
-                    <div css={styles.filters}>
-                      {filterButtons.filterForButtons[idx]}
-                      {filterButtons.filterOutButtons[idx]}
-                    </div>
-                  )}
-                  <span css={styles.dataValue}>{value}</span>
-                </EuiText>
-                <div css={styles.percentageBackground}>
-                  <div
-                    css={{
-                      ...styles.percentageBar,
-                      width: `${(value / dataValueSum || 0) * 100}%`,
-                      backgroundColor: dataValueMap[groupedByValue].color,
-                    }}
-                  />
-                </div>
-              </EuiFlexItem>
-            );
-          });
-        })()}
+        {Object.keys(dataValueMap).map((groupedByValue, idx) => {
+          const value = data?.[groupedByValue] || 0;
+          return (
+            <EuiFlexItem
+              key={`percentage-widget--${dataValueMap[groupedByValue].name}`}
+              onMouseEnter={() => setHoveredFilter(idx)}
+              onMouseLeave={() => setHoveredFilter(null)}
+            >
+              <EuiText size="xs" css={styles.dataInfo}>
+                {dataValueMap[groupedByValue].name}
+                {hoveredFilter === idx && (
+                  <div css={styles.filters}>
+                    {filterButtons.filterForButtons[idx]}
+                    {filterButtons.filterOutButtons[idx]}
+                  </div>
+                )}
+                <span css={styles.dataValue}>{value}</span>
+              </EuiText>
+              <div css={styles.percentageBackground}>
+                <div
+                  css={{
+                    ...styles.percentageBar,
+                    width: `${(value / dataValueSum || 0) * 100}%`,
+                    backgroundColor: dataValueMap[groupedByValue].color,
+                  }}
+                />
+              </div>
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGroup>
     </div>
   );

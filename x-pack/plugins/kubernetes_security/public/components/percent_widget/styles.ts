@@ -20,6 +20,7 @@ export const useStyles = () => {
       border: euiTheme.border.thin,
       borderRadius: euiTheme.border.radius.medium,
       overflow: 'auto',
+      position: 'relative',
     };
 
     const title: CSSObject = {
