@@ -10,6 +10,7 @@ SOURCE_FILES = glob(
     "src/**/*.ts",
     "src/**/*.tsx",
     "src/**/*.mdx",
+    "src/**/*.svg",
   ],
   exclude = [
     "**/*.test.*",
@@ -86,6 +87,10 @@ jsts_transpiler(
   srcs = SRCS,
   build_pkg_name = package_name(),
   web = True,
+  additional_args = [
+    "--copy-files",
+    "--quiet"
+  ],
 )
 
 ts_config(
