@@ -172,10 +172,10 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
       from: `now-${timeWindow}`,
       to: 'now',
     });
-    testSearchSource.setField('filter', timeFilter);
+    testSearchSource.setField('filter', timeFilter ? [timeFilter, ...filters] : filters);
     const { rawResponse } = await firstValueFrom(testSearchSource.fetch$());
     return { nrOfDocs: totalHitsToNumber(rawResponse.hits.total), timeWindow };
-  }, [searchSource, timeWindowSize, timeWindowUnit]);
+  }, [searchSource, timeWindowSize, timeWindowUnit, filters]);
 
   return (
     <Fragment>
