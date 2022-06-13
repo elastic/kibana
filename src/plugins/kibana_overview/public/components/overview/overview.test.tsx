@@ -19,6 +19,27 @@ import { AnalyticsNoDataPage } from '@kbn/shared-ux-page-analytics-no-data';
 import { hasESData, hasUserDataView, mockDataViewEditor } from './overview.test.mocks';
 import { Overview } from './overview';
 
+jest.mock('@kbn/shared-ux-components', () => {
+  const MockedComponent: string = 'MockedKibanaPageTemplate';
+  const mockedModule = {
+    ...jest.requireActual('@kbn/shared-ux-components'),
+    KibanaPageTemplate: () => {
+      return <MockedComponent />;
+    },
+  };
+  return mockedModule;
+});
+
+jest.mock('@kbn/shared-ux-page-analytics-no-data', () => {
+  const MockedComponent: string = 'MockedAnalyticsNoDataPage';
+  return {
+    ...jest.requireActual('@kbn/shared-ux-page-analytics-no-data'),
+    AnalyticsNoDataPage: () => {
+      return <MockedComponent />;
+    },
+  };
+});
+
 const mockNewsFetchResult = {
   error: null,
   feedItems: [
