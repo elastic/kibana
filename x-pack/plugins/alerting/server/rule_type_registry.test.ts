@@ -14,6 +14,7 @@ import { licenseStateMock } from './lib/license_state.mock';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
+import { metricsMock } from './monitoring/metrics.mock';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -22,6 +23,7 @@ let ruleTypeRegistryParams: ConstructorOptions;
 const taskManager = taskManagerMock.createSetup();
 
 const inMemoryMetrics = inMemoryMetricsMock.create();
+const metrics = metricsMock.create();
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -34,6 +36,7 @@ beforeEach(() => {
     licensing: licensingMock.createSetup(),
     minimumScheduleInterval: { value: '1m', enforce: false },
     inMemoryMetrics,
+    metrics,
   };
 });
 
