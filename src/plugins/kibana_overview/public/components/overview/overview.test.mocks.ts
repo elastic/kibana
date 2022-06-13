@@ -8,7 +8,6 @@
 
 import React from 'react';
 import { Observable } from 'rxjs';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 
 export const hasUserDataView = jest.fn();
 export const hasESData = jest.fn();
@@ -58,11 +57,3 @@ jest.doMock('@kbn/kibana-react-plugin/public', () => ({
 jest.doMock('../../lib/ui_metric', () => ({
   trackUiMetric: jest.fn(),
 }));
-
-export const mockDataViewEditor: DataViewEditorStart = {
-  openEditor: jest.fn(),
-  IndexPatternEditorComponent: jest.fn(),
-  userPermissions: {
-    editDataView: jest.fn(),
-  },
-};
