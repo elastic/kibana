@@ -87,10 +87,16 @@ export const updateAgentHandler: RequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
 
+  const partialAgent: any = {};
+  if (request.body.user_provided_metadata) {
+    partialAgent.user_provided_metadata = request.body.user_provided_metadata;
+  }
+  if (request.body.tags) {
+    partialAgent.tags = request.body.tags;
+  }
+
   try {
-    await AgentService.updateAgent(esClient, request.params.agentId, {
-      user_provided_metadata: request.body.user_provided_metadata,
-    });
+    await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);
     const body = {
       item: await AgentService.getAgentById(esClient, request.params.agentId),
     };
