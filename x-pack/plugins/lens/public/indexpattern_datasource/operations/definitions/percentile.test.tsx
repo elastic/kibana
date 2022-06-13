@@ -20,7 +20,11 @@ import { percentileOperation } from '.';
 import { IndexPattern, IndexPatternLayer } from '../../types';
 import { PercentileIndexPatternColumn } from './percentile';
 import { TermsIndexPatternColumn } from './terms';
-import { buildExpressionFunction, buildExpression } from '@kbn/expressions-plugin/public';
+import {
+  buildExpressionFunction,
+  buildExpression,
+  ExpressionAstExpressionBuilder,
+} from '@kbn/expressions-plugin/public';
 import type { OriginalColumn } from '../../to_expression';
 
 jest.mock('lodash', () => {
@@ -190,17 +194,31 @@ describe('percentile', () => {
   });
 
   describe('optimizeEsAggs', () => {
+    const makeEsAggBuilder = (name: string, params: object) =>
+      buildExpression({
+        type: 'expression',
+        chain: [buildExpressionFunction(name, params).toAst()],
+      });
+
+    const buildMapsFromAggBuilders = (aggs: ExpressionAstExpressionBuilder[]) => {
+      const esAggsIdMap: Record<string, OriginalColumn[]> = {};
+      const aggsToIdsMap = new Map();
+      aggs.forEach((builder, i) => {
+        const esAggsId = `col-${i}-${i}`;
+        esAggsIdMap[esAggsId] = [{ id: `original-${i}` } as OriginalColumn];
+        aggsToIdsMap.set(builder, esAggsId);
+      });
+      return {
+        esAggsIdMap,
+        aggsToIdsMap,
+      };
+    };
+
     it('should collapse percentile dimensions with matching parameters', () => {
       const field1 = 'foo';
       const field2 = 'bar';
       const timeShift1 = '1d';
       const timeShift2 = '2d';
-
-      const makeEsAggBuilder = (name: string, params: object) =>
-        buildExpression({
-          type: 'expression',
-          chain: [buildExpressionFunction(name, params).toAst()],
-        });
 
       const aggs = [
         // group 1
@@ -281,17 +299,11 @@ describe('percentile', () => {
         }),
       ];
 
-      const idMap: Record<string, OriginalColumn[]> = {};
-      const aggsToIdsMap = new Map();
-      aggs.forEach((builder, i) => {
-        const esAggsId = `col-${i}-${i}`;
-        idMap[esAggsId] = [{ id: `original-${i}` } as OriginalColumn];
-        aggsToIdsMap.set(builder, esAggsId);
-      });
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
 
-      const { esAggsIdMap, aggs: newAggs } = percentileOperation.optimizeEsAggs!(
+      const { esAggsIdMap: newIdMap, aggs: newAggs } = percentileOperation.optimizeEsAggs!(
         aggs,
-        idMap,
+        esAggsIdMap,
         aggsToIdsMap
       );
 
@@ -306,8 +318,7 @@ describe('percentile', () => {
       expect(newAggs[3].functions[0].getArgument('field')![0]).toBe(field2);
       expect(newAggs[3].functions[0].getArgument('timeShift')![0]).toBe(timeShift2);
 
-      expect(newAggs).toMatchInlineSnapshot(
-        `
+      expect(newAggs).toMatchInlineSnapshot(`
         Array [
           Object {
             "findFunction": [Function],
@@ -461,11 +472,9 @@ describe('percentile', () => {
             "type": "expression_builder",
           },
         ]
-      `
-      );
+      `);
 
-      expect(esAggsIdMap).toMatchInlineSnapshot(
-        `
+      expect(newIdMap).toMatchInlineSnapshot(`
         Object {
           "col-?-1.10": Array [
             Object {
@@ -513,8 +522,109 @@ describe('percentile', () => {
             },
           ],
         }
-      `
+      `);
+    });
+
+    it('should handle multiple identical percentiles', () => {
+      const field1 = 'foo';
+      const field2 = 'bar';
+      const samePercentile = 90;
+
+      const aggs = [
+        // group 1
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: samePercentile,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 2,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: samePercentile,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 4,
+          enabled: true,
+          schema: 'metric',
+          field: field2,
+          percentile: 10,
+          timeShift: undefined,
+        }),
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 3,
+          enabled: true,
+          schema: 'metric',
+          field: field1,
+          percentile: samePercentile,
+          timeShift: undefined,
+        }),
+      ];
+
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+      const { esAggsIdMap: newIdMap, aggs: newAggs } = percentileOperation.optimizeEsAggs!(
+        aggs,
+        esAggsIdMap,
+        aggsToIdsMap
       );
+
+      expect(newAggs.length).toBe(2);
+      expect(newIdMap[`col-?-1.${samePercentile}`].length).toBe(3);
+      expect(newIdMap).toMatchInlineSnapshot(`
+        Object {
+          "col-2-2": Array [
+            Object {
+              "id": "original-2",
+            },
+          ],
+          "col-?-1.90": Array [
+            Object {
+              "id": "original-0",
+            },
+            Object {
+              "id": "original-1",
+            },
+            Object {
+              "id": "original-3",
+            },
+          ],
+        }
+      `);
+    });
+
+    it("shouldn't touch non-percentile aggs or single percentiles with no siblings", () => {
+      const aggs = [
+        makeEsAggBuilder('aggSinglePercentile', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: 'foo',
+          percentile: 30,
+        }),
+        makeEsAggBuilder('aggMax', {
+          id: 1,
+          enabled: true,
+          schema: 'metric',
+          field: 'bar',
+        }),
+      ];
+
+      const { esAggsIdMap, aggsToIdsMap } = buildMapsFromAggBuilders(aggs);
+
+      const { esAggsIdMap: newIdMap, aggs: newAggs } = percentileOperation.optimizeEsAggs!(
+        aggs,
+        esAggsIdMap,
+        aggsToIdsMap
+      );
+
+      expect(newAggs).toEqual(aggs);
+      expect(newIdMap).toEqual(esAggsIdMap);
     });
   });
 
