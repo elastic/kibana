@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// this file would need to be updated further along with mock data file names
+import { Direction, FirstLastSeenRequestOptions } from '../../../../../common/search_strategy';
 import * as buildQuery from './query.first_or_last_seen.dsl';
 import { firstOrLastSeen } from '.';
 import {
@@ -15,20 +15,19 @@ import {
   formattedSearchStrategyLastResponse,
   formattedSearchStrategyFirstResponse,
 } from './__mocks__';
-import { Direction, FirstLastSeenRequestOptions } from '../../../../../common/search_strategy';
 
-describe('firstLastSeenHost search strategy', () => {
+describe('firstLastSeen search strategy', () => {
   describe('first seen search strategy', () => {
-    const buildFirstLastSeenHostQuery = jest.spyOn(buildQuery, 'buildFirstOrLastSeenQuery');
+    const buildFirstLastSeenQuery = jest.spyOn(buildQuery, 'buildFirstOrLastSeenQuery');
 
     afterEach(() => {
-      buildFirstLastSeenHostQuery.mockClear();
+      buildFirstLastSeenQuery.mockClear();
     });
 
     describe('buildDsl', () => {
       test('should build dsl query', () => {
         firstOrLastSeen.buildDsl(mockOptions);
-        expect(buildFirstLastSeenHostQuery).toHaveBeenCalledWith(mockOptions);
+        expect(buildFirstLastSeenQuery).toHaveBeenCalledWith(mockOptions);
       });
     });
 
@@ -44,17 +43,17 @@ describe('firstLastSeenHost search strategy', () => {
   });
 
   describe('last seen search strategy', () => {
-    const buildFirstLastSeenHostQuery = jest.spyOn(buildQuery, 'buildFirstOrLastSeenQuery');
+    const buildFirstLastSeenQuery = jest.spyOn(buildQuery, 'buildFirstOrLastSeenQuery');
 
     afterEach(() => {
-      buildFirstLastSeenHostQuery.mockClear();
+      buildFirstLastSeenQuery.mockClear();
     });
 
     describe('buildDsl', () => {
       test('should build dsl query', () => {
         const options: FirstLastSeenRequestOptions = { ...mockOptions, order: Direction.desc };
         firstOrLastSeen.buildDsl(options);
-        expect(buildFirstLastSeenHostQuery).toHaveBeenCalledWith(options);
+        expect(buildFirstLastSeenQuery).toHaveBeenCalledWith(options);
       });
     });
 

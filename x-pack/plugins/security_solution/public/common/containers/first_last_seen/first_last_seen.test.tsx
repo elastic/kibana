@@ -7,13 +7,85 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 
-import { FirstLastSeenProps } from '../../components/first_last_seen';
-
 import { Direction } from '../../../../common/search_strategy';
-
-import { useFirstLastSeen } from './index';
+import { FirstLastSeenProps } from '../../components/first_last_seen';
 import { useKibana } from '../../lib/kibana';
 import { useSourcererDataView } from '../sourcerer';
+import { useFirstLastSeen } from '.';
+
+jest.mock('../../lib/kibana');
+jest.mock('../sourcerer');
+
+(useSourcererDataView as jest.Mock).mockReturnValue({
+  indicesExist: false,
+});
+const mockSearchStrategy = jest.fn();
+
+(useKibana as jest.Mock).mockReturnValue({
+  services: {
+    data: {
+      search: {
+        search: mockSearchStrategy.mockReturnValue({
+          unsubscribe: jest.fn(),
+          subscribe: jest.fn(({ next, error }) => {
+            try {
+              next(defaultReturn);
+              /* eslint-disable no-empty */
+            } catch (e) {}
+            return {
+              unsubscribe: jest.fn(),
+            };
+          }),
+        }),
+      },
+      query: jest.fn(),
+    },
+  },
+});
+
+const renderUseFirstLastSeen = (props: Partial<FirstLastSeenProps> = {}) =>
+  renderHook<FirstLastSeenProps, ReturnType<typeof useFirstLastSeen>>(() =>
+    useFirstLastSeen({
+      order: Direction.asc,
+      field: 'host.name',
+      value: 'some-host',
+      ...props,
+    })
+  );
+
+describe('useFistLastSeen', () => {
+  it('should return default values', () => {
+    mockSearchStrategy.mockReturnValueOnce({
+      subscribe: jest.fn(),
+    });
+    const { result } = renderUseFirstLastSeen();
+
+    expect(result.current).toEqual([
+      true,
+      {
+        errorMessage: null,
+        firstSeen: null,
+        id: 'firstLastSeenQuery',
+        lastSeen: null,
+        order: null,
+      },
+    ]);
+  });
+
+  it('should return parsed items', () => {
+    const { result } = renderUseFirstLastSeen();
+
+    expect(result.current).toEqual([
+      false,
+      {
+        errorMessage: null,
+        firstSeen: '2022-06-03T19:48:36.165Z',
+        id: 'firstLastSeenQuery',
+        order: null,
+      },
+    ]);
+  });
+});
 
 const defaultReturn = {
   rawResponse: {
@@ -47,82 +119,3 @@ const defaultReturn = {
   isRunning: false,
   firstSeen: '2022-06-03T19:48:36.165Z',
 };
-
-jest.mock('../../lib/kibana');
-jest.mock('../sourcerer');
-
-(useSourcererDataView as jest.Mock).mockReturnValue({
-  indicesExist: false,
-});
-const mockSearchStrategy = jest.fn();
-
-(useKibana as jest.Mock).mockReturnValue({
-  services: {
-    data: {
-      search: {
-        search: mockSearchStrategy.mockReturnValue({
-          unsubscribe: jest.fn(),
-          subscribe: jest.fn(({ next, error }) => {
-            try {
-              next(defaultReturn);
-              /* eslint-disable no-empty */
-            } catch (e) {}
-            return {
-              unsubscribe: jest.fn(),
-            };
-          }),
-        }),
-      },
-      query: jest.fn(),
-    },
-  },
-});
-
-// helper function to render the hook
-const renderUseFirstLastSeen = (props: Partial<FirstLastSeenProps> = {}) =>
-  renderHook<FirstLastSeenProps, ReturnType<typeof useFirstLastSeen>>(() =>
-    useFirstLastSeen({
-      order: Direction.asc,
-      field: 'host.name',
-      value: 'some-host',
-      ...props,
-    })
-  );
-
-describe('useFistLastSeen', () => {
-  beforeEach(() => {
-    // jest.clearAllMocks();
-  });
-
-  it('should return default values', () => {
-    mockSearchStrategy.mockReturnValueOnce({
-      subscribe: jest.fn(),
-    });
-    const { result } = renderUseFirstLastSeen();
-
-    expect(result.current).toEqual([
-      true,
-      {
-        errorMessage: null,
-        firstSeen: null,
-        id: 'firstLastSeenQuery',
-        lastSeen: null,
-        order: null,
-      },
-    ]);
-  });
-
-  it('should return parsed items', () => {
-    const { result } = renderUseFirstLastSeen();
-
-    expect(result.current).toEqual([
-      false,
-      {
-        errorMessage: null,
-        firstSeen: '2022-06-03T19:48:36.165Z',
-        id: 'firstLastSeenQuery',
-        order: null,
-      },
-    ]);
-  });
-});
