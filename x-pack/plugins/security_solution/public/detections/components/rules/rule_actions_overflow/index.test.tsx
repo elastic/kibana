@@ -15,6 +15,7 @@ import {
 import { RuleActionsOverflow } from '.';
 import { mockRule } from '../../../pages/detection_engine/rules/all/__mocks__/mock';
 
+jest.mock('../../../../common/lib/apm/use_start_transaction');
 jest.mock('../../../../common/hooks/use_app_toasts');
 jest.mock('../../../../common/lib/kibana', () => {
   const actual = jest.requireActual('../../../../common/lib/kibana');

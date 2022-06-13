@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useRef } from 'react';
+import React, { memo, useCallback, useEffect, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 import { ConsoleHeader } from './components/console_header';
@@ -104,61 +104,61 @@ export const Console = memo<ConsoleProps>(
       }
     }, []);
 
+    // When the console is shown, set focus to it so that user can just start typing
+    useEffect(() => {
+      if (!managedConsole || managedConsole.isOpen) {
+        setTimeout(handleConsoleClick, 2);
+      }
+    }, [handleConsoleClick, managedConsole]);
+
     return (
       <ConsoleStateProvider
         commands={commands}
         scrollToBottom={scrollToBottom}
+        managedKey={managedKey}
         HelpComponent={HelpComponent}
         dataTestSubj={commonProps['data-test-subj']}
       >
-        {/*
-          If this is a managed console, then we only show its content if it is open.
-          The state provider, however, continues to be rendered so that as updates to pending
-          commands are received, those will still make it to the console's state and be
-          shown when the console is eventually opened again.
-        */}
-        {!managedConsole || managedConsole.isOpen ? (
-          <ConsoleWindow onClick={handleConsoleClick} {...commonProps}>
-            <EuiFlexGroup
-              direction="column"
-              className="layout"
-              gutterSize="none"
-              responsive={false}
-              data-test-subj={getTestId('mainPanel')}
-            >
-              <EuiFlexItem grow={false} className="layout-container layout-header">
-                <ConsoleHeader TitleComponent={TitleComponent} />
-              </EuiFlexItem>
+        <ConsoleWindow onClick={handleConsoleClick} {...commonProps}>
+          <EuiFlexGroup
+            direction="column"
+            className="layout"
+            gutterSize="none"
+            responsive={false}
+            data-test-subj={getTestId('mainPanel')}
+          >
+            <EuiFlexItem grow={false} className="layout-container layout-header">
+              <ConsoleHeader TitleComponent={TitleComponent} />
+            </EuiFlexItem>
 
-              <EuiFlexItem grow className="layout-hideOverflow">
-                <EuiFlexGroup gutterSize="none" responsive={false} className="layout-hideOverflow">
-                  <EuiFlexItem className="eui-fullHeight layout-hideOverflow">
-                    <EuiFlexGroup
-                      direction="column"
-                      gutterSize="none"
-                      responsive={false}
-                      className="layout-hideOverflow"
-                    >
-                      <EuiFlexItem grow className="layout-historyOutput">
-                        <div
-                          className="layout-container layout-historyViewport eui-scrollBar eui-yScroll"
-                          ref={scrollingViewport}
-                        >
-                          <HistoryOutput />
-                        </div>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false} className="layout-container layout-commandInput">
-                        <CommandInput prompt={prompt} focusRef={inputFocusRef} />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
+            <EuiFlexItem grow className="layout-hideOverflow">
+              <EuiFlexGroup gutterSize="none" responsive={false} className="layout-hideOverflow">
+                <EuiFlexItem className="eui-fullHeight layout-hideOverflow">
+                  <EuiFlexGroup
+                    direction="column"
+                    gutterSize="none"
+                    responsive={false}
+                    className="layout-hideOverflow"
+                  >
+                    <EuiFlexItem grow className="layout-historyOutput">
+                      <div
+                        className="layout-container layout-historyViewport eui-scrollBar eui-yScroll"
+                        ref={scrollingViewport}
+                      >
+                        <HistoryOutput />
+                      </div>
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false} className="layout-container layout-commandInput">
+                      <CommandInput prompt={prompt} focusRef={inputFocusRef} />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
 
-                  {<SidePanelFlexItem />}
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </ConsoleWindow>
-        ) : null}
+                {<SidePanelFlexItem />}
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </ConsoleWindow>
       </ConsoleStateProvider>
     );
   }

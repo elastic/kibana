@@ -184,7 +184,6 @@ export function ServiceOverview() {
                   <EuiPanel hasBorder={true}>
                     <ServiceOverviewDependenciesTable
                       fixedHeight={true}
-                      isSingleColumn={isSingleColumn}
                       showPerPageOptions={false}
                       link={
                         <EuiLink href={dependenciesLink}>

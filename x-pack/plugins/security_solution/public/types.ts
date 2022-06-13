@@ -33,6 +33,7 @@ import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ApmBase } from '@elastic/apm-rum';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -84,6 +85,7 @@ export interface StartPlugins {
 export type StartServices = CoreStart &
   StartPlugins & {
     storage: Storage;
+    apm: ApmBase;
   };
 
 export interface PluginSetup {
