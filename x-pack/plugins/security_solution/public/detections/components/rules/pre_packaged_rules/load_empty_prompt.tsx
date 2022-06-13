@@ -6,8 +6,11 @@
  */
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { memo, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
+import { affectedJobIds } from '../../callouts/ml_job_compatibility_callout/affected_job_ids';
+import { MlJobUpgradeModal } from '../../modals/ml_job_upgrade_modal';
+import { useInstalledSecurityJobs } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 
 import * as i18n from './translations';
 import { SecuritySolutionLinkButton } from '../../../../common/components/links';
@@ -35,6 +38,10 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
   const [{ isSignalIndexExists, isAuthenticated, hasEncryptionKey, canUserCRUD, hasIndexWrite }] =
     useUserData();
 
+  const { loading: loadingJobs, jobs } = useInstalledSecurityJobs();
+  const legacyJobsInstalled = jobs.filter((job) => affectedJobIds.includes(job.id));
+  const [isUpgradeModalVisible, setIsUpgradeModalVisible] = useState(false);
+
   const { getLoadPrebuiltRulesAndTemplatesButton } = usePrePackagedRules({
     canUserCRUD,
     hasIndexWrite,
@@ -43,15 +50,35 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
     hasEncryptionKey,
   });
 
+  // Wrapper to add confirmation modal for users who may be running older ML Jobs that would
+  // be overridden by updating their rules. For details, see: https://github.com/elastic/kibana/issues/128121
+  const mlJobUpgradeModalConfirm = useCallback(() => {
+    setIsUpgradeModalVisible(false);
+    createPrePackagedRules();
+  }, [createPrePackagedRules, setIsUpgradeModalVisible]);
+
   const loadPrebuiltRulesAndTemplatesButton = useMemo(
     () =>
       getLoadPrebuiltRulesAndTemplatesButton({
-        isDisabled: !userHasPermissions || loading,
-        onClick: createPrePackagedRules,
+        isDisabled: !userHasPermissions || loading || loadingJobs,
+        onClick: () => {
+          if (legacyJobsInstalled.length > 0) {
+            setIsUpgradeModalVisible(true);
+          } else {
+            createPrePackagedRules();
+          }
+        },
         fill: true,
         'data-test-subj': 'load-prebuilt-rules',
       }),
-    [getLoadPrebuiltRulesAndTemplatesButton, createPrePackagedRules, userHasPermissions, loading]
+    [
+      getLoadPrebuiltRulesAndTemplatesButton,
+      userHasPermissions,
+      loading,
+      loadingJobs,
+      legacyJobsInstalled,
+      createPrePackagedRules,
+    ]
   );
 
   return (
@@ -71,6 +98,13 @@ const PrePackagedRulesPromptComponent: React.FC<PrePackagedRulesPromptProps> = (
               {i18n.CREATE_RULE_ACTION}
             </SecuritySolutionLinkButton>
           </EuiFlexItem>
+          {isUpgradeModalVisible && (
+            <MlJobUpgradeModal
+              jobs={legacyJobsInstalled}
+              onCancel={() => setIsUpgradeModalVisible(false)}
+              onConfirm={mlJobUpgradeModalConfirm}
+            />
+          )}
         </EuiFlexGroup>
       }
     />
