@@ -266,5 +266,4 @@ describe('When using `getActionList()', () => {
       })
     );
   });
-
 });
